@@ -3,6 +3,12 @@
  * @description Perform consequence modeling for hazardous releases including dispersion, fire, and explosion scenarios
  * @inputs { processName: string, releaseScenarios: array, siteData: object, meteorologicalData: object, outputDir: string }
  * @outputs { success: boolean, consequenceResults: object, impactZones: object, emergencyZones: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

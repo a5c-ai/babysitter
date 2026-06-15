@@ -3,6 +3,12 @@
  * @description Test-Driven Development combining Acceptance Test-Driven Development (ATDD) and Test-Driven Development (TDD)
  * @inputs { feature: string, acceptanceCriteria?: array, testFramework?: string, iterationCount?: number }
  * @outputs { success: boolean, feature: object, acceptanceTests: array, unitTests: array, implementation: object, coverage: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

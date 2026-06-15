@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Commissioning
   skill-id: CE-SK-028
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:sensor-fusion, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # Performance Test Designer Skill

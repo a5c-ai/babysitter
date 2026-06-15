@@ -1,0 +1,25 @@
+nodeKind: StackProfile
+id: stack-profile:t3-stack
+attributes:
+  displayName: "T3 Stack (Next.js + tRPC + Prisma + Tailwind)"
+  description: |
+    The T3 Stack — Next.js for the app, tRPC for end-to-end-typed APIs,
+    Prisma as ORM, Tailwind CSS for styling, and optionally NextAuth.js
+    for authentication. The stack's philosophy is "typesafety is non-
+    negotiable": types flow from the database schema (Prisma) through the
+    API layer (tRPC) to the React client without any code generation step.
+
+    create-t3-app is the official scaffolding CLI. The stack targets
+    rapid SaaS and internal tool development where a full-time infrastructure
+    team is not available. Common database choices are PostgreSQL (via
+    PlanetScale, Neon, or Supabase) or SQLite (for local-first apps).
+    Deployment targets include Vercel, Railway, and Fly.io.
+  composes:
+    - language:typescript
+    - framework:nextjs
+    - framework:react
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nextjs
+    - framework:react

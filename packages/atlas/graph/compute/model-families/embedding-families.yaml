@@ -1,0 +1,48 @@
+---
+nodeKind: ModelFamily
+id: model-family:openai-text-embedding-3
+attributes:
+  displayName: "OpenAI text-embedding-3"
+  vendor: "OpenAI"
+  homepageUrl: "https://platform.openai.com/docs/guides/embeddings"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:openai-text-embedding-3-large@current
+---
+nodeKind: ModelFamily
+id: model-family:voyageai-voyage-3
+attributes:
+  displayName: "Voyage AI voyage-3"
+  vendor: "Voyage AI"
+  homepageUrl: "https://docs.voyageai.com/docs/embeddings"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:voyageai-voyage-3@current
+---
+nodeKind: ModelFamily
+id: model-family:jina-embeddings-v3
+attributes:
+  displayName: "Jina Embeddings v3"
+  vendor: "Jina AI"
+  homepageUrl: "https://jina.ai/embeddings/"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:jina-embeddings-v3@current
+---
+nodeKind: ModelFamily
+id: model-family:cohere-embed-english-v3
+attributes:
+  displayName: "Cohere Embed English v3"
+  vendor: "Cohere"
+  homepageUrl: "https://docs.cohere.com/docs/cohere-embed"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:cohere-embed-english-v3@current

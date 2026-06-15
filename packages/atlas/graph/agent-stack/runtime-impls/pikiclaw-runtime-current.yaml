@@ -1,0 +1,40 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:pikiclaw.runtime@current
+attributes:
+  displayName: "PikiClaw Runtime (current)"
+  agentVersionId: agent-version:pikiclaw@current
+  packageRef: source-ref:pikiclaw-app
+  builtInTools: []
+  toolRegistryDiscovery: dynamic-config
+  hookSockets: []
+  internalSessionStateLocation: "cloud-backend"
+  sessionFileFormat: json
+  sessionFilePathConvention: "cloud-managed"
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: none
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+    - mcp-transport:stdio
+  supportsStreaming: true
+  notes: |
+    PikiClaw runtime runs as a cloud-backed mobile agent service. The
+    native mobile app communicates with a backend that manages sessions,
+    plugin loading, and model dispatch.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:pikiclaw
+      role: runtime
+  connects:
+    - target: mcp-transport:stdio
+  supports:
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0'
+      level: full
+      notes: MCP tool servers via backend proxy.
+    - target: capability:streaming
+      versionRange: '>=1.0.0'
+      level: full
+  speaks:
+    - target: mcp-transport:stdio

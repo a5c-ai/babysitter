@@ -1,0 +1,93 @@
+nodeKind: InteractionPattern
+id: interaction-pattern:request-response
+attributes:
+  displayName: "Request / Response"
+  description: |
+    Single-turn synchronous exchange — host sends a prompt, model returns a
+    completion. The simplest pattern; backbone of classic chat completions.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:streaming-tool-loop
+attributes:
+  displayName: "Streaming Tool Loop"
+  description: |
+    Host streams model output token-by-token while interleaving tool calls.
+    Model emits `tool_use` events mid-stream; host executes and feeds
+    `tool_result` back into the streaming context.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:agentic-react
+attributes:
+  displayName: "Agentic ReAct"
+  description: |
+    Reason / Act loop. Model alternates between thought and action steps,
+    invoking tools to refine its plan based on observations. Yao et al. 2022.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:plan-execute
+attributes:
+  displayName: "Plan-and-Execute"
+  description: |
+    Two-stage shape: a planner model emits a structured plan; an executor
+    model carries out steps. Decouples reasoning from action; common in
+    long-horizon agentic workflows.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:multi-agent-debate
+attributes:
+  displayName: "Multi-Agent Debate"
+  description: |
+    Two or more agents (often the same model with different system prompts)
+    debate a question, with a moderator agent synthesizing the conclusion.
+    Improves correctness on hard reasoning at the cost of inference budget.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:human-checkpoint-loop
+attributes:
+  displayName: "Human-in-the-Loop Checkpoint"
+  description: |
+    Loop that pauses at declared `HumanCheckpoint` nodes (D4) for human
+    approval / review / edit / escalation, then resumes via a `ResumeToken`.
+    Backbone of supervised agentic systems (Devin, Manus, Codex sandbox).
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:plan-act-reflect
+attributes:
+  displayName: "Plan-Act-Reflect"
+  description: |
+    Three-phase loop: plan a step, act on it, reflect on the outcome and
+    update the plan. Reflection enables self-correction without external
+    feedback. Used in Reflexion (Shinn et al. 2023).
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:async-job-poll
+attributes:
+  displayName: "Async Job + Poll"
+  description: |
+    Host submits long-running work via an `AsyncJob` (D5) primitive (batch
+    API, background task) and polls / receives a webhook on completion.
+    Decouples the agent loop from inference duration.
+edges:
+  realizes:
+    - target: layer:10-interaction

@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:term
+attributes:
+  canonicalDefinitionId: definition:term.canonical
+  displayName: "Term"
+  kind: concept
+  references:
+    - "NodeKind:Term"
+  description: |
+    A named term in the ontology
+edges:
+  applies_to:
+    - target: domain:computer-science

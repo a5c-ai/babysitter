@@ -13,6 +13,10 @@ required-skills:
   - shipment-visibility-tracker
   - carrier-selection-optimizer
   - last-mile-delivery-optimizer
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:customer-success]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:customer-success-manager]
 ---
 
 # Freight Coordinator

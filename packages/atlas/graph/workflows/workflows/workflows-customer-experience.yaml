@@ -1,0 +1,126 @@
+---
+nodeKind: Workflow
+id: workflow:customer-health-score-review
+attributes:
+  displayName: "Customer Health Score Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews composite customer health scores — analyzing product usage trends,
+    support ticket patterns, engagement metrics, payment behavior, and
+    sentiment signals to identify at-risk accounts requiring intervention and
+    expansion-ready accounts for upsell outreach. Produces a tiered action
+    plan by health segment. Excludes individual customer outreach.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:nps-survey-cycle
+attributes:
+  displayName: "NPS Survey Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end Net Promoter Score survey process — defining cohort
+    sampling strategy, deploying survey instruments, collecting responses,
+    analyzing score distributions by segment, performing text analysis on
+    verbatim feedback, and producing executive summaries with trend
+    comparisons. Produces NPS report and follow-up action plan. Excludes
+    customer outreach for detractor recovery.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:customer-escalation-management
+attributes:
+  displayName: "Customer Escalation Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: cross-team
+  description: |
+    Handles escalated customer issues requiring cross-functional
+    coordination — triaging severity, assembling response teams, coordinating
+    technical investigation with support communication, managing executive
+    stakeholder updates, and ensuring resolution within SLA commitments.
+    Produces escalation post-mortem and process improvement recommendations.
+    Excludes routine support ticket handling.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:incident-command
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:support-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:customer-onboarding-program
+attributes:
+  displayName: "Customer Onboarding Program"
+  workflowKind: onboarding
+  triggerType: event-driven
+  typicalCadence: "per-customer"
+  complexity: cross-team
+  description: |
+    Manages structured customer onboarding from contract signature through
+    time-to-value milestones — defining success criteria, scheduling kickoff
+    and training sessions, tracking integration progress, monitoring adoption
+    metrics, and escalating blockers. Produces onboarding scorecards and
+    handoff documentation to steady-state account management. Excludes
+    product configuration implementation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:support-team

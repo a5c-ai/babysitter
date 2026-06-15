@@ -2,6 +2,14 @@
 name: git
 description: Git workflows, branching strategies, and hooks.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:code-review-practice]
+  roles: [role:frontend-engineer, role:fullstack-engineer]
+  workflows: [workflow:pull-request-lifecycle]
+  topics: [topic:gitflow, topic:trunk-based-development]
+
 ---
 
 # Git Skill

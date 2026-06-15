@@ -40,7 +40,7 @@ Before we begin, let's verify everything is set up correctly. Open your terminal
 node --version
 
 # Check if Babysitter SDK is installed
-npx @a5c-ai/babysitter-sdk@latest --version
+babysitter --version
 ```
 
 **What you should see:**
@@ -706,7 +706,7 @@ Now that you've completed the beginner tutorial, here are some paths to continue
 **Solution:**
 ```bash
 # Reinstall the plugin
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 claude plugin install --scope user babysitter@a5c.ai
 claude plugin enable --scope user babysitter@a5c.ai
 

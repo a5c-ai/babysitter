@@ -1,0 +1,102 @@
+---
+nodeKind: Workflow
+id: workflow:model-fairness-audit
+attributes:
+  displayName: "Model Fairness Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "per-model"
+  complexity: cross-team
+  description: |
+    Audits deployed ML models for demographic bias and fairness violations —
+    computing disparate impact ratios, equalized odds, and demographic parity
+    metrics across protected attributes using Fairlearn or AIF360; comparing
+    subgroup performance differentials; documenting mitigation strategies
+    applied (reweighing, threshold adjustment, post-processing); and certifying
+    compliance with organizational fairness policies before production
+    promotion. Excludes model training and feature engineering.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:ai-enablement
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:model-explainability-review
+attributes:
+  displayName: "Model Explainability Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-model"
+  complexity: single-team
+  description: |
+    Reviews the interpretability and explainability posture of ML models before
+    deployment — generating SHAP/LIME feature importance explanations,
+    validating that global and local explanations are consistent, verifying
+    explanation latency meets serving SLAs, documenting known blind spots and
+    out-of-distribution behavior, and ensuring explanations are surfaced
+    appropriately in end-user interfaces. Excludes model training and fairness
+    auditing.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:ai-safety-guardrails
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:ai-enablement
+---
+nodeKind: Workflow
+id: workflow:dataset-versioning-governance
+attributes:
+  displayName: "Dataset Versioning Governance"
+  workflowKind: governance
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: cross-team
+  description: |
+    Governs the versioning lifecycle of ML training and evaluation datasets —
+    enforcing DVC or LakeFS versioning policies, validating that dataset
+    lineage metadata tracks transformations and source provenance, auditing
+    storage deduplication, managing access controls per dataset sensitivity
+    tier, and ensuring reproducibility by linking model artifacts to exact
+    dataset versions. Excludes dataset creation and labeling.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:data-platform-team

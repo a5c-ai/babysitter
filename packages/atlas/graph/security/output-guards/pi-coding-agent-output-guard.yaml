@@ -1,0 +1,15 @@
+nodeKind: OutputGuard
+id: output-guard:pi-coding-agent
+attributes:
+  displayName: "pi-mono coding-agent output guard"
+  appliesTo: all
+  phase: both
+  detectorKinds: [refusal-stop-reason, secret-leak, format-violation, custom]
+  onTrigger: emit-system-message
+  severity: warn
+  description: |
+    Streaming + post-call guard sitting in front of pi-mono's event-bus.
+    Inspects assistant_message_delta chunks and tool_result blocks before
+    they hit the user-facing channel, raising warnings or rewriting per
+    detector. Distinct from the compliance-side ContentPolicy — this is the
+    runtime gate, not the policy declaration.

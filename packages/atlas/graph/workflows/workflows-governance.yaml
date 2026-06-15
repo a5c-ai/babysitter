@@ -1,0 +1,82 @@
+---
+nodeKind: Workflow
+id: workflow:architecture-governance
+attributes:
+  displayName: "Architecture Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews adherence to architecture principles, evaluates drift from
+    target-state blueprints, and prioritizes remediation work.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+  applies_to_domain:
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:vendor-evaluation
+attributes:
+  displayName: "Vendor Evaluation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-decision"
+  complexity: cross-team
+  description: |
+    Assesses third-party tools and services against technical requirements,
+    security posture, cost, and strategic alignment before adoption.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:engineering-manager
+    - target: role:license-auditor
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:security-team
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:slo-definition-review
+attributes:
+  displayName: "SLO Definition Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates and updates service-level objectives to reflect current
+    business needs, user expectations, and operational capacity.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering

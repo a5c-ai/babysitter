@@ -3,6 +3,12 @@
  * @description Process for creating, testing, and optimizing landing pages to maximize conversion rates for paid campaigns and lead generation initiatives
  * @inputs { campaignBrief: object, valueProposition: object, designAssets: object, trackingRequirements: object, outputDir: string }
  * @outputs { success: boolean, landingPages: array, abTestDocumentation: object, conversionReports: array, optimizationRoadmap: object, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

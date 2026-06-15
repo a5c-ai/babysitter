@@ -1,0 +1,9 @@
+nodeKind: TrustLevel
+id: trust-level:synthetic
+attributes:
+  displayName: "Synthetic"
+  level: synthetic
+  freshnessWindowDaysDefault: 30
+  description: |
+    LLM-generated or schema-inferred default; lowest trust.
+edges: {}

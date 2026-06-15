@@ -1,0 +1,156 @@
+---
+nodeKind: Workflow
+id: workflow:support-queue-triage-automation
+attributes:
+  displayName: "Support Queue Triage Automation"
+  workflowKind: support
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: cross-team
+  description: |
+    Automates the routing and prioritization of incoming support tickets across
+    all channels -- applying NLP-based intent classification to categorize
+    tickets by product area, issue type, and urgency, computing priority scores
+    from customer tier, contract SLA obligations, and issue severity signals,
+    auto-assigning tickets to the appropriate queue based on agent skill tags
+    and current workload distribution, attaching relevant knowledge base
+    articles and historical resolution patterns to the ticket context,
+    triggering SLA countdown timers with escalation rules matched to contract
+    terms, and feeding misclassification feedback loops back into the routing
+    model. Produces auto-triage accuracy dashboard, queue distribution
+    analytics, and SLA assignment audit trail. Excludes ticket resolution and
+    agent training.
+edges:
+  involves_role:
+    - target: role:bug-triager
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:prompt-engineering
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:support-quality-assurance-review
+attributes:
+  displayName: "Support Quality Assurance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Evaluates support interaction quality through structured ticket sampling and
+    agent performance analysis -- selecting statistically representative ticket
+    samples stratified by channel, issue type, and agent, scoring interactions
+    against quality rubrics covering accuracy, empathy, completeness, and
+    adherence to process, correlating quality scores with CSAT survey responses
+    to validate rubric effectiveness, identifying coaching opportunities and
+    high-performer patterns, tracking quality trends by team, tier, and product
+    area, benchmarking first-contact resolution rates and handle times against
+    quality-adjusted baselines, and surfacing systemic knowledge gaps that drive
+    repeat contacts. Produces weekly QA scorecard, agent coaching
+    recommendations, and quality trend reports. Excludes agent disciplinary
+    actions.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:self-service-portal-content-review
+attributes:
+  displayName: "Self-Service Portal Content Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Evaluates the effectiveness of help center and self-service portal content
+    in deflecting support tickets -- analyzing search analytics to identify top
+    queries with zero results or low click-through, measuring article
+    effectiveness through resolution-confirmation signals and subsequent ticket
+    creation rates, auditing article accuracy against current product behavior
+    and release notes, reviewing content coverage gaps by mapping ticket
+    categories to existing knowledge base articles, assessing content freshness
+    by tracking articles not updated since their referenced feature changed,
+    evaluating navigation and taxonomy effectiveness through user journey
+    analytics, and benchmarking self-service resolution rates against industry
+    standards. Produces content effectiveness scorecard, gap analysis report,
+    and content refresh priority queue. Excludes article authoring.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:product-designer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:support-chatbot-performance-review
+attributes:
+  displayName: "Support Chatbot Performance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Reviews AI chatbot and virtual agent performance across support channels --
+    measuring automated resolution rate by intent category and customer segment,
+    analyzing escalation triggers to identify where the bot fails to resolve and
+    why, evaluating intent recognition accuracy through confusion matrix
+    analysis across trained intents, reviewing conversation flow completion
+    rates and abandonment points, assessing response quality through
+    human-evaluated sampling of bot interactions, tracking containment rate
+    trends after knowledge base and prompt updates, benchmarking bot CSAT
+    against human agent CSAT for comparable issue types, and identifying new
+    intents from unmatched utterance clustering. Produces bot performance
+    dashboard, intent coverage gap analysis, and improvement roadmap. Excludes
+    bot development and training.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:ai-agent-usage-review
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:engineering

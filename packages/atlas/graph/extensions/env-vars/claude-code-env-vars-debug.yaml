@@ -1,0 +1,24 @@
+nodeKind: EnvVar
+id: env-var:claude-code-debug-logs-dir
+attributes:
+  displayName: CLAUDE_CODE_DEBUG_LOGS_DIR
+  description: Override the debug log file path.
+  name: CLAUDE_CODE_DEBUG_LOGS_DIR
+  category: debug
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-debug-log-level
+attributes:
+  displayName: CLAUDE_CODE_DEBUG_LOG_LEVEL
+  description: 'Minimum log level: verbose, debug, info, warn, error.'
+  name: CLAUDE_CODE_DEBUG_LOG_LEVEL
+  category: debug
+  valueType: enum
+  defaultValue: debug
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

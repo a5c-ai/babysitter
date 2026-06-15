@@ -1,0 +1,118 @@
+nodeKind: Domain
+id: domain:web-development
+attributes:
+  displayName: "Web Development"
+  description: |
+    Web Development covers the full spectrum of building applications that
+    run in web browsers and on HTTP servers — from semantic HTML and CSS
+    layouts to JavaScript-driven interactivity, server-side rendering,
+    REST and GraphQL APIs, and progressive web app capabilities.
+
+    Key concerns include performance (Core Web Vitals, bundle sizes),
+    accessibility (WCAG compliance), security (CSP, CORS, OWASP Top 10),
+    and the developer experience of modern build toolchains (Vite, webpack,
+    esbuild). Adjacent to Mobile (shared TypeScript logic) and DevOps
+    (deployment pipelines, CDN configuration).
+edges:
+  contains:
+    - specialization:frontend-react
+    - specialization:web-development
+    - specialization:ux-ui-design
+    - specialization:webapp-fullstack-typescript
+    - specialization:webapp-fullstack-python
+    - specialization:backend-python-django
+    - topic:adaptive-design
+    - topic:api-key
+    - topic:api-versioning-strategy
+    - topic:atomic-css
+    - topic:backend-for-frontend
+    - topic:bem
+    - topic:catch-all-routes
+    - topic:client-side-rendering
+    - topic:component-composition
+    - topic:compound-components
+    - topic:container-presentational-pattern
+    - topic:context-api-pattern
+    - topic:controlled-components
+    - topic:controlled-forms
+    - topic:critical-css
+    - topic:csrf-protection
+    - topic:css-variables-pattern
+    - topic:dynamic-forms
+    - topic:dynamic-imports
+    - topic:dynamic-routing
+    - topic:field-array-pattern
+    - topic:form-builder-pattern
+    - topic:form-composition
+    - topic:form-wizard-pattern
+    - topic:hash-based-routing
+    - topic:higher-order-components
+    - topic:history-api-routing
+    - topic:infinite-scrolling
+    - topic:input-sanitization
+    - topic:islands-architecture
+    - topic:isomorphic-universal-javascript
+    - topic:layout-routes
+    - topic:lazy-loading
+    - topic:modal-dialog
+    - topic:modal-routes
+    - topic:multi-page-application
+    - topic:multi-step-forms
+    - topic:mvc
+    - topic:nested-routing
+    - topic:oauth-integration
+    - topic:oocss
+    - topic:parallel-routes
+    - topic:progressive-disclosure
+    - topic:protected-routes
+    - topic:provider-pattern
+    - topic:pull-to-refresh
+    - topic:redux-architecture
+    - topic:render-props
+    - topic:resource-prefetching
+    - topic:route-guards
+    - topic:secure-token-pattern
+    - topic:security-headers-implementation
+    - topic:service-workers
+    - topic:single-page-application
+    - topic:skeleton-screen
+    - topic:slots-pattern
+    - topic:smacss
+    - topic:smart-dumb-components
+    - topic:soap
+    - topic:theming-pattern
+    - topic:throttling
+    - topic:toast-notification
+    - topic:uncontrolled-components
+    - topic:uncontrolled-forms
+    - topic:virtual-dom
+    - topic:windowing-virtualization
+    - topic:accessibility
+    - topic:progressive-web-application
+    - topic:static-site-generation
+    - topic:incremental-static-regeneration
+    - topic:code-splitting
+    - topic:micro-frontend-architecture
+    - topic:jamstack-architecture
+    - topic:offline-first
+    - topic:component-based-architecture
+    - topic:atomic-design
+    - topic:composition-pattern
+    - topic:css-modules
+    - topic:css-in-js
+    - topic:utility-first-css
+    - topic:tree-shaking
+    - topic:custom-hooks
+    - topic:flux-architecture
+    - topic:streaming-ssr
+    - topic:styled-components-pattern
+    - topic:asset-optimization
+    - topic:form-validation
+    - topic:cache-aside-pattern
+    - topic:flux-pattern
+    - topic:redux-pattern
+    - topic:form-state-management
+    - topic:responsive-design
+    - topic:mobile-first-design
+    - topic:progressive-enhancement
+    - topic:serverless-architecture

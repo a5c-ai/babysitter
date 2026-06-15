@@ -2,6 +2,11 @@
 name: godot-development
 description: Godot Engine integration skill for GDScript/C# development, scene composition, node management, and editor automation. Enables LLMs to interact with Godot Editor through MCP servers for asset manipulation, script generation, and automated workflows.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Godot Development Skill

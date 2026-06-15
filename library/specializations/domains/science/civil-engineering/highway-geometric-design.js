@@ -3,6 +3,12 @@
  * @description Geometric design of highways and roads per AASHTO Green Book including horizontal alignment, vertical alignment, and cross-sections
  * @inputs { projectId: string, designSpeed: number, terrainType: string, functionalClass: string, trafficData: object }
  * @outputs { success: boolean, geometricDesign: object, planProfileDrawings: array, crossSections: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

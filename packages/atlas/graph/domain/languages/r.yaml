@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:r-lang
+attributes:
+  displayName: "R"
+  paradigms:
+    - functional
+    - statistical
+  description: |
+    R is an open-source language and environment for statistical computing,
+    data analysis, and visualization. It was developed at Bell Labs (as S)
+    and is now maintained by the R Foundation. R excels at exploratory data
+    analysis, classical statistics, and publication-quality graphics.
+
+    The tidyverse (dplyr, ggplot2, tidyr, purrr, readr) provides a coherent
+    framework for data manipulation and visualization. The Bioconductor
+    project extends R for genomics and bioinformatics. R Markdown and
+    Quarto enable reproducible research documents that weave code and
+    narrative. Shiny builds interactive web applications directly from R.
+    R is commonly used alongside Python in data science teams, with
+    reticulate enabling interoperability.
+edges:
+  applies_to:
+    - target: domain:data-science
+    - target: domain:bioinformatics

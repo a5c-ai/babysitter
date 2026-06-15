@@ -1,0 +1,18 @@
+nodeKind: ModelFamily
+id: model-family:qwen-3-7
+attributes:
+  displayName: "Qwen 3.7"
+  providerId: alibaba
+  providerIds:
+    - alibaba-cloud
+  family: qwen
+  generation: "3.7"
+  modalities:
+    - text
+  status: current
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:qwen3-7-max@current
+    - model:qwen3-7-plus@current

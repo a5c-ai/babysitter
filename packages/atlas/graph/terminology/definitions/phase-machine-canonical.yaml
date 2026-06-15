@@ -1,0 +1,12 @@
+nodeKind: Definition
+id: definition:phase-machine.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:phase-machine
+  text: |
+    a finite-state machine over Phase nodes declared by a reliability-interface
+    impl; distinct from StateMachine which is general over any NodeKind
+  status: canonical
+edges:
+  defines:
+    - term:phase-machine

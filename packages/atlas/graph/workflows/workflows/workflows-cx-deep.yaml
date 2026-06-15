@@ -1,0 +1,121 @@
+---
+nodeKind: Workflow
+id: workflow:customer-journey-mapping-refresh
+attributes:
+  displayName: "Customer Journey Mapping Refresh"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Refreshes customer journey maps to reflect current product, process, and
+    touchpoint realities -- auditing each journey stage (awareness, acquisition,
+    onboarding, adoption, renewal, advocacy) against current product flows and
+    communication sequences, identifying pain points through quantitative
+    drop-off analysis and qualitative interview synthesis, mapping emotional
+    highs and lows along the journey using NPS/CSAT data correlated with
+    journey milestones, cataloging all touchpoints by channel and ownership
+    team, assessing moments-of-truth for alignment between customer expectation
+    and actual experience, evaluating handoff quality between teams at journey
+    stage transitions, and modeling the impact of proposed experience
+    improvements on retention and expansion metrics. Produces updated journey
+    map artifacts, pain-point inventory, opportunity scorecard, and
+    cross-functional improvement recommendations. Excludes implementation of
+    journey changes.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:support-team
+---
+nodeKind: Workflow
+id: workflow:voice-of-customer-synthesis
+attributes:
+  displayName: "Voice of Customer Synthesis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Aggregates and synthesizes customer feedback from all channels into
+    actionable insights -- ingesting data from NPS surveys, CSAT responses,
+    support ticket sentiment, social media mentions, app store reviews, sales
+    call transcripts, and community forum posts, applying topic modeling and
+    sentiment analysis to extract recurring themes, scoring theme urgency by
+    frequency, sentiment intensity, and customer-tier weighting, deduplicating
+    themes against known product backlog items, mapping feedback themes to
+    product areas and journey stages, tracking theme trend trajectories over
+    time to distinguish persistent issues from transient spikes, and packaging
+    insights into structured briefs for product, engineering, and leadership
+    audiences. Produces monthly VoC report, theme trend dashboard, and
+    product-area feedback digest. Excludes product roadmap decisions.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:support-team
+---
+nodeKind: Workflow
+id: workflow:customer-segmentation-review
+attributes:
+  displayName: "Customer Segmentation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and refreshes customer segmentation models to ensure they accurately
+    represent behavioral and value-based groupings -- re-running clustering
+    algorithms on updated usage, engagement, and revenue data, validating
+    segment stability by comparing current assignments against prior period
+    segments, assessing segment actionability by measuring whether
+    differentiated strategies produce statistically different outcomes across
+    segments, reviewing persona documentation for alignment with quantitative
+    segment profiles, evaluating segment-specific churn and expansion rates to
+    validate predictive power, testing new segmentation dimensions (product
+    usage patterns, support interaction frequency, feature adoption velocity)
+    for incremental explanatory value, and reconciling segment definitions
+    across marketing, sales, and customer success teams. Produces segmentation
+    refresh report, persona alignment assessment, and segment performance
+    comparison. Excludes campaign design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:support-team

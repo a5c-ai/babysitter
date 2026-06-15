@@ -1,0 +1,115 @@
+nodeKind: PluginTarget
+id: plugin-target:claude-code
+attributes:
+  displayName: "Claude Code"
+  hostAgent: agent:claude-code
+  adapterName: claude
+  manifestPath: ".claude-plugin/plugin.json"
+  adapterFamily: claude-code-native
+  manifestFormat: "plugin.json + openclaw.plugin.json"
+  commandFormat: markdown-commands
+  skillHandling: native
+  hookRegistrationFormat: claude-code
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: ".claude-plugin/plugin.json"
+  pluginRootEnvVar: CLAUDE_PLUGIN_ROOT
+  pluginRootEnvVarForExtension: null
+  scriptVariants:
+    - bash
+  distribution:
+    - github-repo
+    - marketplace
+    - container-image
+  distributionModel: workspace-generated
+  marketplacePath: ".claude-plugin/marketplace.json"
+  npmPublishable: false
+  installLayout:
+    manifest: ".claude-plugin/plugin.json"
+    commands: "commands/"
+    agents: "agents/"
+    skills: "skills/"
+    hooks: "hooks/"
+    mcp: ".mcp.json"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: restart
+    extraPackageFiles: []
+    extraScripts: {}
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+    skills: native
+    hooks: native
+  cliCommand: "claude"
+  callerEnvVars:
+    - "CLAUDE_ENV_FILE"
+  configPaths:
+    - ".claude"
+  processNames:
+    - "claude"
+    - "claude-code"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - Mcp
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/claude-adapter"
+  externalRepo: "a5c-ai/babysitter-claude"
+  externalPackageName: null
+  generatedSourceDir: "claude-code"
+  marketplaceSpecs:
+    - from: ".claude-plugin/marketplace.json"
+      kind: "claude"
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - hooks
+    - stop-hook
+    - ask-user-question
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: stop-hook
+  hookDriven: true
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); CLAUDE_ENV_FILE and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: claude-code
+  defaultStepCount: 4
+  skillSystemLabel: "Claude Code skill"
+  defaultTransportId: anthropic
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: true
+  supportsBlock: true
+  supportsAsk: true
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: native_env_file
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "-p"
+    execSubcommand: null
+    resumeDelivery: flag
+    resumeFlag: "--resume"
+    sessionIdFlag: "--session-id"
+    maxTurnsFlag: "--max-turns"
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
+  description: |
+    Claude Code as a plugin host — accepts plugin.json + marketplace
+    manifests + container/binary plugin artifacts. Native plugin
+    layout follows the .claude-plugin/plugin.json convention with
+    optional commands/, agents/, skills/, hooks/, and .mcp.json
+    surfaces under the plugin root.
+edges:
+  hosted_by:
+    - target: agent:claude-code
+    - target: agent-platform-impl:claude-code.platform@1.x

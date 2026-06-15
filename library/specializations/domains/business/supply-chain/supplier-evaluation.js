@@ -16,6 +16,12 @@
  * @references
  * - CIPS Qualifications: https://www.cips.org/qualifications/
  * - Supplier Qualification Best Practices: https://www.jaggaer.com/
+  * @graph
+ *   domains: [domain:supply-chain]
+ *   specializations: [specialization:supply-chain-optimization]
+ *   skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:supply-chain-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,37 @@
+{
+  "issueNumber": 579,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-579-concurrent-effects",
+  "planningBranch": "plan/issue-579",
+  "maxImplementationIterations": 2,
+  "relatedIssues": [593, 595, 598, 604],
+  "scope": {
+    "include": [
+      "parallel within-harness dispatch for eligible pending effects",
+      "dependency-aware effect ordering based on explicit ctx.parallel scheduler hints",
+      "selected-harness capability gating for concurrent-effects",
+      "maxConcurrency enforcement",
+      "all-settled result aggregation",
+      "serialized commitEffectResult/task:post-equivalent journal commits",
+      "CLI run:iterate capability propagation",
+      "deterministic SDK and agent-platform regression tests"
+    ],
+    "exclude": [
+      "BackgroundEffects non-blocking dispatch",
+      "MultiHarnessDispatch",
+      "new effect kinds unrelated to ConcurrentEffects",
+      "live external harness credentials in tests"
+    ]
+  },
+  "qualityGates": [
+    "Sequential behavior remains default unless concurrent-effects is supported.",
+    "Sequential ctx.task chains stay ordered.",
+    "Explicit ctx.parallel groups can dispatch concurrently within maxConcurrency.",
+    "Every settled sibling result is committed before replay continues.",
+    "Mixed success/failure does not drop successes.",
+    "Journal commits are serialized per run in deterministic action order.",
+    "No live harness credentials are required for regression tests.",
+    "BackgroundEffects and MultiHarnessDispatch stay out of implementation scope."
+  ],
+  "executionEntry": ".a5c/processes/issue-579-concurrent-effects-plan.mjs#process"
+}

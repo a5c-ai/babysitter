@@ -1,0 +1,27 @@
+nodeKind: Framework
+id: framework:remix
+attributes:
+  displayName: "Remix"
+  homepageUrl: "https://remix.run"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    Remix — a full-stack web framework for React.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:server-side-rendering
+    - target: skill-area:frontend-development
+    - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nextjs
+      comparison: "React meta-frameworks"
+    - target: framework:nuxt
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:sveltekit
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:astro
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:gatsby
+      comparison: "JavaScript meta-frameworks"

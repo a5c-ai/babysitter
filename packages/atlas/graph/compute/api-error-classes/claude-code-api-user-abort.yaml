@@ -1,0 +1,12 @@
+nodeKind: APIErrorClass
+id: api-error-class:claude-code-api-user-abort
+attributes:
+  displayName: "APIUserAbortError"
+  className: "APIUserAbortError"
+  layer: abort
+  triggersAuthCacheClear: false
+  triggersKeepAliveTeardown: false
+  triggersFallbackModel: false
+  description: |
+    Raised when a user/parent abort propagates through the AbortController.
+    Not retryable — caller short-circuits with an "interrupted by user" path.

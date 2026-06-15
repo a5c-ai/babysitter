@@ -3,6 +3,12 @@
  * @description Data-driven quality improvement methodology following Define, Measure, Analyze, Improve, Control phases
  * @inputs { problemStatement: string, projectScope: object, organizationContext: object, outputDir: string }
  * @outputs { success: boolean, dmaicPhases: object, rootCauses: array, solutions: array, controlPlan: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

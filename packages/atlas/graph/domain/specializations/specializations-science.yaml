@@ -1,0 +1,129 @@
+---
+nodeKind: Specialization
+id: specialization:quantum-computing
+attributes:
+  displayName: "Quantum Computing"
+  parentDomainId: domain:computer-science
+  description: |
+    Quantum algorithm design, quantum circuit construction, and error-correction
+    protocols for near-term and fault-tolerant hardware. Covers qubit models
+    (superconducting, photonic, trapped-ion), variational quantum algorithms
+    (VQE, QAOA), quantum complexity theory, and simulation of quantum systems.
+    Bridges computer science theory, physics, and low-level hardware co-design
+    to advance computation beyond classical limits.
+edges:
+  specializes:
+    - domain:computer-science
+---
+nodeKind: Specialization
+id: specialization:aerospace-engineering
+attributes:
+  displayName: "Aerospace Engineering"
+  parentDomainId: domain:aerospace-engineering
+  description: |
+    Aerodynamics simulation, propulsion system modeling, orbital mechanics, and
+    avionics software development. Encompasses computational fluid dynamics (CFD),
+    structural finite-element analysis (FEA), flight control systems, and GNC
+    (guidance, navigation, control) algorithms. Covers both atmospheric and space
+    vehicle design, satellite systems, and regulatory compliance with aerospace
+    standards (DO-178C, AS9100).
+edges:
+  specializes:
+    - domain:aerospace-engineering
+---
+nodeKind: Specialization
+id: specialization:biomedical-informatics
+attributes:
+  displayName: "Biomedical Informatics"
+  parentDomainId: domain:bioinformatics
+  description: |
+    Integration of biomedical data sources — EHR records, genomic datasets,
+    imaging studies, and clinical trial data — into analytical and decision-support
+    systems. Applies sequence analysis, natural language processing on clinical
+    text, and ML-driven phenotyping to enable precision medicine and translational
+    research. Spans standards such as HL7 FHIR, OMOP CDM, and SNOMED CT while
+    maintaining HIPAA and GDPR compliance across data pipelines.
+edges:
+  specializes:
+    - domain:bioinformatics
+---
+nodeKind: Specialization
+id: specialization:computational-mathematics
+attributes:
+  displayName: "Computational Mathematics"
+  parentDomainId: domain:mathematics
+  description: |
+    Numerical analysis, approximation theory, and algorithmic solutions to
+    mathematical problems that resist closed-form answers. Covers numerical linear
+    algebra (direct and iterative solvers), finite difference and finite element
+    methods, Monte Carlo simulation, symbolic computation, and high-performance
+    implementations in Python/Julia/Fortran. Underpins scientific computing,
+    quantitative finance, and machine learning optimization.
+edges:
+  specializes:
+    - domain:mathematics
+---
+nodeKind: Specialization
+id: specialization:theoretical-computer-science
+attributes:
+  displayName: "Theoretical Computer Science"
+  parentDomainId: domain:computer-science
+  description: |
+    Mathematical foundations of computation including automata theory, formal
+    languages, computability, and complexity theory (P vs NP, circuit complexity).
+    Covers type theory, lambda calculus, category-theoretic semantics, and program
+    logics such as Hoare logic and separation logic. Provides the rigorous basis
+    for compiler construction, verification tools, cryptographic protocols, and
+    AI reasoning systems.
+edges:
+  specializes:
+    - domain:computer-science
+---
+nodeKind: Specialization
+id: specialization:statistical-methods
+attributes:
+  displayName: "Statistical Methods"
+  parentDomainId: domain:mathematics
+  description: |
+    Classical and Bayesian statistical inference, experimental design, and causal
+    analysis. Covers hypothesis testing, regression and GLMs, survival analysis,
+    time-series modeling, and resampling techniques (bootstrap, cross-validation).
+    Addresses reproducibility, multiple-comparison corrections, and reporting
+    standards for scientific publications. Increasingly applied to A/B testing,
+    clinical trials, and data-driven product decisions.
+edges:
+  specializes:
+    - domain:mathematics
+---
+nodeKind: Specialization
+id: specialization:formal-methods
+attributes:
+  displayName: "Formal Methods"
+  parentDomainId: domain:computer-science
+  description: |
+    Mathematical techniques for specifying, modeling, and verifying software and
+    hardware correctness. Encompasses model checking (TLA+, Alloy, SPIN), theorem
+    proving (Coq, Lean, Isabelle/HOL), abstract interpretation, and satisfiability
+    solvers (SMT/SAT). Applied to safety-critical systems, concurrent protocols,
+    smart contracts, and compiler verification to provide machine-checked proofs
+    of correctness.
+edges:
+  specializes:
+    - domain:computer-science
+---
+nodeKind: Specialization
+id: specialization:scientific-research-methods
+attributes:
+  displayName: "Scientific Research Methods"
+  parentDomainId: domain:scientific-discovery
+  description: |
+    Systematic application of the scientific method across disciplines — covering
+    hypothesis formulation, experimental design (factorial, adaptive, randomized
+    controlled), data collection protocols, and statistical analysis. Addresses
+    reproducibility crises, pre-registration, open data practices, and AI-assisted
+    literature synthesis. Provides the methodological backbone for peer-reviewed
+    research, systematic reviews, and meta-analyses across natural and social
+    sciences.
+edges:
+  specializes:
+    - domain:scientific-discovery

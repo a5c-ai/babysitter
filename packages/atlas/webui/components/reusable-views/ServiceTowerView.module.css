@@ -1,0 +1,1023 @@
+/* ============================================================
+   ServiceTowerView — a5c Codex Seraphinianus design system
+   Self-contained CSS module.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
+/* ---- Design-system variables scoped to .tower ---- */
+
+.tower {
+  /* Grounds */
+  --ground-vellum:    #EDE3CF;
+  --ground-parchment: #D9CBAE;
+  --ground-void:      #0B0A0F;
+  --ground-ink:       #181624;
+
+  /* Ink (text on vellum / light) */
+  --ink-pigment: #1B1611;
+  --ink-fade:    #5A4E3C;
+  --ink-ghost:   #8C7E65;
+
+  /* Glyph (text on void / dark) */
+  --glyph-bone: #F0E6D1;
+  --glyph-fade: #A89980;
+
+  /* Accents */
+  --accent-cinnabar: #C03A2B;
+  --accent-indigo:   #2B2A6B;
+  --accent-viridian: #2F6F5E;
+  --accent-sulphur:  #D4A84B;
+
+  /* Gemstones */
+  --gem-cyan:    #16D7E6;
+  --gem-magenta: #E23FB4;
+  --gem-ruby:    #D81F3D;
+  --gem-emerald: #3EA676;
+  --gem-amber:   #E0A63A;
+
+  /* Brass registers */
+  --brass-light: #F2C88F;
+  --brass:       #C98A3E;
+  --brass-deep:  #8E5A26;
+  --brass-shadow:#3E1E0E;
+  --leather:     #5B3817;
+  --mahogany:    #2A1607;
+
+  /* Semantic */
+  --gate-pass: var(--accent-viridian);
+  --gate-fail: var(--accent-cinnabar);
+
+  /* Foreground / Background aliases (void mode — stage is dark) */
+  --bg:   var(--ground-void);
+  --bg-2: var(--ground-ink);
+  --fg:   var(--glyph-bone);
+  --fg-2: var(--glyph-fade);
+  --fg-3: color-mix(in oklab, var(--glyph-fade) 70%, transparent);
+  --rule: color-mix(in oklab, var(--brass) 28%, transparent);
+
+  /* Font families */
+  --font-display: 'Cormorant Garamond', 'Cormorant', 'Garamond', 'Didot', serif;
+  --font-body:    'EB Garamond', 'Garamond', Georgia, 'Times New Roman', serif;
+  --font-mono:    'JetBrains Mono', 'IBM Plex Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Type sizes */
+  --fs-hairline: 11px;
+  --fs-caption:  13px;
+  --fs-small:    14px;
+  --fs-body:     17px;
+  --fs-lead:     20px;
+  --fs-h5:       22px;
+  --fs-h4:       28px;
+  --fs-h3:       36px;
+  --fs-h2:       52px;
+  --fs-h1:       84px;
+  --fs-display:  120px;
+
+  /* Line heights */
+  --lh-tight:  1.02;
+  --lh-snug:   1.18;
+  --lh-normal: 1.45;
+  --lh-prose:  1.62;
+
+  /* Letter spacing */
+  --ls-display:  -0.02em;
+  --ls-tight:    -0.01em;
+  --ls-normal:   0;
+  --ls-label:    0.14em;
+  --ls-glyph:    0.28em;
+
+  /* Spacing scale */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Radii */
+  --r-0: 0;
+  --r-1: 2px;
+  --r-pill: 999px;
+
+  /* Shadows */
+  --shadow-plate:      3px 3px 0 var(--ink-pigment);
+  --shadow-plate-dark: 3px 3px 0 var(--glyph-bone);
+  --shadow-stamp:      0 0 0 1px var(--accent-cinnabar);
+
+  /* Motion */
+  --ease-codex: cubic-bezier(.2,.7,.2,1);
+  --dur-quick: 160ms;
+  --dur-base:  320ms;
+  --dur-slow:  520ms;
+
+  /* ---- Tower root layout ---- */
+  display: grid;
+  grid-template-rows: 1fr;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background:
+    radial-gradient(ellipse 70% 80% at 30% 50%, rgba(43, 42, 107, 0.18), transparent 60%),
+    radial-gradient(ellipse 50% 80% at 88% 50%, rgba(212, 168, 75, 0.06), transparent 70%),
+    var(--ground-void);
+  color: var(--glyph-bone);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 24px 80px rgba(0, 0, 0, 0.24);
+}
+
+/* Star-field dots overlay */
+.tower::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(240, 230, 209, 0.14) 0.5px, transparent 1px),
+    radial-gradient(rgba(212, 168, 75, 0.10) 0.5px, transparent 1px);
+  background-size: 73px 73px, 137px 137px;
+  background-position: 0 0, 36px 41px;
+  opacity: 0.35;
+  z-index: 0;
+}
+
+/* ============================================================
+   HEADER CHROME — brand bar with dot indicator, nav, CTA
+   ============================================================ */
+
+.header {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: nowrap;
+  padding: 12px 24px 11px;
+  border-bottom: 1px solid color-mix(in oklab, var(--brass) 28%, transparent);
+  background: linear-gradient(180deg, rgba(11, 10, 15, 0.85), rgba(11, 10, 15, 0.6));
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Monospace label group — shared base for mono-styled elements */
+.eyebrow,
+.nav,
+.crumbs,
+.footer,
+.drawerEyebrow,
+.drawerId,
+.domainLegend,
+.serviceCode,
+.recordKind,
+.statLabel {
+  font-family: var(--font-mono);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--glyph-fade);
+  font-size: var(--fs-hairline);
+  letter-spacing: 0.2em;
+}
+
+/* Dot indicator */
+.seal {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--brass);
+  border-radius: var(--r-pill);
+  background: var(--gem-amber);
+  box-shadow: 0 0 6px var(--gem-amber);
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 4px 0 0;
+  color: var(--glyph-bone);
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.012em;
+}
+
+.title em {
+  color: var(--brass-light);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: rgba(240, 230, 209, 0.72);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.08em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  color: var(--glyph-fade);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+}
+
+.nav a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: color var(--dur-quick) var(--ease-codex),
+              border-color var(--dur-quick) var(--ease-codex);
+}
+
+.nav a:hover {
+  color: var(--brass-light);
+  border-color: var(--brass);
+}
+
+/* CTA button style for the last nav link */
+.nav a:last-child {
+  border: 1px solid var(--brass);
+  padding: 7px 14px;
+  color: var(--brass-light);
+  border-bottom-width: 1px;
+}
+
+.nav a:last-child:hover {
+  background: rgba(201, 138, 62, 0.12);
+  box-shadow: 2px 2px 0 var(--brass-shadow);
+}
+
+/* ============================================================
+   LAYOUT — stage + drawer
+   ============================================================ */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 480px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ============================================================
+   STAGE — floor viewport
+   ============================================================ */
+
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Stage top bar (breadcrumbs + legend) */
+.stageBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px 24px;
+  border-bottom: 1px solid color-mix(in oklab, var(--brass) 14%, transparent);
+}
+
+/* ============================================================
+   BREADCRUMBS — monospace with active state
+   ============================================================ */
+
+.crumbs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--glyph-fade);
+  font-size: var(--fs-hairline);
+  letter-spacing: 0.12em;
+}
+
+.crumbs button {
+  border: 0;
+  background: transparent;
+  color: var(--glyph-fade);
+  cursor: pointer;
+  padding: 2px 4px;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: color var(--dur-quick) var(--ease-codex);
+}
+
+.crumbs button:hover {
+  color: var(--brass-light);
+}
+
+.crumbs .active {
+  color: var(--accent-cinnabar);
+}
+
+.crumbs span {
+  color: var(--glyph-fade);
+  user-select: none;
+}
+
+/* Domain legend (right side of stage bar) */
+.domainLegend {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 14px;
+  color: var(--glyph-fade);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+}
+
+.domainLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.swatch {
+  width: 8px;
+  height: 8px;
+  border: 1px solid currentColor;
+}
+
+/* ============================================================
+   FLOOR WRAP — SVG viewport with star-field overlay
+   ============================================================ */
+
+.svgWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 520px;
+  padding: 4px 6px;
+  overflow: hidden;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  max-height: none;
+  display: block;
+}
+
+/* ============================================================
+   CAMERA — smooth zoom transitions
+   ============================================================ */
+
+.camera {
+  transition: transform 720ms cubic-bezier(0.7, 0.05, 0.25, 1);
+}
+
+/* ============================================================
+   ZONES — floor groups and room groups with hover glow
+   ============================================================ */
+
+.floorGroup,
+.roomGroup {
+  cursor: pointer;
+  transition: opacity 220ms ease;
+}
+
+.floorGroup polygon,
+.roomGroup polygon {
+  transition: opacity 180ms ease, filter 180ms ease;
+}
+
+.floorGroup:hover polygon,
+.roomGroup:hover polygon,
+.focused polygon {
+  filter: drop-shadow(0 0 8px rgba(212, 168, 75, 0.35));
+}
+
+/* Dimming for non-active floors/rooms */
+.dimmed {
+  opacity: 0.2;
+  transition: opacity 320ms var(--ease-codex);
+}
+
+/* Labels inside the SVG tower */
+.floorLabel,
+.roomLabel,
+.roomSubLabel {
+  pointer-events: none;
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.floorLabel {
+  fill: rgba(240, 230, 209, 0.82);
+  font-size: 17px;
+}
+
+.roomLabel {
+  fill: var(--glyph-bone);
+  font-size: 13px;
+}
+
+.roomSubLabel {
+  fill: rgba(240, 230, 209, 0.62);
+  font-size: 9px;
+}
+
+/* ============================================================
+   FOOTER — stats bar with brass accents
+   ============================================================ */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 24px 12px;
+  border-top: 1px solid color-mix(in oklab, var(--brass) 14%, transparent);
+  color: var(--glyph-fade);
+  font-size: 10px;
+  letter-spacing: var(--ls-label);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.statValue {
+  padding-right: 6px;
+  color: var(--brass-light);
+  font-weight: 500;
+}
+
+.statLabel {
+  font-size: 10px;
+  color: var(--glyph-fade);
+}
+
+/* ============================================================
+   DRAWER — vellum background, brass border, light mode context
+   ============================================================ */
+
+.drawer {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+  border-left: 1px solid var(--brass);
+  background: var(--ground-vellum);
+  color: var(--ink-pigment);
+  font-family: var(--font-body);
+}
+
+.drawerInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+  padding: 22px 26px 30px;
+}
+
+.drawerEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-fade);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+}
+
+.drawerName {
+  margin: 8px 0 4px;
+  color: var(--ink-pigment);
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+.drawerId {
+  color: var(--ink-fade);
+  font-size: var(--fs-hairline);
+  letter-spacing: 0.04em;
+}
+
+.drawerBlurb {
+  margin: 0;
+  color: var(--ink-pigment);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  max-width: 52ch;
+}
+
+/* ============================================================
+   SECTION HEADERS in drawer
+   ============================================================ */
+
+.sectionTitle {
+  margin: 0 0 10px;
+  color: var(--ink-fade);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ============================================================
+   ROOM / RECORD / SERVICE lists in drawer
+   ============================================================ */
+
+.roomList,
+.recordList,
+.serviceList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ============================================================
+   CARDS — with corner ornaments (brass pip squares)
+   ============================================================ */
+
+.roomCard,
+.recordCard,
+.serviceCard {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  border: 1px solid color-mix(in oklab, var(--ink-fade) 35%, transparent);
+  background: rgba(255, 255, 255, 0.18);
+  padding: 12px 14px;
+}
+
+/* Corner ornaments */
+.roomCard::before,
+.roomCard::after,
+.recordCard::before,
+.recordCard::after,
+.serviceCard::before,
+.serviceCard::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border: 1px solid var(--brass-deep);
+  background: var(--ground-vellum);
+}
+
+.roomCard::before,
+.recordCard::before,
+.serviceCard::before {
+  top: -3px;
+  left: -3px;
+}
+
+.roomCard::after,
+.recordCard::after,
+.serviceCard::after {
+  bottom: -3px;
+  right: -3px;
+}
+
+.roomCard button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+}
+
+.cardTitle,
+.recordCard a {
+  color: var(--ink-pigment);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: var(--lh-snug);
+  letter-spacing: -0.005em;
+  text-decoration: none;
+}
+
+.cardTitle:hover,
+.recordCard a:hover {
+  color: var(--accent-cinnabar);
+}
+
+.recordKind,
+.serviceCode {
+  color: var(--ink-fade);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.serviceCode {
+  color: var(--brass-deep);
+  font-weight: 700;
+}
+
+.cardText,
+.serviceCard p,
+.recordCard p {
+  margin: 0;
+  color: var(--ink-pigment);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-normal);
+  text-wrap: pretty;
+}
+
+/* ============================================================
+   KPI PILLS
+   ============================================================ */
+
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kpis li {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  border: 1px solid var(--brass-deep);
+  background: rgba(201, 138, 62, 0.10);
+  padding: 3px 8px;
+  color: var(--ink-pigment);
+}
+
+/* ============================================================
+   KPI GRID (drawer-level KPIs, for future use)
+   ============================================================ */
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: var(--s-4) 0 var(--s-2);
+}
+
+.kpi {
+  position: relative;
+  border: 1px solid color-mix(in oklab, var(--ink-fade) 30%, transparent);
+  background: rgba(255, 255, 255, 0.18);
+  padding: 10px 12px;
+}
+
+.kpi::before,
+.kpi::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border: 1px solid var(--brass-deep);
+  background: var(--ground-vellum);
+}
+
+.kpi::before { top: -3px; left: -3px; }
+.kpi::after  { bottom: -3px; right: -3px; }
+
+.kpiKey {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-fade);
+}
+
+.kpiValue {
+  font-family: var(--font-display);
+  font-size: var(--fs-h5);
+  line-height: 1.08;
+  color: var(--ink-pigment);
+  margin-top: var(--s-1);
+  letter-spacing: -0.005em;
+}
+
+.kpiValue small {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-cinnabar);
+  margin-left: var(--s-1);
+}
+
+/* ============================================================
+   SERVICE ACCORDION (for future accordion pattern)
+   ============================================================ */
+
+.service {
+  position: relative;
+  border: 1px solid color-mix(in oklab, var(--ink-fade) 35%, transparent);
+  background: rgba(255, 255, 255, 0.18);
+  margin-bottom: 8px;
+}
+
+.service::before,
+.service::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border: 1px solid var(--brass-deep);
+  background: var(--ground-vellum);
+}
+
+.service::before { top: -3px; left: -3px; }
+.service::after  { bottom: -3px; right: -3px; }
+
+.service.open {
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.serviceHead {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.serviceHead h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: var(--lh-snug);
+  margin: 0;
+  color: var(--ink-pigment);
+  letter-spacing: -0.005em;
+}
+
+.serviceScope {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-fade);
+  letter-spacing: 0.06em;
+  text-align: right;
+}
+
+.chev {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--ink-fade);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-hairline);
+  color: var(--ink-fade);
+  transition: transform 220ms ease;
+}
+
+.service.open .chev {
+  transform: rotate(45deg);
+  border-color: var(--accent-cinnabar);
+  color: var(--accent-cinnabar);
+}
+
+.serviceBody {
+  padding: 0 14px 14px 14px;
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: 10px;
+}
+
+.serviceSummary {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--ink-pigment);
+  text-wrap: pretty;
+  border-top: 1px dashed color-mix(in oklab, var(--ink-fade) 35%, transparent);
+  padding-top: 10px;
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.kpiPill {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  border: 1px solid var(--brass-deep);
+  padding: 6px 8px;
+  background: rgba(201, 138, 62, 0.10);
+  color: var(--ink-pigment);
+  text-align: left;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+
+.kpiPill .arr {
+  color: var(--accent-cinnabar);
+}
+
+.refs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ref {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in oklab, var(--brass-deep) 60%, transparent);
+  background: rgba(201, 138, 62, 0.10);
+  color: var(--brass-shadow);
+}
+
+.ref .refKey {
+  color: var(--brass-deep);
+  font-weight: 700;
+}
+
+.ref .refColon {
+  color: var(--brass-deep);
+  padding: 0 1px;
+}
+
+.tierRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink-fade);
+}
+
+.tierRow .tier {
+  color: var(--accent-cinnabar);
+  font-weight: 700;
+}
+
+/* ============================================================
+   EMPTY STATE — glyph decoration, italic heading
+   ============================================================ */
+
+.empty {
+  padding: 44px 12px;
+  text-align: center;
+}
+
+.emptyGlyph {
+  font-family: var(--font-mono);
+  letter-spacing: var(--ls-glyph);
+  color: var(--ink-ghost);
+  font-size: var(--fs-h5);
+  user-select: none;
+}
+
+.emptyHeading {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-h5);
+  color: var(--ink-pigment);
+  margin: 12px 0 6px;
+}
+
+.emptySubtext {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--ink-fade);
+  max-width: 38ch;
+  margin: 0 auto 14px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   CTA ROW (drawer action buttons)
+   ============================================================ */
+
+.ctaRow {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ctaRow a {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid var(--ink-pigment);
+  color: var(--ink-pigment);
+  background: var(--ground-vellum);
+  position: relative;
+  transition: box-shadow var(--dur-quick) var(--ease-codex);
+}
+
+.ctaRow a:hover {
+  box-shadow: var(--shadow-plate);
+}
+
+.ctaRow a.primary {
+  background: var(--accent-cinnabar);
+  border-color: var(--accent-cinnabar);
+  color: var(--ground-vellum);
+}
+
+.ctaRow a.primary:hover {
+  box-shadow: 3px 3px 0 var(--brass-shadow);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1240px) {
+  .layout {
+    grid-template-columns: 1fr 400px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .drawer {
+    border-left: 0;
+    border-top: 1px solid var(--brass);
+  }
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr 360px;
+  }
+}
+
+@media (max-width: 820px) {
+  .header,
+  .stageBar,
+  .footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .domainLegend {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .drawer {
+    border-left: 0;
+    border-top: 1px solid var(--brass);
+  }
+}

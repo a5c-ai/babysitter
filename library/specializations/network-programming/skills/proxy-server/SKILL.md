@@ -8,6 +8,12 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers]
 ---
 
 # Proxy Server Skill

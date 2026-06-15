@@ -1,0 +1,63 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:clickhouse.run-select-query
+attributes:
+  schema: '{}'
+  displayName: "ClickHouse: Run SELECT Query"
+  description: Execute a read-only SELECT query against the ClickHouse cluster.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      rows: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-clickhouse
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:clickhouse.list-databases
+attributes:
+  schema: '{}'
+  displayName: "ClickHouse: List Databases"
+  description: List databases on the ClickHouse server.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      databases: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-clickhouse
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:clickhouse.list-tables
+attributes:
+  schema: '{}'
+  displayName: "ClickHouse: List Tables"
+  description: List tables (and view metadata such as schema) for a database.
+  inputSchema:
+    type: object
+    required: [database]
+    properties:
+      database: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      tables: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-clickhouse

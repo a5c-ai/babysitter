@@ -1,0 +1,49 @@
+{
+  "issueNumber": 618,
+  "baseBranch": "staging",
+  "branchName": "feat/issue-618-sdk-plugin-subprocess-support",
+  "maxAttempts": 3,
+  "scope": {
+    "summary": "Enable subprocess effects for SDK plugin mode through an explicit local/plugin subprocess support mode while preserving disabled and agent-platform behavior.",
+    "targetFiles": [
+      "packages/sdk/src/runtime/intrinsics/subprocess.ts",
+      "packages/sdk/src/runtime/types.ts",
+      "packages/sdk/src/runtime/processContext.ts",
+      "packages/sdk/src/runtime/replay/createReplayEngine.ts",
+      "packages/sdk/src/runtime/orchestrateIteration.ts",
+      "packages/sdk/src/runtime/intrinsics/task.ts",
+      "packages/sdk/src/harness/unified/adapter.ts",
+      "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+      "packages/sdk/src/runtime/__tests__/intrinsics.behaviors.test.ts",
+      "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+      "packages/sdk/src/harness/unified/__tests__/e2e-integration.test.ts"
+    ],
+    "mustPreserve": [
+      "subprocessSupport disabled mode remains a hard failure",
+      "agent-platform subprocess effect behavior remains compatible",
+      "plugin mode opts into subprocess support intentionally",
+      "local subprocess lifecycle is cleaned up on terminal run/plugin paths"
+    ],
+    "qualityGates": [
+      "targeted SDK runtime and harness tests",
+      "npm run build:sdk",
+      "npm run test:sdk",
+      "npm run verify:metadata",
+      "grep gate for stale agent-platform-only subprocess support wording/types"
+    ]
+  },
+  "references": {
+    "issue": "https://github.com/a5c-ai/babysitter/issues/618",
+    "designDoc": "docs/adapters-babysitter-integrations/plugin-mode.md",
+    "relatedIssues": [
+      593,
+      590
+    ],
+    "processLibraryPatterns": [
+      "cradle/feature-implementation-contribute",
+      "methodologies/metaswarm/metaswarm-execution-loop",
+      "processes/shared/tdd-triplet",
+      "processes/shared/completeness-gate"
+    ]
+  }
+}

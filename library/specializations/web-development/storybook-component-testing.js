@@ -4,6 +4,13 @@
  * @inputs { projectName: string, framework?: string }
  * @outputs { success: boolean, storybookConfig: object, stories: array, artifacts: array }
  * @references - Storybook: https://storybook.js.org/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer, role:qa-engineer]
+ *   skillAreas: [skill-area:design-systems, skill-area:component-testing]
+ *   topics: [topic:component-based-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

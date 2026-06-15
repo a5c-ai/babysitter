@@ -1,0 +1,336 @@
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-contextwindowtokens
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: contextWindowTokens
+  value: '1050000'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current contextWindowTokens is 1050000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-costpermtokinput
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: costPerMTokInput
+  value: '5.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current costPerMTokInput is 5.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-costpermtokoutput
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: costPerMTokOutput
+  value: '30.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current costPerMTokOutput is 30.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-kind
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current kind is reasoning.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: knowledgeCutoffDate
+  value: '2025-12-01'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current knowledgeCutoffDate is 2025-12-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-lifecyclestatus
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-modalities
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-modalitydirections
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-safetytier
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: safetyTier
+  value: openai-preparedness-high
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current safetyTier is openai-preparedness-high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-supportsextendedthinking
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-supportsfinetuning
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-thinkingeffortlevels
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high, xhigh
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current thinkingEffortLevels is low, medium, high, xhigh.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-5-current-versionrange
+attributes:
+  subjectId: model:gpt-5.5@current
+  attribute: versionRange
+  value: '>=5.5.0 <5.6.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.5@current versionRange is >=5.5.0 <5.6.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5.5@current

@@ -14,6 +14,13 @@ expertise:
   - Business glossary curation
   - Compliance monitoring
   - Data discovery facilitation
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:data-governance, skill-area:data-lineage]
+  roles: [role:data-engineer, role:analytics-engineer]
+  workflows: [workflow:data-quality-monitoring]
+  topics: [topic:data-mesh]
 ---
 
 # Data Governance Steward Agent

@@ -2,6 +2,11 @@
 name: unreal-sequencer
 description: Unreal Engine Sequencer skill for cinematics, camera cuts, and in-game cutscenes.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:animation-transitions, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unreal Sequencer Skill

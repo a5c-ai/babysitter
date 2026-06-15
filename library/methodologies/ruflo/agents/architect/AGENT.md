@@ -9,17 +9,15 @@ expertise:
   - Dependency analysis and management
   - Architecture pattern selection
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Architect Agent
-
-## Role
-
-Worker agent specializing in system design and architecture. Decomposes complex tasks into implementable work units, defines interfaces between components, and ensures architectural consistency.
-
-## Expertise
-
-- System architecture design and review
 - Complex task decomposition into bounded work units
 - Interface and API contract definition
 - Dependency graph analysis and conflict detection

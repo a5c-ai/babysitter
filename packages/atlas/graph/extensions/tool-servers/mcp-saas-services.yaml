@@ -1,0 +1,372 @@
+---
+# SaaS Services MCP Servers
+# Only includes MCP servers with verified GitHub repos or npm packages
+
+nodeKind: ToolServer
+id: tool-server:mcp-hubspot
+attributes:
+  displayName: HubSpot MCP Server
+  description: |
+    MCP server providing access to the HubSpot CRM platform.
+    Enables AI agents to manage contacts, companies, deals, and tickets,
+    search CRM records, and automate marketing and sales workflows.
+  protocol: mcp
+  category: crm
+  repoUrl: https://github.com/HubSpot/hubspot-mcp-server
+  maintainer: HubSpot
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:marketing-manager
+      confidence: medium
+      evidence: "HubSpot MCP access to CRM and marketing data supports campaign and revenue workflows."
+    - target: role:account-executive
+      confidence: medium
+      evidence: "CRM records support account management through an agent tool server."
+  integrates_with:
+  - target: tool:hubspot
+  lib_applies_to_domain:
+  - target: domain:sales
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-zendesk
+attributes:
+  displayName: Zendesk MCP Server
+  description: |
+    MCP server providing access to Zendesk customer support workflows.
+    Enables AI agents to list, create, and update tickets, manage users,
+    and search the help center knowledge base.
+  protocol: mcp
+  category: support
+  repoUrl: https://github.com/desmondcheungsl/zendesk-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:support-engineer
+      confidence: high
+      evidence: "Zendesk tickets, help center content, and support analytics support support triage workflows."
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Ticket queues and customer context are direct issue triage inputs."
+  integrates_with:
+  - target: tool:zendesk
+  lib_applies_to_domain:
+  - target: domain:operations
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-salesforce
+attributes:
+  displayName: Salesforce MCP Server
+  description: |
+    MCP server providing access to Salesforce CRM and platform APIs.
+    Enables AI agents to query Salesforce objects via SOQL, create and
+    update records, manage leads, opportunities, and accounts.
+  protocol: mcp
+  category: crm
+  repoUrl: https://github.com/salesforce/mcp-server-salesforce
+  maintainer: Salesforce
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:account-executive
+      confidence: medium
+      evidence: "Salesforce MCP access supports CRM account and opportunity workflows."
+    - target: role:sales-engineer
+      confidence: medium
+      evidence: "Opportunity and account context supports technical sales collaboration."
+  integrates_with:
+  - target: tool:salesforce
+  lib_applies_to_domain:
+  - target: domain:sales
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-confluence
+attributes:
+  displayName: Confluence MCP Server
+  description: |
+    MCP server providing access to Atlassian Confluence knowledge base.
+    Enables AI agents to search pages, retrieve page content, create and
+    update wiki pages, and manage spaces and labels.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/ari-hacks/confluence-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:technical-writer
+      confidence: high
+      evidence: "Confluence space/page access supports structured technical documentation."
+    - target: workflow:developer-documentation-review
+      confidence: high
+      evidence: "Docs review can project page changes, comments, and approvals from Confluence."
+  integrates_with:
+  - target: tool:confluence
+  lib_applies_to_domain:
+  - target: domain:knowledge-management
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-launchdarkly
+attributes:
+  displayName: LaunchDarkly MCP Server
+  description: |
+    MCP server providing access to the LaunchDarkly feature management platform.
+    Enables AI agents to list and evaluate feature flags, manage flag targeting
+    rules, and retrieve flag metadata for controlled rollout workflows.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/launchdarkly/mcp-server
+  maintainer: LaunchDarkly
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:launchdarkly
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-posthog
+attributes:
+  displayName: PostHog MCP Server
+  description: |
+    MCP server providing access to the PostHog product analytics platform.
+    Enables AI agents to query events, list feature flags, retrieve insights
+    and dashboards, and explore user funnels and retention data.
+  protocol: mcp
+  category: analytics
+  repoUrl: https://github.com/PostHog/posthog-mcp
+  maintainer: PostHog
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:product-manager
+      confidence: high
+      evidence: "PostHog analytics, feature flags, and experiments support product decision workflows."
+    - target: workflow:a-b-test-lifecycle
+      confidence: high
+      evidence: "Feature flags and experiment analysis support A/B lifecycle projections."
+    - target: workflow:user-feedback-loop
+      confidence: medium
+      evidence: "Session recordings and funnels inform product feedback loops."
+  integrates_with:
+  - target: tool:posthog
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-algolia
+attributes:
+  displayName: Algolia MCP Server
+  description: |
+    MCP server providing access to Algolia search and discovery APIs.
+    Enables AI agents to search indexes, retrieve records, manage index
+    settings, and query Algolia analytics for search performance.
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/algolia/mcp-node
+  maintainer: Algolia
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:algolia
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-okta
+attributes:
+  displayName: Okta MCP Server
+  description: |
+    MCP server providing access to the Okta identity platform.
+    Enables AI agents to manage users, groups, and applications,
+    query directory data, and automate identity lifecycle operations.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/okta/okta-mcp-server
+  maintainer: Okta
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:okta
+  lib_applies_to_domain:
+  - target: domain:security
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-auth0
+attributes:
+  displayName: Auth0 MCP Server
+  description: |
+    MCP server providing access to the Auth0 identity platform.
+    Enables AI agents to manage Auth0 tenants, applications, connections,
+    users, and rules through the Auth0 Management API.
+  protocol: mcp
+  category: security
+  repoUrl: https://github.com/auth0/auth0-mcp-server
+  maintainer: Auth0 (Okta)
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:auth0
+  lib_applies_to_domain:
+  - target: domain:security
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-trello
+attributes:
+  displayName: Trello MCP Server
+  description: |
+    MCP server providing access to Trello boards and cards.
+    Enables AI agents to list boards and cards, create and update cards,
+    manage checklists, and move cards between lists.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/SwapnilSoni1999/trello-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:trello
+  lib_applies_to_domain:
+  - target: domain:project-management
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-segment
+attributes:
+  displayName: Segment MCP Server
+  description: |
+    MCP server providing access to the Segment customer data platform.
+    Enables AI agents to query event schemas, inspect source configurations,
+    and retrieve workspace metadata for data pipeline management.
+  protocol: mcp
+  category: analytics
+  repoUrl: https://github.com/segmentio/segment-mcp-server
+  maintainer: Segment (Twilio)
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:data-scientist
+      confidence: medium
+      evidence: "Event instrumentation and audience data supports analytics workflows."
+    - target: workflow:data-pipeline-monitoring
+      confidence: medium
+      evidence: "Event stream health and schema metadata feed data pipeline review."
+  integrates_with:
+  - target: tool:segment
+  lib_applies_to_domain:
+  - target: domain:data-engineering
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-paypal
+attributes:
+  displayName: PayPal MCP Server
+  description: |
+    MCP server providing access to the PayPal payments platform.
+    Enables AI agents to create invoices, look up transactions,
+    manage subscriptions, and retrieve payment details via the PayPal API.
+  protocol: mcp
+  category: payments
+  repoUrl: https://github.com/paypal/agent-toolkit
+  maintainer: PayPal
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:paypal
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-square
+attributes:
+  displayName: Square MCP Server
+  description: |
+    MCP server providing access to the Square commerce platform.
+    Enables AI agents to manage catalog items, retrieve orders and
+    payments, and query business locations through the Square API.
+  protocol: mcp
+  category: payments
+  repoUrl: https://github.com/block/square-mcp-server
+  maintainer: Block (Square)
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:square
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-clickup
+attributes:
+  displayName: ClickUp MCP Server
+  description: |
+    MCP server providing access to ClickUp project management.
+    Enables AI agents to manage tasks, spaces, folders, and lists,
+    create and update work items, and query workspace data.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/taazkareem/clickup-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:clickup
+  lib_applies_to_domain:
+  - target: domain:project-management
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-resend
+attributes:
+  displayName: Resend MCP Server
+  description: |
+    MCP server providing access to the Resend email API.
+    Enables AI agents to send emails, manage domains and API keys,
+    and retrieve email delivery status through the Resend platform.
+  protocol: mcp
+  category: email
+  repoUrl: https://github.com/resend/mcp-send-email
+  maintainer: Resend
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:resend
+  lib_applies_to_domain:
+  - target: domain:software-engineering

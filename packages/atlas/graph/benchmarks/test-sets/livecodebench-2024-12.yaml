@@ -1,0 +1,20 @@
+nodeKind: TestSet
+id: test-set:livecodebench-2024-12
+attributes:
+  displayName: "LiveCodeBench 2024-12 cut"
+  benchmarkId: benchmark:livecodebench
+  caseCount: 511
+  releasedAt: "2024-12-01"
+  composition: |
+    The December 2024 contamination-free cut of LiveCodeBench. Includes
+    problems first published on LeetCode/AtCoder/CodeForces between
+    September 2024 and December 2024, after the training cutoff of most
+    contemporaneous frontier models.
+  homepageUrl: "https://livecodebench.github.io/"
+  description: |
+    LiveCodeBench publishes rolling cuts each month; this entry
+    represents the 2024-12 cut commonly referenced in late-2024 model
+    cards.
+edges:
+  belongs_to_benchmark:
+    - benchmark:livecodebench

@@ -1,0 +1,126 @@
+# Top-level CLI subcommand groups exposed by the
+# `tasks-adapter` bin (packages/tasks-adapter/src/cli/program.ts).
+# Each group sub-tree (e.g. `auth login|set-token|status|...`) is summarized
+# at the group level; deep enumeration is deferred — leaf subcommand
+# expansion would not change the grammar shape and is callable through the
+# parent group records here.
+# Wired via @a5c-ai/tasks-adapter PackageSurface `exposes_subcommand` edge.
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-ask
+attributes:
+  displayName: "tasks-adapter ask"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "ask"
+  flags:
+    - "-q,--question:1:breakpoint text (required)"
+    - "-c,--context:1:additional plain-text context"
+    - "--context-file:1:load structured context from JSON or text file"
+    - "--markdown:1:markdown body for the browser session"
+    - "--markdown-file:1:load markdown body from a file"
+    - "--code:1:append a code snippet (repeatable)"
+    - "--file-ref:1:append a file reference (repeatable)"
+    - "--tag:1:append a tag (repeatable)"
+    - "--link:1:append a label=url link (repeatable)"
+    - "-e,--responders:1:comma-separated responder IDs"
+    - "-p,--project:1:project id (required)"
+    - "-r,--repo:1:repository id (required)"
+    - "-s,--strategy:1:single|first-response-wins|collect-all|quorum"
+    - "-t,--timeout:1:wait timeout in seconds (default 300)"
+    - "-w,--wait:0:wait for an answer before returning"
+    - "--open-browser:0:open a browser session for answering"
+    - "--answerer-id:1:identity for browser-session answers"
+    - "--answerer-name:1:display name for browser-session answers"
+  description: |
+    Submit a breakpoint to responders via the configured backend (server
+    or git-native). Optionally waits for an answer and opens a browser
+    session for human responders.
+    Source: packages/tasks-adapter/src/cli/commands/ask.ts:98-200.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-responders
+attributes:
+  displayName: "tasks-adapter responders {list|show}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "responders"
+  flags:
+    - "list:0:list available responder profiles"
+    - "show <id>:0:show a single responder profile"
+  description: |
+    Manage and view responder profiles registered with the configured
+    backend.
+    Source: packages/tasks-adapter/src/cli/commands/responders.ts:17-110.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-breakpoints
+attributes:
+  displayName: "tasks-adapter breakpoints {pending|answer|status|poll}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "breakpoints"
+  flags:
+    - "pending:0:list pending breakpoints for a responder"
+    - "answer <id>:0:submit an answer to a breakpoint"
+    - "status <id>:0:check breakpoint status"
+    - "poll <id>:0:poll for an answer to a breakpoint"
+  description: |
+    Manage breakpoints and answers — list pending, answer, check status,
+    and poll for completion.
+    Source: packages/tasks-adapter/src/cli/commands/breakpoints.ts:31-200.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-server
+attributes:
+  displayName: "tasks-adapter server {start}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "server"
+  flags:
+    - "start:0:start the tasks-adapter MCP server (stdio transport)"
+  description: |
+    Launch the tasks-adapter MCP stdio server, exposing the breakpoint
+    tool catalog (ask, list, answer, claim, ...) to MCP clients.
+    Source: packages/tasks-adapter/src/cli/commands/server.ts:12-50.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-responder-loop
+attributes:
+  displayName: "tasks-adapter responder-loop"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "responder-loop"
+  flags: []
+  description: |
+    Long-running polling loop that watches the configured backend for new
+    breakpoints assigned to a responder and dispatches them.
+    Source: packages/tasks-adapter/src/cli/commands/responder-loop.ts:22-50.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth
+attributes:
+  displayName: "tasks-adapter auth {login|server set|server clear|token set|token clear|clear|status|key generate|key push|key list}"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth"
+  flags:
+    - "login:0:authenticate with GitHub OAuth"
+    - "server set <url>:0:save default server url in ~/.tasks-adapter/config.json"
+    - "server clear:0:remove saved default server url"
+    - "token set <token>:0:save bearer token"
+    - "token clear:0:remove saved bearer token"
+    - "clear:0:clear stored auth tokens"
+    - "status:0:show current authentication status"
+    - "key generate:0:generate a new Ed25519 SSH key pair"
+    - "key push:0:push public key to repository"
+    - "key list:0:list local SSH keys"
+  description: |
+    Authentication and key management for tasks-adapter server / git
+    backends.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:44-470.

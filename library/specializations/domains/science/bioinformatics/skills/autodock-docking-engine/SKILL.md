@@ -18,6 +18,12 @@ metadata:
     - docking
     - virtual-screening
     - drug-discovery
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:biomedical-engineer]
 ---
 
 # AutoDock Docking Engine Skill

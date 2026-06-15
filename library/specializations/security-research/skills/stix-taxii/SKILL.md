@@ -9,6 +9,12 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:threat-intelligence-hunting, skill-area:security-monitoring-siem]
+  roles: [role:security-engineer]
+  workflows: [workflow:vulnerability-management, workflow:penetration-testing-cycle]
 ---
 
 # STIX/TAXII Intelligence Skill

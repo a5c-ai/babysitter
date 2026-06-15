@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:supports-native-tools
+attributes:
+  displayName: "Supports native tools"
+  description: |
+    The entity ships built-in tool definitions (e.g. file Read/Write,
+    Bash) without requiring an external tool server.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: tool
+edges: {}

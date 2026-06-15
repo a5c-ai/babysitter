@@ -1,0 +1,88 @@
+nodeKind: EvidenceSource
+id: evidence:a5c-research-github-repository
+attributes:
+  displayName: Catalog research source for a5c GitHub repository
+  kindLabel: official-repository
+  sourceUrl: https://github.com/a5c-ai/babysitter
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: a5c-research:agent:a5c:github-repository
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:a5c-research-npm-metapackage
+attributes:
+  displayName: Catalog research source for a5c npm metapackage
+  kindLabel: npm-package-metadata
+  sourceUrl: https://www.npmjs.com/package/@a5c-ai/babysitter
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: npm:@a5c-ai/babysitter@5.0.0
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:a5c-research-sdk-npm-package
+attributes:
+  displayName: Catalog research source for Babysitter SDK npm package
+  kindLabel: npm-package-metadata
+  sourceUrl: https://www.npmjs.com/package/@a5c-ai/babysitter-sdk
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: npm:@a5c-ai/babysitter-sdk@5.0.0
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:a5c-research-local-core-model
+attributes:
+  displayName: Catalog research source for a5c local core model
+  kindLabel: graph-local-record
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/agent-stack/core-impls/a5c-core-current.yaml
+  filePath: graph/agent-stack/core-impls/a5c-core-current.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: graph-node:agent-core-impl:a5c.core@current
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:a5c-research-local-runtime-model
+attributes:
+  displayName: Catalog research source for a5c local runtime model
+  kindLabel: graph-local-record
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/agent-stack/runtime-impls/a5c-runtime-current.yaml
+  filePath: graph/agent-stack/runtime-impls/a5c-runtime-current.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: graph-node:agent-runtime-impl:a5c.runtime@current
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:a5c-research-local-platform-model
+attributes:
+  displayName: Catalog research source for a5c local platform model
+  kindLabel: graph-local-record
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/agent-stack/platform-impls/a5c-platform-current.yaml
+  filePath: graph/agent-stack/platform-impls/a5c-platform-current.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: graph-node:agent-platform-impl:a5c.platform@current
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:a5c-research-local-ui-model
+attributes:
+  displayName: Catalog research source for a5c local UI model
+  kindLabel: graph-local-record
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/agent-stack/ui-impls/a5c-ui-current.yaml
+  filePath: graph/agent-stack/ui-impls/a5c-ui-current.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: graph-node:agent-ui-impl:a5c.ui@current
+edges: {}
+

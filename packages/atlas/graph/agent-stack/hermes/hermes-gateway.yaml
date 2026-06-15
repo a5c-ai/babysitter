@@ -1,0 +1,60 @@
+# Hermes messaging gateway -- deep-research atlas node.
+
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:hermes.gateway
+attributes:
+  displayName: "Hermes Gateway"
+  agentVersionId: agentVersion:hermes:ge-0-0-0
+  description: |
+    Long-running messaging gateway connecting Hermes to 20+ external
+    messaging platforms through platform adapters. Normalizes events into
+    a unified MessageEvent format, routes through GatewayRunner with
+    authorization, session management, slash command dispatch, hooks,
+    and cron integration. Supports DM pairing for user onboarding.
+  keyFiles:
+    - gateway/run.py
+    - gateway/session.py
+    - gateway/delivery.py
+    - gateway/pairing.py
+    - gateway/channel_directory.py
+    - gateway/hooks.py
+    - gateway/mirror.py
+    - gateway/status.py
+    - gateway/platforms/
+  platformAdapters:
+    - Telegram
+    - Discord
+    - Slack
+    - WhatsApp
+    - Signal
+    - Matrix
+    - Email
+    - SMS
+    - Mattermost
+    - "15+ others"
+  authorizationLayers:
+    - "Per-platform allow-all flag"
+    - "Platform allowlist"
+    - "DM pairing"
+    - "Global allow-all"
+    - "Default deny"
+  hookEvents:
+    - "gateway:startup"
+    - "session:start"
+    - "session:end"
+    - "session:reset"
+    - "agent:start"
+    - "agent:step"
+    - "agent:end"
+    - "command:*"
+  sessionKeyFormat: "agent:main:{platform}:{chat_type}:{chat_id}"
+  ourEquivalent: |
+    packages/adapters/gateway/ provides our gateway with auth, fanout,
+    kanban, notifications, and pairing. Our gateway is multi-harness
+    (routes to any agent product), while Hermes gateway is Hermes-only
+    but has 20+ platform adapter breadth we do not yet match.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  part_of:
+    - target: agent:hermes

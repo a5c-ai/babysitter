@@ -1,0 +1,212 @@
+---
+nodeKind: Workflow
+id: workflow:model-training-cycle
+attributes:
+  displayName: "Model Training Cycle"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end ML model training lifecycle — dataset preparation,
+    hyperparameter sweeps, distributed training orchestration, experiment
+    tracking, and model artifact registration. Excludes model serving.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:ml-platform-team
+---
+nodeKind: Workflow
+id: workflow:model-deployment-pipeline
+attributes:
+  displayName: "Model Deployment Pipeline"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-model"
+  complexity: cross-team
+  description: |
+    Deploys trained ML models to production serving infrastructure — model
+    packaging, canary rollout, latency and accuracy validation, A/B traffic
+    splitting, and rollback procedures. Excludes model training.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:model-monitoring-drift-detection
+attributes:
+  displayName: "Model Monitoring and Drift Detection"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: single-team
+  description: |
+    Continuously monitors deployed model performance for data drift, concept
+    drift, and prediction quality degradation — alerting on threshold violations
+    and triggering retraining workflows. Excludes initial model training.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:ml-platform-team
+---
+nodeKind: Workflow
+id: workflow:ab-experiment-lifecycle
+attributes:
+  displayName: "A/B Experiment Lifecycle"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: cross-team
+  description: |
+    Governs the full lifecycle of an A/B experiment — hypothesis formulation,
+    sample size calculation, feature flag setup, traffic allocation, statistical
+    analysis, and decision documentation. Excludes feature implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:product-team
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:feature-store-management
+attributes:
+  displayName: "Feature Store Management"
+  workflowKind: data
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: single-team
+  description: |
+    Maintains the shared feature store — registering new features, monitoring
+    freshness SLAs, decommissioning stale features, and ensuring consistent
+    feature computation between training and serving. Excludes feature engineering research.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:kafka-stream-processing
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:data-platform-team
+---
+nodeKind: Workflow
+id: workflow:prompt-regression-testing
+attributes:
+  displayName: "Prompt Regression Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Runs automated evaluation suites against LLM prompts and chains on every
+    change — comparing output quality, latency, cost, and safety metrics
+    against baseline snapshots and flagging regressions. Excludes prompt authoring.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:ai-champion
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+    - target: skill-area:agentic-loops
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:ai-agent-usage-review
+  performed_by_org_unit:
+    - target: org-unit:ai-enablement
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:llm-eval-pipeline
+attributes:
+  displayName: "LLM Evaluation Pipeline"
+  workflowKind: data
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Operates the continuous evaluation pipeline for LLM-powered features —
+    maintaining eval datasets, running benchmark suites across model versions,
+    tracking quality trends, and producing comparative reports. Excludes model fine-tuning.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:ai-champion
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:prompt-engineering
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:ai-tooling-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-team
+    - target: org-unit:ai-enablement
+    - target: org-unit:research-engineering

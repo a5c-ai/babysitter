@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:google-gemini-image-models-issue-534
+attributes:
+  displayName: "Google Gemini image model documentation for issue #534"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/image-generation
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/image-generation
+  locator: "Nano Banana image generation page and linked model detail pages for gemini-3.1-flash-image, gemini-3-pro-image, and gemini-2.5-flash-image"
+  capturedAt: "2026-05-29T12:10:00Z"
+  observedAt: "2026-05-29T12:10:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:10:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-pricing-issue-534
+attributes:
+  displayName: "Google Gemini Developer API pricing for image models, issue #534"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/pricing
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/pricing
+  locator: "Gemini 3.1 Flash Image, Gemini 3 Pro Image, and Gemini 2.5 Flash Image pricing tables"
+  capturedAt: "2026-05-29T12:10:00Z"
+  observedAt: "2026-05-29T12:10:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:10:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-deprecations-issue-534
+attributes:
+  displayName: "Google Gemini API deprecations for issue #534"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/deprecations
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/deprecations
+  locator: "Gemini 3, Gemini 2.5, and Gemini 2.0 deprecation schedule tables"
+  capturedAt: "2026-05-29T12:10:00Z"
+  observedAt: "2026-05-29T12:10:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:10:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-vertex-gemini-image-models-issue-534
+attributes:
+  displayName: "Google Cloud Vertex AI Gemini image model listing for issue #534"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models
+  sourcePathOrUrl: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models
+  locator: "Google models navigation includes Gemini 3 Pro Image, Gemini 3.1 Flash Image, and Gemini 2.5 Flash Image pages"
+  capturedAt: "2026-05-29T12:10:00Z"
+  observedAt: "2026-05-29T12:10:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T12:10:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

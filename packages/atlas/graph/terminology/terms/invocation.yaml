@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:invocation
+attributes:
+  canonicalDefinitionId: definition:invocation.canonical
+  displayName: "Invocation"
+  kind: concept
+  references:
+    - "NodeKind:Invocation"
+  description: |
+    A single agent CLI process spawn.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

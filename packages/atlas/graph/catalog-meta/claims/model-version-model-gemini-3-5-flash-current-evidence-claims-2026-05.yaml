@@ -1,0 +1,243 @@
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-model-code
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: modelCode
+  value: gemini-3.5-flash
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current maps to Gemini API model code gemini-3.5-flash.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google Gemini 3.5 Flash model identifier.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-lifecyclestatus
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current lifecycleStatus is ga.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-whats-new-2026-05
+  - evidence:google-gemini-3-5-flash-changelog-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash GA status.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-whats-new-2026-05
+  - evidence:google-gemini-3-5-flash-changelog-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-releasedate
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: releaseDate
+  value: '2026-05-19'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current releaseDate is 2026-05-19.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-changelog-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash release date.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-changelog-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-contextwindowtokens
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: contextWindowTokens
+  value: '1048576'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current contextWindowTokens is 1048576.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash input token limit.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-maxoutputtokens
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: maxOutputTokens
+  value: '65536'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current maxOutputTokens is 65536.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash output token limit.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-costpermtokinput
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: costPerMTokInput
+  value: '1.5'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current costPerMTokInput is 1.5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-pricing-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash input pricing.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-pricing-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-costpermtokoutput
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: costPerMTokOutput
+  value: '9.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current costPerMTokOutput is 9.0.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-pricing-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash output pricing.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-pricing-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-supportsthinking
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: supportsThinking
+  value: 'true'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current supportsThinking is true.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  - evidence:google-gemini-3-5-flash-whats-new-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash thinking support.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-model-doc-2026-05
+  - evidence:google-gemini-3-5-flash-whats-new-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-thinking-level-control
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: thinkingControlParam
+  value: thinking_level
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current uses thinking_level for qualitative thinking control.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-gemini-3-5-flash-whats-new-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Gemini 3.5 Flash migration from thinking_budget to thinking_level.
+edges:
+  backed_by_evidence:
+  - evidence:google-gemini-3-5-flash-whats-new-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-5-flash-current-served-by-vertex
+attributes:
+  subjectId: model:gemini-3-5-flash@current
+  attribute: served_by
+  value: provider:gcp-vertex
+  subjectKind: ModelVersion
+  statement: model:gemini-3-5-flash@current is documented on Google Cloud Gemini Enterprise Agent Platform.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-cloud-gemini-3-5-flash-model-doc-2026-05
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Google Cloud availability; provider edge follows existing provider:gcp-vertex graph pattern.
+edges:
+  backed_by_evidence:
+  - evidence:google-cloud-gemini-3-5-flash-model-doc-2026-05
+  about_subject:
+  - model:gemini-3-5-flash@current

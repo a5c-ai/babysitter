@@ -1,0 +1,11 @@
+nodeKind: Domain
+id: domain:platform-engineering
+attributes:
+  displayName: "Platform Engineering"
+  description: |
+    Platform Engineering domain — internal developer platforms, golden
+    paths, paved roads, and self-service infrastructure for application
+    teams.
+edges:
+  contains:
+    - specialization:k8s-operator

@@ -1,0 +1,189 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:babysitter.ui@current
+attributes:
+  displayName: "babysitter UI (current) — adapters + agent-platform CLI"
+  agentVersionId: agent-version:babysitter@current
+  packageRef: source-ref:babysitter-github
+  uiKind: multi-surface
+  presentationsBundled:
+    - presentation:adapters-tui
+    - presentation:adapters-cli
+    - presentation:adapters-webui
+    - presentation:adapters-mobile-ios
+    - presentation:adapters-mobile-android
+    - presentation:adapters-tv-androidtv
+    - presentation:adapters-tv-appletv
+    - presentation:adapters-watch-watchos
+    - presentation:adapters-watch-wearos
+    - presentation:agent-platform-cli
+  themeSupport: full-customizable
+  accessibilitySupport: wcag-aa
+  notes: |
+    babysitter is a multi-surface suite. The user-facing UI is delivered by
+    the adapters package family (TUI / web / mobile / TV / watch) and the
+    agent-platform CLI binary. Programmatic consumers use the babysitter
+    SDK directly (no UI). This AgentUIImpl aggregates all UI surfaces
+    available to babysitter operators. The constituent products
+    (`agent:babysitter-sdk`, `agent:agent-platform`, `agent:adapters`)
+    are sibling AgentProducts that compose into the same babysitter
+    umbrella narrative.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:babysitter-call
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:call"
+    - target: interaction-primitive:babysitter-run-create
+      attributes:
+        mechanism: native-api
+    - target: interaction-primitive:babysitter-plan
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:plan"
+    - target: interaction-primitive:babysitter-resume
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:resume"
+    - target: interaction-primitive:babysitter-yolo
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:yolo"
+    - target: interaction-primitive:babysitter-doctor
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:doctor"
+    - target: interaction-primitive:babysitter-observe
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:observe"
+    - target: interaction-primitive:babysitter-observer-dashboard
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:babysitter-breakpoint-approve
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:babysitter-mcp-server
+      attributes:
+        mechanism: mcp-tool
+    - target: interaction-primitive:adapters-kanban-board
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:adapters-hook-inbox
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:adapters-session-list
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:adapters-session-detail
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:babysitter-forever
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:forever"
+    - target: interaction-primitive:babysitter-cleanup
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:cleanup"
+    - target: interaction-primitive:babysitter-retrospect
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:retrospect"
+    - target: interaction-primitive:babysitter-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:help"
+    - target: interaction-primitive:babysitter-blueprints
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:blueprints"
+    - target: interaction-primitive:babysitter-project-install
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:project-install"
+    - target: interaction-primitive:babysitter-user-install
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:user-install"
+    - target: interaction-primitive:babysitter-assimilate
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:assimilate"
+    - target: interaction-primitive:babysitter-contrib
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/babysitter:contrib"
+    - target: interaction-primitive:babysitter-sdk-cli-run
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-task
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-session
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-plugin
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-skill
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-process-library
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-profile
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-instructions
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-compression
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-breakpoint
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-hook
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-harness-runtime
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:babysitter-sdk-cli-mcp-server
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-login
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-server-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-server-clear
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-token-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-token-clear
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-logout
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-status
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-keygen
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-key-push
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth-keys
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-pending
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-answer
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-status
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-poll
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-responders-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-responders-show
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-server-start
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-ask
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-responders
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-server
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-responder-loop
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:tasks-adapter-cli-auth
+      attributes: { mechanism: cli-subcommand }

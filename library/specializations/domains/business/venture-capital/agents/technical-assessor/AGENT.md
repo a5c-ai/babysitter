@@ -8,6 +8,10 @@ expertise:
   - Code quality and technical debt analysis
   - Security and scalability review
   - Intellectual property evaluation
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Technical Assessor

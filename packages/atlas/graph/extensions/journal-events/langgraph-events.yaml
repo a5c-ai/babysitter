@@ -1,0 +1,126 @@
+# JournalEvent records for LangGraph stream taxonomy.
+#
+# Source: https://docs.langchain.com/oss/python/langgraph/streaming
+# (canonical seven stream_mode values per upstream docs, fetched
+# 2026-05-05). Each `stream_mode` corresponds to a distinct event
+# family on the run journal; LangGraph emits StreamPart objects with
+# {type, ns, data} where `type` matches one of these modes.
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-values
+attributes:
+  displayName: "LangGraph stream_mode=values"
+  eventName: values
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted after each step with the full graph state."
+  payloadSchema:
+    type: values
+    fields: ["ns", "data"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=values)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-updates
+attributes:
+  displayName: "LangGraph stream_mode=updates"
+  eventName: updates
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted after each step with the per-node state delta. Multiple updates in the same step stream separately."
+  payloadSchema:
+    type: updates
+    fields: ["ns", "data"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=updates)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-messages
+attributes:
+  displayName: "LangGraph stream_mode=messages"
+  eventName: messages
+  kind: response
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted as 2-tuples of (LLM token, metadata) from LLM calls inside graph nodes."
+  payloadSchema:
+    type: messages
+    fields: ["ns", "data(token, metadata)"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=messages)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-custom
+attributes:
+  displayName: "LangGraph stream_mode=custom"
+  eventName: custom
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted from inside a node via get_stream_writer() for arbitrary user-defined data."
+  payloadSchema:
+    type: custom
+    fields: ["ns", "data"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=custom)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-checkpoints
+attributes:
+  displayName: "LangGraph stream_mode=checkpoints"
+  eventName: checkpoints
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted whenever a checkpoint is written. Requires a checkpointer to be configured."
+  payloadSchema:
+    type: checkpoints
+    fields: ["ns", "data"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=checkpoints)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-tasks
+attributes:
+  displayName: "LangGraph stream_mode=tasks"
+  eventName: tasks
+  kind: completion
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Emitted on task start/finish with results and errors. Requires a checkpointer."
+  payloadSchema:
+    type: tasks
+    fields: ["ns", "data(start|finish, result?, error?)"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=tasks)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current
+---
+nodeKind: JournalEvent
+id: journal-event:langgraph-stream-debug
+attributes:
+  displayName: "LangGraph stream_mode=debug"
+  eventName: debug
+  kind: state-change
+  direction: runtime-to-platform
+  terminal: false
+  triggerCondition: "Combines checkpoints + tasks events with extra metadata for debugging."
+  payloadSchema:
+    type: debug
+    fields: ["ns", "data"]
+  sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=debug)"
+edges:
+  journal_event_emitted_by:
+    - target: agent-runtime-impl:langgraph.runtime@current

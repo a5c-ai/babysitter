@@ -1,0 +1,61 @@
+---
+nodeKind: Tool
+id: tool:tmux
+attributes:
+  displayName: "tmux"
+  homepageUrl: "https://github.com/tmux/tmux"
+  kind: other
+  description: |
+    Terminal multiplexer for splitting, detaching, and resuming
+    terminal sessions over SSH.
+edges:
+  belongs_to_language:
+    - language:c
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+---
+nodeKind: Tool
+id: tool:ripgrep
+attributes:
+  displayName: "ripgrep"
+  homepageUrl: "https://github.com/BurntSushi/ripgrep"
+  kind: other
+  description: |
+    Fast recursive line-oriented search tool with .gitignore awareness,
+    Unicode support, and PCRE2 mode.
+edges:
+  belongs_to_language:
+    - language:rust
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:fd
+      comparison: "Terminal search tools — ripgrep searches file contents; fd searches file names"
+    - target: tool:fzf
+      comparison: "Terminal search tools — ripgrep is line-oriented search; fzf is fuzzy finding"
+---
+nodeKind: Tool
+id: tool:fzf
+attributes:
+  displayName: "fzf"
+  homepageUrl: "https://github.com/junegunn/fzf"
+  kind: other
+  description: |
+    General-purpose command-line fuzzy finder that integrates with
+    shells, editors, git, and process listings.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:cli-tooling
+  used_for:
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:ripgrep
+      comparison: "Terminal search tools — fzf is fuzzy finding; ripgrep is line-oriented search"
+    - target: tool:fd
+      comparison: "Terminal search tools — fzf is interactive fuzzy finding; fd is file name search"

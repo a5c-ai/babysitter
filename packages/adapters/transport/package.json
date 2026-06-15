@@ -1,0 +1,99 @@
+{
+  "name": "@a5c-ai/transport-adapter",
+  "version": "5.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Transport/proxy runtime seam for adapters launcher bridging",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/adapters/transport#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/adapters/transport"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "adapters",
+    "transport",
+    "provider",
+    "proxy",
+    "llm"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "adapters-transport-proxy": "./dist/bin/adapters-transport-proxy.js",
+    "adapters-proxy": "./dist/bin/adapters-proxy.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./config": {
+      "import": {
+        "types": "./dist/config.d.ts",
+        "default": "./dist/config.js"
+      }
+    },
+    "./server": {
+      "import": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
+      }
+    },
+    "./runtime": {
+      "import": {
+        "types": "./dist/runtime.d.ts",
+        "default": "./dist/runtime.js"
+      }
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "scorecard:migration": "node ./scripts/migration-scorecard.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:unit": "vitest run tests",
+    "test:e2e": "vitest run tests/e2e",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "dependencies": {
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "hono": "^4.12.14",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
+  },
+  "atlas": {
+    "layers": [
+      "L3"
+    ],
+    "muxes": [
+      "transport-adapter"
+    ]
+  }
+}

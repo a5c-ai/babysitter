@@ -10,6 +10,11 @@ expertise:
   - AGENT.md structure
   - Collaboration modeling
   - Output schema design
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development]
+  topics: [topic:developer-experience]
+  roles: [role:platform-engineer, role:tech-lead]
 ---
 
 # Agent Designer Agent

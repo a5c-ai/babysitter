@@ -1,0 +1,72 @@
+[
+  {
+    "kind": "node",
+    "label": "alpha",
+    "refs": {
+      "inputsRef": undefined,
+      "taskDefRef": "tasks/effect-0/task.json",
+    },
+    "schedulerHints": {
+      "parallelGroupId": "group-1",
+      "pendingCount": 3,
+      "sleepUntilEpochMs": undefined,
+    },
+    "slot": 0,
+    "stepId": "alpha-task.default.079a626c6aa0.0",
+    "taskDef": {
+      "kind": "node",
+      "metadataKeys": [
+        "value",
+      ],
+      "title": "alpha",
+    },
+    "taskId": "alpha-task",
+  },
+  {
+    "kind": "node",
+    "label": "beta",
+    "refs": {
+      "inputsRef": undefined,
+      "taskDefRef": "tasks/effect-1/task.json",
+    },
+    "schedulerHints": {
+      "parallelGroupId": "group-1",
+      "pendingCount": 3,
+      "sleepUntilEpochMs": undefined,
+    },
+    "slot": 1,
+    "stepId": "beta-task.default.079a626c6aa0.0",
+    "taskDef": {
+      "kind": "node",
+      "metadataKeys": [
+        "value",
+      ],
+      "title": "beta",
+    },
+    "taskId": "beta-task",
+  },
+  {
+    "kind": "sleep",
+    "label": "sleep-thunk",
+    "refs": {
+      "inputsRef": undefined,
+      "taskDefRef": "tasks/effect-2/task.json",
+    },
+    "schedulerHints": {
+      "parallelGroupId": "group-1",
+      "pendingCount": 3,
+      "sleepUntilEpochMs": 4070908800000,
+    },
+    "slot": 2,
+    "stepId": "__sdk-sleep.sleep-thunk.04008deeff20.0",
+    "taskDef": {
+      "kind": "sleep",
+      "metadataKeys": [
+        "iso",
+        "targetEpochMs",
+      ],
+      "title": "sleep:2099-01-01T00:00:00.000Z",
+    },
+    "taskId": "__sdk.sleep",
+  },
+]

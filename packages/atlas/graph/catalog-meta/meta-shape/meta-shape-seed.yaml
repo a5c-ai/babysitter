@@ -1,0 +1,30 @@
+nodeKind: MetaAttribute
+id: meta-attribute:agent-product--display-name
+attributes:
+  displayName: AgentProduct.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-product
+  type: string
+  required: true
+  description: Human-readable product name (e.g. "Claude Code").
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-product
+---
+nodeKind: MetaEnum
+id: meta-enum:origin
+attributes:
+  displayName: origin (NodeKind / EdgeKind classifier)
+  name: origin
+  values:
+  - value: universal
+    description: Applies to the agentic stack at large (incl. a5c framing of universal concepts).
+  - value: standardized
+    description: Names a published external spec we adopt (e.g. MCP, OAuth).
+  - value: convergent
+    description: Emerging consensus across multiple vendors not yet ratified into a formal standard.
+  - value: a5c
+    description: Specific to the a5c product/codebase (Effect, Blueprint, RunJournalEvent, ...).
+edges:
+  used_on_attribute:
+  - target: meta-attribute:role--seniority

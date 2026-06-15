@@ -1,0 +1,17 @@
+nodeKind: Tool
+id: tool:rustfmt
+attributes:
+  displayName: "rustfmt"
+  homepageUrl: "https://github.com/rust-lang/rustfmt"
+  kind: formatter
+  language: language:rust
+  description: |
+    Tool for formatting Rust code according to style guidelines.
+edges:
+  belongs_to_language:
+    - language:rust
+  used_for:
+    - target: skill-area:code-quality
+  alternative_to:
+    - target: tool:clippy
+      comparison: "Rust code quality — rustfmt is a formatter; Clippy is a linter"

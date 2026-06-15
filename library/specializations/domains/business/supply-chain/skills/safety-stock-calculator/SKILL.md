@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: inventory
   priority: medium
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:statistical-analysis, skill-area:quantitative-modeling]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Safety Stock Calculator

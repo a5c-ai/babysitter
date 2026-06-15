@@ -1,0 +1,42 @@
+---
+nodeKind: Tool
+id: tool:openapi-generator
+attributes:
+  displayName: "OpenAPI Generator"
+  homepageUrl: "https://openapi-generator.tech"
+  kind: api-tool
+  description: |
+    Generates client SDKs, server stubs, and docs from OpenAPI 2.0/3.x
+    specs across 50+ languages and frameworks.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:sdk-codegen
+  alternative_to:
+    - target: tool:graphql-codegen
+      comparison: "API codegen — OpenAPI Generator is for REST/OpenAPI; GraphQL Codegen is for GraphQL"
+    - target: tool:swagger-editor
+      comparison: "OpenAPI tools — OpenAPI Generator produces code from specs; Swagger Editor designs specs"
+    - target: tool:rapidapi
+      comparison: "API tools — OpenAPI Generator produces code from specs; RapidAPI is an API marketplace"
+---
+nodeKind: Tool
+id: tool:graphql-codegen
+attributes:
+  displayName: "GraphQL Code Generator"
+  homepageUrl: "https://the-guild.dev/graphql/codegen"
+  kind: api-tool
+  description: |
+    Plugin-based codegen that produces typed clients, hooks, and
+    resolvers from GraphQL schemas and operations.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:sdk-codegen
+  alternative_to:
+    - target: tool:openapi-generator
+      comparison: "API codegen — GraphQL Codegen is for GraphQL; OpenAPI Generator is for REST/OpenAPI"
+    - target: tool:swagger-editor
+      comparison: "API codegen — GraphQL Codegen is for GraphQL; Swagger Editor is for REST/OpenAPI"

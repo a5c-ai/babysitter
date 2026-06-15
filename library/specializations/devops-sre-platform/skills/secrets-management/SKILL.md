@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: security
   backlog-id: SK-008
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:configuration-management, skill-area:secrets-rotation]
+  roles: [role:devops-engineer, role:security-engineer]
+  topics: [topic:infrastructure-as-code]
+
 ---
 
 # secrets-management

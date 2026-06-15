@@ -26,6 +26,11 @@
  *   processScope: { productFamilies: ["Category-A", "Category-B"], geographies: ["NA", "EU"], planningCycle: "monthly" }
  * }
  * @references APICS S&OP Framework, IBP Best Practices, Demand-Driven S&OP
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

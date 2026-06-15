@@ -1,0 +1,6 @@
+extendsNode:
+  nodeKind: ModelFamily
+  id: model-family:claude-opus-4
+edges:
+  has_version:
+    - model:claude-opus-4-8@current

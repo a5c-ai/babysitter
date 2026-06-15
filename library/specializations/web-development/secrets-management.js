@@ -4,6 +4,13 @@
  * @inputs { projectName: string, provider?: string }
  * @outputs { success: boolean, secretsConfig: object, policies: array, artifacts: array }
  * @references - OWASP Secrets: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer, role:security-engineer]
+ *   skillAreas: [skill-area:backend-security, skill-area:configuration-management]
+ *   topics: [topic:twelve-factor-app]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

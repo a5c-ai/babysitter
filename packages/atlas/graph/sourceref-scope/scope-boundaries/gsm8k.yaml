@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:gsm8k.scope
+attributes:
+  subjectId: benchmark:gsm8k
+  inScope: |
+    Grade-school math word problems (~8.5k problems) requiring multi-step natural-language arithmetic reasoning. Scored by exact-match on the final numeric answer.
+  outOfScope: |
+    Code-generation tasks, agentic tool-use, advanced or competition-level mathematics (use MATH), and multilingual variants.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:gsm8k

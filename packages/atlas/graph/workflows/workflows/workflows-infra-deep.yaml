@@ -1,0 +1,96 @@
+---
+nodeKind: Workflow
+id: workflow:chaos-game-day
+attributes:
+  displayName: "Chaos Game Day"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes structured chaos engineering exercises — defining
+    failure scenarios, injecting faults into production or staging, observing
+    system behavior, validating auto-healing mechanisms, and documenting
+    findings for remediation. Excludes individual chaos experiment automation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:incident-response-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:terraform-drift-remediation
+attributes:
+  displayName: "Terraform Drift Remediation"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Detects and remediates infrastructure drift from Terraform state —
+    running plan-only applies, categorizing drift by severity and blast
+    radius, auto-remediating safe drifts, escalating risky drifts for manual
+    review, and tracking drift trends over time. Excludes Terraform module
+    development.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:gitops
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:terraform-state-mgmt
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:service-mesh-traffic-shift
+attributes:
+  displayName: "Service Mesh Traffic Shift"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-deployment"
+  complexity: cross-team
+  description: |
+    Manages progressive traffic shifting through the service mesh during
+    deployments — configuring weighted routing rules, monitoring error rates
+    and latency during shifts, automating rollback on SLO violations, and
+    validating mesh policy propagation. Excludes service mesh infrastructure
+    upgrades.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:service-mesh-config
+    - target: skill-area:canary-rollouts
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering

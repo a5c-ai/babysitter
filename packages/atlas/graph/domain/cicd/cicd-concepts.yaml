@@ -1,0 +1,402 @@
+# CI/CD Pipeline Types, Trigger Types, and Dispatch Patterns
+# Modeled as Definition nodes with connections to tools and skill-areas.
+---
+nodeKind: Definition
+id: definition:ci-pipeline-pr
+attributes:
+  displayName: "PR Validation Pipeline"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI pipeline triggered on pull request open or update that runs
+    lint, unit tests, type-checking, and optionally integration tests
+    to validate the change before merge. The fastest feedback loop in
+    CI — typically completes in under 10 minutes for well-optimised
+    codebases. Blocks merge via required status checks when any step
+    fails. Often runs a reduced test matrix compared to main-branch
+    pipelines to balance speed and coverage.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - tool:circleci
+    - tool:jenkins
+    - skill-area:ci-cd
+    - skill-area:ci-pipeline-optimization
+---
+nodeKind: Definition
+id: definition:ci-pipeline-main
+attributes:
+  displayName: "Main Branch Pipeline"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI pipeline triggered on push to the main (or develop) branch
+    that runs the full build, complete test suite, and deploys to a
+    staging environment. Serves as the integration gate — if this
+    pipeline fails, the team treats it as a broken build requiring
+    immediate attention. Typically includes steps that PR pipelines
+    skip: full matrix testing, integration tests against real services,
+    container image builds, and staging deployment with smoke tests.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - tool:circleci
+    - tool:jenkins
+    - skill-area:ci-cd
+---
+nodeKind: Definition
+id: definition:ci-pipeline-release
+attributes:
+  displayName: "Release Pipeline"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:ci-cd-release-orchestration
+  text: |
+    A CI pipeline triggered on tag creation or release event that
+    handles version bumping, changelog generation, package publishing
+    (npm, PyPI, Maven, Docker Hub), and production deployment. Often
+    includes approval gates, canary analysis, and rollback automation.
+    Artifacts produced here are the immutable, signed, production-ready
+    outputs. Supply-chain security measures (SLSA provenance, SBOM
+    generation) are typically enforced at this stage.
+  status: canonical
+edges:
+  defines:
+    - term:ci-cd-release-orchestration
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - tool:argocd
+    - skill-area:ci-cd
+---
+nodeKind: Definition
+id: definition:ci-pipeline-scheduled
+attributes:
+  displayName: "Scheduled Pipeline"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI pipeline triggered on a cron schedule — nightly, weekly, or at
+    custom intervals. Used for expensive operations that do not need
+    per-commit feedback: full regression suites, security vulnerability
+    scans (Snyk, Trivy, Dependabot), dependency freshness audits, claim
+    verification against external APIs, and data-integrity checks.
+    Schedule pipelines surface slow-burn regressions and external drift
+    that per-PR pipelines miss due to scope or cost constraints.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - tool:jenkins
+    - skill-area:ci-cd
+    - skill-area:ci-security
+---
+nodeKind: Definition
+id: definition:ci-pipeline-dispatch
+attributes:
+  displayName: "Manual/API Dispatch Pipeline"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI pipeline triggered by manual button press (workflow_dispatch)
+    or programmatic API call (repository_dispatch). Enables on-demand
+    deployments, agent-triggered workflows, cross-repo orchestration,
+    and ad-hoc maintenance tasks. Dispatch inputs allow parameterisation
+    — callers specify environment, version, feature flags, or custom
+    payloads. This trigger type is essential for agent-to-CI integration
+    patterns where an AI agent creates a PR and then triggers the
+    deployment pipeline via API.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - skill-area:ci-cd
+
+# ── Trigger Types ────────────────────────────────────────────────────
+---
+nodeKind: Definition
+id: definition:trigger-push
+attributes:
+  displayName: "Push Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger that fires when commits are pushed to a matching branch
+    (typically main, develop, or release/*). The most common trigger type
+    in CI pipelines. Branch filters and path filters narrow execution to
+    relevant changes — e.g., only run backend tests when backend/ files
+    change. Push triggers on the default branch typically gate deployment
+    to staging or production environments.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - tool:jenkins
+    - topic:ci-triggers
+---
+nodeKind: Definition
+id: definition:trigger-pr
+attributes:
+  displayName: "Pull Request Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger that fires when a pull request (or merge request) is
+    opened, updated (new commits pushed), or reopened. The primary
+    mechanism for pre-merge validation. Security considerations include
+    restricting secret access for PRs from forks and using
+    pull_request_target for workflows that need write permissions.
+    Activity filters (opened, synchronize, labeled) allow fine-grained
+    control over which PR events start a pipeline run.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - topic:ci-triggers
+---
+nodeKind: Definition
+id: definition:trigger-schedule
+attributes:
+  displayName: "Schedule Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger that fires on a cron schedule. Defined using standard
+    cron expressions (e.g., '0 6 * * 1' for Monday 06:00 UTC). Used for
+    nightly builds, weekly security scans, periodic claim verification,
+    and freshness checks. Schedule triggers always run against the
+    default branch. Multiple cron expressions can be defined to support
+    different cadences for different job types within the same workflow.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - tool:jenkins
+    - topic:ci-triggers
+---
+nodeKind: Definition
+id: definition:trigger-dispatch
+attributes:
+  displayName: "Manual/API Dispatch Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger activated by manual user action (workflow_dispatch) or
+    programmatic API call (repository_dispatch). workflow_dispatch
+    supports typed input parameters (string, boolean, choice, environment)
+    that appear in the GitHub UI. repository_dispatch accepts arbitrary
+    JSON payloads, enabling cross-repo and agent-driven automation.
+    Both forms are essential for on-demand deployments and
+    machine-to-machine CI orchestration.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - topic:ci-triggers
+---
+nodeKind: Definition
+id: definition:trigger-tag
+attributes:
+  displayName: "Tag Creation Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger that fires when a Git tag matching a pattern (e.g.,
+    v*, release-*) is pushed. The standard mechanism for kicking off
+    release pipelines — tag creation signals an intentional version
+    cut. Semantic version tags enable pipelines to extract the version
+    number and use it for package publishing, Docker image tagging,
+    and changelog generation. Often combined with GitHub Releases for
+    artifact distribution and release notes.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:github-actions
+    - tool:gitlab-ci
+    - topic:ci-triggers
+---
+nodeKind: Definition
+id: definition:trigger-webhook
+attributes:
+  displayName: "External Webhook Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger that fires when an external service sends an HTTP
+    webhook to the CI system. Used for integrating CI with third-party
+    tools: container registry scan completion, infrastructure drift
+    detection, monitoring alert escalation, or external test harness
+    results. Webhook triggers require authentication (shared secrets,
+    HMAC signatures) to prevent unauthorised pipeline execution.
+    Jenkins and GitLab CI have native webhook trigger support; GitHub
+    Actions uses repository_dispatch as its webhook-equivalent.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:jenkins
+    - tool:gitlab-ci
+    - topic:ci-triggers
+---
+nodeKind: Definition
+id: definition:trigger-remote-dispatch
+attributes:
+  displayName: "Remote Repository Dispatch Trigger"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A CI trigger where one repository's workflow dispatches a pipeline
+    in another repository via the repository_dispatch API event. Enables
+    cross-repo CI orchestration: a library repo publishes a new version,
+    then dispatches integration tests in downstream consumer repos. The
+    event payload carries context (version, commit SHA, source repo) so
+    the target workflow can check out the right code and report results
+    back. Requires a personal access token or GitHub App with dispatch
+    permissions on the target repository.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+  supports:
+    - tool:github-actions
+    - topic:ci-triggers
+
+# ── Dispatch Patterns ────────────────────────────────────────────────
+---
+nodeKind: Definition
+id: definition:dispatch-agent-to-ci
+attributes:
+  displayName: "Agent-to-CI Dispatch Pattern"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A dispatch pattern where an AI agent triggers a CI pipeline. The
+    agent creates a pull request, pushes code, or calls the
+    repository_dispatch API to start a pipeline run. Examples: a
+    babysitter process creates a fix PR that triggers PR validation;
+    an agent calls workflow_dispatch to deploy a staging environment
+    for testing. The agent monitors pipeline status via the GitHub
+    Checks API or workflow run API and reacts to success or failure
+    (e.g., iterating on a fix if tests fail). This pattern is the
+    foundation of autonomous agent-driven development workflows.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - skill-area:ci-cd
+---
+nodeKind: Definition
+id: definition:dispatch-ci-to-agent
+attributes:
+  displayName: "CI-to-Agent Dispatch Pattern"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A dispatch pattern where a CI pipeline triggers agent work. When a
+    test fails, a security scan surfaces a vulnerability, or a scheduled
+    pipeline detects drift, the CI pipeline dispatches an agent (via
+    webhook, API call, or comment-triggered workflow) to investigate and
+    propose a fix. The agent receives the failure context (test output,
+    scan results, logs), creates a fix branch, and opens a PR. This
+    pattern closes the loop between automated validation and automated
+    remediation, enabling self-healing repository workflows.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - skill-area:ci-cd
+---
+nodeKind: Definition
+id: definition:dispatch-cross-repo
+attributes:
+  displayName: "Cross-Repo Dispatch Pattern"
+  authoredAt: "2026-05-10T00:00:00Z"
+  termId: term:cicd
+  text: |
+    A dispatch pattern where one repository's workflow triggers a
+    pipeline in a different repository via the repository_dispatch
+    event. Used for multi-repo CI orchestration: a shared library
+    publishes a new version and dispatches integration tests in all
+    consumer repos; a platform repo provisions infrastructure and
+    dispatches application deployment in service repos. The dispatch
+    payload carries context (source repo, version, commit SHA) for
+    traceability. Requires GitHub App or PAT with dispatch permissions
+    on target repos. Enables dependency-aware CI topologies without
+    monorepo coupling.
+  status: canonical
+edges:
+  defines:
+    - term:cicd
+  applies_to:
+    - domain:devops
+    - domain:software-engineering
+  supports:
+    - tool:github-actions
+    - skill-area:ci-cd

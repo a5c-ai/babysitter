@@ -17,6 +17,12 @@
  * - PVD Handbook: Mattox, D.M. "Handbook of Physical Vapor Deposition"
  * - ALD: https://www.cambridge.org/core/books/atomic-layer-deposition
  * - CVD: Hitchman, M.L. "Chemical Vapor Deposition: Principles and Applications"
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

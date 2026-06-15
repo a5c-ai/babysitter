@@ -1,0 +1,20 @@
+nodeKind: Language
+id: language:dart
+attributes:
+  displayName: "Dart"
+  paradigms:
+    - object-oriented
+    - imperative
+  description: |
+    Dart is a client-optimized, statically-typed, object-oriented language
+    developed by Google, designed for building fast apps on any platform.
+
+    It compiles to native ARM/x64 machine code for mobile and desktop, and
+    to JavaScript for the web. Dart's async/await model, isolate-based
+    concurrency, and sound null safety make it well-suited for UI
+    programming. It is the exclusive language of the Flutter framework,
+    which uses Dart for both business logic and reactive widget trees.
+    Outside Flutter, Dart can run server-side via the Dart VM.
+edges:
+  used_by_skill_area:
+    - target: skill-area:flutter-development

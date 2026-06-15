@@ -1,0 +1,42 @@
+nodeKind: AgentVersion
+id: agent-version:adapters-remote@current
+attributes:
+  agentProductId: agent:adapters-remote
+  versionRange: ">=1.0.0"
+  releasedAt: "2025-01-01"
+  cliCommand: "adapters"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:adapters-remote
+  composed_of:
+    - target: agent-core-impl:adapters-remote.core@current
+      role: core
+    - target: agent-runtime-impl:adapters-remote.runtime@current
+      role: runtime
+    - target: agent-platform-impl:adapters-remote.platform@current
+      role: platform
+    - target: agent-ui-impl:adapters-remote.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=1.0.0'
+      level: full
+      notes: adapters-remote orchestrates multi-turn remote agent sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=1.0.0'
+      level: full
+      notes: adapters-remote streams text output from remote agents.
+    - target: capability:supports-mcp
+      versionRange: '>=1.0.0'
+      level: full
+      notes: adapters-remote integrates with MCP servers.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=1.0.0'
+      level: full
+      notes: adapters-remote dispatches work to remote subagent harnesses.
+  uses_memory_system:
+    - target: memory-system:instruction-file-hierarchy

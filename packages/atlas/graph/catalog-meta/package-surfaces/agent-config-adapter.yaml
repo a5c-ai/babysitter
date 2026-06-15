@@ -1,0 +1,16 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-config-adapter
+attributes:
+  packageId: "@a5c-ai/config-adapter"
+  packageName: "@a5c-ai/config-adapter"
+  displayName: "Config Adapter"
+  description: "Installation, configuration, authentication, and host-detection logic for the adapters system. Resolves per-harness config files, credential stores, and environment detection."
+  role: "config-resolution"
+  whenToUse: "Depend on this when you need to discover installed harnesses, resolve configuration files, or manage authentication credentials for AI coding agents."
+  workspacePath: packages/adapters/config
+  moduleType: typescript
+  surfaceKinds:
+    - config-discovery
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver

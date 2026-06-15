@@ -1,0 +1,25 @@
+nodeKind: HookSurface
+id: hook-surface:decision-point
+attributes:
+  eventName: "DecisionPoint (a5c canonical)"
+  displayName: "DecisionPoint (a5c canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [runId, decisionId, options]
+    properties:
+      runId: { type: string }
+      decisionId: { type: string }
+      options:
+        type: array
+        items: { type: object }
+  description: |
+    a5c-emitted: a decision/breakpoint that requires user (or policy)
+    input before continuing. Replaces the legacy Breakpoint surface.
+edges:
+  uses_merge_policy:
+    - target: merge-policy:most-restrictive
+    - target: merge-policy:protected-prefixes

@@ -10,6 +10,11 @@ expertise:
   - MCP server integration
   - Skill scoping
   - Usage pattern design
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development]
+  topics: [topic:developer-experience]
+  roles: [role:platform-engineer, role:tech-lead]
 ---
 
 # Skill Designer Agent

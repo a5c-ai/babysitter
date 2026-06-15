@@ -1,0 +1,16 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:copilot-cli-manifest
+attributes:
+  artifactId: plugin-artifact:copilot-cli-manifest
+  displayName: "GitHub Copilot CLI plugin manifest"
+  targetId: plugin-target:copilot-cli
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - markdown-commands
+  contextFiles:
+    - packages/extensions-adapter/src/targets/github-copilot.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:copilot-cli

@@ -1,0 +1,20 @@
+nodeKind: AgentProduct
+id: agent:omp
+attributes:
+  displayName: "OMP (oh-my-pi)"
+  vendor: "oh-my-pi"
+  homepageUrl: "https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent"
+  primarySurface: cli
+  supportTier: adapter-only
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Community fork of Pi (oh-my-pi) — a terminal coding agent surfaced
+    through the v6 catalog via the adapters adapter. Inherits Pi's
+    plugin shape but maintained independently.
+edges:
+  has_version:
+    - agentVersion:omp:ge-15-5-9
+    - agentVersion:omp:15-7-3
+    - agentVersion:omp:15-7-6
+    - agentVersion:omp:15-9-1

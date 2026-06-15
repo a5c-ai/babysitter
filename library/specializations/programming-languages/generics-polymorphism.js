@@ -16,6 +16,12 @@
  * - Haskell Type Classes: https://wiki.haskell.org/Type_class
  * - Java Generics: https://docs.oracle.com/javase/tutorial/java/generics/
  * - C++ Templates: https://en.cppreference.com/w/cpp/language/templates
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:typescript-generic-programming]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

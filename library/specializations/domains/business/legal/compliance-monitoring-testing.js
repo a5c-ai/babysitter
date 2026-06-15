@@ -16,6 +16,12 @@
  * @references
  * - DOJ Evaluation Criteria: https://www.justice.gov/criminal-fraud/page/file/937501/download
  * - IIA Standards: https://www.theiia.org/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -28,7 +34,8 @@ export async function process(inputs, ctx) {
     outputDir = 'compliance-testing-output',
     includeContinuousMonitoring = true,
     includePeriodicTesting = true
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -76,7 +83,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
         }
-  const phase3Review = await ctx.breakpoint({
+        const phase3Review = await ctx.breakpoint({
         question: `${failedTests.length} control tests failed. Review findings before proceeding?`,
         title: 'Control Testing Failures',
         context: {
@@ -91,7 +98,7 @@ export async function process(inputs, ctx) {
         });
         if (phase3Review.approved) break;
         lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-      }   }
+      }
   }
   // Phase 4: Issue Management
   const issueManagement = await ctx.task(issueManagementTask, {
@@ -120,7 +127,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Compliance testing complete. ${testingResults?.results.length || 0} controls tested, ${issueManagement.issues.length} issues identified. Approve report?`,
     title: 'Compliance Testing Review',
     context: {
@@ -149,7 +156,6 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/legal/compliance-monitoring-testing', timestamp: startTime }
   };
 }
-
 export const testingPlanTask = defineTask('testing-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop testing plan',

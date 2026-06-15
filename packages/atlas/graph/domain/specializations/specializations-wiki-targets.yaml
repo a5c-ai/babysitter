@@ -1,0 +1,407 @@
+---
+nodeKind: Specialization
+id: specialization:atdd-tdd
+attributes:
+  displayName: "ATDD / TDD"
+  description: |
+    Acceptance Test-Driven Development and Test-Driven Development practices
+    for driving design through automated tests written before production code.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:automaker
+attributes:
+  displayName: "Automaker"
+  description: |
+    Automaker agent framework for autonomous code generation and iterative
+    development workflows driven by AI agents.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:bdd-specification-by-example
+attributes:
+  displayName: "BDD / Specification by Example"
+  description: |
+    Behavior-Driven Development using executable specifications and shared
+    language between business and engineering to drive feature implementation.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:bmad-method
+attributes:
+  displayName: "BMAD Method"
+  description: |
+    BMad orchestration method for structured multi-agent development workflows
+    with role-based task delegation and quality gates.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:cc10x
+attributes:
+  displayName: "CC10X"
+  description: |
+    CC10X productivity methodology for Claude Code power users, emphasizing
+    high-leverage automation patterns and workflow optimization.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:ccpm
+attributes:
+  displayName: "Critical Chain Project Management"
+  description: |
+    Critical Chain Project Management applies Theory of Constraints to project
+    scheduling, using buffer management instead of task-level safety margins.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:claudekit
+attributes:
+  displayName: "ClaudeKit"
+  description: |
+    ClaudeKit toolkit and patterns for building Claude Code plugins, skills,
+    and agent configurations with reusable components.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:cleanroom
+attributes:
+  displayName: "Cleanroom Software Engineering"
+  description: |
+    Cleanroom software engineering methodology emphasizing statistical quality
+    control, formal specification, and correctness verification over debugging.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:cog-second-brain
+attributes:
+  displayName: "Cog / Second Brain"
+  description: |
+    Cog second-brain methodology for knowledge management and AI-augmented
+    development using structured memory and retrieval patterns.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:domain-driven-design
+attributes:
+  displayName: "Domain-Driven Design"
+  description: |
+    Domain-Driven Design for modeling complex business domains through
+    ubiquitous language, bounded contexts, and strategic design patterns.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:double-diamond
+attributes:
+  displayName: "Double Diamond"
+  description: |
+    Double Diamond design process that diverges to explore problems and
+    converges to define solutions across discovery and delivery phases.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:event-storming
+attributes:
+  displayName: "Event Storming"
+  description: |
+    Event Storming collaborative workshop technique for discovering domain
+    events, commands, and aggregates in complex business processes.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:everything-claude-code
+attributes:
+  displayName: "Everything Claude Code"
+  description: |
+    Comprehensive Claude Code development patterns covering plugins, agents,
+    skills, hooks, and advanced automation workflows.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:example-mapping
+attributes:
+  displayName: "Example Mapping"
+  description: |
+    Example Mapping technique for breaking user stories into concrete examples,
+    rules, and questions to clarify acceptance criteria before development.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:extreme-programming
+attributes:
+  displayName: "Extreme Programming"
+  description: |
+    Extreme Programming (XP) agile methodology emphasizing pair programming,
+    continuous integration, small releases, and collective code ownership.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:feature-driven-development
+attributes:
+  displayName: "Feature-Driven Development"
+  description: |
+    Feature-Driven Development methodology organizing work around client-valued
+    features with domain modeling, feature lists, and iterative builds.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:gastown
+attributes:
+  displayName: "Gastown"
+  description: |
+    Gastown development framework for structured agent-driven software
+    delivery with defined phases and quality checkpoints.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:gsd
+attributes:
+  displayName: "GSD (Get Stuff Done)"
+  description: |
+    GSD methodology for rapid, pragmatic software delivery focusing on
+    minimal ceremony and maximum shipping velocity.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:hypothesis-driven-development
+attributes:
+  displayName: "Hypothesis-Driven Development"
+  description: |
+    Hypothesis-Driven Development treats features as experiments with
+    measurable outcomes, validating assumptions before committing to solutions.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:impact-mapping
+attributes:
+  displayName: "Impact Mapping"
+  description: |
+    Impact Mapping strategic planning technique connecting business goals
+    to deliverables through actors, impacts, and measurable outcomes.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:jobs-to-be-done
+attributes:
+  displayName: "Jobs to Be Done"
+  description: |
+    Jobs to Be Done framework for understanding customer needs through the
+    functional, social, and emotional jobs customers hire products to do.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:kanban
+attributes:
+  displayName: "Kanban"
+  description: |
+    Kanban method for continuous flow work management using visual boards,
+    work-in-progress limits, and pull-based scheduling.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:maestro
+attributes:
+  displayName: "Maestro"
+  description: |
+    Maestro orchestration pattern for multi-agent coordination with a
+    conductor agent managing task delegation and workflow progression.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:metaswarm
+attributes:
+  displayName: "MetaSwarm"
+  description: |
+    MetaSwarm multi-agent swarm methodology for distributed task execution
+    with emergent coordination and parallel agent workflows.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:ontology-driven-development
+attributes:
+  displayName: "Ontology-Driven Development"
+  description: |
+    Ontology-Driven Development using formal domain ontologies to guide
+    schema design, API contracts, and knowledge graph construction.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:pilot-shell
+attributes:
+  displayName: "Pilot Shell"
+  description: |
+    Pilot Shell development methodology for shell-first automation and
+    CLI-driven development workflows with AI assistance.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:planning-with-files
+attributes:
+  displayName: "Planning with Files"
+  description: |
+    Planning-with-files methodology using markdown plans, task files, and
+    structured documents as the primary coordination mechanism.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:rpikit
+attributes:
+  displayName: "RPiKit"
+  description: |
+    RPiKit development framework for Raspberry Pi and embedded Linux projects
+    with structured hardware-software integration workflows.
+edges:
+  specializes:
+    - domain:embedded-systems
+---
+nodeKind: Specialization
+id: specialization:ruflo
+attributes:
+  displayName: "Ruflo"
+  description: |
+    Ruflo workflow methodology for structured development with defined phases,
+    review gates, and incremental delivery cadence.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:rup
+attributes:
+  displayName: "Rational Unified Process"
+  description: |
+    Rational Unified Process (RUP) iterative software development framework
+    with inception, elaboration, construction, and transition phases.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:scrum
+attributes:
+  displayName: "Scrum"
+  description: |
+    Scrum agile framework with sprints, daily standups, sprint reviews,
+    and retrospectives for iterative product delivery.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:shape-up
+attributes:
+  displayName: "Shape Up"
+  description: |
+    Shape Up methodology from Basecamp using six-week cycles, shaping,
+    betting, and hill charts for product development.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:spec-kit
+attributes:
+  displayName: "Spec Kit"
+  description: |
+    Spec Kit approach for specification-first development with structured
+    requirement documents driving implementation and validation.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:spiral-model
+attributes:
+  displayName: "Spiral Model"
+  description: |
+    Spiral Model risk-driven software process combining iterative development
+    with systematic risk analysis at each cycle.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:superpowers
+attributes:
+  displayName: "Superpowers"
+  description: |
+    Superpowers skill framework for Claude Code enhancing agent capabilities
+    with structured skills for debugging, review, and development workflows.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:v-model
+attributes:
+  displayName: "V-Model"
+  description: |
+    V-Model development methodology pairing each development phase with a
+    corresponding testing phase for verification and validation.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:waterfall
+attributes:
+  displayName: "Waterfall"
+  description: |
+    Waterfall sequential development methodology with distinct requirements,
+    design, implementation, testing, and maintenance phases.
+edges:
+  specializes:
+    - domain:software-engineering

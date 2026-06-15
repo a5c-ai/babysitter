@@ -1,0 +1,52 @@
+---
+nodeKind: EmbeddingModelProfile
+id: embedding-profile:openai-text-embedding-3-large
+attributes:
+  displayName: "OpenAI text-embedding-3-large"
+  modelVersionId: model:openai-text-embedding-3-large@current
+  dimensionality: 3072
+  normalization: l2
+  pooling: mean
+  notes: |
+    OpenAI's flagship general-purpose embedding model; supports
+    dimensionality reduction via the 'dimensions' parameter.
+edges:
+  embeds_into:
+    - target: vector-store:pinecone
+---
+nodeKind: EmbeddingModelProfile
+id: embedding-profile:voyage-3
+attributes:
+  displayName: "Voyage AI voyage-3"
+  modelVersionId: model:voyageai-voyage-3@current
+  dimensionality: 1024
+  normalization: l2
+  pooling: mean
+  notes: |
+    Voyage AI general-purpose embedding model; long-context support to 32K.
+edges: {}
+---
+nodeKind: EmbeddingModelProfile
+id: embedding-profile:jina-embeddings-v3
+attributes:
+  displayName: "Jina Embeddings v3"
+  modelVersionId: model:jina-embeddings-v3@current
+  dimensionality: 1024
+  normalization: l2
+  pooling: mean
+  notes: |
+    Multilingual embedding model with task-specific LoRA adapters.
+edges: {}
+---
+nodeKind: EmbeddingModelProfile
+id: embedding-profile:cohere-embed-english-v3
+attributes:
+  displayName: "Cohere embed-english-v3.0"
+  modelVersionId: model:cohere-embed-english-v3@current
+  dimensionality: 1024
+  normalization: l2
+  pooling: mean
+  notes: |
+    Cohere's English-optimized embedding model with strong retrieval
+    benchmarks.
+edges: {}

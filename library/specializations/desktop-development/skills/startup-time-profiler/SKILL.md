@@ -3,6 +3,12 @@ name: startup-time-profiler
 description: Profile and optimize application startup time for desktop applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [performance, profiling, startup, optimization, desktop]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # startup-time-profiler

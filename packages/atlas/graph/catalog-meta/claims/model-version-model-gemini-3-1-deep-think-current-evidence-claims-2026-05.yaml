@@ -1,0 +1,340 @@
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-contextwindowtokens
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current contextWindowTokens is 1000000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-costpermtokinput
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: costPerMTokInput
+  value: '2.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current costPerMTokInput is 2.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-costpermtokoutput
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: costPerMTokOutput
+  value: '12.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current costPerMTokOutput is 12.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-kind
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current kind is reasoning.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: knowledgeCutoffDate
+  value: '2025-01-01'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current knowledgeCutoffDate is 2025-01-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-lifecyclestatus
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-modalities
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: modalities
+  value: text, image, audio, video
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current modalities is text, image, audio,
+    video.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-modalitydirections
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=audio;direction=input,
+    kind=video;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=audio;direction=input, kind=video;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-safetytier
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: safetyTier
+  value: google-deepmind-frontier-safety
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current safetyTier is google-deepmind-frontier-safety.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-supportsextendedthinking
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-supportsfinetuning
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current supportsThinkingBudgetTokens is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-thinkingeffortlevels
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current thinkingEffortLevels is low, medium,
+    high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gemini-3-1-deep-think-current-versionrange
+attributes:
+  subjectId: model:gemini-3-1-deep-think@current
+  attribute: versionRange
+  value: '>=3.1.0 <3.2.0'
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-deep-think@current versionRange is >=3.1.0 <3.2.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:google-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:google model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:google-models-page
+  about_subject:
+  - model:gemini-3-1-deep-think@current

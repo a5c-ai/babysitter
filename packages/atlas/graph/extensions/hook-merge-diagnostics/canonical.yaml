@@ -1,0 +1,54 @@
+---
+nodeKind: HookMergeDiagnostic
+id: hook-merge-diagnostic:precedence-resolved
+attributes:
+  hookSurfaceId: hook-surface:claude.pre-tool-use
+  outcome: merged
+  sources:
+    - plugin:babysitter
+    - settings:user
+    - settings:project
+  precedenceRule: most-recent-wins
+  severity: info
+  detail: |
+    Three sources contributed PreToolUse bindings; merged cleanly under
+    most-recent-wins. No conflicting decision verbs across sources.
+edges:
+  diagnoses_hook_surface:
+    - target: hook-surface:claude.pre-tool-use
+---
+nodeKind: HookMergeDiagnostic
+id: hook-merge-diagnostic:conflict-blocked
+attributes:
+  hookSurfaceId: hook-surface:claude.pre-tool-use
+  outcome: conflict
+  sources:
+    - plugin:babysitter
+    - settings:project
+  precedenceRule: explicit-deny-wins
+  severity: warning
+  detail: |
+    `plugin:babysitter` returned `allow` for Bash(npm install) while
+    `settings:project` returned `deny`. Conflict resolved by
+    explicit-deny-wins; effective decision is `deny`.
+edges:
+  diagnoses_hook_surface:
+    - target: hook-surface:claude.pre-tool-use
+---
+nodeKind: HookMergeDiagnostic
+id: hook-merge-diagnostic:duplicate-warning
+attributes:
+  hookSurfaceId: hook-surface:claude.post-tool-use
+  outcome: dropped
+  sources:
+    - plugin:babysitter
+    - plugin:babysitter
+  precedenceRule: dedupe-by-id
+  severity: warning
+  detail: |
+    Duplicate registration of the same hook id from `plugin:babysitter`
+    detected during merge; second occurrence dropped under
+    dedupe-by-id. Likely indicates double-installation of the plugin.
+edges:
+  diagnoses_hook_surface:
+    - target: hook-surface:claude.post-tool-use

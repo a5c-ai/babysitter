@@ -1,0 +1,21 @@
+nodeKind: Workspace
+id: workspace:github-codespaces
+attributes:
+  displayName: "GitHub Codespaces workspace"
+  rootPath: "/workspaces/<repo>"
+  description: |
+    Cloud-hosted VS Code workspace. Storage is a container volume managed
+    by the Codespaces backend; per-file encryption is provided by the
+    underlying Azure storage; the IDE owns indexing.
+  materialization: clone
+  storageBackend: container-volume
+  encryptionAtRest: per-file-encrypted
+  indexingState: indexing
+  gitHooksInstalled: []
+  agentArtifactsScope: inside-workspace
+  multiTenantPolicy: single-user
+edges:
+  realizes:
+    - target: layer:7-workspace
+  runs_via:
+    - target: execution:codespaces-container

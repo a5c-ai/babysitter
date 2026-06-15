@@ -1,0 +1,21 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:write
+attributes:
+  schema: '{}'
+  displayName: "Write"
+  description: |
+    Write a file to the local filesystem, overwriting if present.
+    Standard tool across coding agents.
+  inputSchema:
+    type: object
+    required: [file_path, content]
+    properties:
+      file_path: { type: string, description: "Absolute path to the file to write" }
+      content: { type: string, description: "Content to write" }
+  outputSchema:
+    type: object
+    properties:
+      success: { type: boolean }
+  mode: normal
+  streamable: false
+edges: {}

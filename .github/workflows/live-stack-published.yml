@@ -1,0 +1,337 @@
+name: Live Stack (Published)
+on:
+  push:
+    branches: [staging, main, develop]
+    paths:
+      - '.github/workflows/live-stack-published.yml'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or ref to check out (for test code + matrix config only).'
+        required: false
+        type: string
+        default: ''
+      os:
+        description: 'Runner OS (ubuntu-latest-l, macos-latest, windows-latest).'
+        required: false
+        type: string
+        default: 'ubuntu-latest-l'
+      matrix:
+        description: 'JSON array of test combinations. Empty = use push defaults.'
+        required: false
+        type: string
+        default: ''
+      npm_tag:
+        description: 'npm dist-tag for published packages (staging, latest, develop). Auto-detected from branch if empty.'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  NPM_CONFIG_AUDIT: "true"
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_LEGACY_PEER_DEPS: "true"
+  NPM_CONFIG_PREFER_OFFLINE: "true"
+
+concurrency:
+  group: live-stack-published-${{ github.event_name == 'workflow_dispatch' && format('dispatch-{0}', github.run_id) || format('push-{0}', github.ref_name) }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Compute Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      vanilla_ni: ${{ steps.matrix.outputs.vanilla_ni }}
+      vanilla_interactive: ${{ steps.matrix.outputs.vanilla_interactive }}
+      bp_interactive: ${{ steps.matrix.outputs.bp_interactive }}
+      bp_bridged: ${{ steps.matrix.outputs.bp_bridged }}
+      npm_tag: ${{ steps.resolve_tag.outputs.npm_tag }}
+    steps:
+      - name: Resolve npm tag
+        id: resolve_tag
+        run: |
+          TAG="${{ inputs.npm_tag }}"
+          if [ -z "$TAG" ]; then
+            BRANCH="${{ inputs.ref || github.ref_name }}"
+            case "$BRANCH" in
+              main)    TAG="latest" ;;
+              staging) TAG="staging" ;;
+              develop) TAG="develop" ;;
+              *)       TAG="staging" ;;
+            esac
+          fi
+          echo "npm_tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved npm tag: $TAG"
+
+      - name: Generate matrix combinations
+        id: matrix
+        env:
+          DISPATCH_MATRIX: ${{ inputs.matrix }}
+          LIVE_STACK_OS: ${{ inputs.os || 'ubuntu-latest-l' }}
+        run: |
+          set -euo pipefail
+          if [ -n "${DISPATCH_MATRIX:-}" ] && [ "${DISPATCH_MATRIX:-}" != "null" ] && [ "${DISPATCH_MATRIX:-}" != "" ]; then
+            echo "Using workflow_dispatch matrix input"
+            node -e "
+              const input = JSON.parse(process.env.DISPATCH_MATRIX || '[]');
+              const agents = {
+                'claude': {agent:'claude-code', adapters_agent:'claude'},
+                'codex': {agent:'codex', adapters_agent:'codex'},
+                'pi': {agent:'pi', adapters_agent:'pi'},
+                'gemini': {agent:'gemini-cli', adapters_agent:'gemini'},
+                'hermes': {agent:'hermes', adapters_agent:'hermes'},
+              };
+              const models = {
+                'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'google-gemini35flash': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'google-gemini31pro': {provider:'google', adapters_provider:'google', model:'gemini-3.1-pro-preview', required_env:'GOOGLE_API_KEY'},
+                'anthropic-sonnet46': {provider:'anthropic', adapters_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
+                'foundry-deepseek': {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'foundry-gpt54mini': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+              };
+              const modes = {
+                'ni': {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'},
+                'bridged-interactive': {id:'bridged-interactive', interactive:'false', bridge_interactive:'true', bridge_hooks:'false'},
+                'interactive': {id:'interactive', interactive:'true', bridge_interactive:'false', bridge_hooks:'false'},
+                'bridged-hooks': {id:'bridged-hooks', interactive:'false', bridge_interactive:'true', bridge_hooks:'true'},
+              };
+              const installModes = {
+                'vanilla': {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,transport-adapter-trace,provider-trace-redacted'},
+                'bp': {id:'babysitter-plugin', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted'},
+              };
+              function miniBpSupported(entry) {
+                if (entry.install !== 'bp') return true;
+                if ((entry.process_mode || 'predefined') !== 'resume') return false;
+                if (entry.mode === 'interactive') return entry.agent === 'codex' || entry.agent === 'pi';
+                if (entry.mode === 'bridged-hooks') return entry.agent === 'pi' && !String(process.env.LIVE_STACK_OS || '').startsWith('windows');
+                return false;
+              }
+              function modelFor(entry) {
+                const selected = models[entry.model] || models['foundry-gpt55'];
+                return selected.model === 'gpt-5.4-mini' && !miniBpSupported(entry) ? models['foundry-gpt55'] : selected;
+              }
+              function toScenario(entry) {
+                const a = agents[entry.agent] || {agent: entry.agent, adapters_agent: entry.agent};
+                const m = modelFor(entry);
+                return {
+                  id: 'live.adapters.' + a.agent + '.' + m.provider + '.' + m.model,
+                  agent_path: 'adapters', agent: a.agent, adapters_agent: a.adapters_agent,
+                  integration_type: 'third-party-plugin',
+                  provider: m.provider, adapters_provider: m.adapters_provider, model: m.model,
+                  required_env: m.required_env, live: entry.live !== false,
+                  process_mode: entry.process_mode || 'predefined',
+                };
+              }
+              const vanillaNi = [], vanillaInt = [], bpInt = [], bpBridged = [];
+              for (const e of input) {
+                const scenario = toScenario(e);
+                const mode = modes[e.mode] || modes['ni'];
+                const install = installModes[e.install] || installModes['vanilla'];
+                const combo = {scenario, interaction_mode: mode, install_mode: install};
+                if (e.install === 'bp' && mode.id === 'interactive') bpInt.push(combo);
+                else if (e.install === 'bp' && mode.id === 'bridged-hooks') bpBridged.push(combo);
+                else if (mode.id === 'interactive') vanillaInt.push(combo);
+                else vanillaNi.push(combo);
+              }
+              const wrap = (arr) => JSON.stringify({include: arr});
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_ni=' + wrap(vanillaNi) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_interactive=' + wrap(vanillaInt) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_interactive=' + wrap(bpInt) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_bridged=' + wrap(bpBridged) + '\n');
+            "
+          else
+            # Default: claude+codex+pi vanilla NI with gpt-5.5
+            node -e "
+              const foundry = {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
+              const vanillaInstall = {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,transport-adapter-trace,provider-trace-redacted'};
+              const ni = {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'};
+              function scenario(agent, adapters_agent, m) {
+                return {id:'live.adapters.'+agent+'.'+m.provider+'.'+m.model, agent_path:'adapters', agent, adapters_agent, integration_type:'third-party-plugin', provider:m.provider, adapters_provider:m.adapters_provider, model:m.model, required_env:m.required_env, live:true, process_mode:'predefined'};
+              }
+              const vanillaNi = [
+                {scenario: scenario('claude-code','claude',foundry), interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: scenario('codex','codex',foundry), interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: scenario('pi','pi',foundry), interaction_mode: ni, install_mode: vanillaInstall},
+              ];
+              const wrap = (arr) => JSON.stringify({include: arr});
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_ni=' + wrap(vanillaNi) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_interactive=' + wrap([]) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_interactive=' + wrap([]) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_bridged=' + wrap([]) + '\n');
+            "
+          fi
+
+  live_stack_vanilla_ni:
+    needs: [setup]
+    name: "Published (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.vanilla_ni) }}
+    steps: &published_steps
+      - name: Checkout repository (test code only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Setup Python (for pip-based agents)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install published packages
+        env:
+          NPM_TAG: ${{ needs.setup.outputs.npm_tag }}
+        run: |
+          set -euo pipefail
+          echo "Installing published packages with tag: @${NPM_TAG}"
+
+          # Install the adapters CLI (includes transport-adapter, atlas catalog, etc.)
+          npm install -g @a5c-ai/adapters@${NPM_TAG}
+
+          # Install the babysitter SDK CLI
+          npm install -g @a5c-ai/babysitter-sdk@${NPM_TAG}
+
+          # Install hooks-adapter CLI
+          npm install -g @a5c-ai/hooks-adapter-cli@${NPM_TAG}
+
+          # Install node-pty for interactive modes
+          npm install -g node-pty || echo "node-pty install failed (optional)"
+
+          # Install test runner deps in the repo checkout
+          cd packages/adapters/cli
+          npm install --legacy-peer-deps 2>/dev/null || true
+
+          # Verify installations
+          echo "--- Installed versions ---"
+          adapters --version 2>/dev/null || echo "adapters: not found"
+          babysitter --version 2>/dev/null || echo "babysitter: not found"
+
+      - name: Install harness agents
+        run: |
+          # Install agent CLIs via adapters
+          adapters install ${{ matrix.scenario.adapters_agent }} --json || echo "Agent install via adapters failed, trying direct..."
+
+          # Ensure pip user-bin is on PATH
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+
+      - name: Remove agent skill directories (vanilla only)
+        if: matrix.install_mode.id == 'vanilla'
+        run: |
+          rm -rf .codex .claude/commands .gemini CLAUDE.md GEMINI.md AGENTS.md 2>/dev/null || true
+
+      - name: Run selected live stack E2E
+        timeout-minutes: 18
+        env:
+          LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
+          LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
+          LIVE_STACK_AGENT: ${{ matrix.scenario.agent }}
+          LIVE_STACK_AGENT_MUX_AGENT: ${{ matrix.scenario.adapters_agent }}
+          LIVE_STACK_INTEGRATION_TYPE: ${{ matrix.scenario.integration_type }}
+          LIVE_STACK_BABYSITTER_HARNESS: ${{ matrix.scenario.babysitter_harness }}
+          LIVE_STACK_INSTALL_MODE: ${{ matrix.install_mode.id }}
+          LIVE_STACK_PROCESS_MODE: ${{ matrix.scenario.process_mode || 'predefined' }}
+          LIVE_STACK_INTERACTION_MODE: ${{ matrix.interaction_mode.id }}
+          LIVE_STACK_INTERACTIVE: ${{ matrix.interaction_mode.interactive }}
+          LIVE_STACK_BRIDGE_INTERACTIVE: ${{ matrix.interaction_mode.bridge_interactive }}
+          LIVE_STACK_BRIDGE_HOOKS: ${{ matrix.interaction_mode.bridge_hooks }}
+          LIVE_STACK_USE_AGENT_MUX_RUN: 'false'
+          LIVE_STACK_PROVIDER: ${{ matrix.scenario.provider }}
+          LIVE_STACK_AGENT_MUX_PROVIDER: ${{ matrix.scenario.adapters_provider }}
+          LIVE_STACK_MODEL: ${{ matrix.scenario.model }}
+          LIVE_STACK_CREDENTIAL_MODE: github-org-secrets-and-vars
+          LIVE_STACK_REQUIRED_ENV: ${{ matrix.scenario.required_env }}
+          LIVE_STACK_LAYERS: ${{ matrix.install_mode.id }}
+          LIVE_STACK_COVERAGE_LAYERS: ${{ matrix.scenario.provider }},${{ matrix.scenario.agent }}
+          LIVE_STACK_REQUIRED_TRACE_IDS: ${{ matrix.install_mode.required_trace_ids }}
+          LIVE_STACK_EXPECTED_ARTIFACTS: ${{ matrix.install_mode.expected_artifacts }}
+          LIVE_STACK_RUN_MODEL_TESTS: ${{ matrix.scenario.live && '1' || '0' }}
+          LIVE_STACK_REQUIRE_EVIDENCE: '1'
+          LIVE_STACK_TEST_TIMEOUT_MS: '960000'
+          LIVE_STACK_COMMAND_TIMEOUT_MS: '900000'
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_CLOUD_LOCATION: global
+          GOOGLE_GENAI_USE_VERTEXAI: True
+        run: |
+          START_TS=$(date +%s)
+          npm run test:e2e:live-stack:pipeline
+          npm run coverage:e2e:live-stack
+          ELAPSED=$(( $(date +%s) - START_TS ))
+          echo "${ELAPSED}" > artifacts/live-stack/duration-seconds.txt
+
+      - name: Upload live stack artifacts
+        if: ${{ always() }}
+        timeout-minutes: 1
+        uses: actions/upload-artifact@v7
+        with:
+          name: published-${{ github.run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.process_mode || 'predefined' }}-${{ matrix.scenario.id }}
+          path: artifacts/live-stack
+          if-no-files-found: error
+
+  live_stack_vanilla_interactive:
+    needs: [setup]
+    name: "Published (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.vanilla_interactive) }}
+    steps: *published_steps
+
+  live_stack_bp_interactive:
+    needs: [setup]
+    name: "Published (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.bp_interactive) }}
+    steps: *published_steps
+
+  live_stack_bp_bridged:
+    needs: [setup]
+    name: "Published (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.bp_bridged) }}
+    steps: *published_steps

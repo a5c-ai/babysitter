@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:opentofu
+attributes:
+  displayName: "OpenTofu"
+  homepageUrl: "https://opentofu.org"
+  kind: iac
+  description: |
+    Open-source fork of Terraform under the Linux Foundation.
+edges:
+  belongs_to_language:
+    - target: language:hcl
+  used_for:
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:terraform
+      comparison: "IaC — OpenTofu is an open-source fork of Terraform"
+    - target: tool:pulumi
+      comparison: "IaC tools"
+    - target: tool:crossplane
+      comparison: "IaC — OpenTofu uses HCL files; Crossplane uses Kubernetes CRDs"

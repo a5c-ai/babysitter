@@ -18,6 +18,10 @@ metadata:
   phase: 2
   experience: 18+ years systems engineering
   background: Complex mechanical systems, program management
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Systems Engineering Specialist Agent

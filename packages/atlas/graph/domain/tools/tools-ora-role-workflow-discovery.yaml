@@ -1,0 +1,264 @@
+---
+nodeKind: Tool
+id: tool:plain
+attributes:
+  displayName: "Plain"
+  homepageUrl: "https://www.plain.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    API-first customer support platform surfaced by Ora for support-ticket triage,
+    customer context, and developer-facing support workflows.
+  ora:
+    domain: plain.com
+    score: 74
+    grade: B
+    category: "Communication & Support"
+    tags: [customer support, api-first support, modern helpdesk]
+    scoreUrl: https://ora.run/score/plain.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:customer-support
+  supports_work:
+    - target: role:support-engineer
+      confidence: high
+      evidence: "Ora surfaced Plain for customer support ticket triage and knowledge-base workflows."
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Support threads and customer context support issue intake and escalation triage."
+---
+nodeKind: Tool
+id: tool:livechat
+attributes:
+  displayName: "LiveChat"
+  homepageUrl: "https://www.livechat.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Customer chat and helpdesk platform surfaced by Ora for support-ticket and live-chat workflows.
+  ora:
+    domain: livechat.com
+    score: 62
+    grade: C
+    category: "Communication & Support"
+    tags: [live chat, customer support, chatbot, helpdesk]
+    scoreUrl: https://ora.run/score/livechat.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:customer-support
+  supports_work:
+    - target: role:support-engineer
+      confidence: medium
+      evidence: "Live chat and helpdesk interactions support support-engineering intake and triage."
+---
+nodeKind: Tool
+id: tool:browserbase
+attributes:
+  displayName: "Browserbase"
+  homepageUrl: "https://www.browserbase.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Cloud browser automation platform surfaced by Ora for QA, browser testing,
+    scraping, and agent web-interaction workflows.
+  ora:
+    domain: browserbase.com
+    score: 70
+    grade: B
+    category: "Agent Tools"
+    tags: [browser automation, qa automation, stagehand, web testing]
+    scoreUrl: https://ora.run/score/browserbase.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+    - source-ref:browserbase-mcp
+  used_for:
+    - target: skill-area:ui-testing
+  supports_work:
+    - target: role:test-writer
+      confidence: high
+      evidence: "Browser automation supports QA test authoring and verification workflows."
+    - target: workflow:test-automation-pipeline
+      confidence: high
+      evidence: "Cloud browser sessions project browser-test execution into agent workflows."
+---
+nodeKind: Tool
+id: tool:browserless
+attributes:
+  displayName: "Browserless"
+  homepageUrl: "https://www.browserless.io"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Hosted browser automation platform surfaced by Ora for QA and web automation workflows.
+  ora:
+    domain: browserless.io
+    score: 70
+    grade: B
+    category: "Agent Tools"
+    tags: [browser automation, scraping, lighthouse, web testing]
+    scoreUrl: https://ora.run/score/browserless.io
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+    - source-ref:browserless-mcp-docs
+  used_for:
+    - target: skill-area:ui-testing
+  supports_work:
+    - target: role:test-writer
+      confidence: high
+      evidence: "Browserless browser automation supports QA and browser regression workflows."
+    - target: workflow:test-automation-pipeline
+      confidence: high
+      evidence: "Hosted browser execution supports automated web test and audit projections."
+---
+nodeKind: Tool
+id: tool:bill-com
+attributes:
+  displayName: "Bill.com"
+  homepageUrl: "https://www.bill.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Payments and billing operations platform surfaced by Ora for billing, payment, and finance workflows.
+  ora:
+    domain: bill.com
+    score: 74
+    grade: B
+    category: "Payments & Fintech"
+    tags: [payments, billing, accounts payable, accounts receivable]
+    scoreUrl: https://ora.run/score/bill.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  used_for:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:lago
+attributes:
+  displayName: "Lago"
+  homepageUrl: "https://www.getlago.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Open-source metering and billing platform surfaced by Ora for usage-based billing workflows.
+  ora:
+    domain: getlago.com
+    score: 69
+    grade: C
+    category: "Payments & Fintech"
+    tags: [billing, metering, subscriptions, usage-based pricing]
+    scoreUrl: https://ora.run/score/getlago.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  used_for:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:adyen
+attributes:
+  displayName: "Adyen"
+  homepageUrl: "https://www.adyen.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Global payments platform surfaced by Ora for payment integration and commerce workflows.
+  ora:
+    domain: adyen.com
+    score: 0
+    grade: F
+    category: "Payments & Fintech"
+    tags: [payments, acquiring, commerce, checkout]
+    scoreUrl: https://ora.run/score/adyen.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  used_for:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:checkout-com
+attributes:
+  displayName: "Checkout.com"
+  homepageUrl: "https://www.checkout.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Payments platform surfaced by Ora for API integration, checkout, and billing workflows.
+  ora:
+    domain: checkout.com
+    score: 65
+    grade: C
+    category: "Payments & Fintech"
+    tags: [payments, checkout, fraud, acquiring]
+    scoreUrl: https://ora.run/score/checkout.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  used_for:
+    - target: skill-area:payment-processing
+---
+nodeKind: Tool
+id: tool:cloudflare
+attributes:
+  displayName: "Cloudflare"
+  homepageUrl: "https://www.cloudflare.com"
+  kind: orchestrator
+  languageApplicability: neutral
+  description: |
+    Edge, security, developer platform, and operations suite surfaced by Ora for security incident,
+    infrastructure, and alerting workflows.
+  ora:
+    domain: cloudflare.com
+    score: 78
+    grade: B
+    category: "Infrastructure & DevOps"
+    tags: [edge, security, workers, dns, waf, cdn]
+    scoreUrl: https://ora.run/score/cloudflare.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:platform-engineer
+      confidence: high
+      evidence: "Cloudflare edge, DNS, Workers, and security controls support platform operations."
+    - target: role:security-reviewer
+      confidence: medium
+      evidence: "Cloudflare security signals and controls support security incident review."
+---
+nodeKind: Tool
+id: tool:optimizely
+attributes:
+  displayName: "Optimizely"
+  homepageUrl: "https://www.optimizely.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Experimentation and feature-optimization platform surfaced by Ora for product analytics,
+    feature flag, and A/B testing workflows.
+  ora:
+    domain: optimizely.com
+    score: 70
+    grade: B
+    category: "Data & Analytics"
+    tags: [experimentation, feature flags, a/b testing, product analytics]
+    scoreUrl: https://ora.run/score/optimizely.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:product-analytics
+  supports_work:
+    - target: role:product-manager
+      confidence: high
+      evidence: "Experimentation and feature rollout data supports product decision workflows."
+    - target: workflow:a-b-test-lifecycle
+      confidence: high
+      evidence: "Optimizely is directly relevant to A/B test lifecycle projections."
+

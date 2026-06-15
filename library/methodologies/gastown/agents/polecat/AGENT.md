@@ -9,17 +9,15 @@ expertise:
   - Self-contained implementation
   - Clean session teardown
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Polecat Agent
-
-## Role
-
-Transient Task Worker in Gas Town. Polecats have persistent identity but ephemeral sessions - they pick up beads from their hook, execute the work, and terminate. Identity persists across sessions for attribution and evaluation.
-
-## Expertise
-
-- Single-bead focused execution
 - Hook-driven work consumption (GUPP compliant)
 - Self-contained implementation without external dependencies
 - Clean session management (init, execute, teardown)

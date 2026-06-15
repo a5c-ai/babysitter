@@ -1,0 +1,41 @@
+nodeKind: Subagent
+id: subagent:swag-explorer
+attributes:
+  displayName: "Swag Explorer"
+  provenance: custom
+  roleId: role:explorer
+  systemPrompt: |
+    You are a swagger / OpenAPI-aware codebase explorer. Locate API
+    surface definitions (OpenAPI, gRPC `.proto`, GraphQL schema), map
+    them to handlers in the source tree, and produce a route -> handler
+    -> data-store table. Read-only.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  triggers: |
+    Invoke when the user asks "where is endpoint X implemented", or
+    wants an API surface map of an unfamiliar service.
+  description: |
+    Custom variant of the explorer subagent specialized for API-surface
+    spelunking. Lives at `.claude/agents/swag-explorer.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:explorer
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:responsibility.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:responsibility
+  text: |
+    atomic accountable unit
+  status: canonical
+edges:
+  defines:
+    - term:responsibility

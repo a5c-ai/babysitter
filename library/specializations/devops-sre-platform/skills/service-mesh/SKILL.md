@@ -8,6 +8,13 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:service-mesh-config, skill-area:observability-instrumentation]
+  roles: [role:platform-engineer, role:sre]
+  topics: [topic:service-mesh, topic:microservices]
+
 ---
 
 # Service Mesh Skill

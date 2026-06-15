@@ -1,0 +1,1132 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   KRADLE CONSOLE — "Terminal Craft" Design System
+   Dark-first, monospace-forward, information-dense developer control panel.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. CSS Variables ─────────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg: #09090b;
+  --bg-subtle: #0c0c0e;
+  --surface: #18181b;
+  --surface-raised: #1e1e22;
+  --surface-overlay: #27272a;
+
+  /* Borders */
+  --border: #27272a;
+  --border-subtle: #1e1e22;
+  --border-focus: #3b82f6;
+  --border-active: #22c55e;
+
+  /* Text */
+  --text: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-faint: #52525b;
+
+  /* Semantic */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
+  --accent: #3b82f6;
+
+  /* Legacy mappings */
+  --green: #22c55e;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --cyan: #06b6d4;
+  --purple: #8b5cf6;
+  --muted: #71717a;
+  --line: #27272a;
+  --line-strong: #3f3f46;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --panel: rgba(24, 24, 27, 0.92);
+  --panel-strong: rgba(24, 24, 27, 0.98);
+  --card: rgba(30, 30, 34, 0.55);
+
+  /* Typography */
+  --font-display: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  --display: var(--font-display);
+  --sans: var(--font-body);
+  --mono: var(--font-mono);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-glow-green: 0 0 12px rgba(34, 197, 94, 0.3);
+  --shadow-glow-blue: 0 0 12px rgba(59, 130, 246, 0.3);
+  --shadow-glow-red: 0 0 12px rgba(239, 68, 68, 0.3);
+  --shadow-glow-amber: 0 0 12px rgba(245, 158, 11, 0.3);
+
+  color-scheme: dark;
+}
+
+/* ─── 2. Light Theme Override ──────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg: #fafafa;
+  --bg-subtle: #f4f4f5;
+  --surface: #ffffff;
+  --surface-raised: #f4f4f5;
+  --surface-overlay: #e4e4e7;
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --border-focus: #3b82f6;
+  --border-active: #16a34a;
+  --text: #09090b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --text-faint: #a1a1aa;
+  --line: #e4e4e7;
+  --line-strong: #d4d4d8;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-strong: rgba(255, 255, 255, 0.98);
+  --card: rgba(244, 244, 245, 0.55);
+  --muted: #71717a;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  color-scheme: light;
+}
+
+/* ─── 3. Base Styles ───────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle dot-grid background */
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  content: "";
+  background-image: radial-gradient(circle, var(--border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.4;
+}
+body::after { display: none; }
+
+main { width: min(100% - 32px, 1320px); margin: 0 auto; padding: 24px 0 64px; }
+h1, h2, h3, h4, p { margin-top: 0; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+h1 { margin-bottom: 16px; font-size: clamp(1.75rem, 4vw, 2.5rem); line-height: 1.1; }
+h2 { margin-bottom: 12px; font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 1.15; }
+h3 { margin-bottom: 8px; font-size: 1rem; font-weight: 600; }
+h4 { margin: 16px 0 8px; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600; }
+p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; }
+small { color: var(--text-muted); font-size: 0.75rem; line-height: 1.4; }
+code { color: var(--info); font-family: var(--mono); font-size: 0.85em; }
+a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
+a:hover { color: #60a5fa; }
+button, input, select, textarea { font: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ─── 4. Layout — App Shell ────────────────────────────────────────────────── */
+.skipLink {
+  position: fixed; left: 16px; top: 12px; z-index: 20;
+  transform: translateY(-160%);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  background: var(--surface);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.skipLink:focus { transform: translateY(0); }
+
+/* Top bar */
+.appTopbar {
+  position: sticky; top: 0; z-index: 12;
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; margin: 0;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+}
+.appTopbar .globalSearch { flex: 0 1 320px; min-width: 140px; }
+.appTopbar .topbarNav { flex: 0 0 auto; }
+.appTopbar .topbarAccount { margin-left: auto; flex-shrink: 0; }
+
+.brandMark {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 36px; padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  text-decoration: none;
+  background: transparent;
+  box-shadow: none;
+  transition: border-color 0.15s;
+}
+.brandMark:hover { border-color: var(--text-muted); }
+.brandWordmark { display: grid; gap: 1px; line-height: 1; }
+.brandMark strong { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.brandWordmark em { color: var(--text-muted); font-family: var(--mono); font-size: 9px; font-style: normal; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.brandMark strong span { color: var(--success); }
+.brandSigil {
+  display: inline-grid; place-items: center;
+  width: 24px; height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--success);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+}
+
+/* Global search */
+.globalSearch { display: grid; min-width: 0; }
+.globalSearch span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.globalSearch input {
+  height: 34px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.globalSearch input::placeholder { color: var(--text-faint); }
+
+/* Top nav links */
+.topbarNav { display: flex; gap: 4px; justify-content: start; overflow-x: auto; padding: 0; scrollbar-width: thin; }
+.topbarNav a {
+  display: inline-flex; align-items: center;
+  min-height: 32px; padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem; font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+}
+.topbarNav a:hover, .topbarNav a:focus-visible { color: var(--text); background: var(--surface-raised); }
+
+/* Top bar account */
+.topbarAccount { justify-self: end; display: flex; align-items: center; gap: 10px; min-width: max-content; }
+.userChip, .signInLink, .signOutLink {
+  display: inline-flex; align-items: center;
+  min-height: 32px; color: var(--text-secondary);
+  text-decoration: none; font-size: 0.85rem; font-weight: 600;
+}
+.userChip {
+  gap: 8px; padding: 3px 10px 3px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-raised);
+}
+.userAvatar {
+  display: inline-grid; place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  color: var(--bg); background: var(--success);
+  font-size: 0.7rem; font-weight: 700;
+}
+.userName { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.signInLink, .signOutLink { color: var(--text-muted); font-size: 0.8rem; }
+.userChip:hover, .signInLink:hover, .signOutLink:hover { color: var(--text); }
+
+/* App body: sidebar + content */
+.appBody {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 0; width: 100%; max-width: none; margin: 0;
+}
+
+/* Sidebar */
+.appSidebar {
+  position: sticky; top: 53px; align-self: start;
+  min-height: calc(100vh - 53px);
+  padding: 12px 10px 32px;
+  border-right: 1px solid var(--border);
+  background: var(--bg-subtle);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.sidebarSectionTitle {
+  margin: 0 8px 6px;
+  color: var(--text-muted);
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.appSidebar nav { display: grid; gap: 0; }
+.appSidebar a {
+  display: flex; align-items: center;
+  min-height: 28px; padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid transparent;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.8rem; font-weight: 500;
+  transition: all 0.12s;
+}
+.appSidebar a:hover, .appSidebar a:focus-visible { color: var(--text); background: var(--surface); }
+.appSidebar a[aria-current="page"] {
+  color: var(--text); background: var(--surface);
+  border-left-color: var(--success);
+  font-weight: 600;
+}
+
+/* Org switcher */
+.orgSwitcher {
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.orgSwitcher summary { display: grid; gap: 2px; padding: 8px 10px; cursor: pointer; list-style: none; }
+.orgSwitcher summary::-webkit-details-marker { display: none; }
+.orgSwitcher summary span {
+  margin: 0; color: var(--text-muted);
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.orgSwitcher summary strong { color: var(--text); font-size: 0.85rem; }
+.orgSwitcher > div { display: grid; gap: 2px; padding: 0 6px 8px; }
+
+/* Navigation groups */
+.sidebarNavGroup { display: grid; gap: 0; margin-bottom: 4px; }
+.sidebarNavGroup h2 {
+  margin: 0; padding: 12px 10px 4px;
+  color: var(--text-muted);
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border-top: 1px solid var(--border);
+}
+.sidebarNavGroup:first-child h2 { border-top: none; padding-top: 4px; }
+.sidebarNavGroup a { display: block; min-height: auto; padding: 5px 10px; line-height: 1.3; }
+.sidebarNavGroup a span { font-weight: 500; font-size: 0.8rem; }
+.sidebarNavGroup a small { display: none; }
+.advancedNav { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 6px; }
+.advancedNav summary { min-height: 28px; padding: 4px 10px; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; font-weight: 500; }
+.advancedNav a { margin-top: 1px; }
+
+/* Main content area */
+.appContent { min-width: 0; }
+.routeMain { padding: 24px 28px 56px; }
+
+/* ─── 5. Page Frame Components ─────────────────────────────────────────────── */
+.breadcrumbs {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin-bottom: 12px;
+  color: var(--text-muted); font-family: var(--mono); font-size: 0.75rem;
+}
+.breadcrumbs a { color: var(--text-muted); text-decoration: none; }
+.breadcrumbs a:not(:last-child)::after { content: '/'; margin-left: 6px; color: var(--text-faint); }
+.breadcrumbs a[aria-current="page"] { color: var(--text); font-weight: 600; }
+
+.hero { margin-bottom: 16px; }
+
+.heroChrome, .panel, .card, .routeHero {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.heroChrome::before, .panel::before, .card::before, .routeHero::before { display: none; }
+.heroChrome { padding: clamp(20px, 3vw, 32px); }
+
+.heroGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 380px); gap: 24px; align-items: end; }
+.eyebrowRow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.eyebrow { color: var(--success); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.lede { max-width: 700px; color: var(--text-secondary); font-size: clamp(0.9rem, 1.5vw, 1.05rem); }
+.sourceLine { margin: 10px 0 0; color: var(--text-muted); font-size: 0.8rem; }
+
+.heroActions, .shellNav, .repoTabs, .filterRow, .policyRail, .phaseBadges, .actionGrid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Shared button/link pill style */
+.topbarNav a, .heroActions a, .shellNav a, .repoTabs span, .repoTabs a, .filterRow span, .policyRail span, .pill, .phaseBadges span, .actionButton {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  background: var(--surface);
+  font-size: 0.8rem; font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.heroActions a:hover, .shellNav a:hover, .repoTabs a:hover, .actionButton:hover, .filterRow span:hover {
+  color: var(--text); border-color: var(--text-muted); background: var(--surface-raised);
+}
+
+/* Primary CTA */
+.heroActions a:first-child, .linkedTabs a:first-child {
+  color: #fff;
+  border-color: var(--success);
+  background: var(--success);
+  font-weight: 600;
+}
+.heroActions a:first-child:hover, .linkedTabs a:first-child:hover { background: #16a34a; border-color: #16a34a; }
+
+.shellNav { position: sticky; top: 0; z-index: 5; padding: 12px 0 16px; background: var(--bg); backdrop-filter: blur(12px); }
+
+/* Route page structure */
+.routeMain { padding-top: 20px; }
+.routeHero {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px; align-items: center;
+  margin: 0 -28px 20px; padding: 20px 28px 16px;
+  border-width: 0 0 1px; border-radius: 0;
+  background: var(--bg-subtle);
+}
+.routeHero::after { display: none; }
+.routeHero h1 { max-width: none; margin: 4px 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+.routeHero .eyebrow { color: var(--text-muted); font-size: 0.8rem; }
+.routeHero .lede { max-width: 700px; margin: 0; font-size: 0.875rem; }
+.routeHero .heroActions { align-self: center; justify-content: end; max-width: none; }
+
+.routeGrid { display: grid; gap: 16px; align-items: start; }
+.routeGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.routeGrid.wideLeft, .wideLeft { grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.6fr); }
+
+.sectionBlock, .panel { margin-top: 20px; scroll-margin-top: 80px; }
+.panel, .card { padding: 20px; }
+.card.soft { background: var(--bg-subtle); border-color: var(--border-subtle); }
+.sectionHeader { max-width: 800px; margin-bottom: 16px; }
+.sectionHeader p { margin-bottom: 0; }
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.stack { display: grid; gap: 14px; }
+
+/* Card title */
+.cardTitle {
+  display: flex; justify-content: space-between; gap: 12px; align-items: center;
+  margin: -4px 0 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.cardTitle::after { display: none; }
+.cardTitle h2, .cardTitle h3 { margin: 0; }
+.cardTitle h2 { font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 600; }
+.cardTitle h3, .card > h3, .panel > h3 { font-size: 0.95rem; font-weight: 600; }
+.card > h3:first-child, .panel > h3:first-child { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+/* ─── 6. Grid Layouts ──────────────────────────────────────────────────────── */
+.heroCard, .dashboardGrid, .flowGrid, .yamlGrid, .capabilityGrid, .stateStrip, .metricGrid, .settingsGrid, .architectureLanes, .webhookGrid { display: grid; gap: 12px; }
+.heroCard { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.dashboardGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.flowGrid, .yamlGrid, .architectureLanes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.capabilityGrid, .settingsGrid, .webhookGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stateStrip { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 12px; }
+.metricGrid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 14px; }
+
+/* Metric cards & grid items */
+.metric, .runtimeCard, .flowCard, .resourceList li, .resources li, .workItems li, .compactList li, .stepper li, .architectureLanes article, .workQueue article, .boardColumns section, .repoCommandBar > div, .repoCommandBar > a, .endpointList a {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+.metric { min-height: 100px; display: grid; align-content: end; gap: 4px; padding: 16px; }
+.metric strong, .runtimeCard strong, .workQueue span { font-family: var(--font-display); color: var(--accent); font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: -0.03em; }
+.metric span, .runtimeCard small, .flowCard p, .capabilityGrid span, .stateStrip span, .workItems span { color: var(--text-muted); font-size: 0.8rem; }
+.runtimeCard, .flowCard { display: grid; gap: 6px; padding: 16px; text-decoration: none; }
+.runtimeCard span, .flowCard h3 { color: var(--text); font-weight: 600; }
+.flowCard span { color: var(--success); font-family: var(--mono); font-size: 0.75rem; font-weight: 600; }
+.capabilityGrid article, .stateStrip span { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+
+/* Metric grid link cards */
+.metricGrid a {
+  position: relative;
+  min-height: 120px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text); text-decoration: none;
+  background: var(--surface);
+  transition: all 0.15s;
+}
+.metricGrid a::before, .metricGrid a::after { display: none; }
+.metricGrid a strong { font-family: var(--font-display); font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; }
+.metricGrid a span { color: var(--text-muted); font-family: var(--mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.metricGrid a:hover { border-color: var(--text-muted); background: var(--surface-raised); transform: translateY(-1px); }
+
+/* ─── 7. Status Pills ──────────────────────────────────────────────────────── */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  width: fit-content; padding: 4px 10px;
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+}
+.pill.good { color: var(--success); border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.1); }
+.pill.warn { color: var(--warning); border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+.pill.danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
+.pill.neutral { color: var(--accent); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.1); }
+
+/* Glowing live indicator dot */
+.pill.good::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: var(--shadow-glow-green); }
+
+/* ─── 8. Tables and Lists ──────────────────────────────────────────────────── */
+.resourceTable {
+  display: grid; overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.resourceRow {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.4fr) minmax(100px, 0.22fr) minmax(0, 1fr);
+  gap: 12px; align-items: center;
+  padding: 12px 16px;
+}
+.resourceRow + .resourceRow { border-top: 1px solid var(--border); }
+.resourceRow strong { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; color: var(--text); }
+.resourceRow span { color: var(--success); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.resourceRow code { overflow: hidden; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; font-size: 0.8rem; }
+
+.resources, .compactList, .proofList, .timeline, .workItems, .resourceList { padding: 0; margin: 0; list-style: none; }
+.resources, .resourceList, .workItems, .compactList, .reviewFiles, .conversation, .watchPanel, .watchEvents { display: grid; gap: 8px; }
+.resources li { display: grid; gap: 8px; padding: 14px; }
+.resources li > div { display: flex; justify-content: space-between; gap: 12px; }
+.resources span { color: var(--text-muted); font-size: 0.8rem; }
+.resourceList li { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 4px 12px; padding: 12px; }
+.resourceList small { grid-column: 1 / -1; }
+.resourceList li:hover, .resources li:hover, .compactList li:hover, .workItems li:hover, .watchEvents li:hover {
+  border-color: var(--text-faint);
+  background: var(--surface-raised);
+}
+.compactList li { border: 1px solid var(--border); }
+
+.phaseBadges { gap: 6px; }
+.phaseBadges span { padding: 4px 8px; font-size: 0.7rem; }
+.filterRow { margin-bottom: 14px; }
+.workItems li, .compactList li, .stepper li { padding: 10px 12px; color: var(--text); }
+.workItems li { display: grid; gap: 4px; }
+.settingsGrid { margin-top: 12px; }
+.settingsGrid span { padding: 8px 10px; border-radius: var(--radius-sm); background: rgba(34, 197, 94, 0.08); color: var(--success); font-size: 0.8rem; }
+
+/* Jitsi embedded meeting */
+.jitsiMeetingExperience {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+.jitsiMeetingMain { display: grid; gap: 12px; min-width: 0; }
+.jitsiMeetingHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+.jitsiMeetingHeader h2 { margin-bottom: 4px; font-size: 1.25rem; }
+.jitsiMeetingHeader p { margin-bottom: 0; }
+.jitsiError { margin: 0; color: var(--danger); }
+.jitsiEmbed {
+  position: relative;
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.jitsiEmbedFrame {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+}
+.jitsiEmbedFrame iframe {
+  display: block;
+  width: 100% !important;
+  min-height: 560px;
+  border: 0;
+}
+.jitsiEmbedState {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--text-secondary);
+  text-align: center;
+  background: linear-gradient(180deg, rgba(9, 9, 11, 0.94), rgba(24, 24, 27, 0.94));
+}
+.jitsiEmbedState strong { color: var(--text); font-size: 1rem; }
+.jitsiControls {
+  display: grid;
+  gap: 10px;
+}
+.jitsiControlRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.jitsiControlRow input, .jitsiControlRow select { min-width: 160px; }
+.jitsiContextPanel {
+  position: sticky;
+  top: 84px;
+  display: grid;
+  gap: 12px;
+}
+.jitsiContextTitle { margin-top: 4px; }
+.jitsiMetadata {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.jitsiMetadata div {
+  display: grid;
+  grid-template-columns: minmax(72px, max-content) minmax(0, 1fr);
+  gap: 10px;
+}
+.jitsiMetadata dt {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.jitsiMetadata dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.jitsiParticipantList li, .jitsiInviteList li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.jitsiParticipantList li a { grid-column: 2; font-size: 0.8rem; }
+.jitsiAvatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 50%;
+  color: var(--accent);
+  background: rgba(59, 130, 246, 0.12);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.jitsiAvatar.agent {
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.12);
+}
+.jitsiAvatar.pending { opacity: 0.7; }
+
+/* ─── 9. Key-Value Pairs ───────────────────────────────────────────────────── */
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; }
+.kv dt { color: var(--text-muted); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.kv dd { min-width: 0; margin: 0; color: var(--text); overflow-wrap: anywhere; }
+
+/* ─── 10. Code Blocks & Terminal ───────────────────────────────────────────── */
+.fileBrowser, .fileView { display: grid; grid-template-columns: minmax(180px, 0.34fr) minmax(0, 1fr); gap: 12px; }
+.fileBrowser aside, .fileView aside, .terminal, .diffBlock, .yamlCard pre, .codeAffordance pre, .codeEditorShell {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  color: var(--text);
+}
+.fileBrowser aside, .fileView aside { display: grid; gap: 6px; align-content: start; padding: 12px; }
+.fileBrowser a, .fileView aside, .terminal span { color: var(--text); text-decoration: none; }
+.fileView pre, .diffBlock { margin: 0; overflow: auto; padding: 14px; }
+.fileView code, .diffBlock code, .terminal span, .yamlCard code, .codeAffordance code {
+  color: #e2e8f0;
+  font-family: var(--mono); font-size: 0.82rem; line-height: 1.6;
+}
+.terminal { max-height: 240px; overflow: auto; padding: 14px; }
+.terminal span:nth-child(4), .stepper .failed { color: var(--danger); }
+.yamlCard { overflow: hidden; }
+.yamlCard pre, .codeAffordance pre { max-height: 420px; overflow: auto; margin: 0; padding: 14px; }
+.yamlCard pre::selection, .codeAffordance pre::selection { background: rgba(59, 130, 246, 0.25); }
+.yamlCard code, .codeAffordance code { white-space: pre; }
+.compactPlan pre { max-height: 250px; }
+
+.codeEditorShell { overflow: hidden; }
+.editorToolbar {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 8px 12px;
+  color: var(--text-muted); background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.compactEditor .cm-scroller { max-height: 250px; }
+
+/* ─── 11. Forms ────────────────────────────────────────────────────────────── */
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.formGrid label { display: grid; gap: 5px; color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; }
+.formGrid .wideField { grid-column: 1 / -1; }
+
+input, select, textarea {
+  width: 100%; padding: 8px 12px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
+button, .actionButton { cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.mutationStatus { margin: 10px 0 0; color: var(--accent); font-weight: 600; font-size: 0.85rem; }
+.mutationBar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); color: var(--text-muted); }
+
+/* Primary button style */
+.actionButton.primary {
+  color: #fff;
+  border-color: var(--success);
+  background: var(--success);
+  font-weight: 600;
+}
+
+/* ─── 12. Reviews & Diffs ──────────────────────────────────────────────────── */
+.repoBrowser, .inboxCard, .runCard, .reviewShell { background: var(--surface); }
+.repoTabs { margin: 8px 0 14px; }
+.endpointList { display: grid; gap: 8px; }
+.endpointList a { display: grid; grid-template-columns: 56px minmax(0, 160px) minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; text-decoration: none; }
+.reviewShell { display: grid; grid-template-columns: minmax(180px, 0.4fr) minmax(0, 1.2fr) minmax(260px, 0.6fr); gap: 14px; align-items: start; }
+.reviewFiles a { padding: 8px 10px; border-radius: var(--radius-sm); color: var(--text); background: var(--bg-subtle); text-decoration: none; }
+.diffPane { min-width: 0; }
+.diffBlock { margin-top: 14px; }
+.inlineComment { margin-top: 12px; padding: 12px; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.06); }
+
+/* Stepper */
+.stepper { display: grid; gap: 0; margin: 0 0 16px; padding: 0; list-style: none; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.stepper li { display: grid; gap: 6px; padding: 14px 16px; color: var(--text-secondary); font-size: 0.88rem; }
+.stepper li + li { border-top: 1px solid var(--border); }
+.stepper .done { color: var(--success); }
+.stepper .current { color: var(--accent); border-color: var(--accent); }
+.runCard .terminal { margin-top: 10px; }
+
+/* Watch panel */
+.watchPanel p { margin: 0; }
+.watchError { color: var(--warning); }
+.watchEvents { padding: 0; margin: 0; list-style: none; }
+.watchEvents li { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.watchEvents span { color: var(--text); word-break: break-word; }
+
+/* ─── 13. Forge Flow Rail ──────────────────────────────────────────────────── */
+.forgeFlowRail {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr) auto;
+  gap: 16px; align-items: stretch;
+  margin: 0 0 16px; padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.forgeFlowRail h2 { margin: 4px 0 6px; font-size: clamp(1.1rem, 2vw, 1.5rem); }
+.forgeFlowRail p, .forgeFlowRail small { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
+.forgeFlowRail ol {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;
+  margin: 0; padding: 0; list-style: none;
+  overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-subtle);
+}
+.forgeFlowRail li a {
+  display: grid; gap: 4px; min-height: 80px; padding: 10px;
+  border: 0; border-radius: 0; background: transparent;
+  color: var(--text); text-decoration: none;
+  transition: background 0.15s;
+}
+.forgeFlowRail li a:hover { background: var(--surface-raised); }
+.forgeFlowRail li + li a { border-left: 1px solid var(--border); }
+.forgeFlowRail li a strong { font-size: 0.9rem; font-weight: 600; }
+.forgeFlowRail li span { color: var(--text-muted); font-size: 0.75rem; line-height: 1.35; }
+.forgeFlowRail > div:first-child { align-self: center; }
+
+/* Repo command bar */
+.repoCommandBar {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
+  gap: 0; margin: 0 0 14px;
+  overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.repoCommandBar > div, .repoCommandBar > a {
+  display: grid; gap: 4px; min-height: 56px; padding: 10px 12px;
+  border: 0; border-right: 1px solid var(--border); border-radius: 0;
+  color: var(--text); text-decoration: none; background: transparent;
+}
+.repoCommandBar > a { color: var(--accent); font-size: 0.82rem; font-weight: 600; place-content: center; }
+.repoCommandBar span { color: var(--text-muted); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.repoCommandBar code { overflow: hidden; color: var(--text-secondary); text-overflow: ellipsis; white-space: nowrap; }
+.repoCommandBar a[aria-disabled="true"] { opacity: 0.5; }
+.repoCommandBar a:hover { background: var(--surface-raised); }
+
+/* Code affordance */
+.codeAffordance { position: relative; }
+.codeAffordance summary { cursor: pointer; color: var(--accent); font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.codeAffordance[open] > div { position: absolute; right: 0; z-index: 9; display: grid; gap: 0; min-width: min(620px, calc(100vw - 40px)); margin-top: 8px; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-subtle); box-shadow: var(--shadow-lg); }
+.codeAffordance[open] pre { border: 0; border-radius: 0; box-shadow: none; }
+.codeAffordance button { border: 0; border-top: 1px solid var(--border); padding: 10px 16px; color: var(--accent); background: var(--surface); font-family: var(--mono); font-size: 0.72rem; font-weight: 600; }
+
+/* Architecture/Boards */
+.architectureLanes article, .workQueue article, .boardColumns section { display: grid; gap: 6px; padding: 12px; }
+.architectureLanes p { margin: 0; font-size: 0.85rem; }
+.compactArchitecture .architectureLanes { grid-template-columns: 1fr; }
+.workQueue { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.boardColumns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.boardColumns article { display: grid; gap: 4px; margin-top: 8px; padding: 10px; border-radius: var(--radius-sm); background: var(--bg-subtle); }
+.repositoryManageList li { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 10px; align-items: center; }
+.repositoryManageList li span { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.actionList li { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 10px; align-items: center; }
+.actionList li > span:last-child { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Boundary legend */
+.boundaryLegend { margin: 0 0 12px; padding: 12px 14px; border-left: 2px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); background: rgba(59, 130, 246, 0.06); font-style: italic; font-size: 0.85rem; }
+
+/* Empty states */
+.empty, .emptyState { border-style: dashed; background: var(--bg-subtle); text-align: center; }
+.emptyState h3::before { content: ""; }
+.emptyText { color: var(--text-muted); }
+.degradedBanner { border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.06); }
+
+/* ─── 14. Repository Code Browser ─────────────────────────────────────────── */
+.routeMain:has(.repoHeader) { padding-top: 0; }
+.routeMain:has(.repoHeader) > .breadcrumbs, .routeMain:has(.repoHeader) > .routeHero { display: none; }
+
+.repoHeader {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px; align-items: center;
+  margin: 0 -28px; padding: 16px 28px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+.repoTitleLine { display: flex; min-width: 0; gap: 6px; align-items: center; color: var(--text-muted); font-size: 1.15rem; }
+.repoTitleLine strong { min-width: 0; overflow: hidden; color: var(--text); font-size: 1.15rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.repoOwner { color: var(--accent); }
+.repoMetaLine { display: flex; grid-column: 1; gap: 12px; color: var(--text-muted); font-size: 0.8rem; }
+.repoMetaLine span::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: var(--text-faint); }
+.repoHeaderActions { display: flex; grid-column: 2; grid-row: 1 / span 2; gap: 8px; align-items: start; }
+.repoHeaderActions button {
+  min-height: 30px; padding: 5px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); background: var(--surface);
+  font-size: 0.82rem; font-weight: 600;
+}
+.repoHeaderActions span { margin-left: 6px; color: var(--text-muted); font-weight: 500; }
+
+/* Repo tabs */
+.repoTabs {
+  position: sticky; top: 53px; z-index: 8;
+  margin: 0 -28px 16px; padding: 0 28px;
+  border: 0; border-bottom: 1px solid var(--border); border-radius: 0;
+  background: var(--bg-subtle); backdrop-filter: blur(12px);
+}
+.repoTabs a, .repoTabs span { min-height: 42px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; box-shadow: none; }
+.linkedTabs a:first-child { color: var(--text); border-color: var(--success); background: transparent; box-shadow: none; }
+
+.routeMain:has(.repoHeader) .repoTabs { top: 53px; margin-top: 0; padding-top: 0; }
+.routeMain:has(.repoHeader) .repoTabs a::before { margin-right: 6px; color: var(--text-muted); }
+.routeMain:has(.repoHeader) .repoTabs a[href$="/code"]::before { content: "<>"; }
+.routeMain:has(.repoHeader) .repoTabs a[href$="/pull-requests"]::before { content: "PR"; }
+.routeMain:has(.repoHeader) .repoTabs a[href$="/issues"]::before { content: "!"; }
+.routeMain:has(.repoHeader) .repoTabs a[href$="/runs"]::before { content: "run"; }
+.routeMain:has(.repoHeader) .repoTabs a[href$="/hooks"]::before { content: "auto"; }
+.routeMain:has(.repoHeader) .repoTabs a[href$="/settings"]::before { content: "gear"; }
+.routeMain:has(.repoHeader) .repoCommandBar {
+  margin-top: 16px;
+  grid-template-columns: repeat(4, max-content) minmax(0, 1fr);
+  justify-content: start;
+  background: transparent; border: 0;
+}
+.routeMain:has(.repoHeader) .repoCommandBar > div,
+.routeMain:has(.repoHeader) .repoCommandBar > a {
+  min-height: 32px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+}
+.routeMain:has(.repoHeader) .repoCommandBar > div { display: none; }
+.routeMain:has(.repoHeader) .repoCommandBar > a.primaryCommand { color: #fff; background: var(--success); border-color: var(--success); }
+
+/* File browser */
+.repoCodePage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 20px; align-items: start; }
+.repoFileBrowser { min-width: 0; display: grid; gap: 8px; }
+.repoBrowserToolbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 38px; }
+.branchButton, .repoToolbarActions a, .repoToolbarActions button {
+  min-height: 32px; padding: 6px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); background: var(--surface);
+  font-weight: 600; font-size: 0.82rem; text-decoration: none;
+}
+.branchButton::before { content: "branch "; color: var(--text-muted); font-weight: 500; }
+.branchButton::after { content: " \25BE"; color: var(--text-muted); }
+.repoPath { display: flex; gap: 6px; align-items: center; min-width: 0; color: var(--text-muted); font-size: 0.88rem; }
+.repoPath a { overflow: hidden; color: var(--accent); font-weight: 600; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.repoToolbarActions { display: flex; gap: 8px; align-items: center; }
+.repoToolbarActions button { color: #fff; border-color: var(--success); background: var(--success); }
+.repoToolbarActions a:first-child { display: none; }
+.repoToolbarActions button::before { content: "Code "; }
+
+.commitBanner {
+  display: grid; grid-template-columns: minmax(140px, max-content) minmax(0, 1fr) max-content;
+  gap: 10px; align-items: center;
+  min-height: 42px; padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--surface); font-size: 0.85rem;
+}
+.commitBanner strong { color: var(--accent); }
+.commitBanner strong::before { content: "\25CF"; margin-right: 6px; color: var(--success); font-size: 0.65rem; }
+.commitBanner span { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.commitBanner small { justify-self: end; color: var(--text-muted); }
+
+.fileList {
+  display: grid; overflow: hidden; margin-top: -1px;
+  border: 1px solid var(--border); border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--surface);
+}
+.fileRow {
+  display: grid; grid-template-columns: 22px minmax(180px, 0.32fr) minmax(260px, 1fr) minmax(88px, max-content);
+  gap: 10px; align-items: center;
+  min-height: 38px; padding: 6px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text); text-decoration: none; font-size: 0.85rem;
+  transition: background 0.1s;
+}
+.fileRow:first-child { border-top: 0; }
+.fileRow:hover { background: var(--surface-raised); }
+.fileRow strong { color: var(--accent); font-weight: 600; }
+.fileRow span:not(.fileIcon) { min-width: 0; overflow: hidden; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.fileRow time { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; justify-self: end; }
+.fileIcon { width: 16px; height: 16px; overflow: hidden; color: transparent; position: relative; }
+.fileIcon::before { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-muted); font-family: var(--sans); font-size: 14px; line-height: 1; }
+.fileIcon.dir::before { content: "\25B0"; color: var(--warning); }
+.fileIcon.file::before { content: "\25A1"; color: var(--text-muted); }
+
+.readmePanel { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); margin-top: 14px; }
+.readmeHeader { display: flex; justify-content: space-between; gap: 12px; min-height: 44px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-subtle); }
+.readmeHeader span { color: var(--text-muted); font-size: 0.82rem; }
+.readmePanel > h2, .readmePanel > p { margin-left: 20px; margin-right: 20px; }
+.readmePanel > h2 { margin-top: 20px; font-size: 1.5rem; }
+.readmePanel .codeEditorShell, .readmePanel .planCard { margin: 16px 20px 20px; }
+.readmePanel > p { max-width: 78ch; }
+
+.repoCodePage > .card { position: sticky; top: 108px; display: grid; gap: 12px; padding: 14px; }
+.repoCodePage > .card h3 { margin: 0; padding: 0 0 10px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+.repoCodePage > .card .terminal { border-color: var(--border); background: var(--bg-subtle); color: var(--text); padding: 10px 12px; font-size: 0.82rem; }
+.repoCodePage > .card .terminal span { color: var(--text); }
+.repoCodePage > .card h4 { margin-top: 4px; }
+.repoCodePage > .card .compactList li { background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+
+/* ─── 15. Login & Loading ──────────────────────────────────────────────────── */
+.loginMain { display: grid; min-height: 100vh; width: 100%; max-width: none; margin: 0; place-items: center; padding: 48px 20px; }
+.loginCard {
+  width: min(100%, 560px); padding: clamp(28px, 5vw, 48px);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.loginBrand {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; margin-bottom: 28px; padding: 8px 14px;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  color: var(--text); text-decoration: none; background: var(--bg-subtle);
+}
+.loginCard h1 { margin: 8px 0 16px; font-size: clamp(2rem, 6vw, 3rem); }
+.loginNotice { margin: 20px 0 0; padding: 14px 16px; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); color: var(--warning); background: rgba(245, 158, 11, 0.06); font-size: 0.85rem; }
+
+.kradleRecoveryOverlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: clamp(20px, 5vw, 64px); background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
+.kradleLoadingView { width: min(100%, 480px); padding: clamp(24px, 5vw, 40px); text-align: center; color: var(--text); }
+.kradleLoadingView.fullPage { min-height: 100vh; width: 100%; display: grid; align-content: center; justify-items: center; background: var(--bg); }
+.kradleSpinner { width: 40px; height: 40px; margin: 0 auto 16px; }
+.kradleSpinner svg { width: 100%; height: 100%; }
+.kradleSpinnerArc { animation: kradleSpinnerRotate 0.8s linear infinite; transform-origin: center; }
+.kradleLoadingLabel { margin: 0; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+@keyframes kradleSpinnerRotate { to { transform: rotate(360deg); } }
+.kradleLoadingPhase { min-height: 1.4em; margin: 0 0 8px; color: #3d2e1c; font-weight: 600; }
+.kradleLoadingFootnote { color: #a89880; font-size: 0.78rem; margin-top: 12px; display: block; }
+.kradleRecoveryHint { width: min(100%, 480px); margin: 14px auto 0; color: #7a6a56; text-align: center; font-size: 0.85rem; }
+[data-theme="light"] .kradleLoadingView.fullPage { background: linear-gradient(168deg, #faf6ed 0%, #f2eadb 50%, #ebe2ce 100%); }
+[data-theme="light"] .kradleCircleArc { stroke: #a07c52; }
+[data-theme="light"] .kradleCircleMark { color: #6b4c28; }
+
+/* ─── 16. Animations ───────────────────────────────────────────────────────── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.card, .panel, .forgeFlowRail, .repoCommandBar { transition: border-color 0.15s, background 0.15s; }
+.card:hover, .panel:hover { border-color: var(--text-faint); }
+.flowSegment { transition: opacity 0.15s; cursor: default; }
+.flowSegment:hover { opacity: 0.8; }
+
+/* ─── 17. Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .dashboardGrid, .flowGrid, .yamlGrid, .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reviewShell, .forgeFlowRail { grid-template-columns: 1fr; }
+  .stateStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .forgeFlowRail ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .forgeFlowRail li + li a { border-left: 0; border-top: 1px solid var(--border); }
+  .repoCommandBar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .appBody { grid-template-columns: 1fr; }
+  .appSidebar { position: static; min-height: 0; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .appSidebar nav { display: flex; gap: 4px; overflow-x: auto; }
+  .sidebarNavGroup { display: flex; gap: 4px; }
+  .sidebarNavGroup h2, .advancedNav summary, .orgSwitcher { display: none; }
+  .appSidebar a { flex: 0 0 auto; }
+  .sidebarNavGroup a small { display: none; }
+  .routeGrid.two, .routeGrid.wideLeft, .forgeFlowRail { grid-template-columns: 1fr; }
+  .repoCodePage { grid-template-columns: 1fr; }
+  .repoCodePage > .card { position: static; }
+}
+
+@media (max-width: 960px) {
+  main { width: min(100% - 24px, 1320px); }
+  .heroGrid, .split, .wideLeft, .fileView, .fileBrowser, .dashboardGrid, .flowGrid, .yamlGrid, .capabilityGrid, .routeHero, .routeGrid.two, .routeGrid.wideLeft, .endpointList a, .architectureLanes, .workQueue, .boardColumns, .metricGrid { grid-template-columns: 1fr; }
+  .jitsiMeetingExperience { grid-template-columns: 1fr; }
+  .jitsiContextPanel { position: static; }
+}
+
+@media (max-width: 768px) {
+  .routeGrid { grid-template-columns: 1fr !important; }
+  .routeGrid.two { grid-template-columns: 1fr !important; }
+  .routeGrid.three { grid-template-columns: 1fr !important; }
+  .topbarNav { display: none; }
+  .appBody { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .appTopbar { gap: 8px; }
+  .globalSearch { order: 3; }
+  .routeMain { padding: 16px 16px 44px; }
+  .routeHero, .repoTabs { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .routeHero { grid-template-columns: 1fr; gap: 12px; }
+  .routeHero .heroActions { justify-content: start; }
+  .repoCommandBar { grid-template-columns: 1fr; }
+  .repoCommandBar > div, .repoCommandBar > a { border-right: 0; border-bottom: 1px solid var(--border); }
+  .repoHeader { grid-template-columns: 1fr; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .repoHeaderActions, .repoMetaLine { grid-column: 1; grid-row: auto; flex-wrap: wrap; }
+  .routeMain:has(.repoHeader) .repoCommandBar { grid-template-columns: 1fr; }
+  .repoBrowserToolbar, .commitBanner, .fileRow { grid-template-columns: 1fr; align-items: start; }
+  .repoToolbarActions { justify-content: start; }
+  .commitBanner small { justify-self: start; }
+  .fileRow { gap: 4px; grid-template-columns: 22px minmax(0, 1fr); }
+  .fileRow span:not(.fileIcon), .fileRow time { grid-column: 2; justify-self: start; }
+}
+
+@media (max-width: 560px) {
+  main { width: min(100% - 16px, 1320px); padding-top: 20px; }
+  .heroCard, .formGrid, .webhookGrid, .stateStrip, .settingsGrid, .repositoryManageList li, .forgeFlowRail ol, .repoCommandBar { grid-template-columns: 1fr; }
+  .heroChrome, .card, .panel { padding: 14px; }
+  .appTopbar { margin-top: 0; padding: 8px 12px; }
+  .jitsiEmbed, .jitsiEmbedFrame, .jitsiEmbedFrame iframe { min-height: 430px; }
+  .jitsiMeetingHeader { display: grid; }
+  .jitsiControlRow input, .jitsiControlRow select, .jitsiControlRow button { width: 100%; }
+}
+
+/* ─── 18. Utilities ────────────────────────────────────────────────────────── */
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mono { font-family: var(--mono); }
+.uppercase { text-transform: uppercase; letter-spacing: 0.06em; }
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent); }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.infoList { margin-top: 12px; }
+
+/* ─── 19. Light Theme Overrides (component-level) ──────────────────────────── */
+[data-theme="light"] body { background: var(--bg); }
+[data-theme="light"] body::before { opacity: 0.3; }
+[data-theme="light"] .appTopbar { background: var(--surface); border-color: var(--border); }
+[data-theme="light"] .appSidebar { background: var(--bg-subtle); border-color: var(--border); }
+[data-theme="light"] .brandMark { border-color: var(--border); }
+[data-theme="light"] .pill.good { color: #15803d; background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+[data-theme="light"] .pill.warn { color: #92400e; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
+[data-theme="light"] .pill.danger { color: #dc2626; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+[data-theme="light"] .pill.neutral { color: #2563eb; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
+
+/* ─── 20. Mobile Navigation Toggle ───────────────────────────────────────── */
+.mobileNavToggle {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  padding: 0; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); cursor: pointer;
+}
+.hamburgerIcon {
+  display: flex; flex-direction: column; gap: 4px; width: 18px;
+}
+.hamburgerIcon span {
+  display: block; height: 2px; width: 100%;
+  background: var(--text); border-radius: 1px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.mobileNavOverlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 99;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+  .mobileNavToggle { display: flex; }
+  .mobileNavOverlay { display: block; }
+  .appSidebar {
+    position: fixed; top: 0; left: 0; z-index: 100;
+    width: 280px; height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--bg-subtle);
+    padding-top: 60px;
+  }
+  .appSidebar.mobileOpen {
+    transform: translateX(0);
+  }
+  .appSidebar nav { display: grid; gap: 2px; }
+  .sidebarNavGroup { display: grid; gap: 2px; }
+  .sidebarNavGroup h2 { display: block; }
+  .sidebarNavGroup a small { display: block; }
+  .orgSwitcher { display: block; }
+}
+
+/* ─── 21. Load Error Banner ──────────────────────────────────────────────── */
+.loadErrorBanner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--warning, #f59e0b);
+  font-size: 0.85rem; font-weight: 500;
+}
+.loadErrorBanner a {
+  color: var(--warning, #f59e0b); font-weight: 600; text-decoration: underline;
+}
+
+/* Ensure all misc legacy layout selectors render clean */
+.appTopbar, .appBody, .appContent, .routeMain { width: 100%; max-width: none; margin-left: 0; margin-right: 0; }

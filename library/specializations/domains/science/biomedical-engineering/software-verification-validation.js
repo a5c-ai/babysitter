@@ -17,6 +17,12 @@
  * - IEC 62304:2006/AMD1:2015 Software Verification (Section 5.7)
  * - FDA General Principles of Software Validation
  * - GAMP 5 Guide for Validation of Automated Systems
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

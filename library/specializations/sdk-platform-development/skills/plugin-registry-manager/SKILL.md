@@ -8,6 +8,13 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:plugin-systems, skill-area:sdk-codegen]
+  roles: [role:platform-engineer]
+  workflows: [workflow:product-discovery]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Plugin Registry Manager Skill

@@ -1,0 +1,248 @@
+---
+nodeKind: Role
+id: role:game-developer
+attributes:
+  displayName: "Game Developer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Designs and implements interactive game experiences — from gameplay
+    mechanics and AI systems to rendering pipelines and tooling. Works
+    within game engines (Unity, Unreal, Godot, custom) to bring creative
+    visions to life under strict performance constraints. Collaborates
+    with artists, designers, and audio engineers to deliver polished
+    player-facing experiences across console, PC, and mobile platforms.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_skill:
+    - target: specialization:game-development
+      level: expert
+    - target: domain:gaming
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:documentation-engineer
+attributes:
+  displayName: "Documentation Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Owns the developer documentation platform and information architecture
+    for engineering-facing content. Goes beyond traditional technical writing
+    by building docs-as-code pipelines, automated API reference generation,
+    content linting, and search optimization. Partners with engineering teams
+    to ensure documentation stays accurate, discoverable, and integrated into
+    development workflows through CI-driven freshness checks and review gates.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: specialization:technical-documentation
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:desktop-developer
+attributes:
+  displayName: "Desktop Application Developer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Builds native and cross-platform desktop applications — handling window
+    management, native OS integration, file-system access, offline
+    functionality, and platform-specific distribution. Works with frameworks
+    like Electron, Tauri, Qt, or native platform SDKs to deliver performant,
+    polished desktop experiences that feel at home on each operating system.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:performance-optimization
+    - responsibility:deployment-management
+  requires_skill:
+    - target: specialization:desktop-development
+      level: expert
+    - target: domain:software-engineering
+      level: expert
+---
+nodeKind: Role
+id: role:observability-engineer
+attributes:
+  displayName: "Observability Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Designs and operates the observability platform — telemetry collection,
+    storage, querying, and visualization — that gives engineering teams
+    insight into system behavior. Owns OpenTelemetry instrumentation
+    standards, alert policies, dashboard templates, and cost optimization
+    of high-volume telemetry pipelines. Bridges SRE and platform engineering
+    by making production systems debuggable and measurable.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:on-call
+    - responsibility:capacity-planning
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: specialization:observability
+      level: expert
+    - target: domain:observability
+      level: expert
+    - target: specialization:devops-sre-platform
+      level: intermediate
+---
+nodeKind: Role
+id: role:media-engineer
+attributes:
+  displayName: "Media Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Builds and optimizes media processing pipelines — video transcoding,
+    adaptive streaming, image processing, and real-time media delivery.
+    Works with codecs, CDNs, and DRM systems to deliver high-quality media
+    at scale while managing encoding cost and latency tradeoffs.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:code-review
+    - responsibility:documentation
+  requires_skill:
+    - target: specialization:media
+      level: expert
+    - target: domain:media-entertainment
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:compliance-engineer
+attributes:
+  displayName: "Compliance Engineer"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Automates and maintains compliance controls across engineering systems —
+    implementing policy-as-code, continuous compliance monitoring, audit
+    evidence collection, and regulatory reporting automation. Bridges the
+    gap between legal/compliance requirements and engineering implementation
+    for frameworks like SOC 2, ISO 27001, HIPAA, and GDPR.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:compliance-monitoring
+    - responsibility:security-audit
+    - responsibility:documentation
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: specialization:security-compliance
+      level: expert
+    - target: domain:cybersecurity
+      level: intermediate
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:site-reliability-engineer
+attributes:
+  displayName: "Site Reliability Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Ensures production system reliability, availability, and performance through
+    SLO/SLI design, capacity planning, and toil automation. Bridges development
+    and operations by applying software engineering principles to infrastructure
+    challenges. Leads incident response, owns error budget policy, and drives
+    post-incident learning culture within engineering organizations.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:performance-optimization
+    - responsibility:capacity-planning
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:devops
+      level: expert
+    - target: domain:cloud-infra
+      level: expert
+    - target: domain:observability
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:on-call
+attributes:
+  displayName: "On-Call Engineer"
+  isAgentic: false
+  automatability: 0.1
+  description: |
+    Operational role responsible for responding to production incidents during
+    on-call rotation. Triages alerts, coordinates incident response across
+    teams, escalates appropriately, and ensures service restoration within
+    SLO targets. Documents findings and contributes to blameless postmortem
+    reviews to prevent recurrence.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:on-call
+  requires_skill:
+    - target: domain:devops
+      level: intermediate
+    - target: domain:observability
+      level: intermediate
+---
+nodeKind: Role
+id: role:software-engineer
+attributes:
+  displayName: "Software Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    General-purpose software engineer covering full-stack development,
+    system design, and code quality. A broad role encompassing backend,
+    frontend, and infrastructure work without deep specialization in
+    any single area.
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:architecture-decision
+    - responsibility:test-strategy
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+---
+nodeKind: Role
+id: role:blockchain-engineer
+attributes:
+  displayName: "Blockchain Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Specialist in blockchain protocol development, smart contract engineering,
+    consensus mechanisms, and decentralized application architecture.
+    Bridges cryptography, distributed systems, and financial technology.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:security-audit
+    - responsibility:code-review
+  requires_skill:
+    - target: domain:security
+      level: expert
+    - target: specialization:cryptography-blockchain
+      level: expert

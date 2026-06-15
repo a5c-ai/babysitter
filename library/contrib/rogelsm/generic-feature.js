@@ -14,7 +14,7 @@
  *   Phase 7: Breakpoint — human reviews outcome
  *
  * Auth-gated component definition (triggers Phase 5):
- *   Any file matching: **/dashboard/**, **/trips/[id]/**, BentoTripCard,
+ *   Any file matching dashboard routes, trips/[id] routes, BentoTripCard,
  *   DashboardClient, or any file containing isOwner, canEdit, collaboratorRole,
  *   or role === 'ADMIN'.
  *
@@ -36,6 +36,9 @@
  * Evidence: Post-bento 3 permission regressions (fix-delete-permissions,
  * fix-plan-button-visibility, admin-trip-access) — 33 minutes of rework
  * preventable with the Phase 5 permission audit.
+  * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:feature-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

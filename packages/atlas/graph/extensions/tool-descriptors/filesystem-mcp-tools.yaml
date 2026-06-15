@@ -1,0 +1,256 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.read-file
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Read File"
+  description: |
+    Read the complete contents of a file from the filesystem (UTF-8).
+  inputSchema:
+    type: object
+    required: [path]
+    properties:
+      path: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.read-multiple-files
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Read Multiple Files"
+  description: |
+    Read several files in a single call; returns each file's content.
+  inputSchema:
+    type: object
+    required: [paths]
+    properties:
+      paths: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.write-file
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Write File"
+  description: |
+    Create a new file or overwrite an existing file with given content.
+  inputSchema:
+    type: object
+    required: [path, content]
+    properties:
+      path: { type: string }
+      content: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.edit-file
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Edit File"
+  description: |
+    Apply line-based edits to a text file with a diff preview.
+  inputSchema:
+    type: object
+    required: [path, edits]
+    properties:
+      path: { type: string }
+      edits: { type: array }
+      dryRun: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      diff: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.create-directory
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Create Directory"
+  description: |
+    Create a directory (recursively) at the given path.
+  inputSchema:
+    type: object
+    required: [path]
+    properties:
+      path: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.list-directory
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: List Directory"
+  description: |
+    List the immediate entries of a directory with [FILE]/[DIR] prefixes.
+  inputSchema:
+    type: object
+    required: [path]
+    properties:
+      path: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      entries: { type: array, items: { type: string } }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.directory-tree
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Directory Tree"
+  description: |
+    Recursive directory listing as a JSON tree of file/directory nodes.
+  inputSchema:
+    type: object
+    required: [path]
+    properties:
+      path: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      tree: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.move-file
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Move/Rename"
+  description: |
+    Move or rename files and directories.
+  inputSchema:
+    type: object
+    required: [source, destination]
+    properties:
+      source: { type: string }
+      destination: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.search-files
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Search Files"
+  description: |
+    Recursively search for files matching a glob pattern.
+  inputSchema:
+    type: object
+    required: [path, pattern]
+    properties:
+      path: { type: string }
+      pattern: { type: string }
+      excludePatterns: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      matches: { type: array, items: { type: string } }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.get-file-info
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: Get File Info"
+  description: |
+    Return size, mtime, ctime, and permissions metadata for a path.
+  inputSchema:
+    type: object
+    required: [path]
+    properties:
+      path: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      info: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:fs.list-allowed-directories
+attributes:
+  schema: '{}'
+  displayName: "Filesystem: List Allowed Directories"
+  description: |
+    Returns the list of root directories the server is allowed to access.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      directories: { type: array, items: { type: string } }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:filesystem-mcp

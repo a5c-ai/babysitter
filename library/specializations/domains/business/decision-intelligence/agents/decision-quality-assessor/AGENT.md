@@ -11,6 +11,10 @@ expertise:
   - Commitment to action evaluation
   - Overall DQ score calculation
   - Improvement recommendation
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:business-analysis, skill-area:change-management]
+  roles: [role:strategic-planner, role:business-analyst, role:data-analyst]
 ---
 
 # Decision Quality Assessor

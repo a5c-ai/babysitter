@@ -1,0 +1,23 @@
+nodeKind: Domain
+id: domain:cloud-infra
+attributes:
+  displayName: "Cloud Infrastructure"
+  description: |
+    Cloud Infrastructure domain — IaaS/PaaS provisioning across AWS, GCP,
+    Azure, and similar clouds; networking, IAM, compute, storage.
+edges:
+  contains:
+    - specialization:terraform-iac
+    - topic:api-gateway
+    - topic:blue-green-deployment
+    - topic:ci-runners
+    - topic:deployment-strategies
+    - topic:sidecar-pattern
+    - topic:vertical-scaling
+    - topic:auto-scaling
+    - topic:horizontal-scaling
+    - topic:aws
+    - topic:azure
+    - topic:gcp
+    - topic:immutable-infrastructure
+    - topic:infrastructure-as-code

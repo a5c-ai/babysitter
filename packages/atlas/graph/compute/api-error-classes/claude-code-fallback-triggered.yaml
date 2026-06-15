@@ -1,0 +1,15 @@
+nodeKind: APIErrorClass
+id: api-error-class:claude-code-fallback-triggered
+attributes:
+  displayName: "FallbackTriggeredError"
+  className: "FallbackTriggeredError"
+  layer: synthetic-fallback
+  triggersAuthCacheClear: false
+  triggersKeepAliveTeardown: false
+  triggersFallbackModel: true
+  userVisibleMessage: |
+    Repeated 529 Overloaded errors — switching to fallback model.
+  description: |
+    Synthetic class thrown by withRetry after MAX_529_RETRIES=3 consecutive
+    529s on a foreground source. Caller catches and switches to the
+    configured fallback ModelVersion for the remainder of the call.

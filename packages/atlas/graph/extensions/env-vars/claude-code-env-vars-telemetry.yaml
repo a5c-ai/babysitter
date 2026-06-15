@@ -1,0 +1,110 @@
+nodeKind: EnvVar
+id: env-var:disable-telemetry
+attributes:
+  displayName: DISABLE_TELEMETRY
+  description: Disable telemetry when set.
+  name: DISABLE_TELEMETRY
+  category: telemetry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-enable-telemetry
+attributes:
+  displayName: CLAUDE_CODE_ENABLE_TELEMETRY
+  description: Set to 1 to enable OpenTelemetry data collection for metrics and logging.
+  name: CLAUDE_CODE_ENABLE_TELEMETRY
+  category: telemetry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:disable-feedback-command
+attributes:
+  displayName: DISABLE_FEEDBACK_COMMAND
+  description: Disable the feedback command.
+  name: DISABLE_FEEDBACK_COMMAND
+  category: telemetry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:disable-error-reporting
+attributes:
+  displayName: DISABLE_ERROR_REPORTING
+  description: Disable error reporting.
+  name: DISABLE_ERROR_REPORTING
+  category: telemetry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-feedback-survey
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY
+  description: Set to 1 to disable session quality surveys.
+  name: CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY
+  category: telemetry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-attribution-header
+attributes:
+  displayName: CLAUDE_CODE_ATTRIBUTION_HEADER
+  description: Set to 0 to omit the attribution block from the system prompt.
+  name: CLAUDE_CODE_ATTRIBUTION_HEADER
+  category: telemetry
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-otel-flush-timeout-ms
+attributes:
+  displayName: CLAUDE_CODE_OTEL_FLUSH_TIMEOUT_MS
+  description: Timeout in milliseconds for flushing pending OpenTelemetry spans.
+  name: CLAUDE_CODE_OTEL_FLUSH_TIMEOUT_MS
+  category: telemetry
+  valueType: int
+  defaultValue: "5000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-otel-shutdown-timeout-ms
+attributes:
+  displayName: CLAUDE_CODE_OTEL_SHUTDOWN_TIMEOUT_MS
+  description: Timeout in milliseconds for the OpenTelemetry exporter to finish on shutdown.
+  name: CLAUDE_CODE_OTEL_SHUTDOWN_TIMEOUT_MS
+  category: telemetry
+  valueType: int
+  defaultValue: "2000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-otel-headers-helper-debounce-ms
+attributes:
+  displayName: CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS
+  description: Interval for refreshing dynamic OpenTelemetry headers in milliseconds.
+  name: CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS
+  category: telemetry
+  valueType: int
+  defaultValue: "1740000"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

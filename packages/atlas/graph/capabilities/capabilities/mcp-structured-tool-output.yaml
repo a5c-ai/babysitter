@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:mcp-structured-tool-output
+attributes:
+  displayName: "MCP structured tool output"
+  description: |
+    The entity supports structured (typed / JSON-schema-shaped) tool
+    output, as introduced in MCP spec revision 2025-06-18. Tools may
+    return a `structuredContent` payload alongside (or instead of) free
+    text. See https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+  appliesToNodeKinds: ["AgentRuntimeImpl", "ToolServer"]
+  category: agent
+edges: {}

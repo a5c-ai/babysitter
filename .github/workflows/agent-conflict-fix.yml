@@ -1,0 +1,79 @@
+# Agent Conflict Fix — rebase a PR branch onto staging to resolve merge conflicts
+#
+# Usage:
+#   - Comment `/fix-conflicts` on any PR
+#   - Or dispatch manually with a PR number
+#
+# The agent checks out the PR branch, rebases onto staging, resolves any
+# conflicts using the PR's changes as the preferred version, and force-pushes.
+
+name: Agent Conflict Fix
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/agent-conflict-fix.yml']
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to fix conflicts on'
+        required: true
+        type: string
+      instructions:
+        description: 'Additional instructions (optional)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  fix-conflicts:
+    if: >-
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/fix-conflicts'))
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '30'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            Fix merge conflicts on PR #${{ inputs.pr_number || github.event.issue.number }}.
+
+            Steps:
+            1. Run: gh pr view ${{ inputs.pr_number || github.event.issue.number }} --json headRefName --jq '.headRefName' to get the branch name
+            2. Run: git fetch origin && git checkout <branch> && git rebase origin/staging
+            3. If rebase has conflicts, resolve them by reading both versions and keeping the intent of the PR's changes while incorporating staging's updates
+            4. Run: git rebase --continue after resolving each conflict
+            5. Run: git push --force-with-lease origin <branch>
+            6. Verify the PR is now mergeable: gh pr view ${{ inputs.pr_number || github.event.issue.number }} --json mergeable
+
+            ${{ inputs.instructions || '' }}
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}

@@ -1,0 +1,47 @@
+nodeKind: SkillDiscoveryScope
+id: skill-discovery-scope:claude-code-enterprise
+attributes:
+  displayName: "Enterprise skill discovery scope"
+  scope: enterprise
+  precedence: 1
+  description: |
+    Enterprise-administered skills delivered via centralized policy. Highest
+    precedence at name collision time.
+---
+nodeKind: SkillDiscoveryScope
+id: skill-discovery-scope:claude-code-personal
+attributes:
+  displayName: "Personal skill discovery scope"
+  scope: personal
+  precedence: 2
+  description: |
+    User-level skills under `~/.claude/skills/`. Apply across all projects
+    for this user account.
+---
+nodeKind: SkillDiscoveryScope
+id: skill-discovery-scope:claude-code-project
+attributes:
+  displayName: "Project skill discovery scope"
+  scope: project
+  precedence: 3
+  description: |
+    Project-level skills under `.claude/skills/`. Checked into the repo.
+---
+nodeKind: SkillDiscoveryScope
+id: skill-discovery-scope:claude-code-plugin
+attributes:
+  displayName: "Plugin skill discovery scope"
+  scope: plugin
+  precedence: 4
+  description: |
+    Skills bundled inside installed plugins (`<plugin>/skills/`).
+---
+nodeKind: SkillDiscoveryScope
+id: skill-discovery-scope:claude-code-additional-directory
+attributes:
+  displayName: "Additional-directory skill discovery scope"
+  scope: additional-directory
+  precedence: 5
+  description: |
+    Skills loaded from extra directories specified at runtime via
+    `--additional-skill-directory` or equivalent settings entry.

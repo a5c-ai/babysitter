@@ -1,0 +1,266 @@
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-contextwindowtokens
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: contextWindowTokens
+  value: '8191'
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current contextWindowTokens is 8191.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-costpermtokinput
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: costPerMTokInput
+  value: '0.13'
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current costPerMTokInput is 0.13.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-costpermtokoutput
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: costPerMTokOutput
+  value: '0.0'
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current costPerMTokOutput is 0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-kind
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: kind
+  value: embedding
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current kind is embedding.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-lifecyclestatus
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-modalities
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: modalities
+  value: text, embedding
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current modalities is text, embedding.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-modalitydirections
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=embedding;direction=output
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current modalityDirections is kind=text;direction=input,
+    kind=embedding;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-modelcardurl
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: modelCardUrl
+  value: https://platform.openai.com/docs/models/text-embedding-3-large
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current modelCardUrl is https://platform.openai.com/docs/models/text-embedding-3-large.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-supportsextendedthinking
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current supportsExtendedThinking
+    is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current supportsThinkingBudgetTokens
+    is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current
+---
+nodeKind: Claim
+id: claim:model-version-model-openai-text-embedding-3-large-current-versionrange
+attributes:
+  subjectId: model:openai-text-embedding-3-large@current
+  attribute: versionRange
+  value: '>=3.0.0 <4.0.0'
+  subjectKind: ModelVersion
+  statement: model:openai-text-embedding-3-large@current versionRange is >=3.0.0 <4.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:openai-text-embedding-3-large@current

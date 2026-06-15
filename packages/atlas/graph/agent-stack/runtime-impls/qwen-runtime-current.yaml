@@ -1,0 +1,43 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:qwen.runtime@current
+attributes:
+  displayName: Qwen Code Runtime (current)
+  agentVersionId: agent-version:qwen@current
+  subagentDispatchMechanism: none
+  packageRef: source-ref:qwen-code-github
+  builtInTools: []
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.qwen/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.qwen/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: api-key
+  telemetryNotes: |
+    Qwen Code 0.16.2 adds upstream TTFT capture and dual emission for GenAI
+    semantic-convention telemetry. No Qwen-specific telemetry ingestion path is
+    implemented in this repository; adapter consumers should preserve those
+    upstream attributes when proxying Qwen telemetry.
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:qwen
+    role: runtime
+  exposes: []
+  bundles: []
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '*'
+    level: full
+  speaks:
+    - target: mcp-transport:stdio

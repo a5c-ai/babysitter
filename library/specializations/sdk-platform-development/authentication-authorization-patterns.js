@@ -17,6 +17,13 @@
  * - OAuth 2.0: https://oauth.net/2/
  * - OpenID Connect: https://openid.net/connect/
  * - JWT: https://jwt.io/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+ *   roles: [role:platform-engineer]
+ *   topics: [topic:api-design, topic:developer-experience]
+ *   workflows: [workflow:sdk-release-lifecycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

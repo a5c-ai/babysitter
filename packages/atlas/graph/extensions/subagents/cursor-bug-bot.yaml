@@ -1,0 +1,23 @@
+nodeKind: Subagent
+id: subagent:cursor.bug-bot
+attributes:
+  displayName: "Bug Bot (Cursor)"
+  provenance: built-in
+  subjectId: agentVersion:cursor:ge-0-0-0
+  roleId: role:code-reviewer
+  systemPrompt: |
+    Cursor's bundled background reviewer. Watches PR diffs and posts
+    structured comments for likely bugs, regressions, and risky
+    patterns. Read-only against the working tree.
+  tools: []
+  triggers: |
+    Auto-invoked by Cursor on a new PR or when the user enables Bug
+    Bot review for a repository.
+  description: |
+    The "Bug Bot" background agent shipped with Cursor. Documented at
+    https://docs.cursor.com/background-agents.
+edges:
+  roles_played_by:
+    - target: role:code-reviewer
+  implements:
+    - target: extension-interface:governance

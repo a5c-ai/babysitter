@@ -1,0 +1,24 @@
+nodeKind: Framework
+id: framework:supabase
+attributes:
+  displayName: "Supabase"
+  homepageUrl: "https://supabase.com"
+  belongsToLanguageId: language:typescript
+  category: web-backend
+  description: |
+    Supabase — an open-source Firebase alternative built on Postgres,
+    providing auto-generated APIs, auth, storage, edge functions, and
+    realtime subscriptions, with first-class TypeScript SDKs.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:backend-data-persistence
+    - target: skill-area:authentication
+  alternative_to:
+    - target: framework:strapi
+      comparison: "CMS / BaaS platforms"
+    - target: framework:directus
+      comparison: "CMS / BaaS platforms"
+    - target: framework:hasura
+      comparison: "CMS / BaaS platforms"

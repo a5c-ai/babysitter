@@ -1,0 +1,12 @@
+nodeKind: StackPart
+id: stack-part:tracing
+attributes:
+  displayName: "Distributed Tracing"
+  category: observability
+  description: |
+    Captures request spans across services for latency analysis. Examples: Jaeger, Zipkin, Tempo, Honeycomb.
+  commonImplementations:
+    - tool:honeycomb
+edges:
+  implemented_by:
+    - tool:honeycomb

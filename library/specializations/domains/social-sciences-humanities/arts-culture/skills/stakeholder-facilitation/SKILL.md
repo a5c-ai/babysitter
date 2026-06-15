@@ -2,6 +2,10 @@
 name: stakeholder-facilitation
 description: Facilitate meetings, workshops, and community consultations with diverse stakeholders including artists, board members, funders, and community representatives
 allowed-tools: Read, Grep, Write, Edit, Glob
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:stakeholder-management, skill-area:community-management, skill-area:change-management]
+  roles: [role:project-manager, role:strategic-planner]
 ---
 
 # Stakeholder Facilitation

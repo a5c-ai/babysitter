@@ -1,0 +1,17 @@
+nodeKind: ExtensionInterface
+id: extension-interface:reflection
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Reflection
+  displayName: "Reflection"
+  concern: "The agent's ability to inspect and reason about its own state."
+  surface: |
+    `state()`, `transcript()`, `critique(focus)`. Used by retrospect
+    skills and self-evaluation loops.
+  builtInDefault: |
+    Read-only access to the current transcript file. No structured
+    state introspection.
+  notableImpls:
+    - subagent:explorer
+    - skill:python-django-debug
+edges: {}

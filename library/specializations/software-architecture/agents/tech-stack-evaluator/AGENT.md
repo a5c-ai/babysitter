@@ -10,6 +10,14 @@ expertise:
   - Risk assessment
   - Vendor evaluation
   - Technology radar analysis
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:tech-lead]
+  skillAreas: [skill-area:adr-writing, skill-area:monolith-vs-microservices]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions, topic:design-patterns]
+
 ---
 
 # Tech Stack Evaluator Agent

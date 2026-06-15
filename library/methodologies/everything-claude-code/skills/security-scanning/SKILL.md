@@ -2,17 +2,14 @@
 name: security-scanning
 description: AgentShield security audit with 5 scanning categories, 102 static analysis rules, and optional red-team simulation.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Security Scanning
-
-## Overview
-
-AgentShield security audit methodology adapted from the Everything Claude Code project. Scans across 5 categories with 102 static analysis rules.
-
-## Scanning Categories
-
-### 1. Secrets Detection (14 Pattern Categories)
 - AWS access keys (AKIA pattern)
 - GitHub tokens (ghp_, gho_, ghs_, ghr_)
 - Generic API keys and bearer tokens

@@ -2,6 +2,13 @@
 name: nextauth
 description: NextAuth.js (Auth.js) configuration including providers, adapters, session management, callbacks, and JWT handling.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:authentication-authorization, skill-area:oauth-flows]
+  roles: [role:fullstack-engineer]
+  topics: [topic:oauth-openid-connect, topic:secure-authentication-patterns]
+
 ---
 
 # NextAuth Skill

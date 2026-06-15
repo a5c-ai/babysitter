@@ -8,6 +8,13 @@
  * // Input: { reasoning: { conclusion: "...", premises: [...] }, claims: [...], knownBiases: [...] }
  * // Output: { debiasedAnalysis: {...}, biasesIdentified: [...], corrections: [...], recommendations: [...] }
  * @references Cognitive bias mitigation, Debiasing techniques, Epistemic rationality, Structured analytic techniques
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -64,7 +71,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Group Thinking Check
-  let groupThinkCheck = await ctx.task(checkGroupThinkTask, {
+  const groupThinkCheck = await ctx.task(checkGroupThinkTask, {
     reasoning: inputs.reasoning,
     groupContext: inputs.context?.groupContext,
     dissent: inputs.context?.dissentingViews
@@ -82,27 +89,13 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Significant Biases
   const significantBiases = biasFindings.filter(b => b.findings.severity >= 0.6);
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        groupThinkCheck = await ctx.task(checkGroupThinkTask, { ...{
-    reasoning: inputs.reasoning,
-    groupContext: inputs.context?.groupContext,
-    dissent: inputs.context?.dissentingViews
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint('significant-biases-detected', {
+  if (significantBiases.length > 0) {
+    await ctx.breakpoint('significant-biases-detected', {
       message: 'Significant cognitive biases detected in reasoning',
       biases: significantBiases,
-      urgentCorrections: significantBiases.map(b => b.findings.correction),
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      urgentCorrections: significantBiases.map(b => b.findings.correction)
+    });
+  }
 
   // Phase 9: Correction Strategy Development
   const correctionStrategies = await ctx.task(developCorrectionStrategiesTask, {

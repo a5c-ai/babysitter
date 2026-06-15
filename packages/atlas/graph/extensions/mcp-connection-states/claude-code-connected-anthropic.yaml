@@ -1,0 +1,13 @@
+nodeKind: MCPConnectionState
+id: mcp-connection-state:claude-code-connected-anthropic-files
+attributes:
+  displayName: "Connected: anthropic-files"
+  serverName: "anthropic-files"
+  state: connected
+  configScopeId: mcp-config-scope:claude-code-project
+  serverInfoName: "anthropic-files"
+  serverInfoVersion: "1.0.0"
+  serverCapabilities:
+    - tools
+    - resources
+    - prompts

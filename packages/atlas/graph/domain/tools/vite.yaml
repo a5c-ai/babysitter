@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:vite
+attributes:
+  displayName: "Vite"
+  homepageUrl: "https://vite.dev"
+  kind: bundler
+  releasedAt: "2020"
+  description: |
+    Next-generation frontend tooling - native-ESM dev server plus Rollup-based production build.
+edges:
+  belongs_to_language:
+    - target: language:javascript
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:webpack
+      comparison: "bundlers — Vite uses native ESM for dev, Rollup for prod; webpack is the older incumbent"
+    - target: tool:parcel
+      comparison: "JavaScript bundlers"
+    - target: tool:turbopack
+      comparison: "JavaScript bundlers"

@@ -1,0 +1,45 @@
+nodeKind: Subagent
+id: subagent:dependency-updater
+attributes:
+  displayName: "Dependency Updater"
+  provenance: custom
+  roleId: role:dependency-updater
+  systemPrompt: |
+    You bump dependency versions in a managed way. Read lockfiles,
+    identify outdated packages, propose minor/patch updates first.
+    Run tests after each upgrade. Surface major-version bumps as a
+    separate plan with breaking-change notes from changelogs.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:bash
+    - tool-descriptor:web-fetch
+    - tool-descriptor:grep
+  disallowedTools:
+    - tool-descriptor:write
+  triggers: |
+    Invoke when the user asks to "update dependencies", "bump packages",
+    or address a Dependabot/Renovate backlog.
+  description: |
+    Dependency-bump subagent. Lives at `.claude/agents/dependency-updater.md`
+    (project scope). Pairs well with the dependency-hygiene blueprint.
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:dependency-updater
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reliability

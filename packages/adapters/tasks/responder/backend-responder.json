@@ -1,0 +1,9 @@
+{
+  "id": "backend-responder",
+  "name": "Jordan Park",
+  "title": "Senior Backend Engineer",
+  "domains": ["backend", "database"],
+  "tags": ["nodejs", "express", "postgresql", "redis", "api-design", "microservices"],
+  "availability": true,
+  "responseTimeSla": 1800000
+}

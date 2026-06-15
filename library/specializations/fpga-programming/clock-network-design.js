@@ -16,6 +16,12 @@
  * @references
  * - Xilinx Clocking Resources: https://docs.amd.com/r/en-US/ug472_7Series_Clocking
  * - Intel Clock Networks: https://www.intel.com/content/www/us/en/programmable/documentation/mwh1409960181641.html
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

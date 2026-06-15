@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:codex-prompts-dir
+attributes:
+  artifactId: plugin-artifact:codex-prompts-dir
+  displayName: "Codex prompts directory"
+  targetId: plugin-target:codex
+  artifactKind: command
+  pathPattern: "~/.codex/prompts/*.md"
+  installerSurface: "fs"
+  scriptVariants:
+    - markdown-commands
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

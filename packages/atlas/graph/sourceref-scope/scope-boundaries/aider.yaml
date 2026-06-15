@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:aider.scope
+attributes:
+  subjectId: agent:aider
+  inScope: |
+    Open-source terminal pair programmer for editing code in a local git repo. Supports many model backends (OpenAI, Anthropic, Gemini, local Ollama) and auto-commits each change.
+  outOfScope: |
+    IDE side-panel UX (use Continue/Cline), browser-based hosted execution, multi-tenant deployments, and managed cloud agents.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:aider

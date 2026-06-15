@@ -1,0 +1,16 @@
+nodeKind: Tool
+id: tool:sops
+attributes:
+  displayName: "SOPS"
+  homepageUrl: "https://github.com/getsops/sops"
+  kind: secrets-manager
+  description: |
+    Editor of encrypted files supporting YAML, JSON, ENV, INI, and binary formats.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:secrets-rotation
+  alternative_to:
+    - target: tool:vault
+      comparison: "Secrets management tools"

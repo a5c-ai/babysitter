@@ -1,0 +1,170 @@
+{
+  "generatedAt": "2026-06-05T06:08:43.984Z",
+  "targets": [
+    {
+      "id": "antigravity",
+      "displayName": "Antigravity CLI",
+      "cliCommand": "antigravity",
+      "externalPackageName": "@a5c-ai/babysitter-antigravity",
+      "externalRepo": "a5c-ai/babysitter-antigravity"
+    },
+    {
+      "id": "claude",
+      "displayName": "Claude Code",
+      "cliCommand": "claude",
+      "externalPackageName": null,
+      "externalRepo": "a5c-ai/babysitter-claude"
+    },
+    {
+      "id": "codex",
+      "displayName": "Codex",
+      "cliCommand": "codex",
+      "externalPackageName": "@a5c-ai/babysitter-codex",
+      "externalRepo": "a5c-ai/babysitter-codex"
+    },
+    {
+      "id": "copilot",
+      "displayName": "GitHub Copilot CLI",
+      "cliCommand": "gh",
+      "externalPackageName": "@a5c-ai/babysitter-github",
+      "externalRepo": "a5c-ai/babysitter-github-copilot"
+    },
+    {
+      "id": "cursor",
+      "displayName": "Cursor",
+      "cliCommand": "cursor",
+      "externalPackageName": "@a5c-ai/babysitter-cursor",
+      "externalRepo": "a5c-ai/babysitter-cursor"
+    },
+    {
+      "id": "gemini",
+      "displayName": "Gemini CLI",
+      "cliCommand": "gemini",
+      "externalPackageName": "@a5c-ai/babysitter-gemini",
+      "externalRepo": "a5c-ai/babysitter-gemini"
+    },
+    {
+      "id": "hermes",
+      "displayName": "Hermes",
+      "cliCommand": "hermes",
+      "externalPackageName": "@a5c-ai/babysitter-hermes",
+      "externalRepo": "a5c-ai/babysitter-hermes"
+    },
+    {
+      "id": "omp",
+      "displayName": "Oh-My-Pi",
+      "cliCommand": "pi",
+      "externalPackageName": "@a5c-ai/babysitter-omp",
+      "externalRepo": "a5c-ai/babysitter-omp"
+    },
+    {
+      "id": "openclaw",
+      "displayName": "OpenClaw",
+      "cliCommand": "openclaw",
+      "externalPackageName": "@a5c-ai/babysitter-openclaw",
+      "externalRepo": "a5c-ai/babysitter-openclaw"
+    },
+    {
+      "id": "opencode",
+      "displayName": "OpenCode",
+      "cliCommand": "opencode",
+      "externalPackageName": "@a5c-ai/babysitter-opencode",
+      "externalRepo": "a5c-ai/babysitter-opencode"
+    },
+    {
+      "id": "pi",
+      "displayName": "Pi",
+      "cliCommand": "pi",
+      "externalPackageName": "@a5c-ai/babysitter-pi",
+      "externalRepo": "a5c-ai/babysitter-pi"
+    }
+  ],
+  "installPackages": [
+    {
+      "packageName": "@anthropic-ai/claude-code",
+      "sourceLine": "packages/adapters/codecs/src/claude-remote-control-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-code' },"
+    },
+    {
+      "packageName": "@anthropic-ai/claude-agent-sdk",
+      "sourceLine": "packages/adapters/codecs/src/claude-agent-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-agent-sdk' },"
+    },
+    {
+      "packageName": "@pi-ai/sdk",
+      "sourceLine": "packages/adapters/codecs/src/pi-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @pi-ai/sdk' },"
+    },
+    {
+      "packageName": "openai",
+      "sourceLine": "packages/adapters/codecs/src/codex-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g openai' },"
+    },
+    {
+      "packageName": "@qwen-code/qwen-code",
+      "sourceLine": "packages/adapters/codecs/src/qwen-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @qwen-code/qwen-code' },"
+    },
+    {
+      "packageName": "@openai/codex",
+      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @openai/codex' },"
+    },
+    {
+      "packageName": "@openai/codex",
+      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:          command: 'npm install -g @openai/codex',"
+    },
+    {
+      "packageName": "opencode-ai",
+      "sourceLine": "packages/adapters/codecs/src/opencode-http-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g opencode-ai' },"
+    },
+    {
+      "packageName": "@factory/cli",
+      "sourceLine": "packages/adapters/codecs/src/droid-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @factory/cli' },"
+    },
+    {
+      "packageName": "@factory/cli",
+      "sourceLine": "packages/adapters/codecs/src/droid-adapter.ts:        { step: 2, description: 'Install Droid CLI', command: 'npm install -g @factory/cli' },"
+    },
+    {
+      "packageName": "@ampcode/cli",
+      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:        command: 'npm install -g @ampcode/cli',"
+    },
+    {
+      "packageName": "@ampcode/cli",
+      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:          command: 'npm install -g @ampcode/cli',"
+    }
+  ],
+  "npmLatest": [
+    {
+      "packageName": "@ampcode/cli",
+      "latestVersion": "0.0.1780637187-g70e21b"
+    },
+    {
+      "packageName": "@anthropic-ai/claude-agent-sdk",
+      "latestVersion": "0.3.165"
+    },
+    {
+      "packageName": "@anthropic-ai/claude-code",
+      "latestVersion": "2.1.165"
+    },
+    {
+      "packageName": "@factory/cli",
+      "latestVersion": "0.141.0"
+    },
+    {
+      "packageName": "@openai/codex",
+      "latestVersion": "0.137.0"
+    },
+    {
+      "packageName": "@pi-ai/sdk",
+      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-06-05T06_08_42_524Z-debug-0.log\n"
+    },
+    {
+      "packageName": "@qwen-code/qwen-code",
+      "latestVersion": "0.17.1"
+    },
+    {
+      "packageName": "openai",
+      "latestVersion": "6.42.0"
+    },
+    {
+      "packageName": "opencode-ai",
+      "latestVersion": "1.16.0"
+    }
+  ]
+}

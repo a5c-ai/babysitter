@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: continuous-improvement
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:strategic-analysis, skill-area:data-analytics, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:strategic-planner]
 ---
 
 # Benchmarking Analyst

@@ -1,0 +1,456 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:compliance-safety
+attributes:
+  displayName: Compliance & safety (meta)
+  clusterNumber: 19
+  scope: 'Conceptual aggregation of NodeKinds describing the regulatory / safety surface: ComplianceFramework (named regulatory framework — SOC 2, HIPAA, GDPR, EU AI Act, ISO 27001), Regulator (the authority that publishes / enforces a framework), ContentPolicy (allow/deny/classifier safety policy applied by an AgentVersion) and JailbreakPattern (catalog of known prompt-injection / jailbreak techniques). Members live in editorial cluster compliance-safety in ontology-schema.yaml.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:compliance-framework
+  - target: meta-node-kind:regulator
+  - target: meta-node-kind:content-policy
+  - target: meta-node-kind:jailbreak-pattern
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:compliance-framework
+attributes:
+  displayName: ComplianceFramework (meta)
+  name: ComplianceFramework
+  cluster: compliance-safety
+  prefix: compliance
+  origin: standard
+  purpose: a named compliance/regulatory framework (SOC 2, HIPAA, GDPR, EU AI Act, ISO 27001, ...)
+  exampleCount: 0
+  invariants:
+  - 'id starts with compliance:'
+edges:
+  in_cluster:
+  - target: meta-cluster:compliance-safety
+  contains_meta_attribute:
+  - target: meta-attribute:compliance-framework--id
+  - target: meta-attribute:compliance-framework--display-name
+  - target: meta-attribute:compliance-framework--framework-kind
+  - target: meta-attribute:compliance-framework--jurisdiction
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:regulator
+attributes:
+  displayName: Regulator (meta)
+  name: Regulator
+  cluster: compliance-safety
+  prefix: regulator
+  origin: standard
+  purpose: a regulatory body that publishes / enforces a ComplianceFramework
+  exampleCount: 0
+  invariants:
+  - 'id starts with regulator:'
+edges:
+  in_cluster:
+  - target: meta-cluster:compliance-safety
+  contains_meta_attribute:
+  - target: meta-attribute:regulator--id
+  - target: meta-attribute:regulator--display-name
+  - target: meta-attribute:regulator--jurisdiction
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:content-policy
+attributes:
+  displayName: ContentPolicy (meta)
+  name: ContentPolicy
+  cluster: compliance-safety
+  prefix: content-policy
+  origin: standard
+  purpose: a content / safety policy applied by an AgentVersion (allowed/disallowed content, refusal patterns, redaction rules)
+  exampleCount: 0
+  invariants:
+  - 'id starts with content-policy:'
+edges:
+  in_cluster:
+  - target: meta-cluster:compliance-safety
+  contains_meta_attribute:
+  - target: meta-attribute:content-policy--id
+  - target: meta-attribute:content-policy--policy-kind
+  - target: meta-attribute:content-policy--severity
+  - target: meta-attribute:content-policy--version
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:jailbreak-pattern
+attributes:
+  displayName: JailbreakPattern (meta)
+  name: JailbreakPattern
+  cluster: compliance-safety
+  prefix: jailbreak
+  origin: standard
+  purpose: a known prompt-injection / jailbreak technique catalog entry (DAN, role-play escapes, indirect injection, ...)
+  exampleCount: 0
+  invariants:
+  - 'id starts with jailbreak:'
+edges:
+  in_cluster:
+  - target: meta-cluster:compliance-safety
+  contains_meta_attribute:
+  - target: meta-attribute:jailbreak-pattern--id
+  - target: meta-attribute:jailbreak-pattern--display-name
+  - target: meta-attribute:jailbreak-pattern--technique
+  - target: meta-attribute:jailbreak-pattern--severity
+---
+nodeKind: MetaAttribute
+id: meta-attribute:compliance-framework--id
+attributes:
+  displayName: ComplianceFramework.id
+  name: id
+  parentNodeKindId: meta-node-kind:compliance-framework
+  type: id
+  required: true
+  description: id on ComplianceFramework.
+edges:
+  defined_on:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:compliance-framework--display-name
+attributes:
+  displayName: ComplianceFramework.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:compliance-framework
+  type: string
+  required: true
+  description: displayName on ComplianceFramework.
+edges:
+  defined_on:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:compliance-framework--framework-kind
+attributes:
+  displayName: ComplianceFramework.frameworkKind
+  name: frameworkKind
+  parentNodeKindId: meta-node-kind:compliance-framework
+  type: enum<security,privacy,ai-specific,industry>
+  required: false
+  description: frameworkKind on ComplianceFramework (broad category of regulatory regime).
+edges:
+  defined_on:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:compliance-framework--jurisdiction
+attributes:
+  displayName: ComplianceFramework.jurisdiction
+  name: jurisdiction
+  parentNodeKindId: meta-node-kind:compliance-framework
+  type: string
+  required: false
+  description: jurisdiction on ComplianceFramework (geographic / legal scope).
+edges:
+  defined_on:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaAttribute
+id: meta-attribute:regulator--id
+attributes:
+  displayName: Regulator.id
+  name: id
+  parentNodeKindId: meta-node-kind:regulator
+  type: id
+  required: true
+  description: id on Regulator.
+edges:
+  defined_on:
+  - target: meta-node-kind:regulator
+---
+nodeKind: MetaAttribute
+id: meta-attribute:regulator--display-name
+attributes:
+  displayName: Regulator.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:regulator
+  type: string
+  required: true
+  description: displayName on Regulator.
+edges:
+  defined_on:
+  - target: meta-node-kind:regulator
+---
+nodeKind: MetaAttribute
+id: meta-attribute:regulator--jurisdiction
+attributes:
+  displayName: Regulator.jurisdiction
+  name: jurisdiction
+  parentNodeKindId: meta-node-kind:regulator
+  type: string
+  required: false
+  description: jurisdiction on Regulator (geographic / legal scope).
+edges:
+  defined_on:
+  - target: meta-node-kind:regulator
+---
+nodeKind: MetaAttribute
+id: meta-attribute:content-policy--id
+attributes:
+  displayName: ContentPolicy.id
+  name: id
+  parentNodeKindId: meta-node-kind:content-policy
+  type: id
+  required: true
+  description: id on ContentPolicy.
+edges:
+  defined_on:
+  - target: meta-node-kind:content-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:content-policy--policy-kind
+attributes:
+  displayName: ContentPolicy.policyKind
+  name: policyKind
+  parentNodeKindId: meta-node-kind:content-policy
+  type: enum<allow-list,deny-list,classifier,prompt-shield,output-filter,acceptable-use,data-handling,regulatory>
+  required: false
+  description: policyKind on ContentPolicy (mechanism by which the policy operates).
+edges:
+  defined_on:
+  - target: meta-node-kind:content-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:content-policy--severity
+attributes:
+  displayName: ContentPolicy.severity
+  name: severity
+  parentNodeKindId: meta-node-kind:content-policy
+  type: enum<advisory,blocking,redact,low,medium,high,critical>
+  required: false
+  description: severity on ContentPolicy (enforcement strength).
+edges:
+  defined_on:
+  - target: meta-node-kind:content-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:content-policy--version
+attributes:
+  displayName: ContentPolicy.version
+  name: version
+  parentNodeKindId: meta-node-kind:content-policy
+  type: string
+  required: false
+  description: version on ContentPolicy.
+edges:
+  defined_on:
+  - target: meta-node-kind:content-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:jailbreak-pattern--id
+attributes:
+  displayName: JailbreakPattern.id
+  name: id
+  parentNodeKindId: meta-node-kind:jailbreak-pattern
+  type: id
+  required: true
+  description: id on JailbreakPattern.
+edges:
+  defined_on:
+  - target: meta-node-kind:jailbreak-pattern
+---
+nodeKind: MetaAttribute
+id: meta-attribute:jailbreak-pattern--display-name
+attributes:
+  displayName: JailbreakPattern.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:jailbreak-pattern
+  type: string
+  required: true
+  description: displayName on JailbreakPattern.
+edges:
+  defined_on:
+  - target: meta-node-kind:jailbreak-pattern
+---
+nodeKind: MetaAttribute
+id: meta-attribute:jailbreak-pattern--technique
+attributes:
+  displayName: JailbreakPattern.technique
+  name: technique
+  parentNodeKindId: meta-node-kind:jailbreak-pattern
+  type: string
+  required: false
+  description: technique on JailbreakPattern (dan|role-play|indirect-injection|prefix-injection|jailbreak-prompt|encoding|multi-turn).
+edges:
+  defined_on:
+  - target: meta-node-kind:jailbreak-pattern
+---
+nodeKind: MetaAttribute
+id: meta-attribute:jailbreak-pattern--severity
+attributes:
+  displayName: JailbreakPattern.severity
+  name: severity
+  parentNodeKindId: meta-node-kind:jailbreak-pattern
+  type: enum<low,medium,high,critical>
+  required: false
+  description: severity on JailbreakPattern.
+edges:
+  defined_on:
+  - target: meta-node-kind:jailbreak-pattern
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:regulates
+attributes:
+  displayName: regulates (meta)
+  name: regulates
+  source:
+  - meta-node-kind:regulator
+  target:
+  - meta-node-kind:compliance-framework
+  cardinality: N:N
+  origin: standard
+  description: a Regulator regulates a ComplianceFramework (publishes / enforces)
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:regulator
+  target_of_meta_edge:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:detects-jailbreak
+attributes:
+  displayName: detects_jailbreak (meta)
+  name: detects_jailbreak
+  source:
+  - meta-node-kind:content-policy
+  target:
+  - meta-node-kind:jailbreak-pattern
+  cardinality: N:N
+  origin: standard
+  description: a ContentPolicy detects a JailbreakPattern
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:content-policy
+  target_of_meta_edge:
+  - target: meta-node-kind:jailbreak-pattern
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:complies-with
+attributes:
+  displayName: complies_with (meta)
+  name: complies_with
+  source: []
+  target:
+  - meta-node-kind:compliance-framework
+  cardinality: N:N
+  origin: standard
+  description: an AgentVersion / Run / Tenant complies with a ComplianceFramework (operational binding — distinct from Claim.conforms_to which is an attestation, and governed_by which targets state machines). Sources live in agent-stack / catalog-provenance meta-registries.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:conforms-to
+attributes:
+  displayName: conforms_to (meta)
+  name: conforms_to
+  source: []
+  target:
+  - meta-node-kind:compliance-framework
+  cardinality: N:1
+  origin: standard
+  description: a Claim conforms to a ComplianceFramework (used in conjunction with Claim.claimKind=conformance). Claim lives in catalog-provenance and is not re-emitted here.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:compliance-framework
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:policy-applied-by
+attributes:
+  displayName: policy_applied_by (meta)
+  name: policy_applied_by
+  source:
+  - meta-node-kind:content-policy
+  target: []
+  cardinality: N:N
+  origin: standard
+  description: a ContentPolicy is applied by an AgentVersion. AgentVersion lives in agent-stack and is not re-emitted here.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:content-policy
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:assesses-policy
+attributes:
+  displayName: assesses_policy (meta)
+  name: assesses_policy
+  source: []
+  target:
+  - meta-node-kind:content-policy
+  cardinality: N:N
+  origin: standard
+  description: a ToolDescriptor assesses a ContentPolicy, or a Benchmark evaluates a ContentPolicy (security / safety tooling and benchmarks targeting a specific policy). Sources live in agent-stack / evaluation meta-registries.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:content-policy
+---
+nodeKind: MetaEnum
+id: meta-enum:framework-kind
+attributes:
+  displayName: ComplianceFramework kind
+  name: frameworkKind
+  values:
+  - value: security
+    description: Security framework (SOC 2, ISO 27001, ...).
+  - value: privacy
+    description: Privacy / data-protection framework (GDPR, CCPA, ...).
+  - value: ai-specific
+    description: AI-specific framework (EU AI Act, NIST AI RMF, ...).
+  - value: industry
+    description: Industry-specific framework (HIPAA, PCI-DSS, ...).
+  usedOnAttributes:
+  - meta-attribute:compliance-framework--framework-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:compliance-framework--framework-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:content-policy-kind
+attributes:
+  displayName: ContentPolicy kind
+  name: policyKind
+  values:
+  - value: allow-list
+    description: Explicit allow-list of permitted content.
+  - value: deny-list
+    description: Explicit deny-list of prohibited content.
+  - value: classifier
+    description: Trained classifier that scores content.
+  - value: prompt-shield
+    description: Prompt-injection shield / input filter.
+  - value: output-filter
+    description: Post-generation output filter.
+  - value: acceptable-use
+    description: Acceptable-use policy (organizational).
+  - value: data-handling
+    description: Data-handling / redaction policy.
+  - value: regulatory
+    description: Regulatory compliance policy.
+  usedOnAttributes:
+  - meta-attribute:content-policy--policy-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:content-policy--policy-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:jailbreak-severity
+attributes:
+  displayName: JailbreakPattern severity
+  name: severity
+  values:
+  - value: low
+    description: Low-severity jailbreak technique.
+  - value: medium
+    description: Medium-severity jailbreak technique.
+  - value: high
+    description: High-severity jailbreak technique.
+  - value: critical
+    description: Critical-severity jailbreak technique (broad / hard-to-detect).
+  usedOnAttributes:
+  - meta-attribute:jailbreak-pattern--severity
+edges:
+  used_on_attribute:
+  - target: meta-attribute:jailbreak-pattern--severity

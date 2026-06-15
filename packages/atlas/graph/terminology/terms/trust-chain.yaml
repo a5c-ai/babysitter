@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:trust-chain
+attributes:
+  canonicalDefinitionId: definition:trust-chain.canonical
+  displayName: "Trust Chain"
+  kind: concept
+  description: |
+    Out-of-scope concept for the current catalog version.
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:software-engineering

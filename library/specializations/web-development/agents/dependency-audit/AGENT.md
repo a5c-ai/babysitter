@@ -9,6 +9,14 @@ expertise:
   - Update strategies
   - License compliance
   - Breaking changes
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:security-engineer, role:tech-lead]
+  skillAreas: [skill-area:dependency-upgrade-strategies]
+  workflows: [workflow:dependency-update]
+  topics: [topic:developer-experience]
+
 ---
 
 # Dependency Audit Agent

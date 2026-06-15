@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:interaction-primitive.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:interaction-primitive
+  text: |
+    a concrete primitive (slash-command, @-mention, fork, voice, drag-drop, status-line, share-session, ...)
+  status: canonical
+edges:
+  defines:
+    - term:interaction-primitive

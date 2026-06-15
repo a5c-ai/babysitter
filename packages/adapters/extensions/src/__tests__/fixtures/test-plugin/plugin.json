@@ -1,0 +1,17 @@
+{
+  "name": "test-plugin",
+  "version": "1.0.0",
+  "description": "A test plugin for unified plugin compiler",
+  "author": "Test Author",
+  "license": "MIT",
+  "hooks": {
+    "SessionStart": "hooks/session-start.handler.sh"
+  },
+  "commands": "commands/",
+  "skills": [
+    {
+      "name": "test",
+      "file": "skills/test/SKILL.md"
+    }
+  ]
+}

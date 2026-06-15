@@ -1,0 +1,156 @@
+---
+nodeKind: PlatformService
+id: platform-service:azure-functions
+attributes:
+  displayName: "Azure Functions"
+  description: |
+    Event-driven function-as-a-service for .NET, Node, Python, Java.
+  category: compute
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:serverless-runtime
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:serverless-runtime
+    - target: stack-part:serverless-runtime
+  integrates_with:
+    - target: platform-service:azure-blob-storage
+      attributes: { nature: native }
+    - target: platform-service:azure-service-bus
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:azure-blob-storage
+attributes:
+  displayName: "Azure Blob Storage"
+  description: |
+    Object storage with hot/cool/archive tiers.
+  category: storage
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:object-storage
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:object-storage
+    - target: stack-part:object-storage
+  integrates_with:
+    - target: platform-service:azure-functions
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:azure-cosmos-db
+attributes:
+  displayName: "Azure Cosmos DB"
+  description: |
+    Globally distributed multi-model NoSQL database.
+  category: database
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:nosql-database
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:nosql-database
+    - target: stack-part:nosql-database
+---
+nodeKind: PlatformService
+id: platform-service:azure-service-bus
+attributes:
+  displayName: "Azure Service Bus"
+  description: |
+    Enterprise message broker (queues + topics).
+  category: messaging
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:message-queue
+    - stack-part:pubsub-service
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:message-queue
+    - stack-part:pubsub-service
+    - target: stack-part:message-queue
+    - target: stack-part:pubsub-service
+---
+nodeKind: PlatformService
+id: platform-service:azure-monitor
+attributes:
+  displayName: "Azure Monitor"
+  description: |
+    Unified metrics, logs (Log Analytics), and traces.
+  category: observability
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:logging
+    - stack-part:metrics
+    - stack-part:tracing
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:logging
+    - stack-part:metrics
+    - stack-part:tracing
+    - target: stack-part:logging
+    - target: stack-part:metrics
+    - target: stack-part:tracing
+---
+nodeKind: PlatformService
+id: platform-service:azure-aks
+attributes:
+  displayName: "Azure Kubernetes Service"
+  description: |
+    Managed Kubernetes on Azure.
+  category: compute
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:kubernetes-cluster
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:kubernetes-cluster
+    - target: stack-part:kubernetes-cluster
+  integrates_with:
+    - target: platform-service:azure-container-registry
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:azure-container-registry
+attributes:
+  displayName: "Azure Container Registry"
+  description: |
+    Managed OCI registry with geo-replication and tasks.
+  category: build-deploy
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:container-registry
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:container-registry
+    - target: stack-part:container-registry
+---
+nodeKind: PlatformService
+id: platform-service:azure-active-directory
+attributes:
+  displayName: "Microsoft Entra ID (Azure AD)"
+  description: |
+    Enterprise identity provider with OIDC, SAML, conditional access.
+  category: security
+  providedByPlatformId: platform:azure
+  implementsStackPartIds:
+    - stack-part:identity-provider
+edges:
+  provided_by:
+    - platform:azure
+  implements_stack_part:
+    - stack-part:identity-provider
+    - target: stack-part:identity-provider

@@ -8,6 +8,14 @@ expertise:
   - Help text writing
   - Type coercion strategies
   - Default value selection
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:cli-tooling]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Argument Schema Designer Agent

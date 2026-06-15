@@ -9,6 +9,13 @@ expertise:
   - Model comparison with baseline
   - Deployment decision making
   - Rollback coordination
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:automated-retraining, skill-area:model-monitoring-drift-detection]
+  roles: [role:ml-ops-engineer, role:ml-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:data-quality-monitoring]
+
 ---
 
 # retraining-orchestrator

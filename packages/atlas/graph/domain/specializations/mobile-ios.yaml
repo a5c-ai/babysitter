@@ -1,0 +1,19 @@
+nodeKind: Specialization
+id: specialization:mobile-ios
+attributes:
+  displayName: "iOS Mobile"
+  parentDomainId: domain:mobile
+  description: |
+    iOS Mobile specialization covers native app development for iPhone and
+    iPad using Apple's platforms, tools, and design guidelines.
+
+    Core skills include Swift and SwiftUI (UIKit for legacy), Xcode project
+    configuration, App Store submission and TestFlight, Apple's Human
+    Interface Guidelines, Combine and Swift concurrency (async/await),
+    Core Data and CloudKit for persistence, and platform integrations
+    (HealthKit, ARKit, push notifications via APNs). The specialization
+    relates closely to Swift as the primary language, and intersects with
+    React Native and Flutter when cross-platform is a concern.
+edges:
+  specializes:
+    - domain:mobile

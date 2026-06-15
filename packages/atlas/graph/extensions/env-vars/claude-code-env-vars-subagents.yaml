@@ -1,0 +1,36 @@
+nodeKind: EnvVar
+id: env-var:claude-code-subagent-model
+attributes:
+  displayName: CLAUDE_CODE_SUBAGENT_MODEL
+  description: Model to use for subagents; see Model configuration.
+  name: CLAUDE_CODE_SUBAGENT_MODEL
+  category: subagents
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-fork-subagent
+attributes:
+  displayName: CLAUDE_CODE_FORK_SUBAGENT
+  description: Set to 1 to enable forked subagents that inherit full conversation context.
+  name: CLAUDE_CODE_FORK_SUBAGENT
+  category: subagents
+  valueType: bool
+  featureGate: true
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-team-name
+attributes:
+  displayName: CLAUDE_CODE_TEAM_NAME
+  description: Name of the agent team this teammate belongs to; set automatically on agent team members.
+  name: CLAUDE_CODE_TEAM_NAME
+  category: subagents
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

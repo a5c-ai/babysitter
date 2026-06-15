@@ -1,0 +1,64 @@
+{
+  "name": "@a5c-ai/config-adapter",
+  "version": "5.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Install, config, auth, and host-detection logic for adapters",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/adapters/config#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/adapters/config"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "adapters",
+    "config",
+    "install",
+    "auth",
+    "coding-agent",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "vitest run --config ../../../vitest.config.ts \"tests/**/*.test.ts\" \"src/**/*.test.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@a5c-ai/comm-adapter": "5.1.0"
+  },
+  "atlas": {
+    "layers": [
+      "L5",
+      "L6"
+    ],
+    "muxes": [
+      "agent-config-adapter"
+    ]
+  }
+}

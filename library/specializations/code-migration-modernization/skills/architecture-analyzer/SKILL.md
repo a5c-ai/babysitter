@@ -2,6 +2,13 @@
 name: architecture-analyzer
 description: Analyze and visualize software architecture patterns, dependencies, and module boundaries for migration planning
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:monolith-vs-microservices, skill-area:c4-modeling]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Architecture Analyzer Skill

@@ -1,0 +1,98 @@
+nodeKind: PluginTarget
+id: plugin-target:openclaw
+attributes:
+  displayName: "OpenClaw"
+  hostAgent: agent:openclaw
+  adapterFamily: programmatic
+  manifestFormat: "plugin.json"
+  commandFormat: "event-hooks"
+  adapterName: openclaw
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: openclaw
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: null
+  marketplacePath: null
+  scriptVariants:
+    - bash
+    - typescript
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".openclaw"
+  packageMetadata:
+    moduleType: module
+    binScriptExt: ".cjs"
+    installLifecycle: none
+    activationMessage: restart
+    peerDependencyPackage: openclaw
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "openclaw"
+  callerEnvVars:
+    []
+  configPaths:
+    - ".openclaw"
+  processNames:
+    - "openclaw"
+  capabilities:
+    - Programmatic
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/openclaw-adapter"
+  externalRepo: "a5c-ai/babysitter-openclaw"
+  externalPackageName: "@a5c-ai/babysitter-openclaw"
+  generatedSourceDir: "openclaw"
+  marketplaceSpecs: []
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - session-binding
+    - mcp
+    - headless-prompt
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: agent_end
+  hookDriven: false
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); OPENCLAW_SHELL gateway injection and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: in-process
+  sessionIdQuality: derived
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: runtime_hook
+  toolInterceptionScope: all
+  launchBehavior:
+    notes: >
+      Bare `openclaw` starts classic onboarding before an authored config exists;
+      configured installs continue through the normal configured Gateway path.
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+
+edges:
+  hosted_by:
+    - target: agent:openclaw
+    - target: agent-platform-impl:openclaw.platform@current

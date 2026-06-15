@@ -1,0 +1,15 @@
+nodeKind: WorktreeSession
+id: worktree-session:claude-code-feature-auth-jwt
+attributes:
+  displayName: "Mid-session worktree feature/auth-jwt"
+  mainRepoRoot: "/repos/example"
+  worktreePath: "/repos/example.worktrees/feature-auth-jwt"
+  worktreeBranch: "feature/auth-jwt"
+  slug: "feature-auth-jwt"
+  createdMidSession: true
+  cleanupOnExit: prompt-user
+  invalidatesCaches:
+    - system-prompt-sections
+    - memory-file-caches
+    - plans-directory
+    - cwd-bound-services

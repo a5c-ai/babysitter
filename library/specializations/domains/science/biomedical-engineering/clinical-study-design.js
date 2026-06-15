@@ -17,6 +17,12 @@
  * - FDA IDE Regulations 21 CFR 812
  * - ISO 14155:2020 Clinical Investigation of Medical Devices
  * - ICH E6(R2) Good Clinical Practice
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

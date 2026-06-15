@@ -1,0 +1,77 @@
+---
+nodeKind: StackPart
+id: stack-part:managed-postgres
+attributes:
+  displayName: "Managed PostgreSQL"
+  category: data-store
+  description: |
+    Concrete managed Postgres engine offering (RDS Postgres, Cloud SQL
+    Postgres, Neon, Supabase Postgres). Sub-role of
+    stack-part:relational-database.
+  relatedStackParts:
+    - stack-part:relational-database
+edges:
+  implemented_by:
+    - target: platform-service:aws-rds
+    - target: platform-service:gcp-cloud-sql
+    - target: platform-service:fly-postgres
+    - target: platform-service:heroku-postgres
+    - target: platform-service:vercel-postgres
+---
+nodeKind: StackPart
+id: stack-part:managed-mysql
+attributes:
+  displayName: "Managed MySQL"
+  category: data-store
+  description: |
+    Managed MySQL/MariaDB engine offering (RDS MySQL, Cloud SQL MySQL,
+    PlanetScale).
+  relatedStackParts:
+    - stack-part:relational-database
+edges:
+  implemented_by:
+    - target: platform-service:aws-rds
+    - target: platform-service:gcp-cloud-sql
+    - target: platform-service:railway-database
+---
+nodeKind: StackPart
+id: stack-part:managed-redis
+attributes:
+  displayName: "Managed Redis / KV"
+  category: data-store
+  description: |
+    Managed Redis-protocol or KV cache (ElastiCache, Memorystore, Upstash,
+    Vercel KV).
+  relatedStackParts:
+    - stack-part:cache
+edges:
+  implemented_by:
+    - target: platform-service:fly-redis
+    - target: platform-service:heroku-redis
+    - target: platform-service:railway-redis
+    - target: platform-service:vercel-kv
+---
+nodeKind: StackPart
+id: stack-part:data-warehouse
+attributes:
+  displayName: "Data Warehouse"
+  category: data-store
+  description: |
+    OLAP analytical store (BigQuery, Snowflake, Redshift, Synapse).
+edges:
+  implemented_by:
+    - target: platform-service:gcp-bigquery
+  stack_part_used_by:
+    - target: skill-area:data-warehouse-modeling
+---
+nodeKind: StackPart
+id: stack-part:data-lake
+attributes:
+  displayName: "Data Lake / Lakehouse"
+  category: data-store
+  description: |
+    Object-storage-backed analytical lake/lakehouse (S3+Glue, Databricks,
+    Iceberg/Delta tables).
+edges:
+  implemented_by:
+    - target: tool:databricks

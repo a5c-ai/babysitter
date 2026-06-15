@@ -1,0 +1,209 @@
+# NodeKinds for cluster 21-knowledge-fabric.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:knowledge-source
+  name: KnowledgeSource
+  origin: universal
+  prefix: knowledge-source
+  cluster: 21-knowledge-fabric
+  purpose: a source of organizational knowledge that feeds the knowledge fabric
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: sourceKind
+    type: enum<document-store,code-repository,conversation-archive,decision-log,wiki,crm,issue-tracker,design-system,api-docs,runbook,incident-history,meeting-notes,slack-archive>
+    required: false
+  - name: updateFrequency
+    type: enum<real-time,hourly,daily,weekly,manual>
+    required: false
+  - name: indexingMethod
+    type: enum<vector-embedding,full-text,graph-linked,structured-query,hybrid>
+    required: false
+  incomingEdges:
+  - retrieves_from
+  outgoingEdges:
+  - feeds_knowledge
+  invariants:
+  - id starts with knowledge-source: null
+  examples: []
+
+- id: node:knowledge-domain
+  name: KnowledgeDomain
+  origin: universal
+  prefix: knowledge-domain
+  cluster: 21-knowledge-fabric
+  purpose: a bounded area of organizational knowledge (product, engineering, legal, customer, etc.)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: trustLevel
+    type: enum<authoritative,verified,inferred,unverified>
+    required: false
+  - name: staleness
+    type: enum<fresh,recent,aging,stale>
+    required: false
+  incomingEdges:
+  - feeds_knowledge
+  outgoingEdges:
+  - provides_knowledge_to
+  invariants:
+  - id starts with knowledge-domain: null
+  examples: []
+
+- id: node:retrieval-pipeline
+  name: RetrievalPipeline
+  origin: universal
+  prefix: retrieval-pipeline
+  cluster: 21-knowledge-fabric
+  purpose: a concrete pipeline for retrieving knowledge from the fabric (RAG, semantic search, graph query)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: pipelineKind
+    type: enum<rag,semantic-search,graph-traversal,keyword-search,hybrid,multi-hop>
+    required: false
+  - name: embeddingModel
+    type: string
+    required: false
+  - name: vectorStore
+    type: string
+    required: false
+  - name: chunkingStrategy
+    type: enum<fixed-size,semantic,document-level,hierarchical,sentence-level>
+    required: false
+  incomingEdges:
+  - provides_knowledge_to
+  outgoingEdges:
+  - retrieves_from
+  - uses_vector_store
+  invariants:
+  - id starts with retrieval-pipeline: null
+  examples: []
+
+- id: node:memory-system
+  name: MemorySystem
+  origin: universal
+  prefix: memory-system
+  cluster: 21-knowledge-fabric
+  purpose: a concrete memory persistence and retrieval system for an agent or organization — how it stores, retrieves, consolidates, governs, and scopes durable memory across sessions, users, teams, agents, and company-brain contexts
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: memoryKind
+    type: enum<file-based,vector-backed,api-service,hybrid,proprietary>
+    required: false
+    notes: Primary storage/retrieval paradigm for the memory system. Memory systems, retrieval pipelines, source indexes, and provenance infrastructure realize layer:12-knowledge-fabric.
+  - name: persistence
+    type: enum<session-only,project-scoped,user-scoped,org-scoped,cross-agent>
+    required: false
+    notes: Widest scope at which memories persist. org-scoped and cross-agent memories are company-brain concerns and require governance for privacy, retention, provenance, and poisoning mitigation.
+  - name: autoExtraction
+    type: bool
+    required: false
+    notes: Whether the system automatically extracts memories from conversations without user action; automatic extraction should be governed for consent, privacy filtering, and evidence.
+  - name: consolidation
+    type: enum<none,manual,auto-dream,periodic,on-write>
+    required: false
+    notes: Strategy for merging, deduplicating, invalidating stale facts, and pruning memories over time.
+  - name: storageFormat
+    type: enum<markdown,yaml,json,sqlite,vector-db,custom>
+    required: false
+    notes: On-disk or in-service format for persisted memories.
+  - name: privacyFilter
+    type: bool
+    required: false
+    notes: Whether the system strips secrets/credentials before persisting memories; false values should be treated as governance/security review findings for company-brain deployments.
+  - name: deduplication
+    type: enum<none,sha256,semantic,hybrid>
+    required: false
+    notes: Strategy for detecting and removing duplicate or contradictory memory entries.
+  incomingEdges:
+  - uses_memory_system
+  outgoingEdges:
+  - memory_system_integrates
+  - realizes
+  invariants:
+  - id starts with memory-system: null
+  examples:
+  - graph/domain/knowledge-fabric/memory-systems.yaml
+
+- id: node:knowledge-fabric-impl
+  name: KnowledgeFabricImpl
+  origin: universal
+  prefix: knowledge-fabric-impl
+  cluster: 21-knowledge-fabric
+  purpose: a concrete knowledge fabric implementation for an agent product — how it persists, discovers, and retrieves persistent knowledge across sessions
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: true
+  - name: knowledgeFileFormats
+    type: list<string>
+    required: false
+    notes: On-disk file formats the agent reads for persistent knowledge (e.g. CLAUDE.md, .cursorrules, AGENTS.md).
+  - name: knowledgeScopes
+    type: list<enum<project,user,enterprise,session,team>>
+    required: false
+    notes: Scopes at which knowledge is stored and retrieved.
+  - name: autoExtractionSupport
+    type: bool
+    required: false
+    notes: Whether the agent automatically extracts and persists knowledge from conversations.
+  - name: retrievalStrategy
+    type: enum<file-hierarchy,vector-rag,semantic-search,graph-traversal,hybrid,keyword,none>
+    required: false
+    notes: Primary strategy for retrieving persisted knowledge at session start or mid-session.
+  - name: knowledgePersistence
+    type: enum<filesystem,database,cloud-service,in-memory,none>
+    required: false
+    notes: Where knowledge is physically stored between sessions.
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - composed_of
+  outgoingEdges:
+  - composes
+  - realizes
+  invariants:
+  - id starts with knowledge-fabric-impl: null
+  examples: []

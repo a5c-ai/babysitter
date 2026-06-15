@@ -1,0 +1,96 @@
+nodeKind: EnvVar
+id: env-var:claude-code-file-read-max-output-tokens
+attributes:
+  displayName: CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS
+  description: Override the default token limit for file reads.
+  name: CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS
+  category: file-ops
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-attachments
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_ATTACHMENTS
+  description: Set to 1 to disable attachment processing; file mentions are sent as plain text.
+  name: CLAUDE_CODE_DISABLE_ATTACHMENTS
+  category: file-ops
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-file-checkpointing
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING
+  description: Set to 1 to disable file checkpointing; the /rewind command cannot restore code changes.
+  name: CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING
+  category: file-ops
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-glob-hidden
+attributes:
+  displayName: CLAUDE_CODE_GLOB_HIDDEN
+  description: Set to false to exclude dotfiles from Glob tool results.
+  name: CLAUDE_CODE_GLOB_HIDDEN
+  category: file-ops
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-glob-no-ignore
+attributes:
+  displayName: CLAUDE_CODE_GLOB_NO_IGNORE
+  description: Set to false to make the Glob tool respect .gitignore patterns.
+  name: CLAUDE_CODE_GLOB_NO_IGNORE
+  category: file-ops
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-glob-timeout-seconds
+attributes:
+  displayName: CLAUDE_CODE_GLOB_TIMEOUT_SECONDS
+  description: Timeout in seconds for Glob tool file discovery.
+  name: CLAUDE_CODE_GLOB_TIMEOUT_SECONDS
+  category: file-ops
+  valueType: int
+  defaultValue: "20"
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-perforce-mode
+attributes:
+  displayName: CLAUDE_CODE_PERFORCE_MODE
+  description: Set to 1 to enable Perforce-aware write protection.
+  name: CLAUDE_CODE_PERFORCE_MODE
+  category: file-ops
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-tmpdir
+attributes:
+  displayName: CLAUDE_CODE_TMPDIR
+  description: Override the temp directory used for internal temp files.
+  name: CLAUDE_CODE_TMPDIR
+  category: file-ops
+  valueType: path
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

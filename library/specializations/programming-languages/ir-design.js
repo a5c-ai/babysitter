@@ -17,6 +17,12 @@
  * - Engineering a Compiler Chapter 8-9: Optimization
  * - SSA Book: https://pfalcon.github.io/ssabook/latest/
  * - LLVM IR Reference: https://llvm.org/docs/LangRef.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

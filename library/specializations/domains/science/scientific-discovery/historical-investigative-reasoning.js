@@ -8,6 +8,13 @@
  * // Input: { investigativeQuestion: "What caused this system failure?", evidence: [...], context: {...} }
  * // Output: { reconstruction: { timeline: [...], causalChain: {...} }, evidenceAnalysis: {...}, conclusions: {...} }
  * @references Historical method, Source criticism, Inference to best explanation, Forensic analysis
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -50,34 +57,20 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Timeline Reconstruction
-  let timeline = await ctx.task(reconstructTimelineTask, {
+  const timeline = await ctx.task(reconstructTimelineTask, {
     evidence: corroboration.corroboratedEvidence,
     hypotheses: hypotheses.generatedHypotheses,
     temporalConstraints: inputs.constraints?.temporal
   });
 
   // Quality Gate: Timeline Consistency
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        timeline = await ctx.task(reconstructTimelineTask, { ...{
-    evidence: corroboration.corroboratedEvidence,
-    hypotheses: hypotheses.generatedHypotheses,
-    temporalConstraints: inputs.constraints?.temporal
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint('timeline-inconsistency', {
+  if (timeline.consistencyScore < 0.6) {
+    await ctx.breakpoint('timeline-inconsistency', {
       message: 'Timeline reconstruction has significant inconsistencies',
       inconsistencies: timeline.inconsistencies,
-      possibleResolutions: timeline.resolutionOptions,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      possibleResolutions: timeline.resolutionOptions
+    });
+  }
 
   // Phase 7: Causal Reconstruction
   const causalReconstruction = await ctx.task(reconstructCausalChainTask, {

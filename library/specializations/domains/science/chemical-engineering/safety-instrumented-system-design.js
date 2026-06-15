@@ -3,6 +3,12 @@
  * @description Design safety instrumented systems (SIS) to achieve required Safety Integrity Levels (SIL) per IEC 61511
  * @inputs { processName: string, safetyRequirements: object, hazardScenarios: array, outputDir: string }
  * @outputs { success: boolean, sisDesign: object, srsDocument: object, validationPlan: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

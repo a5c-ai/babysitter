@@ -1,0 +1,94 @@
+nodeKind: PluginTarget
+id: plugin-target:opencode
+attributes:
+  displayName: "OpenCode"
+  hostAgent: agent:opencode
+  adapterFamily: programmatic
+  manifestFormat: "plugin.json"
+  commandFormat: "event-hooks"
+  adapterName: opencode
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: opencode
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVarForExtension: null
+  marketplacePath: null
+  pluginRootEnvVar: OPENCODE_PLUGIN_ROOT
+  scriptVariants:
+    - javascript
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".opencode"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: postinstall
+    activationMessage: restart
+    extraScripts:
+      test: "node test/integration.test.js"
+    emitCjsWrappers: true
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "opencode"
+  callerEnvVars:
+    - "AGENT_SESSION_ID"
+    - "OPENCODE_SESSION_ID"
+  configPaths:
+    - ".opencode"
+  processNames:
+    - "opencode"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/opencode-adapter"
+  externalRepo: "a5c-ai/babysitter-opencode"
+  externalPackageName: "@a5c-ai/babysitter-opencode"
+  generatedSourceDir: "opencode"
+  marketplaceSpecs: []
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: in-turn
+  hookDriven: false
+  interactiveToolName: ""
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); shell.env-injected session ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: in-process
+  sessionIdQuality: native
+  supportsOrderedFanout: false
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: runtime_hook
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: flag
+    resumeFlag: "--session"
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+
+edges:
+  hosted_by:
+    - target: agent:opencode
+    - target: agent-platform-impl:opencode.platform@1.x

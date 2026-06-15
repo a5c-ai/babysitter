@@ -7,6 +7,14 @@ metadata:
   version: "1.0.0"
   category: visualization
   backlog-id: SK-SA-001
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:c4-modeling]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions]
+
 ---
 
 # c4-diagram-generator

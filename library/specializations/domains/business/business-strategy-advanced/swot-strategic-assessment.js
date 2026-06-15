@@ -3,6 +3,12 @@
  * @description Internal and external strategic assessment using SWOT framework with TOWS matrix for strategy development
  * @inputs { organizationName: string, internalData: object, externalData: object, competitorData: array }
  * @outputs { success: boolean, swotMatrix: object, towsStrategies: object, strategicOptions: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

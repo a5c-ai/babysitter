@@ -1,0 +1,103 @@
+---
+nodeKind: Workflow
+id: workflow:curriculum-update-cycle
+attributes:
+  displayName: "Curriculum Update Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Coordinates the periodic revision of educational curricula -- gathering
+    instructor feedback and learner outcome data, benchmarking against
+    industry competency frameworks and accreditation requirements, reviewing
+    content currency against evolving technology stacks, prioritizing module
+    additions and deprecations, and routing updated syllabi through academic
+    governance approval. Produces updated curriculum maps, change-impact
+    assessments, and accreditation alignment matrices. Excludes content
+    authoring.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:education
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:lms-content-deployment
+attributes:
+  displayName: "LMS Content Deployment"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Manages the deployment of learning content packages to the learning
+    management system -- validating SCORM/xAPI package compliance, executing
+    staging-environment preview checks, verifying prerequisite and
+    enrollment-rule configurations, testing assessment scoring logic,
+    confirming accessibility compliance (WCAG 2.1), and promoting content
+    from staging to production with rollback capability. Produces deployment
+    manifests, accessibility audit results, and release notes. Excludes
+    course design and instructional authoring.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:test-writer
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:education
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:release-engineering
+---
+nodeKind: Workflow
+id: workflow:learning-outcomes-assessment
+attributes:
+  displayName: "Learning Outcomes Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates the effectiveness of educational programs against defined
+    learning objectives -- aggregating assessment scores, completion rates,
+    and time-to-competency metrics across cohorts, running statistical
+    analyses to identify skill-gap patterns, correlating training completion
+    with on-the-job performance indicators, and benchmarking against
+    industry certification pass rates. Produces learning effectiveness
+    dashboards, cohort comparison reports, and curriculum adjustment
+    recommendations. Excludes individual learner evaluation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:education
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:product-team

@@ -1,0 +1,15 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:todo-write
+attributes:
+  schema: '{}'
+  displayName: "TodoWrite"
+  description: |
+    Built-in Claude Code tool that maintains an in-session structured
+    todo list. The agent updates the list with status transitions
+    (pending → in_progress → completed); the TUI renders the list
+    inline. No filesystem side-effects.
+  category: planning
+  vendor: anthropic
+edges:
+  bundled_in:
+    - target: agent-runtime-impl:claude-code.runtime@1.x

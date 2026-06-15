@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:package-surface
+attributes:
+  canonicalDefinitionId: definition:package-surface.canonical
+  displayName: "PackageSurface"
+  kind: primitive
+  references:
+    - "NodeKind:PackageSurface"
+  description: |
+    Workspace package tracking — module type, surface kinds, source-of-truth role, publish target
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

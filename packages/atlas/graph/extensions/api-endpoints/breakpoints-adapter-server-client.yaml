@@ -1,0 +1,119 @@
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-questions-create
+attributes:
+  displayName: "POST /api/v1/questions"
+  method: POST
+  path: "/api/v1/questions"
+  authRequired: true
+  description: |
+    [direction: outbound-client] Submit a new breakpoint (question) to the
+    upstream breakpoints-pro server. Body: { text, context, routing,
+    projectId, repoId }. Source: packages/tasks-adapter/src/backends/server.ts:287-294.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-questions-get
+attributes:
+  displayName: "GET /api/v1/questions/{id}"
+  method: GET
+  path: "/api/v1/questions/{id}"
+  authRequired: true
+  description: |
+    [direction: outbound-client] Fetch a single breakpoint by ID, including
+    its answers and selectedAnswer.
+    Source: packages/tasks-adapter/src/backends/server.ts:296-303.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-questions-cancel
+attributes:
+  displayName: "DELETE /api/v1/questions/{id}"
+  method: DELETE
+  path: "/api/v1/questions/{id}"
+  authRequired: true
+  description: |
+    [direction: outbound-client] Cancel a breakpoint.
+    Source: packages/tasks-adapter/src/backends/server.ts:452-457.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-questions-list
+attributes:
+  displayName: "GET /api/v1/questions?status=&projectId=&repoId="
+  method: GET
+  path: "/api/v1/questions"
+  authRequired: true
+  description: |
+    [direction: outbound-client] List pending breakpoints for a project/repo
+    pair (status=pending).
+    Source: packages/tasks-adapter/src/backends/server.ts:410-421.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-experts-questions
+attributes:
+  displayName: "GET /api/v1/experts/{responderId}/questions"
+  method: GET
+  path: "/api/v1/experts/{responderId}/questions"
+  authRequired: true
+  description: |
+    [direction: outbound-client] List breakpoints currently routed to a
+    responder (status=routed).
+    Source: packages/tasks-adapter/src/backends/server.ts:395-407.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-questions-answers
+attributes:
+  displayName: "POST /api/v1/questions/{id}/answers"
+  method: POST
+  path: "/api/v1/questions/{id}/answers"
+  authRequired: true
+  description: |
+    [direction: outbound-client] Submit an answer to a breakpoint. Body:
+    { expertId, expertName, text, approved, confidence, references,
+    followUpQuestions, decisionMemory }. Note: signing fields rejected
+    server-side (ServerBackendError 400).
+    Source: packages/tasks-adapter/src/backends/server.ts:424-450.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-experts-list
+attributes:
+  displayName: "GET /api/v1/experts?projectId=&repoId="
+  method: GET
+  path: "/api/v1/experts"
+  authRequired: true
+  description: |
+    [direction: outbound-client] List responder (expert) profiles scoped to
+    a project/repo pair.
+    Source: packages/tasks-adapter/src/backends/server.ts:459-475.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter
+---
+nodeKind: APIEndpoint
+id: api-endpoint:tasks-adapter-server-client-questions-claim
+attributes:
+  displayName: "POST /api/v1/questions/{id}/claim"
+  method: POST
+  path: "/api/v1/questions/{id}/claim"
+  authRequired: true
+  description: |
+    [direction: outbound-client] Claim a breakpoint as a specific responder.
+    Source: packages/tasks-adapter/src/backends/server.ts:477-490.
+edges:
+  exposed_by:
+    - target: package:a5c-ai-tasks-adapter

@@ -6,6 +6,13 @@ backlog-id: AG-001
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:platform-engineer, role:devops-engineer]
+  skillAreas: [skill-area:k8s-rbac, skill-area:service-mesh-config]
+  topics: [topic:infrastructure-as-code]
+
 ---
 
 # kubernetes-expert

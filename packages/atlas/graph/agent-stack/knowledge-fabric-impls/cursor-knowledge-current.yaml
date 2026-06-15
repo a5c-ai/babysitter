@@ -1,0 +1,38 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:cursor.knowledge@current
+attributes:
+  displayName: "Cursor Knowledge Fabric — .cursorrules + codebase indexing"
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  description: |
+    Cursor's knowledge fabric combines project-level rule files (.cursorrules,
+    .cursor/rules/) with whole-codebase semantic indexing. The .cursorrules file
+    and the rules directory provide persistent project-specific instructions
+    akin to CLAUDE.md. Cursor also indexes the entire codebase into a vector
+    store for semantic code search, enabling RAG-style retrieval of relevant
+    code snippets and documentation during conversations. Context pinning (@-mentions)
+    lets users manually anchor specific files, docs, or web pages as knowledge sources.
+  knowledgeFileFormats:
+    - ".cursorrules"
+    - ".cursor/rules/*.mdc"
+    - "AGENTS.md"
+  knowledgeScopes:
+    - project
+    - user
+  autoExtractionSupport: false
+  retrievalStrategy: hybrid
+  knowledgePersistence: filesystem
+  notes: |
+    Cursor's knowledge retrieval is hybrid: .cursorrules files are loaded via
+    file-hierarchy traversal (like CLAUDE.md), while codebase context is
+    retrieved via vector-embedded semantic search over the indexed project.
+    Cursor does not have auto-memory extraction — knowledge must be manually
+    authored in .cursorrules or .cursor/rules/ files. AGENTS.md support was
+    added in >=0.40.0 for cross-agent compatibility.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:cursor:ge-0-0-0
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:cursor-notepads

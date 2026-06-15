@@ -1,10 +1,10 @@
 # Migration System Documentation
 
-The babysitter SDK includes a migration resolution system that finds the shortest path between two plugin versions using migration files in the plugin package directory. This guide covers the naming convention, resolution algorithm, and how to write migration instructions.
+The babysitter SDK includes a migration resolution system that finds the shortest path between two blueprint versions using migration files in the blueprint package directory. This guide covers the naming convention, resolution algorithm, and how to write migration instructions.
 
 ## Migration File Naming Convention
 
-Migration files are stored in the `migrations/` subdirectory of a plugin package. Each file describes how to move from one version to another.
+Migration files are stored in the `migrations/` subdirectory of a blueprint package. Each file describes how to move from one version to another.
 
 ### Format
 
@@ -30,7 +30,7 @@ Migration files are stored in the `migrations/` subdirectory of a plugin package
 
 ## Migration Chain Resolution
 
-When `plugin:update` is called, the SDK resolves the shortest migration path from the installed version to the target version.
+When `blueprints:update` is called, the SDK resolves the shortest migration path from the installed version to the target version.
 
 ### Algorithm
 
@@ -118,13 +118,13 @@ module.exports = { process };
 
 ### Scenario
 
-Plugin `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is available.
+Blueprint `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is available.
 
 ### Agent Steps
 
 1. Agent runs:
    ```bash
-   babysitter plugin:update my-plugin --marketplace-name my-marketplace --global --json
+   babysitter blueprints:update my-plugin --marketplace-name my-marketplace --global --json
    ```
 
 2. SDK updates the marketplace (git pull), reads the registry to find installed version `1.0.0`, determines target version `1.2.0`, and resolves the migration chain.
@@ -152,7 +152,7 @@ Plugin `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is ava
          "file": "1.1.0_to_1.2.0.js",
          "type": "js",
          "instructions": "// Process file content...",
-         "processFile": "/home/user/.babysitter/marketplaces/my-marketplace/plugins/my-plugin/migrations/1.1.0_to_1.2.0.js"
+         "processFile": "/home/user/.a5c/blueprints/marketplaces/my-marketplace/blueprints/my-plugin/migrations/1.1.0_to_1.2.0.js"
        }
      ]
    }
@@ -164,12 +164,12 @@ Plugin `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is ava
 
 5. Agent updates the registry:
    ```bash
-   babysitter plugin:update-registry my-plugin --plugin-version 1.2.0 --marketplace-name my-marketplace --global
+   babysitter blueprints:update-registry my-plugin --plugin-version 1.2.0 --marketplace-name my-marketplace --global
    ```
 
 ## MigrationDescriptor Type
 
-Defined in `packages/sdk/src/plugins/types.ts`:
+Defined in `packages/babysitter-sdk/src/blueprints/types.ts`:
 
 ```typescript
 interface MigrationDescriptor {
@@ -186,7 +186,7 @@ interface MigrationDescriptor {
 
 ## SDK Functions
 
-The migration system is implemented in `packages/sdk/src/plugins/migrations.ts` and exports:
+The migration system is implemented in `packages/babysitter-sdk/src/blueprints/migrations.ts` and exports:
 
 | Function | Description |
 |----------|-------------|

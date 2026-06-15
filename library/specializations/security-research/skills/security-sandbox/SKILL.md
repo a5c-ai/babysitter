@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: analysis-environment
   backlog-id: SK-008
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:endpoint-security-edr, skill-area:incident-response-forensics]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # security-sandbox

@@ -1,0 +1,346 @@
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-159
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.159"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.159"
+  currentVersion: "0.3.159"
+  releasedAt: "2026-05-31"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.159"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.159"
+  summary: "TypeScript Claude Agent SDK parity release for Claude Code 2.1.159."
+  assimilationNotes:
+    - "0.3.159 updates SDK parity with Claude Code v2.1.159; no additional SDK-only migration notes were published."
+    - "Recent 0.3.154 fixed stdio MCP servers being incorrectly restarted on every reconcile pass due to config equality false positives."
+  releaseHighlights:
+    - "Parity with Claude Code v2.1.159."
+    - "Recent SDK line fixed repeated stdio MCP server restarts during reconcile."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+---
+nodeKind: AgentVersion
+id: agentVersion:codex-sdk:6-39-1
+attributes:
+  agentId: "codex-sdk"
+  agentProductId: agent:codex-sdk
+  displayName: "OpenAI Node SDK 6.39.1"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "6.39.1"
+  currentVersion: "6.39.1"
+  releasedAt: "2026-05-28"
+  sourcePackage: "openai"
+  upstreamReleaseTag: "v6.39.1"
+  releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.39.1"
+  summary: "OpenAI Node SDK patch release with undici dispatcher mismatch guidance and binary text/plan raw upload handling."
+  assimilationNotes:
+    - "Improved undici dispatcher mismatch guidance affects SDK adapter error messages and diagnostics."
+    - "text/plan with format: binary is treated as a raw upload, affecting file upload handling in SDK-backed Codex integrations."
+  releaseHighlights:
+    - "Improved undici dispatcher mismatch guidance."
+    - "Raw upload handling for binary text/plan parts."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex-sdk
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-57-3
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.57-3"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.57-3"
+  currentVersion: "1.0.57-3"
+  releasedAt: "2026-05-29"
+  sourcePackage: "github/gh-copilot"
+  upstreamReleaseTag: "v1.0.57-3"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57-3"
+  cliCommand: "gh copilot"
+  summary: "GitHub Copilot CLI patch release improving high-contrast diff readability and crash recovery for session resume."
+  assimilationNotes:
+    - "Session resume works correctly after a crash with partial session-log data; session recovery tests should cover partial logs."
+    - "High-contrast diff backgrounds use darker colors, which may affect screenshot baselines for terminal diff rendering."
+  releaseHighlights:
+    - "Crash-safe session resume after partial session logs."
+    - "Darker high-contrast diff backgrounds."
+  installMethods:
+    - install:gh-extension
+edges:
+  version_of:
+    - agent:copilot-cli
+---
+nodeKind: AgentVersion
+id: agentVersion:cursor:changelog-2026-05-20
+attributes:
+  agentId: "cursor"
+  agentProductId: agent:cursor
+  displayName: "Cursor changelog 2026-05-20"
+  runtimeFamily: "ide-agent"
+  releaseChannel: "stable"
+  versionRange: "2026-05-20-changelog"
+  currentVersion: "2026-05-20-changelog"
+  releasedAt: "2026-05-20"
+  releaseNotesUrl: "https://cursor.com/changelog"
+  cliCommand: "cursor-agent"
+  summary: "Cursor product changelog update adding Automations in the Agents Window, multi-repo/no-repo automations, shared canvases, and the /loop skill."
+  assimilationNotes:
+    - "Automations are now available in the Agents Window and can attach multiple repositories or no repositories; workspace selection assumptions should be reviewed."
+    - "Shared canvases expose live read-only browser snapshots from agent-created artifacts; artifact/session sharing metadata may need catalog coverage."
+    - "`/loop` can run a prompt repeatedly on a local schedule or agent-decided cadence; slash-command and background-run mapping should account for looped runs."
+    - "No public npm-style Cursor CLI package version was identified; this record tracks the dated official changelog entry rather than an installer semver."
+  releaseHighlights:
+    - "Automations in Agents Window."
+    - "Multi-repo and no-repo automations."
+    - "Shared canvases."
+    - "/loop skill."
+  installMethods:
+    - install:manual
+edges:
+  version_of:
+    - agent:cursor
+---
+nodeKind: AgentVersion
+id: agentVersion:gemini:0-44-1
+attributes:
+  agentId: "gemini"
+  agentProductId: agent:gemini-cli
+  displayName: "Gemini CLI 0.44.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.44.1"
+  currentVersion: "0.44.1"
+  releasedAt: "2026-05-28"
+  sourcePackage: "@google/gemini-cli"
+  upstreamReleaseTag: "v0.44.1"
+  releaseNotesUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1"
+  cliCommand: "gemini"
+  summary: "Gemini CLI patch release cherry-picking the PTY resize hardening fix from the 0.45 preview line."
+  assimilationNotes:
+    - "The v0.44.1 patch cherry-picks the PTY resize hardening fix; terminal resize and native PTY crash regression tests should cover Gemini runs."
+    - "No install method or package name change; npm package remains @google/gemini-cli."
+  releaseHighlights:
+    - "PTY resize native crash hardening."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:gemini-cli
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-17-0
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.17.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.17.0"
+  currentVersion: "0.17.0"
+  releasedAt: "2026-05-29"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.17.0"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.17.0"
+  cliCommand: "qwen"
+  summary: "Qwen Code release with startup warnings on stderr, telemetry bridge improvements, Feishu/Lark channel adapter support, skill-based RT optimization groundwork, and model-sent slash command history tracking."
+  assimilationNotes:
+    - "Startup warnings now surface on stderr before TUI render; stderr parsing should distinguish warnings from fatal launch errors."
+    - "Feishu/Lark channel adapter support expands channel surface assumptions beyond local CLI-only operation."
+    - "Telemetry LogToSpan bridge handling changed; observability projections should account for improved error info."
+    - "Model-sent slash command history tracking affects command-history and prompt replay behavior."
+  releaseHighlights:
+    - "Startup warnings emitted on stderr before TUI render."
+    - "Feishu/Lark channel adapter."
+    - "Skill-based RT optimization foundation."
+    - "Model-sent slash command history tracking."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+---
+nodeKind: AgentVersion
+id: agentVersion:pi:0-78-0
+attributes:
+  agentId: "pi"
+  agentProductId: agent:pi
+  displayName: "Pi CLI 0.78.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.78.0"
+  currentVersion: "0.78.0"
+  releasedAt: "2026-05-29"
+  sourcePackage: "@earendil-works/pi-coding-agent"
+  upstreamReleaseTag: "v0.78.0"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.78.0"
+  cliCommand: "pi"
+  summary: "Pi CLI release adding named startup sessions with --name/-n and clickable OSC 8 file tool paths."
+  assimilationNotes:
+    - "`--name` / `-n` sets the session display name before startup across interactive, print, JSON, and RPC modes; launchBehavior should expose these prompt/session flags."
+    - "Built-in file tool titles render OSC 8 file:// hyperlinks when terminal support is detected, including supported tmux clients; terminal output parsers should tolerate OSC 8 sequences."
+    - "No install method or package name change."
+  releaseHighlights:
+    - "Named startup sessions via --name / -n."
+    - "Clickable file tool paths using OSC 8 hyperlinks."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:pi
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:15-7-3
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 15.7.3"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "15.7.3"
+  currentVersion: "15.7.3"
+  releasedAt: "2026-05-31"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v15.7.3"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.3"
+  cliCommand: "pi"
+  summary: "Oh-My-Pi release adding shake compaction primitives and following the 15.7.2 auto-thinking setting line."
+  assimilationNotes:
+    - "New shake compaction primitives detect heavy context regions, including whole tool results and large fenced/XML blocks, and elide or extractively compress them through an injected completion backend."
+    - "The compressor is provider-agnostic and can be wired to local on-device models; context compaction capability metadata should represent this mode."
+    - "Recent 15.7.2 added providers.autoThinkingModel and auto thinking-level classification for each user turn."
+  releaseHighlights:
+    - "Shake compaction primitives under @oh-my-pi/pi-agent-core/compaction."
+    - "Provider-agnostic elision/extractive compression path."
+    - "Recent auto thinking model setting."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+---
+nodeKind: AgentVersion
+id: agentVersion:openclaw:2026-5-28
+attributes:
+  agentId: "openclaw"
+  agentProductId: agent:openclaw
+  displayName: "OpenClaw 2026.5.28"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2026.5.28"
+  currentVersion: "2026.5.28"
+  releasedAt: "2026-05-30"
+  sourcePackage: "openclaw"
+  upstreamReleaseTag: "v2026.5.28"
+  releaseNotesUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.5.28"
+  cliCommand: "openclaw"
+  summary: "OpenClaw release improving agent/Codex runtime recovery, channel delivery/session identity, mobile/chat state preservation, stricter input validation, provider/media/model coverage, and CLI/auth/doctor failure behavior."
+  assimilationNotes:
+    - "Subagents keep cwd/workspace separation, hook context stays prompt-local, session locks release on timeout abort, and stale restart continuations are avoided; session/lock handling should be reviewed."
+    - "Provider coverage expands with Claude Opus 4.8, Fal Krea image schemas, NVIDIA featured models, MiniMax streaming music responses, voice model catalogs, GitHub Copilot agent runtime support, and Codex Supervisor plugin path."
+    - "Browser, channel, and automation inputs reject malformed values earlier; adapter validation assumptions may need tightening."
+    - "CLI/auth/doctor paths fail faster and recover with clearer health labels and restart guidance."
+  releaseHighlights:
+    - "Agent and Codex runtime recovery improvements."
+    - "Broader provider/media/model coverage."
+    - "Stricter browser/channel/automation input validation."
+    - "Clearer CLI/auth/doctor failures."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:openclaw
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-15-13
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.15.13"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.15.13"
+  currentVersion: "1.15.13"
+  releasedAt: "2026-05-30"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.15.13"
+  releaseNotesUrl: "https://github.com/sst/opencode/releases/tag/v1.15.13"
+  cliCommand: "opencode"
+  summary: "OpenCode release fixing Anthropic Opus 4.7+ adaptive reasoning thinking blocks, adding session metadata through API/SDK, and loading config from opened location upward."
+  assimilationNotes:
+    - "Gateway Anthropic Opus 4.7+ adaptive reasoning keeps summarized thinking instead of empty thinking blocks; thinking-stream handling should be checked."
+    - "Sessions can store custom metadata through the API and SDK; session metadata projection should be added to transport/session models."
+    - "Config loads from the opened location upward, so directory-specific settings and provider policies apply more predictably."
+    - "Wrapped inline tool rows and failed inline tool details changed in the TUI; terminal snapshots may need updates."
+  releaseHighlights:
+    - "Adaptive reasoning summarized-thinking fix."
+    - "Session metadata API/SDK support."
+    - "Location-upward config loading."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-137-1
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid 0.137.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.137.1"
+  currentVersion: "0.137.1"
+  releasedAt: "2026-05-30"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.137.1"
+  cliCommand: "droid"
+  summary: "Factory Droid npm release; no public GitHub release notes were available for the package version."
+  assimilationNotes:
+    - "Latest npm version is 0.137.1 for @factory/cli; install command remains `npm install -g @factory/cli`."
+    - "No public release-note body was found in Factory-AI/factory releases or tags for this version, so capability changes could not be confirmed from a changelog."
+    - "Keep existing adapter assumptions until a changelog identifies CLI flag, MCP, model-routing, or transport changes."
+  releaseHighlights:
+    - "Npm package update to 0.137.1."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+---
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1780244579-g6b52f9
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Sourcegraph Amp 0.0.1780244579-g6b52f9"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1780244579-g6b52f9"
+  currentVersion: "0.0.1780244579-g6b52f9"
+  releasedAt: "2026-05-31"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780244579-g6b52f9"
+  cliCommand: "amp"
+  summary: "Sourcegraph Amp npm release; public changelog details were not available for this timestamped build."
+  assimilationNotes:
+    - "Latest npm version is the timestamped build 0.0.1780244579-g6b52f9; install command remains `npm install -g @ampcode/cli`."
+    - "No public release-note body was found for this build; capability changes could not be verified beyond package publication."
+    - "Amp adapter should remain on existing launch, auth, MCP, and subagent assumptions until Sourcegraph publishes build-specific notes."
+  releaseHighlights:
+    - "Npm package update to 0.0.1780244579-g6b52f9."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp

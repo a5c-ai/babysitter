@@ -1,0 +1,283 @@
+---
+nodeKind: Workflow
+id: workflow:strategic-planning
+attributes:
+  displayName: "Strategic Planning"
+  description: |
+    Annual cross-team governance workflow that sets the organization's direction for the
+    coming one-to-three years. Senior leadership and strategic planners synthesize market
+    intelligence, competitive dynamics, and internal capability assessments to define
+    strategic priorities and OKRs. Business unit heads submit bottom-up initiatives, which
+    are evaluated and ranked against strategic fit, resource requirements, and expected
+    return. Approved strategies are translated into multi-year roadmaps, communicated to
+    the board, and cascaded across all teams as measurable milestones. Quarterly progress
+    reviews track execution health and trigger mid-cycle adjustments when market conditions
+    shift materially.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:strategic-planner
+    - role:cto
+    - role:vp-engineering
+    - role:financial-analyst
+    - role:business-analyst
+    - role:marketing-strategist
+  applies_to_domain:
+    - domain:strategy
+    - domain:finance
+    - domain:business-intelligence
+  triggers_responsibility:
+    - responsibility:strategic-planning
+    - responsibility:market-research
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+---
+nodeKind: Workflow
+id: workflow:market-analysis
+attributes:
+  displayName: "Market Analysis"
+  description: |
+    Quarterly on-demand governance workflow that evaluates market conditions, competitive
+    positioning, and emerging customer needs to inform product and go-to-market decisions.
+    Marketing strategists and business analysts gather primary and secondary research —
+    including customer interviews, analyst reports, and competitive teardowns — and
+    synthesize findings into a structured market assessment. Key signals are mapped to
+    strategic implications and shared with product, sales, and leadership teams. Outputs
+    feed directly into roadmap prioritization and campaign planning cycles, ensuring the
+    organization remains responsive to market dynamics.
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "quarterly"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:marketing-strategist
+    - role:business-analyst
+    - role:strategic-planner
+    - role:product-manager
+    - role:product-analyst
+  applies_to_domain:
+    - domain:strategy
+    - domain:marketing
+    - domain:business-intelligence
+  triggers_responsibility:
+    - responsibility:market-research
+    - responsibility:strategic-planning
+    - responsibility:metric-definition
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:financial-planning
+attributes:
+  displayName: "Financial Planning"
+  description: |
+    Annual governance workflow that develops the organization's integrated financial plan
+    covering revenue targets, operating budgets, capital expenditures, and headcount for
+    the coming fiscal year. Financial analysts build detailed models from business-unit
+    inputs, reconciling bottom-up estimates against top-down targets agreed with leadership
+    and the board. Scenario analyses stress-test the plan against downside assumptions.
+    Approved plans are locked, communicated to budget owners, and tracked monthly through
+    variance analysis and reforecasting cycles. The workflow ensures financial discipline,
+    investor confidence, and strategic alignment of resource allocation across the business.
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:financial-analyst
+    - role:strategic-planner
+    - role:vp-engineering
+    - role:engineering-manager
+    - role:business-analyst
+  applies_to_domain:
+    - domain:finance
+    - domain:strategy
+    - domain:business-intelligence
+  triggers_responsibility:
+    - responsibility:financial-analysis
+    - responsibility:budget-management
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+    - responsibility:investor-relations
+---
+nodeKind: Workflow
+id: workflow:talent-acquisition-pipeline
+attributes:
+  displayName: "Talent Acquisition Pipeline"
+  description: |
+    Event-driven cross-team workflow triggered when an approved headcount opening is
+    created. The HR manager and talent recruiter align with the hiring manager to define
+    the role profile, calibrate assessment criteria, and select sourcing channels. Candidate
+    pipelines are built through job boards, referrals, and proactive outreach. A structured
+    interview loop assesses competency and culture fit, with scorecards reviewed by the
+    hiring panel. Offers are extended, negotiated, and closed in coordination with
+    compensation benchmarks. The workflow concludes with candidate acceptance, and a warm
+    handoff to the onboarding process ensures a seamless transition from applicant to
+    productive team member.
+  workflowKind: onboarding
+  triggerType: event-driven
+  typicalCadence: "per-opening"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:hr-manager
+    - role:talent-recruiter
+    - role:engineering-manager
+    - role:business-analyst
+    - role:vp-engineering
+  applies_to_domain:
+    - domain:human-resources
+    - domain:operations
+  triggers_responsibility:
+    - responsibility:talent-acquisition
+    - responsibility:hiring
+    - responsibility:stakeholder-communication
+    - responsibility:metric-definition
+---
+nodeKind: Workflow
+id: workflow:brand-campaign-launch
+attributes:
+  displayName: "Brand Campaign Launch"
+  description: |
+    On-demand cross-team operational workflow that takes a brand or marketing campaign
+    from strategy brief through live execution and post-launch measurement. The marketing
+    strategist and creative director align on objectives, audience, messaging, and channel
+    mix before briefing the creative team. Brand managers oversee asset production,
+    ensuring every deliverable meets identity guidelines. Legal and compliance review
+    copy and claims. Launch timelines are coordinated across paid, owned, and earned
+    channels. Post-launch, performance data is collected against defined KPIs and a
+    retrospective captures learnings to improve future campaign efficiency and impact.
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-campaign"
+  complexity: complex
+edges:
+  involves_role:
+    - role:marketing-strategist
+    - role:brand-manager
+    - role:creative-director
+    - role:marketing-manager
+    - role:content-strategist
+    - role:legal-advisor
+  applies_to_domain:
+    - domain:marketing
+    - domain:digital-marketing
+    - domain:advertising
+  triggers_responsibility:
+    - responsibility:brand-management
+    - responsibility:content-creation
+    - responsibility:market-research
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:vendor-onboarding
+attributes:
+  displayName: "Vendor Onboarding"
+  description: |
+    Event-driven cross-team operational workflow activated once a vendor has been selected
+    and approved through the vendor evaluation process. The procurement manager coordinates
+    contract execution with legal, while IT and security teams provision access, configure
+    integrations, and validate that the vendor meets data handling and security requirements.
+    Business stakeholders complete onboarding documentation and define success metrics for
+    the relationship. The vendor is added to the approved vendor register with assigned
+    relationship owners. A 30/60/90-day check-in cadence monitors early performance and
+    surfaces any compliance or operational issues before they escalate.
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-vendor"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:procurement-manager
+    - role:legal-advisor
+    - role:partnerships-manager
+    - role:business-analyst
+    - role:engineering-manager
+  applies_to_domain:
+    - domain:procurement
+    - domain:legal
+    - domain:operations
+  triggers_responsibility:
+    - responsibility:procurement
+    - responsibility:contract-negotiation
+    - responsibility:vendor-evaluation
+    - responsibility:compliance-monitoring
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:contract-lifecycle
+attributes:
+  displayName: "Contract Lifecycle"
+  description: |
+    Event-driven governance workflow managing a commercial contract from initial request
+    through execution, performance monitoring, and eventual renewal or termination. The
+    legal advisor drafts or reviews the agreement, coordinating redlines with the
+    counterparty and escalating non-standard terms to leadership. Risk and compliance
+    assessments are completed before signature authority is exercised. Executed contracts
+    are stored in the contract management system with key dates flagged for reminders.
+    During the contract term, business owners monitor performance obligations and SLAs.
+    Renewal or renegotiation is initiated automatically sixty to ninety days before
+    expiry, ensuring no lapses in coverage or unintended auto-renewals.
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-contract"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:legal-advisor
+    - role:procurement-manager
+    - role:partnerships-manager
+    - role:financial-analyst
+    - role:business-analyst
+  applies_to_domain:
+    - domain:legal
+    - domain:procurement
+    - domain:operations
+  triggers_responsibility:
+    - responsibility:contract-negotiation
+    - responsibility:regulatory-compliance
+    - responsibility:risk-assessment
+    - responsibility:compliance-monitoring
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:customer-journey-optimization
+attributes:
+  displayName: "Customer Journey Optimization"
+  description: |
+    Continuous cross-team operational workflow that systematically identifies and removes
+    friction from the end-to-end customer experience spanning acquisition, onboarding,
+    product adoption, support, and renewal. Customer success managers and product analysts
+    collect quantitative funnel data, NPS scores, and support ticket themes, while UX
+    researchers conduct qualitative interviews at key journey stages. Insights are
+    synthesized into an updated journey map, and high-impact improvement opportunities
+    are prioritized into the product and marketing roadmaps. Quarterly reviews track
+    whether interventions have measurably improved satisfaction, conversion, or retention
+    metrics, closing the feedback loop between customer insight and business outcome.
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "quarterly"
+  complexity: complex
+edges:
+  involves_role:
+    - role:customer-success-manager
+    - role:product-manager
+    - role:ux-researcher
+    - role:marketing-strategist
+    - role:product-analyst
+    - role:content-strategist
+  applies_to_domain:
+    - domain:customer-experience
+    - domain:marketing
+    - domain:customer-relations
+  triggers_responsibility:
+    - responsibility:customer-journey-mapping
+    - responsibility:user-research
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+    - responsibility:market-research

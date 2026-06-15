@@ -1,0 +1,78 @@
+---
+nodeKind: ToolServer
+id: tool-server:mcp-prisma
+attributes:
+  displayName: Prisma MCP Server
+  description: |
+    MCP server for Prisma ORM providing schema introspection, migration
+    management, and query execution against Prisma-managed databases.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/prisma/prisma
+  maintainer: Prisma
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: library:prisma
+  - target: stack-part:relational-database
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+nodeKind: ToolServer
+id: tool-server:mcp-mongoose
+attributes:
+  displayName: Mongoose MCP Server
+  description: |
+    MCP server providing access to MongoDB via Mongoose ODM; enables
+    AI agents to query, insert, update, and delete documents using schema models.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/mongodb-js/mcp-server-mongodb
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: library:mongoose
+  - target: stack-part:nosql-database
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+nodeKind: ToolServer
+id: tool-server:mcp-winston
+attributes:
+  displayName: Winston MCP Server
+  description: |
+    MCP server that exposes Winston log streams; allows AI agents to
+    read, filter, and search application logs written with Winston.
+  protocol: mcp
+  category: observability
+  repoUrl: https://github.com/hyperdrive-eng/mcp-nodejs-debugger
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: library:winston
+  lib_applies_to_domain:
+  - target: domain:observability
+---
+nodeKind: ToolServer
+id: tool-server:mcp-pino
+attributes:
+  displayName: Pino MCP Server
+  description: |
+    MCP server for Pino structured logs; exposes log ingestion and
+    querying for Node.js services using the Pino logging library.
+  protocol: mcp
+  category: observability
+  repoUrl: https://github.com/pinojs/pino
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: library:pino
+  lib_applies_to_domain:
+  - target: domain:observability

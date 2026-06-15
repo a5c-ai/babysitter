@@ -1,0 +1,140 @@
+# Kradle participates in the agentic stack as an orchestration and interaction
+# layer provider — it dispatches, governs, and surfaces agent work without
+# being an agent itself.
+
+# ═══════════════════════════════════════════
+# Orchestration Primitives (Layer 10)
+# Kradle's agent dispatch and governance patterns
+# ═══════════════════════════════════════════
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-agent-dispatch
+attributes:
+  displayName: "Kradle Agent Dispatch"
+  description: |
+    Dispatch a coding agent to work on a Kradle-managed repository.
+    Creates an AgentDispatchRun (appears as a CI Job), assembles a
+    context bundle with repo state and policy, binds to adapters
+    for session management, and provisions an isolated Git worktree.
+    Supports manual dispatch from UI/API and auto-dispatch via triggers.
+  kind: dispatch
+  trigger: manual
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:kradle-workspace-provision
+    - target: orch-primitive:kradle-context-assembly
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-auto-trigger
+attributes:
+  displayName: "Kradle Auto-Trigger Dispatch"
+  description: |
+    Event-driven agent dispatch via AgentTriggerRule resources. Routes
+    events (CI failure, webhook, label addition, schedule) to the
+    appropriate agent stack and dispatches automatically. Evaluates
+    capability requirements against available agent stacks before
+    dispatching.
+  kind: dispatch
+  trigger: event-driven
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:kradle-agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-approval-gate
+attributes:
+  displayName: "Kradle Approval Gate"
+  description: |
+    Human-in-the-loop approval gate for agent actions. When an agent
+    requests access to secrets, destructive tools, or write-back
+    operations, the dispatch controller pauses and creates an
+    AgentApproval resource requiring human decision. The agent
+    session blocks until approved or denied.
+  kind: approval-gate
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-workspace-provision
+attributes:
+  displayName: "Kradle Workspace Provision"
+  description: |
+    Provision an isolated Git worktree for agent work. Creates a
+    dedicated branch, clones the repo state, applies workspace
+    policy (file access, branch naming, cleanup rules), and
+    manages the worktree lifecycle through the dispatch run.
+  kind: workspace-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-context-assembly
+attributes:
+  displayName: "Kradle Context Assembly"
+  description: |
+    Assemble the prompt context bundle for an agent dispatch. Gathers
+    repo state (files, branches, PRs), issue context, org policies,
+    memory snapshots from company brain, and applies redaction rules
+    before passing to the agent. Tracks source provenance for every
+    context fragment.
+  kind: multi-agent-coordination
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-permission-review
+attributes:
+  displayName: "Kradle Permission Review"
+  description: |
+    Pre-dispatch RBAC audit. Before launching an agent, reviews the
+    agent stack's service account bindings, secret grants, config
+    grants, and tool profile against the org's policy profiles.
+    Blocks dispatch if any required permission is missing or denied.
+  kind: budget-control
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-pr-as-artifact
+attributes:
+  displayName: "Kradle PR-as-Artifact"
+  description: |
+    Agent work products surface as pull requests. When an agent
+    completes its dispatch run, the workspace diff is automatically
+    packaged as a PR with CI pipeline, review gates, and branch
+    protection checks — the same workflow as human-authored PRs.
+  kind: task-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:kradle-approval-gate
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-memory-consolidation
+attributes:
+  displayName: "Kradle Memory Consolidation"
+  description: |
+    Cross-run knowledge persistence via company brain. After a dispatch
+    run completes, extracts salient facts, decisions, and patterns from
+    the agent session transcript and imports them into the org's
+    AgentMemoryRepository. Memory updates go through human review
+    before committing to the knowledge graph.
+  kind: progress-tracking
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction

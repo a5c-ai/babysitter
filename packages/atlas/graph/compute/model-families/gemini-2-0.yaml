@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:gemini-2-0
+attributes:
+  displayName: "Gemini 2.0"
+  vendor: "Google"
+  homepageUrl: "https://ai.google.dev/gemini-api/docs/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:gemini-2-0-flash@current

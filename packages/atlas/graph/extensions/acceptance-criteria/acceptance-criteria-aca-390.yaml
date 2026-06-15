@@ -1,0 +1,35 @@
+nodeKind: AcceptanceCriterion
+id: acceptance-criterion:aca-390-1
+attributes:
+  displayName: "ACA-390 AC#1: tarball smoke covers auth/browser-session"
+  text: "Tarball smoke test exercises both auth and browser-session runtime packages without missing-module errors."
+  order: 1
+  status: met
+  verifiedBy: ci
+edges:
+  criterion_of_issue:
+    - target: issue:linear-aca-390
+---
+nodeKind: AcceptanceCriterion
+id: acceptance-criterion:aca-390-2
+attributes:
+  displayName: "ACA-390 AC#2: runtime artifact contains compiled hooks"
+  text: "Published tarball contains compiled hookRegistration output for both targets."
+  order: 2
+  status: met
+  verifiedBy: ci
+edges:
+  criterion_of_issue:
+    - target: issue:linear-aca-390
+---
+nodeKind: AcceptanceCriterion
+id: acceptance-criterion:gh-1234-1
+attributes:
+  displayName: "GH#1234 AC#1: reconciliation timer fires every 30s"
+  text: "Reconciliation loop fires at 30-second cadence under default config."
+  order: 1
+  status: pending
+  verifiedBy: test
+edges:
+  criterion_of_issue:
+    - target: issue:github-1234

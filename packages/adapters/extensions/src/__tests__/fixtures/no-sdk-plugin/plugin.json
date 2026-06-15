@@ -1,0 +1,7 @@
+{
+  "name": "no-sdk-plugin",
+  "version": "1.0.0",
+  "description": "Fixture manifest without an sdk block",
+  "author": "Test Author",
+  "license": "MIT"
+}

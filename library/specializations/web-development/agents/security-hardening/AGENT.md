@@ -9,6 +9,14 @@ expertise:
   - Rate limiting
   - Input validation
   - Infrastructure security
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:security-engineer, role:backend-engineer]
+  skillAreas: [skill-area:web-security, skill-area:backend-security]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth]
+
 ---
 
 # Security Hardening Agent

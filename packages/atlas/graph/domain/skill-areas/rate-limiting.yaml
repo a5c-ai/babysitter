@@ -1,0 +1,16 @@
+nodeKind: SkillArea
+id: skill-area:rate-limiting
+attributes:
+  displayName: "Rate Limiting"
+  description: |
+    Rate limiting strategies: token bucket, leaky bucket, fixed and
+    sliding windows, distributed limiters backed by Redis, per-tenant
+    quotas, and graceful 429 response patterns with Retry-After.
+  domains:
+    - topic:rate-limiting
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: topic:rate-limiting
+      confidence: primary

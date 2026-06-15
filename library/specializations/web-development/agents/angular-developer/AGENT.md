@@ -9,6 +9,14 @@ expertise:
   - RxJS patterns
   - Dependency injection
   - Enterprise architecture
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer]
+  skillAreas: [skill-area:application-state-management, skill-area:frontend-routing]
+  workflows: [workflow:feature-development]
+  topics: [topic:component-based-architecture]
+
 ---
 
 # Angular Developer Agent

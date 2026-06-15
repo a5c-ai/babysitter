@@ -1,0 +1,193 @@
+---
+nodeKind: SkillArea
+id: skill-area:firmware-development
+attributes:
+  displayName: "Firmware Development"
+  description: |
+    Bare-metal and RTOS-based firmware — startup code, linker scripts,
+    drivers, ISRs, and on-target debugging.
+  domains:
+    - specialization:embedded-systems
+  requiresLanguages:
+    - language:c
+    - language:cpp
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:rpikit
+      confidence: secondary
+    - target: specialization:electrical-engineering
+      confidence: secondary
+  uses_language:
+    - language:c
+    - language:cpp
+    - target: language:c
+    - target: language:cpp
+  prerequisite_for_learning:
+    - target: skill-area:rtos-programming
+      strength: recommended
+    - target: skill-area:communication-protocols
+      strength: recommended
+    - target: skill-area:device-drivers
+      strength: recommended
+    - target: skill-area:sensor-libraries
+      strength: recommended
+    - target: skill-area:real-time-os
+      strength: recommended
+    - target: skill-area:hardware-abstraction-layer
+      strength: recommended
+    - target: skill-area:peripheral-interfacing
+      strength: recommended
+    - target: skill-area:bootloader-design
+      strength: recommended
+    - target: skill-area:low-power-design
+      strength: recommended
+    - target: skill-area:hdl-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:real-time-os
+attributes:
+  displayName: "Real-Time Operating Systems"
+  description: |
+    RTOS concepts — tasks, priorities, preemption, mutexes, and
+    deterministic scheduling on FreeRTOS / Zephyr.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+  uses_library:
+    - library:freertos
+    - library:zephyr-rtos
+---
+nodeKind: SkillArea
+id: skill-area:hardware-abstraction-layer
+attributes:
+  displayName: "Hardware Abstraction Layer Design"
+  description: |
+    Designing HALs over MCU peripherals — portable APIs, register
+    maps, and vendor-SDK isolation.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:peripheral-interfacing
+attributes:
+  displayName: "Peripheral Interfacing"
+  description: |
+    Interfacing with sensors and buses — I2C, SPI, UART, CAN, USB —
+    timing, error handling, and DMA patterns.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:bootloader-design
+attributes:
+  displayName: "Bootloader Design"
+  description: |
+    Designing secure, updatable bootloaders — A/B partitions,
+    image signing, and rollback protection.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:low-power-design
+attributes:
+  displayName: "Low-Power Embedded Design"
+  description: |
+    Sleep modes, peripheral gating, duty-cycling, and energy
+    profiling for battery-powered devices.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:hdl-design
+attributes:
+  displayName: "HDL Design"
+  description: |
+    RTL design with Verilog/SystemVerilog/VHDL — clocking, reset,
+    FSMs, pipelining, and synthesizable subsets.
+  domains:
+    - specialization:fpga-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:fpga-programming
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:fpga-synthesis
+      strength: recommended
+    - target: skill-area:timing-closure
+      strength: recommended
+    - target: skill-area:hardware-verification-uvm
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:fpga-synthesis
+attributes:
+  displayName: "FPGA Synthesis Flow"
+  description: |
+    Synthesis, place-and-route, and bitstream generation across
+    Vivado/Quartus/OSS toolchains; constraint authoring.
+  domains:
+    - specialization:fpga-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:fpga-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:timing-closure
+attributes:
+  displayName: "Timing Closure"
+  description: |
+    Static timing analysis — setup/hold, multi-cycle paths, false
+    paths, CDC analysis, and meeting Fmax.
+  domains:
+    - specialization:fpga-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:fpga-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:hardware-verification-uvm
+attributes:
+  displayName: "Hardware Verification (UVM)"
+  description: |
+    SystemVerilog UVM verification environments — agents, sequences,
+    coverage models, and constrained random stimulus.
+  domains:
+    - specialization:fpga-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:fpga-programming
+      confidence: primary

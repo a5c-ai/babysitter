@@ -2,6 +2,12 @@
 name: compliance-readiness-manager
 description: Ensure continuous readiness for regulatory surveys and accreditation visits through gap assessments, mock surveys, and corrective action management
 required-skills: regulatory-compliance-assessment, accreditation-tracer-simulation, quality-metrics-measurement
+graph:
+  domains: [domain:healthcare]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:compliance-automation, skill-area:data-governance, skill-area:vulnerability-management]
+  workflows: [workflow:experiment-design]
+  roles: [role:compliance-officer, role:audit-analyst]
 ---
 
 # Compliance Readiness Manager Agent

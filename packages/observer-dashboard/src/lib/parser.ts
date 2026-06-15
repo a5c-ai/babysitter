@@ -22,6 +22,70 @@ import type {
 } from "@/types";
 import { getConfig } from "@/lib/config-loader";
 
+function parseTimestampMs(value: string | undefined): number | null {
+  if (!value) return null;
+  const ms = new Date(value).getTime();
+  return Number.isFinite(ms) ? ms : null;
+}
+
+function normalizeInterval(startMs: number | null, endMs: number | null): { startMs: number; endMs: number } | null {
+  if (startMs == null || endMs == null) return null;
+  return {
+    startMs,
+    endMs: Math.max(endMs, startMs),
+  };
+}
+
+function getTaskActiveWindow(task: {
+  startedAt?: string;
+  finishedAt?: string;
+  requestedAt?: string;
+  resolvedAt?: string;
+}): { startMs: number; endMs: number } | null {
+  const explicitWindow = normalizeInterval(
+    parseTimestampMs(task.startedAt),
+    parseTimestampMs(task.finishedAt)
+  );
+  if (explicitWindow) return explicitWindow;
+
+  return normalizeInterval(
+    parseTimestampMs(task.requestedAt),
+    parseTimestampMs(task.resolvedAt)
+  );
+}
+
+function getTaskActiveDuration(task: {
+  startedAt?: string;
+  finishedAt?: string;
+  requestedAt?: string;
+  resolvedAt?: string;
+}): number | undefined {
+  const window = getTaskActiveWindow(task);
+  if (!window) return undefined;
+  return window.endMs - window.startMs;
+}
+
+function getCoveredDurationMs(windows: Array<{ startMs: number; endMs: number }>): number {
+  if (windows.length === 0) return 0;
+
+  const sorted = [...windows].sort((a, b) => a.startMs - b.startMs);
+  let covered = 0;
+  let current = sorted[0];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const next = sorted[i];
+    if (next.startMs <= current.endMs) {
+      current.endMs = Math.max(current.endMs, next.endMs);
+      continue;
+    }
+    covered += current.endMs - current.startMs;
+    current = next;
+  }
+
+  covered += current.endMs - current.startMs;
+  return covered;
+}
+
 async function fileExists(filePath: string): Promise<boolean> {
   try {
     await fs.access(filePath);
@@ -279,11 +343,12 @@ export async function parseRunDir(
         task.resolvedAt = event.ts;
         task.startedAt = p.startedAt;
         task.finishedAt = p.finishedAt;
-        if (p.startedAt && p.finishedAt) {
-          task.duration =
-            new Date(p.finishedAt).getTime() -
-            new Date(p.startedAt).getTime();
-        }
+        task.duration = getTaskActiveDuration({
+          startedAt: p.startedAt,
+          finishedAt: p.finishedAt,
+          requestedAt: task.requestedAt,
+          resolvedAt: event.ts,
+        });
         if (p.error) {
           task.error = {
             name: p.error.name,
@@ -399,7 +464,12 @@ export async function parseRunDir(
   const lastEvent = events[events.length - 1];
 
   let duration: number | undefined;
-  if (createdAt && (runCompleted || runFailed)) {
+  const taskWindows = tasks
+    .map((task) => getTaskActiveWindow(task))
+    .filter((window): window is { startMs: number; endMs: number } => window !== null);
+  if (taskWindows.length > 0) {
+    duration = getCoveredDurationMs(taskWindows);
+  } else if (createdAt && (runCompleted || runFailed)) {
     const endTs = (runCompleted || runFailed)!.ts;
     duration = new Date(endTs).getTime() - new Date(createdAt).getTime();
   } else if (createdAt && lastEvent) {
@@ -496,22 +566,12 @@ export async function parseTaskDetail(
   const requestedAt = requestedEvent?.ts || "";
   const resolvedAt = resolvedEvent?.ts;
 
-  // Compute duration: prefer wall-clock time (requestedAt → resolvedAt) over
-  // startedAt/finishedAt which are often identical when set by task:post
-  let duration: number | undefined;
-  if (resultStartedAt && resultFinishedAt) {
-    const resultDuration = new Date(resultFinishedAt).getTime() - new Date(resultStartedAt).getTime();
-    // If result timestamps differ, use them; otherwise fall back to journal wall-clock
-    if (resultDuration > 0) {
-      duration = resultDuration;
-    } else if (requestedAt && resolvedAt) {
-      duration = new Date(resolvedAt).getTime() - new Date(requestedAt).getTime();
-    } else {
-      duration = 0;
-    }
-  } else if (requestedAt && resolvedAt) {
-    duration = new Date(resolvedAt).getTime() - new Date(requestedAt).getTime();
-  }
+  const duration = getTaskActiveDuration({
+    startedAt: resultStartedAt,
+    finishedAt: resultFinishedAt,
+    requestedAt,
+    resolvedAt,
+  });
 
   // Use inputs from task.json if separate input.json doesn't exist
   const resolvedInput = input ?? (taskDef?.inputs as Record<string, unknown> | undefined);

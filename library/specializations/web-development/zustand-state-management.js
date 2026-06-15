@@ -4,6 +4,13 @@
  * @inputs { projectName: string }
  * @outputs { success: boolean, storeConfig: object, stores: array, artifacts: array }
  * @references - Zustand: https://docs.pmnd.rs/zustand/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:react-state-management]
+ *   topics: [topic:flux-pattern]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

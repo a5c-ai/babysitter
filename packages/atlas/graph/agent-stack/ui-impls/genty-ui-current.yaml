@@ -1,0 +1,41 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:genty.ui@current
+attributes:
+  displayName: "genty UI (current) — CLI binary"
+  agentVersionId: agent-version:genty@current
+  packageRef: source-ref:packages-genty
+  uiKind: cli-only
+  presentationsBundled:
+    - presentation:genty-cli
+  themeSupport: none
+  accessibilitySupport: basic
+  notes: |
+    genty's user-facing surface is its CLI binary (`genty`). The CLI wraps
+    agent-platform and adapters surfaces. Operator UIs (TUI, web, mobile)
+    are delivered via the adapters package family.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  bundled_with:
+    - target: presentation:genty-cli
+  supports_interaction_primitive:
+    - target: interaction-primitive:babysitter-run-create
+      attributes:
+        mechanism: native-api
+        invocationToken: "genty run:create"
+    - target: interaction-primitive:babysitter-run-iterate
+      attributes:
+        mechanism: native-api
+        invocationToken: "genty run:iterate"
+    - target: interaction-primitive:babysitter-task-post
+      attributes:
+        mechanism: native-api
+        invocationToken: "genty task:post"
+    - target: interaction-primitive:babysitter-doctor
+      attributes:
+        mechanism: native-api
+        invocationToken: "genty doctor"
+    - target: interaction-primitive:babysitter-mcp-server
+      attributes:
+        mechanism: native-api
+        invocationToken: "genty mcp"

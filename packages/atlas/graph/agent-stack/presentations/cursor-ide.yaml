@@ -1,0 +1,23 @@
+nodeKind: Presentation
+id: presentation:cursor-ide
+attributes:
+  displayName: "Cursor IDE"
+  kind: ide-extension
+  description: |
+    Cursor's IDE shell — a VS Code-derived desktop application that hosts
+    the Cursor agent inline with the editor. Surfaces Cmd+K, Cmd+L,
+    @-mentions, and inline edits as agent interaction primitives.
+  renderingTechnology: electron
+  themeSupport: full-customizable
+  accessibilitySupport: basic
+  offlineMode: partial
+  platforms: [darwin, linux, win32]
+  bundleSize: "~250 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Cmd+K / Ctrl+K: inline edit palette"
+    - "Cmd+L / Ctrl+L: chat pane"
+    - "Cmd+Shift+P / Ctrl+Shift+P: command palette"
+edges:
+  bundled_with:
+    - agent-platform-impl:cursor.platform@current

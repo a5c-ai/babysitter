@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:integrated-development-environment.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:integrated-development-environment
+  text: |
+    Integrated Development Environment (IDE): a graphical editor with integrated build, debug, language-server, and version-control tooling.
+  status: canonical
+edges:
+  defines:
+    - term:integrated-development-environment

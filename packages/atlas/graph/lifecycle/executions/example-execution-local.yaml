@@ -1,0 +1,118 @@
+nodeKind: Execution
+id: execution:local-host
+attributes:
+  displayName: "Local host (no isolation)"
+  kind: local
+  description: |
+    Direct exec on the developer host. The agent runs in the user's own
+    process tree; signals propagate via process-groups; no sandbox layer.
+  processLifecycleModel: unix-pgroup
+  signalPropagation: reliable
+  resourceLimits: {}
+  isolation: none
+  networkPolicy: unrestricted
+  fsAccess: unrestricted
+  gpuAccess: shared
+  sandboxImpl: none
+edges:
+  realizes:
+    - target: layer:8-execution
+---
+nodeKind: Execution
+id: execution:docker-default
+attributes:
+  displayName: "Docker (default container)"
+  kind: docker
+  description: |
+    Agent runs inside a docker container with a bind-mounted workspace and
+    an egress allowlist enforced at the docker-network level.
+  processLifecycleModel: docker-stop
+  signalPropagation: reliable
+  resourceLimits:
+    cpu: "2"
+    memoryMb: "4096"
+    timeoutMs: "3600000"
+    networkAllowed: "true"
+    diskQuota: "10Gi"
+  isolation: container
+  networkPolicy: egress-allowlist
+  fsAccess: workspace-only
+  gpuAccess: none
+  sandboxImpl: docker
+edges:
+  realizes:
+    - target: layer:8-execution
+  sandboxed_by:
+    - target: sandbox:default-container
+---
+nodeKind: Execution
+id: execution:codespaces-container
+attributes:
+  displayName: "GitHub Codespaces container"
+  kind: cloud
+  description: |
+    Codespaces-managed dev container. Lifecycle controlled by the
+    Codespaces backend; signals translated through the container runtime.
+  processLifecycleModel: docker-stop
+  signalPropagation: reliable
+  resourceLimits:
+    cpu: "4"
+    memoryMb: "8192"
+    networkAllowed: "true"
+    diskQuota: "32Gi"
+  isolation: container
+  networkPolicy: unrestricted
+  fsAccess: unrestricted
+  gpuAccess: none
+  sandboxImpl: docker
+edges:
+  realizes:
+    - target: layer:8-execution
+---
+nodeKind: Execution
+id: execution:k8s-job
+attributes:
+  displayName: "Kubernetes Job"
+  kind: kubernetes
+  description: |
+    Agent runs as a one-shot Kubernetes Job. terminationGracePeriodSeconds
+    governs SIGTERM delivery before SIGKILL.
+  processLifecycleModel: k8s-grace
+  signalPropagation: reliable
+  resourceLimits:
+    cpu: "1"
+    memoryMb: "2048"
+    timeoutMs: "1800000"
+    networkAllowed: "true"
+  isolation: container
+  networkPolicy: egress-allowlist
+  fsAccess: overlay-fs
+  gpuAccess: none
+  sandboxImpl: gvisor
+edges:
+  realizes:
+    - target: layer:8-execution
+---
+nodeKind: Execution
+id: execution:firecracker-microvm
+attributes:
+  displayName: "Firecracker micro-VM"
+  kind: cloud
+  description: |
+    AWS Firecracker micro-VM (e.g. as used by Fly.io / Modal). Provides
+    VM-level isolation with sub-second boot.
+  processLifecycleModel: direct
+  signalPropagation: degraded
+  resourceLimits:
+    cpu: "1"
+    memoryMb: "512"
+    timeoutMs: "900000"
+    networkAllowed: "true"
+  isolation: vm
+  networkPolicy: egress-allowlist
+  fsAccess: overlay-fs
+  gpuAccess: none
+  sandboxImpl: firecracker
+edges:
+  realizes:
+    - target: layer:8-execution

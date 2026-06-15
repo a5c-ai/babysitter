@@ -9,6 +9,13 @@ expertise:
   - Guardrail monitoring
   - Decision recommendation
   - Test documentation
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:ab-testing-experimentation, skill-area:statistical-analysis]
+  roles: [role:data-scientist, role:data-analyst]
+  workflows: [workflow:experiment-design]
+
 ---
 
 # ab-test-analyst

@@ -8,6 +8,12 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:sast, skill-area:code-cybersecurity]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # Static Analysis Tools Skill

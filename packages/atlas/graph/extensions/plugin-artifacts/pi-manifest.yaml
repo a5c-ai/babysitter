@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:pi-manifest
+attributes:
+  artifactId: plugin-artifact:pi-manifest
+  displayName: "Pi plugin manifest (state-only)"
+  targetId: plugin-target:pi
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "state-only"
+  contextFiles:
+    - packages/extensions-adapter/src/targets/pi.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:pi

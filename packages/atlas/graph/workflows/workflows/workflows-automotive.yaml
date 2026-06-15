@@ -1,0 +1,101 @@
+---
+nodeKind: Workflow
+id: workflow:adas-validation-cycle
+attributes:
+  displayName: "ADAS Validation Cycle"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates Advanced Driver Assistance Systems against ISO 26262
+    functional safety requirements -- running scenario-based testing with
+    synthetic sensor data, evaluating perception model performance on
+    edge cases, verifying actuator response latencies, confirming SOTIF
+    (Safety of the Intended Functionality) coverage, and producing the
+    ASIL-rated validation evidence package. Excludes ADAS algorithm
+    development.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:test-writer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:performance-testing
+  applies_to_domain:
+    - target: domain:automotive-engineering
+    - target: domain:robotics
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:ecu-firmware-release
+attributes:
+  displayName: "ECU Firmware Release"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Manages ECU firmware release through AUTOSAR-compliant build
+    pipelines -- compiling for target microcontrollers, running MISRA-C
+    static analysis, executing hardware-in-the-loop regression suites,
+    validating CAN/LIN/FlexRay diagnostic services, signing firmware
+    images with HSM-backed keys, and staging OTA delta packages for
+    fleet deployment. Excludes ECU hardware design.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:firmware-development
+    - target: skill-area:real-time-os
+  applies_to_domain:
+    - target: domain:automotive-engineering
+    - target: domain:embedded-systems
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:vehicle-cybersecurity-assessment
+attributes:
+  displayName: "Vehicle Cybersecurity Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Assesses vehicle cybersecurity posture per UN R155/ISO 21434 --
+    performing threat analysis and risk assessment (TARA) on vehicle
+    architectures, penetration testing CAN bus and Ethernet backbone,
+    evaluating OTA update channel integrity, auditing diagnostic port
+    access controls, and validating intrusion detection system
+    effectiveness. Produces the cybersecurity case for type approval.
+    Excludes vulnerability remediation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:network-security
+  applies_to_domain:
+    - target: domain:automotive-engineering
+    - target: domain:electrical-engineering
+  triggers_responsibility:
+    - target: responsibility:threat-modeling
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:engineering

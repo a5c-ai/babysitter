@@ -19,6 +19,13 @@
  * - IHI FMEA Tool
  * - VA NCPS HFMEA
  * - Joint Commission Proactive Risk Assessment
+ *
+ * @graph
+ *   domains: [domain:healthcare]
+ *   specializations: [specialization:clinical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

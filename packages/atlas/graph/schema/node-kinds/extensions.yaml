@@ -1,0 +1,2846 @@
+# NodeKinds for cluster 7-extensions.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:plugin
+  name: Plugin
+  origin: universal
+  prefix: plugin
+  cluster: 7-extensions
+  purpose: universal plugin (union of skills/MCP/hooks/lsp/monitors/bin)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: manifestPath
+    type: string
+    required: false
+  - name: provenance
+    type: enum<built-in,custom,mixed>
+    required: false
+    default: custom
+    notes: Generalized from Subagent.provenance (remodel 2026-04-29). built-in = vendor-shipped plugin; custom = user-installed; mixed = vendor ships defaults the user can override.
+  - name: version
+    type: semver
+    required: false
+    notes: Current canonical version of this Plugin (remodel 2026-04-29 — change B). Single-version-at-a-time pattern; see ../schema/meta-schema.md §Version-tracking pattern.
+  - name: releasedAt
+    type: iso-date
+    required: false
+    notes: Release date of the current version.
+  - name: supersededBy
+    type: ref<Plugin>
+    required: false
+    notes: When this Plugin has been deprecated in favor of another Plugin entity, point to the replacement.
+  - name: homepageUrl
+    type: url
+    required: false
+  - name: installFormats
+    type: list<string>
+    required: false
+  - name: vendor
+    type: string
+    required: false
+  - name: nativeFormat
+    type: enum<claude-plugin,cursor-extension,codex-extension,gemini-extension,opencode-acp,gh-copilot-plugin,omp-plugin,openclaw-plugin,pi-plugin,a5c-plugin,babysitter-plugin,none>
+    required: false
+    notes: 'Host-specific plugin format this Plugin builds for. Mirrors AgentPlatformImpl.nativeExtensionFormat. Only set when portability=native or hybrid (catalog pass 21 hygiene 2026-05-01: collapsed NativeExtension NodeKind into this enum).'
+  - name: portability
+    type: enum<portable,native,hybrid>
+    required: false
+    notes: 'How this Plugin is delivered. `portable` = single source compiled to many products via extensions-adapter; `native` = built directly for one host''s plugin format; `hybrid` = ships portable source plus pre-compiled native artifacts (catalog pass 21 hygiene 2026-05-01: collapsed PortableExtension NodeKind into this enum).'
+  incomingEdges: []
+  outgoingEdges:
+  - installs_into
+  - contains_skill
+  - contains_subagent
+  - contains_tool_server
+  - contains_tool_descriptor
+  - contains_lsp_server
+  - contains_monitor
+  - contains_bin
+  - ships_settings
+  - applies_to
+  - requires_capability
+  - implements
+  - sourced_from
+  - compiles_to
+  invariants:
+  - every installs_into edge declares installMethod (V-11.1)
+  - portability=native or hybrid implies nativeFormat is set
+  examples: []
+- id: node:lsp-server
+  name: LSPServer
+  origin: universal
+  originContext: Anthropic Claude Code plugin reference
+  prefix: lsp-server
+  cluster: 7-extensions
+  purpose: a Language Server Protocol server bundled in a plugin (Claude Code .lsp.json)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: manifestPath
+    type: string
+    required: true
+  - name: command
+    type: string
+    required: true
+  - name: args
+    type: list<string>
+    required: false
+  - name: languages
+    type: list<ref<Language>>
+    required: true
+  - name: frameworks
+    type: list<ref<Framework>>
+    required: false
+  - name: transport
+    type: enum<stdio,tcp,websocket,ipc>
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - contains_lsp_server
+  outgoingEdges:
+  - lsp_server_contained_in_plugin
+  - serves_language
+  - sourced_from
+  invariants:
+  - languages list is non-empty
+  - manifestPath must exist within the containing plugin's package path
+  examples:
+  - graph/extensions/lsp-servers/example-typescript-lsp.yaml
+- id: node:background-monitor
+  name: BackgroundMonitor
+  origin: universal
+  originContext: Anthropic Claude Code plugin reference
+  prefix: background-monitor
+  cluster: 7-extensions
+  purpose: long-running monitor process bundled in a plugin (Claude Code monitors/monitors.json)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: manifestPath
+    type: string
+    required: true
+  - name: command
+    type: string
+    required: true
+  - name: args
+    type: list<string>
+    required: false
+  - name: triggers
+    type: list<enum<session-start,file-change,git-event,timer,custom>>
+    required: true
+  - name: lifecycle
+    type: enum<persistent,per-session,on-demand>
+    required: true
+  - name: outputs
+    type: list<enum<notification,file,hook-event,custom>>
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - contains_monitor
+  outgoingEdges:
+  - monitor_contained_in_plugin
+  - emits_hook
+  - sourced_from
+  invariants:
+  - lifecycle and triggers must be coherent (on-demand lifecycle excludes session-start trigger)
+  examples:
+  - graph/extensions/background-monitors/example-file-watcher.yaml
+- id: node:binary-provider
+  name: BinaryProvider
+  origin: universal
+  originContext: Anthropic Claude Code plugin reference
+  prefix: binary-provider
+  cluster: 7-extensions
+  purpose: plugin-provided executables added to PATH (Claude Code bin/ directory)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: binDir
+    type: string
+    required: true
+  - name: executables
+    type: list<map<name,platform,target>>
+    required: true
+  - name: pathPolicy
+    type: enum<prepend,append,session-only>
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - contains_bin
+  outgoingEdges:
+  - bin_contained_in_plugin
+  - provides_executable
+  invariants:
+  - executables list is non-empty
+  - every executable must exist on disk under binDir for at least one declared platform
+  examples:
+  - graph/extensions/binary-providers/example-bin-helpers.yaml
+- id: node:settings-template
+  name: SettingsTemplate
+  origin: universal
+  originContext: Anthropic Claude Code plugin reference
+  prefix: settings-template
+  cluster: 7-extensions
+  purpose: a plugin-shipped settings.json fragment merged into host settings on install
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: targetSettingsPath
+    type: string
+    required: true
+  - name: fragmentPath
+    type: string
+    required: true
+  - name: mergeStrategy
+    type: enum<deep-merge,replace,append-only,prepend-only>
+    required: true
+  - name: conflictPolicy
+    type: enum<keep-existing,overwrite,prompt-user,fail>
+    required: true
+  - name: scope
+    type: enum<user,project,both>
+    required: true
+  - name: revertOnUninstall
+    type: bool
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - ships_settings
+  outgoingEdges:
+  - settings_contained_in_plugin
+  - merges_into
+  invariants:
+  - targetSettingsPath must resolve to a PathDescriptor of pathKind settings-file
+  - 'revertOnUninstall: true requires mergeStrategy: deep-merge with conflictPolicy in {keep-existing, overwrite}'
+  examples:
+  - graph/extensions/settings-templates/example-claude-settings.yaml
+- id: node:hook-merge-diagnostic
+  name: HookMergeDiagnostic
+  origin: a5c
+  prefix: hook-merge-diagnostic
+  cluster: 7-extensions
+  purpose: a record produced by hooks-adapter when merging hook surfaces from multiple sources (plugins, settings, profiles)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: hookSurfaceId
+    type: ref<HookSurface>
+    required: true
+  - name: outcome
+    type: enum<accepted,merged,conflict,dropped>
+    required: true
+  - name: sources
+    type: list<string>
+    required: true
+  - name: precedenceRule
+    type: string
+    required: true
+  - name: detail
+    type: markdown
+    required: true
+  - name: severity
+    type: enum<info,warning,error>
+    required: true
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - sources list is non-empty
+  - outcome=conflict requires severity in {warning,error}
+  examples: []
+- id: node:skill
+  name: Skill
+  origin: universal
+  prefix: skill
+  cluster: 7-extensions
+  purpose: |
+    Directory-of-markdown content shape — a procedural workflow described in
+    SKILL.md plus optional supporting files. Distinct from `Subagent` (which
+    is a dispatchable worker). A Skill is the "how to do X" markdown content;
+    a Subagent that loads/uses a Skill is the "who runs that workflow"
+    entity. The same workflow can be packaged as a Skill that's loaded by
+    multiple Subagents.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: kind
+    type: enum<anthropic-api-skill,claude-code-skill,portable-skill>
+    required: false
+  - name: invocationMode
+    type: enum<model-invoked,user-invoked,both>
+    required: false
+  - name: disableModelInvocation
+    type: bool
+    required: false
+  - name: entrypoint
+    type: string
+    required: false
+  - name: argumentsToken
+    type: string
+    required: false
+  - name: provenance
+    type: enum<built-in,custom,mixed>
+    required: false
+    default: custom
+    notes: Generalized from Subagent.provenance (remodel 2026-04-29). built-in = vendor-shipped (e.g. Claude Code's bundled `init`/`compact` skills). custom = user-installed. mixed = vendor ships defaults the user can override.
+  - name: version
+    type: semver
+    required: false
+    notes: Current canonical version of this Skill (remodel 2026-04-29 — change B). Single-version-at-a-time pattern; see ../schema/meta-schema.md §Version-tracking pattern.
+  - name: releasedAt
+    type: iso-date
+    required: false
+    notes: Release date of the current version.
+  - name: supersededBy
+    type: ref<Skill>
+    required: false
+    notes: When this Skill has been deprecated in favor of another Skill, point to the replacement.
+  - name: domains
+    type: any
+    required: false
+  - name: keyword
+    type: any
+    required: false
+  - name: requiresFrameworks
+    type: list<id>
+    required: false
+  - name: requiresLanguages
+    type: list<id>
+    required: false
+  - name: roles
+    type: list<id>
+    required: false
+  - name: sourceRef
+    type: ref<SourceRef>
+    required: false
+  - name: frontmatterFields
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — recognized SKILL.md YAML frontmatter keys (when_to_use, argument-hint, arguments, disable-model-invocation, user-invocable, allowed-tools, model, effort, context, agent, hooks, paths, shell).
+  - name: argumentsMode
+    type: enum<positional,named,$ARGUMENTS-substitution,none>
+    required: false
+    notes: catalog pass 83 — how command-style skills accept arguments. $ARGUMENTS-substitution means the entire arg blob is interpolated as `$ARGUMENTS`; positional means `$1`, `$2`, ... interpolation.
+  - name: substitutionVariables
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — string-substitution placeholders supported in the SKILL.md body (e.g. `$ARGUMENTS`, `$1`, `$2`, `${CLAUDE_PROJECT_DIR}`).
+  - name: dynamicContextSyntax
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — dynamic-context-injection syntax patterns ("!`<cmd>`" for inline shell, "```!" fenced block).
+  - name: shellExecutionPolicy
+    type: enum<allow,deny,allowlist,prompt>
+    required: false
+    notes: catalog pass 83 — policy governing skill-embedded shell snippets (skills docs `shell:` frontmatter).
+  - name: allowedTools
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — `allowed-tools:` frontmatter, restricting which tools the skill may use.
+  - name: pathsGlob
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — `paths:` frontmatter glob list scoping the skill to specific repo paths.
+  - name: model
+    type: string
+    required: false
+    notes: catalog pass 83 — optional `model:` frontmatter override (e.g. claude-sonnet-4.7).
+  - name: effort
+    type: enum<low,medium,high>
+    required: false
+    notes: catalog pass 83 — `effort:` frontmatter governing model thinking budget.
+  - name: argumentHint
+    type: string
+    required: false
+    notes: catalog pass 83 — `argument-hint:` frontmatter — human-readable usage hint shown in slash-command UI.
+  - name: scopePrecedence
+    type: enum<project-over-user,user-over-project,plugin-over-both>
+    required: false
+    notes: catalog pass 83 — Claude Code skill resolution precedence (project-level overrides user-level by default).
+  incomingEdges:
+  - contains_skill
+  - requires_skill
+  - runs_skill
+  outgoingEdges:
+  - requires_capability
+  - applies_to
+  - implements
+  - sourced_from
+  - uses_template
+  - executed_in_child_session
+  - skill_contained_in_plugin
+  invariants: []
+  examples: []
+- id: node:subagent
+  name: Subagent
+  origin: universal
+  originDate: 2025-09-01
+  originContext: Anthropic Claude Code Subagents docs
+  prefix: subagent
+  clusters:
+  - 7-extensions
+  - 3-agent-stack
+  purpose: 'A specialized worker / persona that an agent runtime can dispatch alongside
+
+    its primary loop. Canonical term follows Anthropic Claude Code ("subagent",
+
+    one word; docs.anthropic.com/en/docs/claude-code/sub-agents). The same
+
+    NodeKind covers two provenance variants — vendor-shipped built-ins (Claude
+
+    Code''s general-purpose / Explore / Plan; OpenAI built-in handoff patterns)
+
+    and user-installable custom definitions (Claude Code `.claude/agents/<name>.md`,
+
+    parallel to a Skill''s SKILL.md). Distinguished via the `provenance`
+
+    attribute. The dispatch *mechanism* a runtime uses to invoke a subagent is
+
+    recorded on `AgentRuntimeImpl.subagentDispatchMechanism` (task-tool /
+
+    handoff / sub_agents-array / agent-as-tool / none); the *definition format*
+
+    a platform loads custom subagents from is recorded on
+
+    `AgentPlatformImpl.subagentDefinitionFormat`.
+
+    A Subagent is a DISPATCHABLE WORKER (an entity invoked via a runtime''s
+    dispatch mechanism). Distinct from `Skill`, which is a PROCEDURAL ARTIFACT
+    (directory-of-markdown that describes a workflow). A Subagent CAN RUN a
+    Skill in a ChildSession — see `runs_skill` edge.
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: dispatchPattern
+    type: enum<task-tool,handoff,sub-agents-array,agent-as-tool,slash-command,subprocess-task,custom>
+    required: false
+    notes: |
+      The dispatch pattern this specific subagent uses (per-subagent override of
+      the AgentRuntimeImpl.subagentDispatchMechanism default). Most subagents
+      inherit the runtime's default; explicit value here only when the subagent
+      uses a different mechanism (e.g. claude-code's general-purpose uses
+      `task-tool`, while a slash-command-invoked persona might use
+      `slash-command`).
+  - name: provenance
+    type: enum<built-in,custom,mixed>
+    required: true
+    default: custom
+    notes: 'built-in = vendor-shipped (e.g. Claude Code''s bundled general-purpose / Explore / Plan; OpenAI built-in handoff patterns). custom = user-installable definition (e.g. Claude Code `.claude/agents/<name>.md`, parallel to a Skill''s SKILL.md). mixed = vendor ships defaults that the user can override. Phase-2 backfill will add evidence: vendor-doc-or-better when provenance != custom.'
+  - name: subjectId
+    type: id
+    required: false
+    notes: 'When provenance=built-in: ref<AgentVersion> | ref<AgentProduct> the subagent ships with. When provenance=custom: typically unset (defined by a user in their project/user dir).'
+  - name: version
+    type: semver
+    required: false
+    notes: Current canonical version of this Subagent (remodel 2026-04-29 — change B). Single-version-at-a-time pattern; see ../schema/meta-schema.md §Version-tracking pattern.
+  - name: releasedAt
+    type: iso-date
+    required: false
+    notes: Release date of the current version.
+  - name: supersededBy
+    type: ref<Subagent>
+    required: false
+    notes: When this Subagent has been deprecated in favor of another Subagent, point to the replacement.
+  - name: disallowedTools
+    type: list<string>
+    required: false
+  - name: roleId
+    type: id
+    required: false
+  - name: systemPrompt
+    type: markdown
+    required: false
+  - name: tools
+    type: list<string>
+    required: false
+  - name: triggers
+    type: any
+    required: false
+  - name: agentType
+    type: enum<general-purpose,explore,plan,custom>
+    required: false
+    notes: catalog pass 83 — Claude Code distinguishes built-in Explore/Plan/general-purpose subagents from custom ones (sub-agents docs).
+  - name: dispatchTool
+    type: enum<Task,task-create,send-message,custom>
+    required: false
+    notes: catalog pass 83 — the specific tool that invokes this subagent (Task for canonical subagents, task-create for CC interactive task list, send-message for agent-team teammates).
+  - name: contextIsolation
+    type: enum<isolated,shared,inherits-parent>
+    required: false
+    notes: catalog pass 83 — sub-agents docs note that subagents run with isolated context windows by default; some delegated patterns share or inherit.
+  - name: parallelExecutable
+    type: bool
+    required: false
+    notes: catalog pass 83 — whether multiple instances can run concurrently from the same dispatch (ClaudeCode general-purpose supports parallel Task calls).
+  - name: returnValueShape
+    type: enum<text,structured,tool-result-list,none>
+    required: false
+    notes: catalog pass 83 — subagent return-value semantics; Claude Code subagents return a final text message back to the parent.
+  - name: frontmatterFields
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — for custom subagents loaded from `.claude/agents/<name>.md`, the recognized YAML frontmatter keys (e.g. name, description, tools, model, color).
+  - name: toolAllowlist
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — explicit tool allowlist (frontmatter `tools:`) restricting which tools this subagent may invoke. Distinct from `disallowedTools` (denylist).
+  - name: preloadedSkills
+    type: list<string>
+    required: false
+    notes: catalog pass 83 — Skill ids preloaded into this subagent's context on dispatch.
+  - name: teammateRole
+    type: enum<lead,member,solo>
+    required: false
+    notes: "catalog pass 83 — when this subagent participates in an AgentTeam: lead drives the shared task list, member is a teammate worker, solo means not team-affiliated."
+  - name: teamMemberStorage
+    type: string
+    required: false
+    notes: catalog pass 83 — filesystem path template for team-member working state (e.g. `~/.claude/teams/{team}/members/{name}/`).
+  - name: planApprovalRequired
+    type: bool
+    required: false
+    notes: catalog pass 83 — whether risky teammate actions require lead-approval gating (agent-teams docs).
+  incomingEdges:
+  - contains_subagent
+  - dispatches_subagent
+  outgoingEdges:
+  - roles_played_by
+  - applies_to
+  - implements
+  - sourced_from
+  - uses_template
+  - dispatched_to_child_session
+  - dispatched_via_tool
+  - subagent_contained_in_plugin
+  invariants:
+  - provenance=built-in implies subjectId is set and resolves to an AgentVersion or AgentProduct
+  examples: []
+- id: node:tool-server
+  name: ToolServer
+  origin: universal
+  prefix: tool-server
+  cluster: 7-extensions
+  purpose: external process speaking a tool protocol
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: protocol
+    type: enum<mcp-stdio
+    mcp-streamable-http: null
+    openai-tools: null
+    custom>: null
+    required: true
+  - name: provenance
+    type: enum<built-in,custom,mixed>
+    required: false
+    default: custom
+    notes: Generalized from Subagent.provenance (remodel 2026-04-29). built-in = vendor-shipped tool server; custom = user-installed.
+  - name: version
+    type: semver
+    required: false
+    notes: Current canonical version of this ToolServer (remodel 2026-04-29 — change B). Single-version-at-a-time pattern; see ../schema/meta-schema.md §Version-tracking pattern.
+  - name: releasedAt
+    type: iso-date
+    required: false
+    notes: Release date of the current version.
+  - name: supersededBy
+    type: ref<ToolServer>
+    required: false
+    notes: When this ToolServer has been deprecated in favor of another ToolServer, point to the replacement.
+  - name: mcpTransports
+    type: list<string>
+    required: false
+  - name: sourceRef
+    type: ref<SourceRef>
+    required: false
+  - name: tools
+    type: list<string>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+    notes: Human-readable summary of what this tool server does.
+  - name: repoUrl
+    type: url
+    required: false
+    notes: Source repository URL.
+  - name: installCommand
+    type: string
+    required: false
+    notes: One-liner install command (e.g. npx, npm install).
+  - name: category
+    type: enum<database,search,cloud,devtools,productivity,communication,ai,monitoring,version-control,file-system,design,analytics,security,payment,cms,other>
+    required: false
+    notes: High-level category for filtering and discovery.
+  - name: maintainer
+    type: string
+    required: false
+    notes: Maintainer or organization name.
+  - name: npmPackage
+    type: string
+    required: false
+    notes: npm package name when applicable.
+  incomingEdges:
+  - contains_tool_server
+  - scores_agent_readiness_of
+  - work_supported_by_tool
+  outgoingEdges:
+  - implements
+  - sourced_from
+  - contains_tool_descriptor
+  - requires_capability
+  - supports
+  - exposes_resource
+  - exposes_prompt
+  - exposes_root
+  - exposes_sampling
+  - exposes_tool
+  - mcp_config_scoped_to
+  - has_connection_state
+  - integrates_with
+  - lib_applies_to_domain
+  - supports_work
+  - agent_readiness_score_for
+  invariants: []
+  examples: []
+- id: node:tool-descriptor
+  name: ToolDescriptor
+  origin: universal
+  prefix: tool-descriptor
+  clusters:
+  - 7-extensions
+  - 5-communication-primitives
+  purpose: a callable tool with schema
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: schema
+    type: code
+    required: true
+    annotations:
+    - json-schema
+  - name: category
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: inputSchema
+    type: any
+    required: false
+  - name: mode
+    type: string
+    required: false
+  - name: outputSchema
+    type: any
+    required: false
+  - name: streamable
+    type: bool
+    required: false
+  - name: timeoutMs
+    type: int
+    required: false
+  - name: vendor
+    type: string
+    required: false
+  - name: callShape
+    type: enum<openai-function,anthropic-tool-use,gemini-function-call,json-action,react-action,code-action>
+    required: false
+    notes: Tool-call shape advertised by this descriptor (D-bonus.toolCallShape, planner 2026-05-01). Captures function-call / tool-use shape variation across vendors.
+  - name: requiresPermissionGate
+    type: bool
+    required: false
+    notes: catalog pass 53 / claude-code CanUseToolFn — if true, each invocation runs through a permission hook before execution.
+  - name: supportsCancellation
+    type: bool
+    required: false
+    notes: catalog pass 53 — true if the tool honors AbortSignal mid-call (claude-code createAbortController / ToolUseContext.abortController).
+  - name: abortPropagation
+    type: enum<immediate,cooperative,delayed,none>
+    required: false
+    notes: catalog pass 53 — how the tool propagates abort to subprocesses or remote calls. immediate=signal honored synchronously; cooperative=checks at safe points; delayed=runs to completion then drops result; none=no abort support.
+  - name: errorBehavior
+    type: enum<retryable,fatal,user-handled,returns-tool-error>
+    required: false
+    notes: catalog pass 53 — distinguishes a thrown error (retryable/fatal) from a structured tool_error result the model is expected to handle (returns-tool-error, e.g. claude-code BashTool stderr).
+  - name: isSynthetic
+    type: bool
+    required: false
+    notes: catalog pass 53 / claude-code SYNTHETIC_OUTPUT_TOOL_NAME — synthetic tools are inserted by the runtime to wrap untoolable model output (e.g. structured final-output tool); they are not invoked by the model directly.
+  incomingEdges:
+  - invoking_tool
+  - dispatched_via_tool
+  - contains_tool_descriptor
+  outgoingEdges:
+  - requires_capability
+  - assesses_policy
+  - triggers_child_session
+  - dispatches_subagent
+  - tool_descriptor_contained_in_plugin
+  invariants: []
+  examples: []
+- id: node:blueprint
+  name: Blueprint
+  origin: a5c
+  prefix: blueprint
+  cluster: 7-extensions
+  purpose: markdown bundle agent reads to install/configure projects (a5c-flavored)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: author
+    type: string
+    required: false
+  - name: breakpoints
+    type: list<string>
+    required: false
+  - name: configureMd
+    type: string
+    required: false
+  - name: domains
+    type: any
+    required: false
+  - name: installMd
+    type: string
+    required: false
+  - name: latestVersion
+    type: string
+    required: false
+  - name: marketplaceUrl
+    type: url
+    required: false
+  - name: packagePath
+    type: string
+    required: false
+  - name: requiresFrameworks
+    type: list<id>
+    required: false
+  - name: requiresLanguages
+    type: list<id>
+    required: false
+  - name: scope
+    type: string
+    required: false
+  - name: tags
+    type: list<string>
+    required: false
+  - name: targetSurface
+    type: any
+    required: false
+  - name: uninstallMd
+    type: string
+    required: false
+  - name: versions
+    type: list<string>
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:extension-interface
+  name: ExtensionInterface
+  origin: a5c
+  prefix: extension-interface
+  cluster: 7-extensions
+  purpose: a contract an extension fulfills
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: interfaceVersion
+    type: semver
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: builtInDefault
+    type: string
+    required: false
+  - name: concern
+    type: string
+    required: false
+  - name: notableImpls
+    type: list<string>
+    required: false
+  - name: surface
+    type: string
+    required: false
+  incomingEdges:
+  - implements
+  outgoingEdges: []
+  invariants:
+  - implementers carry interfaceVersion claim evidence-bound to release notes (V-11.3)
+  examples: []
+- id: node:adapter
+  name: Adapter
+  origin: a5c
+  prefix: adapter
+  cluster: 7-extensions
+  purpose: a5c\'s realization of a protocol-type bridge — N-to-1 / 1-to-N translator between concrete impls of the same universal protocol-type and a single canonical impl. Driven by Catalog data.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: protocolType
+    type: enum<llm-wire,spawn,event-stream,session-storage,admin,hook,extension-manifest,tool,task>
+    required: true
+    notes: The universal protocol-type the adapter bridges. See wiki/legacy/universal/04-protocols.md.
+  - name: nativeSide
+    type: list<string>
+    required: true
+    notes: Concrete impls on the native side (N).
+  - name: canonicalSide
+    type: string
+    required: true
+    notes: One canonical impl exposed by the adapter.
+  - name: position
+    type: string
+    required: true
+    notes: Stack-layer position this adapter occupies (e.g. "between Transport-Client and Provider").
+  - name: bridgingConcerns
+    type: list<markdown>
+    required: false
+  - name: catalogInputNodeKinds
+    type: list<string>
+    required: false
+    notes: NodeKinds the adapter is driven by (used at generation time).
+  - name: trustChainParticipation
+    type: enum<live,planned,none>
+    required: false
+  - name: description
+    type: markdown
+    required: true
+  incomingEdges:
+  - bridged_by_mux
+  outgoingEdges:
+  - bridges_protocol_type
+  invariants:
+  - protocolType is one of the canonical protocol-types declared in wiki/legacy/universal/04-protocols.md
+  examples: []
+- id: node:plugin-artifact
+  name: PluginArtifact
+  origin: universal
+  prefix: plugin-artifact
+  cluster: 7-extensions
+  purpose: a single deliverable file (manifest, command, hook script, MCP config, container image) emitted by a PluginTarget / AgentVersion
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: artifactId
+    type: string
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: targetId
+    type: id
+    required: true
+    notes: ref<PluginTarget> | ref<AgentVersion>
+  - name: artifactKind
+    type: enum<manifest
+    command: null
+    hook-script: null
+    skill-md: null
+    subagent-md: null
+    mcp-config: null
+    settings-fragment: null
+    container-image>: null
+    required: true
+  - name: pathPattern
+    type: string
+    required: true
+    evidence: vendor-doc-or-better
+  - name: installerSurface
+    type: string
+    required: true
+  - name: scriptVariants
+    type: list<string>
+    required: false
+  - name: contextFiles
+    type: list<string>
+    required: false
+  - name: requiredAttributes
+    type: list<string>
+    required: false
+  incomingEdges:
+  - emits_artifact
+  outgoingEdges:
+  - references_path
+  - sourced_from
+  invariants:
+  - targetId resolves
+  - artifactKind=container-image implies pathPattern is a container image reference
+  examples: []
+- id: node:plugin-target
+  name: PluginTarget
+  origin: universal
+  prefix: plugin-target
+  cluster: 7-extensions
+  purpose: 'Per-agent target spec used by the extensions-adapter / extensions-adapter to know
+
+    how to compile a portable Plugin (portability=portable|hybrid) into a
+
+    native Plugin (portability=native) for a particular agent host. Distinct from AgentPlatformImpl (the platform itself);
+
+    PluginTarget is the *target descriptor* — manifest format, command format,
+
+    script variants, install layout, package metadata, distribution model, etc.
+
+    Sourced from the legacy agent-catalog ontology
+
+    (packages/agent-catalog/graph/schema/ontology-schema.yaml :: PluginTarget).
+
+    '
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: targetId
+    type: string
+    required: false
+    notes: Stable target identifier; typically equals id slug. Optional in v6 because id is the canonical handle.
+  - name: displayName
+    type: string
+    required: true
+  - name: hostAgent
+    type: ref<AgentProduct>
+    required: true
+    notes: The AgentProduct this target compiles for; populated by every imported example.
+  - name: adapterName
+    type: string
+    required: false
+    notes: Internal adapter id used by extensions-adapter (e.g. claude-code, codex, omp); legacy required, v6 optional pending evidence.
+  - name: adapterFamily
+    type: enum<claude-code-native
+    shell-hook: null
+    programmatic: null
+    extension-manifest>: null
+    required: true
+    evidence: vendor-doc-or-better
+  - name: manifestFormat
+    type: string
+    required: false
+    evidence: vendor-doc-or-better
+    notes: E.g. 'package.json + hooks.json', 'state-only', 'extension-manifest'. Optional because some hosts (claude-code-native) use manifestPath only.
+  - name: manifestPath
+    type: string
+    required: false
+    notes: Direct path to the host-specific manifest in the package, e.g. .claude-plugin/plugin.json.
+  - name: commandFormat
+    type: enum<package-json-commands
+    markdown-commands: null
+    extension-manifest: null
+    preinstalled: null
+    none>: null
+    required: false
+  - name: skillHandling
+    type: enum<native
+    markdown-fallback: null
+    unsupported>: null
+    required: false
+  - name: hookRegistrationFormat
+    type: string
+    required: false
+    notes: E.g. claude-code, codex, opencode, copilot-cli, none.
+  - name: scriptVariants
+    type: list<enum<bash
+    javascript: null
+    typescript: null
+    powershell>>: null
+    required: false
+  - name: distribution
+    type: list<enum<npm-cli
+    github-repo: null
+    marketplace: null
+    container-image: null
+    manual>>: null
+    required: true
+  - name: distributionModel
+    type: enum<workspace-generated
+    vendor-hosted: null
+    marketplace-managed: null
+    user-installed>: null
+    required: false
+  - name: installLayout
+    type: map<string
+    string>: null
+    required: false
+    notes: Map of layout-slot -> relative path (manifest, commands, agents, skills, hooks, mcp, harnessHomeRelative, pluginsDirRelative, marketplacePathRelative).
+  - name: packageMetadata
+    type: map<string
+    any>: null
+    required: false
+    notes: 'Per-target npm package metadata: moduleType, binScriptExt, installLifecycle, activationMessage, peerDependencyPackage, emitCjsWrappers, etc.'
+  - name: componentSupport
+    type: map<string
+    enum<native: null
+    unsupported: null
+    markdown-fallback>>: null
+    required: false
+    notes: Per-component support map (agents, context, skills, hooks).
+  - name: npmPublishable
+    type: bool
+    required: false
+  - name: pluginRootEnvVar
+    type: string
+    required: false
+    notes: Environment variable the host exposes to point at an installed plugin's root (e.g. CLAUDE_PLUGIN_ROOT). Optional pending evidence.
+  - name: pluginRootEnvVarForExtension
+    type: string
+    required: false
+    notes: Environment variable a generated extension uses to find its own root (e.g. OMP_PLUGIN_ROOT).
+  - name: marketplacePath
+    type: string
+    required: false
+    notes: Repo-relative path to the marketplace manifest if the target uses a marketplace registry.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - emits_artifact
+  - hosted_by
+  outgoingEdges:
+  - emits_artifact
+  - hosted_by
+  - pairs_with
+  invariants:
+  - id starts with plugin-target: null
+  - hostAgent resolves to an AgentProduct
+  - distribution non-empty
+  - scriptVariants present implies hookRegistrationFormat or commandFormat is also set (a plugin-target that emits scripts must declare how the host loads them)
+  examples:
+  - graph/extensions/plugin-artifacts/plugin-target-claude-code.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-codex.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-copilot-cli.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-cursor.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-gemini-cli.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-omp.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-openclaw.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-opencode.yaml
+  - graph/extensions/plugin-artifacts/plugin-target-pi.yaml
+- id: node:http-server-extension
+  name: HTTPServerExtension
+  origin: standard
+  originContext: catalog pass 18 / Symphony §13.7 — operator<->orchestrator HTTP control surface (distinct from AgentHostTransport which is agent<->host)
+  prefix: http-server
+  cluster: 7-extensions
+  purpose: an operator-facing HTTP server hosted by the orchestrator (hosts APIEndpoints and Dashboards)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: port
+    type: int
+    required: true
+  - name: bindAddress
+    type: string
+    required: false
+  - name: hotReloadable
+    type: bool
+    required: false
+  - name: dashboardEnabled
+    type: bool
+    required: false
+  - name: apiEnabled
+    type: bool
+    required: false
+  - name: authMode
+    type: enum<none,token,mtls>
+    required: false
+  - name: corsPolicy
+    type: string
+    required: false
+  incomingEdges:
+  - exposed_by
+  outgoingEdges: []
+  invariants:
+  - id starts with http-server: null
+  examples: []
+- id: node:api-endpoint
+  name: APIEndpoint
+  origin: standard
+  originContext: catalog pass 18 / Symphony §13.7.2 — HTTP route hosted by HTTPServerExtension
+  prefix: api-endpoint
+  cluster: 7-extensions
+  purpose: a versioned HTTP route exposed by an HTTPServerExtension; may fire an OperationalTrigger
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: method
+    type: enum<GET,POST,PUT,DELETE,PATCH>
+    required: true
+  - name: path
+    type: string
+    required: true
+  - name: version
+    type: string
+    required: false
+  - name: responseShape
+    type: string
+    required: false
+    notes: JSON-Schema link or free-string description.
+  - name: readOnly
+    type: bool
+    required: false
+  - name: errorEnvelope
+    type: enum<none,standard-json>
+    required: false
+  - name: exposedByServerId
+    type: ref<HTTPServerExtension>
+    required: false
+  - name: triggersOperationalTriggerId
+    type: ref<OperationalTrigger>
+    required: false
+  - name: authRequired
+    type: bool
+    required: false
+    notes: Whether the endpoint requires authentication.
+  - name: description
+    type: markdown
+    required: false
+    notes: Free-form prose describing the endpoint behavior; used for human-facing docs and to fold sourceCitation per catalog pass 95 convention. Added catalog pass 97b to align with channels-hooks.md spec which already listed description as required.
+  incomingEdges:
+  - reads_endpoint
+  outgoingEdges:
+  - exposed_by
+  - fires_operational_trigger
+  invariants:
+  - id starts with api-endpoint: null
+  examples: []
+- id: node:operational-trigger
+  name: OperationalTrigger
+  origin: standard
+  originContext: catalog pass 18 / Symphony §13.7.2 — small set of operator-issued triggers
+  prefix: operational-trigger
+  cluster: 7-extensions
+  purpose: an operator-issued trigger (refresh, drain, suspend, resume) invocable via API endpoint, signal, cron, or hook
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: triggerKind
+    type: enum<refresh-poll,refresh-reconcile,refresh-all,drain,suspend,resume,force-cleanup,webhook-event,vcs-event>
+    required: true
+    notes: |
+      Catalog pass 18 introduced the operator-issued lifecycle set. Catalog pass 94
+      (Catalog pass 94) extended the enum to cover `webhook-event` and `vcs-event` — the
+      VCS / generic-webhook normalization triggers exposed by
+      `@a5c-ai/triggers-adapter` (packages/triggers-adapter/src/types.ts:1, TriggerBackend
+      union: github | gitlab | bitbucket | generic-webhook).
+  - name: effect
+    type: string
+    required: false
+    notes: Human-readable description of what firing the trigger does.
+  - name: idempotent
+    type: bool
+    required: false
+  - name: sideEffects
+    type: list<string>
+    required: false
+  - name: invokerSurface
+    type: enum<api-endpoint,signal,cron,hook,webhook,vcs-event>
+    required: false
+    notes: |
+      `webhook` and `vcs-event` added Catalog pass 94 to capture the
+      `@a5c-ai/triggers-adapter` invocation surfaces (HTTP webhook payload arriving
+      via GitHub Actions / generic webhook receiver, normalized into a
+      single event shape).
+  - name: backend
+    type: enum<github,gitlab,bitbucket,generic-webhook>
+    required: false
+    notes: |
+      Catalog pass 94 — TriggerBackend union from packages/triggers-adapter/src/types.ts:1.
+      Identifies which VCS / webhook payload taxonomy this trigger
+      normalizes against.
+  - name: eventTaxonomy
+    type: list<string>
+    required: false
+    notes: |
+      Catalog pass 94 — illustrative list of canonical `eventName` values the
+      backend is known to handle (e.g. `issue_comment`, `pull_request`,
+      `push`, `merge_request`, `pullrequest:created`). Open-ended; the
+      normalizer accepts arbitrary strings via env / payload fallback
+      (packages/triggers-adapter/src/enrich.ts:99).
+  - name: dispatchModel
+    type: enum<normalize-and-evaluate,direct-cli,reusable-action>
+    required: false
+    notes: |
+      Catalog pass 94 — captures how the trigger is fired:
+      `normalize-and-evaluate` (CLI: enrich → evaluate → exit-code 0 or 78,
+      packages/triggers-adapter/src/cli.ts:50), `direct-cli` (manual adapters-triggers
+      invocation), `reusable-action` (GitHub Action composite at
+      packages/triggers-adapter/action.yml).
+  - name: payloadShape
+    type: string
+    required: false
+    notes: |
+      Catalog pass 94 — TypeScript interface name in
+      packages/triggers-adapter/src/types.ts that defines the normalized payload
+      this trigger emits. Always `NormalizedTriggerEvent` for the four
+      backend triggers (types.ts:11).
+  - name: queryDsl
+    type: enum<key-colon-value,json-object,expression-clause,none>
+    required: false
+    notes: |
+      Catalog pass 94 — the trigger query DSL accepted by
+      `parseQuery` (packages/triggers-adapter/src/query.ts:75). `key-colon-value`
+      = `event:issue_comment text:@develop-this`; `json-object` = JSON
+      `TriggerQuery`; `expression-clause` = `text ~ '@x' && event == 'pull_request'`.
+  - name: cliEntrypoint
+    type: string
+    required: false
+    notes: |
+      Catalog pass 94 — bin entry that fires the trigger
+      (packages/triggers-adapter/package.json:28 — `adapters-triggers` →
+      `./dist/cli.js`).
+  - name: enrichmentSources
+    type: list<enum<workflow-event-payload,github-rest-api,local-git-show,git-diff-unified>>
+    required: false
+    notes: |
+      Catalog pass 94 — channels the enricher draws from
+      (packages/triggers-adapter/src/enrich.ts: readPayload, enrichGithubFromApi,
+      enrichWithLocalGit, enrichDiffsWithLocalGit).
+  - name: sourceCitation
+    type: string
+    required: false
+    notes: |
+      Catalog pass 94 — verbatim file:line citation into
+      `packages/triggers-adapter/` for traceability of every value above.
+  - name: exitCodeSemantics
+    type: list<string>
+    required: false
+    notes: |
+      Catalog pass 95 — `<code>:<symbol>:<meaning>` triples for the trigger's
+      process-exit contract. For adapters-triggers (packages/triggers-adapter/src/cli.ts:65):
+      `0:matched:trigger query matched, downstream pipeline runs`,
+      `78:skip:trigger query did not match (action.yml:165 treats 78 as soft-skip)`,
+      `1:error:invalid args / unhandled exception`.
+  incomingEdges:
+  - fires_operational_trigger
+  outgoingEdges:
+  - calls_endpoint
+  - parsed_by_grammar
+  - has_payload_schema
+  - executes_step
+  - defines_frontmatter_field
+  invariants:
+  - id starts with operational-trigger: null
+  examples: []
+- id: node:github-action-step
+  name: GithubActionStep
+  origin: a5c
+  originContext: |
+    Catalog pass 95 — the seven steps in `packages/triggers-adapter/action.yml` (composite GitHub
+    Action) carry per-step name, shell, run-script, conditional `if:`, env-var
+    bag, and ordering. The existing `WorkflowDefinition` NodeKind models
+    repo-versioned WORKFLOW.md (Symphony §5 issue-tracker binding) — an
+    ontology-distinct surface from a CI composite-action step. Tight new
+    NodeKind so codegen can re-emit `runs:.steps[]` block from the graph.
+  prefix: github-action-step
+  cluster: 4-surfacing-path
+  purpose: |
+    a single ordered step inside a composite GitHub Action's `runs.steps`
+    list, with name, shell, run-script, conditional, env-var bag, and
+    `uses:` reference for prebuilt actions.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: order
+    type: int
+    required: true
+    notes: 1-based step ordinal in the composite-action `runs.steps[]` list.
+  - name: stepName
+    type: string
+    required: true
+    notes: Verbatim `name:` field from action.yml.
+  - name: shell
+    type: enum<bash,pwsh,sh,python,node,none>
+    required: false
+    notes: Verbatim `shell:` field. `none` when the step is a `uses:` invocation.
+  - name: usesRef
+    type: string
+    required: false
+    notes: When the step delegates to a prebuilt action, the `uses:` reference (e.g. `actions/setup-node@v4`).
+  - name: runScript
+    type: markdown
+    required: false
+    notes: Verbatim `run:` block (multi-line bash/pwsh/etc. body).
+  - name: conditional
+    type: string
+    required: false
+    notes: Verbatim `if:` expression.
+  - name: envVars
+    type: list<string>
+    required: false
+    notes: |
+      `<NAME>=<source-expression>` strings copied verbatim from the step's
+      `env:` block. Source-expression preserves the GitHub-Actions template
+      (e.g. `${{ inputs.harness }}`) so the codegen can emit the exact YAML.
+  - name: continueOnError
+    type: bool
+    required: false
+  - name: workingDirectory
+    type: string
+    required: false
+  - name: stepId
+    type: string
+    required: false
+    notes: The `id:` field on the step (used by downstream `${{ steps.<id>.outputs.* }}` references).
+  - name: sourceCitation
+    type: string
+    required: false
+  ontologyRationale: |
+    A composite GitHub Action step is a tight, ordered, scriptable surface with
+    a fixed schema (name/uses/run/shell/env/if/id/working-directory/continue-on-error).
+    Modeling each step as a record lets codegen reconstruct the
+    `runs.steps[]` block byte-for-byte from the graph; demoting to a
+    string list discards the per-step env bag and conditional. Distinct
+    from `WorkflowDefinition` (WORKFLOW.md) and `WorkflowStep` (none exists).
+  incomingEdges:
+  - executes_step
+  outgoingEdges:
+  - executed_by_trigger
+  invariants:
+  - id starts with github-action-step:
+  examples: []
+- id: node:grammar
+  name: Grammar
+  origin: a5c
+  originContext: |
+    Catalog pass 95 — the trigger query DSL implemented by
+    `packages/triggers-adapter/src/query.ts` has a small but real production-rule
+    grammar (compact-key-value, JSON-object, expression-clause, glob,
+    contains-operator, equals-operator). For codegen of a parser the
+    productions need to be enumerated rather than collapsed into a
+    single `queryDsl` enum tag. Cross-cutting NodeKind: any DSL-parser
+    rebuild (not just adapters-triggers) can reuse this shape.
+  prefix: grammar
+  cluster: 13-catalog-meta
+  purpose: |
+    a record of a domain-specific-language grammar with productions,
+    supported operators, lexical tokens, and surface syntax variants.
+    Sized so a parser can be regenerated from the graph alone.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: dslName
+    type: string
+    required: true
+  - name: surfaceVariants
+    type: list<string>
+    required: false
+    notes: Compact representations the parser auto-detects (e.g. `compact-key-value`, `json-object`, `expression-clause`).
+  - name: productions
+    type: list<string>
+    required: true
+    notes: |
+      Each entry is a single grammar production, normally in BNF-ish
+      `<lhs> ::= <rhs>` form, copied verbatim from the parser source so
+      the codegen can re-emit the parser. Order is significant for
+      precedence.
+  - name: tokens
+    type: list<string>
+    required: false
+    notes: Lexical tokens / terminals (e.g. `IDENT`, `STRING`, `COLON`, `AMP_AMP`, `TILDE`, `EQ_EQ`).
+  - name: operators
+    type: list<string>
+    required: false
+    notes: "Operator literals with arity hint (e.g. `~ : binary contains`, `== : binary equals`, `&& : binary clause-and`)."
+  - name: globSyntax
+    type: string
+    required: false
+    notes: Path-glob micro-language (e.g. `**=any`, `*=non-slash`, `?=single`).
+  - name: parserEntrypoint
+    type: string
+    required: false
+    notes: Function name + file path implementing the parser (e.g. `parseQuery (packages/triggers-adapter/src/query.ts:75)`).
+  - name: sourceCitation
+    type: string
+    required: false
+  ontologyRationale: |
+    DSL grammars are first-class codegen artifacts: a string-typed
+    `queryDsl` attribute on OperationalTrigger only categorizes; it
+    cannot drive parser regeneration. A tight Grammar NodeKind keeps
+    productions as ordered list and is reusable by any future
+    DSL-bearing trigger / tool / config surface.
+  incomingEdges:
+  - parsed_by_grammar
+  outgoingEdges: []
+  invariants:
+  - id starts with grammar:
+  - productions non-empty
+  examples: []
+- id: node:issue-tracker
+  name: IssueTracker
+  origin: standard
+  originContext: catalog pass 18 / Symphony §11 — vendor-bound tracker instance (Linear, Jira, GitHub Issues, ClickUp, ...)
+  prefix: issue-tracker
+  cluster: 7-extensions
+  purpose: a vendor-bound issue tracker (Linear, GitHub Issues, Jira, ...) above the ToolServer/ToolDescriptor layer
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: vendor
+    type: enum<linear,github-issues,jira,gitlab-issues,asana,clickup,sentry>
+    required: true
+  - name: protocolStyle
+    type: enum<graphql,rest,sql>
+    required: false
+    notes: Vendor-specific protocol style (alias of querySemantics).
+  - name: writeBoundary
+    type: enum<agent-writes,orchestrator-writes,both>
+    required: false
+    notes: Alias of trackerWriteBoundary for ergonomics.
+  - name: baseUrl
+    type: url
+    required: false
+  - name: projectSlug
+    type: string
+    required: false
+  - name: authEnvVar
+    type: string
+    required: false
+  - name: normalizationRules
+    type: list<string>
+    required: false
+  - name: trackerWriteBoundary
+    type: enum<agent-writes,orchestrator-writes,both>
+    required: false
+    notes: TrackerWriteBoundary enum (Symphony §11.5 architectural rule).
+  incomingEdges:
+  - targets_tracker
+  - from_tracker
+  outgoingEdges:
+  - implements_protocol
+  invariants:
+  - id starts with issue-tracker: null
+  examples: []
+- id: node:issue-tracker-protocol
+  name: IssueTrackerProtocol
+  origin: derived
+  originContext: catalog pass 18 / Symphony §11.1 — minimal portable surface across trackers
+  prefix: issue-tracker-protocol
+  cluster: 7-extensions
+  purpose: the minimal portable contract a tracker must implement (required ops, query semantics, normalization, pagination)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: requiredOps
+    type: list<enum<fetch_candidate_issues,fetch_issues_by_states,fetch_issue_states_by_ids>>
+    required: false
+  - name: optionalOps
+    type: list<string>
+    required: false
+  - name: operations
+    type: list<string>
+    required: false
+    notes: Free-text op signatures (e.g. GraphQL queries, REST routes) for protocol realizations.
+  - name: description
+    type: markdown
+    required: false
+  - name: querySemantics
+    type: enum<graphql,rest,sql>
+    required: false
+  - name: normalizationRules
+    type: list<string>
+    required: false
+  - name: errorEnvelope
+    type: string
+    required: false
+  - name: paginationModel
+    type: enum<cursor,offset,none>
+    required: false
+  - name: allowedWriters
+    type: list<enum<agent-writes,orchestrator-writes,both>>
+    required: false
+    notes: TrackerWriteBoundary enum extension (Symphony §11.5).
+  incomingEdges:
+  - implements_protocol
+  outgoingEdges: []
+  invariants:
+  - id starts with issue-tracker-protocol: null
+  examples: []
+- id: node:issue
+  name: Issue
+  origin: universal
+  originContext: catalog pass 18 / Symphony §4.1.1 — core domain entity (catalog-shape, not per-issue instances)
+  prefix: issue
+  cluster: 7-extensions
+  purpose: an issue in an IssueTracker (catalog-shape; the catalog models the entity kind, not concrete PROJ-123 rows)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: trackerKind
+    type: ref<IssueTracker>
+    required: false
+    notes: Inline ref to the originating tracker (from_tracker edge remains primary).
+  - name: identifier
+    type: string
+    required: false
+    notes: Tracker-native identifier (e.g. PROJ-123).
+  - name: title
+    type: string
+    required: false
+  - name: body
+    type: markdown
+    required: false
+  - name: state
+    type: string
+    required: false
+  - name: priority
+    type: int
+    required: false
+  - name: branchName
+    type: string
+    required: false
+  - name: url
+    type: url
+    required: false
+  - name: labels
+    type: list<string>
+    required: false
+  - name: blockedBy
+    type: list<ref<Issue>>
+    required: false
+  - name: createdAt
+    type: iso-date
+    required: false
+  - name: updatedAt
+    type: iso-date
+    required: false
+  - name: originTrackerId
+    type: ref<IssueTracker>
+    required: false
+  incomingEdges:
+  - for_issue
+  - produces_issue
+  - triggered_by
+  - groups_issue
+  - has_child_issue
+  - tags_issue
+  - labels_issue
+  - activity_for_issue
+  - dispatch_state_of_issue
+  outgoingEdges:
+  - from_tracker
+  - triggers_run
+  - belongs_to_project
+  - has_acceptance_criterion
+  - decomposes_into
+  - child_issue_of_decomposition
+  - tagged_with
+  - labeled_with
+  - has_activity_entry
+  - has_dispatch_state
+  invariants:
+  - id starts with issue: null
+  examples: []
+- id: node:project
+  name: Project
+  origin: derived
+  originContext: adapters webui — planning grouping above Workspace; an Issue belongs to a Project, a Project may map to one or more Workspaces
+  prefix: project
+  cluster: 7-extensions
+  purpose: a planning/grouping unit that gathers issues, board snapshots, and workspaces under a single product or initiative
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: slug
+    type: string
+    required: false
+    notes: Short kebab-case identifier used in URLs (e.g. adapters).
+  - name: description
+    type: markdown
+    required: false
+  - name: trackerKind
+    type: ref<IssueTracker>
+    required: false
+    notes: Originating tracker for this project's issues, when bound to a single tracker.
+  - name: defaultWorkspaceId
+    type: ref<Workspace>
+    required: false
+  - name: archived
+    type: bool
+    required: false
+  incomingEdges:
+  - belongs_to_project
+  - workspace_in_project
+  - snapshots_project
+  - snapshots_project_backlog
+  - scoped_to_project
+  - owned_by_project
+  - activity_for_project
+  outgoingEdges:
+  - groups_issue
+  - groups_workspace
+  - has_board_snapshot
+  - has_backlog_snapshot
+  - owns_label
+  - has_activity_entry
+  invariants:
+  - id starts with project: null
+  examples: []
+- id: node:board-snapshot
+  name: BoardSnapshot
+  origin: derived
+  originContext: adapters webui (KanbanLayout, dashboard/backlog-overview) — point-in-time projection of a kanban board (columns, swimlanes, WIP)
+  prefix: board-snapshot
+  cluster: 7-extensions
+  purpose: a point-in-time projection of a kanban board (its columns, swimlanes, WIP policies, and current issue placement)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: generatedAt
+    type: iso-timestamp
+    required: true
+  - name: columnIds
+    type: list<ref<BoardColumn>>
+    required: false
+  - name: swimlanes
+    type: list<string>
+    required: false
+    notes: Free-form swimlane keys (e.g. by-assignee, by-priority).
+  - name: wipPolicy
+    type: enum<none,per-column,per-swimlane,per-column-and-swimlane>
+    required: false
+  - name: moveValidation
+    type: list<string>
+    required: false
+    notes: Move-validation rule descriptors (e.g. require-acceptance-criteria-met-before-done). Free-form; UI-enforced.
+  - name: issueCount
+    type: int
+    required: false
+  incomingEdges:
+  - has_board_snapshot
+  outgoingEdges:
+  - has_column
+  - snapshots_project
+  invariants:
+  - id starts with board-snapshot: null
+  examples: []
+- id: node:board-column
+  name: BoardColumn
+  origin: derived
+  originContext: adapters webui (KanbanLayout) — a single workflow column on a board, with optional WIP limit
+  prefix: board-column
+  cluster: 7-extensions
+  purpose: a single workflow column on a kanban board (e.g. Backlog / In Progress / In Review / Done)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: order
+    type: int
+    required: true
+    notes: 1-based ordering within its board.
+  - name: workflowState
+    type: string
+    required: false
+    notes: Tracker-native state this column maps to (e.g. 'in-progress', 'review').
+  - name: wipLimit
+    type: int
+    required: false
+    notes: Maximum issues allowed in this column (null = no limit).
+  - name: terminalForCompleted
+    type: bool
+    required: false
+    notes: True when issues in this column are considered done.
+  incomingEdges:
+  - has_column
+  outgoingEdges:
+  - column_of
+  invariants:
+  - id starts with board-column: null
+  examples: []
+- id: node:backlog-snapshot
+  name: BacklogSnapshot
+  origin: derived
+  originContext: adapters webui (dashboard/backlog-overview) — point-in-time backlog projection with priority, dependencies, decomposition
+  prefix: backlog-snapshot
+  cluster: 7-extensions
+  purpose: a point-in-time projection of a project's backlog with priority ordering, dependency, decomposition, and acceptance-criteria coverage
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: generatedAt
+    type: iso-timestamp
+    required: true
+  - name: issueCount
+    type: int
+    required: false
+  - name: priorityScheme
+    type: enum<int,fibonacci,t-shirt,bucket>
+    required: false
+  - name: hasDependencyData
+    type: bool
+    required: false
+  - name: hasDecompositionData
+    type: bool
+    required: false
+  - name: hasAcceptanceCriteriaData
+    type: bool
+    required: false
+  incomingEdges:
+  - has_backlog_snapshot
+  outgoingEdges:
+  - snapshots_project_backlog
+  invariants:
+  - id starts with backlog-snapshot: null
+  examples: []
+- id: node:acceptance-criterion
+  name: AcceptanceCriterion
+  origin: derived
+  originContext: adapters webui — first-class entity per gaps-and-debt 'issue-first orchestration shell' target product model
+  prefix: acceptance-criterion
+  cluster: 7-extensions
+  purpose: a single acceptance-criterion attached to an issue (a checkable predicate that must hold for the issue to be considered done)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: text
+    type: markdown
+    required: true
+  - name: order
+    type: int
+    required: false
+  - name: status
+    type: enum<pending,met,not-met,n-a>
+    required: false
+  - name: verifiedBy
+    type: enum<human,ci,test,manual,unknown>
+    required: false
+  incomingEdges:
+  - has_acceptance_criterion
+  outgoingEdges:
+  - criterion_of_issue
+  invariants:
+  - id starts with acceptance-criterion: null
+  examples: []
+- id: node:issue-decomposition
+  name: IssueDecomposition
+  origin: derived
+  originContext: adapters webui — issue→subtask linkage so decomposition is queryable as a graph entity, not opaque markdown
+  prefix: issue-decomposition
+  cluster: 7-extensions
+  purpose: a parent-issue→child-issue decomposition (one issue split into typed subtasks, with strategy and ordering)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: strategy
+    type: enum<linear,parallel,phased,exploratory>
+    required: false
+  - name: rationale
+    type: markdown
+    required: false
+  - name: generatedBy
+    type: enum<human,agent,llm,unknown>
+    required: false
+  incomingEdges:
+  - decomposes_into
+  - child_issue_of_decomposition
+  outgoingEdges:
+  - decomposition_of
+  - has_child_issue
+  invariants:
+  - id starts with issue-decomposition: null
+  examples: []
+- id: node:session-flow-projection
+  name: SessionFlowProjection
+  origin: derived
+  originContext: packages/adapters/ui/src/session-flow — transcript→AgentFlowLane projection with file-attention and per-segment cost
+  prefix: session-flow
+  cluster: 7-extensions
+  purpose: a derived projection of a Session into agent flow lanes, timeline items, and per-lane segments suitable for UI visualization
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: generatedAt
+    type: iso-timestamp
+    required: false
+  - name: laneCount
+    type: int
+    required: false
+  - name: segmentKinds
+    type: list<enum<user,assistant,thinking,tool,system,lifecycle,branch,error>>
+    required: false
+  - name: hasFileAttention
+    type: bool
+    required: false
+  - name: hasCostBreakdown
+    type: bool
+    required: false
+  incomingEdges:
+  - has_flow_projection
+  outgoingEdges:
+  - projects_session
+  - has_lane
+  invariants:
+  - id starts with session-flow: null
+  examples: []
+- id: node:agent-flow-lane
+  name: AgentFlowLane
+  origin: universal
+  originContext: packages/adapters/ui/src/session-flow — first-class lane within a SessionFlowProjection (catalog pass 39 promotion of inline lane data to a NodeKind)
+  prefix: agent-flow-lane
+  cluster: 7-extensions
+  purpose: a single lane within a SessionFlowProjection (e.g. agent-action lane, tool-call lane, thinking lane) that groups timeline segments by source/role
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: laneKind
+    type: enum<agent-action,tool-call,thinking,human-turn,subagent-call,error>
+    required: true
+  - name: agentVersionId
+    type: ref<AgentVersion>
+    required: false
+    notes: Which AgentVersion owns this lane (when the lane represents a specific agent's actions).
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - has_lane
+  outgoingEdges:
+  - lane_of_projection
+  - contains_segment
+  invariants:
+  - id starts with agent-flow-lane: null
+  examples: []
+- id: node:agent-flow-segment
+  name: AgentFlowSegment
+  origin: universal
+  originContext: packages/adapters/ui/src/session-flow — first-class segment within an AgentFlowLane (catalog pass 39 promotion of inline segment data to a NodeKind)
+  prefix: agent-flow-segment
+  cluster: 7-extensions
+  purpose: a single timeline segment within an AgentFlowLane (a message, tool-call, tool-result, thinking block, or error) with optional Span linkage for observability
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: laneId
+    type: ref<AgentFlowLane>
+    required: true
+  - name: startedAt
+    type: iso-timestamp
+    required: false
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: kind
+    type: enum<message,tool-call,tool-result,thinking,error>
+    required: true
+  - name: parentSpanId
+    type: ref<Span>
+    required: false
+    notes: Optional link to the observability Span this segment projects from.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - contains_segment
+  outgoingEdges:
+  - segment_in_lane
+  - projects_span
+  invariants:
+  - id starts with agent-flow-segment: null
+  examples: []
+- id: node:file-attention
+  name: FileAttention
+  origin: derived
+  originContext: packages/adapters/ui/src/session-flow/file-attention.ts — record of files an agent read/wrote during a session
+  prefix: file-attention
+  cluster: 7-extensions
+  purpose: a record of which files an agent read or wrote during a session, used to power 'what was the agent looking at' UI surfaces
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: path
+    type: string
+    required: true
+  - name: kind
+    type: enum<read,write,both>
+    required: true
+  - name: firstTouchedAt
+    type: iso-timestamp
+    required: false
+  - name: lastTouchedAt
+    type: iso-timestamp
+    required: false
+  - name: touchCount
+    type: int
+    required: false
+  - name: toolNames
+    type: list<string>
+    required: false
+    notes: Names of tools that touched this file (Read, Edit, Write, Bash, etc.).
+  incomingEdges:
+  - recorded_attention
+  outgoingEdges:
+  - attention_recorded_in
+  invariants:
+  - id starts with file-attention: null
+  examples: []
+- id: node:device-pair
+  name: DevicePair
+  origin: derived
+  originContext: packages/adapters/webui/src/pages/PairDevicePage.tsx — paired mobile device for a remote-control surface
+  prefix: device-pair
+  cluster: 7-extensions
+  purpose: a paired remote device (typically mobile) bound to an adapters gateway account for push notifications and remote session control
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: deviceKind
+    type: enum<mobile,desktop,tablet,watch,unknown>
+    required: false
+  - name: platform
+    type: enum<ios,android,web,desktop,unknown>
+    required: false
+  - name: pairingMethod
+    type: enum<qr-code,short-code,deep-link,oauth,unknown>
+    required: false
+  - name: pairedAt
+    type: iso-timestamp
+    required: false
+  - name: pushCapable
+    type: bool
+    required: false
+  - name: revoked
+    type: bool
+    required: false
+  incomingEdges:
+  - has_device_pair
+  outgoingEdges:
+  - paired_to
+  invariants:
+  - id starts with device-pair: null
+  examples: []
+- id: node:task-tag
+  name: TaskTag
+  origin: derived
+  originContext: catalog pass 52 / adapters KanbanTaskTag (packages/adapters/core/src/kanban.ts) — user-defined free-form team-vocabulary tag attached to issues / board entries
+  prefix: task-tag
+  cluster: 7-extensions
+  purpose: a user-defined tag attached to an Issue, BoardSnapshot entry, or other kanban work-item; distinct from Label (system/repo classification with color), TaskTags are typically free-form team vocabulary (e.g. needs-design, frontend, tech-debt) scoped to global / project / workspace
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: false
+    notes: Display name (often slug-ified). Mirrors KanbanTaskTag.label.
+  - name: key
+    type: string
+    required: false
+    notes: Slug / stable key (KanbanTaskTag.key).
+  - name: content
+    type: markdown
+    required: false
+    notes: Free-form content/instruction body associated with the tag (KanbanTaskTag.content).
+  - name: scope
+    type: enum<global,team,project,workspace>
+    required: true
+  - name: scopeId
+    type: string
+    required: false
+    notes: When scope!=global, the id of the team/project/workspace (KanbanTaskTagScope.refId).
+  - name: color
+    type: string
+    required: false
+    notes: Optional CSS color/hex for UI surfacing.
+  - name: description
+    type: markdown
+    required: false
+  - name: order
+    type: int
+    required: false
+  incomingEdges:
+  - tagged_with
+  outgoingEdges:
+  - scoped_to_team
+  - scoped_to_project
+  - scoped_to_workspace
+  invariants:
+  - id starts with task-tag: null
+  examples: []
+- id: node:label
+  name: Label
+  origin: derived
+  originContext: catalog pass 52 / adapters KanbanLabel (packages/adapters/core/src/kanban.ts) — repo / board-scoped classification with color
+  prefix: label
+  cluster: 7-extensions
+  purpose: a repository or board-scoped classification with color + name (parallel to GitHub/GitLab labels); distinct from TaskTag (free-form team vocabulary) — Labels are typically owned by a Project or Repository
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: false
+    notes: Mirrors KanbanLabel.name when displayName is presentation-only.
+  - name: color
+    type: string
+    required: false
+    notes: Optional CSS color/hex (KanbanLabel.color).
+  - name: description
+    type: markdown
+    required: false
+  - name: ownerProjectId
+    type: ref<Project>
+    required: false
+  incomingEdges:
+  - labeled_with
+  - owns_label
+  outgoingEdges:
+  - owned_by_project
+  invariants:
+  - id starts with label: null
+  examples: []
+- id: node:tool-dispatch-policy
+  name: ToolDispatchPolicy
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code Tool.ts (Tool.isConcurrencySafe, isReadOnly,
+    isDestructive, interruptBehavior cancel|block, isOpenWorld, shouldDefer,
+    alwaysLoad) + tools.ts dispatch loop that batches concurrency-safe reads
+    and serializes writes. ToolDispatchPolicy summarizes the runtime
+    parallelism / cancellation posture for a ToolDescriptor in one place.
+  prefix: tool-dispatch-policy
+  cluster: 7-extensions
+  purpose: |
+    Per-tool dispatch posture — concurrency safety, interrupt behavior on
+    new user message, deferred-loading via ToolSearch, alwaysLoad pin,
+    open-world flag, max-result-size before disk persist. Captures the
+    nuances tools.ts uses to parallelize reads, serialize writes, and decide
+    cancellation when the user types mid-call.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: toolDescriptorId
+    type: ref<ToolDescriptor>
+    required: false
+    notes: Optional — examples may omit when the underlying ToolDescriptor entry has not yet been imported into the catalog.
+  - name: isConcurrencySafe
+    type: bool
+    required: false
+    notes: claude-code Tool.isConcurrencySafe — when true, multiple invocations may run in parallel with peers.
+  - name: isReadOnly
+    type: bool
+    required: false
+  - name: isDestructive
+    type: bool
+    required: false
+    notes: claude-code isDestructive — set only for irreversible operations (delete, overwrite, send).
+  - name: interruptBehavior
+    type: enum<cancel,block>
+    required: false
+    notes: claude-code Tool.interruptBehavior — cancel = drop result if user submits mid-call; block = keep running.
+  - name: isOpenWorld
+    type: bool
+    required: false
+    notes: claude-code isOpenWorld — tool may interact with arbitrary external systems.
+  - name: shouldDefer
+    type: bool
+    required: false
+    notes: claude-code shouldDefer — tool ships with defer_loading:true and requires a ToolSearch round-trip before invocation.
+  - name: alwaysLoad
+    type: bool
+    required: false
+    notes: claude-code alwaysLoad — tool schema appears on turn 1 even when ToolSearch is enabled.
+  - name: maxResultSizeChars
+    type: int
+    required: false
+    notes: claude-code maxResultSizeChars — when exceeded, result is persisted to disk and the model receives a preview path.
+  - name: requiresUserInteraction
+    type: bool
+    required: false
+    notes: claude-code requiresUserInteraction — must run on the main thread (e.g. AskUserQuestion).
+  - name: requiresPermissionGate
+    type: bool
+    required: false
+    notes: claude-code requireCanUseTool — every invocation runs through canUseTool even if hooks auto-approve.
+  - name: parentDispatchPattern
+    type: enum<parallel-reads-serial-writes,strict-serial,fan-out,sandbox>
+    required: false
+    notes: How a parent dispatch loop treats this tool relative to peers — typically parallel-reads-serial-writes.
+  incomingEdges:
+  - has_dispatch_policy
+  outgoingEdges:
+  - dispatch_policy_for_tool
+  invariants:
+  - id starts with tool-dispatch-policy:
+  examples:
+  - graph/extensions/tool-dispatch-policies/claude-code-file-read.yaml
+  - graph/extensions/tool-dispatch-policies/claude-code-file-edit.yaml
+  - graph/extensions/tool-dispatch-policies/claude-code-bash.yaml
+- id: node:mcp-config-scope
+  name: MCPConfigScope
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/mcp/types.ts ConfigScope enum
+    (local|user|project|dynamic|enterprise|claudeai|managed). Defines the
+    scope precedence for resolving MCP server configurations — enterprise
+    overrides project overrides user overrides local; claudeai/managed are
+    server-pushed scopes the user cant override locally.
+  prefix: mcp-config-scope
+  cluster: 7-extensions
+  purpose: |
+    A scope tier where MCP server configurations live. Determines override
+    precedence, who can edit, and whether plugin-supplied configs can be
+    refused locally.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: scope
+    type: enum<local,user,project,dynamic,enterprise,claudeai,managed>
+    required: true
+  - name: priority
+    type: int
+    required: false
+    notes: Higher-priority scopes override lower (managed/enterprise > project > user > local).
+  - name: editableBy
+    type: enum<end-user,project-maintainer,enterprise-admin,vendor-pushed,plugin>
+    required: false
+  - name: persistsTo
+    type: string
+    required: false
+    notes: Path or storage destination (settings.json, .mcp.json, ~/.claude/mcp/, etc.).
+  - name: pluginSourced
+    type: bool
+    required: false
+    notes: claude-code ScopedMcpServerConfig.pluginSource — when true the config came from a plugin.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - mcp_config_scoped_to
+  outgoingEdges: []
+  invariants:
+  - id starts with mcp-config-scope:
+  examples:
+  - graph/extensions/mcp-config-scopes/claude-code-project.yaml
+  - graph/extensions/mcp-config-scopes/claude-code-enterprise.yaml
+- id: node:mcp-connection-state
+  name: MCPConnectionState
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code services/mcp/types.ts MCPServerConnection union
+    (connected | failed | needs-auth | pending | disabled) +
+    MCPConnectionManager reconnect logic (reconnectAttempt,
+    maxReconnectAttempts). Each MCP server has a runtime connection state
+    distinct from its config; state transitions happen on
+    initialize/ping/error.
+  prefix: mcp-connection-state
+  cluster: 7-extensions
+  purpose: |
+    Live runtime state of an MCP server connection — connected, failed,
+    needs-auth (OAuth pending), pending (reconnecting), disabled. Carries
+    reconnect counters, server capabilities (when connected), and error info.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: serverName
+    type: string
+    required: true
+  - name: state
+    type: enum<connected,failed,needs-auth,pending,disabled>
+    required: true
+  - name: configScopeId
+    type: ref<MCPConfigScope>
+    required: false
+  - name: reconnectAttempt
+    type: int
+    required: false
+    notes: claude-code PendingMCPServer.reconnectAttempt.
+  - name: maxReconnectAttempts
+    type: int
+    required: false
+  - name: serverInfoName
+    type: string
+    required: false
+  - name: serverInfoVersion
+    type: string
+    required: false
+  - name: serverCapabilities
+    type: list<enum<tools,resources,prompts,sampling,roots,logging,completions>>
+    required: false
+    notes: claude-code ServerCapabilities echoed during initialize.
+  - name: error
+    type: string
+    required: false
+    notes: claude-code FailedMCPServer.error.
+  - name: oauthCallbackPort
+    type: int
+    required: false
+    notes: claude-code McpOAuthConfig.callbackPort when OAuth flow is pending.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - has_connection_state
+  outgoingEdges: []
+  invariants:
+  - id starts with mcp-connection-state:
+  examples:
+  - graph/extensions/mcp-connection-states/claude-code-connected-anthropic.yaml
+  - graph/extensions/mcp-connection-states/claude-code-needs-auth.yaml
+- id: node:agent-team
+  name: AgentTeam
+  origin: universal
+  originContext: |
+    catalog pass 82 / Anthropic docs https://docs.claude.com/en/docs/claude-code/agent-teams
+    (experimental — flag CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1, requires
+    Claude Code v2.1.32+). A team groups one team-lead session with N
+    teammate Claude Code instances that coordinate via shared task list +
+    mailbox.
+  prefix: agent-team
+  cluster: 7-extensions
+  purpose: |
+    A coordinated group of Claude Code instances — one team-lead (the main
+    session) and N teammates running as separate CC processes — sharing
+    a task list and mailbox. Distinct from Subagent (a per-session
+    dispatchable worker); a team persists across multiple turns and exposes
+    direct teammate-to-teammate messaging via the SendMessage tool.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: displayMode
+    type: enum<in-process,tmux,auto>
+    required: false
+    notes: How teammate sessions are surfaced to the lead. in-process = Shift+Down cycles; tmux = split panes; auto = pick by environment.
+  - name: experimental
+    type: bool
+    required: false
+    default: true
+  - name: storageLocation
+    type: string
+    required: false
+    notes: Filesystem path template for team config + tasks (e.g. ~/.claude/teams/{team-name}/config.json).
+  - name: requiresVersion
+    type: string
+    required: false
+    notes: Minimum Claude Code version required (e.g. '>=2.1.32').
+  - name: members
+    type: list<string>
+    required: false
+    notes: Subagent ids that act as teammates in this team (free-form for now; member_of_team edges are authoritative).
+  incomingEdges:
+  - has_team
+  - team_of
+  outgoingEdges:
+  - has_member
+  - requires_capability
+  - sourced_from
+  invariants:
+  - id starts with agent-team:
+  ontologyRationale: An AgentTeam is a multi-process orchestration unit with persistent shared state (task list + mailbox) across many sessions — structurally distinct from a single dispatchable Subagent. Where a Subagent is invoked once per dispatch (transient), a team persists across turns and exposes peer-to-peer messaging via SendMessage. Could not be modeled as a SessionModel attribute (session models describe per-session persistence, not multi-session coordination). catalog pass 83 keeps the NodeKind on these grounds.
+  examples: []
+- id: node:plugin-marketplace
+  name: PluginMarketplace
+  origin: universal
+  originContext: |
+    catalog pass 82 / Anthropic docs https://docs.claude.com/en/docs/claude-code/discover-plugins
+    — `.claude-plugin/marketplace.json` manifest, `/plugin marketplace add|list|update|remove`
+    commands, and the official `claude-plugins-official` registry (auto-added).
+  prefix: plugin-marketplace
+  cluster: 7-extensions
+  purpose: |
+    A registry that catalogs Claude Code plugins. Sources include GitHub
+    repos (`owner/repo`), git URLs (with optional `#ref`), local
+    paths to a marketplace.json, and remote URLs. The official registry
+    `claude-plugins-official` is auto-added on Claude Code install; the
+    `claude-code-plugins` demo is opt-in.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: marketplaceId
+    type: string
+    required: false
+    notes: Stable identifier used by `/plugin marketplace` commands.
+  - name: source
+    type: enum<github,git-url,local,remote>
+    required: true
+  - name: sourceUri
+    type: string
+    required: false
+    notes: e.g. owner/repo, git URL, file path, or HTTPS URL.
+  - name: categories
+    type: list<string>
+    required: false
+    notes: e.g. code-intelligence, external-integrations, development-workflows, output-styles.
+  - name: autoUpdate
+    type: bool
+    required: false
+    notes: True for the official registry (FORCE_AUTOUPDATE_PLUGINS=1, DISABLE_AUTOUPDATER opts out).
+  - name: official
+    type: bool
+    required: false
+  incomingEdges:
+  - cataloged_in
+  - has_marketplace
+  outgoingEdges:
+  - catalogs
+  - marketplace_of
+  - sourced_from
+  invariants:
+  - id starts with plugin-marketplace:
+  ontologyRationale: A PluginMarketplace is a registry of Plugins with discovery semantics, source-type enum, scopes, and auto-update — distinct from a Plugin (the artifact) and from a SettingsTemplate (per-fragment install record). The Plugin↔Marketplace relation is genuinely a different shape than Plugin↔Runtime/Version, so it earns its own NodeKind.
+  examples: []
+# DeepLinkHandler NodeKind demoted in catalog pass 83 — folded into InteractionPrimitive
+# with kind=deep-link plus urlScheme/pathPattern/urlParams/registrationLocation/
+# disableSetting/requiresVersionRange attributes. See schema/node-kinds/surfacing-path.yaml.
+- id: node:env-var
+  name: EnvVar
+  origin: universal
+  originContext: |
+    catalog pass 83 / Anthropic docs https://code.claude.com/docs/en/env-vars — Claude Code
+    documents ~110 environment variables across 25 functional categories (auth,
+    model selection, headers, thinking, output, network/timeout, TLS, shell, memory,
+    file ops, git, plugins, background tasks, interactive, UI, IDE, remote/cloud,
+    Bedrock/Vertex/Foundry, telemetry, debug, prompt, subagents, SDK, tmux, etc.).
+  prefix: env-var
+  cluster: 7-extensions
+  purpose: |
+    A named environment variable that affects an AgentRuntimeImpl's behavior.
+    Distinct ontology category because env-vars carry default values, parse semantics
+    (bool/int/path/enum), category groupings, and feature-gating gates — modeling
+    them as freeform attributes on AgentRuntimeImpl loses the cross-cutting structure.
+    The 110+ Claude Code env-vars are systematically queryable via this NodeKind.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: name
+    type: string
+    required: true
+    notes: The literal env-var name (e.g. `ANTHROPIC_API_KEY`, `CLAUDE_CODE_USE_BEDROCK`).
+  - name: category
+    type: enum<auth,model-selection,headers,thinking,output,network-timeout,tls,shell,memory,file-ops,git,plugins,background-tasks,interactive,ui,ide,remote-cloud,bedrock,vertex,foundry,telemetry,debug,prompt,subagents,sdk,tmux,other>
+    required: true
+  - name: valueType
+    type: enum<bool,int,string,path,url,enum,json>
+    required: false
+  - name: defaultValue
+    type: string
+    required: false
+  - name: featureGate
+    type: bool
+    required: false
+    notes: True when the variable acts as an experimental/beta gate (e.g. `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`).
+  - name: introducedInVersion
+    type: string
+    required: false
+  ontologyRationale: ~110 documented env-vars with structured categories, defaults, and feature-gate semantics warrant first-class modeling rather than a freeform string list on AgentRuntimeImpl. Lets the catalog answer "which env-vars gate which capabilities?" and "which Bedrock/Vertex configuration knobs exist?" via standard graph queries.
+  incomingEdges:
+  - has_env_var
+  outgoingEdges:
+  - affects
+  - sourced_from
+  invariants:
+  - id starts with env-var:
+  examples: []
+- id: node:protocol-message
+  name: ProtocolMessage
+  origin: derived
+  originContext: |
+    catalog pass 86 — promoted from catalog pass 85 flat-list attributes `messageTypesEmitted` and
+    `resultMessageSubtypes` on AgentCoreImpl. The Claude Code agent-loop SDK
+    documents a 5-variant SDKMessage union (System/Assistant/User/StreamEvent/
+    Result) with ResultMessage further subtyped into 5 outcomes
+    (success / error_max_turns / error_max_budget_usd / error_during_execution /
+    error_max_structured_output_retries). Promoting to a NodeKind captures
+    direction, terminality, error-category, and per-message payload schema in
+    addition to the bare type name.
+  prefix: protocol-message
+  cluster: 7-extensions
+  purpose: |
+    A typed message variant exchanged between an agent core and its host (or
+    between core/runtime/user). Carries direction, terminality, and (for
+    terminal error variants) error-category metadata.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: messageType
+    type: enum<SystemMessage,AssistantMessage,UserMessage,StreamEvent,ResultMessage,Content,Part,Candidate,GenerateContentResponse>
+    required: true
+    notes: |
+      Current catalog includes Gemini generateContent envelope types`r`n      (Content, Part, Candidate, GenerateContentResponse) plus vendor`r`n      stream/message variants used by Cohere, Mistral, and Ollama provider`r`n      records. Provider-level protocol taxonomies can be modeled directly`r`n      through emits_message_type edges even when no full AgentCoreImpl exists.
+  - name: subtype
+    type: enum<success,error_max_turns,error_max_budget_usd,error_during_execution,error_max_structured_output_retries,none,text,inlineData,functionCall,functionResponse,fileData,executableCode,codeExecutionResult>
+    required: false
+    notes: |
+      Only populated for ResultMessage variants and Gemini Part variants;
+      `none` for non-Result / non-Part types. Current catalog includes Gemini Part
+      kinds (text / inlineData / functionCall / functionResponse /
+      fileData / executableCode / codeExecutionResult).
+  - name: direction
+    type: enum<runtime-to-core,core-to-runtime,core-to-user,user-to-core>
+    required: false
+  - name: terminal
+    type: bool
+    required: false
+    notes: True for ResultMessage variants — closes the loop iteration.
+  - name: errorCategory
+    type: enum<budget,turns,execution,structured-output,none>
+    required: false
+  - name: payloadSchema
+    type: object
+    required: false
+    notes: Free-form per-doc payload sketch.
+  - name: description
+    type: markdown
+    required: false
+  ontologyRationale: |
+    Cross-cutting concept — message taxonomy is shared across all SDK loops
+    (Claude Code core, Claude Agent SDK core, future SDK loops). Promoting
+    captures direction/terminal/error-category structure that a flat string
+    list cannot express.
+  incomingEdges:
+  - emits_message_type
+  outgoingEdges: []
+  invariants:
+  - id starts with protocol-message:
+  - terminal=true implies messageType=ResultMessage
+  examples: []
+- id: node:effort-level
+  name: EffortLevel
+  origin: derived
+  originContext: |
+    catalog pass 86 — promoted from catalog pass 85 `effortLevelsSupported` flat list on
+    AgentCoreImpl. Effort levels (low/medium/high/xhigh/max) are a cross-cutting
+    knob exposed by the agent loop and gated per ModelVersion (e.g. only some
+    model versions accept `xhigh`). Skill frontmatter `effort` field also
+    references this taxonomy. Promoting to NodeKind enables 2-D Model x Effort
+    queries.
+  prefix: effort-level
+  cluster: 7-extensions
+  purpose: |
+    A reasoning-effort tier the core can request from the model. Cross-cuts
+    AgentCoreImpl (which understands all levels), ModelVersion (which exposes
+    a subset), and Skill (whose frontmatter may pin a level).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: enum<low,medium,high,xhigh,max,minimal>
+    required: true
+    notes: "catalog pass 87 added `minimal` for OpenAI gpt-5 / Codex `reasoning_effort: minimal` tier (docs.openai.com Responses API)."
+  - name: relativeReasoningCost
+    type: int
+    required: false
+    notes: Ordinal cost rank — 1 (low) … 5 (max).
+  - name: description
+    type: markdown
+    required: false
+  ontologyRationale: |
+    Per-model availability is genuinely 2-D (Model x Effort) — a flat list on
+    a single layer cannot express the cross-product. EffortLevel as a NodeKind
+    lets ModelVersion, AgentCoreImpl, and Skill all reference the same canonical
+    levels via edges.
+  incomingEdges:
+  - supports_effort_level
+  outgoingEdges: []
+  invariants:
+  - id starts with effort-level:
+  examples: []
+- id: node:frontmatter-field
+  name: FrontmatterField
+  origin: derived
+  originContext: |
+    catalog pass 86 — promoted from catalog pass 85 `skillFrontmatterFieldsSupported` flat list on
+    AgentPlatformImpl. Skill (and Subagent) frontmatter fields each carry
+    valueType, required-status, defaultValue, and applicability semantics that
+    a string list discards. Promoting lets the catalog query "which platforms
+    support `paths` glob frontmatter?" or "which fields are required vs
+    recommended?".
+  prefix: frontmatter-field
+  cluster: 7-extensions
+  purpose: |
+    A YAML-frontmatter field a platform's Skill / Subagent loader recognizes,
+    with type, required-status, default, and applicability metadata.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: true
+    notes: The frontmatter key (e.g. `description`, `model`, `paths`).
+  - name: valueType
+    type: enum<string,bool,enum,list,object,glob,int>
+    required: true
+  - name: required
+    type: enum<yes,no,recommended>
+    required: false
+  - name: defaultValue
+    type: string
+    required: false
+  - name: appliesTo
+    type: enum<skill,subagent,plugin,github-action-input,github-action-output,cursor-rule,task-schema>
+    required: true
+    notes: |
+      Catalog pass 95 widened to include `github-action-input` /
+      `github-action-output` so composite GitHub Action `action.yml` inputs
+      and outputs (which carry the same valueType / required / default /
+      description metadata payload as skill frontmatter) can be modeled
+      as FrontmatterField rather than as opaque string attributes on the
+      OperationalTrigger record. Source: packages/triggers-adapter/action.yml
+      (16 inputs + 3 outputs).
+      catalog pass 99 widened further to include `cursor-rule` (for `.mdc`
+      Cursor rule frontmatter — `description` / `globs` / `alwaysApply`)
+      and `task-schema` (for babysitter `defineTask` programmatic task-
+      definition fields, ontologically the same per-field metadata
+      payload — name/type/required/default/description — as markdown
+      frontmatter even though the carrier is a TS object literal).
+  - name: description
+    type: markdown
+    required: false
+  ontologyRationale: |
+    Frontmatter fields are a structured schema in their own right (~15 Skill +
+    ~5 Subagent fields per the Claude Code docs). A string list discards
+    valueType / required / default / appliesTo. NodeKind promotion is justified
+    by the per-field metadata payload.
+  incomingEdges:
+  - defines_frontmatter_field
+  - frontmatter_field_defined_by
+  outgoingEdges:
+  - frontmatter_field_defined_by
+  invariants:
+  - id starts with frontmatter-field:
+  examples: []
+- id: node:plugin-install-scope
+  name: PluginInstallScope
+  origin: derived
+  originContext: |
+    catalog pass 86 — promoted from catalog pass 85 `pluginInstallScopes` flat list on
+    AgentRuntimeImpl. Mirrors MCPConfigScope but for plugin install precedence.
+    Kept as a sibling NodeKind (rather than generalizing MCPConfigScope) per
+    the catalog pass 86 directive's pragmatic-fallback option (b).
+  prefix: plugin-install-scope
+  cluster: 7-extensions
+  purpose: |
+    A scope tier where plugins can be installed/discovered (user/project/local/
+    managed). Determines override precedence and editability.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: scope
+    type: enum<user,project,local,managed>
+    required: true
+  - name: priority
+    type: int
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - installs_plugins_in_scope
+  outgoingEdges: []
+  invariants:
+  - id starts with plugin-install-scope:
+  examples: []
+- id: node:skill-discovery-scope
+  name: SkillDiscoveryScope
+  origin: derived
+  originContext: |
+    catalog pass 86 — promoted from catalog pass 85 `skillDiscoveryScopes` flat list on
+    AgentRuntimeImpl. Sibling to MCPConfigScope and PluginInstallScope. Five
+    scopes per Claude Code skills doc: enterprise, personal, project, plugin,
+    additional-directory.
+  prefix: skill-discovery-scope
+  cluster: 7-extensions
+  purpose: |
+    A scope tier where skills can be discovered (enterprise / personal /
+    project / plugin / additional-directory). Carries precedence ordering for
+    name-collision resolution.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: scope
+    type: enum<enterprise,personal,project,plugin,additional-directory>
+    required: true
+  - name: precedence
+    type: int
+    required: false
+    notes: Lower number = higher precedence at name-collision time.
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - discovers_skills_in_scope
+  outgoingEdges: []
+  invariants:
+  - id starts with skill-discovery-scope:
+  examples: []
+- id: node:journal-event
+  name: JournalEvent
+  origin: derived
+  originContext: |
+    Promoted from orchestration-event modeling gaps into a dedicated JournalEvent NodeKind.
+    Babysitter SDK runtime↔harness journal events (RUN_CREATED/COMPLETED/FAILED,
+    EFFECT_REQUESTED/RESOLVED/CANCELLED/PROGRESS, COST_TRACKED, STOP_HOOK_INVOKED,
+    COMPRESSION_APPLIED) are orchestration-layer events distinct from
+    `ProtocolMessage` (which is core↔model). Cited from
+    packages/babysitter-sdk/src/runtime/replay/effectIndex.ts:13 (the SupportedEventType
+    union) and packages/babysitter-sdk/src/storage/types.ts (JournalEvent shape).
+  prefix: journal-event
+  cluster: 7-extensions
+  purpose: |
+    A typed orchestration-level event recorded on the run journal between an
+    agent runtime and its harness. Distinct from ProtocolMessage (LLM
+    core↔model boundary): JournalEvents cross the runtime↔platform boundary,
+    are append-only, sequenced, and include terminal lifecycle events
+    (RUN_COMPLETED / RUN_FAILED).
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: eventName
+    type: string
+    required: true
+    notes: Canonical event-type string as it appears on the journal (e.g. RUN_CREATED, EFFECT_REQUESTED).
+  - name: kind
+    type: enum<request,response,state-change,error,breakpoint,completion>
+    required: true
+  - name: direction
+    type: enum<runtime-to-platform,platform-to-runtime,internal>
+    required: true
+  - name: payloadSchema
+    type: object
+    required: false
+    notes: Free-form per-doc payload sketch.
+  - name: terminal
+    type: bool
+    required: false
+    notes: True for RUN_COMPLETED / RUN_FAILED — closes the run journal.
+  - name: triggerCondition
+    type: string
+    required: false
+  - name: sourceCitation
+    type: string
+    required: false
+    notes: babysitter SDK file path or doc reference grounding the event.
+  - name: description
+    type: markdown
+    required: false
+  ontologyRationale: |
+    Cross-cutting orchestration-layer concept. Distinct from ProtocolMessage
+    (core↔model) by direction semantics, lifecycle (terminal completion
+    events), and boundary (runtime↔platform). catalog pass 89 schema-author decision
+    against widening ProtocolMessage enum: the two NodeKinds answer different
+    queries (debugger replay vs LLM transport).
+  incomingEdges:
+  - emits_journal_event
+  outgoingEdges: []
+  invariants:
+  - id starts with journal-event:
+  - terminal=true implies kind=completion or kind=error
+  examples: []
+
+
+

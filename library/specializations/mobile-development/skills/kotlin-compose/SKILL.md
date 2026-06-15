@@ -5,6 +5,13 @@ version: 1.0.0
 category: Native Android Development
 slug: kotlin-compose
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:android-native, skill-area:mobile-state-management]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Kotlin/Jetpack Compose Development Skill

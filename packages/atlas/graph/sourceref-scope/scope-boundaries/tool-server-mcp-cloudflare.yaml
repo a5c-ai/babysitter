@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-cloudflare.scope
+attributes:
+  subjectId: tool-server:mcp-cloudflare
+  inScope: |
+    Cloudflare API access — DNS, Workers, R2, Pages, KV, Zone settings.
+  outOfScope: |
+    Other CDN / edge platforms (Fastly, Akamai), arbitrary AWS / GCP admin (use cloud-specific MCPs), and DDoS-mitigation policy authoring.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-cloudflare

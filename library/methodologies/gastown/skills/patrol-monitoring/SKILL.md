@@ -2,17 +2,14 @@
 name: patrol-monitoring
 description: Continuous monitoring using Deacon/Witness patterns for agent health checks, stuck detection, and automated recovery.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Patrol Monitoring
-
-## Overview
-
-Continuous monitoring using Gas Town's Deacon/Witness pattern. The Deacon supervises overall health, the Witness manages per-rig agent lifecycle, and the Boot (Dog) watches the Deacon itself.
-
-## When to Use
-
-- During active convoy execution
 - When agents may become stuck or unresponsive
 - For long-running multi-agent workflows
 - When automated recovery is desired

@@ -1,0 +1,22 @@
+nodeKind: Language
+id: language:go
+attributes:
+  displayName: "Go"
+  paradigms:
+    - imperative
+    - concurrent
+  description: |
+    Go (Golang) is a statically-typed, compiled language developed at Google,
+    designed for simplicity, fast compilation, and built-in concurrency via
+    goroutines and channels. Its garbage collector and single-binary output
+    make it popular for cloud-native services and CLI tooling.
+
+    Go is the language of Kubernetes, Docker, Terraform, Prometheus, and
+    much of the CNCF ecosystem. The standard library is comprehensive enough
+    that many services require few third-party dependencies. Common patterns
+    include the context package for cancellation propagation, interfaces for
+    dependency injection, and table-driven tests. Popular frameworks include
+    Gin, Echo, Chi (HTTP routing), and gRPC-go for RPC services.
+edges:
+  used_by_skill_area:
+    - target: skill-area:k8s-operator-development

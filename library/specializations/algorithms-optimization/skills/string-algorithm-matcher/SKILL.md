@@ -6,6 +6,11 @@ allowed-tools:
   - Write
   - Grep
   - Glob
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:string-matching, skill-area:dynamic-programming]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # String Algorithm Matcher Skill

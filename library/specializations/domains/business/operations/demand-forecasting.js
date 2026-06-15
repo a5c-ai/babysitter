@@ -26,6 +26,11 @@
  *   forecastingPolicy: { methods: ["exponential-smoothing", "regression", "ML"], accuracy: {...}, reviewCycles: ["weekly", "monthly"] }
  * }
  * @references APICS Forecasting, Demand Sensing, Machine Learning for Demand Forecasting
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

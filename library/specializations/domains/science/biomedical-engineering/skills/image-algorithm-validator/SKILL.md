@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Medical Imaging
   skill-id: BME-SK-031
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Image Algorithm Validator Skill

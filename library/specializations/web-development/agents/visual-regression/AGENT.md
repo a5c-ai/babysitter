@@ -9,6 +9,14 @@ expertise:
   - Diff analysis
   - CI integration
   - Responsive testing
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:qa-engineer, role:frontend-engineer]
+  skillAreas: [skill-area:visual-regression-testing, skill-area:cross-browser-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Visual Regression Agent

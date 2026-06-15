@@ -8,6 +8,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:compliance-automation, skill-area:data-protection-dlp]
+  roles: [role:compliance-officer, role:privacy-engineer]
+  workflows: [workflow:compliance-audit]
+
 ---
 
 # HIPAA Compliance Automator Skill

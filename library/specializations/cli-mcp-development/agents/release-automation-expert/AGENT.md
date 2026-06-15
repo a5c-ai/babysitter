@@ -8,6 +8,14 @@ expertise:
   - Changelog generation
   - GitHub releases
   - Release automation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:deployment-infrastructure-management]
+  roles: [role:backend-engineer, role:platform-engineer, role:release-manager-bot, role:changelog-writer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Release Automation Expert Agent

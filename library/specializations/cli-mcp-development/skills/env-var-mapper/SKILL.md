@@ -2,6 +2,14 @@
 name: env-var-mapper
 description: Generate environment variable to CLI argument mapping with prefix support, type conversion, and fallback chains for configuration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:configuration-management]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Environment Variable Mapper

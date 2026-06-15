@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: lab-automation
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:sensor-fusion, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # Bluesky Data Collection

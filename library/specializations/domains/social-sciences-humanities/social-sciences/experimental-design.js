@@ -5,6 +5,12 @@
  * @outputs { success: boolean, experimentDesign: object, powerAnalysis: object, randomizationPlan: object, artifacts: array }
  * @recommendedSkills SK-SS-001 (quantitative-methods), SK-SS-014 (research-ethics-irb)
  * @recommendedAgents AG-SS-001 (quantitative-research-methodologist), AG-SS-010 (research-ethics-coordinator)
+ *
+ * @graph
+ *   domains: [domain:social-sciences]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:user-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:data-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

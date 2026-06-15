@@ -1,0 +1,17 @@
+nodeKind: MemoryHierarchy
+id: memory-hierarchy:claude-code-remote-ccr
+attributes:
+  displayName: "Claude Code Remote (CCR) memory hierarchy"
+  scopes:
+    - remote-memory
+    - project-claude-md
+  baseDirEnvVar: "CLAUDE_CODE_REMOTE_MEMORY_DIR"
+  defaultBaseDir: "~/.claude"
+  entrypointFilename: "MEMORY.md"
+  enableGate: env-var-only
+  disableEnvVars:
+    - CLAUDE_CODE_DISABLE_AUTO_MEMORY
+  description: |
+    Remote (CCR) mode requires CLAUDE_CODE_REMOTE_MEMORY_DIR explicitly set —
+    if unset, auto-memory is disabled because there's no persistent storage
+    surface.

@@ -1,0 +1,9 @@
+{
+  "id": "devops-responder",
+  "name": "Sam Rivera",
+  "title": "DevOps Lead",
+  "domains": ["devops", "infrastructure"],
+  "tags": ["docker", "kubernetes", "cicd", "aws", "terraform", "monitoring"],
+  "availability": true,
+  "responseTimeSla": 3600000
+}

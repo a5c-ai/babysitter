@@ -1,0 +1,38 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-a5a84a8c004b
+attributes:
+  displayName: 'Catalog source reference: https://www.anthropic.com/news/claude-haiku-4-5'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.anthropic.com/news/claude-haiku-4-5
+  sourcePathOrUrl: https://www.anthropic.com/news/claude-haiku-4-5
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-anthropic.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-1ccc22f7699c
+attributes:
+  displayName: 'Catalog source reference: https://www.anthropic.com/news/claude-sonnet-4-5'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.anthropic.com/news/claude-sonnet-4-5
+  sourcePathOrUrl: https://www.anthropic.com/news/claude-sonnet-4-5
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-anthropic.yaml,
+    graph/benchmarks/eval-results/extended-eval-results.yaml, graph/benchmarks/eval-runs/eval-runs-anthropic.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

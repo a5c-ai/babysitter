@@ -1,0 +1,42 @@
+# Issue #884 — Track Gemini 3.1 Flash TTS model variant.
+nodeKind: ModelVersion
+id: model:gemini-3-1-flash-tts@current
+attributes:
+  displayName: "Gemini 3.1 Flash TTS"
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:gemini-3
+  kind: audio
+  contextWindowTokens: 0
+  modalities:
+    - text
+    - audio
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: audio
+      direction: output
+  releaseDate: "2026-06-01"
+  lifecycleStatus: preview
+  lifecycleStatusChangedAt: "2026-06-01"
+  modelCardUrl: https://ai.google.dev/gemini-api/docs/models
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Gemini 3.1 Flash TTS is a powerful low-latency speech generation model
+    with natural outputs, steerable prompts, and expressive audio tags.
+    Marked New / Preview on the Google model overview page. Exact API model
+    string and token/audio duration limits should be confirmed from Google
+    API reference before adding precise claims.
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:gemini-3
+  served_by:
+    - provider:google
+  speaks:
+    - model-transport:gemini-generate-content

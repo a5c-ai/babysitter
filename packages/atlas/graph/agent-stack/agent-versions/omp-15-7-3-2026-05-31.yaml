@@ -1,0 +1,67 @@
+# Additive issue #809 record. This file intentionally avoids editing shared
+# OMP current/version YAML so concurrent graph-update PRs do not conflict.
+nodeKind: AgentVersion
+id: agentVersion:omp:15-7-3
+attributes:
+  assimilationNotes:
+    - "Issue #809 tracks Oh-My-Pi 15.7.3 shake compaction primitives: collectShakeRegions, applyShakeRegion(s), summarizeShakeRegions, default/aggressive configs, and related compaction types."
+    - "Shake compaction detects heavy context regions including whole tool-call results and large fenced/XML blocks, then elides or extractively compresses those regions through an injected completion backend."
+    - "The shake compressor is provider-agnostic and can be wired to local on-device models, so adapter metadata should distinguish local-on-device compression backends from remote provider-managed compaction."
+    - "Related 15.7.2 metadata adds providers.autoThinkingModel plus auto thinking-level classification for user turns."
+    - "Whole tool-call result elision changes transcript/context replay assumptions because replay consumers may encounter placeholders instead of the original bulky tool result payload."
+  releaseHighlights:
+    - "Shake compaction primitives under @oh-my-pi/pi-agent-core/compaction."
+    - "Provider-agnostic extractive compression and elision path for heavy context regions."
+    - "Local-on-device completion backends can be used for compression."
+    - "Auto thinking model selection via providers.autoThinkingModel and per-turn thinking-level classification."
+  issue809ReleaseAdditions:
+    releaseVersion: "15.7.3"
+    compaction:
+      shakeCompaction:
+        introducedIn: "15.7.3"
+        packageSubpath: "@oh-my-pi/pi-agent-core/compaction"
+        primitives:
+          - collectShakeRegions
+          - applyShakeRegion
+          - applyShakeRegions
+          - summarizeShakeRegions
+        regionDetection:
+          - whole-tool-call-results
+          - large-fenced-blocks
+          - large-xml-blocks
+        compressionModes:
+          - elision
+          - extractive-compression
+        configs:
+          - default
+          - aggressive
+        completionBackend:
+          kind: injected
+          providerAgnostic: true
+          localOnDeviceSupported: true
+        notes: "Detects heavy context regions, then elides or extractively compresses them through an injected completion backend."
+    providerConfig:
+      autoThinkingModel:
+        introducedIn: "15.7.2"
+        field: "providers.autoThinkingModel"
+        notes: "Selects the model used for automatic thinking-level classification."
+      autoThinkingLevelClassification:
+        introducedIn: "15.7.2"
+        scope:
+          - user-turn
+        notes: "Classifies user turns before choosing the thinking level."
+    transcriptReplay:
+      toolResultElision:
+        introducedIn: "15.7.3"
+        affectedRegions:
+          - whole-tool-call-results
+        replayImplication: "Context replay consumers must tolerate elision placeholders or extractive summaries where the original tool-call result was too large to retain verbatim."
+edges:
+  supports:
+    - target: capability:supports-compaction
+      versionRange: "15.7.3"
+      level: full
+      notes: |
+        Shake compaction provides client-side heavy-region detection,
+        elision, and extractive compression through an injected completion
+        backend, including local-on-device backend support.

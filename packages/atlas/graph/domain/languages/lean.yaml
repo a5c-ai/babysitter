@@ -1,0 +1,16 @@
+nodeKind: Language
+id: language:lean
+attributes:
+  displayName: "Lean"
+  paradigms:
+    - functional
+    - dependently-typed
+    - proof-assistant
+  description: |
+    Lean — a dependently-typed functional programming language and
+    theorem prover (Lean 4) developed by Microsoft Research / the Lean
+    FRO, paired with the mathlib mathematics library.
+edges:
+  applies_to:
+    - target: domain:mathematics
+    - target: domain:computer-science

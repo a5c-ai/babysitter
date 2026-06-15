@@ -1,0 +1,25 @@
+nodeKind: TransportClient
+id: transport-client:claude-code-bedrock
+attributes:
+  displayName: "Claude Code Bedrock transport client"
+  providerId: provider:aws-bedrock
+  idleTimeoutMs: 60000
+  responseTimeoutMs: 600000
+  keepAliveEnabled: true
+  retryPolicyId: retry-policy:claude-code-default
+  oauthRefreshOn401: false
+  clearAuthCacheOn401: true
+  credentialPrecedence:
+    - env-var
+    - bedrock-iam
+    - settings
+  description: |
+    AWS Bedrock Converse client. IAM SigV4 auth — clearing creds on 401 is
+    a no-op (next call re-resolves). No OAuth refresh path.
+edges:
+  client_targets_provider:
+    - target: provider:aws-bedrock
+  client_uses_retry_policy:
+    - target: retry-policy:claude-code-default
+  client_uses_token_budget:
+    - target: token-budget:claude-code-call-1m-extra-usage

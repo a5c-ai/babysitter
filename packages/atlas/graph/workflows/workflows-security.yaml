@@ -1,0 +1,82 @@
+---
+nodeKind: Workflow
+id: workflow:security-review
+attributes:
+  displayName: "Security Review"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Evaluates code changes and infrastructure modifications for security
+    vulnerabilities, compliance gaps, and threat-model alignment.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:code-reviewer
+  requires_skill_area:
+    - target: skill-area:oauth-flows
+    - target: skill-area:webhook-verification
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:review-prs-merge-decisions
+  performed_by_org_unit:
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:vulnerability-management
+attributes:
+  displayName: "Vulnerability Management"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "continuous"
+  complexity: cross-team
+  description: |
+    Scans dependencies and container images for CVEs, triages findings
+    by severity, and tracks remediation to resolution.
+edges:
+  involves_role:
+    - target: role:vulnerability-scanner
+    - target: role:security-reviewer
+    - target: role:dependency-updater
+  requires_skill_area:
+    - target: skill-area:secrets-rotation
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:upgrade-dependencies-weekly
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:secret-rotation
+attributes:
+  displayName: "Secret Rotation"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: single-team
+  description: |
+    Rotates API keys, database credentials, and certificates on a
+    defined schedule with zero-downtime key rollover.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:secrets-rotation
+    - target: skill-area:k8s-rbac
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:platform-team

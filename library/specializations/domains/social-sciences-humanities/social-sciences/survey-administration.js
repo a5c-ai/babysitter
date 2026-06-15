@@ -5,6 +5,12 @@
  * @outputs { success: boolean, administrationPlan: object, qualityControlProtocol: object, qualityScore: number, artifacts: array }
  * @recommendedSkills SK-SS-003 (survey-design-administration), SK-SS-014 (research-ethics-irb)
  * @recommendedAgents AG-SS-003 (survey-research-director), AG-SS-010 (research-ethics-coordinator)
+ *
+ * @graph
+ *   domains: [domain:social-sciences]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:user-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:data-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

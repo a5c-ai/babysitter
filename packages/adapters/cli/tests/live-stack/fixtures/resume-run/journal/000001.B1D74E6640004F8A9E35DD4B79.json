@@ -1,0 +1,9 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-05-01T00:00:00.000Z",
+  "data": {
+    "runId": "RESUME_FIXTURE_RUN",
+    "processId": "processes/live-stack/summarize-translate-test"
+  },
+  "checksum": "fee795f719e39be15419e809a3bf335d8de4131a8b8c8911bd3118b3d6fb3740"
+}

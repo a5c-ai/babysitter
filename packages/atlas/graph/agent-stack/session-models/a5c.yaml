@@ -1,0 +1,17 @@
+nodeKind: SessionModel
+id: session-model:a5c
+attributes:
+  agentVersionId: agent-version:a5c@current
+  persistence: file
+  controlPlane: self-managed
+  structuredTransport: persistent
+  sessionDir: "~/.a5c/sessions/<sessionId>.jsonl"
+  canResume: true
+  canFork: true
+  format: jsonl
+edges:
+  state_machine_for:
+    - target: workspace:local-developer-default
+  requires_capability:
+    - target: capability:can-resume
+    - target: capability:can-fork

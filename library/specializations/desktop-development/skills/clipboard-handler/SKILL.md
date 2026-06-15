@@ -3,6 +3,12 @@ name: clipboard-handler
 description: Cross-platform clipboard operations for text, images, files, and rich content
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [clipboard, cross-platform, desktop, copy-paste, files]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-system-integration, skill-area:desktop-ui-frameworks]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # clipboard-handler

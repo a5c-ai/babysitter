@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:gemini-history
+attributes:
+  pathId: path:gemini-history
+  displayName: "Gemini CLI history file"
+  path: "~/.gemini/history"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:gemini-cli.platform@current
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:gemini-cli.platform@current

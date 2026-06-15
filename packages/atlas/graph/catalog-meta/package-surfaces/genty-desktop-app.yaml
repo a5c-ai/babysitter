@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:genty-desktop-app
+attributes:
+  packageId: "@a5c-ai/genty-desktop-app"
+  packageName: "@a5c-ai/genty-desktop-app"
+  displayName: "Genty Desktop App"
+  description: "Electron-based desktop application for agent control and monitoring. Wraps genty-ui components in a native desktop shell with system tray, notifications, and local session management."
+  role: "desktop-app"
+  whenToUse: "Build and distribute this when you need a native desktop experience for managing and monitoring agent sessions outside the browser or terminal."
+  status: active

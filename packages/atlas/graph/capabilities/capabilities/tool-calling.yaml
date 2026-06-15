@@ -1,0 +1,8 @@
+nodeKind: Capability
+id: capability:tool-calling
+attributes:
+  displayName: Tool Calling
+  label: "Tool Calling"
+  description: "Ability to invoke external tools and receive structured results."
+  namespace: "runtime"
+  producerPackages: []

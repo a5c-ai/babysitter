@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Structural Design
   skill-id: CIV-SK-006
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Concrete Design Calculator Skill

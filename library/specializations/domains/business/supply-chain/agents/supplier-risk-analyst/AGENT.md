@@ -9,6 +9,12 @@ expertise:
   - Signal investigation
   - Risk reporting
   - Trend analysis
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops, skill-area:statistical-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:risk-analyst]
 ---
 
 # Supplier Risk Analyst

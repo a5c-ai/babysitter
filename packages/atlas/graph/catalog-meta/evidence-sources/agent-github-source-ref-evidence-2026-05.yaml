@@ -1,0 +1,14 @@
+nodeKind: EvidenceSource
+id: evidence:agent-github-source-ref-catalog-source-2026-05
+attributes:
+  displayName: agent-github-source-ref catalog source-ref coverage
+  kindLabel: repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/sourceref-scope/source-refs/agent-githubs.yaml
+  filePath: graph/sourceref-scope/source-refs/agent-githubs.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: agent-github-source-ref
+edges:
+  has_trust_level:
+  - trust-level:repo

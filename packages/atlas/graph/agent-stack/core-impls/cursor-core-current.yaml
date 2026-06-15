@@ -1,0 +1,83 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:cursor.core@current
+attributes:
+  displayName: Cursor Core (current)
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  packageRef: source-ref:cursor-binary
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Cursor''s Composer/Agent runs a tool-use loop inside the IDE
+    process; the loop is
+    backed by the Cursor gateway which translates Anthropic / OpenAI / Gemini wire
+    formats. Turn boundaries are signalled via the gateway''s normalized stream-end
+    event; the IDE renders streamed assistant text and tool-call diff previews
+    incrementally.
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'Compaction is performed inside the Cursor gateway; no public
+    threshold is exposed.
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Cursor does not expose a first-class subagent primitive;
+    "background agents"
+    spawn a separate Composer session via the IDE rather than nesting a sub-loop in
+    the parent turn.
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final assistant text is rendered into the Composer chat panel;
+    the IDE applies
+    accepted edits as workspace mutations on user accept.
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: cursor-internal
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  - model-transport:openai-responses
+  - model-transport:gemini-generate-content
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:cursor
+    role: core
+  speaks:
+    - target: model-transport:gemini-generate-content
+    - target: model-transport:anthropic-messages
+    - target: model-transport:openai-responses
+  supports:
+  - target: capability:can-multi-turn
+    versionRange: '*'
+    level: full
+    notes: 'Cursor maintains chat threads; the core loop carries a multi-turn
+      transcript across user/assistant exchanges.
+      '
+  - target: capability:parallel-tool-calls
+    versionRange: '>=0.40.0'
+    level: full
+    notes: 'Cursor''s agent loop natively dispatches tool calls in parallel.
+      '
+  - target: capability:streaming
+    versionRange: '*'
+    level: partial
+    notes: 'Cursor streams chat output incrementally in its IDE chat UI; some
+      long-running tool flows surface incrementally rather than per-token.
+      '
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+    notes: 'Cursor agents invoke editor and shell tools (read, edit, run)
+      through the core loop''s tool dispatch.
+      '
+  fires_hook:
+  - target: hook-surface:cursor.pre-tool
+  - target: hook-surface:cursor.post-tool
+  - target: hook-surface:cursor.user-prompt-submit
+  - target: hook-surface:cursor.stop
+  - target: hook-surface:cursor.session-start
+  - target: hook-surface:cursor.session-end
+  supports_orchestration_primitive:
+    - target: orch-primitive:context-injection
+    - target: orch-primitive:human-review-gate
+    - target: orch-primitive:workspace-snapshot

@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Issue Management
   id: SK-014
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:incident-management, skill-area:stakeholder-management, skill-area:change-management-ops]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:scrum-master, role:technical-program-manager]
 ---
 
 # Issue Tracker

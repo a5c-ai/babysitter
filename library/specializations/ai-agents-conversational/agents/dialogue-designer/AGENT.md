@@ -8,6 +8,13 @@ expertise:
   - State management
   - User intent handling
   - Response generation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:natural-language-processing, skill-area:agent-planning-reasoning]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development]
+
 ---
 
 # Dialogue Designer

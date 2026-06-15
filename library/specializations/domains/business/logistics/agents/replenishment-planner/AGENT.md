@@ -13,6 +13,10 @@ required-skills:
   - safety-stock-calculator
   - demand-forecasting-engine
   - fifo-lifo-controller
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:statistical-analysis, skill-area:data-analytics]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Replenishment Planner

@@ -3,6 +3,11 @@
  * @description Systematic support programs including strategic planning, talent acquisition, customer introductions, operational improvement, and fundraising support
  * @inputs { companyName: string, companyStage: string, companyNeeds: array, portfolioResources: object }
  * @outputs { success: boolean, supportPlan: object, engagementActivities: array, impactMetrics: object, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

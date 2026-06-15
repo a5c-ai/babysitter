@@ -9,6 +9,12 @@ expertise:
   - Authentication and authorization flaws
   - API security vulnerabilities
   - Modern web framework security
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:application-security-testing, skill-area:web-security]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # Web Security Researcher Agent

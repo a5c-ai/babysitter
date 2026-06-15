@@ -8,6 +8,12 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:penetration-testing-ethical-hacking, skill-area:network-security]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle]
 ---
 
 # Network Protocol Analysis Skill

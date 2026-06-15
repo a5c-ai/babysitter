@@ -8,6 +8,12 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:deep-web-research, skill-area:compliance-automation, skill-area:data-governance]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:compliance-officer, role:research-scientist]
 ---
 
 # Bioethics Deliberation Skill

@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:rye
+attributes:
+  displayName: "Rye"
+  homepageUrl: "https://rye.astral.sh"
+  kind: package-manager
+  language: language:python
+  description: |
+    Comprehensive project and package management solution for Python.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:pip
+      comparison: "Python package managers"
+    - target: tool:poetry
+      comparison: "Python project managers"
+    - target: tool:uv
+      comparison: "Python project managers — Rye preceded uv; uv is its successor"

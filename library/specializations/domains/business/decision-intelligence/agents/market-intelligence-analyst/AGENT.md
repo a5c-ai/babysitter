@@ -11,6 +11,10 @@ expertise:
   - Geographic analysis
   - Customer need mapping
   - Recommendation synthesis
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:market-research, skill-area:market-sizing, skill-area:competitive-intelligence]
+  roles: [role:data-analyst, role:strategic-planner, role:marketing-strategist]
 ---
 
 # Market Intelligence Analyst

@@ -1,0 +1,44 @@
+---
+nodeKind: Library
+id: library:spring-boot
+attributes:
+  displayName: "Spring Boot"
+  belongsToLanguageId: language:java
+  description: |
+    Opinionated Spring application bootstrapping with auto-config,
+    starters, actuator, and an embedded servlet container.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:mockito
+attributes:
+  displayName: "Mockito"
+  belongsToLanguageId: language:java
+  description: |
+    Java mocking framework for unit tests — mocks, spies, argument
+    captors, and verification of interactions.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:moq
+---
+nodeKind: Library
+id: library:junit
+attributes:
+  displayName: "JUnit"
+  belongsToLanguageId: language:java
+  description: |
+    Standard Java unit-test framework (JUnit 5 / Jupiter) with
+    extensions, parameterized tests, and lifecycle hooks.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:component-testing

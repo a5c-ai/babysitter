@@ -1,0 +1,80 @@
+---
+nodeKind: Workflow
+id: workflow:cx-measurement-framework-setup
+attributes:
+  displayName: "CX Measurement Framework Setup"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Establishes the instrumentation and measurement framework for customer
+    experience metrics -- selecting primary CX metrics (NPS, CSAT, CES) with
+    appropriate survey methodology and sampling strategy, designing survey
+    instruments with validated question sets and response scales, implementing
+    survey delivery triggers tied to journey milestones and interaction events,
+    building real-time dashboards with drill-down by segment, product area, and
+    journey stage, configuring alerting thresholds for metric degradation,
+    establishing closed-loop follow-up workflows for detractor responses,
+    defining statistical significance criteria for trend reporting, and creating
+    executive reporting cadences with benchmark comparisons. Produces CX
+    measurement architecture document, survey design specifications, dashboard
+    wireframes, and alerting rules. Excludes survey content localization.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:customer-lifecycle-automation-setup
+attributes:
+  displayName: "Customer Lifecycle Automation Setup"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Designs and implements automated customer lifecycle management across
+    onboarding, adoption, renewal, and expansion stages -- defining lifecycle
+    stage criteria with entry and exit conditions based on usage, engagement,
+    and time-based triggers, building automated engagement sequences for each
+    stage including email nurture tracks, in-app guidance, and CSM task
+    creation, configuring health score computation rules that combine product
+    usage signals, support interaction patterns, and billing data into a
+    composite customer health indicator, establishing automated risk alerts
+    when health scores cross critical thresholds, creating expansion signal
+    detection for upsell and cross-sell opportunity routing, setting up renewal
+    workflow triggers with appropriate lead times by contract value, and
+    building lifecycle stage transition reporting. Produces lifecycle automation
+    architecture, health scoring specification, engagement sequence designs, and
+    trigger logic documentation. Excludes CRM platform selection.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:platform-team

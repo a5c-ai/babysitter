@@ -1,0 +1,215 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.echo
+attributes:
+  schema: '{}'
+  displayName: "Everything: Echo"
+  description: Echo back the input message. Used to test tool invocation.
+  inputSchema:
+    type: object
+    required: [message]
+    properties:
+      message: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      message: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.add
+attributes:
+  schema: '{}'
+  displayName: "Everything: Add"
+  description: Add two numbers and return the sum.
+  inputSchema:
+    type: object
+    required: [a, b]
+    properties:
+      a: { type: number }
+      b: { type: number }
+  outputSchema:
+    type: object
+    properties:
+      sum: { type: number }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.long-running-operation
+attributes:
+  schema: '{}'
+  displayName: "Everything: Long Running Operation"
+  description: Demonstrates a long running operation with progress notifications.
+  inputSchema:
+    type: object
+    properties:
+      duration: { type: number }
+      steps: { type: number }
+  outputSchema:
+    type: object
+    properties:
+      status: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.sample-llm
+attributes:
+  schema: '{}'
+  displayName: "Everything: Sample LLM"
+  description: Demonstrates LLM sampling capability via the MCP sampling API.
+  inputSchema:
+    type: object
+    required: [prompt]
+    properties:
+      prompt: { type: string }
+      maxTokens: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      completion: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.get-tiny-image
+attributes:
+  schema: '{}'
+  displayName: "Everything: Get Tiny Image"
+  description: Returns a small test image as base64 content.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      image: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.print-env
+attributes:
+  schema: '{}'
+  displayName: "Everything: Print Env"
+  description: Print all environment variables visible to the server (useful for debugging MCP env passing).
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      env: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.annotated-message
+attributes:
+  schema: '{}'
+  displayName: "Everything: Annotated Message"
+  description: Returns a message with content annotations (priority/audience hints).
+  inputSchema:
+    type: object
+    properties:
+      messageType: { type: string, enum: [error, success, debug] }
+      includeImage: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.get-resource-reference
+attributes:
+  schema: '{}'
+  displayName: "Everything: Get Resource Reference"
+  description: Return a content block referencing a resource by URI.
+  inputSchema:
+    type: object
+    required: [resourceId]
+    properties:
+      resourceId: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.get-resource-links
+attributes:
+  schema: '{}'
+  displayName: "Everything: Get Resource Links"
+  description: Returns a list of resource links to test resource link content blocks.
+  inputSchema:
+    type: object
+    properties:
+      count: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      links: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:everything.structured-content
+attributes:
+  schema: '{}'
+  displayName: "Everything: Structured Content"
+  description: Demonstrates returning structured (typed) content from a tool call.
+  inputSchema:
+    type: object
+    properties:
+      location: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      structuredContent: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-everything

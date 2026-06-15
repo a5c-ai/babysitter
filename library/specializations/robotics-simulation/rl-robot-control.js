@@ -17,6 +17,12 @@
  * - Stable Baselines3: https://stable-baselines3.readthedocs.io/
  * - Sim-to-Real Locomotion: https://arxiv.org/abs/1804.10332
  * - OpenAI Gym: https://sites.google.com/view/simtoreal
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

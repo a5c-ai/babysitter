@@ -1,0 +1,16 @@
+nodeKind: ExtensionInterface
+id: extension-interface:orchestration
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Orchestration
+  displayName: "Orchestration"
+  concern: "Coordinating multiple agents, subagents, and processes."
+  surface: |
+    `dispatch(task, subagent)`, `await(handle)`, `phase(name)`. Backs
+    the babysitter call/yolo flows.
+  builtInDefault: |
+    Sequential subagent dispatch; no phase model; no resumability.
+  notableImpls:
+    - subagent:planner
+    - tool-server:github-issues-mcp
+edges: {}

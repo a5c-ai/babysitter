@@ -1,0 +1,49 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:langgraph.platform@current
+attributes:
+  displayName: "LangGraph Platform / LangSmith Deployment (current)"
+  agentVersionId: agent-version:langgraph@current
+  packageRef: source-ref:langsmith-langgraph-platform-docs
+  nativeExtensionFormat: none
+  nativeExtensionManifestPath: ""
+  nativeExtensionsDirectoryPath: []
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  subagentDefinitionFormat: none
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: ""
+  capabilityProfileRegistry: false
+  launchConfigRegistry: true
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: pip
+  supportedChannelKinds:
+    - http-sse-channel
+  notes: |
+    Maps deployed LangGraph/LangSmith surfaces into Layer 6: packaging and
+    hosting graphs, addressing deployed graphs remotely, separating local graph
+    development from production invocation, and persisting thread state. It does
+    not imply a native plugin marketplace; custom components are authored as code
+    and wired by the host application.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:langgraph
+      role: platform
+  sourced_from:
+    - source-ref:langsmith-langgraph-platform-docs
+    - source-ref:langgraph-docs
+  supports:
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+      notes: |
+        Deployed graph calls can use thread-level persistence and resume-like
+        continuation semantics through stored graph state.
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+

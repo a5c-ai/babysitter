@@ -6,6 +6,11 @@ backlog-id: AG-009
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:deployment-infrastructure-management]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # docs-platform-engineer
@@ -320,17 +325,17 @@ plugins: [
     '@docusaurus/plugin-content-docs',
     {
       id: 'sdk',
-      path: '../packages/sdk/docs',
+      path: '../packages/babysitter-sdk/docs',
       routeBasePath: 'sdk',
       sidebarPath: require.resolve('./sidebars-sdk.js'),
-      editUrl: 'https://github.com/org/repo/edit/main/packages/sdk/',
+      editUrl: 'https://github.com/org/repo/edit/main/packages/babysitter-sdk/',
     },
   ],
   [
     '@docusaurus/plugin-content-docs',
     {
       id: 'cli',
-      path: '../packages/cli/docs',
+      path: '../packages/adapters/cli/docs',
       routeBasePath: 'cli',
       sidebarPath: require.resolve('./sidebars-cli.js'),
     },

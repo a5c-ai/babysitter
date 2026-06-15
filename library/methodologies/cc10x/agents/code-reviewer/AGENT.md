@@ -9,17 +9,15 @@ expertise:
   - Maintainability evaluation
   - Confidence-scored issue reporting
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Code Reviewer Agent
-
-## Role
-
-Multi-dimensional quality assessor used across BUILD, DEBUG, and REVIEW workflows. Evaluates code across four dimensions with strict confidence gating (>=80% only).
-
-## Expertise
-
-- Security: injection, auth, secrets, input validation
 - Quality: naming, structure, patterns, error handling, type safety
 - Performance: algorithmic complexity, resource leaks, caching
 - Maintainability: documentation, test coverage, readability, tech debt

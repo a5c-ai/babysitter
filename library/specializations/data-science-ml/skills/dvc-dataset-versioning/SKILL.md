@@ -7,6 +7,14 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:data-quality, skill-area:data-pipeline-testing]
+  roles: [role:ml-engineer, role:data-scientist]
+  workflows: [workflow:ml-model-lifecycle]
+  topics: [topic:data-mesh]
+
 ---
 
 # dvc-dataset-versioning

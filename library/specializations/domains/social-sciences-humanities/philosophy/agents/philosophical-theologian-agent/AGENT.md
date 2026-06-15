@@ -2,6 +2,12 @@
 name: philosophical-theologian-agent
 description: Integrates philosophical rigor with theological inquiry and evaluates religious claims
 required-skills: theological-synthesis, comparative-religion-analysis, evidence-justification-assessment
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:deep-web-research, skill-area:natural-language-processing, skill-area:document-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Philosophical Theologian Agent

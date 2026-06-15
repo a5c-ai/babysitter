@@ -3,6 +3,10 @@ name: album-curator-agent
 description: Album curator agent for developing cohesive album concepts including themes, motifs, sonic palettes, narrative arcs, track sequencing, and visual direction coordination
 required-skills: album-conceptualization, track-sequencing, persona-development, genre-analysis
 id: AG-MAC-005
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:audio-processing, skill-area:brand-strategy]
+  roles: [role:creative-director, role:brand-manager]
 ---
 
 # Album Curator Agent

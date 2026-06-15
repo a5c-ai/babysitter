@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:worktree
+attributes:
+  canonicalDefinitionId: definition:worktree.canonical
+  displayName: "Worktree"
+  kind: primitive
+  references:
+    - "NodeKind:Worktree"
+  description: |
+    Git-worktree per-branch isolation
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

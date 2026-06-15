@@ -18,6 +18,10 @@ metadata:
   phase: 2
   experience: 12+ years manufacturing engineering
   background: CNC machining, metal fabrication, additive manufacturing
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Manufacturing Engineering Specialist Agent

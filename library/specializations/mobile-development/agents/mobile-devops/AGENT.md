@@ -6,6 +6,13 @@ category: CI/CD and Release
 slug: mobile-devops
 status: active
 role: Mobile DevOps Engineer
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:app-store-deployment, skill-area:deployment-infrastructure-management]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Mobile DevOps Agent

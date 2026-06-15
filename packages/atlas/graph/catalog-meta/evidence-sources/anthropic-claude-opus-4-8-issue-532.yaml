@@ -1,0 +1,113 @@
+nodeKind: EvidenceSource
+id: evidence:anthropic-claude-opus-4-8-announcement-issue-532
+attributes:
+  displayName: "Anthropic Claude Opus 4.8 announcement"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.anthropic.com/news/claude-opus-4-8
+  sourcePathOrUrl: https://www.anthropic.com/news/claude-opus-4-8
+  locator: "Introducing Claude Opus 4.8; availability, release date, pricing, tool-use statements"
+  capturedAt: '2026-05-29T12:39:00Z'
+  observedAt: '2026-05-29T12:39:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T12:39:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+attributes:
+  displayName: "Anthropic models overview for Claude Opus 4.8"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/models/overview.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/models/overview.md
+  locator: "Latest models comparison table"
+  capturedAt: '2026-05-29T12:39:00Z'
+  observedAt: '2026-05-29T12:39:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T12:39:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-pricing-claude-opus-4-8-issue-532
+attributes:
+  displayName: "Anthropic Claude Opus 4.8 pricing"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/pricing.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/pricing.md
+  locator: "Pricing table; prompt caching and batch pricing sections"
+  capturedAt: '2026-05-29T12:39:00Z'
+  observedAt: '2026-05-29T12:39:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T12:39:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+attributes:
+  displayName: "Anthropic Claude in Amazon Bedrock for Claude Opus 4.8"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/build-with-claude/claude-in-amazon-bedrock.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/build-with-claude/claude-in-amazon-bedrock.md
+  locator: "Model IDs and endpoint sections"
+  capturedAt: '2026-05-29T12:39:00Z'
+  observedAt: '2026-05-29T12:39:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T12:39:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-vertex-claude-opus-4-8-issue-532
+attributes:
+  displayName: "Anthropic Claude on Vertex AI for Claude Opus 4.8"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/build-with-claude/claude-on-vertex-ai.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/build-with-claude/claude-on-vertex-ai.md
+  locator: "API model IDs and context window sections"
+  capturedAt: '2026-05-29T12:39:00Z'
+  observedAt: '2026-05-29T12:39:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T12:39:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-deprecations-claude-opus-4-8-issue-532
+attributes:
+  displayName: "Anthropic model deprecations for Claude Opus 4.8"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+  locator: "Current and recently retired models table"
+  capturedAt: '2026-05-29T12:39:00Z'
+  observedAt: '2026-05-29T12:39:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T12:39:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web

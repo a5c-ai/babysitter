@@ -1,0 +1,36 @@
+nodeKind: PermissionMode
+id: permission-mode:a5c-interactive
+attributes:
+  displayName: "a5c interactive (default)"
+  mode: default
+  isReadOnly: false
+  requiresUserConsent: true
+  enteredVia: cli-flag
+  description: |
+    Default interactive mode for the a5c orchestrator. Effects that change
+    workspace state surface as breakpoints to the operator before the
+    orchestrator commits them. Equivalent to passing `--interactive`
+    explicitly.
+
+    Source: packages/babysitter-sdk/src/cli/main/usage.ts shows `--interactive` /
+    `--no-interactive` / `--non-interactive` flags on `create-run` and
+    `run:create`. packages/tasks-adapter mediates the operator-prompt
+    surface. Defaults are interactive when stdin is a TTY.
+---
+nodeKind: PermissionMode
+id: permission-mode:a5c-non-interactive
+attributes:
+  displayName: "a5c non-interactive (yolo)"
+  mode: bypass-permissions
+  isReadOnly: false
+  requiresUserConsent: false
+  enteredVia: cli-flag
+  description: |
+    Non-interactive / yolo mode for a5c. The orchestrator auto-resolves
+    breakpoints and proceeds without operator approval. Entered via
+    `--non-interactive` (alias `yolo`) on the `create-run` CLI; intended
+    for trusted CI / automation contexts only.
+
+    Source: packages/babysitter-sdk/src/cli/main/usage.ts (`yolo [...]` is documented
+    as `alias for create-run --non-interactive`). packages/babysitter-sdk/src/prompts/
+    templates/run-creation.md describes yolo semantics.

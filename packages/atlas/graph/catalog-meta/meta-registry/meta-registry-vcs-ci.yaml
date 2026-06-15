@@ -1,0 +1,467 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:vcs-ci
+attributes:
+  displayName: VCS / CI (meta)
+  clusterNumber: 18
+  scope: 'Conceptual aggregation of NodeKinds describing the version-control and continuous-integration surface: VCSHost (the hosting platform — GitHub / GitLab / Bitbucket / Azure DevOps / Gitea), PullRequest (a code-change proposal: PR / MR / CR), CodeReview (review event on a PR: approval / changes-requested / comment) and CIWorkflow (CI/CD pipeline definition such as a GitHub Actions workflow). Members live in editorial cluster vcs-ci in ontology-schema.yaml.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:vcs-host
+  - target: meta-node-kind:pull-request
+  - target: meta-node-kind:code-review
+  - target: meta-node-kind:ci-workflow
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:vcs-host
+attributes:
+  displayName: VCSHost (meta)
+  name: VCSHost
+  cluster: vcs-ci
+  prefix: vcs-host
+  origin: standard
+  purpose: a version-control hosting platform (GitHub, GitLab, Bitbucket, Azure DevOps, self-hosted Gitea)
+  exampleCount: 0
+  invariants:
+  - 'id starts with vcs-host:'
+edges:
+  in_cluster:
+  - target: meta-cluster:vcs-ci
+  contains_meta_attribute:
+  - target: meta-attribute:vcs-host--id
+  - target: meta-attribute:vcs-host--display-name
+  - target: meta-attribute:vcs-host--host-kind
+  - target: meta-attribute:vcs-host--base-url
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:pull-request
+attributes:
+  displayName: PullRequest (meta)
+  name: PullRequest
+  cluster: vcs-ci
+  prefix: pull-request
+  origin: universal
+  purpose: a code-change proposal (PR/MR) on a VCS host
+  exampleCount: 0
+  invariants:
+  - 'id starts with pull-request:'
+edges:
+  in_cluster:
+  - target: meta-cluster:vcs-ci
+  contains_meta_attribute:
+  - target: meta-attribute:pull-request--id
+  - target: meta-attribute:pull-request--state
+  - target: meta-attribute:pull-request--target-branch
+  - target: meta-attribute:pull-request--vcs-host-id
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:code-review
+attributes:
+  displayName: CodeReview (meta)
+  name: CodeReview
+  cluster: vcs-ci
+  prefix: code-review
+  origin: standard
+  purpose: a review event on a PullRequest (approval / changes-requested / comment)
+  exampleCount: 0
+  invariants:
+  - 'id starts with code-review:'
+edges:
+  in_cluster:
+  - target: meta-cluster:vcs-ci
+  contains_meta_attribute:
+  - target: meta-attribute:code-review--id
+  - target: meta-attribute:code-review--pull-request-id
+  - target: meta-attribute:code-review--verdict
+  - target: meta-attribute:code-review--reviewed-at
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:ci-workflow
+attributes:
+  displayName: CIWorkflow (meta)
+  name: CIWorkflow
+  cluster: vcs-ci
+  prefix: ci-workflow
+  origin: standard
+  purpose: a CI/CD pipeline definition (GitHub Actions workflow, GitLab CI, Buildkite pipeline, ...)
+  exampleCount: 0
+  invariants:
+  - 'id starts with ci-workflow:'
+edges:
+  in_cluster:
+  - target: meta-cluster:vcs-ci
+  contains_meta_attribute:
+  - target: meta-attribute:ci-workflow--id
+  - target: meta-attribute:ci-workflow--display-name
+  - target: meta-attribute:ci-workflow--workflow-kind
+  - target: meta-attribute:ci-workflow--triggers
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vcs-host--id
+attributes:
+  displayName: VCSHost.id
+  name: id
+  parentNodeKindId: meta-node-kind:vcs-host
+  type: id
+  required: true
+  description: id on VCSHost.
+edges:
+  defined_on:
+  - target: meta-node-kind:vcs-host
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vcs-host--display-name
+attributes:
+  displayName: VCSHost.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:vcs-host
+  type: string
+  required: true
+  description: displayName on VCSHost.
+edges:
+  defined_on:
+  - target: meta-node-kind:vcs-host
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vcs-host--host-kind
+attributes:
+  displayName: VCSHost.hostKind
+  name: hostKind
+  parentNodeKindId: meta-node-kind:vcs-host
+  type: enum<github,gitlab,bitbucket,azure-devops,gitea,gerrit,saas,self-hosted,other>
+  required: false
+  description: hostKind on VCSHost (vendor / self-hosting style).
+edges:
+  defined_on:
+  - target: meta-node-kind:vcs-host
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vcs-host--base-url
+attributes:
+  displayName: VCSHost.baseUrl
+  name: baseUrl
+  parentNodeKindId: meta-node-kind:vcs-host
+  type: url
+  required: false
+  description: baseUrl on VCSHost (root URL of the host).
+edges:
+  defined_on:
+  - target: meta-node-kind:vcs-host
+---
+nodeKind: MetaAttribute
+id: meta-attribute:pull-request--id
+attributes:
+  displayName: PullRequest.id
+  name: id
+  parentNodeKindId: meta-node-kind:pull-request
+  type: id
+  required: true
+  description: id on PullRequest.
+edges:
+  defined_on:
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaAttribute
+id: meta-attribute:pull-request--state
+attributes:
+  displayName: PullRequest.state
+  name: state
+  parentNodeKindId: meta-node-kind:pull-request
+  type: string
+  required: false
+  description: state on PullRequest (open|merged|closed|draft).
+edges:
+  defined_on:
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaAttribute
+id: meta-attribute:pull-request--target-branch
+attributes:
+  displayName: PullRequest.targetBranch
+  name: targetBranch
+  parentNodeKindId: meta-node-kind:pull-request
+  type: string
+  required: false
+  description: targetBranch on PullRequest (the branch the change targets).
+edges:
+  defined_on:
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaAttribute
+id: meta-attribute:pull-request--vcs-host-id
+attributes:
+  displayName: PullRequest.vcsHostId
+  name: vcsHostId
+  parentNodeKindId: meta-node-kind:pull-request
+  type: ref<VCSHost>
+  required: false
+  description: vcsHostId on PullRequest.
+edges:
+  defined_on:
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaAttribute
+id: meta-attribute:code-review--id
+attributes:
+  displayName: CodeReview.id
+  name: id
+  parentNodeKindId: meta-node-kind:code-review
+  type: id
+  required: true
+  description: id on CodeReview.
+edges:
+  defined_on:
+  - target: meta-node-kind:code-review
+---
+nodeKind: MetaAttribute
+id: meta-attribute:code-review--pull-request-id
+attributes:
+  displayName: CodeReview.pullRequestId
+  name: pullRequestId
+  parentNodeKindId: meta-node-kind:code-review
+  type: ref<PullRequest>
+  required: false
+  description: pullRequestId on CodeReview.
+edges:
+  defined_on:
+  - target: meta-node-kind:code-review
+---
+nodeKind: MetaAttribute
+id: meta-attribute:code-review--verdict
+attributes:
+  displayName: CodeReview.verdict
+  name: verdict
+  parentNodeKindId: meta-node-kind:code-review
+  type: string
+  required: false
+  description: verdict on CodeReview (approved|changes-requested|commented|dismissed).
+edges:
+  defined_on:
+  - target: meta-node-kind:code-review
+---
+nodeKind: MetaAttribute
+id: meta-attribute:code-review--reviewed-at
+attributes:
+  displayName: CodeReview.reviewedAt
+  name: reviewedAt
+  parentNodeKindId: meta-node-kind:code-review
+  type: iso-timestamp
+  required: false
+  description: reviewedAt on CodeReview.
+edges:
+  defined_on:
+  - target: meta-node-kind:code-review
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ci-workflow--id
+attributes:
+  displayName: CIWorkflow.id
+  name: id
+  parentNodeKindId: meta-node-kind:ci-workflow
+  type: id
+  required: true
+  description: id on CIWorkflow.
+edges:
+  defined_on:
+  - target: meta-node-kind:ci-workflow
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ci-workflow--display-name
+attributes:
+  displayName: CIWorkflow.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:ci-workflow
+  type: string
+  required: true
+  description: displayName on CIWorkflow.
+edges:
+  defined_on:
+  - target: meta-node-kind:ci-workflow
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ci-workflow--workflow-kind
+attributes:
+  displayName: CIWorkflow.workflowKind
+  name: workflowKind
+  parentNodeKindId: meta-node-kind:ci-workflow
+  type: enum<github-actions,gitlab-ci,circleci,buildkite,jenkins,azure-pipelines,other>
+  required: false
+  description: workflowKind on CIWorkflow (CI engine vendor).
+edges:
+  defined_on:
+  - target: meta-node-kind:ci-workflow
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ci-workflow--triggers
+attributes:
+  displayName: CIWorkflow.triggers
+  name: triggers
+  parentNodeKindId: meta-node-kind:ci-workflow
+  type: list<string>
+  required: false
+  description: triggers on CIWorkflow (event tokens, e.g. push, pull_request, workflow_dispatch).
+edges:
+  defined_on:
+  - target: meta-node-kind:ci-workflow
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:hosted-on-vcs
+attributes:
+  displayName: hosted_on_vcs (meta)
+  name: hosted_on_vcs
+  source:
+  - meta-node-kind:pull-request
+  - meta-node-kind:ci-workflow
+  target:
+  - meta-node-kind:vcs-host
+  cardinality: N:1
+  origin: standard
+  description: a PullRequest or CIWorkflow is hosted on a VCSHost
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:pull-request
+  - target: meta-node-kind:ci-workflow
+  target_of_meta_edge:
+  - target: meta-node-kind:vcs-host
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:reviews
+attributes:
+  displayName: reviews (meta)
+  name: reviews
+  source:
+  - meta-node-kind:code-review
+  target:
+  - meta-node-kind:pull-request
+  cardinality: N:1
+  origin: standard
+  description: a CodeReview reviews a PullRequest
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:code-review
+  target_of_meta_edge:
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:validates-pull-request
+attributes:
+  displayName: validates_pull_request (meta)
+  name: validates_pull_request
+  source:
+  - meta-node-kind:ci-workflow
+  target:
+  - meta-node-kind:pull-request
+  cardinality: N:N
+  origin: standard
+  description: a CIWorkflow validates a PullRequest (gate / status check)
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:ci-workflow
+  target_of_meta_edge:
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:submitted-by
+attributes:
+  displayName: submitted_by (meta)
+  name: submitted_by
+  source:
+  - meta-node-kind:pull-request
+  - meta-node-kind:code-review
+  target: []
+  cardinality: N:1
+  origin: standard
+  description: a PullRequest or CodeReview is submitted by a Role. Role lives in role-ontology and is not re-emitted here.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:pull-request
+  - target: meta-node-kind:code-review
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:versioned-via
+attributes:
+  displayName: versioned_via (meta)
+  name: versioned_via
+  source: []
+  target:
+  - meta-node-kind:vcs-host
+  cardinality: N:1
+  origin: standard
+  description: a definitional artifact (AgentVersion / Workspace / WorkflowDefinition) is versioned in a VCSHost (definitional anchor — distinct from PullRequest.hosted_on_vcs which is per-change). Sources are owned by agent-stack / catalog-provenance meta-registries.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:vcs-host
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:triggered-by-vcs
+attributes:
+  displayName: triggered_by (meta)
+  name: triggered_by
+  source: []
+  target:
+  - meta-node-kind:ci-workflow
+  - meta-node-kind:pull-request
+  cardinality: N:N
+  origin: standard
+  description: a Run is triggered by an external event source (CIWorkflow run, PullRequest open/update, Issue activity). Run is owned by agent-stack; Issue is owned by domain meta-registry.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:ci-workflow
+  - target: meta-node-kind:pull-request
+---
+nodeKind: MetaEnum
+id: meta-enum:vcs-host-kind
+attributes:
+  displayName: VCSHost kind
+  name: hostKind
+  values:
+  - value: github
+    description: GitHub / GitHub Enterprise.
+  - value: gitlab
+    description: GitLab SaaS / self-managed.
+  - value: bitbucket
+    description: Atlassian Bitbucket Cloud / Server.
+  - value: azure-devops
+    description: Azure DevOps Repos.
+  - value: gitea
+    description: Gitea / Forgejo.
+  - value: gerrit
+    description: Gerrit code review.
+  - value: saas
+    description: Generic SaaS VCS not otherwise enumerated.
+  - value: self-hosted
+    description: Generic self-hosted VCS not otherwise enumerated.
+  - value: other
+    description: Other VCS host.
+  usedOnAttributes:
+  - meta-attribute:vcs-host--host-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:vcs-host--host-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:ci-workflow-kind
+attributes:
+  displayName: CIWorkflow kind
+  name: workflowKind
+  values:
+  - value: github-actions
+    description: GitHub Actions workflow.
+  - value: gitlab-ci
+    description: GitLab CI/CD pipeline.
+  - value: circleci
+    description: CircleCI configuration.
+  - value: buildkite
+    description: Buildkite pipeline.
+  - value: jenkins
+    description: Jenkins pipeline.
+  - value: azure-pipelines
+    description: Azure Pipelines.
+  - value: other
+    description: Other CI engine.
+  usedOnAttributes:
+  - meta-attribute:ci-workflow--workflow-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:ci-workflow--workflow-kind

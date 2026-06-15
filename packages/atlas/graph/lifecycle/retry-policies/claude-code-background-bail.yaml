@@ -1,0 +1,15 @@
+nodeKind: RetryPolicy
+id: retry-policy:claude-code-background-bail
+attributes:
+  displayName: "Claude Code background-source bail-on-overload policy"
+  variant: background-bail
+  maxRetries: 0
+  maxRetriesOnOverload: 0
+  retryableStatusCodes: []
+  foregroundOnlyOnOverload: true
+  description: |
+    Effective policy for QuerySource values not in FOREGROUND_529_RETRY_SOURCES
+    (e.g. title generation, suggestions, summaries, non-security classifiers).
+    529 overload errors throw CannotRetryError immediately and emit
+    tengu_api_529_background_dropped — the user is not blocked on these calls
+    and retry would amplify a capacity cascade.

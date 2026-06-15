@@ -6,6 +6,13 @@ category: Native iOS Development
 slug: ios-native-expert
 status: active
 role: Senior iOS Engineer
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:mobile-biometrics]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # iOS Native Expert Agent

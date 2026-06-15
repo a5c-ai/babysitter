@@ -1,0 +1,50 @@
+nodeKind: MCPPrompt
+id: mcp-prompt:summarize-thread
+attributes:
+  displayName: "summarize_thread"
+  name: "summarize_thread"
+  arguments:
+    - { name: "thread_id", description: "Conversation thread id", required: true }
+    - { name: "max_words", description: "Target summary length", required: false }
+  description: |
+    Server-supplied prompt template that asks the model to summarize a chat
+    thread into a short brief. Common in chat-platform MCP servers.
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:explain-diff
+attributes:
+  displayName: "explain_diff"
+  name: "explain_diff"
+  arguments:
+    - { name: "diff", description: "Unified diff text", required: true }
+    - { name: "audience", description: "reviewer | maintainer | newcomer", required: false }
+  description: |
+    Prompt template exposed by source-control MCP servers (e.g. github, gitea).
+    Wraps the diff with audience-specific framing.
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:plan-tasks
+attributes:
+  displayName: "plan_tasks"
+  name: "plan_tasks"
+  arguments:
+    - { name: "goal", description: "High-level goal", required: true }
+    - { name: "constraints", description: "Hard constraints", required: false }
+  description: |
+    Prompt template exposed by planner-style MCP servers; returns a structured
+    plan-of-tasks the host agent can execute.
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:review-pr
+attributes:
+  displayName: "review_pr"
+  name: "review_pr"
+  arguments:
+    - { name: "pr_url", description: "Pull request URL", required: true }
+  description: |
+    Code-review prompt template typically exposed by github / gitlab MCP
+    servers. Bundles repository conventions and reviewer persona.
+edges: {}

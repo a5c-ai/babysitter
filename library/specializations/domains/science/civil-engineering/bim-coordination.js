@@ -3,6 +3,12 @@
  * @description Building Information Modeling coordination including model development, clash detection, and multi-discipline integration
  * @inputs { projectId: string, bimExecutionPlan: object, disciplineModels: array, projectRequirements: object }
  * @outputs { success: boolean, coordinatedModel: object, clashReports: array, coordinationDrawings: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

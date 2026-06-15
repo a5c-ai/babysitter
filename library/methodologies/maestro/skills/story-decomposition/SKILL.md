@@ -2,7 +2,14 @@
 name: story-decomposition
 description: Break technical specifications into small, implementable stories with dependency ordering
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
+
 # Story Decomposition
 
 ## Capabilities

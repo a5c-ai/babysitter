@@ -1,0 +1,35 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:http
+attributes:
+  displayName: "HTTP"
+  kind: http
+  description: |
+    HTTP request/response transport between a host and an agent. Used by
+    hosted agent SDKs and dashboard integrations that drive the agent
+    over a synchronous request/response API rather than a long-lived
+    pipe.
+  inboundMessageFormat: |
+    HTTP POST with a JSON body describing the work item. Per-agent shape;
+    a typical request body carries `{prompt|input, context|history?,
+    tools?, options?}`. Streaming variants use `Accept: text/event-stream`
+    or `Accept: application/x-ndjson`. Agent-specific request/response
+    shapes are recorded on the AgentVersion node via per-edge evidence
+    (intentionally not enumerated here — this transport node captures
+    only the cross-vendor contract).
+  outboundMessageFormat: |
+    Either a single JSON response body (`{output, events?, usage?}`) for
+    synchronous calls, or a streamed body — `text/event-stream` SSE
+    frames carrying JSONL turn events, or `application/x-ndjson` with
+    one JSON event per line.
+  signalForwarding: |
+    No OS-signal channel. Cancel is expressed at the HTTP layer:
+      - Closing the TCP connection / aborting the request typically
+        cancels the in-flight turn server-side.
+      - Some agents expose an explicit `POST /sessions/{id}/cancel`
+        (or DELETE) endpoint. The exact path is per-agent and lives on
+        the AgentVersion node, not here.
+  ptySemantics: |
+    Not applicable — there is no terminal in an HTTP transport; ANSI /
+    raw-mode behaviours must be handled by the agent's web frontend if
+    needed at all.
+edges: {}

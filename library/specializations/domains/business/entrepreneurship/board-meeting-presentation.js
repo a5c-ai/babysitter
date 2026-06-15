@@ -15,6 +15,11 @@
  * @references
  * - First Round Review Board Meeting Guides: https://review.firstround.com/
  * - Board Meeting Best Practices
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

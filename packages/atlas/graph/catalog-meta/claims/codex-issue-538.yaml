@@ -1,0 +1,17 @@
+nodeKind: Claim
+id: claim:web-codex-0-135-release
+attributes:
+  claimId: web-codex-0-135-release
+  statement: "Codex CLI 0.135.0 adds richer codex doctor diagnostics, remote transport /status connection and server-version details, Vim text-object and interrupt-binding updates, named permission profile display, bundled patched zsh helper discovery, non-interactive exec resume coverage with cwd overrides, and a dedicated SQLite memory runtime database."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - web-codex-0-135-release
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:web-codex-0-135-release

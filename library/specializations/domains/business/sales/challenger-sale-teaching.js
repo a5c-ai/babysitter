@@ -17,6 +17,11 @@
  * @references
  * - The Challenger Sale by Matthew Dixon: https://www.challengerinc.com/
  * - Challenger Customer: https://www.amazon.com/Challenger-Customer-Selling-Hidden-Influencer/dp/1591848156
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

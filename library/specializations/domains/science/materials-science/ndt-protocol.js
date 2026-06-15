@@ -30,6 +30,12 @@
  *   "acceptanceCriteria": { "standard": "ASME VIII Div. 1", "class": "1" }
  * }
  * @references ASME BPVC Section V, ASTM E164, ASTM E1444, AWS D1.1, ISO 17640
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

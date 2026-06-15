@@ -6,6 +6,11 @@ backlog-id: AG-007
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:internationalization, skill-area:docs-as-code]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # l10n-coordinator

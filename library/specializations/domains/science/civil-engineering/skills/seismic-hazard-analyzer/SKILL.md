@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Structural Analysis
   skill-id: CIV-SK-004
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Seismic Hazard Analyzer Skill

@@ -1,0 +1,19 @@
+nodeKind: Role
+id: role:ml-engineer
+attributes:
+  displayName: "ML Engineer"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:ml-ops
+  description: |
+    Builds and ships ML systems — training pipelines, eval, and serving.
+edges:
+  requires_expertise:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:eval-driven-development
+    - target: skill-area:python-implementation
+    - target: skill-area:retrieval-augmented-generation
+  applies_to:
+    - target: domain:ml-ops

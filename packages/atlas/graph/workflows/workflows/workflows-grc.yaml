@@ -1,0 +1,74 @@
+---
+nodeKind: Workflow
+id: workflow:grc-framework-assessment
+attributes:
+  displayName: "GRC Framework Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Assesses organizational GRC (Governance, Risk, and Compliance) framework
+    maturity -- mapping control implementations against NIST CSF, ISO 27001,
+    and SOC 2 Type II requirements, evaluating control effectiveness through
+    automated evidence collection and testing, identifying control gaps and
+    redundancies across overlapping frameworks, reviewing policy document
+    currency and attestation completion rates, and scoring organizational
+    risk posture against peer benchmarks. Produces control matrix heat maps,
+    framework gap analyses, and audit readiness scorecards. Excludes control
+    remediation implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:principal-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:cybersecurity-grc
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:risk-management-team
+---
+nodeKind: Workflow
+id: workflow:cyber-risk-quantification
+attributes:
+  displayName: "Cyber Risk Quantification"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Quantifies cybersecurity risk in financial terms -- applying FAIR
+    (Factor Analysis of Information Risk) methodology to model loss event
+    frequency and magnitude scenarios, aggregating threat intelligence feeds
+    to calibrate threat event frequency estimates, incorporating
+    vulnerability scan results and penetration test findings into loss
+    scenario inputs, running Monte Carlo simulations to generate annualized
+    loss expectancy distributions, and presenting risk-adjusted ROI analyses
+    for proposed security investments to executive stakeholders. Produces
+    cyber risk quantification reports, loss exceedance curves, and security
+    investment prioritization matrices. Excludes security control
+    implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:cybersecurity-grc
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:threat-modeling
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:risk-management-team

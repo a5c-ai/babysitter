@@ -1,0 +1,24 @@
+nodeKind: Session
+id: session:01kqex-session-001
+attributes:
+  lastActivityAt: "2026-01-01T00:00:00Z"
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  format: jsonl
+  filePath: ".a5c/runs/01KQEX-EXAMPLE-RUN-001/sessions/01KQEX-SESSION-001.jsonl"
+  createdAt: "2026-04-28T10:00:05Z"
+  parentSessionId: null
+  forkPoint: null
+  currentStateId: lifecycle-state:session.active
+edges:
+  in_state:
+    - lifecycle-state:session.active
+  governed_by:
+    - state-machine:session
+  agent_version:
+    - agentVersion:claude:ge-0-0-0
+  recorded_attention:
+    - target: file-attention:example-readme
+    - target: file-attention:example-package-json-write
+    - target: file-attention:example-bash-grep
+  has_flow_projection:
+    - target: session-flow:01kqex-session-001-default

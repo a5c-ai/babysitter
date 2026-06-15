@@ -7,19 +7,14 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-infrastructure
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# context-preservation
-
-You are **context-preservation** -- the state preservation skill for Pilot Shell.
-
-## Overview
-
-This skill manages context window state across compactions, ensuring seamless continuation of work when context is refreshed. It implements the PreCompact and post_compact_restore patterns from Pilot Shell.
-
-## Capabilities
-
-### 1. State Capture (PreCompact)
 - Serialize current spec state (tasks, statuses, acceptance criteria)
 - Capture quality pipeline state (last lint/format/typecheck results)
 - Save TDD progress (current phase, iteration count, scores)

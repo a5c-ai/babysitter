@@ -16,6 +16,12 @@
  * - Fleet Management: https://www.therobotreport.com/fleet-management-software-for-mobile-robots/
  * - VDA 5050: https://www.vda.de/en/topics/innovation-and-standardisation/interface-for-automated-guided-vehicles
  * - Open-RMF: https://www.open-rmf.org/
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: design-integration
   backlog-id: SK-UX-002
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:figma-prototyping, skill-area:design-systems]
+  roles: [role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # figma-api

@@ -18,6 +18,12 @@ metadata:
     - oncology
     - tmb
     - msi
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:biomedical-engineer, role:research-scientist]
 ---
 
 # TMB-MSI Calculator Skill

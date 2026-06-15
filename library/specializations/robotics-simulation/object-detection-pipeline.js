@@ -18,6 +18,12 @@
  * - YOLOv8: https://github.com/ultralytics/ultralytics
  * - Detectron2: https://github.com/facebookresearch/detectron2
  * - NVIDIA DeepStream: https://developer.nvidia.com/deepstream-sdk
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

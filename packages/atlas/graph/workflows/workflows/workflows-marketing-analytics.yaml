@@ -1,0 +1,184 @@
+---
+nodeKind: Workflow
+id: workflow:multi-touch-attribution-calibration
+attributes:
+  displayName: "Multi-Touch Attribution Calibration"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Calibrates multi-touch attribution models for accuracy and actionability —
+    comparing rule-based models against data-driven algorithmic attribution,
+    conducting path analysis to understand common conversion journeys, running
+    incrementality holdout tests to validate model outputs, reconciling
+    attribution credit with actual channel performance changes, adjusting model
+    weights based on cross-channel interaction effects, and documenting model
+    limitations and confidence intervals for stakeholder consumption. Produces
+    attribution model comparison reports, incrementality test results, and model
+    calibration recommendations. Excludes attribution platform implementation
+    and data integration.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:marketing-mix-modeling-cycle
+attributes:
+  displayName: "Marketing Mix Modeling Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Executes marketing mix modeling analyses to quantify channel effectiveness
+    at the aggregate level — preparing input data spanning media spend,
+    impressions, pricing, seasonality, and macroeconomic factors, running
+    regression models to decompose revenue drivers, estimating saturation curves
+    and adstock decay rates per channel, simulating budget reallocation scenarios
+    to maximize predicted outcomes, validating model outputs against known
+    business events, and presenting recommendations to leadership for budget
+    planning. Produces MMM model outputs, scenario simulation reports, and
+    channel saturation analyses. Excludes real-time campaign optimization and
+    attribution modeling.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:business-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:customer-acquisition-cost-review
+attributes:
+  displayName: "Customer Acquisition Cost Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews customer acquisition cost metrics across channels and segments —
+    calculating blended and channel-specific CAC with full cost loading,
+    analyzing payback period trends by cohort and acquisition source, computing
+    LTV-to-CAC ratios segmented by plan tier and company size, identifying
+    channels approaching unsustainable CAC thresholds, benchmarking against
+    industry standards, and flagging CAC inflation trends requiring strategic
+    intervention. Produces CAC trend reports, channel unit economics analyses,
+    and payback period forecasts. Excludes pricing strategy changes and product
+    investment decisions.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:business-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:cohort-retention-analysis
+attributes:
+  displayName: "Cohort Retention Analysis"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Conducts systematic cohort-based retention analysis for marketing-acquired
+    users — building weekly and monthly retention curves segmented by acquisition
+    channel, campaign, and user attributes, identifying inflection points where
+    retention diverges between cohorts, isolating retention drivers through
+    feature-usage correlation analysis, defining intervention triggers for
+    at-risk cohorts, measuring the impact of retention marketing campaigns on
+    curve shape, and comparing organic vs paid cohort long-term value. Produces
+    cohort retention dashboards, driver analysis reports, and intervention
+    trigger recommendations. Excludes product feature development and customer
+    success operations.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:campaign-post-mortem-analysis
+attributes:
+  displayName: "Campaign Post-Mortem Analysis"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Conducts structured post-campaign debriefs to extract learnings and improve
+    future execution — gathering performance data across all activated channels,
+    comparing actual results against pre-campaign success criteria and
+    benchmarks, identifying what worked and what underperformed with root-cause
+    analysis, documenting creative and targeting insights for the organizational
+    knowledge base, updating campaign templates and playbooks based on learnings,
+    and presenting findings with actionable recommendations to stakeholders.
+    Produces campaign post-mortem reports, updated playbook entries, and
+    benchmark recalibration recommendations. Excludes ongoing campaign
+    optimization and new campaign planning.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:analytics-team

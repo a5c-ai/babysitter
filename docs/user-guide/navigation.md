@@ -365,27 +365,17 @@ Configure based on actual usage data:
 
 ---
 
-## Version Selector
+## Versioning
 
-For multi-version documentation:
+The user guide currently tracks the current release only:
 
 ```json
 {
   "versions": {
     "current": {
-      "label": "0.0.123 (Latest)",
+      "label": "5.0.0",
       "path": "/docs/"
-    },
-    "archived": [
-      {
-        "label": "0.0.122",
-        "path": "/docs/0.0.122/"
-      },
-      {
-        "label": "0.0.121",
-        "path": "/docs/0.0.121/"
-      }
-    ]
+    }
   }
 }
 ```

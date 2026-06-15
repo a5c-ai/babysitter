@@ -15,6 +15,12 @@
  * @references
  * - ISO 22301 Business Continuity: https://www.iso.org/standard/75106.html
  * - The Resilient Enterprise: https://mitpress.mit.edu/9780262693493/the-resilient-enterprise/
+  * @graph
+ *   domains: [domain:supply-chain]
+ *   specializations: [specialization:supply-chain-optimization]
+ *   skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:supply-chain-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

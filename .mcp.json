@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "atlas": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://atlas-staging.a5c.ai/api/mcp"]
+    }
+  }
+}

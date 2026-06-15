@@ -1,0 +1,58 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:bedrock-bidirectional-stream
+attributes:
+  displayName: "AWS Bedrock InvokeModelWithBidirectionalStream"
+  vendor: "Amazon Web Services"
+  specUrl: "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithBidirectionalStream.html"
+  streamingFraming: aws-event-stream
+  usageEnvelope: bedrock-usage
+  thinkingChannel: none
+  firstSpecVersion: "2025-12-02"
+  currentSpecVersion: "2025-12-02"
+  status: standard
+  requestBodyShape: |
+    POST /model/{modelId}/invoke-with-bidirectional-stream
+    A Bedrock Runtime bidirectional event stream where the client sends
+    provider-native input events and receives model output events over the
+    same invocation. Nova 2 Sonic uses this surface for low-latency
+    speech-to-speech conversation flows.
+  responseBodyShape: |
+    HTTP 200 application/vnd.amazon.eventstream with interleaved model output
+    and metadata/error events. Payload details are provider/model native for
+    speech-to-speech streaming models such as Amazon Nova 2 Sonic.
+  streamingEventTypes:
+    - input
+    - output
+    - metadata
+    - validationException
+    - throttlingException
+    - modelStreamErrorException
+    - internalServerException
+  errorEnvelope: |
+    Errors follow Bedrock Runtime event-stream exception events or the standard
+    Bedrock JSON error envelope with `message` and `__type` fields.
+  rateLimitSignaling: |
+    On throttling or service quota failures, clients should use standard AWS
+    retry semantics with exponential backoff and jitter. Per-model quota state
+    is managed through AWS Service Quotas and CloudWatch rather than a
+    cross-provider remaining-budget response header.
+  authHeaderFormat: |
+    AWS Signature Version 4 over the request:
+      `Authorization: AWS4-HMAC-SHA256 ...`
+      `x-amz-date: <ISO8601>`
+      `x-amz-security-token: <session-token>` for STS / role credentials.
+    Endpoint: `https://bedrock-runtime.<region>.amazonaws.com`.
+  versioningHeader: |
+    No protocol-version header on the request. The API surface is versioned
+    through the Bedrock Runtime endpoint and model id.
+  notes: |
+    This protocol node is separate from Bedrock Converse because Nova 2 Sonic
+    is tracked as bidirectional speech-to-speech streaming, not a standard
+    request/response text chat model.
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:aws-bedrock
+  spoken_by:
+    - model:amazon-nova-2-sonic@current

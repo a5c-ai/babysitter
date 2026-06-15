@@ -8,6 +8,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:retrieval-augmented-generation, skill-area:search-indexing]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Qdrant Integration Skill

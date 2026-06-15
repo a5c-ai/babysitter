@@ -1,0 +1,28 @@
+nodeKind: Layer
+id: layer:4-agent-core
+attributes:
+  displayName: Agent-Core
+  position: 4
+  path: compute
+  scope: Inner loop and graph/turn semantics for one agent brain.
+  summary: |
+    The agent-core layer drives an inference turn or graph step end-to-end:
+    prompt/context assembly, state transition, tool dispatch, child-agent
+    handoff, message materialization, result synthesis, and stop detection.
+    Realized by `AgentCoreImpl` instances.
+  responsibilities:
+    - Define loop, graph, or state-machine iteration semantics.
+    - Assemble prompt/context and normalize message/state materialization.
+    - Dispatch tools/subagents and synthesize terminal results.
+    - Detect stops, interrupts, graph terminal states, and budget exits.
+  examples:
+    - LangGraph StateGraph, graph nodes/edges/state, create_agent routing.
+    - Claude Code/Codex/Gemini CLI loop cores.
+    - a5c unified core and Pi-compatible tool-use loop profiles.
+    - Tool dispatch, stop detection, context-window handling, result envelopes.
+  fitNotes: |
+    This is where custom agent builders fit first. A product may expose only a
+    core library without owning runtime, platform, workspace, or presentation.
+    a5c's core is modeled as a unified same-layer contract, not as built on top
+    of Pi; Pi is a compatibility profile.
+edges: {}

@@ -1,0 +1,15 @@
+nodeKind: TestSet
+id: test-set:gaia-validation
+attributes:
+  displayName: "GAIA validation split"
+  benchmarkId: benchmark:gaia
+  splitName: validation
+  itemCount: 165
+  description: |
+    Validation split of the GAIA benchmark (Mialon et al., 2023). 165
+    held-out questions across three difficulty levels. Used as the
+    public-leaderboard split because the test split is hidden.
+  sourceUrl: "https://huggingface.co/datasets/gaia-benchmark/GAIA"
+edges:
+  split_of:
+    - target: benchmark:gaia

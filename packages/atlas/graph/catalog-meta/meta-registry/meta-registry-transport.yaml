@@ -1,0 +1,129 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:transport
+attributes:
+  displayName: Transport (meta)
+  clusterNumber: 2
+  scope: 'Conceptual aggregation of NodeKinds describing the transport layer between hosts and agents (AgentHostTransport — already in meta-cluster:agent-stack), the MCP server-side primitives (MCPTransport / MCPResource / MCPPrompt / MCPSampling / MCPRoot — also in meta-cluster:agent-stack), and the proxy / interposer layer that sits in front of them (TransportProxy — authored here). Editorial cluster 2-compute-path covers AgentHostTransport and TransportProxy; the MCP non-tool primitives live in editorial cluster 3-agent-stack but are transport-shaped.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:transport-proxy
+  - target: meta-node-kind:agent-host-transport
+  - target: meta-node-kind:mcp-transport
+  - target: meta-node-kind:mcp-resource
+  - target: meta-node-kind:mcp-prompt
+  - target: meta-node-kind:mcp-sampling
+  - target: meta-node-kind:mcp-root
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:transport-proxy
+attributes:
+  displayName: TransportProxy (meta)
+  name: TransportProxy
+  cluster: 2-compute-path
+  prefix: transport-proxy
+  origin: standard
+  purpose: optional interposer between host and agent / MCP transport, providing recording, integrity, multiplexing, fan-out, or redaction
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:transport
+  contains_meta_attribute:
+  - target: meta-attribute:transport-proxy--id
+  - target: meta-attribute:transport-proxy--display-name
+  - target: meta-attribute:transport-proxy--capabilities
+  - target: meta-attribute:transport-proxy--signs-responses
+---
+nodeKind: MetaAttribute
+id: meta-attribute:transport-proxy--id
+attributes:
+  displayName: TransportProxy.id
+  name: id
+  parentNodeKindId: meta-node-kind:transport-proxy
+  type: id
+  required: true
+  description: id on TransportProxy.
+edges:
+  defined_on:
+  - target: meta-node-kind:transport-proxy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:transport-proxy--display-name
+attributes:
+  displayName: TransportProxy.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:transport-proxy
+  type: string
+  required: true
+  description: displayName on TransportProxy.
+edges:
+  defined_on:
+  - target: meta-node-kind:transport-proxy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:transport-proxy--capabilities
+attributes:
+  displayName: TransportProxy.capabilities
+  name: capabilities
+  parentNodeKindId: meta-node-kind:transport-proxy
+  type: list<enum<recording,integrity,multiplexing,fan-out,redaction>>
+  required: true
+  description: interposer capabilities the proxy provides.
+edges:
+  defined_on:
+  - target: meta-node-kind:transport-proxy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:transport-proxy--signs-responses
+attributes:
+  displayName: TransportProxy.signsResponses
+  name: signsResponses
+  parentNodeKindId: meta-node-kind:transport-proxy
+  type: bool
+  required: false
+  description: whether the proxy signs responses on the way back to the host (integrity flavor).
+edges:
+  defined_on:
+  - target: meta-node-kind:transport-proxy
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:bridges
+attributes:
+  displayName: bridges (meta)
+  name: bridges
+  source:
+  - meta-node-kind:transport-proxy
+  target:
+  - meta-node-kind:transport-proxy
+  cardinality: N:N
+  origin: standard
+  description: 'a transport proxy bridges one ModelTransportProtocol to another (src/dst direction recorded as an edge attribute). Cross-cluster: target is ModelTransportProtocol in meta-cluster:agent-stack — recorded here from the proxy side.'
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:transport-proxy
+  target_of_meta_edge:
+  - target: meta-node-kind:transport-proxy
+---
+nodeKind: MetaEnum
+id: meta-enum:transport-proxy-capability
+attributes:
+  displayName: TransportProxy capability
+  name: capability
+  values:
+  - value: recording
+    description: Records request/response traffic for replay or audit.
+  - value: integrity
+    description: Signs / verifies response integrity (tamper-evident bridging).
+  - value: multiplexing
+    description: Multiplexes multiple logical streams onto one transport connection.
+  - value: fan-out
+    description: Fans a single inbound request out to multiple downstream agents/servers.
+  - value: redaction
+    description: Redacts secrets / PII from traffic in flight.
+  usedOnAttributes:
+  - meta-attribute:transport-proxy--capabilities
+edges:
+  used_on_attribute:
+  - target: meta-attribute:transport-proxy--capabilities

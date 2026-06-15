@@ -1,0 +1,110 @@
+nodeKind: Role
+id: role:ux-writer
+attributes:
+  displayName: "UX Writer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Crafts the words, labels, error messages, and microcopy that guide users
+    through product experiences with clarity and empathy. Collaborates closely
+    with product designers and researchers to ensure language is consistent,
+    accessible, and aligned with brand voice across all touchpoints. Develops
+    and maintains content style guides and contributes to design system
+    documentation that scales writing standards across product teams.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:customer-journey-mapping
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:web-development
+      level: novice
+    - target: specialization:ux-ui-design
+      level: intermediate
+    - target: specialization:technical-documentation
+      level: expert
+---
+nodeKind: Role
+id: role:information-architect
+attributes:
+  displayName: "Information Architect"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Designs the structural organization, labeling systems, navigation, and search
+    mechanisms that help users find and understand information within digital
+    products and knowledge repositories. Conducts card sorting, tree testing, and
+    user research to validate information structures before implementation. Produces
+    sitemaps, taxonomies, content inventories, and wireframe flows that serve as
+    blueprints for product and documentation teams.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:customer-journey-mapping
+    - responsibility:documentation
+    - responsibility:user-research
+  requires_skill:
+    - target: domain:web-development
+      level: intermediate
+    - target: specialization:ux-ui-design
+      level: expert
+    - target: specialization:technical-documentation
+      level: expert
+---
+nodeKind: Role
+id: role:creative-director
+attributes:
+  displayName: "Creative Director"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Sets the creative vision and aesthetic direction for brand, product, and
+    marketing work, ensuring visual identity, messaging, and storytelling cohesively
+    express the organization's values and differentiation. Leads and mentors a team
+    of designers, writers, and creative producers, reviewing work to maintain
+    quality and strategic alignment. Partners with marketing, product, and executive
+    leadership to translate business objectives into compelling creative campaigns
+    and brand experiences.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:brand-management
+    - responsibility:content-creation
+    - responsibility:stakeholder-communication
+    - responsibility:strategic-planning
+    - responsibility:mentoring
+  requires_skill:
+    - target: domain:marketing
+      level: expert
+    - target: domain:web-development
+      level: novice
+    - target: specialization:ux-ui-design
+      level: expert
+---
+nodeKind: Role
+id: role:brand-manager
+attributes:
+  displayName: "Brand Manager"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Owns the consistency and evolution of the brand identity across all customer
+    and stakeholder touchpoints, from visual assets and tone of voice to
+    sponsorships and partnerships. Monitors brand health metrics and competitive
+    positioning, and manages brand guidelines that enable cross-functional teams
+    to work autonomously without diluting the brand. Collaborates with marketing,
+    design, and communications to ensure every expression reinforces brand equity.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:brand-management
+    - responsibility:market-research
+    - responsibility:metric-definition
+    - responsibility:content-creation
+    - responsibility:partnership-development
+  requires_skill:
+    - target: domain:marketing
+      level: expert
+    - target: domain:digital-marketing
+      level: intermediate

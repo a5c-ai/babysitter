@@ -2,6 +2,11 @@
 name: node-operations
 description: Blockchain node deployment and operations. Supports Ethereum execution and consensus clients, validator operations, node monitoring, MEV-Boost configuration, and archive node management.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:blockchain-node-network-setup, skill-area:deployment-infrastructure-management]
+  roles: [role:devops-engineer, role:site-reliability-engineer]
 ---
 
 # Blockchain Node Operations Skill

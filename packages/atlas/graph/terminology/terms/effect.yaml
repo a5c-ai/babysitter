@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:effect
+attributes:
+  canonicalDefinitionId: definition:effect.canonical
+  displayName: "Effect"
+  kind: concept
+  references:
+    - "NodeKind:Effect"
+  description: |
+    Unit of external work in a Run (a5c-flavored)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

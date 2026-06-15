@@ -1,0 +1,135 @@
+---
+nodeKind: PathDescriptor
+id: path:adapters-cli
+attributes:
+  pathId: path:adapters-cli
+  displayName: "adapters CLI workspace"
+  path: "packages/adapters/cli"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-cli
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: adapters CLI bin entrypoint package.
+---
+nodeKind: PathDescriptor
+id: path:adapters-gateway
+attributes:
+  pathId: path:adapters-gateway
+  displayName: "adapters gateway workspace"
+  path: "packages/adapters/gateway"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-gateway
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: HTTP gateway / fanout server.
+---
+nodeKind: PathDescriptor
+id: path:adapters-tui
+attributes:
+  pathId: path:adapters-tui
+  displayName: "adapters TUI workspace"
+  path: "packages/adapters/tui"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-tui
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Ink-based adapters-tui bin entrypoint.
+---
+nodeKind: PathDescriptor
+id: path:adapters-ui
+attributes:
+  pathId: path:adapters-ui
+  displayName: "adapters UI shared workspace"
+  path: "packages/adapters/ui"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-ui
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Cross-platform UI components and session-flow.
+---
+nodeKind: PathDescriptor
+id: path:adapters-webui
+attributes:
+  pathId: path:adapters-webui
+  displayName: "adapters Web UI workspace"
+  path: "packages/adapters/webui"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-webui
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Browser-based adapters web UI.
+---
+nodeKind: PathDescriptor
+id: path:adapters-harness-mock
+attributes:
+  pathId: path:adapters-harness-mock
+  displayName: "adapters harness mock workspace"
+  path: "packages/adapters/harness-mock"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-harness-mock
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Mock harness emulator for adapter tests.
+---
+nodeKind: PathDescriptor
+id: path:adapters-observability
+attributes:
+  pathId: path:adapters-observability
+  displayName: "adapters observability workspace"
+  path: "packages/adapters/observability"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-observability
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Logger and telemetry library.
+---
+nodeKind: PathDescriptor
+id: path:adapters-sdk
+attributes:
+  pathId: path:adapters-sdk
+  displayName: "adapters umbrella SDK workspace"
+  path: "packages/adapters/sdk"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Umbrella @a5c-ai/adapters re-export with adapters bin.
+---
+nodeKind: PathDescriptor
+id: path:adapters-adapters
+attributes:
+  pathId: path:adapters-adapters
+  displayName: "adapters adapters workspace"
+  path: "packages/adapters/adapters"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-adapters-adapters
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Per-harness AgentAdapter implementations bundle.

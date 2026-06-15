@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:phase
+attributes:
+  canonicalDefinitionId: definition:phase.canonical
+  displayName: "Phase"
+  kind: lifecycle-state
+  references:
+    - "NodeKind:Phase"
+  description: |
+    A named state in a phase machine
+edges:
+  applies_to:
+    - target: domain:software-engineering

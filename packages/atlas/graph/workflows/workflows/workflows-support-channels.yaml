@@ -1,0 +1,246 @@
+---
+nodeKind: Workflow
+id: workflow:live-chat-support-optimization
+attributes:
+  displayName: "Live Chat Support Optimization"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Optimizes the live chat support channel for responsiveness and quality —
+    configuring intelligent chat routing rules based on customer tier, issue
+    category, and agent skill tags, managing canned response libraries with
+    usage analytics and effectiveness scoring, calibrating concurrent chat
+    session limits per agent based on complexity distribution, monitoring
+    real-time queue depth and wait times with overflow triggers to secondary
+    channels, analyzing CSAT scores specific to chat interactions versus other
+    channels, optimizing chatbot-to-human handoff points to minimize customer
+    frustration while maximizing deflection, tracking first-contact resolution
+    rates for chat versus re-contact patterns, and A/B testing proactive chat
+    triggers based on page behavior and customer journey stage. Produces chat
+    channel performance dashboards, agent utilization reports, and canned
+    response effectiveness rankings. Excludes chatbot development and platform
+    migration.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:end-user
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:phone-support-queue-management
+attributes:
+  displayName: "Phone Support Queue Management"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages the phone support channel operations end-to-end — designing and
+    optimizing IVR tree structures based on call intent analysis and customer
+    navigation patterns, monitoring hold time distributions with automated
+    callback scheduling triggers when thresholds are breached, implementing
+    skills-based routing to match caller issues with agent expertise,
+    conducting call quality assurance scoring through structured evaluation
+    rubrics covering resolution accuracy, empathy, and process adherence,
+    analyzing call volume patterns to optimize staffing schedules across time
+    zones, managing voicemail response SLAs and callback completion rates,
+    tracking average handle time against quality-adjusted benchmarks to avoid
+    speed-over-quality incentives, and reviewing abandoned call patterns to
+    identify systemic capacity gaps. Produces call center KPI dashboards, IVR
+    path analysis reports, and staffing model recommendations. Excludes
+    workforce hiring and telephony platform selection.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:email-support-workflow
+attributes:
+  displayName: "Email Support Workflow"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Manages the email support channel from receipt through resolution —
+    enforcing response time SLAs tiered by customer segment and issue severity,
+    maintaining and versioning email template libraries with personalization
+    tokens and usage analytics, implementing auto-classification to route
+    emails to specialized queues based on content analysis, defining escalation
+    triggers for emails approaching SLA breach including automatic reassignment
+    and manager notification, managing multi-reply thread continuity so context
+    is preserved across agent shifts, tracking resolution completeness through
+    follow-up rates and re-open frequencies, analyzing email volume patterns to
+    predict staffing needs, and monitoring customer effort scores specific to
+    email interactions. Produces email SLA compliance dashboards, template
+    utilization reports, and channel-specific CSAT analytics. Excludes live
+    chat and phone channel management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+---
+nodeKind: Workflow
+id: workflow:social-media-support-monitoring
+attributes:
+  displayName: "Social Media Support Monitoring"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors and responds to customer support needs surfacing through social
+    media channels — scanning brand mentions, tags, and relevant keywords
+    across Twitter/X, LinkedIn, Facebook, and review platforms using social
+    listening tools, classifying mentions by sentiment and intent to
+    distinguish support requests from general commentary, routing
+    support-worthy mentions to trained agents with social response expertise,
+    managing public response SLAs with escalation paths for viral negative
+    posts, transitioning complex issues from public threads to private DM
+    conversations while maintaining audit trails, coordinating with marketing
+    on brand voice consistency in public support responses, tracking social
+    support volume trends and response effectiveness metrics, and identifying
+    recurring product issues surfacing through social channels before they
+    appear in ticket queues. Produces social support volume dashboards,
+    sentiment trend reports, and public response SLA compliance metrics.
+    Excludes social media marketing and community management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:devrel
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:community-management
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:in-app-support-widget-optimization
+attributes:
+  displayName: "In-App Support Widget Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Optimizes the in-application support experience to maximize self-service
+    resolution — designing contextual help triggers that surface relevant
+    documentation based on user location, action history, and error state,
+    implementing guided troubleshooting flows that walk users through
+    resolution steps before creating tickets, analyzing ticket deflection rates
+    to measure which self-service interventions successfully prevent
+    human-assisted contacts, A/B testing widget placement, timing, and content
+    presentation formats, managing the knowledge surfacing algorithm that
+    matches user context to help articles, tracking user journey drop-off
+    points where help-seeking behavior spikes, coordinating with product teams
+    to embed contextual tooltips at known friction points, and measuring
+    customer effort score differences between widget-resolved and
+    ticket-escalated issues. Produces deflection rate dashboards, guided flow
+    completion analytics, and contextual help coverage gap reports. Excludes
+    product UX redesign and help content authoring.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:video-support-session-management
+attributes:
+  displayName: "Video Support Session Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Manages video and screen-sharing support sessions for complex technical
+    issues — defining criteria for when issues warrant video escalation versus
+    text-based resolution, scheduling video sessions with calendar integration
+    and customer timezone awareness, preparing agents with ticket context and
+    diagnostic pre-work before sessions, implementing screen-sharing protocols
+    with customer consent and security boundaries, recording sessions with
+    customer permission for knowledge capture and training purposes, extracting
+    resolution steps from recordings into structured knowledge base articles,
+    tracking video session outcomes including resolution rates, customer
+    satisfaction, and average duration, and identifying patterns in
+    video-escalated issues that could be prevented through documentation or
+    product improvements. Produces video session utilization reports, knowledge
+    capture metrics, and escalation pattern analyses. Excludes agent hiring and
+    video platform procurement.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success

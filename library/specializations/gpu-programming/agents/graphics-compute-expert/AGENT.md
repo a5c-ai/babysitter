@@ -6,6 +6,11 @@ backlog-id: AG-008
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:shader-programming]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # graphics-compute-expert

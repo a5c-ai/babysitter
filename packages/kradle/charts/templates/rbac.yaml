@@ -1,0 +1,113 @@
+{{- if .Values.rbac.create -}}
+
+apiVersion: rbac.authorization.k8s.io/v1
+
+kind: ClusterRole
+
+metadata:
+
+  name: {{ include "kradle.fullname" . }}
+
+rules:
+
+  - apiGroups: ["kradle.a5c.ai"]
+
+    resources: ["*"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+
+
+  - apiGroups: ["core.oam.dev"]
+
+    resources: ["applications", "applicationrevisions", "componentdefinitions", "workloaddefinitions", "traitdefinitions", "scopedefinitions", "policydefinitions", "policies", "workflowstepdefinitions", "workflows", "resourcetrackers"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: [""]
+
+    resources: ["namespaces", "services", "secrets", "configmaps", "pods", "events", "persistentvolumeclaims"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: ["apiextensions.k8s.io"]
+
+    resources: ["customresourcedefinitions"]
+
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["apiregistration.k8s.io"]
+
+    resources: ["apiservices"]
+
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["kyverno.io"]
+
+    resources: ["policies", "clusterpolicies"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: ["policies.kyverno.io"]
+
+    resources: ["validatingpolicies", "mutatingpolicies", "generatingpolicies", "deletingpolicies", "imagevalidatingpolicies", "policyexceptions"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: ["wgpolicyk8s.io"]
+
+    resources: ["policyreports", "clusterpolicyreports"]
+
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["serving.kserve.io"]
+
+    resources: ["inferenceservices", "servingruntimes"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: ["gateway.envoyproxy.io"]
+
+    resources: ["aigatewayrouteconfigs"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: ["apps"]
+
+    resources: ["deployments"]
+
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["batch"]
+
+    resources: ["jobs"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+
+kind: ClusterRoleBinding
+
+metadata:
+
+  name: {{ include "kradle.fullname" . }}
+
+roleRef:
+
+  apiGroup: rbac.authorization.k8s.io
+
+  kind: ClusterRole
+
+  name: {{ include "kradle.fullname" . }}
+
+subjects:
+
+  - kind: ServiceAccount
+
+    name: {{ include "kradle.fullname" . }}
+
+    namespace: {{ .Release.Namespace }}
+
+{{- end -}}
+

@@ -2,6 +2,11 @@
 name: chain-forensics
 description: On-chain analysis and transaction forensics for blockchain security investigations. Provides capabilities for tracing fund flows, identifying suspicious patterns, MEV analysis, and generating forensic reports for incident response.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch, WebSearch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:blockchain-analytics-explorer, skill-area:incident-response-forensics, skill-area:on-chain-data-oracle-integration]
+  roles: [role:security-engineer, role:security-risk-analyst]
 ---
 
 # Chain Analysis/Forensics Skill

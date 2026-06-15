@@ -9,6 +9,14 @@ expertise:
   - Golden paths and templates
   - Platform adoption metrics
   - Team topologies and cognitive load
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:platform-engineer]
+  skillAreas: [skill-area:gitops, skill-area:cloud-infrastructure]
+  workflows: [workflow:release-management, workflow:change-management]
+  topics: [topic:platform-engineering-practices, topic:infrastructure-as-code]
+
 ---
 
 # Platform Engineer Agent

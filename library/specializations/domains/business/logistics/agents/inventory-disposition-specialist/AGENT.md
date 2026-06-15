@@ -13,6 +13,10 @@ required-skills:
   - dead-stock-identifier
   - returns-disposition-optimizer
   - abc-xyz-classifier
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:financial-planning, skill-area:data-analytics]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Inventory Disposition Specialist

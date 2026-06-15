@@ -1,0 +1,90 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:pikiclaw-voice-input
+attributes:
+  displayName: "PikiClaw Voice Input"
+  description: |
+    Mobile voice input primitive for the PikiClaw agent platform.
+    Tap-to-speak interface that captures voice input via device
+    microphone, transcribes to text, and submits as agent prompts.
+    Optimized for mobile usage patterns where typing is inconvenient.
+    Supports continuous dictation mode and noise cancellation for
+    outdoor and commute use cases.
+  kind: multimodal-input
+  surface: multimodal-input
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:content-input
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:pikiclaw-plugin-marketplace
+attributes:
+  displayName: "PikiClaw Plugin Marketplace"
+  description: |
+    In-app plugin discovery and installation interface for PikiClaw.
+    Browse, search, and install plugins from the PikiClaw marketplace
+    directly within the mobile app. Supports plugin ratings, reviews,
+    one-tap installation, and automatic updates. Plugins extend agent
+    capabilities with custom tools, workflows, and integrations.
+    The marketplace surfaces plugin compatibility with installed
+    agents and highlights popular community extensions.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:pikiclaw-skill-invoke
+attributes:
+  displayName: "PikiClaw Skill Invoke"
+  description: |
+    Mobile skill invocation primitive. Skills are stored in the
+    .pikiclaw/skills directory and can be triggered from the mobile
+    interface via quick-action buttons or voice commands. Each skill
+    represents a reusable workflow or tool configuration that the
+    agent executes on demand. Supports parameterized skill invocation
+    with mobile-optimized input forms.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:lifecycle
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:pikiclaw-agent-select
+attributes:
+  displayName: "PikiClaw Agent Select"
+  description: |
+    Mobile agent selection primitive. Choose between available AI agents
+    on device — PikiClaw supports multiple backend agents configured
+    in the .agents directory. The selector shows agent capabilities,
+    model backing, and recent conversation history. Switching agents
+    preserves conversation context where supported, enabling users to
+    route different types of work to specialized agents from a single
+    mobile interface.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:configuration

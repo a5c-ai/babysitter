@@ -1,0 +1,25 @@
+nodeKind: Plugin
+id: plugin:example-native-claude
+attributes:
+  displayName: "Example Native Claude Plugin"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/plugins/example-native-claude"
+  installFormats: [marketplace]
+  description: |
+    A Claude Code-native plugin built directly against Claude's plugin
+    format (plugin.json + commands/, agents/, skills/, hooks/). No
+    portable manifest; ships only to Claude Code.
+edges:
+  installs_into:
+    - target: agent:claude-code
+      installMethod: marketplace
+  contains_skill:
+    - target: skill:security-review
+  implements:
+    - target: extension-interface:governance
+  sourced_from:
+    - target: source-ref:a5c-plugins-example-native-claude
+  contains_subagent:
+    - target: subagent:claude-code.general-purpose
+  contains_tool_descriptor:
+    - target: tool-descriptor:agent

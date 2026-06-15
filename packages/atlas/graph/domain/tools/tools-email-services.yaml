@@ -1,0 +1,141 @@
+---
+nodeKind: Tool
+id: tool:mailgun
+attributes:
+  displayName: "Mailgun"
+  homepageUrl: "https://www.mailgun.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Email API service for sending, receiving, and tracking transactional
+    and marketing email. Provides SMTP relay, REST API, webhooks, and
+    email validation with advanced deliverability routing.
+edges:
+  tool_used_by:
+    - target: skill-area:transactional-email
+  used_for:
+    - skill-area:transactional-email
+  alternative_to:
+    - target: tool:sendgrid
+      comparison: "Email delivery services"
+    - target: tool:postmark
+      comparison: "Email delivery services"
+    - target: tool:resend
+      comparison: "Email delivery services"
+    - target: tool:aws-ses
+      comparison: "Email delivery services"
+    - target: tool:sparkpost
+      comparison: "Email delivery services"
+---
+nodeKind: Tool
+id: tool:postmark
+attributes:
+  displayName: "Postmark"
+  homepageUrl: "https://postmarkapp.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Transactional email delivery service focused on speed and inbox
+    placement. Provides email templates, message streams for marketing
+    vs. transactional separation, and detailed delivery analytics.
+edges:
+  tool_used_by:
+    - target: skill-area:transactional-email
+  used_for:
+    - skill-area:transactional-email
+  alternative_to:
+    - target: tool:sendgrid
+      comparison: "Email delivery services"
+    - target: tool:mailgun
+      comparison: "Email delivery services"
+    - target: tool:resend
+      comparison: "Email delivery services"
+    - target: tool:aws-ses
+      comparison: "Email delivery services"
+    - target: tool:sparkpost
+      comparison: "Email delivery services"
+---
+nodeKind: Tool
+id: tool:resend
+attributes:
+  displayName: "Resend"
+  homepageUrl: "https://resend.com"
+  kind: other
+  description: |
+    Developer-first email API with React Email template support.
+    Provides clean REST API, domain authentication, webhooks, and
+    a modern dashboard. Designed for modern full-stack applications.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:transactional-email
+  used_for:
+    - skill-area:transactional-email
+  alternative_to:
+    - target: tool:sendgrid
+      comparison: "Email delivery services"
+    - target: tool:mailgun
+      comparison: "Email delivery services"
+    - target: tool:postmark
+      comparison: "Email delivery services"
+    - target: tool:aws-ses
+      comparison: "Email delivery services"
+    - target: tool:sparkpost
+      comparison: "Email delivery services"
+---
+nodeKind: Tool
+id: tool:aws-ses
+attributes:
+  displayName: "Amazon SES"
+  homepageUrl: "https://aws.amazon.com/ses/"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    AWS Simple Email Service for sending transactional, marketing, and
+    notification emails at scale. Integrates with other AWS services and
+    provides SMTP and REST APIs with cost-effective per-message pricing.
+edges:
+  tool_used_by:
+    - target: skill-area:transactional-email
+  used_for:
+    - skill-area:transactional-email
+  alternative_to:
+    - target: tool:sendgrid
+      comparison: "Email delivery services"
+    - target: tool:mailgun
+      comparison: "Email delivery services"
+    - target: tool:postmark
+      comparison: "Email delivery services"
+    - target: tool:resend
+      comparison: "Email delivery services"
+    - target: tool:sparkpost
+      comparison: "Email delivery services"
+---
+nodeKind: Tool
+id: tool:sparkpost
+attributes:
+  displayName: "SparkPost"
+  homepageUrl: "https://www.sparkpost.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Email delivery service with advanced analytics and predictive inbox
+    placement. Provides REST API, SMTP relay, engagement tracking, and
+    suppression list management for high-volume transactional email.
+edges:
+  tool_used_by:
+    - target: skill-area:transactional-email
+  used_for:
+    - skill-area:transactional-email
+  alternative_to:
+    - target: tool:sendgrid
+      comparison: "Email delivery services"
+    - target: tool:mailgun
+      comparison: "Email delivery services"
+    - target: tool:postmark
+      comparison: "Email delivery services"
+    - target: tool:resend
+      comparison: "Email delivery services"
+    - target: tool:aws-ses
+      comparison: "Email delivery services"

@@ -9,17 +9,15 @@ expertise:
   - Gossip state synchronization
   - Partition detection and recovery
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Swarm Coordinator Agent
-
-## Role
-
-Infrastructure coordinator for Ruflo agent swarms. Manages the technical aspects of swarm formation, topology maintenance, consensus protocol execution, and state synchronization.
-
-## Expertise
-
-- Topology selection (Mesh, Hierarchical, Ring, Star)
 - Consensus protocol management (Raft, Byzantine, Gossip, CRDT)
 - Communication graph optimization for latency
 - Gossip-based state propagation

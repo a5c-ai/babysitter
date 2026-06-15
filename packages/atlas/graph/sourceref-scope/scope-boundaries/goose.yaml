@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:goose.scope
+attributes:
+  subjectId: agent:goose
+  inScope: |
+    On-machine open-source agent from Block with multi-provider model backends, MCP tool servers, recipe-based workflows, and both desktop-app and CLI surfaces.
+  outOfScope: |
+    Hosted cloud agent platforms, IDE-side-panel-only workflows, and managed multi-tenant deployments.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:goose

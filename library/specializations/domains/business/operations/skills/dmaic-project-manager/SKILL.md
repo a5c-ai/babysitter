@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: six-sigma-spc
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management, skill-area:statistical-analysis, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:project-manager]
 ---
 
 # DMAIC Project Manager

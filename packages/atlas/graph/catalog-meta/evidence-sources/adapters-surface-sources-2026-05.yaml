@@ -1,0 +1,199 @@
+nodeKind: EvidenceSource
+id: evidence:adapters-tui-package-source
+attributes:
+  displayName: adapters TUI package source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/tui/package.json
+  filePath: packages/adapters/tui/package.json
+  sourcePathOrUrl: packages/adapters/tui/package.json
+  locator: package name, version, adapters-tui binary, and package surface
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:adapters-tui-primitives-source
+attributes:
+  displayName: adapters TUI interaction primitive source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/tui/src/command-palette.tsx
+  filePath: packages/adapters/tui/src/command-palette.tsx
+  sourcePathOrUrl: packages/adapters/tui/src/command-palette.tsx; packages/adapters/tui/src/prompt-input.tsx; packages/adapters/tui/src/model-picker.tsx
+  locator: command palette, prompt input, and model picker interactive components
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:adapters-cli-package-source
+attributes:
+  displayName: adapters CLI package source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/cli/package.json
+  filePath: packages/adapters/cli/package.json
+  sourcePathOrUrl: packages/adapters/cli/package.json
+  locator: package name, version, adapters binary, and package surface
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:adapters-cli-command-source
+attributes:
+  displayName: adapters CLI command source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/cli/src/commands
+  filePath: packages/adapters/cli/src/commands
+  sourcePathOrUrl: packages/adapters/cli/src/commands; packages/adapters/cli/src/exit-codes.ts
+  locator: command handlers and exit-code mapping used by adapters subcommands
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:hooks-adapter-core-package-source
+attributes:
+  displayName: hooks-adapter core package source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/hooks/core/package.json
+  filePath: packages/adapters/hooks/core/package.json
+  sourcePathOrUrl: packages/adapters/hooks/core/package.json
+  locator: package name, version, and package surface
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:hooks-adapter-core-shared-types-source
+attributes:
+  displayName: hooks-adapter core shared type source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/hooks/core/src/types/event.ts
+  filePath: packages/adapters/hooks/core/src/types/event.ts
+  sourcePathOrUrl: packages/adapters/hooks/core/src/types/event.ts; packages/adapters/hooks/core/src/types/result.ts; packages/adapters/hooks/core/src/types/lifecycle.ts; packages/adapters/hooks/core/src/types/session.ts; packages/adapters/hooks/core/src/merge-engine/merge.ts; packages/adapters/hooks/core/src/discovery/detector.ts; packages/adapters/hooks/core/src/propagation/types.ts
+  locator: public hook event, result, phase mapping, session, discovery, merge, and propagation type contracts
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:adapters-gateway-package-source
+attributes:
+  displayName: adapters gateway package source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/gateway/package.json
+  filePath: packages/adapters/gateway/package.json
+  sourcePathOrUrl: packages/adapters/gateway/package.json
+  locator: package metadata and gateway package surface
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:adapters-gateway-endpoint-source
+attributes:
+  displayName: adapters gateway endpoint source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/gateway/src/server.ts
+  filePath: packages/adapters/gateway/src/server.ts
+  sourcePathOrUrl: packages/adapters/gateway/src/server.ts; packages/adapters/gateway/src/kanban/routes.ts; packages/adapters/gateway/src/auth/middleware.ts
+  locator: Hono routes, WebSocket upgrade, Kanban route module, and bearer-auth middleware
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:tasks-adapter-package-source
+attributes:
+  displayName: tasks-adapter package source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/tasks-adapter/package.json
+  filePath: packages/tasks-adapter/package.json
+  sourcePathOrUrl: packages/tasks-adapter/package.json
+  locator: package metadata and breakpoints runtime package surface
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo
+---
+nodeKind: EvidenceSource
+id: evidence:tasks-adapter-server-client-source
+attributes:
+  displayName: tasks-adapter server backend client source
+  kindLabel: file
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/tasks-adapter/src/backends/server.ts
+  filePath: packages/tasks-adapter/src/backends/server.ts
+  sourcePathOrUrl: packages/tasks-adapter/src/backends/server.ts
+  locator: ServerBreakpointBackend outbound-client endpoint methods
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo

@@ -1,0 +1,285 @@
+# NodeKinds for cluster 11-benchmarks.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:benchmark
+  name: Benchmark
+  origin: universal
+  prefix: benchmark
+  cluster: 11-benchmarks
+  purpose: named test/test-suite
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: kind
+    type: string
+    required: false
+  - name: targetsKind
+    type: string
+    required: false
+  incomingEdges:
+  - evaluated_by
+  - scored_against
+  outgoingEdges:
+  - targets
+  - covers
+  - evaluates_policy
+  invariants: []
+  examples: []
+- id: node:test-set
+  name: TestSet
+  origin: universal
+  prefix: test-set
+  cluster: 11-benchmarks
+  purpose: named collection of test cases
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: benchmarkId
+    type: id
+    required: false
+  - name: caseCount
+    type: int
+    required: false
+  - name: composition
+    type: string
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+  - name: itemCount
+    type: int
+    required: false
+  - name: releasedAt
+    type: iso-date
+    required: false
+  - name: sourceUrl
+    type: url
+    required: false
+  - name: splitName
+    type: string
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - tests_in_scope
+  invariants: []
+  examples: []
+- id: node:eval-run
+  name: EvalRun
+  origin: universal
+  prefix: eval-run
+  cluster: 11-benchmarks
+  purpose: one execution of a benchmark against a target
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: benchmarkId
+    type: ref<Benchmark>
+    required: true
+  - name: runAt
+    type: iso-timestamp
+    required: true
+  - name: target
+    type: ref<NodeKind>
+    required: true
+  - name: configHash
+    type: string
+    required: false
+  - name: runBy
+    type: string
+    required: false
+  - name: targetId
+    type: id
+    required: false
+  - name: testSetId
+    type: id
+    required: false
+  - name: evalKind
+    type: enum<capability,safety,robustness,alignment,regression>
+    required: false
+    notes: catalog pass 19 (planner 2026-05-01) — eval discriminator. Seeded with safety (formerly proposed as standalone SafetyEvalRun NodeKind, demoted per reviewer collapse). Required-target lifted to optional pending example backfill.
+  incomingEdges:
+  - uses_harness
+  - judged_by
+  - scored_against_rubric
+  outgoingEdges:
+  - evaluated_by
+  - produced_result
+  - uses_harness
+  - judged_by
+  - scored_against_rubric
+  invariants: []
+  examples: []
+- id: node:eval-result
+  name: EvalResult
+  origin: universal
+  prefix: eval-result
+  cluster: 11-benchmarks
+  purpose: scored result of an EvalRun
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: evalRunId
+    type: ref<EvalRun>
+    required: true
+  - name: score
+    type: float
+    required: true
+  - name: unit
+    type: string
+    required: true
+  - name: metricName
+    type: string
+    required: false
+  - name: passFail
+    type: string
+    required: false
+  - name: reportedAt
+    type: iso-timestamp
+    required: false
+  incomingEdges:
+  - produced_result
+  - attests_to
+  outgoingEdges:
+  - scored_against
+  invariants: []
+  examples: []
+- id: node:eval-harness
+  name: EvalHarness
+  origin: standard
+  prefix: eval-harness
+  cluster: 11-benchmarks
+  purpose: a runnable harness that drives a benchmark (lm-eval-harness, helm, custom) — the executor side of EvalRun
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: harnessKind
+    type: enum<lm-eval-harness,helm,inspect-ai,openai-evals,bigcode-bench,custom>
+    required: false
+  - name: version
+    type: semver
+    required: false
+  - name: vendor
+    type: string
+    required: false
+  - name: language
+    type: string
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - uses_harness
+  outgoingEdges: []
+  invariants:
+  - id starts with eval-harness: null
+  examples: []
+- id: node:judge
+  name: Judge
+  origin: standard
+  prefix: judge
+  cluster: 11-benchmarks
+  purpose: a model or human acting as a judge in an eval (LLM-as-judge, human grader, automated metric)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: judgeKind
+    type: enum<llm,human,programmatic,hybrid,llm-as-judge>
+    required: false
+  - name: modelRef
+    type: id
+    required: false
+    notes: Free-form ref id when judgeKind=llm-as-judge / llm.
+  - name: modelVersionId
+    type: ref<ModelVersion>
+    required: false
+    notes: Bind when judgeKind=llm.
+  - name: rubricId
+    type: ref<Rubric>
+    required: false
+  - name: promptStyle
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - judged_by
+  outgoingEdges: []
+  invariants:
+  - id starts with judge: null
+  examples: []
+- id: node:rubric
+  name: Rubric
+  origin: standard
+  prefix: rubric
+  cluster: 11-benchmarks
+  purpose: a scoring rubric used by an EvalRun or Judge (criteria, scales, weights)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: criteria
+    type: list<map>
+    required: false
+    notes: 'Each entry: { name, description, weight?, scale? }'
+  - name: dimensions
+    type: list<map>
+    required: false
+    notes: 'Alias for criteria (legacy examples). Each entry: { name, description, weight? }.'
+  - name: scale
+    type: any
+    required: false
+    notes: Legacy free-form scale spec.
+  - name: scaleKind
+    type: enum<binary,likert,numeric,categorical>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - scored_against_rubric
+  outgoingEdges: []
+  invariants:
+  - id starts with rubric: null
+  examples: []
+

@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Safety
   skill-id: CE-SK-014
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # HAZOP Facilitator Skill

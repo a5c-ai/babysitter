@@ -1,0 +1,115 @@
+---
+nodeKind: Workflow
+id: workflow:sprint-planning-ceremony
+attributes:
+  displayName: "Sprint Planning Ceremony"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: single-team
+  description: |
+    Facilitates the sprint planning ceremony — reviewing backlog priorities,
+    estimating story points, negotiating sprint scope with product, assigning
+    ownership, identifying dependencies, and publishing the sprint commitment.
+    Excludes daily standups and sprint execution.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:event-storming-session
+attributes:
+  displayName: "Event Storming Session"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Facilitates a collaborative event storming workshop — mapping domain
+    events, identifying aggregates and bounded contexts, discovering commands
+    and policies, resolving hotspots, and producing a shared domain model
+    that informs architecture decisions. Excludes implementation.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:c4-modeling
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:spec-review-cycle
+attributes:
+  displayName: "Spec Review Cycle"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-spec"
+  complexity: single-team
+  description: |
+    Manages the review lifecycle of a technical specification — circulating
+    the draft, collecting structured feedback, facilitating review meetings,
+    tracking revisions, resolving open questions, and recording the final
+    approval decision. Excludes spec authoring.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:tech-lead
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:tdd-kata-session
+attributes:
+  displayName: "TDD Kata Session"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Conducts a time-boxed test-driven development practice session —
+    selecting a coding kata, pairing participants, enforcing red-green-refactor
+    discipline, reviewing solutions, and extracting TDD technique improvements
+    for the team. Excludes production code writing.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:react-testing
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering

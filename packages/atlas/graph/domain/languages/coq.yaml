@@ -1,0 +1,16 @@
+nodeKind: Language
+id: language:coq
+attributes:
+  displayName: "Coq"
+  paradigms:
+    - functional
+    - dependently-typed
+    - proof-assistant
+  description: |
+    Coq (now also known as Rocq) — a formal proof management system based
+    on the Calculus of Inductive Constructions, used for verified
+    software and mathematical proofs.
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:mathematics

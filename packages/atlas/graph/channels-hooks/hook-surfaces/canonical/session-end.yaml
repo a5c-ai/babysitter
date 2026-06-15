@@ -1,0 +1,24 @@
+nodeKind: HookSurface
+id: hook-surface:session-end
+attributes:
+  eventName: "SessionEnd (canonical)"
+  displayName: "SessionEnd (canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [session_id, transcript_path]
+    properties:
+      session_id: { type: string }
+      transcript_path: { type: string }
+      cwd: { type: string }
+      model: { type: string }
+      source:
+        type: string
+        enum: [startup, resume, clear]
+      endedAt: { type: string, format: date-time }
+  description: |
+    Fires when a session is closed.
+edges:

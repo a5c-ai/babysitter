@@ -13,6 +13,11 @@
  * @references
  * - Warehouse Management: https://www.koganpage.com/logistics-operations-management/warehouse-management-9781398614697
  * - WERC: https://www.werc.org/
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -24,7 +29,8 @@ export async function process(inputs, ctx) {
     warehouseLayout,
     putawayRules = [],
     outputDir = 'receiving-putaway-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -74,7 +80,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
       }
-  const phase4Review = await ctx.breakpoint({
+      const phase4Review = await ctx.breakpoint({
       question: `${receiptValidation.discrepancies.length} receiving discrepancies found. Review before putaway?`,
       title: 'Receiving Discrepancy Review',
       context: {
@@ -89,9 +95,8 @@ export async function process(inputs, ctx) {
       });
       if (phase4Review.approved) break;
       lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
-
-  // PHASE 5: PUTAWAY LOCATION OPTIMIZATION
+    }
+    // PHASE 5: PUTAWAY LOCATION OPTIMIZATION
   ctx.log('info', 'Phase 5: Optimizing putaway locations');
   const putawayOptimization = await ctx.task(putawayOptimizationTask, {
     receivedItems: receiptValidation.receivedItems,
@@ -137,7 +142,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Receiving complete. ${receiptValidation.receipts.length} receipts processed, ${putawayExecution.completedTasks} putaway tasks completed. Finalize?`,
     title: 'Receiving and Putaway Complete',
     context: {
@@ -170,7 +175,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/receiving-putaway', timestamp: startTime, outputDir }
   };
 }
-  // TASK DEFINITIONS
+// TASK DEFINITIONS
 export const asnProcessingTask = defineTask('asn-processing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Process ASN data',

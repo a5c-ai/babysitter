@@ -1,0 +1,125 @@
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-kradle
+attributes:
+  ciId: "@a5c-ai/kradle"
+  packageId: package:a5c-ai-kradle
+  scripts:
+    - build
+    - test
+    - validate:docs
+    - package:check
+    - smoke
+    - check
+  publishStrategy: npm-public
+  releaseChannels:
+    - staging
+    - npm
+  validationCommands:
+    - "npm run check --workspace=@a5c-ai/kradle"
+    - "npm run package:check --workspace=@a5c-ai/kradle"
+  artifactExpectations:
+    - "packages/kradle/core/dist/**"
+    - "packages/kradle/core/bin/kradle-demo.mjs"
+    - "packages/kradle/core/bin/kradle-server.mjs"
+  triggerEvents:
+    - push
+    - pr
+    - tag
+edges:
+  validates_package:
+    - target: package:a5c-ai-kradle
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-kradle-sdk
+attributes:
+  ciId: "@a5c-ai/kradle-sdk"
+  packageId: package:a5c-ai-kradle-sdk
+  scripts:
+    - test
+  publishStrategy: internal-workspace
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm test --workspace=@a5c-ai/kradle-sdk"
+  artifactExpectations:
+    - "packages/kradle/sdk/src/index.js"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-kradle-sdk
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-kradle-cli
+attributes:
+  ciId: "@a5c-ai/kradle-cli"
+  packageId: package:a5c-ai-kradle-cli
+  scripts:
+    - test
+    - start
+  publishStrategy: internal-workspace
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm test --workspace=@a5c-ai/kradle-cli"
+  artifactExpectations:
+    - "packages/kradle/cli/bin/kradle.mjs"
+    - "packages/kradle/cli/bin/kradle-server.mjs"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-kradle-cli
+---
+nodeKind: CiSurface
+id: ci:a5c-ai-kradle-web
+attributes:
+  ciId: "@a5c-ai/kradle-web"
+  packageId: package:a5c-ai-kradle-web
+  scripts:
+    - build
+    - test
+    - lint
+  publishStrategy: application
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm run build --workspace=@a5c-ai/kradle-web"
+    - "npm test --workspace=@a5c-ai/kradle-web"
+  artifactExpectations:
+    - "packages/kradle/web/.next/**"
+    - "packages/kradle/web/app/**"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: CiSurface
+id: ci:kradle-helm-chart
+attributes:
+  ciId: kradle-helm-chart
+  packageId: package:kradle-helm-chart
+  scripts:
+    - npm-run-check
+    - helm-template
+  publishStrategy: application
+  releaseChannels:
+    - staging
+  validationCommands:
+    - "npm run check --workspace=@a5c-ai/kradle"
+    - "helm template kradle packages/kradle/charts"
+  artifactExpectations:
+    - "packages/kradle/charts/Chart.yaml"
+    - "packages/kradle/charts/crds/*.yaml"
+    - "packages/kradle/charts/templates/*.yaml"
+  triggerEvents:
+    - push
+    - pr
+edges:
+  validates_package:
+    - target: package:kradle-helm-chart

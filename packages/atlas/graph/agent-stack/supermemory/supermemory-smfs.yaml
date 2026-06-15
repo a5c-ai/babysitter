@@ -1,0 +1,61 @@
+# Supermemory SMFS (Semantic Memory File System) deep-research atlas node.
+
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:supermemory.smfs
+attributes:
+  displayName: "SMFS -- Semantic Memory File System"
+  agentVersionId: agentVersion:supermemory:current
+  fabricKind: filesystem-backed-semantic
+  description: |
+    Filesystem interface that exposes Supermemory containers as mountable
+    directories. Agents interact with memory using standard POSIX operations
+    (ls, cat, grep, echo >) without SDK integration or embedding knowledge.
+    grep is transparently upgraded to semantic search when called without
+    flags. cat profile.md returns a live-synthesized digest of all container
+    memories. Written in pure Rust (forbidden unsafe), uses NFS on macOS
+    and FUSE on Linux. Collapses four moving parts (vector DB, memory
+    service, profile store, SDK) into a single mount point.
+  keyFiles:
+    - "smfs binary (Rust 1.80+)"
+    - "@supermemory/bash (TypeScript virtual bash tool)"
+    - "supermemory-bash (Python virtual bash tool)"
+  mountBackends:
+    - "NFS (macOS default)"
+    - "FUSE (Linux containers, requires /dev/fuse + SYS_ADMIN)"
+  coreCommands:
+    - "smfs mount <tag> -- mount container as directory"
+    - "smfs grep 'query' -- semantic search (no flags) or exact match (with flags)"
+    - "smfs login -- one-time credential storage"
+    - "smfs unmount <tag> -- unmount and drain pending writes"
+  memoryPaths: |
+    Only files under designated memory paths undergo semantic indexing.
+    --memory-paths flag configures which paths are processed. Trailing
+    slash = recursive folder match. No trailing slash = exact file match.
+  syncBehavior: |
+    Local changes upload asynchronously. Remote changes sync every 30s
+    by default. --sync-interval adjusts pull timing. --no-sync disables
+    pulling while preserving uploads.
+  benchmarkResults:
+    xAFS_accuracy_10k_files: "81% vs 69% baseline"
+    cost_reduction: "55% cheaper ($946 vs $2,103)"
+    token_reduction: "53.8% fewer tokens"
+    claude_specific: "-66% tokens, -60% tool calls"
+  virtualBashTool: |
+    For serverless environments (Lambda, Workers, Vercel), the
+    @supermemory/bash package provides identical semantics without
+    filesystem mounting. createBash() returns a tool with exec() method.
+  ourEquivalent: |
+    No direct equivalent. Our memory is accessed through explicit API calls
+    (queryMemories, extractMemoriesFromSession). SMFS's transparent
+    filesystem approach is the primary integration opportunity -- agents
+    can write to memory paths without knowing they are using a memory
+    system. The virtual bash tool maps naturally to our tool injection
+    model in the genty runtime.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  part_of:
+    - target: agent:supermemory
+  integrates_with:
+    - target: tool:smfs-mount
+    - target: tool:supermemory-bash

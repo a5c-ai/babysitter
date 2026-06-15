@@ -15,6 +15,11 @@
  * @references
  * - Born Global (McKinsey): https://www.mckinsey.com/
  * - International Entrepreneurship: https://www.amazon.com/International-Entrepreneurship-Oviatt/dp/1782545492
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

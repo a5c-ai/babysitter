@@ -1,0 +1,34 @@
+nodeKind: Layer
+id: layer:13-orchestration
+attributes:
+  displayName: Orchestration
+  position: 13
+  path: control
+  scope: Control-plane primitives and policies that coordinate agent work, multi-agent workflows, durable runs, and task execution lifecycles.
+  summary: |
+    The orchestration layer owns the control plane for agent work. It models how
+    tasks are dispatched, sequenced, fanned out, handed off, retried,
+    reconciled, budgeted, paused, resumed, validated, and completed. It covers
+    agent selection, queueing, workspace lifecycle, run journals, state replay,
+    human-review gates, auto-merge gates, cost controls, health checks,
+    failover, and multi-agent coordination.
+
+    User-facing commands and buttons that invoke orchestration remain
+    interaction primitives on `layer:10-interaction`; the control-plane action
+    they trigger is an `OrchestrationPrimitive` on this layer.
+  responsibilities:
+    - Dispatch, schedule, route, and coordinate single-agent and multi-agent work.
+    - Manage run/session/task lifecycle, state replay, reconciliation, and durable resume.
+    - Enforce retry, budget, approval, validation, and failover policies during execution.
+    - Coordinate workspace creation, cleanup, snapshotting, and handoff.
+    - Emit progress, audit, and telemetry events for governance and observability.
+  examples:
+    - Sequential, concurrent, handoff, group-chat, supervisor, router, and fan-out/fan-in patterns.
+    - Babysitter run iteration, task effects, breakpoints, completion proof, and journal replay.
+    - LangGraph/agent-framework workflow graphs, human review gates, and durable checkpoints.
+    - Agent dispatch, retry with backoff, budget stop, workspace snapshot, result validation.
+  fitNotes: |
+    If the primitive manages agent work rather than merely exposing a UI action,
+    model it here. Interaction surfaces can trigger orchestration but do not own
+    orchestration semantics.
+edges: {}

@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cursor-mcp-config
+attributes:
+  artifactId: plugin-artifact:cursor-mcp-config
+  displayName: "Cursor .cursor/mcp.json"
+  targetId: plugin-target:cursor
+  artifactKind: mcp-config
+  pathPattern: ".cursor/mcp.json"
+  installerSurface: "mcp.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:roo-code.scope
+attributes:
+  subjectId: agent:roo-code
+  inScope: |
+    Open-source fork of Cline with multi-mode personas (architect / code / ask / debug), custom modes, and integrated MCP tool support, distributed as a VS Code extension.
+  outOfScope: |
+    Non-VS Code IDEs, hosted cloud execution, and the same browser-driving behavior as upstream Cline (varies per fork release).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - agent:roo-code

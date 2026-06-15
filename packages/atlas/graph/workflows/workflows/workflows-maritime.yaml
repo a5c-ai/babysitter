@@ -1,0 +1,70 @@
+---
+nodeKind: Workflow
+id: workflow:vessel-compliance-inspection
+attributes:
+  displayName: "Vessel Compliance Inspection"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-voyage"
+  complexity: cross-team
+  description: |
+    Inspects vessel regulatory compliance before departure -- verifying
+    International Safety Management (ISM) Code documentation, reviewing
+    SOLAS safety equipment certificates and survey status, validating MARPOL
+    pollution prevention equipment and discharge records, inspecting crew
+    certification and rest-hour compliance against STCW and MLC conventions,
+    and checking port state control deficiency remediation status. Produces
+    pre-departure compliance checklists, deficiency logs, and detention risk
+    assessments. Excludes cargo operations planning.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:maritime
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:port-turnaround-optimization
+attributes:
+  displayName: "Port Turnaround Optimization"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-voyage"
+  complexity: cross-team
+  description: |
+    Optimizes vessel port turnaround time -- coordinating berth allocation
+    with terminal operators, sequencing container discharge and loading
+    operations against stowage plans, scheduling bunker fuel and freshwater
+    delivery within cargo operation windows, aligning crew change and
+    provisioning logistics, and tracking port service provider performance
+    against contracted turnaround targets. Produces turnaround plans, berth
+    utilization forecasts, and demurrage/despatch calculations. Excludes
+    ocean routing decisions.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:maritime
+    - target: domain:supply-chain
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:analytics-team

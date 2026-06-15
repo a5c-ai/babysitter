@@ -1,0 +1,79 @@
+{
+  "name": "@a5c-ai/adapters-cli",
+  "version": "5.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "CLI runtime for adapters",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/adapters/cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/adapters/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "adapters",
+    "adapters",
+    "cli",
+    "coding-agent",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./bootstrap": {
+      "import": {
+        "types": "./dist/bootstrap.d.ts",
+        "default": "./dist/bootstrap.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "vitest run --config ../../../vitest.config.ts \"tests/**/*.test.ts\" \"tests/**/*.test.tsx\" \"src/**/*.test.ts\" \"src/**/*.test.tsx\"",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@a5c-ai/config-adapter": "5.1.0",
+    "@a5c-ai/launch-adapter": "5.1.0",
+    "@a5c-ai/adapters-gateway": "5.1.0",
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "@a5c-ai/adapters-codecs": "5.1.0",
+    "@a5c-ai/adapters-observability": "5.1.0",
+    "@a5c-ai/transport-adapter": "5.1.0",
+    "qrcode-terminal": "^0.12.0",
+    "yaml": "^2.8.3"
+  },
+  "optionalDependencies": {
+    "node-pty": "^1.0.0"
+  },
+  "atlas": {
+    "layers": [
+      "L6"
+    ],
+    "muxes": [
+      "adapters"
+    ]
+  }
+}

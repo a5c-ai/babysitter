@@ -1,0 +1,51 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:claude-code-remote-control.core@current
+attributes:
+  displayName: Claude Code Remote Control Core (current)
+  agentVersionId: agent-version:claude-code-remote-control@current
+  packageRef: source-ref:claude-code-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    A parent process spawns the `claude` CLI in remote-control mode and
+    consumes a stdout bridge protocol — `<<< {json}` lines emit
+    structured events, alongside an initial `Created initial session
+    session_*` line and a `https://claude.ai/code/session_*` URL for
+    web-based session takeover. The bridge consumer is stateless —
+    sessions are not persisted from the bridge's perspective.
+  contextManagementStrategy: server-managed
+  compactionTriggerNotes: |
+    Compaction is delegated to the remote-control server side.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Subagent dispatch follows Claude Code's Task primitive but is
+    mediated through the remote-control bridge.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final response is bridged through `<<< {json}` events; the consumer
+    reassembles the assistant text.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: claude-remote-control-bridge
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:claude-code
+    role: core
+  speaks:
+  - target: model-transport:anthropic-messages
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:progress-stream
+    - target: orch-primitive:context-injection

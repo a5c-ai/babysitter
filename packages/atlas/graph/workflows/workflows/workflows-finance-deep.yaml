@@ -1,0 +1,147 @@
+---
+nodeKind: Workflow
+id: workflow:accounts-payable-cycle
+attributes:
+  displayName: "Accounts Payable Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Manages the end-to-end accounts payable process -- receiving and
+    validating vendor invoices against purchase orders and receiving records,
+    performing three-way matching to detect pricing discrepancies and quantity
+    mismatches, routing invoices through approval hierarchies based on amount
+    thresholds and cost-center ownership, scheduling payments to optimize cash
+    flow while capturing early-payment discounts, processing payment batches
+    via ACH, wire, and check runs, reconciling vendor statements against
+    internal AP ledger balances, and maintaining vendor master data with
+    current payment terms and banking details. Produces weekly payment batch
+    summaries and AP aging reports. Excludes vendor contract negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:accounts-receivable-aging-review
+attributes:
+  displayName: "Accounts Receivable Aging Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews accounts receivable aging to optimize cash collection --
+    analyzing AR aging buckets (current, 30-day, 60-day, 90-day+) by customer
+    segment and contract type, prioritizing collection outreach based on amount
+    and days-past-due severity, coordinating with sales account owners on
+    escalation strategies for strategically important but delinquent accounts,
+    evaluating bad-debt reserve adequacy against historical write-off patterns,
+    identifying systemic billing issues driving late payments such as invoice
+    formatting or delivery failures, and tracking DSO trends against industry
+    benchmarks and internal targets. Produces AR aging dashboard and collection
+    action plan. Excludes credit policy definition.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:tax-compliance-review
+attributes:
+  displayName: "Tax Compliance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews tax compliance obligations across all applicable jurisdictions --
+    validating corporate income tax provision calculations and effective tax
+    rate reconciliations, reviewing sales and use tax nexus determinations and
+    collection accuracy, assessing transfer pricing documentation for
+    intercompany transactions against arm's-length standards, evaluating R&D
+    tax credit qualification and supporting documentation, monitoring
+    regulatory changes that may affect tax positions or filing obligations,
+    coordinating with external tax advisors on specialized filings and audit
+    responses, and tracking tax calendar deadlines to prevent late-filing
+    penalties. Produces tax compliance status report and filing calendar.
+    Excludes tax strategy optimization.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:license-auditor
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:financial-close-cycle
+attributes:
+  displayName: "Financial Close Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the month-end and quarter-end financial close process --
+    executing the close checklist with task assignments, deadlines, and
+    dependency sequencing, performing account reconciliations for balance sheet
+    accounts including cash, prepaids, accruals, and fixed assets, recording
+    adjusting journal entries for accrued expenses, deferred revenue, and
+    depreciation, validating intercompany eliminations and consolidation
+    entries for multi-entity organizations, running variance analyses comparing
+    actuals against budget and prior periods, preparing financial statements
+    (income statement, balance sheet, cash flow) with management commentary,
+    and conducting final close review meetings with cross-functional
+    controllers. Produces closed financial statements and close completion
+    certification. Excludes external audit coordination.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team

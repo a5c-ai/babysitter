@@ -1,0 +1,130 @@
+---
+nodeKind: Tool
+id: tool:auth0
+attributes:
+  displayName: "Auth0"
+  homepageUrl: "https://auth0.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Identity-as-a-service platform by Okta for authentication and authorization.
+    Provides social login, MFA, SSO, and RBAC with SDKs for web and mobile.
+    Extensible via Actions, Rules, and Hooks for custom auth flows.
+edges:
+  tool_used_by:
+    - target: skill-area:authentication
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - target: tool:clerk
+      comparison: "Authentication services"
+    - target: tool:keycloak
+      comparison: "Authentication services"
+    - target: tool:okta
+      comparison: "Authentication services"
+    - target: tool:firebase-auth
+      comparison: "Authentication services"
+---
+nodeKind: Tool
+id: tool:clerk
+attributes:
+  displayName: "Clerk"
+  homepageUrl: "https://clerk.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Developer-first authentication and user management service.
+    Provides drop-in UI components, session management, organizations,
+    and webhooks with first-class Next.js and React support.
+edges:
+  tool_used_by:
+    - target: skill-area:authentication
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - target: tool:auth0
+      comparison: "Authentication services"
+    - target: tool:keycloak
+      comparison: "Authentication services"
+    - target: tool:okta
+      comparison: "Authentication services"
+    - target: tool:firebase-auth
+      comparison: "Authentication services"
+---
+nodeKind: Tool
+id: tool:keycloak
+attributes:
+  displayName: "Keycloak"
+  homepageUrl: "https://www.keycloak.org"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Open-source identity and access management (IAM) solution by Red Hat.
+    Provides SSO, OAuth 2.0/OIDC, SAML, user federation, and fine-grained
+    authorization. Self-hosted with a rich admin console and REST API.
+edges:
+  tool_used_by:
+    - target: skill-area:authentication
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - target: tool:auth0
+      comparison: "Authentication services"
+    - target: tool:clerk
+      comparison: "Authentication services"
+    - target: tool:okta
+      comparison: "Authentication services"
+    - target: tool:firebase-auth
+      comparison: "Authentication services"
+---
+nodeKind: Tool
+id: tool:firebase-auth
+attributes:
+  displayName: "Firebase Authentication"
+  homepageUrl: "https://firebase.google.com/products/auth"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Google Firebase's managed authentication service supporting email/password,
+    phone, and social identity providers. Integrates tightly with other Firebase
+    and GCP services via Firebase Admin SDK and Security Rules.
+edges:
+  tool_used_by:
+    - target: skill-area:authentication
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - target: tool:auth0
+      comparison: "Authentication services"
+    - target: tool:clerk
+      comparison: "Authentication services"
+    - target: tool:keycloak
+      comparison: "Authentication services"
+    - target: tool:okta
+      comparison: "Authentication services"
+---
+nodeKind: Tool
+id: tool:okta
+attributes:
+  displayName: "Okta"
+  homepageUrl: "https://www.okta.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Enterprise identity cloud for workforce and customer identity management.
+    Provides SSO, adaptive MFA, lifecycle management, and API access management
+    with integrations to thousands of SaaS apps and on-prem directories.
+edges:
+  tool_used_by:
+    - target: skill-area:authentication
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - target: tool:auth0
+      comparison: "Authentication services"
+    - target: tool:clerk
+      comparison: "Authentication services"
+    - target: tool:keycloak
+      comparison: "Authentication services"
+    - target: tool:firebase-auth
+      comparison: "Authentication services"

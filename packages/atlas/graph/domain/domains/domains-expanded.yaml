@@ -1,0 +1,361 @@
+---
+nodeKind: Domain
+id: domain:ar-vr
+attributes:
+  displayName: "AR/VR & Spatial Computing"
+  description: |
+    Augmented reality, virtual reality, mixed reality, and spatial computing.
+    Covers head-mounted displays, spatial tracking, haptics, 3D interaction
+    paradigms, and immersive experience design.
+edges:
+  contains:
+    - specialization:game-development
+    - specialization:gpu-programming
+---
+nodeKind: Domain
+id: domain:computer-vision
+attributes:
+  displayName: "Computer Vision"
+  description: |
+    Image and video understanding — object detection, segmentation,
+    3D reconstruction, OCR, and visual search. Bridges machine learning
+    with real-world perception for robotics, medical imaging, and autonomous systems.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:robotics-simulation
+---
+nodeKind: Domain
+id: domain:nlp
+attributes:
+  displayName: "Natural Language Processing"
+  description: |
+    Computational linguistics, text understanding, generation, and dialogue.
+    Covers tokenization, parsing, named-entity recognition, sentiment analysis,
+    machine translation, and modern large-language-model applications.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:ai-agents-conversational
+---
+nodeKind: Domain
+id: domain:speech-processing
+attributes:
+  displayName: "Speech Processing"
+  description: |
+    Automatic speech recognition, text-to-speech synthesis, speaker
+    diarization, voice biometrics, and real-time audio streaming.
+    Underpins voice assistants, accessibility tools, and call analytics.
+edges:
+  contains:
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:recommendation-systems
+attributes:
+  displayName: "Recommendation Systems"
+  description: |
+    Collaborative filtering, content-based filtering, hybrid recommenders,
+    and contextual bandits for personalized content, product, and media
+    recommendations at scale.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:data-engineering-analytics
+---
+nodeKind: Domain
+id: domain:search-engineering
+attributes:
+  displayName: "Search Engineering"
+  description: |
+    Full-text search, semantic search, query understanding, ranking,
+    indexing at scale, and search relevance optimization. Covers both
+    enterprise and consumer search systems.
+edges:
+  contains:
+    - specialization:data-engineering-analytics
+    - specialization:algorithms-optimization
+---
+nodeKind: Domain
+id: domain:compiler-engineering
+attributes:
+  displayName: "Compiler Engineering"
+  description: |
+    Compiler design, parsing, optimization passes, code generation, and
+    language tooling. Includes interpreters, JIT compilers, static analysis
+    frameworks, and language server protocols.
+edges:
+  contains:
+    - specialization:algorithms-optimization
+    - specialization:software-architecture
+---
+nodeKind: Domain
+id: domain:distributed-systems
+attributes:
+  displayName: "Distributed Systems"
+  description: |
+    Consensus algorithms, replication, partitioning, distributed storage,
+    and fault-tolerant system design. Covers CAP theorem trade-offs,
+    distributed transactions, and globally consistent architectures.
+edges:
+  contains:
+    - specialization:software-architecture
+    - specialization:network-programming
+---
+nodeKind: Domain
+id: domain:performance-engineering
+attributes:
+  displayName: "Performance Engineering"
+  description: |
+    Systematic approach to performance — profiling, benchmarking, load
+    testing, capacity modeling, and latency optimization across the full
+    stack from frontend to database and network layers.
+edges:
+  contains:
+    - specialization:performance-optimization
+    - specialization:algorithms-optimization
+---
+nodeKind: Domain
+id: domain:site-reliability
+attributes:
+  displayName: "Site Reliability Engineering"
+  description: |
+    Reliability practices at scale — SLO/SLI definition, error budgets,
+    incident management, toil reduction, and production readiness reviews.
+    Bridges software engineering and operations for highly available services.
+edges:
+  contains:
+    - specialization:sre
+    - specialization:devops-sre-platform
+---
+nodeKind: Domain
+id: domain:developer-experience
+attributes:
+  displayName: "Developer Experience"
+  description: |
+    Internal developer productivity — toolchains, local dev environments,
+    CI/CD ergonomics, documentation, onboarding flows, and inner-loop
+    optimization. Focuses on making engineers effective and happy.
+edges:
+  contains:
+    - specialization:devops-sre-platform
+    - specialization:sdk-platform-development
+---
+nodeKind: Domain
+id: domain:genomics
+attributes:
+  displayName: "Genomics"
+  description: |
+    Genome sequencing, variant calling, population genetics, and
+    bioinformatics pipelines. Covers DNA/RNA analysis, GWAS studies,
+    and precision medicine data workflows.
+edges:
+  contains:
+    - specialization:bioinformatics
+    - specialization:biomedical-informatics
+---
+nodeKind: Domain
+id: domain:climate-science
+attributes:
+  displayName: "Climate Science"
+  description: |
+    Climate modeling, atmospheric simulation, carbon cycle analysis,
+    and Earth observation data processing. Bridges computational science
+    with environmental policy and sustainability initiatives.
+edges:
+  contains:
+    - specialization:environmental-engineering
+    - specialization:computational-mathematics
+---
+nodeKind: Domain
+id: domain:computational-biology
+attributes:
+  displayName: "Computational Biology"
+  description: |
+    Protein structure prediction, systems biology, metabolic network
+    modeling, and drug discovery through computational methods. Applies
+    machine learning and simulation to biological systems.
+edges:
+  contains:
+    - specialization:bioinformatics
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:neuroscience
+attributes:
+  displayName: "Neuroscience"
+  description: |
+    Computational and cognitive neuroscience — brain imaging analysis,
+    neural signal processing, brain-computer interfaces, and
+    neurosimulation. Intersects with AI and medical imaging.
+edges:
+  contains:
+    - specialization:biomedical-informatics
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:astronomy
+attributes:
+  displayName: "Astronomy & Astrophysics"
+  description: |
+    Observational and computational astrophysics — telescope data
+    pipelines, sky survey processing, gravitational wave analysis,
+    and cosmological simulation at exascale.
+edges:
+  contains:
+    - specialization:physics
+    - specialization:computational-mathematics
+---
+nodeKind: Domain
+id: domain:e-commerce
+attributes:
+  displayName: "E-Commerce"
+  description: |
+    Online retail platforms — product catalogs, shopping carts, checkout
+    flows, payment processing, inventory management, and order fulfillment.
+    Covers B2C and B2B digital commerce.
+edges:
+  contains:
+    - specialization:web-development
+    - specialization:supply-chain-optimization
+---
+nodeKind: Domain
+id: domain:advertising-tech
+attributes:
+  displayName: "Advertising Technology"
+  description: |
+    Programmatic advertising, demand-side and supply-side platforms, ad
+    serving, real-time bidding, attribution modeling, and audience
+    targeting at scale.
+edges:
+  contains:
+    - specialization:data-engineering-analytics
+    - specialization:digital-marketing
+---
+nodeKind: Domain
+id: domain:autonomous-vehicles
+attributes:
+  displayName: "Autonomous Vehicles"
+  description: |
+    Self-driving car software stacks — perception, planning, control,
+    simulation, HD mapping, and safety validation. Covers L2-L5
+    autonomy across passenger, trucking, and delivery applications.
+edges:
+  contains:
+    - specialization:robotics-simulation
+    - specialization:automotive-engineering
+---
+nodeKind: Domain
+id: domain:space-tech
+attributes:
+  displayName: "Space Technology"
+  description: |
+    Satellite systems, launch vehicle software, ground station networks,
+    orbital mechanics, and space mission operations. Includes NewSpace
+    commercial constellations and deep-space exploration.
+edges:
+  contains:
+    - specialization:aerospace-engineering
+    - specialization:embedded-systems
+---
+nodeKind: Domain
+id: domain:defense-tech
+attributes:
+  displayName: "Defense Technology"
+  description: |
+    Military and intelligence software systems — C4ISR, electronic
+    warfare, cyber operations, logistics, and secure communications.
+    Governed by strict compliance frameworks (ITAR, FedRAMP, CMMC).
+edges:
+  contains:
+    - specialization:security-compliance
+    - specialization:embedded-systems
+---
+nodeKind: Domain
+id: domain:biotech
+attributes:
+  displayName: "Biotechnology"
+  description: |
+    Biotech R&D platforms — LIMS, laboratory automation, CRISPR
+    workflow management, protein engineering pipelines, and clinical
+    data integration for drug discovery and diagnostics.
+edges:
+  contains:
+    - specialization:bioinformatics
+    - specialization:biomedical-informatics
+---
+nodeKind: Domain
+id: domain:crypto-defi
+attributes:
+  displayName: "Crypto & DeFi"
+  description: |
+    Decentralized finance protocols, DEX aggregators, yield farming,
+    lending platforms, stablecoin systems, and on-chain governance.
+    Extends blockchain with financial primitives and smart-contract composability.
+edges:
+  contains:
+    - specialization:cryptography-blockchain
+---
+nodeKind: Domain
+id: domain:gaming-industry
+attributes:
+  displayName: "Gaming Industry"
+  description: |
+    Commercial game studios and publishing — live-service operations,
+    game economy design, anti-cheat systems, cross-platform distribution,
+    esports infrastructure, and player analytics.
+edges:
+  contains:
+    - specialization:game-development
+---
+nodeKind: Domain
+id: domain:media-streaming
+attributes:
+  displayName: "Media Streaming"
+  description: |
+    Audio and video streaming platforms — transcoding pipelines, adaptive
+    bitrate delivery, CDN orchestration, DRM, content recommendation,
+    and real-time live-streaming infrastructure.
+edges:
+  contains:
+    - specialization:web-development
+    - specialization:network-programming
+---
+nodeKind: Domain
+id: domain:social-media
+attributes:
+  displayName: "Social Media"
+  description: |
+    Social networking platforms — feed ranking, content moderation,
+    creator tools, social graph management, real-time messaging,
+    and trust & safety systems at scale.
+edges:
+  contains:
+    - specialization:web-development
+    - specialization:data-engineering-analytics
+---
+nodeKind: Domain
+id: domain:marketplace
+attributes:
+  displayName: "Marketplace Platforms"
+  description: |
+    Two-sided and multi-sided marketplace platforms — matching algorithms,
+    pricing engines, trust and reputation systems, payment escrow,
+    and supply-demand balancing.
+edges:
+  contains:
+    - specialization:web-development
+    - specialization:algorithms-optimization
+---
+nodeKind: Domain
+id: domain:ride-sharing
+attributes:
+  displayName: "Ride-Sharing & Mobility"
+  description: |
+    On-demand transportation platforms — real-time dispatch, dynamic
+    pricing, driver-rider matching, route optimization, ETA prediction,
+    and fleet management.
+edges:
+  contains:
+    - specialization:algorithms-optimization
+    - specialization:mobile-development

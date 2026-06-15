@@ -1,0 +1,20 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-comm-adapter
+attributes:
+  packageId: "@a5c-ai/comm-adapter"
+  packageName: "@a5c-ai/comm-adapter"
+  displayName: "Communication Adapter"
+  description: "Agent communication adapter providing event streaming, hooks, and session management types. Defines the canonical event and invocation contracts used across the adapters system."
+  role: "comm-event-types"
+  whenToUse: "Depend on this when you need the shared TypeScript types for agent communication events, host detection, or invocation payloads without pulling in the full adapters SDK."
+  workspacePath: packages/adapters/core
+  moduleType: typescript
+  surfaceKinds:
+    - host-detection-consumer
+    - invocation-consumer
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:adapters-hooks-global

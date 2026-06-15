@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:supports-thinking-streaming
+attributes:
+  displayName: "Supports thinking streaming"
+  description: |
+    Thinking tokens are delivered incrementally as they are produced,
+    not buffered until the end of the thinking block.
+  appliesToNodeKinds: ["ModelVersion"]
+  category: model
+edges: {}

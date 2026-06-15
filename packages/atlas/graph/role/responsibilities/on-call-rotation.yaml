@@ -1,0 +1,14 @@
+nodeKind: Responsibility
+id: responsibility:on-call-rotation
+attributes:
+  displayName: "Participate in on-call rotation"
+  cadence: continuous
+  requiredSkills: []
+  description: |
+    Participate in on-call rotation.
+edges:
+  held_by:
+    - target: role:sre-lead
+    - target: role:devops-engineer
+  requires_expertise:
+    - target: skill-area:incident-response

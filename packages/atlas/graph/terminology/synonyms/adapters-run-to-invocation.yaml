@@ -1,0 +1,14 @@
+nodeKind: Synonym
+id: synonym:adapters-run-to-invocation
+attributes:
+  termAId: term:adapters-run
+  termBId: term:invocation
+  direction: a-to-b
+  note: |
+    The term "run" in the deprecated adapters codebase corresponds to
+    "Invocation" in the current catalog vocabulary.
+edges:
+  synonym_a:
+    - term:adapters-run
+  synonym_b:
+    - term:invocation

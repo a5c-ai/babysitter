@@ -16,6 +16,13 @@
  * @references
  * - MCP Server Registry: https://modelcontextprotocol.io/docs/registry
  * - Service Discovery: https://microservices.io/patterns/server-side-discovery.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:mcp-tool-design]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:sdk-api-design, workflow:product-discovery]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

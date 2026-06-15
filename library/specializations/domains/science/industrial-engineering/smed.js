@@ -16,6 +16,12 @@
  * - Shingo, A Revolution in Manufacturing: The SMED System
  * - McIntosh et al., A critical review of SMED
  * - Liker, The Toyota Way
+ *
+ * @graph
+ *   domains: [domain:industrial-engineering]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+ *   roles: [role:operations-analyst, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

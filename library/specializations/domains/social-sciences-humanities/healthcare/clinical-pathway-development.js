@@ -19,6 +19,13 @@
  * - Rotter, T. et al. (2010). Clinical pathways: effects on professional practice
  * - De Bleser, L. et al. (2006). Defining pathways
  * - Kinsman, L. et al. (2010). What is a clinical pathway?
+ *
+ * @graph
+ *   domains: [domain:healthcare]
+ *   specializations: [specialization:clinical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

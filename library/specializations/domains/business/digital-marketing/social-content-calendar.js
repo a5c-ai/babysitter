@@ -3,6 +3,12 @@
  * @description Ongoing process for planning, creating, scheduling, and managing social media content across platforms, ensuring consistent brand presence and engagement
  * @inputs { contentStrategy: object, brandAssets: object, campaignCalendar: object, trendingTopics: array, outputDir: string }
  * @outputs { success: boolean, scheduledContent: array, publishedPosts: array, engagementReports: array, contentPerformanceAnalysis: object, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

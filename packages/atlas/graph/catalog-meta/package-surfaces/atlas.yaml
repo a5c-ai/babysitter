@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:atlas
+attributes:
+  packageId: "@a5c-ai/atlas"
+  packageName: "@a5c-ai/atlas"
+  displayName: "Atlas"
+  description: "Knowledge graph catalog containing the canonical graph data, SDK, and CLI for the Atlas system. Stores all package surfaces, interaction primitives, shared context specs, and relationship edges as YAML records."
+  role: "knowledge-graph-catalog"
+  whenToUse: "Depend on this when you need to query, traverse, or extend the Atlas catalog graph, or when building tooling that reads package metadata and architectural relationships."
+  status: active

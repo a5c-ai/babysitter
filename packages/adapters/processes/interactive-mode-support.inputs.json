@@ -1,0 +1,12 @@
+{
+  "repoRoot": "C:/work/adapters",
+  "todoFile": "C:/work/adapters/todos.md",
+  "todoLine": 40,
+  "targetHarnesses": [
+    "codex",
+    "claude",
+    "claude-code",
+    "opencode"
+  ],
+  "maxReviewLoops": 3
+}

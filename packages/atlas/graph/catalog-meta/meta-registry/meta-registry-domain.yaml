@@ -1,0 +1,224 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:domain
+attributes:
+  displayName: Domain (meta)
+  clusterNumber: 9
+  scope: 'Conceptual aggregation of NodeKinds describing the domain ontology and adjacent failure / tracker taxonomies. Members live primarily in editorial cluster 9-domain (Domain, Specialization, Topic, Language, Framework, Library, Tool, StackPart, Platform, PlatformService) with later additions for failure-recovery (ErrorCategory, FailureClass, RecoveryStrategy, PartialStateRecovery in 6-lifecycle) and the issue-tracker triple (IssueTracker, IssueTrackerProtocol, Issue in 7-extensions). Each MetaNodeKind records the truthful editorial slug.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:domain
+  - target: meta-node-kind:specialization
+  - target: meta-node-kind:topic
+  - target: meta-node-kind:language
+  - target: meta-node-kind:framework
+  - target: meta-node-kind:library
+  - target: meta-node-kind:tool
+  - target: meta-node-kind:stack-part
+  - target: meta-node-kind:platform
+  - target: meta-node-kind:platform-service
+  - target: meta-node-kind:issue-tracker
+  - target: meta-node-kind:issue-tracker-protocol
+  - target: meta-node-kind:issue
+  - target: meta-node-kind:error-category
+  - target: meta-node-kind:failure-class
+  - target: meta-node-kind:recovery-strategy
+  - target: meta-node-kind:partial-state-recovery
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:domain
+attributes:
+  displayName: Domain (meta)
+  name: Domain
+  cluster: 9-domain
+  prefix: domain
+  origin: universal
+  purpose: broad area (web-development, devops, ...)
+  exampleCount: 0
+  invariants:
+  - contains hierarchy is acyclic (V-4.1)
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:domain--id
+  - target: meta-attribute:domain--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:specialization
+attributes:
+  displayName: Specialization (meta)
+  name: Specialization
+  cluster: 9-domain
+  prefix: specialization
+  origin: universal
+  purpose: sub-domain (frontend-react, backend-python-django, ...)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:specialization--id
+  - target: meta-attribute:specialization--display-name
+  - target: meta-attribute:specialization--parent-domain
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:topic
+attributes:
+  displayName: Topic (meta)
+  name: Topic
+  cluster: 9-domain
+  prefix: topic
+  origin: universal
+  purpose: granular topic (oauth-flows, ssl-certs, ...)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:topic--id
+  - target: meta-attribute:topic--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:language
+attributes:
+  displayName: Language (meta)
+  name: Language
+  cluster: 9-domain
+  prefix: language
+  origin: universal
+  purpose: programming language
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:language--id
+  - target: meta-attribute:language--display-name
+  - target: meta-attribute:language--paradigms
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:framework
+attributes:
+  displayName: Framework (meta)
+  name: Framework
+  cluster: 9-domain
+  prefix: framework
+  origin: universal
+  purpose: framework
+  exampleCount: 0
+  invariants:
+  - exactly one belongs_to_language unless multiLanguage=true (V-4.2)
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:framework--id
+  - target: meta-attribute:framework--display-name
+  - target: meta-attribute:framework--multi-language
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:library
+attributes:
+  displayName: Library (meta)
+  name: Library
+  cluster: 9-domain
+  prefix: library
+  origin: universal
+  purpose: callable dependency (distinct from Framework which inverts control, and Tool which is dev tooling)
+  exampleCount: 0
+  invariants:
+  - 'id starts with library:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:library--id
+  - target: meta-attribute:library--display-name
+  - target: meta-attribute:library--category
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:tool
+attributes:
+  displayName: Tool (meta)
+  name: Tool
+  cluster: 9-domain
+  prefix: tool
+  origin: universal
+  purpose: dev/build/infra tool (distinct from ToolDescriptor which is agent-callable, and ToolServer which is an MCP server)
+  exampleCount: 0
+  invariants:
+  - 'id starts with tool:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:tool--id
+  - target: meta-attribute:tool--display-name
+  - target: meta-attribute:tool--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:stack-part
+attributes:
+  displayName: StackPart (meta)
+  name: StackPart
+  cluster: 9-domain
+  prefix: stack-part
+  origin: universal
+  purpose: abstract role a stack component fills (orm, api-gateway, message-queue, vector-database, ...)
+  exampleCount: 0
+  invariants:
+  - 'id starts with stack-part:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:stack-part--id
+  - target: meta-attribute:stack-part--display-name
+  - target: meta-attribute:stack-part--category
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:platform
+attributes:
+  displayName: Platform (meta)
+  name: Platform
+  cluster: 9-domain
+  prefix: platform
+  origin: universal
+  purpose: a cloud provider, k8s distribution, PaaS, or self-hosted PaaS that hosts PlatformServices
+  exampleCount: 0
+  invariants:
+  - 'id starts with platform:'
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:platform--id
+  - target: meta-attribute:platform--display-name
+  - target: meta-attribute:platform--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:platform-service
+attributes:
+  displayName: PlatformService (meta)
+  name: PlatformService
+  cluster: 9-domain
+  prefix: platform-service
+  origin: universal
+  purpose: a concrete first-party service offered by a Platform that implements one or more abstract StackParts
+  exampleCount: 0
+  invariants:
+  - 'id starts with platform-service:'
+  - exactly one provided_by (V-platform-1)
+edges:
+  in_cluster:
+  - target: meta-cluster:domain
+  contains_meta_attribute:
+  - target: meta-attribute:platform-service--id
+  - target: meta-attribute:platform-service--display-name
+  - target: meta-attribute:platform-service--category
+  - target: meta-attribute:platform-service--provided-by-platform-id

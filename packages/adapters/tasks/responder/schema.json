@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anthropic.com/bpx/responder-profile.schema.json",
+  "title": "ResponderProfile",
+  "description": "Schema for a responder profile used by the Breakpoints Adapter system.",
+  "type": "object",
+  "required": ["id", "name", "title", "domains", "tags", "availability", "responseTimeSla"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for the responder."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Display name of the responder."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["human", "agent", "tracker", "internal", "auto"],
+      "description": "Responder type used by task routing. Existing profiles default to human when omitted."
+    },
+    "title": {
+      "type": "string",
+      "description": "Professional title or role."
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Capabilities this responder can satisfy during task routing."
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "High-level routing domains for the responder."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Keywords, technologies, and specialties used for matching."
+    },
+    "availability": {
+      "type": "boolean",
+      "description": "Whether the responder is currently available for questions."
+    },
+    "responseTimeSla": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Maximum expected response time in milliseconds."
+    },
+    "publicKeyFingerprint": {
+      "type": "string",
+      "description": "Optional fingerprint for provenance-aware responder flows."
+    },
+    "adapter": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Adapters adapter name for agent responders."
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default model for agent responders."
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default provider for agent responders."
+    },
+    "trackerBackend": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Tracker backend identifier for tracker responders."
+    },
+    "trackerConfig": {
+      "type": "object",
+      "description": "Tracker-specific responder configuration."
+    }
+  }
+}

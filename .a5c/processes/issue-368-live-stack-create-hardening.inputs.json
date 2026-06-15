@@ -1,0 +1,41 @@
+{
+  "issueNumber": 368,
+  "branchName": "agent/issue-368-live-stack-create-hardening",
+  "baseBranch": "staging",
+  "targetFiles": [
+    ".github/workflows/live-stack.yml",
+    "packages/adapters/cli/tests/live-stack/primary-live-runner.ts",
+    "packages/adapters/cli/tests/live-stack/fixtures/create-process-skeleton.mjs",
+    "packages/adapters/cli/tests/live-stack/primary-live-runner.test.ts",
+    "packages/adapters/cli/tests/live-stack/pipeline-scenario.test.ts"
+  ],
+  "targetAgents": [
+    "claude-code",
+    "pi",
+    "codex"
+  ],
+  "targetModes": [
+    "babysitter-plugin/create/interactive",
+    "babysitter-plugin/create/bridged-hooks"
+  ],
+  "verificationCommands": [
+    "npm test --workspace=@a5c-ai/adapters -- primary-live-runner.test.ts",
+    "npm test --workspace=@a5c-ai/adapters -- pipeline-scenario.test.ts",
+    "npm run build --workspace=@a5c-ai/adapters",
+    "git diff --check"
+  ],
+  "liveVerificationLanes": [
+    "install=bp process_mode=create agent=claude-code model=gpt-5.5 mode=interactive",
+    "install=bp process_mode=create agent=claude-code model=gpt-5.5 mode=bridged-hooks",
+    "install=bp process_mode=create agent=pi model=DeepSeek-V4-Pro mode=interactive",
+    "install=bp process_mode=create agent=pi model=DeepSeek-V4-Pro mode=bridged-hooks"
+  ],
+  "processLibraryReferences": [
+    "methodologies/spec-kit-brownfield.js",
+    "methodologies/process-hardening/process-hardening-patterns.js",
+    "methodologies/superpowers/test-driven-development.js",
+    "methodologies/superpowers/verification-before-completion.js",
+    "specializations/collaboration/github/issue-linking.js",
+    "specializations/collaboration/github/pr-policies.js"
+  ]
+}

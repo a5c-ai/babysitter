@@ -1,0 +1,14 @@
+nodeKind: ExtensionInterface
+id: extension-interface:telemetry
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Telemetry
+  displayName: "Telemetry"
+  concern: "Structured emission of run events, metrics, and traces."
+  surface: |
+    `event(name, attrs)`, `metric(name, value, attrs)`,
+    `span(name, fn)`. OpenTelemetry-compatible.
+  builtInDefault: |
+    Stdout JSONL emitter; no metrics aggregation; no spans.
+  notableImpls: []
+edges: {}

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:retrieval-augmented-generation.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:retrieval-augmented-generation
+  text: |
+    Retrieval-Augmented Generation (RAG): a pattern where retrieved documents (often via embedding similarity) are spliced into model context before generation.
+  status: canonical
+edges:
+  defines:
+    - term:retrieval-augmented-generation

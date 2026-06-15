@@ -1,0 +1,15 @@
+nodeKind: LifecycleSemantics
+id: lifecycle-semantics:cursor
+attributes:
+  lifecycleSemanticsId: lifecycle-semantics:cursor
+  agentId: agent:cursor
+  versionRange: ">=0.0.0"
+  runtimeHookMode: native-shell-hooks
+  stopHookMode: blocking-stop-hook
+  backgroundTaskMode: unknown
+  checkpointMode: unspecified
+  pluginContextMode: "plugin.json"
+  platformNuances: []
+edges:
+  applies_to_version:
+    - target: agentVersion:cursor:ge-0-0-0

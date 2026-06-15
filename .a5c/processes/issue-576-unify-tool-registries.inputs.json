@@ -1,0 +1,17 @@
+{
+  "issueNumber": 576,
+  "title": "Unify tool registries: tool-mux replaces DeferredToolRegistry + McpToolRegistry",
+  "changedFiles": [
+    "packages/tool-mux/src/registry.ts",
+    "packages/tool-mux/src/dispatch.ts",
+    "packages/tool-mux/src/mcp-bridge.ts",
+    "packages/agent-core/src/agenticTools/discovery/tools.ts",
+    "packages/agent-core/src/agenticTools/tools/programmaticToolCalling.ts",
+    "packages/genty/platform/src/mcp/client/toolRegistry.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts"
+  ],
+  "verification": [
+    "npm run test --workspace=@a5c-ai/tool-mux",
+    "npm run typecheck --workspace=@a5c-ai/tool-mux"
+  ]
+}

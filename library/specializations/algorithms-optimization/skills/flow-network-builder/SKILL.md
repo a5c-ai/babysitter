@@ -6,6 +6,11 @@ allowed-tools:
   - Write
   - Grep
   - Glob
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:graph-algorithms]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Flow Network Builder Skill

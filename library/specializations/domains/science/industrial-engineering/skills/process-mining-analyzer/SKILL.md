@@ -7,6 +7,10 @@ metadata:
   version: "1.0.0"
   category: work-measurement
   backlog-id: SK-IE-036
+graph:
+  domains: [domain:industrial-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+  roles: [role:operations-analyst, role:research-engineer]
 ---
 
 # process-mining-analyzer

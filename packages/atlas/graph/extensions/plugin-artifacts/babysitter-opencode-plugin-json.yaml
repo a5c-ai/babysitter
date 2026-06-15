@@ -1,0 +1,33 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-opencode-plugin-json
+attributes:
+  artifactId: plugin-artifact:babysitter-opencode-plugin-json
+  displayName: "babysitter-opencode plugin.json"
+  targetId: plugin-target:opencode
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - "shell-hooks"
+  contextFiles:
+    - plugins/babysitter-opencode/plugin.json
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-opencode-hooks-dir
+attributes:
+  artifactId: plugin-artifact:babysitter-opencode-hooks-dir
+  displayName: "babysitter-opencode hooks/ scripts"
+  targetId: plugin-target:opencode
+  artifactKind: hook-script
+  pathPattern: "hooks/*"
+  installerSurface: "hooks/"
+  scriptVariants:
+    - "shell-script"
+  contextFiles:
+    - plugins/babysitter-opencode/hooks/
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

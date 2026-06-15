@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# Pre-push guard: catches the recurring "package added / deps changed without
+# updating the lockfile or metadata" class before it reaches the shared branch.
+# Wired via `core.hooksPath=.githooks` (set by the package.json "prepare" script
+# on `npm install`). Bypass in an emergency with `git push --no-verify`.
+
+node ./scripts/guard-package-integrity.cjs || exit 1

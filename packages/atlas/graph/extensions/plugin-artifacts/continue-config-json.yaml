@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:continue-config-json
+attributes:
+  artifactId: plugin-artifact:continue-config-json
+  displayName: "Continue config.json"
+  targetId: plugin-target:continue
+  artifactKind: settings-fragment
+  pathPattern: "~/.continue/config.json"
+  installerSurface: "settings-merge"
+edges:
+  emits_artifact:
+    - target: plugin-target:continue

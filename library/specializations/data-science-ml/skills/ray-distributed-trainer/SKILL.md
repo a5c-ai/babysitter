@@ -7,6 +7,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:hyperparameter-tuning-experiment-management]
+  roles: [role:ml-engineer, role:ml-ops-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # ray-distributed-trainer

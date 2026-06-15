@@ -1,0 +1,59 @@
+nodeKind: EnvVar
+id: env-var:claude-code-enable-tasks
+attributes:
+  displayName: CLAUDE_CODE_ENABLE_TASKS
+  description: Set to 1 to enable task tracking in non-interactive mode.
+  name: CLAUDE_CODE_ENABLE_TASKS
+  category: interactive
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-enable-prompt-suggestion
+attributes:
+  displayName: CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION
+  description: Set to false to disable prompt suggestions.
+  name: CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION
+  category: interactive
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-enable-away-summary
+attributes:
+  displayName: CLAUDE_CODE_ENABLE_AWAY_SUMMARY
+  description: Override session recap availability; 0 forces off, 1 forces on.
+  name: CLAUDE_CODE_ENABLE_AWAY_SUMMARY
+  category: interactive
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-task-list-id
+attributes:
+  displayName: CLAUDE_CODE_TASK_LIST_ID
+  description: Share a task list across sessions by setting the same ID.
+  name: CLAUDE_CODE_TASK_LIST_ID
+  category: interactive
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-new-init
+attributes:
+  displayName: CLAUDE_CODE_NEW_INIT
+  description: Set to 1 to make /init run an interactive setup flow.
+  name: CLAUDE_CODE_NEW_INIT
+  category: interactive
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

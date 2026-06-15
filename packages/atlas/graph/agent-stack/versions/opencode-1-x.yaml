@@ -1,0 +1,182 @@
+nodeKind: AgentVersion
+id: agentVersion:opencode:ge-0-0-0
+attributes:
+  agentId: "opencode"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "OpenCode"
+  summary: "Terminal-native coding agent with configurable providers"
+  sourcePackage: "opencode-ai"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:opencode
+  versionRange: ">=1.15.13"
+  currentVersion: "1.15.13"
+  releasedAt: "2026-05-30"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.15.13"
+  assimilationNotes:
+    - "Gateway Anthropic Opus 4.7+ adaptive reasoning keeps summarized thinking instead of returning empty thinking blocks; thinking-stream handling should preserve summarized thinking."
+    - "Sessions can store custom metadata through the API and SDK; transport/session model mappings should preserve custom metadata fields."
+    - "Config loads from the opened location upward, so directory-specific settings and provider policies apply more predictably."
+    - "TUI wrapped inline tool rows stay aligned, and failed inline tools can expand error details in place."
+    - "ACP integrations can send prompts, slash commands, and usage updates through acp-next."
+    - "OpenAI Responses gained an experimental WebSocket transport behind OPENCODE_EXPERIMENTAL_WEBSOCKETS=true, with custom base URL support, active timeouts, and retry-before-fallback behavior."
+    - "TUI adds a workspace management dialog, preserves session navigation while prompt modes are open, restores the thinking spinner, surfaces subagent retry status, and opens editors from non-Git project paths."
+    - "Desktop adds a setting to switch tab layouts and fixes V2 home/font/tab close behavior."
+    - "Provider requests gained headerTimeout config with a 10s default for default OpenAI setups."
+    - "Experimental background agents now push updates without polling."
+    - "Config can set only modalities.input or modalities.output."
+    - "Remote-backed projects now resolve a stable project identity."
+    - "Dynamic MCP servers disconnect cleanly when removed, resumed sessions no longer continue orphaned interrupted tools, and the shell tool advertises the configured timeout to the model."
+    - "Provider/runtime fixes cover DigitalOcean OAuth-token inference, Google tool calling after the upstream tool ID regression, OpenAI reasoning summary blocks, and Google Vertex reasoning signatures."
+    - "TUI prompt sizing is responsive/configurable, diff scrolling is accelerated, and external editors open from the worktree directory when available."
+    - "Desktop v2 home, prompt, status popover, session controls, server-list merging, session timeline interactions, titlebar cache handling, health checks, and window restore behavior were refined or fixed."
+    - "Extensions gained a plugin dispose hook and Codex plugin requests now send the expected session ID header."
+    - "Install methods and package name remain unchanged."
+  cliCommand: "opencode"
+  installMethods:
+    - install:npm
+    - install:brew
+    - install:curl
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY]
+      - type: oauth
+        name: "OAuth Login"
+    authFiles:
+      - "~/.config/opencode/opencode.json"
+    hostEnvSignals:
+      - OPENCODE_SESSION_ID
+      - OPENCODE_CONFIG
+    sessionDir: "~/.config/opencode/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: true
+      canFork: true
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: true
+      supportsStructuredOutput: true
+      structuredSessionTransport: restart-per-turn
+      sessionControlPlane: self-managed
+      supportsSkills: true
+      supportsAgentsMd: true
+      skillsFormat: file
+      supportsSubagentDispatch: true
+      supportsParallelExecution: true
+      maxParallelTasks: 5
+      supportsInteractiveMode: false
+      supportsStdinInjection: false
+      supportsImageInput: true
+      supportsImageOutput: false
+      supportsFileAttachments: true
+      supportsPlugins: true
+      pluginFormats: [mcp-server]
+      pluginRegistries:
+        - name: mcp
+          url: https://modelcontextprotocol.io
+          searchable: false
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.config/opencode/opencode.json"
+      projectConfigFilePaths:
+        - ".opencode/config.json"
+    displayName: "OpenCode"
+    defaultModelId: "claude-3-5-sonnet-20241022"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: emulated
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: true
+    positionalPrompt: true
+edges:
+  version_of:
+    - agent:opencode
+  composed_of:
+    - target: agent-core-impl:opencode.core@1.x
+      role: core
+    - target: agent-runtime-impl:opencode.runtime@1.x
+      role: runtime
+    - target: agent-platform-impl:opencode.platform@1.x
+      role: platform
+    - target: agent-ui-impl:opencode.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:opencode.knowledge@current
+      role: knowledge-fabric
+  sourced_from:
+    - evidence:opencode-1-15-13-issue-811-release
+    - evidence:opencode-1-15-12-release
+  supports:
+    - target: capability:skills
+      versionRange: ">=1.15.13"
+      level: full
+      notes: OpenCode documents reusable command surfaces — first-party basis for the local skills abstraction.
+    - target: capability:supports-thinking
+      versionRange: ">=1.15.13"
+      level: full
+      notes: OpenCode documented as an interactive terminal coding surface backed by configurable providers; 1.15.13 fixes Anthropic Opus 4.7+ adaptive reasoning to preserve summarized thinking blocks.
+    - target: capability:interactive-mode
+      versionRange: ">=1.15.13"
+      level: full
+      notes: Interactive terminal use documented directly in OpenCode TUI docs.
+    - target: capability:stdin-injection
+      versionRange: ">=1.15.13"
+      level: full
+      notes: Public docs thinner for non-interactive prompt injection; local fallback metadata remains primary.
+    - target: capability:vision-input
+      versionRange: ">=1.15.13"
+      level: full
+      notes: Public OpenCode docs lack strong technical detail for image input.
+    - target: capability:runtime-hooks
+      versionRange: ">=1.15.13"
+      level: full
+      notes: OpenCode plugins expose hook-based extensibility — first-party basis for runtime hooks.
+    - target: capability:stop-hook
+      versionRange: ">=1.15.13"
+      level: full
+      notes: Local ontology normalizes stop-hook separately; first-party support is the broader plugin hook system.
+    - target: capability:can-resume
+      versionRange: ">=1.15.13"
+      level: full
+      notes: Public OpenCode docs describe where sessions are stored; 1.15.13 adds custom session metadata through the API and SDK.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

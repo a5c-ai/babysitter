@@ -1,0 +1,47 @@
+nodeKind: ModelVersion
+id: model:cohere-embed-v4-0@current
+attributes:
+  displayName: "Cohere Embed v4.0"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:cohere-embed-v4
+  versionRange: '>=4.0.0 <5.0.0'
+  kind: embedding
+  contextWindowTokens: 128000
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: embedding
+      direction: output
+  releaseDate: '2025-11-20'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-11-20'
+  modelCardUrl: https://docs.cohere.com/docs/cohere-embed
+  supportsFineTuning: false
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:cohere-embed-v4
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:cohere-embed-v4
+  supersedes:
+    - target: model:cohere-embed-english-v3@current
+  served_by:
+    - provider:cohere
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:cohere-embed
+  supports:
+    - target: capability:vision-input
+      versionRange: '>=4.0.0 <5.0.0'
+      level: full

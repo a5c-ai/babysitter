@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:framework
+attributes:
+  canonicalDefinitionId: definition:framework.canonical
+  displayName: "Framework"
+  kind: concept
+  references:
+    - "NodeKind:Framework"
+  description: |
+    Framework
+edges:
+  applies_to:
+    - target: domain:software-engineering

@@ -1,0 +1,16 @@
+nodeKind: Library
+id: library:axios
+attributes:
+  displayName: "Axios"
+  belongsToLanguageId: language:javascript
+  category: http-client
+  description: |
+    Promise-based HTTP client for the browser and Node.js.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:got
+    - library:undici

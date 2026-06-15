@@ -1,0 +1,180 @@
+---
+nodeKind: SkillArea
+id: skill-area:financial-planning
+attributes:
+  displayName: "Financial Planning"
+  description: |
+    Budgeting, forecasting, variance analysis, cost modeling,
+    and financial reporting.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:finance
+      confidence: primary
+    - target: specialization:corporate-finance
+      confidence: secondary
+    - target: specialization:finance-accounting
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:procurement-management
+attributes:
+  displayName: "Procurement Management"
+  description: |
+    Strategic sourcing, vendor evaluation, contract negotiation,
+    and spend analytics.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:procurement
+      confidence: primary
+    - target: specialization:supply-chain-optimization
+      confidence: secondary
+    - target: specialization:sourcing
+      confidence: secondary
+    - target: specialization:supply-chain
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:community-management
+attributes:
+  displayName: "Community Management"
+  description: |
+    Community platform management, engagement strategies, moderation,
+    and developer advocacy.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:community
+      confidence: primary
+    - target: specialization:public-relations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:customer-success
+attributes:
+  displayName: "Customer Success"
+  description: |
+    Health scoring, retention strategies, expansion revenue,
+    and customer lifecycle management.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:customer-experience
+      confidence: primary
+    - target: specialization:customer-experience
+      confidence: secondary
+    - target: specialization:sales
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:business-analysis
+attributes:
+  displayName: "Business Analysis"
+  description: |
+    Requirements elicitation, process mapping, stakeholder management,
+    and business case development.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: domain:business-intelligence
+      confidence: secondary
+    - target: specialization:business-analysis
+      confidence: secondary
+    - target: specialization:operations
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:data-analytics
+      strength: recommended
+    - target: skill-area:requirements-engineering
+      strength: recommended
+    - target: skill-area:process-improvement
+      strength: recommended
+    - target: skill-area:quality-management
+      strength: recommended
+    - target: skill-area:operational-excellence
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:data-analytics
+attributes:
+  displayName: "Data Analytics"
+  description: |
+    SQL, dashboarding, statistical analysis, A/B testing interpretation,
+    and metrics definition.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:business-intelligence
+      confidence: primary
+    - target: specialization:decision-intelligence
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:strategic-planning
+attributes:
+  displayName: "Strategic Planning"
+  description: |
+    Corporate strategy, OKR frameworks, competitive positioning,
+    and scenario planning.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:strategy
+      confidence: primary
+    - target: specialization:strategic-consulting
+      confidence: secondary
+    - target: specialization:business-strategy
+      confidence: secondary
+    - target: specialization:business-strategy-advanced
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:business-analysis
+      strength: recommended
+    - target: skill-area:business-model-design
+      strength: recommended
+    - target: skill-area:growth-strategy
+      strength: recommended
+    - target: skill-area:change-management
+      strength: recommended
+    - target: skill-area:change-management-leadership
+      strength: recommended
+    - target: skill-area:economic-analysis
+      strength: recommended
+    - target: skill-area:geopolitical-analysis
+      strength: recommended
+    - target: skill-area:problem-solving
+      strength: recommended
+    - target: skill-area:executive-communication
+      strength: recommended
+    - target: skill-area:procurement-management
+      strength: recommended
+    - target: skill-area:community-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:change-management
+attributes:
+  displayName: "Change Management"
+  description: |
+    Organizational change, stakeholder alignment, communication planning,
+    and adoption tracking.
+  domains: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+    - target: specialization:operations
+      confidence: secondary
+    - target: specialization:logistics
+      confidence: secondary

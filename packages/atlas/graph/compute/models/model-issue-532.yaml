@@ -1,0 +1,125 @@
+nodeKind: ModelVersion
+id: model:claude-opus-4-8@current
+attributes:
+  displayName: "Claude Opus 4.8"
+  modelFamilyId: model-family:claude-opus-4
+  versionRange: '>=4.8.0 <4.9.0'
+  kind: chat
+  contextWindowTokens: 1000000
+  maxOutputTokens: 128000
+  costPerMTokInput: 5.0
+  costPerMTokCachedInput: 0.5
+  costPerMTokCacheWrite5m: 6.25
+  costPerMTokCacheWrite1h: 10.0
+  costPerMTokOutput: 25.0
+  supportsExtendedThinking: false
+  supportsAdaptiveThinking: true
+  supportsThinking: true
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-05-28'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-05-28'
+  knowledgeCutoffDate: '2026-01-01'
+  modelCardUrl: https://www.anthropic.com/claude-opus-4-8-system-card
+  supportsFineTuning: false
+  regions:
+  - global
+  providerModelIds:
+  - claude-opus-4-8
+  - anthropic.claude-opus-4-8
+  - claude-opus-4-8
+  providerAvailability:
+  - provider: provider:anthropic
+    status: ga
+    announcedAt: '2026-05-28'
+    modelId: claude-opus-4-8
+    evidenceSourceIds:
+    - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  - provider: provider:aws-bedrock
+    status: ga
+    announcedAt: '2026-05-28'
+    modelId: anthropic.claude-opus-4-8
+    transport: model-transport:anthropic-messages
+    evidenceSourceIds:
+    - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+    notes: |
+      Anthropic documents Opus 4.8 on the Messages-API Bedrock endpoint,
+      not the legacy ARN-versioned InvokeModel/Converse table.
+  - provider: provider:gcp-vertex
+    status: ga
+    announcedAt: '2026-05-28'
+    modelId: claude-opus-4-8
+    transport: model-transport:vertex-anthropic-messages
+    evidenceSourceIds:
+    - evidence:anthropic-vertex-claude-opus-4-8-issue-532
+  releaseDateNotes: |
+    Anthropic announced Claude Opus 4.8 on 2026-05-28 and states it is
+    available everywhere today. The model deprecations page lists the
+    current Opus alias as Active, with retirement not sooner than
+    2027-05-28.
+edges:
+  belongs_to_family:
+    - target: model-family:claude-opus-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:claude-opus-4
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+    - provider:gcp-vertex
+  speaks:
+    - model-transport:anthropic-messages
+    - model-transport:vertex-anthropic-messages
+  supports:
+    - target: capability:adaptive-thinking
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+    - target: capability:supports-batch-api
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+    - target: capability:supports-prompt-caching
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+    - target: capability:streaming
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+    - target: capability:supports-text-streaming
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+    - target: capability:supports-thinking
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      notes: Anthropic lists adaptive thinking for Claude Opus 4.8, while extended thinking is not supported.
+      evidenceSourceIds:
+      - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+    - target: capability:supports-tool-use
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-claude-opus-4-8-announcement-issue-532
+    - target: capability:vision-input
+      versionRange: '>=4.8.0 <4.9.0'
+      level: full
+      evidenceSourceIds:
+      - evidence:anthropic-models-overview-claude-opus-4-8-issue-532

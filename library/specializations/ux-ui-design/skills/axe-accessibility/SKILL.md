@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: accessibility-testing
   backlog-id: SK-UX-001
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:accessibility-testing, skill-area:accessibility-first-design]
+  roles: [role:product-designer, role:qa-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+  topics: [topic:accessibility]
 ---
 
 # axe-accessibility

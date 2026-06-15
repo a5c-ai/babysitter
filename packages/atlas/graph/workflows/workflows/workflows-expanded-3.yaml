@@ -1,0 +1,480 @@
+---
+nodeKind: Workflow
+id: workflow:clinical-trial-protocol
+attributes:
+  displayName: "Clinical Trial Protocol Design"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-trial"
+  complexity: cross-team
+  description: |
+    End-to-end clinical trial protocol development — study design,
+    endpoint definition, sample size calculation, site selection, and
+    regulatory submission preparation. Includes protocol amendments,
+    safety monitoring board coordination, and interim analysis planning.
+edges:
+  involves_role:
+    - target: role:clinical-data-scientist
+    - target: role:epidemiologist
+    - target: role:research-scientist
+  applies_to_domain:
+    - target: domain:clinical-trials
+    - target: domain:pharmaceuticals
+  triggers_responsibility:
+    - target: responsibility:patient-safety-compliance
+    - target: responsibility:clinical-data-integrity
+---
+nodeKind: Workflow
+id: workflow:drug-approval-pipeline
+attributes:
+  displayName: "Drug Approval Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-drug"
+  complexity: cross-team
+  description: |
+    Regulatory drug approval process — pre-clinical data compilation,
+    IND/NDA/BLA submission preparation, regulatory agency correspondence,
+    advisory committee preparation, and post-approval commitments tracking.
+    Coordinates across clinical, regulatory, and manufacturing teams.
+edges:
+  involves_role:
+    - target: role:clinical-data-scientist
+    - target: role:compliance-officer
+    - target: role:research-scientist
+  applies_to_domain:
+    - target: domain:pharmaceuticals
+    - target: domain:healthcare
+  triggers_responsibility:
+    - target: responsibility:drug-safety-monitoring
+    - target: responsibility:regulatory-reporting
+---
+nodeKind: Workflow
+id: workflow:patient-onboarding
+attributes:
+  displayName: "Patient Onboarding"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-patient"
+  complexity: moderate
+  description: |
+    Onboarding patients into healthcare systems or clinical trials —
+    informed consent, eligibility screening, baseline assessments, medical
+    history collection, and care plan establishment. Ensures data quality,
+    privacy compliance, and smooth care transitions.
+edges:
+  involves_role:
+    - target: role:clinical-data-scientist
+    - target: role:epidemiologist
+  requires_skill_area:
+    - target: skill-area:onboarding-flow-design
+  applies_to_domain:
+    - target: domain:healthcare
+  triggers_responsibility:
+    - target: responsibility:clinical-data-integrity
+    - target: responsibility:patient-safety-compliance
+---
+nodeKind: Workflow
+id: workflow:insurance-claims-adjudication
+attributes:
+  displayName: "Insurance Claims Adjudication"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-claim"
+  complexity: moderate
+  description: |
+    Processing insurance claims from submission to resolution — claim
+    intake, coverage verification, damage assessment, fraud screening,
+    payment calculation, and settlement. Includes appeals handling and
+    regulatory compliance with claims processing timelines.
+edges:
+  involves_role:
+    - target: role:actuary
+    - target: role:fraud-analyst
+    - target: role:compliance-officer
+  applies_to_domain:
+    - target: domain:insurance
+  triggers_responsibility:
+    - target: responsibility:fraud-rule-tuning
+    - target: responsibility:regulatory-reporting
+---
+nodeKind: Workflow
+id: workflow:loan-underwriting-process
+attributes:
+  displayName: "Loan Underwriting Process"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-application"
+  complexity: moderate
+  description: |
+    Evaluating loan applications for creditworthiness — income verification,
+    credit analysis, collateral assessment, risk scoring, and approval
+    decision. Includes automated decisioning for straightforward cases
+    and manual review queues for exceptions.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:financial-analyst
+    - target: role:compliance-officer
+  requires_skill_area:
+    - target: skill-area:financial-risk-modeling
+  applies_to_domain:
+    - target: domain:fintech
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:risk-model-validation
+    - target: responsibility:financial-model-accuracy
+---
+nodeKind: Workflow
+id: workflow:KYC-verification
+attributes:
+  displayName: "KYC Verification"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-customer"
+  complexity: moderate
+  description: |
+    Know Your Customer verification process — identity document collection,
+    identity verification, sanctions screening, PEP checks, and risk
+    classification. Covers initial onboarding KYC, periodic reviews,
+    and enhanced due diligence for high-risk customers.
+edges:
+  involves_role:
+    - target: role:compliance-officer
+    - target: role:fraud-analyst
+  requires_skill_area:
+    - target: skill-area:compliance-automation
+  applies_to_domain:
+    - target: domain:fintech
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:sanctions-screening
+    - target: responsibility:transaction-monitoring
+---
+nodeKind: Workflow
+id: workflow:fraud-investigation
+attributes:
+  displayName: "Fraud Investigation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-case"
+  complexity: cross-team
+  description: |
+    Investigating suspected fraud cases — alert triage, evidence collection,
+    transaction analysis, customer interview, case documentation, and
+    disposition decision. Includes SAR filing, law enforcement referral,
+    and loss recovery coordination.
+edges:
+  involves_role:
+    - target: role:fraud-analyst
+    - target: role:compliance-officer
+    - target: role:legal-counsel
+  applies_to_domain:
+    - target: domain:fraud-detection
+    - target: domain:fintech
+  triggers_responsibility:
+    - target: responsibility:fraud-rule-tuning
+    - target: responsibility:transaction-monitoring
+---
+nodeKind: Workflow
+id: workflow:content-review-pipeline
+attributes:
+  displayName: "Content Review Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "continuous"
+  complexity: cross-team
+  description: |
+    Processing user-generated content through moderation stages — automated
+    classification, human review queues, quality assurance sampling, and
+    enforcement action execution. Covers content prioritization, reviewer
+    workload management, and accuracy metrics tracking.
+edges:
+  involves_role:
+    - target: role:content-moderator
+    - target: role:trust-safety-engineer
+  applies_to_domain:
+    - target: domain:content-moderation
+    - target: domain:social-media
+  triggers_responsibility:
+    - target: responsibility:content-policy-enforcement
+    - target: responsibility:community-guidelines-enforcement
+---
+nodeKind: Workflow
+id: workflow:content-appeal-process
+attributes:
+  displayName: "Content Appeal Process"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-appeal"
+  complexity: moderate
+  description: |
+    Handling appeals of content moderation decisions — appeal intake,
+    independent re-review, escalation to senior reviewers, decision
+    communication, and policy exception tracking. Ensures fair process
+    and identifies systematic enforcement issues.
+edges:
+  involves_role:
+    - target: role:content-moderator
+    - target: role:trust-safety-engineer
+    - target: role:legal-counsel
+  applies_to_domain:
+    - target: domain:content-moderation
+  triggers_responsibility:
+    - target: responsibility:content-policy-enforcement
+---
+nodeKind: Workflow
+id: workflow:brand-safety-review
+attributes:
+  displayName: "Brand Safety Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: moderate
+  description: |
+    Reviewing advertising placements and content adjacency for brand
+    safety — keyword blocklist management, content category exclusions,
+    placement audit, and brand suitability scoring. Ensures ads appear
+    in appropriate contexts.
+edges:
+  involves_role:
+    - target: role:brand-manager
+    - target: role:marketing-strategist
+    - target: role:content-moderator
+  requires_skill_area:
+    - target: skill-area:brand-strategy
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:advertising-tech
+  triggers_responsibility:
+    - target: responsibility:brand-consistency
+---
+nodeKind: Workflow
+id: workflow:influencer-vetting
+attributes:
+  displayName: "Influencer Vetting"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: moderate
+  description: |
+    Evaluating potential influencer partners — audience authenticity
+    analysis, content quality review, brand alignment assessment, past
+    controversy screening, and engagement rate verification. Produces
+    partnership recommendations with risk assessment.
+edges:
+  involves_role:
+    - target: role:marketing-strategist
+    - target: role:brand-manager
+  requires_skill_area:
+    - target: skill-area:brand-positioning
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:social-media
+  triggers_responsibility:
+    - target: responsibility:brand-consistency
+---
+nodeKind: Workflow
+id: workflow:ad-campaign-launch
+attributes:
+  displayName: "Ad Campaign Launch"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Launching advertising campaigns across channels — creative asset
+    production, targeting configuration, budget allocation, A/B test setup,
+    tracking pixel implementation, and go-live verification. Includes
+    day-one monitoring and rapid optimization.
+edges:
+  involves_role:
+    - target: role:marketing-strategist
+    - target: role:creative-director
+    - target: role:marketing-manager
+  requires_skill_area:
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:brand-consistency
+---
+nodeKind: Workflow
+id: workflow:product-launch-go-to-market
+attributes:
+  displayName: "Product Launch Go-to-Market"
+  workflowKind: strategic
+  triggerType: event-driven
+  typicalCadence: "per-launch"
+  complexity: cross-team
+  description: |
+    Coordinating product launches across teams — positioning development,
+    sales enablement, marketing campaign coordination, support readiness,
+    pricing finalization, and launch day execution. Includes post-launch
+    monitoring and rapid iteration.
+edges:
+  involves_role:
+    - target: role:product-manager
+    - target: role:marketing-manager
+    - target: role:solutions-architect
+  requires_skill_area:
+    - target: skill-area:brand-positioning
+    - target: skill-area:content-strategy
+  applies_to_domain:
+    - target: domain:e-commerce
+  triggers_responsibility:
+    - target: responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:customer-onboarding-B2B
+attributes:
+  displayName: "Customer Onboarding (B2B)"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-customer"
+  complexity: cross-team
+  description: |
+    Onboarding enterprise customers after contract signing — kickoff
+    meeting, technical integration, data migration, user provisioning,
+    training delivery, and success plan creation. Includes milestone
+    tracking and time-to-value optimization.
+edges:
+  involves_role:
+    - target: role:customer-success-manager
+    - target: role:solutions-architect
+    - target: role:account-executive
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:onboarding-flow-design
+  applies_to_domain:
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:customer-satisfaction-metrics
+    - target: responsibility:user-activation-rate
+---
+nodeKind: Workflow
+id: workflow:employee-onboarding-process
+attributes:
+  displayName: "Employee Onboarding Process"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-hire"
+  complexity: moderate
+  description: |
+    Onboarding new employees from offer acceptance to full productivity —
+    pre-boarding logistics, Day 1 orientation, equipment provisioning,
+    system access setup, buddy assignment, training schedule, and
+    30/60/90-day check-ins. Distinct from engineering-onboarding in
+    covering the full organizational process.
+edges:
+  involves_role:
+    - target: role:hr-manager
+    - target: role:talent-recruiter
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:developer-onboarding
+  applies_to_domain:
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:employee-retention
+---
+nodeKind: Workflow
+id: workflow:compensation-review
+attributes:
+  displayName: "Compensation Review"
+  workflowKind: strategic
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Annual compensation review cycle — market data collection, pay band
+    calibration, individual adjustment recommendations, manager calibration
+    sessions, equity refresh planning, and communication to employees.
+    Includes budget allocation and pay equity analysis.
+edges:
+  involves_role:
+    - target: role:hr-manager
+    - target: role:people-analytics-specialist
+    - target: role:financial-analyst
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:diversity-metrics-reporting
+    - target: responsibility:employee-retention
+---
+nodeKind: Workflow
+id: workflow:succession-planning
+attributes:
+  displayName: "Succession Planning"
+  workflowKind: strategic
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Identifying and developing future leaders — critical role mapping,
+    successor identification, readiness assessment, development plan
+    creation, and progress tracking. Ensures organizational continuity
+    and reduces key-person risk.
+edges:
+  involves_role:
+    - target: role:hr-manager
+    - target: role:organizational-development-specialist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:talent-acquisition-strategy
+  applies_to_domain:
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:employee-retention
+---
+nodeKind: Workflow
+id: workflow:org-restructuring
+attributes:
+  displayName: "Organization Restructuring"
+  workflowKind: strategic
+  triggerType: event-driven
+  typicalCadence: "ad-hoc"
+  complexity: cross-team
+  description: |
+    Planning and executing organizational structure changes — org design
+    analysis, role mapping, reporting line changes, team recomposition,
+    communication planning, and transition support. Includes change
+    management and culture impact assessment.
+edges:
+  involves_role:
+    - target: role:hr-manager
+    - target: role:organizational-development-specialist
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:employee-retention
+    - target: responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:M-and-A-tech-integration
+attributes:
+  displayName: "M&A Technology Integration"
+  workflowKind: strategic
+  triggerType: event-driven
+  typicalCadence: "per-acquisition"
+  complexity: cross-team
+  description: |
+    Integrating technology stacks after mergers and acquisitions —
+    technology due diligence, architecture assessment, system consolidation
+    planning, data migration, team integration, and toolchain unification.
+    Covers technical debt assessment and platform rationalization.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:technical-program-manager
+    - target: role:solutions-architect
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:architecture-decision
+    - target: responsibility:stakeholder-communication

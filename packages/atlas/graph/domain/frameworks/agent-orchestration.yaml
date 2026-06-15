@@ -1,0 +1,383 @@
+---
+nodeKind: Framework
+id: framework:langchain
+attributes:
+  displayName: "LangChain"
+  homepageUrl: "https://www.langchain.com"
+  belongsToLanguageId: language:python
+  category: agent-orchestration
+  description: |
+    LLM application framework for building chains, agents, and RAG
+    pipelines. Provides abstractions for prompt templates, output parsers,
+    document loaders, vector stores, memory, and tool calling. The Python
+    package is the primary implementation with a TypeScript port
+    (LangChain.js) also available. LangSmith provides observability and
+    evaluation for LangChain applications.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: framework:langgraph
+      comparison: "Agent frameworks — LangChain is chain-based; LangGraph is graph-based"
+    - target: framework:crewai
+      comparison: "Agent frameworks — LangChain is general-purpose; CrewAI is role-based multi-agent"
+    - target: framework:autogen
+      comparison: "Agent frameworks — LangChain is chain/agent; AutoGen is conversation-based"
+    - target: framework:pydantic-ai
+      comparison: "Agent frameworks — LangChain is batteries-included; PydanticAI is type-safe minimal"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:langgraph
+attributes:
+  displayName: "LangGraph"
+  homepageUrl: "https://www.langchain.com/langgraph"
+  belongsToLanguageId: language:python
+  category: agent-orchestration
+  description: |
+    Graph-based agent orchestration framework from the LangChain team
+    that models agent workflows as stateful, cyclic graphs. Nodes represent
+    computation steps and edges define control flow with conditional
+    branching. Supports human-in-the-loop breakpoints, persistent
+    checkpointing, and multi-agent architectures. Built on top of
+    LangChain primitives but usable independently.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:agentic-loops
+    - target: skill-area:multi-agent-coordination
+  alternative_to:
+    - target: framework:langchain
+      comparison: "Agent frameworks — LangGraph is graph-based; LangChain is chain-based"
+    - target: framework:crewai
+      comparison: "Agent frameworks — LangGraph is graph-based; CrewAI is role-based"
+    - target: framework:autogen
+      comparison: "Agent frameworks — LangGraph is graph-based; AutoGen is conversation-based"
+    - target: framework:pydantic-ai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:crewai
+attributes:
+  displayName: "CrewAI"
+  homepageUrl: "https://www.crewai.com"
+  belongsToLanguageId: language:python
+  category: agent-orchestration
+  description: |
+    Multi-agent role-playing framework where you define agents with
+    specific roles, goals, and backstories, then compose them into crews
+    that collaborate on tasks. Supports sequential and hierarchical
+    process flows, tool delegation between agents, and memory. Designed
+    for workflows where distinct personas (researcher, writer, reviewer)
+    need to collaborate toward a shared objective.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+  alternative_to:
+    - target: framework:langchain
+      comparison: "Agent frameworks — CrewAI is role-based multi-agent; LangChain is general-purpose"
+    - target: framework:autogen
+      comparison: "Multi-agent frameworks — CrewAI uses roles; AutoGen uses conversations"
+    - target: framework:pydantic-ai
+      comparison: "Agent frameworks — CrewAI is multi-agent; PydanticAI is single-agent type-safe"
+    - target: framework:langgraph
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:autogen
+attributes:
+  displayName: "AutoGen"
+  homepageUrl: "https://github.com/microsoft/autogen"
+  belongsToLanguageId: language:python
+  category: agent-orchestration
+  description: |
+    Microsoft's multi-agent conversation framework that enables multiple
+    AI agents to communicate with each other and with humans to solve
+    tasks. Agents can be configured with different LLMs, tools, and human
+    input modes. Supports group chat, nested conversations, and teachable
+    agents. AutoGen Studio provides a visual interface for building and
+    debugging multi-agent workflows.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+  alternative_to:
+    - target: framework:langchain
+      comparison: "Agent frameworks — AutoGen is conversation-based; LangChain is chain/agent"
+    - target: framework:crewai
+      comparison: "Multi-agent frameworks — AutoGen uses conversations; CrewAI uses roles"
+    - target: framework:langgraph
+      comparison: "Agent frameworks — AutoGen is conversation-based; LangGraph is graph-based"
+    - target: framework:pydantic-ai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:pydantic-ai
+attributes:
+  displayName: "PydanticAI"
+  homepageUrl: "https://ai.pydantic.dev"
+  belongsToLanguageId: language:python
+  category: agent-orchestration
+  description: |
+    Type-safe agent framework from the Pydantic team that uses Python
+    type hints and Pydantic models to define agent inputs, outputs, and
+    tool signatures with full validation. Supports dependency injection
+    for tools, structured result types, streaming, and multiple model
+    providers. Logfire integration provides observability. Emphasizes
+    production correctness over notebook-style experimentation.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
+  alternative_to:
+    - target: framework:langchain
+      comparison: "Agent frameworks — PydanticAI is type-safe minimal; LangChain is batteries-included"
+    - target: framework:crewai
+      comparison: "Agent frameworks — PydanticAI is single-agent type-safe; CrewAI is multi-agent"
+    - target: framework:langgraph
+      comparison: "Agent orchestration frameworks"
+    - target: framework:autogen
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:semantic-kernel
+attributes:
+  displayName: "Semantic Kernel"
+  homepageUrl: "https://learn.microsoft.com/en-us/semantic-kernel"
+  belongsToLanguageId: language:csharp
+  category: agent-orchestration
+  description: |
+    Microsoft's AI orchestration SDK for integrating LLMs into enterprise
+    applications. Provides a plugin model for exposing native functions
+    and API endpoints as tools, planners for automatic multi-step task
+    decomposition, and memory connectors for vector stores. Available in
+    C#, Python, and Java. Targets the .NET ecosystem and Azure OpenAI
+    Service deployments.
+edges:
+  belongs_to_language:
+    - language:csharp
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
+  alternative_to:
+    - target: framework:langchain
+      comparison: "Agent orchestration frameworks"
+    - target: framework:langgraph
+      comparison: "Agent orchestration frameworks"
+    - target: framework:crewai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:autogen
+      comparison: "Agent orchestration frameworks"
+    - target: framework:pydantic-ai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:mastra
+attributes:
+  displayName: "Mastra"
+  homepageUrl: "https://mastra.ai"
+  belongsToLanguageId: language:typescript
+  category: agent-orchestration
+  description: |
+    TypeScript-first agent framework for building AI applications with
+    tools, workflows, RAG, and multi-agent systems. Provides a unified
+    API for LLM providers, structured outputs via Zod schemas, and a
+    workflow engine with branching, retries, and human-in-the-loop steps.
+    Designed for TypeScript developers who want agent capabilities without
+    switching to the Python ecosystem.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:agentic-loops
+  alternative_to:
+    - target: framework:vercel-ai-sdk
+      comparison: "TypeScript agent frameworks — Mastra is workflow-focused; Vercel AI SDK is web-focused"
+    - target: framework:langchain
+      comparison: "Agent orchestration frameworks"
+    - target: framework:langgraph
+      comparison: "Agent orchestration frameworks"
+    - target: framework:crewai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:autogen
+      comparison: "Agent orchestration frameworks"
+    - target: framework:pydantic-ai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"
+---
+nodeKind: Framework
+id: framework:google-adk
+attributes:
+  displayName: "Google Agent Development Kit (ADK)"
+  homepageUrl: "https://google.github.io/adk-docs"
+  belongsToLanguageId: language:python
+  category: agent-orchestration
+  description: |
+    Google's open-source framework for building, evaluating, and deploying
+    AI agents. Provides a code-first approach with composable agent
+    architectures — sequential agents, parallel agents, and loop agents
+    for multi-step reasoning. Features built-in support for Google's
+    Gemini models, tool calling with automatic schema generation, session
+    state management, memory services, and artifact handling. Includes
+    a local development UI for testing and debugging agent interactions.
+    Natively supports the A2A (Agent-to-Agent) protocol for inter-agent
+    communication and MCP tool servers for external tool integration.
+    Deployable to Google Cloud (Vertex AI, Cloud Run) or any container
+    environment.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:tool-use
+    - target: skill-area:agentic-loops
+  alternative_to:
+    - target: framework:langchain
+      comparison: "Agent orchestration frameworks"
+    - target: framework:langgraph
+      comparison: "Agent orchestration frameworks"
+    - target: framework:crewai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:autogen
+      comparison: "Agent orchestration frameworks"
+    - target: framework:pydantic-ai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:mastra
+      comparison: "Agent orchestration frameworks"
+    - target: framework:vercel-ai-sdk
+      comparison: "Agent orchestration frameworks"
+  integrates_with:
+    - target: topic:a2a-protocol
+    - target: topic:parallel-agent-execution
+  supports:
+    - target: capability:supports-subagent-dispatch
+      level: full
+      notes: |
+        ADK's sub_agents parameter enables agent-to-agent delegation via
+        sequential, parallel, and loop agent compositions.
+    - target: capability:supports-tool-use
+      level: full
+      notes: |
+        Built-in tool calling with automatic schema generation from Python
+        function signatures and Pydantic models.
+    - target: capability:supports-mcp
+      level: full
+      notes: |
+        Native MCP tool server integration for external tool access.
+---
+nodeKind: Framework
+id: framework:vercel-ai-sdk
+attributes:
+  displayName: "Vercel AI SDK"
+  homepageUrl: "https://sdk.vercel.ai"
+  belongsToLanguageId: language:typescript
+  category: agent-orchestration
+  description: |
+    Vercel's TypeScript SDK for building AI-powered web applications with
+    streaming UI, tool calling, structured outputs, and multi-step agent
+    workflows. Provides React hooks (useChat, useCompletion) and server
+    actions for seamless frontend-backend AI integration. Supports
+    multiple providers via a unified API (OpenAI, Anthropic, Google,
+    Mistral, Cohere, and community providers). Features include:
+    generateText/streamText for server-side LLM calls, generateObject
+    for structured outputs with Zod schemas, multi-step tool use with
+    maxSteps, middleware for guardrails and logging, and an experimental
+    agent framework (experimental_createMCPClient) for MCP tool server
+    integration. The standard choice for adding AI features to Next.js
+    applications. Pairs with Vercel AI Elements (presentation:ai-elements)
+    for pre-built UI components.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:server-side-rendering
+    - target: skill-area:tool-use
+    - target: skill-area:agentic-loops
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:retrieval-augmented-generation
+  integrates_with:
+    - target: presentation:ai-elements
+    - target: framework:react
+  alternative_to:
+    - target: framework:mastra
+      comparison: "TypeScript agent frameworks — Vercel AI SDK is web-focused; Mastra is workflow-focused"
+    - target: framework:langchain
+      comparison: "Agent orchestration frameworks"
+    - target: framework:langgraph
+      comparison: "Agent orchestration frameworks"
+    - target: framework:crewai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:autogen
+      comparison: "Agent orchestration frameworks"
+    - target: framework:pydantic-ai
+      comparison: "Agent orchestration frameworks"
+    - target: framework:semantic-kernel
+      comparison: "Agent orchestration frameworks"
+    - target: framework:google-adk
+      comparison: "Agent orchestration frameworks"

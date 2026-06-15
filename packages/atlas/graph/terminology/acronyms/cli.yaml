@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:cli
+attributes:
+  acronym: "CLI"
+  expandsToTermId: term:command-line-interface
+  description: |
+    Acronym for CLI.
+edges:
+  expands_to:
+    - term:command-line-interface

@@ -1,0 +1,219 @@
+# NodeKinds for cluster 16-cost-quota.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:cost-model
+  name: CostModel
+  origin: standard
+  prefix: cost-model
+  cluster: 16-cost-quota
+  purpose: a structured cost specification (per-token / per-call / tiered) for a Provider or ModelVersion
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: costKind
+    type: enum<per-token,per-call,per-second,tiered,hybrid>
+    required: false
+  - name: currency
+    type: string
+    required: false
+    notes: ISO 4217 currency code (e.g. USD).
+  - name: inputPricePerMTokens
+    type: float
+    required: false
+  - name: outputPricePerMTokens
+    type: float
+    required: false
+  - name: tiers
+    type: list<map>
+    required: false
+    notes: 'Each entry: { name, threshold?, ratePerMTokInput?, ratePerMTokOutput?, ratePerCall? }'
+  - name: effectiveFrom
+    type: iso-date
+    required: false
+  - name: effectiveTo
+    type: iso-date
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - priced_by
+  outgoingEdges:
+  - provides_cost_for
+  invariants:
+  - id starts with cost-model: null
+  examples: []
+- id: node:quota
+  name: Quota
+  origin: standard
+  prefix: quota
+  cluster: 16-cost-quota
+  purpose: a quota constraint (RPM/TPM/requests/concurrent) bound to a tenant, role, or capability scope
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: quotaKind
+    type: enum<rpm,tpm,rpd,tpd,concurrent,storage,bandwidth>
+    required: false
+  - name: limit
+    type: any
+    required: false
+    notes: Numeric limit (int or float).
+  - name: hardLimit
+    type: any
+    required: false
+  - name: metric
+    type: string
+    required: false
+  - name: window
+    type: string
+    required: false
+    notes: Window/period (e.g. 1m, 1d, rolling-7d).
+  - name: windowSeconds
+    type: int
+    required: false
+  - name: scope
+    type: enum<global,tenant,role,api-key,model>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - constrains
+  - applies_to_tenant
+  invariants:
+  - id starts with quota: null
+  examples: []
+- id: node:usage-record
+  name: UsageRecord
+  origin: standard
+  prefix: usage-record
+  cluster: 16-cost-quota
+  purpose: a recorded unit of resource consumption against a Quota / CostModel (per-call billing event)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: recordedAt
+    type: iso-timestamp
+    required: false
+  - name: occurredAt
+    type: iso-timestamp
+    required: false
+  - name: tenantId
+    type: ref<Tenant>
+    required: false
+  - name: providerId
+    type: ref<Provider>
+    required: false
+  - name: modelVersionId
+    type: ref<ModelVersion>
+    required: false
+  - name: inputTokens
+    type: int
+    required: false
+  - name: outputTokens
+    type: int
+    required: false
+  - name: callCount
+    type: int
+    required: false
+  - name: amount
+    type: float
+    required: false
+    notes: Monetary amount in CostModel.currency.
+  - name: totalCost
+    type: float
+    required: false
+  - name: currency
+    type: string
+    required: false
+  - name: invocationId
+    type: ref<Invocation>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - records_usage
+  outgoingEdges:
+  - recorded_against
+  - usage_recorded_for
+  invariants:
+  - id starts with usage-record: null
+  examples: []
+- id: node:budget-policy
+  name: BudgetPolicy
+  origin: standard
+  prefix: budget-policy
+  cluster: 16-cost-quota
+  purpose: a budget envelope and enforcement policy for a tenant or org-unit
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: limit
+    type: float
+    required: false
+  - name: totalBudget
+    type: float
+    required: false
+  - name: currency
+    type: string
+    required: false
+  - name: period
+    type: string
+    required: false
+    notes: daily|weekly|monthly|quarterly|annual or freeform window.
+  - name: periodStart
+    type: iso-date
+    required: false
+  - name: periodEnd
+    type: iso-date
+    required: false
+  - name: enforcement
+    type: string
+    required: false
+  - name: onExceeded
+    type: string
+    required: false
+  - name: alertThresholds
+    type: list<float>
+    required: false
+    notes: Fractional thresholds (0..1) for alerts.
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - owns_budget
+  invariants:
+  - id starts with budget-policy: null
+  examples: []
+

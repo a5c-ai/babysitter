@@ -1,0 +1,52 @@
+nodeKind: RecoveryStrategy
+id: recovery-strategy:retry-backoff
+attributes:
+  displayName: "Exponential backoff retry"
+  action: retry-with-backoff
+  backoffSpec:
+    baseMs: 2000
+    capMs: 60000
+    strategy: exponential
+  maxAttempts: 5
+  escalationPolicy: surface-to-operator
+  handlesFailureClassId: failure-class:agent-session
+edges:
+  handles_failure:
+    - target: failure-class:agent-session
+    - target: failure-class:workflow-config
+---
+nodeKind: RecoveryStrategy
+id: recovery-strategy:skip-tick
+attributes:
+  displayName: "Skip current orchestrator tick"
+  action: skip-tick
+  maxAttempts: 1
+  escalationPolicy: none
+  handlesFailureClassId: failure-class:tracker
+edges:
+  handles_failure:
+    - target: failure-class:tracker
+---
+nodeKind: RecoveryStrategy
+id: recovery-strategy:keep-workers
+attributes:
+  displayName: "Keep workers running on refresh failure"
+  action: keep-workers
+  maxAttempts: 1
+  escalationPolicy: none
+  handlesFailureClassId: failure-class:tracker
+edges:
+  handles_failure:
+    - target: failure-class:tracker
+---
+nodeKind: RecoveryStrategy
+id: recovery-strategy:best-effort-log
+attributes:
+  displayName: "Best-effort log and continue"
+  action: best-effort-log
+  maxAttempts: 1
+  escalationPolicy: none
+  handlesFailureClassId: failure-class:observability
+edges:
+  handles_failure:
+    - target: failure-class:observability

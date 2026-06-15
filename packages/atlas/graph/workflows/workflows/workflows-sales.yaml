@@ -1,0 +1,123 @@
+---
+nodeKind: Workflow
+id: workflow:sales-pipeline-review
+attributes:
+  displayName: "Sales Pipeline Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Reviews the health and velocity of the sales pipeline — analyzing stage
+    conversion rates, identifying stalled opportunities, validating forecast
+    accuracy against historical close rates, and flagging deals requiring
+    executive intervention or resource reallocation. Produces a pipeline
+    health report and action items. Excludes individual deal negotiation.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:deal-qualification
+attributes:
+  displayName: "Deal Qualification"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-opportunity"
+  complexity: single-team
+  description: |
+    Evaluates inbound opportunities against qualification criteria — scoring
+    prospects on budget, authority, need, and timeline dimensions, validating
+    technical fit against product capabilities, assessing competitive
+    landscape, and determining required presales resources. Produces a
+    qualification decision with next-step recommendations. Excludes proposal
+    creation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:territory-planning
+attributes:
+  displayName: "Territory Planning"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Defines and optimizes sales territory assignments — analyzing market
+    potential by geography and segment, balancing quota distribution across
+    reps, reviewing account coverage gaps, and aligning territory boundaries
+    with go-to-market strategy changes. Produces updated territory maps and
+    quota allocations. Excludes individual account planning.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:sales-enablement-content-update
+attributes:
+  displayName: "Sales Enablement Content Update"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Refreshes sales enablement materials in response to product changes,
+    competitive moves, or win/loss analysis — updating battle cards, demo
+    scripts, objection-handling guides, pricing sheets, and case studies.
+    Validates content accuracy with product and engineering teams. Produces
+    updated asset library and training notifications. Excludes sales training
+    delivery.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:product-designer
+    - target: role:devrel
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:marketing-team
+    - target: org-unit:product-team

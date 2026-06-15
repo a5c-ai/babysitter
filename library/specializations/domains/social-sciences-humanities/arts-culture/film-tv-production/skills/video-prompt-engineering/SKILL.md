@@ -4,6 +4,10 @@ id: SK-FTV-006
 version: 1.0.0
 description: Optimize prompts for AI video generation platforms including Sora, Runway, Pika, and Kling
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:prompt-engineering, skill-area:video-processing, skill-area:media-encoding]
+  roles: [role:creative-director, role:media-engineer]
 ---
 
 # Video Prompt Engineering Skill

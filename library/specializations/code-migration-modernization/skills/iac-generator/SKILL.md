@@ -2,6 +2,13 @@
 name: iac-generator
 description: Generate Infrastructure as Code from existing infrastructure with Terraform/CloudFormation support
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:cloud-infrastructure]
+  roles: [role:devops-engineer, role:platform-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # IaC Generator Skill

@@ -1,0 +1,261 @@
+---
+nodeKind: ToolServer
+id: tool-server:mcp-rippling-candidate
+attributes:
+  displayName: "Rippling MCP candidate"
+  description: |
+    Candidate MCP server for Rippling hr, payroll, it management, employee management workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: rippling.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:rippling
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:hr-manager
+      confidence: high
+      evidence: "Employee lifecycle, payroll, benefits, and onboarding state supports HR management workflows."
+    - target: workflow:employee-onboarding-process
+      confidence: high
+      evidence: "Onboarding tasks, accounts, and employee records are direct onboarding projection points."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-gusto-candidate
+attributes:
+  displayName: "Gusto MCP candidate"
+  description: |
+    Candidate MCP server for Gusto payroll, hr, benefits, tax filing workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: gusto.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:gusto
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:hr-manager
+      confidence: high
+      evidence: "Payroll, benefits, hiring, and employee data support core HR operations."
+    - target: workflow:employee-onboarding-process
+      confidence: medium
+      evidence: "Hiring and payroll setup information supports employee onboarding."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-ghost-candidate
+attributes:
+  displayName: "Ghost MCP candidate"
+  description: |
+    Candidate MCP server for Ghost publishing, blogging, content management, headless cms workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: developer-tools
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: ghost.org
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:ghost
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Publishing and content APIs support docs, release notes, and knowledge-base workflows."
+    - target: workflow:documentation-publishing
+      confidence: high
+      evidence: "Content publishing state is a direct documentation-publishing projection point."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-contentstack-candidate
+attributes:
+  displayName: "Contentstack MCP candidate"
+  description: |
+    Candidate MCP server for Contentstack headless cms, content management, enterprise cms, content api workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: developer-tools
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: contentstack.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:contentstack
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:documentation-manager
+      confidence: medium
+      evidence: "CMS entries, releases, and workflows support documentation program management."
+    - target: workflow:documentation-publishing
+      confidence: medium
+      evidence: "Headless CMS publishing status supports documentation release review."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-coda-candidate
+attributes:
+  displayName: "Coda MCP candidate"
+  description: |
+    Candidate MCP server for Coda docs, spreadsheets, automation, workspace workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: coda.io
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:coda
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:project-manager
+      confidence: medium
+      evidence: "Docs, tables, and automations support project coordination workflows."
+    - target: workflow:knowledge-base-maintenance
+      confidence: medium
+      evidence: "Structured docs and tables support knowledge-base maintenance."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-chargebee-candidate
+attributes:
+  displayName: "Chargebee MCP candidate"
+  description: |
+    Candidate MCP server for Chargebee billing, subscriptions, invoicing, revenue management workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: payments-fintech
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: chargebee.com
+    score: 68
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:chargebee
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: high
+      evidence: "Subscription and invoice data supports revenue operations and retention workflows."
+    - target: workflow:billing-support-workflow
+      confidence: high
+      evidence: "Billing state, invoices, and subscriptions are direct support workflow projection points."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-lemon-squeezy-candidate
+attributes:
+  displayName: "Lemon Squeezy MCP candidate"
+  description: |
+    Candidate MCP server for Lemon Squeezy payments, digital products, subscriptions, merchant of record workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: payments-fintech
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: lemonsqueezy.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:lemon-squeezy
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: medium
+      evidence: "Subscription and merchant-of-record data supports revenue operations."
+    - target: workflow:billing-support-workflow
+      confidence: medium
+      evidence: "Payments and subscription state supports customer billing support."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-revenuecat-candidate
+attributes:
+  displayName: "RevenueCat MCP candidate"
+  description: |
+    Candidate MCP server for RevenueCat subscriptions, in-app purchases, mobile payments, subscription management workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: payments-fintech
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: revenuecat.com
+    score: 66
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:revenuecat
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: medium
+      evidence: "Subscription entitlement and purchase data supports revenue operations."
+    - target: workflow:billing-support-workflow
+      confidence: medium
+      evidence: "Entitlements and subscription events support mobile billing support workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-mollie-candidate
+attributes:
+  displayName: "Mollie MCP candidate"
+  description: |
+    Candidate MCP server for Mollie payments, payment processing, checkout, european payments workflows. Recorded from Ora discovery as a missing MCP/tool-server coverage point.
+  protocol: mcp-stdio
+  provenance: custom
+  category: payments-fintech
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: mollie.com
+    score: 62
+    grade: C
+edges:
+  integrates_with:
+    - target: tool:mollie
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: medium
+      evidence: "Payment and checkout events support revenue operations."
+    - target: workflow:billing-support-workflow
+      confidence: medium
+      evidence: "Payment status and refund data support billing support."

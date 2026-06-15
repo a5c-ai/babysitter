@@ -1,0 +1,13 @@
+nodeKind: Capability
+id: capability:supports-files-api
+attributes:
+  displayName: "Supports Files API"
+  description: |
+    The provider exposes a Files surface for uploading and managing
+    durable file objects referenced by id from inference / batch /
+    fine-tuning calls. OpenAI Files API and Anthropic Files API are
+    examples. Distinct from inline base64 attachment of media on a
+    single request.
+  appliesToNodeKinds: ["Provider"]
+  category: provider-feature
+edges: {}

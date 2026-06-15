@@ -1,0 +1,65 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:postgres.query
+attributes:
+  schema: '{}'
+  displayName: "Postgres: Query (read-only)"
+  description: Execute a read-only SQL query against the connected database.
+  inputSchema:
+    type: object
+    required: [sql]
+    properties:
+      sql: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      rows: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:postgres-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:postgres.list-tables
+attributes:
+  schema: '{}'
+  displayName: "Postgres: List Tables"
+  description: Enumerate table names in the connected database/schema.
+  inputSchema:
+    type: object
+    properties:
+      schema_name: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      tables: { type: array, items: { type: string } }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:postgres-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:postgres.describe-table
+attributes:
+  schema: '{}'
+  displayName: "Postgres: Describe Table"
+  description: Return column names, types, and constraints for a table.
+  inputSchema:
+    type: object
+    required: [table]
+    properties:
+      table: { type: string }
+      schema_name: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      columns: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:postgres-mcp

@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Medical Device Software
   skill-id: BME-SK-020
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:qa-engineer]
 ---
 
 # Software V&V Test Generator Skill

@@ -1,0 +1,754 @@
+{
+  "generatedAt": "2026-04-27",
+  "familyEntryPoints": [
+    {
+      "surface": "packages/adapters",
+      "status": "Public family overview",
+      "canonicalHome": "../packages/adapters/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "Use this family README to enter the adapters workspace tree before dropping into package-specific READMEs."
+    },
+    {
+      "surface": "packages/adapters/hooks",
+      "status": "Public family overview",
+      "canonicalHome": "../packages/adapters/hooks/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/core/README.md",
+        "../packages/adapters/hooks/cli/README.md"
+      ],
+      "note": "Use this family README for the hooks-adapter package set and adapter lineup."
+    },
+    {
+      "surface": "plugins",
+      "status": "Public plugin overview",
+      "canonicalHome": "./plugins.md",
+      "supporting": [
+        "../plugins/babysitter/README.md",
+        "../plugins/babysitter-codex/README.md"
+      ],
+      "note": "The docs-site plugin landing page is the canonical discovery entrypoint for harness plugin packages and plugin-system concepts."
+    }
+  ],
+  "surfaces": [
+    {
+      "surface": "packages/atlas",
+      "packageName": "@a5c-ai/atlas",
+      "description": "Atlas catalog graph SDK, CLI, and data.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/atlas/README.md",
+      "supporting": [],
+      "note": "Public npm package for the Atlas catalog graph index and query SDK."
+    },
+    {
+      "surface": "packages/genty/core",
+      "packageName": "@a5c-ai/genty-core",
+      "description": "Genty core runtime and tool surface for Babysitter.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/genty/core/README.md",
+      "supporting": [],
+      "note": "Public runtime dependency package for advanced orchestration surfaces."
+    },
+    {
+      "surface": "packages/genty/runtime",
+      "packageName": "@a5c-ai/genty-runtime",
+      "description": "Agent runtime layer (L5) — daemon, session, resource management, telemetry.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/genty/runtime/README.md",
+      "supporting": [],
+      "note": "Public runtime dependency for L5 agent runtime concerns."
+    },
+    {
+      "surface": "packages/adapters/codecs",
+      "packageName": "@a5c-ai/adapters-codecs",
+      "description": "Built-in agent adapters for adapters",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/adapters/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/cli",
+      "packageName": "@a5c-ai/adapters-cli",
+      "description": "CLI binary (adapters) for adapters",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/cli/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/config",
+      "packageName": "@a5c-ai/config-adapter",
+      "description": "Agent config adapter — install, auth, host detection, adapter configuration",
+      "hasReadme": false,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "New package from adapters decomposition (#211)."
+    },
+    {
+      "surface": "packages/adapters/core",
+      "packageName": "@a5c-ai/comm-adapter",
+      "description": "Core types, client, and stream engine for adapters",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/core/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/launch",
+      "packageName": "@a5c-ai/launch-adapter",
+      "description": "Agent launch adapter — spawn/lifecycle, PTY bridge, signal handling",
+      "hasReadme": false,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "New package from adapters decomposition (#211)."
+    },
+    {
+      "surface": "packages/adapters/gateway",
+      "packageName": "@a5c-ai/adapters-gateway",
+      "description": "Gateway package for remote and browser-facing adapters surfaces",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/gateway/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/harness-mock",
+      "packageName": "@a5c-ai/adapters-harness-mock",
+      "description": "Mock harness simulator for testing adapters adapters — simulates claude-code, codex, and other CLI harnesses",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/harness-mock/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/mobile-android-app",
+      "packageName": "@a5c-ai/genty-mobile-android-app",
+      "description": "Expo-based Android companion app for adapters",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/adapters/mobile-ios-app",
+      "packageName": "@a5c-ai/genty-mobile-ios-app",
+      "description": "Expo-based iOS companion app for adapters",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/adapters/observability",
+      "packageName": "@a5c-ai/adapters-observability",
+      "description": "Logging and telemetry infrastructure for adapters",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/observability/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/sdk",
+      "packageName": "@a5c-ai/adapters",
+      "description": "Unified dispatch layer for local CLI-based AI coding agents",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/sdk/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/tui",
+      "packageName": "@a5c-ai/genty-tui",
+      "description": "Extensible Ink-based TUI for adapters, with a plugin-first architecture",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/tui/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/tv-androidtv-app",
+      "packageName": "@a5c-ai/genty-tv-androidtv-app",
+      "description": "Android TV companion surfaces for adapters",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/adapters/tv-appletv-app",
+      "packageName": "@a5c-ai/genty-tv-appletv-app",
+      "description": "Apple TV companion surfaces for adapters",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/adapters/ui",
+      "packageName": "@a5c-ai/genty-ui",
+      "description": "Shared UI foundation and session-flow projection surface for browser and React Native adapters apps",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/ui/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/watch-watchos-app",
+      "packageName": "@a5c-ai/genty-watch-watchos-app",
+      "description": "watchOS companion surfaces for adapters",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/adapters/watch-wearos-app",
+      "packageName": "@a5c-ai/genty-watch-wearos-app",
+      "description": "Wear OS companion surfaces for adapters",
+      "hasReadme": false,
+      "status": "Internal-only companion app",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "No package README today. This map is the explicit internal-only note until the surface is promoted."
+    },
+    {
+      "surface": "packages/adapters/webui",
+      "packageName": "@a5c-ai/genty-webui",
+      "description": "Browser app for adapters gateway control, monitoring, and realtime session-detail flow inspection",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/webui/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/extensions",
+      "packageName": "@a5c-ai/extensions-adapter",
+      "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/adapters/extensions/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/tools",
+      "packageName": "@a5c-ai/tools-adapter",
+      "description": "Tool multiplexer — ToolDescriptor registry, dispatch policies, schema translation, MCP bridge.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/adapters/tools/README.md",
+      "supporting": [],
+      "note": "New package from tools-adapter build (#215)."
+    },
+    {
+      "surface": "packages/adapters/tasks",
+      "packageName": "@a5c-ai/tasks-adapter",
+      "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/adapters/tasks/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/babysitter",
+      "packageName": "@a5c-ai/babysitter",
+      "description": "Metapackage for installing all babysitter npm packages",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/babysitter/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/genty/platform",
+      "packageName": "@a5c-ai/genty-platform",
+      "description": "Agent Platform layer — harness integration, governance, CLI hosting, interaction, storage.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/genty/platform/README.md",
+      "supporting": [
+        "../README.md"
+      ],
+      "note": "Public npm package, platform layer for agent orchestration."
+    },
+    {
+      "surface": "packages/genty/cli",
+      "packageName": "@a5c-ai/genty",
+      "description": "Genty — unified agent product integrating core, runtime, platform, and TUI.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/genty/README.md",
+      "supporting": [],
+      "note": "Top-level integrated agent product."
+    },
+    {
+      "surface": "packages/genty/tui-plugins",
+      "packageName": "@a5c-ai/genty-tui-plugins",
+      "description": "Babysitter TUI plugins for adapters",
+      "hasReadme": false,
+      "status": "Internal-only workspace",
+      "canonicalHome": "./package-and-plugin-map.md",
+      "supporting": [],
+      "note": "Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README."
+    },
+    {
+      "surface": "packages/breakpoints-adapter",
+      "packageName": "@a5c-ai/breakpoints-adapter",
+      "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/breakpoints-adapter/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/cloud",
+      "packageName": "@a5c-ai/cloud",
+      "description": "Deployment SDK and CLI for Babysitter Kubernetes environments.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/cloud/README.md",
+      "supporting": [],
+      "note": "README is the canonical public docs home today; the validation matrix does not currently expose a separate central docs entrypoint for this package."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-claude",
+      "packageName": "@a5c-ai/hooks-adapter-claude",
+      "description": "Claude Code harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-claude/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-codex",
+      "packageName": "@a5c-ai/hooks-adapter-codex",
+      "description": "Codex harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-codex/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-copilot",
+      "packageName": "@a5c-ai/hooks-adapter-copilot",
+      "description": "GitHub Copilot harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-copilot/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-cursor",
+      "packageName": "@a5c-ai/hooks-adapter-cursor",
+      "description": "Cursor harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-cursor/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-gemini",
+      "packageName": "@a5c-ai/hooks-adapter-gemini",
+      "description": "Gemini CLI harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-gemini/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-genty",
+      "packageName": "@a5c-ai/hooks-adapter-genty",
+      "description": "Genty harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-genty/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-oh-my-pi",
+      "packageName": "@a5c-ai/hooks-adapter-oh-my-pi",
+      "description": "oh-my-pi harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-oh-my-pi/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-hermes",
+      "packageName": "@a5c-ai/hooks-adapter-hermes",
+      "description": "Hermes harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-hermes/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-openclaw",
+      "packageName": "@a5c-ai/hooks-adapter-openclaw",
+      "description": "OpenClaw harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-openclaw/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-opencode",
+      "packageName": "@a5c-ai/hooks-adapter-opencode",
+      "description": "OpenCode harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-opencode/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-pi",
+      "packageName": "@a5c-ai/hooks-adapter-pi",
+      "description": "Pi harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-pi/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/cli",
+      "packageName": "@a5c-ai/hooks-adapter-cli",
+      "description": "CLI entrypoint for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/cli/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/hooks/core",
+      "packageName": "@a5c-ai/hooks-adapter-core",
+      "description": "Canonical schemas, types, session store, and merge engine for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/core/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/kradle/core",
+      "packageName": "@a5c-ai/kradle",
+      "description": "Kubernetes-native forge runtime with Argo CD GitOps and Gitea-backed Git hosting.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/kradle/core/README.md",
+      "supporting": [],
+      "note": "Public npm package for the Kradle Kubernetes forge platform."
+    },
+    {
+      "surface": "packages/observer-dashboard",
+      "packageName": "@a5c-ai/babysitter-observer-dashboard",
+      "description": "Real-time observability dashboard for babysitter orchestration runs",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/observer-dashboard/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/babysitter-sdk",
+      "packageName": "@a5c-ai/babysitter-sdk",
+      "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/babysitter-sdk/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/babysitter-genty",
+      "packageName": "@a5c-ai/babysitter-genty",
+      "description": "Babysitter orchestration provider for genty — bridges genty interfaces to the babysitter-sdk runtime.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/babysitter-genty/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/adapters/transport",
+      "packageName": "@a5c-ai/transport-adapter",
+      "description": "Transport/proxy runtime seam for adapters launcher bridging",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/transport/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract for the published transport/proxy runtime seam."
+    },
+    {
+      "surface": "packages/adapters/triggers",
+      "packageName": "@a5c-ai/triggers-adapter",
+      "description": "Trigger normalization, enrichment, filtering, and GitHub Action glue for adapters automation pipelines.",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/triggers/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "README is the canonical package-level contract for reusable trigger/action glue used with adapters pipelines."
+    },
+    {
+      "surface": "plugins/babysitter",
+      "packageName": "Babysitter Claude Code plugin",
+      "description": "Claude Code harness plugin surface shipped from the repo plugin directory.",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "Canonical Claude Code plugin surface. This repo plugin is discoverable from the docs-site plugin landing page and the root README install guide."
+    },
+    {
+      "surface": "plugins/babysitter-codex",
+      "packageName": "@a5c-ai/babysitter-codex",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-codex/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-cursor",
+      "packageName": "@a5c-ai/babysitter-cursor",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-cursor/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-gemini",
+      "packageName": "@a5c-ai/babysitter-gemini",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-gemini/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-github",
+      "packageName": "@a5c-ai/babysitter-github",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-github/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-omp",
+      "packageName": "@a5c-ai/babysitter-omp",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval — oh-my-pi",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-omp/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-openclaw",
+      "packageName": "@a5c-ai/babysitter-openclaw",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-openclaw/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-opencode",
+      "packageName": "@a5c-ai/babysitter-opencode",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-opencode/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "plugins/babysitter-pi",
+      "packageName": "@a5c-ai/babysitter-pi",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval — Pi Coding Agent",
+      "hasReadme": true,
+      "status": "Public harness plugin",
+      "canonicalHome": "../plugins/babysitter-pi/README.md",
+      "supporting": [
+        "./plugins.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/genty/tui",
+      "packageName": "@a5c-ai/genty-tui",
+      "description": "Genty tui surface.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/genty/tui/README.md",
+      "supporting": [],
+      "note": ""
+    },
+    {
+      "surface": "packages/genty/webui",
+      "packageName": "@a5c-ai/genty-webui",
+      "description": "Genty webui surface.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/genty/webui/README.md",
+      "supporting": [],
+      "note": ""
+    },
+    {
+      "surface": "packages/genty/ui",
+      "packageName": "@a5c-ai/genty-ui",
+      "description": "Genty ui surface.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/genty/ui/README.md",
+      "supporting": [],
+      "note": ""
+    },
+    {
+      "surface": "packages/kradle/installer",
+      "packageName": "@a5c-ai/kradle-installer",
+      "description": "Kradle installer.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/kradle/installer/README.md",
+      "supporting": [],
+      "note": ""
+    },
+    {
+      "surface": "packages/adapters/hooks/adapter-antigravity",
+      "packageName": "@a5c-ai/hooks-adapter-antigravity",
+      "description": "Google Antigravity CLI harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-antigravity/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    }
+  ]
+}

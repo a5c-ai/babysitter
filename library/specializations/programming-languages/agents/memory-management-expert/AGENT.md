@@ -10,6 +10,11 @@ expertise:
   - Memory allocator strategies
   - Heap profiling and analysis
   - Memory leak detection
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:profiling-memory, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:principal-engineer]
 ---
 
 # Memory Management Expert Agent

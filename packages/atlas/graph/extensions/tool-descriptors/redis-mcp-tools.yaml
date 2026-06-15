@@ -1,0 +1,183 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.get
+attributes:
+  schema: '{}'
+  displayName: "Redis: GET"
+  description: Get the value of a string key.
+  inputSchema:
+    type: object
+    required: [key]
+    properties:
+      key: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      value: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.set
+attributes:
+  schema: '{}'
+  displayName: "Redis: SET"
+  description: Set a string key to a value, optionally with TTL.
+  inputSchema:
+    type: object
+    required: [key, value]
+    properties:
+      key: { type: string }
+      value: { type: string }
+      ex: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.delete
+attributes:
+  schema: '{}'
+  displayName: "Redis: DEL"
+  description: Delete one or more keys.
+  inputSchema:
+    type: object
+    required: [key]
+    properties:
+      key: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      deleted: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.list-keys
+attributes:
+  schema: '{}'
+  displayName: "Redis: List Keys (SCAN)"
+  description: Iterate keys matching a pattern using SCAN.
+  inputSchema:
+    type: object
+    properties:
+      pattern: { type: string }
+      count: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      keys: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.hget
+attributes:
+  schema: '{}'
+  displayName: "Redis: HGET"
+  description: Get a hash field value.
+  inputSchema:
+    type: object
+    required: [key, field]
+    properties:
+      key: { type: string }
+      field: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      value: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.hset
+attributes:
+  schema: '{}'
+  displayName: "Redis: HSET"
+  description: Set a hash field value.
+  inputSchema:
+    type: object
+    required: [key, field, value]
+    properties:
+      key: { type: string }
+      field: { type: string }
+      value: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      added: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.lpush
+attributes:
+  schema: '{}'
+  displayName: "Redis: LPUSH"
+  description: Prepend one or more values to a list.
+  inputSchema:
+    type: object
+    required: [key, value]
+    properties:
+      key: { type: string }
+      value: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      length: { type: integer }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:redis.lrange
+attributes:
+  schema: '{}'
+  displayName: "Redis: LRANGE"
+  description: Read a range of elements from a list.
+  inputSchema:
+    type: object
+    required: [key, start, stop]
+    properties:
+      key: { type: string }
+      start: { type: integer }
+      stop: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      values: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-redis

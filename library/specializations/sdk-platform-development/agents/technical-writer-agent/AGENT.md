@@ -7,6 +7,12 @@ expertise:
   - Documentation style guides
   - API reference documentation
   - Code example creation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:api-doc-generation, skill-area:tutorial-design]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Technical Writer Agent

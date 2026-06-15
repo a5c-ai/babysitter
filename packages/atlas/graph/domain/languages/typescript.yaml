@@ -1,0 +1,26 @@
+nodeKind: Language
+id: language:typescript
+attributes:
+  displayName: "TypeScript"
+  paradigms:
+    - imperative
+    - object-oriented
+    - functional
+  description: |
+    TypeScript is a statically-typed superset of JavaScript developed by
+    Microsoft that compiles to plain JavaScript. Its structural type system,
+    generics, union/intersection types, template literal types, and
+    conditional types provide fine-grained type safety for large codebases.
+
+    TypeScript is the de facto standard for React, Node.js, and Deno
+    applications. The tsc compiler and ts-morph AST manipulation library
+    enable sophisticated code generation and refactoring. Declaration files
+    (.d.ts) allow typing third-party JavaScript libraries via DefinitelyTyped.
+    Bundlers (Vite, esbuild, Rollup) strip types at build time. TypeScript's
+    type system is Turing-complete, enabling advanced type-level programming.
+edges:
+  used_by_skill_area:
+    - target: skill-area:react-testing
+    - target: skill-area:react-native-development
+    - target: skill-area:web-scraping
+    - target: skill-area:typescript-generic-programming

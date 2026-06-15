@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:change-management]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:operations-analyst, role:research-scientist]
 ---
 
 # Program Evaluation Skill

@@ -1,0 +1,109 @@
+---
+nodeKind: Workflow
+id: workflow:certification-program-management
+attributes:
+  displayName: "Certification Program Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Manages professional certification programs for the engineering workforce
+    -- maintaining a catalog of approved certifications mapped to career
+    levels and specializations, tracking individual certification status and
+    renewal timelines, coordinating exam scheduling and study-group
+    formation, managing certification reimbursement budgets and approval
+    workflows, analyzing certification coverage gaps against team capability
+    requirements, reporting certification attainment trends by team and
+    domain, and evaluating new certification programs for catalog inclusion.
+    Produces certification coverage dashboard and budget utilization report.
+    Excludes external training vendor selection.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:training-team
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:leadership-development-review
+attributes:
+  displayName: "Leadership Development Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Reviews the effectiveness and pipeline health of leadership development
+    programs -- assessing high-potential identification accuracy against
+    subsequent promotion and performance outcomes, evaluating program
+    completion rates and participant satisfaction scores, measuring
+    behavioral change through 360-degree feedback delta analysis, reviewing
+    succession-plan bench-strength for critical leadership roles, analyzing
+    diversity representation in leadership pipeline at each stage,
+    benchmarking program investment per participant against industry norms,
+    and identifying program design adjustments for emerging leadership
+    competency needs. Produces leadership development effectiveness report
+    and succession-bench update. Excludes individual coaching.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:training-team
+    - target: org-unit:hr-team
+---
+nodeKind: Workflow
+id: workflow:technical-skills-gap-analysis
+attributes:
+  displayName: "Technical Skills Gap Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Analyzes technical skills gaps across engineering teams relative to
+    strategic technology needs -- surveying current skill inventories through
+    self-assessment and manager calibration, mapping required skills against
+    technology roadmap and architecture evolution plans, identifying critical
+    skill shortages by team and domain, modeling build-vs-hire-vs-outsource
+    options for gap remediation, designing targeted upskilling programs with
+    measurable competency milestones, prioritizing training investments by
+    business-impact weighted gap severity, and tracking skill-acquisition
+    progress against quarterly targets. Produces skills gap heat map and
+    remediation investment plan. Excludes individual performance reviews.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:onboard-new-engineer
+  performed_by_org_unit:
+    - target: org-unit:training-team
+    - target: org-unit:engineering
+    - target: org-unit:hr-team

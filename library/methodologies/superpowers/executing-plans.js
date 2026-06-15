@@ -3,6 +3,12 @@
  * @description Executing Plans - Load plan, execute tasks in batches with checkpoints, verify between batches, finish branch
  * @inputs { planPath: string, batchSize?: number, worktreePath?: string, resumeFromTask?: number }
  * @outputs { success: boolean, completedTasks: number, totalTasks: number, batchReports: array, verificationResult: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

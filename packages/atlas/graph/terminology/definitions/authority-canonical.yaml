@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:authority.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:authority
+  text: |
+    Authority is a deprecated trust-scoring concept; replaced by TrustLevel (cluster 12-trust).
+  status: canonical
+edges:
+  defines:
+    - term:authority

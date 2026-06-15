@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:code-review.scope
+attributes:
+  subjectId: skill:code-review
+  inScope: |
+    Reviewing a pull request or diff for correctness, security, performance,
+    style adherence, and test coverage. Produces structured comments per
+    file/line. Works across mainstream languages and frameworks present in
+    the diff.
+  outOfScope: |
+    Architectural redesign (delegated to system-design), full security
+    audit (delegated to security-review), production incident triage,
+    license / IP review, and reviewing changes spanning unrelated repos.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - skill:code-review

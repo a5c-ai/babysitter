@@ -28,6 +28,9 @@
  * Evidence: Duration warning bug fixed twice (incomplete verification);
  * parking address took 3 runs (first-plausible-fix diagnosis). Both preventable
  * with this template.
+  * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:bug-triage]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

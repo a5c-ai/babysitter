@@ -1,0 +1,42 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:claude-code.knowledge@current
+attributes:
+  displayName: "Claude Code Knowledge Fabric — CLAUDE.md hierarchy + auto-memory"
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  description: |
+    Claude Code's knowledge fabric is built on a hierarchical markdown file
+    system. CLAUDE.md files at project root, nested directories, and user home
+    provide persistent instructions and context that survive across sessions.
+    Auto-memory extraction (`/memory` command, background consolidation)
+    automatically captures lessons, preferences, and project-specific knowledge
+    into `~/.claude/memory/MEMORY.md` and project-level memory files. The
+    hierarchy is: enterprise CLAUDE.md > user CLAUDE.md > project CLAUDE.md >
+    nested directory CLAUDE.md. Knowledge is retrieved via file-hierarchy
+    traversal at session bootstrap and injected into the system prompt.
+  knowledgeFileFormats:
+    - CLAUDE.md
+    - MEMORY.md
+    - ".claude/settings.json"
+    - ".claude/settings.local.json"
+  knowledgeScopes:
+    - project
+    - user
+    - enterprise
+  autoExtractionSupport: true
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Claude Code reads CLAUDE.md files from multiple scopes at session start,
+    merging them into the system prompt. The auto-memory system extracts
+    salient facts from conversations and persists them to MEMORY.md files.
+    Background consolidation (the "dream" cycle) runs post-session to
+    deduplicate and organize extracted memories. The knowledge is not
+    vector-embedded; retrieval is file-system traversal with scope precedence.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:claude:ge-0-0-0
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:claude-code-auto-memory

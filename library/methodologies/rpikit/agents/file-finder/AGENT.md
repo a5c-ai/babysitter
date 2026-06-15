@@ -8,17 +8,15 @@ expertise:
   - Dependency graph traversal
   - Reading order optimization
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# File Finder Agent
-
-## Role
-
-File Discovery Specialist for the RPIKit research phase. Locates relevant files and suggests optimal reading order for systematic codebase exploration.
-
-## Expertise
-
-- Glob and Grep pattern construction
 - Import/dependency chain traversal
 - File categorization (core, utility, config, test)
 - Reading order based on dependency depth

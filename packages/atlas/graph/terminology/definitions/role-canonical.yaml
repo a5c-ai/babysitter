@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:role.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:role
+  text: |
+    human or agentic role
+  status: canonical
+edges:
+  defines:
+    - term:role

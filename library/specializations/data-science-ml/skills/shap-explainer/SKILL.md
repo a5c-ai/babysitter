@@ -7,6 +7,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:explainability-interpretation, skill-area:model-explainability-testing]
+  roles: [role:data-scientist, role:ml-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # shap-explainer

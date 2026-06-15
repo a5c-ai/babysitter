@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:protobuf-js
+attributes:
+  displayName: "protobuf.js"
+  belongsToLanguageId: language:javascript
+  category: serialization
+  description: |
+    Pure-JavaScript Protocol Buffers implementation with TypeScript support.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:backend-api-design

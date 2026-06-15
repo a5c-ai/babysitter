@@ -18,6 +18,12 @@
  * - ASTM E647: Standard Test Method for Measurement of Fatigue Crack Growth Rates
  * - ASTM E399: Standard Test Method for Linear-Elastic Plane-Strain Fracture Toughness KIC
  * - ASTM E1820: Standard Test Method for Measurement of Fracture Toughness
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

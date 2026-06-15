@@ -1,0 +1,22 @@
+nodeKind: SkillArea
+id: skill-area:ml-fine-tuning
+attributes:
+  displayName: "ML Fine-Tuning"
+  description: |
+    Adapting pretrained foundation models: full fine-tuning, parameter-
+    efficient methods (LoRA, QLoRA, IA3, prefix tuning), instruction
+    tuning, RLHF / DPO, dataset curation, and eval harnesses.
+  domains:
+    - domain:ml-ops
+  requiresLanguages:
+    - language:python
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:llm-fine-tuning
+      confidence: secondary
+  uses_language:
+    - language:python
+    - target: language:python

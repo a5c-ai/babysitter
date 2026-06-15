@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Research
   agent-id: AG-007
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:market-research, skill-area:competitive-intelligence, skill-area:market-sizing]
+  workflows: [workflow:product-discovery]
+  roles: [role:data-analyst, role:strategic-planner, role:business-analyst]
 ---
 
 # Market Research Analyst Agent

@@ -9,6 +9,11 @@
  *   distribution, CLI surface, and richer extension capabilities.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:ai-agent-development, skill-area:orchestration-loop]
+ *   topics: [topic:developer-experience, topic:integrations]
+ *   roles: [role:platform-engineer]
  */
 
 import {
@@ -23,6 +28,8 @@ import {
   writePluginTestsTask,
   setupCiCdTask,
   createSyncScriptTask,
+  validateAssimilationTask,
+  fixValidationFailuresTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -69,7 +76,7 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 1: SDK ADAPTER
-  // Oh-my-pi shares the adapter at packages/sdk/src/harness/pi.ts with Pi.
+  // Oh-my-pi shares the adapter at packages/babysitter-sdk/src/harness/pi.ts with Pi.
   // This phase verifies the oh-my-pi-specific discovery entry (name="oh-my-pi",
   // cli="omp", OMP_* env vars) and invoker entry are correct and distinct from
   // the pi entry. Key: Programmatic capability, loop-driver via agent_end,
@@ -165,7 +172,7 @@ export async function process(inputs, ctx) {
   // ==========================================================================
   // PHASE 5: TESTING
   // Adapter unit tests and plugin integration tests run in parallel.
-  // Adapter tests: Vitest in packages/sdk/src/harness/__tests__/
+  // Adapter tests: Vitest in packages/babysitter-sdk/src/harness/__tests__/
   // Plugin tests: syntax validation + packaged-install in <pluginDir>/test/
   // ==========================================================================
 
@@ -235,7 +242,21 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...syncScript.filesCreated, ...syncScript.filesModified);
 
   // ==========================================================================
-  // PHASE 7: VERIFY + CONVERGE
+  // PHASE 7: VALIDATE
+  // ==========================================================================
+
+  ctx.log('phase:validate', 'Running concrete validation checks for the assimilation');
+
+  let validation = await ctx.task(validateAssimilationTask, {
+    projectDir,
+    harnessName,
+    adapterName,
+    pluginDir,
+    integrationFiles,
+  });
+
+  // ==========================================================================
+  // PHASE 8: VERIFY + CONVERGE
   // ==========================================================================
 
   ctx.log('phase:verify', 'Scoring assimilation quality');
@@ -246,25 +267,51 @@ export async function process(inputs, ctx) {
     targetQuality,
     integrationFiles,
     research,
+    validation,
   });
 
   finalQuality = verification.qualityScore;
   iterations = 1;
 
-  while (finalQuality < targetQuality && iterations < maxIterations) {
+  while ((!validation.passed || finalQuality < targetQuality) && iterations < maxIterations) {
     iterations++;
-    ctx.log('phase:converge', `Refinement iteration ${iterations}`);
+    ctx.log('phase:converge', `Validation/refinement iteration ${iterations}`);
 
-    const refinement = await ctx.task(refineAssimilationTask, {
+    if (!validation.passed) {
+      ctx.log('phase:fix-validation', `Fixing validation failures for iteration ${iterations}`);
+
+      const validationFixes = await ctx.task(fixValidationFailuresTask, {
+        projectDir,
+        harnessName,
+        adapterName,
+        pluginDir,
+        validation,
+        integrationFiles,
+      });
+
+      integrationFiles.push(...validationFixes.filesCreated, ...validationFixes.filesModified);
+    }
+
+    if (finalQuality < targetQuality) {
+      const refinement = await ctx.task(refineAssimilationTask, {
+        projectDir,
+        harnessName,
+        iteration: iterations,
+        issues: verification.issues,
+        recommendations: verification.recommendations,
+        integrationFiles,
+      });
+
+      integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
+    }
+
+    validation = await ctx.task(validateAssimilationTask, {
       projectDir,
       harnessName,
-      iteration: iterations,
-      issues: verification.issues,
-      recommendations: verification.recommendations,
+      adapterName,
+      pluginDir,
       integrationFiles,
     });
-
-    integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
 
     verification = await ctx.task(verifyAssimilationTask, {
       projectDir,
@@ -272,14 +319,15 @@ export async function process(inputs, ctx) {
       targetQuality,
       integrationFiles,
       research,
+      validation,
     });
 
     finalQuality = verification.qualityScore;
-    ctx.log('phase:converge:score', `Quality: ${finalQuality}/${targetQuality}`);
+    ctx.log('phase:converge:score', `Quality: ${finalQuality}/${targetQuality}; validation: ${validation.passed ? 'passed' : 'failed'}`);
   }
 
   return {
-    success: finalQuality >= targetQuality,
+    success: validation.passed && finalQuality >= targetQuality,
     integrationFiles: [...new Set(integrationFiles)],
     finalQuality,
     iterations,

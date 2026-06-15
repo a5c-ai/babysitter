@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:apps.scope
+attributes:
+  subjectId: benchmark:apps
+  inScope: |
+    Competitive-programming benchmark of 10,000 problems sourced from public coding-challenge sites; tests Python solutions against hidden unit tests.
+  outOfScope: |
+    Repository-scale tasks, agentic tool-use, multi-file refactoring, and contamination-controlled rolling collection (use LiveCodeBench).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:apps

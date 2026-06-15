@@ -1,0 +1,21 @@
+nodeKind: RetryPolicy
+id: retry-policy:claude-code-persistent-unattended
+attributes:
+  displayName: "Claude Code persistent (unattended) retry policy"
+  variant: persistent
+  maxRetries: 10
+  baseDelayMs: 500
+  maxDelayMs: 300000
+  backoffStrategy: exponential-jitter
+  jitterFactor: 0.25
+  honorRetryAfterHeader: true
+  retryableStatusCodes: [429, 529]
+  heartbeatIntervalMs: 30000
+  persistentMaxBackoffMs: 300000
+  persistentResetCapMs: 21600000
+  description: |
+    Active when CLAUDE_CODE_UNATTENDED_RETRY is set. Bypasses subscriber gates
+    and x-should-retry header; retries 429/529 indefinitely. Uses
+    anthropic-ratelimit-unified-reset to wait until window reset rather than
+    polling. Long sleeps are chunked so the host sees stdout activity and does
+    not mark the session idle (each chunk yields a SystemAPIErrorMessage).

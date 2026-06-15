@@ -1,0 +1,161 @@
+---
+nodeKind: Workflow
+id: workflow:outbound-prospecting-cadence
+attributes:
+  displayName: "Outbound Prospecting Cadence"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Manages the outbound sales development motion — building targeted
+    prospect lists from ICP criteria, crafting personalized multi-channel
+    sequences (email, LinkedIn, phone), tracking open/reply/meeting-booked
+    rates by sequence variant, A/B testing messaging and cadence timing,
+    and analyzing response patterns to refine personas. Produces sequence
+    performance reports and prospect pipeline handoff metrics. Excludes
+    deal negotiation and closing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+---
+nodeKind: Workflow
+id: workflow:sales-forecast-review
+attributes:
+  displayName: "Sales Forecast Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Inspects forecast accuracy and pipeline integrity — reviewing commit
+    vs best-case vs pipeline categories, analyzing historical close-rate
+    deviation by rep and segment, identifying coverage gaps against
+    quarterly targets, stress-testing upside scenarios, and reconciling
+    CRM pipeline data with rep-submitted forecasts. Produces forecast
+    confidence report with gap-closing action plans. Excludes individual
+    deal strategy and territory rebalancing.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:enterprise-deal-negotiation
+attributes:
+  displayName: "Enterprise Deal Negotiation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-opportunity"
+  complexity: cross-team
+  description: |
+    Manages complex enterprise deal cycles from proposal through close —
+    coordinating technical validation and proof-of-concept, assembling
+    deal desk pricing with discount approval workflows, navigating legal
+    redline cycles, managing procurement requirements (security
+    questionnaires, vendor onboarding), and orchestrating executive
+    sponsor engagement. Produces deal approval packages and negotiation
+    outcome documentation. Excludes post-sale implementation and
+    onboarding.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:legal-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:partner-channel-sales-review
+attributes:
+  displayName: "Partner Channel Sales Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews partner and channel sales performance — analyzing
+    partner-sourced pipeline by tier and region, evaluating deal
+    registration compliance, reviewing co-sell motion effectiveness,
+    tracking partner enablement completion rates, and identifying
+    high-potential partners for investment escalation. Produces partner
+    scorecard updates and co-marketing recommendations. Excludes partner
+    onboarding and contract negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:business-development
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:bizdev-team
+    - target: org-unit:partnerships-team
+---
+nodeKind: Workflow
+id: workflow:customer-renewal-management
+attributes:
+  displayName: "Customer Renewal Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the customer renewal pipeline — monitoring upcoming renewals
+    by cohort, scoring churn risk based on product usage and engagement
+    signals, identifying upsell and expansion opportunities, coordinating
+    renewal pricing with deal desk, and tracking renewal execution against
+    targets. Produces renewal forecast updates and at-risk account
+    intervention plans. Excludes new business acquisition and customer
+    success program design.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:sales
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:sales-team
+    - target: org-unit:customer-success

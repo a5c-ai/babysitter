@@ -17,6 +17,12 @@
  * - FactSage: https://factsage.com/
  * - CALPHAD Method: https://www.calphad.org/
  * - DICTRA: https://thermocalc.com/products/dictra/
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

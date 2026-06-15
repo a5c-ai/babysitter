@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:copilot-cli-container-image
+attributes:
+  artifactId: plugin-artifact:copilot-cli-container-image
+  displayName: "GitHub Copilot CLI container image"
+  targetId: plugin-target:copilot-cli
+  artifactKind: container-image
+  pathPattern: "ghcr.io/github/copilot-cli"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:copilot-cli

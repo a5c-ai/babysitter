@@ -8,6 +8,12 @@ expertise:
   - Annotation generation
   - Responsive wireframe variants
   - Wireframe-to-prototype conversion
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:prototyping, skill-area:interaction-design]
+  roles: [role:product-designer, role:ux-researcher]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Wireframe Generator Agent

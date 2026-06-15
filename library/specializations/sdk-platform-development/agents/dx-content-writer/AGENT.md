@@ -7,6 +7,12 @@ expertise:
   - Developer documentation frameworks
   - Code example creation
   - API documentation standards
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:tutorial-design, skill-area:reference-docs]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # DX Content Writer Agent

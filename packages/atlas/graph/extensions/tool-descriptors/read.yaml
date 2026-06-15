@@ -1,0 +1,22 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:read
+attributes:
+  schema: '{}'
+  displayName: "Read"
+  description: |
+    Read a file from the local filesystem. Returns content with
+    optional offset/limit. Standard tool across coding agents.
+  inputSchema:
+    type: object
+    required: [file_path]
+    properties:
+      file_path: { type: string, description: "Absolute path to the file" }
+      offset: { type: integer, description: "Line offset to start reading from" }
+      limit: { type: integer, description: "Maximum number of lines to read" }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+edges: {}

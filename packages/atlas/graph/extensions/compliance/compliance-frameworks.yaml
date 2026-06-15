@@ -1,0 +1,67 @@
+---
+nodeKind: ComplianceFramework
+id: compliance:nist-ai-rmf
+attributes:
+  displayName: "NIST AI Risk Management Framework 1.0"
+  frameworkKind: ai-specific
+  jurisdiction: "us"
+  version: "1.0"
+  homepageUrl: https://www.nist.gov/itl/ai-risk-management-framework
+  description: |
+    Voluntary US framework for managing AI risk; Govern/Map/Measure/Manage
+    functions.
+edges: {}
+---
+nodeKind: ComplianceFramework
+id: compliance:eu-ai-act
+attributes:
+  displayName: "EU AI Act"
+  frameworkKind: ai-specific
+  jurisdiction: "eu"
+  version: "Regulation (EU) 2024/1689"
+  homepageUrl: https://artificialintelligenceact.eu
+  description: |
+    Risk-tiered AI regulation covering prohibited, high-risk, limited-risk,
+    and minimal-risk AI systems.
+edges: {}
+---
+nodeKind: ComplianceFramework
+id: compliance:iso-42001
+attributes:
+  displayName: "ISO/IEC 42001:2023 — AI Management System"
+  frameworkKind: ai-specific
+  jurisdiction: "international"
+  version: "2023"
+  homepageUrl: https://www.iso.org/standard/81230.html
+  description: |
+    First international management-system standard for AI; certification
+    scheme analogous to ISO 27001.
+edges: {}
+---
+nodeKind: ComplianceFramework
+id: compliance:owasp-llm-top-10
+attributes:
+  displayName: "OWASP LLM Applications Top 10"
+  frameworkKind: security
+  jurisdiction: "international"
+  version: "2025"
+  homepageUrl: https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  description: |
+    Community-curated top-10 risks for LLM-backed applications.
+edges:
+  regulated_by:
+    - target: regulator:ftc
+    - target: regulator:uk-aisi
+---
+nodeKind: ComplianceFramework
+id: compliance:soc-2
+attributes:
+  displayName: "SOC 2"
+  frameworkKind: security
+  jurisdiction: "us"
+  version: "2017 TSC (revised 2022)"
+  homepageUrl: https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2
+  description: |
+    AICPA Trust Services Criteria audit framework; commonly required by
+    enterprise SaaS buyers.
+edges: {}

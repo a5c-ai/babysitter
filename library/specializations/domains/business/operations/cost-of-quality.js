@@ -26,6 +26,11 @@
  *   analysisScope: { timeframe: "12-months", scope: ["manufacturing", "customer-service"], granularity: "monthly" }
  * }
  * @references Juran's Quality Costs, ASQ COQ Guidelines, PAF Model
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-cursor
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-cursor"
+  packageName: "@a5c-ai/hooks-adapter-cursor"
+  displayName: "Hooks Adapter - Cursor"
+  description: "Cursor harness adapter for the hooks-adapter system. Translates Cursor-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Cursor as the active harness. Extend this to customize hook behavior specific to Cursor."
+  status: active

@@ -18,6 +18,10 @@ metadata:
   phase: 5
   experience: 12+ years dynamics and vibration
   background: Rotating equipment, vehicle dynamics, aerospace structures
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Vibration and Dynamics Specialist Agent

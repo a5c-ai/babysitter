@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: software-engineering
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:backend-engineer]
 ---
 
 # Quantum SDK Developer

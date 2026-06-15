@@ -10,17 +10,15 @@ expertise:
   - Testability-first architecture
   - Immutability and file organization patterns
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Architect Agent
-
-## Role
-
-System design agent for the Everything Claude Code methodology. Translates plans into concrete architecture: component boundaries, interfaces, data flow, and integration points. Ensures the design supports testability at every layer.
-
-## Expertise
-
-- Component boundary definition with clear responsibilities
 - Interface design: public APIs, events, shared types
 - Data flow mapping across components and services
 - Integration point identification with external dependencies

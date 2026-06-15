@@ -1,0 +1,84 @@
+---
+nodeKind: Workflow
+id: workflow:growth-experimentation-platform-setup
+attributes:
+  displayName: "Growth Experimentation Platform Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Builds the experimentation infrastructure enabling systematic growth
+    testing -- selecting and configuring feature-flagging and A/B testing
+    platforms with server-side and client-side SDK integration, designing the
+    experiment lifecycle workflow from hypothesis documentation through
+    statistical analysis and decision recording, establishing sample-size
+    calculators and guardrail metric definitions to prevent degraded user
+    experience during tests, integrating experiment assignment data with
+    analytics pipelines for cohort analysis and long-term impact measurement,
+    creating experiment catalog templates with standardized fields for
+    hypothesis, metrics, audience targeting, and rollout criteria, configuring
+    automated statistical significance alerts and experiment duration monitors,
+    and building experiment results dashboards accessible to product,
+    engineering, and growth stakeholders. Produces experimentation platform
+    architecture guide, experiment template library, and integration runbook.
+    Excludes running specific experiments.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:referral-program-design
+attributes:
+  displayName: "Referral Program Design"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Designs a referral program from concept through launch readiness --
+    defining referral mechanics including single-sided versus double-sided
+    incentive structures, modeling reward economics with cost-per-acquisition
+    targets and breakeven analysis, designing fraud prevention controls for
+    self-referrals, account farming, and reward abuse, specifying referral link
+    tracking and attribution logic across web, mobile, and email channels,
+    creating the referral user experience with share flows, reward dashboards,
+    and notification sequences, planning integration with payment and billing
+    systems for automated reward fulfillment, and developing launch
+    communication plans including in-app prompts, email campaigns, and
+    help-center documentation. Produces referral program specification, fraud
+    prevention rules, and launch playbook. Excludes ongoing program
+    management.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:product-team
+    - target: org-unit:engineering

@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:tdd
+attributes:
+  acronym: "TDD"
+  expandsToTermId: term:test-driven-development
+  description: |
+    Acronym for TDD.
+edges:
+  expands_to:
+    - term:test-driven-development

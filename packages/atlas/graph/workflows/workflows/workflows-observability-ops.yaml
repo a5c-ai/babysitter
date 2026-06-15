@@ -1,0 +1,104 @@
+---
+nodeKind: Workflow
+id: workflow:distributed-tracing-coverage-audit
+attributes:
+  displayName: "Distributed Tracing Coverage Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits the completeness and correctness of distributed tracing across the
+    service mesh — verifying that every service propagates trace context
+    headers, checking span naming and attribute conventions against the
+    OpenTelemetry semantic spec, identifying services with broken or missing
+    parent-span links, measuring sampling-rate adequacy for long-tail latency
+    debugging, and validating that traces are queryable end-to-end in the
+    backend. Produces a tracing coverage heatmap and instrumentation gap list.
+    Excludes trace-backend capacity planning.
+edges:
+  involves_role:
+    - target: role:sre-lead
+    - target: role:backend-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:service-mesh-config
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:error-budget-exhaustion-review
+attributes:
+  displayName: "Error Budget Exhaustion Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: cross-team
+  description: |
+    Triggers when a service's error budget drops below a defined threshold —
+    reviewing SLI burn-rate charts, attributing budget consumption to specific
+    incidents or deployments, evaluating whether the remaining budget is
+    sufficient for planned releases, negotiating feature-freeze vs
+    risk-acceptance trade-offs with product owners, and updating the
+    error-budget policy if thresholds prove miscalibrated. Produces an
+    error-budget status report and a release-gating decision. Excludes SLO
+    redefinition.
+edges:
+  involves_role:
+    - target: role:sre-lead
+    - target: role:engineering-manager
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:incident-command
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:synthetic-monitoring-maintenance
+attributes:
+  displayName: "Synthetic Monitoring Maintenance"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Maintains and evolves the suite of synthetic monitors (canary tests, uptime
+    checks, transaction monitors) — reviewing which critical user journeys are
+    covered, updating selectors and API contracts broken by recent deploys,
+    tuning alert thresholds to reduce false-positive noise, rotating test
+    credentials, validating multi-region probe distribution, and retiring
+    monitors for deprecated features. Produces a synthetic-monitor inventory
+    with coverage and health status. Excludes production incident response.
+edges:
+  involves_role:
+    - target: role:sre-lead
+    - target: role:test-writer
+    - target: role:devops-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:observability
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:flaky-test-quarantine
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:quality-engineering

@@ -9,6 +9,12 @@ expertise:
   - Technical debt prioritization
   - Architecture decision involvement
   - Technical roadmap planning
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:roadmap-management]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Technical Product Manager Agent

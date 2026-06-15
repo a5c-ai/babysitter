@@ -1,0 +1,121 @@
+# Claims linked to capability-support nodes.
+# These record the provenance and evidence strength for each capability assertion.
+---
+nodeKind: Claim
+id: claim:repo-sdk-fallback
+attributes:
+  claimId: repo-sdk-fallback
+  statement: "The babysitter-sdk adapterFallbackMetadata module provides fallback metadata for all known CLI harnesses."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: repo-observation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - repo-sdk-fallback
+    - repo-target-codex
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:repo-sdk-fallback
+  supported_by_claim: []
+---
+nodeKind: Claim
+id: claim:web-codex-0-134-release
+attributes:
+  claimId: web-codex-0-134-release
+  statement: "Codex CLI 0.134.0 adds local conversation history search, makes --profile the primary profile selector, improves MCP HTTP OAuth setup, preserves and compacts connector schemas, allows concurrent read-only MCP tools, expands hook and extension context, improves remote websocket recovery, and makes Node-based tools honor the managed network proxy environment."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - web-codex-0-134-release
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:web-codex-0-134-release
+---
+nodeKind: Claim
+id: claim:web-codex-hooks
+attributes:
+  claimId: web-codex-hooks
+  statement: "Codex CLI supports runtime hooks for tool-use interception and custom lifecycle events; 0.134.0 expands extension observation across subagent lifecycle, tool execution, turn metadata, async approval, and turn processing."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: medium
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: partial
+  evidenceIds:
+    - web-codex-hooks
+    - web-codex-0-134-release
+  unresolvedGaps:
+    - "The release notes confirm expanded lifecycle observation, while the stable hooks docs remain the primary hook-surface reference."
+edges:
+  sourced_from:
+    - evidence:web-codex-hooks
+    - evidence:web-codex-0-134-release
+---
+nodeKind: Claim
+id: claim:web-codex-session-resume
+attributes:
+  claimId: web-codex-session-resume
+  statement: "Codex CLI supports session resume through its conversation history and checkpoint mechanisms, with 0.134.0 adding default-on goals backed by dedicated storage across active turns."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: vendor-documentation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - web-codex-cli
+    - web-codex-cli-features
+    - web-codex-0-134-release
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:web-codex-cli
+    - evidence:web-codex-cli-features
+    - evidence:web-codex-0-134-release
+---
+nodeKind: Claim
+id: claim:web-codex-image-input
+attributes:
+  claimId: web-codex-image-input
+  statement: "Codex CLI may support image input through its multi-modal pipeline, but no explicit documentation confirms the feature."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: low
+  status: current
+  provenanceKind: vendor-inference
+  evidenceStrength: inferred
+  evidenceIds:
+    - web-codex-cli-features
+  unresolvedGaps:
+    - "No vendor documentation explicitly confirms image input support for Codex CLI."
+edges:
+  sourced_from:
+    - evidence:web-codex-cli-features
+---
+nodeKind: Claim
+id: claim:repo-transport-adapter-readme
+attributes:
+  claimId: repo-transport-adapter-readme
+  statement: "The transport-adapter package README documents the transport abstraction layer for multi-runtime agent communication."
+  subjectKind: AgentVersion
+  subjectId: "agentVersion:codex:ge-0-119-0"
+  confidence: high
+  status: current
+  provenanceKind: repo-observation
+  evidenceStrength: corroborated
+  evidenceIds:
+    - repo-transport-adapter-readme
+    - repo-transport-adapter-architecture
+  unresolvedGaps: []
+edges:
+  sourced_from:
+    - evidence:repo-transport-adapter-readme

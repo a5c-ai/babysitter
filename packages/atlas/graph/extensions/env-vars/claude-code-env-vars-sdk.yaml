@@ -1,0 +1,23 @@
+nodeKind: EnvVar
+id: env-var:claude-agent-sdk-mcp-no-prefix
+attributes:
+  displayName: CLAUDE_AGENT_SDK_MCP_NO_PREFIX
+  description: Set to 1 to skip the mcp__<server>__ prefix on tool names from SDK-created MCP servers.
+  name: CLAUDE_AGENT_SDK_MCP_NO_PREFIX
+  category: sdk
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-agent-sdk-disable-builtin-agents
+attributes:
+  displayName: CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS
+  description: Set to 1 to disable all built-in subagent types in non-interactive mode.
+  name: CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS
+  category: sdk
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

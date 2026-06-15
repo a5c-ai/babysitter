@@ -1,0 +1,19 @@
+nodeKind: LaunchContract
+id: launch-contract:codex-default
+attributes:
+  displayName: "Symphony default codex subprocess launch contract"
+  command: "codex"
+  invocationShell: none
+  cwdRule: workspace-absolute
+  transportRef: agent-host-transport:stdio
+  maxLineSizeBytes: 1048576
+  readTimeoutMs: 60000
+  turnTimeoutMs: 600000
+  stallTimeoutMs: 120000
+  threadCreationMode: create
+  initialPromptSource: workflow-template
+  advertisedToolNames:
+    - "shell"
+    - "apply_patch"
+    - "browser"
+  userInputRequiredPolicy: fail-run

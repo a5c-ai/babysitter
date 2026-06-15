@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: error-management
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Error Mitigation Engineer

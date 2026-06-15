@@ -1,0 +1,87 @@
+---
+nodeKind: SkillArea
+id: skill-area:ros-development
+attributes:
+  displayName: "ROS / ROS 2 Development"
+  description: |
+    Building robotics systems on ROS — nodes, topics, services,
+    actions, lifecycle, and DDS-based middleware.
+  domains:
+    - specialization:robotics-simulation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:robotics-simulation
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:robot-kinematics
+      strength: recommended
+    - target: skill-area:slam
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:robot-kinematics
+attributes:
+  displayName: "Robot Kinematics"
+  description: |
+    Forward and inverse kinematics, Jacobians, DH parameters, and
+    common manipulator/mobile-base models.
+  domains:
+    - specialization:robotics-simulation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:robotics-simulation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:slam
+attributes:
+  displayName: "SLAM"
+  description: |
+    Simultaneous Localization and Mapping — EKF/particle/graph SLAM,
+    visual and LiDAR SLAM stacks.
+  domains:
+    - specialization:robotics-simulation
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:robotics-simulation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:sensor-fusion
+attributes:
+  displayName: "Sensor Fusion"
+  description: |
+    Fusing IMU/GNSS/odometry/vision via Kalman/EKF/UKF and factor-
+    graph approaches.
+  domains:
+    - specialization:robotics-simulation
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:robotics-simulation
+      confidence: primary
+    - target: specialization:automotive-engineering
+      confidence: secondary
+    - target: specialization:aerospace-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:motion-planning
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:motion-planning
+attributes:
+  displayName: "Motion Planning"
+  description: |
+    Sampling-based (RRT, PRM) and optimization-based motion
+    planning, plus collision checking and trajectory smoothing.
+  domains:
+    - specialization:robotics-simulation
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:robotics-simulation
+      confidence: primary

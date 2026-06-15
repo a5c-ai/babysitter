@@ -1,0 +1,21 @@
+nodeKind: SessionSemantics
+id: session-semantics:cursor
+attributes:
+  sessionSemanticsId: session-semantics:cursor
+  agentId: agent:cursor
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - CURSOR_PROJECT_DIR
+    - CURSOR_VERSION
+  resumeSemantics: Cursor detection is environment-driven and anchored to project-directory signals.
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [CURSOR_SESSION, CURSOR_AGENT_SESSION] }
+edges:
+  applies_to_version:
+    - target: agentVersion:cursor:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

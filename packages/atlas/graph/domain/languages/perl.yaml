@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:perl
+attributes:
+  displayName: "Perl"
+  paradigms:
+    - imperative
+    - scripting
+  description: |
+    Perl is a high-level, interpreted, dynamically-typed scripting language
+    renowned for its powerful regular expression engine and text processing
+    capabilities. Perl 5 is widely used in system administration, bioinformatics
+    pipelines, CGI web scripting, and legacy enterprise applications.
+
+    CPAN (Comprehensive Perl Archive Network) provides one of the largest
+    collections of reusable modules in any language ecosystem. Moose and Moo
+    provide modern OOP layers on top of Perl's flexible object system. Perl
+    6 was reimagined as Raku, a separate language. Despite declining
+    popularity, Perl remains deeply embedded in genomics tooling (BioPerl),
+    network automation, and long-lived IT operations scripts.
+edges:
+  applies_to:
+    - target: domain:bioinformatics
+    - target: domain:software-engineering

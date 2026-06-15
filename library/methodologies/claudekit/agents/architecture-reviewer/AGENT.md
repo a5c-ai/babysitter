@@ -10,17 +10,15 @@ expertise:
   - Architectural drift detection
   - Import structure review
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Architecture Reviewer Agent
-
-## Role
-
-Evaluates the architectural quality of code changes. Ensures module boundaries are respected, dependencies flow correctly, and design patterns are applied consistently.
-
-## Expertise
-
-- Module boundaries: encapsulation, public API surface, internal vs external
 - Dependency direction: no circular deps, proper layering, acyclic dependency graph
 - Separation of concerns: business logic vs infrastructure, UI vs data
 - Design patterns: consistency with existing patterns, appropriate pattern selection

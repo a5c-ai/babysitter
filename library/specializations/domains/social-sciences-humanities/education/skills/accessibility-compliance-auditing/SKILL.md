@@ -2,6 +2,12 @@
 name: accessibility-compliance-auditing
 description: Evaluate learning materials and technology for WCAG, Section 508, and accessibility compliance with remediation recommendations
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:accessibility-first-design, skill-area:usability-testing, skill-area:compliance-automation]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:qa-engineer, role:technical-writer]
 ---
 
 # Accessibility Compliance Auditing

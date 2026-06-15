@@ -1,0 +1,38 @@
+nodeKind: Label
+id: label:bug
+attributes:
+  displayName: "bug"
+  name: "bug"
+  color: "#d73a4a"
+  description: "Something isn't working."
+edges: {}
+---
+nodeKind: Label
+id: label:enhancement
+attributes:
+  displayName: "enhancement"
+  name: "enhancement"
+  color: "#a2eeef"
+  description: "New feature or request."
+edges: {}
+---
+nodeKind: Label
+id: label:documentation
+attributes:
+  displayName: "documentation"
+  name: "documentation"
+  color: "#0075ca"
+  description: "Improvements or additions to documentation."
+edges: {}
+---
+nodeKind: Label
+id: label:good-first-issue
+attributes:
+  displayName: "good-first-issue"
+  name: "good-first-issue"
+  color: "#7057ff"
+  description: "Good for newcomers."
+  ownerProjectId: "project:babysitter"
+edges:
+  owned_by_project:
+    - target: project:babysitter

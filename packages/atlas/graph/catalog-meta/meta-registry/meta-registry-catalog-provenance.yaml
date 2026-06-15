@@ -1,0 +1,223 @@
+nodeKind: MetaCluster
+id: meta-cluster:catalog-provenance
+attributes:
+  displayName: Catalog Provenance
+  clusterNumber: 15
+  scope: Current catalog provenance and meta-shape records for ontology, gaps, shared context, terms, definitions, and meta-registry entities.
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:ontology-schema
+attributes:
+  displayName: OntologySchema (meta)
+  name: OntologySchema
+  cluster: 15-catalog-provenance
+  prefix: ontology
+  origin: universal
+  purpose: 'The catalog ontology itself (this `ontology-schema.yaml` plus the
+
+    `../../../schema/node-kinds/` and `../../../schema/edge-kinds.md` it mirrors) modeled as a
+
+    first-class entity so it can be claimed about, versioned via
+
+    `current catalog snapshot`, and pointed at by `Term term:ontology`.
+
+    Now references MetaClusters: the meta-shape of the catalog (the
+
+    MetaCluster / MetaNodeKind / MetaEdgeKind / MetaAttribute / MetaEnum
+
+    registry) makes the ontology self-describing so generators and the
+
+    wiki can enumerate the schema without re-parsing this file.'
+  exampleCount: 0
+  invariants:
+  - Companion of current catalog snapshot; the meta-shape registry (MetaCluster + MetaNodeKind + MetaEdgeKind + MetaAttribute + MetaEnum) is referenced via `metaClusters` and the `defines_meta_cluster` edge.
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:ontology-schema--id
+  - target: meta-attribute:ontology-schema--display-name
+  - target: meta-attribute:ontology-schema--catalog-version-id
+  - target: meta-attribute:ontology-schema--meta-clusters
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:gap
+attributes:
+  displayName: Gap (meta)
+  name: Gap
+  cluster: 13-catalog-meta
+  prefix: gap
+  origin: a5c
+  purpose: tracked debt-loop finding (level 1-7); first-class graph entity so gap state is queryable
+  exampleCount: 0
+  invariants:
+  - level in 1..7
+  - status = closed implies closedAt is set
+  - status = closed implies every applicable propagationStatus entry is done or not-applicable
+  - markdownRef points at wiki/process/gaps/GAP-<level>-<priority>-<slug>.md
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:gap--id
+  - target: meta-attribute:gap--title
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:shared-context-spec
+attributes:
+  displayName: SharedContextSpec (meta)
+  name: SharedContextSpec
+  cluster: 13-catalog-meta
+  prefix: shared-context-spec
+  origin: a5c
+  purpose: 'Stub. The shape of an a5c shared-context fabric record, attached as a
+
+    structured `Claim` on the reliability-interface. Recorded as a
+
+    NodeKind so the schema mapping referenced from coverage-checklist row
+
+    "Shared Context fabric" resolves.'
+  exampleCount: 0
+  invariants:
+  - 'STUB: deferred to Phase 2 (extension-interfaces track).'
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:shared-context-spec--id
+  - target: meta-attribute:shared-context-spec--context-kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:meta-node-kind
+attributes:
+  displayName: MetaNodeKind (meta)
+  name: MetaNodeKind
+  cluster: 15-catalog-provenance
+  prefix: meta-node-kind
+  origin: universal
+  purpose: 'A first-class record describing one NodeKind in the catalog ontology.
+
+    Lets the catalog enumerate, query, and version its own meta-shape
+
+    without re-parsing `schema/ontology-schema.yaml`. Mirrors the
+
+    NodeKind declaration fields from `../../../schema/meta-schema.md`.'
+  exampleCount: 1
+  invariants:
+  - 'id starts with meta-node-kind:'
+  - name MUST match a NodeKind defined in this ontology snapshot.
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:meta-node-kind--id
+  - target: meta-attribute:meta-node-kind--display-name
+  - target: meta-attribute:meta-node-kind--name
+  - target: meta-attribute:meta-node-kind--cluster
+  - target: meta-attribute:meta-node-kind--prefix
+  - target: meta-attribute:meta-node-kind--origin
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:meta-edge-kind
+attributes:
+  displayName: MetaEdgeKind (meta)
+  name: MetaEdgeKind
+  cluster: 15-catalog-provenance
+  prefix: meta-edge-kind
+  origin: universal
+  purpose: 'A first-class record describing one EdgeKind in the catalog ontology.
+
+    Mirrors the EdgeKind declaration fields from `../../../schema/meta-schema.md`
+
+    (source, target, cardinality, inverse).'
+  exampleCount: 0
+  invariants:
+  - 'id starts with meta-edge-kind:'
+  - name MUST match an EdgeKind defined in this ontology snapshot.
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:meta-edge-kind--id
+  - target: meta-attribute:meta-edge-kind--display-name
+  - target: meta-attribute:meta-edge-kind--name
+  - target: meta-attribute:meta-edge-kind--cardinality
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:meta-cluster
+attributes:
+  displayName: MetaCluster (meta)
+  name: MetaCluster
+  cluster: 15-catalog-provenance
+  prefix: meta-cluster
+  origin: universal
+  purpose: 'A first-class record describing one editorial cluster of the catalog
+
+    ontology (e.g. `10-roles`, `15-catalog-provenance`). Groups the
+
+    MetaNodeKinds and MetaEdgeKinds that live inside that cluster.'
+  exampleCount: 0
+  invariants:
+  - 'id starts with meta-cluster:'
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:meta-cluster--id
+  - target: meta-attribute:meta-cluster--display-name
+  - target: meta-attribute:meta-cluster--cluster-number
+  - target: meta-attribute:meta-cluster--scope
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:meta-attribute
+attributes:
+  displayName: MetaAttribute (meta)
+  name: MetaAttribute
+  cluster: 15-catalog-provenance
+  prefix: meta-attribute
+  origin: universal
+  purpose: 'A first-class record describing one attribute on a NodeKind. Lets the
+
+    catalog enumerate every declared attribute (with type, required, and
+
+    evidence-tier hints) without re-parsing the YAML.'
+  exampleCount: 0
+  invariants:
+  - 'id starts with meta-attribute:'
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:meta-attribute--id
+  - target: meta-attribute:meta-attribute--display-name
+  - target: meta-attribute:meta-attribute--name
+  - target: meta-attribute:meta-attribute--parent-node-kind-id
+  - target: meta-attribute:meta-attribute--type
+  - target: meta-attribute:meta-attribute--required
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:meta-enum
+attributes:
+  displayName: MetaEnum (meta)
+  name: MetaEnum
+  cluster: 15-catalog-provenance
+  prefix: meta-enum
+  origin: universal
+  purpose: 'A first-class record describing one named enum used in attribute
+
+    types across the ontology (e.g. the `origin` enum
+
+    `universal|standardized|convergent|a5c`). Lets the wiki enumerate
+
+    enum values cleanly with per-value descriptions.'
+  exampleCount: 0
+  invariants:
+  - 'id starts with meta-enum:'
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:meta-enum--id
+  - target: meta-attribute:meta-enum--display-name
+  - target: meta-attribute:meta-enum--name
+  - target: meta-attribute:meta-enum--values

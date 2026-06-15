@@ -1,0 +1,180 @@
+---
+nodeKind: Workflow
+id: workflow:alpha-factor-research-cycle
+attributes:
+  displayName: "Alpha Factor Research Cycle"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-research-cycle"
+  complexity: complex
+  description: |
+    Manages the end-to-end alpha factor discovery process — generating
+    candidate factors from fundamental, technical, and alternative data
+    sources, running single-sort quintile analysis with proper
+    neutralization, evaluating multi-factor combination using
+    orthogonalization and risk-model residualization, analyzing factor
+    decay profiles and half-lives, testing factor crowding via turnover
+    correlation analysis, and estimating factor capacity constraints.
+    Produces factor tearsheets with IC/IR time-series, factor exposure
+    summaries, and production readiness assessments. Excludes portfolio
+    optimization and execution.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:quantitative-finance
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:research-publication
+    - target: responsibility:model-validation
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+---
+nodeKind: Workflow
+id: workflow:alternative-data-evaluation
+attributes:
+  displayName: "Alternative Data Evaluation"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-dataset-evaluation"
+  complexity: cross-team
+  description: |
+    Evaluates new alternative data sources for investable alpha signal —
+    assessing data vendor delivery reliability and coverage, profiling
+    data quality (missing values, staleness, survivorship bias), performing
+    point-in-time correctness validation to prevent look-ahead bias,
+    running univariate predictive tests against forward returns, estimating
+    incremental information content versus existing factor library, and
+    analyzing regulatory/compliance implications of data usage. Produces
+    data evaluation scorecards with signal strength metrics, cost-benefit
+    analysis, and integration recommendations. Excludes vendor contract
+    negotiation and data infrastructure provisioning.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+    - target: role:data-engineer
+    - target: role:compliance-officer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:quantitative-finance
+    - target: domain:market-data
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:research-publication
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+    - target: org-unit:trading-compliance
+---
+nodeKind: Workflow
+id: workflow:quant-model-peer-review
+attributes:
+  displayName: "Quant Model Peer Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-model-submission"
+  complexity: cross-team
+  description: |
+    Conducts rigorous peer review of quantitative models before production
+    deployment — performing code review for implementation correctness and
+    computational efficiency, verifying mathematical derivations and
+    statistical methodology (hypothesis testing, multiple comparison
+    corrections), auditing data pipeline integrity and point-in-time
+    correctness, reviewing parameter sensitivity analysis and stress test
+    results, and assessing model risk including regime-dependence and tail
+    behaviour. Produces review verdicts with required changes, conditional
+    approvals, or rejection rationale. Excludes model ideation and
+    research direction setting.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:quantitative-finance
+    - target: domain:financial-risk-management
+  triggers_responsibility:
+    - target: responsibility:model-validation
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+    - target: org-unit:market-risk-team
+---
+nodeKind: Workflow
+id: workflow:research-notebook-reproducibility
+attributes:
+  displayName: "Research Notebook Reproducibility"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-publication"
+  complexity: moderate
+  description: |
+    Ensures Jupyter and Quarto research notebooks reproduce results
+    end-to-end — validating that all cells execute in sequence without
+    manual intervention, pinning dependency versions and data snapshot
+    timestamps, verifying numerical outputs match documented results
+    within tolerance, checking random seed determinism across runs, and
+    archiving reproducible notebook bundles with frozen data slices.
+    Produces reproducibility attestation reports and identifies cells
+    requiring manual data access or external API calls. Excludes original
+    research content creation.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:research-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:quantitative-finance
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:research-publication
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+---
+nodeKind: Workflow
+id: workflow:signal-decay-monitoring
+attributes:
+  displayName: "Signal Decay Monitoring"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: moderate
+  description: |
+    Monitors live trading signal degradation and triggers re-research when
+    performance deteriorates — tracking rolling information coefficient and
+    information ratio against historical baselines, detecting structural
+    breaks in signal-return relationships using CUSUM and regime-change
+    models, monitoring factor crowding indicators and capacity erosion,
+    alerting when drawdown or hit-rate metrics breach predefined
+    thresholds, and maintaining signal health dashboards with
+    traffic-light status. Produces decay alert notifications and
+    re-research prioritization queues. Excludes signal construction and
+    strategy modification.
+edges:
+  involves_role:
+    - target: role:quantitative-analyst
+    - target: role:risk-analyst
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:quantitative-finance
+    - target: domain:algorithmic-trading
+  triggers_responsibility:
+    - target: responsibility:model-validation
+    - target: responsibility:risk-reporting
+  performed_by_org_unit:
+    - target: org-unit:quant-research
+    - target: org-unit:market-risk-team

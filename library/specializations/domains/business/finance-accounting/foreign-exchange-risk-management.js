@@ -2,6 +2,12 @@
  * @file foreign-exchange-risk-management.js
  * @description Identifying FX exposures, developing hedging strategies, executing FX derivatives, and monitoring hedge effectiveness
  * @module specializations/domains/business/finance-accounting
+  * @graph
+ *   domains: [domain:finance]
+ *   specializations: [specialization:corporate-finance]
+ *   skillAreas: [skill-area:financial-modeling, skill-area:budgeting-forecasting, skill-area:investment-analysis, skill-area:valuation-analysis]
+ *   workflows: [workflow:financial-planning, workflow:budget-planning]
+ *   roles: [role:financial-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

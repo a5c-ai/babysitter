@@ -1,0 +1,11 @@
+nodeKind: OrgUnit
+id: org-unit:devrel
+attributes:
+  displayName: "Developer Relations"
+  kind: team
+  description: |
+    Developer Relations team — owns docs, samples, and external developer engagement.
+edges:
+  has_member:
+    - target: role:devrel
+    - target: role:technical-writer

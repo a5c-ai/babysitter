@@ -3,6 +3,12 @@
  * @description Multi-factor portfolio analysis using GE-McKinsey Nine-Box Matrix for strategic investment decisions
  * @inputs { organizationName: string, businessUnits: array, industryData: object, competitiveData: object }
  * @outputs { success: boolean, nineBoxMatrix: object, investmentStrategy: object, portfolioPriorities: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

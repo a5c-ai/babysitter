@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:binary-provider
+attributes:
+  canonicalDefinitionId: definition:binary-provider.canonical
+  displayName: "BinaryProvider"
+  kind: tool
+  references:
+    - "NodeKind:BinaryProvider"
+  description: |
+    Plugin-provided executables added to PATH (Claude Code bin/ directory)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

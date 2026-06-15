@@ -1,0 +1,21 @@
+nodeKind: Presentation
+id: presentation:copilot-cli
+attributes:
+  displayName: "GitHub Copilot CLI"
+  kind: tui
+  description: |
+    Terminal interface bundled with GitHub Copilot CLI. Renders
+    natural-language shell-command suggestions, explanations, and
+    coding-agent turns driven by GitHub-hosted infrastructure.
+  renderingTechnology: terminal-emulator
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~40 MB"
+  updateChannel: extension-store
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel suggestion"
+edges:
+  bundled_with:
+    - agent-platform-impl:copilot-cli.platform@current

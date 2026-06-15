@@ -1,0 +1,243 @@
+nodeKind: Workflow
+id: workflow:code-review
+attributes:
+  displayName: "Code Review"
+  description: |
+    A structured peer-review process triggered whenever a pull request is opened or updated.
+    Engineers inspect proposed changes for correctness, style, security, and alignment with
+    team standards before code is merged into a protected branch. Reviewers leave inline
+    comments, request changes, or approve the PR. The author addresses feedback, re-requests
+    review, and resolves conversations until the required approvals are obtained. Outcome is
+    a higher-quality, well-understood codebase and shared team knowledge of every change.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: simple
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:frontend-engineer
+    - role:tech-lead
+    - role:fullstack-engineer
+  applies_to_domain:
+    - domain:software-engineering
+  triggers_responsibility:
+    - responsibility:code-review
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:pull-request-lifecycle
+attributes:
+  displayName: "Pull Request Lifecycle"
+  description: |
+    Governs the full journey of a code change from branch creation to merge and deployment.
+    A developer opens a PR after pushing a feature branch, CI pipelines run automated tests
+    and static analysis, and one or more reviewers are assigned. Failing checks must be fixed,
+    review feedback addressed, and all required approvals collected before the merge button
+    is unlocked. After merge, post-merge automation may tag the release, close linked issues,
+    and trigger deployment pipelines. The workflow enforces quality gates while keeping
+    developer cycle time low.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-feature"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:frontend-engineer
+    - role:tech-lead
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:devops
+  triggers_responsibility:
+    - responsibility:code-review
+    - responsibility:release-coordination
+---
+nodeKind: Workflow
+id: workflow:feature-development
+attributes:
+  displayName: "Feature Development"
+  description: |
+    End-to-end process for designing, building, testing, and shipping a new product feature
+    within a sprint or iteration. Begins with backlog grooming and requirements clarification
+    between the product manager, tech lead, and engineers. Design mockups are reviewed and
+    signed off before development starts. Engineers implement the feature, write unit and
+    integration tests, and open pull requests for review. QA validates the feature in a
+    staging environment, and after all checks pass the feature is merged and released behind
+    a feature flag or directly to production. Retros capture lessons learned.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-sprint"
+  complexity: complex
+edges:
+  involves_role:
+    - role:product-manager
+    - role:tech-lead
+    - role:backend-engineer
+    - role:frontend-engineer
+    - role:qa-engineer
+    - role:product-designer
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:web-development
+  triggers_responsibility:
+    - responsibility:sprint-planning
+    - responsibility:backlog-grooming
+    - responsibility:code-review
+    - responsibility:test-strategy
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:bug-triage
+attributes:
+  displayName: "Bug Triage"
+  description: |
+    Daily or near-daily process for reviewing newly filed bug reports and assigning them
+    appropriate priority, severity, and ownership. An on-call engineer or designated triage
+    role reviews incoming issues, reproduces critical bugs, and escalates blockers to the
+    relevant team. Each bug is tagged with severity, component label, and estimated effort
+    before being placed in the appropriate sprint or backlog queue. The workflow prevents
+    critical bugs from going unnoticed while ensuring the team's roadmap commitments are
+    not derailed by lower-priority noise.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:engineering-manager
+    - role:tech-lead
+    - role:qa-engineer
+    - role:backend-engineer
+  applies_to_domain:
+    - domain:software-engineering
+  triggers_responsibility:
+    - responsibility:backlog-grooming
+    - responsibility:on-call
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:technical-debt-reduction
+attributes:
+  displayName: "Technical Debt Reduction"
+  description: |
+    Quarterly cross-team initiative to identify, prioritize, and systematically address
+    accumulated technical debt across the codebase and infrastructure. Teams nominate
+    debt items, which are reviewed by principal engineers and architects for impact and
+    remediation cost. Selected items are scoped into dedicated reduction sprints or
+    allocated a fixed percentage of each sprint's capacity. Progress is tracked in a
+    shared backlog, and outcomes are reviewed in a quarterly architecture sync. The
+    workflow balances shipping new value with maintaining a sustainable, high-quality
+    codebase over the long term.
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: complex
+edges:
+  involves_role:
+    - role:architect
+    - role:principal-engineer
+    - role:tech-lead
+    - role:engineering-manager
+    - role:backend-engineer
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:platform-engineering
+  triggers_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:knowledge-sharing
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:api-design-review
+attributes:
+  displayName: "API Design Review"
+  description: |
+    Structured cross-team review triggered whenever a team proposes a new public or
+    internal API contract. The proposing team documents endpoints, data schemas, error
+    codes, and versioning strategy in an API design document or OpenAPI spec. A review
+    panel of architects, backend engineers, and consumer-team leads evaluates the design
+    for consistency, backward compatibility, security, and developer experience. Feedback
+    is incorporated and a second round of review may follow. Final approval gates
+    implementation work. The workflow ensures APIs are coherent, stable, and easy to
+    consume across organizational boundaries.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-api-change"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:architect
+    - role:backend-engineer
+    - role:tech-lead
+    - role:solutions-architect
+    - role:technical-writer
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:web-development
+  triggers_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:documentation
+    - responsibility:stakeholder-communication
+---
+nodeKind: Workflow
+id: workflow:dependency-update
+attributes:
+  displayName: "Dependency Update"
+  description: |
+    Scheduled monthly workflow for reviewing and updating third-party libraries, runtime
+    versions, and infrastructure dependencies to their latest stable releases. Automated
+    tools (e.g. Dependabot, Renovate) propose update PRs; engineers review changelogs
+    for breaking changes, run the test suite, and merge safe updates. Security patches
+    are fast-tracked outside the normal schedule. The workflow reduces exposure to known
+    vulnerabilities and prevents dependency drift that makes future upgrades dramatically
+    harder and riskier.
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: simple
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:devops-engineer
+    - role:security-engineer
+    - role:tech-lead
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:devops
+  triggers_responsibility:
+    - responsibility:security-audit
+    - responsibility:risk-assessment
+---
+nodeKind: Workflow
+id: workflow:architecture-decision-record
+attributes:
+  displayName: "Architecture Decision Record"
+  description: |
+    Lightweight on-demand workflow invoked whenever a significant architectural decision
+    must be made and preserved for future reference. The proposing engineer or architect
+    drafts an ADR document describing the context, options considered, decision made,
+    and expected consequences. The draft circulates to relevant stakeholders for
+    asynchronous comment over a fixed review window. After consensus or formal approval,
+    the ADR is merged into the repository's decision log and linked from affected code
+    or documentation. The workflow creates a durable, discoverable record of why the
+    system is the way it is, reducing repeated debates and onboarding friction.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-decision"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:architect
+    - role:principal-engineer
+    - role:tech-lead
+    - role:engineering-manager
+    - role:cto
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:platform-engineering
+  triggers_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:documentation
+    - responsibility:knowledge-sharing

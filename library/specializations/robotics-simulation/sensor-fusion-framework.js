@@ -16,6 +16,12 @@
  * - robot_localization: http://wiki.ros.org/robot_localization
  * - Probabilistic Robotics: https://mitpress.mit.edu/9780262201629/
  * - Kalibr: https://github.com/ethz-asl/kalibr
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

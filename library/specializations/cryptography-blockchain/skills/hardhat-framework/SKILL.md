@@ -2,6 +2,11 @@
 name: hardhat-framework
 description: Expert usage of Hardhat for smart contract development, testing, and deployment. Includes TypeChain generation, plugin ecosystem, network forking, and deployment management.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-development-testing, skill-area:smart-contract-security]
+  roles: [role:backend-engineer, role:security-engineer]
 ---
 
 # Hardhat Framework Skill

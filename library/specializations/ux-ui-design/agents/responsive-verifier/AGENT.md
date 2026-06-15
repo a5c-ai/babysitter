@@ -8,6 +8,13 @@ expertise:
   - Touch target verification
   - Layout adaptation analysis
   - Mobile-first verification
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:cross-browser-testing, skill-area:visual-regression-testing]
+  roles: [role:qa-engineer, role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+  topics: [topic:responsive-design]
 ---
 
 # responsive-verifier

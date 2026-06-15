@@ -1,0 +1,6 @@
+{
+  "harness": "qwen",
+  "docsUrls": ["https://github.com/QwenLM/qwen-code"],
+  "repoUrl": "https://github.com/QwenLM/qwen-code",
+  "projectRoot": "."
+}

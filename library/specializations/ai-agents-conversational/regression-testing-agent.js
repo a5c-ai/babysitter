@@ -15,6 +15,9 @@
  * @references
  * - pytest: https://docs.pytest.org/
  * - LangSmith Testing: https://docs.smith.langchain.com/concepts/evaluation/testing
+ * @graph
+ *   domains: [domain:software-engineering, workflow:code-review]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

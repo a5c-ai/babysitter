@@ -17,6 +17,10 @@ metadata:
     - Cision API
     - Muck Rack API
     - Propel API
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:market-research, skill-area:brand-positioning, skill-area:community-management]
+  roles: [role:marketing-strategist, role:content-strategist, role:marketing-manager]
 ---
 
 # Media Database and Outreach Skill

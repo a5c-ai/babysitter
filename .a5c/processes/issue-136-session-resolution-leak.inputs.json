@@ -1,0 +1,146 @@
+{
+  "issueNumber": 136,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-136-session-resolution-leak",
+  "title": "BABYSITTER_SESSION_ID leak recurred - run:create --harness claude-code bound to wrong session",
+  "labels": [
+    "bug",
+    "sdk",
+    "hooks-mux",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev",
+    "regression"
+  ],
+  "summary": "Issue #136 reports a regression of #133 where `babysitter run:create --harness claude-code` can bind a new run to a stale inherited session ID instead of the active Claude Code session. The run is created successfully but remains stuck at RUN_CREATED because the real Claude Code stop hook checks a different session state file and finds no active run.",
+  "observedFailureMode": {
+    "command": "babysitter run:create --process-id <id> --entry <process>#process --harness claude-code --json",
+    "badBinding": "Returned `session.sessionId` and stateFile point to an inherited or freshly generated non-current session instead of the real Claude Code session.",
+    "runtimeImpact": "The stop hook fires for the real Claude session, logs no active loop for that session, exits successfully, and never drives `run:iterate` for the created run.",
+    "journalEvidence": "Affected run journals remain at RUN_CREATED with no STOP_HOOK_INVOKED or EFFECT_REQUESTED events until manually repaired."
+  },
+  "triageFindings": [
+    "`packages/sdk/src/cli/main/runCreate.ts` does delegate to the selected harness adapter via `adapter.resolveSessionId(parsed)` and `adapter.bindSession(...)`.",
+    "`packages/sdk/src/utils/sessionMarker.ts` currently checks harness env vars and `AGENT_SESSION_ID` before reading the PID-scoped marker when trust-env is not set.",
+    "`packages/sdk/src/harness/README.md` documents the opposite intended precedence: PID-scoped marker first, then harness-native env file/native env var, then `AGENT_SESSION_ID` as lowest priority.",
+    "`packages/sdk/src/cli/__tests__/cliRuns.test.ts` contains a regression-shaped test named `binds claude-code runs to AGENT_SESSION_ID when pid markers are disabled` that expects the leaked env session to win even when a marker-backed current session exists.",
+    "Claude Code provenance helpers in `packages/sdk/src/harness/adapters/claude-code.ts` currently report only env-var, explicit, or none and should be checked for marker/current-session reporting consistency."
+  ],
+  "targetFiles": [
+    "packages/sdk/src/cli/main/runCreate.ts",
+    "packages/sdk/src/utils/sessionMarker.ts",
+    "packages/sdk/src/harness/BaseAdapter.ts",
+    "packages/sdk/src/harness/adapters/claude-code.ts",
+    "packages/sdk/src/harness/registry.ts",
+    "packages/sdk/src/session/discovery.ts",
+    "packages/sdk/src/session/whoami.ts",
+    "packages/sdk/src/harness/hooks/sessionBinding.ts",
+    "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+    "packages/sdk/src/harness/hooks/utils.ts",
+    "packages/sdk/src/cli/__tests__/cliRuns.test.ts",
+    "packages/sdk/src/harness/__tests__/sessionResolutionPrecedence.test.ts",
+    "packages/sdk/src/harness/__tests__/sessionMarker.test.ts",
+    "packages/sdk/src/session/__tests__/whoami.test.ts",
+    "packages/sdk/src/session/__tests__/cleanup.test.ts",
+    "packages/hooks-mux/core/src/session-store/markers.ts",
+    "packages/hooks-mux/core/src/session-store/__tests__/markers.test.ts",
+    "packages/sdk/src/harness/README.md",
+    "docs/v6-announcement.md",
+    "CHANGELOG.md"
+  ],
+  "relatedIssuesAndPrs": [
+    130,
+    133,
+    134,
+    138,
+    164,
+    166
+  ],
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "status": "not-present-in-checkout",
+    "localAlternativesUsed": [
+      "docs/agent-reference/process-authoring.md",
+      ".a5c/processes/issue-166-stop-hook-missing-session-recovery.mjs",
+      ".a5c/processes/issue-166-stop-hook-missing-session-recovery.inputs.json"
+    ],
+    "methodologyReferencesToPreserve": [
+      "bugfix",
+      "tdd-quality-convergence",
+      "sdk-platform-development",
+      "qa-testing-automation",
+      "compatibility-review"
+    ]
+  },
+  "acceptanceFocus": [
+    "`run:create --harness claude-code` binds to the real current Claude Code session when a live PID-scoped marker/current hook-provided session exists, even if the shell has stale inherited `AGENT_SESSION_ID` or legacy `BABYSITTER_SESSION_ID`-style values.",
+    "`run:create`, `session:*`, and `session:whoami` use one coherent resolver contract and report truthful provenance for marker/current-session, env-var, explicit, and none.",
+    "The resolver honors the documented trust-env escape hatch: `AGENT_TRUST_ENV_SESSION=1` or `BABYSITTER_TRUST_ENV_SESSION=1` intentionally restores env-first behavior for CI and scripted workflows.",
+    "Regression tests cover stale inherited env values losing to current marker/session state, trust-env env-first behavior, JSON/provenance output, and any explicit `--session-id` override semantics changed by the fix.",
+    "The stop-hook path for the real Claude Code session can find the run's state file after `run:create`, so orchestration advances beyond RUN_CREATED without manual `run:iterate` or state-file repair.",
+    "Diagnostics warn or otherwise expose stale env mismatch cases without breaking JSON automation or making successful normal binding noisy.",
+    "No unrelated harnesses, CI workflows, or non-Claude session discovery paths regress."
+  ],
+  "nonGoals": [
+    "Do not redesign the orchestration lifecycle outside session ID resolution and binding.",
+    "Do not implement a broad stop-hook recovery mechanism for missing session files; that is covered by adjacent issue #166 unless a small shared helper is required.",
+    "Do not reintroduce legacy `BABYSITTER_SESSION_ID` as a primary SDK session source unless maintaining compatibility explicitly requires detection-only behavior.",
+    "Do not generate shell-oriented process subtasks for this repository workflow."
+  ],
+  "qualityGates": [
+    "Regression tests fail against the pre-fix behavior or are clearly shown to encode the previously wrong expectation.",
+    "Targeted run:create/session-resolution tests pass.",
+    "Session marker, whoami, and hook/session-binding tests touched by the fix pass.",
+    "SDK build passes.",
+    "SDK test suite passes or any unrelated pre-existing failures are documented with exact evidence.",
+    "Compatibility review confirms trust-env CI behavior and non-Claude adapters are preserved.",
+    "Final review confirms docs/help text and JSON diagnostics match the implemented resolver semantics."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/__tests__/cliRuns.test.ts packages/sdk/src/harness/__tests__/sessionResolutionPrecedence.test.ts packages/sdk/src/harness/__tests__/sessionMarker.test.ts packages/sdk/src/session/__tests__/whoami.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/session/__tests__/cleanup.test.ts packages/sdk/src/cli/commands/__tests__/hookRun.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #136, comments, labels, and related issues/PRs to lock the behavioral spec and scope boundaries."
+    },
+    {
+      "name": "Session-resolution trace",
+      "purpose": "Map run:create, adapter resolution, session:* commands, Claude Code marker/env behavior, bindSession, and stop-hook lookup."
+    },
+    {
+      "name": "Regression tests",
+      "purpose": "Add failing tests that prove current-session marker/session state wins over stale inherited env, while trust-env remains env-first."
+    },
+    {
+      "name": "Focused implementation",
+      "purpose": "Localize the fix in the shared resolver/provenance path and avoid one-off run:create-only behavior."
+    },
+    {
+      "name": "Verification loop",
+      "purpose": "Run targeted and full SDK gates, iterating up to three attempts if tests or review find regressions."
+    },
+    {
+      "name": "Compatibility review",
+      "purpose": "Check run:create, session commands, Claude hooks, CI trust-env, JSON automation, and non-Claude adapter behavior."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm acceptance criteria, diagnostics, docs consistency, changed files, and release-note candidate."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if implementation discovers a real semantic conflict, such as whether explicit `--session-id` should override auto-detected Claude Code sessions despite existing SESSION_ID_CONFLICT behavior.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended semantics",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ]
+}

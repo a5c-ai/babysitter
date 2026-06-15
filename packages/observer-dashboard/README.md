@@ -6,6 +6,11 @@
 
 Real-time observability dashboard for [babysitter](https://github.com/a5c-ai/babysitter) orchestration runs.
 
+<!-- docs-status:start -->
+> Status: Public package.
+> Canonical docs home: [Package and Plugin Docs Map](../../docs/package-and-plugin-map.md).
+> This README is the canonical operator guide for the observer dashboard package.
+<!-- docs-status:end -->
 
 ## What is Babysitter Observer Dashboard?
 
@@ -85,7 +90,7 @@ Or run it directly with npx without adding a script:
 npx babysitter-observer-dashboard --watch-dir .
 ```
 
-The dashboard opens at [http://localhost:4800](http://localhost:4800) by default.
+The dashboard opens at [http://localhost:4800](http://localhost:4800) by default, and the CLI prints the exact local URL when it starts.
 
 ### Updating
 
@@ -455,30 +460,14 @@ The observer reads and writes `~/.a5c/observer.json`. If this file or directory 
 mkdir -p ~/.a5c
 ```
 
-### Safe Chain blocks newly published versions
+### Release channel ownership
 
-If you have [Aikido Safe Chain](https://www.aikido.dev/) installed, you may see the following error when running `npx -y @a5c-ai/babysitter-observer-dashboard@latest`:
+`@a5c-ai/babysitter-observer-dashboard` is published from the monorepo release workflows:
 
-```
-npm error code ENOVERSIONS
-npm error No versions available for @a5c-ai/babysitter-observer-dashboard
-```
+- `main` publishes the production package through `.github/workflows/release.yml`
+- `staging` publishes prerelease artifacts with the `staging` dist-tag through `.github/workflows/staging-publish.yml`
 
-Along with a message like:
-
-```
-Safe-chain: Some package versions were suppressed due to minimum age requirement.
-```
-
-This happens because Safe Chain suppresses npm package versions that were published less than 24 hours ago as a supply-chain security measure. If a new version of the dashboard was released recently, Safe Chain will block it until it passes the minimum age threshold.
-
-**Workaround:** Add the `--safe-chain-skip-minimum-package-age` flag to bypass the age check:
-
-```bash
-npx -y @a5c-ai/babysitter-observer-dashboard@latest --safe-chain-skip-minimum-package-age
-```
-
-This only affects recently published versions. After 24 hours from publication, the package version will pass Safe Chain's age requirement and the standard command will work without the extra flag.
+If you see `E404` or `ENOVERSIONS`, verify the branch-specific publish workflow succeeded before retrying the install.
 
 ## Known Limitations
 

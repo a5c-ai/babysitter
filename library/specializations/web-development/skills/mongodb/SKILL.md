@@ -2,6 +2,13 @@
 name: mongodb
 description: MongoDB schema design, aggregation pipelines, indexing strategies, and performance.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:backend-data-persistence, skill-area:database-migrations-zero-downtime]
+  roles: [role:backend-engineer, role:fullstack-engineer]
+  topics: [topic:database-sharding]
+
 ---
 
 # MongoDB Skill

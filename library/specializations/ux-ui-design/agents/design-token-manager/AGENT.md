@@ -6,6 +6,12 @@ backlog-id: AG-UX-003
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:design-systems, skill-area:ui-styling]
+  roles: [role:product-designer, role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # design-token-manager

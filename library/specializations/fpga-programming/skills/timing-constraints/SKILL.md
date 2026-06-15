@@ -2,6 +2,11 @@
 name: timing-constraints
 description: Expert skill for developing and validating timing constraints. Writes SDC (Synopsys Design Constraints) and XDC files for FPGA timing closure.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis, skill-area:timing-closure]
+  roles: [role:embedded-engineer]
 ---
 
 # Timing Constraints Skill
@@ -141,7 +146,7 @@ set_false_path -from [get_clocks clk_b] -to [get_clocks clk_a]
 set_false_path -from [get_cells -hier -filter {NAME =~ *cdc_src_reg*}] \
                -to [get_cells -hier -filter {NAME =~ *cdc_dst_sync_reg[0]*}]
 
-# Mutually exclusive clock mux paths
+# Mutually exclusive clock adapter paths
 set_false_path -from [get_clocks clk_mux_a] -to [get_clocks clk_mux_b]
 set_false_path -from [get_clocks clk_mux_b] -to [get_clocks clk_mux_a]
 
@@ -184,7 +189,7 @@ set_clock_groups -asynchronous \
   -group [get_clocks clk_125mhz] \
   -group [get_clocks gt_refclk]
 
-# Physically exclusive clocks (mux-selected)
+# Physically exclusive clocks (adapter-selected)
 set_clock_groups -physically_exclusive \
   -group [get_clocks clk_mux_a] \
   -group [get_clocks clk_mux_b]

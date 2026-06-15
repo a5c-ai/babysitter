@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-cli
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-cli"
+  packageName: "@a5c-ai/hooks-adapter-cli"
+  displayName: "Hooks Adapter CLI"
+  description: "CLI entrypoint for the hooks-adapter system. Provides the `adapters-hooks` and `a5c-hooks-adapter` binaries for discovering, listing, and executing hooks across installed harnesses."
+  role: "hooks-cli"
+  whenToUse: "Use this to invoke hook adapters from the command line, debug hook execution, or integrate hook discovery into shell-based workflows."
+  status: active

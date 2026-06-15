@@ -8,6 +8,12 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:authentication-authorization, skill-area:secrets-rotation]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # API Key Manager Skill

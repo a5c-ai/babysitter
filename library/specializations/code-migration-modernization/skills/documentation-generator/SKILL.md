@@ -2,6 +2,13 @@
 name: documentation-generator
 description: Generate documentation for migrated systems including API docs, architecture docs, and runbooks
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:api-doc-generation, skill-area:docs-as-code]
+  roles: [role:technical-writer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Documentation Generator Skill

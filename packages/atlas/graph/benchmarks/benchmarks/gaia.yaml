@@ -1,0 +1,15 @@
+nodeKind: Benchmark
+id: benchmark:gaia
+attributes:
+  displayName: "GAIA"
+  homepageUrl: https://huggingface.co/gaia-benchmark
+  kind: agent-reasoning
+  targetsKind: AgentVersion
+  description: |
+    General AI Assistants benchmark — real-world agent reasoning tasks.
+edges:
+  covers:
+    - target: skill-area:agentic-loops
+      attributes:
+        coverage: partial
+        weight: 0.6

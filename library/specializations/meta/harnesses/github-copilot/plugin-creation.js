@@ -3,13 +3,19 @@
  * @description Create and distribute a GitHub Copilot plugin with plugin.json manifest,
  *   hooks.json (version 1 format: sessionStart, sessionEnd, userPromptSubmitted, preToolUse, postToolUse,
  *   agentStop, subagentStop, errorOccurred), .github/agents/*.agent.md, skills/<name>/SKILL.md,
- *   commands/*.md, AGENTS.md, .github/instructions/**/*.instructions.md, MCP configs,
+ *   commands/*.md, AGENTS.md, .github/instructions/<name>.instructions.md files, MCP configs,
  *   copilot-setup-steps.yml, and npm distribution
  * @inputs { extensionName: string, description: string, components?: object, outputDir?: string, repoOwner?: string, author?: string }
  * @outputs { success: boolean, outputDir: string, agents: array, hooks: array, instructions: array, distribution: object }
  * @agent process-architect specializations/meta/agents/process-architect/AGENT.md
  * @agent quality-assessor specializations/meta/agents/quality-assessor/AGENT.md
  * @agent technical-writer specializations/meta/agents/technical-writer/AGENT.md
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:ai-agent-development]
+ *   topics: [topic:developer-experience, topic:package-management]
+ *   roles: [role:platform-engineer]
+ *   workflows: [workflow:feature-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

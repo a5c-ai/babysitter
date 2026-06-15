@@ -1,0 +1,17 @@
+nodeKind: OutputModeChange
+id: output-mode-change:claude-code-enter-plan-mode-example
+attributes:
+  changeKind: plan-mode-enter
+  fromMode: default
+  toMode: plan
+  scope: session
+  requiresUserApproval: true
+  invalidatesCaches:
+    - tool-inventory
+  description: |
+    Model-initiated plan-mode entry — destination=session means the change
+    survives the tool's turn and only restores via ExitPlanMode (or session
+    end). prePlanMode is captured as the previous mode for restore.
+edges:
+  mode_change_triggered_by_tool:
+    - target: tool-descriptor:claude-code-enter-plan-mode

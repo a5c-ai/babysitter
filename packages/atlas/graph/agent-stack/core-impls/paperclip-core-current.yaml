@@ -1,0 +1,86 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:paperclip.core@current
+attributes:
+  displayName: "Paperclip Core (current)"
+  agentVersionId: agent-version:paperclip@current
+  packageRef: source-ref:paperclip-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Express REST API orchestrates multi-agent task dispatch. The server
+    receives task assignments from the board UI, routes them through the
+    appropriate agent adapter (claude-local, codex-local, cursor-local,
+    gemini-local, openclaw-gateway, opencode-local, pi-local, acpx-local),
+    and tracks execution state. Company-scoped isolation ensures tenants
+    operate independently.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Task state persisted in Drizzle ORM schema with PGlite for local
+    development and Postgres for production. Activity log provides
+    append-only mutation history for audit and recovery.
+  subagentInvokerPolicy: adapter-dispatch
+  subagentInvokerNotes: |
+    Each coding agent is wrapped in an adapter that translates Paperclip's
+    task format into the agent's native invocation protocol. Adapters
+    handle agent-specific setup (worktree creation, config injection,
+    environment variables) and normalize output back to Paperclip's
+    task completion format. New agents require only a new adapter.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Agent output (code changes, PR creation, deployment results) flows
+    back through the adapter into the board UI. Tasks transition through
+    states (queued, checked-out, in-progress, review, done) based on
+    agent output signals.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: paperclip-internal
+  supportedTransportProtocols:
+    - model-transport:openai-responses
+    - model-transport:anthropic-messages
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+  notes: |
+    Core architecture:
+    - Express REST API: task CRUD, agent dispatch, company management
+    - Drizzle ORM: typed schema for tasks, companies, agents, activity logs
+    - PGlite: embedded Postgres for local development (zero-config)
+    - Adapter layer: pluggable agent integrations via adapter interface
+    - Approval gates: governed action control with human-in-the-loop
+    - Budget control: per-task and per-company cost tracking with auto-pause
+    - Atomic checkout: transactional task assignment preventing double-claims
+    - Activity log: append-only mutation audit trail
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:paperclip
+      role: core
+  speaks:
+    - target: model-transport:openai-responses
+    - target: model-transport:anthropic-messages
+  supports:
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Adapter-based dispatch to 8+ coding agents.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Concurrent agent execution across company-scoped task boards.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:task-create
+    - target: orch-primitive:task-assign
+    - target: orch-primitive:approval-gate
+    - target: orch-primitive:budget-stop
+    - target: orch-primitive:concurrency-control
+    - target: orch-primitive:session-handoff
+    - target: orch-primitive:task-complete

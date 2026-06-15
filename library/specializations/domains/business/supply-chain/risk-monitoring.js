@@ -15,6 +15,12 @@
  * @references
  * - EcoVadis Risk Monitoring: https://ecovadis.com/
  * - Resilinc Supply Chain Risk: https://www.resilinc.com/
+  * @graph
+ *   domains: [domain:supply-chain]
+ *   specializations: [specialization:supply-chain-optimization]
+ *   skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:supply-chain-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

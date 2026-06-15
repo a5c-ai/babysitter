@@ -1,0 +1,178 @@
+---
+nodeKind: Workflow
+id: workflow:demand-generation-campaign
+attributes:
+  displayName: "Demand Generation Campaign"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Plans and executes top-of-funnel demand generation campaigns — creating
+    awareness-stage content assets like guides, reports, and toolkits, designing
+    gated content strategies with progressive profiling forms, orchestrating
+    multi-channel distribution across paid, organic, and partner channels,
+    managing lead magnet delivery and follow-up automation, qualifying
+    marketing-qualified leads against ICP criteria, and measuring
+    campaign-sourced pipeline contribution. Produces campaign briefs, lead
+    quality analyses, and pipeline attribution reports. Excludes mid-funnel
+    nurture sequences and sales qualification.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:content-marketing
+    - target: skill-area:marketing-automation
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:content-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:lead-nurture-sequence-optimization
+attributes:
+  displayName: "Lead Nurture Sequence Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Optimizes mid-funnel email nurture sequences for lead conversion — mapping
+    content to buyer journey stages and pain points, testing email cadence and
+    spacing, reviewing lead scoring threshold effectiveness, analyzing sequence
+    drop-off points and engagement decay, personalizing content paths by segment
+    and behavioral signals, and coordinating marketing-to-sales handoff timing
+    based on intent signals. Produces sequence performance dashboards, scoring
+    model adjustment recommendations, and content gap analyses by funnel stage.
+    Excludes initial lead capture and sales outreach sequences.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:marketing-automation
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:customer-marketing-campaign
+attributes:
+  displayName: "Customer Marketing Campaign"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Designs and executes post-acquisition marketing campaigns targeting existing
+    customers — identifying cross-sell and upsell opportunities from product
+    usage data, launching feature adoption campaigns for underutilized
+    capabilities, building expansion revenue programs through upgrade incentives,
+    creating customer advocacy programs that generate case studies and referrals,
+    and measuring net revenue retention impact per campaign. Produces customer
+    segment engagement reports, expansion pipeline attribution, and feature
+    adoption lift analyses. Excludes customer support and success operations.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:marketing-automation
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:account-based-marketing-cycle
+attributes:
+  displayName: "Account-Based Marketing Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Orchestrates account-based marketing programs targeting high-value accounts —
+    selecting target accounts based on ICP fit scores and intent signals,
+    personalizing content and messaging by account and buying committee role,
+    coordinating multi-touch orchestration across ads, email, direct mail, and
+    sales outreach, measuring account engagement scores and buying stage
+    progression, and aligning marketing and sales on account prioritization and
+    coverage strategy. Produces account tier lists, engagement heatmaps, and
+    pipeline influence reports by account. Excludes broad demand generation and
+    inbound marketing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:marketing-automation
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:partner-co-marketing-campaign
+attributes:
+  displayName: "Partner Co-Marketing Campaign"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes joint marketing campaigns with technology and channel
+    partners — identifying co-marketing opportunities aligned with mutual
+    audience overlap, managing MDF budget allocation and reimbursement workflows,
+    developing co-branded content assets and landing pages, coordinating joint
+    webinars and events, managing lead sharing agreements and attribution splits,
+    and measuring partner-sourced pipeline contribution. Produces partner
+    campaign briefs, MDF utilization reports, and co-marketing ROI analyses.
+    Excludes partner recruitment and contract negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:brand-strategy
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:growth-team

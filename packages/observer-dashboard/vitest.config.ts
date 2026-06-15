@@ -5,8 +5,10 @@ const localReact = path.resolve(__dirname, './node_modules/react');
 const localReactDom = path.resolve(__dirname, './node_modules/react-dom');
 
 export default defineConfig({
-  esbuild: {
-    jsx: 'automatic',
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
   },
   test: {
     environment: 'jsdom',

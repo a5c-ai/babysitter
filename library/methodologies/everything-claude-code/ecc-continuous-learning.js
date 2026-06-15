@@ -3,6 +3,12 @@
  * @description Everything Claude Code Continuous Learning Pipeline - Pattern extraction, evaluation with confidence scoring, skill creation, organization, versioning, and export
  * @inputs { sessionData?: object, projectRoot?: string, patternSources?: array, confidenceThreshold?: number, exportEnabled?: boolean, compactionEnabled?: boolean }
  * @outputs { success: boolean, patternsExtracted: array, skillCandidates: array, skillsCreated: array, compactionSuggestions: array, exportResult: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:prioritization-frameworks]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:engineering-manager, role:tech-lead, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

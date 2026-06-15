@@ -8,6 +8,13 @@
  * // Input: { ethicalDilemma: "Should AI be used for autonomous weapons?", stakeholders: [...], context: {...} }
  * // Output: { ethicalAnalysis: { consequentialist: {...}, deontological: {...} }, recommendations: [...] }
  * @references Utilitarian calculus, Kantian ethics, Virtue ethics, Rawlsian justice theory, Care ethics
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -76,31 +83,18 @@ export async function process(inputs, ctx) {
     justiceAnalysis
   ];
 
-  let convergenceAnalysis = await ctx.task(analyzeConvergenceTask, {
+  const convergenceAnalysis = await ctx.task(analyzeConvergenceTask, {
     frameworkResults: frameworkResults,
     options: dilemmaAnalysis.availableOptions
   });
 
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        convergenceAnalysis = await ctx.task(analyzeConvergenceTask, { ...{
-    frameworkResults: frameworkResults,
-    options: dilemmaAnalysis.availableOptions
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint('ethical-conflict-resolution', {
+  if (convergenceAnalysis.significantConflict) {
+    await ctx.breakpoint('ethical-conflict-resolution', {
       message: 'Significant conflict between ethical frameworks',
       conflicts: convergenceAnalysis.conflicts,
-      possibleResolutions: convergenceAnalysis.resolutionStrategies,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      possibleResolutions: convergenceAnalysis.resolutionStrategies
+    });
+  }
 
   // Phase 8: Moral Intuition Check
   const intuitionCheck = await ctx.task(checkMoralIntuitionsTask, {

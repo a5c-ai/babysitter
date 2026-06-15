@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:k8s-operator
+attributes:
+  displayName: "Kubernetes Operator Development"
+  parentDomainId: domain:platform-engineering
+  description: |
+    Building Kubernetes operators and custom controllers — CRDs,
+    reconcile loops, webhooks, and operator-sdk / kubebuilder workflows.
+edges:
+  specializes:
+    - domain:platform-engineering

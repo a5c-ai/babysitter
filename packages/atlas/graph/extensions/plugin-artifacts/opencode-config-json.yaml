@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:opencode-config-json
+attributes:
+  artifactId: plugin-artifact:opencode-config-json
+  displayName: "OpenCode opencode.json"
+  targetId: plugin-target:opencode
+  artifactKind: settings-fragment
+  pathPattern: "opencode.json"
+  installerSurface: "opencode.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

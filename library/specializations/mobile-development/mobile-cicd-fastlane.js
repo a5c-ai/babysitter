@@ -17,6 +17,13 @@
  * - Fastlane: https://fastlane.tools/
  * - Fastlane iOS: https://docs.fastlane.tools/actions/
  * - Fastlane Android: https://docs.fastlane.tools/getting-started/android/setup/
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -59,21 +66,14 @@ export async function process(inputs, ctx) {
       appName, platforms, ciProvider, deployTargets, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `CI/CD pipeline ready for ${appName}. Ready to test the pipeline?`,
     title: 'CI/CD Review',
-    context: { runId: ctx.runId, appName, ciProvider, deployTargets },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, ciProvider, deployTargets }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

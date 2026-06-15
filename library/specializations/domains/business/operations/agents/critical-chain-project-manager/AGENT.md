@@ -9,6 +9,11 @@ expertise:
   - Project portfolio synchronization
   - Execution discipline
   - Performance reporting
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:capacity-planning-ops, skill-area:quantitative-modeling, skill-area:change-management-ops]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:project-manager, role:procurement-manager]
 ---
 
 # Critical Chain Project Manager

@@ -1,0 +1,247 @@
+nodeKind: ToolServer
+id: tool-server:mcp-next-devtools
+attributes:
+  displayName: Next.js DevTools MCP Server
+  description: |
+    Official MCP server for Next.js development maintained by Vercel.
+    Connects AI coding agents to your Next.js dev server to retrieve build errors,
+    runtime errors, page metadata, and server action details in real time.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/vercel/next-devtools-mcp
+  npmPackage: "next-devtools-mcp"
+  maintainer: Vercel
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: framework:nextjs
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-django
+attributes:
+  displayName: Django MCP Server
+  description: |
+    MCP server that exposes Django application internals to AI assistants.
+    Allows agents to browse models, query data safely, manage migrations,
+    and inspect routes and views within a running Django project.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/gts360/django-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:django
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-fastapi
+attributes:
+  displayName: FastAPI MCP Server
+  description: |
+    Exposes FastAPI application endpoints as MCP tools with zero configuration.
+    Preserves request/response schemas from your existing FastAPI app, supports
+    authentication via FastAPI dependencies, and mounts directly into any project.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/tadata-org/fastapi_mcp
+  maintainer: Tadata
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:fastapi
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-laravel
+attributes:
+  displayName: Laravel MCP Server
+  description: |
+    Official Laravel package for rapidly building MCP servers inside Laravel apps.
+    Exposes Eloquent models, routes, jobs, and Artisan commands as MCP tools and
+    resources so AI assistants can interact with your application directly.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/laravel/mcp
+  maintainer: Laravel
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:laravel
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-nestjs
+attributes:
+  displayName: NestJS MCP Server (MCP-Nest)
+  description: |
+    NestJS module for effortlessly exposing MCP tools, resources, and prompts
+    using familiar NestJS decorators and dependency injection. Supports stdio,
+    SSE, and Streamable HTTP transports for AI assistant integration.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/rekog-labs/MCP-Nest
+  npmPackage: "@rekog/mcp-nest"
+  maintainer: rekog-labs
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:nestjs
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-rails
+attributes:
+  displayName: Rails MCP Server
+  description: |
+    Ruby gem implementing an MCP server for Ruby on Rails projects.
+    Enables AI assistants to explore routes, models, migrations, and run
+    Rails-aware queries against the project through the Model Context Protocol.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/maquina-app/rails-mcp-server
+  maintainer: maquina-app
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: framework:rails
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-flask
+attributes:
+  displayName: Flask MCP Server
+  description: |
+    Lightweight, production-ready MCP server for Flask applications.
+    Mounts into any Flask project via mount_mcp(), supports Streamable HTTP
+    and SSE notifications, and is compliant with the latest MCP specification.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/bashar94/flask-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:flask
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-flutter
+attributes:
+  displayName: Flutter / Dart MCP Server
+  description: |
+    Official MCP server for the Dart and Flutter ecosystem maintained by the Dart team.
+    Exposes Flutter SDK tools (analyze, format, fix, create, run, test) as MCP endpoints
+    so AI assistants can automate Dart and Flutter development workflows.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/Centinol-alt/flutter_mcp_server
+  maintainer: Dart Team / Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: framework:flutter
+  lib_applies_to_domain:
+  - target: domain:mobile
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-tauri
+attributes:
+  displayName: Tauri MCP Server
+  description: |
+    MCP server and plugin for Tauri v2 application development.
+    Gives AI coding agents (Claude, Cursor, Windsurf) the ability to build,
+    test, and debug Tauri apps with live screenshots, DOM state, and console logs.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/hypothesi/mcp-server-tauri
+  maintainer: Hypothesi
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: framework:tauri
+  lib_applies_to_domain:
+  - target: domain:frontend
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-electron
+attributes:
+  displayName: Electron MCP Server
+  description: |
+    MCP server for testing and debugging Electron applications.
+    Provides AI assistants with 34+ tools for app automation, Chrome DevTools
+    Protocol integration, visual testing, and session management via Playwright.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/kanishka-namdeo/electron-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: framework:electron
+  lib_applies_to_domain:
+  - target: domain:frontend
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-angular-cli
+attributes:
+  displayName: Angular CLI MCP Server
+  description: |
+    MCP server wrapping the Angular CLI for AI-assisted Angular development.
+    Enables agents to scaffold components, run builds, execute tests, and invoke
+    Angular schematics through a standardized MCP interface.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/talzach/mcp-angular-cli
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: framework:angular
+  lib_applies_to_domain:
+  - target: domain:frontend
+  - target: domain:web-development

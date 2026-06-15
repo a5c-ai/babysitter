@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Reaction Engineering
   skill-id: CE-SK-006
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Kinetic Modeler Skill

@@ -2,6 +2,12 @@
 name: academic-philosophy-writer-agent
 description: Produces scholarly philosophical prose and manages publication processes
 required-skills: philosophical-writing-argumentation, scholarly-literature-synthesis, argument-mapping-reconstruction
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:technical-writing, skill-area:deep-web-research, skill-area:natural-language-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer, role:research-analyst]
 ---
 
 # Academic Philosophy Writer Agent

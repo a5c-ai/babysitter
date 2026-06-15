@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:technical-writing, skill-area:docs-as-code, skill-area:deep-web-research]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:technical-writer, role:research-analyst]
 ---
 
 # Academic Writing and Publication Skill

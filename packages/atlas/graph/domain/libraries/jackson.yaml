@@ -1,0 +1,15 @@
+nodeKind: Library
+id: library:jackson
+attributes:
+  displayName: "Jackson"
+  belongsToLanguageId: language:java
+  category: serialization
+  description: |
+    Streaming JSON parser/generator and data-binding library for Java.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:gson

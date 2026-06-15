@@ -3,6 +3,9 @@
  * @description Automated Exploratory Data Analysis (EDA) pipeline with quality gates
  * @inputs { dataPath: string, targetDataQuality: number, generateVisualizations: boolean }
  * @outputs { success: boolean, dataQualityScore: number, insights: object, artifacts: array }
+ * @graph
+ *   domains: [domain:data-science, workflow:release-management]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

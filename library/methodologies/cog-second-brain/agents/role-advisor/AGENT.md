@@ -2,13 +2,17 @@
 name: role-advisor
 description: Personalizes COG workflows through role pack selection and configuration
 role: Role Pack Customization & Onboarding
----
-
-# Role Advisor Agent
-
-**Name:** Role Advisor
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Role Pack Customization & Onboarding
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
+
+---
 
 ## Identity
 

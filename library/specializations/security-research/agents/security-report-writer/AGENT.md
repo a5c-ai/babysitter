@@ -9,6 +9,12 @@ expertise:
   - Executive summary creation
   - Technical writing for security
   - CVSS scoring and risk assessment
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:vulnerability-management, skill-area:compliance-automation]
+  roles: [role:security-engineer]
+  workflows: [workflow:vulnerability-management, workflow:penetration-testing-cycle]
 ---
 
 # Security Report Writer Agent

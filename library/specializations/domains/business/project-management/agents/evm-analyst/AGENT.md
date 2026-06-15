@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Performance Measurement
   id: AG-014
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:financial-planning, skill-area:data-analytics, skill-area:roadmap-planning]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:financial-analyst, role:data-analyst]
 ---
 
 # EVM Analyst Agent

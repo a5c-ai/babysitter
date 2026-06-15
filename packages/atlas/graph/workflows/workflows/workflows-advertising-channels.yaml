@@ -1,0 +1,285 @@
+---
+nodeKind: Workflow
+id: workflow:youtube-video-ad-campaign
+attributes:
+  displayName: "YouTube Video Ad Campaign"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Manages YouTube video advertising campaigns end-to-end — producing video ad
+    creatives in skippable, non-skippable, and bumper formats, configuring
+    audience targeting via custom intent and affinity segments, optimizing
+    cost-per-view bids against brand lift benchmarks, monitoring view-through
+    rates and earned actions, conducting A/B tests on thumbnails and CTAs, and
+    measuring brand lift through Google's survey methodology. Produces creative
+    performance reports, audience refinement recommendations, and CPV
+    optimization plans. Excludes organic YouTube channel management.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:linkedin-sponsored-content-management
+attributes:
+  displayName: "LinkedIn Sponsored Content Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages B2B advertising campaigns on LinkedIn — configuring account-based
+    targeting by company size, industry, seniority, and job function, setting up
+    lead gen form campaigns with CRM integration, orchestrating sponsored content
+    and InMail sequences for ABM programs, monitoring cost-per-lead against
+    pipeline value targets, and optimizing audience matched segments based on
+    engagement scoring. Produces campaign performance dashboards, lead quality
+    reports, and ABM account engagement scores. Excludes organic LinkedIn content
+    and employee advocacy programs.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:marketing-automation
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:tiktok-short-form-ad-cycle
+attributes:
+  displayName: "TikTok Short-Form Ad Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Produces and optimizes short-form video ad campaigns for TikTok —
+    identifying trending sounds, formats, and hashtag challenges for creative
+    inspiration, producing native-feeling vertical video content optimized for
+    the For You Page algorithm, configuring Spark Ads to amplify organic creator
+    content, managing TopView and in-feed placements, monitoring completion rates
+    and engagement signals, and iterating creative rapidly to combat
+    platform-specific fatigue curves. Produces creative production briefs,
+    trend-alignment reports, and platform performance analytics. Excludes
+    long-form content and non-TikTok short-form platforms.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:content-team
+    - target: org-unit:design-team
+---
+nodeKind: Workflow
+id: workflow:google-shopping-feed-optimization
+attributes:
+  displayName: "Google Shopping Feed Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Optimizes Google Shopping and Performance Max campaigns through product feed
+    management — maintaining Merchant Center compliance, enriching product titles
+    and descriptions with high-intent keywords, configuring custom labels for bid
+    segmentation by margin tier and sell-through velocity, diagnosing feed
+    disapprovals and policy violations, structuring campaign architecture by
+    product category and ROAS target, and implementing supplemental feeds for
+    promotional pricing. Produces feed health scorecards, shopping campaign
+    restructuring plans, and product-level ROAS analyses. Excludes product
+    catalog management and pricing strategy.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:podcast-advertising-management
+attributes:
+  displayName: "Podcast Advertising Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages podcast advertising campaigns across host-read and programmatic audio
+    placements — evaluating show alignment with target audience demographics,
+    negotiating host-read integration scripts and talking points, configuring
+    programmatic audio buys through podcast DSPs, implementing pixel-based and
+    promo-code attribution, managing ad frequency across listener cohorts, and
+    reconciling downloads against impression delivery guarantees. Produces show
+    selection scorecards, attribution reports, and frequency optimization
+    recommendations. Excludes podcast production and organic content strategy.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:connected-tv-campaign-management
+attributes:
+  displayName: "Connected TV Campaign Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Plans and executes CTV and OTT advertising campaigns — selecting inventory
+    across streaming platforms and AVOD services, configuring audience targeting
+    using ACR data and first-party segments, managing frequency capping across
+    linear and streaming environments, implementing cross-device measurement to
+    link TV exposure to digital actions, optimizing creative length variants for
+    non-skippable formats, and reconciling reach and frequency against media plan
+    guarantees. Produces reach/frequency reports, cross-device attribution
+    analyses, and platform mix recommendations. Excludes linear TV buying and
+    creative production.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:out-of-home-advertising-review
+attributes:
+  displayName: "Out-of-Home Advertising Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews digital out-of-home advertising campaigns — evaluating DOOH
+    placement performance using mobile location data and foot traffic analytics,
+    optimizing programmatic DOOH bids by daypart and weather triggers, measuring
+    campaign effectiveness through exposed vs control group lift studies,
+    auditing creative compliance with venue specifications, and assessing
+    share-of-voice against competitors in key geographies. Produces location
+    performance heatmaps, campaign lift measurement reports, and venue
+    optimization recommendations. Excludes static billboard buying and creative
+    design.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:affiliate-program-management
+attributes:
+  displayName: "Affiliate Program Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages performance-based affiliate marketing programs — recruiting and
+    vetting new affiliate partners, configuring commission structures by product
+    category and partner tier, monitoring affiliate compliance with brand
+    guidelines and FTC disclosure requirements, detecting fraudulent traffic
+    patterns and cookie stuffing, managing payout reconciliation across networks,
+    and optimizing program economics by analyzing incrementality vs organic
+    cannibalization. Produces affiliate performance scorecards, fraud alert
+    reports, and commission structure optimization recommendations. Excludes
+    influencer partnerships and direct sponsorships.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-analyst
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:digital-advertising
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:advertising
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:advertising-team
+    - target: org-unit:growth-team

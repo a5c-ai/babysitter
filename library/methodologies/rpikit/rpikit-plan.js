@@ -3,6 +3,13 @@
  * @description RPIKit Planning Phase - Transform research findings into actionable implementation plans with stakes-based rigor, test-first strategy, and human approval gates.
  * @inputs { topic: string, researchDocPath?: string, projectRoot?: string, stakesOverride?: string }
  * @outputs { success: boolean, planDocument: object, stakes: string, tasks: array, testStrategy: object, risks: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,91 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:git-markdown-wiki
+attributes:
+  displayName: "Git Markdown Wiki — version-controlled markdown knowledge base"
+  description: |
+    A git repository of markdown files organized by topic, with cross-references
+    via relative links. The most fundamental knowledge fabric — version-controlled,
+    reviewable, diff-able, and mergeable. Used by engineering teams for runbooks,
+    ADRs, onboarding docs, and internal wikis. Knowledge is organized via directory
+    hierarchy and frontmatter metadata. Retrieval is file-hierarchy traversal,
+    full-text search, or link-following. The git history itself becomes a knowledge
+    artifact — who changed what, when, and why.
+  knowledgeFileFormats:
+    - markdown
+    - yaml-frontmatter
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: git-versioned
+  knowledgeScopes:
+    - project
+    - organization
+  autoExtractionSupport: false
+  notes: |
+    Git-native markdown wikis are the simplest knowledge fabric with the
+    strongest durability guarantees. Every change is versioned, attributed,
+    and reviewable via pull requests. Tools like MkDocs, Docusaurus, or
+    GitHub Wiki render them as browsable sites. The trade-off is manual
+    curation — there is no automatic extraction or semantic search without
+    additional tooling.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:atlas-knowledge-graph
+attributes:
+  displayName: "Atlas Knowledge Graph — YAML graph with build-time indexing"
+  description: |
+    Atlas-style YAML knowledge graph where nodes are YAML documents with typed
+    nodeKinds and edges are ID references between nodes. The graph is indexed
+    into a JSON structure at build time for fast traversal and querying. This
+    is the pattern used by the babysitter atlas repository — each YAML file
+    defines one or more graph nodes with attributes and typed edges. A build
+    step validates referential integrity and produces a queryable index.
+  knowledgeFileFormats:
+    - yaml
+    - markdown
+  retrievalStrategy: graph-traversal
+  knowledgePersistence: git-versioned
+  knowledgeScopes:
+    - project
+    - organization
+  autoExtractionSupport: false
+  notes: |
+    The atlas pattern combines the durability of git-versioned files with
+    the queryability of a graph database. Nodes are typed (Layer, Tool,
+    AgentVersion, etc.) and edges carry semantic relationships (realizes,
+    integrates_with, composed_of). The build step catches dangling references
+    and produces a single JSON index for programmatic access. This is more
+    structured than a markdown wiki but requires schema discipline.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:adr-decision-log
+attributes:
+  displayName: "ADR Decision Log — Architecture Decision Records in git"
+  description: |
+    Architecture Decision Records (ADRs) in git using the MADR format or
+    similar conventions. Each decision is a numbered markdown file tracking
+    context, decision drivers, considered options, the decision outcome, and
+    consequences. ADRs create a searchable, append-only decision log that
+    explains why the system is the way it is. Tools like adr-tools, log4brains,
+    and adr-manager help maintain the log.
+  knowledgeFileFormats:
+    - markdown
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: git-versioned
+  knowledgeScopes:
+    - project
+  autoExtractionSupport: false
+  notes: |
+    ADRs are the gold standard for capturing architectural decisions. They
+    answer the "why" question that code and tests cannot. The MADR template
+    (Markdown Any Decision Record) provides a structured format. ADRs are
+    typically stored in docs/adr/ or docs/decisions/ and numbered sequentially.
+    They are immutable once accepted — superseded decisions reference their
+    replacements rather than being edited.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric

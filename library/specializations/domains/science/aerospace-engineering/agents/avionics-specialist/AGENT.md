@@ -14,6 +14,11 @@ expertise:
 metadata:
   version: "1.0"
   category: aerospace-engineering
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:physics-simulation, skill-area:mathematical-reasoning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Avionics Systems Specialist Agent

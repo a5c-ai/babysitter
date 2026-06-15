@@ -1,0 +1,116 @@
+---
+title: Package and Plugin Docs Map
+description: Canonical docs coverage map for public packages, internal workspaces, and harness plugin surfaces in the Babysitter repo.
+last_updated: 2026-04-27
+---
+
+# Package and Plugin Docs Map
+
+This page is the canonical discovery index for package and plugin documentation in the Babysitter monorepo.
+
+Use it to answer three questions quickly:
+
+1. Is this surface public, public-but-advanced, or internal-only?
+2. Where is the canonical documentation home for that surface right now?
+3. Which surfaces still rely on a package README or this map instead of a dedicated docs-site page?
+
+`docs/workspace-validation.md` remains the validation-contract ledger. It is **not** the primary docs discovery entrypoint anymore.
+
+## Status labels
+
+- **Public package**: supported public npm or app surface.
+- **Public advanced/runtime package**: public and supported, but primarily for operator/runtime workflows rather than first-time users.
+- **Public family package**: a published package that belongs to a larger package family whose overview docs also matter.
+- **Public harness plugin**: a supported harness/plugin surface for a specific host.
+- **Internal-only workspace**: active inside this monorepo, but not documented as a productized public offering.
+- **Internal-only companion app**: repo-active support app surface with no separate public docs contract.
+
+## Family entrypoints
+
+| Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
+| --- | --- | --- | --- | --- |
+| `packages/adapters` | Public family overview | [packages/adapters/README.md](../packages/adapters/README.md) | [docs/adapters/README.md](./adapters/README.md) | Use this family README to enter the adapters workspace tree before dropping into package-specific READMEs. |
+| `packages/adapters/hooks` | Public family overview | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | [packages/adapters/hooks/core/README.md](../packages/adapters/hooks/core/README.md)<br />[packages/adapters/hooks/cli/README.md](../packages/adapters/hooks/cli/README.md) | Use this family README for the hooks-adapter package set and adapter lineup. |
+| `plugins` | Public plugin overview | [docs/plugins.md](./plugins.md) | [plugins/babysitter-unified/per-harness/claude-code/README.md](../plugins/babysitter-unified/per-harness/claude-code/README.md)<br />[plugins/babysitter-unified/per-harness/codex/README.md](../plugins/babysitter-unified/per-harness/codex/README.md) | `plugins/babysitter-unified/` is the canonical source. Generated harness bundles are published from that source and are not maintained as checked-in directories here. |
+
+## Public core and runtime packages
+
+| Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
+| --- | --- | --- | --- | --- |
+| `packages/extensions-adapter` | Public package | [packages/extensions-adapter/README.md](../packages/extensions-adapter/README.md) | — | README is the canonical package-level contract. |
+| `packages/genty/core` | Public advanced/runtime package | [packages/genty/core/README.md](../packages/genty/core/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public runtime dependency package for advanced orchestration surfaces; README is the canonical package contract. |
+| `packages/babysitter` | Public package | [packages/babysitter/README.md](../packages/babysitter/README.md) | — | README is the canonical package-level contract. |
+| `packages/genty/platform` | Public advanced/runtime package | [packages/genty/platform/README.md](../packages/genty/platform/README.md) | [README.md](../README.md) | Public npm package, but it is an advanced/operator-facing runtime CLI rather than the default entrypoint for new users. |
+| `packages/atlas` (`./catalog` export) | Public advanced/runtime package surface | [packages/atlas/README.md](../packages/atlas/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public package surface for shared ontology/discovery/evidence assets used by other published runtimes; atlas README is the canonical package contract. |
+| `packages/tasks-adapter` | Public package | [packages/tasks-adapter/README.md](../packages/tasks-adapter/README.md) | — | README is the canonical package-level contract. |
+| `packages/cloud` | Public package | [packages/cloud/README.md](../packages/cloud/README.md) | — | README is the canonical public docs home today; the validation matrix does not currently expose a separate central docs entrypoint for this package. |
+| `packages/kradle/core` | Public package | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kubernetes-native Git forge runtime. No package README today; this map is the documentation home until a README is added. |
+| `packages/babysitter-sdk` | Public package | [packages/babysitter-sdk/README.md](../packages/babysitter-sdk/README.md) | — | README is the canonical package-level contract. |
+
+## Public product and operator apps
+
+| Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
+| --- | --- | --- | --- | --- |
+| `packages/observer-dashboard` | Public package | [packages/observer-dashboard/README.md](../packages/observer-dashboard/README.md) | — | README is the canonical package-level contract. |
+
+## Public package families
+
+| Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
+| --- | --- | --- | --- | --- |
+| `packages/adapters/adapters` | Public family package | [packages/adapters/adapters/README.md](../packages/adapters/adapters/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/cli` | Public family package | [packages/adapters/cli/README.md](../packages/adapters/cli/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/core` | Public family package | [packages/adapters/core/README.md](../packages/adapters/core/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/gateway` | Public family package | [packages/adapters/gateway/README.md](../packages/adapters/gateway/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/harness-mock` | Public family package | [packages/adapters/harness-mock/README.md](../packages/adapters/harness-mock/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/observability` | Public family package | [packages/adapters/observability/README.md](../packages/adapters/observability/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/sdk` | Public family package | [packages/adapters/sdk/README.md](../packages/adapters/sdk/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/transport-adapter` | Public family package | [packages/transport-adapter/README.md](../packages/transport-adapter/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract for the published transport/proxy runtime seam. |
+| `packages/triggers-adapter` | Public family package | [packages/triggers-adapter/README.md](../packages/triggers-adapter/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract for reusable trigger/action glue used with adapters pipelines. |
+| `packages/adapters/tui` | Public family package | [packages/adapters/tui/README.md](../packages/adapters/tui/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/ui` | Public family package | [packages/adapters/ui/README.md](../packages/adapters/ui/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/webui` | Public family package | [packages/adapters/webui/README.md](../packages/adapters/webui/README.md) | [docs/adapters/README.md](./adapters/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-claude` | Public family package | [packages/adapters/hooks/adapter-claude/README.md](../packages/adapters/hooks/adapter-claude/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-codex` | Public family package | [packages/adapters/hooks/adapter-codex/README.md](../packages/adapters/hooks/adapter-codex/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-copilot` | Public family package | [packages/adapters/hooks/adapter-copilot/README.md](../packages/adapters/hooks/adapter-copilot/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-cursor` | Public family package | [packages/adapters/hooks/adapter-cursor/README.md](../packages/adapters/hooks/adapter-cursor/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-gemini` | Public family package | [packages/adapters/hooks/adapter-gemini/README.md](../packages/adapters/hooks/adapter-gemini/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-oh-my-pi` | Public family package | [packages/adapters/hooks/adapter-oh-my-pi/README.md](../packages/adapters/hooks/adapter-oh-my-pi/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-openclaw` | Public family package | [packages/adapters/hooks/adapter-openclaw/README.md](../packages/adapters/hooks/adapter-openclaw/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-opencode` | Public family package | [packages/adapters/hooks/adapter-opencode/README.md](../packages/adapters/hooks/adapter-opencode/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/adapter-pi` | Public family package | [packages/adapters/hooks/adapter-pi/README.md](../packages/adapters/hooks/adapter-pi/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/cli` | Public family package | [packages/adapters/hooks/cli/README.md](../packages/adapters/hooks/cli/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+| `packages/adapters/hooks/core` | Public family package | [packages/adapters/hooks/core/README.md](../packages/adapters/hooks/core/README.md) | [packages/adapters/hooks/README.md](../packages/adapters/hooks/README.md) | README is the canonical package-level contract. |
+
+## Public harness plugins
+
+| Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
+| --- | --- | --- | --- | --- |
+| `plugins/babysitter-unified` | Public harness plugin source | [plugins/babysitter-unified/per-harness/claude-code/README.md](../plugins/babysitter-unified/per-harness/claude-code/README.md) | [docs/plugins.md](./plugins.md) | Canonical source tree for all harness plugins plus the Claude Code surface. |
+| `@a5c-ai/babysitter-codex` | Public harness plugin | [plugins/babysitter-unified/per-harness/codex/README.md](../plugins/babysitter-unified/per-harness/codex/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-cursor` | Public harness plugin | [plugins/babysitter-unified/per-harness/cursor/README.md](../plugins/babysitter-unified/per-harness/cursor/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `babysitter-gemini` | Public harness plugin | [plugins/babysitter-unified/per-harness/gemini/README.md](../plugins/babysitter-unified/per-harness/gemini/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `babysitter-github` | Public harness plugin | [plugins/babysitter-unified/per-harness/github/README.md](../plugins/babysitter-unified/per-harness/github/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-omp` | Public harness plugin | [plugins/babysitter-unified/per-harness/omp/README.md](../plugins/babysitter-unified/per-harness/omp/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-openclaw` | Public harness plugin | [plugins/babysitter-unified/per-harness/openclaw/README.md](../plugins/babysitter-unified/per-harness/openclaw/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-opencode` | Public harness plugin | [plugins/babysitter-unified/per-harness/opencode/README.md](../plugins/babysitter-unified/per-harness/opencode/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-pi` | Public harness plugin | [plugins/babysitter-unified/per-harness/pi/README.md](../plugins/babysitter-unified/per-harness/pi/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+
+## Internal-only workspaces and companion apps
+
+| Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
+| --- | --- | --- | --- | --- |
+| `packages/adapters/mobile-android-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
+| `packages/adapters/mobile-ios-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
+| `packages/adapters/tv-androidtv-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
+| `packages/adapters/tv-appletv-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
+| `packages/adapters/watch-watchos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
+| `packages/adapters/watch-wearos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
+| `packages/genty/tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
+| `packages/kradle/web` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kradle web console. Internal-only; this map is the documentation home until the surface is promoted. |
+
+## Coverage rules for future changes
+
+- If a new active workspace or plugin is added, update this map in the same change.
+- If a public surface still relies only on a package README, note that explicitly here until a docs-site page exists.
+- If a surface is internal-only, say so plainly here or in the package README instead of implying external product support.
+- If a package or plugin is promoted from internal-only to public, update the package metadata, README status block, and this map together.

@@ -16,6 +16,12 @@
  * @references
  * - Licensing Intellectual Property: https://www.wiley.com/en-us/Licensing+Intellectual+Property%3A+Law+and+Management-p-9781118432174
  * - LESI: https://www.lesi.org/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

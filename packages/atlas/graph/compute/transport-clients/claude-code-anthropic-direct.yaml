@@ -1,0 +1,40 @@
+nodeKind: TransportClient
+id: transport-client:claude-code-anthropic-direct
+attributes:
+  displayName: "Claude Code Anthropic-direct transport client"
+  providerId: provider:anthropic
+  idleTimeoutMs: 30000
+  responseTimeoutMs: 600000
+  firstTokenTimeoutMs: 120000
+  keepAliveEnabled: true
+  keepAliveTeardownOnCodes:
+    - ECONNRESET
+    - EPIPE
+  retryPolicyId: retry-policy:claude-code-default
+  oauthRefreshOn401: true
+  clearAuthCacheOn401: true
+  credentialPrecedence:
+    - env-var
+    - oauth
+    - api-key-helper
+    - settings
+  mockModeEnabled: false
+  dumpsPrompts: false
+  description: |
+    Direct Anthropic Messages API client. Streams via SSE, uses keep-alive
+    with ECONNRESET/EPIPE teardown, refreshes OAuth on 401 (handleOAuth401Error)
+    or clears apikey-helper cache on non-OAuth 401.
+edges:
+  client_targets_provider:
+    - target: provider:anthropic
+  client_uses_retry_policy:
+    - target: retry-policy:claude-code-default
+  client_uses_token_budget:
+    - target: token-budget:claude-code-call-default
+  emits_api_error:
+    - target: api-error-class:claude-code-api-connection-timeout
+    - target: api-error-class:claude-code-fallback-triggered
+    - target: api-error-class:claude-code-api-user-abort
+  emits_cascade_signal:
+    - target: capacity-cascade-signal:claude-code-repeated-529
+    - target: capacity-cascade-signal:claude-code-fast-mode-cooldown

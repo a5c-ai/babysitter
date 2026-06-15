@@ -3,6 +3,13 @@
  * @description Metaswarm Issue Orchestrator - Master coordinator that manages the full lifecycle from issue to merged PR through research, planning, design review gates, orchestrated execution, and PR shepherding
  * @inputs { issueDescription: string, projectRoot?: string, coverageThresholds?: object, maxRetries?: number, executionMode?: string }
  * @outputs { success: boolean, phases: array, workUnits: array, reviewResults: object, prUrl: string, knowledgeExtracted: array, summary: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

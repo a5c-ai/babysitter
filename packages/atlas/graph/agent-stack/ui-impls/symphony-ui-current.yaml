@@ -1,0 +1,30 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:symphony.ui@current
+attributes:
+  displayName: "Symphony UI (current) — CLI orchestrator"
+  agentVersionId: agent-version:symphony@current
+  packageRef: source-ref:symphony-github
+  uiKind: cli
+  themeSupport: none
+  accessibilitySupport: none
+  notes: |
+    Symphony UI is a CLI-based orchestrator. It runs a poll-dispatch-reconcile
+    loop monitoring Linear issues, dispatching coding agents to isolated
+    workspaces, and reconciling state on restart. Configuration is via
+    WORKFLOW.md policy files.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:symphony-poll-tick
+      attributes: { mechanism: cli-daemon }
+    - target: interaction-primitive:symphony-workspace-create
+      attributes: { mechanism: cli-daemon }
+    - target: interaction-primitive:symphony-agent-session
+      attributes: { mechanism: cli-daemon }
+    - target: interaction-primitive:symphony-reconciliation
+      attributes: { mechanism: cli-daemon }
+    - target: interaction-primitive:symphony-workflow-md
+      attributes: { mechanism: config-file }
+    - target: interaction-primitive:symphony-status-surface
+      attributes: { mechanism: cli-output }

@@ -1,0 +1,11 @@
+nodeKind: Term
+id: term:architecture-decision-record
+attributes:
+  canonicalDefinitionId: definition:architecture-decision-record.canonical
+  displayName: "Architecture Decision Record"
+  kind: concept
+  description: |
+    A short markdown document recording an architectural decision.
+edges:
+  applies_to:
+    - target: domain:software-engineering

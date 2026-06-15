@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:can-fork
+attributes:
+  displayName: "Can fork"
+  description: |
+    A session can be forked at any point, producing two independent
+    branches that can evolve separately.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: session
+edges: {}

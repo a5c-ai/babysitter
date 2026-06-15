@@ -1,0 +1,13 @@
+nodeKind: APIErrorClass
+id: api-error-class:claude-code-api-connection-timeout
+attributes:
+  displayName: "APIConnectionTimeoutError"
+  className: "APIConnectionTimeoutError"
+  layer: timeout
+  causeFingerprint:
+    - ETIMEDOUT
+  triggersAuthCacheClear: false
+  triggersKeepAliveTeardown: true
+  triggersFallbackModel: false
+  userVisibleMessage: |
+    Request timed out — please retry or check connectivity.

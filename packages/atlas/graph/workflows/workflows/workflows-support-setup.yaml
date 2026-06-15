@@ -1,0 +1,120 @@
+---
+nodeKind: Workflow
+id: workflow:helpdesk-platform-migration
+attributes:
+  displayName: "Helpdesk Platform Migration"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Plans and executes the migration from one ticketing and helpdesk platform to
+    another -- inventorying current system configurations including workflows,
+    automations, macros, custom fields, SLA policies, and integration
+    endpoints, mapping data schemas between source and target platforms with
+    field-level transformation rules, defining migration waves prioritized by
+    team criticality and integration dependency, executing test migrations with
+    data integrity validation on ticket history, attachments, and customer
+    records, coordinating agent training and certification on the new platform,
+    managing parallel-run periods with dual-system routing, validating that SLA
+    timers, escalation rules, and reporting dashboards function correctly
+    post-migration, and conducting post-migration retrospective with rollback
+    criteria. Produces migration plan, data mapping specification, training
+    schedule, and post-migration validation report. Excludes vendor selection.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:integration-testing
+    - target: skill-area:api-design
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:support-tier-structure-design
+attributes:
+  displayName: "Support Tier Structure Design"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Designs or redesigns the support tier structure to match organizational
+    scale and customer needs -- defining L1, L2, and L3 tier boundaries with
+    clear skill requirements, issue complexity thresholds, and technology domain
+    ownership, establishing escalation paths with handoff protocols, context
+    packaging requirements, and maximum time-at-tier limits, designing SLA
+    tiers mapped to customer contract levels with response and resolution time
+    commitments, modeling staffing ratios across tiers based on historical
+    ticket volume and complexity distribution, defining tier-specific tooling
+    and access requirements, creating career progression pathways between tiers,
+    and documenting cross-tier collaboration protocols for complex multi-domain
+    issues. Produces tier structure document, escalation flow diagrams, SLA tier
+    matrix, and staffing model. Excludes hiring execution.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:support-automation-setup
+attributes:
+  displayName: "Support Automation Setup"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Establishes automated support workflows to improve efficiency and
+    consistency -- creating macro libraries for common response templates with
+    dynamic field insertion, configuring auto-response rules for
+    acknowledgment, status updates, and resolution confirmation, building
+    trigger-based automations for ticket tagging, routing, and priority
+    adjustment, integrating helpdesk with engineering issue trackers for
+    bug-linked ticket synchronization, setting up automated satisfaction surveys
+    at resolution with configurable timing and follow-up logic, creating
+    escalation automations that trigger based on SLA proximity and customer
+    tier, and establishing reporting automations for daily team dashboards and
+    weekly management summaries. Produces automation inventory document,
+    integration architecture diagram, and automation effectiveness metrics.
+    Excludes helpdesk platform selection.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:bug-triager
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:engineering

@@ -8,6 +8,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:typography, skill-area:visual-design]
+  roles: [role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+  topics: [topic:responsive-design]
 ---
 
 # Typography Calculator Skill

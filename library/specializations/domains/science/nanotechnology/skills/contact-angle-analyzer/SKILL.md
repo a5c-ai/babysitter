@@ -16,6 +16,11 @@ metadata:
   tools-libraries:
     - Contact angle goniometers
     - Surface energy calculators
+graph:
+  domains: [domain:nanotechnology]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Contact Angle Analyzer

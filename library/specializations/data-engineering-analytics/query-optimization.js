@@ -27,6 +27,9 @@
  * - MySQL Query Optimization: https://dev.mysql.com/doc/refman/8.0/en/optimization.html
  * - SQL Server Performance: https://docs.microsoft.com/en-us/sql/relational-databases/performance/
  * - Database Indexing Strategies: https://planet.postgresql.org/
+ * @graph
+ *   domains: [domain:data-engineering]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

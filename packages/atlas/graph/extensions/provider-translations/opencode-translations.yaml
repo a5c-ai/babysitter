@@ -1,0 +1,143 @@
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:anthropic
+attributes:
+  harness: opencode
+  provider: anthropic
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/anthropic"
+  envMapping:
+    - envVar: ANTHROPIC_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    OpenCode with Anthropic provider. Uses @ai-sdk/anthropic npm package.
+    Generates OPENCODE_CONFIG_CONTENT JSON dynamically with provider/model config.
+edges:
+  translates_for:
+    - target: agent:opencode
+  uses_provider:
+    - target: provider:anthropic
+---
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:openai
+attributes:
+  harness: opencode
+  provider: openai
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/openai"
+  envMapping:
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    OpenCode with OpenAI provider. Uses @ai-sdk/openai npm package.
+    Generates OPENCODE_CONFIG_CONTENT JSON dynamically.
+edges:
+  translates_for:
+    - target: agent:opencode
+  uses_provider:
+    - target: provider:openai
+---
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:google
+attributes:
+  harness: opencode
+  provider: google
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/google"
+  envMapping:
+    - envVar: GOOGLE_GENERATIVE_AI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    OpenCode with Google provider. Uses @ai-sdk/google npm package.
+    Generates OPENCODE_CONFIG_CONTENT JSON dynamically.
+edges:
+  translates_for:
+    - target: agent:opencode
+  uses_provider:
+    - target: provider:google
+---
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:vertex
+attributes:
+  harness: opencode
+  provider: vertex
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/google-vertex"
+  envMapping: []
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    OpenCode with Vertex AI provider. Uses @ai-sdk/google-vertex npm package.
+    Generates OPENCODE_CONFIG_CONTENT JSON dynamically.
+edges:
+  translates_for:
+    - target: agent:opencode
+  uses_provider:
+    - target: provider:vertex
+---
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:bedrock
+attributes:
+  harness: opencode
+  provider: bedrock
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/amazon-bedrock"
+  envMapping: []
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    OpenCode with Amazon Bedrock provider. Uses @ai-sdk/amazon-bedrock npm package.
+    Generates OPENCODE_CONFIG_CONTENT JSON dynamically.
+edges:
+  translates_for:
+    - target: agent:opencode
+  uses_provider:
+    - target: provider:bedrock
+---
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:azure
+attributes:
+  harness: opencode
+  provider: azure
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/azure"
+  envMapping: []
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    OpenCode with Azure provider. Uses @ai-sdk/azure npm package.
+    Generates OPENCODE_CONFIG_CONTENT JSON dynamically.
+edges:
+  translates_for:
+    - target: agent:opencode
+  uses_provider:
+    - target: provider:azure
+---
+nodeKind: ProviderTranslation
+id: provider-translation:opencode:default
+attributes:
+  harness: opencode
+  provider: _default
+  proxyRequired: false
+  nativeSdk: "@ai-sdk/openai-compatible"
+  envMapping:
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  args: []
+  conditionalLogic: opencode-config-generation
+  notes: >
+    Default fallback for OpenCode - uses @ai-sdk/openai-compatible with
+    optional baseURL from params.apiBase. Generates OPENCODE_CONFIG_CONTENT
+    JSON dynamically.
+edges:
+  translates_for:
+    - target: agent:opencode

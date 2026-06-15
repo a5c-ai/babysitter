@@ -1,0 +1,30 @@
+nodeKind: Skill
+id: skill:security-review
+attributes:
+  displayName: "Security Review"
+  description: |
+    Reviews diffs and modules for common security issues: injection,
+    auth/authz gaps, secret handling, deserialization, SSRF, and unsafe
+    third-party usage. Produces structured findings with severity.
+  keyword: security-review
+  entrypoint: SKILL.md
+  domains:
+    - domain:security
+  roles:
+    - role:code-reviewer
+  sourceRef: source-ref:a5c-plugins-security-review
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: domain:cybersecurity
+      confidence: primary
+  implements:
+    - target: extension-interface:governance
+    - target: extension-interface:secrets
+  sourced_from:
+    - target: source-ref:a5c-plugins-security-review
+  addresses:
+    - target: skill-area:web-security
+    - target: skill-area:sast
+    - target: skill-area:threat-modeling

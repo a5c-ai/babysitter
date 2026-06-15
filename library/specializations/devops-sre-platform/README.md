@@ -669,8 +669,237 @@ This specialization is critical for modern software organizations operating in c
 - Focus: Technical strategy, cross-org initiatives, thought leadership
 - Experience: 12+ years
 
+
 ---
 
 **Created**: 2026-01-23
 **Version**: 1.0.0
 **Specialization**: DevOps, SRE, and Platform Engineering
+
+
+
+# Cloud discovery + cost-reduction processes
+
+Generic, multi-cloud babysitter processes for inventorying a cloud account/subscription/project and acting on cost waste with mandatory human-in-the-loop breakpoints.
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `aws-systems-discovery.js` | AWS account discovery: bootstrap (CLI install + auth + account+region select), per-region inventory, EKS deep-dive, ALB/NLB → target attribution, Route 53 + CloudFront external exposure, mermaid diagrams. |
+| `aws-systems-cost-reduction.js` | AWS cost reduction: Cost Explorer + Compute Optimizer + Trusted Advisor → tiered recommendations → per-action breakpoint with backup-before-destroy. |
+| `azure-systems-discovery.js` | Azure subscription discovery: bootstrap, per-RG inventory, AKS deep-dive (kubectl direct + `az aks command invoke` fallback), AppGW listener-to-backend with AGIC convention parsing, DNS + wildcard surface analysis, mermaid diagrams. |
+| `azure-systems-cost-reduction.js` | Azure cost reduction: Retail Prices API + Azure Advisor + Cost Management → tiered recommendations → per-action breakpoint with backup. |
+| `gcp-systems-discovery.js` | GCP project/org discovery: bootstrap, Cloud Asset Inventory, GKE deep-dive (Standard + Autopilot), GCLB forwarding-rule → URL map → backend chain, Cloud DNS exposure, mermaid diagrams. |
+| `gcp-systems-cost-reduction.js` | GCP cost reduction: Recommender API (multiple categories) + Billing BigQuery export → tiered recommendations → per-action breakpoint with backup. |
+
+## Design rules
+
+These are the rules that govern every process file in this directory.
+
+### 1. All tasks are `kind: 'agent'`
+
+There are NO `kind: 'shell'` tasks. Whenever a step needs to run a CLI command, an agent task is dispatched and the agent runs the command via its built-in Bash tool. This eliminates the inter-task filesystem contract that shell tasks would otherwise create.
+
+### 2. No shared filesystem layout between tasks
+
+Tasks pass data forward via **JSON return values**, not via known file paths. When an upstream task produces an artifact too large to inline (e.g. the full inventory of an AWS account), it writes the artifact under its own `tasks/<effectId>/artifacts/` scratch dir and returns the path **explicitly** in its `result.value`. The downstream task receives that path verbatim through its prompt args and `cat`s it at execution time.
+
+The only path the user controls is `inputs.outputDir`, which is where the **final composed reports** land. Intermediate state never escapes the run's `tasks/` tree.
+
+### 3. Bootstrap-first
+
+Every discovery and cost-reduction process starts with a bootstrap phase:
+
+1. **CLI probe + install** (`cliBootstrapTask`)
+   - Detects whether the cloud CLI + companion tools are installed.
+   - `installPolicy: 'ask'` (default): probes only, returns `pendingInstall: [...]`. Orchestrator raises an install-approval breakpoint, then re-invokes with `installPolicy: 'auto'`.
+   - `installPolicy: 'auto'`: installs missing tools (preferring non-sudo `$HOME/.local/bin` paths).
+   - `installPolicy: 'never'`: fails fast with a list of missing tools.
+
+2. **Authentication** (cloud-specific auth task)
+   - `use-existing` first; if no active session, prompts the user to pick a method.
+   - Azure: `interactive`, `device-code`, `service-principal`, `managed-identity`.
+   - AWS: `sso`, `assume-role`, `static-keys`, `container-or-instance-role`.
+   - GCP: `interactive` (gcloud-login), `service-account-key`, `workload-identity`.
+   - Sensitive credentials (service principal password, static keys, key file) are gathered through a dedicated breakpoint and never logged.
+
+3. **Account / subscription / project + region selection**
+   - Lists what the authenticated identity can see.
+   - Breakpoint: pick `current default` / `all-in-tenant|org` / explicit list / cancel.
+   - For AWS, **regions are confirmed explicitly** (regions billed independently — wrong region = blind spot).
+
+### 4. Tiered actions + per-action breakpoints (cost-reduction processes)
+
+Every cost-reduction recommendation is gated by its own breakpoint with the same 4 options:
+
+- **Apply with backup** — runs the per-rec `backupCommand` first, then `suggestedAction`, then `verifyCommand`.
+- **Apply WITHOUT backup** — skips the backup (only valid when `reversibility !== 'destructive-permanent'`).
+- **Skip** — records the rec in the `skipped` list with reason.
+- **Skip all in this tier** — adds the tier to a skip-set; subsequent recs in that tier short-circuit.
+
+Risk tiers (universal across clouds):
+
+| Tier | Examples | Reversibility |
+|---|---|---|
+| 1 | empty resource groups, dangling DNS, missing tags | reversible |
+| 2 | rightsize, switch storage class, lower DB tier, switch to Spot/preemptible | reversible (some require restart) |
+| 3 | Reserved Instances / Savings Plans / Committed Use Discounts | **irreversible commitment** |
+| 4 | delete idle resources (volumes, IPs, snapshots, NAT, AppGW) | destructive — backup default-on |
+| 5 | shrink/delete clusters, delete dev VPCs, drain workloads | destructive — backup default-on |
+
+### 5. Backup-before-destroy
+
+Every Tier 4+ recommendation must include a real `backupCommand` (a CLI invocation that captures the data). When the resource type has no meaningful backup (e.g. an empty AppGW where there is no data), the rec sets `backupNeeded: false` so the breakpoint UI hides the "with backup" option.
+
+When a backup destination is required (Azure storage container, AWS S3 bucket, GCS bucket) and not provided in inputs, the backup task **refuses with `missing-backup-destination`** rather than silently dropping data.
+
+### 6. Wildcard DNS — explicit treatment
+
+Each discovery process flags `*.<zone>` records as **OPEN SURFACE** in the external-exposure report. The wording is consistent: "Any subdomain not listed above also reaches `<backend>` — anyone who can publish a kubectl Ingress / GCLB rule / ALB listener with that hostname can route traffic instantly without a DNS change."
+
+### 7. Ingress-controller convention parsing
+
+When an in-cluster controller provisions cloud-side LB resources, the discovery agent recognises the naming convention to attribute LB config back to the originating k8s ingress:
+
+- **AGIC** (Azure App Gateway Ingress Controller): `pool-<ns>-<svc>-<port>-bp-<port>`
+- **GCE Ingress** (GKE): URL map + backend service named `<ingress-name>-<hash>`
+- **AWS Load Balancer Controller** (EKS): target group `k8s-<ns>-<ingressname>-<hash>` + tag `kubernetes.io/cluster/<name>`
+
+### 8. Drift defense
+
+Composer agents read source data via Bash `cat` at execution time rather than receiving inlined JSON bytes through the prompt. This keeps large source data out of the process-authoring compose pass where token proximity bias would otherwise rewrite acceptance criteria.
+
+## Inputs cheat-sheet
+
+### Discovery
+
+```jsonc
+// azure-systems-discovery.js
+{
+  // Scope
+  "subscriptionIds": [],                      // omit to use current az account
+  "scopeMode": "current",                     // 'current' | 'all-in-tenant' | 'list'
+  "systemUnit": "resource-group",             // 'resource-group' | 'tag' | 'aks-namespace'
+  "systemTagKey": "system",
+  "includeAksDeepDive": true,
+  "includeDnsRecords": true,
+  "probeExternalEndpoints": false,
+  "diagrams": "mermaid",
+  "outputDir": "azure-discovery",
+  "serviceCategories": null,                  // restrict scan; null = all
+  // Bootstrap
+  "installPolicy": "ask",                     // 'ask' | 'auto' | 'never'
+  "preferredAzInstallMethod": null,
+  "authMethod": "use-existing",               // 'use-existing'|'interactive'|'device-code'|'service-principal'|'managed-identity'
+  "servicePrincipal": null,                   // {appId, tenantId, password|certificateFile}
+  "tenantHint": null
+}
+
+// aws-systems-discovery.js
+{
+  "accountIds": [],
+  "regions": ["us-east-1"],                   // CRITICAL — confirmed via breakpoint
+  "scopeMode": "current",                     // 'current' | 'org' | 'list'
+  "systemUnit": "vpc",                        // 'vpc' | 'tag' | 'cf-stack' | 'eks-namespace'
+  "systemTagKey": "system",
+  "includeEksDeepDive": true,
+  "includeRoute53Records": true,
+  "probeExternalEndpoints": false,
+  "diagrams": "mermaid",
+  "outputDir": "aws-discovery",
+  "serviceCategories": null,
+  "installPolicy": "ask",
+  "authMethod": "use-existing",               // 'use-existing'|'sso'|'assume-role'|'static-keys'|'container-or-instance-role'
+  "ssoProfile": null, "assumeRoleArn": null, "staticCredentials": null
+}
+
+// gcp-systems-discovery.js
+{
+  "projectIds": [],
+  "organizationId": null,                     // org-wide scan via Cloud Asset Inventory
+  "regions": ["us-central1"],
+  "scopeMode": "current",                     // 'current' | 'project-list' | 'organization'
+  "systemUnit": "project",                    // 'project' | 'label' | 'gke-namespace'
+  "systemLabelKey": "system",
+  "includeGkeDeepDive": true,
+  "includeDnsRecords": true,
+  "probeExternalEndpoints": false,
+  "diagrams": "mermaid",
+  "outputDir": "gcp-discovery",
+  "serviceCategories": null,
+  "installPolicy": "ask",
+  "authMethod": "use-existing",               // 'use-existing'|'interactive'|'service-account-key'|'workload-identity'
+  "serviceAccountKeyFile": null
+}
+```
+
+### Cost reduction
+
+```jsonc
+// azure-systems-cost-reduction.js
+{
+  "subscriptionId": "string",
+  "outputDir": "string",
+  "discoveryManifest": null,                  // pass output of azure-systems-discovery; null = minimal local inventory
+  "targetSavingsPercent": 25,
+  "maxRiskTier": 4,                           // 1..5
+  "defaultBackupBeforeDestroy": true,
+  "backupContainerStorageAccount": null,      // SA name where backups land
+  "currency": "USD",
+  // Bootstrap (same as discovery)
+  "installPolicy": "ask", "preferredAzInstallMethod": null,
+  "authMethod": "use-existing", "servicePrincipal": null, "tenantHint": null
+}
+
+// aws-systems-cost-reduction.js
+{
+  "accountId": "string",
+  "outputDir": "string",
+  "regions": ["us-east-1"],
+  "discoveryManifest": null,
+  "targetSavingsPercent": 25,
+  "maxRiskTier": 4,
+  "defaultBackupBeforeDestroy": true,
+  "backupS3Bucket": null,
+  "currency": "USD",
+  "installPolicy": "ask",
+  "authMethod": "use-existing", "ssoProfile": null, "assumeRoleArn": null, "staticCredentials": null
+}
+
+// gcp-systems-cost-reduction.js
+{
+  "projectId": "string",
+  "outputDir": "string",
+  "discoveryManifest": null,
+  "billingAccount": null,
+  "billingExportDataset": null,               // <project>.<dataset> — strongly recommended
+  "targetSavingsPercent": 25,
+  "maxRiskTier": 4,
+  "defaultBackupBeforeDestroy": true,
+  "backupGcsBucket": null,
+  "currency": "USD",
+  "installPolicy": "ask",
+  "authMethod": "use-existing", "serviceAccountKeyFile": null
+}
+```
+
+## Pipeline pattern
+
+`discovery → cost-reduction` is a 2-step pipeline. Run discovery first; pass the resulting `manifest` JSON object as `inputs.discoveryManifest` to the cost-reduction process. The cost-reduction process re-pulls billing data (which changes daily) but reuses the inventory.
+
+The cost-reduction processes can also run **standalone** (`discoveryManifest: null`) — they fall back to a minimal local inventory using the same bootstrap + auth phase.
+
+## Coverage at a glance
+
+Each discovery process probes a broad set of managed services per cloud. The full list is in the `Service coverage` JSDoc block at the top of each file. Highlights:
+
+- **Azure** — Compute (VMs, VMSS, Disks, Bastion), Containers (AKS, Container Apps, ACI, ACR), Web (ASP/Webapps/Functions/SWA, APIM, Logic Apps), Data (SQL, Postgres, MySQL, Cosmos, Redis, Storage, Synapse, Data Factory, Databricks, HDInsight), Messaging (Service Bus, Event Hub, Event Grid, IoT Hub, SignalR), AI/ML (Cognitive incl. OpenAI, Cognitive Search, ML workspaces), Networking (VNets, NSGs, PIPs, AppGW + WAF, LB, Front Door + AFD, CDN, Traffic Manager, Azure Firewall, VPN, ExpressRoute, Private Endpoints, Private DNS), Identity (Key Vaults), Observability (Log Analytics, App Insights, Grafana), Security (Sentinel, Defender, DDoS).
+
+- **AWS** — Compute (EC2, EBS, ASGs, Outposts), Containers (EKS, ECS, Fargate, ECR), Serverless / Web (Lambda + Function URLs, API Gateway REST + v2, AppSync, Amplify, Step Functions, Cognito), Data (RDS + Aurora, DynamoDB, ElastiCache, Redshift, OpenSearch, Glue, Athena, EMR, Kinesis, MSK, MQ), Messaging (SQS, SNS, EventBridge, Kinesis, MSK), Storage (S3, EFS, FSx, Storage Gateway, Backup, DataSync), Networking (VPCs, subnets, NAT GWs, EIPs, VPC endpoints, Transit Gateway, Direct Connect, Network Firewall, ALB/NLB/CLB + target groups, CloudFront, Route53, Global Accelerator, WAF, Shield), Identity/Secrets (IAM, KMS, Secrets Manager, SSM Parameter Store), Observability (CloudWatch, X-Ray, CloudTrail, Config), AI/ML (SageMaker, Bedrock, Comprehend, Lex, Polly, Rekognition).
+
+- **GCP** — Compute (Compute Engine, MIGs), Containers (GKE Standard + Autopilot, Cloud Run services + jobs, Cloud Functions Gen1+Gen2, Cloud Build, Artifact Registry, GCR), Data (Cloud SQL, Spanner, Bigtable, Memorystore Redis+Memcache, Firestore, BigQuery, Dataflow, Dataproc, Cloud Composer), AI/ML (Vertex AI, AI Platform), Storage (GCS, Filestore), Messaging (Pub/Sub, Cloud Tasks, Cloud Scheduler, Cloud Workflows, Eventarc), Networking (VPC + subnets + peerings + Shared VPC, GCLB HTTP(S)/TCP/UDP/internal, Cloud DNS, Cloud Armor, Cloud CDN, Cloud NAT, Cloud Interconnect, Cloud VPN, IAP), Identity (Cloud KMS, Secret Manager), Observability (Cloud Logging, Monitoring, Trace, Profiler), API/Edge (Apigee, Cloud Endpoints), Specialty (Healthcare API, Anthos).
+
+## Origin
+
+Extracted from a real Azure cleanup run on 2026-04-19 that took an account from $5,689/mo down to ~$1,150/mo (80% reduction) over multiple breakpoint-gated rounds. The patterns (per-action gates, backup-before-destroy, wildcard surface flagging, AGIC parsing, runtime-spec-read, agent-only no-FS-contract, bootstrap-first auth) all came from solving real ambiguities during that run — including the case where the cluster was found to be `Stopped` and "delete cluster completely" had to be expanded to wipe a webapp + 2 Cosmos DBs that were the cluster's data backings.

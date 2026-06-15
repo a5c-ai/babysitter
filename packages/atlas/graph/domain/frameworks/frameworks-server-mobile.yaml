@@ -1,0 +1,317 @@
+nodeKind: Framework
+id: framework:livewire
+attributes:
+  displayName: "Laravel Livewire"
+  homepageUrl: "https://livewire.laravel.com"
+  belongsToLanguageId: language:php
+  category: web-fullstack
+  description: |
+    Livewire is a full-stack framework for Laravel that allows building dynamic UI
+    components using PHP. It eliminates the need for custom JavaScript by handling
+    reactivity server-side, enabling rich SPA-like experiences with Blade templates.
+edges:
+  belongs_to_language:
+    - language:php
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:inertia
+    - framework:alpine
+---
+nodeKind: Framework
+id: framework:stimulus
+attributes:
+  displayName: "Stimulus"
+  homepageUrl: "https://stimulus.hotwired.dev"
+  belongsToLanguageId: language:javascript
+  category: web-frontend
+  description: |
+    Stimulus is a modest JavaScript framework designed to augment server-rendered HTML.
+    It connects JavaScript controllers to HTML elements via data attributes, providing
+    structure without requiring a full SPA architecture.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:alpine
+    - framework:htmx
+    - framework:turbo-rails
+---
+nodeKind: Framework
+id: framework:turbo-rails
+attributes:
+  displayName: "Turbo Rails"
+  homepageUrl: "https://turbo.hotwired.dev"
+  belongsToLanguageId: language:ruby
+  category: web-fullstack
+  description: |
+    Turbo Rails is part of the Hotwire suite for Ruby on Rails, enabling fast
+    server-rendered HTML updates via Turbo Frames and Turbo Streams. It speeds up
+    Rails apps by replacing full-page reloads with targeted DOM updates over WebSockets.
+edges:
+  belongs_to_language:
+    - language:ruby
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:htmx
+    - framework:stimulus
+    - framework:alpine
+---
+nodeKind: Framework
+id: framework:blazor
+attributes:
+  displayName: "Blazor"
+  homepageUrl: "https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor"
+  belongsToLanguageId: language:csharp
+  category: web-fullstack
+  description: |
+    Blazor is a .NET web framework from Microsoft that allows building interactive
+    web UIs using C# instead of JavaScript. It supports both WebAssembly and
+    server-side rendering modes within the ASP.NET Core ecosystem.
+edges:
+  belongs_to_language:
+    - language:csharp
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - library:leptos
+---
+nodeKind: Framework
+id: framework:spring-webflux
+attributes:
+  displayName: "Spring WebFlux"
+  homepageUrl: "https://docs.spring.io/spring-framework/reference/web/webflux.html"
+  belongsToLanguageId: language:java
+  category: web-backend
+  description: |
+    Spring WebFlux is the reactive web framework within the Spring ecosystem for Java.
+    It supports non-blocking, event-driven programming using Project Reactor, enabling
+    high-throughput server applications with backpressure-aware streaming.
+edges:
+  belongs_to_language:
+    - language:java
+  used_by_skill_area:
+    - target: skill-area:backend-async-processing
+---
+nodeKind: Framework
+id: framework:dropwizard
+attributes:
+  displayName: "Dropwizard"
+  homepageUrl: "https://www.dropwizard.io"
+  belongsToLanguageId: language:java
+  category: web-backend
+  description: |
+    Dropwizard is a Java framework for building production-ready RESTful web services.
+    It bundles Jetty, Jersey, Jackson, and Metrics into a single opinionated library,
+    enabling rapid development of high-performance, operationally mature microservices.
+edges:
+  belongs_to_language:
+    - language:java
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Framework
+id: framework:spark-java
+attributes:
+  displayName: "Spark Java"
+  homepageUrl: "https://sparkjava.com"
+  belongsToLanguageId: language:java
+  category: web-backend
+  description: |
+    Spark is a lightweight Java and Kotlin web framework inspired by Sinatra.
+    It provides a simple DSL for defining routes and handlers, making it ideal for
+    building small REST APIs and microservices with minimal boilerplate.
+edges:
+  belongs_to_language:
+    - language:java
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Framework
+id: framework:javalin
+attributes:
+  displayName: "Javalin"
+  homepageUrl: "https://javalin.io"
+  belongsToLanguageId: language:kotlin
+  category: web-backend
+  description: |
+    Javalin is a simple, lightweight web framework for Java and Kotlin built on top
+    of Jetty. It is designed to be straightforward and unopinionated, supporting both
+    synchronous and asynchronous request handling with OpenAPI documentation generation.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Framework
+id: framework:vert-x
+attributes:
+  displayName: "Vert.x"
+  homepageUrl: "https://vertx.io"
+  belongsToLanguageId: language:java
+  category: web-backend
+  description: |
+    Vert.x is a polyglot, event-driven application framework running on the JVM.
+    It provides a reactive toolkit for building high-performance, non-blocking services
+    in Java, Kotlin, Groovy, and other JVM languages using an actor-like model.
+edges:
+  belongs_to_language:
+    - language:java
+  used_by_skill_area:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - target: framework:spring-webflux
+      comparison: "JVM backend frameworks"
+    - target: framework:dropwizard
+      comparison: "JVM backend frameworks"
+    - target: framework:spark-java
+      comparison: "JVM backend frameworks"
+    - target: framework:javalin
+      comparison: "JVM backend frameworks"
+    - target: framework:ktor-server
+      comparison: "JVM backend frameworks"
+---
+nodeKind: Framework
+id: framework:swiftui
+attributes:
+  displayName: "SwiftUI"
+  homepageUrl: "https://developer.apple.com/xcode/swiftui"
+  belongsToLanguageId: language:swift
+  category: mobile-framework
+  description: |
+    SwiftUI is Apple's declarative UI framework for building apps across iOS, macOS,
+    watchOS, and tvOS using Swift. It features live previews, data-driven view
+    composition, and deep integration with the Apple platform ecosystem.
+edges:
+  belongs_to_language:
+    - language:swift
+  used_by_skill_area:
+    - target: skill-area:ios-native
+  alternative_to:
+    - target: framework:flutter
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:jetpack-compose
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:compose-multiplatform
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:maui
+      comparison: "Mobile / cross-platform UI frameworks"
+---
+nodeKind: Framework
+id: framework:jetpack-compose
+attributes:
+  displayName: "Jetpack Compose"
+  homepageUrl: "https://developer.android.com/compose"
+  belongsToLanguageId: language:kotlin
+  category: mobile-framework
+  description: |
+    Jetpack Compose is Android's modern declarative UI toolkit built with Kotlin.
+    It simplifies UI development by replacing XML layouts with composable functions,
+    enabling reactive, state-driven UIs tightly integrated with Android Jetpack.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  used_by_skill_area:
+    - target: skill-area:android-native
+  alternative_to:
+    - target: framework:flutter
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:swiftui
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:compose-multiplatform
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:maui
+      comparison: "Mobile / cross-platform UI frameworks"
+---
+nodeKind: Framework
+id: framework:compose-multiplatform
+attributes:
+  displayName: "Compose Multiplatform"
+  homepageUrl: "https://www.jetbrains.com/compose-multiplatform"
+  belongsToLanguageId: language:kotlin
+  category: mobile-framework
+  description: |
+    Compose Multiplatform is JetBrains' framework for sharing UI code across Android,
+    iOS, desktop, and web using Kotlin and Jetpack Compose APIs. It enables a single
+    codebase for cross-platform applications while retaining native look and feel.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  used_by_skill_area:
+    - target: skill-area:android-native
+  alternative_to:
+    - target: framework:flutter
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:swiftui
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:jetpack-compose
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:maui
+      comparison: "Mobile / cross-platform UI frameworks"
+---
+nodeKind: Framework
+id: framework:maui
+attributes:
+  displayName: ".NET MAUI"
+  homepageUrl: "https://dotnet.microsoft.com/en-us/apps/maui"
+  belongsToLanguageId: language:csharp
+  category: mobile-framework
+  description: |
+    .NET Multi-platform App UI (MAUI) is Microsoft's cross-platform framework for
+    building native mobile and desktop applications with C# and XAML. It is the
+    evolution of Xamarin.Forms, targeting iOS, Android, macOS, and Windows from a
+    single codebase.
+edges:
+  belongs_to_language:
+    - language:csharp
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - target: framework:flutter
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:swiftui
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:jetpack-compose
+      comparison: "Mobile / cross-platform UI frameworks"
+    - target: framework:compose-multiplatform
+      comparison: "Mobile / cross-platform UI frameworks"
+---
+nodeKind: Framework
+id: framework:vapor
+attributes:
+  displayName: "Vapor"
+  homepageUrl: "https://vapor.codes"
+  belongsToLanguageId: language:swift
+  category: web-backend
+  description: |
+    Vapor is a server-side Swift web framework built on SwiftNIO for building
+    HTTP APIs, web apps, and real-time services. It features async/await support,
+    Fluent ORM, and Leaf templating for full-stack Swift development.
+edges:
+  belongs_to_language:
+    - language:swift
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - framework:phoenix
+---
+nodeKind: Framework
+id: framework:ktor-server
+attributes:
+  displayName: "Ktor Server"
+  homepageUrl: "https://ktor.io"
+  belongsToLanguageId: language:kotlin
+  category: web-backend
+  description: |
+    Ktor Server is JetBrains' asynchronous Kotlin framework for building server-side
+    applications and microservices. It is lightweight and extensible, leveraging Kotlin
+    coroutines for non-blocking I/O and a plugin-based architecture for HTTP handling.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  used_by_skill_area:
+    - target: skill-area:backend-api-design

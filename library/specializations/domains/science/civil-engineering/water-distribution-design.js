@@ -3,6 +3,12 @@
  * @description Design of water distribution systems including pipe network analysis, pump station design, and storage facility design
  * @inputs { projectId: string, serviceArea: object, demandProjections: object, existingSystem: object }
  * @outputs { success: boolean, distributionDesign: object, networkModel: object, pumpStationDesign: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

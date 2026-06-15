@@ -1,0 +1,182 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.list-channels
+attributes:
+  schema: '{}'
+  displayName: "Slack: List Channels"
+  description: List public channels in the workspace.
+  inputSchema:
+    type: object
+    properties:
+      limit: { type: integer }
+      cursor: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      channels: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.post-message
+attributes:
+  schema: '{}'
+  displayName: "Slack: Post Message"
+  description: Post a message to a channel.
+  inputSchema:
+    type: object
+    required: [channel_id, text]
+    properties:
+      channel_id: { type: string }
+      text: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ts: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.reply-to-thread
+attributes:
+  schema: '{}'
+  displayName: "Slack: Reply to Thread"
+  description: Reply to a thread in a channel.
+  inputSchema:
+    type: object
+    required: [channel_id, thread_ts, text]
+    properties:
+      channel_id: { type: string }
+      thread_ts: { type: string }
+      text: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ts: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.add-reaction
+attributes:
+  schema: '{}'
+  displayName: "Slack: Add Reaction"
+  description: Add a reaction emoji to a message.
+  inputSchema:
+    type: object
+    required: [channel_id, timestamp, reaction]
+    properties:
+      channel_id: { type: string }
+      timestamp: { type: string }
+      reaction: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      ok: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.get-channel-history
+attributes:
+  schema: '{}'
+  displayName: "Slack: Get Channel History"
+  description: Return recent messages from a channel.
+  inputSchema:
+    type: object
+    required: [channel_id]
+    properties:
+      channel_id: { type: string }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      messages: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.get-thread-replies
+attributes:
+  schema: '{}'
+  displayName: "Slack: Get Thread Replies"
+  description: Return replies to a parent message in a thread.
+  inputSchema:
+    type: object
+    required: [channel_id, thread_ts]
+    properties:
+      channel_id: { type: string }
+      thread_ts: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      messages: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.get-users
+attributes:
+  schema: '{}'
+  displayName: "Slack: List Users"
+  description: List members of the workspace.
+  inputSchema:
+    type: object
+    properties:
+      limit: { type: integer }
+      cursor: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      users: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:slack.get-user-profile
+attributes:
+  schema: '{}'
+  displayName: "Slack: Get User Profile"
+  description: Return profile fields for a single user.
+  inputSchema:
+    type: object
+    required: [user_id]
+    properties:
+      user_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      profile: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:slack-mcp

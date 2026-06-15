@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:sla
+attributes:
+  acronym: "SLA"
+  expandsToTermId: term:service-level-agreement
+  description: |
+    Acronym for SLA.
+edges:
+  expands_to:
+    - term:service-level-agreement

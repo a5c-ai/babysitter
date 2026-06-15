@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Scope Management
   id: SK-007
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:stakeholder-management, skill-area:business-analysis]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:technical-program-manager, role:scrum-master]
 ---
 
 # WBS Generator

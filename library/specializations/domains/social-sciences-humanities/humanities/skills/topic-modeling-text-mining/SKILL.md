@@ -2,6 +2,12 @@
 name: topic-modeling-text-mining
 description: Apply LDA, NMF, and other computational methods to discover patterns in large text corpora with appropriate parameter tuning
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:natural-language-processing, skill-area:machine-learning-frameworks, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:data-scientist, role:computational-scientist]
 ---
 
 # Topic Modeling and Text Mining

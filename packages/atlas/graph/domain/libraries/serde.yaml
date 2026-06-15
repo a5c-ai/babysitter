@@ -1,0 +1,16 @@
+nodeKind: Library
+id: library:serde
+attributes:
+  displayName: "Serde"
+  belongsToLanguageId: language:rust
+  category: serialization
+  description: |
+    Generic serialization / deserialization framework for Rust data structures.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:aeson
+    - library:jackson

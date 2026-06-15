@@ -1,0 +1,81 @@
+nodeKind: Plugin
+id: plugin:babysitter-platform-plugin
+attributes:
+  displayName: "Babysitter Platform Plugin"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter"
+  installFormats: [marketplace, npm, local]
+  nativeFormat: babysitter-plugin
+  portability: hybrid
+  description: |
+    Portable Babysitter plugin source that packages Babysitter skills, commands,
+    hooks, and orchestration governance into concrete platform plugins. It is
+    the platform-plugin integration point that compiles or projects into host
+    specific plugins such as babysitter-codex and babysitter-claude.
+edges:
+  realizes:
+    - target: layer:14-governance
+  implements:
+    - target: extension-interface:governance
+    - target: extension-interface:orchestration
+    - target: extension-interface:reliability
+  compiles_to:
+    - target: plugin:babysitter-codex
+      host: plugin-target:codex
+    - target: plugin:babysitter-claude
+      host: plugin-target:claude-code
+  contains_tool_descriptor:
+    - target: tool-descriptor:babysitter-sdk-process-api
+  sourced_from:
+    - target: source-ref:babysitter-plugin
+---
+nodeKind: Plugin
+id: plugin:babysitter-codex
+attributes:
+  displayName: "babysitter-codex"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter-codex"
+  installFormats: [npm, local]
+  nativeFormat: codex-extension
+  portability: native
+  description: |
+    Codex-native Babysitter plugin integration. It targets the Codex plugin
+    surface through plugin-target:codex and carries the Babysitter governance,
+    orchestration, hook, task-tool, and breakpoint-routing surfaces into Codex.
+edges:
+  realizes:
+    - target: layer:14-governance
+  installs_into:
+    - target: agent:codex
+      installMethod: npm
+  implements:
+    - target: extension-interface:governance
+    - target: extension-interface:orchestration
+  sourced_from:
+    - target: source-ref:babysitter-codex-plugin
+---
+nodeKind: Plugin
+id: plugin:babysitter-claude
+attributes:
+  displayName: "babysitter-claude"
+  vendor: "a5c-ai"
+  homepageUrl: "https://github.com/a5c-ai/babysitter-claude"
+  installFormats: [marketplace, local]
+  nativeFormat: claude-plugin
+  portability: native
+  description: |
+    Claude Code-native Babysitter plugin integration. It targets the Claude Code
+    plugin surface through plugin-target:claude-code and carries Babysitter
+    governance, orchestration, hooks, commands, skills, task-tool, and
+    breakpoint-routing surfaces into Claude Code.
+edges:
+  realizes:
+    - target: layer:14-governance
+  installs_into:
+    - target: agent:claude-code
+      installMethod: marketplace
+  implements:
+    - target: extension-interface:governance
+    - target: extension-interface:orchestration
+  sourced_from:
+    - target: source-ref:babysitter-plugin

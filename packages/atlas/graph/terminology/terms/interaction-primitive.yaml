@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:interaction-primitive
+attributes:
+  canonicalDefinitionId: definition:interaction-primitive.canonical
+  displayName: "InteractionPrimitive"
+  kind: primitive
+  references:
+    - "NodeKind:InteractionPrimitive"
+  description: |
+    A concrete primitive (slash-command, @-mention, fork, voice, drag-drop, status-line, share-session, ...)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

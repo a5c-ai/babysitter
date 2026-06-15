@@ -1,0 +1,16 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:openclaw-manifest
+attributes:
+  artifactId: plugin-artifact:openclaw-manifest
+  displayName: "OpenClaw plugin manifest"
+  targetId: plugin-target:openclaw
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - event-hooks
+  contextFiles:
+    - packages/extensions-adapter/src/targets/openclaw.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:openclaw

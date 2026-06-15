@@ -16,6 +16,10 @@ metadata:
     - custom workflows
     - collaboration tools
     - documentation generators
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:competitive-intelligence, skill-area:strategic-analysis, skill-area:strategic-planning]
+  roles: [role:strategic-planner, role:business-analyst, role:marketing-strategist]
 ---
 
 # War Game Orchestrator

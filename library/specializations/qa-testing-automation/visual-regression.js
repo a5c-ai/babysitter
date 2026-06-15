@@ -28,6 +28,13 @@
  * - Applitools Eyes: https://applitools.com/
  * - Chromatic: https://www.chromatic.com/
  * - Visual Regression Testing Best Practices: https://testingjavascript.com/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:visual-regression-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -76,7 +83,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning visual regression testing strategy');
 
-  let strategyPlanning = await ctx.task(visualRegressionStrategyTask, {
+  const strategyPlanning = await ctx.task(visualRegressionStrategyTask, {
     projectName,
     applicationUrl,
     pages,
@@ -105,25 +112,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyPlanning.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      strategyPlanning = await ctx.task(visualRegressionStrategyTask, { ...{
-    projectName,
-    applicationUrl,
-    pages,
-    components,
-    framework,
-    tool,
-    viewports,
-    baselineStrategy,
-    thresholds,
-    crossBrowserTesting,
-    browsers,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Quality Gate: Strategy review
+  await ctx.breakpoint({
     question: `Visual regression strategy planned. Tool: ${tool}, ${strategyPlanning.totalScenarios} test scenarios identified across ${viewports.length} viewport(s). Baseline strategy: ${baselineStrategy}. Review and approve strategy?`,
     title: 'Visual Regression Strategy Review',
     context: {
@@ -138,15 +128,9 @@ export async function process(inputs, ctx) {
       },
       testCoverage: strategyPlanning.testCoverage,
       files: strategyPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: TOOL SETUP AND CONFIGURATION
   // ============================================================================
@@ -254,6 +238,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Page ${page}: ${pageBaseline.baselinesCaptured} baseline(s) captured`);
   }
+
   // Capture component baselines if specified
   const componentBaselineResults = [];
   if (components.length > 0) {
@@ -262,7 +247,7 @@ export async function process(inputs, ctx) {
     for (const component of components) {
       ctx.log('info', `Capturing baselines for component: ${component}`);
 
-      let componentBaseline = await ctx.task(captureComponentBaselinesTask, {
+      const componentBaseline = await ctx.task(captureComponentBaselinesTask, {
         projectName,
         component,
         viewports: viewportConfig.viewports,
@@ -283,18 +268,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Total baselines captured: ${baselinesCaptured}`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      componentBaseline = await ctx.task(captureComponentBaselinesTask, { ...{
-        projectName,
-        component,
-        viewports: viewportConfig.viewports,
-        tool: toolSetup.toolConfig,
-        outputDir
-      }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: Baseline review
+  await ctx.breakpoint({
     question: `Baseline capture complete. ${baselinesCaptured} baseline images captured across ${pages.length} page(s) and ${components.length} component(s). Review baselines and approve to proceed with visual tests?`,
     title: 'Baseline Capture Review',
     context: {
@@ -313,15 +288,9 @@ export async function process(inputs, ctx) {
       files: baselineResults
         .slice(0, 5)
         .map(b => ({ path: b.result.sampleImagePath, format: 'image', label: `Baseline: ${b.page}` }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: VISUAL TEST IMPLEMENTATION
   // ============================================================================
@@ -369,7 +338,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Running initial visual comparison tests');
 
-  let initialComparison = await ctx.task(visualComparisonTask, {
+  const initialComparison = await ctx.task(visualComparisonTask, {
     projectName,
     applicationUrl,
     visualTests: testImplementation.visualTests,
@@ -388,20 +357,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Initial comparison: ${totalDifferences} difference(s) found, ${criticalDifferences} critical`);
 
   // Quality Gate: Initial comparison results
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        initialComparison = await ctx.task(visualComparisonTask, { ...{
-    projectName,
-    applicationUrl,
-    visualTests: testImplementation.visualTests,
-    thresholdConfig: thresholdConfig.configuration,
-    tool: toolSetup.toolConfig,
-    runType: 'initial',
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (totalDifferences > 0) {
+    await ctx.breakpoint({
       question: `Initial visual comparison found ${totalDifferences} difference(s), including ${criticalDifferences} critical difference(s). This is expected for first run. Review differences and approve to continue?`,
       title: 'Initial Visual Comparison Results',
       context: {
@@ -418,15 +375,9 @@ export async function process(inputs, ctx) {
           { path: initialComparison.reportPath, format: 'html', label: 'Visual Comparison Report' },
           ...initialComparison.diffImages.slice(0, 5).map(img => ({ path: img, format: 'image', label: 'Diff' }))
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: DIFFERENCE ANALYSIS AND CATEGORIZATION
@@ -456,7 +407,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Implementing baseline update strategy');
 
-  let baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, {
+  const baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, {
     projectName,
     differenceAnalysis,
     baselineStrategy,
@@ -468,19 +419,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...baselineUpdateStrategy.artifacts);
 
   // Quality Gate: Baseline update approval
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, { ...{
-    projectName,
-    differenceAnalysis,
-    baselineStrategy,
-    acceptanceCriteria,
-    tool: toolSetup.toolConfig,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+  if (baselineUpdateStrategy.updatesRequired.length > 0) {
+    await ctx.breakpoint({
       question: `${baselineUpdateStrategy.updatesRequired.length} baseline(s) require update based on intentional changes. Review updates and approve baseline refresh?`,
       title: 'Baseline Update Approval',
       context: {
@@ -494,15 +434,9 @@ export async function process(inputs, ctx) {
         files: [
           { path: baselineUpdateStrategy.updatePlanPath, format: 'markdown', label: 'Update Plan' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: REGRESSION REMEDIATION
@@ -521,19 +455,8 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationResults.artifacts);
 
-      let lastFeedback_phase11Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase11Review) {
-        baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, { ...{
-    projectName,
-    differenceAnalysis,
-    baselineStrategy,
-    acceptanceCriteria,
-    tool: toolSetup.toolConfig,
-    outputDir
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-      }
-  const phase11Review = await ctx.breakpoint({
+    // Quality Gate: Regression review
+    await ctx.breakpoint({
       question: `${regressions.length} visual regression(s) detected. Review regressions and remediation plan. Approve to continue or halt for fixes?`,
       title: 'Visual Regression Detected',
       context: {
@@ -549,15 +472,9 @@ export async function process(inputs, ctx) {
           { path: remediationResults.reportPath, format: 'markdown', label: 'Regression Report' },
           ...regressions.slice(0, 3).map(r => ({ path: r.diffImagePath, format: 'image', label: `Regression: ${r.testName}` }))
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase11Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase11Review.approved) break;
-      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: FALSE POSITIVE ELIMINATION
@@ -600,6 +517,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cross-browser testing: ${crossBrowserResults.browserTestsRun} test(s) across ${browsers.length} browser(s)`);
   }
+
   // ============================================================================
   // PHASE 14: VISUAL TEST OPTIMIZATION
   // ============================================================================
@@ -660,6 +578,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', 'CI/CD integration configured');
   }
+
   // ============================================================================
   // PHASE 17: VISUAL TESTING DOCUMENTATION
   // ============================================================================
@@ -690,7 +609,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Conducting final validation');
 
-  let finalValidation = await ctx.task(visualRegressionValidationTask, {
+  const finalValidation = await ctx.task(visualRegressionValidationTask, {
     projectName,
     baselinesCaptured,
     visualTests: testImplementation.visualTests,
@@ -707,22 +626,8 @@ export async function process(inputs, ctx) {
   const validationScore = finalValidation.validationScore;
   const productionReady = finalValidation.productionReady;
 
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      finalValidation = await ctx.task(visualRegressionValidationTask, { ...{
-    projectName,
-    baselinesCaptured,
-    visualTests: testImplementation.visualTests,
-    comparisonResults: initialComparison,
-    differenceAnalysis,
-    regressions,
-    acceptanceCriteria,
-    cicdIntegrationResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // Final Breakpoint: Visual regression setup approval
+  await ctx.breakpoint({
     question: `Visual Regression Testing Setup Complete! Validation score: ${validationScore}/100. ${baselinesCaptured} baselines, ${visualTests.length} tests, ${regressions.length} regressions. Production ready: ${productionReady}. Approve for deployment?`,
     title: 'Visual Regression Setup Complete',
     context: {
@@ -756,15 +661,9 @@ export async function process(inputs, ctx) {
         { path: finalValidation.reportPath, format: 'markdown', label: 'Validation Report' },
         ...(differenceAnalysis.diffSummaryPath ? [{ path: differenceAnalysis.diffSummaryPath, format: 'html', label: 'Difference Summary' }] : [])
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -842,7 +741,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
@@ -1618,7 +1518,7 @@ export const visualDifferenceAnalysisTask = defineTask('visual-difference-analys
             }
           }
         },
-        analysisSum mary: {
+        analysisSummary: {
           type: 'object',
           properties: {
             totalDifferences: { type: 'number' },
@@ -1790,7 +1690,26 @@ export const visualRegressionValidationTask = defineTask('visual-regression-vali
 export const visualRegressionRemediationTask = defineTask('visual-regression-remediation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 11: Regression Remediation - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'Visual QA Engineer', task: 'Create remediation plan for visual regressions', context: args, instructions: ['Create remediation tasks', 'Prioritize by severity', 'Estimate effort', 'Document fixes'], outputFormat: 'JSON with remediation plan' }, outputSchema: { type: 'object', required: ['remediationTasks', 'estimatedEffort', 'reportPath', 'artifacts'], properties: { remediationTasks: { type: 'array' }, estimatedEffort: { type: 'string' }, reportPath: { type: 'string' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'Visual QA Engineer',
+      task: 'Create remediation plan for visual regressions',
+      context: args,
+      instructions: ['Create remediation tasks', 'Prioritize by severity', 'Estimate effort', 'Document fixes'],
+      outputFormat: 'JSON with remediation plan'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['remediationTasks', 'estimatedEffort', 'reportPath', 'artifacts'],
+      properties: {
+        remediationTasks: { type: 'array' },
+        estimatedEffort: { type: 'string' },
+        reportPath: { type: 'string' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'remediation']
 }));
@@ -1798,7 +1717,26 @@ export const visualRegressionRemediationTask = defineTask('visual-regression-rem
 export const falsePositiveEliminationTask = defineTask('false-positive-elimination', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 12: False Positive Elimination - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'Visual Testing Engineer', task: 'Eliminate false positives through improved masking and thresholds', context: args, instructions: ['Analyze false positives', 'Adjust masking', 'Tune thresholds', 'Re-run tests'], outputFormat: 'JSON with elimination results' }, outputSchema: { type: 'object', required: ['eliminatedCount', 'artifacts'], properties: { eliminatedCount: { type: 'number' }, adjustedMasks: { type: 'array' }, adjustedThresholds: { type: 'array' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'Visual Testing Engineer',
+      task: 'Eliminate false positives through improved masking and thresholds',
+      context: args,
+      instructions: ['Analyze false positives', 'Adjust masking', 'Tune thresholds', 'Re-run tests'],
+      outputFormat: 'JSON with elimination results'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['eliminatedCount', 'artifacts'],
+      properties: {
+        eliminatedCount: { type: 'number' },
+        adjustedMasks: { type: 'array' },
+        adjustedThresholds: { type: 'array' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'false-positives']
 }));
@@ -1806,7 +1744,26 @@ export const falsePositiveEliminationTask = defineTask('false-positive-eliminati
 export const crossBrowserVisualTestTask = defineTask('cross-browser-visual-test', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 13: Cross-Browser Visual Testing - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'Cross-Browser Testing Engineer', task: 'Run visual tests across multiple browsers', context: args, instructions: ['Run tests on each browser', 'Compare cross-browser differences', 'Document rendering variations'], outputFormat: 'JSON with cross-browser results' }, outputSchema: { type: 'object', required: ['browserTestsRun', 'crossBrowserDifferences', 'artifacts'], properties: { browserTestsRun: { type: 'number' }, crossBrowserDifferences: { type: 'number' }, browsers: { type: 'array' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'Cross-Browser Testing Engineer',
+      task: 'Run visual tests across multiple browsers',
+      context: args,
+      instructions: ['Run tests on each browser', 'Compare cross-browser differences', 'Document rendering variations'],
+      outputFormat: 'JSON with cross-browser results'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['browserTestsRun', 'crossBrowserDifferences', 'artifacts'],
+      properties: {
+        browserTestsRun: { type: 'number' },
+        crossBrowserDifferences: { type: 'number' },
+        browsers: { type: 'array' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'cross-browser']
 }));
@@ -1814,7 +1771,26 @@ export const crossBrowserVisualTestTask = defineTask('cross-browser-visual-test'
 export const visualTestOptimizationTask = defineTask('visual-test-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 14: Test Optimization - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'Performance Engineer', task: 'Optimize visual test execution performance', context: args, instructions: ['Enable parallel execution', 'Optimize screenshot capture', 'Reduce test duration'], outputFormat: 'JSON with optimization results' }, outputSchema: { type: 'object', required: ['speedupFactor', 'optimizedExecutionTime', 'artifacts'], properties: { speedupFactor: { type: 'number' }, optimizedExecutionTime: { type: 'string' }, optimizations: { type: 'array' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'Performance Engineer',
+      task: 'Optimize visual test execution performance',
+      context: args,
+      instructions: ['Enable parallel execution', 'Optimize screenshot capture', 'Reduce test duration'],
+      outputFormat: 'JSON with optimization results'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['speedupFactor', 'optimizedExecutionTime', 'artifacts'],
+      properties: {
+        speedupFactor: { type: 'number' },
+        optimizedExecutionTime: { type: 'string' },
+        optimizations: { type: 'array' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'optimization']
 }));
@@ -1822,7 +1798,25 @@ export const visualTestOptimizationTask = defineTask('visual-test-optimization',
 export const visualRegressionReportingTask = defineTask('visual-regression-reporting', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 15: Reporting Setup - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'QA Reporting Specialist', task: 'Set up visual regression reporting and review workflow', context: args, instructions: ['Generate HTML reports', 'Create review dashboard', 'Set up approval workflow'], outputFormat: 'JSON with reporting setup' }, outputSchema: { type: 'object', required: ['mainReportPath', 'artifacts'], properties: { mainReportPath: { type: 'string' }, dashboardUrl: { type: 'string' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'QA Reporting Specialist',
+      task: 'Set up visual regression reporting and review workflow',
+      context: args,
+      instructions: ['Generate HTML reports', 'Create review dashboard', 'Set up approval workflow'],
+      outputFormat: 'JSON with reporting setup'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['mainReportPath', 'artifacts'],
+      properties: {
+        mainReportPath: { type: 'string' },
+        dashboardUrl: { type: 'string' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'reporting']
 }));
@@ -1830,7 +1824,26 @@ export const visualRegressionReportingTask = defineTask('visual-regression-repor
 export const visualRegressionCICDTask = defineTask('visual-regression-cicd', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 16: CI/CD Integration - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'DevOps Engineer', task: 'Integrate visual regression testing into CI/CD pipeline', context: args, instructions: ['Create pipeline config', 'Set up quality gates', 'Configure baseline management'], outputFormat: 'JSON with CI/CD integration' }, outputSchema: { type: 'object', required: ['configured', 'pipelineConfigPath', 'qualityGatesEnabled', 'artifacts'], properties: { configured: { type: 'boolean' }, pipelineConfigPath: { type: 'string' }, qualityGatesEnabled: { type: 'boolean' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'DevOps Engineer',
+      task: 'Integrate visual regression testing into CI/CD pipeline',
+      context: args,
+      instructions: ['Create pipeline config', 'Set up quality gates', 'Configure baseline management'],
+      outputFormat: 'JSON with CI/CD integration'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['configured', 'pipelineConfigPath', 'qualityGatesEnabled', 'artifacts'],
+      properties: {
+        configured: { type: 'boolean' },
+        pipelineConfigPath: { type: 'string' },
+        qualityGatesEnabled: { type: 'boolean' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'cicd']
 }));
@@ -1838,7 +1851,26 @@ export const visualRegressionCICDTask = defineTask('visual-regression-cicd', (ar
 export const visualRegressionDocumentationTask = defineTask('visual-regression-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 17: Documentation - ${args.projectName}`,
-  agent: { name: 'e2e-automation-expert', // AG-002: E2E Automation Expert Agent prompt: { role: 'Technical Writer', task: 'Generate comprehensive visual regression testing documentation', context: args, instructions: ['Create setup guide', 'Write usage documentation', 'Document troubleshooting'], outputFormat: 'JSON with documentation paths' }, outputSchema: { type: 'object', required: ['setupGuidePath', 'usageGuidePath', 'troubleshootingPath', 'artifacts'], properties: { setupGuidePath: { type: 'string' }, usageGuidePath: { type: 'string' }, troubleshootingPath: { type: 'string' }, artifacts: { type: 'array' } } } },
+  agent: {
+    name: 'e2e-automation-expert',
+    prompt: {
+      role: 'Technical Writer',
+      task: 'Generate comprehensive visual regression testing documentation',
+      context: args,
+      instructions: ['Create setup guide', 'Write usage documentation', 'Document troubleshooting'],
+      outputFormat: 'JSON with documentation paths'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['setupGuidePath', 'usageGuidePath', 'troubleshootingPath', 'artifacts'],
+      properties: {
+        setupGuidePath: { type: 'string' },
+        usageGuidePath: { type: 'string' },
+        troubleshootingPath: { type: 'string' },
+        artifacts: { type: 'array' }
+      }
+    }
+  },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
   labels: ['agent', 'visual-regression', 'documentation']
 }));

@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: returns
   priority: lower
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:financial-planning, skill-area:data-analytics]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Returns Disposition Optimizer

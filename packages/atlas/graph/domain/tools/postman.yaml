@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:postman
+attributes:
+  displayName: "Postman"
+  homepageUrl: "https://www.postman.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Collaboration platform for API development - request building, collections, and tests.
+edges:
+  tool_used_by:
+    - target: skill-area:api-design
+  alternative_to:
+    - target: tool:insomnia
+      comparison: "API testing clients"
+    - target: tool:hoppscotch
+      comparison: "API testing clients"
+    - target: tool:bruno
+      comparison: "API testing clients"
+    - target: tool:httpie
+      comparison: "API testing clients"

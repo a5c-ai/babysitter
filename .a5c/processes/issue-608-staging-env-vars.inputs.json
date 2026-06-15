@@ -1,0 +1,67 @@
+{
+  "issueNumber": 608,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-608-staging-env-vars",
+  "stagingHost": "kradle-staging.a5c.ai",
+  "chartPath": "packages/kradle/charts",
+  "deployLiveStaging": false,
+  "requiredEnv": [
+    "ANTHROPIC_API_KEY",
+    "KRADLE_ASSISTANT_API_KEY",
+    "KRADLE_GITEA_HTTP_URL",
+    "KRADLE_GITEA_TOKEN",
+    "AGENT_MUX_URL",
+    "AGENT_GATEWAY_URL"
+  ],
+  "requiredWorkflows": [
+    "Assistant chat and playground make a real model call instead of returning API key not configured.",
+    "Repository code browser and clone URLs use real Gitea data rather than placeholder/template data.",
+    "Agent dispatch reaches Agent Mux and produces job/session/transcript evidence."
+  ],
+  "targetFiles": [
+    "packages/kradle/charts/values.yaml",
+    "packages/kradle/charts/templates/deployments.yaml",
+    "packages/kradle/charts/templates/gitea.yaml",
+    "packages/kradle/charts/README.md",
+    "packages/kradle/core/tests/deployment.test.js",
+    "packages/kradle/core/scripts/validate-package.mjs",
+    "packages/kradle/docs/gaps/staging-status.md",
+    "packages/kradle/docs/gaps/infrastructure-deps.md"
+  ],
+  "runtimeTraceFiles": [
+    "packages/kradle/web/app/api/orgs/[org]/snapshot/route.js",
+    "packages/kradle/core/src/assistant-runtime.js",
+    "packages/kradle/core/src/gitea-service.js",
+    "packages/kradle/core/src/adapters-client.js",
+    "packages/kradle/core/src/agent-dispatch-controller.js",
+    "packages/kradle/web/app/api/orgs/[org]/repositories/[name]/tree/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/repositories/[name]/blob/[...path]/route.js"
+  ],
+  "verificationCommands": [
+    "node --test packages/kradle/core/tests/deployment.test.js",
+    "cd packages/kradle/core && node scripts/validate-package.mjs",
+    "helm template kradle packages/kradle/charts -n kradle-system --set argocd.enabled=false",
+    "helm template kradle packages/kradle/charts -n kradle-system --set argocd.enabled=false --set gitea.httpUrl=http://gitea-http.kradle-system.svc.cluster.local:3000/kradle --set agentMux.url=http://adapters.kradle-system.svc.cluster.local:8080 --set assistant.existingSecret=kradle-assistant --set gitea.token.existingSecret=kradle-gitea-token",
+    "git diff --check"
+  ],
+  "secretExposureChecks": [
+    "No plaintext Anthropic API key or Gitea token appears in source, rendered manifests, logs, PR body, or issue comments.",
+    "Rendered manifests use secretKeyRef or other approved secret references for token-bearing values.",
+    "Agent and verification output redacts secret values and reports only object/key names."
+  ],
+  "smokeChecks": [
+    "GET https://kradle-staging.a5c.ai/api/orgs/default/snapshot reports Kubernetes, Gitea, and Agent Mux healthy.",
+    "Assistant chat/playground returns a model response and usage metadata without API key errors.",
+    "Repository tree/blob routes return source:gitea for a real repository.",
+    "Dispatch creates a real Agent Mux-backed job/session/transcript path."
+  ],
+  "processLibraryReferences": [
+    "methodologies/spec-kit-brownfield.js",
+    "methodologies/rpikit/rpikit-plan.js",
+    "methodologies/superpowers/verification-before-completion.js",
+    "specializations/devops-sre-platform/agents/platform-engineer/AGENT.md",
+    "specializations/devops-sre-platform/agents/kubernetes-expert/AGENT.md",
+    "specializations/qa-testing-automation/agents/test-strategy-architect/AGENT.md",
+    "specializations/security-compliance/agents/secure-code-reviewer-agent/AGENT.md"
+  ]
+}

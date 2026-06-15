@@ -1,0 +1,22 @@
+nodeKind: HookSurface
+id: hook-surface:codex.on-stop
+attributes:
+  eventName: "OnStop (Codex)"
+  displayName: "OnStop (Codex)"
+  kind: native
+  originVendor: OpenAI
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [sessionId]
+    properties:
+      sessionId: { type: string }
+      reason: { type: string }
+  description: |
+    Codex's session-stop hook. Fired when the assistant finishes its
+    last turn before yielding control. Canonicalizes to stop.
+edges:
+  canonicalized_to:
+    - target: hook-surface:stop

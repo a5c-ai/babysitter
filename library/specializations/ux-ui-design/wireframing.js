@@ -3,6 +3,12 @@
  * @description Wireframing and Lo-Fi Prototyping process for exploring information architecture, layout, and user flows through iterative wireframe creation
  * @inputs { projectName: string, requirements: array, userFlows: array, contentInventory: object, designPrinciples: array, fidelityLevel: string }
  * @outputs { success: boolean, wireframes: object, userFlowDiagrams: array, annotations: array, artifacts: array }
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:ux-ui-design]
+ *   skillAreas: [skill-area:design-systems, skill-area:interaction-design]
+ *   roles: [role:product-designer, role:ux-researcher]
+ *   workflows: [workflow:user-feedback-loop, workflow:product-discovery]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

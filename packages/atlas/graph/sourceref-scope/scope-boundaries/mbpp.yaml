@@ -1,0 +1,20 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:mbpp.scope
+attributes:
+  subjectId: benchmark:mbpp
+  inScope: |
+    Mostly-Basic-Python-Problems — 974 short Python function tasks
+    (entry-level, designed for ~3-line solutions) scored by pass-at-k
+    against 3 unit tests per problem. English-only natural-language
+    prompts.
+  outOfScope: |
+    Languages other than Python, repository-scale or multi-file tasks
+    (use SWE-bench), advanced algorithms / competitive-programming tasks
+    (use APPS / LiveCodeBench), agentic tool-use, and tasks requiring
+    external libraries beyond Python stdlib.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:mbpp

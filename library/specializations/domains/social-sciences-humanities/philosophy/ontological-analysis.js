@@ -5,6 +5,13 @@
  * @outputs { success: boolean, ontologicalInvestigation: object, metaphysicalFindings: object, philosophicalPosition: object, artifacts: array }
  * @recommendedSkills SK-PHIL-005 (conceptual-analysis), SK-PHIL-006 (thought-experiment-design), SK-PHIL-010 (philosophical-writing-argumentation)
  * @recommendedAgents AG-PHIL-004 (metaphysics-epistemology-agent), AG-PHIL-006 (academic-philosophy-writer-agent)
+ *
+ * @graph
+ *   domains: [domain:philosophy]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

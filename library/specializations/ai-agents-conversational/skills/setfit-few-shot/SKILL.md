@@ -8,6 +8,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:ml-fine-tuning, skill-area:natural-language-processing]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # SetFit Few-Shot Skill

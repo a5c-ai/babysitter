@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: combinatorics
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:graph-algorithms, skill-area:dynamic-programming, skill-area:np-hard-heuristics]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Graph Algorithm Library

@@ -17,6 +17,12 @@
  * - Code Size Optimization: https://interrupt.memfault.com/blog/code-size-optimization-gcc-flags
  * - Link-Time Optimization: https://gcc.gnu.org/wiki/LinkTimeOptimization
  * - Dead Code Elimination: https://www.embedded.com/dead-code-elimination/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:compiler-implementation]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

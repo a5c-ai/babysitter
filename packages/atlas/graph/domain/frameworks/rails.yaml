@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:rails
+attributes:
+  displayName: "Ruby on Rails"
+  homepageUrl: "https://rubyonrails.org"
+  belongsToLanguageId: language:ruby
+  category: web-backend
+  description: |
+    Ruby on Rails web framework.
+edges:
+  belongs_to_language:
+    - language:ruby
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:laravel
+      comparison: "Full-stack server-side frameworks"

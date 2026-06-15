@@ -1,0 +1,131 @@
+{
+  "projectName": "v6 Agent Catalog Schema",
+  "domainDescription": "Comprehensive agentic-stack ontology and catalog covering NodeKinds, EdgeKinds, examples, generators, encyclopedia, tests, SDK, and operator surfaces. Source of truth: a graph ontology from which downstream code, docs, and tools are derived. Currently has ~123 NodeKinds, ~190+ EdgeKinds, ~1500+ example YAML files spanning 15 clusters. Symphony SPEC concepts (workspaces, run attempts, live sessions, observability surfaces, issue trackers, failure recovery) recently landed in Wave-18; Trust Chain is explicitly OUT OF SCOPE.",
+  "ontologyScope": "encyclopedic",
+  "graphDepth": "complete",
+  "wikiTarget": "full-reference",
+  "iterationDepth": "thorough",
+  "adversarialMode": "standard",
+  "projectComplexity": "enterprise",
+  "stakeholderContext": "single-team",
+  "domainType": "ai-ml-systems",
+  "riskProfile": "moderate",
+  "targetQuality": 92,
+  "maxIterationsPerPhase": 4,
+  "phase": "full",
+
+  "ontology": {
+    "name": "v6 catalog-schema",
+    "schemaFile": "C:/work/v6/catalog-schema/schema/ontology-schema.yaml",
+    "markdownDir": "C:/work/v6/catalog-schema/02-node-kinds",
+    "edgeKindsFile": "C:/work/v6/catalog-schema/03-edge-kinds.md",
+    "examplesDir": "C:/work/v6/catalog-schema/schema/examples",
+    "validationRulesFile": "C:/work/v6/catalog-schema/05-validation-rules.md",
+    "remodelNotesFile": "C:/work/v6/catalog-schema/REMODEL-NOTES.md",
+    "metaSchemaFile": "C:/work/v6/catalog-schema/01-meta-schema.md",
+    "evidenceModelFile": "C:/work/v6/catalog-schema/04-evidence-model.md",
+    "validatorCmd": "cd C:/work/v6/catalog-schema/tools/validator && python validate.py",
+    "validatorReportPath": "C:/work/v6/.validator-report.json",
+    "researchDir": "C:/work/v6/research"
+  },
+
+  "domainContext": {
+    "industry": "AI / Agent Engineering / Catalog Engineering",
+    "targetUsers": [
+      "Agent platform engineers",
+      "Skill/Plugin/Subagent authors",
+      "Catalog consumers (UIs, generators, validators)",
+      "Methodology authors",
+      "Observability/operator dashboards"
+    ],
+    "keyDomains": [
+      "Agent/runtime/transport semantics",
+      "Skills, Plugins, Subagents, Agents, Roles",
+      "Process orchestration + lifecycle",
+      "Observability and operator surfaces (TUI/web/API)",
+      "Issue trackers + workflows",
+      "Failure/recovery + safety descriptors",
+      "Benchmarks + SkillAreas",
+      "Platforms + PlatformServices",
+      "Interaction primitives (MCP, async-jobs, human-checkpoints)"
+    ],
+    "externalReferenceCatalogs": [
+      "OpenAI Symphony SPEC (research/symphony-spec.md)",
+      "OpenAI Codex app-server protocol",
+      "Anthropic agent + Claude API surfaces",
+      "Model Context Protocol (MCP)",
+      "Backstage software catalog",
+      "ServiceNow CMDB",
+      "OpenTelemetry semconv",
+      "C4 + ArchiMate (architecture KGs)",
+      "OpenAPI / AsyncAPI / JSON Schema",
+      "LangChain / LlamaIndex agent abstractions"
+    ]
+  },
+
+  "industryReferenceModels": [
+    "openai-symphony-spec",
+    "openai-codex-app-server",
+    "anthropic-claude-api",
+    "model-context-protocol",
+    "backstage-catalog",
+    "opentelemetry-semconv",
+    "c4-architecture-model",
+    "openapi-spec",
+    "langchain-agent-abstractions",
+    "servicenow-cmdb"
+  ],
+
+  "forbiddenChanges": [
+    "Trust Chain — Authority/Attestation/trust-interface concepts are OUT OF SCOPE for the entire catalog. Do not propose, add, or extend Trust Chain entities or edges in any phase.",
+    "No new wave-N / batch-N / round-N / iteration-N filenames. Use semantic naming.",
+    "Phase-* lifecycle vocabulary files (canonical) must not be split or renamed."
+  ],
+
+  "preferredCollapsePrecedents": [
+    "2026-04-29 remodel collapsed Hook, HookFamily, ChannelKind, Modality, TermKind from NodeKinds to enums (precedent A.1-A.5).",
+    "Wave-17 collapsed OutputFormat / IOSurface / AgentMemory / NotificationChannel / HumanReadableStatusSurface to enum extensions instead of NodeKinds.",
+    "ApprovalPolicy + SandboxPolicy already exist as enums on AgentRuntimeImpl + a Sandbox NodeKind — do not re-reify."
+  ],
+
+  "currentState": {
+    "lastImprovementCycle": "Wave-18 (Symphony application-layer additions)",
+    "validatorBaseline": {
+      "passing": 1122,
+      "structural": 0,
+      "dangling": 0,
+      "evidenceViolations": "out-of-scope (Trust Chain)"
+    },
+    "knownOpenAreas": [
+      "Encyclopedia (Phase 4 home) — not started; spec exists at 06-derivation-spec.md",
+      "Generators (Phase 3 home) — not started",
+      "QA/CI/CD/test infrastructure (Phase 5 home) — not started",
+      "Coverage-checklist OpenQuestions count: ~29 (as of mid-Wave-18)",
+      "InteractionPattern populated (8 canonical patterns) but more needed",
+      "Cluster-9 (domain) Platform/PlatformService recently added — examples thin in some platforms"
+    ],
+    "completedWavesThisCycle": [
+      "Wave-15: 28 Role->SkillArea edges + 25 new Roles + 24 Responsibilities + 10 OrgUnits",
+      "Wave-16: Platform/PlatformService NodeKinds + 5 edges + 19 cloud-primitive StackParts + 8 SkillAreas + 10 Platforms + 65 PlatformServices + 14 benchmark covers",
+      "Wave-17: 17 benchmarks + 11 SkillAreas + 7 interaction-primitive NodeKinds + 8 enums + 5 edges + 37 examples + 40 wave-* files restructured into 111 semantic files (765 ids conserved)",
+      "Wave-18: 20 application-layer NodeKinds + 10 enums + 14 edges + 49 examples sourced from Symphony SPEC"
+    ]
+  },
+
+  "strategicContext": {
+    "northStar": "Graph thorough enough to write a full wiki/encyclopedia on the entire agent-engineering domain.",
+    "downstreamDerivations": [
+      "Validator (Phase 1.5) — partially built",
+      "Generators (Phase 3) — code/docs/SDK derived from graph",
+      "Encyclopedia (Phase 4) — full wiki derived from graph queries",
+      "Test infrastructure (Phase 5) — coverage, evidence boundaries, versioning, CI/CD"
+    ],
+    "primaryConsumers": [
+      "Babysitter SDK (programmable interface)",
+      "Babysitter CLI",
+      "Claude Code / Codex / Cursor harnesses",
+      "MCP servers + tools",
+      "Marketplace plugins"
+    ]
+  }
+}

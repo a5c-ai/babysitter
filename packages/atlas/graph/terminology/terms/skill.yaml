@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:skill
+attributes:
+  displayName: "Skill"
+  kind: extension-shape
+  references:
+    - "NodeKind:Skill"
+  description: |
+    A SKILL.md-driven extension shape.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

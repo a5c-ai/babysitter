@@ -1,0 +1,364 @@
+---
+nodeKind: Domain
+id: domain:K12-education
+attributes:
+  displayName: "K-12 Education"
+  description: |
+    Primary and secondary education systems — curriculum delivery, classroom
+    technology, student assessment platforms, and school administration.
+    Encompasses public, private, and charter school operations along with
+    standardized testing and learning management systems.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:higher-education
+attributes:
+  displayName: "Higher Education"
+  description: |
+    Post-secondary academic institutions — universities, colleges, and
+    graduate programs. Covers admissions, enrollment management, course
+    scheduling, research administration, and alumni engagement platforms.
+    Includes both traditional campus and distance learning models.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:vocational-training
+attributes:
+  displayName: "Vocational Training"
+  description: |
+    Skills-based education programs that prepare learners for specific trades
+    and occupations — apprenticeships, certification programs, technical
+    colleges, and workforce development initiatives. Emphasizes hands-on
+    competency assessment and industry-aligned curricula.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:corporate-training
+attributes:
+  displayName: "Corporate Training"
+  description: |
+    Employee learning and development programs within organizations —
+    onboarding, compliance training, leadership development, and upskilling
+    initiatives. Leverages learning management systems, microlearning
+    platforms, and skills gap analysis to drive workforce capability.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:special-education
+attributes:
+  displayName: "Special Education"
+  description: |
+    Educational services designed for students with disabilities or
+    exceptional learning needs — individualized education programs (IEPs),
+    assistive technology, behavioral intervention plans, and inclusive
+    classroom strategies. Governed by regulations like IDEA and Section 504.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:online-learning
+attributes:
+  displayName: "Online Learning"
+  description: |
+    Digital-first education delivery — MOOCs, virtual classrooms, asynchronous
+    course platforms, and blended learning environments. Covers instructional
+    design for digital media, learner analytics, engagement optimization,
+    and content authoring tools.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:educational-assessment
+attributes:
+  displayName: "Educational Assessment"
+  description: |
+    Design, administration, and analysis of assessments that measure student
+    learning — standardized tests, formative assessments, adaptive testing
+    engines, and psychometric analysis. Ensures validity, reliability, and
+    fairness of measurement instruments.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:student-information-systems
+attributes:
+  displayName: "Student Information Systems"
+  description: |
+    Software platforms that manage student records, enrollment, grades,
+    attendance, and transcripts across educational institutions. Integrates
+    with learning management systems, financial aid, and reporting tools
+    to support institutional operations and regulatory compliance.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:library-science
+attributes:
+  displayName: "Library Science"
+  description: |
+    Organization, preservation, and dissemination of information resources —
+    cataloging systems, digital archives, metadata standards, interlibrary
+    loan networks, and information literacy programs. Encompasses both
+    physical and digital collection management.
+edges:
+  contains:
+    - specialization:education
+---
+nodeKind: Domain
+id: domain:academic-publishing
+attributes:
+  displayName: "Academic Publishing"
+  description: |
+    Production and distribution of scholarly research — peer review workflows,
+    journal management systems, open access publishing, citation indexing,
+    and preprint servers. Covers the full lifecycle from manuscript
+    submission through publication and post-publication metrics.
+edges:
+  contains:
+    - specialization:research
+---
+nodeKind: Domain
+id: domain:renewable-energy
+attributes:
+  displayName: "Renewable Energy"
+  description: |
+    Generation of electricity from sustainable sources — solar photovoltaics,
+    wind turbines, hydroelectric, geothermal, and biomass systems. Covers
+    project development, resource assessment, grid interconnection, and
+    performance monitoring of renewable installations.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:oil-gas
+attributes:
+  displayName: "Oil & Gas"
+  description: |
+    Upstream, midstream, and downstream petroleum operations — exploration,
+    drilling, production, refining, and distribution. Encompasses reservoir
+    simulation, SCADA systems, pipeline integrity management, and
+    environmental compliance for hydrocarbon operations.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:nuclear-energy
+attributes:
+  displayName: "Nuclear Energy"
+  description: |
+    Nuclear fission and fusion power generation — reactor design, fuel cycle
+    management, radiation safety, waste disposal, and regulatory compliance
+    (NRC, IAEA). Covers both traditional light-water reactors and advanced
+    reactor concepts like small modular reactors.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:carbon-capture
+attributes:
+  displayName: "Carbon Capture"
+  description: |
+    Technologies that capture CO2 emissions from industrial sources or
+    directly from the atmosphere — post-combustion capture, direct air
+    capture, carbon mineralization, and geological sequestration. Includes
+    monitoring, reporting, and verification of stored carbon.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:electric-vehicles
+attributes:
+  displayName: "Electric Vehicles"
+  description: |
+    Design, manufacturing, and infrastructure for battery-electric and
+    plug-in hybrid vehicles — powertrain engineering, charging network
+    deployment, battery management systems, and vehicle-to-grid
+    integration. Spans consumer, commercial, and fleet applications.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:battery-technology
+attributes:
+  displayName: "Battery Technology"
+  description: |
+    Energy storage research and manufacturing — lithium-ion, solid-state,
+    flow batteries, and next-generation chemistries. Covers cell design,
+    thermal management, battery management systems, lifecycle analysis,
+    and recycling processes for stationary and mobile applications.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:grid-modernization
+attributes:
+  displayName: "Grid Modernization"
+  description: |
+    Upgrading electrical grid infrastructure for reliability, resilience, and
+    renewable integration — smart meters, advanced distribution management
+    systems, demand response, microgrids, and grid-scale energy storage.
+    Enables bidirectional power flow and real-time grid optimization.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:climate-adaptation
+attributes:
+  displayName: "Climate Adaptation"
+  description: |
+    Strategies and infrastructure to adapt human systems to climate change
+    impacts — flood resilience, heat island mitigation, drought-resistant
+    agriculture, coastal protection, and climate-resilient urban design.
+    Uses climate projections to inform long-term planning.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:biodiversity
+attributes:
+  displayName: "Biodiversity"
+  description: |
+    Conservation and monitoring of biological diversity — species tracking,
+    habitat mapping, ecological modeling, wildlife corridors, and
+    biodiversity offset programs. Leverages remote sensing, eDNA sampling,
+    and citizen science platforms for ecosystem health assessment.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:ocean-conservation
+attributes:
+  displayName: "Ocean Conservation"
+  description: |
+    Protection and sustainable management of marine ecosystems — ocean
+    acidification monitoring, marine protected area design, fisheries
+    management, coral reef restoration, and plastic pollution mitigation.
+    Integrates satellite oceanography and underwater sensor networks.
+edges:
+  contains:
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:commercial-real-estate
+attributes:
+  displayName: "Commercial Real Estate"
+  description: |
+    Acquisition, development, leasing, and management of commercial
+    properties — office buildings, retail centers, industrial warehouses,
+    and mixed-use developments. Covers financial modeling, tenant
+    management, market analysis, and portfolio optimization.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:residential-construction
+attributes:
+  displayName: "Residential Construction"
+  description: |
+    Design and construction of housing — single-family homes, multi-family
+    complexes, and planned communities. Encompasses permitting, site
+    preparation, framing, mechanical systems, finishing, and warranty
+    management across the project lifecycle.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:building-information-modeling
+attributes:
+  displayName: "Building Information Modeling"
+  description: |
+    Digital representation and management of building design and construction
+    data — 3D modeling, clash detection, quantity takeoff, and facility
+    lifecycle management. BIM enables multidisciplinary coordination
+    across architecture, structure, and MEP trades.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:structural-engineering
+attributes:
+  displayName: "Structural Engineering"
+  description: |
+    Analysis and design of load-bearing structures — buildings, bridges,
+    towers, and foundations. Covers structural analysis software, seismic
+    design, wind engineering, progressive collapse prevention, and
+    structural health monitoring systems.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:HVAC-systems
+attributes:
+  displayName: "HVAC Systems"
+  description: |
+    Heating, ventilation, and air conditioning design and controls —
+    load calculations, ductwork design, refrigeration cycles, building
+    automation systems, and indoor air quality management. Balances
+    occupant comfort with energy efficiency requirements.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:fire-safety
+attributes:
+  displayName: "Fire Safety"
+  description: |
+    Fire protection engineering and life safety systems — fire detection
+    and alarm design, sprinkler systems, smoke control, egress analysis,
+    and code compliance (NFPA, IBC). Covers both active and passive fire
+    protection strategies for buildings and industrial facilities.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:elevator-systems
+attributes:
+  displayName: "Elevator Systems"
+  description: |
+    Vertical transportation engineering — elevator design, escalator systems,
+    traffic analysis, dispatching algorithms, and predictive maintenance.
+    Covers traction, hydraulic, and machine-room-less configurations for
+    residential, commercial, and high-rise applications.
+edges:
+  contains:
+    - specialization:civil-engineering
+---
+nodeKind: Domain
+id: domain:smart-buildings
+attributes:
+  displayName: "Smart Buildings"
+  description: |
+    Intelligent building systems that integrate IoT sensors, building
+    automation, and data analytics — occupancy-driven HVAC, automated
+    lighting, predictive maintenance, digital twins, and tenant experience
+    platforms. Optimizes energy use, comfort, and operational efficiency.
+edges:
+  contains:
+    - specialization:civil-engineering

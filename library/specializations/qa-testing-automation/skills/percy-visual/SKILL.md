@@ -8,6 +8,14 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:visual-regression-testing]
+  roles: [role:qa-engineer, role:frontend-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Percy Visual Testing Skill

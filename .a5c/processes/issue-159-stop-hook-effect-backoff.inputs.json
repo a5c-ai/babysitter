@@ -1,0 +1,88 @@
+{
+  "issueNumber": 159,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-159-stop-hook-effect-backoff",
+  "title": "[Hooks] Feature: exponential backoff in babysitter-stop-hook.sh per-effectId during long agent waits",
+  "labels": [
+    "sdk",
+    "hooks-mux",
+    "effort:medium",
+    "ready-for-dev",
+    "plugins",
+    "feature",
+    "priority:medium"
+  ],
+  "summary": "Add per-effectId exponential backoff to the shared stop-hook path so repeated blocks while the same agent effect is pending produce fewer redundant assistant turns without delaying progress after the effect resolves.",
+  "targetFiles": [
+    "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+    "packages/sdk/src/harness/hooks/stopHookContinuation.ts",
+    "packages/sdk/src/harness/hooks/utils.ts",
+    "packages/sdk/src/harness/hooks/runState.ts",
+    "packages/sdk/src/runtime/runLifecycleState.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/storage/journal.ts",
+    "packages/sdk/src/cli/commands/__tests__/hookRun.test.ts",
+    "packages/sdk/src/harness/__tests__/harness.test.ts",
+    "plugins/babysitter-unified/hooks/stop.sh"
+  ],
+  "relatedIssues": [
+    158,
+    160,
+    170
+  ],
+  "processLibraryReferences": [
+    "methodologies/atdd-tdd/atdd-tdd.js",
+    "methodologies/process-hardening/process-hardening-patterns.js",
+    "processes/shared/deterministic-quality-gate.js",
+    "specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "specializations/sdk-platform-development/error-handling-debugging-support.js",
+    "specializations/sdk-platform-development/compatibility-testing.js",
+    "specializations/qa-testing-automation/quality-gates.js"
+  ],
+  "implementationFocus": [
+    "Implement the feature in the SDK shared stop-hook runtime rather than only in plugins/babysitter-unified/hooks/stop.sh, because that wrapper delegates to babysitter hook:run.",
+    "Identify the current pending effectId when run state is waiting and apply backoff per runId plus effectId.",
+    "Use default delay semantics matching the issue: 10 seconds, 30 seconds, 90 seconds, then cap at 300 seconds.",
+    "Expose BABYSITTER_HOOK_BACKOFF_BASE and BABYSITTER_HOOK_BACKOFF_CAP with defensive parsing.",
+    "Record effectId and actual applied delay on STOP_HOOK_INVOKED.",
+    "Ensure effect resolution during a backoff period causes prompt continuation instead of waiting for the full old delay."
+  ],
+  "acceptanceFocus": [
+    "Per-effectId fire counter or equivalent journal-derived count is tracked.",
+    "Delay grows for repeated stop-hook fires on the same effectId and caps at the configured maximum.",
+    "Counter or derived state resets when EFFECT_RESOLVED or EFFECT_CANCELLED is observed for that effectId.",
+    "Run-level tracking is cleaned up or harmless after RUN_COMPLETED and RUN_FAILED.",
+    "When an effect resolves during backoff, the next hook fire happens promptly and #158-style post-resolution progress is not regressed.",
+    "BABYSITTER_HOOK_BACKOFF_BASE defaults to 10 seconds and BABYSITTER_HOOK_BACKOFF_CAP defaults to 300 seconds.",
+    "STOP_HOOK_INVOKED includes the actual applied delay and effectId.",
+    "Short tasks and breakpoint-only waits keep existing behavior."
+  ],
+  "qualityGates": [
+    "Regression tests fail before implementation and pass after implementation.",
+    "Targeted hookRun tests cover default growth, cap, env overrides, reset on resolve/cancel, terminal cleanup, journal metadata, and interruptible wait behavior.",
+    "Targeted hookRun tests do not sleep for real backoff durations.",
+    "No regression for issue #158 post-resolution progress.",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/commands/__tests__/hookRun.test.ts passes.",
+    "npm run build:sdk passes.",
+    "npm run test:sdk passes or any unrelated pre-existing failures are documented with evidence.",
+    "Reviewer approves compatibility with shared hook behavior and plugin wrapper expectations."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/commands/__tests__/hookRun.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/harness/__tests__/harness.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk"
+  ],
+  "nonGoals": [
+    "Do not fix issue #158 except to prevent regressions in its behavior.",
+    "Do not change broad orchestration lifecycle semantics outside stop-hook continuation/backoff handling.",
+    "Do not convert this repository process to shell subtasks.",
+    "Do not add noisy user-facing stop-hook text solely to describe backoff internals.",
+    "Do not introduce real long sleeps into automated tests."
+  ],
+  "notes": [
+    ".a5c/process-library/ was not present while authoring; matching methodologies and specializations were researched under the repository process library root at library/.",
+    "The implementation should verify whether journal-derived tracking or a run-local state file best satisfies responsiveness, cleanup, and race-safety. The design phase must decide before code changes.",
+    "If a run has multiple pending effects, the trace/design phase must define deterministic current-effect selection before implementation."
+  ]
+}

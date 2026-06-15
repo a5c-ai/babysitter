@@ -1,0 +1,136 @@
+nodeKind: ToolServer
+id: tool-server:mcp-discord
+attributes:
+  displayName: Discord MCP Server
+  description: |
+    MCP server providing access to the Discord platform.
+    Enables AI agents to read and post messages, manage channels,
+    handle reactions, and work with file attachments via the Discord API.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/v-3/discordmcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:discord
+  lib_applies_to_domain:
+  - target: domain:community
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-teams
+attributes:
+  displayName: Microsoft Teams MCP Server
+  description: |
+    MCP server providing access to Microsoft Teams.
+    Enables AI agents to send and read messages, manage channels,
+    and integrate with existing Office 365 infrastructure.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/inditextech/mcp-teams-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:microsoft-teams
+  lib_applies_to_domain:
+  - target: domain:operations
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-twilio
+attributes:
+  displayName: Twilio MCP Server
+  description: |
+    MCP server providing access to Twilio communication APIs.
+    Enables AI agents to send and receive SMS and MMS messages,
+    manage phone numbers, and initiate voice calls.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/twilio/twilio-mcp
+  maintainer: Twilio
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:twilio
+  - target: stack-part:sms-delivery
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-sendgrid
+attributes:
+  displayName: SendGrid MCP Server
+  description: |
+    MCP server providing access to Twilio SendGrid email platform.
+    Enables AI agents to manage contact lists, email templates,
+    trigger single sends, and retrieve delivery statistics.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/Garoth/sendgrid-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:sendgrid
+  - target: stack-part:email-delivery
+  lib_applies_to_domain:
+  - target: domain:digital-marketing
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-gmail
+attributes:
+  displayName: Gmail MCP Server
+  description: |
+    MCP server providing access to Gmail.
+    Enables AI agents to search threads, read messages, create drafts,
+    manage labels, and organize email workflows.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-servers/gmail
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: stack-part:email-delivery
+  lib_applies_to_domain:
+  - target: domain:operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-intercom
+attributes:
+  displayName: Intercom MCP Server
+  description: |
+    MCP server providing access to the Intercom customer platform.
+    Enables AI agents to manage conversations, query contacts and
+    companies, access help center articles, and handle support tickets.
+  protocol: mcp
+  category: communication
+  repoUrl: https://github.com/raoulbia-ai/mcp-server-for-intercom
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:support-engineer
+      confidence: high
+      evidence: "Intercom conversations, contacts, and help center articles support support engineering workflows."
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Customer conversations and bot handoffs are direct triage inputs."
+  integrates_with:
+  - target: tool:intercom
+  lib_applies_to_domain:
+  - target: domain:customer-experience
+  - target: domain:customer-relations

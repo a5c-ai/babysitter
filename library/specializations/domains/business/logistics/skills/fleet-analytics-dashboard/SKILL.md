@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: fleet-management
   priority: medium
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:business-analysis]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:business-analyst]
 ---
 
 # Fleet Analytics Dashboard

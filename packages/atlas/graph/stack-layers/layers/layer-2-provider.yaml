@@ -1,0 +1,25 @@
+nodeKind: Layer
+id: layer:2-provider
+attributes:
+  displayName: Provider
+  position: 2
+  path: compute
+  scope: Hosted or self-hosted serving boundary.
+  summary: |
+    The hosted-inference vendor or self-hosted serving boundary that exposes a
+    `ModelVersion` over an endpoint. Provider posture covers auth scheme, rate
+    limits, regions, fine-tuning availability, and SLA — distinct from the wire
+    protocol (Layer 3) and the agent-side core that consumes it (Layer 4).
+  responsibilities:
+    - Serve model versions through authenticated endpoints.
+    - Own availability, regions, quotas, rate limits, billing, and deployment posture.
+    - Publish provider-specific model and endpoint capabilities.
+  examples:
+    - Anthropic, OpenAI, Google, Azure OpenAI, AWS Bedrock, OpenRouter.
+    - Self-hosted vLLM, Ollama, llama.cpp, or custom inference gateway.
+    - Auth scheme, region, quota, rate-limit, and SLA records.
+  fitNotes: |
+    LangChain/LangGraph apps usually choose providers through model adapters
+    rather than owning this layer. Gateways may specialize here while leaving
+    higher layers to another product.
+edges: {}

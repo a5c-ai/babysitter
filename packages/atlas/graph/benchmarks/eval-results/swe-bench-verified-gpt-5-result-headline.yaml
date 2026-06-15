@@ -1,0 +1,14 @@
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.gpt-5.headline.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.gpt-5.2025-08
+  metricName: pass_rate_headline
+  score: 0.749
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-08-07T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.gpt-5.2025-08
+  scored_against:
+    - target: benchmark:swe-bench-verified

@@ -16,6 +16,12 @@
  * - Nav2: https://navigation.ros.org/
  * - Navigation2 GitHub: https://github.com/ros-planning/navigation2
  * - Nav2 Tutorials: https://docs.nav2.org/tutorials/
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:engineering-onboarding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

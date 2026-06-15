@@ -1,0 +1,88 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:codex.core@1.x
+attributes:
+  displayName: Codex CLI Core (1.x)
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  packageRef: source-ref:codex-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Tool-use loop driven by the OpenAI Responses API. Each turn
+    the model emits a
+    `response.output_item.added` event sequence; the runtime executes any tool calls
+    via its bundled shell sandbox and posts back `function_call_output` items. The
+    loop advances until a `response.completed` event is observed.
+    '
+  contextManagementStrategy: rolling-summary
+  compactionTriggerNotes: 'Codex maintains a rolling summary of older turns; the cutover
+    is decided by the
+    Codex Rust runtime, not by an exposed token threshold.
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Codex emits a Responses-API `handoff` event (or a structured
+    `function_call`
+    targeting another agent profile) and the runtime swaps the active profile/model
+    for the duration of the sub-task.
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final response text is streamed via `response.output_text.delta`
+    events and
+    finalized on `response.completed`; the CLI prints the assistant text to stdout
+    when `--output-last-message` or default streaming mode is used.
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: codex-internal
+  supportedTransportProtocols:
+  - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: model-dependent
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:codex
+    role: core
+  speaks:
+  - target: model-transport:openai-responses
+  supports:
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0 <2.0.0'
+    level: partial
+    notes: 'Codex''s tool dispatch is gated by per-call approval; parallel
+      tool calls depend on model emission and approval policy.
+      '
+  - target: capability:requires-tool-approval
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Codex''s approvalGatingPrimitive is per-call; the runtime exposes
+      --ask-for-approval and --sandbox modes to gate tool execution.
+      '
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Codex CLI''s runtime advertises supportsStreaming=true; tokens are
+      streamed to the TUI.
+      '
+  - target: capability:supports-tool-use
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Codex bundles built-in tools (read, bash) and dispatches model-emitted
+      tool calls through the core loop with per-call approval gating.
+      '
+  emits_message_type:
+  - target: protocol-message:openai-response-created
+  - target: protocol-message:openai-response-output-item-added
+  - target: protocol-message:openai-response-output-text-delta
+  - target: protocol-message:openai-response-completed
+  - target: protocol-message:openai-response-failed
+  supports_effort_level:
+  - target: effort-level:minimal
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high
+  fires_hook:
+  - target: hook-surface:codex.on-tool-call
+  - target: hook-surface:codex.on-stop
+  # GAP: No CLI flag for thinking/reasoning level (openai/codex#9381).
+  # Claude Code exposes --thinking via effort-level nodes; Codex profiles
+  # can set it but there is no --thinking-level CLI flag for scripted use.
+  # Missing supports_effort_level edges (unlike Claude Code core which has them).

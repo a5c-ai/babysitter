@@ -1,0 +1,70 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:perplexity.ask
+attributes:
+  schema: '{}'
+  displayName: "Perplexity: Ask"
+  description: Send a query to the Perplexity Sonar API and return a web-grounded answer with citations.
+  inputSchema:
+    type: object
+    required: [messages]
+    properties:
+      messages: { type: array }
+      model: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      answer: { type: string }
+      citations: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-perplexity
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:perplexity.research
+attributes:
+  schema: '{}'
+  displayName: "Perplexity: Research"
+  description: Run a deep research query against Perplexity's research models, returning a long-form answer with sources.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      model: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      answer: { type: string }
+      sources: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-perplexity
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:perplexity.reason
+attributes:
+  schema: '{}'
+  displayName: "Perplexity: Reason"
+  description: Run a reasoning query against Perplexity reasoning models for chain-of-thought style answers.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      model: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      answer: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-perplexity

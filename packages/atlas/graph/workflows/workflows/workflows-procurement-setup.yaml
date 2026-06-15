@@ -1,0 +1,87 @@
+---
+nodeKind: Workflow
+id: workflow:procurement-policy-development
+attributes:
+  displayName: "Procurement Policy Development"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Develops and maintains procurement policies and procedures that govern
+    organizational purchasing -- defining approval authority thresholds and
+    delegation matrices by spend level, category, and risk classification,
+    establishing preferred vendor selection criteria and approved vendor list
+    management procedures, creating competitive bidding requirements with clear
+    thresholds for when formal RFP/RFQ processes are mandatory, documenting
+    purchase requisition workflows from request through approval, PO issuance,
+    and receipt confirmation, designing compliance controls for
+    conflict-of-interest declarations, gift policies, and anti-corruption
+    requirements, establishing emergency procurement procedures for urgent
+    business needs with appropriate controls, creating policy exception request
+    and approval processes with documentation requirements, and defining policy
+    review and update cadences with stakeholder consultation processes. Produces
+    procurement policy manual, approval authority matrix, workflow
+    specifications, and compliance control documentation. Excludes policy legal
+    review.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:data-governance
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:procurement
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:e-procurement-platform-setup
+attributes:
+  displayName: "E-Procurement Platform Setup"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Establishes the electronic procurement platform and associated workflows
+    for streamlined purchasing -- configuring requisition workflows with
+    role-based approval chains mapped to spend thresholds and categories,
+    building supplier catalogs with negotiated pricing, item descriptions, and
+    availability status, integrating the procurement platform with ERP,
+    accounting, and contract management systems via API connections, setting up
+    three-way matching automation (PO, receipt, invoice) with exception routing
+    for discrepancies, configuring budget checking at requisition time to
+    prevent overspend, building approval delegation rules for out-of-office
+    scenarios, creating reporting dashboards for cycle time, approval
+    bottlenecks, and user adoption metrics, establishing user training and
+    support materials with role-specific guides for requesters, approvers, and
+    procurement staff, and conducting parallel-run validation against legacy
+    processes. Produces platform configuration specification, integration
+    architecture, catalog structure, training materials, and go-live checklist.
+    Excludes platform vendor selection.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:integration-testing
+  applies_to_domain:
+    - target: domain:procurement
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:platform-team
+    - target: org-unit:operations-team

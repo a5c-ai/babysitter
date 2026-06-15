@@ -18,6 +18,12 @@ metadata:
     - phylogenetics
     - evolution
     - trees
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:graph-algorithms, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Phylogenetics Tree Builder Skill

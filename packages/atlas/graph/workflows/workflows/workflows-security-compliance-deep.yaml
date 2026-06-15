@@ -1,0 +1,132 @@
+---
+nodeKind: Workflow
+id: workflow:hipaa-compliance-audit
+attributes:
+  displayName: "HIPAA Compliance Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Audits systems handling protected health information (PHI) against HIPAA
+    Security Rule and Privacy Rule requirements -- assessing administrative,
+    physical, and technical safeguards, reviewing access controls for ePHI,
+    validating encryption at rest and in transit, auditing BAA coverage with
+    third-party vendors, and generating the compliance evidence package for
+    external assessors. Excludes remediation implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:cloud-architect
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:identity-security
+    - target: skill-area:secrets-rotation
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cybersecurity
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:iac-security-scanning
+attributes:
+  displayName: "IaC Security Scanning"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Scans Infrastructure-as-Code templates (Terraform, CloudFormation, Helm,
+    Pulumi) for misconfigurations, overly permissive IAM policies, unencrypted
+    storage, public network exposure, and CIS benchmark violations before
+    merge -- triaging findings by severity, suppressing accepted risks, and
+    blocking deployments with critical violations. Excludes IaC authoring and
+    drift remediation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:container-security
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:terraform-state-mgmt
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:container-image-hardening
+attributes:
+  displayName: "Container Image Hardening"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-image-build"
+  complexity: single-team
+  description: |
+    Hardens container images against attack surface -- enforcing minimal base
+    images, scanning for OS and language-level CVEs, removing unnecessary
+    packages and shells, configuring non-root users, validating Dockerfile best
+    practices, signing images with cosign/Notary, and gating promotion to
+    production registries on scan pass. Excludes container runtime security
+    policies.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:containerization
+    - target: skill-area:container-security
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:approve-deploys
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:phishing-simulation-exercise
+attributes:
+  displayName: "Phishing Simulation Exercise"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes simulated phishing campaigns against the organization --
+    selecting attack vectors (credential harvesting, malware attachment, business
+    email compromise), distributing test payloads, measuring click and
+    credential-submission rates, analyzing response times of reporting
+    mechanisms, debriefing results with leadership, and triggering targeted
+    security awareness training for high-risk cohorts. Excludes real-world
+    incident response.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:identity-security
+    - target: skill-area:network-security
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:engineering

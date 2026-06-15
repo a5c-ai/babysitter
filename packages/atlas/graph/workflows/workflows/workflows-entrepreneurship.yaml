@@ -1,0 +1,113 @@
+---
+nodeKind: Workflow
+id: workflow:startup-mvp-validation
+attributes:
+  displayName: "Startup MVP Validation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Validates a minimum viable product against market signals and early user
+    feedback — defining success metrics and kill criteria before launch,
+    instrumenting the MVP with analytics to capture usage funnels and feature
+    engagement, conducting structured user interviews with problem-solution fit
+    questionnaires, analyzing activation and retention cohorts against
+    pre-defined thresholds, A/B testing core value proposition variants,
+    synthesizing quantitative metrics with qualitative feedback into a
+    pivot-or-persevere recommendation, and documenting learnings for investor
+    communication. Produces validation scorecards, user interview synthesis
+    reports, and cohort analysis dashboards. Excludes product development
+    execution.
+edges:
+  involves_role:
+    - target: role:cto
+    - target: role:fullstack-engineer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:api-design
+  applies_to_domain:
+    - target: domain:entrepreneurship
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-architecture-review
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:fundraising-due-diligence-preparation
+attributes:
+  displayName: "Fundraising Due Diligence Preparation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Prepares technical and operational materials for investor due diligence —
+    assembling architecture documentation showing system design, scalability
+    posture, and tech debt inventory, compiling engineering velocity metrics
+    (cycle time, deployment frequency, MTTR), preparing security and compliance
+    documentation (SOC 2 readiness, penetration test summaries, data handling
+    policies), documenting intellectual property provenance and open-source
+    license compliance, creating financial-model backing data for infrastructure
+    cost projections, and packaging team composition and hiring plan materials.
+    Produces due diligence data room, technical architecture summaries, and
+    engineering metrics packages. Excludes financial modeling and legal document
+    review.
+edges:
+  involves_role:
+    - target: role:cto
+    - target: role:vp-engineering
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:c4-modeling
+    - target: skill-area:supply-chain-security
+  applies_to_domain:
+    - target: domain:entrepreneurship
+    - target: domain:venture-capital
+  triggers_responsibility:
+    - target: responsibility:run-architecture-review
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:investor-relations
+---
+nodeKind: Workflow
+id: workflow:product-market-fit-assessment
+attributes:
+  displayName: "Product-Market Fit Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Systematically assesses product-market fit indicators across quantitative and
+    qualitative dimensions — tracking Sean Ellis survey scores (percentage who
+    would be very disappointed without the product), measuring natural organic
+    growth rate and viral coefficient, analyzing revenue retention cohorts and
+    expansion revenue trends, monitoring support ticket volume relative to user
+    growth as a quality proxy, evaluating competitive win/loss ratios from sales
+    data, and correlating NPS segments with feature usage patterns to identify
+    the core value driver. Produces PMF scorecard dashboards, cohort retention
+    analyses, and strategic recommendation memos for the leadership team.
+    Excludes go-to-market strategy execution.
+edges:
+  involves_role:
+    - target: role:cto
+    - target: role:data-scientist
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:entrepreneurship
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:analytics-team

@@ -1,0 +1,14 @@
+nodeKind: Language
+id: language:scheme
+attributes:
+  displayName: "Scheme"
+  paradigms:
+    - functional
+    - lisp
+  description: |
+    Scheme — a minimalist Lisp dialect standardized by R5RS / R6RS / R7RS,
+    known for hygienic macros and tail-call optimization.
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:education

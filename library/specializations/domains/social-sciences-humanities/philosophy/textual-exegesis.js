@@ -5,6 +5,13 @@
  * @outputs { success: boolean, interpretation: object, hermeneuticalAnalysis: object, contextualFindings: object, artifacts: array }
  * @recommendedSkills SK-PHIL-004 (hermeneutical-interpretation), SK-PHIL-005 (conceptual-analysis), SK-PHIL-013 (scholarly-literature-synthesis)
  * @recommendedAgents AG-PHIL-003 (hermeneutics-specialist-agent), AG-PHIL-005 (philosophical-theologian-agent)
+ *
+ * @graph
+ *   domains: [domain:philosophy]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,49 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:amp.core@current
+attributes:
+  displayName: Sourcegraph Amp Core (current)
+  agentVersionId: agent-version:amp@current
+  packageRef: source-ref:amp-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Amp runs a tool-use loop with multi-model routing and specialized
+    subagents (Oracle, Librarian) for code understanding.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Compaction handled internally by the Amp runtime.
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: |
+    Amp supports parallel subagent dispatch (up to 8 concurrent tasks
+    per maxParallelTasks); Oracle and Librarian are first-party
+    specialized subagents.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final result streamed by the routed model; CLI emits structured
+    events.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: amp-internal
+  supportedTransportProtocols: []
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:amp
+    role: core
+  speaks: []
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  - target: capability:parallel-tool-calls
+    versionRange: '*'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:multi-agent-dispatch
+    - target: orch-primitive:concurrency-control
+    - target: orch-primitive:telemetry-collection

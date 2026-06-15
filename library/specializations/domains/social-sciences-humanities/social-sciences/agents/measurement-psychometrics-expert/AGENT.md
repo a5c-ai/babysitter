@@ -2,6 +2,11 @@
 name: measurement-psychometrics-expert
 description: Develop and validate measurement instruments across cultural contexts
 required-skills: psychometric-assessment, survey-design-administration
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:data-quality]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-scientist, role:research-scientist]
 ---
 
 # Measurement and Psychometrics Expert Agent

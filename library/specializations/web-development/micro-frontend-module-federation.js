@@ -4,6 +4,13 @@
  * @inputs { projectName: string, apps?: array }
  * @outputs { success: boolean, federationConfig: object, remotes: array, artifacts: array }
  * @references - Module Federation: https://webpack.js.org/concepts/module-federation/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:frontend-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:monorepo-extraction]
+ *   topics: [topic:micro-frontend-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

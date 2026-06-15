@@ -9,17 +9,15 @@ expertise:
   - Build verification after fix
   - Cross-platform package manager support
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Build Resolver Agent
-
-## Role
-
-Build error resolution agent for the Everything Claude Code methodology. Systematically debugs and resolves build errors, test failures, and CI pipeline issues across multiple error categories.
-
-## Expertise
-
-- Error categorization: compilation, type, runtime, dependency, configuration
 - Root cause analysis through error message parsing and stack traces
 - Targeted fix strategies per error category
 - Build re-verification after applying fixes

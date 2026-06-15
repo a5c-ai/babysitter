@@ -1,0 +1,95 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-adapters-cli
+attributes:
+  packageId: "@a5c-ai/adapters-cli"
+  packageName: "@a5c-ai/adapters-cli"
+  displayName: "Adapters CLI"
+  description: "CLI runtime for the adapters system. Provides the `adapters` command with subcommands for running, installing, detecting, and managing AI coding harnesses, models, sessions, plugins, and gateway operations."
+  role: "adapter-cli"
+  whenToUse: "Use this when building or extending the adapters command-line interface, or when you need programmatic access to CLI commands like run, install, detect, launch, or gateway management."
+  workspacePath: packages/adapters/cli
+  moduleType: typescript
+  surfaceKinds:
+    - cli
+    - bin-entrypoint
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:adapters-cli
+  exposes_subcommand:
+    - target: interaction-primitive:adapters-cli-run
+    - target: interaction-primitive:adapters-cli-install
+    - target: interaction-primitive:adapters-cli-update
+    - target: interaction-primitive:adapters-cli-detect
+    - target: interaction-primitive:adapters-cli-uninstall
+    - target: interaction-primitive:adapters-cli-adapters-list
+    - target: interaction-primitive:adapters-cli-adapters-detect
+    - target: interaction-primitive:adapters-cli-adapters-info
+    - target: interaction-primitive:adapters-cli-models-list
+    - target: interaction-primitive:adapters-cli-models-info
+    - target: interaction-primitive:adapters-cli-models-refresh
+    - target: interaction-primitive:adapters-cli-models-current
+    - target: interaction-primitive:adapters-cli-models-set
+    - target: interaction-primitive:adapters-cli-sessions-list
+    - target: interaction-primitive:adapters-cli-sessions-show
+    - target: interaction-primitive:adapters-cli-sessions-search
+    - target: interaction-primitive:adapters-cli-sessions-export
+    - target: interaction-primitive:adapters-cli-sessions-cost
+    - target: interaction-primitive:adapters-cli-config-get
+    - target: interaction-primitive:adapters-cli-config-set
+    - target: interaction-primitive:adapters-cli-config-schema
+    - target: interaction-primitive:adapters-cli-config-validate
+    - target: interaction-primitive:adapters-cli-config-reload
+    - target: interaction-primitive:adapters-cli-profiles-list
+    - target: interaction-primitive:adapters-cli-profiles-show
+    - target: interaction-primitive:adapters-cli-profiles-set
+    - target: interaction-primitive:adapters-cli-profiles-delete
+    - target: interaction-primitive:adapters-cli-profiles-apply
+    - target: interaction-primitive:adapters-cli-auth-check
+    - target: interaction-primitive:adapters-cli-auth-setup
+    - target: interaction-primitive:adapters-cli-plugin-list
+    - target: interaction-primitive:adapters-cli-plugin-install
+    - target: interaction-primitive:adapters-cli-plugin-enable
+    - target: interaction-primitive:adapters-cli-plugin-disable
+    - target: interaction-primitive:adapters-cli-plugin-marketplace
+    - target: interaction-primitive:adapters-cli-mcp-list
+    - target: interaction-primitive:adapters-cli-mcp-install
+    - target: interaction-primitive:adapters-cli-mcp-uninstall
+    - target: interaction-primitive:adapters-cli-skill-list
+    - target: interaction-primitive:adapters-cli-skill-add
+    - target: interaction-primitive:adapters-cli-skill-remove
+    - target: interaction-primitive:adapters-cli-skill-where
+    - target: interaction-primitive:adapters-cli-skill-agents
+    - target: interaction-primitive:adapters-cli-agent-list
+    - target: interaction-primitive:adapters-cli-agent-add
+    - target: interaction-primitive:adapters-cli-agent-remove
+    - target: interaction-primitive:adapters-cli-agent-where
+    - target: interaction-primitive:adapters-cli-agent-agents
+    - target: interaction-primitive:adapters-cli-workspaces-list
+    - target: interaction-primitive:adapters-cli-workspaces-create
+    - target: interaction-primitive:adapters-cli-workspaces-archive
+    - target: interaction-primitive:adapters-cli-workspaces-cleanup
+    - target: interaction-primitive:adapters-cli-workspaces-recover
+    - target: interaction-primitive:adapters-cli-workspaces-delete
+    - target: interaction-primitive:adapters-cli-workspaces-sync-sessions
+    - target: interaction-primitive:adapters-cli-launch
+    - target: interaction-primitive:adapters-cli-detect-host
+    - target: interaction-primitive:adapters-cli-doctor
+    - target: interaction-primitive:adapters-cli-tui
+    - target: interaction-primitive:adapters-cli-remote-install
+    - target: interaction-primitive:adapters-cli-remote-update
+    - target: interaction-primitive:adapters-cli-hooks-discover
+    - target: interaction-primitive:adapters-cli-hooks-list
+    - target: interaction-primitive:adapters-cli-hooks-add
+    - target: interaction-primitive:adapters-cli-hooks-remove
+    - target: interaction-primitive:adapters-cli-hooks-set
+    - target: interaction-primitive:adapters-cli-hooks-handle
+    - target: interaction-primitive:adapters-cli-gateway-serve
+    - target: interaction-primitive:adapters-cli-gateway-status
+    - target: interaction-primitive:adapters-cli-gateway-tokens-list
+    - target: interaction-primitive:adapters-cli-gateway-tokens-create
+    - target: interaction-primitive:adapters-cli-gateway-tokens-revoke
+    - target: interaction-primitive:adapters-cli-help
+    - target: interaction-primitive:adapters-cli-version

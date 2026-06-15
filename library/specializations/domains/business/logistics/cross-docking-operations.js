@@ -13,6 +13,11 @@
  *
  * @references
  * - Logistics Handbook: https://www.koganpage.com/logistics-operations-management/the-handbook-of-logistics-and-distribution-management-9781398600744
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

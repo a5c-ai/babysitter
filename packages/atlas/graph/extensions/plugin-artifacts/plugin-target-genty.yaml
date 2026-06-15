@@ -1,0 +1,101 @@
+nodeKind: PluginTarget
+id: plugin-target:genty
+attributes:
+  displayName: "genty"
+  hostAgent: agent:genty
+  adapterFamily: programmatic
+  manifestFormat: "package.json"
+  commandFormat: "markdown"
+  adapterName: genty
+  skillHandling: native
+  hookRegistrationFormat: none
+  hookRegistrationOutputPath: null
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: GENTY_PLUGIN_ROOT
+  scriptVariants:
+    - bash
+    - powershell
+  distribution:
+    - npm-cli
+  distributionModel: monorepo
+  marketplacePath: null
+  npmPublishable: true
+  installLayout: null
+  packageMetadata:
+    moduleType: module
+    # genty packages are ESM and expose CommonJS bin entrypoints (bin/cli.cjs);
+    # keep the emitted bin script extension aligned with the genty package.json
+    # bin target so output verification passes.
+    binScriptExt: ".cjs"
+    installLifecycle: none
+    activationMessage: null
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "genty"
+  # Caller detection must use a genty-SPECIFIC env var. AGENT_SESSION_ID is a
+  # generic var set by every harness session, so using it here caused
+  # detectCallerHarness() to falsely resolve "genty" in any environment
+  # (issue #949). GENTY_PLUGIN_ROOT is set only by the genty extension.
+  # AGENT_SESSION_ID remains a session-id fallback (sessionEnvVarsDescription),
+  # not a caller-detection signal.
+  callerEnvVars:
+    - "GENTY_PLUGIN_ROOT"
+  configPaths: []
+  processNames:
+    - "genty"
+    - "agent-platform"
+  capabilities:
+    - SessionBinding
+    - HeadlessPrompt
+  adapterModule: null
+  externalRepo: null
+  externalPackageName: "@a5c-ai/genty"
+  generatedSourceDir: null
+  marketplaceSpecs: []
+  requiredSurfaceFile: AGENTS.md
+  promptCapabilities:
+    - hooks
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: internal
+  hookDriven: false
+  interactiveToolName: null
+  sessionEnvVarsDescription: "AGENT_SESSION_ID for session tracking"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: null
+  defaultTransportId: openai-chat
+  hooksMuxFamily: null
+  sessionIdQuality: generated
+  supportsOrderedFanout: false
+  supportsNativeAdditionalContext: false
+  supportsBlock: false
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: none
+  toolInterceptionScope: none
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "--prompt"
+    promptExtraFlags:
+      - "--json"
+    execSubcommand: null
+    resumeDelivery: flag
+    resumeFlag: "--run-id"
+    sessionIdFlag: null
+    maxTurnsFlag: "--max-iterations"
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
+
+edges:
+  hosted_by:
+    - target: agent:genty

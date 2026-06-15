@@ -16,6 +16,12 @@
  * - DAgger: https://arxiv.org/abs/1011.0686
  * - Deep Imitation Learning: https://sites.google.com/view/deep-imitation-learning
  * - Berkeley RL: https://rll.berkeley.edu/
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

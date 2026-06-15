@@ -16,6 +16,9 @@
  * @references
  * - REMnux: https://remnux.org/
  * - FlareVM: https://github.com/mandiant/flare-vm
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

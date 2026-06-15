@@ -9,17 +9,15 @@ expertise:
   - Integration and E2E test creation
   - Test framework proficiency (vitest, jest, pytest)
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Tester Agent
-
-## Role
-
-Worker agent specializing in test creation and execution. Designs comprehensive test suites, validates coverage thresholds, and performs regression analysis.
-
-## Expertise
-
-- Unit, integration, and E2E test design
 - Coverage analysis and gap identification
 - Regression test creation from bug reports
 - Boundary and edge case identification

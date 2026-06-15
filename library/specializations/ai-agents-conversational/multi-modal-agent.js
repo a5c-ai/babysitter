@@ -16,6 +16,9 @@
  * - GPT-4 Vision: https://platform.openai.com/docs/guides/vision
  * - Claude Vision: https://docs.anthropic.com/claude/docs/vision
  * - Gemini Multi-Modal: https://ai.google.dev/docs/gemini_api_overview
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

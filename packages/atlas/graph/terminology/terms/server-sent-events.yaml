@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:server-sent-events
+attributes:
+  canonicalDefinitionId: definition:server-sent-events.canonical
+  displayName: "Server-Sent Events"
+  kind: protocol
+  description: |
+    A unidirectional HTTP streaming protocol from server to client.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:backend

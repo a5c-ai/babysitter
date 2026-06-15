@@ -15,6 +15,12 @@
  * - Crafting Interpreters REPL: https://craftinginterpreters.com/scanning.html#the-repl
  * - Readline Library: https://tiswww.case.edu/php/chet/readline/rltop.html
  * - REPL Best Practices: https://langserver.org/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

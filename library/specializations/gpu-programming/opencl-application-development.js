@@ -17,6 +17,12 @@
  * - OpenCL Specification: https://registry.khronos.org/OpenCL/specs/3.0-unified/html/OpenCL_API.html
  * - OpenCL C Language Specification: https://registry.khronos.org/OpenCL/specs/3.0-unified/html/OpenCL_C.html
  * - OpenCL Reference Pages: https://man.opencl.org/
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:opencl-programming]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

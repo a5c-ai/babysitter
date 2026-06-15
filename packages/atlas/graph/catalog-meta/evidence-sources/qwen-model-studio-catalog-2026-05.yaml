@@ -1,0 +1,76 @@
+---
+nodeKind: EvidenceSource
+id: evidence:alibaba-model-studio-qwen-catalog-2026-05
+attributes:
+  displayName: "Alibaba Cloud Model Studio — Qwen model catalog"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://help.aliyun.com/zh/model-studio/models
+  sourcePathOrUrl: https://help.aliyun.com/zh/model-studio/models
+  locator: "Model catalog cards for qwen3.7-max, qwen3.7-plus, qwen3.6-plus, qwen3.6-flash, and qwen3.5-omni-plus"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:alibaba-model-studio-home-qwen-2026-05
+attributes:
+  displayName: "Alibaba Cloud Model Studio — public homepage Qwen cards"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://modelstudio.alibabacloud.com/
+  sourcePathOrUrl: https://modelstudio.alibabacloud.com/
+  locator: "Public homepage model cards and latest update timeline for Qwen3.7-Max and Qwen3.6-Plus"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:alibaba-model-studio-qwen-pricing-2026-05
+attributes:
+  displayName: "Alibaba Cloud Model Studio — Qwen model pricing"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://help.aliyun.com/zh/model-studio/model-pricing
+  sourcePathOrUrl: https://help.aliyun.com/zh/model-studio/model-pricing
+  locator: "Model pricing tables for qwen3.7-max, qwen3.7-plus, Qwen Plus, Flash, and Omni families"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:qwen3-5-omni-qwen-blog-2026-05
+attributes:
+  displayName: "Qwen — Qwen3.5-Omni release blog"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://qwen.ai/blog?id=qwen3.5-omni
+  sourcePathOrUrl: https://qwen.ai/blog?id=qwen3.5-omni
+  locator: "Qwen3.5-Omni series context length and omni-modality description"
+  capturedAt: "2026-05-27T00:00:00Z"
+  observedAt: "2026-05-27T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

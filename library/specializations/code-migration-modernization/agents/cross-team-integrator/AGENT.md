@@ -7,6 +7,13 @@ model: opus
 skills:
   - contract-test-generator
   - api-compatibility-analyzer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:contract-testing, skill-area:api-contract-testing]
+  roles: [role:tech-lead, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Cross-Team Integrator Agent

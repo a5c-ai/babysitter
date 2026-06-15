@@ -14,6 +14,12 @@ metadata:
   domain: science
   category: optimization
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:dynamic-programming, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Discrete Optimization Expert

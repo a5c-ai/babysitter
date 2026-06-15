@@ -1,0 +1,135 @@
+# NodeKinds for cluster 12-trust.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:trust-level
+  name: TrustLevel
+  origin: universal
+  prefix: trust-level
+  cluster: 12-trust
+  purpose: enum — official-web, vendor-doc, community, synthetic, repo
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: level
+    type: enum<official-web
+    vendor-doc: null
+    community: null
+    synthetic: null
+    repo>: null
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: freshnessWindowDaysDefault
+    type: int
+    required: true
+  incomingEdges:
+  - at_trust_level
+  outgoingEdges:
+  - evidence_at_level
+  isolatedAllowed: true
+  invariants:
+  - level restricted to the five values (V-8.3)
+  examples: []
+- id: node:fs-safety-invariant
+  name: FilesystemSafetyInvariant
+  origin: standard
+  prefix: fs-safety-invariant
+  cluster: 12-trust
+  purpose: a filesystem safety invariant that constrains how an agent or harness writes to disk
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: rule
+    type: string
+    required: true
+  - name: scope
+    type: string
+    required: true
+    notes: subject scope (e.g. agent-session, workspace, host)
+  - name: enforcement
+    type: string
+    required: true
+    notes: enforcement mechanism (e.g. sandbox-policy, reconciler, dispatch-preflight)
+  - name: rationale
+    type: string
+    required: false
+  incomingEdges:
+  - invariant_enforced_by
+  outgoingEdges: []
+  invariants:
+  - id starts with fs-safety-invariant: null
+  examples: []
+- id: node:harness-hardening
+  name: HarnessHardeningGuidance
+  origin: standard
+  prefix: harness-hardening
+  cluster: 12-trust
+  purpose: guidance for hardening an agent harness (sandboxing, approval gating, non-interactive policies)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: guidance
+    type: string
+    required: true
+  - name: appliesTo
+    type: string
+    required: true
+    notes: subject scope (e.g. agent-session, orchestrator)
+  - name: severity
+    type: enum<recommended
+    required: true
+    optional>: null
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - id starts with harness-hardening: null
+  examples: []
+- id: node:secret-handling
+  name: SecretHandlingPolicy
+  origin: standard
+  prefix: secret-handling
+  cluster: 12-trust
+  purpose: a policy governing how secrets (API keys, credentials) are handled in workflows, sessions, and logs
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: rule
+    type: string
+    required: true
+  - name: scope
+    type: string
+    required: true
+    notes: subject scope (e.g. workflow-config, agent-session, observability)
+  - name: enforcement
+    type: string
+    required: true
+    notes: enforcement mechanism (e.g. workflow-linter, launch-contract, journal-writer)
+  - name: rationale
+    type: string
+    required: false
+  incomingEdges:
+  - secret_policy_applied_by
+  outgoingEdges: []
+  invariants:
+  - id starts with secret-handling: null
+  examples: []
+

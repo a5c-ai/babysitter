@@ -1,0 +1,91 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:bedrock.list-foundation-models
+attributes:
+  schema: '{}'
+  displayName: "Bedrock: List Foundation Models"
+  description: List foundation models available in Amazon Bedrock for the active account/region.
+  inputSchema:
+    type: object
+    properties:
+      by_provider: { type: string }
+      by_output_modality: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      models: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-bedrock
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:bedrock.invoke-model
+attributes:
+  schema: '{}'
+  displayName: "Bedrock: Invoke Model"
+  description: Invoke a Bedrock foundation model with a request body and return the model output.
+  inputSchema:
+    type: object
+    required: [modelId, body]
+    properties:
+      modelId: { type: string }
+      body: { type: object }
+      accept: { type: string }
+      contentType: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      output: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-bedrock
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:bedrock.list-knowledge-bases
+attributes:
+  schema: '{}'
+  displayName: "Bedrock: List Knowledge Bases"
+  description: List Bedrock knowledge bases in the account.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      knowledgeBases: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-bedrock
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:bedrock.retrieve-and-generate
+attributes:
+  schema: '{}'
+  displayName: "Bedrock: Retrieve and Generate"
+  description: Run a RAG query against a Bedrock knowledge base and generate a grounded answer.
+  inputSchema:
+    type: object
+    required: [knowledgeBaseId, input]
+    properties:
+      knowledgeBaseId: { type: string }
+      input: { type: string }
+      modelArn: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      output: { type: object }
+      citations: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-aws-bedrock

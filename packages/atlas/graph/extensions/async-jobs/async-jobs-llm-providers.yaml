@@ -1,0 +1,59 @@
+nodeKind: AsyncJob
+id: async-job:openai-batch-api
+attributes:
+  displayName: "OpenAI Batch API"
+  kind: batch-api
+  statusModel: polling
+  description: |
+    OpenAI's Batch API — submit a JSONL of completion / embedding requests,
+    poll the batch object until status transitions to `completed`. 24-hour
+    SLA, ~50% discount versus synchronous calls.
+edges: {}
+---
+nodeKind: AsyncJob
+id: async-job:anthropic-message-batches
+attributes:
+  displayName: "Anthropic Message Batches"
+  kind: batch-api
+  statusModel: polling
+  description: |
+    Anthropic's Message Batches API — submit a list of Messages requests,
+    poll batch status. Batches process within 24 hours; 50% discount on input
+    and output tokens.
+edges: {}
+---
+nodeKind: AsyncJob
+id: async-job:replicate-prediction
+attributes:
+  displayName: "Replicate prediction"
+  kind: background-task
+  statusModel: webhook
+  description: |
+    Replicate's prediction primitive — submit a model run, optionally register
+    a webhook for completion. Used for image / audio / video generation models
+    where inference time is seconds-to-minutes.
+edges: {}
+---
+nodeKind: AsyncJob
+id: async-job:gemini-batch-prediction
+attributes:
+  displayName: "Vertex AI Batch Prediction"
+  kind: batch-api
+  statusModel: polling
+  description: |
+    Google Vertex AI batch-prediction job for Gemini family models. Submit a
+    GCS-hosted JSONL input; poll the operation until done.
+edges: {}
+---
+nodeKind: AsyncJob
+id: async-job:openai-streaming-response
+attributes:
+  displayName: "OpenAI Responses streaming"
+  kind: streaming-completion
+  statusModel: sse
+  description: |
+    OpenAI Responses API in streaming mode — server emits SSE events
+    (`response.created`, `response.output_text.delta`, `response.completed`).
+    Modeled as AsyncJob for symmetry with batch primitives even though the
+    callback shape is in-band SSE rather than out-of-band webhook.
+edges: {}

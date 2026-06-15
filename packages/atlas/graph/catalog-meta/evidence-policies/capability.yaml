@@ -1,0 +1,17 @@
+nodeKind: EvidencePolicy
+id: policy:capability
+attributes:
+  displayName: "Capability Evidence Policy"
+  minimumTrustLevel: trust-level:vendor-doc
+  freshnessWindowDays: 180
+  requiresAttestation: false
+  reviewOwnerPattern: "^@a5c-ai/"
+  appliesTo:
+    - "AgentVersion.supports"
+    - "AgentVersion.supportsThinking"
+    - "ModelVersion.supportsThinking"
+  description: |
+    Stricter policy for capability claims on agents and model versions.
+edges:
+  requires_minimum_trust:
+    - trust-level:vendor-doc

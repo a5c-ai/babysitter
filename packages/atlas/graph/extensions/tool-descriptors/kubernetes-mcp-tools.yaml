@@ -1,0 +1,166 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.get
+attributes:
+  schema: '{}'
+  displayName: "kubectl: get"
+  description: List or fetch Kubernetes resources of a given kind in a namespace.
+  inputSchema:
+    type: object
+    required: [resource]
+    properties:
+      resource: { type: string }
+      namespace: { type: string }
+      name: { type: string }
+      label_selector: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      items: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.describe
+attributes:
+  schema: '{}'
+  displayName: "kubectl: describe"
+  description: Describe a Kubernetes resource (events, conditions, status).
+  inputSchema:
+    type: object
+    required: [resource, name]
+    properties:
+      resource: { type: string }
+      name: { type: string }
+      namespace: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      description: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.logs
+attributes:
+  schema: '{}'
+  displayName: "kubectl: logs"
+  description: Read container logs from a pod.
+  inputSchema:
+    type: object
+    required: [pod]
+    properties:
+      pod: { type: string }
+      namespace: { type: string }
+      container: { type: string }
+      tail: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      logs: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.apply
+attributes:
+  schema: '{}'
+  displayName: "kubectl: apply"
+  description: Apply a Kubernetes manifest (create or update).
+  inputSchema:
+    type: object
+    required: [manifest]
+    properties:
+      manifest: { type: string }
+      namespace: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      result: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.delete
+attributes:
+  schema: '{}'
+  displayName: "kubectl: delete"
+  description: Delete a Kubernetes resource by kind and name.
+  inputSchema:
+    type: object
+    required: [resource, name]
+    properties:
+      resource: { type: string }
+      name: { type: string }
+      namespace: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      result: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.exec
+attributes:
+  schema: '{}'
+  displayName: "kubectl: exec"
+  description: Execute a command inside a running container.
+  inputSchema:
+    type: object
+    required: [pod, command]
+    properties:
+      pod: { type: string }
+      namespace: { type: string }
+      container: { type: string }
+      command: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      stdout: { type: string }
+      stderr: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kubectl.list-contexts
+attributes:
+  schema: '{}'
+  displayName: "kubectl: list contexts"
+  description: List available kubeconfig contexts.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      contexts: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-kubernetes

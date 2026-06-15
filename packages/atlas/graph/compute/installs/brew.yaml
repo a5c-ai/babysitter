@@ -1,0 +1,13 @@
+nodeKind: InstallMethod
+id: install:brew
+attributes:
+  displayName: "Homebrew"
+  kind: brew
+  platforms:
+    - darwin
+    - linux
+  command: "brew install {{package}}"
+  prerequisiteCheck: "brew --version"
+edges:
+  installs:
+    - agentVersion:claude:ge-0-0-0

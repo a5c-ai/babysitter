@@ -1,0 +1,72 @@
+# Kubernetes Invocation Mode
+
+`RunOptions.invocationMode = { kind: 'k8s', ... }` runs the agent inside a Kubernetes pod, exec'ing into a container you control.
+
+## Quickstart
+
+```ts
+await client.run({
+  agent: 'claude',
+  prompt: 'Run the suite',
+  invocationMode: {
+    kind: 'k8s',
+    namespace: 'agents',
+    pod: 'adapters-runner-0',
+    container: 'runner',
+  },
+});
+```
+
+Or via CLI:
+
+```bash
+adapters run claude \
+  --mode k8s \
+  --namespace agents \
+  --pod adapters-runner-0 \
+  --container runner \
+  --prompt "Hello"
+```
+
+Under the hood this becomes:
+
+```
+kubectl exec -n agents adapters-runner-0 -c runner -i -- \
+  claude --output-format jsonl --prompt "Hello"
+```
+
+## Ephemeral pods
+
+To create a one-shot pod from an image, use `kind: 'k8s'` with `create: true`:
+
+```ts
+invocationMode: {
+  kind: 'k8s',
+  namespace: 'agents',
+  create: true,
+  image: 'ghcr.io/a5c-ai/adapters-runtime:latest',
+  env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY! },
+}
+```
+
+The run handle will delete the pod on completion.
+
+## Remote agent pattern
+
+Combine with the `adapters-remote` adapter to host many agents behind one pod template:
+
+```ts
+await client.run({
+  agent: 'adapters-remote',
+  prompt: 'Hello',
+  invocationMode: { kind: 'k8s', namespace: 'agents', pod: 'adapters-0' },
+  env: { ADAPTER_REMOTE_AGENT: 'claude' },
+});
+```
+
+## Prereqs
+
+- `kubectl` on `PATH` with a context that can `exec` into the target namespace.
+- The pod's container image must include the target agent CLI (or `adapters` when using `adapters-remote`).
+
+See [Invocation Modes](../reference/13-invocation-modes.md).

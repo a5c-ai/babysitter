@@ -1,0 +1,19 @@
+nodeKind: SkillArea
+id: skill-area:serverless-cold-start-optimization
+attributes:
+  displayName: "Serverless Cold-Start Optimization"
+  description: |
+    Reducing cold-start latency in serverless platforms (AWS Lambda,
+    Cloudflare Workers, Vercel Functions): runtime selection, init-phase
+    minimization, provisioned concurrency, snapshotting (Lambda SnapStart),
+    and bundling strategies.
+  domains:
+    - domain:devops
+    - domain:infrastructure
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:infrastructure
+      confidence: primary

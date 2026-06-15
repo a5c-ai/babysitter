@@ -16,6 +16,11 @@
  * 7. Run Tests & Lint - Verify implementation doesn't break anything (parallel)
  * 8. Review Breakpoint - Let user review all changes before PR
  * 9. Submit PR - Create pull request from fork to upstream (with breakpoint)
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -284,16 +289,16 @@ export const analyzeExistingHarnessesTask = defineTask('analyze-existing-harness
         harnessType: args.harnessType,
         repoRoot: args.repoRoot,
         searchPaths: [
-          'packages/sdk/src/',
-          'packages/sdk/src/cli/',
-          'packages/sdk/src/hooks/',
-          'packages/sdk/src/config/',
-          'plugins/babysitter/'
+          'packages/babysitter-sdk/src/',
+          'packages/babysitter-sdk/src/cli/',
+          'packages/babysitter-sdk/src/hooks/',
+          'packages/babysitter-sdk/src/config/',
+          'plugins/babysitter-unified/'
         ]
       },
       instructions: [
         'Search for existing harness implementations in the SDK source code',
-        'Look for harness-related files in packages/sdk/src/ (especially cli/, hooks/, config/)',
+        'Look for harness-related files in packages/babysitter-sdk/src/ (especially cli/, hooks/, config/)',
         'Identify the claude-code harness as a reference implementation',
         'Study how session:init, session:associate, session:resume commands work',
         'Analyze the hooks system (on-run-start, on-run-complete, on-task-start, etc.)',
@@ -473,6 +478,9 @@ export const implementHarnessIntegrationTask = defineTask('implement-harness-int
       },
       instructions: [
         'Follow the patterns identified from existing harness implementations',
+        'Before authoring planned new files under scripts/, supabase/migrations/, src/server/, or src/lib/, check each exact path with ls or rg/grep.',
+        'If an exact planned new path already exists, read the existing file, report findings to the orchestrator, and wait for scope direction such as use-existing, replace, append, or renumber.',
+        'Do not auto-resolve existing-file collisions.',
         'Create necessary files for the harness integration:',
         '  - Session binding module (how the harness connects to babysitter)',
         '  - Hook handlers (how the harness responds to orchestration events)',

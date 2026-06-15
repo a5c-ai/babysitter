@@ -1,0 +1,143 @@
+---
+nodeKind: Role
+id: role:cto
+attributes:
+  displayName: "Chief Technology Officer"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Sets technical strategy, approves architectural direction, owns long-horizon technology bets and org-wide engineering investment.
+edges:
+  holds_responsibility:
+    - responsibility:approve-architecture
+    - responsibility:strategic-planning
+    - responsibility:budget-management
+  requires_expertise:
+    - target: skill-area:c4-modeling
+    - target: skill-area:adr-writing
+    - target: skill-area:monolith-vs-microservices
+    - target: skill-area:domain-driven-design
+  delegates_to:
+    - target: role:vp-engineering
+      condition: |
+        Day-to-day engineering execution, hiring approvals, performance
+        reviews, and budget operations are delegated to VP Engineering;
+        CTO retains technical-direction and strategic-investment authority.
+---
+nodeKind: Role
+id: role:vp-engineering
+attributes:
+  displayName: "VP of Engineering"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns engineering execution, headcount, delivery, and cross-team coordination.
+edges:
+  holds_responsibility:
+    - responsibility:hiring
+    - responsibility:budget-management
+    - responsibility:stakeholder-communication
+  requires_expertise:
+    - target: skill-area:adr-writing
+    - target: skill-area:sli-slo-management
+    - target: skill-area:incident-response
+    - target: skill-area:dependency-upgrade-strategies
+---
+nodeKind: Role
+id: role:sre-lead
+attributes:
+  displayName: "SRE Lead"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns reliability, on-call, incident command, SLOs, and production hygiene across services.
+edges:
+  holds_responsibility:
+    - responsibility:on-call
+    - responsibility:incident-command
+    - responsibility:slo-definition
+    - responsibility:disaster-recovery
+  requires_expertise:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+    - target: skill-area:chaos-engineering
+    - target: skill-area:canary-rollouts
+    - target: skill-area:k8s-rbac
+---
+nodeKind: Role
+id: role:qa-lead
+attributes:
+  displayName: "QA Lead"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns test strategy, quality gates, and cross-team test infrastructure.
+edges:
+  holds_responsibility:
+    - responsibility:test-strategy
+    - responsibility:flaky-test-quarantine
+    - responsibility:release-coordination
+  requires_expertise:
+    - target: skill-area:e2e-testing
+    - target: skill-area:integration-testing
+    - target: skill-area:contract-testing
+    - target: skill-area:performance-testing
+    - target: skill-area:accessibility-testing
+    - target: skill-area:visual-regression-testing
+---
+nodeKind: Role
+id: role:engineering-manager-convergent
+attributes:
+  displayName: "Engineering Manager"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns people, delivery, and operational health for a team; partners with TL on technical direction.
+    (Convergent-catalog update; complements the canonical `role:engineering-manager` example with explicit SkillArea expertise edges.)
+edges:
+  holds_responsibility:
+    - responsibility:hiring
+    - responsibility:mentoring
+    - responsibility:sprint-planning
+    - responsibility:stakeholder-communication
+  requires_expertise:
+    - target: skill-area:adr-writing
+    - target: skill-area:sli-slo-management
+    - target: skill-area:code-review-practice
+---
+nodeKind: Role
+id: role:staff-engineer-convergent
+attributes:
+  displayName: "Staff Engineer"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Cross-team technical leader driving architecture, standards, and high-leverage migrations.
+    (Convergent-catalog update; complements the canonical `role:staff-engineer` example with explicit SkillArea expertise edges.)
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:code-review
+    - responsibility:mentoring
+    - responsibility:adr-curation
+  requires_expertise:
+    - target: skill-area:c4-modeling
+    - target: skill-area:adr-writing
+    - target: skill-area:domain-driven-design
+    - target: skill-area:hexagonal-architecture
+    - target: skill-area:strangler-fig-pattern
+    - target: skill-area:api-design
+    - target: skill-area:dependency-upgrade-strategies

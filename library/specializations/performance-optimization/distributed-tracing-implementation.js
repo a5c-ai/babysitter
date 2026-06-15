@@ -16,6 +16,13 @@
  * - OpenTelemetry: https://opentelemetry.io/docs/
  * - Jaeger: https://www.jaegertracing.io/docs/
  * - Zipkin: https://zipkin.io/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:performance-optimization]
+ *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:distributed-tracing]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:observability-driven-development]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

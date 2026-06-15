@@ -1,0 +1,86 @@
+nodeKind: ProviderTranslation
+id: provider-translation:generic-openai:direct-providers
+attributes:
+  harness: generic-openai
+  provider: _group
+  providerGroup:
+    - openai
+    - foundry
+    - groq
+    - fireworks
+    - together
+    - deepseek
+    - mistral
+    - cerebras
+    - sambanova
+    - openrouter
+    - xai
+    - grok
+    - ollama
+    - local
+    - lmstudio
+    - vllm
+    - custom
+  proxyRequired: false
+  envMapping:
+    - envVar: OPENAI_BASE_URL
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_BASE
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: true
+  args: []
+  harnessUsers:
+    - cursor
+    - omp
+    - openclaw
+    - hermes
+    - droid
+    - amp
+  notes: >
+    Generic OpenAI-compatible translation used by agents that speak the
+    OpenAI protocol natively (Cursor, OMP, OpenClaw, Hermes, Droid, Amp).
+    Sets both OPENAI_BASE_URL and OPENAI_API_BASE (legacy). Suppresses
+    ANTHROPIC_API_KEY for non-anthropic providers. OpenClaw 2026.5.27 reuses
+    xAI OAuth auth profiles for Grok web_search and carries the active agent
+    auth profile through web_search calls; named auth profiles, OpenAI
+    sampling params, Codex app-server resume/timeout/usage-limit recovery,
+    OpenAI-compatible embedding providers in core, DeepInfra catalog browsing,
+    Pixverse video generation, VLLM thinking params, Claude CLI OAuth overlays,
+    direct Anthropic model IDs, xAI usage-limit surfacing, dynamic tool-schema
+    guards, Ollama top-p normalization, and media-provider operation timeouts
+    are tracked as provider recovery metadata.
+---
+nodeKind: ProviderTranslation
+id: provider-translation:generic-openai:default
+attributes:
+  harness: generic-openai
+  provider: _default
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  envMapping:
+    - envVar: OPENAI_BASE_URL
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_BASE
+      source: params.apiBase
+      condition: present
+    - envVar: OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: true
+  args: []
+  harnessUsers:
+    - cursor
+    - omp
+    - openclaw
+    - hermes
+    - droid
+    - amp
+  notes: >
+    Default fallback for the generic OpenAI translation.
+    Routes through transport-adapter proxy exposing OpenAI Chat transport.

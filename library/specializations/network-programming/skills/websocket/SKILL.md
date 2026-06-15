@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: real-time-communication
   backlog-id: SK-005
+graph:
+  domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:websocket-design]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers]
 ---
 
 # websocket

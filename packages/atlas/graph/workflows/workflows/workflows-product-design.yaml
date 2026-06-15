@@ -1,0 +1,90 @@
+---
+nodeKind: Workflow
+id: workflow:user-research-session
+attributes:
+  displayName: "User Research Session"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-feature"
+  complexity: cross-team
+  description: |
+    Plans and conducts user research sessions — participant recruitment,
+    script preparation, session facilitation, note synthesis, insight
+    extraction, and findings distribution to product and engineering teams.
+    Excludes long-term research strategy.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:engineering-manager
+    - target: role:end-user
+  requires_skill_area:
+    - target: skill-area:react-state-management
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:design-review
+attributes:
+  displayName: "Design Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-feature"
+  complexity: cross-team
+  description: |
+    Evaluates UX and visual design proposals before implementation —
+    reviewing mockups for accessibility, consistency with design system,
+    interaction patterns, responsive behavior, and alignment with product
+    requirements. Excludes code review of the implementation.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:tech-lead
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:react-state-management
+    - target: skill-area:react-testing
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:feature-flag-lifecycle
+attributes:
+  displayName: "Feature Flag Lifecycle"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages feature flags from creation to cleanup — enforcing naming
+    conventions, tracking flag age, alerting on stale flags, coordinating
+    gradual rollout percentages, and ensuring dead flags are removed from
+    code after full rollout. Excludes experiment analysis.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:implementer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity

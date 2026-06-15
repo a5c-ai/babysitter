@@ -1,0 +1,78 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-9018849449ec
+attributes:
+  displayName: 'Catalog source reference: https://huggingface.co/CohereForAI/c4ai-command-r-plus-08-2024'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://huggingface.co/CohereForAI/c4ai-command-r-plus-08-2024
+  sourcePathOrUrl: https://huggingface.co/CohereForAI/c4ai-command-r-plus-08-2024
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-other-oss.yaml,
+    graph/benchmarks/eval-runs/eval-runs-other-oss.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-93bec2ea7b74
+attributes:
+  displayName: 'Catalog source reference: https://huggingface.co/datasets/gaia-benchmark/GAIA'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://huggingface.co/datasets/gaia-benchmark/GAIA
+  sourcePathOrUrl: https://huggingface.co/datasets/gaia-benchmark/GAIA
+  locator: Source reference for catalog entities in graph/benchmarks/test-sets/gaia-validation.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-b705dadaf7e2
+attributes:
+  displayName: 'Catalog source reference: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct
+  sourcePathOrUrl: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-meta.yaml,
+    graph/benchmarks/eval-runs/eval-runs-meta.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-7e994b0eae5a
+attributes:
+  displayName: 'Catalog source reference: https://huggingface.co/microsoft/Phi-3-medium-128k-instruct'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://huggingface.co/microsoft/Phi-3-medium-128k-instruct
+  sourcePathOrUrl: https://huggingface.co/microsoft/Phi-3-medium-128k-instruct
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-other-oss.yaml,
+    graph/benchmarks/eval-runs/eval-runs-other-oss.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

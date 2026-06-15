@@ -1,0 +1,148 @@
+nodeKind: AgentVersion
+id: agentVersion:omp:ge-15-5-9
+attributes:
+  agentId: "omp"
+  aliases:
+    - "oh-my-pi"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "OMP (oh-my-pi)"
+  summary: "Oh-My-Pi terminal coding agent"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:omp
+  versionRange: ">=15.5.11"
+  currentVersion: "15.5.11"
+  releasedAt: "2026-05-29"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.5.11"
+  assimilationNotes:
+    - "Added mid-conversation system-message support for eligible Anthropic Messages turns on Claude Opus 4.8+ and newer first-party Claude API use."
+    - "Added supportsMidConversationSystem compatibility settings and Anthropic Claude Opus 4.8 model metadata for Bedrock Converse streaming through xhigh effort."
+    - "Anthropic adaptive-thinking effort mapping for Opus 4.7+ now shifts efforts up one notch so high maps to xhigh and xhigh reaches max."
+    - "Coding agent adds SQL and Redis SessionStorage backends, exports session storage symbols from the package root, and emits fresh hashline snapshot headers after writes."
+    - "Hashline/edit stale-snapshot diagnostics now distinguish file drift from fabricated or cross-session tags."
+    - "v15.5.7 adds OpenRouter model variants, xAI Grok OAuth login, and OpenRouter API-key login validation."
+    - "v15.5.8 adds credential completion probes plus Wafer Pass and Wafer Serverless providers."
+    - "v15.5.9 changes native addon extraction to reuse cached .node files when sizes match and ships standalone binaries with a compressed native-addon archive."
+    - "v15.5.9 hardens native addon extraction by rejecting unsafe archive entries and non-file entries before writing binaries."
+    - "Install method and package name remain npm install -g @oh-my-pi/pi-coding-agent."
+  cliCommand: "omp"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY]
+    authFiles:
+      - "~/.omp/agent/settings.json"
+    hostEnvSignals:
+      - OMP_RUN_ID
+      - OMP_SESSION_ID
+    sessionDir: "~/.omp/agent/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: false
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: false
+      supportsParallelToolCalls: false
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: true
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: false
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.omp/agent/settings.json"
+    displayName: "OMP"
+    defaultModelId: "default"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive: {}
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: true
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:omp
+  composed_of:
+    - target: agent-core-impl:omp.core@current
+      role: core
+    - target: agent-runtime-impl:omp.runtime@current
+      role: runtime
+    - target: agent-platform-impl:omp.platform@current
+      role: platform
+    - target: agent-ui-impl:omp.ui@current
+      role: ui
+  sourced_from:
+    - evidence:omp-15-5-11-release
+  supports:
+    - target: capability:skills
+      versionRange: ">=15.5.11"
+      level: full
+      notes: Oh-My-Pi documents file-backed skills explicitly.
+    - target: capability:supports-thinking
+      versionRange: ">=15.5.11"
+      level: full
+      notes: Oh-My-Pi publicly described as a terminal coding agent with broad tool surface.
+    - target: capability:interactive-mode
+      versionRange: ">=15.5.11"
+      level: full
+      notes: Interactive terminal behavior grounded in upstream product README.
+    - target: capability:stdin-injection
+      versionRange: ">=15.5.11"
+      level: full
+      notes: Public operator docs are thin; local fallback metadata remains primary source of truth.
+    - target: capability:vision-input
+      versionRange: ">=15.5.11"
+      level: full
+      notes: Public README advertises image support; technical detail is thinner.
+    - target: capability:can-resume
+      versionRange: ">=15.5.11"
+      level: full
+      notes: Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations.
+  uses_memory_system:
+    - target: memory-system:pi-memory

@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:agent-recipe
+attributes:
+  canonicalDefinitionId: definition:agent-recipe.canonical
+  displayName: "Agent Recipe"
+  kind: concept
+  description: |
+    Alternative term for Blueprint.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

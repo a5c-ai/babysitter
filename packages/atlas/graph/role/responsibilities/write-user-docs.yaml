@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:write-user-docs
+attributes:
+  displayName: "Write end-user documentation"
+  cadence: per-release
+  requiredSkills:
+    - skill:technical-writing
+  description: |
+    Write end-user documentation.
+edges:
+  requires_skill:
+    - skill:technical-writing

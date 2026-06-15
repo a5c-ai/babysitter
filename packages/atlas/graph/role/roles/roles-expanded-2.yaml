@@ -1,0 +1,1103 @@
+---
+nodeKind: Role
+id: role:firmware-engineer
+attributes:
+  displayName: "Firmware Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops low-level software that runs directly on hardware — bootloaders,
+    device drivers, interrupt handlers, and OTA update mechanisms. Works
+    at the boundary of hardware and software.
+edges:
+  holds_responsibility:
+    - responsibility:deployment-management
+    - responsibility:test-strategy
+  requires_expertise:
+    - target: skill-area:firmware-development
+    - target: skill-area:real-time-os
+    - target: skill-area:bootloader-design
+  applies_to:
+    - target: domain:embedded-systems
+---
+nodeKind: Role
+id: role:fpga-engineer
+attributes:
+  displayName: "FPGA Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and implements digital logic on field-programmable gate arrays —
+    HDL coding, synthesis, place-and-route, timing closure, and hardware
+    verification using UVM or cocotb.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:test-strategy
+  requires_expertise:
+    - target: skill-area:hdl-design
+    - target: skill-area:fpga-synthesis
+    - target: skill-area:timing-closure
+    - target: skill-area:hardware-verification-uvm
+  applies_to:
+    - target: domain:embedded-systems
+    - target: domain:semiconductor-design
+---
+nodeKind: Role
+id: role:kernel-developer
+attributes:
+  displayName: "Kernel Developer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Works on operating system kernels — scheduler, memory management,
+    file systems, device drivers, and system call interfaces. Requires
+    deep understanding of hardware-software interaction and concurrency.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:security-audit
+  requires_expertise:
+    - target: skill-area:rtos-programming
+    - target: skill-area:concurrency-multithreading
+    - target: skill-area:lock-free-data-structures
+  applies_to:
+    - target: domain:systems-programming
+---
+nodeKind: Role
+id: role:compiler-engineer
+attributes:
+  displayName: "Compiler Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and builds compilers, interpreters, and language tooling —
+    parsing, type checking, optimization passes, code generation, and
+    language server protocols.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:code-review
+  requires_expertise:
+    - target: skill-area:compiler-implementation
+    - target: skill-area:language-design
+  applies_to:
+    - target: domain:compiler-engineering
+    - target: domain:systems-programming
+---
+nodeKind: Role
+id: role:graphics-engineer
+attributes:
+  displayName: "Graphics Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Implements real-time and offline rendering pipelines — shader programming,
+    GPU optimization, ray tracing, and graphics API integration (Vulkan,
+    DirectX, Metal). Bridges art direction with technical performance.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:code-review
+  requires_expertise:
+    - target: skill-area:shader-programming
+    - target: skill-area:graphics-rendering
+    - target: skill-area:gpu-memory-hierarchy
+  applies_to:
+    - target: domain:gaming
+    - target: domain:ar-vr
+---
+nodeKind: Role
+id: role:audio-engineer
+attributes:
+  displayName: "Audio Engineer (Software)"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops audio processing systems — DSP algorithms, spatial audio,
+    codec integration, real-time mixing, and audio middleware for games
+    and media applications.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:test-strategy
+  requires_expertise:
+    - target: skill-area:audio-processing
+    - target: skill-area:game-audio-systems
+  applies_to:
+    - target: domain:gaming
+    - target: domain:music-production
+---
+nodeKind: Role
+id: role:networking-engineer
+attributes:
+  displayName: "Networking Engineer (Software)"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds networking stacks, protocols, and distributed communication
+    layers — TCP/UDP tuning, HTTP/2 multiplexing, WebSocket servers,
+    and custom protocol implementations.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:platform-reliability
+  requires_expertise:
+    - target: skill-area:tcp-tuning
+    - target: skill-area:websocket-design
+    - target: skill-area:protocol-design
+  applies_to:
+    - target: domain:networking
+    - target: domain:distributed-systems
+---
+nodeKind: Role
+id: role:protocol-engineer
+attributes:
+  displayName: "Protocol Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and implements communication protocols — wire format design,
+    handshake mechanisms, versioning, backward compatibility, and
+    conformance test suites.
+edges:
+  holds_responsibility:
+    - responsibility:api-design-governance
+    - responsibility:test-strategy
+  requires_expertise:
+    - target: skill-area:protocol-design
+    - target: skill-area:socket-programming
+  applies_to:
+    - target: domain:networking
+    - target: domain:distributed-systems
+---
+nodeKind: Role
+id: role:database-engineer
+attributes:
+  displayName: "Database Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and optimizes database internals or database-heavy systems —
+    query planners, storage engines, replication, and connection pool
+    tuning. Distinct from DBA; focuses on engineering over operations.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:data-quality
+  requires_expertise:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:connection-pool-tuning
+    - target: skill-area:database-migration
+  applies_to:
+    - target: domain:databases
+---
+nodeKind: Role
+id: role:search-engineer
+attributes:
+  displayName: "Search Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and tunes search systems — index design, query understanding,
+    ranking algorithms, relevance tuning, and search analytics. Covers
+    both full-text and semantic/vector search.
+edges:
+  holds_responsibility:
+    - responsibility:search-relevance-quality
+    - responsibility:performance-optimization
+  requires_expertise:
+    - target: skill-area:search-infrastructure
+    - target: skill-area:search-indexing
+    - target: skill-area:natural-language-processing
+  applies_to:
+    - target: domain:search-engineering
+---
+nodeKind: Role
+id: role:storage-engineer
+attributes:
+  displayName: "Storage Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and operates storage systems — block, object, and file storage,
+    data replication, tiered storage, and backup/recovery infrastructure.
+    Optimizes for durability, throughput, and cost.
+edges:
+  holds_responsibility:
+    - responsibility:capacity-planning
+    - responsibility:disaster-recovery
+  requires_expertise:
+    - target: skill-area:cloud-infrastructure
+    - target: skill-area:columnar-storage
+  applies_to:
+    - target: domain:infrastructure
+    - target: domain:cloud-infra
+---
+nodeKind: Role
+id: role:streaming-engineer
+attributes:
+  displayName: "Streaming Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds real-time data streaming pipelines — Kafka, Flink, Spark
+    Streaming, and event-driven architectures. Owns throughput, latency,
+    exactly-once semantics, and stream processing topology design.
+edges:
+  holds_responsibility:
+    - responsibility:data-pipeline-reliability
+    - responsibility:performance-optimization
+  requires_expertise:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:stream-processing-design
+    - target: skill-area:streaming-realtime-processing
+  applies_to:
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:real-time-systems-engineer
+attributes:
+  displayName: "Real-Time Systems Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops systems with hard or soft real-time constraints — deterministic
+    scheduling, jitter analysis, watchdog timers, and safety-critical
+    control loops for avionics, automotive, and industrial applications.
+edges:
+  holds_responsibility:
+    - responsibility:platform-reliability
+    - responsibility:performance-optimization
+  requires_expertise:
+    - target: skill-area:rtos-programming
+    - target: skill-area:real-time-os
+  applies_to:
+    - target: domain:embedded-systems
+    - target: domain:industrial-automation
+---
+nodeKind: Role
+id: role:test-automation-engineer
+attributes:
+  displayName: "Test Automation Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs and maintains automated test frameworks and CI test pipelines —
+    integration tests, E2E tests, flaky test management, and test
+    infrastructure at scale.
+edges:
+  holds_responsibility:
+    - responsibility:test-strategy
+    - responsibility:code-review
+  requires_expertise:
+    - target: skill-area:e2e-testing
+    - target: skill-area:integration-testing
+    - target: skill-area:ci-pipeline-optimization
+  applies_to:
+    - target: domain:qa-testing
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:accessibility-engineer
+attributes:
+  displayName: "Accessibility Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Ensures software products are usable by people with disabilities —
+    WCAG implementation, screen reader compatibility, keyboard navigation,
+    and assistive technology testing.
+edges:
+  holds_responsibility:
+    - responsibility:accessibility-compliance
+    - responsibility:accessibility-wcag-compliance
+  requires_expertise:
+    - target: skill-area:web-accessibility
+    - target: skill-area:accessibility-testing
+    - target: skill-area:accessibility-first-design
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development
+---
+nodeKind: Role
+id: role:localization-engineer
+attributes:
+  displayName: "Localization Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and maintains internationalization infrastructure — string
+    extraction, translation management systems, locale-specific formatting,
+    and right-to-left layout support.
+edges:
+  holds_responsibility:
+    - responsibility:localization-management
+    - responsibility:code-review
+  requires_expertise:
+    - target: skill-area:internationalization
+  applies_to:
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:integration-engineer
+attributes:
+  displayName: "Integration Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Connects disparate systems through APIs, middleware, and data
+    integration patterns — ETL, webhooks, message brokers, and iPaaS
+    platforms. Ensures reliable data flow across organizational boundaries.
+edges:
+  holds_responsibility:
+    - responsibility:data-pipeline-reliability
+    - responsibility:api-design-governance
+  requires_expertise:
+    - target: skill-area:event-driven-architecture
+    - target: skill-area:messaging-queuing
+    - target: skill-area:api-design
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:applied-scientist
+attributes:
+  displayName: "Applied Scientist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:ml-ai
+  description: |
+    Bridges research and production — takes ML research findings and adapts
+    them into scalable, production-grade systems. Runs experiments, builds
+    prototypes, and collaborates with engineering for deployment.
+edges:
+  holds_responsibility:
+    - responsibility:model-quality-assurance
+    - responsibility:research-design
+  requires_expertise:
+    - target: skill-area:machine-learning-frameworks
+    - target: skill-area:deep-learning-libraries
+    - target: skill-area:feature-engineering
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:machine-learning
+---
+nodeKind: Role
+id: role:machine-learning-ops-engineer
+attributes:
+  displayName: "Machine Learning Ops Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Operates ML infrastructure at scale — model registries, training
+    pipelines, serving infrastructure, A/B testing for models, and
+    drift detection. Distinct from ml-ops-engineer in focusing on
+    operational excellence.
+edges:
+  holds_responsibility:
+    - responsibility:model-drift-monitoring
+    - responsibility:inference-latency-sla
+  requires_expertise:
+    - target: skill-area:model-serving
+    - target: skill-area:model-monitoring-drift-detection
+    - target: skill-area:ci-cd-ml-pipelines
+  applies_to:
+    - target: domain:ml-ops
+    - target: domain:ml-ai
+---
+nodeKind: Role
+id: role:nlp-engineer
+attributes:
+  displayName: "NLP Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds natural language processing systems — text classification,
+    named entity recognition, sentiment analysis, machine translation,
+    and LLM fine-tuning for domain-specific applications.
+edges:
+  holds_responsibility:
+    - responsibility:model-quality-assurance
+    - responsibility:model-training-quality
+  requires_expertise:
+    - target: skill-area:natural-language-processing
+    - target: skill-area:machine-learning-frameworks
+  applies_to:
+    - target: domain:nlp
+    - target: domain:ml-ai
+---
+nodeKind: Role
+id: role:computer-vision-engineer
+attributes:
+  displayName: "Computer Vision Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops image and video understanding systems — object detection,
+    segmentation, OCR, pose estimation, and 3D reconstruction for
+    autonomous systems, medical imaging, or industrial inspection.
+edges:
+  holds_responsibility:
+    - responsibility:model-quality-assurance
+    - responsibility:model-training-quality
+  requires_expertise:
+    - target: skill-area:computer-vision
+    - target: skill-area:deep-learning-libraries
+  applies_to:
+    - target: domain:computer-vision
+---
+nodeKind: Role
+id: role:speech-engineer
+attributes:
+  displayName: "Speech Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds speech processing systems — automatic speech recognition,
+    text-to-speech synthesis, speaker diarization, and voice activity
+    detection for voice assistants and call analytics.
+edges:
+  holds_responsibility:
+    - responsibility:model-quality-assurance
+    - responsibility:inference-latency-sla
+  requires_expertise:
+    - target: skill-area:audio-processing
+    - target: skill-area:natural-language-processing
+  applies_to:
+    - target: domain:speech-processing
+---
+nodeKind: Role
+id: role:recommendation-engineer
+attributes:
+  displayName: "Recommendation Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds recommendation and personalization systems — collaborative
+    filtering, content-based ranking, real-time feature serving, and
+    online learning for content, product, and media recommendations.
+edges:
+  holds_responsibility:
+    - responsibility:recommendation-quality
+    - responsibility:a-b-test-integrity
+  requires_expertise:
+    - target: skill-area:machine-learning-frameworks
+    - target: skill-area:feature-engineering-production
+  applies_to:
+    - target: domain:recommendation-systems
+---
+nodeKind: Role
+id: role:reinforcement-learning-engineer
+attributes:
+  displayName: "Reinforcement Learning Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops RL agents — reward function design, environment simulation,
+    policy optimization, and multi-agent systems. Applications in
+    robotics, game AI, and resource optimization.
+edges:
+  holds_responsibility:
+    - responsibility:model-quality-assurance
+    - responsibility:model-training-quality
+  requires_expertise:
+    - target: skill-area:reinforcement-learning-agents
+    - target: skill-area:machine-learning-frameworks
+  applies_to:
+    - target: domain:ml-ai
+---
+nodeKind: Role
+id: role:ai-trainer
+attributes:
+  displayName: "AI Trainer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates and curates training data for AI systems — data labeling,
+    RLHF feedback, red-teaming, and quality evaluation of model outputs.
+    Combines domain expertise with systematic evaluation methodology.
+edges:
+  holds_responsibility:
+    - responsibility:annotation-accuracy
+    - responsibility:data-labeling-consistency
+  requires_expertise:
+    - target: skill-area:data-collection
+    - target: skill-area:eval-driven-development
+  applies_to:
+    - target: domain:ml-ai
+---
+nodeKind: Role
+id: role:annotation-lead
+attributes:
+  displayName: "Annotation Lead"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages data annotation teams and processes — labeling guidelines,
+    inter-annotator agreement, quality assurance workflows, and annotation
+    tool selection. Ensures consistent, high-quality training data.
+edges:
+  holds_responsibility:
+    - responsibility:annotation-accuracy
+    - responsibility:data-labeling-consistency
+    - responsibility:data-quality
+  requires_expertise:
+    - target: skill-area:data-collection
+    - target: skill-area:data-quality
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:data-steward
+attributes:
+  displayName: "Data Steward"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Owns data quality and governance for specific data domains — defines
+    data standards, monitors quality metrics, resolves data issues, and
+    enforces retention and privacy policies.
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:data-retention-compliance
+    - responsibility:data-quality-monitoring
+  requires_expertise:
+    - target: skill-area:data-governance
+    - target: skill-area:data-quality
+  applies_to:
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:data-quality-engineer
+attributes:
+  displayName: "Data Quality Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds automated data quality checks and observability — schema
+    validation, anomaly detection, freshness monitors, and data quality
+    dashboards across pipelines.
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:data-pipeline-reliability
+  requires_expertise:
+    - target: skill-area:data-quality
+    - target: skill-area:etl-pipelines
+    - target: skill-area:data-lineage
+  applies_to:
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:etl-developer
+attributes:
+  displayName: "ETL Developer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds extract-transform-load pipelines — batch and streaming data
+    ingestion, transformation logic, data warehouse loading, and
+    pipeline orchestration with tools like Airflow, dbt, or Dagster.
+edges:
+  holds_responsibility:
+    - responsibility:data-pipeline-reliability
+    - responsibility:data-quality
+  requires_expertise:
+    - target: skill-area:etl-pipelines
+    - target: skill-area:dbt-modeling
+    - target: skill-area:python-data-pipelines
+  applies_to:
+    - target: domain:data-engineering
+---
+nodeKind: Role
+id: role:reporting-analyst
+attributes:
+  displayName: "Reporting Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates and maintains operational and business reports — scheduled
+    reports, ad-hoc analysis, and stakeholder-facing dashboards. Translates
+    data into actionable insights for decision-makers.
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+  requires_expertise:
+    - target: skill-area:data-analysis
+    - target: skill-area:data-visualization
+  applies_to:
+    - target: domain:business-intelligence
+---
+nodeKind: Role
+id: role:data-visualization-specialist
+attributes:
+  displayName: "Data Visualization Specialist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs compelling visual representations of data — interactive
+    dashboards, infographics, custom D3 visualizations, and data
+    storytelling. Combines design skills with data fluency.
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:data-visualization
+    - target: skill-area:visual-design
+  applies_to:
+    - target: domain:business-intelligence
+    - target: domain:data-science
+---
+nodeKind: Role
+id: role:penetration-tester
+attributes:
+  displayName: "Penetration Tester"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Conducts authorized offensive security testing — web application
+    pentesting, network penetration, social engineering, and physical
+    security assessments. Documents findings with severity ratings and
+    remediation guidance.
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:security-review
+  requires_expertise:
+    - target: skill-area:penetration-testing-ethical-hacking
+    - target: skill-area:application-security-testing
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:security
+---
+nodeKind: Role
+id: role:security-architect
+attributes:
+  displayName: "Security Architect"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs organization-wide security architecture — zero-trust frameworks,
+    network segmentation, identity federation, and defense-in-depth
+    strategies. Sets security standards and reviews system designs.
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:security-audit
+    - responsibility:threat-modeling
+  requires_expertise:
+    - target: skill-area:zero-trust-architecture
+    - target: skill-area:threat-modeling
+    - target: skill-area:network-segmentation
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:security
+---
+nodeKind: Role
+id: role:threat-analyst
+attributes:
+  displayName: "Threat Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Monitors and analyzes cyber threats — threat intelligence feeds,
+    indicator-of-compromise tracking, adversary TTPs (MITRE ATT&CK),
+    and threat landscape reporting for proactive defense.
+edges:
+  holds_responsibility:
+    - responsibility:security-incident-triage
+    - responsibility:risk-assessment
+  requires_expertise:
+    - target: skill-area:threat-intelligence-hunting
+    - target: skill-area:threat-detection
+  applies_to:
+    - target: domain:cybersecurity
+---
+nodeKind: Role
+id: role:soc-analyst
+attributes:
+  displayName: "SOC Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Operates within a Security Operations Center — monitors SIEM alerts,
+    triages security events, investigates incidents, and escalates
+    confirmed threats. Works in tiered shifts (L1/L2/L3).
+edges:
+  holds_responsibility:
+    - responsibility:security-incident-triage
+    - responsibility:incident-response
+  requires_expertise:
+    - target: skill-area:security-monitoring-siem
+    - target: skill-area:incident-response-forensics
+  applies_to:
+    - target: domain:cybersecurity
+---
+nodeKind: Role
+id: role:forensic-analyst
+attributes:
+  displayName: "Digital Forensic Analyst"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Conducts digital forensic investigations — disk imaging, memory
+    analysis, log reconstruction, malware analysis, and chain-of-custody
+    documentation for legal proceedings.
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:incident-response
+  requires_expertise:
+    - target: skill-area:incident-response-forensics
+    - target: skill-area:endpoint-security-edr
+  applies_to:
+    - target: domain:cybersecurity
+---
+nodeKind: Role
+id: role:red-team-lead
+attributes:
+  displayName: "Red Team Lead"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads adversary simulation exercises — plans attack scenarios, coordinates
+    red team operators, emulates real-world threat actors, and debriefs
+    findings with blue team and leadership.
+edges:
+  holds_responsibility:
+    - responsibility:security-audit
+    - responsibility:zero-day-response
+  requires_expertise:
+    - target: skill-area:penetration-testing-ethical-hacking
+    - target: skill-area:threat-intelligence-hunting
+  applies_to:
+    - target: domain:cybersecurity
+---
+nodeKind: Role
+id: role:blue-team-lead
+attributes:
+  displayName: "Blue Team Lead"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Leads defensive security operations — detection engineering, incident
+    response playbooks, security monitoring tuning, and defensive
+    infrastructure improvements based on red team findings.
+edges:
+  holds_responsibility:
+    - responsibility:security-incident-triage
+    - responsibility:incident-response
+  requires_expertise:
+    - target: skill-area:security-monitoring-siem
+    - target: skill-area:threat-detection
+    - target: skill-area:incident-response
+  applies_to:
+    - target: domain:cybersecurity
+---
+nodeKind: Role
+id: role:appsec-engineer
+attributes:
+  displayName: "Application Security Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Secures application code and deployments — SAST/DAST tooling, secure
+    code reviews, threat modeling workshops, dependency vulnerability
+    management, and developer security training.
+edges:
+  holds_responsibility:
+    - responsibility:security-review
+    - responsibility:dependency-security
+  requires_expertise:
+    - target: skill-area:application-security
+    - target: skill-area:sast
+    - target: skill-area:dast
+    - target: skill-area:threat-modeling
+  applies_to:
+    - target: domain:security
+    - target: domain:software-engineering
+---
+nodeKind: Role
+id: role:accessibility-specialist
+attributes:
+  displayName: "Accessibility Specialist"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Champions accessible design across the organization — conducts
+    accessibility audits, trains teams on WCAG standards, evaluates
+    assistive technology compatibility, and advocates for inclusive design.
+edges:
+  holds_responsibility:
+    - responsibility:accessibility-wcag-compliance
+    - responsibility:accessibility-compliance
+  requires_expertise:
+    - target: skill-area:accessibility-first-design
+    - target: skill-area:accessibility-testing
+    - target: skill-area:web-accessibility
+  applies_to:
+    - target: domain:frontend
+---
+nodeKind: Role
+id: role:content-designer
+attributes:
+  displayName: "Content Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Designs content experiences end-to-end — information architecture,
+    content hierarchy, user flows, and editorial standards. Combines
+    UX research insights with writing craft to improve product clarity.
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:brand-consistency
+  requires_expertise:
+    - target: skill-area:content-strategy
+    - target: skill-area:interaction-design
+  applies_to:
+    - target: domain:ux-writing
+---
+nodeKind: Role
+id: role:motion-designer
+attributes:
+  displayName: "Motion Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Creates animations and motion graphics for UI, marketing, and
+    product — micro-interactions, loading states, transitions, and
+    explainer videos. Works with design systems to codify motion language.
+edges:
+  holds_responsibility:
+    - responsibility:brand-consistency
+    - responsibility:performance-budget-enforcement
+  requires_expertise:
+    - target: skill-area:motion-design
+    - target: skill-area:animation-transitions
+  applies_to:
+    - target: domain:animation
+    - target: domain:graphic-design
+---
+nodeKind: Role
+id: role:brand-designer
+attributes:
+  displayName: "Brand Designer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Develops and maintains visual brand identity — logos, color systems,
+    typography, illustration style, brand guidelines, and packaging design.
+    Ensures consistency across all touchpoints.
+edges:
+  holds_responsibility:
+    - responsibility:brand-consistency
+    - responsibility:brand-management
+  requires_expertise:
+    - target: skill-area:visual-design
+    - target: skill-area:color-theory
+    - target: skill-area:typography
+  applies_to:
+    - target: domain:graphic-design
+---
+nodeKind: Role
+id: role:design-researcher
+attributes:
+  displayName: "Design Researcher"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Conducts qualitative and quantitative research to inform design
+    decisions — usability testing, contextual inquiry, diary studies,
+    surveys, and card sorting. Synthesizes findings into design
+    recommendations.
+edges:
+  holds_responsibility:
+    - responsibility:user-research
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:user-research
+    - target: skill-area:product-analytics
+  applies_to:
+    - target: domain:customer-experience
+---
+nodeKind: Role
+id: role:conversion-rate-optimizer
+attributes:
+  displayName: "Conversion Rate Optimizer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Optimizes digital funnels for conversion — A/B testing, multivariate
+    testing, landing page optimization, and behavioral analytics. Bridges
+    product, design, and marketing with data-driven experimentation.
+edges:
+  holds_responsibility:
+    - responsibility:a-b-test-integrity
+    - responsibility:experimentation-governance
+  requires_expertise:
+    - target: skill-area:conversion-optimization
+    - target: skill-area:experiment-design-AB-testing
+    - target: skill-area:a-b-testing
+  applies_to:
+    - target: domain:e-commerce
+    - target: domain:digital-marketing
+---
+nodeKind: Role
+id: role:it-operations-manager
+attributes:
+  displayName: "IT Operations Manager"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages day-to-day IT operations — service desk, infrastructure,
+    endpoint management, and IT service delivery. Oversees ITIL processes
+    and vendor relationships for enterprise IT.
+edges:
+  holds_responsibility:
+    - responsibility:sla-management
+    - responsibility:vendor-management
+    - responsibility:change-management
+  requires_expertise:
+    - target: skill-area:itsm
+    - target: skill-area:operations-automation
+    - target: skill-area:vendor-management-ops
+  applies_to:
+    - target: domain:operations
+---
+nodeKind: Role
+id: role:network-administrator
+attributes:
+  displayName: "Network Administrator"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages enterprise network infrastructure — routers, switches,
+    firewalls, VPNs, and wireless networks. Handles network monitoring,
+    troubleshooting, and capacity planning.
+edges:
+  holds_responsibility:
+    - responsibility:platform-reliability
+    - responsibility:capacity-planning
+  requires_expertise:
+    - target: skill-area:networking
+    - target: skill-area:network-segmentation
+  applies_to:
+    - target: domain:networking
+---
+nodeKind: Role
+id: role:systems-administrator
+attributes:
+  displayName: "Systems Administrator"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Manages servers, operating systems, and enterprise applications —
+    patching, configuration management, user provisioning, and backup
+    operations. Covers both on-premises and cloud environments.
+edges:
+  holds_responsibility:
+    - responsibility:platform-reliability
+    - responsibility:disaster-recovery
+  requires_expertise:
+    - target: skill-area:configuration-management
+    - target: skill-area:operations-automation
+  applies_to:
+    - target: domain:infrastructure
+---
+nodeKind: Role
+id: role:helpdesk-engineer
+attributes:
+  displayName: "Helpdesk Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Provides technical support to internal users — ticket triage,
+    troubleshooting, escalation, and knowledge base maintenance. First
+    point of contact for IT issues.
+edges:
+  holds_responsibility:
+    - responsibility:customer-escalation
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:itsm
+    - target: skill-area:customer-support
+  applies_to:
+    - target: domain:operations
+---
+nodeKind: Role
+id: role:capacity-planner
+attributes:
+  displayName: "Capacity Planner"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Forecasts infrastructure and resource needs — demand modeling,
+    utilization trending, headroom analysis, and scaling recommendations.
+    Bridges engineering, finance, and operations for cost-effective growth.
+edges:
+  holds_responsibility:
+    - responsibility:capacity-planning
+    - responsibility:cost-optimization-cloud
+  requires_expertise:
+    - target: skill-area:capacity-forecasting
+    - target: skill-area:capacity-planning-ops
+  applies_to:
+    - target: domain:infrastructure
+    - target: domain:cloud-infra

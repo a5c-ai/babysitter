@@ -1,0 +1,184 @@
+nodeKind: EvidenceSource
+id: evidence:openai-node-6-40-0-update-release
+attributes:
+  displayName: "OpenAI Node SDK v6.40.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/openai-node/releases/tag/v6.40.0"
+  sourcePathOrUrl: "https://github.com/openai/openai-node/releases/tag/v6.40.0"
+  locator: "openai/openai-node release v6.40.0"
+  capturedAt: "2026-06-02T06:13:00Z"
+  observedAt: "2026-06-01T18:52:48Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:13:00Z"
+  notes: |
+    Issue #860 tracks OpenAI Node SDK 6.40.0 for the Codex SDK adapter surface.
+    Official release notes document workload identity in audit logs, an
+    additional_tools item in Responses, optional ActionSearch.query typing, and
+    removal of the migrate CLI. No npm package name or install method change is
+    modeled; the package remains openai.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex-sdk:6-40-0
+    - agent:codex-sdk
+---
+nodeKind: Claim
+id: claim:openai-node-6-40-0-update-release-tracking
+attributes:
+  claimId: openai-node-6-40-0-update-release-tracking
+  subjectKind: AgentVersion
+  subjectId: agentVersion:codex-sdk:6-40-0
+  attribute: releaseTracking
+  value: "openai-node:v6.40.0"
+  statement: "OpenAI Node SDK 6.40.0 is the tracked upstream release for the Codex SDK adapter record."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-40-0-update-release
+  claimedAt: "2026-06-02T06:13:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:codex-sdk:6-40-0
+  backed_by_evidence:
+    - evidence:openai-node-6-40-0-update-release
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-40-0-update-additional-tools
+attributes:
+  claimId: openai-node-6-40-0-update-additional-tools
+  subjectKind: AgentVersion
+  subjectId: agentVersion:codex-sdk:6-40-0
+  attribute: responseShapeUpdates.responsesAdditionalToolsItem
+  value: true
+  statement: "OpenAI Node SDK 6.40.0 includes an additional_tools item in Responses, affecting SDK response-shape handling."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-40-0-update-release
+  claimedAt: "2026-06-02T06:13:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:codex-sdk:6-40-0
+  backed_by_evidence:
+    - evidence:openai-node-6-40-0-update-release
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-40-0-update-action-search-query
+attributes:
+  claimId: openai-node-6-40-0-update-action-search-query
+  subjectKind: AgentVersion
+  subjectId: agentVersion:codex-sdk:6-40-0
+  attribute: responseShapeUpdates.actionSearchQueryOptional
+  value: true
+  statement: "OpenAI Node SDK 6.40.0 fixes ActionSearch.query to be optional in the generated API/type surface."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-40-0-update-release
+  claimedAt: "2026-06-02T06:13:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:codex-sdk:6-40-0
+  backed_by_evidence:
+    - evidence:openai-node-6-40-0-update-release
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-40-0-update-workload-identity
+attributes:
+  claimId: openai-node-6-40-0-update-workload-identity
+  subjectKind: AgentVersion
+  subjectId: agentVersion:codex-sdk:6-40-0
+  attribute: auditLogUpdates.workloadIdentity
+  value: true
+  statement: "OpenAI Node SDK 6.40.0 adds workload identity in audit logs."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-40-0-update-release
+  claimedAt: "2026-06-02T06:13:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:codex-sdk:6-40-0
+  backed_by_evidence:
+    - evidence:openai-node-6-40-0-update-release
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-40-0-update-removed-migrate-cli
+attributes:
+  claimId: openai-node-6-40-0-update-removed-migrate-cli
+  subjectKind: AgentVersion
+  subjectId: agentVersion:codex-sdk:6-40-0
+  attribute: removedCliSurfaces
+  value:
+    - migrate
+  statement: "OpenAI Node SDK 6.40.0 removes the migrate CLI surface."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-40-0-update-release
+  claimedAt: "2026-06-02T06:13:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:codex-sdk:6-40-0
+  backed_by_evidence:
+    - evidence:openai-node-6-40-0-update-release
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-40-0-update-install-continuity
+attributes:
+  claimId: openai-node-6-40-0-update-install-continuity
+  subjectKind: AgentVersion
+  subjectId: agentVersion:codex-sdk:6-40-0
+  attribute: releaseTracking.installMethodContinuity
+  value: "openai npm package unchanged"
+  statement: "No package or install command change is modeled for OpenAI Node SDK 6.40.0; Codex SDK integrations continue to use the openai npm package."
+  confidence: medium
+  provenanceKind: release-notes
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-40-0-update-release
+  claimedAt: "2026-06-02T06:13:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:codex-sdk:6-40-0
+  backed_by_evidence:
+    - evidence:openai-node-6-40-0-update-release
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release

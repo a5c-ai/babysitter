@@ -15,6 +15,13 @@
  * @references
  * - JMeter: https://jmeter.apache.org/
  * - Gatling Endurance Testing: https://gatling.io/docs/gatling/reference/current/http/check/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:performance-optimization]
+ *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:observability-driven-development]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

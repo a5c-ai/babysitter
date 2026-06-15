@@ -19,6 +19,13 @@
  * - Flutter Material/Cupertino: https://flutter.dev/docs/development/ui/widgets
  * - Design Systems: https://www.designsystems.com/
  * - WCAG Guidelines: https://www.w3.org/WAI/standards-guidelines/wcag/
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:cross-platform-desktop]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management, workflow:cross-platform-testing]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

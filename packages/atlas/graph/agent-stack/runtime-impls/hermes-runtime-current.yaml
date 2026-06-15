@@ -1,0 +1,47 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:hermes.runtime@current
+attributes:
+  displayName: Hermes Runtime (current)
+  agentVersionId: agent-version:hermes@current
+  subagentDispatchMechanism: none
+  packageRef: source-ref:hermes-agent-pypi
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.hermes/sessions/
+  sessionFileFormat: jsonl-with-sqlite-index
+  sessionFilePathConvention: ~/.hermes/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: none
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:hermes
+    role: runtime
+  exposes:
+  - target: hook-surface:hermes.on-event
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:supports-mcp
+    versionRange: '>=1.0.0'
+    level: full
+    notes: 'MCP via stdio.
+
+      '
+  speaks:
+    - target: mcp-transport:stdio

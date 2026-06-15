@@ -2,6 +2,13 @@
 name: refactoring-assistant
 description: Suggest and guide application of refactoring patterns to improve code quality
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dead-code-elimination, skill-area:code-analysis-linting]
+  roles: [role:backend-engineer, role:refactor-bot]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Refactoring Assistant Skill

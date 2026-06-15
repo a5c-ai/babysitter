@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:mcp-no-jsonrpc-batching
+attributes:
+  displayName: "MCP without JSON-RPC batching"
+  description: |
+    The entity conforms to the MCP 2025-06-18 revision which removed
+    JSON-RPC batching support: messages are exchanged one-at-a-time and
+    arrays of JSON-RPC requests are no longer accepted.
+    See https://modelcontextprotocol.io/specification/2025-06-18/changelog
+  appliesToNodeKinds: ["AgentRuntimeImpl", "ToolServer"]
+  category: agent
+edges: {}

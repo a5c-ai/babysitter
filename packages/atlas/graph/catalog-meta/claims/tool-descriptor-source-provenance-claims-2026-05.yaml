@@ -1,0 +1,305 @@
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-puppeteer-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+    is the migrated source reference for ToolDescriptor tool-descriptor:puppeteer.navigate
+    in graph/extensions/tool-descriptors/puppeteer-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:puppeteer.navigate
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-puppeteer-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:puppeteer.navigate
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-puppeteer-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-time-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/time is
+    the migrated source reference for ToolDescriptor tool-descriptor:time.get-current-time
+    in graph/extensions/tool-descriptors/time-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:time.get-current-time
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/time
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-time-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:time.get-current-time
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-time-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-sqlite-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+    is the migrated source reference for ToolDescriptor tool-descriptor:sqlite.read-query
+    in graph/extensions/tool-descriptors/sqlite-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:sqlite.read-query
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-sqlite-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:sqlite.read-query
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-sqlite-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-sequential-thinking-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+    is the migrated source reference for ToolDescriptor tool-descriptor:sequentialthinking.sequentialthinking
+    in graph/extensions/tool-descriptors/sequential-thinking-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:sequentialthinking.sequentialthinking
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-sequential-thinking-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:sequentialthinking.sequentialthinking
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-sequential-thinking-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-supabase-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/supabase-community/supabase-mcp is the migrated source
+    reference for ToolDescriptor tool-descriptor:supabase.list-projects in graph/extensions/tool-descriptors/supabase-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:supabase.list-projects
+  attribute: source
+  value: https://github.com/supabase-community/supabase-mcp
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-supabase-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:supabase.list-projects
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-supabase-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-postgres-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+    is the migrated source reference for ToolDescriptor tool-descriptor:postgres.query
+    in graph/extensions/tool-descriptors/postgres-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:postgres.query
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-postgres-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:postgres.query
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-postgres-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-sentry-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/getsentry/sentry-mcp is the migrated source reference
+    for ToolDescriptor tool-descriptor:sentry.get-issue in graph/extensions/tool-descriptors/sentry-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:sentry.get-issue
+  attribute: source
+  value: https://github.com/getsentry/sentry-mcp
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-sentry-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:sentry.get-issue
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-sentry-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-tavily-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/tavily-ai/tavily-mcp is the migrated source reference
+    for ToolDescriptor tool-descriptor:tavily.search in graph/extensions/tool-descriptors/tavily-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:tavily.search
+  attribute: source
+  value: https://github.com/tavily-ai/tavily-mcp
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-tavily-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:tavily.search
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-tavily-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-redis-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/redis/mcp-redis is the migrated source reference for
+    ToolDescriptor tool-descriptor:redis.get in graph/extensions/tool-descriptors/redis-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:redis.get
+  attribute: source
+  value: https://github.com/redis/mcp-redis
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-redis-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:redis.get
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-redis-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-slack-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/slack is
+    the migrated source reference for ToolDescriptor tool-descriptor:slack.list-channels
+    in graph/extensions/tool-descriptors/slack-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:slack.list-channels
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-slack-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:slack.list-channels
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-slack-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-stripe-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/stripe/agent-toolkit is the migrated source reference
+    for ToolDescriptor tool-descriptor:stripe.list-customers in graph/extensions/tool-descriptors/stripe-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:stripe.list-customers
+  attribute: source
+  value: https://github.com/stripe/agent-toolkit
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-stripe-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:stripe.list-customers
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-stripe-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-run3-extensions-tool-descriptors-perplexity-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/ppl-ai/modelcontextprotocol is the migrated source
+    reference for ToolDescriptor tool-descriptor:perplexity.ask in graph/extensions/tool-descriptors/perplexity-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:perplexity.ask
+  attribute: source
+  value: https://github.com/ppl-ai/modelcontextprotocol
+  evidenceSourceIds:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-perplexity-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:perplexity.ask
+  backed_by_evidence:
+  - evidence:source-provenance-run3-extensions-tool-descriptors-perplexity-mcp-tools-yaml

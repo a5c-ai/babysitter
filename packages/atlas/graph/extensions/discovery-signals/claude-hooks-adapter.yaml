@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:claude-hooks-adapter
+attributes:
+  signalId: discovery-signal:claude-hooks-adapter
+  signalKind: env-any
+  key: claude
+  matchMode: all
+  confidence: high
+  scope: hooks-adapter
+  signals:
+    - CLAUDE_PLUGIN_ROOT
+    - CLAUDE_ENV_FILE
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-adapter-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-adapter. Verbatim from legacy packages/agent-catalog/graph/nodes/runtime-semantics/discovery-signals-hooks.yaml :: discovery:claude:hooks-adapter:1.'
+edges:
+  applies_to:
+    - target: agent:claude-code

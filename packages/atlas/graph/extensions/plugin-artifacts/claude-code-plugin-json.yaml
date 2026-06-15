@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-plugin-json
+attributes:
+  artifactId: plugin-artifact:claude-code-plugin-json
+  displayName: "Claude Code plugin.json manifest"
+  targetId: plugin-target:claude-code
+  artifactKind: manifest
+  pathPattern: ".claude-plugin/plugin.json"
+  installerSurface: "plugin.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

@@ -1,0 +1,23 @@
+nodeKind: Language
+id: language:fsharp
+attributes:
+  displayName: "F#"
+  paradigms:
+    - functional
+    - object-oriented
+  description: |
+    F# is a functional-first, statically-typed language on the .NET CLR,
+    influenced by OCaml and Haskell. It favors immutability, algebraic data
+    types (discriminated unions, records), and a pipeline-oriented style
+    while allowing object-oriented and imperative code when needed.
+
+    F# excels at domain modeling (type-driven design), data transformation
+    pipelines, financial modeling, and scripting. Its computation expressions
+    (a generalization of monads) support async workflows, sequences, and
+    custom DSLs. F# scripts (.fsx) and the REPL (FSI) make it productive for
+    exploratory data work. It interoperates fully with C# and the NuGet
+    ecosystem, and shares the .NET runtime's performance characteristics.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:finance

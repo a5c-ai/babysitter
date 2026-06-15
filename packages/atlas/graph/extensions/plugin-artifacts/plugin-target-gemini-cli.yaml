@@ -1,0 +1,95 @@
+nodeKind: PluginTarget
+id: plugin-target:gemini-cli
+attributes:
+  displayName: "Gemini CLI"
+  hostAgent: agent:gemini-cli
+  adapterFamily: shell-hook
+  adapterName: gemini
+  manifestFormat: "plugin.json + gemini-extension.json"
+  commandFormat: extension-manifest
+  skillHandling: native
+  hookRegistrationFormat: gemini
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: "gemini-extension.json"
+  pluginRootEnvVarForExtension: null
+  marketplacePath: null
+  pluginRootEnvVar: GEMINI_EXTENSION_PATH
+  scriptVariants:
+    - bash
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout: null
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: plugin-scripts
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: native
+  cliCommand: "gemini"
+  callerEnvVars:
+    - "GEMINI_SESSION_ID"
+    - "GEMINI_CWD"
+    - "GEMINI_PROJECT_DIR"
+  configPaths:
+    - ".gemini"
+  processNames:
+    - "gemini"
+    - "gemini-cli"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/gemini-adapter"
+  externalRepo: "a5c-ai/babysitter-gemini"
+  externalPackageName: "@a5c-ai/babysitter-gemini"
+  generatedSourceDir: "gemini-cli"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "GEMINI.md"
+  promptCapabilities:
+    - hooks
+    - stop-hook
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: stop-hook
+  hookDriven: true
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); GEMINI_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: google
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: derived
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: true
+  supportsBlock: true
+  supportsAsk: true
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "--prompt"
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
+
+edges:
+  hosted_by:
+    - target: agent:gemini-cli
+    - target: agent-platform-impl:gemini-cli.platform@current

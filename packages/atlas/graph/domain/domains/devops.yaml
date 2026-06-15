@@ -1,0 +1,39 @@
+nodeKind: Domain
+id: domain:devops
+attributes:
+  displayName: "DevOps"
+  description: |
+    DevOps bridges software development and IT operations to shorten
+    delivery cycles, increase deployment frequency, and improve reliability
+    through automation, shared tooling, and cultural practices.
+
+    Core practices include CI/CD pipelines, infrastructure-as-code,
+    configuration management, container orchestration (Kubernetes), and
+    feedback loops via monitoring and incident management. It overlaps
+    heavily with SRE (reliability engineering) and Platform Engineering
+    (internal developer platforms). Languages most common in this domain
+    include Bash, Python, Go, and YAML-based configuration.
+edges:
+  contains:
+    - specialization:devops-sre-platform
+    - specialization:k8s-ops
+    - specialization:sre
+    - topic:blue-green-deployment
+    - topic:ci-artifacts
+    - topic:ci-observability
+    - topic:ci-pipeline-design
+    - topic:ci-runners
+    - topic:ci-secrets-management
+    - topic:ci-triggers
+    - topic:deployment-strategies
+    - topic:feature-flags
+    - topic:github-actions-workflows
+    - topic:microservices-architecture
+    - topic:monorepo-ci
+    - topic:remote-dispatch
+    - topic:scheduled-dispatch
+    - topic:sidecar-pattern
+    - topic:chaos-engineering
+    - topic:observability-driven-development
+    - topic:platform-engineering-practices
+    - topic:rate-limiting

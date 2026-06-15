@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:mmlu.scope
+attributes:
+  subjectId: benchmark:mmlu
+  inScope: |
+    Multiple-choice (4-option) academic-knowledge questions across 57
+    subjects (STEM, humanities, social sciences, professional) — scored
+    by accuracy on a held-out test set of ~14k questions. English only.
+  outOfScope: |
+    Code-generation tasks, agentic / tool-use evaluations, multilingual
+    reasoning (use MMMLU/Global-MMLU), free-form generation quality,
+    and tasks requiring image/video input.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:mmlu

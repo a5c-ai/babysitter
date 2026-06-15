@@ -1,0 +1,53 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:antigravity-cli.platform@current
+attributes:
+  displayName: Antigravity CLI Platform (current)
+  agentVersionId: agentVersion:antigravity:2-0-11
+  subagentDefinitionFormat: workflow
+  packageRef: source-ref:antigravity-cli-github
+  nativeExtensionFormat: skill-md
+  nativeExtensionManifestPath: ~/.antigravity/skills/<name>/SKILL.md
+  nativeExtensionsDirectoryPath:
+  - ~/.antigravity/skills/
+  skillFormat: skill-md
+  skillsDirectoryPath:
+  - ~/.antigravity/skills/
+  customSlashCommandsPath:
+  - ~/.antigravity/commands/
+  subagentsDirectoryPath:
+  - ~/.antigravity/agents/
+  hooksDirectoryOrConfigPath:
+  - ~/.antigravity/workflows/hooks/
+  settingsFiles:
+  - ~/.antigravity/settings.json
+  - ~/.config/antigravity/settings.json
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: oauth-keychain
+  updateChannelMechanism: brew
+  supportedChannelKinds:
+  - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:antigravity-cli
+    role: platform
+  bundles:
+  - target: presentation:antigravity-cli-tui
+  succeeds:
+  - target: agent-platform-impl:gemini-cli.platform@current
+    notes: 'Antigravity CLI platform is the successor to Gemini CLI platform, rewritten in Go with SKILL.md plugins and workflow-driven hooks replacing the gemini-extension format.
+      '
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=2.0.0'
+    level: full
+    notes: 'File-based session persistence; resume supported.
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=2.0.0'
+    level: full
+    notes: 'SKILL.md plugin format with workflows, rules, and MCP server integration.
+      '

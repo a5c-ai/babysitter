@@ -1,0 +1,15 @@
+nodeKind: ExtensionInterface
+id: extension-interface:sandbox
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Sandbox
+  displayName: "Sandbox"
+  concern: "Bounded execution for untrusted code and shell commands."
+  surface: |
+    `exec(cmd, limits)` runs a command under CPU/mem/network/file
+    limits and returns a typed result.
+  builtInDefault: |
+    Direct host shell with no sandboxing. Permission prompts only.
+  notableImpls:
+    - tool-server:filesystem-mcp
+edges: {}

@@ -1,0 +1,77 @@
+---
+nodeKind: SourceRef
+id: source-ref:langgraph-github
+attributes:
+  description: "LangGraph open-source framework repository"
+  displayName: "LangGraph GitHub"
+  repoUrl: https://github.com/langchain-ai/langgraph
+  ref: main
+  path: "."
+  packageManager: pip
+  packageName: langgraph
+  kind: github-repo
+  notes: |
+    Canonical open-source repository for LangGraph graph orchestration,
+    checkpointing, persistence, and multi-agent/custom-agent building APIs.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:langgraph-docs
+attributes:
+  description: "LangGraph official documentation"
+  displayName: "LangGraph Docs"
+  repoUrl: https://docs.langchain.com/oss/python/langgraph/overview
+  ref: current
+  path: "."
+  kind: documentation-page
+  notes: |
+    Official LangChain documentation entrypoint for LangGraph concepts,
+    graph APIs, persistence, memory, human-in-the-loop, and deployment guidance.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:langchain-agents-docs
+attributes:
+  description: "LangChain agents official documentation"
+  displayName: "LangChain Agents Docs"
+  repoUrl: https://docs.langchain.com/oss/python/langchain/agents
+  ref: current
+  path: "."
+  kind: documentation-page
+  notes: |
+    Official LangChain documentation for create_agent, model/tool binding,
+    middleware, structured output, and higher-level agent-building APIs built
+    over graph-style execution.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:langsmith-langgraph-platform-docs
+attributes:
+  description: "LangGraph/LangSmith deployment and RemoteGraph documentation"
+  displayName: "LangGraph Platform / RemoteGraph Docs"
+  repoUrl: https://docs.langchain.com/langsmith/use-remote-graph
+  ref: current
+  path: "."
+  kind: documentation-page
+  notes: |
+    Official LangSmith documentation describing deployed graph invocation via
+    RemoteGraph, separation of local graph development from deployed execution,
+    and thread-level persistence.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:deepagents-github
+attributes:
+  description: "Deep Agents custom-agent harness by LangChain"
+  displayName: "Deep Agents GitHub"
+  repoUrl: https://github.com/langchain-ai/deepagents
+  ref: main
+  path: "."
+  packageManager: pip
+  packageName: deepagents
+  kind: github-repo
+  notes: |
+    LangChain-maintained custom-agent harness built with LangChain and
+    LangGraph, useful as an ecosystem exemplar for filesystem-backed,
+    planning, and subagent-capable custom agent construction.
+edges: {}

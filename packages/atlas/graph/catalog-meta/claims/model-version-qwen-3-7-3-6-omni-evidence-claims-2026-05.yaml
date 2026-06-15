@@ -1,0 +1,181 @@
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-max-model-studio-catalog
+attributes:
+  subjectId: model:qwen3-7-max@current
+  predicate: modelMetadata
+  value: qwen3.7-max; Qwen3.7-Max; launch 2026-05-21; qwen3.7-max-2026-05-20 equivalent; 1M-token pricing tier
+  statement: "Alibaba Cloud Model Studio lists Qwen3.7-Max as qwen3.7-max, describes it as a versatile agent foundation with long-horizon reasoning and cross-framework flexibility, shows launch time 2026-05-21, and its pricing page says current qwen3.7-max capability is equivalent to qwen3.7-max-2026-05-20 with a 0<Token<=1M tier."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-7-max@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-max-pricing
+attributes:
+  subjectId: model:qwen3-7-max@current
+  predicate: pricing
+  value: Model Studio public homepage $2.5 input and $7.5 output per 1M tokens; mainland/global pricing page 12 CNY input and 36 CNY output per 1M tokens for 0<Token<=1M; international pricing page 18.736 CNY input and 56.207 CNY output per 1M tokens
+  statement: "Alibaba Cloud Model Studio's public homepage lists qwen3.7-max at $2.5 input and $7.5 output per 1M tokens; the Chinese pricing table lists qwen3.7-max in mainland/global scopes at 12 CNY input and 36 CNY output per 1M tokens for 0<Token<=1M, and in the international scope at 18.736 CNY input and 56.207 CNY output."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-7-max@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-plus-model-studio-catalog
+attributes:
+  subjectId: model:qwen3-7-plus@current
+  predicate: modelMetadata
+  value: qwen3.7-plus; Qwen3.7-Plus; text-generation catalog card; qwen3.7-plus-2026-05-26 equivalent; 1M-token pricing tier
+  statement: "Alibaba Cloud Model Studio lists qwen3.7-plus in the Qwen text-generation model catalog, and its pricing page says current qwen3.7-plus capability is equivalent to qwen3.7-plus-2026-05-26 with pricing tiers through 1M input tokens."
+  confidence: high
+  reviewedAt: "2026-06-05T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-catalog-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-7-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-plus-pricing
+attributes:
+  subjectId: model:qwen3-7-plus@current
+  predicate: pricing
+  value: mainland/global 2-6 CNY input and 8-24 CNY output per 1M tokens across 0<Token<=1M tiers
+  statement: "Alibaba Cloud Model Studio's pricing page lists qwen3.7-plus at 2 CNY input and 8 CNY output per 1M tokens for 0<Token<=256K, and 6 CNY input and 24 CNY output per 1M tokens for 256K<Token<=1M."
+  confidence: high
+  reviewedAt: "2026-06-05T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-7-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-6-plus-model-studio-catalog
+attributes:
+  subjectId: model:qwen3-6-plus@current
+  predicate: modelMetadata
+  value: qwen3.6-plus; Qwen3.6-Plus; native multimodal; 1M context; launch 2026-04-02; qwen3.6-plus-2026-04-02 equivalent
+  statement: "Alibaba Cloud Model Studio lists Qwen3.6-Plus as qwen3.6-plus, describes it as native multimodal with 1M context and agentic coding, shows launch time 2026-04-02, and its pricing page says current qwen3.6-plus capability is equivalent to qwen3.6-plus-2026-04-02."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-6-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-6-plus-pricing
+attributes:
+  subjectId: model:qwen3-6-plus@current
+  predicate: pricing
+  value: Model Studio public homepage $0.5-$2 input and $3-$6 output per 1M tokens; mainland/global pricing page 2-8 CNY input and 12-48 CNY output per 1M tokens across 0<Token<=1M tiers
+  statement: "Alibaba Cloud Model Studio's public homepage lists qwen3.6-plus at $0.5-$2 input and $3-$6 output per 1M tokens; the Chinese pricing table lists qwen3.6-plus across 0<Token<=256K and 256K<Token<=1M tiers at 2-8 CNY input and 12-48 CNY output per 1M tokens in mainland/global scopes."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-6-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-6-flash-model-studio-catalog
+attributes:
+  subjectId: model:qwen3-6-flash@current
+  predicate: modelMetadata
+  value: qwen3.6-flash; text generation catalog card; qwen3.6-flash-2026-04-16 equivalent; 1M-token pricing tier
+  statement: "Alibaba Cloud Model Studio's model catalog lists qwen3.6-flash under Qwen text-generation models, and its pricing page says current qwen3.6-flash capability is equivalent to qwen3.6-flash-2026-04-16 with pricing tiers through 1M input tokens."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-catalog-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-6-flash@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-6-flash-pricing
+attributes:
+  subjectId: model:qwen3-6-flash@current
+  predicate: pricing
+  value: mainland/global 1.2-4.8 CNY input and 7.2-28.8 CNY output per 1M tokens; international 1.87355-7.4942 CNY input and 11.2413-29.9758 CNY output per 1M tokens
+  statement: "Alibaba Cloud Model Studio's pricing page lists qwen3.6-flash at 1.2-4.8 CNY input and 7.2-28.8 CNY output per 1M tokens across the mainland/global 0<Token<=1M tiers, and 1.87355-7.4942 CNY input and 11.2413-29.9758 CNY output per 1M tokens in the international scope."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-6-flash@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-5-omni-plus-model-studio-catalog
+attributes:
+  subjectId: model:qwen3-5-omni-plus@current
+  predicate: modelMetadata
+  value: qwen3.5-omni-plus; text/image/audio/video; launch 2026-03-30; qwen3.5-omni-plus-2026-03-15 equivalent; 256k context
+  statement: "Alibaba Cloud Model Studio lists qwen3.5-omni-plus in visual understanding, speech, and full-omni catalog sections; its public homepage data describes detailed audio-visual captioning, audio-visual vibe coding, and audio-visual conversation with launch date 2026-03-30; its pricing page says current capability is equivalent to qwen3.5-omni-plus-2026-03-15. Qwen's release blog states the Qwen3.5-Omni series supports 256k long-context input."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-catalog-2026-05
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+    - evidence:qwen3-5-omni-qwen-blog-2026-05
+  about:
+    - model:qwen3-5-omni-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-5-omni-plus-pricing
+attributes:
+  subjectId: model:qwen3-5-omni-plus@current
+  predicate: pricing
+  value: Model Studio public homepage $1.4-$11 input and $8.3-$44 output per 1M tokens; Chinese pricing page mainland 7 CNY text input, 53 CNY multimodal input, 40 CNY text/audio output, 213 CNY audio-only output; international 10.49 CNY, 82.44 CNY, 62.2 CNY, 329.74 CNY respectively
+  statement: "Alibaba Cloud Model Studio's public homepage lists qwen3.5-omni-plus at $1.4-$11 input and $8.3-$44 output per 1M tokens; the Chinese pricing table breaks out text, multimodal input, text+audio output, and audio-only output rates for qwen3.5-omni-plus in mainland and international scopes."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-5-omni-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-3-6-omni-alibaba-availability
+attributes:
+  subjectId: provider:alibaba-cloud
+  predicate: serves
+  value: qwen3.7-max; qwen3.7-plus; qwen3.6-plus; qwen3.6-flash; qwen3.5-omni-plus
+  statement: "Alibaba Cloud Model Studio is the confirmed serving provider for qwen3.7-max, qwen3.7-plus, qwen3.6-plus, qwen3.6-flash, and qwen3.5-omni-plus. This claim intentionally does not assert AWS Bedrock, Azure, or Vertex availability for these non-coder model IDs."
+  confidence: high
+  reviewedAt: "2026-05-27T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-catalog-2026-05
+    - evidence:alibaba-model-studio-home-qwen-2026-05
+  about:
+    - provider:alibaba-cloud
+    - model:qwen3-7-max@current
+    - model:qwen3-7-plus@current
+    - model:qwen3-6-plus@current
+    - model:qwen3-6-flash@current
+    - model:qwen3-5-omni-plus@current

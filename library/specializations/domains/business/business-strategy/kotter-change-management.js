@@ -3,6 +3,12 @@
  * @description Structured approach to leading organizational change through urgency creation, coalition building, vision communication, and institutionalization
  * @inputs { changeInitiative: string, organizationContext: object, stakeholders: array, outputDir: string }
  * @outputs { success: boolean, changePhases: object, coalitionPlan: object, communicationPlan: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

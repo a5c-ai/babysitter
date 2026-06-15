@@ -11,6 +11,11 @@ metadata:
   specialization: operations
   domain: business
   category: six-sigma-spc
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analytics, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:data-analyst, role:business-analyst]
 ---
 
 # Control Chart Analyzer

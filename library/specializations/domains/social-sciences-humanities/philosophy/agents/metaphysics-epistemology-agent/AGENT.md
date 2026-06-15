@@ -2,6 +2,12 @@
 name: metaphysics-epistemology-agent
 description: Investigates questions of being, knowledge, and reality through conceptual analysis
 required-skills: conceptual-analysis, thought-experiment-design, evidence-justification-assessment
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:deep-web-research, skill-area:natural-language-processing, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Metaphysics and Epistemology Agent

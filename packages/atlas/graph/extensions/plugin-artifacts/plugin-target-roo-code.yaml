@@ -1,0 +1,43 @@
+nodeKind: PluginTarget
+id: plugin-target:roo-code
+attributes:
+  displayName: "Roo Code"
+  hostAgent: agent:roo-code
+  adapterFamily: shell-hook
+  manifestFormat: "n/a"
+  commandFormat: markdown-commands
+  hookRegistrationFormat: none
+  skillHandling: unsupported
+  marketplacePath: null
+  adapterName: roo-code
+  scriptVariants:
+    - bash
+  distribution:
+    - manual
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".roo"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: supported
+    context: supported
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+edges:
+  hosted_by:
+    - target: agent:roo-code

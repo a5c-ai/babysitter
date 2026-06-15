@@ -2,6 +2,12 @@
 name: faculty-development-facilitator
 description: Design and deliver professional development programs to enhance teaching effectiveness using adult learning principles
 required-skills: facilitation-workshop-delivery, learning-transfer-design
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:mentorship, skill-area:stakeholder-management]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:engineering-manager, role:technical-writer]
 ---
 
 # Faculty Development Facilitator Agent

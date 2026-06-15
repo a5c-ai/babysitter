@@ -1,0 +1,46 @@
+{
+  "issueNumber": 616,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-616-sdk-host-tool-discovery",
+  "scope": {
+    "summary": "Propagate optional host-native tool inventory through hooks-mux AGENT_CAPABILITIES_JSON into SDK unified PromptContext and process creation prompt rendering.",
+    "mustModifyOnlyIfOnLivePath": [
+      "packages/hooks-mux/core/src/types/adapter.ts",
+      "packages/hooks-mux/adapter-claude/src/adapter.ts",
+      "packages/hooks-mux/core/src/sdk-interface/context-reader.ts",
+      "packages/hooks-mux/core/src/propagation/materialize.ts",
+      "packages/hooks-mux/core/src/programmatic/engine.ts",
+      "packages/sdk/src/harness/unified/capabilities.ts",
+      "packages/sdk/src/harness/unified/promptContext.ts",
+      "packages/sdk/src/prompts/types.ts",
+      "packages/sdk/src/prompts/compose.ts",
+      "packages/sdk/src/prompts/parts",
+      "packages/sdk/src/prompts/templates",
+      "docs/adapters-babysitter-integrations/plugin-mode.md"
+    ],
+    "acceptanceCriteria": [
+      "Host tool inventory is structured and optional/additive on the serialized adapter capability contract.",
+      "Existing adapters and SDK consumers continue to work when tool inventory is absent.",
+      "Claude adapter populates reliable host tool descriptors or partial descriptors without pretending to know unavailable metadata.",
+      "SDK unified ProxyCapabilities preserves the inventory from AGENT_CAPABILITIES_JSON.",
+      "PromptContext exposes host-native tools distinctly from coarse capabilities and external agent discovery.",
+      "Process creation prompt includes concise guidance such as host can do X and external agents should be used for Y when host inventory is present.",
+      "Focused no-model tests cover hooks-mux serialization, SDK env parsing, createUnifiedContext, prompt rendering, and absent-inventory fallback behavior."
+    ],
+    "qualityGates": [
+      "Targeted Vitest suites for hooks-mux capability serialization and SDK unified prompt context.",
+      "Claude adapter test for populated host tool inventory.",
+      "Prompt composer test proving host tool section appears in process creation prompt and stays absent when no inventory exists.",
+      "npm run build:hooks-mux",
+      "npm run build:sdk",
+      "npm run check:sdk-command-templates",
+      "git diff --check"
+    ],
+    "riskControls": [
+      "Keep schema optional to avoid breaking existing AGENT_CAPABILITIES_JSON payloads.",
+      "Use concise prompt rendering to avoid prompt bloat.",
+      "Keep host-native tools in a separate prompt section from external agent discovery.",
+      "Do not add AGENT_TOOLS_JSON unless contract design finds a concrete reason the existing JSON cannot safely carry the optional field."
+    ]
+  }
+}

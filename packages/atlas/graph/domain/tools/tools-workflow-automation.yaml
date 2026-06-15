@@ -1,0 +1,105 @@
+---
+nodeKind: Tool
+id: tool:n8n
+attributes:
+  displayName: "n8n"
+  homepageUrl: "https://n8n.io"
+  kind: other
+  description: |
+    Open-source workflow automation platform with a visual node-based
+    editor. Connects 400+ integrations (APIs, databases, SaaS services)
+    into automated workflows with branching, loops, error handling, and
+    webhooks. Self-hostable with a fair-code license. Increasingly used
+    as an AI agent orchestration layer with LLM nodes, AI agent nodes,
+    and tool-use capabilities. Supports custom code nodes (JavaScript/
+    Python) for advanced logic.
+edges:
+  supports_work:
+    - target: role:legal-counsel
+      confidence: medium
+      evidence: "Ora surfaced n8n for legal/compliance workflow automation."
+    - target: workflow:contract-review-cycle
+      confidence: medium
+      evidence: "Workflow automation can route contract review steps and handoffs."
+    - target: workflow:accounts-payable-cycle
+      confidence: medium
+      evidence: "Automation can connect finance approvals, procurement, and accounting workflows."
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:operations-automation
+  used_for:
+    - skill-area:operations-automation
+    - skill-area:ai-agent-development
+    - skill-area:agentic-loops
+  lib_applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:operations
+  integrates_with:
+    - target: tool-server:mcp-n8n
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:communication
+    - target: topic:agent-orchestration-products
+  alternative_to:
+    - target: tool:zapier
+      comparison: "Workflow automation platforms"
+    - target: tool:make
+      comparison: "Workflow automation platforms"
+---
+nodeKind: Tool
+id: tool:zapier
+attributes:
+  displayName: "Zapier"
+  homepageUrl: "https://zapier.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Cloud-based workflow automation platform connecting 7,000+ apps
+    via triggers and actions ("Zaps"). No-code interface for building
+    multi-step automations with filters, formatters, paths, and
+    scheduling. Offers Zapier Central for AI-powered automation and
+    natural-language workflow creation.
+edges:
+  supports_work:
+    - target: workflow:ai-agent-adoption-rollout
+      confidence: medium
+      evidence: "Workflow automation connects agent-ready products into rollout automations."
+    - target: responsibility:ai-tooling-evaluation
+      confidence: medium
+      evidence: "Integration breadth is relevant when evaluating agent toolchains."
+  tool_used_by:
+    - target: skill-area:operations-automation
+  used_for:
+    - skill-area:operations-automation
+  lib_applies_to_domain:
+    - target: domain:operations
+  alternative_to:
+    - target: tool:n8n
+      comparison: "Workflow automation platforms"
+    - target: tool:make
+      comparison: "Workflow automation platforms"
+---
+nodeKind: Tool
+id: tool:make
+attributes:
+  displayName: "Make (Integromat)"
+  homepageUrl: "https://www.make.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Visual workflow automation platform (formerly Integromat) with a
+    drag-and-drop scenario builder. Connects 1,500+ apps with advanced
+    data transformation, iteration, error handling, and webhook triggers.
+    Supports complex multi-branch scenarios with routers and aggregators.
+edges:
+  tool_used_by:
+    - target: skill-area:operations-automation
+  used_for:
+    - skill-area:operations-automation
+  lib_applies_to_domain:
+    - target: domain:operations
+  alternative_to:
+    - target: tool:n8n
+      comparison: "Workflow automation platforms"
+    - target: tool:zapier
+      comparison: "Workflow automation platforms"

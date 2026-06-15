@@ -3,6 +3,12 @@
  * @description Macro-environmental scanning of Political, Economic, Social, Technological, Environmental, and Legal factors affecting the organization
  * @inputs { organizationContext: object, industry: string, geographicScope: array, timeHorizon: string, outputDir: string }
  * @outputs { success: boolean, pestelFactors: object, impactAssessment: object, strategicImplications: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

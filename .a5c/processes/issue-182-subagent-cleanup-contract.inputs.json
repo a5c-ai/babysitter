@@ -1,0 +1,68 @@
+{
+  "issueNumber": 182,
+  "title": "Subagent finally-cleanup contract for /tmp clones and run-dir worktrees",
+  "labels": [
+    "sdk",
+    "effort:medium",
+    "ready-for-dev",
+    "plugins",
+    "feature",
+    "priority:medium"
+  ],
+  "userRequest": "Plan the implementation for subagent finally-cleanup contract for /tmp clones and run-dir worktrees",
+  "issueBody": "Implementation subagents invoked via the Agent / Task tool inside a babysitter process sometimes need a working directory -- to clone the babysitter repo for a PR, to spin up a sandbox, etc. There is no current convention or SDK affordance for cleaning these up, which leads to leaked worktrees inside .a5c/runs/<runId>/work/ and no finally-style cleanup hook. A real incident left a 2.6 GB babysitter clone under .a5c/runs/.../work/babysitter, inflated vitest discovery from 442 to 1294 files, and produced confusing lint/typecheck failures. Proposed affordances: document that subagents needing a workspace MUST use /tmp/<descriptive-name>/ and never .a5c/runs/<runId>/; add pre-validation that find .a5c/runs -maxdepth 3 -name work -type d returns empty before JSON deliverables; preferably expose ProcessContext.onCleanup or a task cleanup callback that runs regardless of success, failure, or abort; or warn when a task returns with a non-empty .a5c/runs/<runId>/work directory.",
+  "triageComment": "Root cause analysis: packages/sdk/src/runtime/types.ts exposes ProcessContext with runId, runDir, artifactsDir, task, breakpoint, subprocess, hook, etc., but no onCleanup/finally-style cleanup registration API. packages/sdk/src/runtime/processContext.ts constructs the context and artifactsDir but has no cleanup registry or lifecycle flush. packages/sdk/src/runtime/commitEffectResult.ts records task results and EFFECT_RESOLVED but does not invoke task cleanup callbacks and does not inspect <runDir>/work after task completion. packages/sdk/src/runtime/orchestrateIteration.ts calls run/iteration hooks, while packages/sdk/src/hooks/types.ts defines on-task-complete; the effect-resolution path does not currently appear to dispatch a task-complete cleanup/warning hook. plugins/babysitter-unified/skills/babysit/SKILL.md and .codex/skills/babysit/SKILL.md mention orchestrating .a5c/runs/<runId>/, but do not document the proposed /tmp-only convention for subagent scratch clones. Suggested approach: short-term docs guardrail, runtime guardrail warning/check after task result commit if <runDir>/work exists and is non-empty, and preferred SDK affordance ctx.onCleanup with tests around ProcessContext, commitEffectResult/iteration failure, and run completion/failure lifecycle.",
+  "acceptanceCriteria": [
+    "Babysit skill SKILL.md mentions the /tmp-only convention explicitly.",
+    "Preferred: ProcessContext exposes onCleanup so subagent workspace cleanup can be registered at process time and run in finally-style terminal paths.",
+    "Runtime warns when a task returns with a non-empty .a5c/runs/<runId>/work directory.",
+    "Cleanup behavior is covered by focused regression tests for success, failure/process-error, non-waiting semantics, and cleanup error handling.",
+    "Leak warning behavior is covered by focused tests for non-empty, empty, and absent <runDir>/work."
+  ],
+  "targetFiles": [
+    "packages/sdk/src/runtime/types.ts",
+    "packages/sdk/src/runtime/processContext.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/commitEffectResult.ts",
+    "packages/sdk/src/runtime/hooks/runtime.ts",
+    "packages/sdk/src/runtime/intrinsics/task.ts",
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/tasks/serializer.ts",
+    "packages/sdk/src/storage/tasks.ts",
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/runtime/__tests__/commitEffectResult.test.ts",
+    "packages/sdk/src/runtime/__tests__/testHelpers.ts",
+    "packages/sdk/src/hooks/types.ts"
+  ],
+  "documentationFiles": [
+    "plugins/babysitter-unified/skills/babysit/SKILL.md",
+    ".codex/skills/babysit/SKILL.md",
+    "library/reference/sdk.md",
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-reference/runtime-and-layout.md"
+  ],
+  "testTargets": [
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/runtime/__tests__/commitEffectResult.test.ts"
+  ],
+  "qualityCommands": [
+    "npm exec --workspace=@a5c-ai/babysitter-sdk -- vitest run src/runtime/__tests__/orchestrateIteration.integration.test.ts src/runtime/__tests__/commitEffectResult.test.ts",
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "maxVerificationAttempts": 2,
+  "branch": "staging",
+  "plannedProcessEntry": ".a5c/processes/issue-182-subagent-cleanup-contract.mjs#process",
+  "processLibraryResearch": {
+    "projectLocalProcessLibrary": ".a5c/process-library/ was absent in this checkout",
+    "activeProcessLibraryRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "referencePatterns": [
+      "library/methodologies/superpowers/systematic-debugging.js",
+      "library/methodologies/superpowers/test-driven-development.js",
+      "library/methodologies/process-hardening/process-hardening-patterns.js",
+      "library/specializations/sdk-platform-development/error-handling-debugging-support.js",
+      "library/processes/shared/runtime-call-tracer.js"
+    ]
+  }
+}

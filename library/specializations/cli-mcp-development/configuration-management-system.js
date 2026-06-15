@@ -17,6 +17,13 @@
  * - node-config: https://github.com/node-config/node-config
  * - Viper (Go): https://github.com/spf13/viper
  * - python-decouple: https://github.com/HBNetwork/python-decouple
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:sdk-api-design]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

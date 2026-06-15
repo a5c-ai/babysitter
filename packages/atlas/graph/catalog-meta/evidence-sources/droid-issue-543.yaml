@@ -1,0 +1,25 @@
+nodeKind: EvidenceSource
+id: evidence:droid-cli-0-136-1-issue-543
+attributes:
+  displayName: "Factory Droid CLI 0.136.1 npm package for issue #543"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.npmjs.com/package/@factory/cli/v/0.136.1
+  sourcePathOrUrl: https://www.npmjs.com/package/@factory/cli/v/0.136.1
+  locator: "npm @factory/cli v0.136.1"
+  capturedAt: "2026-05-29T11:28:00Z"
+  observedAt: "2026-05-29T11:28:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-29T11:28:00Z"
+  notes: |
+    Issue #543 records @factory/cli 0.136.1 as the latest npm package
+    version published on 2026-05-29. The issue research found no public
+    Factory GitHub release or changelog entry for 0.136.1 and found no
+    install-method, CLI flag, transport, MCP, auth, or package-name change.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:droid@0.136.1

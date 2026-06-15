@@ -1,0 +1,80 @@
+---
+nodeKind: Workflow
+id: workflow:partner-program-design
+attributes:
+  displayName: "Partner Program Design"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Designs and launches the organization's formal partner program from
+    scratch -- defining partner tier structures (e.g., Silver, Gold, Platinum)
+    with clear qualification criteria, designing benefit packages per tier
+    including margin structures, MDF allocations, and co-marketing
+    entitlements, establishing partner portal requirements with self-service
+    deal registration, lead distribution, and certification tracking, creating
+    partner onboarding playbooks with technical integration guides and sales
+    enablement kits, modeling program economics to validate sustainable margin
+    and incentive levels, and planning the launch communication sequence for
+    internal sales teams and external partner prospects. Produces partner
+    program charter, tier-benefits matrix, and portal requirements document.
+    Excludes ongoing partner management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:tutorial-design
+  applies_to_domain:
+    - target: domain:business-development
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:bizdev-team
+    - target: org-unit:partnerships-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:bizdev-crm-and-tracking-setup
+attributes:
+  displayName: "BizDev CRM and Tracking Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Configures the CRM and deal-tracking infrastructure for business
+    development operations -- designing partner and deal object schemas with
+    custom fields for partner type, tier, and integration status, building deal
+    registration workflows with automated routing and deduplication logic,
+    configuring attribution models to track partner-sourced versus
+    partner-influenced pipeline, setting up automated stage-progression alerts
+    and stale-deal notifications, creating partner performance dashboards with
+    revenue contribution, deal velocity, and certification metrics, integrating
+    with finance systems for commission and revenue-share calculations, and
+    establishing data hygiene rules with duplicate-detection and
+    mandatory-field enforcement. Produces CRM configuration guide, attribution
+    model documentation, and dashboard gallery. Excludes ongoing CRM data
+    entry.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:business-development
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:bizdev-team
+    - target: org-unit:revenue-operations-team

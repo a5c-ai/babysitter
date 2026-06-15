@@ -1,0 +1,19 @@
+nodeKind: TestSet
+id: test-set:hellaswag-validation
+attributes:
+  displayName: "HellaSwag validation"
+  benchmarkId: benchmark:hellaswag
+  caseCount: 10042
+  releasedAt: "2019-05-19"
+  composition: |
+    The validation split of HellaSwag (10,042 multiple-choice
+    sentence-completion items adversarially filtered against an
+    ELMO/BERT discriminator). The test split labels are not public,
+    so most evaluations report on validation.
+  homepageUrl: "https://rowanzellers.com/hellaswag/"
+  description: |
+    Standard HellaSwag validation split. Nearly all reported HellaSwag
+    numbers in modern model cards refer to this set.
+edges:
+  belongs_to_benchmark:
+    - benchmark:hellaswag

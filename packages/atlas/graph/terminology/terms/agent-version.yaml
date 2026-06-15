@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:agent-version
+attributes:
+  canonicalDefinitionId: definition:agent-version.canonical
+  displayName: "AgentVersion"
+  kind: concept
+  references:
+    - "NodeKind:AgentVersion"
+  description: |
+    A version of an AgentProduct
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

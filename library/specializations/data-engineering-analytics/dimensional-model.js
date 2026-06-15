@@ -19,6 +19,9 @@
  * - Kimball Dimensional Modeling Techniques: https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/
  * - Star Schema: The Complete Reference by Christopher Adamson: https://www.oreilly.com/library/view/star-schema-the/9780071744324/
  * - Slowly Changing Dimensions: https://en.wikipedia.org/wiki/Slowly_changing_dimension
+ * @graph
+ *   domains: [domain:data-engineering]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,94 @@
+---
+nodeKind: Workflow
+id: workflow:api-versioning-deprecation
+attributes:
+  displayName: "API Versioning and Deprecation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-version"
+  complexity: cross-team
+  description: |
+    Manages the lifecycle of API versions from introduction through sunset —
+    announcing deprecation timelines, tracking consumer migration, enforcing
+    sunset headers, removing dead endpoints, and archiving documentation.
+    Excludes initial API design.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:tech-lead
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:webhook-verification
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:api-contract-testing
+attributes:
+  displayName: "API Contract Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: cross-team
+  description: |
+    Validates that API changes conform to published contracts using
+    consumer-driven contract tests — generating pacts, running provider
+    verification, detecting breaking changes, and gating merges on contract
+    compliance. Excludes API design review.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:react-testing
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:graphql-schema-review
+attributes:
+  displayName: "GraphQL Schema Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: cross-team
+  description: |
+    Reviews proposed GraphQL schema changes for naming consistency,
+    breaking-change detection, performance implications, and federation
+    compatibility — running schema linting, diffing against the production
+    registry, and validating resolver coverage. Excludes resolver
+    implementation.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:code-reviewer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:typescript-generic-programming
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:review-prs-merge-decisions
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering

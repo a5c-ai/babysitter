@@ -1,0 +1,14 @@
+nodeKind: Language
+id: language:assembly-x86
+attributes:
+  displayName: "x86 Assembly"
+  paradigms:
+    - imperative
+    - low-level
+  description: |
+    x86 / x86-64 assembly language (Intel and AT&T syntaxes) targeting
+    Intel and AMD processors via assemblers such as NASM, MASM, and GAS.
+edges:
+  applies_to:
+    - target: domain:systems-programming
+    - target: domain:embedded-systems

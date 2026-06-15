@@ -1,0 +1,24 @@
+nodeKind: Invocation
+id: invocation:01kqex-invocation-001
+attributes:
+  status: "running"
+  agentVersionId: agentVersion:claude:ge-0-0-0
+  runId: run:01kqex-example-run-001
+  sessionId: session:01kqex-session-001
+  startedAt: "2026-04-28T10:00:05Z"
+  endedAt: null
+  exitCode: null
+  currentStateId: lifecycle-state:invocation.running
+edges:
+  in_state:
+    - lifecycle-state:invocation.running
+  governed_by:
+    - state-machine:invocation
+  belongs_to_run:
+    - run:01kqex-example-run-001
+  uses_session:
+    - session:01kqex-session-001
+  ran_agent_version:
+    - agentVersion:claude:ge-0-0-0
+  executes_in:
+    - target: sandbox:default-container

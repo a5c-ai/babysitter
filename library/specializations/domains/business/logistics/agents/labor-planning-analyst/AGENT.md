@@ -13,6 +13,10 @@ required-skills:
   - labor-productivity-optimizer
   - wave-planning-optimizer
   - warehouse-simulation-modeler
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:talent-acquisition-strategy]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:hr-manager]
 ---
 
 # Labor Planning Analyst

@@ -2,17 +2,14 @@
 name: codebase-mapping
 description: Automatic codebase indexing for invisible context injection. Catalogs project structure, file types, entry points, dependencies, and test layout.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Codebase Mapping
-
-## Overview
-
-Auto-indexes the project structure to build a comprehensive codebase map. This map is used for invisible context injection via the UserPromptSubmit hook, providing Claude with project awareness without explicit user prompting.
-
-## Map Contents
-
-### Project Structure
 - Directory tree with depth-limited enumeration
 - Key file identification (entry points, configs, lock files)
 

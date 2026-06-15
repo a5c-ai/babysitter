@@ -1,0 +1,30 @@
+{
+  "issueNumber": 622,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-622",
+  "specFiles": [
+    "packages/kradle/docs/agent-identity/01-resource-model.md",
+    "packages/kradle/docs/agent-identity/02-migration.md"
+  ],
+  "targetSurfaces": {
+    "core": [
+      "packages/kradle/core/src/agent-dispatch-controller.js",
+      "packages/kradle/core/src/agent-prompt-composition.js",
+      "packages/kradle/core/src/agent-identity-migration.js"
+    ],
+    "web": [
+      "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+      "packages/kradle/web/app/components/agent/dispatch-button.jsx",
+      "packages/kradle/web/app/components/agent/trigger-rule-form.jsx"
+    ],
+    "mcp": [
+      "packages/kradle/cli/src/mcp-server.js",
+      "packages/atlas/graph/extensions/tool-servers/kradle-mcp-server.yaml"
+    ]
+  },
+  "verificationCommands": [
+    "cd packages/kradle/core && node --test tests/agent-identity-migration.test.js tests/agent-prompt-composition.test.js tests/agent-dispatch-controller.test.js",
+    "cd packages/kradle/cli && node --test tests/mcp-server.test.js",
+    "cd packages/kradle/web && node --test tests/resource-contract.test.js"
+  ]
+}

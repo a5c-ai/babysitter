@@ -1,0 +1,222 @@
+nodeKind: ToolServer
+id: tool-server:mcp-asana
+attributes:
+  displayName: Asana MCP Server
+  description: |
+    MCP server providing access to Asana project management.
+    Enables AI agents to create and update tasks, manage projects
+    and sections, assign work, and query workspaces.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/rohanb10/asana-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: role:engineering-manager
+      confidence: medium
+      evidence: "Task/project metadata supports team planning and execution review."
+    - target: responsibility:triage-incoming-issues
+      confidence: medium
+      evidence: "Task intake queues can represent issue triage and assignment workflows."
+  integrates_with:
+  - target: tool:asana
+  - target: issue-tracker:asana
+  lib_applies_to_domain:
+  - target: domain:project-management
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-todoist
+attributes:
+  displayName: Todoist MCP Server
+  description: |
+    MCP server providing access to Todoist task management.
+    Enables AI agents to create, update, and complete tasks,
+    manage projects and labels, and query filters.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/abhiz123/todoist-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:todoist
+  lib_applies_to_domain:
+  - target: domain:project-management
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-monday
+attributes:
+  displayName: Monday.com MCP Server
+  description: |
+    MCP server providing access to Monday.com work management.
+    Enables AI agents to manage boards, items, columns, groups,
+    and automate workspace operations.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/sakce/monday-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:monday
+  lib_applies_to_domain:
+  - target: domain:project-management
+  - target: domain:operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-airtable
+attributes:
+  displayName: Airtable MCP Server
+  description: |
+    MCP server providing access to Airtable databases.
+    Enables AI agents to read and write records, manage tables
+    and bases, query views, and manipulate field configurations.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/felores/airtable-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:airtable
+  lib_applies_to_domain:
+  - target: domain:project-management
+  - target: domain:operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-google-calendar
+attributes:
+  displayName: Google Calendar MCP Server
+  description: |
+    MCP server providing access to Google Calendar.
+    Enables AI agents to list events, create and update calendar
+    entries, check free/busy status, and manage recurring schedules.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/nspady/google-calendar-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: provider:google
+  lib_applies_to_domain:
+  - target: domain:project-management
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-google-sheets
+attributes:
+  displayName: Google Sheets MCP Server
+  description: |
+    MCP server providing access to Google Sheets spreadsheets.
+    Enables AI agents to read and write cells, apply formatting,
+    execute formulas, and perform batch operations on sheet data.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/nicepkg/google-sheets-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: provider:google
+  lib_applies_to_domain:
+  - target: domain:data-engineering
+  - target: domain:operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-google-docs
+attributes:
+  displayName: Google Docs MCP Server
+  description: |
+    MCP server providing access to Google Docs.
+    Enables AI agents to create, read, and edit documents,
+    insert content, manage formatting, and collaborate on text.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/nicepkg/google-docs-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: provider:google
+  lib_applies_to_domain:
+  - target: domain:knowledge-management
+  - target: domain:content-operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-outlook
+attributes:
+  displayName: Outlook MCP Server
+  description: |
+    MCP server providing access to Microsoft Outlook.
+    Enables AI agents to manage emails, calendar events, contacts,
+    and tasks through the Microsoft Graph API.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/microsoft/mcp-server-outlook
+  maintainer: Microsoft
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:outlook
+  lib_applies_to_domain:
+  - target: domain:operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-zoom
+attributes:
+  displayName: Zoom MCP Server
+  description: |
+    MCP server providing access to the Zoom meeting platform.
+    Enables AI agents to schedule meetings, list recordings,
+    retrieve transcripts, and manage meeting assets.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/zoom/mcp-server-zoom
+  maintainer: Zoom
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:zoom
+  lib_applies_to_domain:
+  - target: domain:operations
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-calendly
+attributes:
+  displayName: Calendly MCP Server
+  description: |
+    MCP server providing access to Calendly scheduling.
+    Enables AI agents to manage event types, list scheduled events,
+    check invitee details, and configure availability windows.
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/calendly/calendly-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:calendly
+  lib_applies_to_domain:
+  - target: domain:operations
+  - target: domain:sales

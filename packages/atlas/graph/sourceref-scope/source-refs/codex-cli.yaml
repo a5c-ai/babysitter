@@ -1,0 +1,12 @@
+nodeKind: SourceRef
+id: source-ref:codex-cli
+attributes:
+  description: "OpenAI Codex CLI"
+  displayName: "OpenAI Codex CLI"
+  repoUrl: https://github.com/openai/codex
+  ref: main
+  path: "."
+  packageManager: npm
+  packageName: "@openai/codex"
+  kind: npm-package
+edges: {}

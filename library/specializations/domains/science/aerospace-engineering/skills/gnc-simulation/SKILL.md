@@ -18,6 +18,11 @@ metadata:
     - gnc
     - navigation
     - simulation
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:sensor-fusion]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # GNC Simulation Skill

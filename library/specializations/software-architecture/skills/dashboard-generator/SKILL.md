@@ -6,6 +6,13 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:metrics-dashboarding, skill-area:observability-instrumentation]
+  roles: [role:sre, role:architect]
+  topics: [topic:observability-driven-development]
+
 ---
 
 # Dashboard Generator Skill

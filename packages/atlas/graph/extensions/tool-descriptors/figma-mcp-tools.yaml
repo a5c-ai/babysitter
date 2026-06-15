@@ -1,0 +1,117 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:figma.get-file
+attributes:
+  schema: '{}'
+  displayName: "Figma: Get File"
+  description: Retrieve the structure of a Figma file (pages, frames, components).
+  inputSchema:
+    type: object
+    required: [fileKey]
+    properties:
+      fileKey: { type: string }
+      depth: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      document: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-figma
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:figma.get-node
+attributes:
+  schema: '{}'
+  displayName: "Figma: Get Node"
+  description: Retrieve a specific node within a Figma file by node ID.
+  inputSchema:
+    type: object
+    required: [fileKey, nodeId]
+    properties:
+      fileKey: { type: string }
+      nodeId: { type: string }
+      depth: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      node: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-figma
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:figma.get-image
+attributes:
+  schema: '{}'
+  displayName: "Figma: Get Image"
+  description: Render an image (PNG/SVG) of one or more Figma nodes.
+  inputSchema:
+    type: object
+    required: [fileKey, ids]
+    properties:
+      fileKey: { type: string }
+      ids: { type: array, items: { type: string } }
+      format: { type: string, enum: [png, svg, jpg, pdf] }
+      scale: { type: number }
+  outputSchema:
+    type: object
+    properties:
+      images: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-figma
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:figma.list-components
+attributes:
+  schema: '{}'
+  displayName: "Figma: List Components"
+  description: List components defined in a Figma file.
+  inputSchema:
+    type: object
+    required: [fileKey]
+    properties:
+      fileKey: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      components: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-figma
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:figma.download-images
+attributes:
+  schema: '{}'
+  displayName: "Figma: Download Images"
+  description: Download referenced image assets from a Figma file to local paths.
+  inputSchema:
+    type: object
+    required: [fileKey, nodes]
+    properties:
+      fileKey: { type: string }
+      nodes: { type: array }
+      localPath: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      files: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-figma

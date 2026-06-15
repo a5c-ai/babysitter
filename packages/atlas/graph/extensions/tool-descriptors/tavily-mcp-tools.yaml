@@ -1,0 +1,95 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:tavily.search
+attributes:
+  schema: '{}'
+  displayName: "Tavily: Search"
+  description: Run a Tavily web search and return ranked results with snippets.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      search_depth: { type: string, enum: [basic, advanced] }
+      max_results: { type: integer }
+      include_domains: { type: array, items: { type: string } }
+      exclude_domains: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-tavily
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:tavily.extract
+attributes:
+  schema: '{}'
+  displayName: "Tavily: Extract"
+  description: Extract clean structured content (text/markdown) from one or more URLs.
+  inputSchema:
+    type: object
+    required: [urls]
+    properties:
+      urls: { type: array, items: { type: string } }
+      extract_depth: { type: string, enum: [basic, advanced] }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-tavily
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:tavily.crawl
+attributes:
+  schema: '{}'
+  displayName: "Tavily: Crawl"
+  description: Crawl a site starting from a base URL up to a maximum depth.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      max_depth: { type: integer }
+      max_breadth: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      pages: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-tavily
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:tavily.map
+attributes:
+  schema: '{}'
+  displayName: "Tavily: Map"
+  description: Map the URL graph of a site without fetching full page content.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      max_depth: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      urls: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-tavily

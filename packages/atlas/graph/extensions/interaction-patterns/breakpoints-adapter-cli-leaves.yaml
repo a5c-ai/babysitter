@@ -1,0 +1,242 @@
+# leaf-level CLI subcommand records for `tasks-adapter` bin.
+# Promotes the current catalog group-level records to leaf-level primitives so codegen
+# can emit each commander.Command leaf from the v6 graph alone.
+# Source root: packages/tasks-adapter/src/cli/commands/*.ts.
+# Wired via @a5c-ai/tasks-adapter PackageSurface `exposes_subcommand` edge.
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-login
+attributes:
+  displayName: "tasks-adapter auth login"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth login"
+  flags: []
+  description: |
+    Authenticate with GitHub OAuth via a one-shot localhost callback server;
+    saves access token + user profile to ~/.tasks-adapter/auth.json.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:61-130.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-server-set
+attributes:
+  displayName: "tasks-adapter auth server set <url>"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth server set"
+  flags: []
+  description: |
+    Persist a default tasks-adapter server URL in
+    ~/.tasks-adapter/config.json.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:135-160.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-server-clear
+attributes:
+  displayName: "tasks-adapter auth server clear"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth server clear"
+  flags: []
+  description: |
+    Remove the saved default server URL from
+    ~/.tasks-adapter/config.json.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:163-181.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-token-set
+attributes:
+  displayName: "tasks-adapter auth token set <token>"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth token set"
+  flags: []
+  description: |
+    Persist a bearer token in ~/.tasks-adapter/config.json for CLI/MCP use.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:189-212.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-token-clear
+attributes:
+  displayName: "tasks-adapter auth token clear"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth token clear"
+  flags: []
+  description: |
+    Remove the saved bearer token from ~/.tasks-adapter/config.json.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:214-233.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-logout
+attributes:
+  displayName: "tasks-adapter auth logout"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth logout"
+  flags: []
+  description: |
+    Clear stored OAuth + bearer-token state from disk.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:240-261.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-status
+attributes:
+  displayName: "tasks-adapter auth status"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth status"
+  flags: []
+  description: |
+    Print current authentication state (user, server URL, token source,
+    expiration). Calls /auth/me on the configured server.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:265-335.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-keygen
+attributes:
+  displayName: "tasks-adapter auth keygen"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth keygen"
+  flags: []
+  description: |
+    Generate a new Ed25519 SSH key pair, saved as
+    ~/.tasks-adapter/keys/<fingerprint>.pem with mode 0600.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:339-383.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-key-push
+attributes:
+  displayName: "tasks-adapter auth key-push"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth key-push"
+  flags:
+    - "--pr:0:create a pull request with the key"
+    - "--key:1:fingerprint of the key to push (defaults to most recent)"
+  description: |
+    Push the local public SSH key into the configured repository (optionally
+    via PR), enabling signed-answer flows.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:387-470.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-auth-keys
+attributes:
+  displayName: "tasks-adapter auth keys"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "auth keys"
+  flags: []
+  description: |
+    List local SSH keys stored under ~/.tasks-adapter/keys/.
+    Source: packages/tasks-adapter/src/cli/commands/auth.ts:53,470-583.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-breakpoints-pending
+attributes:
+  displayName: "tasks-adapter breakpoints pending"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "breakpoints pending"
+  flags:
+    - "-e,--responder:1:responder ID (required)"
+  description: |
+    List pending breakpoints assigned to a responder via the configured
+    backend.
+    Source: packages/tasks-adapter/src/cli/commands/breakpoints.ts:34-68.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-breakpoints-answer
+attributes:
+  displayName: "tasks-adapter breakpoints answer <breakpointId>"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "breakpoints answer"
+  flags:
+    - "-a,--answer:1:answer text (required)"
+    - "-e,--responder:1:responder ID (required)"
+    - "--confidence:1:confidence level 0-100 (default 80)"
+  description: |
+    Submit an answer to an open breakpoint as a given responder.
+    Source: packages/tasks-adapter/src/cli/commands/breakpoints.ts:70-105.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-breakpoints-status
+attributes:
+  displayName: "tasks-adapter breakpoints status <breakpointId>"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "breakpoints status"
+  flags: []
+  description: |
+    Fetch a single breakpoint and any associated answers.
+    Source: packages/tasks-adapter/src/cli/commands/breakpoints.ts:107-139.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-breakpoints-poll
+attributes:
+  displayName: "tasks-adapter breakpoints poll <breakpointId>"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "breakpoints poll"
+  flags:
+    - "-t,--timeout:1:timeout in seconds (default 300)"
+    - "-i,--interval:1:polling interval in seconds (default 5)"
+  description: |
+    Poll (or open SSE stream) for an answer to a specific breakpoint.
+    Source: packages/tasks-adapter/src/cli/commands/breakpoints.ts:141-187.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-responders-list
+attributes:
+  displayName: "tasks-adapter responders list"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "responders list"
+  flags:
+    - "-d,--domain:1:filter by domain"
+  description: |
+    List available responder profiles; optionally filter by domain.
+    Source: packages/tasks-adapter/src/cli/commands/responders.ts:20-64.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-responders-show
+attributes:
+  displayName: "tasks-adapter responders show <responderId>"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "responders show"
+  flags: []
+  description: |
+    Show full responder profile by ID.
+    Source: packages/tasks-adapter/src/cli/commands/responders.ts:66-92.
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tasks-adapter-cli-server-start
+attributes:
+  displayName: "tasks-adapter server start"
+  kind: cli-subcommand
+  surface: cli
+  parentBin: "tasks-adapter"
+  subcommandVerb: "server start"
+  flags: []
+  description: |
+    Start the tasks-adapter MCP server on stdio, exposing the breakpoint
+    tool catalog (ask, list, answer, claim, status, ...) to MCP clients.
+    Source: packages/tasks-adapter/src/cli/commands/server.ts:15-46.

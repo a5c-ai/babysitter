@@ -2,6 +2,13 @@
 name: aso-expert
 description: Agent specialized in App Store Optimization (ASO), including keyword research, metadata optimization, screenshot strategy, A/B testing, review management, and conversion rate optimization for iOS App Store and Google Play Store.
 required-skills: []
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:app-store-deployment, skill-area:analytics-tracking]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # App Store Optimization Expert Agent

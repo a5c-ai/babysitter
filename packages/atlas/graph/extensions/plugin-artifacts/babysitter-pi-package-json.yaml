@@ -1,0 +1,35 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-pi-package-json
+attributes:
+  artifactId: plugin-artifact:babysitter-pi-package-json
+  displayName: "babysitter-pi package.json"
+  targetId: plugin-target:pi
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "package.json"
+  scriptVariants:
+    - "node-extensions"
+  contextFiles:
+    - plugins/babysitter-pi/package.json
+    - plugins/babysitter-pi/AGENTS.md
+edges:
+  emits_artifact:
+    - target: plugin-target:pi
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-pi-extensions
+attributes:
+  artifactId: plugin-artifact:babysitter-pi-extensions
+  displayName: "babysitter-pi extensions bundle"
+  targetId: plugin-target:pi
+  artifactKind: hook-script
+  pathPattern: "extensions/*"
+  installerSurface: "extensions/"
+  scriptVariants:
+    - "node-extension-module"
+  contextFiles:
+    - plugins/babysitter-pi/extensions/
+    - plugins/babysitter-pi/hooks/
+edges:
+  emits_artifact:
+    - target: plugin-target:pi

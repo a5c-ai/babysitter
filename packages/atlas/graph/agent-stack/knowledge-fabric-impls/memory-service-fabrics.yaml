@@ -1,0 +1,75 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:mem0-fabric
+attributes:
+  displayName: "Mem0 as Agent Memory Fabric"
+  description: |
+    Mem0 as an agent-facing memory knowledge fabric. Automatically extracts
+    memories from conversations and persists them for cross-session retrieval.
+    Provides user-level, session-level, and agent-level memory scopes with a
+    simple add/search/get API. Supports multiple vector store backends
+    (Chroma, Qdrant, Pinecone) and integrates with LangChain, CrewAI, and
+    other agent frameworks. As a knowledge fabric, Mem0 bridges the gap
+    between ephemeral conversation context and persistent organizational
+    knowledge by automatically extracting and organizing salient facts.
+  knowledgeFileFormats:
+    - conversation-extracts
+    - structured-memories
+  retrievalStrategy: semantic-search
+  knowledgePersistence: memory-service
+  knowledgeScopes:
+    - user
+    - agent
+    - organization
+  autoExtractionSupport: true
+  notes: |
+    Mem0's distinguishing feature is automatic memory extraction — it uses
+    an LLM to identify facts, preferences, and decisions from conversations
+    and persists them without manual curation. This makes it the closest
+    third-party analog to Claude Code's auto-memory system. The trade-off
+    is accuracy of extraction — automated extraction can miss nuance or
+    extract noise.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:mem0
+  uses_memory_system:
+    - target: memory-system:mem0-service
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:zep-fabric
+attributes:
+  displayName: "Zep as Agent Memory Fabric"
+  description: |
+    Zep as an agent-facing memory knowledge fabric. Persists, summarizes,
+    and retrieves conversation history with entity extraction and temporal
+    awareness. Enriches memories with structured entity graphs — tracking
+    people, organizations, and concepts mentioned across conversations.
+    REST API and SDKs for Python and TypeScript. As a knowledge fabric,
+    Zep provides conversation-centric knowledge with temporal reasoning —
+    understanding not just what was discussed but when and in what order.
+  knowledgeFileFormats:
+    - conversation-history
+    - entity-extracts
+    - fact-triples
+  retrievalStrategy: hybrid
+  knowledgePersistence: memory-service
+  knowledgeScopes:
+    - user
+    - agent
+  autoExtractionSupport: true
+  notes: |
+    Zep's temporal awareness sets it apart from simple vector stores — it
+    understands that knowledge has a time dimension. Fact retrieval is
+    time-weighted, so recent knowledge is prioritized. Entity extraction
+    builds a knowledge graph of entities mentioned in conversations,
+    enabling relationship-aware retrieval. This makes Zep particularly
+    suited for long-running agent relationships where context evolution
+    matters.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:zep
+  uses_memory_system:
+    - target: memory-system:zep-service

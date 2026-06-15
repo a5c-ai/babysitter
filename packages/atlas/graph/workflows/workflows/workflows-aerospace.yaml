@@ -1,0 +1,99 @@
+---
+nodeKind: Workflow
+id: workflow:flight-software-certification
+attributes:
+  displayName: "Flight Software Certification"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Certifies flight software against DO-178C standards -- verifying
+    requirements traceability, structural coverage analysis, formal
+    verification of safety-critical modules, regression testing against
+    hardware-in-the-loop simulators, and generating the Data Item
+    Submittal list for the Designated Engineering Representative (DER).
+    Excludes initial software development.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:test-writer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:firmware-development
+    - target: skill-area:integration-testing
+  applies_to_domain:
+    - target: domain:aerospace-engineering
+    - target: domain:embedded-systems
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:avionics-integration-testing
+attributes:
+  displayName: "Avionics Integration Testing"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates avionics subsystem integration across flight management,
+    navigation, and communication buses -- verifying ARINC 429/664
+    message exchange, timing constraints on MIL-STD-1553 buses,
+    redundancy failover behavior, and end-to-end data flow from sensors
+    to cockpit displays. Excludes individual line-replaceable-unit (LRU)
+    unit testing.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:test-writer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:hardware-abstraction-layer
+    - target: skill-area:integration-testing
+  applies_to_domain:
+    - target: domain:aerospace-engineering
+    - target: domain:electrical-engineering
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:mission-simulation-review
+attributes:
+  displayName: "Mission Simulation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Reviews mission simulation fidelity and results -- validating orbital
+    mechanics models, propulsion performance assumptions, thermal
+    environment accuracy, Monte Carlo dispersion analysis coverage, and
+    ensuring simulation outputs meet mission success criteria margins.
+    Produces a simulation adequacy report for mission readiness review
+    gates. Excludes simulation tool development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:computational-geometry
+  applies_to_domain:
+    - target: domain:aerospace-engineering
+    - target: domain:physics
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:engineering

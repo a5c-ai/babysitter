@@ -1,3 +1,12 @@
+---
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
+---
+
 # Audit Trail
 
 Full traceability from PRD to code commit through the CCPM spec-driven pipeline.

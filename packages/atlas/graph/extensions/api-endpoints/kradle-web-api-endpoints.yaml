@@ -1,0 +1,738 @@
+# Kradle Next.js Web API endpoints generated from tracked packages/kradle/web/app/api/**/route.js exports.
+# Keep one APIEndpoint per exported HTTP method so Atlas can reason over route-level API coverage.
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-atlas-search
+attributes:
+  displayName: "GET /api/atlas/search"
+  method: GET
+  path: "/api/atlas/search"
+  version: v1
+  responseShape: "{ total: number, hits: list<AtlasSearchHit>, error?: string }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Searches or proxies Atlas graph search results for the Kradle web UI. Source: packages/kradle/web/app/api/atlas/search/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-auth-provider
+attributes:
+  displayName: "GET /api/auth/:provider"
+  method: GET
+  path: "/api/auth/:provider"
+  version: v1
+  responseShape: "redirect response, session cookie update, or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: false
+  description: "Starts provider login for Kradle web authentication. Source: packages/kradle/web/app/api/auth/[provider]/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-auth-callback-provider
+attributes:
+  displayName: "GET /api/auth/callback/:provider"
+  method: GET
+  path: "/api/auth/callback/:provider"
+  version: v1
+  responseShape: "redirect response, session cookie update, or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: false
+  description: "Handles provider login callback and session cookie creation. Source: packages/kradle/web/app/api/auth/callback/[provider]/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-auth-delegated
+attributes:
+  displayName: "GET /api/auth/delegated"
+  method: GET
+  path: "/api/auth/delegated"
+  version: v1
+  responseShape: "redirect response, session cookie update, or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: false
+  description: "Creates a Kradle session from delegated identity headers. Source: packages/kradle/web/app/api/auth/delegated/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-auth-logout
+attributes:
+  displayName: "GET /api/auth/logout"
+  method: GET
+  path: "/api/auth/logout"
+  version: v1
+  responseShape: "redirect response, session cookie update, or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: false
+  description: "Clears the Kradle web session cookie and redirects to login. Source: packages/kradle/web/app/api/auth/logout/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-controller
+attributes:
+  displayName: "GET /api/controller"
+  method: GET
+  path: "/api/controller"
+  version: v1
+  responseShape: "Kradle controller UI model snapshot"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Returns the Kradle controller UI model snapshot for an organization. Source: packages/kradle/web/app/api/controller/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-git-proxy
+attributes:
+  displayName: "GET /api/git-proxy"
+  method: GET
+  path: "/api/git-proxy"
+  version: v1
+  responseShape: "{ ok: boolean, message: string, upstream?: string }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle web git proxy operations. Source: packages/kradle/web/app/api/git-proxy/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-git-proxy
+attributes:
+  displayName: "POST /api/git-proxy"
+  method: POST
+  path: "/api/git-proxy"
+  version: v1
+  responseShape: "proxied git HTTP response or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle web git proxy operations. Source: packages/kradle/web/app/api/git-proxy/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-agents-dispatch
+attributes:
+  displayName: "POST /api/orgs/:org/agents/dispatch"
+  method: POST
+  path: "/api/orgs/:org/agents/dispatch"
+  version: v1
+  responseShape: "AgentDispatchRun result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Dispatches an agent stack through the Kradle controller. Source: packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-agents-memory-query
+attributes:
+  displayName: "POST /api/orgs/:org/agents/memory/query"
+  method: POST
+  path: "/api/orgs/:org/agents/memory/query"
+  version: v1
+  responseShape: "AgentMemoryQuery result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Queries the Kradle knowledge-fabric memory layer for agent context. Source: packages/kradle/web/app/api/orgs/[org]/agents/memory/query/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-agents-runs-name-cancel
+attributes:
+  displayName: "POST /api/orgs/:org/agents/runs/:name/cancel"
+  method: POST
+  path: "/api/orgs/:org/agents/runs/:name/cancel"
+  version: v1
+  responseShape: "Agent run cancel result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Cancels an in-flight Kradle agent dispatch run. Source: packages/kradle/web/app/api/orgs/[org]/agents/runs/[name]/cancel/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-external-conflicts-id-resolve
+attributes:
+  displayName: "POST /api/orgs/:org/external/conflicts/:id/resolve"
+  method: POST
+  path: "/api/orgs/:org/external/conflicts/:id/resolve"
+  version: v1
+  responseShape: "External conflict resolution result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Resolves an external backend synchronization conflict. Source: packages/kradle/web/app/api/orgs/[org]/external/conflicts/[id]/resolve/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-external-sync
+attributes:
+  displayName: "POST /api/orgs/:org/external/sync"
+  method: POST
+  path: "/api/orgs/:org/external/sync"
+  version: v1
+  responseShape: "External sync result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Triggers external backend synchronization. Source: packages/kradle/web/app/api/orgs/[org]/external/sync/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-external-write-intents-name-approve
+attributes:
+  displayName: "POST /api/orgs/:org/external/write-intents/:name/approve"
+  method: POST
+  path: "/api/orgs/:org/external/write-intents/:name/approve"
+  version: v1
+  responseShape: "External write intent approval result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Approves an external write intent. Source: packages/kradle/web/app/api/orgs/[org]/external/write-intents/[name]/approve/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-external-write-intents-name-cancel
+attributes:
+  displayName: "POST /api/orgs/:org/external/write-intents/:name/cancel"
+  method: POST
+  path: "/api/orgs/:org/external/write-intents/:name/cancel"
+  version: v1
+  responseShape: "External write intent cancellation result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Cancels an external write intent. Source: packages/kradle/web/app/api/orgs/[org]/external/write-intents/[name]/cancel/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-policies
+attributes:
+  displayName: "GET /api/orgs/:org/policies"
+  method: GET
+  path: "/api/orgs/:org/policies"
+  version: v1
+  responseShape: "{ policies: list<Policy> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle governance policy resources. Source: packages/kradle/web/app/api/orgs/[org]/policies/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-policies
+attributes:
+  displayName: "POST /api/orgs/:org/policies"
+  method: POST
+  path: "/api/orgs/:org/policies"
+  version: v1
+  responseShape: "Policy resource result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle governance policy resources. Source: packages/kradle/web/app/api/orgs/[org]/policies/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-policy-exception-requests
+attributes:
+  displayName: "GET /api/orgs/:org/policy-exception-requests"
+  method: GET
+  path: "/api/orgs/:org/policy-exception-requests"
+  version: v1
+  responseShape: "{ requests: list<PolicyExceptionRequest> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle policy exception request resources. Source: packages/kradle/web/app/api/orgs/[org]/policy-exception-requests/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-policy-exception-requests
+attributes:
+  displayName: "POST /api/orgs/:org/policy-exception-requests"
+  method: POST
+  path: "/api/orgs/:org/policy-exception-requests"
+  version: v1
+  responseShape: "PolicyExceptionRequest result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle policy exception request resources. Source: packages/kradle/web/app/api/orgs/[org]/policy-exception-requests/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-policy-reports
+attributes:
+  displayName: "GET /api/orgs/:org/policy-reports"
+  method: GET
+  path: "/api/orgs/:org/policy-reports"
+  version: v1
+  responseShape: "{ reports: list<PolicyReport> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Lists Kradle policy reports. Source: packages/kradle/web/app/api/orgs/[org]/policy-reports/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-profile
+attributes:
+  displayName: "GET /api/orgs/:org/profile"
+  method: GET
+  path: "/api/orgs/:org/profile"
+  version: v1
+  responseShape: "{ profile, grants } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for the signed-in Kradle user profile. Source: packages/kradle/web/app/api/orgs/[org]/profile/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-patch-orgs-org-profile
+attributes:
+  displayName: "PATCH /api/orgs/:org/profile"
+  method: PATCH
+  path: "/api/orgs/:org/profile"
+  version: v1
+  responseShape: "updated profile result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "PATCH endpoint for the signed-in Kradle user profile. Source: packages/kradle/web/app/api/orgs/[org]/profile/route.js; export async function PATCH."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-repositories-name-blob-path-catchall
+attributes:
+  displayName: "GET /api/orgs/:org/repositories/:name/blob/:path*"
+  method: GET
+  path: "/api/orgs/:org/repositories/:name/blob/:path*"
+  version: v1
+  responseShape: "repository blob content response or blob metadata JSON"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Reads repository blob content or metadata through Kradle web. Source: packages/kradle/web/app/api/orgs/[org]/repositories/[name]/blob/[...path]/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-repositories-name
+attributes:
+  displayName: "GET /api/orgs/:org/repositories/:name"
+  method: GET
+  path: "/api/orgs/:org/repositories/:name"
+  version: v1
+  responseShape: "Repository resource or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for a named Kradle repository resource. Source: packages/kradle/web/app/api/orgs/[org]/repositories/[name]/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-delete-orgs-org-repositories-name
+attributes:
+  displayName: "DELETE /api/orgs/:org/repositories/:name"
+  method: DELETE
+  path: "/api/orgs/:org/repositories/:name"
+  version: v1
+  responseShape: "repository deletion result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "DELETE endpoint for a named Kradle repository resource. Source: packages/kradle/web/app/api/orgs/[org]/repositories/[name]/route.js; export async function DELETE."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-repositories-name-tree
+attributes:
+  displayName: "GET /api/orgs/:org/repositories/:name/tree"
+  method: GET
+  path: "/api/orgs/:org/repositories/:name/tree"
+  version: v1
+  responseShape: "repository tree listing or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Lists repository tree entries through Kradle web. Source: packages/kradle/web/app/api/orgs/[org]/repositories/[name]/tree/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-repositories
+attributes:
+  displayName: "GET /api/orgs/:org/repositories"
+  method: GET
+  path: "/api/orgs/:org/repositories"
+  version: v1
+  responseShape: "{ repositories: list<Repository> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle repository resources. Source: packages/kradle/web/app/api/orgs/[org]/repositories/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-repositories
+attributes:
+  displayName: "POST /api/orgs/:org/repositories"
+  method: POST
+  path: "/api/orgs/:org/repositories"
+  version: v1
+  responseShape: "Repository resource result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle repository resources. Source: packages/kradle/web/app/api/orgs/[org]/repositories/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-resources-kind-name
+attributes:
+  displayName: "GET /api/orgs/:org/resources/:kind/:name"
+  method: GET
+  path: "/api/orgs/:org/resources/:kind/:name"
+  version: v1
+  responseShape: "Kradle resource object or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for a named Kradle resource. Source: packages/kradle/web/app/api/orgs/[org]/resources/[kind]/[name]/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-delete-orgs-org-resources-kind-name
+attributes:
+  displayName: "DELETE /api/orgs/:org/resources/:kind/:name"
+  method: DELETE
+  path: "/api/orgs/:org/resources/:kind/:name"
+  version: v1
+  responseShape: "resource deletion result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "DELETE endpoint for a named Kradle resource. Source: packages/kradle/web/app/api/orgs/[org]/resources/[kind]/[name]/route.js; export async function DELETE."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-resources
+attributes:
+  displayName: "GET /api/orgs/:org/resources"
+  method: GET
+  path: "/api/orgs/:org/resources"
+  version: v1
+  responseShape: "{ resources: list<KradleResource> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle resource collection operations. Source: packages/kradle/web/app/api/orgs/[org]/resources/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-resources
+attributes:
+  displayName: "POST /api/orgs/:org/resources"
+  method: POST
+  path: "/api/orgs/:org/resources"
+  version: v1
+  responseShape: "Kradle resource apply/create result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle resource collection operations. Source: packages/kradle/web/app/api/orgs/[org]/resources/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-search
+attributes:
+  displayName: "GET /api/orgs/:org/search"
+  method: GET
+  path: "/api/orgs/:org/search"
+  version: v1
+  responseShape: "{ results: list<SearchResult> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Searches organization-scoped Kradle resources. Source: packages/kradle/web/app/api/orgs/[org]/search/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-delete-orgs-org-secrets-name
+attributes:
+  displayName: "DELETE /api/orgs/:org/secrets/:name"
+  method: DELETE
+  path: "/api/orgs/:org/secrets/:name"
+  version: v1
+  responseShape: "secret deletion result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Deletes a named Kradle secret resource. Source: packages/kradle/web/app/api/orgs/[org]/secrets/[name]/route.js; export async function DELETE."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-secrets
+attributes:
+  displayName: "GET /api/orgs/:org/secrets"
+  method: GET
+  path: "/api/orgs/:org/secrets"
+  version: v1
+  responseShape: "{ secrets: list<SecretSummary> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle secret resources. Source: packages/kradle/web/app/api/orgs/[org]/secrets/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-secrets
+attributes:
+  displayName: "POST /api/orgs/:org/secrets"
+  method: POST
+  path: "/api/orgs/:org/secrets"
+  version: v1
+  responseShape: "secret upsert result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle secret resources. Source: packages/kradle/web/app/api/orgs/[org]/secrets/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-webhooks-ingest
+attributes:
+  displayName: "POST /api/orgs/:org/webhooks/ingest"
+  method: POST
+  path: "/api/orgs/:org/webhooks/ingest"
+  version: v1
+  responseShape: "{ accepted: boolean, deliveryId?: string, eventType?: string } or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Ingests external webhook deliveries for Kradle synchronization. Source: packages/kradle/web/app/api/orgs/[org]/webhooks/ingest/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-workspaces-name-associations
+attributes:
+  displayName: "GET /api/orgs/:org/workspaces/:name/associations"
+  method: GET
+  path: "/api/orgs/:org/workspaces/:name/associations"
+  version: v1
+  responseShape: "{ associations: list<WorkspaceAssociation> } or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for workspace association resources. Source: packages/kradle/web/app/api/orgs/[org]/workspaces/[name]/associations/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-workspaces-name-associations
+attributes:
+  displayName: "POST /api/orgs/:org/workspaces/:name/associations"
+  method: POST
+  path: "/api/orgs/:org/workspaces/:name/associations"
+  version: v1
+  responseShape: "workspace association mutation result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for workspace association resources. Source: packages/kradle/web/app/api/orgs/[org]/workspaces/[name]/associations/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-delete-orgs-org-workspaces-name-associations
+attributes:
+  displayName: "DELETE /api/orgs/:org/workspaces/:name/associations"
+  method: DELETE
+  path: "/api/orgs/:org/workspaces/:name/associations"
+  version: v1
+  responseShape: "workspace association mutation result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "DELETE endpoint for workspace association resources. Source: packages/kradle/web/app/api/orgs/[org]/workspaces/[name]/associations/route.js; export async function DELETE."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs-org-workspaces-name-codespace
+attributes:
+  displayName: "GET /api/orgs/:org/workspaces/:name/codespace"
+  method: GET
+  path: "/api/orgs/:org/workspaces/:name/codespace"
+  version: v1
+  responseShape: "Codespace status or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for workspace Codespace lifecycle operations. Source: packages/kradle/web/app/api/orgs/[org]/workspaces/[name]/codespace/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs-org-workspaces-name-codespace
+attributes:
+  displayName: "POST /api/orgs/:org/workspaces/:name/codespace"
+  method: POST
+  path: "/api/orgs/:org/workspaces/:name/codespace"
+  version: v1
+  responseShape: "Codespace mutation result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for workspace Codespace lifecycle operations. Source: packages/kradle/web/app/api/orgs/[org]/workspaces/[name]/codespace/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-delete-orgs-org-workspaces-name-codespace
+attributes:
+  displayName: "DELETE /api/orgs/:org/workspaces/:name/codespace"
+  method: DELETE
+  path: "/api/orgs/:org/workspaces/:name/codespace"
+  version: v1
+  responseShape: "Codespace mutation result or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "DELETE endpoint for workspace Codespace lifecycle operations. Source: packages/kradle/web/app/api/orgs/[org]/workspaces/[name]/codespace/route.js; export async function DELETE."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-orgs
+attributes:
+  displayName: "GET /api/orgs"
+  method: GET
+  path: "/api/orgs"
+  version: v1
+  responseShape: "{ organizations: list<OrganizationSummary> }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "GET endpoint for Kradle organizations. Source: packages/kradle/web/app/api/orgs/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-post-orgs
+attributes:
+  displayName: "POST /api/orgs"
+  method: POST
+  path: "/api/orgs"
+  version: v1
+  responseShape: "Organization resource (status 201) or { error, message }"
+  readOnly: false
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "POST endpoint for Kradle organizations. Source: packages/kradle/web/app/api/orgs/route.js; export async function POST."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web
+---
+nodeKind: APIEndpoint
+id: api-endpoint:kradle-web-get-watch-resource-catchall-optional
+attributes:
+  displayName: "GET /api/watch/:resource*?"
+  method: GET
+  path: "/api/watch/:resource*?"
+  version: v1
+  responseShape: "Server-Sent Events stream or { error, message }"
+  readOnly: true
+  errorEnvelope: standard-json
+  authRequired: true
+  description: "Streams Kradle resource watch events via server-sent events. Source: packages/kradle/web/app/api/watch/[[...resource]]/route.js; export async function GET."
+edges:
+  exposed_by:
+    - target: package:a5c-ai-kradle-web

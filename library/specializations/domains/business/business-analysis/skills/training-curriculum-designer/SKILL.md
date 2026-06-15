@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-015
   category: Learning & Development
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:learning-development, skill-area:change-management, skill-area:business-analysis]
+  workflows: [workflow:market-analysis]
+  roles: [role:learning-development-specialist, role:business-analyst]
 ---
 
 # Training Curriculum Designer

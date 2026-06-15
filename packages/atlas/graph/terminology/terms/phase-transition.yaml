@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:phase-transition
+attributes:
+  canonicalDefinitionId: definition:phase-transition.canonical
+  displayName: "PhaseTransition"
+  kind: lifecycle-state
+  references:
+    - "NodeKind:PhaseTransition"
+  description: |
+    Transition between two phases (gateable)
+edges:
+  applies_to:
+    - target: domain:software-engineering

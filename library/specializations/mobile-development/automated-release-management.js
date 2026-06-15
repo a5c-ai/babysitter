@@ -17,6 +17,13 @@
  * - Semantic Versioning: https://semver.org/
  * - App Store Phased Release: https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases
  * - Google Play Staged Rollouts: https://support.google.com/googleplay/android-developer/answer/6346149
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -59,21 +66,14 @@ export async function process(inputs, ctx) {
       appName, platforms, releaseStrategy, rolloutPercentage, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Release management configured for ${appName}. Ready to execute first release?`,
     title: 'Release Management Review',
-    context: { runId: ctx.runId, appName, releaseStrategy, rolloutPercentage },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, releaseStrategy, rolloutPercentage }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

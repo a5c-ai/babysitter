@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:gemini-hooks-adapter
+attributes:
+  signalId: discovery-signal:gemini-hooks-adapter
+  signalKind: env-any
+  key: gemini
+  matchMode: all
+  confidence: high
+  scope: hooks-adapter
+  signals:
+    - GEMINI_EXTENSION_PATH
+    - BABYSITTER_EXTENSION_PATH
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-adapter-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-adapter. Verbatim from legacy discovery:gemini:hooks-adapter:4.'
+edges:
+  applies_to:
+    - target: agent:gemini-cli

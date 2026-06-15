@@ -1,0 +1,95 @@
+nodeKind: ModelVersion
+id: model:claude-opus-4-6@current
+attributes:
+  displayName: "Claude 4.6 Opus"
+  modelFamilyId: model-family:claude-opus-4
+  versionRange: '>=4.6.0 <4.7.0'
+  kind: chat
+  contextWindowTokens: 500000
+  costPerMTokInput: 5.0
+  costPerMTokOutput: 25.0
+  supportsExtendedThinking: true
+  supportsAdaptiveThinking: false
+  thinkingEffortLevels:
+  - low
+  - medium
+  - high
+  supportsThinkingBudgetTokens: true
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-10-15'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-10-15'
+  knowledgeCutoffDate: '2025-04-01'
+  safetyTier: anthropic-asl-3
+  modelCardUrl: https://www.anthropic.com/claude/opus
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:claude-opus-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:claude-opus-4
+  served_by:
+  - provider:anthropic
+  - provider:aws-bedrock
+  - provider:gcp-vertex
+  speaks:
+  - model-transport:anthropic-messages
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:extended-thinking
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:parallel-tool-calls
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:streaming
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  - target: capability:supports-text-streaming
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-thinking-budget-tokens
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=4.6.0 <4.7.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:anthropic-models-page

@@ -1,0 +1,48 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:droid.core@current
+attributes:
+  displayName: Factory Droid Core (current)
+  agentVersionId: agent-version:droid@current
+  packageRef: source-ref:droid-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Factory Droid runs a tool-use loop with parallel subagent execution
+    (up to 10 concurrent tasks per the adapter's maxParallelTasks).
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Compaction is handled internally by the Droid runtime; not exposed
+    to host programs.
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: |
+    Droid supports parallel subagent dispatch with up to 10 concurrent tasks.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final result is streamed by the active model; the CLI emits structured
+    JSON events.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: droid-internal
+  supportedTransportProtocols: []
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:droid
+    role: core
+  speaks: []
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  - target: capability:parallel-tool-calls
+    versionRange: '*'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:multi-agent-dispatch
+    - target: orch-primitive:concurrency-control
+    - target: orch-primitive:agent-failover

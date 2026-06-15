@@ -7,6 +7,14 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:feature-engineering, skill-area:feature-engineering-pipelines]
+  roles: [role:ml-engineer, role:data-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+  topics: [topic:data-mesh]
+
 ---
 
 # feast-feature-store

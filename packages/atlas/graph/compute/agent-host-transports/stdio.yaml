@@ -1,0 +1,48 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:stdio
+attributes:
+  displayName: "stdio"
+  kind: stdio
+  description: |
+    Plain stdin/stdout pipe to the agent process. The simplest invocation
+    shape; used by CI runners, the babysitter harness, and most CLI tools
+    when they spawn an agent for a single task.
+  inboundMessageFormat: |
+    Per-agent. Common patterns:
+      - Single JSON object on stdin, EOF terminates the request (one-shot
+        mode used by most CI invocations).
+      - Newline-delimited JSON (JSONL) when the host streams multiple
+        turns / tool results into the agent across a single session.
+      - Free-form text prompt on stdin (legacy / interactive REPL agents).
+    The agent's CLI surface (flags, env vars) configures which shape is
+    expected; no cross-vendor standard exists. Agent-specific stdin
+    formats are recorded on the AgentVersion node via per-edge
+    evidence rather than duplicated on this transport node.
+  outboundMessageFormat: |
+    Per-agent. Common patterns:
+      - Newline-delimited JSON (JSONL) event stream on stdout, one event
+        per line (e.g. Claude Code `--output-format stream-json`,
+        Codex CLI session events).
+      - Single JSON document on stdout for one-shot invocations.
+      - Plain text / ANSI-coloured output for interactive agents.
+    stderr is reserved for human-readable diagnostics and is NOT part of
+    the structured wire surface.
+  signalForwarding: |
+    POSIX signals on the child process:
+      - SIGINT  — interrupt the current turn (graceful cancel; agent should
+        flush partial output and return).
+      - SIGTERM — request a clean shutdown.
+      - SIGKILL — last-resort termination (no cleanup).
+    On Windows, hosts typically use `GenerateConsoleCtrlEvent(CTRL_C_EVENT)`
+    or `TerminateProcess`. Closing stdin (EOF) is also commonly used to
+    signal end-of-input without sending a signal.
+  ptySemantics: |
+    Plain stdio — the agent is invoked with anonymous pipes for
+    stdin/stdout/stderr; `isatty()` returns false on all three. ANSI
+    colour codes, prompt redraws, and raw-mode keystrokes are not
+    available. Hosts that need TTY behaviour use
+    `agent-host-transport:stdio-pty` instead.
+edges:
+  used_by:
+    - agentVersion:claude:ge-0-0-0
+    - agentVersion:codex:ge-0-119-0

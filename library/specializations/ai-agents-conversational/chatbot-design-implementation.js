@@ -19,6 +19,9 @@
  * - Botpress: https://botpress.com/docs
  * - Dialogflow: https://cloud.google.com/dialogflow/docs
  * - Conversation Design: https://designguidelines.withgoogle.com/conversation/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,12 @@
+{
+  "issueNumber": 320,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-320",
+  "specPath": ".a5c/processes/specs/issue-320-openclaw-2026-5-22.md",
+  "targetVersionId": "agentVersion:openclaw:ge-2026-5-22",
+  "previousVersionId": "agentVersion:openclaw:ge-2026-5-20",
+  "verificationCommands": [
+    "npm run verify:metadata",
+    "npm run build:sdk"
+  ]
+}

@@ -1,0 +1,31 @@
+---
+nodeKind: BudgetPolicy
+id: budget-policy:acme-q2-2026
+attributes:
+  displayName: "Acme Q2 2026 budget policy"
+  limit: 50000.00
+  currency: USD
+  period: quarterly
+  enforcement: throttle
+  alertThresholds: [0.5, 0.8, 0.95]
+  notes: |
+    Quarterly LLM spend cap with three escalating alert thresholds. On 100%
+    consumption, the platform throttles new requests rather than blocking.
+edges:
+  owns_budget:
+    - target: tenant:acme
+---
+nodeKind: BudgetPolicy
+id: budget-policy:eval-team-experimentation
+attributes:
+  displayName: "ML Platform eval team experimentation budget"
+  limit: 15000.00
+  currency: USD
+  period: quarterly
+  enforcement: alert-only
+  alertThresholds: [0.75, 0.9]
+  notes: |
+    Soft budget for offline eval runs; only alerts on overrun.
+edges:
+  owns_budget:
+    - target: tenant:globex

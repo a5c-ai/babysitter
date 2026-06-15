@@ -1,0 +1,27 @@
+nodeKind: Framework
+id: framework:nuxt
+attributes:
+  displayName: "Nuxt"
+  homepageUrl: "https://nuxt.com"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    Nuxt — a full-stack Vue.js framework.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:server-side-rendering
+    - target: skill-area:frontend-development
+    - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nextjs
+      comparison: "meta-frameworks — Nuxt for Vue; Next.js for React"
+    - target: framework:sveltekit
+      comparison: "meta-frameworks — Nuxt for Vue; SvelteKit for Svelte"
+    - target: framework:remix
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:astro
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:gatsby
+      comparison: "JavaScript meta-frameworks"

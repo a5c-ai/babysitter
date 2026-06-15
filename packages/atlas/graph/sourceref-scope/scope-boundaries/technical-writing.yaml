@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:technical-writing.scope
+attributes:
+  subjectId: skill:technical-writing
+  inScope: |
+    Producing clear technical documentation for engineering audiences —
+    READMEs, runbooks, API references, architecture overviews, and
+    onboarding guides. Targets markdown output suitable for repo
+    documentation or static-site generators.
+  outOfScope: |
+    Marketing or sales copy, end-user product documentation requiring UX
+    research, video / multimedia content, translation/localization,
+    and legal-compliance documents (privacy policies, ToS).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - skill:technical-writing

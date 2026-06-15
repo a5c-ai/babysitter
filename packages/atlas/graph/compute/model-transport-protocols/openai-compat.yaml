@@ -1,0 +1,14 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:openai-compat
+attributes:
+  displayName: "OpenAI-compatible chat completions"
+  vendor: "(third-party)"
+  specUrl: "https://platform.openai.com/docs/api-reference/chat"
+  streamingFraming: sse
+  status: alias
+  aliasOf: model-transport:openai-chat-completions
+edges:
+  realizes:
+    - target: layer:3-transport
+  alias_of:
+    - target: model-transport:openai-chat-completions

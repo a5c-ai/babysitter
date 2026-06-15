@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: generation
   backlog-id: SK-META-006
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:orchestration-loop, skill-area:code-analysis-linting]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
 ---
 
 # process-generator

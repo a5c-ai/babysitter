@@ -1,0 +1,30 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:long-build
+attributes:
+  schema: '{}'
+  displayName: "Long Build (Background)"
+  inputSchema:
+    type: object
+    required: [target]
+    properties:
+      target: { type: string }
+      env:
+        type: object
+        additionalProperties: { type: string }
+  outputSchema:
+    type: object
+    required: [exitCode, logsRef]
+    properties:
+      exitCode: { type: integer }
+      logsRef: { type: string }
+  timeoutMs: 600000
+  mode: background
+  streamable: false
+  description: |
+    Kicks off a long-running build in the background and returns a
+    handle / log reference. Status is polled via the runtime's
+    background-tool capability.
+edges:
+  requires_capability:
+    - target: capability:supports-tool-call-streaming
+      level: recommended

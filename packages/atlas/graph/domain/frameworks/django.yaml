@@ -1,0 +1,22 @@
+nodeKind: Framework
+id: framework:django
+attributes:
+  displayName: "Django"
+  homepageUrl: "https://www.djangoproject.com"
+  belongsToLanguageId: language:python
+  category: web-backend
+  releasedAt: "2005"
+  description: |
+    The Django framework.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:fastapi
+      comparison: "Python web frameworks — Django is batteries-included; FastAPI is async-first"
+    - target: framework:flask
+      comparison: "Python web frameworks — Django is batteries-included; Flask is minimal"
+    - target: framework:litestar
+      comparison: "Python web frameworks"

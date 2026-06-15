@@ -3,6 +3,13 @@
  * @description Event Storming - Workshop-based domain modeling using events, commands, and aggregates
  * @inputs { projectName: string, domainDescription?: string, sessionType?: string, existingModel?: object }
  * @outputs { success: boolean, bigPicture: object, processModels: object, softwareDesign: object, contextMap: object, visualizations: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:domain-driven-design, skill-area:c4-modeling, skill-area:adr-writing]
+ *   workflows: [workflow:architecture-decision-record]
+ *   topics: [topic:domain-driven-design, topic:clean-architecture]
+ *   roles: [role:architect, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

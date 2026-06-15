@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:blueprint-basic-security.scope
+attributes:
+  subjectId: blueprint:basic-security
+  inScope: |
+    Baseline application-security checks on a code change — secrets in
+    source, common injection sinks, missing auth/authorization on routes,
+    overly permissive CORS / CSP, unsafe deserialization, and outdated
+    dependency callouts (advisory, not full SCA).
+  outOfScope: |
+    Penetration testing, dynamic analysis / fuzzing, full SAST tool
+    replacement, threat modeling, cryptographic-primitive review, and
+    compliance attestation (SOC2, ISO 27001, PCI-DSS).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - blueprint:basic-security

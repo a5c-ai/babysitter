@@ -1,0 +1,46 @@
+nodeKind: Provider
+id: provider:replicate
+attributes:
+  versionRange: ">=2024-01-01"
+  displayName: "Replicate"
+  vendor: "Replicate"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    `Authorization: Token <api-key>` header (Replicate-native), with an
+    OpenAI-compatible chat endpoint also available for many models.
+  endpoints:
+    base: "https://api.replicate.com/v1"
+    predictions: "https://api.replicate.com/v1/predictions"
+    models: "https://api.replicate.com/v1/models"
+  pricing: |
+    Pay-per-token or pay-per-second of GPU time depending on the model;
+    see https://replicate.com/pricing
+  pricingTiers:
+    - name: serverless
+      rateLimit: "Per-account RPS caps; queue when saturated"
+      priceMultiplier: 1.0
+      description: "Pay-per-call serverless inference."
+    - name: dedicated
+      rateLimit: "Provisioned hardware; throughput per deployment"
+      priceMultiplier: 1.0
+      description: "Dedicated deployments — reserved GPU capacity."
+  rateLimitSignalingProtocol: |
+    HTTP 429 with `retry-after` for pay-as-you-go; queued predictions return
+    a status URL that callers poll.
+  dataResidencyOptions:
+    - us
+  vendorFeatures:
+    - capability:streaming
+  slaTier: "replicate-no-public-sla"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  serves:
+    - model:llama-3-1-405b-instruct@current
+    - model:llama-3-1-70b-instruct@current
+    - model:llama-3-3-70b-instruct@current
+    - model:llama-4-maverick@current
+    - model:llama-4-scout@current

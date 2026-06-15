@@ -18,6 +18,10 @@ metadata:
   phase: 3
   experience: 15+ years welding engineering
   background: Structural steel, pressure vessels, aerospace
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Welding and Joining Specialist Agent

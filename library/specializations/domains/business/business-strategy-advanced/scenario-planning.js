@@ -3,6 +3,12 @@
  * @description Developing alternative future scenarios for strategic planning and risk management
  * @inputs { organizationName: string, industryContext: object, timeHorizon: string, strategicQuestions: array }
  * @outputs { success: boolean, scenarios: array, strategyStressTest: object, signpostSystem: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

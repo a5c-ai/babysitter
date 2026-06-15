@@ -1,0 +1,100 @@
+nodeKind: PluginTarget
+id: plugin-target:cursor
+attributes:
+  displayName: "Cursor"
+  hostAgent: agent:cursor
+  adapterFamily: shell-hook
+  manifestFormat: "plugin.json"
+  commandFormat: "markdown-commands"
+  adapterName: cursor
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: cursor
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths:
+    - "hooks/hooks-cursor.json"
+  harnessManifestPath: ".cursor-plugin/plugin.json"
+  pluginRootEnvVarForExtension: null
+  marketplacePath: null
+  pluginRootEnvVar: CURSOR_PLUGIN_ROOT
+  scriptVariants:
+    - bash
+    - powershell
+  distribution:
+    - github-repo
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".cursor"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: postinstall
+    activationMessage: restart
+    extraPackageFiles:
+      - hooks.json
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "cursor"
+  callerEnvVars:
+    - "CURSOR_PROJECT_DIR"
+    - "CURSOR_VERSION"
+  configPaths:
+    - ".cursor"
+  processNames:
+    - "cursor"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/cursor-adapter"
+  externalRepo: "a5c-ai/babysitter-cursor"
+  externalPackageName: "@a5c-ai/babysitter-cursor"
+  generatedSourceDir: "cursor"
+  marketplaceSpecs: []
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - hooks
+    - stop-hook
+    - mcp
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: stop-hook
+  hookDriven: true
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "conversation_id from hook stdin (authoritative per-request); PID-scoped session marker; AGENT_SESSION_ID fallback"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: derived
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+
+edges:
+  hosted_by:
+    - target: agent:cursor
+    - target: agent-platform-impl:cursor.platform@current

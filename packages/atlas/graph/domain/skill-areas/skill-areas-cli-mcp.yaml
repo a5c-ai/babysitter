@@ -1,0 +1,109 @@
+---
+nodeKind: SkillArea
+id: skill-area:cli-design
+attributes:
+  displayName: "CLI Design"
+  description: |
+    Designing ergonomic CLIs — subcommands, flag conventions,
+    streaming I/O, exit codes, and shell completion.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary
+  uses_library:
+    - library:cobra
+    - library:clap
+  prerequisite_for_learning:
+    - target: skill-area:mcp-server-implementation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:mcp-server-implementation
+attributes:
+  displayName: "MCP Server Implementation"
+  description: |
+    Implementing Model Context Protocol servers — tool/resource
+    schemas, capability negotiation, and lifecycle.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:mcp-stdio-transport
+      strength: recommended
+    - target: skill-area:mcp-sse-transport
+      strength: recommended
+    - target: skill-area:mcp-tool-design
+      strength: recommended
+    - target: skill-area:mcp-resource-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:mcp-stdio-transport
+attributes:
+  displayName: "MCP stdio Transport"
+  description: |
+    JSON-RPC over stdio for MCP — framing, lifecycle, and process
+    supervision in editor/agent hosts.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary
+  requires_skill_area:
+    - skill-area:mcp-server-implementation
+---
+nodeKind: SkillArea
+id: skill-area:mcp-sse-transport
+attributes:
+  displayName: "MCP SSE / HTTP Transport"
+  description: |
+    Server-Sent Events and HTTP transports for MCP — auth, retries,
+    and bidirectional messaging patterns.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary
+  requires_skill_area:
+    - skill-area:mcp-server-implementation
+---
+nodeKind: SkillArea
+id: skill-area:mcp-tool-design
+attributes:
+  displayName: "MCP Tool Design"
+  description: |
+    Designing MCP tools — input schemas, idempotency, side-effect
+    classification, and helpful error returns.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mcp-resource-design
+attributes:
+  displayName: "MCP Resource Design"
+  description: |
+    Designing MCP resources — URI schemes, listing semantics,
+    pagination, and content-type negotiation.
+  domains:
+    - specialization:cli-mcp-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cli-mcp-development
+      confidence: primary

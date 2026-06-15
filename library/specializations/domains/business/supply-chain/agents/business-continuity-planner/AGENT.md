@@ -9,6 +9,12 @@ expertise:
   - Recovery procedures
   - Scenario testing
   - Plan maintenance
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:change-management, skill-area:strategic-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:strategic-planner]
 ---
 
 # Business Continuity Planner

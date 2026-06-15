@@ -1,0 +1,67 @@
+---
+nodeKind: Workflow
+id: workflow:structural-analysis-review
+attributes:
+  displayName: "Structural Analysis Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-design-iteration"
+  complexity: single-team
+  description: |
+    Reviews finite element analysis (FEA) models for structural adequacy
+    -- validating mesh quality and convergence studies, checking boundary
+    condition assumptions against real-world loading, verifying material
+    model selection, confirming load combinations per applicable building
+    codes (Eurocode/ASCE), and ensuring safety factors meet design
+    criteria. Excludes structural design authoring.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:computational-geometry
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:civil-engineering
+    - target: domain:materials-science
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:construction-schedule-optimization
+attributes:
+  displayName: "Construction Schedule Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Optimizes construction project schedules using critical path method
+    and resource leveling -- analyzing activity dependencies and float,
+    identifying resource conflicts, resequencing non-critical activities
+    to reduce peak resource demand, incorporating weather and supply
+    chain delay buffers, and publishing updated Gantt baselines with
+    earned-value progress metrics. Excludes procurement and contract
+    negotiation.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:graph-algorithms
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:civil-engineering
+    - target: domain:industrial-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:platform-team

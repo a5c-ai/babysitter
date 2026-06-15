@@ -1,0 +1,57 @@
+---
+nodeKind: Workflow
+id: workflow:roadmap-review
+attributes:
+  displayName: "Roadmap Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Conducts a structured review of the product and engineering roadmap —
+    aligning strategic goals with technical capacity, re-prioritizing
+    initiatives based on new data, resolving cross-team resource conflicts,
+    and publishing the updated roadmap. Excludes individual project planning.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:principal-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:feature-prioritization
+attributes:
+  displayName: "Feature Prioritization"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Scores and ranks proposed features using a structured prioritization
+    framework (RICE, ICE, or weighted scoring) — gathering impact estimates,
+    assessing engineering effort, factoring strategic alignment, and producing
+    a ranked backlog with rationale. Excludes sprint-level planning.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:engineering

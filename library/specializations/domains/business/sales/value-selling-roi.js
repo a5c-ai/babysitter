@@ -17,6 +17,11 @@
  * @references
  * - Value Selling: https://www.valueselling.com/
  * - ROI Selling by Michael Nick: https://www.amazon.com/ROI-Selling-Increasing-Revenue-Creating/dp/0793188857
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

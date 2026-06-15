@@ -8,6 +8,10 @@ expertise:
   - Distribution communication
   - LP inquiry handling
   - Annual meeting coordination
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # LP Relations

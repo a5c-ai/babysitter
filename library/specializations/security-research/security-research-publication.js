@@ -16,6 +16,9 @@
  * - Project Zero Blog: https://googleprojectzero.blogspot.com/
  * - Black Hat CFP: https://www.blackhat.com/call-for-papers.html
  * - DEF CON CFP: https://defcon.org/html/defcon-call-for-papers.html
+ * @graph
+ *   domains: [domain:cybersecurity]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

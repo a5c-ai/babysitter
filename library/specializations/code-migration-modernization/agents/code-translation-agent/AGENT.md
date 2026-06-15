@@ -7,6 +7,13 @@ model: opus
 skills:
   - codemod-executor
   - static-code-analyzer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:polyglot-development, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Code Translation Agent

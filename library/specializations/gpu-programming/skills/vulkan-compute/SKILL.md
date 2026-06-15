@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: compute-shaders
   backlog-id: SK-004
+graph:
+  domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:shader-programming]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # vulkan-compute

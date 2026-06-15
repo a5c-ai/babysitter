@@ -1,0 +1,64 @@
+---
+nodeKind: ToolServer
+id: tool-server:mcp-sequelize
+attributes:
+  displayName: Sequelize MCP Server
+  description: |
+    MCP server providing access to databases managed by Sequelize ORM.
+    Enables AI agents to query models, inspect schema definitions, run
+    migrations, and execute raw SQL via the Sequelize connection.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/sequelize/sequelize
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: library:sequelize
+  - target: stack-part:relational-database
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+nodeKind: ToolServer
+id: tool-server:mcp-typeorm
+attributes:
+  displayName: TypeORM MCP Server
+  description: |
+    MCP server for TypeORM-managed databases that exposes entity metadata,
+    migration status, and query execution to AI agents, supporting multiple
+    database backends through TypeORM's unified API.
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/typeorm/typeorm
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: library:typeorm
+  - target: stack-part:relational-database
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+nodeKind: ToolServer
+id: tool-server:mcp-apollo-studio
+attributes:
+  displayName: Apollo Studio MCP Server
+  description: |
+    MCP server integrating with Apollo Studio (GraphOS) to expose schema
+    registry, operation metrics, field usage analytics, and schema change
+    proposals to AI coding agents.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/apollographql/apollo-mcp-server
+  maintainer: Apollo GraphQL
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: library:apollo-client
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:backend

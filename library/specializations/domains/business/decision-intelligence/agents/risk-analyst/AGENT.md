@@ -11,6 +11,10 @@ expertise:
   - Residual risk evaluation
   - Risk monitoring setup
   - Risk communication
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:financial-risk-modeling, skill-area:statistical-analysis]
+  roles: [role:risk-analyst, role:quantitative-analyst, role:data-analyst]
 ---
 
 # Risk Analyst

@@ -1,0 +1,858 @@
+{
+  "refreshedAt": "2026-05-07",
+  "paths": {
+    "libraryRoot": "library",
+    "methodologiesRoot": "library/methodologies",
+    "sharedProcessesRoot": "library/processes/shared",
+    "specializationsRoot": "library/specializations",
+    "businessRoot": "library/specializations/domains/business",
+    "scienceRoot": "library/specializations/domains/science",
+    "socialRoot": "library/specializations/domains/social-sciences-humanities"
+  },
+  "counts": {
+    "docsMarkdownFiles": 485,
+    "allLibraryProcessFiles": 2239,
+    "methodologyDirectories": 38,
+    "methodologyProcessFiles": 149,
+    "sharedProcessFiles": 31,
+    "specializationProcessFiles": 2038,
+    "topLevelSpecializationDirectories": 39,
+    "technicalSpecializationProcesses": 837,
+    "businessDomainProcesses": 490,
+    "scienceDomainProcesses": 551,
+    "socialDomainProcesses": 160,
+    "skillFiles": 2021,
+    "agentFiles": 1342,
+    "readmeFiles": 1816
+  },
+  "methodologyFamilies": [
+    {
+      "slug": "superpowers",
+      "count": 15,
+      "repoPath": "library/methodologies/superpowers",
+      "docLink": "../../../library/methodologies/superpowers/"
+    },
+    {
+      "slug": "gsd",
+      "count": 14,
+      "repoPath": "library/methodologies/gsd",
+      "docLink": "../../../library/methodologies/gsd/"
+    },
+    {
+      "slug": "bmad-method",
+      "count": 6,
+      "repoPath": "library/methodologies/bmad-method",
+      "docLink": "../../../library/methodologies/bmad-method/"
+    },
+    {
+      "slug": "ccpm",
+      "count": 6,
+      "repoPath": "library/methodologies/ccpm",
+      "docLink": "../../../library/methodologies/ccpm/"
+    },
+    {
+      "slug": "maestro",
+      "count": 6,
+      "repoPath": "library/methodologies/maestro",
+      "docLink": "../../../library/methodologies/maestro/"
+    },
+    {
+      "slug": "metaswarm",
+      "count": 6,
+      "repoPath": "library/methodologies/metaswarm",
+      "docLink": "../../../library/methodologies/metaswarm/"
+    },
+    {
+      "slug": "rpikit",
+      "count": 6,
+      "repoPath": "library/methodologies/rpikit",
+      "docLink": "../../../library/methodologies/rpikit/"
+    },
+    {
+      "slug": "cc10x",
+      "count": 5,
+      "repoPath": "library/methodologies/cc10x",
+      "docLink": "../../../library/methodologies/cc10x/"
+    },
+    {
+      "slug": "claudekit",
+      "count": 5,
+      "repoPath": "library/methodologies/claudekit",
+      "docLink": "../../../library/methodologies/claudekit/"
+    },
+    {
+      "slug": "cog-second-brain",
+      "count": 5,
+      "repoPath": "library/methodologies/cog-second-brain",
+      "docLink": "../../../library/methodologies/cog-second-brain/"
+    },
+    {
+      "slug": "everything-claude-code",
+      "count": 5,
+      "repoPath": "library/methodologies/everything-claude-code",
+      "docLink": "../../../library/methodologies/everything-claude-code/"
+    },
+    {
+      "slug": "gastown",
+      "count": 5,
+      "repoPath": "library/methodologies/gastown",
+      "docLink": "../../../library/methodologies/gastown/"
+    },
+    {
+      "slug": "pilot-shell",
+      "count": 5,
+      "repoPath": "library/methodologies/pilot-shell",
+      "docLink": "../../../library/methodologies/pilot-shell/"
+    },
+    {
+      "slug": "ruflo",
+      "count": 5,
+      "repoPath": "library/methodologies/ruflo",
+      "docLink": "../../../library/methodologies/ruflo/"
+    },
+    {
+      "slug": "automaker",
+      "count": 4,
+      "repoPath": "library/methodologies/automaker",
+      "docLink": "../../../library/methodologies/automaker/"
+    },
+    {
+      "slug": "planning-with-files",
+      "count": 4,
+      "repoPath": "library/methodologies/planning-with-files",
+      "docLink": "../../../library/methodologies/planning-with-files/"
+    },
+    {
+      "slug": "spec-kit",
+      "count": 4,
+      "repoPath": "library/methodologies/spec-kit",
+      "docLink": "../../../library/methodologies/spec-kit/"
+    },
+    {
+      "slug": "atdd-tdd",
+      "count": 1,
+      "repoPath": "library/methodologies/atdd-tdd",
+      "docLink": "../../../library/methodologies/atdd-tdd/"
+    },
+    {
+      "slug": "bdd-specification-by-example",
+      "count": 1,
+      "repoPath": "library/methodologies/bdd-specification-by-example",
+      "docLink": "../../../library/methodologies/bdd-specification-by-example/"
+    },
+    {
+      "slug": "cleanroom",
+      "count": 1,
+      "repoPath": "library/methodologies/cleanroom",
+      "docLink": "../../../library/methodologies/cleanroom/"
+    },
+    {
+      "slug": "domain-driven-design",
+      "count": 1,
+      "repoPath": "library/methodologies/domain-driven-design",
+      "docLink": "../../../library/methodologies/domain-driven-design/"
+    },
+    {
+      "slug": "double-diamond",
+      "count": 1,
+      "repoPath": "library/methodologies/double-diamond",
+      "docLink": "../../../library/methodologies/double-diamond/"
+    },
+    {
+      "slug": "event-storming",
+      "count": 1,
+      "repoPath": "library/methodologies/event-storming",
+      "docLink": "../../../library/methodologies/event-storming/"
+    },
+    {
+      "slug": "example-mapping",
+      "count": 1,
+      "repoPath": "library/methodologies/example-mapping",
+      "docLink": "../../../library/methodologies/example-mapping/"
+    },
+    {
+      "slug": "extreme-programming",
+      "count": 1,
+      "repoPath": "library/methodologies/extreme-programming",
+      "docLink": "../../../library/methodologies/extreme-programming/"
+    },
+    {
+      "slug": "feature-driven-development",
+      "count": 1,
+      "repoPath": "library/methodologies/feature-driven-development",
+      "docLink": "../../../library/methodologies/feature-driven-development/"
+    },
+    {
+      "slug": "hypothesis-driven-development",
+      "count": 1,
+      "repoPath": "library/methodologies/hypothesis-driven-development",
+      "docLink": "../../../library/methodologies/hypothesis-driven-development/"
+    },
+    {
+      "slug": "impact-mapping",
+      "count": 1,
+      "repoPath": "library/methodologies/impact-mapping",
+      "docLink": "../../../library/methodologies/impact-mapping/"
+    },
+    {
+      "slug": "jobs-to-be-done",
+      "count": 1,
+      "repoPath": "library/methodologies/jobs-to-be-done",
+      "docLink": "../../../library/methodologies/jobs-to-be-done/"
+    },
+    {
+      "slug": "kanban",
+      "count": 1,
+      "repoPath": "library/methodologies/kanban",
+      "docLink": "../../../library/methodologies/kanban/"
+    },
+    {
+      "slug": "ontology-driven-development",
+      "count": 1,
+      "repoPath": "library/methodologies/ontology-driven-development",
+      "docLink": "../../../library/methodologies/ontology-driven-development/"
+    },
+    {
+      "slug": "process-hardening",
+      "count": 1,
+      "repoPath": "library/methodologies/process-hardening",
+      "docLink": "../../../library/methodologies/process-hardening/"
+    },
+    {
+      "slug": "rup",
+      "count": 1,
+      "repoPath": "library/methodologies/rup",
+      "docLink": "../../../library/methodologies/rup/"
+    },
+    {
+      "slug": "scrum",
+      "count": 1,
+      "repoPath": "library/methodologies/scrum",
+      "docLink": "../../../library/methodologies/scrum/"
+    },
+    {
+      "slug": "shape-up",
+      "count": 1,
+      "repoPath": "library/methodologies/shape-up",
+      "docLink": "../../../library/methodologies/shape-up/"
+    },
+    {
+      "slug": "spiral-model",
+      "count": 1,
+      "repoPath": "library/methodologies/spiral-model",
+      "docLink": "../../../library/methodologies/spiral-model/"
+    },
+    {
+      "slug": "v-model",
+      "count": 1,
+      "repoPath": "library/methodologies/v-model",
+      "docLink": "../../../library/methodologies/v-model/"
+    },
+    {
+      "slug": "waterfall",
+      "count": 1,
+      "repoPath": "library/methodologies/waterfall",
+      "docLink": "../../../library/methodologies/waterfall/"
+    }
+  ],
+  "sharedProcessGroups": [
+    {
+      "slug": "ci",
+      "count": 5,
+      "repoPath": "library/processes/shared/ci",
+      "docLink": "../../../library/processes/shared/ci/"
+    },
+    {
+      "slug": "communication",
+      "count": 3,
+      "repoPath": "library/processes/shared/communication",
+      "docLink": "../../../library/processes/shared/communication/"
+    },
+    {
+      "slug": "local-dev",
+      "count": 2,
+      "repoPath": "library/processes/shared/local-dev",
+      "docLink": "../../../library/processes/shared/local-dev/"
+    },
+    {
+      "slug": "analysis",
+      "count": 1,
+      "repoPath": "library/processes/shared/analysis",
+      "docLink": "../../../library/processes/shared/analysis/"
+    },
+    {
+      "slug": "release",
+      "count": 1,
+      "repoPath": "library/processes/shared/release",
+      "docLink": "../../../library/processes/shared/release/"
+    },
+    {
+      "slug": "reporting",
+      "count": 1,
+      "repoPath": "library/processes/shared/reporting",
+      "docLink": "../../../library/processes/shared/reporting/"
+    }
+  ],
+  "technicalSpecializations": [
+    {
+      "slug": "web-development",
+      "count": 61,
+      "repoPath": "library/specializations/web-development",
+      "docLink": "../../../library/specializations/web-development/"
+    },
+    {
+      "slug": "algorithms-optimization",
+      "count": 45,
+      "repoPath": "library/specializations/algorithms-optimization",
+      "docLink": "../../../library/specializations/algorithms-optimization/"
+    },
+    {
+      "slug": "ai-agents-conversational",
+      "count": 43,
+      "repoPath": "library/specializations/ai-agents-conversational",
+      "docLink": "../../../library/specializations/ai-agents-conversational/"
+    },
+    {
+      "slug": "cryptography-blockchain",
+      "count": 33,
+      "repoPath": "library/specializations/cryptography-blockchain",
+      "docLink": "../../../library/specializations/cryptography-blockchain/"
+    },
+    {
+      "slug": "security-research",
+      "count": 32,
+      "repoPath": "library/specializations/security-research",
+      "docLink": "../../../library/specializations/security-research/"
+    },
+    {
+      "slug": "meta",
+      "count": 31,
+      "repoPath": "library/specializations/meta",
+      "docLink": "../../../library/specializations/meta/"
+    },
+    {
+      "slug": "cli-mcp-development",
+      "count": 30,
+      "repoPath": "library/specializations/cli-mcp-development",
+      "docLink": "../../../library/specializations/cli-mcp-development/"
+    },
+    {
+      "slug": "game-development",
+      "count": 30,
+      "repoPath": "library/specializations/game-development",
+      "docLink": "../../../library/specializations/game-development/"
+    },
+    {
+      "slug": "network-programming",
+      "count": 30,
+      "repoPath": "library/specializations/network-programming",
+      "docLink": "../../../library/specializations/network-programming/"
+    },
+    {
+      "slug": "performance-optimization",
+      "count": 30,
+      "repoPath": "library/specializations/performance-optimization",
+      "docLink": "../../../library/specializations/performance-optimization/"
+    },
+    {
+      "slug": "robotics-simulation",
+      "count": 30,
+      "repoPath": "library/specializations/robotics-simulation",
+      "docLink": "../../../library/specializations/robotics-simulation/"
+    },
+    {
+      "slug": "devops-sre-platform",
+      "count": 29,
+      "repoPath": "library/specializations/devops-sre-platform",
+      "docLink": "../../../library/specializations/devops-sre-platform/"
+    },
+    {
+      "slug": "embedded-systems",
+      "count": 26,
+      "repoPath": "library/specializations/embedded-systems",
+      "docLink": "../../../library/specializations/embedded-systems/"
+    },
+    {
+      "slug": "mobile-development",
+      "count": 26,
+      "repoPath": "library/specializations/mobile-development",
+      "docLink": "../../../library/specializations/mobile-development/"
+    },
+    {
+      "slug": "security-compliance",
+      "count": 26,
+      "repoPath": "library/specializations/security-compliance",
+      "docLink": "../../../library/specializations/security-compliance/"
+    },
+    {
+      "slug": "code-migration-modernization",
+      "count": 25,
+      "repoPath": "library/specializations/code-migration-modernization",
+      "docLink": "../../../library/specializations/code-migration-modernization/"
+    },
+    {
+      "slug": "fpga-programming",
+      "count": 25,
+      "repoPath": "library/specializations/fpga-programming",
+      "docLink": "../../../library/specializations/fpga-programming/"
+    },
+    {
+      "slug": "gpu-programming",
+      "count": 25,
+      "repoPath": "library/specializations/gpu-programming",
+      "docLink": "../../../library/specializations/gpu-programming/"
+    },
+    {
+      "slug": "programming-languages",
+      "count": 25,
+      "repoPath": "library/specializations/programming-languages",
+      "docLink": "../../../library/specializations/programming-languages/"
+    },
+    {
+      "slug": "sdk-platform-development",
+      "count": 25,
+      "repoPath": "library/specializations/sdk-platform-development",
+      "docLink": "../../../library/specializations/sdk-platform-development/"
+    },
+    {
+      "slug": "desktop-development",
+      "count": 24,
+      "repoPath": "library/specializations/desktop-development",
+      "docLink": "../../../library/specializations/desktop-development/"
+    },
+    {
+      "slug": "ux-ui-design",
+      "count": 24,
+      "repoPath": "library/specializations/ux-ui-design",
+      "docLink": "../../../library/specializations/ux-ui-design/"
+    },
+    {
+      "slug": "technical-documentation",
+      "count": 21,
+      "repoPath": "library/specializations/technical-documentation",
+      "docLink": "../../../library/specializations/technical-documentation/"
+    },
+    {
+      "slug": "qa-testing-automation",
+      "count": 20,
+      "repoPath": "library/specializations/qa-testing-automation",
+      "docLink": "../../../library/specializations/qa-testing-automation/"
+    },
+    {
+      "slug": "software-architecture",
+      "count": 20,
+      "repoPath": "library/specializations/software-architecture",
+      "docLink": "../../../library/specializations/software-architecture/"
+    },
+    {
+      "slug": "product-management",
+      "count": 19,
+      "repoPath": "library/specializations/product-management",
+      "docLink": "../../../library/specializations/product-management/"
+    },
+    {
+      "slug": "collaboration",
+      "count": 18,
+      "repoPath": "library/specializations/collaboration",
+      "docLink": "../../../library/specializations/collaboration/"
+    },
+    {
+      "slug": "data-engineering-analytics",
+      "count": 18,
+      "repoPath": "library/specializations/data-engineering-analytics",
+      "docLink": "../../../library/specializations/data-engineering-analytics/"
+    },
+    {
+      "slug": "data-science-ml",
+      "count": 18,
+      "repoPath": "library/specializations/data-science-ml",
+      "docLink": "../../../library/specializations/data-science-ml/"
+    },
+    {
+      "slug": "media",
+      "count": 7,
+      "repoPath": "library/specializations/media",
+      "docLink": "../../../library/specializations/media/"
+    },
+    {
+      "slug": "observability",
+      "count": 5,
+      "repoPath": "library/specializations/observability",
+      "docLink": "../../../library/specializations/observability/"
+    },
+    {
+      "slug": "research",
+      "count": 5,
+      "repoPath": "library/specializations/research",
+      "docLink": "../../../library/specializations/research/"
+    },
+    {
+      "slug": "communication",
+      "count": 4,
+      "repoPath": "library/specializations/communication",
+      "docLink": "../../../library/specializations/communication/"
+    },
+    {
+      "slug": "common-utilities",
+      "count": 3,
+      "repoPath": "library/specializations/common-utilities",
+      "docLink": "../../../library/specializations/common-utilities/"
+    },
+    {
+      "slug": "authoring",
+      "count": 2,
+      "repoPath": "library/specializations/authoring",
+      "docLink": "../../../library/specializations/authoring/"
+    },
+    {
+      "slug": "business",
+      "count": 1,
+      "repoPath": "library/specializations/business",
+      "docLink": "../../../library/specializations/business/"
+    },
+    {
+      "slug": "sourcing",
+      "count": 1,
+      "repoPath": "library/specializations/sourcing",
+      "docLink": "../../../library/specializations/sourcing/"
+    }
+  ],
+  "businessDomains": [
+    {
+      "slug": "knowledge-management",
+      "count": 36,
+      "repoPath": "library/specializations/domains/business/knowledge-management",
+      "docLink": "../../../library/specializations/domains/business/knowledge-management/"
+    },
+    {
+      "slug": "decision-intelligence",
+      "count": 33,
+      "repoPath": "library/specializations/domains/business/decision-intelligence",
+      "docLink": "../../../library/specializations/domains/business/decision-intelligence/"
+    },
+    {
+      "slug": "legal",
+      "count": 28,
+      "repoPath": "library/specializations/domains/business/legal",
+      "docLink": "../../../library/specializations/domains/business/legal/"
+    },
+    {
+      "slug": "business-strategy",
+      "count": 26,
+      "repoPath": "library/specializations/domains/business/business-strategy",
+      "docLink": "../../../library/specializations/domains/business/business-strategy/"
+    },
+    {
+      "slug": "operations",
+      "count": 26,
+      "repoPath": "library/specializations/domains/business/operations",
+      "docLink": "../../../library/specializations/domains/business/operations/"
+    },
+    {
+      "slug": "business-analysis",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/business-analysis",
+      "docLink": "../../../library/specializations/domains/business/business-analysis/"
+    },
+    {
+      "slug": "entrepreneurship",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/entrepreneurship",
+      "docLink": "../../../library/specializations/domains/business/entrepreneurship/"
+    },
+    {
+      "slug": "finance-accounting",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/finance-accounting",
+      "docLink": "../../../library/specializations/domains/business/finance-accounting/"
+    },
+    {
+      "slug": "logistics",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/logistics",
+      "docLink": "../../../library/specializations/domains/business/logistics/"
+    },
+    {
+      "slug": "marketing",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/marketing",
+      "docLink": "../../../library/specializations/domains/business/marketing/"
+    },
+    {
+      "slug": "project-management",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/project-management",
+      "docLink": "../../../library/specializations/domains/business/project-management/"
+    },
+    {
+      "slug": "public-relations",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/public-relations",
+      "docLink": "../../../library/specializations/domains/business/public-relations/"
+    },
+    {
+      "slug": "sales",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/sales",
+      "docLink": "../../../library/specializations/domains/business/sales/"
+    },
+    {
+      "slug": "supply-chain",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/supply-chain",
+      "docLink": "../../../library/specializations/domains/business/supply-chain/"
+    },
+    {
+      "slug": "venture-capital",
+      "count": 25,
+      "repoPath": "library/specializations/domains/business/venture-capital",
+      "docLink": "../../../library/specializations/domains/business/venture-capital/"
+    },
+    {
+      "slug": "human-resources",
+      "count": 24,
+      "repoPath": "library/specializations/domains/business/human-resources",
+      "docLink": "../../../library/specializations/domains/business/human-resources/"
+    },
+    {
+      "slug": "digital-marketing",
+      "count": 23,
+      "repoPath": "library/specializations/domains/business/digital-marketing",
+      "docLink": "../../../library/specializations/domains/business/digital-marketing/"
+    },
+    {
+      "slug": "business-strategy-advanced",
+      "count": 22,
+      "repoPath": "library/specializations/domains/business/business-strategy-advanced",
+      "docLink": "../../../library/specializations/domains/business/business-strategy-advanced/"
+    },
+    {
+      "slug": "customer-experience",
+      "count": 20,
+      "repoPath": "library/specializations/domains/business/customer-experience",
+      "docLink": "../../../library/specializations/domains/business/customer-experience/"
+    },
+    {
+      "slug": "travel",
+      "count": 2,
+      "repoPath": "library/specializations/domains/business/travel",
+      "docLink": "../../../library/specializations/domains/business/travel/"
+    }
+  ],
+  "scienceDomains": [
+    {
+      "slug": "scientific-discovery",
+      "count": 168,
+      "repoPath": "library/specializations/domains/science/scientific-discovery",
+      "docLink": "../../../library/specializations/domains/science/scientific-discovery/"
+    },
+    {
+      "slug": "quantum-computing",
+      "count": 27,
+      "repoPath": "library/specializations/domains/science/quantum-computing",
+      "docLink": "../../../library/specializations/domains/science/quantum-computing/"
+    },
+    {
+      "slug": "mechanical-engineering",
+      "count": 26,
+      "repoPath": "library/specializations/domains/science/mechanical-engineering",
+      "docLink": "../../../library/specializations/domains/science/mechanical-engineering/"
+    },
+    {
+      "slug": "aerospace-engineering",
+      "count": 25,
+      "repoPath": "library/specializations/domains/science/aerospace-engineering",
+      "docLink": "../../../library/specializations/domains/science/aerospace-engineering/"
+    },
+    {
+      "slug": "automotive-engineering",
+      "count": 25,
+      "repoPath": "library/specializations/domains/science/automotive-engineering",
+      "docLink": "../../../library/specializations/domains/science/automotive-engineering/"
+    },
+    {
+      "slug": "biomedical-engineering",
+      "count": 25,
+      "repoPath": "library/specializations/domains/science/biomedical-engineering",
+      "docLink": "../../../library/specializations/domains/science/biomedical-engineering/"
+    },
+    {
+      "slug": "chemical-engineering",
+      "count": 25,
+      "repoPath": "library/specializations/domains/science/chemical-engineering",
+      "docLink": "../../../library/specializations/domains/science/chemical-engineering/"
+    },
+    {
+      "slug": "civil-engineering",
+      "count": 25,
+      "repoPath": "library/specializations/domains/science/civil-engineering",
+      "docLink": "../../../library/specializations/domains/science/civil-engineering/"
+    },
+    {
+      "slug": "computer-science",
+      "count": 25,
+      "repoPath": "library/specializations/domains/science/computer-science",
+      "docLink": "../../../library/specializations/domains/science/computer-science/"
+    },
+    {
+      "slug": "environmental-engineering",
+      "count": 24,
+      "repoPath": "library/specializations/domains/science/environmental-engineering",
+      "docLink": "../../../library/specializations/domains/science/environmental-engineering/"
+    },
+    {
+      "slug": "materials-science",
+      "count": 24,
+      "repoPath": "library/specializations/domains/science/materials-science",
+      "docLink": "../../../library/specializations/domains/science/materials-science/"
+    },
+    {
+      "slug": "mathematics",
+      "count": 24,
+      "repoPath": "library/specializations/domains/science/mathematics",
+      "docLink": "../../../library/specializations/domains/science/mathematics/"
+    },
+    {
+      "slug": "physics",
+      "count": 24,
+      "repoPath": "library/specializations/domains/science/physics",
+      "docLink": "../../../library/specializations/domains/science/physics/"
+    },
+    {
+      "slug": "industrial-engineering",
+      "count": 23,
+      "repoPath": "library/specializations/domains/science/industrial-engineering",
+      "docLink": "../../../library/specializations/domains/science/industrial-engineering/"
+    },
+    {
+      "slug": "electrical-engineering",
+      "count": 21,
+      "repoPath": "library/specializations/domains/science/electrical-engineering",
+      "docLink": "../../../library/specializations/domains/science/electrical-engineering/"
+    },
+    {
+      "slug": "bioinformatics",
+      "count": 20,
+      "repoPath": "library/specializations/domains/science/bioinformatics",
+      "docLink": "../../../library/specializations/domains/science/bioinformatics/"
+    },
+    {
+      "slug": "nanotechnology",
+      "count": 20,
+      "repoPath": "library/specializations/domains/science/nanotechnology",
+      "docLink": "../../../library/specializations/domains/science/nanotechnology/"
+    }
+  ],
+  "socialDomains": [
+    {
+      "slug": "arts-culture",
+      "count": 35,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/arts-culture",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/arts-culture/"
+    },
+    {
+      "slug": "philosophy",
+      "count": 26,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/philosophy",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/philosophy/"
+    },
+    {
+      "slug": "education",
+      "count": 25,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/education",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/education/"
+    },
+    {
+      "slug": "humanities",
+      "count": 25,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/humanities",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/humanities/"
+    },
+    {
+      "slug": "social-sciences",
+      "count": 25,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/social-sciences",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/social-sciences/"
+    },
+    {
+      "slug": "healthcare",
+      "count": 24,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/healthcare",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/healthcare/"
+    }
+  ],
+  "largestCategories": [
+    {
+      "slug": "scientific-discovery",
+      "count": 168,
+      "repoPath": "library/specializations/domains/science/scientific-discovery",
+      "docLink": "../../../library/specializations/domains/science/scientific-discovery/"
+    },
+    {
+      "slug": "web-development",
+      "count": 61,
+      "repoPath": "library/specializations/web-development",
+      "docLink": "../../../library/specializations/web-development/"
+    },
+    {
+      "slug": "algorithms-optimization",
+      "count": 45,
+      "repoPath": "library/specializations/algorithms-optimization",
+      "docLink": "../../../library/specializations/algorithms-optimization/"
+    },
+    {
+      "slug": "ai-agents-conversational",
+      "count": 43,
+      "repoPath": "library/specializations/ai-agents-conversational",
+      "docLink": "../../../library/specializations/ai-agents-conversational/"
+    },
+    {
+      "slug": "knowledge-management",
+      "count": 36,
+      "repoPath": "library/specializations/domains/business/knowledge-management",
+      "docLink": "../../../library/specializations/domains/business/knowledge-management/"
+    },
+    {
+      "slug": "arts-culture",
+      "count": 35,
+      "repoPath": "library/specializations/domains/social-sciences-humanities/arts-culture",
+      "docLink": "../../../library/specializations/domains/social-sciences-humanities/arts-culture/"
+    },
+    {
+      "slug": "cryptography-blockchain",
+      "count": 33,
+      "repoPath": "library/specializations/cryptography-blockchain",
+      "docLink": "../../../library/specializations/cryptography-blockchain/"
+    },
+    {
+      "slug": "decision-intelligence",
+      "count": 33,
+      "repoPath": "library/specializations/domains/business/decision-intelligence",
+      "docLink": "../../../library/specializations/domains/business/decision-intelligence/"
+    },
+    {
+      "slug": "security-research",
+      "count": 32,
+      "repoPath": "library/specializations/security-research",
+      "docLink": "../../../library/specializations/security-research/"
+    },
+    {
+      "slug": "meta",
+      "count": 31,
+      "repoPath": "library/specializations/meta",
+      "docLink": "../../../library/specializations/meta/"
+    },
+    {
+      "slug": "cli-mcp-development",
+      "count": 30,
+      "repoPath": "library/specializations/cli-mcp-development",
+      "docLink": "../../../library/specializations/cli-mcp-development/"
+    },
+    {
+      "slug": "game-development",
+      "count": 30,
+      "repoPath": "library/specializations/game-development",
+      "docLink": "../../../library/specializations/game-development/"
+    }
+  ]
+}

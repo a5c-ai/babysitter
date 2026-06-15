@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: analytics
   priority: high
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:financial-planning, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:financial-analyst]
 ---
 
 # Spend Analytics Engine

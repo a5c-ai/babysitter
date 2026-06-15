@@ -19,6 +19,13 @@
  * - ERC-721 Standard: https://eips.ethereum.org/EIPS/eip-721
  * - OpenSea Metadata Standards: https://docs.opensea.io/docs/metadata-standards
  * - ERC-2981 Royalties: https://eips.ethereum.org/EIPS/eip-2981
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:token-nft-management]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:crypto-protocol-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

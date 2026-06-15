@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:source-ref
+attributes:
+  canonicalDefinitionId: definition:source-ref.canonical
+  displayName: "SourceRef"
+  kind: primitive
+  references:
+    - "NodeKind:SourceRef"
+  description: |
+    Repo+ref+path pointer to source-of-truth for an artifact
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

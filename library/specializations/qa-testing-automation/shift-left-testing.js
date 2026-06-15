@@ -6,6 +6,13 @@
  * @complexity Medium
  * @inputs { projectPath: string, teamSize: number, currentWorkflow: object, qualityTargets: object }
  * @outputs { success: boolean, implementationPlan: object, metricsBaseline: object, culturalReadiness: number }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development, workflow:code-review]
+ *   roles: [role:qa-engineer, role:backend-engineer]
+ *   skillAreas: [skill-area:unit-testing, skill-area:component-testing]
+ *   topics: [topic:test-driven-development, topic:continuous-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

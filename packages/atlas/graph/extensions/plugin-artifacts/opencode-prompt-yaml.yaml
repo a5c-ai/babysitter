@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:opencode-prompt-yaml
+attributes:
+  artifactId: plugin-artifact:opencode-prompt-yaml
+  displayName: "OpenCode agent prompt files"
+  targetId: plugin-target:opencode
+  artifactKind: subagent-md
+  pathPattern: ".opencode/agent/*.md"
+  installerSurface: "fs"
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

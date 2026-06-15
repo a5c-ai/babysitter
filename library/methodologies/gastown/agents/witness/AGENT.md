@@ -9,17 +9,15 @@ expertise:
   - Worker health monitoring
   - Rig-level coordination
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Witness Agent
-
-## Role
-
-Per-rig Lifecycle Manager in Gas Town. Each rig has a Witness that oversees the worker agents on that rig, managing their session lifecycle, local state, and rig-level coordination.
-
-## Expertise
-
-- Per-rig agent session management
 - Worker initialization and teardown
 - Local state persistence and recovery
 - Rig-level health monitoring

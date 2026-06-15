@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:org-unit.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:org-unit
+  text: |
+    team/department/squad
+  status: canonical
+edges:
+  defines:
+    - term:org-unit

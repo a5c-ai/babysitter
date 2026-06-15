@@ -7,15 +7,14 @@ allowed-tools:
   - directory-create
   - git-init
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# COG Onboarding Skill
-
-Personalize the COG Second Brain workflow by selecting a role pack, configuring integrations, and initializing the vault structure.
-
-## Capabilities
-
-- Initialize COG vault with the standard directory structure (00-inbox through 05-knowledge)
 - Configure one of 7 role packs: Product Manager, Engineering Lead, Engineer, Designer, Founder, Marketer, Custom
 - Set up user profile with interests, domains, and news sources
 - Configure external integrations (GitHub, Linear, Slack, PostHog)

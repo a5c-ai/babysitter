@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:codex-config-toml
+attributes:
+  artifactId: plugin-artifact:codex-config-toml
+  displayName: "Codex config.toml"
+  targetId: plugin-target:codex
+  artifactKind: settings-fragment
+  pathPattern: "~/.codex/config.toml"
+  installerSurface: "settings-merge"
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

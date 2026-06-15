@@ -2,6 +2,13 @@
 name: mem0-integration
 description: Mem0 memory layer integration for AI agents. Implement persistent, semantic memory for long-term context retention and personalization.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob, WebFetch
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:context-management, skill-area:retrieval-augmented-generation]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # mem0-integration

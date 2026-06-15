@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:binary-provider.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:binary-provider
+  text: |
+    plugin-provided executables added to PATH (Claude Code bin/ directory)
+  status: canonical
+edges:
+  defines:
+    - term:binary-provider

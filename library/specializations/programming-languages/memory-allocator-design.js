@@ -16,6 +16,12 @@
  * - jemalloc: https://jemalloc.net/
  * - mimalloc: https://github.com/microsoft/mimalloc
  * - Custom Allocators: https://www.gingerbill.org/article/2019/02/08/memory-allocation-strategies-001/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

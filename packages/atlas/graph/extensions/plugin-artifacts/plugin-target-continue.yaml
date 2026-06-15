@@ -1,0 +1,43 @@
+nodeKind: PluginTarget
+id: plugin-target:continue
+attributes:
+  displayName: "Continue"
+  hostAgent: agent:continue
+  adapterFamily: shell-hook
+  manifestFormat: "config.json"
+  commandFormat: markdown-commands
+  hookRegistrationFormat: none
+  skillHandling: unsupported
+  marketplacePath: null
+  adapterName: continue
+  scriptVariants:
+    - bash
+  distribution:
+    - manual
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".continue"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: supported
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+edges:
+  hosted_by:
+    - target: agent:continue

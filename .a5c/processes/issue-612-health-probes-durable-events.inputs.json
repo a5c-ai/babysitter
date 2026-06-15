@@ -1,0 +1,96 @@
+{
+  "issueNumber": 612,
+  "title": "Implement real health probes and durable event streaming",
+  "issueUrl": "https://github.com/a5c-ai/babysitter/issues/612",
+  "baseBranch": "staging",
+  "targetBranch": "plan/issue-612",
+  "labels": [
+    "enhancement",
+    "effort:medium",
+    "ready-for-dev",
+    "priority:medium",
+    "kradle",
+    "kradle-core",
+    "infrastructure",
+    "risk:medium"
+  ],
+  "relatedIssues": [
+    608
+  ],
+  "relatedPullRequests": [
+    694,
+    702
+  ],
+  "preferredBroker": "nats-jetstream",
+  "issueBody": "## Summary\n\nTwo infrastructure systems are stubs that need real implementations to support production operations.\n\n## 1. Health Probes\n\nThe adapter health check returns `{ status: 'unknown', reason: 'not-implemented' }`. The health page shows Connected/Error based on env var presence + simple fetch, but doesn't do deep probes.\n\n**What's needed:**\n- TCP/HTTP probe to Gitea (`KRADLE_GITEA_HTTP_URL/api/v1/version`)\n- HTTP probe to Agent Mux Gateway (`AGENT_MUX_URL/healthz`)\n- HTTP probe to Kradle Controller API (`KRADLE_CONTROLLER_URL/healthz`)\n- kubectl connectivity check (`kubectl cluster-info`)\n- Anthropic API key validation (test with a minimal API call or key format check)\n\n**Files:** `agent-adapter-controller.js`, `agent-stack-controller.js`, health API route\n\n## 2. Durable Event Streaming\n\nThe SSE endpoint emits events via an in-process event bus. Issues:\n- Events don't survive server restarts (JSONL ring buffer persists 1000 events but isn't replicated)\n- Multiple server replicas each have their own event bus — no cross-replica sync\n- No backpressure or guaranteed delivery\n\n**What's needed:**\n- Replace in-memory event bus with Redis pub/sub, NATS, or similar\n- SSE endpoint subscribes to durable topic instead of local bus\n- Event persistence to queryable store (not just JSONL append)\n- The Helm chart already includes optional NATS (`demo.nats`) — wire it up\n\n**Files:** `event-bus.js`, `app/api/orgs/[org]/agents/events/stream/route.js`\n\n## Reference\n\n- [docs/gaps/staging-status.md](packages/kradle/docs/gaps/staging-status.md) — health section\n- [docs/gaps/infrastructure-deps.md](packages/kradle/docs/gaps/infrastructure-deps.md) — service dependencies\n\n## Dependencies\n\n- #608 (staging env vars) — probes need services to probe",
+  "issueCommentsSummary": "Triage confirmed #612 is valid production-readiness work. Existing staging has partial health/SSE behavior: adapter and MCP endpoint checks exist when a resource endpoint is configured, web snapshot probes Kubernetes by listing Organization, Gitea at /api/v1/version, and Agent Mux/Gateway at /health, while event-bus.js still uses a process-local Set and local JSONL ring buffer. Recommended implementation is two tracks: shared bounded health probes for Gitea, Agent Mux /healthz, Kradle Controller /healthz, Kubernetes connectivity, and assistant credential validation; and a durable event transport abstraction with in-memory fallback plus NATS/JetStream production transport, replay cursors, retention, backpressure, reconnect behavior, and broker failure reporting. Previous planning PR #694 used branch plan/issue-612 and was closed after the issue was closed. Comment also references implementation PR #702 with health probes, memory + NATS/JetStream event transport, Helm values/templates, docs, and tests; the process must verify whether that work is present on the current branch before reimplementing.",
+  "acceptanceCriteria": [
+    "Health API/snapshot output includes deep structured probes for Gitea at KRADLE_GITEA_HTTP_URL/api/v1/version, Agent Mux/Gateway at AGENT_MUX_URL or AGENT_GATEWAY_URL /healthz, Kradle Controller at KRADLE_CONTROLLER_URL/healthz, Kubernetes connectivity, and assistant credentials.",
+    "Health probes run concurrently with strict timeouts, partial failure reporting, injectable dependencies for tests, and no secret leakage.",
+    "Agent adapter and stack health behavior remains backward compatible while removing stale not-implemented semantics where real endpoints exist.",
+    "Production event streaming uses NATS/JetStream or an equivalent durable broker when configured and no longer depends on process-local-only fanout for multi-replica deployments.",
+    "The event transport preserves createEventBus/globalEventBus compatibility for local tests while adding stable event IDs, replay cursor support, cross-subscriber fanout, retention semantics, backpressure behavior, reconnect handling, and broker outage status.",
+    "Core HTTP SSE and Next.js agents events stream route subscribe through the durable transport abstraction and support replay from Last-Event-ID or an explicit cursor where practical.",
+    "Helm values/templates wire optional NATS/event transport configuration into the relevant workloads without embedding secrets or breaking local default installs.",
+    "Docs and gaps references describe the new operational behavior and remaining staging validation dependencies."
+  ],
+  "nonGoals": [
+    "Do not implement unrelated API route fixes, UI redesigns, or broad Kradle controller refactors.",
+    "Do not commit real Anthropic, Gitea, NATS, Kubernetes, or staging credentials.",
+    "Do not require live external services for unit tests; use injectable clients/runners and reserve live checks for explicit staging smoke validation.",
+    "Do not remove the in-memory event bus path needed for local development and deterministic tests."
+  ],
+  "targetFiles": [
+    "packages/kradle/core/src/agent-adapter-controller.js",
+    "packages/kradle/core/src/agent-stack-controller.js",
+    "packages/kradle/web/app/api/orgs/[org]/snapshot/route.js",
+    "packages/kradle/core/src/event-bus.js",
+    "packages/kradle/core/src/http-server.js",
+    "packages/kradle/web/app/api/orgs/[org]/agents/events/stream/route.js",
+    "packages/kradle/charts/values.yaml",
+    "packages/kradle/charts/templates/deployments.yaml",
+    "packages/kradle/docs/gaps/staging-status.md",
+    "packages/kradle/docs/gaps/infrastructure-deps.md",
+    "packages/kradle/core/docs/sdk-api-reference.md",
+    "packages/kradle/core/tests/health-check-real.test.js",
+    "packages/kradle/core/tests/event-bus-integration.test.js",
+    "packages/kradle/core/tests/sse-events.test.js",
+    "packages/kradle/core/tests/deployment.test.js",
+    "packages/kradle/web/tests"
+  ],
+  "expectedRuntimeCallPaths": [
+    "Web HealthMonitor -> GET /api/orgs/{org}/snapshot -> packages/kradle/web/app/api/orgs/[org]/snapshot/route.js -> shared health probe service -> Kubernetes/Gitea/Agent Mux/Kradle Controller/assistant probes",
+    "Kradle API controller resource mutations -> packages/kradle/core/src/api-controller.js -> globalEventBus.emitResourceChange -> event transport abstraction -> memory or NATS/JetStream publish/persist",
+    "Core controller SSE -> packages/kradle/core/src/http-server.js GET /api/orgs/{org}/agents/events/stream -> event transport subscription/replay -> text/event-stream",
+    "Web SSE -> packages/kradle/web/app/api/orgs/[org]/agents/events/stream/route.js -> controller stream proxy when configured, otherwise event transport subscription/replay -> text/event-stream",
+    "Helm chart values -> packages/kradle/charts/templates/deployments.yaml -> KRADLE_* and NATS/event transport env vars for API, controllers, and web workloads"
+  ],
+  "verificationCommands": [
+    "node --test packages/kradle/core/tests/health-check-real.test.js packages/kradle/core/tests/event-bus-integration.test.js packages/kradle/core/tests/sse-events.test.js",
+    "npm --workspace @a5c-ai/kradle test -- --test-name-pattern='health|event|sse|stream|adapter|stack'",
+    "npm --workspace @a5c-ai/kradle test",
+    "npm --workspace @a5c-ai/kradle-web test",
+    "node --test tests/deployment.test.js --test-name-pattern='auth chart|staging service|nats|event' (from packages/kradle/core if required by the repo test layout)",
+    "npm run build --workspace @a5c-ai/kradle",
+    "npm run package:check --workspace @a5c-ai/kradle",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "processLibraryReferences": [
+    "library/methodologies/atdd-tdd/atdd-tdd.js",
+    "library/methodologies/superpowers/test-driven-development.js",
+    "library/methodologies/superpowers/verification-before-completion.js",
+    "library/methodologies/automaker/automaker-review-ship.js",
+    "library/specializations/devops-sre-platform/monitoring-setup.js",
+    "library/specializations/devops-sre-platform/iac-testing.js",
+    "library/specializations/network-programming/health-check-system.js",
+    "library/specializations/network-programming/realtime-messaging-system.js",
+    "library/specializations/web-development/server-sent-events.js",
+    "library/specializations/web-development/api-integration-testing.js",
+    "library/specializations/web-development/secrets-management.js",
+    "library/cradle/feature-implementation-contribute.js"
+  ],
+  "maxRefinements": 2
+}

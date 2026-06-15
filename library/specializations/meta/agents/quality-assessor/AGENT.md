@@ -11,6 +11,11 @@ expertise:
   - Completeness assessment
   - Format validation
   - Best practice verification
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development]
+  topics: [topic:quality-assurance, topic:developer-experience]
+  roles: [role:tech-lead, role:platform-engineer]
 ---
 
 # Quality Assessor Agent

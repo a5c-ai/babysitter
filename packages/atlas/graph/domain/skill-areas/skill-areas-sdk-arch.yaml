@@ -1,0 +1,234 @@
+---
+nodeKind: SkillArea
+id: skill-area:api-design
+attributes:
+  displayName: "API Design"
+  description: |
+    Designing public APIs — naming, resource modeling, idempotency,
+    pagination, error envelopes, and consistency.
+  domains:
+    - specialization:sdk-platform-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+  uses_tool:
+    - tool:postman
+    - tool:insomnia
+  prerequisite_for_learning:
+    - target: skill-area:semver-discipline
+      strength: recommended
+    - target: skill-area:breaking-change-management
+      strength: recommended
+    - target: skill-area:deprecation-policy
+      strength: recommended
+    - target: skill-area:sdk-codegen
+      strength: recommended
+    - target: skill-area:plugin-systems
+      strength: recommended
+    - target: skill-area:api-contract-testing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:semver-discipline
+attributes:
+  displayName: "Semantic Versioning Discipline"
+  description: |
+    Applying SemVer to library/SDK releases — what counts as breaking,
+    pre-releases, and ranges in dependent projects.
+  domains:
+    - specialization:sdk-platform-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:breaking-change-management
+attributes:
+  displayName: "Breaking Change Management"
+  description: |
+    Detecting and communicating breaking changes — API diff tools,
+    migration guides, codemods, and deprecation timelines.
+  domains:
+    - specialization:sdk-platform-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:deprecation-policy
+attributes:
+  displayName: "Deprecation Policy"
+  description: |
+    Designing deprecation policies — warnings, sunset headers,
+    parallel surfaces, and EOL timelines.
+  domains:
+    - specialization:sdk-platform-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:sdk-codegen
+attributes:
+  displayName: "SDK Code Generation"
+  description: |
+    Generating SDKs from OpenAPI/GraphQL/Protobuf specs — language
+    customization, idiomatic shapes, and release pipelines.
+  domains:
+    - specialization:sdk-platform-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+  uses_tool:
+    - tool:openapi-generator
+    - tool:graphql-codegen
+---
+nodeKind: SkillArea
+id: skill-area:plugin-systems
+attributes:
+  displayName: "Plugin System Design"
+  description: |
+    Designing plugin/extension systems — registries, lifecycle hooks,
+    sandboxing, and capability boundaries.
+  domains:
+    - specialization:sdk-platform-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:sdk-platform-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:domain-driven-design
+attributes:
+  displayName: "Domain-Driven Design"
+  description: |
+    Strategic and tactical DDD — bounded contexts, aggregates,
+    ubiquitous language, and context maps.
+  domains:
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+    - target: specialization:domain-driven-design
+      confidence: primary
+    - target: specialization:event-storming
+      confidence: secondary
+    - target: specialization:ontology-driven-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:strangler-fig-pattern
+      strength: recommended
+    - target: skill-area:parallel-run-migration
+      strength: recommended
+    - target: skill-area:schema-evolution
+      strength: recommended
+    - target: skill-area:monorepo-extraction
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:hexagonal-architecture
+attributes:
+  displayName: "Hexagonal Architecture"
+  description: |
+    Ports-and-adapters style decomposition — pure domain core,
+    inbound/outbound adapters, and dependency inversion.
+  domains:
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:event-sourcing
+attributes:
+  displayName: "Event Sourcing"
+  description: |
+    Modeling state as an append-only event log — aggregates,
+    snapshots, projections, and replay.
+  domains:
+    - specialization:software-architecture
+    - topic:event-sourcing
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+    - target: specialization:event-storming
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:cqrs
+attributes:
+  displayName: "CQRS"
+  description: |
+    Command/Query Responsibility Segregation — separate write/read
+    models, eventual consistency, and projection design.
+  domains:
+    - specialization:software-architecture
+    - topic:cqrs
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:monolith-vs-microservices
+attributes:
+  displayName: "Monolith vs Microservices Tradeoffs"
+  description: |
+    Choosing decomposition styles — modular monolith, service
+    boundaries, deployment topology, and Conway's Law effects.
+  domains:
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:c4-modeling
+attributes:
+  displayName: "C4 Modeling"
+  description: |
+    Documenting architecture with C4 (Context/Container/Component/
+    Code) diagrams and Structurizr DSL.
+  domains:
+    - specialization:software-architecture
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:software-architecture
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:adr-writing
+attributes:
+  displayName: "ADR Writing"
+  description: |
+    Writing Architecture Decision Records — context, decision,
+    consequences, status — and managing ADR catalogs.
+  domains:
+    - specialization:technical-documentation
+    - topic:architecture-decisions
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:technical-documentation
+      confidence: primary

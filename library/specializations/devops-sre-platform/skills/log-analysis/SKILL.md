@@ -9,6 +9,14 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:log-aggregation, skill-area:observability-instrumentation]
+  roles: [role:sre, role:devops-engineer]
+  workflows: [workflow:incident-response]
+  topics: [topic:observability-driven-development]
+
 ---
 
 # Log Analysis Skill

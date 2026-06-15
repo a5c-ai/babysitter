@@ -1,0 +1,21 @@
+nodeKind: Framework
+id: framework:flask
+attributes:
+  displayName: "Flask"
+  homepageUrl: "https://flask.palletsprojects.com"
+  belongsToLanguageId: language:python
+  category: web-backend
+  description: |
+    Flask — a lightweight Python web framework.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:fastapi
+      comparison: "Python web frameworks — Flask is minimal; FastAPI is async-first"
+    - target: framework:django
+      comparison: "Python web frameworks — Flask is minimal; Django is batteries-included"
+    - target: framework:litestar
+      comparison: "Python web frameworks"

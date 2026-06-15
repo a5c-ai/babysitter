@@ -1,0 +1,2 @@
+# Temporary handler launchers created during e2e tests
+.e2e-tmp-handlers/

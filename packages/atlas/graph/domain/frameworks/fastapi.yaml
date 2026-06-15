@@ -1,0 +1,22 @@
+nodeKind: Framework
+id: framework:fastapi
+attributes:
+  displayName: "FastAPI"
+  homepageUrl: "https://fastapi.tiangolo.com"
+  belongsToLanguageId: language:python
+  category: web-backend
+  releasedAt: "2018"
+  description: |
+    The FastAPI framework.
+edges:
+  belongs_to_language:
+    - language:python
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:django
+      comparison: "Python web frameworks — FastAPI is async-first; Django is batteries-included"
+    - target: framework:flask
+      comparison: "Python web frameworks — FastAPI is async-first; Flask is minimal"
+    - target: framework:litestar
+      comparison: "Python web frameworks"

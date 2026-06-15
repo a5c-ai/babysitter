@@ -1,0 +1,22 @@
+nodeKind: SkillArea
+id: skill-area:react-state-management
+attributes:
+  displayName: "React State Management"
+  description: |
+    Patterns for managing client state in React: Context vs. external
+    stores, Redux Toolkit, Zustand, Jotai, Recoil, normalized state shapes,
+    selector memoization, async state with React Query / SWR, and
+    server-component / RSC boundaries.
+  parentSpecializationId: specialization:frontend-react
+  domains:
+    - specialization:frontend-react
+  requiresFrameworks:
+    - framework:react
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:frontend-react
+      confidence: primary
+  uses_framework:
+    - framework:react
+    - target: framework:react

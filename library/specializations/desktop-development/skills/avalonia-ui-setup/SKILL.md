@@ -3,6 +3,12 @@ name: avalonia-ui-setup
 description: Set up Avalonia UI project with cross-platform XAML for Windows, macOS, and Linux
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [avalonia, dotnet, cross-platform, xaml, ui]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # avalonia-ui-setup

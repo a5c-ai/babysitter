@@ -2,6 +2,11 @@
 name: subgraph-indexing
 description: Subgraph development for The Graph protocol. Includes manifest configuration, GraphQL schema design, AssemblyScript handlers, entity relationships, and deployment to hosted and decentralized networks.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:blockchain-analytics-explorer, skill-area:on-chain-data-oracle-integration, skill-area:graphql-schema-design]
+  roles: [role:backend-engineer, role:data-engineer]
 ---
 
 # Subgraph Indexing Skill

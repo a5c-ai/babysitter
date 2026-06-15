@@ -3,6 +3,11 @@
  * @description Create executive dashboards tracking key metrics (CAC, LTV, conversion rates, brand awareness) with data visualization for stakeholder reporting.
  * @inputs { metrics: array, dataSources: array, stakeholders: array, reportingCadence: object, existingDashboards: array }
  * @outputs { success: boolean, dashboardDesign: object, kpiDefinitions: array, visualizations: array, reportingFramework: object, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

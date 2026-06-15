@@ -8,6 +8,10 @@ required-skills:
   - SK-FTV-004 (dialogue-crafting)
   - SK-FTV-007 (character-development)
   - SK-FTV-012 (genre-analysis-film)
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:visual-design, skill-area:natural-language-processing, skill-area:content-strategy]
+  roles: [role:creative-director, role:ux-writer]
 ---
 
 # Character Designer Agent

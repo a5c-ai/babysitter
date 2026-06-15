@@ -1,0 +1,320 @@
+{
+  "issueNumber": 831,
+  "baseBranch": "staging",
+  "implementationBranch": "issue-831-adapters-directory-moves",
+  "targetQuality": 90,
+  "maxIterationsPerPhase": 4,
+  "designDocs": [
+    "docs/adapters/terminology-and-structure-gaps/README.md",
+    "docs/adapters/terminology-and-structure-gaps/directory-moves.md",
+    "docs/adapters/terminology-and-structure-gaps/package-renames.md",
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-reference/repo-map.md",
+    "docs/agent-reference/runtime-and-layout.md"
+  ],
+  "processLibraryReferences": [
+    "/home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.md",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/tdd-triplet.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/completeness-gate.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/metaswarm/skills/adversarial-review/SKILL.md",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/verification-before-completion.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/cradle/feature-implementation-contribute.js"
+  ],
+  "packageMoves": [
+    {
+      "from": "packages/transport-mux",
+      "to": "packages/adapters/transport",
+      "currentPackage": "@a5c-ai/transport-mux",
+      "targetPackage": "@a5c-ai/transport-adapter"
+    },
+    {
+      "from": "packages/extension-mux",
+      "to": "packages/adapters/extensions",
+      "currentPackage": "@a5c-ai/extension-mux",
+      "targetPackage": "@a5c-ai/extensions-adapter"
+    },
+    {
+      "from": "packages/triggers-mux",
+      "to": "packages/adapters/triggers",
+      "currentPackage": "@a5c-ai/triggers-mux",
+      "targetPackage": "@a5c-ai/triggers-adapter"
+    },
+    {
+      "from": "packages/tasks-mux",
+      "to": "packages/adapters/tasks",
+      "currentPackage": "@a5c-ai/tasks-mux",
+      "targetPackage": "@a5c-ai/tasks-adapter"
+    },
+    {
+      "from": "packages/tool-mux",
+      "to": "packages/adapters/tools",
+      "currentPackage": "@a5c-ai/tool-mux",
+      "targetPackage": "@a5c-ai/tools-adapter"
+    },
+    {
+      "from": "packages/hooks-mux/core",
+      "to": "packages/adapters/hooks/core",
+      "currentPackage": "@a5c-ai/hooks-mux-core",
+      "targetPackage": "@a5c-ai/hooks-adapter-core"
+    },
+    {
+      "from": "packages/hooks-mux/cli",
+      "to": "packages/adapters/hooks/cli",
+      "currentPackage": "@a5c-ai/hooks-mux-cli",
+      "targetPackage": "@a5c-ai/hooks-adapter-cli"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-claude",
+      "to": "packages/adapters/hooks/adapter-claude",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-claude",
+      "targetPackage": "@a5c-ai/hooks-adapter-claude"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-codex",
+      "to": "packages/adapters/hooks/adapter-codex",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-codex",
+      "targetPackage": "@a5c-ai/hooks-adapter-codex"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-copilot",
+      "to": "packages/adapters/hooks/adapter-copilot",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-copilot",
+      "targetPackage": "@a5c-ai/hooks-adapter-copilot"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-cursor",
+      "to": "packages/adapters/hooks/adapter-cursor",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-cursor",
+      "targetPackage": "@a5c-ai/hooks-adapter-cursor"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-gemini",
+      "to": "packages/adapters/hooks/adapter-gemini",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-gemini",
+      "targetPackage": "@a5c-ai/hooks-adapter-gemini"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-hermes",
+      "to": "packages/adapters/hooks/adapter-hermes",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-hermes",
+      "targetPackage": "@a5c-ai/hooks-adapter-hermes"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-oh-my-pi",
+      "to": "packages/adapters/hooks/adapter-oh-my-pi",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-oh-my-pi",
+      "targetPackage": "@a5c-ai/hooks-adapter-oh-my-pi"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-openclaw",
+      "to": "packages/adapters/hooks/adapter-openclaw",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-openclaw",
+      "targetPackage": "@a5c-ai/hooks-adapter-openclaw"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-opencode",
+      "to": "packages/adapters/hooks/adapter-opencode",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-opencode",
+      "targetPackage": "@a5c-ai/hooks-adapter-opencode"
+    },
+    {
+      "from": "packages/hooks-mux/adapter-pi",
+      "to": "packages/adapters/hooks/adapter-pi",
+      "currentPackage": "@a5c-ai/hooks-mux-adapter-pi",
+      "targetPackage": "@a5c-ai/hooks-adapter-pi"
+    }
+  ],
+  "legacyDirectoryMoves": [
+    {
+      "from": "packages/adapters/adapters-proxy",
+      "to": "packages/adapters/transport-proxy"
+    },
+    {
+      "from": "packages/adapters/meta/config/adapters",
+      "to": "packages/adapters/meta/config/adapters"
+    }
+  ],
+  "verificationCommands": [
+    "npm install --package-lock-only",
+    "npm run verify:metadata",
+    "npm run validate:processes",
+    "npm run build:adapters",
+    "npm run test:adapters",
+    "npm run build:hooks-mux",
+    "npm run test:hooks-mux",
+    "npm run build:extension-mux",
+    "npm run test:extension-mux",
+    "npm run test:agent-catalog-contracts",
+    "npm run validate:edges",
+    "npm run docs:snippets",
+    "npm run docs:links",
+    "rg -n \"packages/(transport-mux|extension-mux|triggers-mux|tasks-mux|tool-mux|hooks-mux)\" package.json tsconfig.json package-lock.json .github docs packages --glob '!**/node_modules/**' --glob '!**/dist/**'",
+    "rg -n \"@a5c-ai/(transport-mux|extension-mux|triggers-mux|tasks-mux|tool-mux|hooks-mux-)\" package.json package-lock.json packages docs .github --glob '!**/node_modules/**' --glob '!**/dist/**'",
+    "test -d packages/adapters/transport && test -d packages/adapters/extensions && test -d packages/adapters/triggers && test -d packages/adapters/tasks && test -d packages/adapters/tools && test -d packages/adapters/hooks && test -d packages/adapters/transport-proxy && test -d packages/adapters/meta/config/adapters"
+  ],
+  "phaseSpecs": [
+    {
+      "id": "phase-1-top-level-package-moves",
+      "title": "Move five top-level mux packages",
+      "scope": [
+        "Move packages/transport-mux to packages/adapters/transport.",
+        "Move packages/extension-mux to packages/adapters/extensions.",
+        "Move packages/triggers-mux to packages/adapters/triggers.",
+        "Move packages/tasks-mux to packages/adapters/tasks.",
+        "Move packages/tool-mux to packages/adapters/tools.",
+        "Rename moved package names to @a5c-ai/transport-adapter, @a5c-ai/extensions-adapter, @a5c-ai/triggers-adapter, @a5c-ai/tasks-adapter, and @a5c-ai/tools-adapter when required by the referenced package-renames doc."
+      ],
+      "acceptance": [
+        "Old top-level directories are absent and target directories are present.",
+        "Root workspaces include target directories without relying on stale top-level package paths.",
+        "Root tsconfig references point at target directories.",
+        "Package names and internal package references are consistent with the target adapters naming contract.",
+        "Narrow package build/test commands pass for the five moved packages."
+      ],
+      "testFocus": [
+        "Add or update a metadata validation test that fails when moved package directories or package names do not match the contract.",
+        "Add or update workspace/tsconfig validation coverage for the five moved packages.",
+        "Add stale path scans for old top-level package directories."
+      ],
+      "verification": [
+        "npm run verify:metadata",
+        "npm run build:adapters",
+        "npm run build --workspace=@a5c-ai/transport-adapter",
+        "npm run build --workspace=@a5c-ai/extensions-adapter",
+        "npm run build --workspace=@a5c-ai/triggers-adapter",
+        "npm run build --workspace=@a5c-ai/tasks-adapter",
+        "npm run build --workspace=@a5c-ai/tools-adapter",
+        "rg -n \"packages/(transport-mux|extension-mux|triggers-mux|tasks-mux|tool-mux)\" package.json tsconfig.json package-lock.json packages .github docs --glob '!**/node_modules/**' --glob '!**/dist/**'"
+      ]
+    },
+    {
+      "id": "phase-2-hooks-mux-move",
+      "title": "Move hooks-mux umbrella under adapters/hooks",
+      "scope": [
+        "Move packages/hooks-mux to packages/adapters/hooks.",
+        "Preserve all 12 hooks-mux subpackages as adapters hooks subpackages.",
+        "Rename hooks package names to @a5c-ai/adapters-hooks-* when required by the referenced package-renames doc.",
+        "Update hooks build/test/lint helper scripts and workspace references."
+      ],
+      "acceptance": [
+        "packages/hooks-mux is absent and packages/adapters/hooks contains all 12 expected subpackages.",
+        "Root workspace entries and package-lock resolve hooks packages from packages/adapters/hooks/*.",
+        "scripts/hooks-mux-build.cjs and package scripts operate on the new paths or are intentionally renamed with compatibility preserved where required.",
+        "Hooks discovery and agent-catalog contract tests pass with the new layout.",
+        "No source import or metadata reference still depends on packages/hooks-mux except explicitly documented historical references."
+      ],
+      "testFocus": [
+        "Add a hooks layout contract test that enumerates the 12 expected target subpackages.",
+        "Add script-level coverage for hooks build path discovery.",
+        "Add stale path scans for packages/hooks-mux and @a5c-ai/hooks-mux-* references."
+      ],
+      "verification": [
+        "npm run verify:metadata",
+        "npm run build:hooks-mux",
+        "npm run test:hooks-mux",
+        "npm run lint:hooks-mux",
+        "npm run test:agent-catalog-contracts",
+        "rg -n \"packages/hooks-mux|@a5c-ai/hooks-mux-\" package.json tsconfig.json package-lock.json packages .github docs --glob '!**/node_modules/**' --glob '!**/dist/**'"
+      ]
+    },
+    {
+      "id": "phase-3-reference-sweep",
+      "title": "Update repo-wide references, CI, docs, and atlas graph",
+      "scope": [
+        "Update root workspace and package-lock references after all moves.",
+        "Update tsconfig references across moved and dependent packages.",
+        "Update TypeScript import paths, package dependencies, test mocks, and package script references.",
+        "Update .github/workflows build paths, action uses paths, publish lists, and artifact labels where path-sensitive.",
+        "Update packages/atlas/graph source refs, package surfaces, capabilities, and docs references to new paths and package names.",
+        "Update docs references to the new canonical package paths while preserving historical context only where clearly labeled."
+      ],
+      "acceptance": [
+        "No build, test, workflow, docs, or atlas metadata reference points to obsolete moved directories for active package surfaces.",
+        "All package dependency names are internally consistent after package renames.",
+        "CI workflows build/test/publish the moved packages from the new workspace layout.",
+        "Atlas graph validation and documentation snippet/link checks pass."
+      ],
+      "testFocus": [
+        "Add or update repo metadata tests covering workspace, tsconfig, workflow, atlas, and docs references.",
+        "Add package dependency consistency checks for old and new package names.",
+        "Add stale-reference scan tests that distinguish active references from explicitly historical docs."
+      ],
+      "verification": [
+        "npm run verify:metadata",
+        "npm run validate:edges",
+        "npm run docs:snippets",
+        "npm run docs:links",
+        "npm run build:sdk",
+        "npm run build:runtime",
+        "rg -n \"packages/(transport-mux|extension-mux|triggers-mux|tasks-mux|tool-mux|hooks-mux)\" package.json tsconfig.json package-lock.json .github docs packages --glob '!**/node_modules/**' --glob '!**/dist/**'",
+        "rg -n \"@a5c-ai/(transport-mux|extension-mux|triggers-mux|tasks-mux|tool-mux|hooks-mux-)\" package.json package-lock.json packages docs .github --glob '!**/node_modules/**' --glob '!**/dist/**'"
+      ]
+    },
+    {
+      "id": "phase-4-legacy-adapters-directory-renames",
+      "title": "Rename legacy adapters directories",
+      "scope": [
+        "Move packages/adapters/adapters-proxy to packages/adapters/transport-proxy.",
+        "Move packages/adapters/meta/config/adapters to packages/adapters/meta/config/adapters.",
+        "Update Python package path references, README/docs, Docker files, package metadata, workflows, atlas graph, and tests affected by those directory moves.",
+        "Avoid broad code identifier or environment variable cleanup unless directly required for these directory renames."
+      ],
+      "acceptance": [
+        "Legacy adapters directory paths are absent and new target paths are present.",
+        "Proxy tests and docs refer to transport-proxy path terminology where path-specific.",
+        "Config fixture paths refer to adapters, not adapters, where path-specific.",
+        "No active reference to packages/adapters/adapters-proxy or packages/adapters/meta/config/adapters remains."
+      ],
+      "testFocus": [
+        "Add a filesystem/path contract test for legacy directory renames.",
+        "Add a stale-reference scan for packages/adapters/adapters-proxy and packages/adapters/meta/config/adapters.",
+        "Run proxy and metadata tests that fail before the directory rename and pass afterward."
+      ],
+      "verification": [
+        "npm run verify:metadata",
+        "pytest packages/adapters/transport-proxy/tests",
+        "rg -n \"packages/adapters/(adapters-proxy|meta/config/adapters)|adapters-proxy\" packages docs .github package.json package-lock.json --glob '!**/node_modules/**' --glob '!**/dist/**'",
+        "test -d packages/adapters/transport-proxy && test -d packages/adapters/meta/config/adapters"
+      ]
+    },
+    {
+      "id": "phase-5-final-integration-hardening",
+      "title": "Full integration and release readiness",
+      "scope": [
+        "Run full moved-package verification after all phases compose.",
+        "Confirm package-lock, workspace installs, TypeScript references, CI workflow paths, atlas graph metadata, docs, and stale-reference scans all agree.",
+        "Refactor duplicated path maps or compatibility shims created during earlier phases.",
+        "Prepare final implementation summary with risk and rollback notes."
+      ],
+      "acceptance": [
+        "All commands in verificationCommands pass or documented non-applicability is justified by environment constraints.",
+        "Every packageMove and legacyDirectoryMove is complete.",
+        "No stale active references to old paths or old package names remain.",
+        "Adversarial final review score is at least 90 with no blocking issues."
+      ],
+      "testFocus": [
+        "Consolidate phase-specific tests into stable metadata and stale-reference checks.",
+        "Ensure final tests cover every moved package family and legacy directory rename.",
+        "Remove brittle test scaffolding introduced only to prove red failures."
+      ],
+      "verification": [
+        "npm install --package-lock-only",
+        "npm run verify:metadata",
+        "npm run validate:processes",
+        "npm run build:sdk",
+        "npm run build:adapters",
+        "npm run test:adapters",
+        "npm run build:hooks-mux",
+        "npm run test:hooks-mux",
+        "npm run build:extension-mux",
+        "npm run test:extension-mux",
+        "npm run test:agent-catalog-contracts",
+        "npm run validate:edges",
+        "npm run docs:snippets",
+        "npm run docs:links"
+      ]
+    }
+  ]
+}

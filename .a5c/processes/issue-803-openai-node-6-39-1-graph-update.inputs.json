@@ -1,0 +1,6 @@
+{
+  "issueNumber": 803,
+  "targetVersion": "6.39.1",
+  "branchName": "agent/issue-803",
+  "baseBranch": "staging"
+}

@@ -1,0 +1,21 @@
+nodeKind: Effect
+id: effect:01kqex-effect-breakpoint-001
+attributes:
+  kind: breakpoint
+  status: pending
+  runId: run:01kqex-example-run-001
+  invocationId: invocation:01kqex-invocation-001
+  requestedAt: "2026-04-28T10:10:00Z"
+  resolvedAt: null
+  request:
+    prompt: "Approve plan before continuing?"
+    options: ["approve", "reject", "modify"]
+  result: null
+  currentStateId: lifecycle-state:effect.pending
+edges:
+  in_state:
+    - lifecycle-state:effect.pending
+  governed_by:
+    - state-machine:effect
+  requested_by:
+    - invocation:01kqex-invocation-001

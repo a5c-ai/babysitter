@@ -1,0 +1,219 @@
+nodeKind: ToolServer
+id: tool-server:mcp-playwright
+attributes:
+  displayName: Playwright MCP Server
+  description: |
+    Official MCP server for Playwright browser automation by Microsoft.
+    Enables AI agents to interact with web pages through structured
+    accessibility snapshots, navigate, click, fill forms, and extract
+    content without requiring vision models.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/microsoft/playwright-mcp
+  npmPackage: "@playwright/mcp"
+  maintainer: Microsoft
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:playwright
+  lib_applies_to_domain:
+  - target: domain:qa-testing
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-vitest
+attributes:
+  displayName: Vitest MCP Server
+  description: |
+    MCP server providing access to the Vitest testing framework.
+    Enables AI agents to discover test files, run test suites,
+    inspect results, and analyze code coverage reports.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/vitest-dev/mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:vitest
+  lib_applies_to_domain:
+  - target: domain:qa-testing
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-eslint
+attributes:
+  displayName: ESLint MCP Server
+  description: |
+    MCP server providing access to ESLint linting and analysis.
+    Enables AI agents to lint files, inspect rule configurations,
+    apply auto-fixes, and analyze code quality issues.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/nicepkg/eslint-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:eslint
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-prettier
+attributes:
+  displayName: Prettier MCP Server
+  description: |
+    MCP server providing access to Prettier code formatting.
+    Enables AI agents to format source files, check formatting
+    compliance, and apply consistent code style across projects.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/jsilva-js/prettier-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:prettier
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-turborepo
+attributes:
+  displayName: Turborepo MCP Server
+  description: |
+    MCP server providing access to Turborepo monorepo tooling.
+    Enables AI agents to run tasks across workspaces, inspect the
+    task graph, manage caching, and orchestrate monorepo builds.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/vercel/turborepo-mcp
+  maintainer: Vercel
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:turbopack
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-storybook
+attributes:
+  displayName: Storybook MCP Server
+  description: |
+    MCP server providing access to Storybook component documentation.
+    Enables AI agents to browse component stories, inspect props,
+    and retrieve rendered component previews for UI development.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/nicepkg/storybook-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:storybook
+  lib_applies_to_domain:
+  - target: domain:frontend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-webpack
+attributes:
+  displayName: Webpack MCP Server
+  description: |
+    MCP server providing access to Webpack bundler operations.
+    Enables AI agents to inspect build configurations, analyze
+    bundle stats, and diagnose build issues in Webpack projects.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/nicepkg/webpack-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:webpack
+  lib_applies_to_domain:
+  - target: domain:frontend
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-vite
+attributes:
+  displayName: Vite MCP Server
+  description: |
+    MCP server providing access to Vite build tool operations.
+    Enables AI agents to inspect project configuration, analyze
+    dependency graphs, and manage the Vite dev server.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/nicepkg/vite-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:vite
+  lib_applies_to_domain:
+  - target: domain:frontend
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-nx
+attributes:
+  displayName: Nx MCP Server
+  description: |
+    MCP server providing access to the Nx monorepo build system.
+    Enables AI agents to explore workspace projects, run generators,
+    inspect the project graph, and execute tasks across an Nx workspace.
+  protocol: mcp
+  category: devtools
+  npmPackage: "nx-mcp"
+  maintainer: Nx
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:nx
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-bazel
+attributes:
+  displayName: Bazel MCP Server
+  description: |
+    MCP server providing access to the Bazel build system.
+    Enables AI agents to query build targets, run builds and tests,
+    inspect the dependency graph, and analyze build rules.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/nicepkg/bazel-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:bazel
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:systems-programming

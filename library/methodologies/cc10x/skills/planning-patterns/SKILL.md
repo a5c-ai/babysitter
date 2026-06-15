@@ -2,17 +2,14 @@
 name: planning-patterns
 description: Structured planning methodology with research, brainstorming, phased plan creation, risk assessment, and plan-to-build continuity.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Planning Patterns
-
-## Overview
-
-Structured methodology for comprehensive planning that flows directly into BUILD execution through plan-to-build continuity.
-
-## Planning Process
-
-### 1. Research Phase
 - Search for existing solutions and patterns
 - Identify relevant libraries and tools
 - Find best practices in the domain

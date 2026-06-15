@@ -5,6 +5,11 @@
  * @category Measurement and Analytics
  * @inputs { organization: object, prProgram: object, objectives: object[], currentMeasurement: object }
  * @outputs { success: boolean, measurementFramework: object, kpiDashboard: object, reportingPlan: object, quality: number }
+  * @graph
+ *   domains: [domain:public-relations]
+ *   skillAreas: [skill-area:brand-positioning, skill-area:content-marketing, skill-area:brand-strategy]
+ *   roles: [role:marketing-strategist, role:content-strategist]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

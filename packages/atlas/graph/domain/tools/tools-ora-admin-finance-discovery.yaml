@@ -1,0 +1,270 @@
+---
+nodeKind: Tool
+id: tool:rippling
+attributes:
+  displayName: "Rippling"
+  homepageUrl: "https://www.rippling.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    HR, payroll, IT, and employee lifecycle platform surfaced by Ora for recruiting, onboarding, access, and HR operations workflows.
+  ora:
+    domain: rippling.com
+    score: 0
+    grade: F
+    category: "Productivity"
+    tags: ["hr", "payroll", "it management", "employee management", "benefits", "onboarding"]
+    scoreUrl: https://ora.run/score/rippling.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:hr-manager
+      confidence: high
+      evidence: "Employee lifecycle, payroll, benefits, and onboarding state directly supports HR management workflows."
+    - target: workflow:employee-onboarding-process
+      confidence: high
+      evidence: "Onboarding tasks, accounts, and employee records are direct onboarding projection points."
+    - target: workflow:employee-exit-process
+      confidence: medium
+      evidence: "Device, access, and payroll data supports offboarding and exit-process review."
+---
+nodeKind: Tool
+id: tool:gusto
+attributes:
+  displayName: "Gusto"
+  homepageUrl: "https://gusto.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Payroll, benefits, HR, and hiring platform surfaced by Ora for employee lifecycle and finance operations workflows.
+  ora:
+    domain: gusto.com
+    score: 0
+    grade: F
+    category: "Productivity"
+    tags: ["payroll", "hr", "benefits", "tax filing", "employee management", "hiring"]
+    scoreUrl: https://ora.run/score/gusto.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:hr-manager
+      confidence: high
+      evidence: "Payroll, benefits, hiring, and employee data support core HR operations."
+    - target: workflow:employee-onboarding-process
+      confidence: medium
+      evidence: "Hiring and payroll setup information supports employee onboarding."
+    - target: workflow:financial-close-cycle
+      confidence: medium
+      evidence: "Payroll and tax-filing data feeds finance close and reconciliation workflows."
+---
+nodeKind: Tool
+id: tool:ghost
+attributes:
+  displayName: "Ghost"
+  homepageUrl: "https://ghost.org"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Publishing, newsletter, and headless CMS platform surfaced by Ora for documentation, knowledge base, and content operations workflows.
+  ora:
+    domain: ghost.org
+    score: 68
+    grade: C
+    category: "Developer Tools"
+    tags: ["publishing", "blogging", "content management", "headless cms", "newsletter"]
+    scoreUrl: https://ora.run/score/ghost.org
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Publishing and content APIs support docs, release notes, and knowledge-base workflows."
+    - target: workflow:documentation-publishing
+      confidence: high
+      evidence: "Content publishing state is a direct documentation-publishing projection point."
+    - target: workflow:content-release-pipeline
+      confidence: medium
+      evidence: "Editorial content, drafts, and publication status support content release pipelines."
+---
+nodeKind: Tool
+id: tool:contentstack
+attributes:
+  displayName: "Contentstack"
+  homepageUrl: "https://www.contentstack.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Enterprise headless CMS surfaced by Ora for developer portals, knowledge bases, content APIs, and digital experience workflows.
+  ora:
+    domain: contentstack.com
+    score: 0
+    grade: F
+    category: "Developer Tools"
+    tags: ["headless cms", "content management", "enterprise cms", "content api", "digital experience"]
+    scoreUrl: https://ora.run/score/contentstack.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:documentation-manager
+      confidence: medium
+      evidence: "CMS entries, releases, and workflows support documentation program management."
+    - target: workflow:documentation-publishing
+      confidence: medium
+      evidence: "Headless CMS publishing status supports documentation release review."
+    - target: workflow:content-review-pipeline
+      confidence: medium
+      evidence: "Content approval and publishing workflows map to review pipeline projections."
+---
+nodeKind: Tool
+id: tool:coda
+attributes:
+  displayName: "Coda"
+  homepageUrl: "https://coda.io"
+  kind: workflow-automation
+  languageApplicability: neutral
+  description: |
+    Collaborative docs, tables, and automation workspace surfaced by Ora for docs, knowledge base, and lightweight operational workflow projections.
+  ora:
+    domain: coda.io
+    score: 0
+    grade: F
+    category: "Productivity"
+    tags: ["docs", "spreadsheets", "automation", "workspace", "collaboration"]
+    scoreUrl: https://ora.run/score/coda.io
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:project-manager
+      confidence: medium
+      evidence: "Docs, tables, and automations support project coordination workflows."
+    - target: workflow:knowledge-base-maintenance
+      confidence: medium
+      evidence: "Structured docs and tables support knowledge-base maintenance."
+    - target: responsibility:stakeholder-communication
+      confidence: medium
+      evidence: "Collaborative docs can capture decisions, status, and stakeholder updates."
+---
+nodeKind: Tool
+id: tool:chargebee
+attributes:
+  displayName: "Chargebee"
+  homepageUrl: "https://www.chargebee.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Subscription billing and revenue platform surfaced by Ora for invoicing, subscription, revenue, and billing-support workflows.
+  ora:
+    domain: chargebee.com
+    score: 68
+    grade: C
+    category: "Payments & Fintech"
+    tags: ["billing", "subscriptions", "invoicing", "revenue management"]
+    scoreUrl: https://ora.run/score/chargebee.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: high
+      evidence: "Subscription and invoice data supports revenue operations and retention workflows."
+    - target: workflow:billing-support-workflow
+      confidence: high
+      evidence: "Billing state, invoices, and subscriptions are direct support workflow projection points."
+    - target: workflow:financial-close-cycle
+      confidence: medium
+      evidence: "Revenue and invoice data supports finance close and reconciliation."
+---
+nodeKind: Tool
+id: tool:lemon-squeezy
+attributes:
+  displayName: "Lemon Squeezy"
+  homepageUrl: "https://www.lemonsqueezy.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Merchant-of-record payments and subscriptions platform surfaced by Ora for digital-product billing and subscription workflows.
+  ora:
+    domain: lemonsqueezy.com
+    score: 0
+    grade: F
+    category: "Payments & Fintech"
+    tags: ["payments", "digital products", "subscriptions", "merchant of record"]
+    scoreUrl: https://ora.run/score/lemonsqueezy.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: medium
+      evidence: "Subscription and merchant-of-record data supports revenue operations."
+    - target: workflow:billing-support-workflow
+      confidence: medium
+      evidence: "Payments and subscription state supports customer billing support."
+    - target: workflow:financial-close-cycle
+      confidence: low
+      evidence: "Transaction and payout data can inform finance reconciliation."
+---
+nodeKind: Tool
+id: tool:revenuecat
+attributes:
+  displayName: "RevenueCat"
+  homepageUrl: "https://www.revenuecat.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Subscription and in-app purchase platform surfaced by Ora for mobile billing, entitlement, and revenue workflows.
+  ora:
+    domain: revenuecat.com
+    score: 66
+    grade: C
+    category: "Payments & Fintech"
+    tags: ["subscriptions", "in-app purchases", "mobile payments", "subscription management"]
+    scoreUrl: https://ora.run/score/revenuecat.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: medium
+      evidence: "Subscription entitlement and purchase data supports revenue operations."
+    - target: workflow:billing-support-workflow
+      confidence: medium
+      evidence: "Entitlements and subscription events support mobile billing support workflows."
+    - target: workflow:customer-journey-optimization
+      confidence: medium
+      evidence: "Subscription lifecycle events support customer journey analysis."
+---
+nodeKind: Tool
+id: tool:mollie
+attributes:
+  displayName: "Mollie"
+  homepageUrl: "https://www.mollie.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    European payments and checkout platform surfaced by Ora for payment processing, billing, and support workflows.
+  ora:
+    domain: mollie.com
+    score: 62
+    grade: C
+    category: "Payments & Fintech"
+    tags: ["payments", "payment processing", "checkout", "european payments"]
+    scoreUrl: https://ora.run/score/mollie.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  supports_work:
+    - target: role:revenue-operations-manager
+      confidence: medium
+      evidence: "Payment and checkout events support revenue operations."
+    - target: workflow:billing-support-workflow
+      confidence: medium
+      evidence: "Payment status and refund data support billing support."
+    - target: workflow:accounts-payable-cycle
+      confidence: low
+      evidence: "Payment and payout records can inform finance operations."

@@ -1,0 +1,272 @@
+import { JsonRecord } from "../storage/types";
+
+// Known task kinds (custom kinds are also allowed as any string)
+export type KnownTaskKind = "node" | "breakpoint" | "orchestrator_task" | "sleep" | "subprocess";
+
+// TaskKind accepts any string (including custom task kinds)
+export type TaskKind = string;
+
+export interface TaskIOHints {
+  inputJsonPath?: string;
+  outputJsonPath?: string;
+  stdoutPath?: string;
+  stderrPath?: string;
+}
+
+export type ResponderType = "internal" | "human" | "agent" | "tracker" | "auto";
+
+export interface ResponderRoutingOptions {
+  external?: boolean;
+  responderType?: ResponderType;
+  adapter?: string;
+  fallbackType?: ResponderType;
+  fallbackToInternal?: boolean;
+  targetResponders?: string[];
+  trackerBackend?: string;
+  capabilities?: string[];
+  timeout?: number;
+  timeoutMs?: number;
+}
+
+export type AgentPrompt = string | JsonRecord;
+
+export interface AgentTaskOptions extends ResponderRoutingOptions {
+  name?: string;
+  prompt?: AgentPrompt;
+  outputSchema?: Record<string, unknown>;
+  model?: string;
+  provider?: string;
+  approvalMode?: string;
+  maxTurns?: number;
+  [key: string]: unknown;
+}
+
+export interface NodeTaskOptions {
+  entry: string;
+  args?: string[];
+  env?: Record<string, string>;
+  cwd?: string;
+  timeoutMs?: number;
+}
+
+export interface BreakpointTaskOptions {
+  payload?: unknown;
+  confirmationRequired?: boolean;
+  responderType?: ResponderType;
+  fallbackType?: ResponderType;
+  targetResponders?: string[];
+  trackerBackend?: string;
+  timeoutMs?: number;
+}
+
+export interface OrchestratorTaskOptions {
+  payload?: JsonRecord;
+  resumeCommand?: string;
+}
+
+export interface SleepTaskOptions {
+  iso: string;
+  targetEpochMs: number;
+}
+
+export interface SubprocessTaskOptions {
+  processPath: string;
+  exportName?: string;
+  processId?: string;
+  prompt?: string;
+  inputs?: unknown;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+  harness?: string;
+  model?: string;
+  maxIterations?: number;
+  shareSession?: boolean;
+  metadata?: JsonRecord;
+}
+
+export interface EffectExecutionHints {
+  /** Preferred internal harness CLI (e.g., 'pi', 'claude-code'). Not a universal cross-plugin contract. */
+  harness?: string;
+  /** Preferred model identifier (e.g., 'claude-opus-4-6'). Used for subagent model selection. */
+  model?: string;
+  /** Internal harness permission hints. Plugins may ignore them; do not treat them as a security boundary. */
+  permissions?: string[];
+}
+
+export interface TaskDef {
+  kind: TaskKind;
+  title?: string;
+  description?: string;
+  labels?: string[];
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown> | false | null;
+  io?: TaskIOHints;
+  metadata?: JsonRecord;
+  execution?: EffectExecutionHints;
+  agent?: AgentTaskOptions;
+  node?: NodeTaskOptions;
+  breakpoint?: BreakpointTaskOptions;
+  orchestratorTask?: OrchestratorTaskOptions;
+  sleep?: SleepTaskOptions;
+  subprocess?: SubprocessTaskOptions;
+  [key: string]: unknown;
+}
+
+export interface BlobWriteOptions {
+  /**
+   * Optional content-type metadata (reserved for future integrations).
+   */
+  contentType?: string;
+  /**
+   * Text encoding to use when serializing string payloads (default: utf8).
+   */
+  encoding?: BufferEncoding;
+  /**
+   * Force JSON serialization (default: true for objects, false for strings/Buffers).
+   */
+  asJson?: boolean;
+}
+
+export interface TaskBuildContext {
+  effectId: string;
+  invocationKey: string;
+  /**
+   * Stable id returned from defineTask (used for serialization + hashing).
+   */
+  taskId: string;
+  /**
+   * Active run identifier (matches run.json:id).
+   */
+  runId: string;
+  /**
+   * Absolute path to the run directory containing journal/tasks/etc.
+   */
+  runDir: string;
+  /**
+   * Absolute path to the effect-specific task directory (runs/<id>/tasks/<effectId>).
+   */
+  taskDir: string;
+  /**
+   * Absolute path to the run-level tasks directory (runs/<id>/tasks).
+   * @deprecated Use taskDir instead.
+   */
+  tasksDir: string;
+  /**
+   * Optional label provided at invocation time.
+   */
+  label?: string;
+  labels: string[];
+  /**
+   * Writes the provided payload under tasks/<effectId>/blobs and returns a run-relative POSIX path.
+   */
+  createBlobRef(name: string, value: unknown, options?: BlobWriteOptions): Promise<string>;
+  /**
+   * Resolves a task-scoped relative path to a run-relative POSIX string.
+   */
+  toTaskRelativePath(relativePath: string): string;
+}
+
+export type TaskValueFactory<TArgs, TValue> = (args: TArgs, ctx: TaskBuildContext) => TValue | Promise<TValue>;
+
+export type TaskValueOrFactory<TArgs, TValue> = TValue | TaskValueFactory<TArgs, TValue>;
+
+export type TaskImpl<TArgs = unknown, _TResult = unknown> = (
+  args: TArgs,
+  ctx: TaskBuildContext
+) => TaskDef | Promise<TaskDef>;
+
+export interface DefinedTask<TArgs = unknown, _TResult = unknown> {
+  id: string;
+  build(args: TArgs, ctx: TaskBuildContext): TaskDef | Promise<TaskDef>;
+}
+
+export interface TaskInvokeOptions {
+  label?: string;
+  /**
+   * Explicit invocation key for retry/idempotent patterns. When provided, the ReplayCursor
+   * is NOT advanced - all calls with the same key resolve to the same effect slot.
+   * Use dotted-namespace kebab-case (e.g., 'bootstrap.fetch-data') unique within the process.
+   * This prevents the phantom duplicate effects bug when ctx.task() is inside a retry loop.
+   */
+  key?: string;
+  /** @deprecated Use `key`. */
+  stableKey?: string;
+}
+
+export interface TaskSerializerContext {
+  runDir: string;
+  effectId: string;
+  taskId: string;
+  invocationKey: string;
+  stepId?: string;
+}
+
+export interface NodeTaskDefinitionOptions<TArgs = unknown> {
+  entry: TaskValueOrFactory<TArgs, string>;
+  title?: TaskValueOrFactory<TArgs, string | undefined>;
+  description?: TaskValueOrFactory<TArgs, string | undefined>;
+  labels?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+  io?: TaskValueOrFactory<TArgs, TaskIOHints | undefined>;
+  env?: TaskValueOrFactory<TArgs, Record<string, string | undefined> | undefined>;
+  cwd?: TaskValueOrFactory<TArgs, string | undefined>;
+  args?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
+}
+
+export interface AgentTaskDefinitionOptions<TArgs = unknown> {
+  title?: TaskValueOrFactory<TArgs, string | undefined>;
+  description?: TaskValueOrFactory<TArgs, string | undefined>;
+  labels?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+  io?: TaskValueOrFactory<TArgs, TaskIOHints | undefined>;
+  name?: TaskValueOrFactory<TArgs, string | undefined>;
+  prompt?: TaskValueOrFactory<TArgs, AgentPrompt | undefined>;
+  outputSchema?: TaskValueOrFactory<TArgs, Record<string, unknown> | undefined>;
+  external?: TaskValueOrFactory<TArgs, boolean | undefined>;
+  responderType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  adapter?: TaskValueOrFactory<TArgs, string | undefined>;
+  fallbackType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  fallbackToInternal?: TaskValueOrFactory<TArgs, boolean | undefined>;
+  model?: TaskValueOrFactory<TArgs, string | undefined>;
+  provider?: TaskValueOrFactory<TArgs, string | undefined>;
+  approvalMode?: TaskValueOrFactory<TArgs, string | undefined>;
+  maxTurns?: TaskValueOrFactory<TArgs, number | undefined>;
+  timeout?: TaskValueOrFactory<TArgs, number | undefined>;
+  timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
+}
+
+export interface BreakpointTaskDefinitionOptions<TArgs = unknown> {
+  title?: TaskValueOrFactory<TArgs, string | undefined>;
+  description?: TaskValueOrFactory<TArgs, string | undefined>;
+  labels?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+  payload?: TaskValueOrFactory<TArgs, unknown>;
+  confirmationRequired?: TaskValueOrFactory<TArgs, boolean | undefined>;
+  responderType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  fallbackType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  targetResponders?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  trackerBackend?: TaskValueOrFactory<TArgs, string | undefined>;
+  timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
+}
+
+export interface OrchestratorTaskDefinitionOptions<TArgs = JsonRecord> {
+  title?: TaskValueOrFactory<TArgs, string | undefined>;
+  description?: TaskValueOrFactory<TArgs, string | undefined>;
+  labels?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+  payload?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+  resumeCommand?: TaskValueOrFactory<TArgs, string | undefined>;
+}
+
+export interface SleepTaskBuilderArgs {
+  iso: string;
+  targetEpochMs: number;
+}
+
+export interface SleepTaskDefinitionOptions<TArgs extends SleepTaskBuilderArgs = SleepTaskBuilderArgs> {
+  title?: TaskValueOrFactory<TArgs, string | undefined>;
+  description?: TaskValueOrFactory<TArgs, string | undefined>;
+  labels?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+}

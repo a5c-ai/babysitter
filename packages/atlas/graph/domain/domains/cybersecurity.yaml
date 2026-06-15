@@ -1,0 +1,13 @@
+nodeKind: Domain
+id: domain:cybersecurity
+attributes:
+  displayName: "Cybersecurity"
+  description: |
+    Cybersecurity domain — narrower than `domain:security`, focused on
+    offensive/defensive practitioner work: threat modeling, incident
+    response, vulnerability research, red/blue team operations.
+edges:
+  contains:
+    - specialization:security-compliance
+    - topic:ci-secrets-management
+    - topic:information-trust-tiers

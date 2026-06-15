@@ -12,6 +12,11 @@ expertise:
 metadata:
   version: "1.0"
   category: physics
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:data-visualization]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:technical-writer]
 ---
 
 # Publication Coordinator Agent

@@ -8,6 +8,10 @@ expertise:
   - Deal negotiation support
   - Transaction execution
   - Seller-side advisory
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # M&A Advisor

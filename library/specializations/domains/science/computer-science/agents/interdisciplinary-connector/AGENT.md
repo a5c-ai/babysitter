@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: research-methodology
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:graph-algorithms, skill-area:np-hard-heuristics]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:research-scientist, role:research-engineer]
 ---
 
 # Interdisciplinary Connector

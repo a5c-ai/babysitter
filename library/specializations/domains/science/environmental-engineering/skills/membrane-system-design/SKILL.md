@@ -7,6 +7,11 @@ backlog-id: SK-003
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:environmental-engineering]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:geospatial-data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Membrane System Design Skill

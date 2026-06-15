@@ -1,0 +1,16 @@
+nodeKind: CiSurface
+id: ci:a5c-ai-catalog
+attributes:
+  ciId: "@a5c-ai/catalog"
+  packageId: package:a5c-ai-catalog
+  scripts:
+    - build
+    - test
+  publishStrategy: internal-workspace
+  releaseChannels:
+    - ci
+  validationCommands:
+    - "npm run build --workspace=@a5c-ai/catalog"
+edges:
+  validates_package:
+    - target: package:a5c-ai-catalog

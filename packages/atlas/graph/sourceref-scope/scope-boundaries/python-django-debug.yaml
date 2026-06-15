@@ -1,0 +1,20 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:python-django-debug.scope
+attributes:
+  subjectId: skill:python-django-debug
+  inScope: |
+    Debugging Django 4.x and 5.x server-side request/response failures —
+    ORM query errors, middleware regressions, signals, migrations, DRF
+    serializer/view exceptions, and management-command tracebacks. Targets
+    Python 3.10+ on CPython.
+  outOfScope: |
+    Front-end JS/TS errors, Django Channels / async-WS bugs, Django 1.x
+    or 2.x legacy stacks, packaging/setuptools issues, performance tuning
+    of WSGI/ASGI servers (gunicorn, uvicorn), and infrastructure failures
+    (load balancer, DNS).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - skill:python-django-debug

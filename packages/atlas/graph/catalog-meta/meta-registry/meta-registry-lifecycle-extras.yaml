@@ -1,0 +1,630 @@
+nodeKind: MetaAttribute
+id: meta-attribute:run--id
+attributes:
+  displayName: Run.id
+  name: id
+  parentNodeKindId: meta-node-kind:run
+  type: id
+  required: true
+  description: id on Run.
+edges:
+  defined_on:
+  - target: meta-node-kind:run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run--display-name
+attributes:
+  displayName: Run.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:run
+  type: string
+  required: true
+  description: displayName on Run.
+edges:
+  defined_on:
+  - target: meta-node-kind:run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run--status
+attributes:
+  displayName: Run.status
+  name: status
+  parentNodeKindId: meta-node-kind:run
+  type: enum<running,completed,failed,aborted>
+  required: true
+  description: status on Run.
+edges:
+  defined_on:
+  - target: meta-node-kind:run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run--started-at
+attributes:
+  displayName: Run.startedAt
+  name: startedAt
+  parentNodeKindId: meta-node-kind:run
+  type: iso-timestamp
+  required: true
+  description: startedAt on Run.
+edges:
+  defined_on:
+  - target: meta-node-kind:run
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-journal-event--id
+attributes:
+  displayName: RunJournalEvent.id
+  name: id
+  parentNodeKindId: meta-node-kind:run-journal-event
+  type: id
+  required: true
+  description: id on RunJournalEvent.
+edges:
+  defined_on:
+  - target: meta-node-kind:run-journal-event
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-journal-event--event-name
+attributes:
+  displayName: RunJournalEvent.eventName
+  name: eventName
+  parentNodeKindId: meta-node-kind:run-journal-event
+  type: string
+  required: true
+  description: eventName on RunJournalEvent (event-type literal as written to the journal payload's `type` field).
+edges:
+  defined_on:
+  - target: meta-node-kind:run-journal-event
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-journal-event--category
+attributes:
+  displayName: RunJournalEvent.category
+  name: category
+  parentNodeKindId: meta-node-kind:run-journal-event
+  type: enum<run-lifecycle,effect-lifecycle,iteration,hook,cost,custom>
+  required: true
+  description: category on RunJournalEvent.
+edges:
+  defined_on:
+  - target: meta-node-kind:run-journal-event
+---
+nodeKind: MetaAttribute
+id: meta-attribute:run-journal-event--terminal
+attributes:
+  displayName: RunJournalEvent.terminal
+  name: terminal
+  parentNodeKindId: meta-node-kind:run-journal-event
+  type: bool
+  required: false
+  description: terminal on RunJournalEvent (true for events that represent a terminal Run state, e.g. RUN_COMPLETED, RUN_FAILED).
+edges:
+  defined_on:
+  - target: meta-node-kind:run-journal-event
+---
+nodeKind: MetaAttribute
+id: meta-attribute:workspace--id
+attributes:
+  displayName: Workspace.id
+  name: id
+  parentNodeKindId: meta-node-kind:workspace
+  type: id
+  required: true
+  description: id on Workspace.
+edges:
+  defined_on:
+  - target: meta-node-kind:workspace
+---
+nodeKind: MetaAttribute
+id: meta-attribute:workspace--display-name
+attributes:
+  displayName: Workspace.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:workspace
+  type: string
+  required: true
+  description: displayName on Workspace.
+edges:
+  defined_on:
+  - target: meta-node-kind:workspace
+---
+nodeKind: MetaAttribute
+id: meta-attribute:workspace--root-path
+attributes:
+  displayName: Workspace.rootPath
+  name: rootPath
+  parentNodeKindId: meta-node-kind:workspace
+  type: string
+  required: true
+  description: rootPath on Workspace.
+edges:
+  defined_on:
+  - target: meta-node-kind:workspace
+---
+nodeKind: MetaAttribute
+id: meta-attribute:workspace--materialization
+attributes:
+  displayName: Workspace.materialization
+  name: materialization
+  parentNodeKindId: meta-node-kind:workspace
+  type: enum<worktree,symlink,clone,copy,virtual>
+  required: false
+  description: materialization on Workspace (how the workspace projects onto the filesystem).
+edges:
+  defined_on:
+  - target: meta-node-kind:workspace
+---
+nodeKind: MetaAttribute
+id: meta-attribute:session--id
+attributes:
+  displayName: Session.id
+  name: id
+  parentNodeKindId: meta-node-kind:session
+  type: id
+  required: true
+  description: id on Session.
+edges:
+  defined_on:
+  - target: meta-node-kind:session
+---
+nodeKind: MetaAttribute
+id: meta-attribute:session--workspace-id
+attributes:
+  displayName: Session.workspaceId
+  name: workspaceId
+  parentNodeKindId: meta-node-kind:session
+  type: ref<Workspace>
+  required: false
+  description: workspaceId on Session.
+edges:
+  defined_on:
+  - target: meta-node-kind:session
+---
+nodeKind: MetaAttribute
+id: meta-attribute:session--created-at
+attributes:
+  displayName: Session.createdAt
+  name: createdAt
+  parentNodeKindId: meta-node-kind:session
+  type: iso-timestamp
+  required: true
+  description: createdAt on Session.
+edges:
+  defined_on:
+  - target: meta-node-kind:session
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase--id
+attributes:
+  displayName: Phase.id
+  name: id
+  parentNodeKindId: meta-node-kind:phase
+  type: id
+  required: true
+  description: id on Phase.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase--display-name
+attributes:
+  displayName: Phase.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:phase
+  type: string
+  required: true
+  description: displayName on Phase.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase--order
+attributes:
+  displayName: Phase.order
+  name: order
+  parentNodeKindId: meta-node-kind:phase
+  type: int
+  required: true
+  description: order on Phase.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-transition--id
+attributes:
+  displayName: PhaseTransition.id
+  name: id
+  parentNodeKindId: meta-node-kind:phase-transition
+  type: id
+  required: true
+  description: id on PhaseTransition.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-transition
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-transition--from-phase-id
+attributes:
+  displayName: PhaseTransition.fromPhaseId
+  name: fromPhaseId
+  parentNodeKindId: meta-node-kind:phase-transition
+  type: ref<Phase>
+  required: true
+  description: fromPhaseId on PhaseTransition.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-transition
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-transition--to-phase-id
+attributes:
+  displayName: PhaseTransition.toPhaseId
+  name: toPhaseId
+  parentNodeKindId: meta-node-kind:phase-transition
+  type: ref<Phase>
+  required: true
+  description: toPhaseId on PhaseTransition.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-transition
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-machine--id
+attributes:
+  displayName: PhaseMachine.id
+  name: id
+  parentNodeKindId: meta-node-kind:phase-machine
+  type: id
+  required: true
+  description: id on PhaseMachine.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-machine
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-machine--display-name
+attributes:
+  displayName: PhaseMachine.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:phase-machine
+  type: string
+  required: true
+  description: displayName on PhaseMachine.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-machine
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-machine--initial-phase
+attributes:
+  displayName: PhaseMachine.initialPhase
+  name: initialPhase
+  parentNodeKindId: meta-node-kind:phase-machine
+  type: ref<Phase>
+  required: true
+  description: initialPhase on PhaseMachine.
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-machine
+---
+nodeKind: MetaAttribute
+id: meta-attribute:phase-machine--arbitration-policy
+attributes:
+  displayName: PhaseMachine.arbitrationPolicy
+  name: arbitrationPolicy
+  parentNodeKindId: meta-node-kind:phase-machine
+  type: enum<most-restrictive-wins,first-impl-wins,declared-precedence>
+  required: false
+  description: arbitrationPolicy on PhaseMachine (how to combine phase machines when multiple reliability-interface impls declare overlapping ones).
+edges:
+  defined_on:
+  - target: meta-node-kind:phase-machine
+---
+nodeKind: MetaAttribute
+id: meta-attribute:invocation--id
+attributes:
+  displayName: Invocation.id
+  name: id
+  parentNodeKindId: meta-node-kind:invocation
+  type: id
+  required: true
+  description: id on Invocation.
+edges:
+  defined_on:
+  - target: meta-node-kind:invocation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:invocation--agent-version-id
+attributes:
+  displayName: Invocation.agentVersionId
+  name: agentVersionId
+  parentNodeKindId: meta-node-kind:invocation
+  type: ref<AgentVersion>
+  required: true
+  description: agentVersionId on Invocation.
+edges:
+  defined_on:
+  - target: meta-node-kind:invocation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:invocation--status
+attributes:
+  displayName: Invocation.status
+  name: status
+  parentNodeKindId: meta-node-kind:invocation
+  type: enum<running,completed,failed,aborted>
+  required: true
+  description: status on Invocation.
+edges:
+  defined_on:
+  - target: meta-node-kind:invocation
+---
+nodeKind: MetaAttribute
+id: meta-attribute:background-monitor--id
+attributes:
+  displayName: BackgroundMonitor.id
+  name: id
+  parentNodeKindId: meta-node-kind:background-monitor
+  type: id
+  required: true
+  description: id on BackgroundMonitor.
+edges:
+  defined_on:
+  - target: meta-node-kind:background-monitor
+---
+nodeKind: MetaAttribute
+id: meta-attribute:background-monitor--display-name
+attributes:
+  displayName: BackgroundMonitor.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:background-monitor
+  type: string
+  required: true
+  description: displayName on BackgroundMonitor.
+edges:
+  defined_on:
+  - target: meta-node-kind:background-monitor
+---
+nodeKind: MetaAttribute
+id: meta-attribute:background-monitor--lifecycle
+attributes:
+  displayName: BackgroundMonitor.lifecycle
+  name: lifecycle
+  parentNodeKindId: meta-node-kind:background-monitor
+  type: enum<persistent,per-session,on-demand>
+  required: true
+  description: lifecycle on BackgroundMonitor.
+edges:
+  defined_on:
+  - target: meta-node-kind:background-monitor
+---
+nodeKind: MetaAttribute
+id: meta-attribute:background-monitor--triggers
+attributes:
+  displayName: BackgroundMonitor.triggers
+  name: triggers
+  parentNodeKindId: meta-node-kind:background-monitor
+  type: list<enum<session-start,file-change,git-event,timer,custom>>
+  required: true
+  description: triggers on BackgroundMonitor.
+edges:
+  defined_on:
+  - target: meta-node-kind:background-monitor
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:has-phase
+attributes:
+  displayName: has_phase (meta)
+  name: has_phase
+  source:
+  - meta-node-kind:phase-machine
+  target:
+  - meta-node-kind:phase
+  cardinality: 1:N
+  origin: universal
+  description: a phase-machine has phase states
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:phase-machine
+  target_of_meta_edge:
+  - target: meta-node-kind:phase
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:has-transition
+attributes:
+  displayName: has_transition (meta)
+  name: has_transition
+  source:
+  - meta-node-kind:phase
+  target:
+  - meta-node-kind:phase-transition
+  cardinality: 1:N
+  origin: universal
+  description: a phase declares outgoing transitions
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:phase
+  target_of_meta_edge:
+  - target: meta-node-kind:phase-transition
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:transition-of
+attributes:
+  displayName: transition_of (meta)
+  name: transition_of
+  source:
+  - meta-node-kind:phase-transition
+  target:
+  - meta-node-kind:phase
+  cardinality: N:1
+  origin: universal
+  description: a transition belongs to its source phase
+  inverse: meta-edge-kind:has-transition
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:phase-transition
+  target_of_meta_edge:
+  - target: meta-node-kind:phase
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:scopes-runs
+attributes:
+  displayName: scopes_runs (meta)
+  name: scopes_runs
+  source:
+  - meta-node-kind:session
+  target:
+  - meta-node-kind:run
+  cardinality: 1:N
+  origin: universal
+  description: a session scopes one or more runs
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:session
+  target_of_meta_edge:
+  - target: meta-node-kind:run
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:spans
+attributes:
+  displayName: spans (meta)
+  name: spans
+  source:
+  - meta-node-kind:run
+  target:
+  - meta-node-kind:invocation
+  cardinality: 1:N
+  origin: universal
+  description: a run spans one or more invocations
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:run
+  target_of_meta_edge:
+  - target: meta-node-kind:invocation
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:uses-workspace
+attributes:
+  displayName: uses_workspace (meta)
+  name: uses_workspace
+  source:
+  - meta-node-kind:run
+  - meta-node-kind:invocation
+  target:
+  - meta-node-kind:workspace
+  cardinality: N:1
+  origin: universal
+  description: a run/invocation executes in a workspace
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:run
+  - target: meta-node-kind:invocation
+  target_of_meta_edge:
+  - target: meta-node-kind:workspace
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:phase-in
+attributes:
+  displayName: phase_in (meta)
+  name: phase_in
+  source:
+  - meta-node-kind:phase
+  target:
+  - meta-node-kind:phase-machine
+  cardinality: N:1
+  origin: universal
+  description: a phase belongs to a phase-machine
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:phase
+  target_of_meta_edge:
+  - target: meta-node-kind:phase-machine
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:emits-journal-event
+attributes:
+  displayName: emits_journal_event (meta)
+  name: emits_journal_event
+  source:
+  - meta-node-kind:run
+  target:
+  - meta-node-kind:run-journal-event
+  cardinality: 1:N
+  origin: a5c
+  description: a run emits journal events into its journal directory
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:run
+  target_of_meta_edge:
+  - target: meta-node-kind:run-journal-event
+---
+nodeKind: MetaEnum
+id: meta-enum:run-status
+attributes:
+  displayName: Run lifecycle status
+  name: status
+  values:
+  - value: running
+    description: Run is currently executing.
+  - value: completed
+    description: Run reached a successful terminal state.
+  - value: failed
+    description: Run reached a failed terminal state.
+  - value: aborted
+    description: Run was deliberately aborted before completion.
+  usedOnAttributes:
+  - meta-attribute:run--status
+  - meta-attribute:invocation--status
+edges:
+  used_on_attribute:
+  - target: meta-attribute:run--status
+  - target: meta-attribute:invocation--status
+---
+nodeKind: MetaEnum
+id: meta-enum:run-journal-event-category
+attributes:
+  displayName: RunJournalEvent category
+  name: category
+  values:
+  - value: run-lifecycle
+    description: Run-level lifecycle events (created, completed, failed, aborted).
+  - value: effect-lifecycle
+    description: Effect lifecycle events (requested, resolved, failed).
+  - value: iteration
+    description: Iteration markers (turn boundaries, phase transitions emitted as iterations).
+  - value: hook
+    description: Hook invocation / merge / decision events.
+  - value: cost
+    description: Token / cost accounting events.
+  - value: custom
+    description: Custom event names emitted by user processes.
+  usedOnAttributes:
+  - meta-attribute:run-journal-event--category
+edges:
+  used_on_attribute:
+  - target: meta-attribute:run-journal-event--category
+---
+nodeKind: MetaEnum
+id: meta-enum:workspace-materialization
+attributes:
+  displayName: Workspace materialization
+  name: materialization
+  values:
+  - value: worktree
+    description: git-worktree (default for git repos).
+  - value: symlink
+    description: Path alias / symlink onto another workspace.
+  - value: clone
+    description: Independent full git clone.
+  - value: copy
+    description: Non-git filesystem snapshot.
+  - value: virtual
+    description: Overlay / FUSE / in-memory projection.
+  usedOnAttributes:
+  - meta-attribute:workspace--materialization
+edges:
+  used_on_attribute:
+  - target: meta-attribute:workspace--materialization

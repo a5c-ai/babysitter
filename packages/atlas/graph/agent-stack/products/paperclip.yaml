@@ -1,0 +1,87 @@
+nodeKind: AgentProduct
+id: agent:paperclip
+attributes:
+  displayName: "Paperclip"
+  vendor: "Paperclip (open-source)"
+  homepageUrl: "https://github.com/paperclip-ai/paperclip"
+  primarySurface: web
+  supportTier: none
+  productKind: web-agent
+  stackScope: full
+  description: |
+    Control plane for AI-agent companies. Multi-agent task board with
+    company-scoped multi-tenant architecture. Provides adapter-based
+    integration with multiple coding agents (Claude Code, Codex, Cursor,
+    Gemini CLI, OpenCode, Pi, OpenClaw) through a unified dispatch
+    interface. Features governed action approval gates, budget hard-stop
+    auto-pause, atomic single-assignee task checkout, and mutation
+    activity logging. Server is Express REST API with Drizzle ORM;
+    UI is React + Vite board; supports PGlite for local dev and
+    Postgres for production.
+  aliases:
+    - "paperclip"
+edges:
+  has_version:
+    - agent-version:paperclip@current
+  integrates_with:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:multi-agent-coordination
+    - target: topic:agent-orchestration-products
+    - target: agent:claude-code
+      notes: claude-local adapter
+    - target: agent:codex
+      notes: codex-local adapter
+    - target: agent:cursor
+      notes: cursor-local adapter
+    - target: agent:gemini-cli
+      notes: gemini-local adapter
+    - target: agent:opencode
+      notes: opencode-local adapter
+    - target: agent:openclaw
+      notes: openclaw-gateway adapter
+    - target: agent:pi
+      notes: pi-local adapter
+---
+nodeKind: AgentVersion
+id: agent-version:paperclip@current
+attributes:
+  agentProductId: agent:paperclip
+  versionRange: '>=0.1.0'
+  releasedAt: '2025-01-01'
+  installMethods:
+    - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+    - agent:paperclip
+  composed_of:
+    - target: agent-core-impl:paperclip.core@current
+      role: core
+    - target: agent-runtime-impl:paperclip.runtime@current
+      role: runtime
+    - target: agent-platform-impl:paperclip.platform@current
+      role: platform
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Paperclip agents maintain persistent multi-turn state across workflows.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Adapter-based dispatch to multiple coding agents for task execution.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Concurrent agent execution for parallel task processing across the board.
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Streams agent output in the web UI board view.
+    - target: capability:supports-plugins
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Plugin SDK with create-paperclip-plugin scaffolding and sandbox providers.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

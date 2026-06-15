@@ -2,6 +2,10 @@
 name: curatorial-research
 description: Conduct art historical research, provenance investigation, and scholarly analysis to inform exhibitions, acquisitions, and publications using primary and secondary sources
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch, WebSearch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:document-processing]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Curatorial Research

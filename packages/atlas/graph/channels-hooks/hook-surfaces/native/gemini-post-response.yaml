@@ -1,0 +1,21 @@
+nodeKind: HookSurface
+id: hook-surface:gemini.post-response
+attributes:
+  eventName: "post_response (Gemini)"
+  displayName: "post_response (Gemini)"
+  kind: native
+  originVendor: Google
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [response]
+    properties:
+      response: { type: string }
+  description: |
+    Gemini's post-response hook. Fires after the model's reply is
+    rendered. Canonicalizes to post-tool-use for cross-product policies.
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use

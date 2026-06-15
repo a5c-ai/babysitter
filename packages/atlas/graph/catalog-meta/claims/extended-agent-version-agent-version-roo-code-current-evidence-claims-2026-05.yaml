@@ -1,0 +1,47 @@
+nodeKind: Claim
+id: claim:extended-agent-version-agent-version-roo-code-current-clicommand
+attributes:
+  subjectId: agent-version:roo-code@current
+  attribute: cliCommand
+  value: roo
+  subjectKind: AgentVersion
+  statement: agent-version:roo-code@current cliCommand is roo.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for extended agent version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  about_subject:
+  - agent-version:roo-code@current
+---
+nodeKind: Claim
+id: claim:extended-agent-version-agent-version-roo-code-current-versionrange
+attributes:
+  subjectId: agent-version:roo-code@current
+  attribute: versionRange
+  value: '>=3.0.0'
+  subjectKind: AgentVersion
+  statement: agent-version:roo-code@current versionRange is >=3.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for extended agent version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  about_subject:
+  - agent-version:roo-code@current

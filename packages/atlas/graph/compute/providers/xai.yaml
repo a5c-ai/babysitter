@@ -1,0 +1,47 @@
+nodeKind: Provider
+id: provider:xai
+attributes:
+  displayName: "xAI"
+  vendor: "xAI"
+  versionRange: ">=2024-01-01"
+  authMethods:
+    - api-key
+  authMethodNotes: |
+    Standard `Authorization: Bearer <api-key>` on xAI's
+    OpenAI-compatible API surface.
+  endpoints:
+    base: "https://api.x.ai/v1"
+    chat_completions: "https://api.x.ai/v1/chat/completions"
+    models: "https://api.x.ai/v1/models"
+  pricing: |
+    See https://docs.x.ai/developers/models for current per-model rates.
+  rateLimitSignalingProtocol: |
+    OpenAI-compatible 429/error semantics; exact rate-limit headers should
+    be confirmed against live responses.
+  dataResidencyOptions:
+    - us
+    - eu
+  vendorFeatures:
+    - capability:model-discovery
+    - capability:streaming
+    - capability:supports-tool-use
+    - capability:supports-structured-output
+  slaTier: "xai-no-public-sla"
+  regions:
+    - global
+    - us-east-1
+    - eu-west-1
+edges:
+  realizes:
+    - target: layer:2-provider
+  supports:
+    - target: capability:model-discovery
+      versionRange: ">=0.0.0"
+      level: full
+      notes: xAI exposes model discovery through its OpenAI-compatible REST API.
+    - target: capability:supports-structured-output
+      versionRange: ">=0.0.0"
+      level: full
+      notes: Grok 4.3 model docs list structured outputs as supported.
+  serves:
+    - model:grok-4-3@current

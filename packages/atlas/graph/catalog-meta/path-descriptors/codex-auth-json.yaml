@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:codex-auth-json
+attributes:
+  pathId: path:codex-auth-json
+  displayName: "Codex auth credentials"
+  path: "~/.codex/auth.json"
+  pathKind: vendor-auth
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:codex.runtime@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:codex.runtime@1.x

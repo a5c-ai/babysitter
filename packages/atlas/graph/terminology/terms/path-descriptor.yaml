@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:path-descriptor
+attributes:
+  canonicalDefinitionId: definition:path-descriptor.canonical
+  displayName: "PathDescriptor"
+  kind: primitive
+  references:
+    - "NodeKind:PathDescriptor"
+  description: |
+    Typed pointer to a runtime filesystem path (run dir, session dir, MCP
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

@@ -5,6 +5,13 @@
  * @outputs { success: boolean, comparativeAnalysis: object, influenceMapping: object, transnationalConnections: array, artifacts: array }
  * @recommendedSkills SK-HUM-005 (literary-close-reading), SK-HUM-013 (critical-theory-application), SK-HUM-010 (citation-scholarly-apparatus)
  * @recommendedAgents AG-HUM-004 (literary-critic-theorist)
+ *
+ * @graph
+ *   domains: [domain:humanities]
+ *   specializations: [specialization:digital-humanities]
+ *   skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

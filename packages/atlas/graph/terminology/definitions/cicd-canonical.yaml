@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:cicd.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:cicd
+  text: |
+    CI/CD: automated build, test, and deployment pipelines triggered on commit/merge events. Used in this catalog via CiSurface.
+  status: canonical
+edges:
+  defines:
+    - term:cicd

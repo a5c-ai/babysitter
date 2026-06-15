@@ -1,0 +1,414 @@
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-versionrange
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: versionRange
+  value: '>=4.8.0 <4.9.0'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current versionRange is >=4.8.0 <4.9.0.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-kind
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current kind is chat.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-contextwindowtokens
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-costpermtokinput
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: costPerMTokInput
+  value: '5.0'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current costPerMTokInput is 5.0.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-costpermtokcachedinput
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: costPerMTokCachedInput
+  value: '0.5'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current costPerMTokCachedInput is 0.5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Prompt-cache hit pricing is 10% of the base input price for Claude Opus 4.8.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-costpermtokoutput
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: costPerMTokOutput
+  value: '25.0'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current costPerMTokOutput is 25.0.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-pricing-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-supportsextendedthinking
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current supportsExtendedThinking is False.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The current models table lists Extended thinking as No for Claude Opus 4.8.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-supportsadaptivethinking
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: supportsAdaptiveThinking
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current supportsAdaptiveThinking is True.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The current models table lists Adaptive thinking as Yes for Claude Opus 4.8.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current supportsThinkingBudgetTokens is False.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Claude Opus 4.8 does not expose extended-thinking budget tokens on the current models table.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-modalities
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current modalities is text, image.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Current Claude models support text and image input, text output, and vision.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-modalitydirections
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Current Claude models support text and image input and text output.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-lifecyclestatus
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current lifecycleStatus is ga.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-deprecations-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Anthropic's deprecations page lists the current Opus model as Active; the graph maps vendor Active to ga.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-deprecations-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-knowledgecutoffdate
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: knowledgeCutoffDate
+  value: '2026-01-01'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current knowledgeCutoffDate is 2026-01-01.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Anthropic lists Jan 2026 as the reliable knowledge cutoff.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-modelcardurl
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: modelCardUrl
+  value: https://www.anthropic.com/claude-opus-4-8-system-card
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current modelCardUrl is https://www.anthropic.com/claude-opus-4-8-system-card.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-claude-opus-4-8-announcement-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Anthropic links the Claude Opus 4.8 System Card from the launch announcement.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-claude-opus-4-8-announcement-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-supportsfinetuning
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The public Claude model overview and pricing pages do not list a fine-tuning surface for Claude Opus 4.8.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-apifamily
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: apiFamily
+  value: Anthropic Messages API
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current API family is Anthropic Messages API.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+  - evidence:anthropic-vertex-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Anthropic documents the first-party, Bedrock, and Vertex surfaces as Messages API compatible.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+  - evidence:anthropic-vertex-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-opus-4-8-current-aliases
+attributes:
+  subjectId: model:claude-opus-4-8@current
+  attribute: providerModelIds
+  value: claude-opus-4-8, anthropic.claude-opus-4-8
+  subjectKind: ModelVersion
+  statement: model:claude-opus-4-8@current provider aliases include claude-opus-4-8 and anthropic.claude-opus-4-8.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+  - evidence:anthropic-vertex-claude-opus-4-8-issue-532
+  claimedAt: '2026-05-29T12:39:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Claude API and Vertex use claude-opus-4-8; Claude in Amazon Bedrock uses anthropic.claude-opus-4-8.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-overview-claude-opus-4-8-issue-532
+  - evidence:anthropic-bedrock-claude-opus-4-8-issue-532
+  - evidence:anthropic-vertex-claude-opus-4-8-issue-532
+  about_subject:
+  - model:claude-opus-4-8@current

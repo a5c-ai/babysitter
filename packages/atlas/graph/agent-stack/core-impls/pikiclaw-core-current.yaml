@@ -1,0 +1,50 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:pikiclaw.core@current
+attributes:
+  displayName: "PikiClaw Core (current)"
+  agentVersionId: agent-version:pikiclaw@current
+  packageRef: source-ref:pikiclaw-app
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Mobile-first tool-use loop optimized for touch interactions.
+    Supports vision input from device camera and voice transcription
+    as input modalities alongside text.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Context management handled by the PikiClaw backend; mobile clients
+    send messages and receive streamed responses.
+  subagentInvokerPolicy: none
+  subagentInvokerNotes: |
+    PikiClaw does not currently support subagent dispatch; plugins
+    extend capabilities via tool registration.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final output rendered directly from model response in the mobile UI.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: pikiclaw-native
+  supportedTransportProtocols:
+    - model-transport:anthropic-messages
+    - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:pikiclaw
+      role: core
+  speaks:
+    - target: model-transport:anthropic-messages
+    - target: model-transport:openai-responses
+  supports:
+    - target: capability:streaming
+      versionRange: '>=1.0.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0'
+      level: full
+    - target: capability:vision-input
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Camera and photo library input on mobile devices.

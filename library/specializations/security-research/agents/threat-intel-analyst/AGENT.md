@@ -9,6 +9,12 @@ expertise:
   - STIX/TAXII standards
   - Dark web intelligence
   - Geopolitical context analysis
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:threat-intelligence-hunting, skill-area:security-monitoring-siem]
+  roles: [role:security-engineer]
+  workflows: [workflow:vulnerability-management, workflow:penetration-testing-cycle]
 ---
 
 # Threat Intelligence Analyst Agent

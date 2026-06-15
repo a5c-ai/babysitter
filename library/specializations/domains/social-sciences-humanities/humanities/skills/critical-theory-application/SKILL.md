@@ -2,6 +2,12 @@
 name: critical-theory-application
 description: Apply theoretical frameworks (postcolonial, feminist, Marxist, post-structuralist) to cultural texts and phenomena
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:deep-web-research, skill-area:natural-language-processing, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:research-scientist]
 ---
 
 # Critical Theory Application

@@ -1,0 +1,57 @@
+---
+nodeKind: VectorStore
+id: vector-store:pinecone
+attributes:
+  displayName: "Pinecone"
+  storeKind: pinecone
+  distanceMetric: cosine
+  indexKind: hnsw
+  notes: |
+    Managed vector database; serverless and pod-based tiers.
+edges: {}
+---
+nodeKind: VectorStore
+id: vector-store:weaviate
+attributes:
+  displayName: "Weaviate"
+  storeKind: weaviate
+  distanceMetric: cosine
+  indexKind: hnsw
+  notes: |
+    Open-source vector database with built-in hybrid search and
+    multi-tenancy.
+edges: {}
+---
+nodeKind: VectorStore
+id: vector-store:chroma
+attributes:
+  displayName: "Chroma"
+  storeKind: chroma
+  distanceMetric: cosine
+  indexKind: hnsw
+  notes: |
+    Lightweight open-source embedding database; popular for local dev and
+    notebooks.
+edges: {}
+---
+nodeKind: VectorStore
+id: vector-store:pgvector
+attributes:
+  displayName: "pgvector (PostgreSQL extension)"
+  storeKind: pgvector
+  distanceMetric: cosine
+  indexKind: hnsw
+  notes: |
+    PostgreSQL extension turning any Postgres into a vector database.
+edges: {}
+---
+nodeKind: VectorStore
+id: vector-store:qdrant
+attributes:
+  displayName: "Qdrant"
+  storeKind: qdrant
+  distanceMetric: cosine
+  indexKind: hnsw
+  notes: |
+    Open-source vector search engine in Rust with managed cloud offering.
+edges: {}

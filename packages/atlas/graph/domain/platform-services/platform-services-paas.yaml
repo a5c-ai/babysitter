@@ -1,0 +1,359 @@
+---
+nodeKind: PlatformService
+id: platform-service:vercel-functions
+attributes:
+  displayName: "Vercel Serverless Functions"
+  description: |
+    Node/Python serverless functions colocated with Next.js apps.
+  category: compute
+  providedByPlatformId: platform:vercel
+  implementsStackPartIds:
+    - stack-part:serverless-runtime
+edges:
+  provided_by:
+    - platform:vercel
+  implements_stack_part:
+    - stack-part:serverless-runtime
+    - target: stack-part:serverless-runtime
+---
+nodeKind: PlatformService
+id: platform-service:vercel-edge-network
+attributes:
+  displayName: "Vercel Edge Network"
+  description: |
+    Global CDN + edge functions runtime for ultra-low-latency delivery.
+  category: networking
+  providedByPlatformId: platform:vercel
+  implementsStackPartIds:
+    - stack-part:cdn
+    - stack-part:edge-functions
+edges:
+  provided_by:
+    - platform:vercel
+  implements_stack_part:
+    - stack-part:cdn
+    - stack-part:edge-functions
+    - target: stack-part:cdn
+    - target: stack-part:edge-functions
+---
+nodeKind: PlatformService
+id: platform-service:vercel-kv
+attributes:
+  displayName: "Vercel KV"
+  description: |
+    Managed Redis-compatible KV (powered by Upstash).
+  category: database
+  providedByPlatformId: platform:vercel
+  implementsStackPartIds:
+    - stack-part:managed-redis
+    - stack-part:cache
+edges:
+  provided_by:
+    - platform:vercel
+  implements_stack_part:
+    - stack-part:managed-redis
+    - stack-part:cache
+    - target: stack-part:managed-redis
+    - target: stack-part:cache
+---
+nodeKind: PlatformService
+id: platform-service:vercel-postgres
+attributes:
+  displayName: "Vercel Postgres"
+  description: |
+    Managed serverless Postgres (Neon-backed).
+  category: database
+  providedByPlatformId: platform:vercel
+  implementsStackPartIds:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+edges:
+  provided_by:
+    - platform:vercel
+  implements_stack_part:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+    - target: stack-part:managed-postgres
+    - target: stack-part:relational-database
+---
+nodeKind: PlatformService
+id: platform-service:vercel-blob
+attributes:
+  displayName: "Vercel Blob"
+  description: |
+    Object storage optimized for web app uploads and assets.
+  category: storage
+  providedByPlatformId: platform:vercel
+  implementsStackPartIds:
+    - stack-part:object-storage
+edges:
+  provided_by:
+    - platform:vercel
+  implements_stack_part:
+    - stack-part:object-storage
+    - target: stack-part:object-storage
+---
+nodeKind: PlatformService
+id: platform-service:netlify-functions
+attributes:
+  displayName: "Netlify Functions"
+  description: |
+    AWS-Lambda-backed serverless functions for Netlify sites.
+  category: compute
+  providedByPlatformId: platform:netlify
+  implementsStackPartIds:
+    - stack-part:serverless-runtime
+edges:
+  provided_by:
+    - platform:netlify
+  implements_stack_part:
+    - stack-part:serverless-runtime
+    - target: stack-part:serverless-runtime
+---
+nodeKind: PlatformService
+id: platform-service:netlify-edge-functions
+attributes:
+  displayName: "Netlify Edge Functions"
+  description: |
+    Deno-based edge runtime running at the CDN edge.
+  category: compute
+  providedByPlatformId: platform:netlify
+  implementsStackPartIds:
+    - stack-part:edge-functions
+edges:
+  provided_by:
+    - platform:netlify
+  implements_stack_part:
+    - stack-part:edge-functions
+    - target: stack-part:edge-functions
+---
+nodeKind: PlatformService
+id: platform-service:netlify-forms
+attributes:
+  displayName: "Netlify Forms"
+  description: |
+    Built-in form submission handling without backend code.
+  category: other
+  providedByPlatformId: platform:netlify
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:netlify
+---
+nodeKind: PlatformService
+id: platform-service:netlify-identity
+attributes:
+  displayName: "Netlify Identity"
+  description: |
+    GoTrue-based managed auth for Netlify sites.
+  category: security
+  providedByPlatformId: platform:netlify
+  implementsStackPartIds:
+    - stack-part:auth-broker
+edges:
+  provided_by:
+    - platform:netlify
+  implements_stack_part:
+    - stack-part:auth-broker
+    - target: stack-part:auth-broker
+---
+nodeKind: PlatformService
+id: platform-service:heroku-dynos
+attributes:
+  displayName: "Heroku Dynos"
+  description: |
+    Container-based runtime units for processes and one-off jobs.
+  category: compute
+  providedByPlatformId: platform:heroku
+  implementsStackPartIds:
+    - stack-part:container-runtime
+edges:
+  provided_by:
+    - platform:heroku
+  implements_stack_part:
+    - stack-part:container-runtime
+    - target: stack-part:container-runtime
+---
+nodeKind: PlatformService
+id: platform-service:heroku-postgres
+attributes:
+  displayName: "Heroku Postgres"
+  description: |
+    Managed Postgres addon with continuous protection.
+  category: database
+  providedByPlatformId: platform:heroku
+  implementsStackPartIds:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+edges:
+  provided_by:
+    - platform:heroku
+  implements_stack_part:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+    - target: stack-part:managed-postgres
+    - target: stack-part:relational-database
+---
+nodeKind: PlatformService
+id: platform-service:heroku-redis
+attributes:
+  displayName: "Heroku Redis"
+  description: |
+    Managed Redis addon.
+  category: database
+  providedByPlatformId: platform:heroku
+  implementsStackPartIds:
+    - stack-part:managed-redis
+    - stack-part:cache
+edges:
+  provided_by:
+    - platform:heroku
+  implements_stack_part:
+    - stack-part:managed-redis
+    - stack-part:cache
+    - target: stack-part:managed-redis
+    - target: stack-part:cache
+---
+nodeKind: PlatformService
+id: platform-service:heroku-connect
+attributes:
+  displayName: "Heroku Connect"
+  description: |
+    Bi-directional sync between Heroku Postgres and Salesforce.
+  category: other
+  providedByPlatformId: platform:heroku
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:heroku
+---
+nodeKind: PlatformService
+id: platform-service:fly-apps
+attributes:
+  displayName: "Fly Apps"
+  description: |
+    Firecracker microVMs deployed globally.
+  category: compute
+  providedByPlatformId: platform:fly-io
+  implementsStackPartIds:
+    - stack-part:container-runtime
+edges:
+  provided_by:
+    - platform:fly-io
+  implements_stack_part:
+    - stack-part:container-runtime
+    - target: stack-part:container-runtime
+---
+nodeKind: PlatformService
+id: platform-service:fly-volumes
+attributes:
+  displayName: "Fly Volumes"
+  description: |
+    Local NVMe persistent volumes attached to Fly Machines.
+  category: storage
+  providedByPlatformId: platform:fly-io
+  implementsStackPartIds:
+    - stack-part:block-storage
+edges:
+  provided_by:
+    - platform:fly-io
+  implements_stack_part:
+    - stack-part:block-storage
+    - target: stack-part:block-storage
+---
+nodeKind: PlatformService
+id: platform-service:fly-postgres
+attributes:
+  displayName: "Fly Postgres"
+  description: |
+    Postgres clusters running on Fly infrastructure (user-operated).
+  category: database
+  providedByPlatformId: platform:fly-io
+  implementsStackPartIds:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+edges:
+  provided_by:
+    - platform:fly-io
+  implements_stack_part:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+    - target: stack-part:managed-postgres
+    - target: stack-part:relational-database
+---
+nodeKind: PlatformService
+id: platform-service:fly-redis
+attributes:
+  displayName: "Fly Redis (Upstash)"
+  description: |
+    Upstash-powered Redis offering on Fly.
+  category: database
+  providedByPlatformId: platform:fly-io
+  implementsStackPartIds:
+    - stack-part:managed-redis
+    - stack-part:cache
+edges:
+  provided_by:
+    - platform:fly-io
+  implements_stack_part:
+    - stack-part:managed-redis
+    - stack-part:cache
+    - target: stack-part:managed-redis
+    - target: stack-part:cache
+---
+nodeKind: PlatformService
+id: platform-service:railway-service
+attributes:
+  displayName: "Railway Service"
+  description: |
+    Auto-deployed container service built from a Git repo.
+  category: compute
+  providedByPlatformId: platform:railway
+  implementsStackPartIds:
+    - stack-part:container-runtime
+edges:
+  provided_by:
+    - platform:railway
+  implements_stack_part:
+    - stack-part:container-runtime
+    - target: stack-part:container-runtime
+---
+nodeKind: PlatformService
+id: platform-service:railway-database
+attributes:
+  displayName: "Railway Postgres"
+  description: |
+    One-click managed Postgres on Railway.
+  category: database
+  providedByPlatformId: platform:railway
+  implementsStackPartIds:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+edges:
+  provided_by:
+    - platform:railway
+  implements_stack_part:
+    - stack-part:managed-postgres
+    - stack-part:relational-database
+    - target: stack-part:managed-postgres
+    - target: stack-part:relational-database
+---
+nodeKind: PlatformService
+id: platform-service:railway-redis
+attributes:
+  displayName: "Railway Redis"
+  description: |
+    One-click managed Redis on Railway.
+  category: database
+  providedByPlatformId: platform:railway
+  implementsStackPartIds:
+    - stack-part:managed-redis
+    - stack-part:cache
+edges:
+  provided_by:
+    - platform:railway
+  implements_stack_part:
+    - stack-part:managed-redis
+    - stack-part:cache
+    - target: stack-part:managed-redis
+    - target: stack-part:cache

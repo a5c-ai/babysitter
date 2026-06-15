@@ -4,6 +4,13 @@
  * @inputs { projectName: string }
  * @outputs { success: boolean, queryConfig: object, queries: array, artifacts: array }
  * @references - TanStack Query: https://tanstack.com/query/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:data-fetching-caching, skill-area:react-state-management]
+ *   topics: [topic:cache-aside-pattern]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

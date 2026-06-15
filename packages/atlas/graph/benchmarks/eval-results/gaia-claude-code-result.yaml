@@ -1,0 +1,14 @@
+nodeKind: EvalResult
+id: eval-result:gaia.claude-code.001
+attributes:
+  evalRunId: eval-run:gaia.claude-code.2025
+  metricName: accuracy
+  score: 0.0
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-01T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gaia.claude-code.2025
+  scored_against:
+    - target: benchmark:gaia

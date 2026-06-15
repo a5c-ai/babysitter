@@ -17,6 +17,13 @@
  * - App Store Connect: https://developer.apple.com/app-store-connect/
  * - App Store Review Guidelines: https://developer.apple.com/app-store/review/guidelines/
  * - App Store Optimization: https://developer.apple.com/app-store/product-page/
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -56,21 +63,14 @@ export async function process(inputs, ctx) {
       appName, appVersion, bundleId, teamId, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `App Store submission prepared for ${appName} v${appVersion}. Ready to submit?`,
     title: 'Submission Review',
-    context: { runId: ctx.runId, appName, appVersion, bundleId, phases: phases.map(p => p.title) },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, appVersion, bundleId, phases: phases.map(p => p.title) }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

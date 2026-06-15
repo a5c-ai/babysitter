@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-hermes
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-hermes"
+  packageName: "@a5c-ai/hooks-adapter-hermes"
+  displayName: "Hooks Adapter - Hermes"
+  description: "Hermes harness adapter for the hooks-adapter system. Translates Hermes-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Hermes as the active harness. Extend this to customize hook behavior specific to Hermes."
+  status: active

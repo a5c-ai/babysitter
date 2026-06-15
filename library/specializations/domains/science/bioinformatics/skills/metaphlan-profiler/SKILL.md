@@ -18,6 +18,12 @@ metadata:
     - profiling
     - species
     - community
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:biomedical-engineer]
 ---
 
 # MetaPhlAn Profiler Skill

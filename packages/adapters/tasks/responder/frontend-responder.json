@@ -1,0 +1,9 @@
+{
+  "id": "frontend-responder",
+  "name": "Alex Chen",
+  "title": "Senior Frontend Engineer",
+  "domains": ["frontend", "ui"],
+  "tags": ["react", "typescript", "css", "accessibility", "performance"],
+  "availability": true,
+  "responseTimeSla": 1800000
+}

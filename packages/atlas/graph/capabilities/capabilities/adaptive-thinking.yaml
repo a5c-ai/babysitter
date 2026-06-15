@@ -1,0 +1,14 @@
+nodeKind: Capability
+id: capability:adaptive-thinking
+attributes:
+  displayName: "Adaptive thinking"
+  description: |
+    Model autonomously decides when to engage extended reasoning, without
+    requiring an explicit thinking-budget request from the caller.
+    Distinct from `capability:extended-thinking` which gates explicit
+    reasoning budget allocation. Introduced with Claude Opus 4.7.
+  appliesToNodeKinds: ["ModelVersion"]
+  category: reasoning
+edges:
+  supported_by:
+    - model:claude-opus-4-7@current

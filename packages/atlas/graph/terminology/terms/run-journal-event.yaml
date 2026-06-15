@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:run-journal-event
+attributes:
+  canonicalDefinitionId: definition:run-journal-event.canonical
+  displayName: "RunJournalEvent"
+  kind: operation
+  references:
+    - "NodeKind:RunJournalEvent"
+  description: |
+    The enum of run journal event names emitted by the babysitter runtime
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

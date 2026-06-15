@@ -2,6 +2,11 @@
 name: unity-profiler
 description: Unity Profiler skill for performance analysis, frame debugging, memory profiling, and optimization workflows.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unity Profiler Skill

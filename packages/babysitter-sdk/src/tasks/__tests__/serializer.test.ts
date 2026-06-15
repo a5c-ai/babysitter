@@ -1,0 +1,281 @@
+import { promises as fs } from "fs";
+import os from "os";
+import path from "path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+  RESULT_SCHEMA_VERSION,
+  TASK_SCHEMA_VERSION,
+  serializeAndWriteTaskDefinition,
+  serializeAndWriteTaskResult,
+} from "../serializer";
+
+const EFFECT_ID = "01HQA4SERIALZR";
+
+describe("task serializer", () => {
+  let runDir: string;
+
+  beforeEach(async () => {
+    runDir = await fs.mkdtemp(path.join(os.tmpdir(), "babysitter-serializer-"));
+  });
+
+  afterEach(async () => {
+    await fs.rm(runDir, { recursive: true, force: true });
+  });
+
+  it("writes task.json with schema metadata and inline inputs", async () => {
+    const { taskRef, inputsRef, serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "inline-input-task",
+      invocationKey: "proc:step-001",
+      stepId: "step-001",
+      task: {
+        kind: "node",
+        title: "Serialize Inline",
+        metadata: { foo: "bar" },
+      },
+      inputs: { hello: "world" },
+    });
+
+    expect(taskRef).toBe(`tasks/${EFFECT_ID}/task.json`);
+    expect(inputsRef).toBeUndefined();
+    expect(serialized.schemaVersion).toBe(TASK_SCHEMA_VERSION);
+    expect(serialized.inputs).toEqual({ hello: "world" });
+
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, taskRef), "utf8"));
+    expect(onDisk.effectId).toBe(EFFECT_ID);
+    expect(onDisk.schemaVersion).toBe(TASK_SCHEMA_VERSION);
+    expect(onDisk.inputs).toEqual({ hello: "world" });
+  });
+
+  it("spills large inputs to blobs and returns refs", async () => {
+    const bigPayload = { data: "x".repeat(1024 * 1024 + 512) };
+    const { inputsRef, serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "blobbed-input-task",
+      invocationKey: "proc:step-002",
+      stepId: "step-002",
+      task: { kind: "breakpoint" },
+      inputs: bigPayload,
+    });
+
+    expect(serialized.inputs).toBeUndefined();
+    expect(inputsRef).toMatch(/tasks\/01HQA4SERIALZR\/blobs\/inputs-[0-9a-f]+\.json$/);
+    const absoluteRef = path.join(runDir, inputsRef!);
+    const blob = JSON.parse(await fs.readFile(absoluteRef, "utf8"));
+    expect(blob).toEqual(bigPayload);
+  });
+
+  it("preserves agent task payloads needed by external harness mappers", async () => {
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "agent-task",
+      invocationKey: "proc:step-002b",
+      stepId: "step-002b",
+      task: {
+        kind: "agent",
+        title: "Create alpha artifact",
+        agent: {
+          role: "CI filesystem validation agent",
+          task: "Create codex-artifacts/alpha.txt in the current workspace.",
+          context: {
+            requiredContents: "alpha-run-ok",
+            requiredPath: "codex-artifacts/alpha.txt",
+          },
+          instructions: [
+            "Create the file if it does not exist.",
+            "Write exactly the required contents followed by a trailing newline.",
+          ],
+          outputFormat: "plain text",
+        },
+      },
+      inputs: { contents: "alpha-run-ok" },
+    });
+
+    expect(serialized.kind).toBe("agent");
+    expect(serialized.title).toBe("Create alpha artifact");
+    expect(serialized.agent).toMatchObject({
+      role: "CI filesystem validation agent",
+      task: "Create codex-artifacts/alpha.txt in the current workspace.",
+      outputFormat: "plain text",
+    });
+    expect(serialized.agent).toHaveProperty("context.requiredPath", "codex-artifacts/alpha.txt");
+  });
+
+  it("preserves shell outputSchema declarations in task.json", async () => {
+    const outputSchema = {
+      type: "object",
+      required: ["verified", "checks"],
+      properties: {
+        verified: { type: "boolean" },
+        checks: { type: "array" },
+      },
+    };
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "shell-schema-task",
+      invocationKey: "proc:step-shell-schema",
+      task: {
+        kind: "shell",
+        title: "Verify shell output",
+        outputSchema,
+      },
+    });
+
+    expect(serialized.outputSchema).toEqual(outputSchema);
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, `tasks/${EFFECT_ID}/task.json`), "utf8"));
+    expect(onDisk.outputSchema).toEqual(outputSchema);
+  });
+
+  it("preserves inputSchema parameter declarations in task.json", async () => {
+    const inputSchema = {
+      type: "object",
+      required: ["query"],
+      properties: {
+        query: { type: "string" },
+        limit: { type: "integer", minimum: 1 },
+      },
+      additionalProperties: false,
+    };
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "shell-input-schema-task",
+      invocationKey: "proc:step-shell-input-schema",
+      task: {
+        kind: "shell",
+        title: "Search",
+        inputSchema,
+      },
+    });
+
+    expect(serialized.inputSchema).toEqual(inputSchema);
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, `tasks/${EFFECT_ID}/task.json`), "utf8"));
+    expect(onDisk.inputSchema).toEqual(inputSchema);
+  });
+
+  it("preserves both inputSchema and outputSchema for tool discovery", async () => {
+    const inputSchema = {
+      type: "object",
+      properties: {
+        target: { type: "string" },
+      },
+    };
+    const outputSchema = {
+      type: "object",
+      properties: {
+        ok: { type: "boolean" },
+      },
+    };
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "discovery-schema-task",
+      invocationKey: "proc:step-discovery-schema",
+      task: {
+        kind: "agent",
+        inputSchema,
+        outputSchema,
+      },
+    });
+
+    expect(serialized).toMatchObject({ inputSchema, outputSchema });
+  });
+
+  it("preserves shell outputSchema false opt-out in task.json", async () => {
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "shell-schema-disabled-task",
+      invocationKey: "proc:step-shell-schema-disabled",
+      task: {
+        kind: "shell",
+        title: "Verify shell output without schema",
+        outputSchema: false,
+      },
+    });
+
+    expect(serialized.outputSchema).toBe(false);
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, `tasks/${EFFECT_ID}/task.json`), "utf8"));
+    expect(onDisk.outputSchema).toBe(false);
+  });
+
+  it("preserves responder routing metadata for agent and breakpoint tasks", async () => {
+    const { serialized: agentSerialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "responder-agent-task",
+      invocationKey: "proc:step-responder-agent",
+      stepId: "step-responder-agent",
+      task: {
+        kind: "agent",
+        title: "Route to external agent",
+        agent: {
+          responderType: "agent",
+          adapter: "codex",
+          fallbackType: "internal",
+        },
+      },
+    });
+
+    expect(agentSerialized.agent).toMatchObject({
+      responderType: "agent",
+      adapter: "codex",
+      fallbackType: "internal",
+    });
+
+    const { serialized: breakpointSerialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: `${EFFECT_ID}B`,
+      taskId: "responder-breakpoint-task",
+      invocationKey: "proc:step-responder-breakpoint",
+      stepId: "step-responder-breakpoint",
+      task: {
+        kind: "breakpoint",
+        title: "Route to human",
+        breakpoint: {
+          responderType: "human",
+          targetResponders: ["maintainer"],
+          trackerBackend: "linear",
+        },
+      },
+    });
+
+    expect(breakpointSerialized.breakpoint).toMatchObject({
+      responderType: "human",
+      targetResponders: ["maintainer"],
+      trackerBackend: "linear",
+    });
+  });
+
+  it("serializes task results, spilling large payloads and emitting stdout/stderr refs", async () => {
+    const hugeResult = { payload: "z".repeat(1024 * 1024 + 256) };
+    const { resultRef, stdoutRef, stderrRef, serialized } = await serializeAndWriteTaskResult({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "result-task",
+      invocationKey: "proc:step-003",
+      payload: {
+        status: "ok",
+        result: hugeResult,
+        stdout: "hello stdout",
+        stderr: "hello stderr",
+      },
+    });
+
+    expect(resultRef).toBe(`tasks/${EFFECT_ID}/result.json`);
+    expect(stdoutRef).toBe(`tasks/${EFFECT_ID}/stdout.log`);
+    expect(stderrRef).toBe(`tasks/${EFFECT_ID}/stderr.log`);
+
+    const serializedResult = JSON.parse(await fs.readFile(path.join(runDir, resultRef), "utf8"));
+    expect(serializedResult.schemaVersion).toBe(RESULT_SCHEMA_VERSION);
+    expect(serializedResult.result).toBeUndefined();
+    expect(serializedResult.resultRef).toMatch(/blobs\/result-[0-9a-f]+\.json$/);
+
+    const blobContents = JSON.parse(await fs.readFile(path.join(runDir, serializedResult.resultRef), "utf8"));
+    expect(blobContents).toEqual(hugeResult);
+  });
+});

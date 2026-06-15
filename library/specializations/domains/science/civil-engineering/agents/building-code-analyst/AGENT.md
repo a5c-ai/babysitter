@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Code Compliance
   agent-id: CIV-AG-026
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Building Code Analyst Agent

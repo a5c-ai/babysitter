@@ -1,0 +1,165 @@
+{
+  "issueNumber": 635,
+  "baseBranch": "staging",
+  "targetBranch": "feat/issue-635-sdk-task-responder-type",
+  "title": "tasks-mux: responderType on SDK task definitions (defineTask API)",
+  "labels": [
+    "sdk",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev",
+    "feature",
+    "tasks-mux",
+    "agent-core",
+    "P0",
+    "risk:medium"
+  ],
+  "summary": "Extend the SDK defineTask task-definition API so tasks can declare routing intent through responderType. Add typed agent and breakpoint routing metadata, helper APIs for external agent/human/auto tasks, validation that agent responderType requires an adapter, and tests/docs that migrate away from the superseded external: true model.",
+  "dependencyNote": "This depends on foundational tasks-mux routing work being implemented in parallel. The SDK change should remain backward-compatible and should not implement tasks-mux runtime consumption unless a dependency contract has landed and requires a small compile integration.",
+  "relatedIssues": [
+    603,
+    620,
+    630
+  ],
+  "supersedes": [
+    603
+  ],
+  "relatedDesignDocs": [
+    "docs/adapters-babysitter-integrations/tasks-mux-routing.md",
+    "docs/adapters-babysitter-integrations/external-agent-tasks.md",
+    "docs/adapters-babysitter-integrations/overview.md",
+    "docs/adapters-babysitter-integrations/testing.md",
+    "docs/adapters-babysitter-integrations/process-authoring.md"
+  ],
+  "targetFiles": [
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/tasks/defineTask.ts",
+    "packages/sdk/src/tasks/kinds/index.ts",
+    "packages/sdk/src/tasks/index.ts",
+    "packages/sdk/src/tasks/serializer.ts",
+    "packages/sdk/src/tasks/__tests__/defineTask.test.ts",
+    "packages/sdk/src/tasks/__tests__/kinds.test.ts",
+    "packages/sdk/src/test-fixtures/kinds.ts",
+    "packages/sdk/src/index.ts",
+    "docs/adapters-babysitter-integrations/tasks-mux-routing.md",
+    "docs/adapters-babysitter-integrations/external-agent-tasks.md",
+    "docs/adapters-babysitter-integrations/testing.md",
+    "docs/adapters-babysitter-integrations/process-authoring.md"
+  ],
+  "acceptanceCriteria": [
+    "Add a public ResponderType type and typed AgentTaskOptions for TaskDef.agent.",
+    "Extend BreakpointTaskOptions with responderType and routing metadata needed by human/tracker breakpoint routing.",
+    "Add adapter and fallbackType fields for agent routing hints.",
+    "Implement externalAgentTask() so it emits responderType: \"agent\" with an adapter instead of external: true.",
+    "Implement humanTask() so it emits responderType: \"human\".",
+    "Implement autoTask() so it emits responderType: \"auto\".",
+    "Validate that a non-empty adapter is required when agent.responderType is \"agent\".",
+    "Ensure validation applies to positional and object-form defineTask builds.",
+    "Preserve legacy/custom TaskDef structural permissiveness for task definitions that do not opt into responderType.",
+    "Add targeted tests for helper output, defineTask serialization/preservation, adapter validation, breakpoint routing metadata, and legacy object-form compatibility.",
+    "Update docs/examples that still describe external: true as the primary external-agent contract, noting that #635 supersedes #603 and tasks-mux runtime consumption is related follow-up work."
+  ],
+  "nonGoals": [
+    "Do not implement full tasks-mux routing consumption for SDK task effects; that belongs to the parallel foundational work tracked by #630/#620.",
+    "Do not remove the TaskDef index signature or otherwise make custom process definitions fail unless they opt into invalid responderType metadata.",
+    "Do not redesign defineTask beyond the routing-intent API needed for #635.",
+    "Do not require adapter for responderType values other than \"agent\" unless the design docs or landed foundational contract explicitly require it.",
+    "Do not keep external: true as the primary new helper contract."
+  ],
+  "processLibraryResearch": {
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "methodologyReferences": [
+      "methodologies/superpowers/test-driven-development.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "methodologies/v-model/v-model.js",
+      "cradle/feature-implementation-contribute.js"
+    ],
+    "discoveryCommandsUsed": [
+      "babysitter process-library:active --json",
+      "rg -n \"defineTask|SDK|tasks-mux|routing|validation|quality gate|TypeScript|api\" /home/runner/.a5c/process-library/babysitter-repo/library -S",
+      "babysitter skill:discover --plugin-root /home/runner/.a5c/process-library/babysitter-repo --process-path /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js --json",
+      "babysitter skill:discover --plugin-root /home/runner/.a5c/process-library/babysitter-repo --process-path /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/v-model/v-model.js --json"
+    ]
+  },
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #635, every comment, labels, related issue mentions, and the routing design docs to lock the SDK API contract and scope boundaries."
+    },
+    {
+      "name": "Foundation dependency check",
+      "purpose": "Check parallel tasks-mux routing work and open PRs for field-name or contract conflicts before implementing the SDK layer."
+    },
+    {
+      "name": "SDK API design",
+      "purpose": "Define responderType, agent and breakpoint option shapes, helper outputs, validation location, and compatibility rules."
+    },
+    {
+      "name": "Regression plan",
+      "purpose": "Add failing tests for helper output, defineTask positional/object-form behavior, adapter validation, breakpoint metadata, and legacy compatibility before implementation."
+    },
+    {
+      "name": "Implementation loop",
+      "purpose": "Implement the focused SDK type/helper/validation/doc changes, iterating up to three attempts based on verification and review findings."
+    },
+    {
+      "name": "Verification gate",
+      "purpose": "Run targeted task tests, SDK build, SDK tests, metadata verification, and diff hygiene checks."
+    },
+    {
+      "name": "Compatibility review",
+      "purpose": "Review public API completeness, object-form compatibility, serializer preservation, docs migration, and non-goal compliance."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm every issue deliverable is satisfied and identify any remaining dependency-driven maintainer decision before PR finalization."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "The foundational tasks-mux work has landed with incompatible routing field names or semantics.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with SDK-only compatibility shim",
+        "Pause for foundational work to land"
+      ]
+    },
+    {
+      "when": "Final acceptance finds a real ambiguity in the responderType union or adapter validation contract.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended final shape",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "New targeted tests fail for the expected missing-implementation reason before code changes.",
+    "Helper tests prove externalAgentTask emits responderType: \"agent\" plus adapter and does not rely on external: true.",
+    "defineTask tests prove positional and object-form APIs preserve valid routing metadata and reject agent responderType without adapter.",
+    "Compatibility tests prove legacy object-form and custom TaskDef shapes still build when responderType is absent.",
+    "Docs/examples no longer present external: true as the primary model for this feature.",
+    "Targeted task tests pass.",
+    "npm run build:sdk passes.",
+    "npm run test:sdk passes or unrelated pre-existing failures are documented with exact evidence.",
+    "npm run verify:metadata passes.",
+    "Code review approves API shape, dependency boundaries, and migration wording."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/tasks/__tests__/defineTask.test.ts packages/sdk/src/tasks/__tests__/kinds.test.ts packages/sdk/src/tasks/__tests__/serializer.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "publishPlan": {
+    "branchName": "feat/issue-635-sdk-task-responder-type",
+    "prTitle": "Add responderType to SDK task definitions",
+    "prBodyMustMention": [
+      "Closes #635",
+      "Supersedes #603",
+      "Related to #630/#620",
+      "Validation and compatibility tests run"
+    ]
+  }
+}

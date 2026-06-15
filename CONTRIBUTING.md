@@ -50,7 +50,7 @@ npm install
 ### 3. Install the Plugin in Claude Code
 
 ```bash
-claude plugin marketplace add a5c-ai/babysitter
+claude plugin marketplace add a5c-ai/babysitter-claude
 claude plugin install --scope user babysitter@a5c.ai
 ```
 
@@ -118,10 +118,10 @@ The Babysitter plugin provides slash commands for orchestrating development work
 
 ## SDK CLI Commands
 
-The Babysitter SDK CLI (`babysitter`) is used to drive the orchestration loop and inspect run state. Install it globally if you need it in your terminal:
+The Babysitter CLI (`babysitter`) is used to drive the orchestration loop and inspect run state. Install the metapackage globally if you need it in your terminal:
 
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
 ```
 
 ### Run Management
@@ -153,7 +153,7 @@ babysitter plugin:uninstall <plugin-name> --global
 
 ```bash
 babysitter harness:discover --json
-babysitter harness:invoke <name> --prompt "<text>"
+agent-platform invoke <name> --prompt "<text>"
 ```
 
 See the full [CLI Reference](docs/user-guide/reference/cli-reference.md) and [Slash Commands Reference](docs/user-guide/reference/slash-commands.md) for details.
@@ -172,7 +172,7 @@ npm run test:sdk
 npm run test:e2e:docker
 
 # Single test file
-cd packages/sdk && npx vitest run src/runtime/__tests__/someFile.test.ts
+cd packages/babysitter-sdk && npx vitest run src/runtime/__tests__/someFile.test.ts
 ```
 
 ### Building the SDK

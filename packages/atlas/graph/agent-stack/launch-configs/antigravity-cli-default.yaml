@@ -1,0 +1,28 @@
+nodeKind: LaunchConfig
+id: launch-config:antigravity.default
+attributes:
+  agentVersionId: agentVersion:antigravity:2-0-11
+  displayName: Antigravity CLI default launch
+  env: {}
+  commArgs: []
+  description: |-
+    Antigravity CLI default launch — no special flags.
+edges:
+  requires_capability: []
+
+---
+nodeKind: LaunchConfig
+id: launch-config:antigravity.dangerously-bypass-approvals-and-sandbox
+attributes:
+  agentVersionId: agentVersion:antigravity:2-0-11
+  displayName: Antigravity CLI dangerous bypass launch
+  env: {}
+  commArgs:
+    - --dangerously-skip-permissions
+  description: |-
+    Antigravity CLI launch recipe for `--dangerously-skip-permissions`,
+    which auto-approves all tool permission requests without prompting.
+    Intended for CI/test environments where interactive approval is
+    not possible.
+edges:
+  requires_capability: []

@@ -1,0 +1,111 @@
+---
+nodeKind: Tool
+id: tool:paypal
+attributes:
+  displayName: "PayPal"
+  homepageUrl: "https://developer.paypal.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Global digital payments platform for online and in-person transactions.
+    Provides REST APIs for payments, subscriptions, invoicing, and
+    payouts supporting multiple currencies and payment methods worldwide.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+  used_for:
+    - skill-area:payment-processing
+  alternative_to:
+    - target: tool:stripe
+      comparison: "Payment processing platforms"
+    - target: tool:square
+      comparison: "Payment processing platforms"
+    - target: tool:paddle
+      comparison: "Payment processing platforms"
+    - target: tool:braintree
+      comparison: "Payment processing platforms"
+---
+nodeKind: Tool
+id: tool:square
+attributes:
+  displayName: "Square"
+  homepageUrl: "https://squareup.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Payment and commerce platform for in-person, online, and mobile
+    payments. Provides point-of-sale hardware, e-commerce APIs, invoicing,
+    payroll, and inventory management for small to mid-size businesses.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+  used_for:
+    - skill-area:payment-processing
+  alternative_to:
+    - target: tool:stripe
+      comparison: "Payment processing platforms"
+    - target: tool:paypal
+      comparison: "Payment processing platforms"
+    - target: tool:paddle
+      comparison: "Payment processing platforms"
+    - target: tool:braintree
+      comparison: "Payment processing platforms"
+---
+nodeKind: Tool
+id: tool:paddle
+attributes:
+  displayName: "Paddle"
+  homepageUrl: "https://www.paddle.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Merchant of record payment infrastructure for SaaS businesses.
+    Handles global tax compliance, subscription billing, and payment
+    processing so vendors avoid managing tax obligations in each country.
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Ora surfaced Paddle for API integration, payments, and billing workflows."
+    - target: workflow:release-management
+      confidence: medium
+      evidence: "Merchant-of-record and subscription readiness can gate SaaS releases."
+  tool_used_by:
+    - target: skill-area:payment-processing
+  used_for:
+    - skill-area:payment-processing
+  alternative_to:
+    - target: tool:stripe
+      comparison: "Payment processing platforms"
+    - target: tool:paypal
+      comparison: "Payment processing platforms"
+    - target: tool:square
+      comparison: "Payment processing platforms"
+    - target: tool:braintree
+      comparison: "Payment processing platforms"
+---
+nodeKind: Tool
+id: tool:braintree
+attributes:
+  displayName: "Braintree"
+  homepageUrl: "https://www.braintreepayments.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    PayPal-owned full-stack payment platform for accepting credit cards,
+    PayPal, Venmo, and local payment methods. Provides client SDKs,
+    hosted fields, vaulting, and advanced fraud protection tools.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+  used_for:
+    - skill-area:payment-processing
+  alternative_to:
+    - target: tool:stripe
+      comparison: "Payment processing platforms"
+    - target: tool:paypal
+      comparison: "Payment processing platforms"
+    - target: tool:square
+      comparison: "Payment processing platforms"
+    - target: tool:paddle
+      comparison: "Payment processing platforms"

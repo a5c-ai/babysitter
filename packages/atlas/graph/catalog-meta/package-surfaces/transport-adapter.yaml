@@ -1,0 +1,26 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-transport-adapter
+attributes:
+  packageId: "@a5c-ai/transport-adapter"
+  packageName: "@a5c-ai/transport-adapter"
+  displayName: "Transport Adapter"
+  description: "Transport/proxy runtime seam for adapters launcher bridging. Handles model provider transport protocols and the adapters-proxy CLI for routing requests between harnesses and LLM providers."
+  role: "transport-proxy"
+  whenToUse: "Depend on this when you need to proxy LLM API traffic between harnesses and providers, or when adding support for a new model transport protocol."
+  workspacePath: packages/transport-adapter
+  moduleType: typescript
+  surfaceKinds:
+    - transport-runtime
+    - provider-ontology-source
+  sourceOfTruthRole: ontology-input
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:agent-catalog-graph
+  # `adapters-proxy` runtime CLI bin modeled as
+  # InteractionPrimitive[kind=cli-subcommand]. The package's transport-
+  # protocol handlers are already modeled as ModelTransportProtocol records
+  # and are NOT duplicated here.
+  exposes_subcommand:
+    - target: interaction-primitive:transport-adapter-adapters-proxy

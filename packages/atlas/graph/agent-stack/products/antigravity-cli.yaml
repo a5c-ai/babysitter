@@ -1,0 +1,22 @@
+nodeKind: AgentProduct
+id: agent:antigravity-cli
+attributes:
+  displayName: "Antigravity CLI"
+  vendor: "Google"
+  homepageUrl: "https://github.com/google-antigravity/antigravity-cli"
+  primarySurface: cli
+  supportTier: catalog-backed
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Google's next-generation command-line coding agent, successor to Gemini CLI.
+    Built in Go, drives Gemini and third-party models over the generateContent
+    API, supports SKILL.md workflows, rules, and MCP plugin system, and
+    integrates with the local workspace through file and shell tool use.
+edges:
+  has_version:
+    - agentVersion:antigravity:2-0-11
+    - agentVersion:antigravity:1-0-5
+  composed_of:
+    - target: language:go
+      role: core

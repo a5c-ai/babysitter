@@ -1,0 +1,430 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kradleinferenceservices.kradle.a5c.ai
+spec:
+  group: kradle.a5c.ai
+  scope: Namespaced
+  names:
+    plural: kradleinferenceservices
+    singular: kradleinferenceservice
+    kind: KradleInferenceService
+    shortNames:
+    - kis
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Format
+      type: string
+      jsonPath: .spec.modelFormat
+    - name: Protocol
+      type: string
+      jsonPath: .spec.inferenceProtocol
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - modelFormat
+            - storageUri
+            properties:
+              organizationRef:
+                type: string
+              modelFormat:
+                type: string
+                enum:
+                - sklearn
+                - xgboost
+                - lightgbm
+                - tensorflow
+                - pytorch
+                - onnx
+                - triton
+                - huggingface
+                - custom
+              modelVersion:
+                type: string
+              storageUri:
+                type: string
+              runtime:
+                type: string
+              inferenceProtocol:
+                type: string
+                enum:
+                - v1
+                - v2
+              resources:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              transformer:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              explainer:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              modelCatalog:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              featureFlags:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              rateLimits:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kradleservingruntimes.kradle.a5c.ai
+spec:
+  group: kradle.a5c.ai
+  scope: Namespaced
+  names:
+    plural: kradleservingruntimes
+    singular: kradleservingruntime
+    kind: KradleServingRuntime
+    shortNames:
+    - ksr
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - supportedModelFormats
+            - containers
+            properties:
+              organizationRef:
+                type: string
+              supportedModelFormats:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+              containers:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              resourceLimits:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              schedulingPolicy:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kradlemodelroutes.kradle.a5c.ai
+spec:
+  group: kradle.a5c.ai
+  scope: Namespaced
+  names:
+    plural: kradlemodelroutes
+    singular: kradlemodelroute
+    kind: KradleModelRoute
+    shortNames:
+    - kmr
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Model
+      type: string
+      jsonPath: .spec.modelName
+    - name: Type
+      type: string
+      jsonPath: .spec.routeType
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - modelName
+            - routeType
+            properties:
+              organizationRef:
+                type: string
+              modelName:
+                type: string
+                description: Logical model name that agents request
+              routeType:
+                type: string
+                enum:
+                - internal
+                - external
+              internal:
+                type: object
+                description: KServe internal routing configuration
+                properties:
+                  inferenceServiceRef:
+                    type: string
+                  protocol:
+                    type: string
+              external:
+                type: object
+                description: Cloud LLM external routing configuration
+                properties:
+                  provider:
+                    type: string
+                  endpoint:
+                    type: string
+                  model:
+                    type: string
+                  authSecretRef:
+                    type: string
+              priority:
+                type: integer
+                default: 100
+              enabled:
+                type: boolean
+                default: true
+              rateLimits:
+                type: object
+                properties:
+                  requestsPerMinute:
+                    type: integer
+                  tokensPerMinute:
+                    type: integer
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            properties:
+              phase:
+                type: string
+              conditions:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              resolvedEndpoint:
+                type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kradlevirtualmodels.kradle.a5c.ai
+spec:
+  group: kradle.a5c.ai
+  scope: Namespaced
+  names:
+    plural: kradlevirtualmodels
+    singular: kradlevirtualmodel
+    kind: KradleVirtualModel
+    shortNames:
+    - kvm
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Model
+      type: string
+      jsonPath: .spec.modelName
+    - name: Routes
+      type: integer
+      jsonPath: .status.resolvedRoutes
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - modelName
+            - routes
+            properties:
+              organizationRef:
+                type: string
+              modelName:
+                type: string
+                description: Logical model name that consumers request
+              routes:
+                type: array
+                description: Weighted route references for traffic distribution
+                items:
+                  type: object
+                  required:
+                  - modelRouteRef
+                  properties:
+                    modelRouteRef:
+                      type: string
+                    weight:
+                      type: integer
+                      default: 100
+                    priority:
+                      type: integer
+                      default: 100
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+              fallbackChain:
+                type: array
+                description: Ordered list of fallback route references
+                items:
+                  type: string
+              rules:
+                type: array
+                description: Declarative routing rules evaluated before weighted selection
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          field:
+                            type: string
+                          operator:
+                            type: string
+                            enum:
+                            - eq
+                            - neq
+                            - gt
+                            - lt
+                            - gte
+                            - lte
+                            - in
+                            - contains
+                            - matches
+                          value:
+                            x-kubernetes-preserve-unknown-fields: true
+                    action:
+                      type: object
+                      properties:
+                        route:
+                          type: string
+              hooks:
+                type: object
+                description: JS hook bodies for routing, transformation, and agentic lifecycle
+                properties:
+                  routeSelect:
+                    type: string
+                  requestTransform:
+                    type: string
+                  responseTransform:
+                    type: string
+                  sessionLifecycle:
+                    type: string
+                  observe:
+                    type: string
+                  onSessionStart:
+                    type: string
+                  onSessionEnd:
+                    type: string
+                  onTurnEnd:
+                    type: string
+                  onPreToolUse:
+                    type: string
+                  onPostToolUse:
+                    type: string
+                  onUserPromptSubmit:
+                    type: string
+                  onError:
+                    type: string
+                  onCompact:
+                    type: string
+              sessionConfig:
+                type: object
+                description: Session lifecycle management configuration
+                properties:
+                  enabled:
+                    type: boolean
+                    default: false
+                  maxTurns:
+                    type: integer
+                  escalationThreshold:
+                    type: integer
+                  stateFields:
+                    type: array
+                    items:
+                      type: string
+              enabled:
+                type: boolean
+                default: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            properties:
+              phase:
+                type: string
+              conditions:
+                type: array
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              resolvedRoutes:
+                type: integer
+              activeSessionCount:
+                type: integer

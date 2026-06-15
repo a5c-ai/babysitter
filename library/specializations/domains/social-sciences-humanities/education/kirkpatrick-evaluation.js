@@ -5,6 +5,13 @@
  * @outputs { success: boolean, evaluationPlan: object, instruments: array, analysisFramework: object, artifacts: array }
  * @recommendedSkills SK-EDU-001 (learning-needs-analysis), SK-EDU-009 (learning-analytics-interpretation), SK-EDU-003 (assessment-item-development)
  * @recommendedAgents AG-EDU-007 (learning-evaluation-analyst)
+ *
+ * @graph
+ *   domains: [domain:education]
+ *   specializations: [specialization:instructional-design]
+ *   skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

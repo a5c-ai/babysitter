@@ -1,0 +1,19 @@
+nodeKind: SkillArea
+id: skill-area:typescript-generic-programming
+attributes:
+  displayName: "TypeScript Generic Programming"
+  description: |
+    Advanced TypeScript types: conditional types, mapped types, template
+    literal types, recursive type aliases, variance, declaration-merging,
+    and type-level programming patterns used in libraries like Zod,
+    tRPC, and Drizzle.
+  requiresLanguages:
+    - language:typescript
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_language:
+    - language:typescript
+    - target: language:typescript

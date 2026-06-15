@@ -1,0 +1,11 @@
+nodeKind: OrgUnit
+id: org-unit:ml-team
+attributes:
+  displayName: "ML Team"
+  kind: team
+  description: |
+    Machine learning team — owns model training, eval, and deployment.
+edges:
+  has_member:
+    - target: role:ml-engineer
+    - target: role:data-scientist

@@ -1,0 +1,54 @@
+nodeKind: ProviderTranslation
+id: provider-translation:hermes:foundry
+attributes:
+  harness: hermes
+  provider: foundry
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  envMapping:
+    - envVar: AZURE_API_KEY
+      source: auth.apiKey
+      condition: present
+    - envVar: AZURE_OPENAI_API_KEY
+      source: auth.apiKey
+      condition: present
+    - envVar: AZURE_FOUNDRY_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: true
+  args: []
+  notes: >
+    Hermes azure-foundry provider reads AZURE_FOUNDRY_API_KEY env var.
+    Pass --provider azure-foundry CLI flag. No proxy needed.
+---
+nodeKind: ProviderTranslation
+id: provider-translation:hermes:anthropic
+attributes:
+  harness: hermes
+  provider: anthropic
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  envMapping:
+    - envVar: ANTHROPIC_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: false
+  args: []
+  notes: >
+    Route through proxy — hermes custom provider with proxy baseURL.
+---
+nodeKind: ProviderTranslation
+id: provider-translation:hermes:google
+attributes:
+  harness: hermes
+  provider: google
+  proxyRequired: true
+  proxyExposedTransport: openai-chat
+  envMapping:
+    - envVar: GOOGLE_API_KEY
+      source: auth.apiKey
+      condition: present
+  suppressNonAnthropicKey: true
+  args: []
+  notes: >
+    Hermes has a built-in gemini provider. No proxy needed.

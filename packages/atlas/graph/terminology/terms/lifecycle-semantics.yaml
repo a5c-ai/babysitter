@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:lifecycle-semantics
+attributes:
+  canonicalDefinitionId: definition:lifecycle-semantics.canonical
+  displayName: "LifecycleSemantics"
+  kind: lifecycle-state
+  references:
+    - "NodeKind:LifecycleSemantics"
+  description: |
+    Per-agent runtime lifecycle — hook mode, stop-hook mode, background tasks, checkpoints, plugin context
+edges:
+  applies_to:
+    - target: domain:software-engineering

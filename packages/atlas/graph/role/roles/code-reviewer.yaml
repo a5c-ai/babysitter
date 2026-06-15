@@ -1,0 +1,28 @@
+nodeKind: Role
+id: role:code-reviewer
+attributes:
+  displayName: "Code Reviewer"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+    - capability:supports-text-streaming
+  requiredDomains:
+    - domain:web-development
+  description: |
+    The Code Reviewer role.
+edges:
+  holds_responsibility:
+    - responsibility:code-review
+    - responsibility:code-review-coverage
+    - responsibility:knowledge-sharing
+  requires_expertise:
+    - target: skill-area:code-review-practice
+    - target: skill-area:sast
+    - target: skill-area:unit-testing
+    - target: skill-area:api-design
+    - target: skill-area:dependency-vulnerability-mgmt
+  requires_capability:
+    - target: capability:supports-tool-use
+    - target: capability:supports-text-streaming
+  applies_to:
+    - target: domain:web-development

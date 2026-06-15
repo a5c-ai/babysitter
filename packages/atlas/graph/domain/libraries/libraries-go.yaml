@@ -1,0 +1,48 @@
+---
+nodeKind: Library
+id: library:gorm
+attributes:
+  displayName: "GORM"
+  belongsToLanguageId: language:go
+  description: |
+    Go ORM with associations, hooks, migrations, and multi-driver
+    support (Postgres, MySQL, SQLite, SQL Server).
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:sqlx-go
+    - library:pgx
+    - library:gorm-v2
+---
+nodeKind: Library
+id: library:cobra
+attributes:
+  displayName: "Cobra"
+  belongsToLanguageId: language:go
+  description: |
+    Library for building powerful Go CLIs with nested commands,
+    flags, and shell completion (used by kubectl, gh, hugo).
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:cli-design
+  alternative_to:
+    - library:clap-rs
+---
+nodeKind: Library
+id: library:viper
+attributes:
+  displayName: "Viper"
+  belongsToLanguageId: language:go
+  description: |
+    Go configuration library — reads JSON/YAML/TOML/env/flags and
+    supports live reloading and remote backends.
+edges:
+  belongs_to_language:
+    - language:go
+  library_used_by:
+    - target: skill-area:configuration-management

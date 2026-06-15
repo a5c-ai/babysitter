@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:agent-recipe-blueprint
+attributes:
+  termAId: term:agent-recipe
+  termBId: term:blueprint
+  direction: bidirectional
+  note: |
+    "agent-recipe" is an informal alternative for the canonical Blueprint term.
+edges:
+  synonym_a:
+    - term:agent-recipe
+  synonym_b:
+    - term:blueprint

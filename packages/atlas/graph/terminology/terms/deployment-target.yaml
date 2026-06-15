@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:deployment-target
+attributes:
+  canonicalDefinitionId: definition:deployment-target.canonical
+  displayName: "DeploymentTarget"
+  kind: primitive
+  references:
+    - "NodeKind:DeploymentTarget"
+  description: |
+    A named Kubernetes-cluster (or local minikube) target that the
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:cloud-infra

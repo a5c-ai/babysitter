@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:redis-ops
+attributes:
+  displayName: "Redis Operations"
+  parentDomainId: domain:databases
+  description: |
+    Redis operations — clustering, persistence, eviction policies,
+    Sentinel/Cluster topology, and latency tuning.
+edges:
+  specializes:
+    - domain:databases

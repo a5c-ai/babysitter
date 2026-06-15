@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: error-management
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:research-engineer]
 ---
 
 # Noise Characterizer

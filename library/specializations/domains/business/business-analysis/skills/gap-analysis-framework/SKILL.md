@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-005
   category: Analysis
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:process-improvement]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:strategic-planner]
 ---
 
 # Gap Analysis Framework

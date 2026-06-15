@@ -9,6 +9,12 @@ expertise:
   - Build vs. buy vs. partner decisions
   - Platform strategy
   - Business model innovation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:competitive-intelligence]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Product Strategist Agent

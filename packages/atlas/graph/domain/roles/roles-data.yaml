@@ -1,0 +1,171 @@
+nodeKind: Role
+id: role:data-scientist
+attributes:
+  displayName: "Data Scientist"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Applies statistical modeling, machine learning, and data analysis to generate
+    insights that drive product and business decisions. Formulates hypotheses,
+    designs experiments, and communicates findings to both technical and non-technical
+    audiences. Collaborates with data engineers to productionize models and with
+    product teams to embed intelligence into features.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:data-quality
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:data-science
+      level: expert
+    - target: domain:databases
+      level: intermediate
+    - target: specialization:algorithms-optimization
+      level: intermediate
+    - target: domain:scientific-computing
+      level: intermediate
+---
+nodeKind: Role
+id: role:data-analyst
+attributes:
+  displayName: "Data Analyst"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Explores and interprets business and product data to answer operational questions
+    and surface actionable insights for stakeholders. Builds reports, dashboards, and
+    ad-hoc analyses using SQL and BI tools, translating raw numbers into clear
+    narratives. Works closely with product managers, finance, and operations teams
+    to track KPIs and identify areas for improvement.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+    - responsibility:data-quality
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:data-science
+      level: intermediate
+    - target: domain:databases
+      level: expert
+    - target: specialization:data-engineering-analytics
+      level: intermediate
+---
+nodeKind: Role
+id: role:analytics-engineer
+attributes:
+  displayName: "Analytics Engineer"
+  isAgentic: false
+  automatability: 0.8
+  description: |
+    Sits at the intersection of data engineering and analytics, owning the transformation
+    layer that turns raw data warehouse tables into clean, reliable, and well-documented
+    dimensional models. Builds and maintains dbt projects, defines data contracts, and
+    partners with analysts and data scientists to ensure the semantic layer accurately
+    reflects business logic. Champions data testing, documentation, and modeling best
+    practices across the data organization.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:documentation
+    - responsibility:code-review
+    - responsibility:performance-optimization
+  requires_skill:
+    - target: domain:data-engineering
+      level: expert
+    - target: specialization:data-engineering-analytics
+      level: expert
+    - target: domain:databases
+      level: expert
+---
+nodeKind: Role
+id: role:bi-developer
+attributes:
+  displayName: "BI Developer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Designs and builds business intelligence reports, dashboards, and semantic models
+    that empower stakeholders to self-serve their data needs. Translates business
+    requirements into intuitive visualizations and ensures BI assets perform well
+    at scale. Partners with data analysts and analytics engineers to curate and
+    validate the data foundations underlying BI solutions.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:data-quality
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:data-science
+      level: intermediate
+    - target: domain:databases
+      level: expert
+    - target: specialization:data-engineering-analytics
+      level: intermediate
+---
+nodeKind: Role
+id: role:research-scientist
+attributes:
+  displayName: "Research Scientist"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Conducts original research into novel algorithms, models, and techniques relevant
+    to the organization's technology domain, publishing results internally and
+    externally. Evaluates state-of-the-art approaches from academic literature and
+    translates promising directions into practical experiments. Collaborates with
+    ML engineers to transfer validated ideas from research prototype to production
+    deployment.
+  seniority: staff
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:knowledge-sharing
+    - responsibility:documentation
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:data-science
+      level: authoritative
+    - target: domain:scientific-computing
+      level: expert
+    - target: specialization:algorithms-optimization
+      level: expert
+    - target: domain:bioinformatics
+      level: novice
+---
+nodeKind: Role
+id: role:ml-ops-engineer
+attributes:
+  displayName: "MLOps Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Builds and maintains the infrastructure and tooling that enables data scientists
+    and ML engineers to train, evaluate, deploy, and monitor machine learning models
+    in production efficiently. Owns the ML platform stack including experiment
+    tracking, feature stores, model registries, and serving infrastructure. Bridges
+    the operational gap between research and production, ensuring models degrade
+    gracefully and can be retrained and redeployed with minimal friction.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:deployment-management
+    - responsibility:on-call
+    - responsibility:capacity-planning
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:ml-ops
+      level: expert
+    - target: domain:cloud-infra
+      level: expert
+    - target: specialization:devops-sre-platform
+      level: intermediate
+    - target: specialization:k8s-ops
+      level: intermediate

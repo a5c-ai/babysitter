@@ -1,0 +1,61 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-tasks-adapter
+attributes:
+  packageId: "@a5c-ai/tasks-adapter"
+  packageName: "@a5c-ai/tasks-adapter"
+  displayName: "Tasks Adapter"
+  description: "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing. Manages breakpoint questions, responder routing, and answer verification for human-in-the-loop workflows."
+  role: "breakpoint-runtime"
+  whenToUse: "Depend on this when you need to ask humans questions during agent runs, manage breakpoint responders, or implement custom breakpoint backends with cryptographic answer proofs."
+  workspacePath: packages/tasks-adapter
+  moduleType: typescript
+  surfaceKinds:
+    - breakpoint-runtime
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:adapters-hooks-global
+  exposes_subcommand:
+    - target: interaction-primitive:tasks-adapter-cli-ask
+    - target: interaction-primitive:tasks-adapter-cli-responders
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints
+    - target: interaction-primitive:tasks-adapter-cli-server
+    - target: interaction-primitive:tasks-adapter-cli-responder-loop
+    - target: interaction-primitive:tasks-adapter-cli-auth
+    - target: interaction-primitive:tasks-adapter-cli-auth-login
+    - target: interaction-primitive:tasks-adapter-cli-auth-server-set
+    - target: interaction-primitive:tasks-adapter-cli-auth-server-clear
+    - target: interaction-primitive:tasks-adapter-cli-auth-token-set
+    - target: interaction-primitive:tasks-adapter-cli-auth-token-clear
+    - target: interaction-primitive:tasks-adapter-cli-auth-logout
+    - target: interaction-primitive:tasks-adapter-cli-auth-status
+    - target: interaction-primitive:tasks-adapter-cli-auth-keygen
+    - target: interaction-primitive:tasks-adapter-cli-auth-key-push
+    - target: interaction-primitive:tasks-adapter-cli-auth-keys
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-pending
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-answer
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-status
+    - target: interaction-primitive:tasks-adapter-cli-breakpoints-poll
+    - target: interaction-primitive:tasks-adapter-cli-responders-list
+    - target: interaction-primitive:tasks-adapter-cli-responders-show
+    - target: interaction-primitive:tasks-adapter-cli-server-start
+  exposes_endpoint:
+    - target: api-endpoint:tasks-adapter-mcp-streamable
+    - target: api-endpoint:tasks-adapter-mcp-healthz
+    - target: api-endpoint:tasks-adapter-server-client-questions-create
+    - target: api-endpoint:tasks-adapter-server-client-questions-get
+    - target: api-endpoint:tasks-adapter-server-client-questions-cancel
+    - target: api-endpoint:tasks-adapter-server-client-questions-list
+    - target: api-endpoint:tasks-adapter-server-client-experts-questions
+    - target: api-endpoint:tasks-adapter-server-client-questions-answers
+    - target: api-endpoint:tasks-adapter-server-client-experts-list
+    - target: api-endpoint:tasks-adapter-server-client-questions-claim
+  has_payload_schema:
+    - target: shared-context-spec:tasks-adapter-breakpoint-context
+    - target: shared-context-spec:tasks-adapter-breakpoint-routing
+    - target: shared-context-spec:tasks-adapter-breakpoint-answer
+    - target: shared-context-spec:tasks-adapter-proven-breakpoint-answer
+    - target: shared-context-spec:tasks-adapter-responder-profile
+    - target: shared-context-spec:tasks-adapter-backend-iface

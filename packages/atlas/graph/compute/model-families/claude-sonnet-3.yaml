@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:claude-sonnet-3
+attributes:
+  displayName: "Claude Sonnet 3 (legacy)"
+  vendor: "Anthropic"
+  homepageUrl: "https://docs.anthropic.com/en/docs/about-claude/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-sonnet-3-5@current

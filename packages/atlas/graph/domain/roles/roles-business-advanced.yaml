@@ -1,0 +1,268 @@
+nodeKind: Role
+id: role:financial-analyst
+attributes:
+  displayName: "Financial Analyst"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Models financial performance, evaluates investment opportunities, and produces
+    reports that guide capital allocation decisions for business units and senior
+    leadership. Maintains financial forecasts, tracks actuals against budget,
+    and performs variance analysis to surface actionable insights. Partners with
+    accounting, treasury, and strategy teams to support earnings cycles and
+    investor communications.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:financial-analysis
+    - responsibility:budget-management
+    - responsibility:investor-relations
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:finance
+      level: expert
+    - target: domain:capital-markets
+      level: intermediate
+    - target: domain:business-intelligence
+      level: intermediate
+---
+nodeKind: Role
+id: role:hr-manager
+attributes:
+  displayName: "HR Manager"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Oversees the full employee lifecycle from onboarding through offboarding,
+    ensuring policies, practices, and benefits programs attract, develop, and
+    retain talent across the organization. Manages employee relations cases,
+    coordinates performance review cycles, and partners with leadership on
+    workforce planning and organizational design. Maintains compliance with
+    labor regulations and fosters a healthy, equitable workplace culture.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:talent-acquisition
+    - responsibility:training-development
+    - responsibility:compliance-monitoring
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:human-resources
+      level: expert
+    - target: domain:legal
+      level: novice
+---
+nodeKind: Role
+id: role:talent-recruiter
+attributes:
+  displayName: "Talent Recruiter"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Sources, screens, and engages candidates across technical and non-technical
+    roles, building diverse pipelines through job boards, referrals, and proactive
+    outreach. Partners with hiring managers to define role requirements, calibrate
+    assessments, and coordinate structured interviews that deliver equitable,
+    data-informed hiring decisions. Tracks funnel metrics and continuously improves
+    time-to-fill and candidate experience.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:talent-acquisition
+    - responsibility:stakeholder-communication
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:human-resources
+      level: expert
+---
+nodeKind: Role
+id: role:marketing-strategist
+attributes:
+  displayName: "Marketing Strategist"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Develops comprehensive marketing strategies that align brand positioning,
+    audience targeting, and channel mix with business growth objectives. Conducts
+    market research and competitive analysis to identify opportunities, then
+    translates insights into campaign briefs, messaging frameworks, and
+    go-to-market plans. Evaluates performance across digital and offline channels
+    to continuously refine strategy and improve ROI.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:market-research
+    - responsibility:strategic-planning
+    - responsibility:brand-management
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:marketing
+      level: expert
+    - target: domain:digital-marketing
+      level: expert
+    - target: domain:strategy
+      level: intermediate
+---
+nodeKind: Role
+id: role:content-strategist
+attributes:
+  displayName: "Content Strategist"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Defines the editorial direction, content architecture, and publishing cadence
+    that support brand storytelling and audience acquisition across web, social,
+    and product surfaces. Conducts content audits, builds content calendars, and
+    collaborates with writers, designers, and SEO specialists to produce high-impact
+    content. Measures content performance through engagement and conversion metrics
+    to iterate on strategy.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:brand-management
+    - responsibility:metric-definition
+    - responsibility:customer-journey-mapping
+  requires_skill:
+    - target: domain:marketing
+      level: expert
+    - target: domain:web-development
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:supply-chain-analyst
+attributes:
+  displayName: "Supply Chain Analyst"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Analyzes end-to-end supply chain data to identify inefficiencies, cost reduction
+    opportunities, and resilience gaps across sourcing, production, and distribution.
+    Builds demand forecasts, tracks supplier performance metrics, and supports
+    inventory optimization initiatives. Collaborates with procurement, logistics,
+    and operations teams to implement process improvements and contingency plans.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:supply-chain-optimization
+    - responsibility:financial-analysis
+    - responsibility:metric-definition
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:supply-chain
+      level: expert
+    - target: domain:logistics
+      level: intermediate
+    - target: domain:business-intelligence
+      level: intermediate
+---
+nodeKind: Role
+id: role:operations-analyst
+attributes:
+  displayName: "Operations Analyst"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Examines operational workflows and business processes to uncover bottlenecks,
+    redundancies, and improvement opportunities, then models and pilots solutions
+    that increase efficiency and reduce cost. Builds dashboards and reports that
+    give operational leadership real-time visibility into key performance indicators.
+    Partners with cross-functional teams to implement and sustain process changes.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:strategic-planning
+    - responsibility:financial-analysis
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:operations
+      level: expert
+    - target: domain:business-intelligence
+      level: intermediate
+---
+nodeKind: Role
+id: role:legal-advisor
+attributes:
+  displayName: "Legal Advisor"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Provides proactive legal guidance on commercial, regulatory, and operational
+    matters, reviewing contracts, policies, and business practices to identify and
+    mitigate legal exposure. Advises on applicable laws and regulations across
+    jurisdictions, supports contract drafting and negotiation, and coordinates with
+    external counsel on complex or specialized matters. Acts as a trusted partner
+    to business teams navigating compliance obligations and risk trade-offs.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:regulatory-compliance
+    - responsibility:contract-negotiation
+    - responsibility:risk-assessment
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:legal
+      level: expert
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:procurement-manager
+attributes:
+  displayName: "Procurement Manager"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Leads the strategic sourcing and procurement function, developing supplier
+    strategies, managing the vendor lifecycle, and negotiating contracts that
+    balance cost, quality, and supply security. Establishes procurement policies
+    and approval workflows, monitors supplier performance, and ensures compliance
+    with regulatory and internal governance requirements. Collaborates with
+    finance and legal to manage total cost of ownership and contractual risk.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:procurement
+    - responsibility:vendor-evaluation
+    - responsibility:contract-negotiation
+    - responsibility:supply-chain-optimization
+    - responsibility:budget-management
+  requires_skill:
+    - target: domain:procurement
+      level: expert
+    - target: domain:supply-chain
+      level: intermediate
+    - target: domain:legal
+      level: novice
+---
+nodeKind: Role
+id: role:strategic-planner
+attributes:
+  displayName: "Strategic Planner"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Develops and maintains the organization's long-range strategic plans by
+    synthesizing market intelligence, competitive dynamics, and internal capability
+    assessments into coherent strategic options. Facilitates strategy development
+    processes with senior leadership, translates agreed strategies into roadmaps
+    and OKRs, and tracks execution progress against strategic milestones. Produces
+    board-level presentations and strategic narratives that align the organization.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:strategic-planning
+    - responsibility:market-research
+    - responsibility:stakeholder-communication
+    - responsibility:investor-relations
+    - responsibility:partnership-development
+  requires_skill:
+    - target: domain:strategy
+      level: expert
+    - target: domain:finance
+      level: intermediate
+    - target: domain:business-intelligence
+      level: intermediate

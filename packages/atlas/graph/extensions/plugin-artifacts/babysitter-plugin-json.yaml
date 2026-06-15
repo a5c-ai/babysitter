@@ -1,0 +1,18 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-claude-plugin-manifest
+attributes:
+  artifactId: plugin-artifact:babysitter-claude-plugin-manifest
+  displayName: "babysitter claude-code plugin.json (v5)"
+  targetId: plugin-target:claude-code
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - "shell-hooks"
+    - "markdown-skills"
+  contextFiles:
+    - plugins/babysitter/plugin.json
+    - plugins/babysitter/skills/babysit/SKILL.md
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

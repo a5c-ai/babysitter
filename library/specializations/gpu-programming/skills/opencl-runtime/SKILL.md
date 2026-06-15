@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: opencl-development
   backlog-id: SK-003
+graph:
+  domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:opencl-programming]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # opencl-runtime

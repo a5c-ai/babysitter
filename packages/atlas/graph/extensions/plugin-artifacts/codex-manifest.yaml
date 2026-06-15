@@ -1,0 +1,16 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:codex-manifest
+attributes:
+  artifactId: plugin-artifact:codex-manifest
+  displayName: "Codex plugin manifest"
+  targetId: plugin-target:codex
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "package.json + hooks.json"
+  scriptVariants:
+    - "package-json commands"
+  contextFiles:
+    - packages/extensions-adapter/src/targets/codex.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

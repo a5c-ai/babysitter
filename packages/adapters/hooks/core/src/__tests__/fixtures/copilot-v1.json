@@ -1,0 +1,71 @@
+{
+  "version": "v1",
+  "adapter": "copilot",
+  "description": "GitHub Copilot CLI native hook event payloads for compatibility regression testing",
+  "events": [
+    {
+      "nativeEventName": "sessionStart",
+      "stdin": {
+        "event": "sessionStart",
+        "cwd": "/home/user/project",
+        "workspace": "/home/user/project"
+      },
+      "env": {},
+      "expected": {
+        "phase": "session.start",
+        "supportLevel": "native",
+        "adapter": "copilot"
+      }
+    },
+    {
+      "nativeEventName": "preToolUse",
+      "stdin": {
+        "event": "preToolUse",
+        "cwd": "/home/user/project",
+        "workspace": "/home/user/project",
+        "toolName": "bash",
+        "toolCallId": "call-abc-123",
+        "toolInput": { "command": "rm -rf /" }
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.before",
+        "supportLevel": "native",
+        "adapter": "copilot",
+        "payloadKeys": ["toolName", "toolCallId", "toolInput"]
+      }
+    },
+    {
+      "nativeEventName": "postToolUse",
+      "stdin": {
+        "event": "postToolUse",
+        "cwd": "/home/user/project",
+        "workspace": "/home/user/project",
+        "toolName": "bash",
+        "toolCallId": "call-abc-123",
+        "toolResponse": { "stdout": "Permission denied", "exitCode": 1 }
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.after",
+        "supportLevel": "native",
+        "adapter": "copilot"
+      }
+    },
+    {
+      "nativeEventName": "userPromptSubmitted",
+      "stdin": {
+        "event": "userPromptSubmitted",
+        "cwd": "/home/user/project",
+        "workspace": "/home/user/project",
+        "prompt": "Fix the login bug in auth.ts"
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.user_prompt_submitted",
+        "supportLevel": "native",
+        "adapter": "copilot"
+      }
+    }
+  ]
+}

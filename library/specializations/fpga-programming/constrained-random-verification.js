@@ -17,6 +17,12 @@
  * - SystemVerilog for Verification: https://verificationacademy.com/
  * - Constrained Random Verification: https://www.mentor.com/
  * - Coverage-Driven Verification: https://www.cadence.com/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:hardware-software-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

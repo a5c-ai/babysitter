@@ -1,0 +1,22 @@
+nodeKind: Language
+id: language:crystal
+attributes:
+  displayName: "Crystal"
+  paradigms:
+    - imperative
+    - object-oriented
+  description: |
+    Crystal is a statically-typed, compiled, object-oriented language with a
+    Ruby-inspired syntax. It aims to offer Ruby's developer ergonomics with
+    C-level performance by compiling to native machine code via LLVM.
+
+    Crystal's type system uses structural typing and union types, and its
+    compiler infers most types so annotations are rarely needed. Fibers and
+    channels provide lightweight concurrency (CSP-style). The Shards package
+    manager handles dependencies. Popular use cases include high-performance
+    CLI tools, web APIs (Kemal, Lucky frameworks), and systems where
+    migrating from Ruby while gaining performance is desired.
+edges:
+  applies_to:
+    - target: domain:web-development
+    - target: domain:software-engineering

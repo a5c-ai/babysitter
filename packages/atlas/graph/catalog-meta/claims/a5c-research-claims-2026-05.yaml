@@ -1,0 +1,131 @@
+nodeKind: Claim
+id: claim:a5c-research-npm-metapackage-current
+attributes:
+  subjectId: agent:a5c
+  subjectKind: AgentProduct
+  attribute: installPackage
+  value: '@a5c-ai/babysitter'
+  statement: |-
+    Catalog research observed @a5c-ai/babysitter as the public npm metapackage for a5c installation, with latest version 5.0.0 on 2026-05-04.
+  evidenceSourceIds:
+    - evidence:a5c-research-npm-metapackage
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds web-researched package provenance for the a5c AgentProduct.
+edges:
+  about_subject:
+    - agent:a5c
+  backed_by_evidence:
+    - evidence:a5c-research-npm-metapackage
+---
+nodeKind: Claim
+id: claim:a5c-research-sdk-package-current
+attributes:
+  subjectId: agent-runtime-impl:a5c.runtime@current
+  subjectKind: AgentRuntimeImpl
+  attribute: sdkPackage
+  value: '@a5c-ai/babysitter-sdk'
+  statement: |-
+    Catalog research observed @a5c-ai/babysitter-sdk as the npm package for Babysitter SDK storage and run-registry primitives, with latest version 5.0.0 on 2026-05-04.
+  evidenceSourceIds:
+    - evidence:a5c-research-sdk-npm-package
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds web-researched runtime package provenance for a5c.
+edges:
+  about_subject:
+    - agent-runtime-impl:a5c.runtime@current
+  backed_by_evidence:
+    - evidence:a5c-research-sdk-npm-package
+---
+nodeKind: Claim
+id: claim:a5c-research-layer-completeness
+attributes:
+  subjectId: agent-version:a5c@current
+  subjectKind: AgentVersion
+  attribute: graphCompleteness
+  value: full-layer-coverage
+  statement: |-
+    Catalog research verified that agent-version:a5c@current composes the expected full stack: AgentCoreImpl, AgentRuntimeImpl, AgentPlatformImpl, and AgentUIImpl.
+  evidenceSourceIds:
+    - evidence:a5c-research-local-core-model
+    - evidence:a5c-research-local-runtime-model
+    - evidence:a5c-research-local-platform-model
+    - evidence:a5c-research-local-ui-model
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: No implementation layer gap remained; all expected stack layers are present.
+edges:
+  about_subject:
+    - agent-version:a5c@current
+  backed_by_evidence:
+    - evidence:a5c-research-local-core-model
+    - evidence:a5c-research-local-runtime-model
+    - evidence:a5c-research-local-platform-model
+    - evidence:a5c-research-local-ui-model
+---
+nodeKind: Claim
+id: claim:a5c-research-unified-transport-profile
+attributes:
+  subjectId: agent-core-impl:a5c.core@current
+  subjectKind: AgentCoreImpl
+  attribute: supportedTransportProtocols
+  value: anthropic-messages openai-responses openai-chat-completions gemini-generate-content openai-compat openrouter github-copilot
+  statement: |-
+    Catalog research verified the local a5c core model as a unified transport profile spanning Anthropic Messages, OpenAI Responses, OpenAI Chat Completions, Gemini Generate Content, OpenAI-compatible APIs, OpenRouter, and GitHub Copilot.
+  evidenceSourceIds:
+    - evidence:a5c-research-local-core-model
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds research provenance for the a5c core transport profile.
+edges:
+  about_subject:
+    - agent-core-impl:a5c.core@current
+  backed_by_evidence:
+    - evidence:a5c-research-local-core-model
+---
+nodeKind: Claim
+id: claim:a5c-research-ui-primitives
+attributes:
+  subjectId: agent-ui-impl:a5c.ui@current
+  subjectKind: AgentUIImpl
+  attribute: supportsInteractionPrimitives
+  value: /a5c:install /a5c:configure /a5c:plugins /model command-palette
+  statement: |-
+    Catalog research verified the a5c UI model as TUI and CLI surfaces exposing install, configure, plugin browse, model picker, and command palette interaction primitives.
+  evidenceSourceIds:
+    - evidence:a5c-research-local-ui-model
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Adds research provenance for the currently modeled a5c UI interaction primitives.
+edges:
+  about_subject:
+    - agent-ui-impl:a5c.ui@current
+  backed_by_evidence:
+    - evidence:a5c-research-local-ui-model
+

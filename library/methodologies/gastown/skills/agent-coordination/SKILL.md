@@ -2,17 +2,14 @@
 name: agent-coordination
 description: Coordinate Crew (persistent) and Polecat (transient) agents using Gas Town's hook-based work distribution and GUPP principle.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Agent Coordination
-
-## Overview
-
-Coordinate multi-agent work using Gas Town's role hierarchy: Mayor assigns, Crew persists, Polecats execute transiently, and hooks drive the GUPP principle ("If there is work on your Hook, YOU MUST RUN IT").
-
-## When to Use
-
-- Assigning beads to agents
 - Managing agent handoffs
 - Nudging stuck agents
 - Coordinating Crew and Polecat workers

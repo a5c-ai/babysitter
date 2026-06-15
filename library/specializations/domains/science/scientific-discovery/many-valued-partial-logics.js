@@ -3,6 +3,13 @@
  * @description More than two truth values; explicitly represent "unknown" for reasoning under vagueness
  * @inputs { propositions: array, truthValueAssignments: object, logicType: string, inferenceRules: array, outputDir: string }
  * @outputs { success: boolean, truthValues: object, inferences: array, partialModel: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

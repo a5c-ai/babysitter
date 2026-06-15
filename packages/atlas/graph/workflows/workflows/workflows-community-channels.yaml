@@ -1,0 +1,346 @@
+---
+nodeKind: Workflow
+id: workflow:discord-community-management
+attributes:
+  displayName: "Discord Community Management"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages the Discord community server operations and engagement — designing
+    and maintaining channel and category structure aligned with community
+    topics and user journey stages, configuring bot automations for onboarding
+    flows, role assignment, FAQ responses, and moderation actions, managing
+    role hierarchies that reflect community contribution levels and access
+    permissions, running engagement programs including weekly challenges, voice
+    hangouts, and themed discussion threads, monitoring server health metrics
+    including daily active users, message volume by channel, and voice
+    participation rates, coordinating community champion and moderator
+    volunteer programs with recognition rewards, managing integration with
+    external tools for ticket creation, announcement syndication, and
+    analytics, and reviewing server settings for security and anti-raid
+    protections. Produces Discord engagement dashboards, channel activity
+    reports, and bot effectiveness metrics. Excludes community strategy and
+    cross-platform management.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:end-user
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:forum-community-management
+attributes:
+  displayName: "Forum Community Management"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Manages the community forum platform operations and quality — organizing
+    category and tag taxonomies that enable discoverability and reduce
+    duplicate posts, configuring moderation queues with automated spam
+    detection and new-user post approval workflows, implementing reputation
+    systems that reward quality contributions through trust levels and
+    privileges, managing the unanswered question queue with staff response SLAs
+    and community expert pings, tracking thread resolution rates and
+    time-to-answer metrics by category, promoting high-quality posts to
+    knowledge base articles or featured content, coordinating community expert
+    programs where power users earn recognition for helping others, analyzing
+    search patterns to identify content gaps where users seek but cannot find
+    answers, and maintaining SEO optimization for forum content indexing and
+    external discoverability. Produces forum health dashboards, unanswered
+    question reports, and reputation system analytics. Excludes platform
+    development and migration.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:technical-writer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:open-source-community-stewardship
+attributes:
+  displayName: "Open Source Community Stewardship"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Stewards open source project community health and contributor
+    engagement — designing contributor onboarding pathways from first issue to
+    merged PR including good-first-issue curation and mentorship pairing,
+    managing issue triage workflows with labeling conventions, priority
+    assignments, and staleness policies, coordinating release communication
+    including changelogs, migration guides, and deprecation notices across
+    GitHub, blog, and social channels, reviewing and responding to RFCs and
+    feature proposals from external contributors, maintaining contribution
+    guidelines, code of conduct, and governance documentation, tracking
+    contributor funnel metrics from star/fork through issue comment through PR
+    submission, recognizing top contributors through release notes mentions and
+    contributor spotlight programs, and managing the relationship between open
+    source community needs and commercial product roadmap. Produces contributor
+    funnel analytics, release communication plans, and community governance
+    health reports. Excludes core development and commercial licensing
+    decisions.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:open-source-program-office
+---
+nodeKind: Workflow
+id: workflow:developer-advocacy-content-pipeline
+attributes:
+  displayName: "Developer Advocacy Content Pipeline"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end content production pipeline for developer
+    advocacy — maintaining an editorial calendar of blog posts, conference
+    talks, video tutorials, live streams, and code sample repositories aligned
+    with product launches and community interest signals, coordinating content
+    ideation through developer feedback analysis, trending topic monitoring,
+    and search demand research, managing the writing and review workflow from
+    outline through technical review through publication, producing demo
+    applications and code samples that showcase real-world use cases with
+    maintained, runnable repositories, coordinating conference CFP submissions
+    and talk preparation including slide design and rehearsal scheduling,
+    repurposing long-form content into social media threads, short videos, and
+    community discussion starters, tracking content performance across views,
+    engagement, and downstream developer activation, and maintaining a content
+    inventory with refresh cadences for evergreen pieces. Produces content
+    calendar dashboards, performance attribution reports, and pipeline velocity
+    metrics. Excludes product documentation and marketing campaign content.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:technical-writer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:community-feedback-to-product-loop
+attributes:
+  displayName: "Community Feedback to Product Loop"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Operates the structured feedback loop from community channels to product
+    decisions — aggregating feature requests and pain points surfaced across
+    forum posts, Discord discussions, GitHub issues, and social mentions into a
+    unified feedback taxonomy, implementing community voting mechanisms that
+    surface high-demand features with transparent priority signals, analyzing
+    feedback volume and sentiment trends by product area to identify emerging
+    unmet needs, coordinating bi-weekly feedback synthesis reviews with product
+    managers where community signal informs backlog prioritization,
+    communicating roadmap influence back to the community through public
+    roadmap updates and shipped-feature attribution, tracking the percentage of
+    shipped features that originated from community feedback, managing
+    expectation setting when community requests conflict with product strategy,
+    and maintaining a public feature request tracker with status updates.
+    Produces community feedback digests, roadmap influence reports, and
+    closed-loop communication metrics. Excludes product specification and
+    development execution.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:product-designer
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:product-team
+    - target: org-unit:community-team
+---
+nodeKind: Workflow
+id: workflow:hackathon-organization
+attributes:
+  displayName: "Hackathon Organization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes community hackathons from concept through winner
+    announcement — designing hackathon themes aligned with product capabilities
+    and community interest areas, defining judging criteria with weighted
+    rubrics covering innovation, technical execution, and practical
+    applicability, sourcing and coordinating sponsors including prize
+    allocation and brand visibility commitments, managing registration flows
+    with team formation support and skill-matching for solo participants,
+    preparing starter kits including API documentation, boilerplate code, and
+    sandbox environments, coordinating day-of logistics including kickoff
+    presentations, mentor office hours, and submission deadlines, running
+    judging processes with diverse panels and structured evaluation workflows,
+    producing post-event content showcasing winning projects with participant
+    testimonials, and tracking hackathon outcomes including projects that
+    evolve into integrations or community tools. Produces hackathon planning
+    timelines, participant engagement reports, and post-event impact analyses.
+    Excludes ongoing developer program management.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:event-management
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:developer-relations-team
+    - target: org-unit:community-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:user-group-chapter-management
+attributes:
+  displayName: "User Group Chapter Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Coordinates the network of local user group chapters and meetup
+    programs — establishing chapter launch criteria including minimum local
+    community size, volunteer leader identification, and regional market
+    relevance, recruiting and onboarding chapter leaders with structured
+    playbooks covering event planning, speaker sourcing, and community building
+    best practices, coordinating meetup scheduling across chapters to avoid
+    conflicts and enable cross-chapter speaker sharing, providing chapter
+    leaders with swag budgets, venue sponsorship frameworks, and content
+    packages, managing a speaker bureau that connects internal experts and
+    community champions with chapter events, tracking chapter health metrics
+    including attendance trends, new member acquisition, and leader engagement
+    levels, facilitating cross-chapter knowledge sharing through leader
+    community channels and quarterly syncs, and identifying underperforming
+    chapters for intervention or graceful sunset. Produces chapter network
+    dashboards, leader engagement reports, and geographic coverage analyses.
+    Excludes individual event logistics and conference organization.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:planner
+    - target: role:end-user
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:event-management
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+---
+nodeKind: Workflow
+id: workflow:community-gamification-design
+attributes:
+  displayName: "Community Gamification Design"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Designs and iterates on community gamification systems that drive
+    meaningful engagement — defining badge and achievement taxonomies aligned
+    with desired community behaviors including helping others, creating
+    content, reporting bugs, and attending events, implementing tiered level
+    systems with progression mechanics that reward sustained contribution over
+    one-time activity, designing time-limited challenges and seasonal events
+    that create urgency and community bonding moments, building leaderboard
+    systems with multiple dimensions to avoid winner-take-all dynamics and
+    encourage diverse participation, defining reward mechanics including
+    digital recognition, physical swag, feature access, and exclusive event
+    invitations, analyzing gamification system health through participation
+    rates, completion percentages, and engagement lift measurements,
+    identifying gaming or exploitation patterns and adjusting rules to maintain
+    system integrity, and correlating gamification participation with long-term
+    community retention and contribution depth. Produces gamification system
+    health reports, engagement lift analyses, and reward economics dashboards.
+    Excludes platform development and community strategy.
+edges:
+  involves_role:
+    - target: role:devrel
+    - target: role:product-designer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:community-management
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:community-team
+    - target: org-unit:developer-relations-team
+    - target: org-unit:design-team

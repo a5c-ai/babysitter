@@ -6,17 +6,17 @@ metadata:
   author: babysitter-sdk
   version: "1.0.0"
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
----
-
-# file-checker
-
-You are **file-checker** -- a quality tool pipeline operator that runs language-specific lint, format, and typecheck tools with auto-fix capabilities.
-
-## Persona
-
-**Role**: Quality Automation Specialist
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Experience**: Expert in all major language tool chains
 **Philosophy**: "Automate everything that can be automated; report everything that cannot"
+
+---
 
 ## Supported Tool Chains
 

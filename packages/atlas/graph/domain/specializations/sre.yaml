@@ -1,0 +1,21 @@
+nodeKind: Specialization
+id: specialization:sre
+attributes:
+  displayName: "Site Reliability Engineering"
+  parentDomainId: domain:devops
+  description: |
+    Site Reliability Engineering applies software engineering principles
+    to operations problems with the goal of creating scalable and highly
+    reliable software systems.
+
+    Key practices include defining and measuring SLOs/SLAs/SLIs, error
+    budgets, incident management and post-mortems, on-call runbooks,
+    capacity planning, chaos engineering, and toil reduction through
+    automation. SRE is distinct from Kubernetes Operations (which is a
+    tool set) — SRE is a discipline applied across many platforms. It
+    connects to Observability (metrics, traces, logs), DevOps (CI/CD,
+    change management), and Platform Engineering (golden paths that
+    encode reliability best practices).
+edges:
+  specializes:
+    - domain:devops

@@ -1,0 +1,25 @@
+nodeKind: Workspace
+id: workspace:local-developer-default
+attributes:
+  displayName: "Local developer workspace (default)"
+  rootPath: "/home/<user>/projects/<repo>"
+  description: |
+    Standard single-developer workspace: a git checkout on the local
+    filesystem, FileVault/LUKS-encrypted disk, agent artifacts kept
+    inside the workspace under `.claude/` / `.codex/` / etc.
+  materialization: worktree
+  storageBackend: local-fs
+  encryptionAtRest: os-keystore
+  indexingState: indexed
+  gitHooksInstalled:
+    - pre-commit
+    - commit-msg
+  agentArtifactsScope: inside-workspace
+  multiTenantPolicy: single-user
+edges:
+  realizes:
+    - target: layer:7-workspace
+  materializes_as:
+    - target: worktree:local-developer-default.main
+  runs_via:
+    - target: execution:local-host

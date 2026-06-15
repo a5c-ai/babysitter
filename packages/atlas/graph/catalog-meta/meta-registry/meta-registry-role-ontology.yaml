@@ -1,0 +1,400 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:roles
+attributes:
+  displayName: Roles & responsibilities (meta)
+  clusterNumber: 10
+  scope: Cluster 10 — role ontology. Defines who does what in agentic systems (humans, agents, org-units, tenants, customers, vendors) and the holds_responsibility / belongs_to / accountable_to relationships between them.
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:role
+  - target: meta-node-kind:responsibility
+  - target: meta-node-kind:org-unit
+  - target: meta-node-kind:tenant
+  - target: meta-node-kind:customer
+  - target: meta-node-kind:end-user
+  - target: meta-node-kind:vendor-relationship
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:role
+attributes:
+  displayName: Role (meta)
+  name: Role
+  cluster: 10-roles
+  prefix: role
+  origin: universal
+  purpose: human or agentic role
+  exampleCount: 0
+  invariants:
+  - isAgentic required (V-5.1)
+  - delegates_to acyclic (V-5.2)
+  - at least one holds_responsibility (V-5.3)
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:role--id
+  - target: meta-attribute:role--display-name
+  - target: meta-attribute:role--seniority
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:responsibility
+attributes:
+  displayName: Responsibility (meta)
+  name: Responsibility
+  cluster: 10-roles
+  prefix: responsibility
+  origin: universal
+  purpose: atomic accountable unit
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:responsibility--id
+  - target: meta-attribute:responsibility--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:org-unit
+attributes:
+  displayName: OrgUnit (meta)
+  name: OrgUnit
+  cluster: 10-roles
+  prefix: org-unit
+  origin: universal
+  purpose: team/department/squad
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:org-unit--id
+  - target: meta-attribute:org-unit--display-name
+  - target: meta-attribute:org-unit--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:tenant
+attributes:
+  displayName: Tenant (meta)
+  name: Tenant
+  cluster: 10-roles
+  prefix: tenant
+  origin: standard
+  purpose: an isolated multi-tenant subject (workspace/account/project) within a hosted product
+  exampleCount: 0
+  invariants:
+  - 'id starts with tenant:'
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:tenant--id
+  - target: meta-attribute:tenant--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:customer
+attributes:
+  displayName: Customer (meta)
+  name: Customer
+  cluster: 10-roles
+  prefix: customer
+  origin: standard
+  purpose: a commercial counterparty (the buyer/payer) — distinct from organizational OrgUnit
+  exampleCount: 0
+  invariants:
+  - 'id starts with customer:'
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:customer--id
+  - target: meta-attribute:customer--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:end-user
+attributes:
+  displayName: EndUser (meta)
+  name: EndUser
+  cluster: 10-roles
+  prefix: end-user
+  origin: standard
+  purpose: an individual human user (distinct from Role which is a position; distinct from Customer which is commercial)
+  exampleCount: 0
+  invariants:
+  - 'id starts with end-user:'
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:end-user--id
+  - target: meta-attribute:end-user--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:vendor-relationship
+attributes:
+  displayName: VendorRelationship (meta)
+  name: VendorRelationship
+  cluster: 10-roles
+  prefix: vendor-rel
+  origin: standard
+  purpose: a contractual relationship between an organization and an upstream vendor (Provider, ToolServer host, etc.)
+  exampleCount: 0
+  invariants:
+  - 'id starts with vendor-rel:'
+edges:
+  in_cluster:
+  - target: meta-cluster:roles
+  contains_meta_attribute:
+  - target: meta-attribute:vendor-relationship--id
+  - target: meta-attribute:vendor-relationship--display-name
+---
+nodeKind: MetaAttribute
+id: meta-attribute:role--id
+attributes:
+  displayName: Role.id
+  name: id
+  parentNodeKindId: meta-node-kind:role
+  type: id
+  required: true
+  description: id on Role.
+edges:
+  defined_on:
+  - target: meta-node-kind:role
+---
+nodeKind: MetaAttribute
+id: meta-attribute:role--display-name
+attributes:
+  displayName: Role.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:role
+  type: string
+  required: true
+  description: displayName on Role.
+edges:
+  defined_on:
+  - target: meta-node-kind:role
+---
+nodeKind: MetaAttribute
+id: meta-attribute:role--seniority
+attributes:
+  displayName: Role.seniority
+  name: seniority
+  parentNodeKindId: meta-node-kind:role
+  type: string
+  required: false
+  description: seniority on Role.
+edges:
+  defined_on:
+  - target: meta-node-kind:role
+---
+nodeKind: MetaAttribute
+id: meta-attribute:responsibility--id
+attributes:
+  displayName: Responsibility.id
+  name: id
+  parentNodeKindId: meta-node-kind:responsibility
+  type: id
+  required: true
+  description: id on Responsibility.
+edges:
+  defined_on:
+  - target: meta-node-kind:responsibility
+---
+nodeKind: MetaAttribute
+id: meta-attribute:responsibility--display-name
+attributes:
+  displayName: Responsibility.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:responsibility
+  type: string
+  required: true
+  description: displayName on Responsibility.
+edges:
+  defined_on:
+  - target: meta-node-kind:responsibility
+---
+nodeKind: MetaAttribute
+id: meta-attribute:org-unit--id
+attributes:
+  displayName: OrgUnit.id
+  name: id
+  parentNodeKindId: meta-node-kind:org-unit
+  type: id
+  required: true
+  description: id on OrgUnit.
+edges:
+  defined_on:
+  - target: meta-node-kind:org-unit
+---
+nodeKind: MetaAttribute
+id: meta-attribute:org-unit--display-name
+attributes:
+  displayName: OrgUnit.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:org-unit
+  type: string
+  required: true
+  description: displayName on OrgUnit.
+edges:
+  defined_on:
+  - target: meta-node-kind:org-unit
+---
+nodeKind: MetaAttribute
+id: meta-attribute:org-unit--kind
+attributes:
+  displayName: OrgUnit.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:org-unit
+  type: enum<team
+  required: true
+  description: kind on OrgUnit.
+edges:
+  defined_on:
+  - target: meta-node-kind:org-unit
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tenant--id
+attributes:
+  displayName: Tenant.id
+  name: id
+  parentNodeKindId: meta-node-kind:tenant
+  type: id
+  required: true
+  description: id on Tenant.
+edges:
+  defined_on:
+  - target: meta-node-kind:tenant
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tenant--display-name
+attributes:
+  displayName: Tenant.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:tenant
+  type: string
+  required: true
+  description: displayName on Tenant.
+edges:
+  defined_on:
+  - target: meta-node-kind:tenant
+---
+nodeKind: MetaAttribute
+id: meta-attribute:customer--id
+attributes:
+  displayName: Customer.id
+  name: id
+  parentNodeKindId: meta-node-kind:customer
+  type: id
+  required: true
+  description: id on Customer.
+edges:
+  defined_on:
+  - target: meta-node-kind:customer
+---
+nodeKind: MetaAttribute
+id: meta-attribute:customer--display-name
+attributes:
+  displayName: Customer.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:customer
+  type: string
+  required: true
+  description: displayName on Customer.
+edges:
+  defined_on:
+  - target: meta-node-kind:customer
+---
+nodeKind: MetaAttribute
+id: meta-attribute:end-user--id
+attributes:
+  displayName: EndUser.id
+  name: id
+  parentNodeKindId: meta-node-kind:end-user
+  type: id
+  required: true
+  description: id on EndUser.
+edges:
+  defined_on:
+  - target: meta-node-kind:end-user
+---
+nodeKind: MetaAttribute
+id: meta-attribute:end-user--display-name
+attributes:
+  displayName: EndUser.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:end-user
+  type: string
+  required: true
+  description: displayName on EndUser.
+edges:
+  defined_on:
+  - target: meta-node-kind:end-user
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vendor-relationship--id
+attributes:
+  displayName: VendorRelationship.id
+  name: id
+  parentNodeKindId: meta-node-kind:vendor-relationship
+  type: id
+  required: true
+  description: id on VendorRelationship.
+edges:
+  defined_on:
+  - target: meta-node-kind:vendor-relationship
+---
+nodeKind: MetaAttribute
+id: meta-attribute:vendor-relationship--display-name
+attributes:
+  displayName: VendorRelationship.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:vendor-relationship
+  type: string
+  required: true
+  description: displayName on VendorRelationship.
+edges:
+  defined_on:
+  - target: meta-node-kind:vendor-relationship
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:holds-responsibility
+attributes:
+  displayName: holds_responsibility (meta)
+  name: holds_responsibility
+  source:
+  - meta-node-kind:role
+  target:
+  - meta-node-kind:responsibility
+  cardinality: N:N
+  origin: universal
+  description: a role holds a responsibility
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:role
+  target_of_meta_edge:
+  - target: meta-node-kind:responsibility
+---
+nodeKind: MetaEnum
+id: meta-enum:seniority
+attributes:
+  displayName: Role seniority band
+  name: seniority
+  values:
+  - value: junior
+    description: Entry-level / IC1-IC2 band.
+  - value: mid
+    description: Mid-level IC band.
+  - value: senior
+    description: Senior IC band.
+  - value: principal
+    description: Principal-level IC.
+  - value: staff
+    description: Staff-level IC.
+  usedOnAttributes:
+  - meta-attribute:role--seniority
+edges:
+  used_on_attribute:
+  - target: meta-attribute:role--seniority

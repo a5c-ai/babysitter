@@ -1,0 +1,12 @@
+nodeKind: Capability
+id: capability:mcp-resource-links
+attributes:
+  displayName: "MCP resource links"
+  description: |
+    The entity supports resource links in tool call results, allowing
+    resources to reference other resources and form graphs. Introduced
+    in MCP spec revision 2025-06-18.
+    See https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+  appliesToNodeKinds: ["AgentRuntimeImpl", "ToolServer"]
+  category: agent
+edges: {}

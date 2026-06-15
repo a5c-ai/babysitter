@@ -1,0 +1,70 @@
+---
+nodeKind: ClaimTest
+id: claim-test:claude-code-cli-command
+attributes:
+  displayName: "Claude Code CLI command name"
+  claimId: claim:claude-code-cli-command
+  filePath: graph/tests/claims/claude-code-cli-command.test.cjs
+  framework: node-test
+  cadence: weekly
+  testabilityKind: cli-flag
+  lastResult: never-run
+edges:
+  tests_claim:
+    - target: claim:claude-code-cli-command
+---
+nodeKind: ClaimTest
+id: claim-test:claude-opus-4-7-context-window
+attributes:
+  displayName: "Claude Opus 4.7 context-window limit"
+  claimId: claim:claude-opus-4-7-context-window
+  filePath: graph/tests/claims/claude-opus-4-7-context-window.test.cjs
+  framework: node-test
+  cadence: weekly
+  testabilityKind: api-shape
+  lastResult: never-run
+edges:
+  tests_claim:
+    - target: claim:claude-opus-4-7-context-window
+---
+nodeKind: ClaimTest
+id: claim-test:claude-code-session-path-convention
+attributes:
+  displayName: "Claude Code session JSONL path convention"
+  claimId: claim:claude-code-cli-command
+  filePath: graph/tests/claims/claude-code-session-path-convention.test.cjs
+  framework: node-test
+  cadence: daily
+  testabilityKind: path-convention
+  lastResult: never-run
+edges:
+  tests_claim:
+    - target: claim:claude-code-cli-command
+---
+nodeKind: ClaimTest
+id: claim-test:mcp-stdio-init-handshake
+attributes:
+  displayName: "MCP stdio initialize handshake shape"
+  claimId: claim:claude-code-cli-command
+  filePath: graph/tests/claims/mcp-stdio-init-handshake.test.cjs
+  framework: node-test
+  cadence: weekly
+  testabilityKind: api-shape
+  lastResult: never-run
+edges:
+  tests_claim:
+    - target: claim:claude-code-cli-command
+---
+nodeKind: ClaimTest
+id: claim-test:filesystem-mcp-tool-list
+attributes:
+  displayName: "Filesystem MCP server tool list completeness"
+  claimId: claim:claude-code-cli-command
+  filePath: graph/tests/claims/filesystem-mcp-tool-list.test.cjs
+  framework: node-test
+  cadence: weekly
+  testabilityKind: api-shape
+  lastResult: never-run
+edges:
+  tests_claim:
+    - target: claim:claude-code-cli-command

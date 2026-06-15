@@ -2,6 +2,13 @@
 name: radix-ui
 description: Radix UI primitives, composition patterns, accessibility, and customization.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:ui-component-libraries, skill-area:design-systems]
+  roles: [role:frontend-engineer, role:product-designer]
+  topics: [topic:accessibility, topic:component-based-architecture]
+
 ---
 
 # Radix UI Skill

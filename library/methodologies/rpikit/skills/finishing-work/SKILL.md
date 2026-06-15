@@ -2,17 +2,14 @@
 name: finishing-work
 description: Final completion discipline including summary generation, plan document updates, and confirmation that all success criteria from the original plan are satisfied.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Finishing Work
-
-## Overview
-
-Final completion protocol ensuring implementation is properly wrapped up with summary, plan updates, and success criteria confirmation.
-
-## When to Use
-
-- After all implementation steps and reviews are complete
 - When transitioning from implementation to done
 - Final quality check before closing out work
 

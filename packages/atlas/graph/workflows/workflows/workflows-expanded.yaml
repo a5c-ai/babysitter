@@ -1,0 +1,367 @@
+---
+nodeKind: Workflow
+id: workflow:post-mortem
+attributes:
+  displayName: "Post-Mortem Review"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: moderate
+  description: |
+    Conducts a blameless post-mortem after a significant incident --
+    gathering timeline of events, identifying contributing factors and
+    root causes, documenting impact and detection/recovery metrics,
+    deriving action items with owners and deadlines, and publishing
+    the post-mortem document for organizational learning. Produces
+    post-mortem report, action items tracker, and knowledge base entry.
+    Excludes ongoing action-item execution.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:sre
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:runbook-writing
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:site-reliability
+  triggers_responsibility:
+    - target: responsibility:incident-response-coordination
+    - target: responsibility:knowledge-sharing
+---
+nodeKind: Workflow
+id: workflow:cost-optimization
+attributes:
+  displayName: "Cloud Cost Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: moderate
+  description: |
+    Reviews and optimizes cloud infrastructure spending -- analyzing
+    resource utilization, identifying idle or over-provisioned instances,
+    evaluating reserved instance and savings plan coverage, reviewing
+    data transfer costs, assessing spot instance opportunities, and
+    implementing right-sizing recommendations. Produces cost optimization
+    report and projected savings forecast. Excludes architectural
+    re-design for cost.
+edges:
+  involves_role:
+    - target: role:devops-engineer
+    - target: role:infrastructure-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:cloud-infrastructure
+    - target: skill-area:terraform-infrastructure
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:cost-optimization-cloud
+    - target: responsibility:capacity-planning
+---
+nodeKind: Workflow
+id: workflow:penetration-testing
+attributes:
+  displayName: "Penetration Testing Engagement"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes penetration testing engagements -- scoping target
+    systems and attack surfaces, conducting reconnaissance and
+    vulnerability exploitation, testing authentication and authorization
+    boundaries, assessing data exfiltration risks, documenting findings
+    with severity ratings, and coordinating remediation with engineering
+    teams. Produces pen-test report and remediation priority list.
+    Excludes ongoing vulnerability scanning.
+edges:
+  involves_role:
+    - target: role:security-engineer
+    - target: role:chief-security-officer
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:vulnerability-scanning
+    - target: skill-area:threat-modeling
+    - target: skill-area:application-security
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cybersecurity
+  triggers_responsibility:
+    - target: responsibility:security-audit
+    - target: responsibility:risk-assessment
+---
+nodeKind: Workflow
+id: workflow:data-migration
+attributes:
+  displayName: "Data Migration"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Plans and executes data migration between systems -- profiling source
+    data quality and schema, designing target schema mapping and
+    transformation rules, building and testing ETL pipelines, executing
+    dry-run migrations with validation checksums, coordinating cutover
+    windows with stakeholders, and verifying data integrity post-migration.
+    Produces migration runbook, validation report, and rollback plan.
+    Excludes ongoing data sync.
+edges:
+  involves_role:
+    - target: role:data-engineer
+    - target: role:data-architect
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:etl-pipelines
+    - target: skill-area:schema-evolution
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:data-pipeline-reliability
+    - target: responsibility:data-quality
+---
+nodeKind: Workflow
+id: workflow:api-deprecation
+attributes:
+  displayName: "API Deprecation"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-version"
+  complexity: moderate
+  description: |
+    Manages the deprecation lifecycle for API versions or endpoints --
+    analyzing consumer usage patterns, communicating deprecation timelines,
+    providing migration guides and tooling, monitoring adoption of
+    replacement APIs, enforcing sunset deadlines with grace periods,
+    and removing deprecated code. Produces deprecation notice, migration
+    guide, and usage analytics dashboard. Excludes new API design.
+edges:
+  involves_role:
+    - target: role:api-engineer
+    - target: role:developer-advocate
+    - target: role:product-manager
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:breaking-change-management
+    - target: skill-area:deprecation-policy
+  applies_to_domain:
+    - target: domain:api-development
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:api-design-governance
+    - target: responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:blue-green-deployment
+attributes:
+  displayName: "Blue-Green Deployment"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: moderate
+  description: |
+    Executes a blue-green deployment strategy -- provisioning an identical
+    production environment (green), deploying the new version, running
+    smoke tests and health checks, switching traffic at the load balancer,
+    monitoring error rates during the transition, and maintaining the
+    previous environment (blue) for instant rollback. Produces deployment
+    log and switchover checklist. Excludes canary percentage rollouts.
+edges:
+  involves_role:
+    - target: role:devops-engineer
+    - target: role:sre
+    - target: role:release-engineer
+  requires_skill_area:
+    - target: skill-area:blue-green-deployment
+    - target: skill-area:deployment-automation
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:deployment-management
+    - target: responsibility:platform-reliability
+---
+nodeKind: Workflow
+id: workflow:disaster-recovery-drill
+attributes:
+  displayName: "Disaster Recovery Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Simulates disaster scenarios to validate recovery procedures --
+    triggering controlled failovers, testing backup restoration,
+    validating data integrity after recovery, measuring RTO and RPO
+    against targets, documenting gaps in runbooks, and updating
+    disaster recovery plans. Produces drill report, gap analysis,
+    and updated DR runbook. Excludes actual incident response.
+edges:
+  involves_role:
+    - target: role:sre
+    - target: role:infrastructure-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:runbook-writing
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:infrastructure
+    - target: domain:site-reliability
+  triggers_responsibility:
+    - target: responsibility:disaster-recovery
+    - target: responsibility:platform-reliability
+---
+nodeKind: Workflow
+id: workflow:vendor-evaluation-extended
+attributes:
+  displayName: "Vendor Evaluation (Extended)"
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-vendor"
+  complexity: cross-team
+  description: |
+    Conducts deep vendor evaluation for critical infrastructure or
+    platform decisions -- technical proof-of-concept, security review,
+    compliance assessment, cost modeling over 3-year horizon, reference
+    checks, SLA negotiation, and executive buy-in. Produces vendor
+    scorecard, TCO analysis, and recommendation memo. Excludes
+    contract execution.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:security-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:solution-architecture
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:vendor-management
+---
+nodeKind: Workflow
+id: workflow:tech-debt-sprint
+attributes:
+  displayName: "Tech Debt Sprint"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: moderate
+  description: |
+    Dedicated sprint for tech debt reduction -- reviewing the tech debt
+    register, prioritizing items by risk and developer friction impact,
+    allocating engineering time, executing refactoring and upgrades,
+    validating improvements through tests and metrics, and updating
+    the debt register. Produces completed items summary and updated
+    tech debt backlog. Excludes feature work.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:code-quality
+    - target: skill-area:strangler-fig-pattern
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:tech-debt-management
+---
+nodeKind: Workflow
+id: workflow:localization-workflow
+attributes:
+  displayName: "Localization Workflow"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: moderate
+  description: |
+    Manages the end-to-end localization process for new features --
+    extracting translatable strings, sending to translation vendors or
+    internal teams, reviewing translations for context accuracy,
+    integrating translated assets, testing locale-specific rendering
+    and formatting, and validating RTL layouts where applicable.
+    Produces localized builds and translation quality report.
+    Excludes original content authoring.
+edges:
+  involves_role:
+    - target: role:frontend-engineer
+    - target: role:product-manager
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:internationalization
+    - target: skill-area:web-accessibility
+  applies_to_domain:
+    - target: domain:frontend
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:localization-management
+---
+nodeKind: Workflow
+id: workflow:sdk-release
+attributes:
+  displayName: "SDK Release"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-version"
+  complexity: moderate
+  description: |
+    Manages the release of a client SDK across multiple languages --
+    running cross-language test suites, generating API documentation,
+    validating semver compliance, publishing to package registries,
+    updating quickstart guides, announcing the release through developer
+    channels, and monitoring adoption metrics. Produces release notes,
+    published packages, and updated docs. Excludes API server changes.
+edges:
+  involves_role:
+    - target: role:sdk-engineer
+    - target: role:developer-advocate
+    - target: role:release-engineer
+  requires_skill_area:
+    - target: skill-area:sdk-codegen
+    - target: skill-area:semver-discipline
+    - target: skill-area:ci-cd
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:developer-experience
+  triggers_responsibility:
+    - target: responsibility:sdk-quality
+    - target: responsibility:release-cadence
+---
+nodeKind: Workflow
+id: workflow:open-source-contribution
+attributes:
+  displayName: "Open Source Contribution"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-contribution"
+  complexity: moderate
+  description: |
+    Manages contributions to external open-source projects -- identifying
+    upstream issues or features aligned with business needs, checking
+    contribution guidelines and CLA requirements, developing and testing
+    the change, submitting the pull request with context, addressing
+    maintainer feedback, and tracking merge status. Produces merged
+    contribution and internal knowledge base entry. Excludes maintaining
+    own OSS projects.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:developer-advocate
+    - target: role:backend-engineer
+  requires_skill_area:
+    - target: skill-area:code-quality
+    - target: skill-area:code-review-practice
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:knowledge-sharing

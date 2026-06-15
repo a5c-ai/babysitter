@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:invocation.canonical
+attributes:
+  authoredAt: "2026-01-01T00:00:00Z"
+  termId: term:invocation
+  text: |
+    A single agent CLI process spawn from start (`agent_started`) to exit (`agent_stopped`). Has its own lifecycle state machine and may belong to a Run.
+  status: canonical
+edges:
+  defines:
+    - term:invocation

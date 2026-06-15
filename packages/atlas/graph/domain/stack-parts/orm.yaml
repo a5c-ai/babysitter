@@ -1,0 +1,14 @@
+nodeKind: StackPart
+id: stack-part:orm
+attributes:
+  displayName: "Object-Relational Mapper"
+  category: data-store
+  description: |
+    Maps database rows to objects in the host language - identity map, unit of work, lazy loading. Examples: Hibernate, SQLAlchemy, Prisma, Drizzle, Sequelize.
+  commonImplementations:
+    - library:hibernate
+    - library:sqlalchemy
+edges:
+  implemented_by:
+    - library:hibernate
+    - library:sqlalchemy

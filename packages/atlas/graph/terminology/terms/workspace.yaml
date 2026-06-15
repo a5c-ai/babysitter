@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:workspace
+attributes:
+  canonicalDefinitionId: definition:workspace.canonical
+  displayName: "Workspace"
+  kind: primitive
+  references:
+    - "NodeKind:Workspace"
+  description: |
+    Project context with sessions+repos
+edges:
+  applies_to:
+    - target: domain:software-engineering

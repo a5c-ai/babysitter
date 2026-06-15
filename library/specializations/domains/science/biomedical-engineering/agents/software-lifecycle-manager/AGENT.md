@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Medical Software
   agent-id: BME-AG-014
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:data-analysis, skill-area:compliance-automation, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Software Lifecycle Manager Agent

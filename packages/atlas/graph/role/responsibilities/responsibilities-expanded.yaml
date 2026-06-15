@@ -1,0 +1,289 @@
+---
+nodeKind: Responsibility
+id: responsibility:platform-reliability
+attributes:
+  displayName: "Platform reliability"
+  cadence: continuous
+  description: |
+    Ensure platform services meet reliability targets — uptime SLOs,
+    error-budget tracking, and proactive resilience improvements.
+edges:
+  held_by:
+    - target: role:platform-engineer
+    - target: role:sre
+    - target: role:infrastructure-engineer
+---
+nodeKind: Responsibility
+id: responsibility:api-design-governance
+attributes:
+  displayName: "API design governance"
+  cadence: continuous
+  description: |
+    Review and enforce API design standards — naming conventions, versioning
+    strategy, backward compatibility, and contract-first development.
+edges:
+  held_by:
+    - target: role:api-engineer
+    - target: role:staff-engineer
+    - target: role:architect
+  requires_expertise:
+    - target: skill-area:api-design
+    - target: skill-area:api-contract-testing
+---
+nodeKind: Responsibility
+id: responsibility:sdk-quality
+attributes:
+  displayName: "SDK quality"
+  cadence: continuous
+  description: |
+    Maintain SDK test coverage, ergonomics, and cross-language consistency.
+    Ensure SDKs track API changes promptly and provide clear migration guides.
+edges:
+  held_by:
+    - target: role:sdk-engineer
+    - target: role:developer-advocate
+  requires_expertise:
+    - target: skill-area:sdk-codegen
+    - target: skill-area:semver-discipline
+---
+nodeKind: Responsibility
+id: responsibility:developer-onboarding
+attributes:
+  displayName: "Developer onboarding"
+  cadence: per-hire
+  description: |
+    Ensure new engineers reach productivity quickly — maintained onboarding
+    docs, working local-dev setup, and structured first-week milestones.
+edges:
+  held_by:
+    - target: role:engineering-manager
+    - target: role:tech-lead
+    - target: role:devops-engineer
+  requires_expertise:
+    - target: skill-area:developer-experience
+---
+nodeKind: Responsibility
+id: responsibility:incident-response-coordination
+attributes:
+  displayName: "Incident response coordination"
+  cadence: on-demand
+  description: |
+    Coordinate cross-team incident response — establish communication
+    channels, delegate workstreams, manage stakeholder updates, and
+    drive resolution.
+edges:
+  held_by:
+    - target: role:incident-commander
+    - target: role:sre
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:incident-response
+    - target: skill-area:incident-management
+---
+nodeKind: Responsibility
+id: responsibility:cost-optimization-cloud
+attributes:
+  displayName: "Cloud cost optimization"
+  cadence: monthly
+  description: |
+    Identify and execute cloud cost reduction opportunities — right-sizing,
+    reserved instances, spot usage, and waste elimination across cloud accounts.
+edges:
+  held_by:
+    - target: role:devops-engineer
+    - target: role:infrastructure-engineer
+    - target: role:platform-engineer
+---
+nodeKind: Responsibility
+id: responsibility:feature-flag-governance
+attributes:
+  displayName: "Feature flag governance"
+  cadence: continuous
+  description: |
+    Manage feature flag lifecycle — creation standards, stale flag cleanup,
+    permission controls, and audit trails for flag state changes.
+edges:
+  held_by:
+    - target: role:release-manager
+    - target: role:tech-lead
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:feature-management
+---
+nodeKind: Responsibility
+id: responsibility:data-pipeline-reliability
+attributes:
+  displayName: "Data pipeline reliability"
+  cadence: continuous
+  description: |
+    Monitor and maintain data pipeline health — freshness SLAs, throughput,
+    error rates, and automated alerting for pipeline failures.
+edges:
+  held_by:
+    - target: role:data-engineer
+    - target: role:data-governance-lead
+  requires_expertise:
+    - target: skill-area:etl-pipelines
+    - target: skill-area:data-quality
+---
+nodeKind: Responsibility
+id: responsibility:model-quality-assurance
+attributes:
+  displayName: "Model quality assurance"
+  cadence: continuous
+  description: |
+    Validate ML model quality through eval harnesses, drift detection,
+    performance benchmarks, and fairness audits before and after deployment.
+edges:
+  held_by:
+    - target: role:ml-engineer
+    - target: role:prompt-engineer
+    - target: role:ai-ethics-researcher
+  requires_expertise:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:model-evaluation
+---
+nodeKind: Responsibility
+id: responsibility:prompt-quality-assurance
+attributes:
+  displayName: "Prompt quality assurance"
+  cadence: continuous
+  description: |
+    Maintain prompt regression test suites, benchmark prompt versions,
+    and govern prompt templates across the organization.
+edges:
+  held_by:
+    - target: role:prompt-engineer
+    - target: role:ml-engineer
+  requires_expertise:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:eval-driven-development
+---
+nodeKind: Responsibility
+id: responsibility:accessibility-compliance
+attributes:
+  displayName: "Accessibility compliance"
+  cadence: continuous
+  description: |
+    Ensure products meet WCAG and platform-specific accessibility standards.
+    Run audits, maintain accessible component patterns, and train teams.
+edges:
+  held_by:
+    - target: role:frontend-engineer
+    - target: role:design-lead
+    - target: role:qa-engineer
+  requires_expertise:
+    - target: skill-area:web-accessibility
+    - target: skill-area:accessibility-testing
+---
+nodeKind: Responsibility
+id: responsibility:localization-management
+attributes:
+  displayName: "Localization management"
+  cadence: continuous
+  description: |
+    Manage translation workflows, locale-specific content, and i18n string
+    extraction. Ensure quality across supported languages and regions.
+edges:
+  held_by:
+    - target: role:product-manager
+    - target: role:technical-writer
+    - target: role:frontend-engineer
+  requires_expertise:
+    - target: skill-area:internationalization
+---
+nodeKind: Responsibility
+id: responsibility:release-cadence
+attributes:
+  displayName: "Release cadence"
+  cadence: continuous
+  description: |
+    Maintain healthy release frequency — track cycle time, enforce release
+    train schedules, and remove blockers that delay shipping.
+edges:
+  held_by:
+    - target: role:release-manager
+    - target: role:release-engineer
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:ci-cd
+    - target: skill-area:deployment-automation
+---
+nodeKind: Responsibility
+id: responsibility:tech-debt-management
+attributes:
+  displayName: "Tech debt management"
+  cadence: quarterly
+  description: |
+    Track, prioritize, and schedule technical debt remediation. Maintain
+    a tech-debt register and negotiate allocation with product stakeholders.
+edges:
+  held_by:
+    - target: role:tech-lead
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:code-quality
+---
+nodeKind: Responsibility
+id: responsibility:service-mesh-governance
+attributes:
+  displayName: "Service mesh governance"
+  cadence: continuous
+  description: |
+    Manage service mesh configuration — traffic policies, mTLS, retries,
+    circuit breakers, and observability integration across the mesh.
+edges:
+  held_by:
+    - target: role:platform-engineer
+    - target: role:sre
+  requires_expertise:
+    - target: skill-area:service-mesh-config
+    - target: skill-area:observability-pipeline
+---
+nodeKind: Responsibility
+id: responsibility:slo-management
+attributes:
+  displayName: "SLO management"
+  cadence: continuous
+  description: |
+    Define, track, and report on service-level objectives. Manage error
+    budgets and trigger reliability investments when budgets are exhausted.
+edges:
+  held_by:
+    - target: role:sre
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+---
+nodeKind: Responsibility
+id: responsibility:change-management
+attributes:
+  displayName: "Change management"
+  cadence: continuous
+  description: |
+    Govern production changes through change advisory processes — risk
+    assessment, approval workflows, rollback plans, and post-change verification.
+edges:
+  held_by:
+    - target: role:release-manager
+    - target: role:change-manager
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:change-management-ops
+---
+nodeKind: Responsibility
+id: responsibility:vendor-management
+attributes:
+  displayName: "Vendor management"
+  cadence: continuous
+  description: |
+    Manage ongoing vendor relationships — performance reviews, contract
+    renewals, SLA enforcement, and escalation procedures.
+edges:
+  held_by:
+    - target: role:engineering-manager
+    - target: role:cto
+    - target: role:procurement-manager

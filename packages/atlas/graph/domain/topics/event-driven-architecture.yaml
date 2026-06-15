@@ -1,0 +1,13 @@
+nodeKind: Topic
+id: topic:event-driven-architecture
+attributes:
+  displayName: "Event-Driven Architecture"
+  description: |
+    Event-Driven Architecture as a cross-cutting topic — asynchronous
+    message-passing between services via events, brokers (Kafka, Pulsar,
+    NATS), exactly-once vs at-least-once semantics, choreography vs
+    orchestration, and downstream consumer patterns.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-engineering

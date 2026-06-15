@@ -1,0 +1,57 @@
+# Supermemory deep-research overview node.
+# Maps the product-level architecture to atlas layers and notes our equivalents.
+
+nodeKind: AgentProduct
+id: agent:supermemory
+attributes:
+  displayName: "Supermemory"
+  vendor: "Supermemory Inc."
+  homepageUrl: "https://supermemory.ai"
+  primarySurface: api
+  supportTier: catalog-backed
+  productKind: memory-service
+  stackScope: memory-and-retrieval
+  description: |
+    Cloud memory engine and context layer for AI agents. Ranks #1 on
+    LongMemEval, LoCoMo, and ConvoMem benchmarks. Provides automatic memory
+    extraction from conversations, knowledge graph with Update/Extend/Derive
+    relationships, user profile synthesis, hybrid search (RAG + memory),
+    connectors for Google Drive/Gmail/Notion/OneDrive/GitHub, multi-modal
+    processing (PDF, images, video, code), and SMFS filesystem interface.
+    TypeScript + Python SDKs, MCP server, and REST API.
+  deepResearchNotes:
+    architectureStyle: cloud-memory-service-with-filesystem-interface
+    language: "TypeScript 64%, MDX 28.9%, Python 6.2%"
+    license: MIT
+    layerCoverage:
+      L5-agent-runtime: "SMFS mount provides transparent memory via filesystem"
+      L12-knowledge-fabric: "Knowledge graph, user profiles, semantic search, contradiction resolution"
+      L13-orchestration: "Connectors for real-time sync with external services"
+    benchmarks:
+      LongMemEval: "#1"
+      LoCoMo: "#1"
+      ConvoMem: "#1"
+      xAFS: "81% accuracy at 10k files, 55% cheaper than baseline"
+    keyComponents:
+      - "Memory Engine (fact extraction, contradiction resolution, temporal decay)"
+      - "User Profiles (static + dynamic, ~50ms retrieval)"
+      - "Hybrid Search (RAG + memory in single queries)"
+      - "SMFS (Semantic Memory File System -- NFS/FUSE mount)"
+      - "MCP Server 4.0 (Cloudflare Workers + Durable Objects)"
+      - "Connectors (7 integrations with real-time webhooks)"
+      - "MemoryBench (open-source benchmarking framework)"
+    ourEquivalent: |
+      packages/genty/runtime/src/session/memoryExtraction.ts provides
+      LLM-extracted MemoryEntry objects with category/confidence/tags.
+      packages/genty/platform/src/session/memoryConsolidation.ts handles
+      Jaccard-similarity deduplication. packages/genty/platform/src/session/
+      crossRunState.ts provides key-value cross-run state. Supermemory adds
+      semantic search, knowledge graph relationships, user profile synthesis,
+      and multi-modal extraction that we currently lack. SMFS is the primary
+      integration path -- transparent memory via filesystem operations.
+edges:
+  has_version:
+    - agent-version:supermemory@current
+  competes_with:
+    - target: knowledge-fabric-impl:mem0-fabric
+    - target: knowledge-fabric-impl:zep-fabric

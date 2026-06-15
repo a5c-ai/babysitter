@@ -11,6 +11,13 @@
  * - Russell, S. & Norvig, P. (2020). Artificial Intelligence: A Modern Approach
  * - Pearl, J. (1984). Heuristics: Intelligent Search Strategies
  * - Korf, R.E. (1990). Real-time heuristic search
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

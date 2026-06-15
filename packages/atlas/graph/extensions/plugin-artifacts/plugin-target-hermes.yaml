@@ -1,0 +1,95 @@
+nodeKind: PluginTarget
+id: plugin-target:hermes
+attributes:
+  displayName: "Hermes"
+  hostAgent: agent:hermes
+  adapterFamily: shell-hook
+  manifestFormat: "package.json + hooks.json"
+  commandFormat: "package-json commands"
+  adapterName: hermes
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: hermes
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: ".hermes-plugin/plugin.json"
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: HERMES_PLUGIN_ROOT
+  scriptVariants:
+    - bash
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  marketplacePath: ".agents/plugins/marketplace.json"
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".hermes"
+    pluginsDirRelative: ".agents/plugins"
+    marketplacePathRelative: ".agents/plugins/marketplace.json"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: hermes-open-plugins
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "hermes"
+  callerEnvVars:
+    - "HERMES_SESSION"
+    - "HERMES_PLUGIN_ROOT"
+  configPaths:
+    - ".hermes"
+  processNames:
+    - "hermes"
+  capabilities:
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/hermes-adapter"
+  externalRepo: "a5c-ai/babysitter-hermes"
+  externalPackageName: "@a5c-ai/babysitter-hermes"
+  generatedSourceDir: "hermes"
+  marketplaceSpecs:
+    - from: ".agents/plugins/marketplace.json"
+      kind: "hermes"
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - hooks
+    - headless-prompt
+  loopControlTerm: null
+  hookDriven: true
+  interactiveToolName: null
+  sessionEnvVarsDescription: "HERMES_SESSION env var provides native session identity"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: native
+  supportsOrderedFanout: false
+  supportsNativeAdditionalContext: false
+  supportsBlock: false
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: none
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    promptExtraFlags: []
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: keep-open
+    selfExits: false
+    needsIdleKill: true
+
+edges:
+  hosted_by:
+    - target: agent:hermes
+    - target: agent-platform-impl:hermes.platform@current

@@ -2,19 +2,16 @@
 name: test-driven-development
 description: Strict RED-GREEN-REFACTOR cycle enforcement. Tests are never skipped or deferred. Run mode only, never watch mode. Exit code evidence mandatory.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
----
-
-# Test-Driven Development
-
-## Overview
-
-Enforces the TDD discipline in all CC10X BUILD workflows. The RED-GREEN-REFACTOR cycle is mandatory and cannot be skipped or deferred.
-
-## TDD Cycle
-
-1. **RED**: Write failing test first. Run with `CI=true npm test` or `--run` flag. Exit code MUST be 1.
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **GREEN**: Write minimal code to make test pass. Exit code MUST be 0.
 3. **REFACTOR**: Clean up implementation while keeping tests green. Exit code MUST remain 0.
+
+---
 
 ## Non-Negotiable Rules
 

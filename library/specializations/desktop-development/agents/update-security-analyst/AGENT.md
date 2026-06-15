@@ -2,6 +2,12 @@
 name: update-security-analyst
 description: Validates auto-update mechanisms for signature verification, MITM protection, and rollback safety
 expertise: [auto-update, security, signatures, mitm, rollback]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:application-security-testing, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # update-security-analyst

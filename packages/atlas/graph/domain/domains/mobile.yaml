@@ -1,0 +1,29 @@
+nodeKind: Domain
+id: domain:mobile
+attributes:
+  displayName: "Mobile"
+  description: |
+    Mobile development focuses on building applications that run on
+    smartphones and tablets, primarily targeting iOS (Apple App Store) and
+    Android (Google Play) platforms.
+
+    Key concerns include platform-specific UX patterns (HIG, Material
+    Design), performance on constrained hardware, offline-first data sync,
+    push notifications, app store compliance, and deep linking. The domain
+    spans native development (Swift/SwiftUI for iOS, Kotlin/Compose for
+    Android), cross-platform frameworks (React Native, Flutter), and hybrid
+    web-based approaches. It shares code-sharing concerns with Web
+    Development and intersects with Cloud Infrastructure for backend APIs.
+edges:
+  contains:
+    - specialization:mobile-development
+    - specialization:mobile-ios
+    - specialization:react-native-mobile
+    - specialization:flutter-mobile
+    - topic:adaptive-design
+    - topic:infinite-scrolling
+    - topic:mvp
+    - topic:mvvm
+    - topic:pull-to-refresh
+    - topic:skeleton-screen
+    - topic:toast-notification

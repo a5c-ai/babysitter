@@ -1,0 +1,35 @@
+nodeKind: Issue
+id: issue:linear-aca-390
+attributes:
+  displayName: "ACA-390 — tasks-adapter runtime packaging"
+  identifier: "ACA-390"
+  trackerKind: issue-tracker:linear
+  state: "in-progress"
+  title: "tasks-adapter: fix auth/browser-session runtime packaging"
+  url: "https://linear.app/a5c/issue/ACA-390"
+edges:
+  from_tracker:
+    - target: issue-tracker:linear
+  tagged_with:
+    - target: task-tag:tech-debt
+    - target: task-tag:needs-design
+    - target: task-tag:security-review
+  labeled_with:
+    - target: label:bug
+    - target: label:enhancement
+    - target: label:documentation
+  belongs_to_project:
+    - target: project:babysitter
+---
+nodeKind: Issue
+id: issue:github-1234
+attributes:
+  displayName: "GH#1234 — Add reconciliation timer"
+  identifier: "1234"
+  trackerKind: issue-tracker:github-issues
+  state: "open"
+  title: "Add reconciliation timer to orchestrator"
+  url: "https://github.com/a5c-ai/babysitter/issues/1234"
+edges:
+  from_tracker:
+    - target: issue-tracker:github-issues

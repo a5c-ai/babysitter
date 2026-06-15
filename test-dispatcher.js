@@ -1,5 +1,5 @@
 // Test the TypeScript hook dispatcher
-const { callHook } = require('./packages/sdk/dist/hooks/dispatcher.js');
+const { callHook } = require('./packages/babysitter-sdk/dist/hooks/dispatcher.js');
 
 async function test() {
   console.log('Testing callHook...');

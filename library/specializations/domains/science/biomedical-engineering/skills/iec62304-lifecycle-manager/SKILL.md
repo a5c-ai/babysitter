@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Medical Device Software
   skill-id: BME-SK-019
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:data-analysis, skill-area:compliance-automation, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # IEC 62304 Lifecycle Manager Skill

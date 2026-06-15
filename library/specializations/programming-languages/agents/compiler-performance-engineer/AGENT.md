@@ -10,6 +10,11 @@ expertise:
   - Startup time optimization
   - Compilation speed optimization
   - Performance regression testing
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:profiling-cpu, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:principal-engineer]
 ---
 
 # Compiler Performance Engineer Agent

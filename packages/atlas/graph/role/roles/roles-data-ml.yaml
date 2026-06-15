@@ -1,0 +1,46 @@
+---
+nodeKind: Role
+id: role:data-engineer
+attributes:
+  displayName: "Data Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Builds and operates ETL/ELT, warehouse models, lineage, and data quality.
+edges:
+  holds_responsibility:
+    - responsibility:data-quality
+    - responsibility:data-quality-monitoring
+    - responsibility:documentation
+  requires_expertise:
+    - target: skill-area:etl-pipelines
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:dbt-modeling
+    - target: skill-area:data-quality
+    - target: skill-area:data-lineage
+    - target: skill-area:spark-jobs
+    - target: skill-area:batch-vs-stream-tradeoffs
+---
+nodeKind: Role
+id: role:ml-engineer-convergent
+attributes:
+  displayName: "ML Engineer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Productionizes models: fine-tuning, eval harnesses, prompt and retrieval pipelines, GPU performance.
+    (Convergent-catalog update; complements the canonical `role:ml-engineer` example with explicit SkillArea expertise edges.)
+edges:
+  holds_responsibility:
+    - responsibility:model-validation
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_expertise:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:prompt-engineering
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:eval-driven-development
+    - target: skill-area:cuda-kernels
+    - target: skill-area:gpu-memory-hierarchy

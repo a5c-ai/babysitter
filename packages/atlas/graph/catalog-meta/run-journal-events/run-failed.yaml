@@ -1,0 +1,12 @@
+nodeKind: RunJournalEvent
+id: run-journal-event:run-failed
+attributes:
+  eventName: RUN_FAILED
+  category: run-lifecycle
+  emittedByPhase: run.failed
+  terminal: true
+  description: |
+    Terminal failure event for a Run. Records the failure reason, error
+    metadata (name, message, stack), and any partial state references.
+    Counterpart to RUN_COMPLETED — exactly one of the two must terminate
+    a Run's journal stream.

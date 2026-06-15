@@ -1,0 +1,12 @@
+nodeKind: Responsibility
+id: responsibility:write-rfc-documents
+attributes:
+  displayName: "Write RFC / design documents"
+  cadence: as-needed
+  requiredSkills:
+    - skill:system-design
+  description: |
+    Write RFC / design documents.
+edges:
+  requires_skill:
+    - skill:system-design

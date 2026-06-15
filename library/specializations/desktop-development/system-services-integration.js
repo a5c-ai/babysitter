@@ -17,6 +17,12 @@
  * - Electron clipboard: https://www.electronjs.org/docs/latest/api/clipboard
  * - Electron globalShortcut: https://www.electronjs.org/docs/latest/api/global-shortcut
  * - Electron powerMonitor: https://www.electronjs.org/docs/latest/api/power-monitor
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -67,26 +73,17 @@ export async function process(inputs, ctx) {
   }
 
   if (services.includes('system-info')) {
-    let systemInfo = await ctx.task(implementSystemInfoTask, { projectName, framework, targetPlatforms, outputDir });
+    const systemInfo = await ctx.task(implementSystemInfoTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...systemInfo.artifacts);
     serviceModules.push({ name: 'system-info', ...systemInfo });
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      systemInfo = await ctx.task(implementSystemInfoTask, { ...{ projectName, framework, targetPlatforms, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `System services integrated: ${services.join(', ')}. ${serviceModules.length} modules created. Review implementation?`,
     title: 'System Services Review',
-    context: { runId: ctx.runId, services: serviceModules.map(s => s.name) },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, services: serviceModules.map(s => s.name) }
+  });
+
   // Phase 7: Validation
   const validation = await ctx.task(validateServicesTask, { projectName, framework, services, serviceModules, targetPlatforms, outputDir });
   artifacts.push(...validation.artifacts);

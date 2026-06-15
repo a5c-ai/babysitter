@@ -1,0 +1,1292 @@
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+import { buildPrimaryLiveStackCommands, buildPrompt, executeChildProcessCommand, runPrimaryLiveStackScenario } from './primary-live-runner';
+import type { LiveStackScenario } from './scenario-contract';
+import { liveStackScenarioFromEnv, primaryLiveStackScenario } from './scenario-contract';
+
+async function writeMinimalJournal(journalDir: string, completed: boolean): Promise<void> {
+  const events = [
+    { type: 'RUN_CREATED' },
+    { type: 'PROCESS_ASSIGNED' },
+    { type: 'ITERATION_STARTED', iteration: 1 },
+    { type: 'EFFECT_REQUESTED', kind: 'shell' },
+    { type: 'EFFECT_RESOLVED', status: 'ok' },
+    { type: 'EFFECT_REQUESTED', kind: 'agent' },
+    { type: 'EFFECT_RESOLVED', status: 'ok' },
+    { type: 'ITERATION_STARTED', iteration: 2 },
+    { type: 'EFFECT_REQUESTED', kind: 'agent' },
+    { type: 'EFFECT_RESOLVED', status: 'ok' },
+    { type: 'EFFECT_REQUESTED', kind: 'agent' },
+    { type: 'EFFECT_RESOLVED', status: 'ok' },
+    { type: 'EFFECT_REQUESTED', kind: 'agent' },
+    { type: 'EFFECT_RESOLVED', status: 'ok' },
+    { type: 'ITERATION_STARTED', iteration: 3 },
+    { type: 'EFFECT_REQUESTED', kind: 'shell' },
+    { type: 'EFFECT_RESOLVED', status: 'ok' },
+    ...(completed ? [{ type: 'RUN_COMPLETED' }] : []),
+  ];
+  for (let i = 0; i < events.length; i++) {
+    await fs.writeFile(path.join(journalDir, `${String(i + 1).padStart(6, '0')}.json`), JSON.stringify(events[i]));
+  }
+}
+
+function foundryClaudeVanillaScenario(): LiveStackScenario {
+  return liveStackScenarioFromEnv({
+    LIVE_STACK_SCENARIO_ID: 'live.adapters.claude-code.foundry-openai.gpt-5.5',
+    LIVE_STACK_AGENT_PATH: 'adapters',
+    LIVE_STACK_AGENT: 'claude-code',
+    LIVE_STACK_AGENT_MUX_AGENT: 'claude',
+    LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+    LIVE_STACK_INSTALL_MODE: 'vanilla',
+    LIVE_STACK_PROVIDER: 'foundry-openai',
+    LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+    LIVE_STACK_MODEL: 'gpt-5.5',
+    LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+    LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+    LIVE_STACK_LAYERS: 'adapters install,adapters invocation,transport-adapter route,provider/model trace',
+    LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+    LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,transport-adapter-trace,provider-trace-redacted',
+  });
+}
+
+const CLAUDE_LIVE_MODEL_CASES = [
+  {
+    provider: 'foundry-openai',
+    agentMuxProvider: 'foundry',
+    model: 'gpt-5.5',
+    requiredEnv: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+    credentials: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test' },
+  },
+  {
+    provider: 'google',
+    agentMuxProvider: 'google',
+    model: 'gemini-3.5-flash',
+    requiredEnv: 'GOOGLE_API_KEY',
+    credentials: { GOOGLE_API_KEY: 'google-secret' },
+  },
+  {
+    provider: 'anthropic-direct',
+    agentMuxProvider: 'anthropic',
+    model: 'claude-sonnet-4-6',
+    requiredEnv: 'ANTHROPIC_API_KEY',
+    credentials: { ANTHROPIC_API_KEY: 'sk-ant-secret' },
+  },
+  {
+    provider: 'foundry-openai',
+    agentMuxProvider: 'foundry',
+    model: 'DeepSeek-V4-Pro',
+    requiredEnv: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+    credentials: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test' },
+  },
+  {
+    provider: 'foundry-openai',
+    agentMuxProvider: 'foundry',
+    model: 'gpt-5.4-mini',
+    requiredEnv: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+    credentials: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test' },
+  },
+] as const;
+
+function claudeScenarioFor(modelCase: typeof CLAUDE_LIVE_MODEL_CASES[number], installMode: 'vanilla' | 'babysitter-plugin'): LiveStackScenario {
+  return liveStackScenarioFromEnv({
+    LIVE_STACK_SCENARIO_ID: `live.adapters.claude-code.${modelCase.provider}.${modelCase.model}`,
+    LIVE_STACK_AGENT_PATH: 'adapters',
+    LIVE_STACK_AGENT: 'claude-code',
+    LIVE_STACK_AGENT_MUX_AGENT: 'claude',
+    LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+    LIVE_STACK_INSTALL_MODE: installMode,
+    LIVE_STACK_PROVIDER: modelCase.provider,
+    LIVE_STACK_AGENT_MUX_PROVIDER: modelCase.agentMuxProvider,
+    LIVE_STACK_MODEL: modelCase.model,
+    LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+    LIVE_STACK_REQUIRED_ENV: modelCase.requiredEnv,
+    LIVE_STACK_LAYERS: installMode,
+    LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+    LIVE_STACK_EXPECTED_ARTIFACTS: installMode === 'babysitter-plugin'
+      ? 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted'
+      : 'adapters-events,transport-adapter-trace,provider-trace-redacted',
+  });
+}
+
+function geminiPluginScenario(model = 'gemini-3.5-flash'): LiveStackScenario {
+  return liveStackScenarioFromEnv({
+    LIVE_STACK_SCENARIO_ID: `live.adapters.gemini-cli.google.${model}`,
+    LIVE_STACK_AGENT_PATH: 'adapters',
+    LIVE_STACK_AGENT: 'gemini-cli',
+    LIVE_STACK_AGENT_MUX_AGENT: 'gemini',
+    LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+    LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+    LIVE_STACK_PROVIDER: 'google',
+    LIVE_STACK_AGENT_MUX_PROVIDER: 'google',
+    LIVE_STACK_MODEL: model,
+    LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+    LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+    LIVE_STACK_LAYERS: 'babysitter-plugin',
+    LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+    LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+  });
+}
+
+function promptFor(scenario: LiveStackScenario, env: Record<string, string | undefined> = {}): string | undefined {
+  const commands = buildPrimaryLiveStackCommands(scenario, {
+    cwd: '/repo',
+    timeoutMs: 1000,
+    env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1', ...env },
+  });
+  const launch = commands.at(-1);
+  return launch?.args[(launch?.args.indexOf('--prompt') ?? -2) + 1];
+}
+
+describe('primary live stack runner contract', () => {
+  it('keeps Claude Code babysitter-plugin live lanes on Foundry GPT-5.5', () => {
+    const scenario = primaryLiveStackScenario();
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+
+    const run = commands.at(-1);
+    expect(run?.args).toContain('launch');
+    expect(run?.args).toContain('claude');
+    expect(run?.args).toContain('gpt-5.5');
+    expect(run?.args).toContain('foundry');
+    expect(run?.args).not.toContain('anthropic');
+    expect(run?.args).not.toContain('sonnet');
+  });
+
+  it('invokes concrete Babysitter commands for plugin live lanes', () => {
+    const claudeScenario = primaryLiveStackScenario();
+    const claudeCommands = buildPrimaryLiveStackCommands(claudeScenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+    const claudeLaunch = claudeCommands.at(-1);
+    const claudePrompt = claudeLaunch?.args[(claudeLaunch?.args.indexOf('--prompt') ?? -2) + 1];
+
+    expect(claudePrompt).toMatch(/^\/(babysitter:)?yolo /);
+    expect(claudePrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+    expect(claudePrompt).not.toContain('Use the babysitter skill');
+
+    const codexScenario = liveStackScenarioFromEnv({
+      LIVE_STACK_SCENARIO_ID: 'live.adapters.codex.foundry-openai.gpt-5.5',
+      LIVE_STACK_AGENT_PATH: 'adapters',
+      LIVE_STACK_AGENT: 'codex',
+      LIVE_STACK_AGENT_MUX_AGENT: 'codex',
+      LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+      LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+      LIVE_STACK_PROVIDER: 'foundry-openai',
+      LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+      LIVE_STACK_MODEL: 'gpt-5.5',
+      LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+      LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+      LIVE_STACK_LAYERS: 'babysitter-plugin',
+      LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+      LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+    });
+    const codexCommands = buildPrimaryLiveStackCommands(codexScenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+    const codexLaunch = codexCommands.at(-1);
+    const codexPrompt = codexLaunch?.args[(codexLaunch?.args.indexOf('--prompt') ?? -2) + 1];
+
+    expect(codexPrompt).toMatch(/^\$(babysitter:)?yolo /);
+    expect(codexPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+
+    const geminiCommands = buildPrimaryLiveStackCommands(geminiPluginScenario(), {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { GOOGLE_API_KEY: 'google-secret', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+    const geminiLaunch = geminiCommands.at(-1);
+    const geminiPrompt = geminiLaunch?.args[(geminiLaunch?.args.indexOf('--prompt') ?? -2) + 1];
+
+    expect(geminiPrompt).toMatch(/^\/(babysitter:)?yolo /);
+    expect(geminiPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+    const geminiMaxTurnsIndex = geminiLaunch?.args.indexOf('--max-turns') ?? -1;
+    expect(geminiLaunch?.args[geminiMaxTurnsIndex + 1]).toBe('60');
+  });
+
+  it('invokes non-interactive Babysitter orchestration for pi create-mode plugin lanes', () => {
+    const piScenario = liveStackScenarioFromEnv({
+      LIVE_STACK_SCENARIO_ID: 'live.adapters.pi.foundry-openai.Kimi-K2.6',
+      LIVE_STACK_AGENT_PATH: 'adapters',
+      LIVE_STACK_AGENT: 'pi',
+      LIVE_STACK_AGENT_MUX_AGENT: 'pi',
+      LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+      LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+      LIVE_STACK_PROVIDER: 'foundry-openai',
+      LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+      LIVE_STACK_MODEL: 'Kimi-K2.6',
+      LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+      LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+      LIVE_STACK_LAYERS: 'babysitter-plugin',
+      LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+      LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+    });
+
+    const piPrompt = promptFor(piScenario, { LIVE_STACK_PROCESS_MODE: 'create' });
+
+    expect(piPrompt).toMatch(/^\/(babysitter:)?yolo /);
+    expect(piPrompt).toContain('CREATE odyssey-live-test.mjs');
+    expect(piPrompt).toContain('.a5c/processes/odyssey-live-test.mjs');
+  });
+
+  it('invokes non-interactive Babysitter orchestration for all create-mode plugin commands', () => {
+    const cases = [
+      {
+        agent: 'claude-code',
+        agentMuxAgent: 'claude',
+        prefix: /^\/(babysitter:)?yolo /,
+      },
+      {
+        agent: 'codex',
+        agentMuxAgent: 'codex',
+        prefix: /^\$(babysitter:)?yolo /,
+      },
+      {
+        agent: 'pi',
+        agentMuxAgent: 'pi',
+        prefix: /^\/(babysitter:)?yolo /,
+      },
+      {
+        agent: 'gemini-cli',
+        agentMuxAgent: 'gemini',
+        prefix: /^\/(babysitter:)?yolo /,
+      },
+    ] as const;
+
+    for (const { agent, agentMuxAgent, prefix } of cases) {
+      const scenario = liveStackScenarioFromEnv({
+        LIVE_STACK_SCENARIO_ID: `live.adapters.${agent}.foundry-openai.gpt-5.5`,
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: agent,
+        LIVE_STACK_AGENT_MUX_AGENT: agentMuxAgent,
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'foundry-openai',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+        LIVE_STACK_MODEL: 'gpt-5.5',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      });
+
+      const prompt = promptFor(scenario, { LIVE_STACK_PROCESS_MODE: 'create' });
+      expect(prompt).toMatch(prefix);
+      expect(prompt).toContain('CREATE odyssey-live-test.mjs');
+      expect(prompt).toContain('Use only .a5c/processes/odyssey-live-test.mjs');
+      expect(prompt).not.toContain('babysitter:call');
+    }
+  });
+
+  it('uses native Gemini babysitter commands for every plugin process mode', () => {
+    const predefinedPrompt = promptFor(geminiPluginScenario());
+    const createPrompt = promptFor(geminiPluginScenario(), { LIVE_STACK_PROCESS_MODE: 'create' });
+    const resumePrompt = promptFor(geminiPluginScenario(), {
+      LIVE_STACK_PROCESS_MODE: 'resume',
+      LIVE_STACK_RESUME_RUN_ID: 'resume-trace-1',
+    });
+
+    expect(predefinedPrompt).toMatch(/^\/(babysitter:)?yolo /);
+    expect(predefinedPrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
+    expect(predefinedPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+
+    expect(createPrompt).toMatch(/^\/(babysitter:)?yolo /);
+    expect(createPrompt).toContain('CREATE odyssey-live-test.mjs');
+    expect(createPrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
+
+    expect(resumePrompt).toMatch(/^\/(babysitter:)?resume /);
+    expect(resumePrompt).toContain('resume-trace-1');
+    expect(resumePrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
+  });
+
+  it('uses babysitter instructions for yolo plugin commands', async () => {
+    const yoloCommand = await fs.readFile(path.join(process.cwd(), 'plugins', 'babysitter-unified', 'commands', 'yolo.md'), 'utf8');
+
+    expect(yoloCommand).toContain('babysitter instructions:babysit-skill');
+    expect(yoloCommand).toContain('--harness');
+    expect(yoloCommand).not.toContain('agent-platform');
+  });
+
+  it('keeps Claude TTY live prompts bounded for interactive and bridged-interactive lanes', () => {
+    const scenario = foundryClaudeVanillaScenario();
+
+    for (const env of [
+      { LIVE_STACK_INTERACTIVE: 'true' },
+      { LIVE_STACK_INTERACTIVE: 'false', LIVE_STACK_BRIDGE_INTERACTIVE: 'true' },
+    ]) {
+      const prompt = promptFor(scenario, env);
+
+      expect(prompt).toContain('concise 6-section summary');
+      expect(prompt).toContain('.a5c-live-test directory already exists');
+      expect(prompt).not.toContain('12-paragraph summary');
+    }
+  });
+
+  it('keeps the full Odyssey task for non-TTY live prompts', () => {
+    const claudePrompt = promptFor(foundryClaudeVanillaScenario());
+    const codexPrompt = promptFor(liveStackScenarioFromEnv({
+      LIVE_STACK_SCENARIO_ID: 'live.adapters.codex.foundry-openai.gpt-5.5',
+      LIVE_STACK_AGENT_PATH: 'adapters',
+      LIVE_STACK_AGENT: 'codex',
+      LIVE_STACK_AGENT_MUX_AGENT: 'codex',
+      LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+      LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+      LIVE_STACK_PROVIDER: 'foundry-openai',
+      LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+      LIVE_STACK_MODEL: 'gpt-5.5',
+      LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+      LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+      LIVE_STACK_LAYERS: 'babysitter-plugin',
+      LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+      LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+    }));
+
+    for (const prompt of [claudePrompt, codexPrompt]) {
+      expect(prompt).toContain('concise 6-section summary');
+    }
+  });
+
+  it('runs plugin bridged-hooks through the interactive bridge so slash commands resolve', () => {
+    const scenario = primaryLiveStackScenario();
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: 'trace-1',
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'true',
+      },
+    });
+
+    const launch = commands.at(-1);
+    expect(launch?.args).toContain('--no-interactive');
+    expect(launch?.args).toContain('--bridge-interactive');
+    expect(launch?.args).toContain('--bridge-hooks');
+    expect(launch?.args).not.toContain('-p');
+  });
+
+  it('constructs Claude all-model bridged-interactive and bridged-hooks lanes with non-interactive controls', () => {
+    const laneCases = [
+      {
+        installMode: 'vanilla' as const,
+        env: { LIVE_STACK_INTERACTIVE: 'false', LIVE_STACK_BRIDGE_INTERACTIVE: 'true', LIVE_STACK_BRIDGE_HOOKS: 'false' },
+        expectedBridgeFlags: ['--bridge-interactive'],
+        rejectedBridgeFlags: ['--bridge-hooks'],
+      },
+      {
+        installMode: 'babysitter-plugin' as const,
+        env: {
+          LIVE_STACK_INTERACTIVE: 'false',
+          LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+          LIVE_STACK_BRIDGE_HOOKS: 'true',
+          LIVE_STACK_PROCESS_MODE: 'create',
+        },
+        expectedBridgeFlags: ['--bridge-interactive', '--bridge-hooks'],
+        rejectedBridgeFlags: [],
+      },
+    ];
+
+    for (const modelCase of CLAUDE_LIVE_MODEL_CASES) {
+      for (const lane of laneCases) {
+        const scenario = claudeScenarioFor(modelCase, lane.installMode);
+        const commands = buildPrimaryLiveStackCommands(scenario, {
+          cwd: '/repo',
+          timeoutMs: 1000,
+          env: {
+            ...modelCase.credentials,
+            LIVE_STACK_TRACE_ID: `trace-${modelCase.model}`,
+            ...lane.env,
+          },
+        });
+        const launch = commands.at(-1);
+
+        expect(launch?.args).toContain('launch');
+        expect(launch?.args).toContain('claude');
+        expect(launch?.args).toContain(modelCase.agentMuxProvider);
+        expect(launch?.args).toContain(modelCase.model);
+        expect(launch?.args).toContain('--no-interactive');
+        expect(launch?.args.some((a: string) => a.includes('proxy'))).toBe(true);
+        expect(launch?.args).toContain('--prompt');
+        expect(launch?.args).toContain('--max-turns');
+        expect(launch?.args).toContain('--yolo');
+        for (const flag of lane.expectedBridgeFlags) expect(launch?.args).toContain(flag);
+        for (const flag of lane.rejectedBridgeFlags) expect(launch?.args).not.toContain(flag);
+      }
+    }
+  });
+
+  it('pins babysitter-plugin runs to the workspace runs directory', () => {
+    const scenario = primaryLiveStackScenario();
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+
+    for (const command of commands) {
+      expect(command.env['BABYSITTER_RUNS_DIR']).toBe(path.join('/repo', '.a5c', 'runs'));
+      expect(command.env['BABYSITTER_RUNS_SCOPE']).toBe('repo');
+    }
+  });
+
+  it('does not pre-create a babysitter run — hooks handle run lifecycle', () => {
+    const scenario = primaryLiveStackScenario();
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+
+    const createRun = commands.find((command) => command.args?.[0] === 'run:create');
+    expect(createRun).toBeUndefined();
+  });
+
+  it('removes stale create-mode process files before exposing only the skeleton', () => {
+    const scenario = primaryLiveStackScenario();
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: 'trace-1',
+        LIVE_STACK_PROCESS_MODE: 'create',
+      },
+    });
+
+    const createSetup = commands.find((command) => command.args.join(' ').includes('odyssey-live-test.skeleton.mjs'));
+    const setupScript = createSetup?.args.at(-1) ?? '';
+
+    expect(setupScript).toContain('create-process-skeleton.mjs');
+    expect(setupScript).toContain('odyssey-live-test.skeleton.mjs');
+
+    // Cleanup uses node -e with fs.unlinkSync (cross-platform, no rm -f dependency)
+    const cleanupCommand = commands.find((command) => command.args.join(' ').includes('unlinkSync') || command.args.join(' ').includes('rm -f'));
+    const cleanupScript = cleanupCommand?.args.at(-1) ?? '';
+    expect(cleanupScript).toContain('odyssey-live-test.mjs');
+    expect(cleanupScript).toContain('summarize-translate-test.mjs');
+  });
+
+  it('passes explicit Google env to Gemini 3.1 Pro live lanes', () => {
+    const scenario = liveStackScenarioFromEnv({
+      LIVE_STACK_SCENARIO_ID: 'live.adapters.claude-code.google.gemini-3.1-pro',
+      LIVE_STACK_AGENT_PATH: 'adapters',
+      LIVE_STACK_AGENT: 'claude-code',
+      LIVE_STACK_AGENT_MUX_AGENT: 'claude',
+      LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+      LIVE_STACK_INSTALL_MODE: 'vanilla',
+      LIVE_STACK_PROVIDER: 'google',
+      LIVE_STACK_AGENT_MUX_PROVIDER: 'google',
+      LIVE_STACK_MODEL: 'gemini-3.1-pro-preview',
+      LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+      LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+      LIVE_STACK_LAYERS: 'adapters install,adapters invocation,transport-adapter route,provider/model trace',
+      LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+      LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,transport-adapter-trace,provider-trace-redacted',
+    });
+    const commands = buildPrimaryLiveStackCommands(scenario, {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: {
+        GOOGLE_API_KEY: 'google-secret',
+        LIVE_STACK_TRACE_ID: 'trace-1',
+      },
+    });
+
+    const launch = commands.at(-1);
+    expect(launch?.args).toContain('google');
+    expect(launch?.args).toContain('gemini-3.1-pro-preview');
+    expect(launch?.env['GOOGLE_API_KEY']).toBe('google-secret');
+  });
+
+  it('fails without Foundry credentials and never calls the command executor', async () => {
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir: path.join(os.tmpdir(), 'live-stack-missing-credentials'),
+      env: {},
+      executeCommand: async () => {
+        throw new Error('should not execute commands when credentials are missing');
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('missing live-model credential env');
+    expect(result.commands.at(-1)?.command).toBe('adapters');
+  });
+
+  it('fails credential-present runs unless the explicit live execution flag is set', async () => {
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir: path.join(os.tmpdir(), 'live-stack-opt-in'),
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test' },
+      executeCommand: async () => {
+        throw new Error('should not execute without live opt-in');
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toBe('LIVE_STACK_RUN_MODEL_TESTS=1 is required to execute live provider scenario');
+    expect(JSON.stringify(result)).not.toContain('sk-live-secret');
+  });
+
+  it('accepts completed plugin runs when setup also leaves a bare run behind', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-run-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-run';
+    const completedRunId = '01KRNFFW81BT433PT8HSTA32NZ';
+    const bareRunId = '01KRNFFW81BT433PT8HSTA32NY';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: traceId },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        for (const [runId, processId, completed] of [
+          [bareRunId, 'bare-run', false],
+          [completedRunId, 'processes/shared/local-dev-workflow', true],
+        ] as const) {
+          const runDir = path.join(cwd, '.a5c', 'runs', runId);
+          await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+          await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId, metadata: { completionProof: `${runId}-proof` } }));
+          await writeMinimalJournal(path.join(runDir, 'journal'), completed);
+        }
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${completedRunId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+    expect(result.status).toBe('passed');
+    expect(result.failure).toBeUndefined();
+  });
+
+  it('requires hooks evidence from interactive plugin lanes', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-interactive-run-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-interactive-run';
+    const runId = '01KRNFFW81BT433PT8HSTA32PZ';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'false',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+        const hooksDir = path.join(cwd, '.a5c', 'logs', 'hooks');
+        await fs.mkdir(hooksDir, { recursive: true });
+        await fs.writeFile(path.join(hooksDir, 'session-start.json'), JSON.stringify({ eventId: 'hook-1', status: 'completed' }));
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('passed');
+    expect(result.failure).toBeUndefined();
+  });
+  it('requires hooks evidence from bridged-interactive plugin lanes', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-bridged-interactive-run-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-bridged-interactive-run';
+    const runId = '01KRNFFW81BT433PT8HSTA32Q0';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'false',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+        const hooksDir = path.join(cwd, '.a5c', 'logs', 'hooks');
+        await fs.mkdir(hooksDir, { recursive: true });
+        await fs.writeFile(path.join(hooksDir, 'session-start.json'), JSON.stringify({ eventId: 'hook-1', status: 'completed' }));
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('passed');
+    expect(result.failure).toBeUndefined();
+  });
+
+  it('requires hook evidence from bridged interactive hook plugin lanes', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-bridged-hooks-run-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-bridged-hooks-run';
+    const runId = '01KRNFFW81BT433PT8HSTA32Q1';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'true',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+        const hooksDir = path.join(cwd, '.a5c', 'logs', 'hooks');
+        await fs.mkdir(hooksDir, { recursive: true });
+        await fs.writeFile(path.join(hooksDir, 'session-start.json'), JSON.stringify({ eventId: 'hook-1', status: 'completed' }));
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('passed');
+    const hookCheck = result.verifications?.find(v => v.name === 'stop-hooks');
+    expect(hookCheck?.detail).toContain('hooks-adapter log files found');
+  });
+
+  it('fails plugin lanes when the model emits substantial Odyssey text but no artifact file', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-missing-artifact-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-missing-artifact';
+    const runId = '01KRNFFW81BT433PT8HSTA32Q2';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        GOOGLE_API_KEY: 'google-secret',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.gemini-cli.google.gemini-3.5-flash',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'gemini-cli',
+        LIVE_STACK_AGENT_MUX_AGENT: 'gemini',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'google',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'google',
+        LIVE_STACK_MODEL: 'gemini-3.5-flash',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            "# Homer's Odyssey",
+            '## The voyage home',
+            'Ο Οδυσσέας αναζητά την Ιθάκη μέσα από θύελλες και δοκιμασίες.',
+            'The Greek epic unfolds across multiple books. '.repeat(200),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.verifications?.find(v => v.name === 'model-response')).toMatchObject({
+      status: 'passed',
+    });
+    expect(result.verifications?.find(v => v.name === 'file-creation')).toMatchObject({
+      status: 'failed',
+      detail: expect.stringContaining(`agent did not create .a5c-live-test/${traceId}-odyssey.md`),
+    });
+  });
+
+  it('fails create-mode plugin lanes when the agent does not persist the created process file', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-create-run-proof-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-create-run-proof';
+    const runId = 'run-create-proof';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+        LIVE_STACK_INTERACTIVE: 'false',
+        LIVE_STACK_BRIDGE_INTERACTIVE: 'true',
+        LIVE_STACK_BRIDGE_HOOKS: 'true',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ about Homer and Odyssey. '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+        const hooksDir = path.join(cwd, '.a5c', 'logs', 'hooks');
+        await fs.mkdir(hooksDir, { recursive: true });
+        await fs.writeFile(path.join(hooksDir, 'session-start.json'), JSON.stringify({ eventId: 'hook-1', status: 'completed' }));
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    const processCreation = result.verifications?.find(v => v.name === 'process-creation');
+    expect(processCreation?.status).toBe('failed');
+    expect(processCreation?.detail).toContain('no .a5c/processes/odyssey-live-test.mjs file created');
+  });
+
+  it('accepts create-mode process files without requiring implementation-specific parallelism', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-create-process-contract-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-create-process-contract';
+    const runId = '01KRNFFW81BT433PT8HSTA32QR';
+    await fs.mkdir(path.join(cwd, '.a5c', 'processes'), { recursive: true });
+    await fs.writeFile(path.join(cwd, '.a5c', 'processes', 'odyssey-live-test.mjs'), [
+      '/** @reference create-process-skeleton.mjs */',
+      "import { defineTask } from '@a5c-ai/babysitter-sdk';",
+      "const writeTask = defineTask('write', () => ({ kind: 'shell', shell: { command: 'true', expectedExitCode: 0 } }));",
+      'export async function process(inputs, ctx) { await ctx.task(writeTask, inputs); return { success: true }; }',
+    ].join('\n'));
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Odyssey\n\n' + 'Greek text ΑΒΓ '.repeat(80));
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/odyssey-live-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            'hookEventId: hook-1',
+            'hookMuxEventId: hookmux-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            'The Greek epic unfolds across multiple books. '.repeat(20),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('passed');
+    expect(result.verifications?.find(v => v.name === 'process-creation')).toMatchObject({
+      status: 'passed',
+    });
+  });
+
+  it('does not treat bridged auth errors as valid Odyssey artifacts', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-bridged-auth-error-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-bridged-auth-error';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      requireRunnable: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.codex.foundry-openai.gpt-5.5',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'codex',
+        LIVE_STACK_AGENT_MUX_AGENT: 'codex',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'foundry-openai',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+        LIVE_STACK_MODEL: 'gpt-5.5',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), 'ERROR: unexpected status 401 Unauthorized\n'.repeat(40));
+        return { status: 1, stdout: '', stderr: 'ERROR: unexpected status 401 Unauthorized: Unauthorized, url: http://127.0.0.1:46085/v1/responses' };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
+  });
+
+  it('fails live agents that emit login UI instead of task output', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-login-ui-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-login-ui';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      requireRunnable: true,
+      env: {
+        GOOGLE_API_KEY: 'google-secret',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.codex.google.gemini-3.1-pro-preview',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'codex',
+        LIVE_STACK_AGENT_MUX_AGENT: 'codex',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'google',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'google',
+        LIVE_STACK_MODEL: 'gemini-3.1-pro-preview',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), '# Welcome to Codex\n\nPreparing device code login\nRequesting a one-time code\n'.repeat(40));
+        return { status: 0, stdout: 'Welcome to Codex\nPreparing device code login\nRequesting a one-time code', stderr: '' };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('does not contain a valid Odyssey markdown artifact');
+  });
+
+  it('fails live agents that request tools without executable tool results', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-empty-tool-use-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-empty-tool-use';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      requireRunnable: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.pi.foundry-openai.Kimi-K2.6',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'pi',
+        LIVE_STACK_AGENT_MUX_AGENT: 'pi',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'foundry-openai',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+        LIVE_STACK_MODEL: 'Kimi-K2.6',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+        const transcript = '{"type":"turn_end","message":{"stopReason":"toolUse"},"toolResults":[]}';
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), transcript.repeat(80));
+        return { status: 0, stdout: '', stderr: '[adapters launch] agent wrote invalid transcript artifact' };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('does not contain a valid Odyssey markdown artifact');
+  });
+
+  it('fails terminated bridged launches that only bridge transcripts', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-terminated-bridge-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-terminated-bridge';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      requireRunnable: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.pi.foundry-openai.Kimi-K2.6',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'pi',
+        LIVE_STACK_AGENT_MUX_AGENT: 'pi',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'foundry-openai',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+        LIVE_STACK_MODEL: 'Kimi-K2.6',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+        const transcript = '{"type":"message_start","message":{"role":"assistant","content":[],"stopReason":"stop"}}';
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), transcript.repeat(80));
+        return {
+          status: 143,
+          stdout: transcript,
+          stderr: '[adapters launch] exit=143 captured=3444 chunks=6',
+        };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
+  });
+
+  it('fails successful bridged launches that only bridge non-task transcripts', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-invalid-bridge-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-invalid-bridge';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      requireRunnable: true,
+      env: {
+        GOOGLE_API_KEY: 'google-secret',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_PROCESS_MODE: 'create',
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.codex.google.gemini-3.1-pro-preview',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'codex',
+        LIVE_STACK_AGENT_MUX_AGENT: 'codex',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'google',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'google',
+        LIVE_STACK_MODEL: 'gemini-3.1-pro-preview',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+        await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
+        await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), 'terminal transcript without greek markdown\n'.repeat(80));
+        return { status: 0, stdout: 'terminal transcript without task output', stderr: '[adapters launch] agent wrote invalid transcript artifact' };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('does not contain a valid Odyssey markdown artifact');
+  });
+
+  it('writes a redacted failed artifact when live output lacks required joined trace IDs', async () => {
+    const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-artifacts-'));
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir,
+      executeLiveProvider: true,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'transport-trace-1' },
+      executeCommand: async () => ({
+        status: 0,
+        stdout: 'transportTraceId: transport-trace-1\nagentMuxRunId: adapters-1\nagentMuxSessionId: sess-1',
+        stderr: '',
+      }),
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.missingTraceIds).toEqual(['babysitterRunId', 'babysitterEffectId', 'hookEventId', 'hookMuxEventId']);
+    expect(result.artifactPath).toBeDefined();
+    const artifact = await fs.readFile(result.artifactPath!, 'utf8');
+    expect(artifact).not.toContain('sk-live-secret');
+    expect(artifact).toContain('[REDACTED]');
+  });
+
+  it('fails provider-backed live runs when the upstream service reports exhausted credits', async () => {
+    const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-provider-fail-'));
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir,
+      executeLiveProvider: true,
+      env: { ANTHROPIC_API_KEY: 'sk-ant-secret', LIVE_STACK_TRACE_ID: 'trace-1', LIVE_STACK_SCENARIO_ID: 'live.adapters.claude-code.anthropic-direct.sonnet', LIVE_STACK_AGENT_PATH: 'adapters', LIVE_STACK_AGENT: 'claude-code', LIVE_STACK_AGENT_MUX_AGENT: 'claude', LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin', LIVE_STACK_INSTALL_MODE: 'vanilla', LIVE_STACK_PROVIDER: 'anthropic-direct', LIVE_STACK_AGENT_MUX_PROVIDER: 'anthropic', LIVE_STACK_MODEL: 'sonnet', LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets', LIVE_STACK_REQUIRED_ENV: 'ANTHROPIC_API_KEY', LIVE_STACK_LAYERS: 'adapters install,adapters invocation,transport-adapter route,provider/model trace', LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId', LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,transport-adapter-trace,provider-trace-redacted' },
+      executeCommand: async (command) => command.args.includes('install')
+        ? { status: 0, stdout: '{"ok":true}', stderr: '' }
+        : { status: 1, stdout: 'Credit balance is too low', stderr: '' },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
+    expect(result.artifactPath).toBeDefined();
+  });
+
+  it('fails provider-backed live runs when configured credentials are rejected upstream', async () => {
+    const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-provider-auth-fail-'));
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir,
+      executeLiveProvider: true,
+      env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'trace-1', LIVE_STACK_SCENARIO_ID: 'live.adapters.pi.foundry-openai.gpt-5.5', LIVE_STACK_AGENT_PATH: 'adapters', LIVE_STACK_AGENT: 'pi', LIVE_STACK_AGENT_MUX_AGENT: 'pi', LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin', LIVE_STACK_INSTALL_MODE: 'vanilla', LIVE_STACK_PROVIDER: 'foundry-openai', LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry', LIVE_STACK_MODEL: 'gpt-5.5', LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars', LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE', LIVE_STACK_LAYERS: 'adapters install,adapters invocation,transport-adapter route,provider/model trace', LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId', LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,transport-adapter-trace,provider-trace-redacted' },
+      executeCommand: async (command) => command.args.includes('install')
+        ? { status: 0, stdout: '{"ok":true}', stderr: '' }
+        : { status: 1, stdout: '', stderr: '401 Incorrect API key provided: sk-incorrect' },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
+    expect(result.artifactPath).toBeDefined();
+  });
+
+  it('fails Codex live runs when upstream OpenAI auth is missing', async () => {
+    const artifactsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-provider-codex-auth-fail-'));
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: 'trace-1',
+        LIVE_STACK_SCENARIO_ID: 'live.adapters.codex.foundry-openai.gpt-5.5',
+        LIVE_STACK_AGENT_PATH: 'adapters',
+        LIVE_STACK_AGENT: 'codex',
+        LIVE_STACK_AGENT_MUX_AGENT: 'codex',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'vanilla',
+        LIVE_STACK_PROVIDER: 'foundry-openai',
+        LIVE_STACK_AGENT_MUX_PROVIDER: 'foundry',
+        LIVE_STACK_MODEL: 'gpt-5.5',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'AZURE_API_KEY,AGENT_MUX_API_BASE',
+        LIVE_STACK_LAYERS: 'adapters install,adapters invocation,vanilla agent prompt,transport-adapter route,provider/model trace',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'adapters-events,transport-adapter-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => command.args.includes('install')
+        ? { status: 0, stdout: '{"ok":true}', stderr: '' }
+        : { status: 1, stdout: '', stderr: 'ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses' },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('command failed:');
+    expect(result.artifactPath).toBeDefined();
+  });
+
+  it('terminates the command process group when live commands time out', async () => {
+    const result = await executeChildProcessCommand({
+      command: process.execPath,
+      args: ['-e', 'process.on("SIGTERM", () => {}); setInterval(() => {}, 1000);'],
+      env: {},
+      cwd: process.cwd(),
+      timeoutMs: 50,
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('Timed out after 50ms');
+  });
+
+  it('executes the primary live provider scenario when explicitly enabled', async () => {
+    if (process.env['LIVE_STACK_RUN_MODEL_TESTS'] !== '1') return;
+    const result = await runPrimaryLiveStackScenario({
+      cwd: process.cwd(),
+      artifactsDir: 'artifacts/live-stack',
+      executeLiveProvider: true,
+      env: process.env,
+      executeCommand: executeChildProcessCommand,
+      timeoutMs: 5 * 60 * 1000,
+    });
+
+    expect(result.status).toBe('passed');
+    expect(result.missingTraceIds).toEqual([]);
+    expect(result.artifactPath).toBeDefined();
+  });
+});
+
+describe('buildPrompt — BP-mode invocation hardening (issue #947)', () => {
+  // gpt-5.4-mini case — the model that ignored the command prefix in #947.
+  const gptMiniCase = CLAUDE_LIVE_MODEL_CASES[4];
+  const bpClaude = claudeScenarioFor(gptMiniCase, 'babysitter-plugin');
+
+  it('keeps the babysitter command token at the very start (native command recognition must not break)', () => {
+    for (const mode of ['predefined', 'create', 'resume'] as const) {
+      const prompt = buildPrompt(bpClaude, 'trace-947', { LIVE_STACK_PROCESS_MODE: mode });
+      // The slash command MUST be the first token, else the harness won't treat
+      // it as a command — so the directive is appended, never prepended.
+      expect(prompt.startsWith('/babysitter:')).toBe(true);
+    }
+  });
+
+  it('appends an unmissable orchestration directive in every BP process mode', () => {
+    for (const mode of ['predefined', 'create', 'resume'] as const) {
+      const prompt = buildPrompt(bpClaude, 'trace-947', { LIVE_STACK_PROCESS_MODE: mode });
+      expect(prompt).toContain('ORCHESTRATION REQUIRED');
+      expect(prompt).toContain('.a5c/runs/');
+    }
+  });
+
+  it('does not add the orchestration directive to vanilla (non-BP) prompts', () => {
+    const vanilla = claudeScenarioFor(gptMiniCase, 'vanilla');
+    const prompt = buildPrompt(vanilla, 'trace-947', {});
+    expect(prompt).not.toContain('ORCHESTRATION REQUIRED');
+  });
+});

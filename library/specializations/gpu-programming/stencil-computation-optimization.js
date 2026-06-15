@@ -16,6 +16,12 @@
  * @references
  * - Stencil Optimization: https://developer.nvidia.com/blog/finite-difference-methods-cuda-cc-part-1/
  * - Temporal Blocking: https://dl.acm.org/doi/10.1145/1654059.1654099
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

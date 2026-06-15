@@ -1,0 +1,165 @@
+{
+  "issueNumber": 599,
+  "baseBranch": "staging",
+  "implementationBranch": "feat/issue-599-transport-mux-integration",
+  "maxAttempts": 3,
+  "title": "transport-mux: cost feedback loop + session-aware proxy + codec plugin system",
+  "labels": [
+    "enhancement",
+    "sdk",
+    "ready-for-dev",
+    "plugins",
+    "priority:medium",
+    "adapters",
+    "transport-mux",
+    "effort:large",
+    "P2",
+    "integration",
+    "risk:high"
+  ],
+  "issueSummary": "Three transport-mux integration gaps: cost records are extracted but not fully fed into SDK journal or L6 cost tracking, proxy requests lack runId/sessionId traceability, and codec discovery is hardcoded rather than pluggable. Tool schema translation in tool-mux should share normalization with transport-mux.",
+  "issueCommentsSummary": [
+    "#578 is related for end-to-end cost tracking; #599 owns the transport-mux side of the feedback loop.",
+    "#591 is related for observability and distributed tracing; #599 owns session-aware proxy context.",
+    "Triage says this is staged integration/architecture work, not a quick single-file bug fix.",
+    "Triage recommends a request context contract, narrow cost/event sink, usage-bearing buffered and streaming cost emission, passthrough metrics-only behavior unless upstream usage parsing exists, explicit plugin/atlas-backed codec discovery, route-level tests, and privacy controls.",
+    "A previous closed plan PR #660 existed for the same branch name; implementation was reported in-progress and should not be assumed complete without current-state validation.",
+    "A later open plan PR #727 exists on plan/issue-599 and should be updated rather than overwritten if the branch already exists."
+  ],
+  "relatedIssues": [
+    578,
+    591,
+    213
+  ],
+  "processLibraryReferences": [
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-reference/command-surfaces.md",
+    "docs/agent-reference/repo-map.md",
+    "library/cradle/feature-implementation-contribute.js",
+    "library/processes/shared/tdd-triplet.js",
+    "library/processes/shared/deterministic-quality-gate.js",
+    "library/specializations/sdk-platform-development",
+    "library/specializations/qa-testing-automation",
+    ".a5c/processes/issue-578-end-to-end-token-cost-tracking.mjs",
+    ".a5c/processes/issue-591-agent-runtime-observability.mjs",
+    ".a5c/processes/issue-588-agent-core-tool-system-gaps.mjs"
+  ],
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "docs/plugins.md",
+    "packages/transport-mux/README.md",
+    "packages/transport-mux/architecture.md",
+    "packages/transport-mux/migration.md",
+    "packages/transport-mux/src/server.ts",
+    "packages/transport-mux/src/types.ts",
+    "packages/transport-mux/src/codec.ts",
+    "packages/transport-mux/src/codecs/index.ts",
+    "packages/transport-mux/src/codecs/openai-chat.ts",
+    "packages/transport-mux/src/codecs/openai-responses.ts",
+    "packages/transport-mux/src/codecs/anthropic.ts",
+    "packages/transport-mux/src/codecs/google.ts",
+    "packages/transport-mux/src/codecs/bedrock.ts",
+    "packages/transport-mux/src/config.ts",
+    "packages/transport-mux/src/runtime.ts",
+    "packages/transport-mux/src/index.ts",
+    "packages/transport-mux/src/bin/adapters-proxy.ts",
+    "packages/transport-mux/tests/server.test.ts",
+    "packages/transport-mux/tests/runtime.test.ts",
+    "packages/transport-mux/tests/config.test.ts",
+    "packages/transport-mux/tests/transports/openai-chat.test.ts",
+    "packages/transport-mux/tests/transports/openai-responses.test.ts",
+    "packages/transport-mux/tests/transports/anthropic.test.ts",
+    "packages/transport-mux/tests/transports/google.test.ts",
+    "packages/transport-mux/tests/transports/vertex-native.test.ts",
+    "packages/transport-mux/tests/transports/bedrock-converse.test.ts",
+    "packages/transport-mux/tests/transports/azure-foundry.test.ts",
+    "packages/transport-mux/tests/transports/passthrough.test.ts",
+    "packages/sdk/src/cost/journal.ts",
+    "packages/sdk/src/cost/types.ts",
+    "packages/sdk/src/cost/collector.ts",
+    "packages/sdk/src/session/types.ts",
+    "packages/sdk/src/session/index.ts",
+    "packages/sdk/src/harness/amuxMetadata.ts",
+    "packages/sdk/src/harness/amuxFallbackMetadata.ts",
+    "packages/adapters/adapters/src/translate-for-harness.ts",
+    "packages/adapters/adapters/src/base-adapter.ts",
+    "packages/adapters/core/src/client.ts",
+    "packages/adapters/core/src/run-handle.ts",
+    "packages/adapters/core/src/run-handle-impl.ts",
+    "packages/adapters/core/src/spawn-runner.ts",
+    "packages/sdk/src/cli/commands/plugin",
+    "packages/sdk/src/plugins"
+  ],
+  "implementationSlices": [
+    {
+      "id": "cost-feedback",
+      "summary": "Inject a narrow transport cost/event sink, emit normalized usage once for buffered and streaming completion outcomes, and bridge to SDK journal through appendCostEventOnce semantics where run context is available."
+    },
+    {
+      "id": "session-context",
+      "summary": "Carry runId, sessionId, effectId, taskId, taskKind, traceparent, tracestate, request ID, and correlation ID into internal proxy context and sinks while redacting internal metadata from upstream provider requests by default."
+    },
+    {
+      "id": "codec-discovery",
+      "summary": "Expose deterministic codec registration/discovery APIs backed by explicit descriptors or plugin metadata, preserving built-ins and testing duplicate, alias, and unknown codec behavior."
+    },
+    {
+      "id": "schema-sharing",
+      "summary": "Share tool schema normalization between transport-mux and tool-mux without circular dependencies, covering OpenAI, Anthropic, and Google tool shapes."
+    }
+  ],
+  "acceptanceCriteria": [
+    "Reuse-audit findings are rendered before design or implementation work.",
+    "Runtime call paths are recorded for buffered HTTP, streaming SSE, WebSocket, passthrough, SDK journal, adapters context, codec lookup, and tool schema normalization.",
+    "Tests are authored before production implementation changes and red failures are verified against issue #599 behavior.",
+    "Cost feedback emits exactly once per usage-bearing buffered completion or final streaming done event.",
+    "Cost feedback reaches SDK journal or its narrow adapter using idempotency semantics and feeds run/effect/session cost consumers where applicable.",
+    "Passthrough remains metrics-only unless upstream usage parsing is explicitly implemented and tested.",
+    "runId/sessionId/trace/correlation metadata is available to internal sinks and not forwarded to upstream providers by default.",
+    "Codec discovery is deterministic, pluggable through explicit descriptors or plugin metadata, and preserves built-in aliases.",
+    "Duplicate and unknown codec behavior is specified and tested.",
+    "Tool schema normalization is shared or bridged so tool-mux and transport-mux do not drift.",
+    "Transport-mux package build, tests, migration scorecard, SDK targeted checks, metadata verification, and diff checks pass."
+  ],
+  "nonGoals": [
+    "Do not implement the entirety of #578 end-to-end cost tracking outside the transport-mux integration boundary.",
+    "Do not implement the entirety of #591 observability platform outside transport proxy context propagation.",
+    "Do not perform broad protocol/provider architecture rewrites unrelated to issue #599.",
+    "Do not add implicit arbitrary plugin code execution for codec discovery.",
+    "Do not forward internal orchestration headers upstream by default."
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "npm run test --workspace=@a5c-ai/transport-mux",
+    "npm run build --workspace=@a5c-ai/transport-mux",
+    "npm run scorecard:migration --workspace=@a5c-ai/transport-mux",
+    "npm run test --workspace=@a5c-ai/babysitter-sdk -- src/cost src/session src/harness/__tests__/amuxMetadata.test.ts src/harness/__tests__/amuxFallbackMetadata.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": {
+    "reuseAuditRequired": true,
+    "runtimeTraceRequired": true,
+    "testsFirstRequired": true,
+    "maxVerificationAttempts": 3,
+    "exactOnceCostRequired": true,
+    "metadataRedactionRequired": true,
+    "deterministicCodecDiscoveryRequired": true,
+    "migrationScorecardRequired": true,
+    "privacyReviewRequired": true,
+    "finalAcceptanceReviewRequired": true
+  },
+  "knownCurrentStateHints": {
+    "processLibraryPath": ".a5c/process-library/ was not present in the planning checkout; use library/ and nearby process files as the local process-library source.",
+    "partialCostSessionImplementation": "Current staging appears to contain CostFeedbackSink, CostFeedbackMetadata, x-babysitter-* extraction, cost feedback tests, appendCostEventOnce integration tests, normalizeUsage, convertTools, and codec descriptor lookup. The implementation process must validate and preserve usable partial or complete work before adding new code.",
+    "stagingEvidenceObservedDuringPlanning": [
+      "packages/transport-mux/src/types.ts defines CostFeedbackMetadata, CostFeedbackRecord, and CostFeedbackSink.",
+      "packages/transport-mux/src/server.ts extracts x-babysitter-run-id, x-babysitter-session-id, x-babysitter-effect-id, x-babysitter-task-id, x-babysitter-task-kind, x-babysitter-cost-source, and x-babysitter-cost-idempotency-key into cost feedback metadata.",
+      "packages/transport-mux/tests/server.test.ts covers buffered cost feedback, streaming final-usage feedback, SDK journal appendCostEventOnce idempotency, effect cost indexing, and session budget enforcement.",
+      "packages/transport-mux/src/codecs/index.ts exposes getCodecForDescriptor, convertTools, and normalizeUsage backed by built-in codecs and aliases."
+    ],
+    "currentStateRule": "Each implementation slice should begin by classifying the current staging state as complete, partial, or missing. Complete slices are preserve-and-verify work and should not trigger production rewrites.",
+    "priorPlanPr": "PR #660 was a previous closed plan PR for issue #599; PR #727 is the current open plan PR on plan/issue-599. Both should be treated as context only, not proof of completion."
+  }
+}

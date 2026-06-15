@@ -1,0 +1,114 @@
+{
+  "issueNumber": 632,
+  "dependencyIssueNumber": 630,
+  "dependencyPrNumber": 644,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-632-external-tracker-backend",
+  "title": "tasks-mux: ExternalTrackerBackend -- sync tasks to Jira/Linear/REST",
+  "labels": [
+    "priority:high",
+    "ready-for-dev",
+    "feature",
+    "effort:large",
+    "tasks-mux",
+    "P1",
+    "integration",
+    "risk:high"
+  ],
+  "userRequest": "Create implementation plan for issue #632: tasks-mux: ExternalTrackerBackend -- sync tasks to Jira/Linear/REST. Note: this depends on foundational work that is being implemented in parallel.",
+  "issueBody": "New backend that syncs tasks to external issue trackers as a responder type. Deliverables: ExternalTrackerBackend implementing BreakpointBackend; pluggable tracker adapters: GitHubIssues (existing), Jira (new), Linear (new), GenericREST (new); bidirectional sync: task state changes flow both ways; webhook listener for push notifications from trackers; field mapping configuration. Depends on #620 in original body, but latest comment updates dependency to #630. Related/supersedes #583. Design: docs/adapters-babysitter-integrations/tasks-mux-routing.md",
+  "issueComments": [
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T08:41:46Z",
+      "body": "Depends on: #630 (ResponderType system). Supersedes: #583 (tasks-mux-native version of external trackers)."
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T10:11:38Z",
+      "body": "Triage says the gap is tracker responder semantics: outbound sync, inbound webhook/status sync, provider-specific field mapping, conflict handling, idempotency, and auth boundaries. Recommended staged approach: define tracker responder/backend contract and config model; add provider-neutral mapping and sync primitives; refactor or wrap GitHubIssuesBackend behind tracker abstraction while preserving behavior; add Jira, Linear, and GenericREST adapters; add webhook ingestion; wire tracker routing after #630 lands; add S../platform integration only after tasks-mux backend contracts are covered by tests."
+    }
+  ],
+  "latestDependencyNote": "Use #630, not the stale #620 reference in the issue body, as the active dependency for the ResponderType system.",
+  "dependencyContext": {
+    "issueNumber": 630,
+    "issueTitle": "tasks-mux: add ResponderType system (human, agent, tracker, internal, auto)",
+    "issueState": "OPEN",
+    "planningPrNumber": 644,
+    "planningPrTitle": "feat: tasks-mux ResponderType system",
+    "planningPrState": "OPEN",
+    "summary": "Foundational typed responder routing must define ResponderType, responder metadata, and TaskRouter. Issue #632 should consume that contract and avoid duplicating it.",
+    "expectedContract": [
+      "ResponderType includes human, agent, tracker, internal, and auto or an equivalent routing mode.",
+      "Tracker responders can carry trackerBackend/trackerConfig metadata.",
+      "TaskRouter can match tracker responders by type, capabilities, availability, and hints.",
+      "Existing human responder and BreakpointBackend behavior remains compatible."
+    ]
+  },
+  "designDoc": "docs/adapters-babysitter-integrations/tasks-mux-routing.md",
+  "docs": [
+    "docs/agent-reference/process-authoring.md",
+    "docs/adapters-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-layer-gaps.md",
+    "docs/testing/quality-gates.md",
+    "packages/tasks-mux/README.md",
+    "packages/tasks-mux/specs/architecture.md"
+  ],
+  "targetFiles": [
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backends/index.ts",
+    "packages/tasks-mux/src/backends/github-issues.ts",
+    "packages/tasks-mux/src/harness/interaction-provider.ts",
+    "packages/tasks-mux/src/mcp/backend-resolver.ts",
+    "packages/tasks-mux/src/index.ts",
+    "packages/tasks-mux/src/config.ts",
+    "packages/tasks-mux/src/auth/types.ts",
+    "packages/tasks-mux/src/__tests__/github-issues-backend.test.ts",
+    "packages/tasks-mux/src/__tests__/harness-integration.test.ts",
+    "packages/tasks-mux/src/__tests__/mcp-server.test.ts"
+  ],
+  "testTargets": [
+    "packages/tasks-mux/src/__tests__/external-tracker-backend.test.ts",
+    "packages/tasks-mux/src/__tests__/tracker-adapters.test.ts",
+    "packages/tasks-mux/src/__tests__/tracker-sync-webhooks.test.ts",
+    "packages/tasks-mux/src/__tests__/github-issues-backend.test.ts",
+    "packages/tasks-mux/src/__tests__/shared-types-backend-interface.test.ts"
+  ],
+  "reuseAuditFindings": {
+    "processLibraryStatus": ".a5c/process-library/ was requested but is not present in this checkout; use docs/agent-reference/process-authoring.md and existing .a5c/processes conventions instead.",
+    "matchedExistingInfrastructure": [
+      "packages/tasks-mux/src/backend.ts defines the BreakpointBackend lifecycle contract to implement.",
+      "packages/tasks-mux/src/types.ts defines BackendConfigSchema for git-native, server, and github-issues only.",
+      "packages/tasks-mux/src/backends/index.ts has a backend factory registry with git-native, github-issues, and server.",
+      "packages/tasks-mux/src/backends/github-issues.ts already maps breakpoints to GitHub issues with hidden payload markers and answer parsing.",
+      "packages/tasks-mux/routing.json shows existing github-issues routing config examples.",
+      "packages/tasks-mux/src/mcp/backend-resolver.ts and packages/tasks-mux/src/harness/interaction-provider.ts are routing integration surfaces.",
+      "packages/tasks-mux/src/auth/types.ts includes webhookSecret patterns for GitHub app auth.",
+      "packages/genty/platform/src/daemon/webhookListener.ts has a simple HTTP webhook listener pattern, but package boundaries must be evaluated before reuse."
+    ],
+    "absentInfrastructure": [
+      "No ExternalTrackerBackend implementation exists.",
+      "No Jira, Linear, or Generic REST tracker adapters exist.",
+      "No provider-neutral tracker sync cursor, event id, or conflict-resolution model exists in tasks-mux.",
+      "No tasks-mux-local webhook ingestion surface exists for tracker updates.",
+      "No field mapping configuration schema exists for tracker-backed tasks.",
+      "No bulk sync implementation is requested in #632 despite being listed as a broader gap."
+    ],
+    "implementationConstraints": [
+      "Do not implement #630 ResponderType/TaskRouter in this issue.",
+      "Do not add live-provider tests that require Jira, Linear, GitHub, or arbitrary REST credentials.",
+      "Preserve GitHubIssuesBackend behavior and durable gh-{number} ids.",
+      "Keep credentials and webhook secrets out of serialized breakpoint content, logs, and snapshots."
+    ]
+  },
+  "qualityCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/tasks-mux/vitest.config.ts packages/tasks-mux/src/__tests__/github-issues-backend.test.ts packages/tasks-mux/src/__tests__/external-tracker*.test.ts packages/tasks-mux/src/__tests__/tracker-*.test.ts",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run lint --workspace=@a5c-ai/tasks-mux",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "git diff --check"
+  ],
+  "maxVerificationAttempts": 2
+}

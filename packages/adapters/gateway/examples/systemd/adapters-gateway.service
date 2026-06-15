@@ -1,0 +1,12 @@
+[Unit]
+Description=agent-mux gateway
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env amux gateway serve --config /etc/amux/gateway.yml
+Restart=on-failure
+WorkingDirectory=/var/lib/amux
+
+[Install]
+WantedBy=multi-user.target

@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: theoretical
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Theoretical Model Developer

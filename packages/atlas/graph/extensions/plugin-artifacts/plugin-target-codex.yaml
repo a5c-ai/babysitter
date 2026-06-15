@@ -1,0 +1,111 @@
+nodeKind: PluginTarget
+id: plugin-target:codex
+attributes:
+  displayName: "Codex"
+  hostAgent: agent:codex
+  adapterFamily: shell-hook
+  manifestFormat: "package.json + hooks.json"
+  commandFormat: "package-json commands"
+  adapterName: codex
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: codex
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: ".codex-plugin/plugin.json"
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: CODEX_PLUGIN_ROOT
+  scriptVariants:
+    - bash
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  marketplacePath: ".agents/plugins/marketplace.json"
+  npmPublishable: false
+  installLayout:
+    harnessHomeRelative: ".codex"
+    pluginsDirRelative: ".agents/plugins"
+    marketplacePathRelative: ".agents/plugins/marketplace.json"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: none
+    activationMessage: codex-open-plugins
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: unsupported
+  cliCommand: "codex"
+  callerEnvVars:
+    - "CODEX_THREAD_ID"
+    - "CODEX_SESSION_ID"
+    - "CODEX_PLUGIN_ROOT"
+  configPaths:
+    - ".codex"
+  processNames:
+    - "codex"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/codex-adapter"
+  externalRepo: "a5c-ai/babysitter-codex"
+  externalPackageName: "@a5c-ai/babysitter-codex"
+  generatedSourceDir: "codex"
+  marketplaceSpecs:
+    - from: ".agents/plugins/marketplace.json"
+      kind: "codex"
+      primary: true
+    - from: ".claude-plugin/marketplace.json"
+      kind: "codex"
+      legacy: true
+  marketplaceCli:
+    command: "codex plugin marketplace"
+    subcommands: [add, list, upgrade, remove]
+  pluginCacheDir: "~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/"
+  hookEnvVars:
+    native: [PLUGIN_ROOT, PLUGIN_DATA]
+    compatAliases: [CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
+  requiredSurfaceFile: null
+  promptCapabilities:
+    - hooks
+    - stop-hook
+    - ask-user-question
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: stop-hook
+  hookDriven: true
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); CODEX_THREAD_ID/CODEX_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: true
+  hasNonNegotiables: true
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-responses
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: partial_shell_only
+  launchBehavior:
+    promptDelivery: exec-subcommand
+    promptFlag: null
+    execSubcommand: exec
+    resumeDelivery: subcommand
+    resumeSubcommand: resume
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
+
+edges:
+  hosted_by:
+    - target: agent:codex
+    - target: agent-platform-impl:codex.platform@1.x

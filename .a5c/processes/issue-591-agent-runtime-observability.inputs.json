@@ -1,0 +1,183 @@
+{
+  "issueNumber": 591,
+  "baseBranch": "staging",
+  "targetBranch": "feature/issue-591-agent-runtime-observability",
+  "title": "agent-runtime: observability gaps - structured logging, metrics export, distributed tracing",
+  "labels": [
+    "enhancement",
+    "ready-for-dev",
+    "priority:medium",
+    "effort:large",
+    "agent-runtime",
+    "P2",
+    "risk:medium"
+  ],
+  "summary": "Issue #591 tracks production observability hardening for packages/agent-runtime. Current daemon logging is append-only JSONL with no levels, filtering, rotation, or sampling. Health snapshots compute average latency but not P50/P95/P99. Metrics are computed locally but not exported through Prometheus, CloudWatch, or diagnostics surfaces. Telemetry is in-memory only and lacks OTLP export, W3C trace context, and cross-process correlation IDs. The issue also calls out missing diagnostics endpoints for /health, /metrics, /config, and /queue.",
+  "issueContext": {
+    "issueBodyReference": "docs/agent-layer-gaps.md",
+    "relatedIssues": [
+      {
+        "number": 578,
+        "reason": "Cost tracking needs metrics visibility."
+      },
+      {
+        "number": 599,
+        "reason": "Transport-mux session-aware proxy is a likely distributed trace propagation boundary."
+      }
+    ],
+    "triageFindings": [
+      "packages/agent-runtime/src/daemon/daemonLog.ts only appends JSON lines with timestamp, event, and optional data to daemon.jsonl.",
+      "packages/agent-runtime/src/observability/health.ts computes counters and avgEffectLatencyMs; packages/agent-runtime/src/observability/types.ts has no P50/P95/P99 latency fields.",
+      "packages/agent-runtime/src/telemetry/provider.ts implements InMemoryTelemetryProvider with flush and drain but no OTLP/file/console exporter implementation.",
+      "packages/agent-runtime/src/telemetry/types.ts has OpenTelemetry-aligned span types but no W3C traceparent boundary or cross-process correlation helpers.",
+      "packages/agent-runtime/src/observability/webhooks.ts builds webhook events from health snapshots but is not a metrics export or diagnostics API surface.",
+      "docs/agent-layer-gaps.md records the same medium-priority L5 gaps under no structured logging, no health percentiles, no metrics export, no distributed tracing, and limited daemon tests."
+    ]
+  },
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "status": "not-present-in-checkout",
+    "localAlternativesUsed": [
+      "docs/agent-reference/process-authoring.md",
+      "library/cradle/feature-request.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/deterministic-quality-gate.js",
+      "library/specializations/sdk-platform-development/observability-integration.js",
+      "library/specializations/sdk-platform-development/logging-diagnostics.js",
+      "library/specializations/sdk-platform-development/telemetry-analytics-integration.js",
+      "library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+      "library/specializations/devops-sre-platform/monitoring-setup.js",
+      "library/specializations/qa-testing-automation/quality-gates.js",
+      "library/specializations/collaboration/github/issue-linking.js"
+    ],
+    "methodologyReferencesToPreserve": [
+      "feature-hardening",
+      "reuse-audit",
+      "tdd-quality-convergence",
+      "deterministic-quality-gate",
+      "sdk-platform-development",
+      "observability-integration",
+      "logging-diagnostics",
+      "monitoring-setup",
+      "security-and-compatibility-review"
+    ]
+  },
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/agent-runtime/README.md",
+    "packages/agent-runtime/package.json",
+    "packages/agent-runtime/src/index.ts",
+    "packages/agent-runtime/src/daemon/daemonLog.ts",
+    "packages/agent-runtime/src/daemon/config.ts",
+    "packages/agent-runtime/src/daemon/index.ts",
+    "packages/agent-runtime/src/daemon/lifecycle.ts",
+    "packages/agent-runtime/src/daemon/loop.ts",
+    "packages/agent-runtime/src/daemon/types.ts",
+    "packages/agent-runtime/src/observability/index.ts",
+    "packages/agent-runtime/src/observability/health.ts",
+    "packages/agent-runtime/src/observability/runStatus.ts",
+    "packages/agent-runtime/src/observability/timeline.ts",
+    "packages/agent-runtime/src/observability/types.ts",
+    "packages/agent-runtime/src/observability/webhooks.ts",
+    "packages/agent-runtime/src/telemetry/index.ts",
+    "packages/agent-runtime/src/telemetry/provider.ts",
+    "packages/agent-runtime/src/telemetry/types.ts",
+    "packages/agent-runtime/src/telemetry/audit-log.ts",
+    "packages/agent-runtime/src/telemetry/span-tree.ts",
+    "packages/agent-runtime/src/telemetry/__tests__/provider.test.ts",
+    "packages/agent-runtime/src/observability/__tests__/health.test.ts",
+    "packages/agent-runtime/src/observability/__tests__/diagnostics.test.ts",
+    "packages/agent-runtime/src/daemon/__tests__/daemonLog.test.ts",
+    "packages/agent-runtime/src/telemetry/__tests__/traceContext.test.ts",
+    "packages/agent-runtime/src/telemetry/__tests__/exporters.test.ts"
+  ],
+  "acceptanceFocus": [
+    "Daemon logging remains backward compatible with existing JSONL readers while adding log levels, filtering, rotation, optional deterministic sampling, and schema/version metadata.",
+    "Health metrics preserve avgEffectLatencyMs and add deterministic p50EffectLatencyMs, p95EffectLatencyMs, and p99EffectLatencyMs fields with tests for empty, single, ordered, and unordered latency samples.",
+    "Metrics export includes a Prometheus-compatible text surface or endpoint with stable metric names and bounded labels.",
+    "Diagnostics surfaces expose safe /health, /metrics, /config, and /queue behavior with local-only or explicitly enabled defaults and test-covered secret redaction.",
+    "Telemetry supports W3C traceparent parse/serialize, propagated parent context, correlation IDs across runtime boundaries, and optional exporters while preserving in-memory/no-op defaults.",
+    "Exporter failures or missing external telemetry services do not prevent daemon startup or normal local runtime behavior.",
+    "Public exports are intentional and documented enough for downstream packages to use without importing private source paths.",
+    "Implementation coordinates with #578 and #599 by exposing integration points without implementing cost tracking or transport-mux session-aware proxy scope."
+  ],
+  "nonGoals": [
+    "Do not implement queue persistence, dead letter queues, crash recovery, or supervisor/systemd integration.",
+    "Do not implement #578 cost tracking beyond exposing metrics integration points useful to it.",
+    "Do not implement #599 transport-mux session-aware proxy behavior beyond trace context/correlation primitives in agent-runtime.",
+    "Do not require Prometheus, CloudWatch, OTLP collectors, or any remote telemetry backend for daemon startup.",
+    "Do not remove timestamp, event, or data fields from daemon JSONL entries.",
+    "Do not generate shell-oriented process subtasks for this repository workflow."
+  ],
+  "qualityGates": [
+    "Phase 0 reuse audit is rendered before new observability infrastructure is added.",
+    "Regression tests are written before implementation changes for logging, health percentiles, diagnostics/metrics, and tracing/exporters.",
+    "Targeted agent-runtime tests pass for daemon logging, observability health/diagnostics, and telemetry trace/export behavior.",
+    "Full agent-runtime test suite passes or unrelated pre-existing failures are documented with exact evidence.",
+    "Agent-runtime package build passes.",
+    "Repository metadata verification passes.",
+    "Security review confirms diagnostics /config output and logs redact secrets and do not expose private run data by default.",
+    "Compatibility review confirms existing JSONL readers, public package exports, and in-memory telemetry defaults remain compatible."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts packages/agent-runtime/src/daemon/__tests__/daemonLog.test.ts packages/agent-runtime/src/observability/__tests__/health.test.ts packages/agent-runtime/src/observability/__tests__/diagnostics.test.ts packages/agent-runtime/src/telemetry/__tests__/provider.test.ts packages/agent-runtime/src/telemetry/__tests__/traceContext.test.ts packages/agent-runtime/src/telemetry/__tests__/exporters.test.ts",
+    "npm run test --workspace=@a5c-ai/agent-runtime",
+    "npm run build --workspace=@a5c-ai/agent-runtime",
+    "npm run build:runtime:agent-core-deps",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #591, comments, labels, and related issue references to lock the behavioral spec and scope boundaries."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Render repo-required reuse-audit findings before adding logging, metrics, diagnostics, or tracing infrastructure."
+    },
+    {
+      "name": "Runtime observability trace",
+      "purpose": "Map current daemon logging, health snapshots, webhook alerts, daemon queue/status state, telemetry providers, package exports, and tests."
+    },
+    {
+      "name": "Observability design",
+      "purpose": "Define compatible logging, health percentile, diagnostics/metrics, and trace propagation/export slices with safe defaults."
+    },
+    {
+      "name": "Regression coverage",
+      "purpose": "Add failing tests for each reported observability gap before implementation changes."
+    },
+    {
+      "name": "Incremental implementation",
+      "purpose": "Implement structured logging policy, health percentiles, diagnostics/Prometheus surfaces, and W3C trace/export primitives in small slices."
+    },
+    {
+      "name": "Verification loop",
+      "purpose": "Run targeted and full agent-runtime gates, iterating up to three attempts if tests or review find regressions."
+    },
+    {
+      "name": "SRE/security/compatibility review",
+      "purpose": "Review for secret leakage, unsafe network defaults, metrics cardinality, exporter failure isolation, JSONL compatibility, and package API drift."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm acceptance criteria, verification evidence, review approval, changed files, release-note candidate, and follow-up boundaries."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if implementation discovers a real maintainer decision is needed, such as enabling diagnostics over HTTP by default, adding a new mandatory telemetry dependency, or choosing between incompatible trace propagation APIs.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended observability defaults",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "delivery": {
+    "implementationBranch": "feature/issue-591-agent-runtime-observability",
+    "planBranch": "plan/issue-591",
+    "planEntrypoint": ".a5c/processes/issue-591-agent-runtime-observability.mjs#process"
+  }
+}

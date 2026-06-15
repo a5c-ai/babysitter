@@ -2,6 +2,13 @@
 name: msw
 description: Mock Service Worker API mocking, request handlers, and integration testing.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:react-testing, skill-area:service-mocking]
+  roles: [role:frontend-engineer, role:qa-engineer]
+  topics: [topic:test-driven-development]
+
 ---
 
 # MSW Skill

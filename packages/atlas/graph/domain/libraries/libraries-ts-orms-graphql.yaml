@@ -1,0 +1,357 @@
+---
+nodeKind: Library
+id: library:knex
+attributes:
+  displayName: "Knex.js"
+  belongsToLanguageId: language:typescript
+  category: orm
+  description: |
+    SQL query builder for Node.js supporting PostgreSQL, MySQL, SQLite,
+    and more, with a fluent API for schema building, migrations, and
+    seeding. Works well with or without an ORM layer.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs / query builders"
+    - target: library:typeorm
+      comparison: "TypeScript ORMs / query builders"
+    - target: library:sequelize
+      comparison: "TypeScript ORMs / query builders"
+---
+nodeKind: Library
+id: library:sequelize
+attributes:
+  displayName: "Sequelize"
+  belongsToLanguageId: language:typescript
+  category: orm
+  description: |
+    Promise-based ORM for Node.js supporting PostgreSQL, MySQL, MariaDB,
+    SQLite, and MSSQL with model definitions, associations, hooks,
+    transactions, and auto-migration tooling.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs"
+    - target: library:typeorm
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript ORMs / query builders"
+---
+nodeKind: Library
+id: library:typeorm
+attributes:
+  displayName: "TypeORM"
+  belongsToLanguageId: language:typescript
+  category: orm
+  description: |
+    TypeScript-first ORM supporting Active Record and Data Mapper patterns
+    across PostgreSQL, MySQL, SQLite, and MongoDB, with decorators, entity
+    relationships, migrations, and CLI tooling.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - target: library:prisma
+      comparison: "TypeScript ORMs"
+    - target: library:sequelize
+      comparison: "TypeScript ORMs"
+    - target: library:knex
+      comparison: "TypeScript ORMs / query builders"
+---
+nodeKind: Library
+id: library:mikro-orm
+attributes:
+  displayName: "MikroORM"
+  belongsToLanguageId: language:typescript
+  category: orm
+  description: |
+    TypeScript ORM based on the Data Mapper, Unit of Work, and Identity Map
+    patterns, supporting PostgreSQL, MySQL, SQLite, and MongoDB with a
+    schema generator and seamless migration support.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - library:prisma
+    - library:typeorm
+    - library:drizzle-orm
+    - library:sequelize
+---
+nodeKind: Library
+id: library:objection
+attributes:
+  displayName: "Objection.js"
+  belongsToLanguageId: language:typescript
+  category: orm
+  description: |
+    SQL-friendly ORM for Node.js built on top of Knex, offering eager
+    loading, JSON schema validation, relation definitions, and flexible
+    query building with minimal magic.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - library:prisma
+    - library:knex
+    - library:kysely
+---
+nodeKind: Library
+id: library:kysely
+attributes:
+  displayName: "Kysely"
+  belongsToLanguageId: language:typescript
+  category: orm
+  description: |
+    Type-safe SQL query builder for TypeScript with zero runtime overhead,
+    dialect support for PostgreSQL, MySQL, and SQLite, and auto-generated
+    database type introspection via kysely-codegen.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-data-persistence
+  alternative_to:
+    - library:knex
+    - library:drizzle-orm
+    - library:prisma
+---
+nodeKind: Library
+id: library:apollo-client
+attributes:
+  displayName: "Apollo Client"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Comprehensive GraphQL client for JavaScript/TypeScript with intelligent
+    caching, real-time subscriptions, local state management, and deep
+    integration with React, Vue, and Angular.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+  alternative_to:
+    - library:urql
+    - library:relay
+    - library:graphql-request
+---
+nodeKind: Library
+id: library:urql
+attributes:
+  displayName: "urql"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Lightweight and flexible GraphQL client for React, Svelte, and Vue
+    with a document-centric cache, exchangeable middleware pipeline, and
+    first-class support for subscriptions and offline mode.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+---
+nodeKind: Library
+id: library:relay
+attributes:
+  displayName: "Relay"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Facebook's production-grade GraphQL client for React with co-located
+    data declarations, automatic batching, incremental data delivery via
+    @defer/@stream, and a compile-time query transformation step.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+---
+nodeKind: Library
+id: library:graphql-request
+attributes:
+  displayName: "graphql-request"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Minimal GraphQL client for Node.js and browsers with a simple
+    promise-based API, TypeScript support, and optional request
+    batching — ideal for scripts and server-side data fetching.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+---
+nodeKind: Library
+id: library:graphql-tools
+attributes:
+  displayName: "GraphQL Tools"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Collection of utilities for building, mocking, stitching, and
+    transforming GraphQL schemas, including schema merging, schema
+    delegation, and remote schema wrapping.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+  alternative_to:
+    - library:mercurius
+---
+nodeKind: Library
+id: library:nexus
+attributes:
+  displayName: "Nexus"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Code-first GraphQL schema construction library for TypeScript that
+    generates SDL from type-safe resolver definitions, with plugins
+    for Prisma integration and authorization.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+---
+nodeKind: Library
+id: library:type-graphql
+attributes:
+  displayName: "TypeGraphQL"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Create GraphQL schemas and resolvers with TypeScript classes and
+    decorators, automatically generating SDL from your type definitions
+    with built-in validation, authorization, and dependency injection.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+---
+nodeKind: Library
+id: library:mercurius
+attributes:
+  displayName: "Mercurius"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Fast GraphQL adapter for Fastify leveraging JIT compilation, query
+    caching, subscription support via WebSocket, and federation-ready
+    architecture for high-throughput APIs.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+  alternative_to:
+    - library:yoga
+    - library:nexus
+    - library:type-graphql
+---
+nodeKind: Library
+id: library:yoga
+attributes:
+  displayName: "GraphQL Yoga"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Fully-featured, spec-compliant GraphQL server built on top of
+    graphql-js with support for subscriptions, file uploads, defer/stream,
+    and adapters for Node.js, Cloudflare Workers, and Deno.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:graphql-schema-design
+---
+nodeKind: Library
+id: library:next-auth
+attributes:
+  displayName: "NextAuth.js"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Complete open-source authentication solution for Next.js applications
+    supporting 50+ OAuth providers, email/password, magic links, JWT and
+    database sessions, with a built-in adapter system.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:authentication
+  alternative_to:
+    - library:lucia
+    - library:passport
+---
+nodeKind: Library
+id: library:lucia
+attributes:
+  displayName: "Lucia"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Lightweight, framework-agnostic TypeScript auth library providing
+    session management primitives with adapters for popular databases
+    and full control over user table design.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:authentication
+---
+nodeKind: Library
+id: library:trpc-server
+attributes:
+  displayName: "tRPC Server"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Server-side half of the tRPC stack for defining end-to-end typesafe
+    API procedures — queries, mutations, and subscriptions — with input
+    validation via Zod and context-based middleware.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:trpc-client
+    - library:trpc
+---
+nodeKind: Library
+id: library:trpc-client
+attributes:
+  displayName: "tRPC Client"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Client-side half of the tRPC stack that consumes server router types
+    for fully type-safe API calls without a code generation step, with
+    React Query integration and vanilla client support.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:trpc-server
+    - library:trpc

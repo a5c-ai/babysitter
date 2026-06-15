@@ -1,0 +1,15 @@
+nodeKind: Language
+id: language:fortran
+attributes:
+  displayName: "Fortran"
+  paradigms:
+    - imperative
+    - array-oriented
+  description: |
+    Fortran — the canonical numerical / scientific computing language;
+    modern standards (Fortran 2003 / 2008 / 2018 / 2023) support modules,
+    OOP, and parallel coarrays.
+edges:
+  applies_to:
+    - target: domain:scientific-computing
+    - target: domain:mathematics

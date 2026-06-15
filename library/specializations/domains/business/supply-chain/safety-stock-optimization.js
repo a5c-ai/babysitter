@@ -16,6 +16,12 @@
  * @references
  * - ASCM CPIM: https://www.ascm.org/learning-development/certifications-credentials/cpim/
  * - Safety Stock Best Practices: https://www.kinaxis.com/
+  * @graph
+ *   domains: [domain:supply-chain]
+ *   specializations: [specialization:supply-chain-optimization]
+ *   skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:supply-chain-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

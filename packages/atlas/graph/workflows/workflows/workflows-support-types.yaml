@@ -1,0 +1,165 @@
+---
+nodeKind: Workflow
+id: workflow:technical-support-escalation
+attributes:
+  displayName: "Technical Support Escalation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Manages the escalation of technically complex support cases to
+    engineering — defining clear escalation criteria based on issue
+    reproduction complexity, code-level investigation requirements, and
+    potential bug severity, packaging escalation handoffs with structured
+    reproduction steps, environment details, log snippets, and customer impact
+    assessment, routing to the appropriate engineering team based on component
+    ownership and on-call schedules, tracking engineering SLAs for
+    acknowledging, investigating, and fixing escalated issues, managing
+    customer communication cadence during engineering investigation periods,
+    coordinating hotfix deployment decisions versus next-release scheduling,
+    feeding resolution patterns back to support teams as runbooks for future
+    self-resolution, and maintaining an escalation backlog review cadence to
+    prevent aging issues. Produces escalation volume dashboards, engineering
+    response SLA reports, and fix-time distribution analyses by component.
+    Excludes L1 triage and product roadmap prioritization.
+edges:
+  involves_role:
+    - target: role:bug-triager
+    - target: role:debugger
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:billing-support-workflow
+attributes:
+  displayName: "Billing Support Workflow"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Handles billing and payment-related support cases — processing payment
+    failure investigations including declined cards, expired payment methods,
+    and gateway errors, managing refund request workflows with approval tiers
+    based on amount and reason code, handling subscription modification
+    requests including plan upgrades, downgrades, add-on changes, and
+    cancellation with retention offers, coordinating dunning communication
+    sequences for failed payments with escalating urgency, resolving invoice
+    discrepancies through reconciliation with usage data and contract terms,
+    managing proration calculations for mid-cycle changes, tracking billing
+    dispute resolution times and outcomes, and identifying systemic billing
+    issues that indicate product or integration problems. Produces billing
+    support volume dashboards, refund rate analytics, and dunning effectiveness
+    reports. Excludes pricing strategy and payment platform engineering.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:onboarding-support-program
+attributes:
+  displayName: "Onboarding Support Program"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-customer"
+  complexity: cross-team
+  description: |
+    Provides structured support during customer onboarding and
+    implementation — designing guided setup workflows with milestone
+    checkpoints and progress tracking, triggering proactive outreach when
+    customers stall at known friction points in the onboarding journey,
+    assigning dedicated onboarding specialists for high-value accounts with
+    defined engagement cadences, tracking time-to-first-value metrics by
+    customer segment and onboarding path, managing onboarding kickoff calls
+    with structured agendas and success criteria definition, coordinating
+    technical integration support including API setup guidance and data
+    migration assistance, measuring onboarding completion rates and correlating
+    with long-term retention, and identifying at-risk onboarding customers
+    through engagement scoring before they churn. Produces onboarding progress
+    dashboards, milestone completion funnels, and time-to-value benchmarks by
+    segment. Excludes product development and post-onboarding account
+    management.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:end-user
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:onboard-new-engineer
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success
+---
+nodeKind: Workflow
+id: workflow:vip-support-program-management
+attributes:
+  displayName: "VIP Support Program Management"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages the premium support tier for high-value customers — assigning
+    dedicated support representatives with deep account context and
+    relationship continuity, configuring priority queue routing that ensures
+    VIP tickets bypass standard queue wait times, defining and monitoring
+    enhanced SLA guarantees with contractual obligation tracking, conducting
+    proactive health checks and system reviews before issues escalate, managing
+    executive escalation paths with defined response commitments, coordinating
+    VIP customer feedback directly with product leadership, tracking program
+    economics including cost-to-serve versus premium revenue, reviewing VIP
+    tier qualification criteria and customer movement between tiers, and
+    maintaining VIP customer satisfaction scores significantly above standard
+    tier benchmarks. Produces VIP program health reports, SLA compliance
+    dashboards, and cost-to-serve analyses. Excludes standard support
+    operations and contract pricing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:customer-success
+    - target: skill-area:revenue-operations
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:support-team
+    - target: org-unit:customer-success

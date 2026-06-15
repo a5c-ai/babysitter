@@ -2,17 +2,14 @@
 name: task-decomposition
 description: Convert technical plans into actionable development tasks with dependency graphs, effort estimates, and parallelization opportunities.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Task Decomposition
-
-## Overview
-
-Decompose a technical plan into actionable development tasks. Each task is atomic, has clear acceptance criteria traceable to specification requirements, and includes dependency information for optimal execution ordering.
-
-## When to Use
-
-- After technical plan is approved, before implementation
 - When breaking down a large feature into implementable units
 - When identifying parallelization opportunities in a task set
 - When estimating effort and critical path for a feature

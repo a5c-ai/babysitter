@@ -4,7 +4,7 @@ All paths are relative to the babysitter monorepo root. Last verified: 2026-04-0
 
 ---
 
-## SDK Harness Layer (`packages/sdk/src/harness/`)
+## SDK Harness Layer (`packages/babysitter-sdk/src/harness/`)
 
 | File | Description |
 |------|-------------|
@@ -20,7 +20,7 @@ All paths are relative to the babysitter monorepo root. Last verified: 2026-04-0
 | `agenticTools.ts` | Agentic tool integration module |
 | `index.ts` | Public API re-exports for the harness module |
 
-### SDK Harness Tests (`packages/sdk/src/harness/__tests__/`)
+### SDK Harness Tests (`packages/babysitter-sdk/src/harness/__tests__/`)
 
 | File | Description |
 |------|-------------|
@@ -83,7 +83,7 @@ All paths are relative to the babysitter monorepo root. Last verified: 2026-04-0
 
 ---
 
-## SDK Prompts Layer (`packages/sdk/src/prompts/`)
+## SDK Prompts Layer (`packages/babysitter-sdk/src/prompts/`)
 
 | File | Description |
 |------|-------------|
@@ -96,7 +96,7 @@ All paths are relative to the babysitter monorepo root. Last verified: 2026-04-0
 
 | File | Description |
 |------|-------------|
-| `packages/sdk/src/runtime/exceptions.ts` | `BabysitterRuntimeError`, `ErrorCategory` -- error types used by Pi wrapper |
-| `packages/sdk/src/compression/config-loader.ts` | `loadCompressionConfig()` -- used by PiSessionHandle for compaction settings |
-| `packages/sdk/src/session/` | Session state management used by Pi adapter's `bindSession()` |
-| `packages/sdk/src/cli/main.ts` | CLI entry point -- `harness:install`, `harness:install-plugin` commands for Pi |
+| `packages/babysitter-sdk/src/runtime/exceptions.ts` | `BabysitterRuntimeError`, `ErrorCategory` -- error types used by Pi wrapper |
+| `packages/babysitter-sdk/src/compression/config-loader.ts` | `loadCompressionConfig()` -- used by PiSessionHandle for compaction settings |
+| `packages/babysitter-sdk/src/session/` | Session state management used by Pi adapter's `bindSession()` |
+| `packages/babysitter-sdk/src/cli/main.ts` | CLI entry point -- `harness:install`, `harness:install-plugin` commands for Pi |

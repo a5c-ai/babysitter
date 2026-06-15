@@ -5,6 +5,12 @@
  * @outputs { success: boolean, riskAssessment: object, mitigationPlan: object, prioritization: array, artifacts: array }
  * @recommendedSkills SK-AC-011 (risk-mitigation-planning), SK-AC-006 (conservation-assessment)
  * @recommendedAgents AG-AC-004 (conservator-agent), AG-AC-006 (registrar-agent), AG-AC-002 (arts-administrator-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

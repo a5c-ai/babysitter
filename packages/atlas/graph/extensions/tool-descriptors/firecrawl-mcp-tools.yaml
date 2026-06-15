@@ -1,0 +1,121 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:firecrawl.scrape
+attributes:
+  schema: '{}'
+  displayName: "Firecrawl: Scrape"
+  description: Scrape a single URL and return content as markdown / HTML / structured data.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      formats: { type: array, items: { type: string } }
+      onlyMainContent: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      data: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-firecrawl
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:firecrawl.crawl
+attributes:
+  schema: '{}'
+  displayName: "Firecrawl: Crawl"
+  description: Crawl a site and return scraped content for matching pages.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      maxDepth: { type: integer }
+      limit: { type: integer }
+      includePaths: { type: array, items: { type: string } }
+      excludePaths: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      jobId: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-firecrawl
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:firecrawl.map
+attributes:
+  schema: '{}'
+  displayName: "Firecrawl: Map"
+  description: Map a site's URLs without fetching full page content.
+  inputSchema:
+    type: object
+    required: [url]
+    properties:
+      url: { type: string }
+      search: { type: string }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      links: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-firecrawl
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:firecrawl.search
+attributes:
+  schema: '{}'
+  displayName: "Firecrawl: Search"
+  description: Run a web search and optionally scrape the top results in a single call.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      limit: { type: integer }
+      scrapeOptions: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-firecrawl
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:firecrawl.extract
+attributes:
+  schema: '{}'
+  displayName: "Firecrawl: Extract"
+  description: Extract structured data from URLs using a JSON schema or natural language prompt.
+  inputSchema:
+    type: object
+    required: [urls]
+    properties:
+      urls: { type: array, items: { type: string } }
+      schema: { type: object }
+      prompt: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      data: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-firecrawl

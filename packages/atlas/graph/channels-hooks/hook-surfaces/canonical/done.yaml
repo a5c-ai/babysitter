@@ -1,0 +1,18 @@
+nodeKind: HookSurface
+id: hook-surface:done
+attributes:
+  eventName: "Done (a5c canonical)"
+  displayName: "Done (a5c canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [runId, status]
+    properties:
+      runId: { type: string }
+      status: { type: string, enum: [success, failure, cancelled] }
+  description: |
+    a5c-emitted: fires at the end of a babysitter run.
+edges:

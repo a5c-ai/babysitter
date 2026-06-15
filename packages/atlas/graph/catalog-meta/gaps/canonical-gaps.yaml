@@ -1,0 +1,85 @@
+---
+nodeKind: Gap
+id: gap:expertise-level-collapse
+attributes:
+  title: "Collapse redundant ExpertiseLevel NodeKind into TerminologyEntry"
+  level: 4
+  priority: P2
+  discoveredAt: "2026-04-28T12:00:00Z"
+  source: |
+    REMODEL openItems     expressible as TerminologyEntry under term:expertise-level.
+  currentState: |
+    `ExpertiseLevel` exists as its own NodeKind with three instances; no
+    incoming edges reference it. Coverage-checklist row "expertise level"
+    points at it.
+  desiredState: |
+    NodeKind removed from ontology-schema.yaml; instances migrated to
+    TerminologyEntry under cluster 13. Coverage-checklist row updated.
+  propagationStatus:
+    ontology-schema: in-progress
+    examples: not-started
+    coverage-checklist: not-started
+  status: open
+  markdownRef: wiki/process/gaps/GAP-4-P2-expertise-level-collapse.md
+  owner: "a5c:ontology-stewards"
+edges:
+  raised_question:
+    - target: open-question:harness-rename
+    - target: open-question:benchmark-run-primitive
+---
+nodeKind: Gap
+id: gap:capability-support-deprecation
+attributes:
+  title: "Deprecate CapabilitySupport in favor of capability ref + supportLevel attr"
+  level: 5
+  priority: P1
+  discoveredAt: "2026-04-29T09:30:00Z"
+  source: |
+    REMODEL openItems     only attributes (supportLevel, notes) belong on the edge between
+    AgentProduct and Capability.
+  currentState: |
+    `CapabilitySupport` modeled as standalone NodeKind with 47 instances;
+    each duplicates an (agentProductId, capabilityId) pair already
+    expressible via the `supports` edge.
+  desiredState: |
+    NodeKind removed; `supports` edge gains `supportLevel` and `notes`
+    attributes; existing instances migrated to edge attributes; downstream
+    queries updated.
+  propagationStatus:
+    ontology-schema: not-started
+    examples: not-started
+    coverage-checklist: not-started
+    edge-kinds: not-started
+  status: open
+  markdownRef: wiki/process/gaps/GAP-5-P1-capability-support-deprecation.md
+  owner: "a5c:ontology-stewards"
+edges:
+  blocks:
+    - target: phase:plan
+---
+nodeKind: Gap
+id: gap:lifecycle-state-resolution
+attributes:
+  title: "Resolve LifecycleState vs ProcessPhase overlap"
+  level: 3
+  priority: P3
+  discoveredAt: "2026-04-30T15:45:00Z"
+  source: |
+    REMODEL openItems     (cluster 11) both model "named stage in a workflow" with different
+    attribute shapes; consumers conflate them.
+  currentState: |
+    Two parallel NodeKinds with overlapping semantics; coverage-checklist
+    references both interchangeably in some rows.
+  desiredState: |
+    Decision recorded (collapse, alias, or fully orthogonalize) and
+    applied uniformly across ontology-schema, examples, and checklist.
+  propagationStatus:
+    ontology-schema: not-started
+    examples: not-started
+    coverage-checklist: not-started
+  status: open
+  markdownRef: wiki/process/gaps/GAP-3-P3-lifecycle-state-resolution.md
+  owner: "a5c:ontology-stewards"
+edges:
+  blocks:
+    - target: phase:plan

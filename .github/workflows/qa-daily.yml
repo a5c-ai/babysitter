@@ -1,0 +1,294 @@
+# QA Daily — comprehensive daily QA, triage, changelog, and PR review
+#
+# Runs daily at midnight UTC on staging, or manually with custom instructions.
+# Executes 4 parallel jobs covering QA, triage, changelog, and PR review.
+
+name: QA Daily
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths: ['.github/workflows/qa-daily.yml']
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      instructions:
+        description: 'Custom instructions added to every job prompt (optional)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+  pages: write
+
+concurrency:
+  group: qa-daily
+  cancel-in-progress: false
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────
+  # Job 1: Comprehensive live-stack QA based on recent changes
+  # ──────────────────────────────────────────────────────────────────────
+  comprehensive-qa:
+    name: Comprehensive QA
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are a comprehensive QA agent running the daily QA sweep on staging.
+            ${{ inputs.instructions || '' }}
+
+            STEP 1 — ANALYZE RECENT CHANGES:
+            Run `git log --since="24 hours ago" --oneline --stat` to see what changed.
+            Categorize changes by component: sdk, adapters, transport-adapter, hooks-adapter,
+            adapters-tasks, atlas catalog, triggers, plugins, ci, docs.
+            Count the volume of changes per component.
+
+            STEP 2 — SELECT TEST MATRIX:
+            Based on the changed components, build a comprehensive live-stack matrix.
+            Rules:
+            - More changes → more coverage (more agents, models, modes, OSes)
+            - SDK/runtime changes → test all process modes (predefined, create, resume)
+            - Transport-adapter changes → test multiple providers (foundry, google)
+            - Adapter changes → test the specific harness + at least one other
+            - Hooks changes → test bridged-hooks mode
+            - Plugin changes → test BP install mode
+            - CI changes → test on multiple OSes (ubuntu, macos)
+            - If few changes, run a minimal smoke test (1 agent, 1 model, predefined)
+            - Always include at least: codex+foundry BP predefined
+
+            Available axes:
+            - agents: claude, codex, pi, gemini, copilot, hermes
+            - models: foundry-gpt55, google-gemini31, anthropic-sonnet46, foundry-kimi
+            - modes: ni, bridged-interactive, interactive, bridged-hooks
+            - install: vanilla, bp
+            - process_mode: predefined, create, resume
+            - os (dispatch separately): ubuntu-latest-l, macos-latest, windows-latest
+
+            STEP 3 — DISPATCH LIVE-STACK:
+            For each OS needed, dispatch separately:
+            `gh workflow run live-stack.yml --ref staging -f os=<os> -f 'matrix=<JSON>'`
+            Dispatch Ubuntu first, then macOS/Windows if needed.
+
+            STEP 4 — WAIT AND COLLECT RESULTS:
+            Poll each dispatched run every 60s until complete (timeout 25 min per run).
+            `gh run list --workflow=live-stack.yml --limit=<count> --json databaseId,status,conclusion`
+
+            STEP 5 — OPEN ISSUES FOR FAILURES:
+            For each failed scenario:
+            - Check if an existing open issue matches: `gh issue list --label "live-stack-failure" --state open --search "<keywords>"`
+            - If match found, add a comment with the new failure details
+            - If no match, create a new issue:
+              `gh issue create --label "live-stack-failure,ci,automated-triage" --title "<failure summary>" --body "<details>"`
+            - Include: scenario, OS, error message, run link, affected component
+
+            Do NOT comment on PRs. All failures become issues.
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Job 2: Triage untriaged issues
+  # ──────────────────────────────────────────────────────────────────────
+  triage-sweep:
+    name: Triage Sweep
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are a triage sweep agent. Find and triage all open issues that haven't been triaged yet.
+            ${{ inputs.instructions || '' }}
+
+            STEP 1 — FIND UNTRIAGED ISSUES:
+            Run: `gh issue list --state open --json number,title,labels --jq '.[] | select(.labels | map(.name) | (contains(["ready-for-dev"]) or contains(["needs-info"]) or contains(["duplicate"])) | not) | "\(.number) \(.title)"'`
+            This finds issues without ready-for-dev, needs-info, or duplicate labels.
+
+            STEP 2 — DISPATCH TRIAGE IN PARALLEL:
+            For each untriaged issue, dispatch the triage workflow:
+            `gh workflow run issue-triage-dispatch.yml --ref staging -f issue_number=<number>`
+            Dispatch ALL of them without waiting — they run in parallel.
+            Log each dispatch.
+
+            STEP 3 — REPORT:
+            Print a summary of how many issues were dispatched for triage.
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Job 3: Changelog and wiki update
+  # ──────────────────────────────────────────────────────────────────────
+  changelog-update:
+    name: Changelog & Wiki Update
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are a changelog and documentation agent. Update the changelog and create a wiki page for today's changes.
+            ${{ inputs.instructions || '' }}
+
+            STEP 1 — CHECK FOR CHANGES:
+            Run: `git log --since="24 hours ago" --oneline`
+            If no commits, print "No changes since last run" and stop.
+
+            STEP 2 — READ GIT LOGS:
+            Run: `git log --since="24 hours ago" --format="%h %s (%an, %ar)" --no-merges`
+            Group commits by category:
+            - feat: new features
+            - fix: bug fixes
+            - refactor: code changes
+            - docs: documentation
+            - test: test changes
+            - ci: CI/CD changes
+            - chore: maintenance
+
+            STEP 3 — UPDATE CHANGELOG:
+            Read the existing CHANGELOG.md (create if missing).
+            Add a new section at the top with today's date and the categorized changes.
+            Format: `## [Unreleased] - YYYY-MM-DD` with bullet points per category.
+            Create a branch: `git checkout -b changelog/daily-$(date +%Y-%m-%d)`
+            Commit and push: `git add CHANGELOG.md && git commit -m "docs: daily changelog update" && git push origin changelog/daily-$(date +%Y-%m-%d)`
+            Create PR: `gh pr create --base staging --title "docs: changelog update $(date +%Y-%m-%d)" --body "Automated daily changelog update"`
+
+            STEP 4 — CREATE WIKI PAGE:
+            Create a wiki page with today's summary using the GitHub API:
+            `gh api repos/${{ github.repository }}/pages` or use the wiki git clone approach.
+            If wiki is not available, create a markdown file at `docs/daily-updates/$(date +%Y-%m-%d).md` and include it in the PR.
+
+            Include in the wiki/daily update:
+            - Summary of changes (categorized)
+            - Links to PRs merged
+            - Issues opened/closed
+            - CI status summary
+            - Live-stack test results (if available)
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Job 4: Review unreviewed PRs
+  # ──────────────────────────────────────────────────────────────────────
+  pr-review-sweep:
+    name: PR Review Sweep
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are a PR review sweep agent. Find open PRs that haven't been reviewed by the agent-review workflow and dispatch reviews.
+            ${{ inputs.instructions || '' }}
+
+            STEP 1 — LIST OPEN PRS:
+            Run: `gh pr list --state open --json number,title,labels,reviews,headRefName --jq '.[] | {number, title, headRefName, reviewCount: (.reviews | length), labels: [.labels[].name]}'`
+
+            STEP 2 — IDENTIFY UNREVIEWED PRS:
+            A PR is "unreviewed" if:
+            - It has no reviews at all, OR
+            - It has no review from "github-actions" bot (which is how agent-review posts)
+            - It does NOT have the "draft" label
+            - It does NOT have the "wip" label
+            Skip PRs that are:
+            - Drafts or work-in-progress
+            - Plan-only PRs (title starts with "Plan:" or branch starts with "plan/")
+            - PRs that only contain .mjs process files and .inputs.json files under .a5c/processes/
+            Only review PRs with concrete code implementations (source changes in packages/, plugins/, .github/, etc.).
+
+            STEP 3 — DISPATCH REVIEWS:
+            For each unreviewed PR, dispatch the agent-review workflow:
+            `gh workflow run agent-review-dispatch.yml --ref staging -f pr_number=<number>`
+            Dispatch ALL of them — they run in parallel.
+            Log each dispatch with the PR number and title.
+
+            STEP 4 — REPORT:
+            Print a summary: how many PRs found, how many dispatched for review, which were skipped and why.
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}

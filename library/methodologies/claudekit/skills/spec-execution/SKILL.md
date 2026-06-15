@@ -2,17 +2,14 @@
 name: spec-execution
 description: 6-phase iterative specification execution workflow covering implementation, testing, review, improvement, commit, and progress tracking with quality-gated convergence.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Spec Execution
-
-## Overview
-
-Executes a feature specification through 6 iterative phases with quality-gated convergence. Each phase builds on the previous, with improvement cycles triggered when quality falls below threshold.
-
-## Six Phases
-
-### Phase 1: Implementation
 - Read specification for requirements and architecture
 - Implement each requirement following project conventions
 - Add type definitions and JSDoc documentation

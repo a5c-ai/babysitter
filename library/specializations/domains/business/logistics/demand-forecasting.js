@@ -14,6 +14,11 @@
  * @references
  * - MIT Supply Chain: https://www.edx.org/micromasters/mitx-supply-chain-management
  * - Forecasting Best Practices: https://www.ascm.org/
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

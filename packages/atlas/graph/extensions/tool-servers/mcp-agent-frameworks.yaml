@@ -1,0 +1,68 @@
+nodeKind: ToolServer
+id: tool-server:mcp-langchain-adapters
+attributes:
+  displayName: LangChain MCP Adapters
+  description: |
+    Official adapters that make MCP tool servers compatible with LangChain and LangGraph.
+    Converts MCP tools into LangChain-compatible tools, supports multiple simultaneous
+    MCP server connections, and works with both stdio and Streamable HTTP transports.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/langchain-ai/langchain-mcp-adapters
+  maintainer: LangChain AI
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:langchain
+  - target: framework:langgraph
+  lib_applies_to_domain:
+  - target: domain:ml-ai
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-crewai-enterprise
+attributes:
+  displayName: CrewAI Enterprise MCP Server
+  description: |
+    Official MCP server from CrewAI for kicking off and monitoring deployed crew workflows.
+    Enables AI clients to launch CrewAI crew deployments and poll their execution status
+    and results through a standardized MCP interface.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/crewAIInc/enterprise-mcp-server
+  maintainer: CrewAI Inc
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:crewai
+  lib_applies_to_domain:
+  - target: domain:ml-ai
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-autogen-tools
+attributes:
+  displayName: AutoGen MCP Tools Extension
+  description: |
+    Official AutoGen extension (autogen_ext.tools.mcp) that integrates MCP servers
+    into AutoGen agents via McpWorkbench. Supports stdio, SSE, and Streamable HTTP
+    transports, allowing any MCP tool server to be used directly by AutoGen agents.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/richard-gyiko/autogen-ext-mcp
+  maintainer: Microsoft / Community
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: framework:autogen
+  lib_applies_to_domain:
+  - target: domain:ml-ai
+  - target: domain:software-engineering

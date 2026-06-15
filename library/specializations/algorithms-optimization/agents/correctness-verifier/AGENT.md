@@ -8,6 +8,11 @@ expertise:
   - Edge case identification
   - Counter-example generation
   - Termination proof
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:dynamic-programming, skill-area:mathematical-reasoning]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Correctness Verifier Agent

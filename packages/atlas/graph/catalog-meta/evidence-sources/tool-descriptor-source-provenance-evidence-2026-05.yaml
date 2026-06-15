@@ -1,0 +1,227 @@
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-puppeteer-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for puppeteer-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+  locator: migrated source comment for graph/extensions/tool-descriptors/puppeteer-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-time-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for time-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/time
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/time
+  locator: migrated source comment for graph/extensions/tool-descriptors/time-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-sqlite-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for sqlite-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  locator: migrated source comment for graph/extensions/tool-descriptors/sqlite-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-sequential-thinking-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for sequential-thinking-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+  locator: migrated source comment for graph/extensions/tool-descriptors/sequential-thinking-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-supabase-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for supabase-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/supabase-community/supabase-mcp
+  sourcePathOrUrl: https://github.com/supabase-community/supabase-mcp
+  locator: migrated source comment for graph/extensions/tool-descriptors/supabase-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-postgres-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for postgres-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  locator: migrated source comment for graph/extensions/tool-descriptors/postgres-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-sentry-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for sentry-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/getsentry/sentry-mcp
+  sourcePathOrUrl: https://github.com/getsentry/sentry-mcp
+  locator: migrated source comment for graph/extensions/tool-descriptors/sentry-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-tavily-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for tavily-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/tavily-ai/tavily-mcp
+  sourcePathOrUrl: https://github.com/tavily-ai/tavily-mcp
+  locator: migrated source comment for graph/extensions/tool-descriptors/tavily-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-redis-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for redis-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/redis/mcp-redis
+  sourcePathOrUrl: https://github.com/redis/mcp-redis
+  locator: migrated source comment for graph/extensions/tool-descriptors/redis-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-slack-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for slack-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  locator: migrated source comment for graph/extensions/tool-descriptors/slack-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-stripe-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for stripe-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/stripe/agent-toolkit
+  sourcePathOrUrl: https://github.com/stripe/agent-toolkit
+  locator: migrated source comment for graph/extensions/tool-descriptors/stripe-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run3-extensions-tool-descriptors-perplexity-mcp-tools-yaml
+attributes:
+  displayName: Deferred source for perplexity-mcp-tools
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/ppl-ai/modelcontextprotocol
+  sourcePathOrUrl: https://github.com/ppl-ai/modelcontextprotocol
+  locator: migrated source comment for graph/extensions/tool-descriptors/perplexity-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc

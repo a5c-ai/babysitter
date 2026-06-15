@@ -1,0 +1,54 @@
+---
+nodeKind: SkillArea
+id: skill-area:editor-fluency
+attributes:
+  displayName: "Editor Fluency"
+  description: |
+    Working productively in modern code editors and IDEs — modal editing,
+    keyboard-driven navigation, project-wide refactor, debugger
+    integration, and editor-extension authoring. Spans terminal editors
+    (vim, neovim, emacs, helix) and graphical IDEs (VS Code, JetBrains).
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_tool:
+    - tool:vim
+    - tool:neovim
+    - tool:emacs
+    - tool:helix
+    - tool:vscode
+    - tool:jetbrains-idea
+  prerequisite_for_learning:
+    - target: skill-area:cli-tooling
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:cli-tooling
+attributes:
+  displayName: "CLI Tooling"
+  description: |
+    Effective use of UNIX shell tooling for navigation, search, multiplexing,
+    and database administration — terminal multiplexers, fast in-repo
+    search, fuzzy finders, and command-line database clients.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  uses_tool:
+    - tool:tmux
+    - tool:ripgrep
+    - tool:fzf
+    - tool:redis-cli
+    - tool:mongosh
+  prerequisite_for_learning:
+    - target: skill-area:cli-design
+      strength: recommended
+    - target: skill-area:command-line-interface-tools
+      strength: recommended

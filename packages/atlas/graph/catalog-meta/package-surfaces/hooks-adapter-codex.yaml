@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-codex
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-codex"
+  packageName: "@a5c-ai/hooks-adapter-codex"
+  displayName: "Hooks Adapter - Codex"
+  description: "OpenAI Codex harness adapter for the hooks-adapter system. Translates Codex-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Codex as the active harness. Extend this to customize hook behavior specific to Codex."
+  status: active

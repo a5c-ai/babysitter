@@ -1,0 +1,20 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:langgraph-custom-agent-building.scope
+attributes:
+  subjectId: agent:langgraph
+  inScope: |
+    Custom agent-building frameworks that expose graph/state-machine loops,
+    tool-bound model calls, durable checkpoints, human-in-the-loop gates,
+    deployed graph runtimes, and code-authored multi-agent/subagent patterns.
+    These map primarily to layers 4-6 of the universal agentic stack, with
+    optional workspace/execution/sandbox/presentation layers supplied by the host
+    application.
+  outOfScope: |
+    Treating LangGraph as a fixed CLI/TUI agent with one bundled tool set,
+    assuming every LangGraph application has a plugin marketplace, or requiring
+    all eleven universal stack layers to be present in every custom-agent app.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - agent:langgraph

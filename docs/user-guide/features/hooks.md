@@ -144,7 +144,7 @@ Hooks are discovered and executed in a specific priority order. All matching hoo
 
 1. **Per-repo hooks:** `.a5c/hooks/<hook-type>/*.sh`
 2. **Per-user hooks:** `~/.config/babysitter/hooks/<hook-type>/*.sh`
-3. **Plugin hooks:** `plugins/babysitter/hooks/<hook-type>/*.sh`
+3. **Plugin hooks:** `plugins/babysitter-unified/hooks/<hook-type>.sh`
 
 **Execution Order:**
 
@@ -319,7 +319,7 @@ These environment variables are available to hooks:
 | `HOOK_PAYLOAD` | The JSON payload (also available via stdin) |
 | `HOOK_TYPE` | The hook type being executed |
 | `REPO_ROOT` | Repository root directory |
-| `BABYSITTER_SESSION_ID` | Cross-harness session identifier |
+| `AGENT_SESSION_ID` | Cross-harness session identifier |
 | `CLAUDE_PLUGIN_ROOT` | Plugin installation directory |
 | `CLAUDE_ENV_FILE` | Path to session environment file |
 
@@ -429,7 +429,7 @@ echo '{"ok": true}'
 
 The plugin includes a `native-orchestrator.sh` hook that automatically executes Node.js tasks:
 
-**File:** `plugins/babysitter/hooks/on-iteration-start/native-orchestrator.sh`
+**File:** generated harness-specific runtime bundle under `artifacts/generated-plugins/<target>/hooks/`
 
 This hook:
 1. Queries run status via CLI
@@ -467,23 +467,9 @@ jq -n \
 
 ---
 
-## The Hook Dispatcher
+## Hook Execution
 
-The hook dispatcher (`hook-dispatcher.sh`) is responsible for discovering and executing hooks.
-
-### Usage
-
-```bash
-echo '{"runId":"...","key":"value"}' | hook-dispatcher.sh <hook-type>
-```
-
-### Dispatcher Behavior
-
-1. **Discovers hooks** in priority order (per-repo, per-user, plugin)
-2. **Executes all matching hooks** in lexicographic order
-3. **Passes payload** to each hook via stdin
-4. **Logs results** to stderr
-5. **Continues on failure** - individual hook failures do not stop execution
+The SDK discovers per-repo and per-user runtime hooks directly. Harness entrypoints in the maintained plugin source live under `plugins/babysitter-unified/hooks/*.sh` and invoke `babysitter hook:run` for harness-specific lifecycle hooks such as `session-start` and `stop`.
 
 ### Example Dispatcher Output
 
@@ -506,7 +492,7 @@ per-user:notify.sh:success
 
 The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUse, PostToolUse).
 
-**Location:** `plugins/babysitter/hooks/hooks.json`
+**Location:** generated from `plugins/babysitter-unified/plugin.json`
 
 ```json
 {
@@ -517,7 +503,7 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-session-start-hook.sh"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
           }
         ]
       }
@@ -527,7 +513,7 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-stop-hook.sh"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/stop.sh"
           }
         ]
       }
@@ -623,7 +609,7 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
 
 1. **Verify state file exists:**
    ```bash
-   ls -la $CLAUDE_PLUGIN_ROOT/skills/babysit/state/
+   ls -la ~/.a5c/state/
    ```
 
 2. **Check stop hook output is valid JSON:**
@@ -634,8 +620,7 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
 
 3. **Verify session ID is being passed:**
    ```bash
-   # Check /tmp/babysitter-stop-hook.log for debugging
-   cat /tmp/babysitter-stop-hook.log
+   babysitter session:whoami --json
    ```
 
 ---

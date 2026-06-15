@@ -5,6 +5,13 @@
  * @outputs { success: boolean, literatureReview: object, majorPositions: array, debates: array, gaps: array, artifacts: array }
  * @recommendedSkills SK-PHIL-013 (scholarly-literature-synthesis), SK-PHIL-010 (philosophical-writing-argumentation), SK-PHIL-005 (conceptual-analysis)
  * @recommendedAgents AG-PHIL-006 (academic-philosophy-writer-agent), AG-PHIL-003 (hermeneutics-specialist-agent)
+ *
+ * @graph
+ *   domains: [domain:philosophy]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

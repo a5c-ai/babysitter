@@ -1,0 +1,205 @@
+nodeKind: Role
+id: role:project-manager
+attributes:
+  displayName: "Project Manager"
+  isAgentic: false
+  automatability: 0.4
+  description: |
+    Plans, coordinates, and tracks the execution of cross-functional projects from
+    initiation through closure, ensuring deliverables are on time, within scope, and
+    budget. Manages project plans, identifies risks, and facilitates communication
+    between technical and business stakeholders. Acts as the operational hub for
+    complex initiatives that involve multiple teams or external dependencies.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+    - responsibility:budget-management
+    - responsibility:sprint-planning
+    - responsibility:release-coordination
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:scrum-master
+attributes:
+  displayName: "Scrum Master"
+  isAgentic: false
+  automatability: 0.4
+  description: |
+    Facilitates the agile ceremonies and coaches the development team and organization
+    on Scrum practices, removing impediments that slow delivery. Protects the team's
+    focus during sprints, tracks velocity and sprint health, and continuously improves
+    team processes through retrospectives. Acts as a servant-leader who enables
+    self-organization rather than directing work.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:sprint-planning
+    - responsibility:backlog-grooming
+    - responsibility:stakeholder-communication
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: novice
+---
+nodeKind: Role
+id: role:business-analyst
+attributes:
+  displayName: "Business Analyst"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Elicits, analyzes, and documents business requirements, translating them into
+    detailed specifications that engineering and product teams can act upon. Bridges
+    the gap between business stakeholders and technical teams by modelling processes,
+    identifying gaps, and validating that delivered solutions meet original intent.
+    Contributes to acceptance testing and change management activities.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:backlog-grooming
+    - responsibility:documentation
+    - responsibility:risk-assessment
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: domain:databases
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate
+---
+nodeKind: Role
+id: role:marketing-manager
+attributes:
+  displayName: "Marketing Manager"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Plans and executes marketing campaigns and programs that build brand awareness,
+    generate pipeline, and support product launches. Manages relationships with
+    agencies and vendors, tracks campaign performance metrics, and aligns messaging
+    with product and sales. Coordinates cross-channel efforts across digital, content,
+    events, and paid media to hit growth targets.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:metric-definition
+    - responsibility:budget-management
+    - responsibility:vendor-evaluation
+  requires_skill:
+    - target: domain:data-science
+      level: novice
+    - target: specialization:web-development
+      level: novice
+---
+nodeKind: Role
+id: role:sales-engineer
+attributes:
+  displayName: "Sales Engineer"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Serves as the technical counterpart to account executives during the sales cycle,
+    demonstrating product capabilities, answering deep technical questions, and
+    building proof-of-concept integrations for prospective customers. Translates
+    complex buyer requirements into product fit assessments and provides feedback
+    loops to product teams. Builds trust with technical buyers who may become champions.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+    - responsibility:customer-escalation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:software-engineering
+      level: intermediate
+    - target: specialization:technical-documentation
+      level: intermediate
+    - target: domain:cloud-infra
+      level: novice
+---
+nodeKind: Role
+id: role:customer-success-manager
+attributes:
+  displayName: "Customer Success Manager"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Owns the post-sale relationship with a portfolio of customers, ensuring they
+    realize the intended value from the product and renew or expand their contracts.
+    Conducts regular business reviews, monitors adoption health metrics, and
+    coordinates with support and product teams to resolve friction. Acts as the
+    customer's advocate internally, surfacing churn signals and growth opportunities.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:customer-escalation
+    - responsibility:sla-management
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: novice
+---
+nodeKind: Role
+id: role:account-executive
+attributes:
+  displayName: "Account Executive"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Drives new business revenue by identifying, qualifying, and closing enterprise
+    or mid-market customer deals. Manages the full sales cycle from outbound
+    prospecting through contract signature, coordinating internal resources such as
+    sales engineers and legal as needed. Maintains accurate pipeline forecasts and
+    builds long-term relationships with economic buyers and decision-makers.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:contract-negotiation
+    - responsibility:budget-management
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: novice
+---
+nodeKind: Role
+id: role:partnerships-manager
+attributes:
+  displayName: "Partnerships Manager"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Develops and manages strategic relationships with technology partners, resellers,
+    and ecosystem integrators that expand market reach and product capabilities.
+    Negotiates partnership agreements, defines co-marketing and co-selling programs,
+    and tracks the revenue and pipeline contribution of each partnership. Works across
+    product, legal, and marketing to onboard partners and keep them engaged.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:contract-negotiation
+    - responsibility:vendor-evaluation
+    - responsibility:budget-management
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: novice

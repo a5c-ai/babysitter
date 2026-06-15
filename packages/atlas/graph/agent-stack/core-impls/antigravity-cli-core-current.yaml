@@ -1,0 +1,72 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:antigravity-cli.core@current
+attributes:
+  displayName: Antigravity CLI Core (current)
+  agentVersionId: agentVersion:antigravity:2-0-11
+  packageRef: source-ref:antigravity-cli-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Tool-use loop over Gemini''s `generateContent` (streaming) API,
+    inherited from Gemini CLI architecture. Each turn, the model emits
+    `functionCall` parts; the CLI executes them and feeds back
+    `functionResponse` parts. The loop advances until a chunk arrives with
+    `finishReason: STOP` (or `MAX_TOKENS` / `SAFETY`). Multi-model support
+    routes Claude Sonnet 4.6 and GPT-OSS-120B through the same loop
+    abstraction.
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'Antigravity CLI relies on the model''s context window
+    directly; no in-CLI compaction is performed for the @current pin.
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'Antigravity CLI follows a workflow-driven dispatch model:
+    subagent invocation is a structured tool-call whose target name resolves to
+    another agent or workflow definition; the CLI dispatches a child
+    generateContent loop for the sub-task.
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final text parts are streamed as they arrive; workflow hooks
+    fire after the last chunk with `finishReason: STOP` is observed.
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: '@google/genai'
+  supportedTransportProtocols:
+  - model-transport:gemini-generate-content
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:antigravity-cli
+    role: core
+  speaks:
+  - target: model-transport:gemini-generate-content
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-thinking
+    versionRange: '>=2.0.0'
+    level: full
+    notes: 'Thinking effort low/medium/high streamed.
+      '
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  supports_effort_level:
+  - target: effort-level:low
+  - target: effort-level:medium
+  - target: effort-level:high
+  emits_message_type:
+  - target: protocol-message:gemini-content
+  - target: protocol-message:gemini-part-text
+  - target: protocol-message:gemini-part-inline-data
+  - target: protocol-message:gemini-part-function-call
+  - target: protocol-message:gemini-part-function-response
+  - target: protocol-message:gemini-candidate
+  - target: protocol-message:gemini-generate-content-response
+  supports_orchestration_primitive:
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:multi-agent-dispatch
+    - target: orch-primitive:session-handoff

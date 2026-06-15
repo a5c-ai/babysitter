@@ -17,6 +17,12 @@
  * - IEC 61508: https://www.iec.ch/functionalsafety
  * - ISO 26262: https://www.iso.org/standard/68383.html
  * - Functional Safety: https://www.embedded.com/functional-safety-in-embedded-systems/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

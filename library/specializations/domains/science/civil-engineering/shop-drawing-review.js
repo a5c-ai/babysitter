@@ -3,6 +3,12 @@
  * @description Review of contractor shop drawings and submittals for compliance with design intent and specifications
  * @inputs { projectId: string, submittalPackage: object, designDocuments: object, specifications: object }
  * @outputs { success: boolean, reviewComments: array, approvalStatus: string, rfiResponses: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:code-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -77,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Material and Product Review
   ctx.log('info', 'Reviewing materials and products');
-  let materialReview = await ctx.task(materialReviewTask, {
+  const materialReview = await ctx.task(materialReviewTask, {
     projectId,
     submittalPackage,
     specifications,
@@ -90,17 +96,8 @@ export async function process(inputs, ctx) {
   const totalComments = specCompliance.comments.length +
                         designIntentReview.comments.length +
                         coordinationReview.comments.length +
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      materialReview = await ctx.task(materialReviewTask, { ...{
-    projectId,
-    submittalPackage,
-    specifications,
-    outputDir
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+                        materialReview.comments.length;
+  await ctx.breakpoint({
     question: `Shop drawing review complete for ${projectId}. Total comments: ${totalComments}. Review findings and determine action?`,
     title: 'Shop Drawing Review Summary',
     context: {
@@ -113,15 +110,9 @@ export async function process(inputs, ctx) {
         materialComments: materialReview.comments.length,
         hasRejectableItems: specCompliance.hasRejectableItems || designIntentReview.hasRejectableItems
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Task 6: Review Comment Compilation
   ctx.log('info', 'Compiling review comments');
   const commentCompilation = await ctx.task(commentCompilationTask, {
@@ -178,7 +169,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task 1: Submittal Logging
+
+// Task 1: Submittal Logging
 export const submittalLoggingTask = defineTask('submittal-logging', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Log and track submittal',

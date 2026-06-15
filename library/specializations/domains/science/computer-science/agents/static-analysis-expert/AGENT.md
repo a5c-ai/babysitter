@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: formal-verification
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design, skill-area:graph-algorithms]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Static Analysis Expert

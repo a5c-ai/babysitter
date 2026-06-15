@@ -13,6 +13,11 @@
  * 4. Compose Issue - Build the GitHub issue body with all gathered information
  * 5. Review Breakpoint - Let user review the issue before submission
  * 6. Submit Issue - Open the issue on a5c-ai/babysitter GitHub (with breakpoint)
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

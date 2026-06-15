@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:test-set.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:test-set
+  text: |
+    named collection of test cases
+  status: canonical
+edges:
+  defines:
+    - term:test-set

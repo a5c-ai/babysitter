@@ -1,0 +1,166 @@
+nodeKind: Workflow
+id: workflow:incident-response
+attributes:
+  displayName: "Incident Response"
+  description: |
+    Cross-team workflow activated when a production system experiences an outage, degradation,
+    or security breach that impacts users or violates SLAs. An incident commander is declared,
+    a war-room channel is opened, and on-call responders are paged from the relevant service
+    teams. The commander coordinates parallel streams: triage and diagnosis, customer
+    communications, and executive updates. Mitigation actions are applied, rollbacks or
+    hotfixes deployed, and the incident is declared resolved once metrics recover. Within
+    48-72 hours a blameless post-mortem is drafted, reviewed, and action items assigned to
+    prevent recurrence. Outcome is restored service reliability and a learning artifact.
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "on-incident"
+  complexity: complex
+edges:
+  involves_role:
+    - role:incident-commander
+    - role:sre
+    - role:devops-engineer
+    - role:backend-engineer
+    - role:engineering-manager
+    - role:customer-success-manager
+  applies_to_domain:
+    - domain:observability
+    - domain:devops
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:incident-response
+    - responsibility:on-call
+    - responsibility:stakeholder-communication
+    - responsibility:sla-management
+    - responsibility:disaster-recovery
+---
+nodeKind: Workflow
+id: workflow:on-call-rotation
+attributes:
+  displayName: "On-Call Rotation"
+  description: |
+    Scheduled weekly operational workflow that ensures 24/7 engineering coverage for
+    production systems. An on-call schedule is maintained in PagerDuty or equivalent,
+    with primary and secondary responders drawn from the team roster. At the start of
+    each rotation the incoming on-call engineer reviews open incidents, recent deploys,
+    and any known fragile areas. Alerts are tuned periodically to reduce noise and
+    prevent alert fatigue. At rotation handoff, the outgoing engineer documents any
+    unresolved issues and shares a brief handoff summary. The workflow distributes
+    operational burden equitably and keeps response times within SLA thresholds.
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: simple
+edges:
+  involves_role:
+    - role:sre
+    - role:backend-engineer
+    - role:devops-engineer
+    - role:engineering-manager
+  applies_to_domain:
+    - domain:observability
+    - domain:devops
+  triggers_responsibility:
+    - responsibility:on-call
+    - responsibility:sla-management
+    - responsibility:knowledge-sharing
+---
+nodeKind: Workflow
+id: workflow:capacity-planning
+attributes:
+  displayName: "Capacity Planning"
+  description: |
+    Quarterly cross-team workflow for forecasting infrastructure resource needs and ensuring
+    sufficient capacity is provisioned ahead of anticipated growth or peak traffic events.
+    Platform engineers and SREs analyse historical usage trends, projected product growth,
+    and upcoming campaigns or launches. Resource gap analyses are translated into provisioning
+    requests or cloud scaling policies. Cost implications are reviewed with finance or
+    engineering leadership, and approved capacity changes are scheduled. The workflow prevents
+    both costly over-provisioning and performance degradations from under-provisioning,
+    directly supporting uptime and cost-efficiency objectives.
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: complex
+edges:
+  involves_role:
+    - role:sre
+    - role:platform-engineer
+    - role:devops-engineer
+    - role:engineering-manager
+    - role:vp-engineering
+  applies_to_domain:
+    - domain:cloud-infra
+    - domain:infrastructure
+    - domain:observability
+  triggers_responsibility:
+    - responsibility:capacity-planning
+    - responsibility:budget-management
+    - responsibility:risk-assessment
+---
+nodeKind: Workflow
+id: workflow:change-management
+attributes:
+  displayName: "Change Management"
+  description: |
+    Structured on-demand workflow governing how planned changes to production systems
+    are proposed, assessed, approved, and executed with minimal risk. An engineer or
+    team submits a change request describing scope, rollback plan, risk rating, and
+    required maintenance window. A change advisory board or designated approver reviews
+    the request and either approves, defers, or rejects it. Approved changes are
+    communicated to affected stakeholders, executed during the scheduled window, and
+    verified post-execution. Emergency changes follow an expedited path with post-hoc
+    documentation. The workflow prevents uncoordinated changes from causing outages or
+    compliance failures.
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "per-change"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:change-manager
+    - role:devops-engineer
+    - role:platform-engineer
+    - role:engineering-manager
+    - role:compliance-officer
+  applies_to_domain:
+    - domain:devops
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:change-approval
+    - responsibility:risk-assessment
+    - responsibility:stakeholder-communication
+    - responsibility:deployment-management
+---
+nodeKind: Workflow
+id: workflow:post-mortem-review
+attributes:
+  displayName: "Post-Mortem Review"
+  description: |
+    Blameless retrospective workflow conducted after a significant incident or production
+    failure, typically within 48-72 hours of resolution. The incident commander or a
+    designated facilitator assembles a timeline of events from logs, chat history, and
+    monitoring data. Participants from all involved teams collaboratively identify contributing
+    factors, gaps in detection or response, and systemic weaknesses. A written post-mortem
+    document is produced capturing the timeline, root causes, impact, and concrete action
+    items with owners and due dates. The document is shared broadly to drive organisational
+    learning. Action items are tracked in the team backlog until resolved.
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "post-incident"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:incident-commander
+    - role:sre
+    - role:engineering-manager
+    - role:devops-engineer
+    - role:backend-engineer
+  applies_to_domain:
+    - domain:observability
+    - domain:devops
+  triggers_responsibility:
+    - responsibility:incident-response
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:risk-assessment

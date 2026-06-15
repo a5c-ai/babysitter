@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:mbpp-plus.scope
+attributes:
+  subjectId: benchmark:mbpp-plus
+  inScope: |
+    EvalPlus-augmented MBPP — adds large numbers of additional auto-generated tests to the original Mostly Basic Python Problems suite to detect overfitting.
+  outOfScope: |
+    Repository-scale tasks, advanced or competition-level problems (use APPS / LiveCodeBench), and non-Python languages.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:mbpp-plus

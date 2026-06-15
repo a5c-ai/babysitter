@@ -26,9 +26,9 @@
 
 | Title | Path | Accessed |
 |-------|------|----------|
-| Codex Adapter (SDK) | packages/sdk/src/harness/codex.ts | 2026-04-02 |
+| Codex Adapter (SDK) | packages/babysitter-sdk/src/harness/codex.ts | 2026-04-02 |
 | Babysitter Codex Plugin | plugins/babysitter-codex/ | 2026-04-02 |
-| Harness Discovery | packages/sdk/src/harness/discovery.ts | 2026-04-02 |
+| Harness Discovery | packages/babysitter-sdk/src/harness/discovery.ts | 2026-04-02 |
 
 ## Distribution
 

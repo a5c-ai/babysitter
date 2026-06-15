@@ -1,0 +1,227 @@
+---
+nodeKind: Workflow
+id: workflow:crisis-communication-drill
+attributes:
+  displayName: "Crisis Communication Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Simulates a public-facing crisis scenario to test communication
+    readiness — exercising spokesperson preparation, validating message
+    approval chains, testing media response time, rehearsing social media
+    monitoring and response protocols, and evaluating internal/external
+    communication coordination. Produces drill performance assessment and
+    communication playbook updates. Excludes actual crisis management.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:engineering-manager
+    - target: role:technical-writer
+  applies_to_domain:
+    - target: domain:public-relations
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:incident-command
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:operations-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:media-coverage-analysis
+attributes:
+  displayName: "Media Coverage Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Analyzes media coverage and public narrative about the
+    organization — tracking mention volume and sentiment trends, evaluating
+    message penetration from recent announcements, benchmarking
+    share-of-voice against competitors, identifying emerging narrative
+    themes, and assessing journalist relationship health. Produces media
+    intelligence report and PR strategy adjustments. Excludes media outreach
+    execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:technical-writer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:public-relations
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:kpi-dashboard-review
+attributes:
+  displayName: "KPI Dashboard Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews organizational KPI dashboards for accuracy and
+    actionability — validating data freshness and pipeline integrity,
+    assessing metric definition consistency, identifying misleading
+    visualizations, evaluating dashboard coverage against strategic
+    objectives, and recommending new metrics or retirement of stale ones.
+    Produces dashboard health assessment and metric governance updates.
+    Excludes dashboard implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:business-intelligence
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:business-intelligence-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:data-storytelling-workshop
+attributes:
+  displayName: "Data Storytelling Workshop"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Facilitates collaborative sessions to transform raw data insights into
+    compelling business narratives — reviewing recent analytics findings,
+    workshopping visualization approaches, practicing executive presentation
+    techniques, critiquing draft data stories for clarity and impact, and
+    building a shared library of storytelling patterns. Produces refined data
+    narratives and presentation templates. Excludes data analysis itself.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:technical-writer
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:business-intelligence
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:ai-knowledge-sharing
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:business-intelligence-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:knowledge-base-audit
+attributes:
+  displayName: "Knowledge Base Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits the organizational knowledge base for quality and
+    completeness — identifying outdated articles, detecting conflicting
+    information across documents, analyzing search analytics for content
+    gaps, reviewing article ownership and maintenance assignments, and
+    evaluating taxonomy and tagging consistency. Produces audit findings with
+    remediation assignments and archival recommendations. Excludes content
+    rewriting.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:knowledge-management
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:engineering
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:lessons-learned-capture
+attributes:
+  displayName: "Lessons Learned Capture"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Facilitates structured retrospectives at project completion or major
+    milestones — gathering participant feedback, identifying what worked well
+    and what failed, extracting reusable process improvements, documenting
+    decision rationale for future reference, and routing actionable
+    improvements to process owners. Produces lessons-learned document and
+    process improvement tickets. Excludes process change implementation.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:knowledge-management
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:postmortem-writeup
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:project-portfolio-rebalancing
+attributes:
+  displayName: "Project Portfolio Rebalancing"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Rebalances the active project portfolio against strategic priorities and
+    resource constraints — evaluating project health scores, assessing
+    resource utilization and conflicts, analyzing portfolio risk
+    concentration, recommending project acceleration, deprioritization, or
+    cancellation, and reallocating budget and headcount across initiatives.
+    Produces updated portfolio allocation and resource assignment plan.
+    Excludes individual project execution decisions.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:project-management
+    - target: domain:operations
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering
+    - target: org-unit:product-team

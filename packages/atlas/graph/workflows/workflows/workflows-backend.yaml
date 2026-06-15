@@ -1,0 +1,125 @@
+---
+nodeKind: Workflow
+id: workflow:microservice-decomposition
+attributes:
+  displayName: "Microservice Decomposition"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Analyzes a monolithic service to identify bounded contexts and extract
+    them into independent microservices — modeling domain boundaries,
+    defining API contracts, planning data ownership splits, and executing
+    phased extraction with traffic mirroring. Excludes ongoing microservice
+    maintenance.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:monolith-vs-microservices
+    - target: skill-area:monorepo-extraction
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:event-driven-architecture-review
+attributes:
+  displayName: "Event-Driven Architecture Review"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews the event-driven architecture landscape — auditing event
+    schemas, verifying consumer group lag, validating dead-letter queue
+    handling, assessing event ordering guarantees, and ensuring schema
+    registry governance. Excludes individual event handler development.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:run-architecture-review
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:api-design-review
+attributes:
+  displayName: "API Design Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-api-change"
+  complexity: single-team
+  description: |
+    Reviews proposed API surface changes against organizational design
+    guidelines — checking naming conventions, pagination patterns, error
+    formats, backward compatibility, and OpenAPI spec correctness before
+    implementation begins. Excludes implementation and testing.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:code-reviewer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:rate-limiting
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:backend-performance-profiling
+attributes:
+  displayName: "Backend Performance Profiling"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-regression"
+  complexity: single-team
+  description: |
+    Investigates backend performance regressions — capturing flame graphs,
+    tracing slow requests, profiling memory allocations, analyzing database
+    query plans, and producing actionable optimization recommendations.
+    Excludes frontend performance work.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:debugger
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity

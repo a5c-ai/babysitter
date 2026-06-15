@@ -1,0 +1,61 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:ai-elements-chat
+attributes:
+  displayName: "AI Elements Chat Input"
+  description: |
+    Pre-built React chat input component from the Vercel AI Elements
+    library. Provides a styled text input with send button, file
+    attachment support, and integration with the Vercel AI SDK's
+    useChat hook for streaming message submission. Built on shadcn/ui
+    for consistent design system integration.
+  kind: prompt-ui
+  surface: prompt-ui
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:content-input
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:ai-elements-tool-call-card
+attributes:
+  displayName: "AI Elements Tool Call Card"
+  description: |
+    Pre-built React component for visualizing tool calls and their results
+    in AI chat interfaces. Displays tool name, input parameters, execution
+    status, and output in a structured card layout. Supports streaming
+    updates as tool execution progresses. Part of the Vercel AI Elements
+    component library.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+  in_category:
+    - interaction-primitive-category:telemetry
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:ai-elements-streaming-response
+attributes:
+  displayName: "AI Elements Streaming Response Display"
+  description: |
+    Pre-built React component for rendering streaming LLM responses with
+    markdown formatting, syntax highlighting, and progressive token
+    display. Integrates with Vercel AI SDK's streaming hooks to show
+    responses as they arrive. Supports code blocks, tables, and rich
+    formatting via the shadcn/ui design system.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

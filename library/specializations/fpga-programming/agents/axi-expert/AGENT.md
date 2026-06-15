@@ -11,6 +11,11 @@ expertise:
   - IP integration
   - Bus architecture
   - Transaction modeling
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # AXI Expert Agent

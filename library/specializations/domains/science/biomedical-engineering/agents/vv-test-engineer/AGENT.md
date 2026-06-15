@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Design Control
   agent-id: BME-AG-006
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:qa-engineer]
 ---
 
 # V&V Test Engineer Agent

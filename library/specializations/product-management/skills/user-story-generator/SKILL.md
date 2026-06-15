@@ -2,6 +2,12 @@
 name: user-story-generator
 description: Generate and validate user stories from various inputs including requirements, research, and feature descriptions. Apply INVEST criteria validation, create acceptance criteria, split large stories, and convert between story formats.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-discovery, skill-area:roadmap-planning]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # User Story Generator Skill

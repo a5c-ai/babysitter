@@ -1,0 +1,17 @@
+nodeKind: HookSurface
+id: hook-surface:start
+attributes:
+  eventName: "Start (a5c canonical)"
+  displayName: "Start (a5c canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [runId]
+    properties:
+      runId: { type: string }
+  description: |
+    a5c-emitted: fires at the start of a babysitter run.
+edges:

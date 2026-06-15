@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-017
   category: Performance Measurement
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:performance-management, skill-area:data-analytics, skill-area:business-analysis]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:people-analytics-specialist]
 ---
 
 # Metrics Dashboard Designer

@@ -1,0 +1,6 @@
+{
+  "issueNumber": 602,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-602-external-agent-discovery",
+  "maxReviewIterations": 2
+}

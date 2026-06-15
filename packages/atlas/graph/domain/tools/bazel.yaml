@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:bazel
+attributes:
+  displayName: "Bazel"
+  homepageUrl: "https://bazel.build"
+  kind: build-tool
+  description: |
+    Multi-language, multi-platform build and test tool that scales to large codebases.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:terraform-infrastructure
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:gradle
+      comparison: "Build systems — Bazel is multi-language; Gradle is JVM-focused"
+    - target: tool:maven
+      comparison: "Build systems — Bazel is multi-language; Maven is JVM-focused"

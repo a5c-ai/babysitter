@@ -11,6 +11,10 @@ expertise:
   - Implementation guidance
   - Follow-up tracking
   - Feedback integration
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:data-analytics, skill-area:strategic-analysis, skill-area:business-analysis]
+  roles: [role:data-analyst, role:business-analyst, role:strategic-planner]
 ---
 
 # Insight Translator

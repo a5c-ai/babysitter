@@ -1,0 +1,43 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:adapters-remote.core@current
+attributes:
+  displayName: adapters-remote Core (current) — transport-only delegator
+  agentVersionId: agent-version:adapters-remote@current
+  packageRef: source-ref:adapters-github
+  loopIteratorPolicy: delegated-to-remote
+  loopIteratorNotes: |
+    No local loop. adapters-remote opens a transport (`adapters run --json` over local
+    process / ssh / docker / kubectl) and proxies the remote agent's normalized
+    event stream verbatim. Whatever loop semantics the remote agent has are what
+    the host observes.
+  contextManagementStrategy: delegated-to-remote
+  compactionTriggerNotes: |
+    Whatever the remote agent does. No local compaction.
+  subagentInvokerPolicy: delegated-to-remote
+  subagentInvokerNotes: |
+    Subagent semantics, if any, are emitted by the remote agent and proxied verbatim;
+    adapters-remote does not introduce its own subagent primitive.
+  resultSynthesisPolicy: delegated-to-remote
+  resultSynthesisNotes: |
+    Final response is whatever the remote agent emits; adapters-remote forwards
+    bytes 1:1 over the proxied stream.
+  stopDetectionStrategy: delegated-to-remote
+  transportClientLibrary: none
+  supportedTransportProtocols: []
+  parallelToolCallHandling: delegated-to-remote
+  streamingFidelity: full
+  thinkingChannelHandling: delegated-to-remote
+  notes: |
+    Special case: this AgentCoreImpl exists for ontology completeness but does not
+    implement an agent loop. All Layer-3 (model transport) concerns are delegated
+    to whichever agent runs on the remote target (selected via AGENT_MUX_REMOTE_AGENT).
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:adapters-remote
+      role: core
+  speaks: []
+  supports_orchestration_primitive:
+    - target: orch-primitive:progress-stream
+    - target: orch-primitive:telemetry-collection

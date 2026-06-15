@@ -1,0 +1,7 @@
+{
+  "issueNumber": 595,
+  "baseBranch": "staging",
+  "branchName": "plan/issue-595",
+  "implementationBranchName": "agent/issue-595-orchestration-features",
+  "maxReviewIterations": 2
+}

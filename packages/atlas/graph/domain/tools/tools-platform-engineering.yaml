@@ -1,0 +1,109 @@
+---
+nodeKind: Tool
+id: tool:apl-core
+attributes:
+  displayName: "APL Core"
+  homepageUrl: "https://github.com/linode/apl-core"
+  kind: orchestrator
+  description: |
+    Linode App Platform for Kubernetes Engine (APL Core). A PaaS layer
+    built on top of Linode Kubernetes Engine (LKE) that provides
+    self-service application deployment, ingress management, certificate
+    handling, and observability out of the box. Packages Istio, Knative,
+    Keycloak, Harbor, and other CNCF tools into a cohesive developer
+    platform with a web UI and GitOps workflows. Designed for teams
+    that want Heroku-like simplicity on their own Kubernetes clusters.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:platform-engineering
+    - target: skill-area:deployment-automation
+---
+nodeKind: Tool
+id: tool:devtron
+attributes:
+  displayName: "Devtron"
+  homepageUrl: "https://devtron.ai"
+  kind: orchestrator
+  description: |
+    Kubernetes-native application management dashboard with built-in
+    CI/CD, security scanning, monitoring, and debugging. Provides a
+    unified web UI for deploying, managing, and observing workloads
+    across multiple clusters. Features include Helm chart management,
+    GitOps-based deployments, vulnerability scanning, RBAC, and
+    interactive Kubernetes debugging. Targets platform teams that need
+    a full-featured internal developer platform without stitching
+    together dozens of separate tools.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:platform-engineering
+    - target: skill-area:ci-cd
+  alternative_to:
+    - target: tool:backstage
+      comparison: "Platform engineering — Devtron is K8s app management; Backstage is a developer portal"
+    - target: tool:kubevela
+      comparison: "Kubernetes app delivery platforms"
+    - target: tool:rancher
+      comparison: "Kubernetes management platforms"
+    - target: tool:port-dev
+      comparison: "Platform engineering tools"
+---
+nodeKind: Tool
+id: tool:kubevela
+attributes:
+  displayName: "KubeVela"
+  homepageUrl: "https://kubevela.io"
+  kind: orchestrator
+  description: |
+    Modern application delivery platform based on the Open Application
+    Model (OAM). Provides a higher-level abstraction over Kubernetes
+    that lets developers describe applications and their operational
+    requirements declaratively. Features include multi-cluster delivery,
+    canary rollouts, GitOps integration, workflow orchestration, and an
+    addon ecosystem for extending platform capabilities. The OAM model
+    separates application definition from operational concerns, enabling
+    platform teams to encode best practices into reusable components.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:platform-engineering
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:backstage
+      comparison: "Platform engineering — KubeVela is OAM-based delivery; Backstage is a developer portal"
+    - target: tool:devtron
+      comparison: "Kubernetes app delivery platforms"
+    - target: tool:rancher
+      comparison: "Kubernetes platforms — KubeVela manages app delivery; Rancher manages clusters"
+    - target: tool:port-dev
+      comparison: "Platform engineering tools"
+---
+nodeKind: Tool
+id: tool:onedev
+attributes:
+  displayName: "OneDev"
+  homepageUrl: "https://onedev.io"
+  kind: ci
+  description: |
+    Self-hosted Git server with integrated CI/CD engine, Kanban boards,
+    package registry, and code search. Written in Java, runs as a single
+    Docker container. CI pipelines are defined in YAML with support for
+    matrix builds, caching, and Kubernetes-based agents. Includes code
+    review, issue tracking, time tracking, and fine-grained RBAC. A
+    lightweight alternative to GitLab for teams that want all-in-one
+    Git hosting without the resource overhead.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:ci-cd
+    - target: skill-area:project-planning
+  alternative_to:
+    - target: tool:drone-ci
+      comparison: "Self-hosted CI — OneDev is all-in-one Git+CI; Drone CI is container-native CI only"
+    - target: tool:woodpecker
+      comparison: "Self-hosted CI — OneDev is all-in-one Git+CI; Woodpecker is container-native CI only"

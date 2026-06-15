@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:adaptive-learning-model-review
+attributes:
+  displayName: "Adaptive Learning Model Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews adaptive learning algorithm performance and fairness --
+    evaluating knowledge-tracing model accuracy against student assessment
+    outcomes, analyzing content recommendation diversity to prevent filter
+    bubbles, auditing learning path personalization for demographic bias,
+    validating spaced-repetition scheduling parameters against retention
+    curve data, and reviewing A/B test results for pedagogical intervention
+    effectiveness. Produces model performance reports, bias audit findings,
+    and algorithm tuning recommendations. Excludes curriculum content
+    authoring.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:data-scientist
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:edtech
+    - target: domain:machine-learning
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:student-engagement-analytics
+attributes:
+  displayName: "Student Engagement Analytics"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Analyzes student engagement signals to identify at-risk learners --
+    computing engagement scores from login frequency, content interaction
+    depth, assignment completion velocity, discussion forum participation,
+    and video watch-through rates, applying early-warning models to predict
+    dropout risk, segmenting cohorts by engagement patterns for targeted
+    interventions, and correlating engagement metrics with learning outcome
+    assessments. Produces engagement dashboards, at-risk student alerts, and
+    intervention effectiveness reports. Excludes individual student
+    counseling.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:edtech
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:product-team

@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:blueprint-a11y.scope
+attributes:
+  subjectId: blueprint:a11y
+  inScope: |
+    Web-app accessibility checks against WCAG 2.1 AA — semantic HTML,
+    ARIA roles, keyboard navigation, color contrast, alt text, and form
+    label associations. Targets HTML/JSX/TSX templates and CSS tokens.
+  outOfScope: |
+    Native mobile (iOS / Android) accessibility, voice-UI accessibility,
+    cognitive-accessibility (Plain-Language) review, full WCAG 2.2/3.0
+    AAA conformance audits, and runtime/dynamic screen-reader behavior
+    that requires a live browser.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - blueprint:a11y

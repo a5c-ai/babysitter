@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Schedule Management
   id: AG-004
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:quantitative-modeling, skill-area:data-analytics]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:technical-program-manager, role:data-analyst]
 ---
 
 # Schedule Analyst Agent

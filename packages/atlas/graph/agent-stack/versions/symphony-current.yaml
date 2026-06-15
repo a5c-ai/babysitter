@@ -1,0 +1,37 @@
+nodeKind: AgentVersion
+id: agent-version:symphony@current
+attributes:
+  agentProductId: agent:symphony
+  versionRange: '>=0.1.0'
+  releasedAt: '2025-06-01'
+  installMethods:
+    - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+    - agent:symphony
+  composed_of:
+    - target: agent-core-impl:symphony.core@current
+      role: core
+    - target: agent-runtime-impl:symphony.runtime@current
+      role: runtime
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Long-running issue-driven agent sessions with persistent workspace state.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Dispatches coding agents per-issue with isolated workspaces.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Bounded concurrency for parallel issue processing.
+    - target: capability:can-resume
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Filesystem-driven restart recovery — reconciles workspace directories on startup to resume in-progress work.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

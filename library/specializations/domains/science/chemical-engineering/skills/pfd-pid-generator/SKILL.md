@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Design
   skill-id: CE-SK-029
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # PFD/P&ID Generator Skill

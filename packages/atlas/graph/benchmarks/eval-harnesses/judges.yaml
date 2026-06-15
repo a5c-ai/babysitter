@@ -1,0 +1,31 @@
+---
+nodeKind: Judge
+id: judge:gpt-4o-pairwise
+attributes:
+  displayName: "GPT-4o pairwise preference judge"
+  judgeKind: llm
+  rubricId: rubric:helpfulness-1-5
+  notes: |
+    Standard pairwise A/B preference judge using GPT-4o; emits a winner +
+    rationale.
+edges: {}
+---
+nodeKind: Judge
+id: judge:claude-3-5-sonnet-rubric
+attributes:
+  displayName: "Claude 3.5 Sonnet rubric-based judge"
+  judgeKind: llm
+  rubricId: rubric:safety-3-axis
+  notes: |
+    Rubric-scored single-response judge using Claude 3.5 Sonnet against a
+    multi-axis safety rubric.
+edges: {}
+---
+nodeKind: Judge
+id: judge:exact-match
+attributes:
+  displayName: "Exact-match programmatic judge"
+  judgeKind: programmatic
+  notes: |
+    Deterministic exact-match judge for closed-form benchmarks (e.g. MMLU).
+edges: {}

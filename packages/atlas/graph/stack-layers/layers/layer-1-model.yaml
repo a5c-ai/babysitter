@@ -1,0 +1,26 @@
+nodeKind: Layer
+id: layer:1-model
+attributes:
+  displayName: Model
+  position: 1
+  path: compute
+  scope: Trained artifact and declared capability surface.
+  summary: |
+    The trained model artifact itself — weights, tokenizer, inference graph —
+    independent of any provider that serves it. Concrete realizations are
+    `ModelFamily` and `ModelVersion` nodes. Capability claims about token
+    limits, modalities, native tools, and reasoning posture are bound to
+    `ModelVersion`, not to providers or transports.
+  responsibilities:
+    - Preserve model family/version identity.
+    - Declare token, modality, reasoning, tool, and output-shape capabilities.
+    - Separate model-native behavior from provider/runtime behavior.
+  examples:
+    - Model family and version records.
+    - Context window and output token limits.
+    - Native tool-use, reasoning, vision, audio, and embedding support.
+  fitNotes: |
+    Custom-agent apps may expose model choice directly or hide it behind a
+    provider/model configuration. Local inference collapses Model and Provider
+    operationally, but the graph keeps them separate.
+edges: {}

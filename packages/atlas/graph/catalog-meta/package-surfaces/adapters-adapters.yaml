@@ -1,0 +1,21 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-adapters-adapters
+attributes:
+  packageId: "@a5c-ai/adapters-codecs"
+  packageName: "@a5c-ai/adapters-codecs"
+  displayName: "Adapters Codecs"
+  description: "Built-in agent adapter codecs for encoding/decoding communication with each supported AI harness (Claude, Codex, Gemini, Copilot, Cursor, etc.)."
+  role: "harness-codec-bundle"
+  whenToUse: "Depend on this when you need to serialize or deserialize messages in the native format of a specific AI coding harness."
+  workspacePath: packages/adapters/adapters
+  moduleType: typescript
+  surfaceKinds:
+    - adapter-registry
+    - harness-adapter-bundle
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/adapters/adapters/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:adapters-adapters

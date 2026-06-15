@@ -1,0 +1,54 @@
+name: Generate Plugins
+
+# Disabled by default — enable by uncommenting the trigger
+# on:
+#   push:
+#     branches: [main, staging]
+#     paths:
+#       - 'plugins/babysitter-unified/**'
+#       - 'packages/adapters/extensions/**'
+#   workflow_dispatch:
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: generate-plugins-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate Target Plugins
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --legacy-peer-deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Generate all target plugins
+        run: |
+          set -euo pipefail
+          npm run generate:plugins
+
+      - name: Upload generated plugins
+        uses: actions/upload-artifact@v7
+        with:
+          name: generated-plugins
+          path: artifacts/generated-plugins/
+          if-no-files-found: error

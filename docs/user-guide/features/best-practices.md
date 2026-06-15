@@ -1394,7 +1394,7 @@ Generates SDK bindings for external AI agents. Contribute your integration back 
 - [Run Resumption](./run-resumption.md) - Pause and continue
 - [Journal System](./journal-system.md) - Event sourcing
 - [Hooks](./hooks.md) - Extensible lifecycle events
-- [Process Library](./process-library.md) - 2,000+ pre-built processes
+- [Process Library](./process-library.md) - SDK-managed library layout and current counts
 
 ---
 
@@ -1402,7 +1402,7 @@ Generates SDK bindings for external AI agents. Contribute your integration back 
 
 **These best practices apply to ANY of Babysitter's workflows.** Whether you're using a methodology or a domain-specific process, these patterns will help you get the best results.
 
-### Methodologies (19+) - Development Approaches
+### Methodologies (38 directories in this repo snapshot) - Development Approaches
 
 Not sure which methodology to use? Here's a quick guide:
 
@@ -1416,18 +1416,21 @@ Not sure which methodology to use? Here's a quick guide:
 | Risk management | Spiral Model |
 
 **Browse methodologies:**
-- [All 19+ methodologies with source code](../reference/glossary.md#methodology)
-- [Methodologies folder](../../../plugins/babysitter/skills/babysit/process/methodologies/)
+- [Methodology overview](../reference/glossary.md#methodology)
+- [Methodologies folder](../../../library/methodologies/)
 
-### Domain Processes (2,000+) - Ready-to-Use Workflows
+### Domain Processes - Ready-to-Use Workflows
 
-Beyond methodologies, explore 2,000+ domain-specific processes:
+Beyond methodologies, explore the current specialization catalog:
 
+<!-- best-practices:domains:start -->
 | Domain | Processes | Browse |
 |--------|-----------|--------|
-| **Development** | 680+ (web, mobile, DevOps, AI, security) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/) |
-| **Business** | 430+ (legal, HR, marketing, finance) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/business/) |
-| **Science & Engineering** | 550+ (physics, aerospace, biomedical) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/science/) |
+| **Development and technical specializations** | 837 | [Browse →](../../../library/specializations/) |
+| **Business domains** | 490 | [Browse →](../../../library/specializations/domains/business/) |
+| **Science & engineering domains** | 551 | [Browse →](../../../library/specializations/domains/science/) |
+| **Social sciences & humanities** | 160 | [Browse →](../../../library/specializations/domains/social-sciences-humanities/) |
+<!-- best-practices:domains:end -->
 
 See the full catalog in the [Process Library](./process-library.md).
 

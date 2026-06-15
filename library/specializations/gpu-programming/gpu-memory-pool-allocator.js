@@ -16,6 +16,12 @@
  * @references
  * - CUDA Memory Management: https://docs.nvidia.com/cuda/cuda-c-programming-guide/
  * - Memory Pools API: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html
+ * @graph
+ *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:gpu-memory-hierarchy]
+ *   roles: [role:computational-scientist, role:ml-engineer]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

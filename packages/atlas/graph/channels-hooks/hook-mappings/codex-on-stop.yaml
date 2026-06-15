@@ -1,0 +1,22 @@
+nodeKind: HookMapping
+id: hook-mapping:stop-codex
+attributes:
+  mappingId: hook-mapping:stop-codex
+  hookId: hook-surface:stop
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: OnStop
+  versionRange: ">=0.119.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop
+  emits_hook:
+    - target: agentVersion:codex:ge-0-119-0

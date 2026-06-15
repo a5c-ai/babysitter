@@ -1,0 +1,40 @@
+nodeKind: APIEndpoint
+id: api-endpoint:get-state
+attributes:
+  displayName: "GET /api/v1/state"
+  method: GET
+  path: "/api/v1/state"
+  responseShape: "RuntimeSnapshot"
+  authRequired: false
+edges:
+  exposed_by:
+    - target: http-server:default-localhost
+  fires_operational_trigger:
+    - target: operational-trigger:refresh-reconcile
+    - target: operational-trigger:drain
+---
+nodeKind: APIEndpoint
+id: api-endpoint:get-by-id
+attributes:
+  displayName: "GET /api/v1/<id>"
+  method: GET
+  path: "/api/v1/{id}"
+  responseShape: "LiveSession"
+  authRequired: false
+edges:
+  exposed_by:
+    - target: http-server:default-localhost
+---
+nodeKind: APIEndpoint
+id: api-endpoint:post-refresh
+attributes:
+  displayName: "POST /api/v1/refresh"
+  method: POST
+  path: "/api/v1/refresh"
+  responseShape: "{ ok: boolean, reconciliationId: string }"
+  authRequired: false
+edges:
+  exposed_by:
+    - target: http-server:default-localhost
+  fires_operational_trigger:
+    - target: operational-trigger:refresh-poll

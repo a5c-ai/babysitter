@@ -1,0 +1,40 @@
+nodeKind: Skill
+id: skill:react-tdd
+attributes:
+  displayName: "React TDD"
+  description: |
+    A test-driven-development loop for React components: writes a failing
+    Jest/RTL test, implements the component, refactors. Optimized for
+    function components with hooks and TypeScript prop typing.
+  keyword: react-tdd
+  entrypoint: SKILL.md
+  domains:
+    - specialization:frontend-react
+  roles:
+    - role:implementer
+  requiresLanguages:
+    - language:typescript
+  requiresFrameworks:
+    - framework:react
+    - framework:jest
+  sourceRef: source-ref:a5c-plugins-react-tdd
+edges:
+  applies_to:
+    - target: specialization:frontend-react
+      confidence: primary
+  requires_capability:
+    - target: capability:supports-text-streaming
+      level: recommended
+  contained_in_plugin:
+    - target: plugin:example-portable-extension
+  implements:
+    - target: extension-interface:reliability
+  sourced_from:
+    - target: source-ref:a5c-plugins-react-tdd
+  addresses:
+    - target: skill-area:react-testing
+    - target: skill-area:unit-testing
+  uses_template:
+    - target: prompt-template:few-shot-classification
+  uses_context_bundle:
+    - target: context-bundle:symphony-default

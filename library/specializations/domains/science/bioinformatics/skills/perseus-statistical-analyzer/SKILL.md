@@ -18,6 +18,12 @@ metadata:
     - statistics
     - analysis
     - visualization
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:data-visualization]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # Perseus Statistical Analyzer Skill

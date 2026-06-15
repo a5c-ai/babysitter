@@ -8,6 +8,14 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:mutation-testing, skill-area:unit-testing]
+  roles: [role:qa-engineer]
+  workflows: [workflow:code-review]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Stryker Mutation Testing Skill

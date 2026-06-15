@@ -9,6 +9,12 @@ expertise:
   - Access control and upgradeability
   - Gas optimization and DoS
   - Cross-chain security
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:smart-contract-security, skill-area:application-security-testing]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # Smart Contract Auditor Agent

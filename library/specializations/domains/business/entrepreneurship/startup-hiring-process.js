@@ -16,6 +16,11 @@
  * @references
  * - Who (Geoff Smart): https://www.amazon.com/Who-Geoff-Smart/dp/0345504194
  * - Work Rules (Laszlo Bock): https://www.amazon.com/Work-Rules-Insights-Inside-Transform/dp/1455554790
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

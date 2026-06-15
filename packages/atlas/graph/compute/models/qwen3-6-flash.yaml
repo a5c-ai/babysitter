@@ -1,0 +1,55 @@
+nodeKind: ModelVersion
+id: model:qwen3-6-flash@current
+attributes:
+  displayName: "Qwen3.6-Flash"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: true
+  modelFamilyId: model-family:qwen-3-6
+  versionRange: '>=3.6.0 <3.7.0'
+  kind: reasoning
+  contextWindowTokens: 1000000
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-04-16'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-04-16'
+  modelCardUrl: https://help.aliyun.com/zh/model-studio/models
+  supportsFineTuning: false
+  providerModelIds:
+    alibabaModelStudio: qwen3.6-flash
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3-6
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3-6
+  served_by:
+    - provider:alibaba-cloud
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=3.6.0 <3.7.0'
+      level: full
+    - target: capability:supports-text-streaming
+      versionRange: '>=3.6.0 <3.7.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=3.6.0 <3.7.0'
+      level: full
+    - target: capability:can-multi-turn
+      versionRange: '>=3.6.0 <3.7.0'
+      level: full
+    - target: capability:supports-native-tools
+      versionRange: '>=3.6.0 <3.7.0'
+      level: full

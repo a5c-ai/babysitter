@@ -17,6 +17,10 @@ required-skills:
   - SK-FTV-010 (sound-design-direction)
   - SK-FTV-011 (screenplay-formatting)
   - SK-FTV-012 (genre-analysis-film)
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:audio-processing, skill-area:media-encoding, skill-area:video-processing]
+  roles: [role:creative-director, role:media-engineer]
 ---
 
 # Production Coordinator Agent

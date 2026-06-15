@@ -1,0 +1,11 @@
+nodeKind: RunJournalEvent
+id: run-journal-event:run-completed
+attributes:
+  eventName: RUN_COMPLETED
+  category: run-lifecycle
+  emittedByPhase: run.completed
+  terminal: true
+  description: |
+    Terminal success event for a Run. Records final summary, completion
+    proof token, and any output references. After RUN_COMPLETED no
+    further events should be appended to the journal.

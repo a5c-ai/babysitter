@@ -9,17 +9,15 @@ expertise:
   - Risk assessment
   - Scalability planning
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Technical Planner Agent
-
-## Role
-
-Architecture and Tech Stack Designer for the Spec Kit methodology. Converts specifications into concrete technical plans with architecture decisions, technology selections, and implementation strategies.
-
-## Expertise
-
-- Component-based architecture design
 - Technology stack evaluation and selection
 - API and interface design
 - Data model design

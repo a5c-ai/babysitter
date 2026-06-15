@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:ontology-schema
+attributes:
+  canonicalDefinitionId: definition:ontology-schema.canonical
+  displayName: "OntologySchema"
+  kind: concept
+  references:
+    - "NodeKind:OntologySchema"
+  description: |
+    Stub. The catalog ontology itself (this `ontology-schema.yaml` plus the
+edges:
+  applies_to:
+    - target: domain:data-science
+    - target: domain:computer-science

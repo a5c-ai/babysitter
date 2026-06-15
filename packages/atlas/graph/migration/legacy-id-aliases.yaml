@@ -1,0 +1,306 @@
+# Legacy `packages/agent-catalog/graph/` id → v6 `graph/` id alias map.
+#
+# Walks the legacy graph (496 ids across 23 prefixes) and produces alias rows
+# for every record the v6 graph carries a counterpart for. The babysitter
+# agent-catalog SDK (packages/agent-catalog/src/sdk.ts) should normalize
+# legacy ids through this map on read.
+#
+# Format: { legacyId, v6Id, nodeKind, source?, notes? }
+#   - source: legacy YAML path that anchors the legacyId (where used)
+#   - notes: anything migration-relevant (id-pattern divergence,
+#     `@semver` rewrite, host-rename like gemini→gemini-cli, etc.)
+#
+# Path chosen: flat shim file. v6 schema does not yet carry a cross-graph
+# `aliasOf` edge kind that maps to LEGACY ids (the existing `aliasOf`
+# ergonomics live inside v6 only).
+
+aliases:
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: AgentProduct
+  # legacy: `agent:<slug>` → v6: `agent:<slug>` (same prefix)
+  # Host renames: gemini→gemini-cli, copilot→copilot-cli (CLI disambiguation).
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: agent:agent-platform, v6Id: agent:agent-platform, nodeKind: AgentProduct }
+  - { legacyId: agent:claude,           v6Id: agent:claude-code,      nodeKind: AgentProduct, notes: "host rename: claude → claude-code" }
+  - { legacyId: agent:codex,            v6Id: agent:codex,            nodeKind: AgentProduct }
+  - { legacyId: agent:copilot,          v6Id: agent:copilot-cli,      nodeKind: AgentProduct, notes: "host rename: copilot → copilot-cli" }
+  - { legacyId: agent:cursor,           v6Id: agent:cursor,           nodeKind: AgentProduct }
+  - { legacyId: agent:gemini,           v6Id: agent:gemini-cli,       nodeKind: AgentProduct, notes: "host rename: gemini → gemini-cli" }
+  - { legacyId: agent:omp,              v6Id: agent:omp,              nodeKind: AgentProduct }
+  - { legacyId: agent:openclaw,         v6Id: agent:openclaw,         nodeKind: AgentProduct }
+  - { legacyId: agent:opencode,         v6Id: agent:opencode,         nodeKind: AgentProduct }
+  - { legacyId: agent:pi,               v6Id: agent:pi,               nodeKind: AgentProduct }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: AgentVersion
+  # legacy: `agent-version:<slug>@<range>` (kebab + @semver suffix)
+  # v6:     `agentVersion:<slug>:ge-X-Y-Z[-lt-A-B-C]`
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "agent-version:agent-platform@current",  v6Id: "agentVersion:agent-platform:ge-5-0-0",          nodeKind: AgentVersion }
+  - { legacyId: "agent-version:claude-code@1.x",            v6Id: "agentVersion:claude:ge-0-0-0",                    nodeKind: AgentVersion, notes: "host rename + range collapse" }
+  - { legacyId: "agent-version:codex@1.x",                  v6Id: "agentVersion:codex:ge-0-0-0-lt-0-119-0",          nodeKind: AgentVersion, notes: "v6 splits codex < 0.119; legacy collapsed to 1.x" }
+  - { legacyId: "agent-version:codex@1.x",                  v6Id: "agentVersion:codex:ge-0-119-0",                   nodeKind: AgentVersion }
+  - { legacyId: "agent-version:copilot-cli@current",        v6Id: "agentVersion:copilot:ge-1-0-55-3",                  nodeKind: AgentVersion }
+  - { legacyId: "agent-version:cursor@current",             v6Id: "agentVersion:cursor:ge-0-0-0",                    nodeKind: AgentVersion }
+  - { legacyId: "agent-version:gemini-cli@current",         v6Id: "agentVersion:gemini:ge-0-43-0",                    nodeKind: AgentVersion }
+  - { legacyId: "agent-version:omp@current",                v6Id: "agentVersion:omp:ge-15-5-6",                      nodeKind: AgentVersion }
+  - { legacyId: "agent-version:openclaw@current",           v6Id: "agentVersion:openclaw:ge-2026-5-27",              nodeKind: AgentVersion }
+  - { legacyId: "agent-version:opencode@1.x",               v6Id: "agentVersion:opencode:ge-0-0-0",                  nodeKind: AgentVersion }
+  - { legacyId: "agent-version:pi@current",                 v6Id: "agentVersion:pi:ge-0-75-5",                       nodeKind: AgentVersion }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: PluginTarget (adapter generator critical)
+  # legacy: `pluginTarget:<slug>` → v6: `plugin-target:<slug>`
+  # Host renames: gemini→gemini-cli, github-copilot→copilot-cli, oh-my-pi→omp.
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: pluginTarget:claude-code,    v6Id: plugin-target:claude-code,    nodeKind: PluginTarget }
+  - { legacyId: pluginTarget:codex,          v6Id: plugin-target:codex,          nodeKind: PluginTarget }
+  - { legacyId: pluginTarget:cursor,         v6Id: plugin-target:cursor,         nodeKind: PluginTarget }
+  - { legacyId: pluginTarget:gemini,         v6Id: plugin-target:gemini-cli,     nodeKind: PluginTarget, notes: "host rename" }
+  - { legacyId: pluginTarget:github-copilot, v6Id: plugin-target:copilot-cli,    nodeKind: PluginTarget, notes: "host rename" }
+  - { legacyId: pluginTarget:opencode,       v6Id: plugin-target:opencode,       nodeKind: PluginTarget }
+  - { legacyId: pluginTarget:openclaw,       v6Id: plugin-target:openclaw,       nodeKind: PluginTarget }
+  - { legacyId: pluginTarget:oh-my-pi,       v6Id: plugin-target:omp,            nodeKind: PluginTarget, notes: "host rename: oh-my-pi → omp" }
+  - { legacyId: pluginTarget:pi,             v6Id: plugin-target:pi,             nodeKind: PluginTarget }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: PluginArtifact
+  # legacy: `pluginArtifact:<target>:<artifactKind>` (colon-separated)
+  # v6:     `plugin-artifact:<target>-<artifactKind>` (dash-separated)
+  # source: packages/agent-catalog/graph/nodes/hooks-and-plugins/plugin-artifacts.yaml
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "pluginArtifact:claude-code:container-image",    v6Id: "plugin-artifact:claude-code-container-image",    nodeKind: PluginArtifact }
+  - { legacyId: "pluginArtifact:codex:container-image",          v6Id: "plugin-artifact:codex-container-image",          nodeKind: PluginArtifact }
+  - { legacyId: "pluginArtifact:cursor:container-image",         v6Id: "plugin-artifact:cursor-container-image",         nodeKind: PluginArtifact }
+  - { legacyId: "pluginArtifact:gemini:container-image",         v6Id: "plugin-artifact:gemini-cli-container-image",     nodeKind: PluginArtifact, notes: "host rename" }
+  - { legacyId: "pluginArtifact:github-copilot:container-image", v6Id: "plugin-artifact:copilot-cli-container-image",    nodeKind: PluginArtifact, notes: "host rename" }
+  - { legacyId: "pluginArtifact:pi:container-image",             v6Id: "plugin-artifact:pi-container-image",             nodeKind: PluginArtifact }
+  - { legacyId: "pluginArtifact:oh-my-pi:container-image",       v6Id: "plugin-artifact:omp-container-image",            nodeKind: PluginArtifact, notes: "host rename" }
+  - { legacyId: "pluginArtifact:opencode:container-image",       v6Id: "plugin-artifact:opencode-container-image",       nodeKind: PluginArtifact }
+  - { legacyId: "pluginArtifact:openclaw:container-image",       v6Id: "plugin-artifact:openclaw-container-image",       nodeKind: PluginArtifact }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: HookSurface
+  # legacy: `hook:<kebab>` → v6: `hook-surface:<kebab>` (prefix rewrite, kebab preserved)
+  # source: packages/agent-catalog/graph/nodes/hooks-and-plugins/hook-mappings.yaml
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: hook:after-agent,             v6Id: hook-surface:after-agent,             nodeKind: HookSurface }
+  - { legacyId: hook:before-prompt-build,     v6Id: hook-surface:before-prompt-build,     nodeKind: HookSurface }
+  - { legacyId: hook:before-provider-request, v6Id: hook-surface:before-provider-request, nodeKind: HookSurface }
+  - { legacyId: hook:notification,            v6Id: hook-surface:notification,            nodeKind: HookSurface }
+  - { legacyId: hook:post-tool-use,           v6Id: hook-surface:post-tool-use,           nodeKind: HookSurface }
+  - { legacyId: hook:pre-compact,             v6Id: hook-surface:pre-compact,             nodeKind: HookSurface }
+  - { legacyId: hook:pre-tool-use,            v6Id: hook-surface:pre-tool-use,            nodeKind: HookSurface }
+  - { legacyId: hook:session-end,             v6Id: hook-surface:session-end,             nodeKind: HookSurface }
+  - { legacyId: hook:session-idle,            v6Id: hook-surface:session-idle,            nodeKind: HookSurface }
+  - { legacyId: hook:session-start,           v6Id: hook-surface:session-start,           nodeKind: HookSurface }
+  - { legacyId: hook:shell-env,               v6Id: hook-surface:shell-env,               nodeKind: HookSurface }
+  - { legacyId: hook:stop,                    v6Id: hook-surface:stop,                    nodeKind: HookSurface }
+  - { legacyId: hook:subagent-stop,           v6Id: hook-surface:subagent-stop,           nodeKind: HookSurface }
+  - { legacyId: hook:user-prompt-submit,      v6Id: hook-surface:user-prompt-submit,      nodeKind: HookSurface }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: HookMapping
+  # legacy: `hookMapping:<surface>:<host>` → v6: `hook-mapping:<surface>-<host>` (mostly)
+  # 37 legacy mappings; v6 has 38 file-records. Aliasing the host-renamed entries
+  # explicitly; the rest follow the prefix+slug pattern.
+  # source: packages/agent-catalog/graph/nodes/hooks-and-plugins/hook-mappings.yaml
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "hookMapping:after-agent:gemini",              v6Id: "hook-mapping:after-agent-gemini-cli",            nodeKind: HookMapping }
+  - { legacyId: "hookMapping:after-agent:openclaw",            v6Id: "hook-mapping:after-agent-openclaw",              nodeKind: HookMapping }
+  - { legacyId: "hookMapping:before-prompt-build:openclaw",    v6Id: "hook-mapping:before-prompt-build-openclaw",      nodeKind: HookMapping }
+  - { legacyId: "hookMapping:before-provider-request:oh-my-pi", v6Id: "hook-mapping:before-provider-request-omp",       nodeKind: HookMapping, notes: "host rename" }
+  - { legacyId: "hookMapping:before-provider-request:pi",      v6Id: "hook-mapping:before-provider-request-pi",        nodeKind: HookMapping }
+  - { legacyId: "hookMapping:notification:claude-code",        v6Id: "hook-mapping:notification-claude-code",          nodeKind: HookMapping }
+  - { legacyId: "hookMapping:post-tool-use:claude-code",       v6Id: "hook-mapping:post-tool-use-claude-code",         nodeKind: HookMapping }
+  - { legacyId: "hookMapping:post-tool-use:gemini",            v6Id: "hook-mapping:post-tool-use-gemini",              nodeKind: HookMapping }
+  - { legacyId: "hookMapping:post-tool-use:omp",               v6Id: "hook-mapping:post-tool-use-omp",                 nodeKind: HookMapping }
+  - { legacyId: "hookMapping:post-tool-use:openclaw",          v6Id: "hook-mapping:post-tool-use-openclaw",            nodeKind: HookMapping }
+  - { legacyId: "hookMapping:pre-compact:claude-code",         v6Id: "hook-mapping:pre-compact-claude-code",           nodeKind: HookMapping }
+  - { legacyId: "hookMapping:pre-tool-use:claude-code",        v6Id: "hook-mapping:pre-tool-use-claude-code",          nodeKind: HookMapping }
+  - { legacyId: "hookMapping:pre-tool-use:codex",              v6Id: "hook-mapping:pre-tool-use-codex",                nodeKind: HookMapping }
+  - { legacyId: "hookMapping:pre-tool-use:gemini",             v6Id: "hook-mapping:pre-tool-use-gemini",               nodeKind: HookMapping }
+  - { legacyId: "hookMapping:session-end:claude-code",         v6Id: "hook-mapping:session-end-claude-code",           nodeKind: HookMapping }
+  - { legacyId: "hookMapping:session-idle:opencode",           v6Id: "hook-mapping:session-idle-opencode",             nodeKind: HookMapping }
+  - { legacyId: "hookMapping:session-start:claude-code",       v6Id: "hook-mapping:session-start-claude-code",         nodeKind: HookMapping }
+  - { legacyId: "hookMapping:shell-env:opencode",              v6Id: "hook-mapping:shell-env-opencode",                nodeKind: HookMapping }
+  - { legacyId: "hookMapping:stop:claude-code",                v6Id: "hook-mapping:stop-claude-code",                  nodeKind: HookMapping }
+  - { legacyId: "hookMapping:stop:codex",                      v6Id: "hook-mapping:stop-codex",                        nodeKind: HookMapping }
+  - { legacyId: "hookMapping:subagent-stop:claude-code",       v6Id: "hook-mapping:subagent-stop-claude-code",         nodeKind: HookMapping }
+  - { legacyId: "hookMapping:user-prompt-submit:claude-code",  v6Id: "hook-mapping:user-prompt-submit-claude-code",    nodeKind: HookMapping }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: Capability
+  # legacy: `capability:<kebab>` → v6: `capability:<kebab>` (same prefix; some renames)
+  # source: packages/agent-catalog/graph/nodes/capabilities/capabilities.yaml
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: capability:image-input,               v6Id: capability:supports-file-attachments,     nodeKind: Capability, notes: "renamed: image-input → supports-file-attachments (v6 broadened)" }
+  - { legacyId: capability:interactive-mode,          v6Id: capability:interactive-mode,              nodeKind: Capability }
+  - { legacyId: capability:mcp,                       v6Id: capability:mcp-stdio,                     nodeKind: Capability, notes: "v6 splits MCP into per-transport capabilities; mcp-stdio is the closest broad-MCP alias" }
+  - { legacyId: capability:model-discovery,           v6Id: capability:model-discovery,               nodeKind: Capability }
+  - { legacyId: capability:parallel-execution,        v6Id: capability:supports-parallel-execution,   nodeKind: Capability, notes: "renamed: parallel-execution → supports-parallel-execution" }
+  - { legacyId: capability:proxy-transport-emulation, v6Id: capability:proxy-transport-emulation,     nodeKind: Capability }
+  - { legacyId: capability:runtime-hooks,             v6Id: capability:runtime-hooks,                 nodeKind: Capability }
+  - { legacyId: capability:session-resume,            v6Id: capability:can-resume,                    nodeKind: Capability, notes: "renamed: session-resume → can-resume" }
+  - { legacyId: capability:skills,                    v6Id: capability:skills,                        nodeKind: Capability }
+  - { legacyId: capability:stdin-injection,           v6Id: capability:stdin-injection,               nodeKind: Capability }
+  - { legacyId: capability:stop-hook,                 v6Id: capability:stop-hook,                     nodeKind: Capability }
+  - { legacyId: capability:streaming,                 v6Id: capability:streaming,                     nodeKind: Capability, notes: "v6 may not have a top-level capability:streaming; consumers should check before relying" }
+  - { legacyId: capability:subagent-dispatch,         v6Id: capability:subagent-dispatch,             nodeKind: Capability, notes: "v6 may not yet declare; closest analog is can-fork" }
+  - { legacyId: capability:thinking,                  v6Id: capability:extended-thinking,             nodeKind: Capability, notes: "renamed: thinking → extended-thinking" }
+  - { legacyId: capability:token-counting,            v6Id: capability:token-counting,                nodeKind: Capability }
+  - { legacyId: capability:tool-approval,             v6Id: capability:tool-approval,                 nodeKind: Capability }
+  - { legacyId: capability:tool-calling,              v6Id: capability:tool-calling,                  nodeKind: Capability, notes: "v6 carries via tool descriptors; legacy used a flat capability flag" }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: PathDescriptor
+  # legacy: `path:<slug>` (or `path:.<dotpath>` / `path:auto:<flatten>`)
+  # v6:     `path-descriptor:<slug>` under graph/catalog-meta/path-descriptors/
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: path:.a5c-runs,             v6Id: path-descriptor:a5c-runs-dir,            nodeKind: PathDescriptor }
+  - { legacyId: path:agent-catalog-graph,   v6Id: path-descriptor:agent-catalog-graph,     nodeKind: PathDescriptor }
+  - { legacyId: path:catalog-api,           v6Id: path-descriptor:catalog-app-api,         nodeKind: PathDescriptor }
+  - { legacyId: "path:auto:ghcr-io-anthropics-claude-code",       v6Id: path-descriptor:claude-code-container-image,   nodeKind: PathDescriptor }
+  - { legacyId: "path:auto:ghcr-io-openai-codex",                 v6Id: path-descriptor:codex-container-image,         nodeKind: PathDescriptor }
+  - { legacyId: "path:auto:ghcr-io-cursor-cursor-agent",          v6Id: path-descriptor:cursor-container-image,        nodeKind: PathDescriptor }
+  - { legacyId: "path:auto:ghcr-io-google-gemini-cli",            v6Id: path-descriptor:gemini-cli-container-image,    nodeKind: PathDescriptor }
+  - { legacyId: "path:auto:ghcr-io-github-copilot-cli",           v6Id: path-descriptor:copilot-cli-container-image,   nodeKind: PathDescriptor }
+  - { legacyId: "path:auto:ghcr-io-a5c-ai-pi",                    v6Id: path-descriptor:pi-container-image,            nodeKind: PathDescriptor, notes: "v6 may need to author this PathDescriptor row" }
+  - { legacyId: "path:auto:ghcr-io-a5c-ai-omp",                   v6Id: path-descriptor:omp-container-image,           nodeKind: PathDescriptor, notes: "v6 may need to author this PathDescriptor row" }
+  - { legacyId: "path:auto:ghcr-io-anomalyco-opencode",           v6Id: path-descriptor:opencode-container-image,      nodeKind: PathDescriptor, notes: "v6 may need to author this PathDescriptor row" }
+  - { legacyId: "path:auto:ghcr-io-openclaw-openclaw",            v6Id: path-descriptor:openclaw-container-image,      nodeKind: PathDescriptor, notes: "v6 may need to author this PathDescriptor row" }
+  - { legacyId: path:transport-adapter,         v6Id: path-descriptor:transport-adapter,           nodeKind: PathDescriptor, notes: "best-effort; verify v6 record exists before relying" }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: ModelVersion
+  # legacy: `modelVersion:<slug>:ge-X-Y-Z` → v6: `model-version:<slug>` (no @range needed; default)
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "modelVersion:claude-code-default:ge-0-0-0", v6Id: "model-version:claude-code-default",  nodeKind: ModelVersion }
+  - { legacyId: "modelVersion:codex-default:ge-0-0-0",       v6Id: "model-version:codex-default",        nodeKind: ModelVersion }
+  - { legacyId: "modelVersion:copilot-default:ge-0-0-0",     v6Id: "model-version:copilot-cli-default",  nodeKind: ModelVersion }
+  - { legacyId: "modelVersion:gemini-cli-default:ge-0-0-0",  v6Id: "model-version:gemini-cli-default",   nodeKind: ModelVersion }
+
+  # NodeKind: Model
+  - { legacyId: model:claude-code-default, v6Id: model:claude-code-default, nodeKind: Model }
+  - { legacyId: model:codex-default,       v6Id: model:codex-default,       nodeKind: Model }
+  - { legacyId: model:copilot-default,     v6Id: model:copilot-cli-default, nodeKind: Model, notes: "host rename" }
+  - { legacyId: model:gemini-cli-default,  v6Id: model:gemini-cli-default,  nodeKind: Model }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: Provider / ProviderVersion
+  # legacy: `provider:<slug>` / `providerVersion:<slug>:ge-X-Y-Z`
+  # v6:     `provider:<slug>` / `provider-version:<slug>@<range>`
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: provider:anthropic, v6Id: provider:anthropic, nodeKind: Provider }
+  - { legacyId: provider:bedrock,   v6Id: provider:bedrock,   nodeKind: Provider }
+  - { legacyId: provider:foundry,   v6Id: provider:foundry,   nodeKind: Provider }
+  - { legacyId: provider:github,    v6Id: provider:github,    nodeKind: Provider }
+  - { legacyId: provider:google,    v6Id: provider:google,    nodeKind: Provider }
+  - { legacyId: provider:openai,    v6Id: provider:openai,    nodeKind: Provider }
+  - { legacyId: provider:vertex,    v6Id: provider:vertex,    nodeKind: Provider }
+  - { legacyId: "providerVersion:anthropic:ge-0-0-0", v6Id: "provider-version:anthropic@current", nodeKind: ProviderVersion }
+  - { legacyId: "providerVersion:bedrock:ge-0-0-0",   v6Id: "provider-version:bedrock@current",   nodeKind: ProviderVersion }
+  - { legacyId: "providerVersion:foundry:ge-0-0-0",   v6Id: "provider-version:foundry@current",   nodeKind: ProviderVersion }
+  - { legacyId: "providerVersion:github:ge-0-0-0",    v6Id: "provider-version:github@current",    nodeKind: ProviderVersion }
+  - { legacyId: "providerVersion:google:ge-0-0-0",    v6Id: "provider-version:google@current",    nodeKind: ProviderVersion }
+  - { legacyId: "providerVersion:openai:ge-0-0-0",    v6Id: "provider-version:openai@current",    nodeKind: ProviderVersion }
+  - { legacyId: "providerVersion:vertex:ge-0-0-0",    v6Id: "provider-version:vertex@current",    nodeKind: ProviderVersion }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: TransportProtocol / TransportRuntime
+  # legacy & v6 both use kebab; prefix rewrite only.
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: transportProtocol:anthropic,           v6Id: transport-protocol:anthropic,           nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:azure-foundry,       v6Id: transport-protocol:azure-foundry,       nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:bedrock-converse,    v6Id: transport-protocol:bedrock-converse,    nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:google,              v6Id: transport-protocol:google,              nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:openai-chat,         v6Id: transport-protocol:openai-chat,         nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:openai-responses,    v6Id: transport-protocol:openai-responses,    nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:passthrough,         v6Id: transport-protocol:passthrough,         nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:shell-hook-runtime,  v6Id: transport-protocol:shell-hook-runtime,  nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:terminal-cli,        v6Id: transport-protocol:terminal-cli,        nodeKind: TransportProtocol }
+  - { legacyId: transportProtocol:vertex-native,       v6Id: transport-protocol:vertex-native,       nodeKind: TransportProtocol }
+  - { legacyId: transportRuntime:adapters-proxy,           v6Id: transport-runtime:adapters-proxy,           nodeKind: TransportRuntime }
+  - { legacyId: transportRuntime:shell-hook-runtime,   v6Id: transport-runtime:shell-hook-runtime,   nodeKind: TransportRuntime }
+  - { legacyId: transportRuntime:terminal-cli,         v6Id: transport-runtime:terminal-cli,         nodeKind: TransportRuntime }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: Modality
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: modality:commands,      v6Id: modality:commands,      nodeKind: Modality }
+  - { legacyId: modality:hooks,         v6Id: modality:hooks,         nodeKind: Modality }
+  - { legacyId: modality:image,         v6Id: modality:image,         nodeKind: Modality }
+  - { legacyId: modality:json,          v6Id: modality:json,          nodeKind: Modality }
+  - { legacyId: modality:mcp,           v6Id: modality:mcp,           nodeKind: Modality }
+  - { legacyId: modality:stream-events, v6Id: modality:stream-events, nodeKind: Modality }
+  - { legacyId: modality:text,          v6Id: modality:text,          nodeKind: Modality }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: PackageSurface
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "package:@a5c-ai/atlas/catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/comm-adapter",    v6Id: "package-surface:a5c-ai-agent-comm-adapter",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/extensions-adapter", v6Id: "package-surface:a5c-ai-extensions-adapter", nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/babysitter-sdk",    v6Id: "package-surface:a5c-ai-babysitter-sdk",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/catalog",           v6Id: "package-surface:a5c-ai-catalog",           nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/hooks-adapter-core",    v6Id: "package-surface:a5c-ai-hooks-adapter-core",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/transport-adapter",     v6Id: "package-surface:a5c-ai-transport-adapter",     nodeKind: PackageSurface }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: ProcessDescriptor
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "process:adapters/model-catalog",                 v6Id: "process-descriptor:adapters-model-catalog",            nodeKind: ProcessDescriptor }
+  - { legacyId: "process:packages/catalog/process-library-catalog", v6Id: "process-descriptor:catalog-process-library-catalog",    nodeKind: ProcessDescriptor }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: CiSurface
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "ci:@a5c-ai/atlas/catalog", v6Id: "ci-surface:a5c-ai-agent-catalog", nodeKind: CiSurface }
+  - { legacyId: "ci:@a5c-ai/catalog",       v6Id: "ci-surface:a5c-ai-catalog",       nodeKind: CiSurface }
+
+  # ─────────────────────────────────────────────────────────────────
+  # NodeKind: LifecycleSemantics / SessionSemantics
+  # legacy: `lifecycleSemantics:<host>:ge-X-Y-Z` → v6: `lifecycle-semantics:<host>@current`
+  # legacy: `sessionSemantics:<host>:ge-X-Y-Z`   → v6: `session-semantics:<host>@current`
+  # ─────────────────────────────────────────────────────────────────
+  - { legacyId: "lifecycleSemantics:claude:ge-0-0-0",                  v6Id: "lifecycle-semantics:claude-code@current",  nodeKind: LifecycleSemantics, notes: "host rename" }
+  - { legacyId: "lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0",        v6Id: "lifecycle-semantics:codex@1.x",            nodeKind: LifecycleSemantics }
+  - { legacyId: "lifecycleSemantics:codex:ge-0-119-0",                 v6Id: "lifecycle-semantics:codex@1.x",            nodeKind: LifecycleSemantics }
+  - { legacyId: "lifecycleSemantics:copilot:ge-0-0-0",                 v6Id: "lifecycle-semantics:copilot-cli@current",  nodeKind: LifecycleSemantics, notes: "host rename" }
+  - { legacyId: "lifecycleSemantics:cursor:ge-0-0-0",                  v6Id: "lifecycle-semantics:cursor@current",       nodeKind: LifecycleSemantics }
+  - { legacyId: "lifecycleSemantics:gemini:ge-0-0-0",                  v6Id: "lifecycle-semantics:gemini-cli@current",   nodeKind: LifecycleSemantics, notes: "host rename" }
+  - { legacyId: "lifecycleSemantics:omp:ge-0-0-0",                     v6Id: "lifecycle-semantics:omp@current",          nodeKind: LifecycleSemantics }
+  - { legacyId: "lifecycleSemantics:openclaw:ge-0-0-0",                v6Id: "lifecycle-semantics:openclaw@current",     nodeKind: LifecycleSemantics }
+  - { legacyId: "lifecycleSemantics:opencode:ge-0-0-0",                v6Id: "lifecycle-semantics:opencode@1.x",         nodeKind: LifecycleSemantics }
+  - { legacyId: "lifecycleSemantics:pi:ge-0-0-0",                      v6Id: "lifecycle-semantics:pi@current",           nodeKind: LifecycleSemantics }
+  - { legacyId: "sessionSemantics:claude:ge-0-0-0",                    v6Id: "session-semantics:claude-code@current",    nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:codex:ge-0-0-0",                     v6Id: "session-semantics:codex@1.x",              nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:copilot:ge-0-0-0",                   v6Id: "session-semantics:copilot-cli@current",    nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:cursor:ge-0-0-0",                    v6Id: "session-semantics:cursor@current",         nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:gemini:ge-0-0-0",                    v6Id: "session-semantics:gemini-cli@current",     nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:omp:ge-0-0-0",                       v6Id: "session-semantics:omp@current",            nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:openclaw:ge-0-0-0",                  v6Id: "session-semantics:openclaw@current",       nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:opencode:ge-0-0-0",                  v6Id: "session-semantics:opencode@1.x",           nodeKind: SessionSemantics }
+  - { legacyId: "sessionSemantics:pi:ge-0-0-0",                        v6Id: "session-semantics:pi@current",             nodeKind: SessionSemantics }
+
+# Notes
+# - Legacy uses camelCase prefixes (pluginTarget:, agentVersion:, modelVersion:, hookMapping:).
+# - v6 uses kebab-case (plugin-target:, agent-version:, model-version:, hook-mapping:),
+#   and appends `@<versionRange>` for any NodeKind that takes versionRange
+#   (AgentVersion, ProviderVersion, ModelVersion, LifecycleSemantics, SessionSemantics).
+# - Host renames to be aware of:
+#     * legacy `claude` → v6 `claude-code`
+#     * legacy `gemini` → v6 `gemini-cli`
+#     * legacy `copilot` / `github-copilot` → v6 `copilot-cli`
+#     * legacy `oh-my-pi` → v6 `omp`
+# - capabilitySupport entries (100 records) are intentionally NOT enumerated:
+#   v6 treats CapabilitySupport as a derived/edge-implicit fact, not a node;
+#   consumers should walk `agent-version → supports → capability` instead of
+#   id-resolving each support row.
+# - claim/evidence (162 records) are catalog-internal; not expected to be
+#   referenced by adapter generators, so omitted here.
+# - Coverage: ~95 alias rows across 18 NodeKinds. Uncovered legacy prefixes:
+#   `claim:`, `evidence:`, `capabilitySupport:`, `discovery:` — none are
+#   consumed by extensions-adapter / agent-comm-adapter / hooks-adapter-core codegen
+#   based on the projection-adapters.md audit.

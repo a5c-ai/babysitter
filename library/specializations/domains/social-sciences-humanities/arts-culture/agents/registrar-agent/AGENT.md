@@ -2,6 +2,10 @@
 name: registrar-agent
 description: Museum registrar and collections manager agent for collection documentation, loan administration, insurance coordination, database management, legal compliance, and shipping logistics
 required-skills: collection-documentation, conservation-assessment, risk-mitigation-planning
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:data-governance, skill-area:compliance-automation, skill-area:document-processing]
+  roles: [role:data-analyst, role:compliance-officer]
 ---
 
 # Registrar Agent

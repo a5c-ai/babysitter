@@ -1,0 +1,120 @@
+---
+nodeKind: EvalResult
+id: eval-result:gpqa.gemini-2-5-pro.001
+attributes:
+  evalRunId: eval-run:gpqa.gemini-2-5-pro.2025-06
+  metricName: accuracy
+  score: 0.84
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:livecodebench.gemini-2-5-pro.001
+attributes:
+  evalRunId: eval-run:livecodebench.gemini-2-5-pro.2025-06
+  metricName: pass_rate
+  score: 0.74
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:livecodebench.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:livecodebench
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench-verified.gemini-2-5-flash.001
+attributes:
+  evalRunId: eval-run:swe-bench-verified.gemini-2-5-flash.2025-06
+  metricName: pass_rate
+  score: 0.45
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench-verified.gemini-2-5-flash.2025-06
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.gemini-2-5-pro.001
+attributes:
+  evalRunId: eval-run:gpqa-diamond.gemini-2-5-pro.2025-06
+  metricName: accuracy
+  score: 0.86
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:gpqa
+---
+nodeKind: EvalResult
+id: eval-result:android-world.gemini-2-5-pro.001
+attributes:
+  evalRunId: eval-run:android-world.gemini-2-5-pro.2025-06
+  metricName: success_rate
+  score: 0.40
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:android-world.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:android-world
+---
+nodeKind: EvalResult
+id: eval-result:mgsm.gemini-2-5-pro.001
+attributes:
+  evalRunId: eval-run:mgsm.gemini-2-5-pro.2025-06
+  metricName: accuracy
+  score: 0.91
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-06-17T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mgsm.gemini-2-5-pro.2025-06
+  scored_against:
+    - target: benchmark:mgsm
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.gemini-3-1-pro.2026-02-19.accuracy
+attributes:
+  evalRunId: eval-run:gpqa-diamond.gemini-3-1-pro.2026-02-19
+  metricName: accuracy
+  score: 0.943
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2026-05-04T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.gemini-3-1-pro.2026-02-19
+  scored_against:
+    - target: benchmark:gpqa
+---
+nodeKind: EvalResult
+id: eval-result:gpqa-diamond.gemini-3-pro.2025-11-18.accuracy
+attributes:
+  evalRunId: eval-run:gpqa-diamond.gemini-3-pro.2025-11-18
+  metricName: accuracy
+  score: 0.919
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2026-05-04T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa-diamond.gemini-3-pro.2025-11-18
+  scored_against:
+    - target: benchmark:gpqa

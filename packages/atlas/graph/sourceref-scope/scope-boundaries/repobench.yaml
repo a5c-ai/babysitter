@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:repobench.scope
+attributes:
+  subjectId: benchmark:repobench
+  inScope: |
+    Repository-level code completion benchmark across Python and Java; tests retrieval and completion within multi-file project context.
+  outOfScope: |
+    Single-file code completion (use HumanEval/MBPP), agentic tool-use evaluations, and runtime test-pass scoring of full repositories.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:repobench

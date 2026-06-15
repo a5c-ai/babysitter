@@ -1,0 +1,65 @@
+nodeKind: SourceRef
+id: source-ref:anthropic-skills-pdf
+attributes:
+  description: "Anthropic Skills — pdf"
+  displayName: "anthropic-skills/document-skills/pdf"
+  repoUrl: https://github.com/anthropics/skills
+  ref: main
+  path: document-skills/pdf
+  kind: git-path
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:anthropic-skills-docx
+attributes:
+  description: "Anthropic Skills — docx"
+  displayName: "anthropic-skills/document-skills/docx"
+  repoUrl: https://github.com/anthropics/skills
+  ref: main
+  path: document-skills/docx
+  kind: git-path
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:anthropic-skills-xlsx
+attributes:
+  description: "Anthropic Skills — xlsx"
+  displayName: "anthropic-skills/document-skills/xlsx"
+  repoUrl: https://github.com/anthropics/skills
+  ref: main
+  path: document-skills/xlsx
+  kind: git-path
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:anthropic-skills-pptx
+attributes:
+  description: "Anthropic Skills — pptx"
+  displayName: "anthropic-skills/document-skills/pptx"
+  repoUrl: https://github.com/anthropics/skills
+  ref: main
+  path: document-skills/pptx
+  kind: git-path
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:anthropic-skills-skill-creator
+attributes:
+  description: "Anthropic Skills — skill-creator"
+  displayName: "anthropic-skills/skill-creator"
+  repoUrl: https://github.com/anthropics/skills
+  ref: main
+  path: skill-creator
+  kind: git-path
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:anthropic-extra-skills
+attributes:
+  description: "Anthropic Skills repository root for additional skill-compatible catalog examples"
+  displayName: "anthropic-skills repository root"
+  repoUrl: https://github.com/anthropics/skills
+  ref: main
+  path: "."
+  kind: git-path
+edges: {}

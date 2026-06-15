@@ -1,0 +1,31 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-adapters-observability
+attributes:
+  packageId: "@a5c-ai/adapters-observability"
+  packageName: "@a5c-ai/adapters-observability"
+  displayName: "Adapters Observability"
+  description: "Logging and telemetry infrastructure for the adapters system. Provides structured Logger and Telemetry interfaces, log levels, cost tracking, and OpenTelemetry-compatible instrumentation."
+  role: "observability-infra"
+  whenToUse: "Depend on this when adding structured logging, cost tracking, or telemetry instrumentation to any adapters subsystem."
+  workspacePath: packages/adapters/observability
+  moduleType: typescript
+  surfaceKinds:
+    - observability-library
+    - logger
+    - telemetry
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/adapters/observability/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:adapters-observability
+  # Public LogLevel / CostInfo / LogContext / Logger / Telemetry types
+  # modeled as SharedContextSpec records.
+  # Source: packages/adapters/observability/src/types.ts.
+  has_payload_schema:
+    - target: shared-context-spec:adapters-observability-log-level
+    - target: shared-context-spec:adapters-observability-cost-info
+    - target: shared-context-spec:adapters-observability-log-context
+    - target: shared-context-spec:adapters-observability-logger-iface
+    - target: shared-context-spec:adapters-observability-telemetry-iface

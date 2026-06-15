@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:language
+attributes:
+  canonicalDefinitionId: definition:language.canonical
+  displayName: "Language"
+  kind: concept
+  references:
+    - "NodeKind:Language"
+  description: |
+    Programming language
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

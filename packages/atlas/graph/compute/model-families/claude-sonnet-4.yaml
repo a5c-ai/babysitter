@@ -1,0 +1,12 @@
+nodeKind: ModelFamily
+id: model-family:claude-sonnet-4
+attributes:
+  displayName: "Claude Sonnet 4"
+  vendor: "Anthropic"
+  homepageUrl: "https://docs.anthropic.com/en/docs/about-claude/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-sonnet-4-5@current
+    - model:claude-sonnet-4-6@current

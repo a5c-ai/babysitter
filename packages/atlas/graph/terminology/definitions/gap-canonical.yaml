@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:gap.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:gap
+  text: |
+    tracked debt-loop finding (level 1-7); first-class graph entity so gap state is queryable
+  status: canonical
+edges:
+  defines:
+    - term:gap

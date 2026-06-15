@@ -1,0 +1,51 @@
+nodeKind: ModelVersion
+id: model:qwen3-coder-next@current
+attributes:
+  displayName: "Qwen3-Coder-Next"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:qwen-3-coder
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: code-completion
+  contextWindowTokens: 262144
+  maxOutputTokens: 16384
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-02-04'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-02-04'
+  modelCardUrl: https://huggingface.co/Qwen/Qwen3-Coder-Next
+  supportsFineTuning: true
+  fineTuningKind: full
+  providerModelIds:
+    alibabaModelStudio: qwen3-coder-next
+    awsBedrockRuntime: qwen.qwen3-coder-next
+    awsBedrockMantle: qwen.qwen3-coder-next
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3-coder
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3-coder
+  supersedes:
+    - target: model:qwen-2-5-coder-32b@current
+  served_by:
+    - provider:alibaba-cloud
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:openai-compat
+    - model-transport:bedrock-converse
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full

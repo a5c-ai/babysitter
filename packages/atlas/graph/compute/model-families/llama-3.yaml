@@ -1,0 +1,13 @@
+nodeKind: ModelFamily
+id: model-family:llama-3
+attributes:
+  displayName: "Llama 3"
+  vendor: "Meta"
+  homepageUrl: "https://www.llama.com/"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:llama-3-1-405b-instruct@current
+    - model:llama-3-1-70b-instruct@current
+    - model:llama-3-3-70b-instruct@current

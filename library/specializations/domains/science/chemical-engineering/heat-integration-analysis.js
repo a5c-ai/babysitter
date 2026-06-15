@@ -3,6 +3,12 @@
  * @description Apply pinch analysis methodology to optimize heat recovery, design heat exchanger networks, and minimize utility consumption
  * @inputs { processName: string, streamData: array, utilityData: object, outputDir: string }
  * @outputs { success: boolean, pinchTemperature: number, minimumUtilities: object, henDesign: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

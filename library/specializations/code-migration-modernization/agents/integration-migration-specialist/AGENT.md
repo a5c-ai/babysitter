@@ -8,6 +8,13 @@ skills:
   - api-inventory-scanner
   - configuration-migrator
   - contract-test-generator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:api-design, skill-area:strangler-fig-pattern]
+  roles: [role:backend-engineer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Integration Migration Specialist Agent

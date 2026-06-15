@@ -1,0 +1,141 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:a5c.runtime@current
+attributes:
+  displayName: a5c Unified Runtime (current) — unified tool host
+  agentVersionId: agent-version:a5c@current
+  subagentDispatchMechanism: agent-as-tool
+  subagentChildSessionPolicy: ephemeral-child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:a5c-cli
+  builtInTools:
+    - tool-descriptor:read
+    - tool-descriptor:write
+    - tool-descriptor:edit
+    - tool-descriptor:bash
+    - tool-descriptor:glob
+    - tool-descriptor:grep
+    - tool-descriptor:agent
+    - tool-descriptor:notebook-edit
+    - tool-descriptor:todo-write
+    - tool-descriptor:web-fetch
+    - tool-descriptor:web-search
+  toolRegistryDiscovery: dynamic-extension-loaded
+  hookSockets: []
+  internalSessionStateLocation: "~/.a5c/sessions/"
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: "~/.a5c/sessions/<sessionId>.jsonl"
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: invocation-mode
+  runtimeIdentity: host-process
+  supportedMCPTransports:
+    - mcp-transport:stdio
+    - mcp-transport:streamable-http
+    - mcp-transport:http-sse
+  supportsStreaming: true
+  supportedAgentControlVerbs:
+    - interrupt
+    - abort
+    - cancel
+    - pause
+    - resume
+    - yield
+    - checkpoint
+  ioSurfaceKinds:
+    - filesystem
+    - terminal-shell
+    - browser-dom
+    - clipboard
+  agentMemoryKinds:
+    - conversation-buffer
+    - tool-state
+  userInputRequiredPolicy: breakpoint-mediated
+  secretHandlingPolicy: env-allowlist
+  tokenAccountingSemantics: mixed-prefer-absolute
+  pluginDiscoverySource:
+    - marketplaceManifest
+    - localPath
+    - remoteUrl
+    - gitRepo
+  subagentToolInheritance: allowlist
+  skillScopePrecedence:
+    - personal
+    - project
+    - plugin
+  liveChangeDetection: true
+  disableSkillShellExecutionSupported: false
+  outputGuardMechanism: task-output-schema
+  notes: |
+    a5c runtime is the Layer-5 unified contract for tool hosting, session
+    state, approval, streaming, and extension-loaded tools. It is compatible
+    with the legacy Pi runtime profile (read/write/edit/bash tools, per-call
+    approval, stdio MCP, API-key backed sessions) but is not built on Pi. Pi is
+    one compatibility profile within the wider a5c runtime envelope, alongside
+    Claude/Codex/Gemini/OpenCode/LangGraph-style runtime profiles.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:a5c
+      role: runtime
+  bundles:
+    - target: tool-descriptor:read
+    - target: tool-descriptor:write
+    - target: tool-descriptor:edit
+    - target: tool-descriptor:bash
+    - target: tool-descriptor:glob
+    - target: tool-descriptor:grep
+    - target: tool-descriptor:agent
+    - target: tool-descriptor:notebook-edit
+    - target: tool-descriptor:todo-write
+    - target: tool-descriptor:web-fetch
+    - target: tool-descriptor:web-search
+  connects:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse
+  operates_in_permission_mode:
+    - target: permission-mode:a5c-interactive
+    - target: permission-mode:a5c-non-interactive
+  output_guard_applied_by:
+    - target: output-guard:babysitter-task-output-schema
+  emits_journal_event:
+    - target: journal-event:babysitter-run-created
+    - target: journal-event:babysitter-run-completed
+    - target: journal-event:babysitter-run-failed
+    - target: journal-event:babysitter-effect-requested
+    - target: journal-event:babysitter-task-start
+    - target: journal-event:babysitter-task-complete
+    - target: journal-event:babysitter-step-dispatch
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: "*"
+      level: full
+      notes: |
+        Built-in and dynamically-loaded tools cover the Pi runtime surface and
+        broader same-layer runtime alternatives.
+    - target: capability:requires-tool-approval
+      versionRange: "*"
+      level: full
+      notes: |
+        Per-call approval is the compatibility baseline; stricter policy-engine
+        and host-specific approval modes can be layered by capability profile.
+    - target: capability:supports-mcp
+      versionRange: "*"
+      level: full
+      notes: |
+        Supports stdio and streamable/http-sse MCP transports, including the
+        Pi-compatible stdio profile.
+    - target: capability:can-resume
+      versionRange: "*"
+      level: full
+      notes: |
+        a5c keeps normalized session records and can map Pi JSONL-tree or other
+        backend session formats into its session envelope.
+    - target: capability:streaming
+      versionRange: "*"
+      level: full
+
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse

@@ -1,0 +1,105 @@
+{
+  "issueNumber": 620,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-620-agent-identity",
+  "title": "Agent identity: decouple persona from stack",
+  "summary": "Implement the Kradle agent identity model by adding AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition CRDs, resolving personas independently of AgentStack infrastructure, composing prompts centrally, and preserving legacy AgentStack dispatch.",
+  "targetFiles": [
+    "packages/kradle/core/src/resource-model.js",
+    "packages/kradle/charts/crds/agent-resources.yaml",
+    "packages/kradle/core/src/agent-persona-controller.js",
+    "packages/kradle/core/src/agent-prompt-composition.js",
+    "packages/kradle/core/src/agent-dispatch-controller.js",
+    "packages/kradle/core/src/agent-trigger-controller.js",
+    "packages/kradle/core/src/agent-stack-controller.js",
+    "packages/kradle/core/src/index.js",
+    "packages/kradle/sdk/src/index.js",
+    "packages/kradle/cli/src/mcp-server.js",
+    "packages/kradle/core/tests/agent-resources.test.js",
+    "packages/kradle/core/tests/agent-persona-controller.test.js",
+    "packages/kradle/core/tests/agent-prompt-composition.test.js",
+    "packages/kradle/core/tests/agent-dispatch-controller.test.js",
+    "packages/kradle/core/tests/agent-trigger-controller.test.js",
+    "packages/kradle/core/tests/agent-stack-controller.test.js",
+    "packages/kradle/sdk/tests/sdk-exports.test.js",
+    "packages/kradle/cli/tests/mcp-server.test.js"
+  ],
+  "sourceOfTruthDocs": [
+    "packages/kradle/docs/agent-identity/01-resource-model.md",
+    "packages/kradle/docs/agent-identity/02-migration.md",
+    "docs/agent-reference/process-authoring.md"
+  ],
+  "processLibraryReferences": [
+    "library/methodologies/rpikit/rpikit-implement.js",
+    "library/methodologies/rpikit/rpikit-review.js",
+    "library/methodologies/superpowers/test-driven-development.js",
+    "library/methodologies/superpowers/verification-before-completion.js",
+    "library/specializations/software-architecture/migration-strategy.js",
+    "library/specializations/ai-agents-conversational/prompt-engineering-workflow.js",
+    "library/specializations/ai-agents-conversational/system-prompt-guardrails.js",
+    "library/specializations/qa-testing-automation/quality-gates.js"
+  ],
+  "resourceKinds": [
+    "AgentPersona",
+    "AgentSoul",
+    "AgentAppearance",
+    "AgentVoiceProfile",
+    "AgentDefinition"
+  ],
+  "requiredSpec": {
+    "AgentPersona": [
+      "organizationRef",
+      "displayName"
+    ],
+    "AgentSoul": [
+      "organizationRef",
+      "content"
+    ],
+    "AgentAppearance": [
+      "organizationRef"
+    ],
+    "AgentVoiceProfile": [
+      "organizationRef",
+      "ttsProvider"
+    ],
+    "AgentDefinition": [
+      "organizationRef",
+      "personaRef",
+      "stackRef"
+    ]
+  },
+  "compatibilityRequirements": [
+    "AgentStack continues to work with inline systemPrompt, developerPrompt, taskPrompt, and skillRefs as deprecated-but-functional compatibility behavior.",
+    "Manual dispatch accepts either agentDefinition or agentStack.",
+    "AgentTriggerRule accepts either agentDefinition or agentStack.",
+    "AgentDefinition must resolve to its AgentStack before permission review, runtime identity checks, memory snapshot selection, workspace provisioning, context bundle assembly, and job creation.",
+    "Prompt composition is centralized and deterministic in soul -> persona -> definition -> stack fallback order.",
+    "Do not implement web console persona management from follow-up issue #621 or migration tooling from follow-up issue #622 in this run."
+  ],
+  "mcpTools": [
+    "kradle_list_agents",
+    "kradle_get_agent_profile",
+    "kradle_create_agent"
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "node --test packages/kradle/core/tests/agent-resources.test.js packages/kradle/core/tests/agent-persona-controller.test.js packages/kradle/core/tests/agent-prompt-composition.test.js packages/kradle/core/tests/agent-dispatch-controller.test.js packages/kradle/core/tests/agent-trigger-controller.test.js packages/kradle/core/tests/agent-stack-controller.test.js",
+    "node --test packages/kradle/cli/tests/mcp-server.test.js",
+    "node --test packages/kradle/sdk/tests/sdk-exports.test.js",
+    "npm run build:kradle",
+    "npm run test:kradle",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "acceptanceCriteria": [
+    "The five new identity CRDs are defined in resource-model.js and packages/kradle/charts/crds/agent-resources.yaml with matching required fields.",
+    "createResource, validateResource, resourceSchemaForKind, storageClassForKind, and kind count tests cover the five new kinds.",
+    "Agent persona resolution validates persona references and resolves referenced or inline soul, appearance, and voice profile data.",
+    "Prompt composition produces deterministic soul, persona, definition, and legacy stack fallback output with tests proving order.",
+    "AgentDefinition dispatch works and preserves the existing permission review and AgentStack runtime path.",
+    "Legacy AgentStack dispatch, triggers, MCP stack dispatch, and inline prompt behavior remain functional.",
+    "SDK exports include the new persona controller and prompt composition helpers.",
+    "MCP exposes kradle_list_agents, kradle_get_agent_profile, and kradle_create_agent with focused tests.",
+    "Focused and broad verification commands pass or document only environment-specific residual risk."
+  ]
+}

@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:terminal-bench.scope
+attributes:
+  subjectId: benchmark:terminal-bench
+  inScope: |
+    Terminal-task benchmark — agent operates a real shell to complete sysadmin / dev-tooling tasks; scored by per-task success and step-budget.
+  outOfScope: |
+    GUI-based agents, browser-only tasks (use WebArena), and benchmarks without a real-shell harness.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:terminal-bench

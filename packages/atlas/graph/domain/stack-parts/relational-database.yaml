@@ -1,0 +1,11 @@
+nodeKind: StackPart
+id: stack-part:relational-database
+attributes:
+  displayName: "Relational Database"
+  category: data-store
+  description: |
+    SQL database with ACID transactions and schema. Examples: PostgreSQL, MySQL, MariaDB, SQLite.
+edges:
+  stack_part_used_by:
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:postgres-tuning

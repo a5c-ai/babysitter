@@ -16,6 +16,12 @@
  * - Bartholdi & Hackman, Warehouse & Distribution Science
  * - Tompkins et al., Facilities Planning
  * - De Koster et al., Design and control of warehouse order picking
+ *
+ * @graph
+ *   domains: [domain:industrial-engineering]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+ *   roles: [role:operations-analyst, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

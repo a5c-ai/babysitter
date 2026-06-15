@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "description": "Stable redacted native-shape session fixtures for the unified persistent-session adapter contract.",
+  "targets": [
+    {
+      "target": "claude-code",
+      "adapterName": "claude",
+      "nativeSessionId": "claude-fixture-001",
+      "unifiedId": "claude:claude-fixture-001",
+      "sessionDirStrategy": "~/.claude/projects/<project-hash>",
+      "filePath": "~/.claude/projects/-workspace-demo/claude-fixture-001.jsonl",
+      "format": "jsonl",
+      "cwd": "/workspace/demo",
+      "createdAt": "2026-01-02T03:04:05.000Z",
+      "updatedAt": "2026-01-02T03:14:05.000Z",
+      "resume": {
+        "sessionIdSource": "filename",
+        "flag": "--resume"
+      },
+      "records": [
+        { "type": "system", "subtype": "init", "session_id": "claude-fixture-001", "cwd": "/workspace/demo", "model": "claude-sonnet-4-5" },
+        { "type": "user", "message": { "role": "user", "content": "Summarize the adapter contract." }, "timestamp": "2026-01-02T03:04:05.000Z" },
+        { "type": "assistant", "message": { "role": "assistant", "content": "The adapter contract is read-only." }, "timestamp": "2026-01-02T03:04:20.000Z" },
+        "{malformed-jsonl-row"
+      ],
+      "expected": {
+        "title": "Summarize the adapter contract.",
+        "messageCount": 2,
+        "turnCount": 1
+      }
+    },
+    {
+      "target": "codex",
+      "adapterName": "codex",
+      "nativeSessionId": "codex-fixture-001",
+      "unifiedId": "codex:codex-fixture-001",
+      "sessionDirStrategy": "~/.codex/sessions",
+      "filePath": "~/.codex/sessions/2026/01/02/codex-fixture-001.jsonl",
+      "format": "jsonl",
+      "cwd": "/workspace/demo",
+      "createdAt": "2026-01-02T04:00:00.000Z",
+      "updatedAt": "2026-01-02T04:10:00.000Z",
+      "resume": {
+        "sessionIdSource": "CODEX_SESSION_ID",
+        "flag": "resume"
+      },
+      "records": [
+        { "type": "session_meta", "id": "codex-fixture-001", "cwd": "/workspace/demo", "model": "gpt-5-codex" },
+        { "type": "message", "role": "user", "content": "List existing session files." },
+        { "type": "message", "role": "assistant", "content": "I found the session files." }
+      ],
+      "expected": {
+        "title": "List existing session files.",
+        "messageCount": 2,
+        "turnCount": 1
+      }
+    },
+    {
+      "target": "pi",
+      "adapterName": "pi",
+      "nativeSessionId": "pi-fixture-001",
+      "unifiedId": "pi:pi-fixture-001",
+      "sessionDirStrategy": "~/.pi/agent/sessions",
+      "filePath": "~/.pi/agent/sessions/pi-fixture-001/messages.jsonl",
+      "format": "jsonl-tree",
+      "cwd": "/workspace/demo",
+      "createdAt": "2026-01-02T05:00:00.000Z",
+      "updatedAt": "2026-01-02T05:12:00.000Z",
+      "resume": {
+        "sessionIdSource": "PI_SESSION_ID",
+        "flag": "--session-id"
+      },
+      "records": [
+        { "id": "root", "parentId": null, "role": "user", "content": "Start a tree session.", "createdAt": "2026-01-02T05:00:00.000Z" },
+        { "id": "assistant-1", "parentId": "root", "role": "assistant", "content": "Tree session started.", "createdAt": "2026-01-02T05:00:30.000Z" },
+        { "id": "branch-1", "parentId": "assistant-1", "role": "user", "content": "Continue the selected branch.", "createdAt": "2026-01-02T05:12:00.000Z" }
+      ],
+      "expected": {
+        "title": "Start a tree session.",
+        "messageCount": 3,
+        "turnCount": 2
+      }
+    },
+    {
+      "target": "gemini",
+      "adapterName": "gemini",
+      "nativeSessionId": "gemini-fixture-001",
+      "unifiedId": "gemini:gemini-fixture-001",
+      "sessionDirStrategy": "~/.gemini/sessions",
+      "filePath": "~/.gemini/sessions/gemini-fixture-001.jsonl",
+      "format": "jsonl",
+      "cwd": "/workspace/demo",
+      "createdAt": "2026-01-02T06:00:00.000Z",
+      "updatedAt": "2026-01-02T06:03:00.000Z",
+      "resume": {
+        "sessionIdSource": "GEMINI_SESSION_ID",
+        "flag": null
+      },
+      "records": [
+        { "type": "content", "role": "user", "parts": [{ "text": "Explain registry aliases." }] },
+        { "type": "content", "role": "model", "parts": [{ "text": "Aliases map target IDs to adapter names." }] }
+      ],
+      "expected": {
+        "title": "Explain registry aliases.",
+        "messageCount": 2,
+        "turnCount": 1
+      }
+    },
+    {
+      "target": "opencode",
+      "adapterName": "opencode",
+      "nativeSessionId": "opencode-fixture-001",
+      "unifiedId": "opencode:opencode-fixture-001",
+      "sessionDirStrategy": "~/.local/share/opencode",
+      "filePath": "~/.local/share/opencode/session/opencode-fixture-001.jsonl",
+      "format": "jsonl",
+      "cwd": "/workspace/demo",
+      "createdAt": "2026-01-02T07:00:00.000Z",
+      "updatedAt": "2026-01-02T07:04:00.000Z",
+      "resume": {
+        "sessionIdSource": "OPENCODE_SESSION",
+        "flag": "run"
+      },
+      "records": [
+        { "type": "session", "id": "opencode-fixture-001", "title": "OpenCode fixture", "cwd": "/workspace/demo" },
+        { "type": "message", "role": "user", "content": "Open the target descriptor." },
+        { "type": "message", "role": "assistant", "content": "Descriptor opened." }
+      ],
+      "expected": {
+        "title": "OpenCode fixture",
+        "messageCount": 2,
+        "turnCount": 1
+      }
+    },
+    {
+      "target": "plugin-generated-target",
+      "adapterName": "codex",
+      "pluginTargetId": "codex",
+      "nativeSessionId": "plugin-target-fixture-001",
+      "unifiedId": "codex:plugin-target-fixture-001",
+      "sessionDirStrategy": "PluginTarget targetId + adapterName alias",
+      "filePath": "$PLUGIN_ROOT/.sessions/plugin-target-fixture-001.jsonl",
+      "format": "jsonl",
+      "cwd": "/workspace/demo-plugin",
+      "createdAt": "2026-01-02T08:00:00.000Z",
+      "updatedAt": "2026-01-02T08:05:00.000Z",
+      "resume": {
+        "sessionIdSource": "plugin target adapterName",
+        "flag": null
+      },
+      "records": [
+        { "type": "session_meta", "id": "plugin-target-fixture-001", "targetId": "codex", "adapterName": "codex" },
+        { "type": "message", "role": "user", "content": "Validate generated target registration." },
+        { "type": "message", "role": "assistant", "content": "Generated target registration is valid." }
+      ],
+      "expected": {
+        "title": "Validate generated target registration.",
+        "messageCount": 2,
+        "turnCount": 1
+      }
+    }
+  ],
+  "coverage": {
+    "nativeSessionIds": true,
+    "unifiedIds": true,
+    "createdUpdatedTimestamps": true,
+    "cwdWorkspaceMetadata": true,
+    "malformedRows": true,
+    "emptySessions": "covered by parser tests using this matrix plus synthetic empty file rows",
+    "resumeIdentifiers": true,
+    "pluginGeneratedTargetAlias": true
+  },
+  "redactions": [
+    "Paths use /workspace/demo placeholders.",
+    "Prompts contain synthetic non-user-identifying text.",
+    "No API keys, account IDs, hostnames, or private repository names are present."
+  ]
+}

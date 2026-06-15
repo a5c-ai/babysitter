@@ -1,0 +1,6 @@
+{
+  "issueNumber": 860,
+  "targetVersion": "6.40.0",
+  "branchName": "agent/issue-860",
+  "baseBranch": "staging"
+}

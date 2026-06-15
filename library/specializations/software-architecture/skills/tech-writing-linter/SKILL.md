@@ -6,6 +6,13 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:api-doc-generation]
+  roles: [role:technical-writer]
+  topics: [topic:developer-experience]
+
 ---
 
 # Technical Writing Style Checker Skill

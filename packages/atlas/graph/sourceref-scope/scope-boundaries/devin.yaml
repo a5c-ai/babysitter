@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:devin.scope
+attributes:
+  subjectId: agent:devin
+  inScope: |
+    Hosted autonomous software engineering agent from Cognition; users delegate tasks via web UI, Slack, or IDE plug-ins; execution runs in a sandboxed cloud workspace with a browser and terminal.
+  outOfScope: |
+    Self-hosted on-machine execution, BYO-model backends (vendor-controlled), and offline / air-gapped operation.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:devin

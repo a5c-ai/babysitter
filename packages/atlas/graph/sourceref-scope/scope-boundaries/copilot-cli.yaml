@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:copilot-cli.scope
+attributes:
+  subjectId: agent:copilot-cli
+  inScope: |
+    Developer terminal workflow integrated with the GitHub Copilot
+    subscription — shell suggestion / git command help and coding
+    assistance gated on a logged-in GitHub user.
+  outOfScope: |
+    Production runtime, multi-tenant hosting, IDE editing surfaces
+    (delegated to Copilot in IDE / Copilot Chat), CI without GitHub
+    Actions integration, and use without an active Copilot subscription.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:copilot-cli

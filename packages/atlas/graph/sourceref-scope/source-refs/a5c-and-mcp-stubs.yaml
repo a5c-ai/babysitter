@@ -1,0 +1,156 @@
+nodeKind: SourceRef
+id: source-ref:a5c-plugins-quality
+attributes:
+  description: "a5c-ai/plugins — quality blueprint"
+  displayName: "a5c-ai/plugins — quality blueprint"
+  repoUrl: https://github.com/a5c-ai/plugins
+  ref: main
+  path: blueprints/quality
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-anycli-examples
+attributes:
+  description: "a5c-ai/anycli — examples"
+  displayName: "a5c-ai/anycli — examples"
+  repoUrl: https://github.com/a5c-ai/anycli
+  ref: main
+  path: examples
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-plugins-python-django-debug
+attributes:
+  description: "a5c-ai/plugins — python-django-debug skill"
+  displayName: "a5c-ai/plugins — python-django-debug skill"
+  repoUrl: https://github.com/a5c-ai/plugins
+  ref: main
+  path: skills/python-django-debug
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-plugins-security-review
+attributes:
+  description: "a5c-ai/plugins — security-review skill"
+  displayName: "a5c-ai/plugins — security-review skill"
+  repoUrl: https://github.com/a5c-ai/plugins
+  ref: main
+  path: skills/security-review
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:example-skill-source
+attributes:
+  description: "Example skill source (placeholder)"
+  repoUrl: "https://example.invalid/TODO"
+  ref: "main"
+  path: "."
+  displayName: "Example skill source (placeholder)"
+  kind: example-placeholder
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:github-mcp-servers
+attributes:
+  description: "modelcontextprotocol/servers (GitHub)"
+  displayName: "modelcontextprotocol/servers (GitHub)"
+  repoUrl: https://github.com/modelcontextprotocol/servers
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:mcp-filesystem
+attributes:
+  description: "modelcontextprotocol/servers — filesystem"
+  displayName: "modelcontextprotocol/servers — filesystem"
+  repoUrl: https://github.com/modelcontextprotocol/servers
+  ref: main
+  path: src/filesystem
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-marketplace-a11y
+attributes:
+  description: "a5c marketplace — a11y blueprint"
+  ref: "main"
+  displayName: "a5c marketplace — a11y blueprint"
+  kind: marketplace-blueprint
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  repoUrl: https://github.com/a5c-ai/babysitter
+  path: blueprints/a11y
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-marketplace-adr
+attributes:
+  description: "a5c marketplace — adr blueprint"
+  ref: "main"
+  displayName: "a5c marketplace — adr blueprint"
+  kind: marketplace-blueprint
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  repoUrl: https://github.com/a5c-ai/babysitter
+  path: blueprints/adr
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-marketplace-basic-security
+attributes:
+  description: "a5c marketplace — basic-security blueprint"
+  ref: "main"
+  displayName: "a5c marketplace — basic-security blueprint"
+  kind: marketplace-blueprint
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  repoUrl: https://github.com/a5c-ai/babysitter
+  path: blueprints/basic-security
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-plugins-example-native-claude
+attributes:
+  description: "a5c-ai/plugins — example-native-claude"
+  displayName: "a5c-ai/plugins — example-native-claude"
+  repoUrl: https://github.com/a5c-ai/plugins
+  ref: main
+  path: plugins/example-native-claude
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:a5c-plugins-example-portable
+attributes:
+  description: "a5c-ai/plugins — example-portable"
+  displayName: "a5c-ai/plugins — example-portable"
+  repoUrl: https://github.com/a5c-ai/plugins
+  ref: main
+  path: plugins/example-portable
+  kind: github-repo-subtree
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:mcp-servers-registry
+attributes:
+  description: "modelcontextprotocol/servers — registry root used as the source-of-record for MCP servers."
+  displayName: "MCP servers registry (modelcontextprotocol/servers)"
+  repoUrl: https://github.com/modelcontextprotocol/servers
+  ref: main
+  path: "."
+  kind: github-repo
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:packages-extensions-adapter
+attributes:
+  description: "@a5c-ai/extensions-adapter — portable plugin compiler (packages/extensions-adapter)"
+  displayName: "a5c-ai/babysitter — packages/extensions-adapter"
+  kind: monorepo-subtree
+  repoUrl: https://github.com/a5c-ai/babysitter
+  ref: main
+  path: packages/extensions-adapter
+edges: {}

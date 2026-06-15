@@ -1,0 +1,27 @@
+{
+  "openaiAppPath": "./openai-app",
+  "description": "Existing OpenAI Apps SDK application that displays interactive data visualizations. Uses window.openai.toolInput for data, window.openai.theme for styling, and fetches additional data from an external API.",
+  "targetFramework": "react",
+  "transport": "http",
+  "knownExternalOrigins": [
+    {
+      "origin": "https://api.example.com",
+      "purpose": "Data API for additional metrics",
+      "type": "connectDomain"
+    },
+    {
+      "origin": "https://fonts.gstatic.com",
+      "purpose": "Google Fonts",
+      "type": "resourceDomain"
+    }
+  ],
+  "openaiFeatures": {
+    "toolInput": true,
+    "toolOutput": true,
+    "theme": true,
+    "widgetState": false,
+    "uploadFile": false,
+    "requestModal": false
+  },
+  "compositionPattern": "full-pipeline"
+}

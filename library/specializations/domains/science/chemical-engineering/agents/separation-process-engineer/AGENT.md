@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Separation Processes
   agent-id: CE-AG-008
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:np-hard-heuristics]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Separation Process Engineer Agent

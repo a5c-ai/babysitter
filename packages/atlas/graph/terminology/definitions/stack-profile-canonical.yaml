@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:stack-profile.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:stack-profile
+  text: |
+    named composition of language + framework + tooling
+  status: canonical
+edges:
+  defines:
+    - term:stack-profile

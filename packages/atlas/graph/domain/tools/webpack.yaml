@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:webpack
+attributes:
+  displayName: "webpack"
+  homepageUrl: "https://webpack.js.org"
+  kind: bundler
+  releasedAt: "2014"
+  description: |
+    Static module bundler for modern JavaScript applications.
+edges:
+  belongs_to_language:
+    - target: language:javascript
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:vite
+      comparison: "bundlers — webpack is the established standard; Vite is the faster modern alternative"
+    - target: tool:parcel
+      comparison: "JavaScript bundlers"
+    - target: tool:turbopack
+      comparison: "JavaScript bundlers"

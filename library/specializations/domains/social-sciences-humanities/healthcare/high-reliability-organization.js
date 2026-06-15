@@ -20,6 +20,13 @@
  * - Weick, K. & Sutcliffe, K. (2015). Managing the Unexpected
  * - Chassin, M. & Loeb, J. (2013). High-Reliability Healthcare
  * - AHRQ High Reliability Organization Tools
+ *
+ * @graph
+ *   domains: [domain:healthcare]
+ *   specializations: [specialization:clinical-informatics]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

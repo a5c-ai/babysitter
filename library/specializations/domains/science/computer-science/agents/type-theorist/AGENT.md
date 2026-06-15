@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: programming-language-theory
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:mathematical-reasoning]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:computational-scientist, role:research-scientist]
 ---
 
 # Type Theorist

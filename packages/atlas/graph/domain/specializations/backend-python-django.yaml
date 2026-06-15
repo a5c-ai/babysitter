@@ -1,0 +1,20 @@
+nodeKind: Specialization
+id: specialization:backend-python-django
+attributes:
+  displayName: "Backend (Python/Django)"
+  parentDomainId: domain:web-development
+  description: |
+    The Backend Python/Django specialization covers building server-side
+    web applications and APIs using the Django framework and the broader
+    Python web ecosystem.
+
+    Key skills include Django ORM and migrations, Django REST Framework
+    and Ninja for API layers, Celery for background tasks, authentication
+    (django-allauth, social auth), caching with Redis, and deployment on
+    gunicorn/uvicorn behind nginx. The specialization shares concerns with
+    Full-stack Web App (Python) when a frontend is included, and with
+    Data Science/Engineering when Python services consume or produce data
+    pipelines. PostgreSQL is the canonical database companion.
+edges:
+  specializes:
+    - domain:web-development

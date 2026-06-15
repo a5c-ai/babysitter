@@ -1,0 +1,196 @@
+---
+nodeKind: Workflow
+id: workflow:project-risk-assessment
+attributes:
+  displayName: "Project Risk Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Identifies and plans mitigation for project-level risks -- conducting
+    structured risk identification workshops with project stakeholders
+    using techniques like pre-mortem analysis and SWOT, scoring risks on
+    likelihood and impact dimensions to populate the project risk
+    register, categorizing risks as schedule, scope, resource, technical,
+    or external, assigning risk owners and defining mitigation strategies
+    (avoid, transfer, mitigate, accept), establishing risk monitoring
+    triggers and escalation criteria, and reviewing risk register
+    evolution at project milestone gates. Produces project risk register,
+    mitigation plan, and risk monitoring dashboard. Excludes enterprise
+    risk aggregation and portfolio-level risk assessment.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:business-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:project-management
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:risk-management-team
+---
+nodeKind: Workflow
+id: workflow:supply-chain-risk-monitoring
+attributes:
+  displayName: "Supply Chain Risk Monitoring"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors supply chain disruption risks and activates contingency
+    plans -- tracking supplier health indicators including financial
+    stability, geopolitical exposure, and natural disaster proximity,
+    monitoring lead-time variability and order-fulfillment rates against
+    contracted SLAs, evaluating concentration risk across tier-1 and
+    tier-2 suppliers, detecting early-warning signals from news feeds,
+    trade-compliance databases, and logistics tracking systems, triggering
+    contingency activation protocols when disruption probability exceeds
+    thresholds, and coordinating alternate sourcing or buffer-stock
+    drawdown decisions. Produces supply chain risk dashboard, disruption
+    alerts, and contingency activation recommendations. Excludes
+    procurement execution and contract renegotiation.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:supply-chain
+    - target: domain:logistics
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:climate-risk-physical-assessment
+attributes:
+  displayName: "Climate Risk Physical Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Assesses physical climate risk exposure across organizational assets
+    and operations -- mapping asset locations against climate hazard
+    projections for flooding, extreme heat, wildfire, storm surge, and
+    water stress under RCP/SSP scenarios, quantifying financial exposure
+    through asset damage, business interruption, and insurance cost
+    models, evaluating supply chain vulnerability to climate-driven
+    disruption in key sourcing regions, assessing workforce exposure to
+    extreme heat and air quality risks, benchmarking adaptation readiness
+    against TCFD and ISSB disclosure requirements, and prioritizing
+    adaptation investments by risk-reduction effectiveness. Produces
+    physical climate risk assessment, asset exposure heat maps, and
+    adaptation investment recommendations. Excludes transition risk
+    analysis and carbon accounting.
+edges:
+  involves_role:
+    - target: role:operational-risk-analyst
+    - target: role:data-scientist
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:sustainability-esg
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:risk-management-team
+---
+nodeKind: Workflow
+id: workflow:technology-risk-assessment
+attributes:
+  displayName: "Technology Risk Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Assesses technology and IT risk across the organization --
+    maintaining the technology risk register with categorization across
+    obsolescence, vendor lock-in, architectural debt, and scalability
+    constraints, evaluating end-of-life and end-of-support timelines for
+    critical infrastructure components, assessing single-vendor
+    dependency concentration and contractual exit barriers, reviewing
+    disaster recovery and business continuity readiness for key
+    technology stacks, scoring technology risks on likelihood, impact,
+    and velocity dimensions, and recommending risk treatment actions
+    including modernization, diversification, and contingency planning.
+    Produces technology risk register, vendor concentration analysis, and
+    risk treatment roadmap. Excludes technology selection and migration
+    planning.
+edges:
+  involves_role:
+    - target: role:security-risk-analyst
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:monolith-vs-microservices
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:product-risk-analysis
+attributes:
+  displayName: "Product Risk Analysis"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Analyzes product liability, safety, and regulatory risk before major
+    releases -- reviewing product changes against applicable safety
+    standards and regulatory requirements, assessing product liability
+    exposure from feature changes that could affect user safety or data
+    integrity, evaluating accessibility and compliance impacts of UX
+    changes, conducting failure mode and effects analysis for critical
+    product functions, reviewing terms-of-service and privacy policy
+    alignment with new capabilities, and documenting risk acceptance
+    decisions with appropriate sign-off. Produces product risk
+    assessment, FMEA worksheet, and regulatory compliance checklist.
+    Excludes product development and legal contract drafting.
+edges:
+  involves_role:
+    - target: role:business-analyst
+    - target: role:operational-risk-analyst
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:legal-team

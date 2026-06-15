@@ -7,6 +7,12 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:user-research, skill-area:product-discovery]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Persona Development Skill

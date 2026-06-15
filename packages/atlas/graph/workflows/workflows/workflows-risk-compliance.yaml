@@ -1,0 +1,156 @@
+---
+nodeKind: Workflow
+id: workflow:enterprise-risk-register-review
+attributes:
+  displayName: "Enterprise Risk Register Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and updates the enterprise risk register across all
+    organizational risk categories -- reassessing likelihood and impact
+    ratings for existing risks based on emerging indicators, identifying new
+    risks from regulatory changes, market shifts, and technology evolution,
+    validating risk-owner assignments and mitigation-plan progress,
+    evaluating control effectiveness through key-risk-indicator trend
+    analysis, conducting risk-appetite alignment checks with board-defined
+    thresholds, and escalating risks that breach tolerance limits. Produces
+    updated risk register and quarterly risk dashboard. Excludes
+    risk-mitigation implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:finance
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:compliance-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:third-party-risk-assessment
+attributes:
+  displayName: "Third-Party Risk Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-vendor"
+  complexity: cross-team
+  description: |
+    Assesses risk exposure from third-party vendors, partners, and service
+    providers -- distributing security questionnaires and evaluating
+    responses against organizational standards, reviewing SOC 2 and ISO
+    27001 attestation reports for control coverage, assessing data-handling
+    practices and sub-processor chains for GDPR compliance, evaluating
+    business-continuity and disaster-recovery capabilities, scoring vendors
+    on a composite risk matrix incorporating financial stability,
+    concentration risk, and geopolitical factors, and defining residual-risk
+    acceptance or mitigation requirements. Produces third-party risk
+    assessment report and risk-tier classification. Excludes contract
+    negotiation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:operations
+    - target: domain:legal
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:security-team
+    - target: org-unit:procurement-team
+---
+nodeKind: Workflow
+id: workflow:business-impact-analysis
+attributes:
+  displayName: "Business Impact Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Conducts business impact analysis across critical processes and systems
+    -- identifying and cataloging mission-critical business processes with
+    their technology dependencies, estimating maximum tolerable downtime and
+    recovery-point objectives for each process, quantifying financial and
+    reputational impact of disruption scenarios at escalating time horizons,
+    mapping single-points-of-failure in both technology and human-capital
+    dimensions, validating recovery-priority rankings with business-unit
+    leaders, and assessing insurance coverage adequacy against modeled loss
+    scenarios. Produces BIA report with recovery-priority matrix and gap
+    assessment. Excludes disaster-recovery plan implementation.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:infrastructure
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:incident-command
+  performed_by_org_unit:
+    - target: org-unit:risk-management-team
+    - target: org-unit:operations-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:regulatory-change-management
+attributes:
+  displayName: "Regulatory Change Management"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-regulation"
+  complexity: cross-team
+  description: |
+    Manages the intake and organizational response to new or amended
+    regulatory requirements -- monitoring regulatory feeds and industry
+    association alerts for relevant changes, conducting initial impact
+    assessment to determine affected business units and systems, assembling
+    cross-functional working groups for gap analysis, developing compliance
+    implementation plans with milestone timelines, coordinating policy and
+    procedure updates, tracking evidence-collection for compliance
+    demonstration, and reporting implementation progress to executive
+    sponsors and regulators. Produces regulatory change impact assessment and
+    compliance implementation plan. Excludes lobbying or regulatory advocacy.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:legal
+    - target: domain:operations
+    - target: domain:cybersecurity-grc
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:legal-team
+    - target: org-unit:risk-management-team

@@ -1,0 +1,12 @@
+nodeKind: Benchmark
+id: benchmark:swe-bench-multimodal
+attributes:
+  displayName: "SWE-bench Multimodal"
+  homepageUrl: https://www.swebench.com/multimodal.html
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    Multimodal extension of SWE-bench: visual / GUI-driven software engineering tasks.
+edges:
+  applies_to:
+    - target: domain:software-engineering

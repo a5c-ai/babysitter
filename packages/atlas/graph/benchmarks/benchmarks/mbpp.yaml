@@ -1,0 +1,10 @@
+nodeKind: Benchmark
+id: benchmark:mbpp
+attributes:
+  displayName: "MBPP"
+  homepageUrl: https://github.com/google-research/google-research/tree/master/mbpp
+  kind: code-generation
+  targetsKind: ModelVersion
+  description: |
+    Mostly Basic Python Problems — ~1,000 short Python programming problems with tests.
+edges: {}

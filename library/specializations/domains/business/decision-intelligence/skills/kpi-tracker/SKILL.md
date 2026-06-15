@@ -18,6 +18,10 @@ metadata:
     - polars
     - great_expectations
     - pandera
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:data-analytics, skill-area:data-analysis, skill-area:business-analysis]
+  roles: [role:data-analyst, role:business-analyst, role:bi-developer]
 ---
 
 # KPI Tracker

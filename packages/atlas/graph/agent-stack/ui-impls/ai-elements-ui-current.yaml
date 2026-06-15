@@ -1,0 +1,39 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:ai-elements.ui@current
+attributes:
+  displayName: "Vercel AI Elements UI"
+  uiKind: web-only
+  presentationsBundled:
+    - presentation:ai-elements
+  themeSupport: full-customizable
+  accessibilitySupport: wcag-aa
+  notes: |
+    React component library providing the building blocks for AI-native
+    interfaces — chat, streaming, tool calls, file attachments. Functions
+    as both a presentation layer (visual components) and interaction layer
+    (user input patterns, response rendering, tool-call approval).
+edges:
+  bundled_with:
+    - presentation:ai-elements
+  realizes:
+    - target: layer:11-presentation
+  integrates_with:
+    - target: framework:vercel-ai-sdk
+    - target: framework:react
+    - target: library:shadcn
+  supports_interaction_primitive:
+    - target: interaction-primitive:ai-elements-chat
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:ai-elements-tool-call-card
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:ai-elements-streaming-response
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:prompt-input
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:file-attachment
+      attributes:
+        mechanism: ui-control

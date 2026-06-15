@@ -1,0 +1,21 @@
+nodeKind: StackPart
+id: stack-part:graph-database
+attributes:
+  displayName: "Graph Database"
+  category: data-store
+  description: |
+    Database purpose-built for storing and traversing graph structures —
+    nodes (entities) and edges (relationships) with properties on both.
+    Graph databases excel at multi-hop relationship queries that would
+    require expensive recursive joins in a relational database.
+
+    Common use cases: fraud detection, recommendation engines, knowledge
+    graphs, identity and access management, and social networks. Neo4j
+    uses the Cypher query language; Amazon Neptune supports Gremlin and
+    SPARQL; Dgraph uses GraphQL+DQL. Property graphs (Neo4j, Neptune) and
+    RDF triplestores (Stardog, Amazon Neptune/SPARQL) are the two dominant
+    paradigms. Vector + graph hybrids are emerging for AI knowledge graph
+    applications.
+edges:
+  implemented_by:
+    - target: tool:neo4j

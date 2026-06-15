@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: cicd
   backlog-id: SK-004
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:gitops, skill-area:canary-rollouts]
+  roles: [role:devops-engineer, role:release-manager]
+  workflows: [workflow:release-management]
+  topics: [topic:continuous-integration, topic:continuous-deployment]
 ---
 
 # cicd-pipelines

@@ -1,0 +1,75 @@
+---
+nodeKind: PathDescriptor
+id: path:kradle-core
+attributes:
+  pathId: path:kradle-core
+  displayName: "Kradle core workspace"
+  path: "packages/kradle/core"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-kradle
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Core @a5c-ai/kradle ESM package with controller API, demo/server bins, and validation scripts.
+---
+nodeKind: PathDescriptor
+id: path:kradle-sdk
+attributes:
+  pathId: path:kradle-sdk
+  displayName: "Kradle SDK workspace"
+  path: "packages/kradle/sdk"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-kradle-sdk
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Private @a5c-ai/kradle-sdk re-export package for Kradle controllers, resource helpers, and Atlas graph client.
+---
+nodeKind: PathDescriptor
+id: path:kradle-cli
+attributes:
+  pathId: path:kradle-cli
+  displayName: "Kradle CLI workspace"
+  path: "packages/kradle/cli"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-kradle-cli
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Private @a5c-ai/kradle-cli package exposing the kradle CLI and kradle-server MCP/server bin.
+---
+nodeKind: PathDescriptor
+id: path:kradle-web
+attributes:
+  pathId: path:kradle-web
+  displayName: "Kradle web workspace"
+  path: "packages/kradle/web"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:a5c-ai-kradle-web
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Next.js Kradle web console package for the browser management UI.
+---
+nodeKind: PathDescriptor
+id: path:kradle-chart
+attributes:
+  pathId: path:kradle-chart
+  displayName: "Kradle Helm chart workspace"
+  path: "packages/kradle/charts"
+  pathKind: source-of-truth-dir
+  ownerKind: PackageSurface
+  ownerId: package:kradle-helm-chart
+  platform: repo
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: Helm application chart containing Kradle CRDs, controller/API deployments, services, RBAC, GitOps templates, and release-gate annotations.

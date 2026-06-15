@@ -1,0 +1,13 @@
+nodeKind: RunJournalEvent
+id: run-journal-event:effect-resolved
+attributes:
+  eventName: EFFECT_RESOLVED
+  category: effect-lifecycle
+  terminal: false
+  description: |
+    Emitted when an effect's StoredTaskResult is committed to the run
+    directory. The journal payload references the result by effectId
+    and carries the status (`ok` | `error` | `cancelled`), startedAt /
+    finishedAt, optional resultRef / stdoutRef / stderrRef, and any
+    error metadata. Replay engines use EFFECT_RESOLVED records to
+    short-circuit redundant effect work.

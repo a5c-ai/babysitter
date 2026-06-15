@@ -1,0 +1,99 @@
+---
+nodeKind: Workflow
+id: workflow:seo-content-audit
+attributes:
+  displayName: "SEO Content Audit"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Audits website and content assets for search engine optimization
+    health — analyzing keyword ranking positions, reviewing technical SEO
+    issues like crawlability and structured data, evaluating content freshness
+    and topical authority gaps, assessing backlink profile quality, and
+    benchmarking against competitor visibility. Produces prioritized
+    optimization recommendations. Excludes content creation and link building.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:conversion-funnel-optimization
+attributes:
+  displayName: "Conversion Funnel Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Analyzes and optimizes conversion funnels across acquisition
+    channels — identifying drop-off points through behavioral analytics,
+    reviewing A/B test results, evaluating page load performance impact on
+    conversions, mapping user journey friction points, and prioritizing
+    experiments for the next optimization sprint. Produces funnel performance
+    report and experiment backlog. Excludes experiment implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:growth-experiment-review
+attributes:
+  displayName: "Growth Experiment Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Reviews active and completed growth experiments — evaluating statistical
+    significance of test results, analyzing unexpected side effects on
+    adjacent metrics, deciding ship/iterate/kill for each experiment,
+    validating measurement methodology, and reprioritizing the experiment
+    queue based on learnings. Produces experiment decision log and updated
+    roadmap. Excludes experiment design and implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:product-team
+    - target: org-unit:engineering

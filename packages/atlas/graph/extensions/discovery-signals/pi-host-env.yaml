@@ -1,0 +1,24 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:pi-host-env
+attributes:
+  signalId: discovery-signal:pi-host-env
+  signalKind: env-any
+  key: pi
+  matchMode: any
+  confidence: medium
+  scope: host-detection
+  signals:
+    - PI_RUN_ID
+    - PI_SESSION_ID
+  argvMatches:
+    - pi
+  argvFlags:
+    - "--session-id"
+  consumer: agent-comm-adapter
+  metadataFields:
+    - { key: session_id, envVars: [PI_SESSION_ID] }
+    - { key: run_id,     envVars: [PI_RUN_ID] }
+    - { key: session_id_arg, argvFlag: "--session-id" }
+edges:
+  applies_to:
+    - target: agent:pi

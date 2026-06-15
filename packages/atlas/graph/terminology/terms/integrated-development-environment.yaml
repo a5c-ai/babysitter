@@ -1,0 +1,11 @@
+nodeKind: Term
+id: term:integrated-development-environment
+attributes:
+  canonicalDefinitionId: definition:integrated-development-environment.canonical
+  displayName: "Integrated Development Environment"
+  kind: tool
+  description: |
+    A graphical editor with integrated build, debug, and tooling support.
+edges:
+  applies_to:
+    - target: domain:software-engineering

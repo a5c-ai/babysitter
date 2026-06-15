@@ -10,13 +10,13 @@
   "dependencies": {
     "@remotion/cli": "^4.0.242",
     "@remotion/player": "^4.0.242",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "remotion": "^4.0.242"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "typescript": "^5.6.3"
   }
 }

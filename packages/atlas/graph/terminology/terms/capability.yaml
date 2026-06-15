@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:capability
+attributes:
+  canonicalDefinitionId: definition:capability.canonical
+  displayName: "Capability"
+  kind: capability
+  references:
+    - "NodeKind:Capability"
+  description: |
+    A named capability
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

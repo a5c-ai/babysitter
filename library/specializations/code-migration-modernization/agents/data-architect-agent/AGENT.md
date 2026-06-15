@@ -8,6 +8,13 @@ skills:
   - schema-comparator
   - etl-pipeline-builder
   - event-sourcing-migrator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:domain-driven-design, skill-area:schema-evolution]
+  roles: [role:architect, role:data-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Data Architect Agent

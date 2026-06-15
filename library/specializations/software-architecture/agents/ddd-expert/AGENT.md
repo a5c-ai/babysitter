@@ -6,6 +6,14 @@ backlog-id: AG-SA-003
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:principal-engineer]
+  skillAreas: [skill-area:domain-driven-design]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:domain-driven-design, topic:event-sourcing]
+
 ---
 
 # ddd-expert

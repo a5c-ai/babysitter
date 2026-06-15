@@ -1,0 +1,65 @@
+{
+  "name": "@a5c-ai/hooks-adapter-cli",
+  "version": "5.1.0",
+  "description": "CLI entrypoint for the hooks-adapter system",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "adapters-hooks": "dist/cli/main.js",
+    "a5c-hooks-adapter": "dist/cli/a5c-hooks-adapter.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/adapters/hooks/cli"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/adapters/hooks/cli#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@a5c-ai/hooks-adapter-claude": "5.1.0",
+    "@a5c-ai/hooks-adapter-antigravity": "5.1.0",
+    "@a5c-ai/hooks-adapter-codex": "5.1.0",
+    "@a5c-ai/hooks-adapter-copilot": "5.1.0",
+    "@a5c-ai/hooks-adapter-cursor": "5.1.0",
+    "@a5c-ai/hooks-adapter-gemini": "5.1.0",
+    "@a5c-ai/hooks-adapter-hermes": "5.1.0",
+    "@a5c-ai/hooks-adapter-oh-my-pi": "5.1.0",
+    "@a5c-ai/hooks-adapter-openclaw": "5.1.0",
+    "@a5c-ai/hooks-adapter-opencode": "5.1.0",
+    "@a5c-ai/hooks-adapter-pi": "5.1.0",
+    "@a5c-ai/hooks-adapter-core": "5.1.0",
+    "yargs": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/yargs": "^17.0.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.8"
+  },
+  "atlas": {
+    "layers": [
+      "cross-cutting"
+    ],
+    "muxes": [
+      "hooks-adapter"
+    ]
+  }
+}

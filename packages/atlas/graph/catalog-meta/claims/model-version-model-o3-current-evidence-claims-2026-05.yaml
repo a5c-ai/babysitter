@@ -1,0 +1,360 @@
+nodeKind: Claim
+id: claim:model-version-model-o3-current-contextwindowtokens
+attributes:
+  subjectId: model:o3@current
+  attribute: contextWindowTokens
+  value: '200000'
+  subjectKind: ModelVersion
+  statement: model:o3@current contextWindowTokens is 200000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-costpermtokinput
+attributes:
+  subjectId: model:o3@current
+  attribute: costPerMTokInput
+  value: '2.0'
+  subjectKind: ModelVersion
+  statement: model:o3@current costPerMTokInput is 2.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-costpermtokoutput
+attributes:
+  subjectId: model:o3@current
+  attribute: costPerMTokOutput
+  value: '8.0'
+  subjectKind: ModelVersion
+  statement: model:o3@current costPerMTokOutput is 8.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-kind
+attributes:
+  subjectId: model:o3@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:o3@current kind is reasoning.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-knowledgecutoffdate
+attributes:
+  subjectId: model:o3@current
+  attribute: knowledgeCutoffDate
+  value: '2024-06-01'
+  subjectKind: ModelVersion
+  statement: model:o3@current knowledgeCutoffDate is 2024-06-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-lifecyclestatus
+attributes:
+  subjectId: model:o3@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:o3@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-modalities
+attributes:
+  subjectId: model:o3@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:o3@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-modalitydirections
+attributes:
+  subjectId: model:o3@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:o3@current modalityDirections is kind=text;direction=input, kind=image;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-modelcardurl
+attributes:
+  subjectId: model:o3@current
+  attribute: modelCardUrl
+  value: https://openai.com/index/o3-o4-mini-system-card/
+  subjectKind: ModelVersion
+  statement: model:o3@current modelCardUrl is https://openai.com/index/o3-o4-mini-system-card/.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-safetytier
+attributes:
+  subjectId: model:o3@current
+  attribute: safetyTier
+  value: openai-preparedness-high
+  subjectKind: ModelVersion
+  statement: model:o3@current safetyTier is openai-preparedness-high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-supportsextendedthinking
+attributes:
+  subjectId: model:o3@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:o3@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-supportsfinetuning
+attributes:
+  subjectId: model:o3@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:o3@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:o3@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:o3@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-thinkingeffortlevels
+attributes:
+  subjectId: model:o3@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high
+  subjectKind: ModelVersion
+  statement: model:o3@current thinkingEffortLevels is low, medium, high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-o3-current-versionrange
+attributes:
+  subjectId: model:o3@current
+  attribute: versionRange
+  value: '>=3.0.0 <4.0.0'
+  subjectKind: ModelVersion
+  statement: model:o3@current versionRange is >=3.0.0 <4.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:o3@current

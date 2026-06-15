@@ -1,0 +1,15 @@
+nodeKind: ExtensionInterface
+id: extension-interface:compression
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Compression
+  displayName: "Compression"
+  concern: "Context window compaction without losing decision-relevant facts."
+  surface: |
+    `compact(transcript, budget)` returns a shortened transcript;
+    `summarize(span)` produces a fact-preserving summary.
+  builtInDefault: |
+    Truncate-oldest-first up to the model's context window. No
+    semantic preservation.
+  notableImpls: []
+edges: {}

@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:service-level-agreement
+attributes:
+  canonicalDefinitionId: definition:service-level-agreement.canonical
+  displayName: "Service Level Agreement"
+  kind: concept
+  description: |
+    A contract specifying expected service availability and response targets.
+edges:
+  applies_to:
+    - target: domain:devops
+    - target: domain:cloud-infra

@@ -1,0 +1,46 @@
+---
+nodeKind: Topic
+id: topic:evidence-based-graph
+attributes:
+  displayName: "Evidence-Based Graph"
+  description: |
+    Evidence-Based Graph as a cross-cutting topic — grounding knowledge graph
+    assertions in verifiable evidence through testable claims, provenance
+    tracking, and confidence scoring. Ensures graph content reflects
+    demonstrated truths rather than untested assumptions, enabling systematic
+    quality improvement and trust calibration across the catalog.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:experiment-driven-development
+attributes:
+  displayName: "Experiment-Driven Development"
+  description: |
+    Experiment-Driven Development as a cross-cutting topic — treating
+    engineering decisions as hypotheses validated through controlled
+    experiments with measurable outcomes. Covers A/B testing, feature
+    experiments, performance benchmarks as experiments, and using
+    hypothesis-outcome loops to reduce uncertainty before committing
+    to architectural or product directions.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:graph-provenance
+attributes:
+  displayName: "Graph Provenance"
+  description: |
+    Graph Provenance as a cross-cutting topic — tracking the origin,
+    lineage, and transformation history of nodes and edges in a knowledge
+    graph. Covers source attribution, temporal versioning, confidence
+    decay, and audit trails that enable consumers to assess data quality
+    and trace assertions back to their originating evidence or process.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - domain:data-science

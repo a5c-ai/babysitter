@@ -2,6 +2,10 @@
 name: digital-engagement-strategy
 description: Develop digital content strategies including virtual exhibitions, online programming, social media campaigns, and digital collection access
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch, WebSearch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:digital-marketing-analytics, skill-area:seo-sem]
+  roles: [role:content-strategist, role:marketing-manager]
 ---
 
 # Digital Engagement Strategy

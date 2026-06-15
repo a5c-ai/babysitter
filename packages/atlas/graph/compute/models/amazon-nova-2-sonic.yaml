@@ -1,0 +1,55 @@
+nodeKind: ModelVersion
+id: model:amazon-nova-2-sonic@current
+attributes:
+  displayName: "Amazon Nova 2 Sonic"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  providerModelIds:
+    - amazon.nova-2-sonic-v1:0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:amazon-nova-2
+  versionRange: '>=2.0.0 <3.0.0'
+  kind: audio
+  contextWindowTokens: 0
+  modalities:
+    - audio
+    - text
+  modalityDirections:
+    - kind: audio
+      direction: bidirectional
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-12-02'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-12-02'
+  modelCardUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-sonic.html
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Nova 2 Sonic is modeled as a low-latency real-time voice conversation
+    model over Bedrock bidirectional streaming. The issue did not confirm a
+    normal text context window or token output ceiling, so contextWindowTokens
+    is intentionally a non-applicable placeholder rather than a text-window
+    claim. Pricing is region/model specific on the Bedrock pricing page and is
+    not hardcoded in this graph node.
+edges:
+  belongs_to_family:
+    - target: model-family:amazon-nova-2
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:amazon-nova-2
+  served_by:
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:bedrock-bidirectional-stream
+  supports:
+    - target: capability:streaming
+      versionRange: '>=2.0.0 <3.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-2-sonic-model-card

@@ -1,0 +1,110 @@
+---
+nodeKind: ToolServer
+id: tool-server:mcp-pyairbyte
+attributes:
+  displayName: PyAirbyte MCP Server
+  description: |
+    MCP server built into PyAirbyte for managing Airbyte connectors through AI agents.
+    Provides tools to list connectors, validate configurations, preview stream schemas,
+    and run sync operations against any Airbyte-compatible source.
+  protocol: mcp
+  category: data-engineering
+  repoUrl: https://github.com/airbytehq/PyAirbyte
+  maintainer: Airbyte
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:airbyte
+  lib_applies_to_domain:
+  - target: domain:data-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-fivetran
+attributes:
+  displayName: Fivetran MCP Server
+  description: |
+    MCP server for natural language control of Fivetran data pipelines via AI agents.
+    Provides 25+ tools built on the Fivetran REST API to manage connectors, trigger syncs,
+    check connection status, and control data pipeline operations.
+  protocol: mcp
+  category: data-engineering
+  repoUrl: https://github.com/kellykohlleffel/fivetran-mcp-toolkit
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  supports_work:
+    - target: responsibility:data-pipeline-reliability
+      confidence: high
+      evidence: "Connector status, sync failures, and freshness support pipeline reliability."
+    - target: workflow:data-pipeline-monitoring
+      confidence: high
+      evidence: "Fivetran connector metadata is a direct data-pipeline monitoring input."
+  integrates_with:
+  - target: tool:fivetran
+  lib_applies_to_domain:
+  - target: domain:data-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-dagster
+attributes:
+  displayName: Dagster MCP Server
+  description: |
+    MCP server for interacting with Dagster data orchestration instances via AI agents.
+    Enables agents to explore pipelines, monitor asset materializations, query run history,
+    manage schedules and sensors, and trigger backfills through the Dagster GraphQL API.
+  protocol: mcp
+  category: data-engineering
+  repoUrl: https://github.com/kyryl-opens-ml/mcp-server-dagster
+  npmPackage: mcp-server-dagster
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:dagster
+  lib_applies_to_domain:
+  - target: domain:data-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-prefect
+attributes:
+  displayName: Prefect MCP Server
+  description: |
+    Official MCP server from PrefectHQ providing AI agents read-only access to the Prefect control plane.
+    Enables agents to query deployments, flow runs, task runs, work pools, and execution logs,
+    and get contextual guidance for troubleshooting failed flows and deployment issues.
+  protocol: mcp
+  category: data-engineering
+  repoUrl: https://github.com/PrefectHQ/prefect-mcp-server
+  maintainer: Prefect
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:prefect
+  lib_applies_to_domain:
+  - target: domain:data-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-aws-serverless
+attributes:
+  displayName: AWS Serverless MCP Server
+  description: |
+    Official AWS Labs MCP server for serverless application development with AWS SAM CLI.
+    Provides tools to initialize SAM projects, work with SAM templates, manage Lambda event schemas,
+    and integrate with EventBridge schema registry for type-safe serverless development.
+  protocol: mcp
+  category: cloud-infra
+  repoUrl: https://github.com/awslabs/mcp
+  maintainer: AWS
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:sam-cli
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:serverless

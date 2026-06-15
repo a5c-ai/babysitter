@@ -1,0 +1,115 @@
+# NodeKinds for cluster 17-observability-pipeline.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:observability-backend
+  name: ObservabilityBackend
+  origin: standard
+  prefix: obs-backend
+  cluster: 17-observability-pipeline
+  purpose: an observability backend that ingests traces / metrics / logs (Datadog, Honeycomb, OTel collector, ...). Collapses MetricSink and LogSink into a single NodeKind discriminated by `kind`.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<trace,metric,log,multi>
+    required: false
+    notes: Pipeline modality. `multi` indicates the backend ingests multiple signal types.
+  - name: vendor
+    type: string
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: endpoints
+    type: map<string
+    url>: null
+    required: false
+  - name: protocols
+    type: list<string>
+    required: false
+    notes: Wire protocols (otlp-grpc, otlp-http, statsd, prometheus-remote-write, ...).
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - exports_to
+  - emits_signals_to
+  outgoingEdges:
+  - ingests_from
+  - receives_signals_from
+  invariants:
+  - id starts with obs-backend: null
+  examples: []
+- id: node:span
+  name: Span
+  origin: universal
+  prefix: span
+  cluster: 17-observability-pipeline
+  purpose: a single trace span emitted by an Effect / Invocation; the leaf unit of distributed tracing
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: traceId
+    type: string
+    required: false
+  - name: spanId
+    type: string
+    required: false
+  - name: parentSpanId
+    type: string
+    required: false
+  - name: name
+    type: string
+    required: false
+  - name: startedAt
+    type: iso-timestamp
+    required: false
+  - name: startTime
+    type: iso-timestamp
+    required: false
+  - name: endedAt
+    type: iso-timestamp
+    required: false
+  - name: endTime
+    type: iso-timestamp
+    required: false
+  - name: durationMs
+    type: float
+    required: false
+  - name: status
+    type: string
+    required: false
+    notes: OK|ERROR|UNSET (case-insensitive accepted by examples).
+  - name: kind
+    type: enum<server,client,producer,consumer,internal>
+    required: false
+  - name: attributes
+    type: any
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - projects_span
+  outgoingEdges:
+  - emitted_by_span
+  - exports_to
+  - projected_by_segment
+  invariants:
+  - id starts with span: null
+  examples: []
+

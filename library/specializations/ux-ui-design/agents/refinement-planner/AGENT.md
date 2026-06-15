@@ -8,6 +8,12 @@ expertise:
   - Risk assessment
   - Batch optimization
   - Convergence strategy
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:design-systems, skill-area:prioritization-frameworks]
+  roles: [role:product-designer, role:frontend-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # refinement-planner

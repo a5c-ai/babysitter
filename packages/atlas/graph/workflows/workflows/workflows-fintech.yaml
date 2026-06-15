@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:payment-reconciliation-audit
+attributes:
+  displayName: "Payment Reconciliation Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Audits payment transaction reconciliation across systems -- matching
+    payment processor settlement files against internal ledger entries,
+    identifying discrepancies from currency conversion, interchange fee
+    calculations, and chargeback adjustments, validating nostro/vostro
+    account balances with banking partners, tracking reconciliation break
+    aging and resolution, and verifying compliance with PCI-DSS data
+    handling requirements throughout the process. Produces reconciliation
+    exception reports, break resolution dashboards, and settlement accuracy
+    metrics. Excludes payment product development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:database-migrations-zero-downtime
+  applies_to_domain:
+    - target: domain:fintech
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:regulatory-sandbox-compliance
+attributes:
+  displayName: "Regulatory Sandbox Compliance"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages compliance with financial regulatory sandbox requirements --
+    tracking sandbox participation conditions and reporting obligations to
+    regulators (FCA, MAS, OCC), monitoring transaction volumes and customer
+    counts against sandbox limits, validating consumer protection safeguards
+    are operational, preparing periodic progress reports with innovation
+    metrics and risk indicators, and managing the transition plan from
+    sandbox to full regulatory authorization. Produces sandbox compliance
+    reports, regulator correspondence logs, and authorization readiness
+    assessments. Excludes product feature development.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:fintech
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:regulatory-filing
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:risk-management-team

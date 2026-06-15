@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Commissioning
   agent-id: CE-AG-018
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:statistical-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Startup and Commissioning Engineer Agent

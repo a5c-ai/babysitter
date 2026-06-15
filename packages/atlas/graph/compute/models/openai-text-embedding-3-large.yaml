@@ -1,0 +1,35 @@
+nodeKind: ModelVersion
+id: model:openai-text-embedding-3-large@current
+attributes:
+  displayName: "OpenAI Text Embedding 3 Large"
+  modelFamilyId: model-family:openai-text-embedding-3
+  versionRange: ">=3.0.0 <4.0.0"
+  kind: embedding
+  contextWindowTokens: 8191
+  costPerMTokInput: 0.13
+  costPerMTokOutput: 0.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+    - text
+    - embedding
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: embedding
+      direction: output
+  releaseDate: "2024-01-25"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2024-01-25"
+  modelCardUrl: "https://platform.openai.com/docs/models/text-embedding-3-large"
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:openai-text-embedding-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:openai-text-embedding-3
+  served_by:
+  - provider:openai

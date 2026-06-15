@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:run.babysitter
+attributes:
+  authoredAt: "2026-01-01T00:00:00Z"
+  termId: term:run
+  text: |
+    A babysitter run: an orchestrated execution of a process definition with one or more invocations, tracked under .a5c/runs/<runId>/.
+  status: canonical
+edges:
+  defines:
+    - term:run

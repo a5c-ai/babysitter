@@ -9,6 +9,12 @@ expertise:
   - Story mapping and backlog management
   - Sprint planning support
   - Requirements traceability
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-discovery, skill-area:roadmap-planning]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Requirements Analyst Agent

@@ -13,6 +13,12 @@ metadata:
   domain: business
   category: Customer Value
   skill-id: SK-007
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:market-research]
+  workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+  roles: [role:strategic-planner, role:management-consultant]
 ---
 
 # Value Proposition Design Skill

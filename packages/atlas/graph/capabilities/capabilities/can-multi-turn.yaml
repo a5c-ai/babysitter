@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:can-multi-turn
+attributes:
+  displayName: "Can multi-turn"
+  description: |
+    The entity supports multi-turn conversation — successive user
+    messages share state without the caller re-sending history.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: session
+edges: {}

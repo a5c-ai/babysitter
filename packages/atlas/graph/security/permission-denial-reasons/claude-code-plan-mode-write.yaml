@@ -1,0 +1,11 @@
+nodeKind: PermissionDenialReason
+id: permission-denial-reason:claude-code-plan-mode-write-blocked
+attributes:
+  displayName: "Plan mode: write blocked"
+  kind: plan-mode-write-blocked
+  ruleSource: builtin
+  behavior: deny
+  triggeredBy: checkPermissions
+  interpretedMessage: |
+    This tool cannot run in plan mode — exit plan mode (ExitPlanMode) before
+    making changes.

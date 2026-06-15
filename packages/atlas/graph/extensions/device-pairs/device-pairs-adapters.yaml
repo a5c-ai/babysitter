@@ -1,0 +1,32 @@
+nodeKind: DevicePair
+id: device-pair:adapters-mobile-ios
+attributes:
+  displayName: "adapters mobile (iOS) paired device"
+  deviceKind: mobile
+  platform: ios
+  pairingMethod: qr-code
+  pairedAt: "2026-05-02T00:00:00Z"
+  pushCapable: true
+  revoked: false
+---
+nodeKind: DevicePair
+id: device-pair:adapters-mobile-android
+attributes:
+  displayName: "adapters mobile (Android) paired device"
+  deviceKind: mobile
+  platform: android
+  pairingMethod: short-code
+  pairedAt: "2026-05-02T00:00:00Z"
+  pushCapable: true
+  revoked: false
+---
+nodeKind: DevicePair
+id: device-pair:adapters-web-desktop
+attributes:
+  displayName: "adapters web desktop paired session"
+  deviceKind: desktop
+  platform: web
+  pairingMethod: oauth
+  pairedAt: "2026-05-02T00:00:00Z"
+  pushCapable: false
+  revoked: false

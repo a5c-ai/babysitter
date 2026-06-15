@@ -1,0 +1,57 @@
+---
+nodeKind: PromptTemplate
+id: prompt-template:symphony-system
+attributes:
+  displayName: "Symphony agent system prompt"
+  templateKind: system
+  body: |
+    You are Symphony, an orchestration agent. Decompose the user's task into
+    sub-goals, choose the right tool for each, and verify results before
+    returning. Honor the active ContentPolicy and BudgetPolicy at all times.
+  variables: []
+  version: "1.4.0"
+  notes: |
+    Default system prompt for the symphony agent.
+edges: {}
+---
+nodeKind: PromptTemplate
+id: prompt-template:few-shot-classification
+attributes:
+  displayName: "Few-shot intent-classification prompt"
+  templateKind: few-shot
+  body: |
+    Classify the following user query into one of: {{labels}}.
+    Examples:
+    {{
+    Query: {{this.query}}
+    Label: {{this.label}}
+    {{/each}}
+    Query: {{query}}
+    Label:
+  variables: [labels, examples, query]
+  examples:
+    - { input: "reset my password", output: "account" }
+    - { input: "what's the weather?", output: "smalltalk" }
+  notes: |
+    Few-shot template for intent classification; examples are inlined per
+    invocation. Replaces the proposed FewShotExampleSet NodeKind (collapsed
+    per catalog update reviewer).
+edges: {}
+---
+nodeKind: PromptTemplate
+id: prompt-template:rag-answer
+attributes:
+  displayName: "RAG answer-with-citations template"
+  templateKind: scaffold
+  body: |
+    Answer the question using ONLY the provided sources. Cite each fact
+    with [n] where n is the source index.
+    Sources:
+    {{
+    [{{@index}}] {{this.text}}
+    {{/each}}
+    Question: {{question}}
+  variables: [sources, question]
+  notes: |
+    Retrieval-augmented generation template with mandatory citation format.
+edges: {}

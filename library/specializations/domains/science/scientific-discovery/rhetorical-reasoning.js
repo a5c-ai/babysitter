@@ -19,6 +19,13 @@
  * - Argumentation Theory: https://plato.stanford.edu/entries/argument/
  * - Science Communication: https://www.sciencedirect.com/topics/social-sciences/science-communication
  * - Framing Effects: https://www.annualreviews.org/doi/abs/10.1146/annurev.polisci.10.072805.103054
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

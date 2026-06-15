@@ -1,0 +1,18 @@
+nodeKind: Benchmark
+id: benchmark:swe-bench-verified
+attributes:
+  displayName: "SWE-bench Verified"
+  homepageUrl: https://www.swebench.com/
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    Human-verified subset of SWE-bench (500 cases) with cleaned task
+    statements and verified-solvable issues.
+edges:
+  refines:
+    - benchmark:swe-bench
+  covers:
+    - target: skill-area:bug-fixing-from-issues
+      attributes:
+        coverage: full
+        weight: 0.4

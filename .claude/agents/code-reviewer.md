@@ -23,7 +23,7 @@ Review code changes for quality and consistency across the babysitter monorepo.
 - [ ] Package boundaries respected
 
 ### SDK Patterns
-- [ ] CLI commands follow existing patterns in `packages/sdk/src/cli/`
+- [ ] CLI commands follow existing patterns in `packages/babysitter-sdk/src/cli/`
 - [ ] Exported APIs are properly typed and documented
 - [ ] Backwards compatibility maintained for public APIs
 - [ ] Event sourcing patterns followed for state changes

@@ -1,0 +1,22 @@
+nodeKind: StackProfile
+id: stack-profile:rails-stack
+attributes:
+  displayName: "Rails + Hotwire + Stimulus"
+  description: |
+    Classic modern-Rails stack: Ruby on Rails with Hotwire (Turbo Frames and
+    Turbo Streams) for server-driven UI updates without writing JavaScript,
+    and Stimulus for small, targeted client-side behaviors.
+
+    ActiveRecord (PostgreSQL or MySQL), Active Job (with Sidekiq for
+    background processing), Action Mailer, and Action Cable (WebSockets)
+    are the canonical Rails companions. Tailwind CSS via the cssbundling-rails
+    gem is the standard styling approach. Deployment commonly targets Heroku,
+    Render, or Fly.io. This stack favors convention over configuration and
+    maximizes developer productivity for feature-rich web applications.
+  composes:
+    - language:ruby
+    - framework:rails
+edges:
+  composed_of:
+    - language:ruby
+    - framework:rails

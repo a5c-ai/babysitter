@@ -1,0 +1,116 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:a5c.platform@current
+attributes:
+  displayName: a5c Unified Platform (current) — unified extension host
+  agentVersionId: agent-version:a5c@current
+  subagentDefinitionFormat: claude-code-md
+  packageRef: source-ref:a5c-cli
+  nativeExtensionFormat: a5c-plugin
+  nativeExtensionManifestPath: .a5c/plugin.json
+  nativeExtensionsDirectoryPath:
+    - ~/.a5c/plugins/
+    - .a5c/plugins/
+    - ~/.pi/agent/plugins/
+  skillFormat: anthropic-skill-md
+  skillsDirectoryPath:
+    - ~/.a5c/skills/
+    - .a5c/skills/
+  customSlashCommandsPath:
+    - ~/.a5c/commands/
+    - .a5c/commands/
+  subagentsDirectoryPath:
+    - ~/.a5c/agents/
+    - .a5c/agents/
+  hooksDirectoryOrConfigPath:
+    - .a5c/settings.json (hooks block)
+    - .a5c/hooks.json
+  settingsFiles:
+    - ~/.a5c/settings.json
+    - .a5c/settings.json
+    - .a5c/settings.local.json
+    - ~/.pi/agent/settings.json
+  marketplaceUrl: https://github.com/a5c-ai/babysitter
+  pluginRegistryPath: ~/.a5c/plugins/registry.json
+  capabilityProfileRegistry: true
+  launchConfigRegistry: true
+  platformIdentityStrategy: oauth-keychain
+  updateChannelMechanism: npm
+  supportedChannelKinds:
+    - mcp-channel
+    - http-sse-channel
+  pluginManifestPath: ".a5c/plugin.json"
+  marketplaceCommands:
+    - add
+    - list
+    - update
+    - remove
+  pluginCommands:
+    - install
+    - disable
+    - enable
+    - uninstall
+    - reload-plugins
+  subagentStorageLocations:
+    - "~/.a5c/agents/"
+    - ".a5c/agents/"
+    - "<plugin>/agents/"
+  skillStorageLocations:
+    - "~/.a5c/skills/"
+    - ".a5c/skills/"
+    - "<plugin>/skills/"
+  extraKnownMarketplacesSupport: true
+  skillStringSubstitutions:
+    - "$ARGUMENTS"
+    - "${AGENT_SESSION_ID}"
+  skillDynamicContextInjection: true
+  notes: |
+    a5c platform is the Layer-6 unified contract for installed plugins,
+    installed skills, subagents, command surfaces, hooks, launch profiles, and
+    marketplace distribution. The `a5c-plugin` descriptor is modeled as the
+    unifying extension envelope: it can represent Pi plugin metadata, Claude
+    plugin/skill bundles, Codex/Gemini/OpenCode-style extension packages,
+    babysitter plugins, and installed skill directories without making a5c
+    depend on any one platform shape. The legacy Pi wrapper remains a supported
+    compatibility profile via pi-plugin-compatible directories and settings.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:a5c
+      role: platform
+  bundles:
+    - target: presentation:a5c-tui
+    - target: presentation:a5c-cli
+  emits_journal_event:
+    - target: journal-event:babysitter-effect-resolved
+    - target: journal-event:babysitter-effect-cancelled
+    - target: journal-event:babysitter-effect-progress
+    - target: journal-event:babysitter-cost-tracked
+    - target: journal-event:babysitter-stop-hook-invoked
+    - target: journal-event:babysitter-compression-applied
+  supports:
+    - target: capability:supports-plugins
+      versionRange: "*"
+      level: full
+      notes: |
+        a5c-plugin is the native descriptor and can import or mirror pi-plugin
+        and other same-layer extension descriptors as compatibility profiles.
+    - target: capability:supports-custom-subagents
+      versionRange: "*"
+      level: full
+      notes: |
+        Subagent definitions are loaded as a platform surface and exposed to the
+        runtime through tool/subagent compatibility profiles.
+    - target: capability:supports-mcp
+      versionRange: "*"
+      level: full
+      notes: |
+        Platform-installed tools and plugins can expose MCP channels to the
+        unified runtime.
+    - target: capability:can-resume
+      versionRange: "*"
+      level: full
+      notes: |
+        Platform launch/session profiles retain enough metadata to map legacy Pi
+        resume/fork behavior and other backend resume profiles into a5c sessions.
+

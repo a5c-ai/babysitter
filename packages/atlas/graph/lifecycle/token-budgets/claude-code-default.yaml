@@ -1,0 +1,18 @@
+nodeKind: TokenBudget
+id: token-budget:claude-code-call-default
+attributes:
+  displayName: "Claude Code default per-call token budget"
+  scope: call
+  maxTotalTokens: 200000
+  contextWindowTokens: 200000
+  floorOutputTokens: 3000
+  safetyBufferTokens: 1000
+  enforcement: downscale-output
+  onExceededAction: reduce-max-tokens
+  description: |
+    Per-call budget enforced by withRetry's max-tokens-context-overflow branch.
+    On a 400 with "input length and max_tokens exceed context limit", compute
+    availableContext = contextLimit - inputTokens - 1000 safety buffer, then
+    set maxTokensOverride = max(FLOOR_OUTPUT_TOKENS, availableContext,
+    thinkingBudgetTokens + 1) and retry. If availableContext < FLOOR_OUTPUT_TOKENS
+    the call fails permanently (logError + throw original).

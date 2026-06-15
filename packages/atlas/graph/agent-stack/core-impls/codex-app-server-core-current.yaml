@@ -1,0 +1,47 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:codex-app-server.core@current
+attributes:
+  displayName: Codex App-Server Core (current)
+  agentVersionId: agent-version:codex-app-server@current
+  packageRef: source-ref:codex-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Same Codex Rust tool-use loop as the CLI core, but the loop's events
+    are surfaced to external clients over the app-server's JSON-RPC
+    protocol (stdio, SSE, or WebSocket transports) instead of a bundled
+    TUI. Clients drive the loop by sending RPC requests and consuming the
+    streamed event channel.
+  contextManagementStrategy: rolling-summary
+  compactionTriggerNotes: |
+    Inherits the Codex Rust runtime's rolling-summary strategy.
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: |
+    Inherits the Codex CLI's handoff/profile-swap subagent mechanism;
+    available to app-server clients via the same JSON-RPC surface.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final assistant text is streamed via JSON-RPC notifications carrying
+    Responses-API delta events; the consuming client renders or
+    persists the result.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: codex-internal
+  supportedTransportProtocols:
+  - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: model-dependent
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:codex-app-server
+    role: core
+  speaks:
+  - target: model-transport:openai-responses
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

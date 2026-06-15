@@ -1,0 +1,239 @@
+nodeKind: EnvVar
+id: env-var:anthropic-model
+attributes:
+  displayName: ANTHROPIC_MODEL
+  description: Name of the model setting to use.
+  name: ANTHROPIC_MODEL
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-haiku-model
+attributes:
+  displayName: ANTHROPIC_DEFAULT_HAIKU_MODEL
+  description: Custom Haiku-class model ID; see Model configuration documentation.
+  name: ANTHROPIC_DEFAULT_HAIKU_MODEL
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-haiku-model-name
+attributes:
+  displayName: ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME
+  description: Display name for the custom Haiku model in the /model picker.
+  name: ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-haiku-model-description
+attributes:
+  displayName: ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION
+  description: Display description for the custom Haiku model in the /model picker.
+  name: ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-haiku-model-supported-capabilities
+attributes:
+  displayName: ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES
+  description: Supported capabilities for the custom Haiku model.
+  name: ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-sonnet-model
+attributes:
+  displayName: ANTHROPIC_DEFAULT_SONNET_MODEL
+  description: Custom Sonnet-class model ID; see Model configuration documentation.
+  name: ANTHROPIC_DEFAULT_SONNET_MODEL
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-sonnet-model-name
+attributes:
+  displayName: ANTHROPIC_DEFAULT_SONNET_MODEL_NAME
+  description: Display name for the custom Sonnet model in the /model picker.
+  name: ANTHROPIC_DEFAULT_SONNET_MODEL_NAME
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-sonnet-model-description
+attributes:
+  displayName: ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION
+  description: Display description for the custom Sonnet model in the /model picker.
+  name: ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-sonnet-model-supported-capabilities
+attributes:
+  displayName: ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES
+  description: Supported capabilities for the custom Sonnet model.
+  name: ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-opus-model
+attributes:
+  displayName: ANTHROPIC_DEFAULT_OPUS_MODEL
+  description: Custom Opus-class model ID; see Model configuration documentation.
+  name: ANTHROPIC_DEFAULT_OPUS_MODEL
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-opus-model-name
+attributes:
+  displayName: ANTHROPIC_DEFAULT_OPUS_MODEL_NAME
+  description: Display name for the custom Opus model in the /model picker.
+  name: ANTHROPIC_DEFAULT_OPUS_MODEL_NAME
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-opus-model-description
+attributes:
+  displayName: ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION
+  description: Display description for the custom Opus model in the /model picker.
+  name: ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-default-opus-model-supported-capabilities
+attributes:
+  displayName: ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES
+  description: Supported capabilities for the custom Opus model.
+  name: ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-custom-model-option
+attributes:
+  displayName: ANTHROPIC_CUSTOM_MODEL_OPTION
+  description: Model ID to add as a custom entry in the /model picker without replacing built-in aliases.
+  name: ANTHROPIC_CUSTOM_MODEL_OPTION
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-custom-model-option-name
+attributes:
+  displayName: ANTHROPIC_CUSTOM_MODEL_OPTION_NAME
+  description: Display name for the custom model entry in the /model picker.
+  name: ANTHROPIC_CUSTOM_MODEL_OPTION_NAME
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-custom-model-option-description
+attributes:
+  displayName: ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION
+  description: Display description for the custom model entry in the /model picker.
+  name: ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-custom-model-option-supported-capabilities
+attributes:
+  displayName: ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES
+  description: Supported capabilities for the custom model option.
+  name: ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-small-fast-model
+attributes:
+  displayName: ANTHROPIC_SMALL_FAST_MODEL
+  description: '[DEPRECATED] Name of the Haiku-class model for background tasks.'
+  name: ANTHROPIC_SMALL_FAST_MODEL
+  category: model-selection
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-legacy-model-remap
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_LEGACY_MODEL_REMAP
+  description: Set to 1 to prevent automatic remapping of Opus 4.0/4.1 to current Opus on the Anthropic API.
+  name: CLAUDE_CODE_DISABLE_LEGACY_MODEL_REMAP
+  category: model-selection
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-provider-managed-by-host
+attributes:
+  displayName: CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST
+  description: Set by host platforms to prevent user settings from overriding provider routing.
+  name: CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST
+  category: model-selection
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

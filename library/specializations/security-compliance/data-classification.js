@@ -32,6 +32,9 @@
  * - PCI-DSS Data Protection: https://www.pcisecuritystandards.org/
  * - NIST Privacy Framework: https://www.nist.gov/privacy-framework
  * - Data Classification Best Practices: https://www.sans.org/white-papers/
+ * @graph
+ *   domains: [domain:security]
+ *   workflows: [workflow:vulnerability-management, workflow:data-governance-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

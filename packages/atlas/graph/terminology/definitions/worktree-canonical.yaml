@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:worktree.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:worktree
+  text: |
+    git-worktree per-branch isolation
+  status: canonical
+edges:
+  defines:
+    - term:worktree

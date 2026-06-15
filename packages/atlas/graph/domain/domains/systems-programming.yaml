@@ -1,0 +1,13 @@
+nodeKind: Domain
+id: domain:systems-programming
+attributes:
+  displayName: "Systems Programming"
+  description: |
+    The Systems Programming domain — low-level software close to the
+    hardware or kernel: operating systems, device drivers, async runtimes,
+    memory and concurrency primitives, network stacks, and language
+    runtimes. Languages typical of the domain include C, C++, Rust, Zig,
+    and Go.
+edges:
+  contains:
+    - specialization:rust-systems

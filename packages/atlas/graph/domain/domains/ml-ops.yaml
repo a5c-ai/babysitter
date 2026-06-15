@@ -1,0 +1,20 @@
+nodeKind: Domain
+id: domain:ml-ops
+attributes:
+  displayName: "MLOps"
+  description: |
+    MLOps operationalizes the machine learning lifecycle — taking models
+    from experimental notebooks to production systems and keeping them
+    reliable over time.
+
+    Key concerns include reproducible training pipelines, model versioning
+    and registries (MLflow, SageMaker), feature stores, CI/CD for ML,
+    A/B testing of model variants, drift detection, and inference serving
+    at scale. MLOps is the production face of Data Science and bridges
+    into DevOps (pipeline automation) and Cloud Infrastructure (GPU
+    compute, managed endpoints). Specializations include LLM fine-tuning
+    and ML inference serving.
+edges:
+  contains:
+    - specialization:llm-fine-tuning
+    - specialization:ml-inference-serving

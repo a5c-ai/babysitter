@@ -1,0 +1,10 @@
+{
+  "projectRoot": "C:/work/adapters",
+  "bugDescription": "system bug: sessions not showing in sessions view for discovered installed agents (claude, codex, etc.)",
+  "targetScore": 90,
+  "maxAttempts": 2,
+  "verificationCommands": [
+    "npm exec -- vitest run packages/adapters/core/tests/session-manager.test.ts packages/adapters/tui/tests/sessions-view.test.tsx",
+    "npm run build -- --pretty false"
+  ]
+}

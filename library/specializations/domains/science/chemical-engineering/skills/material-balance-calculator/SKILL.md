@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Design
   skill-id: CE-SK-030
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Material Balance Calculator Skill

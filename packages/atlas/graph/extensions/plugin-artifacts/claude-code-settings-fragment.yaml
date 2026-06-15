@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-settings-fragment
+attributes:
+  artifactId: plugin-artifact:claude-code-settings-fragment
+  displayName: "Claude Code plugin settings.json fragment"
+  targetId: plugin-target:claude-code
+  artifactKind: settings-fragment
+  pathPattern: "settings.json"
+  installerSurface: "settings-merge"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

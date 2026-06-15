@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:opencode-mcp-json
+attributes:
+  artifactId: plugin-artifact:opencode-mcp-json
+  displayName: "OpenCode MCP servers config"
+  targetId: plugin-target:opencode
+  artifactKind: mcp-config
+  pathPattern: "opencode.json#mcp"
+  installerSurface: "opencode.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

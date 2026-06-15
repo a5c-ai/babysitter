@@ -1,0 +1,101 @@
+---
+nodeKind: Workflow
+id: workflow:quantum-algorithm-benchmarking
+attributes:
+  displayName: "Quantum Algorithm Benchmarking"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-algorithm-revision"
+  complexity: single-team
+  description: |
+    Benchmarks quantum algorithms against classical baselines and prior
+    quantum implementations -- measuring circuit depth and gate counts,
+    evaluating fidelity on noisy simulators and real hardware, computing
+    quantum volume utilization efficiency, comparing variational ansatz
+    convergence rates, and producing standardized performance scorecards
+    with statistical confidence intervals. Excludes algorithm design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:quantum-computing
+    - target: domain:physics
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:error-correction-validation
+attributes:
+  displayName: "Error Correction Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates quantum error correction implementations against
+    theoretical thresholds -- simulating surface code decoders under
+    realistic noise models, measuring logical error rates as a function
+    of code distance, verifying syndrome extraction circuit correctness,
+    benchmarking decoder latency against qubit coherence times, and
+    confirming that pseudo-threshold estimates match published results.
+    Excludes QEC code design.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:data-scientist
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:quantum-computing
+    - target: domain:physics
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:quantum-hardware-calibration
+attributes:
+  displayName: "Quantum Hardware Calibration"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Calibrates quantum hardware systems for optimal gate fidelity --
+    running randomized benchmarking sequences, tuning qubit frequencies
+    to minimize crosstalk, optimizing pulse shapes via DRAG calibration,
+    measuring T1/T2 coherence times, characterizing readout assignment
+    errors, updating the device calibration database, and gating system
+    availability on minimum fidelity thresholds. Excludes hardware
+    maintenance and cryogenic operations.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:data-scientist
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:quantum-computing
+    - target: domain:physics
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:platform-team

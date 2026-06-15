@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:terraform-iac
+attributes:
+  displayName: "Terraform / IaC"
+  parentDomainId: domain:cloud-infra
+  description: |
+    Terraform-driven Infrastructure-as-Code: module design, state
+    management, drift detection, and CI/CD-integrated apply pipelines.
+edges:
+  specializes:
+    - domain:cloud-infra

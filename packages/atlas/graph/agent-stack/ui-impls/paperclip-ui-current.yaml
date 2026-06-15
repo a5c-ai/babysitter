@@ -1,0 +1,29 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:paperclip.ui@current
+attributes:
+  displayName: "Paperclip UI (current) — web board"
+  agentVersionId: agent-version:paperclip@current
+  packageRef: source-ref:paperclip-github
+  uiKind: web
+  themeSupport: basic
+  accessibilitySupport: wcag-a
+  notes: |
+    Paperclip UI is a React + Vite web board for managing AI-agent companies.
+    Features company board, agent adapter configuration, approval gates,
+    budget controls, and activity logging.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:paperclip-company-board
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paperclip-agent-adapter
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paperclip-approval-gate
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paperclip-budget-control
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paperclip-issue-checkout
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paperclip-activity-log
+      attributes: { mechanism: ui-control }

@@ -1,0 +1,79 @@
+---
+nodeKind: Workflow
+id: workflow:partner-integration-review
+attributes:
+  displayName: "Partner Integration Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews the health and effectiveness of technology partner integrations
+    -- auditing API integration uptime and error rates across partner
+    connections, validating data-exchange formats and schema compatibility
+    after partner API version updates, reviewing partner SLA compliance
+    against contractual commitments, assessing security posture of
+    partner-facing endpoints and authentication mechanisms, evaluating
+    partner-contributed revenue and co-sell pipeline metrics, identifying
+    integration maintenance burden and technical-debt accumulation, and
+    planning integration upgrades aligned with partner product roadmaps.
+    Produces partner integration health report and upgrade backlog. Excludes
+    partnership commercial negotiations.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:api-design
+    - target: skill-area:api-contract-testing
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:partnerships-team
+    - target: org-unit:engineering
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:ecosystem-health-assessment
+attributes:
+  displayName: "Ecosystem Health Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Assesses the overall health of the partner and developer ecosystem --
+    measuring ecosystem growth metrics including new partner onboarding rate,
+    active integration count, and marketplace listing quality, analyzing
+    developer adoption funnel from documentation visits through production
+    integration, benchmarking ecosystem revenue contribution and growth
+    trajectory, evaluating partner satisfaction through NPS surveys and
+    support-ticket sentiment, identifying ecosystem gaps where competitor
+    platforms have integrations the organization lacks, and modeling
+    network-effect dynamics to prioritize ecosystem investment areas.
+    Produces ecosystem health scorecard and investment priority
+    recommendations. Excludes individual partner onboarding.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:software-engineering
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:partnerships-team
+    - target: org-unit:devrel-team
+    - target: org-unit:analytics-team

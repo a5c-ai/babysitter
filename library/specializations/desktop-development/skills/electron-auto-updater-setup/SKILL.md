@@ -3,6 +3,12 @@ name: electron-auto-updater-setup
 description: Configure electron-updater with code signing verification, delta updates, staged rollouts, and multiple update channels for Electron applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [electron, desktop, auto-update, deployment, releases]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # electron-auto-updater-setup

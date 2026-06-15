@@ -3,6 +3,12 @@
  * @description Development of multiple plausible future scenarios to stress-test strategies and improve organizational adaptability
  * @inputs { strategicQuestion: string, organizationContext: object, timeHorizon: string, stakeholders: array, outputDir: string }
  * @outputs { success: boolean, scenarios: array, strategicOptions: array, robustStrategies: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:out-of-scope-reason.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:out-of-scope-reason
+  text: |
+    structured reason for out-of-scope
+  status: canonical
+edges:
+  defines:
+    - term:out-of-scope-reason

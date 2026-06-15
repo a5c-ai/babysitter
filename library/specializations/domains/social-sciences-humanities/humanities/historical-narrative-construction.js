@@ -5,6 +5,13 @@
  * @outputs { success: boolean, historicalNarrative: object, argumentStructure: object, historiographicalPosition: object, artifacts: array }
  * @recommendedSkills SK-HUM-001 (primary-source-evaluation), SK-HUM-010 (citation-scholarly-apparatus), SK-HUM-005 (literary-close-reading)
  * @recommendedAgents AG-HUM-007 (historical-narrator), AG-HUM-001 (archival-research-specialist)
+ *
+ * @graph
+ *   domains: [domain:humanities]
+ *   specializations: [specialization:digital-humanities]
+ *   skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,133 @@
+---
+nodeKind: ToolServer
+id: tool-server:mcp-browserbase
+attributes:
+  displayName: Browserbase MCP Server
+  description: |
+    Browserbase MCP server for cloud browser automation and Stagehand-backed web interaction.
+  protocol: mcp-stdio
+  provenance: custom
+  category: devtools
+  maintainer: Browserbase
+  repoUrl: https://github.com/browserbase/mcp-server-browserbase
+  sourceRef: source-ref:browserbase-mcp
+  npmPackage: "@browserbasehq/mcp"
+  mcpTransports:
+    - mcp-transport:stdio
+  ora:
+    domain: browserbase.com
+    score: 70
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:browserbase
+  sourced_from:
+    - target: source-ref:browserbase-mcp
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:test-writer
+      confidence: high
+      evidence: "Browserbase MCP exposes cloud browser interaction for QA and browser-test automation."
+    - target: workflow:test-automation-pipeline
+      confidence: high
+      evidence: "Browser automation sessions support test pipeline execution and evidence capture."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-browserless
+attributes:
+  displayName: Browserless MCP Server
+  description: |
+    Browserless MCP server for hosted browser automation, scraping, search, map/crawl, Lighthouse audits,
+    exports, downloads, and custom browser code.
+  protocol: mcp-streamable-http
+  provenance: custom
+  category: devtools
+  maintainer: Browserless
+  repoUrl: https://docs.browserless.io
+  sourceRef: source-ref:browserless-mcp-docs
+  mcpTransports:
+    - mcp-transport:streamable-http
+  ora:
+    domain: browserless.io
+    score: 70
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:browserless
+  sourced_from:
+    - target: source-ref:browserless-mcp-docs
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:test-writer
+      confidence: high
+      evidence: "Browserless MCP exposes hosted browser automation for QA and web test workflows."
+    - target: workflow:test-automation-pipeline
+      confidence: high
+      evidence: "Hosted browser runs can project browser test results into automated pipelines."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-plain
+attributes:
+  displayName: Plain MCP Server
+  description: |
+    Plain MCP surface for support threads, customer context, and support analytics.
+  protocol: mcp-streamable-http
+  provenance: custom
+  category: communication
+  maintainer: Plain
+  repoUrl: https://www.plain.com/blog/mcp-server
+  sourceRef: source-ref:plain-mcp-blog
+  mcpTransports:
+    - mcp-transport:streamable-http
+  ora:
+    domain: plain.com
+    score: 74
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:plain
+  sourced_from:
+    - target: source-ref:plain-mcp-blog
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:support-engineer
+      confidence: high
+      evidence: "Plain MCP makes support data available alongside GitHub, Linear, Slack, and other work tools."
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Support threads and customer context support issue triage and escalation."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-amplitude
+attributes:
+  displayName: Amplitude MCP Server
+  description: |
+    Amplitude MCP server for product analytics, dashboards, experiments, feature flags, and cohorts.
+  protocol: mcp-streamable-http
+  provenance: custom
+  category: analytics
+  maintainer: Amplitude
+  repoUrl: https://amplitude.com/docs/amplitude-ai/amplitude-mcp
+  sourceRef: source-ref:amplitude-mcp-docs
+  mcpTransports:
+    - mcp-transport:streamable-http
+  ora:
+    domain: amplitude.com
+    score: 71
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:amplitude
+  sourced_from:
+    - target: source-ref:amplitude-mcp-docs
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:product-manager
+      confidence: high
+      evidence: "Amplitude MCP exposes product analytics, experiments, and feature flags for product workflows."
+    - target: workflow:a-b-test-lifecycle
+      confidence: high
+      evidence: "Experiment and cohort queries support A/B test lifecycle review."
+    - target: workflow:user-feedback-loop
+      confidence: medium
+      evidence: "Behavioral analytics supports product feedback-loop analysis."

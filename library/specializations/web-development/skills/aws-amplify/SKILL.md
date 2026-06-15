@@ -2,6 +2,13 @@
 name: aws-amplify
 description: AWS Amplify deployment, hosting, and backend resources.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:authentication-authorization, skill-area:deployment-infrastructure-management]
+  roles: [role:fullstack-engineer]
+  topics: [topic:serverless-architecture]
+
 ---
 
 # AWS Amplify Skill

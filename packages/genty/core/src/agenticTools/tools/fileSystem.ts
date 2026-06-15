@@ -1,0 +1,231 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { Type } from "@sinclair/typebox";
+import type { AgenticToolOptions, CustomToolDefinition, ToolResult } from "../types";
+import { DEFAULT_SEARCH_TIMEOUT, MAX_READ_LINES, getRgPath, spawnAsync } from "../shared/process";
+import { errorResult, ok } from "../shared/results";
+import { globToRegex, resolveReadable, resolveSafe, walkDir } from "../shared/paths";
+
+function escapePatchPath(value: string): string {
+  return value.replace(/\\/g, "/");
+}
+
+function buildUnifiedPatch(filePath: string, before: string, after: string): string {
+  const label = escapePatchPath(filePath);
+  const beforeLines = before.split("\n");
+  const afterLines = after.split("\n");
+  return [
+    `--- a/${label}`,
+    `+++ b/${label}`,
+    `@@ -1,${beforeLines.length} +1,${afterLines.length} @@`,
+    ...beforeLines.map((line) => `-${line}`),
+    ...afterLines.map((line) => `+${line}`),
+  ].join("\n");
+}
+
+export function createFileSystemTools(options: AgenticToolOptions): CustomToolDefinition[] {
+  const { workspace } = options;
+  const readOnlyRoots = options.readOnlyRoots;
+
+  return [
+    {
+      name: "read",
+      label: "Read File",
+      description:
+        "Read a file from the workspace. Returns numbered lines. Supports offset and limit for partial reads.",
+      parameters: Type.Object({
+        path: Type.String({ description: "File path relative to workspace" }),
+        offset: Type.Optional(Type.Number({ description: "1-based line to start reading from" })),
+        limit: Type.Optional(Type.Number({ description: "Max number of lines to return" })),
+      }),
+      execute: (_toolCallId, params): ToolResult => {
+        const filePath = resolveReadable(workspace, String(params.path), readOnlyRoots);
+        const lines = fs.readFileSync(filePath, "utf8").split("\n");
+        const start = Math.max(0, ((params.offset as number) ?? 1) - 1);
+        const requestedLimit = (params.limit as number) ?? MAX_READ_LINES;
+        const count = Math.min(requestedLimit, MAX_READ_LINES);
+        const content = lines.slice(start, start + count).map((line, index) => `${start + index + 1}\t${line}`).join("\n");
+        if (requestedLimit > MAX_READ_LINES) {
+          return ok(`${content}\n(capped at ${MAX_READ_LINES} lines — requested ${requestedLimit})`);
+        }
+        return ok(content);
+      },
+    },
+    {
+      name: "write",
+      label: "Write File",
+      description: "Write content to a file in the workspace. Creates parent directories if needed.",
+      parameters: Type.Object({
+        path: Type.String({ description: "File path relative to workspace" }),
+        content: Type.String({ description: "File content to write" }),
+      }),
+      execute: (_toolCallId, params): ToolResult => {
+        const filePath = resolveSafe(workspace, String(params.path));
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+        fs.writeFileSync(filePath, String(params.content), "utf8");
+        return ok(`File written: ${filePath}`);
+      },
+    },
+    {
+      name: "edit",
+      label: "Edit File",
+      description:
+        "Replace a string in a file. Reads the file, replaces old_string with new_string, and writes it back.",
+      parameters: Type.Object({
+        path: Type.String({ description: "File path relative to workspace" }),
+        old_string: Type.String({ description: "Exact string to find" }),
+        new_string: Type.String({ description: "Replacement string" }),
+        replace_all: Type.Optional(Type.Boolean({ description: "Replace all occurrences (default: false)" })),
+      }),
+      execute: (_toolCallId, params): ToolResult => {
+        const filePath = resolveSafe(workspace, String(params.path));
+        const content = fs.readFileSync(filePath, "utf8");
+        const oldString = String(params.old_string);
+        const newString = String(params.new_string);
+
+        if (!content.includes(oldString)) {
+          return errorResult(`old_string not found in ${params.path as string}. Ensure it matches exactly.`);
+        }
+
+        const updated = params.replace_all
+          ? content.split(oldString).join(newString)
+          : content.replace(oldString, newString);
+        fs.writeFileSync(filePath, updated, "utf8");
+        const relativePath = path.relative(workspace, filePath) || String(params.path);
+        return ok(`File edited: ${filePath}\nUnified patch:\n${buildUnifiedPatch(relativePath, content, updated)}`);
+      },
+    },
+    {
+      name: "grep",
+      label: "Search Files",
+      description: "Search file contents using ripgrep. Returns matching lines with context.",
+      parameters: Type.Object({
+        pattern: Type.String({ description: "Regex pattern to search for" }),
+        path: Type.Optional(Type.String({ description: "Directory or file to search (default: workspace)" })),
+        glob: Type.Optional(Type.String({ description: "Glob filter (e.g. '*.ts')" })),
+        type: Type.Optional(Type.String({ description: "File type filter (e.g. 'ts', 'py')" })),
+        i: Type.Optional(Type.Boolean({ description: "Case-insensitive search" })),
+        context: Type.Optional(Type.Number({ description: "Context lines around matches" })),
+        limit: Type.Optional(Type.Number({ description: "Max results" })),
+        offset: Type.Optional(Type.Number({ description: "Skip first N results" })),
+        multiline: Type.Optional(Type.Boolean({ description: "Enable multiline mode" })),
+        output_mode: Type.Optional(Type.Union([
+          Type.Literal("content"),
+          Type.Literal("files_with_matches"),
+          Type.Literal("count"),
+        ], { description: "Output mode: content, files_with_matches, or count" })),
+        before_context: Type.Optional(Type.Number({ description: "Lines before each match (rg -B)" })),
+        after_context: Type.Optional(Type.Number({ description: "Lines after each match (rg -A)" })),
+        line_numbers: Type.Optional(Type.Boolean({ description: "Show line numbers in content mode (default true)" })),
+        head_limit: Type.Optional(Type.Number({ description: "Max output lines (default 250)" })),
+      }),
+      execute: async (_toolCallId, params) => {
+        const searchPath = params.path ? resolveReadable(workspace, String(params.path), readOnlyRoots) : workspace;
+        const mode = (params.output_mode as string) ?? "files_with_matches";
+        const args: string[] = ["--color", "never"];
+
+        if (mode === "files_with_matches") {
+          args.push("-l");
+        } else if (mode === "count") {
+          args.push("-c");
+        } else {
+          args.push("--no-heading", params.line_numbers === false ? "--no-line-number" : "--line-number");
+          if (params.before_context != null) {
+            args.push("-B", String(params.before_context));
+          }
+          if (params.after_context != null) {
+            args.push("-A", String(params.after_context));
+          }
+        }
+
+        if (params.i) {
+          args.push("-i");
+        }
+        if (params.multiline) {
+          args.push("-U", "--multiline-dotall");
+        }
+        const hasSplitContext = params.before_context != null || params.after_context != null;
+        if (mode === "content" && params.context != null && !hasSplitContext) {
+          args.push("-C", String(params.context));
+        }
+        if (params.glob) {
+          args.push("--glob", String(params.glob));
+        }
+        if (params.type) {
+          args.push("--type", String(params.type));
+        }
+        args.push("--", String(params.pattern), searchPath);
+
+        const result = await spawnAsync(getRgPath(), args, { cwd: workspace, timeout: DEFAULT_SEARCH_TIMEOUT });
+        let output = result.stdout;
+        const rawHeadLimit = params.head_limit as number | undefined;
+        const headLimit = rawHeadLimit === 0 ? Infinity : (rawHeadLimit ?? 250);
+        const headLimited = output.split("\n").slice(0, headLimit);
+
+        if (params.offset || params.limit) {
+          const offset = (params.offset as number) ?? 0;
+          const limit = (params.limit as number) ?? 250;
+          output = headLimited.slice(offset, offset + limit).join("\n");
+        } else {
+          output = headLimited.join("\n");
+        }
+
+        if (!output.trim() && result.exitCode !== 0 && result.stderr) {
+          return errorResult(result.stderr.trim());
+        }
+        return ok(output || "(no matches)");
+      },
+    },
+    {
+      name: "find",
+      label: "Find Files",
+      description: "Discover files matching a glob pattern in the workspace.",
+      parameters: Type.Object({
+        pattern: Type.String({ description: "Glob pattern (e.g. '**/*.ts')" }),
+        hidden: Type.Optional(Type.Boolean({ description: "Include hidden files/dirs" })),
+        limit: Type.Optional(Type.Number({ description: "Max results (default: 500)" })),
+      }),
+      execute: (_toolCallId, params): ToolResult => {
+        const DEFAULT_GLOB_LIMIT = 500;
+        const MAX_GLOB_LIMIT = 5000;
+        const maxResults = Math.min((params.limit as number) ?? DEFAULT_GLOB_LIMIT, MAX_GLOB_LIMIT);
+        const regex = globToRegex(String(params.pattern));
+        const matches: string[] = [];
+
+        // Search roots: the workspace (relative matches) plus any declared
+        // read-only roots (absolute matches so they are unambiguous).
+        const roots: Array<{ dir: string; relativeTo: string | null }> = [
+          { dir: workspace, relativeTo: workspace },
+        ];
+        for (const root of readOnlyRoots ?? []) {
+          if (root && path.resolve(root) !== path.resolve(workspace)) {
+            roots.push({ dir: path.resolve(root), relativeTo: null });
+          }
+        }
+
+        for (const { dir, relativeTo } of roots) {
+          if (matches.length >= maxResults) {
+            break;
+          }
+          const rootFiles: string[] = [];
+          walkDir(dir, Boolean(params.hidden), maxResults * 5, rootFiles);
+          for (const filePath of rootFiles) {
+            if (matches.length >= maxResults) {
+              break;
+            }
+            const candidate = relativeTo
+              ? path.relative(relativeTo, filePath).replace(/\\/g, "/")
+              : filePath.replace(/\\/g, "/");
+            const matchKey = relativeTo
+              ? candidate
+              : path.relative(dir, filePath).replace(/\\/g, "/");
+            if (regex.test(matchKey)) {
+              matches.push(candidate);
+            }
+          }
+        }
+        return ok(matches.join("\n") || "(no matches)");
+      },
+    },
+  ];
+}

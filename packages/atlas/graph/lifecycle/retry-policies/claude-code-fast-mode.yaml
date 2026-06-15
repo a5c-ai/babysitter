@@ -1,0 +1,22 @@
+nodeKind: RetryPolicy
+id: retry-policy:claude-code-fast-mode
+attributes:
+  displayName: "Claude Code fast-mode retry policy"
+  variant: fast-mode
+  maxRetries: 10
+  baseDelayMs: 500
+  maxDelayMs: 32000
+  backoffStrategy: exponential-jitter
+  jitterFactor: 0.25
+  honorRetryAfterHeader: true
+  retryableStatusCodes: [429, 529]
+  fastModeShortRetryThresholdMs: 20000
+  fastModeCooldownMs: 1800000
+  description: |
+    On 429/529 with a Retry-After under 20s, retry inline keeping fast mode
+    active so the prompt cache survives the same-model retry. On longer or
+    unknown Retry-After, trigger triggerFastModeCooldown(now+max(retry-after,
+    10min)) and disable fast mode for this attempt — the next call resolves
+    to a standard-speed model. Permanent rejection (anthropic-ratelimit-
+    unified-overage-disabled-reason) calls handleFastModeOverageRejection and
+    drops fast mode for the rest of the session.

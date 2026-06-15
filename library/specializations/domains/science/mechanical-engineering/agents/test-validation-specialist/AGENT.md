@@ -18,6 +18,10 @@ metadata:
   phase: 2
   experience: 12+ years mechanical testing
   background: Prototype testing, validation, certification
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Test and Validation Specialist Agent

@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:threat-modeling]
+  roles: [role:security-engineer, role:architect]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth, topic:zero-trust-architecture]
+
 ---
 
 # Threat Modeler Skill

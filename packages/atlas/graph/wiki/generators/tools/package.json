@@ -1,0 +1,31 @@
+{
+  "name": "@v6/graph-tools",
+  "version": "0.1.0",
+  "description": "Utility CLI and library for loading, querying, and rendering generators from the v6 catalog graph.",
+  "type": "module",
+  "bin": {
+    "v6-graph": "./src/cli.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./graph": "./src/graph.mjs",
+    "./query": "./src/query.mjs",
+    "./template": "./src/template.mjs",
+    "./generator": "./src/generator.mjs"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "src/index.d.ts"
+  ],
+  "scripts": {
+    "smoke": "node ./src/cli.mjs stats --root ../../.. && node ./src/cli.mjs get agent:a5c --root ../../.. --json && node ./src/cli.mjs render --root ../../.. --template wiki/generators/templates/examples/layers.md.tmpl --kind Layer --missing attributes.parentLayerId --stdout"
+  },
+  "dependencies": {
+    "yaml": "^2.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "types": "./src/index.d.ts"
+}

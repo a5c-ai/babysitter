@@ -1,0 +1,43 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-triggers
+attributes:
+  packageId: "@a5c-ai/triggers-adapter"
+  packageName: "@a5c-ai/triggers-adapter"
+  displayName: "Triggers Adapter"
+  description: "Event trigger normalization, enrichment, and filtering adapter for automation actions. Normalizes CI/CD events from GitHub, GitLab, Bitbucket, and webhooks into a canonical trigger format for harness dispatch."
+  role: "ci-trigger-evaluator"
+  whenToUse: "Use this when building CI/CD integrations that need to translate platform-specific events (pull requests, pushes, comments) into normalized trigger payloads for agent dispatch."
+  workspacePath: packages/triggers-adapter
+  moduleType: typescript
+  surfaceKinds:
+    - cli
+    - sdk
+    - github-action
+    - trigger-normalizer
+  sourceOfTruthRole: external
+  publishedTo: npm
+  versionPolicy: semver
+  supportedHarnesses:
+    - claude
+    - codex
+    - gemini
+    - copilot
+    - cursor
+    - opencode
+    - pi
+    - hermes
+  supportedProviders:
+    - foundry
+    - google
+    - anthropic
+    - bedrock
+    - openai
+  supportedTriggerBackends:
+    - github
+    - gitlab
+    - bitbucket
+    - generic-webhook
+edges:
+  has_payload_schema:
+    - target: shared-context-spec:normalized-trigger-event
+    - target: shared-context-spec:trigger-change

@@ -1,0 +1,39 @@
+# Catalog ontology manifest.
+# NodeKinds are split per-cluster under schema/node-kinds/*.yaml.
+# EdgeKinds live in schema/edge-kinds.yaml (single file — edges span clusters).
+# The validator (tools/validator/validate.py) composes these at load time.
+# Markdown <-> YAML parity is enforced by V-12.5.
+
+catalogSchemaVersion: 1.0.0
+metaSchemaVersion: 1.0.0
+generatedAt: 2026-04-29 00:00:00+00:00
+attributeTypes: {}
+nodeKindFiles:
+- schema/node-kinds/stack-layers.yaml
+- schema/node-kinds/compute-path.yaml
+- schema/node-kinds/agent-stack.yaml
+- schema/node-kinds/surfacing-path.yaml
+- schema/node-kinds/communication-primitives.yaml
+- schema/node-kinds/lifecycle.yaml
+- schema/node-kinds/extensions.yaml
+- schema/node-kinds/capabilities.yaml
+- schema/node-kinds/domain.yaml
+- schema/node-kinds/roles.yaml
+- schema/node-kinds/benchmarks.yaml
+- schema/node-kinds/trust.yaml
+- schema/node-kinds/catalog-meta.yaml
+- schema/node-kinds/terminology.yaml
+- schema/node-kinds/catalog-provenance.yaml
+- schema/node-kinds/cost-quota.yaml
+- schema/node-kinds/observability-pipeline.yaml
+- schema/node-kinds/vcs-ci.yaml
+- schema/node-kinds/compliance-safety.yaml
+- schema/node-kinds/context-engineering.yaml
+- schema/node-kinds/workflows.yaml
+- schema/node-kinds/library-artifacts.yaml
+- schema/node-kinds/methodologies.yaml
+- schema/node-kinds/deferred.yaml
+- schema/node-kinds/testable-claims.yaml
+- schema/node-kinds/decision-types.yaml
+- schema/node-kinds/knowledge-fabric.yaml
+edgeKindFile: schema/edge-kinds.yaml

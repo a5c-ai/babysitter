@@ -1,0 +1,67 @@
+---
+nodeKind: Workflow
+id: workflow:pcb-design-review
+attributes:
+  displayName: "PCB Design Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-revision"
+  complexity: single-team
+  description: |
+    Reviews printed circuit board designs for manufacturability and
+    reliability -- checking DRC/ERC violations, validating
+    impedance-controlled trace routing, auditing power delivery network
+    decoupling strategy, verifying thermal relief pads, confirming BOM
+    component availability and lifecycle status, and ensuring compliance
+    with IPC-2221 standards. Excludes schematic capture and component
+    selection.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:hardware-abstraction-layer
+    - target: skill-area:peripheral-interfacing
+  applies_to_domain:
+    - target: domain:electrical-engineering
+    - target: domain:embedded-systems
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:signal-integrity-analysis
+attributes:
+  displayName: "Signal Integrity Analysis"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-revision"
+  complexity: single-team
+  description: |
+    Analyzes signal integrity for high-speed digital interfaces --
+    running IBIS/SPICE simulations for eye diagram compliance, validating
+    transmission line impedance matching, checking crosstalk budgets on
+    adjacent traces, verifying DDR/PCIe/USB timing margins, and
+    confirming EMI compliance through pre-layout and post-layout
+    simulations. Excludes PCB routing decisions.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:hardware-abstraction-layer
+    - target: skill-area:performance-testing
+  applies_to_domain:
+    - target: domain:electrical-engineering
+    - target: domain:physics
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:research-engineering

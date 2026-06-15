@@ -1,0 +1,6 @@
+{
+  "issueNumber": 505,
+  "targetVersion": "0.135.0",
+  "branchName": "agent/issue-505",
+  "baseBranch": "staging"
+}

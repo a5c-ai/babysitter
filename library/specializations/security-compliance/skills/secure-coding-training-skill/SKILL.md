@@ -8,6 +8,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:application-security-testing, skill-area:security-testing]
+  roles: [role:security-engineer, role:compliance-engineer]
+  workflows: [workflow:security-audit]
+
 ---
 
 # Secure Coding Training Skill

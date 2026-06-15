@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:honeycomb
+attributes:
+  displayName: "Honeycomb"
+  homepageUrl: "https://www.honeycomb.io"
+  kind: observability
+  languageApplicability: neutral
+  description: |
+    Observability platform for high-cardinality, wide-event analytics on production systems.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:distributed-tracing
+  used_for:
+    - skill-area:distributed-tracing
+  alternative_to:
+    - target: tool:jaeger
+      comparison: "Distributed tracing platforms"
+    - target: tool:zipkin
+      comparison: "Distributed tracing platforms"

@@ -1,0 +1,14 @@
+nodeKind: EvidenceSource
+id: evidence:mcp-transport-http-sse-catalog-source-2026-05
+attributes:
+  displayName: HTTP+SSE MCP transport catalog source
+  kindLabel: repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/atlas/graph/compute/mcp-transports/http-sse.yaml
+  filePath: graph/compute/mcp-transports/http-sse.yaml
+  trustLevel: trust-level:repo
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: mcp-transport:http-sse
+edges:
+  has_trust_level:
+  - trust-level:repo

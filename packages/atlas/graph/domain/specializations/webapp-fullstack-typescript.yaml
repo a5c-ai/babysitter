@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:webapp-fullstack-typescript
+attributes:
+  displayName: "Full-stack Web App (TypeScript)"
+  parentDomainId: domain:web-development
+  description: |
+    Full-stack TypeScript web application development — Next.js / Remix
+    / Nuxt with TypeScript across browser, server, and shared libraries.
+edges:
+  specializes:
+    - domain:web-development

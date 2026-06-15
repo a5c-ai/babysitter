@@ -11,6 +11,11 @@ expertise:
   - Deterministic timing analysis
   - WCET analysis methodology
   - Real-time Linux (PREEMPT_RT)
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:real-time-os]
+  roles: [role:embedded-engineer]
 ---
 
 # RTOS Expert Agent

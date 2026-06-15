@@ -1,0 +1,59 @@
+---
+nodeKind: Workflow
+id: workflow:gpu-kernel-benchmarking
+attributes:
+  displayName: "GPU Kernel Benchmarking"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-optimization"
+  complexity: single-team
+  description: |
+    Benchmarks GPU compute kernels across hardware targets — measuring
+    throughput, latency, memory bandwidth, and occupancy; comparing
+    against baseline; profiling hotspots; and publishing results to
+    a performance dashboard. Excludes kernel development.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:implementer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:scientific-computing
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:cuda-driver-compatibility-testing
+attributes:
+  displayName: "CUDA Driver Compatibility Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-driver-release"
+  complexity: single-team
+  description: |
+    Validates application compatibility with new CUDA driver and toolkit
+    releases — running regression test suites across GPU SKUs, checking
+    API deprecation impact, verifying container image compatibility, and
+    producing a go/no-go recommendation. Excludes CUDA kernel writing.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:platform-engineer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:scientific-computing
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:upgrade-dependencies-weekly
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:platform-team

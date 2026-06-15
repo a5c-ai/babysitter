@@ -5,6 +5,13 @@ version: 1.0.0
 category: Android Distribution
 slug: google-play-console
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:app-store-deployment, skill-area:android-native]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Google Play Console Skill

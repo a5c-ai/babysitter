@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:mcptransport.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:mcptransport
+  text: |
+    an MCP wire transport (stdio, Streamable HTTP, ...)
+  status: canonical
+edges:
+  defines:
+    - term:mcptransport

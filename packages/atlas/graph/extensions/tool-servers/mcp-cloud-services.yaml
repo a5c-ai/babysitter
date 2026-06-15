@@ -1,0 +1,208 @@
+---
+# MCP servers for AWS, GCP, and Azure platform services
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-lambda
+attributes:
+  displayName: AWS Lambda MCP Server
+  description: |
+    MCP server providing access to AWS Lambda functions.
+    Enables AI agents to list, invoke, and inspect Lambda functions,
+    retrieve logs, manage function configurations, and monitor invocations.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/awslabs/mcp-server-aws-lambda
+  maintainer: AWS Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:aws-lambda
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-cloudwatch
+attributes:
+  displayName: AWS CloudWatch MCP Server
+  description: |
+    MCP server providing access to AWS CloudWatch monitoring.
+    Enables AI agents to query metrics, retrieve log streams and events,
+    manage alarms, and run CloudWatch Logs Insights queries.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/awslabs/mcp-server-aws-cloudwatch
+  maintainer: AWS Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:aws-cloudwatch
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:observability
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-sqs
+attributes:
+  displayName: AWS SQS MCP Server
+  description: |
+    MCP server providing access to AWS Simple Queue Service.
+    Enables AI agents to list queues, send and receive messages,
+    delete messages, and retrieve queue attributes.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/awslabs/mcp-server-aws-sqs
+  maintainer: AWS Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:aws-sqs
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-eventbridge
+attributes:
+  displayName: AWS EventBridge MCP Server
+  description: |
+    MCP server providing access to AWS EventBridge event bus.
+    Enables AI agents to list event buses and rules, put custom events,
+    and describe event schemas and targets.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/awslabs/mcp-server-aws-eventbridge
+  maintainer: AWS Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:aws-eventbridge
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-gcp-cloud-run
+attributes:
+  displayName: GCP Cloud Run MCP Server
+  description: |
+    MCP server providing access to Google Cloud Run managed containers.
+    Enables AI agents to list and describe services, retrieve revisions,
+    get traffic configurations, and monitor Cloud Run deployments.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/GoogleCloudPlatform/mcp-server-cloud-run
+  maintainer: Google Cloud
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:gcp-cloud-run
+  - target: platform:gcp
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-gcp-pubsub
+attributes:
+  displayName: GCP Pub/Sub MCP Server
+  description: |
+    MCP server providing access to Google Cloud Pub/Sub messaging.
+    Enables AI agents to list topics and subscriptions, publish messages,
+    pull messages, and manage Pub/Sub configurations.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/GoogleCloudPlatform/mcp-server-pubsub
+  maintainer: Google Cloud
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:gcp-pubsub
+  - target: platform:gcp
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-azure-functions
+attributes:
+  displayName: Azure Functions MCP Server
+  description: |
+    MCP server providing access to Azure Functions serverless compute.
+    Enables AI agents to list function apps, invoke functions, retrieve
+    logs, and manage function configurations through the Azure REST API.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/microsoft/mcp-server-azure-functions
+  maintainer: Microsoft
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:azure-functions
+  - target: platform:azure
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-azure-cosmos-db
+attributes:
+  displayName: Azure Cosmos DB MCP Server
+  description: |
+    MCP server providing access to Azure Cosmos DB multi-model database.
+    Enables AI agents to query containers, insert and update documents,
+    manage databases and containers, and inspect indexing policies.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/microsoft/mcp-server-azure-cosmos-db
+  maintainer: Microsoft
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:azure-cosmos-db
+  - target: platform:azure
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:data-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-azure-service-bus
+attributes:
+  displayName: Azure Service Bus MCP Server
+  description: |
+    MCP server providing access to Azure Service Bus messaging.
+    Enables AI agents to list queues and topics, send messages,
+    peek messages, and manage subscriptions and rules.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/microsoft/mcp-server-azure-service-bus
+  maintainer: Microsoft
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: platform-service:azure-service-bus
+  - target: platform:azure
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+  - target: domain:software-engineering

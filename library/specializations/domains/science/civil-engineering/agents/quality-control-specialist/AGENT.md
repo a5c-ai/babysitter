@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Construction Management
   agent-id: CIV-AG-019
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Quality Control Specialist Agent

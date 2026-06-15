@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:install-method
+attributes:
+  canonicalDefinitionId: definition:install-method.canonical
+  displayName: "InstallMethod"
+  kind: extension-shape
+  references:
+    - "NodeKind:InstallMethod"
+  description: |
+    A canonical install method (npm, brew, gh-extension, …) referenced by
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

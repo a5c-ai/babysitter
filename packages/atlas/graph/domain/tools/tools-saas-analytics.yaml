@@ -1,0 +1,225 @@
+---
+nodeKind: Tool
+id: tool:segment
+attributes:
+  displayName: "Segment"
+  homepageUrl: "https://segment.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Customer data platform (CDP) for collecting, unifying, and routing
+    user event data. Provides a single API to capture behavioral data
+    and send it to analytics, marketing, and data warehouse destinations.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:mixpanel
+      comparison: "Product analytics platforms"
+    - target: tool:amplitude
+      comparison: "Product analytics platforms"
+    - target: tool:posthog
+      comparison: "Product analytics platforms"
+    - target: tool:heap
+      comparison: "Product analytics platforms"
+---
+nodeKind: Tool
+id: tool:mixpanel
+attributes:
+  displayName: "Mixpanel"
+  homepageUrl: "https://mixpanel.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Product analytics platform for tracking user interactions and funnels.
+    Enables event-based analysis, cohort segmentation, A/B test measurement,
+    and retention reporting for web and mobile applications.
+edges:
+  supports_work:
+    - target: role:product-manager
+      confidence: medium
+      evidence: "Ora surfaced Mixpanel for product analytics and experimentation workflows."
+    - target: workflow:user-feedback-loop
+      confidence: medium
+      evidence: "Funnels and cohorts support behavioral feedback-loop analysis."
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:segment
+      comparison: "Product analytics platforms"
+    - target: tool:amplitude
+      comparison: "Product analytics platforms"
+    - target: tool:posthog
+      comparison: "Product analytics platforms"
+    - target: tool:heap
+      comparison: "Product analytics platforms"
+---
+nodeKind: Tool
+id: tool:amplitude
+attributes:
+  displayName: "Amplitude"
+  homepageUrl: "https://amplitude.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Digital analytics platform focused on product and behavioral analytics.
+    Provides pathfinder analysis, funnel charts, retention curves, and
+    experiment analysis to help teams understand user journeys.
+edges:
+  supports_work:
+    - target: role:product-manager
+      confidence: high
+      evidence: "Ora surfaced Amplitude for product analytics, feature flag, and experimentation workflows."
+    - target: responsibility:metric-definition
+      confidence: medium
+      evidence: "Product analytics events and dashboards support metric definition and review."
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:segment
+      comparison: "Product analytics platforms"
+    - target: tool:mixpanel
+      comparison: "Product analytics platforms"
+    - target: tool:posthog
+      comparison: "Product analytics platforms"
+    - target: tool:heap
+      comparison: "Product analytics platforms"
+---
+nodeKind: Tool
+id: tool:posthog
+attributes:
+  displayName: "PostHog"
+  homepageUrl: "https://posthog.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Open-source product analytics suite with event capture, funnels,
+    session recordings, feature flags, and A/B testing. Self-hostable
+    and offers a managed cloud with generous free tier.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:segment
+      comparison: "Product analytics platforms"
+    - target: tool:mixpanel
+      comparison: "Product analytics platforms"
+    - target: tool:amplitude
+      comparison: "Product analytics platforms"
+    - target: tool:heap
+      comparison: "Product analytics platforms"
+---
+nodeKind: Tool
+id: tool:heap
+attributes:
+  displayName: "Heap"
+  homepageUrl: "https://www.heap.io"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Automatic event-capture analytics platform that retroactively records
+    all user interactions. Eliminates manual instrumentation by capturing
+    clicks, taps, and form submissions without upfront tagging.
+edges:
+  supports_work:
+    - target: role:product-manager
+      confidence: medium
+      evidence: "Ora surfaced Heap for product analytics and experimentation workflows."
+    - target: workflow:user-feedback-loop
+      confidence: medium
+      evidence: "Automatic event capture supports user behavior feedback loops."
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:segment
+      comparison: "Product analytics platforms"
+    - target: tool:mixpanel
+      comparison: "Product analytics platforms"
+    - target: tool:amplitude
+      comparison: "Product analytics platforms"
+    - target: tool:posthog
+      comparison: "Product analytics platforms"
+---
+nodeKind: Tool
+id: tool:google-analytics
+attributes:
+  displayName: "Google Analytics"
+  homepageUrl: "https://analytics.google.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Google's web and app analytics service for tracking traffic, user
+    behavior, and conversions. GA4 uses an event-based model with
+    BigQuery integration for raw data export and custom reporting.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:hotjar
+      comparison: "Web analytics — Google Analytics tracks quantitative metrics; Hotjar provides qualitative insights"
+    - target: tool:fullstory
+      comparison: "Web analytics — Google Analytics tracks traffic; FullStory provides session replay"
+---
+nodeKind: Tool
+id: tool:hotjar
+attributes:
+  displayName: "Hotjar"
+  homepageUrl: "https://www.hotjar.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Behavioral analytics and user feedback platform providing heatmaps,
+    session recordings, and on-site surveys. Complements quantitative
+    analytics with qualitative insights into user experience.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:google-analytics
+      comparison: "Web analytics — Hotjar provides qualitative insights; Google Analytics tracks quantitative metrics"
+    - target: tool:fullstory
+      comparison: "UX analytics — Hotjar has heatmaps and surveys; FullStory has session replay and frustration detection"
+---
+nodeKind: Tool
+id: tool:fullstory
+attributes:
+  displayName: "FullStory"
+  homepageUrl: "https://www.fullstory.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Digital experience intelligence platform with session replay, funnel
+    analysis, and frustration signal detection. Automatically indexes all
+    user interactions for retroactive analysis without manual tagging.
+edges:
+  tool_used_by:
+    - target: skill-area:product-analytics
+  used_for:
+    - skill-area:data-collection
+    - skill-area:frontend-performance
+  alternative_to:
+    - target: tool:google-analytics
+      comparison: "Web analytics — FullStory provides session replay; Google Analytics tracks traffic"
+    - target: tool:hotjar
+      comparison: "UX analytics — FullStory has session replay and frustration detection; Hotjar has heatmaps and surveys"

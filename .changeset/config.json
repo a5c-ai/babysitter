@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": ["@changesets/cli/changelog", null],
+  "commit": false,
+  "fixed": [
+    [
+      "@a5c-ai/comm-adapter",
+      "@a5c-ai/adapters-codecs",
+      "@a5c-ai/adapters-cli",
+      "@a5c-ai/adapters",
+      "@a5c-ai/adapters-harness-mock"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}

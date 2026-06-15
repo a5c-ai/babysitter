@@ -1,0 +1,251 @@
+name: Publish Packages From Tag
+
+on:
+  push:
+    tags:
+      - 'babysitter/**'
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: package-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish_non_plugin_packages:
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          npm ci --prefer-offline --legacy-peer-deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare staging prerelease manifests
+        if: startsWith(github.ref_name, 'babysitter/staging/')
+        run: |
+          set -euo pipefail
+          STAGING_VERSION="${GITHUB_REF_NAME#babysitter/staging/v}"
+          node scripts/sync-workspace-versions.mjs --version "$STAGING_VERSION"
+
+      - name: Build publish packages once
+        run: |
+          set -euo pipefail
+
+          wait_for_pids() {
+            local status=0
+            for pid in "$@"; do
+              wait "$pid" || status=1
+            done
+            return "$status"
+          }
+
+          run_many() {
+            local label="$1"
+            shift
+            echo "::group::${label}"
+            local pids=()
+            for workspace in "$@"; do
+              echo "Building ${workspace}"
+              npm run build --workspace="${workspace}" &
+              pids+=("$!")
+            done
+            local status=0
+            wait_for_pids "${pids[@]}" || status="$?"
+            echo "::endgroup::"
+            return "$status"
+          }
+
+          build_agent_mux_webui() {
+            echo "Building @a5c-ai/genty-web-app without rebuilding @a5c-ai/genty-ui"
+            npm run clean --workspace=@a5c-ai/genty-web-app
+            (
+              cd packages/genty/web-app
+              npx --no-install vite build
+            )
+          }
+
+          build_agent_core() {
+            echo "Building @a5c-ai/genty-core without rebuilding runtime dependencies"
+            npx --no-install tsc --build packages/genty/core/tsconfig.json
+          }
+
+          build_babysitter_agent() {
+            echo "Building @a5c-ai/genty-platform without rebuilding runtime dependencies"
+            npx --no-install tsc --build packages/genty/platform/tsconfig.json
+          }
+
+          echo "Building @a5c-ai/atlas catalog foundation"
+          npm run build --workspace=@a5c-ai/atlas
+
+          run_many "Build foundation packages" \
+            @a5c-ai/tasks-adapter \
+            @a5c-ai/kradle-installer \
+            @a5c-ai/adapters-observability \
+            @a5c-ai/triggers-adapter \
+            @a5c-ai/babysitter-observer-dashboard
+
+          run_many "Build core packages" \
+            @a5c-ai/hooks-adapter-core \
+            @a5c-ai/comm-adapter \
+            @a5c-ai/extensions-adapter
+
+          run_many "Build leaf adapter packages" \
+            @a5c-ai/adapters-codecs \
+            @a5c-ai/adapters-harness-mock \
+            @a5c-ai/transport-adapter \
+            @a5c-ai/config-adapter \
+            @a5c-ai/genty-ui \
+            @a5c-ai/hooks-adapter-claude \
+            @a5c-ai/hooks-adapter-codex \
+            @a5c-ai/hooks-adapter-gemini \
+            @a5c-ai/hooks-adapter-copilot \
+            @a5c-ai/hooks-adapter-cursor \
+            @a5c-ai/hooks-adapter-pi \
+            @a5c-ai/hooks-adapter-oh-my-pi \
+            @a5c-ai/hooks-adapter-opencode \
+            @a5c-ai/hooks-adapter-openclaw
+
+          run_many "Build packages depending on leaf adapters" \
+            @a5c-ai/launch-adapter \
+            @a5c-ai/tools-adapter
+
+          echo "::group::Build aggregate packages"
+          aggregate_pids=()
+          npm run build --workspace=@a5c-ai/adapters-gateway &
+          aggregate_pids+=("$!")
+          npm run build --workspace=@a5c-ai/hooks-adapter-cli &
+          aggregate_pids+=("$!")
+          build_agent_mux_webui &
+          aggregate_pids+=("$!")
+          aggregate_status=0
+          wait_for_pids "${aggregate_pids[@]}" || aggregate_status="$?"
+          echo "::endgroup::"
+          if [[ "$aggregate_status" != "0" ]]; then
+            exit "$aggregate_status"
+          fi
+
+          npm run build --workspace=@a5c-ai/adapters-cli
+          npm run build --workspace=@a5c-ai/adapters
+
+          echo "::group::Build runtime packages"
+          runtime_pids=()
+          npm run build --workspace=@a5c-ai/babysitter-sdk &
+          runtime_pids+=("$!")
+          npm run build:local --workspace=@a5c-ai/genty-tui &
+          runtime_pids+=("$!")
+          runtime_status=0
+          wait_for_pids "${runtime_pids[@]}" || runtime_status="$?"
+          echo "::endgroup::"
+          if [[ "$runtime_status" != "0" ]]; then
+            exit "$runtime_status"
+          fi
+
+          build_agent_core
+          npm run build --workspace=@a5c-ai/genty-runtime
+          build_babysitter_agent
+          npm run build --workspace=@a5c-ai/genty
+
+      - name: Verify SDK package health
+        run: npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
+
+      - name: Publish packages from tag
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PUBLISH_PACKAGE_FROM_TAG_SKIP_BUILD: '1'
+        run: |
+          set -euo pipefail
+
+          publish_many() {
+            local label="$1"
+            shift
+            echo "::group::${label}"
+            local pids=()
+            local status=0
+            for workspace in "$@"; do
+              echo "Publishing ${workspace}"
+              node scripts/publish-package-from-tag.mjs --workspace="${workspace}" --skip-build &
+              pids+=("$!")
+            done
+            for pid in "${pids[@]}"; do
+              wait "$pid" || status=1
+            done
+            echo "::endgroup::"
+            return "$status"
+          }
+
+          publish_many "Publish foundation packages" \
+            @a5c-ai/atlas \
+            @a5c-ai/tasks-adapter \
+            @a5c-ai/kradle-installer \
+            @a5c-ai/adapters-observability \
+            @a5c-ai/triggers-adapter \
+            @a5c-ai/babysitter-observer-dashboard
+
+          publish_many "Publish core packages" \
+            @a5c-ai/hooks-adapter-core \
+            @a5c-ai/comm-adapter \
+            @a5c-ai/extensions-adapter
+
+          publish_many "Publish leaf adapter packages" \
+            @a5c-ai/adapters-codecs \
+            @a5c-ai/adapters-harness-mock \
+            @a5c-ai/transport-adapter \
+            @a5c-ai/config-adapter \
+            @a5c-ai/launch-adapter \
+            @a5c-ai/tools-adapter \
+            @a5c-ai/genty-ui \
+            @a5c-ai/hooks-adapter-claude \
+            @a5c-ai/hooks-adapter-codex \
+            @a5c-ai/hooks-adapter-gemini \
+            @a5c-ai/hooks-adapter-copilot \
+            @a5c-ai/hooks-adapter-cursor \
+            @a5c-ai/hooks-adapter-pi \
+            @a5c-ai/hooks-adapter-oh-my-pi \
+            @a5c-ai/hooks-adapter-opencode \
+            @a5c-ai/hooks-adapter-openclaw
+
+          publish_many "Publish aggregate packages" \
+            @a5c-ai/adapters-gateway \
+            @a5c-ai/hooks-adapter-cli \
+            @a5c-ai/genty-web-app
+
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-cli --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters --skip-build
+
+          publish_many "Publish runtime packages" \
+            @a5c-ai/babysitter-sdk \
+            @a5c-ai/genty-tui
+
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-core --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-runtime --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-platform --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
+
+  sync_external_plugins_develop:
+    if: startsWith(github.ref_name, 'babysitter/develop/')
+    name: Sync External Plugins (develop)
+    needs:
+      - publish_non_plugin_packages
+    uses: ./.github/workflows/sync-external-plugins.yml
+    with:
+      branch: develop
+      ref: ${{ github.sha }}
+    secrets: inherit

@@ -1,0 +1,133 @@
+nodeKind: Workflow
+id: workflow:vulnerability-management
+attributes:
+  displayName: "Vulnerability Management"
+  description: |
+    Continuous security workflow that identifies, assesses, prioritises, and remediates
+    vulnerabilities across the organisation's software, infrastructure, and dependencies.
+    Automated scanning tools run continuously against code repositories, container images,
+    and cloud environments, feeding findings into a centralised vulnerability tracker.
+    Security engineers triage new findings by CVSS score and exploitability, assign
+    remediation owners, and track SLA compliance. Critical and high-severity findings
+    trigger an expedited remediation path with engineering escalation. Monthly metrics
+    on mean-time-to-remediate and open CVE counts are reported to leadership. The workflow
+    maintains a continuously shrinking attack surface.
+  workflowKind: security
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: complex
+edges:
+  involves_role:
+    - role:security-engineer
+    - role:devops-engineer
+    - role:platform-engineer
+    - role:backend-engineer
+    - role:compliance-officer
+  applies_to_domain:
+    - domain:cybersecurity
+    - domain:devops
+    - domain:cloud-infra
+  triggers_responsibility:
+    - responsibility:security-audit
+    - responsibility:risk-assessment
+    - responsibility:compliance-monitoring
+---
+nodeKind: Workflow
+id: workflow:access-review
+attributes:
+  displayName: "Access Review"
+  description: |
+    Quarterly scheduled workflow ensuring that user and service account permissions across
+    all systems remain appropriate and consistent with the principle of least privilege.
+    IT operations and security engineers generate access reports for critical systems,
+    cloud environments, and sensitive data stores. Each team manager reviews the permissions
+    of their reports, certifying or revoking access as appropriate. Orphaned accounts from
+    departures or role changes are deprovisioned. Exceptions require documented justification
+    and compensating controls. Audit evidence is retained for compliance reporting. The
+    workflow reduces insider threat risk and satisfies regulatory access-control requirements.
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:security-engineer
+    - role:it-ops-engineer
+    - role:compliance-officer
+    - role:engineering-manager
+    - role:privacy-engineer
+  applies_to_domain:
+    - domain:cybersecurity
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:access-control
+    - responsibility:compliance-monitoring
+    - responsibility:risk-assessment
+---
+nodeKind: Workflow
+id: workflow:security-audit
+attributes:
+  displayName: "Security Audit"
+  description: |
+    Annual comprehensive review of the organisation's security posture, policies, controls,
+    and compliance against applicable frameworks (e.g. SOC 2, ISO 27001, NIST CSF). An
+    internal or external audit team assesses controls across identity management, network
+    security, data protection, incident response, and physical security. Gaps are documented
+    in an audit report with risk ratings and recommended remediations. Engineering and
+    security teams develop a remediation roadmap prioritised by risk. Progress is tracked
+    quarterly, and evidence of completed remediations is collected for the next audit cycle.
+    The workflow provides leadership and customers with assurance of security maturity.
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:security-engineer
+    - role:compliance-officer
+    - role:audit-analyst
+    - role:privacy-engineer
+    - role:legal-counsel
+    - role:vp-engineering
+  applies_to_domain:
+    - domain:cybersecurity
+    - domain:infrastructure
+  triggers_responsibility:
+    - responsibility:security-audit
+    - responsibility:compliance-monitoring
+    - responsibility:risk-assessment
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:penetration-testing-cycle
+attributes:
+  displayName: "Penetration Testing Cycle"
+  description: |
+    Semi-annual workflow where authorised security professionals attempt to compromise
+    production or staging systems to identify exploitable vulnerabilities before malicious
+    actors do. The cycle begins with scoping — defining targets, rules of engagement, and
+    success criteria with security and legal stakeholders. An external penetration testing
+    firm or internal red team conducts the test over a defined window using agreed
+    methodologies. Findings are documented in a penetration test report with severity
+    ratings, proof-of-concept evidence, and remediation guidance. Engineering teams
+    prioritise and remediate findings, and a retest validates critical fixes. Results
+    inform the vulnerability management programme and security roadmap.
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "semi-annual"
+  complexity: complex
+edges:
+  involves_role:
+    - role:security-engineer
+    - role:compliance-officer
+    - role:engineering-manager
+    - role:legal-counsel
+    - role:audit-analyst
+  applies_to_domain:
+    - domain:cybersecurity
+    - domain:networking
+  triggers_responsibility:
+    - responsibility:security-audit
+    - responsibility:risk-assessment
+    - responsibility:compliance-monitoring
+    - responsibility:vendor-evaluation

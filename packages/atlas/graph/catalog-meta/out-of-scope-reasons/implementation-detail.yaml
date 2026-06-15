@@ -1,0 +1,8 @@
+nodeKind: OutOfScopeReason
+id: out-of-scope-reason:implementation-detail
+attributes:
+  reasonKind: "implementation-detail"
+  displayName: "Implementation Detail"
+  description: |
+    An internal implementation detail not exposed publicly.
+edges: {}

@@ -2,6 +2,10 @@
 name: production-coordination
 description: Coordinate all aspects of live performance production including scheduling, technical requirements, artist contracts, venue logistics, and show documentation
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:event-management, skill-area:change-management, skill-area:stakeholder-management]
+  roles: [role:project-manager, role:operations-analyst]
 ---
 
 # Production Coordination

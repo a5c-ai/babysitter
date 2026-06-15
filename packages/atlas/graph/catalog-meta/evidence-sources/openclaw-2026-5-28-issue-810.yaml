@@ -1,0 +1,29 @@
+# Dedicated issue #810 evidence record. Kept separate from date-bucket evidence
+# files to avoid conflicts with concurrent graph-update PRs.
+nodeKind: EvidenceSource
+id: evidence:openclaw-2026-5-28-release-issue-810
+attributes:
+  displayName: "OpenClaw v2026.5.28 release notes for issue #810"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/openclaw/openclaw/releases/tag/v2026.5.28
+  sourcePathOrUrl: https://github.com/openclaw/openclaw/releases/tag/v2026.5.28
+  locator: "openclaw/openclaw release v2026.5.28 tracked by issue #810"
+  capturedAt: "2026-05-30T20:06:10Z"
+  observedAt: "2026-05-31T20:12:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:12:00Z"
+  notes: |
+    Issue #810 tracks OpenClaw v2026.5.28 release notes. The release improves
+    agent and Codex runtime recovery, safer channel delivery and session identity
+    across outbound plugin hooks and chat transports, provider/media/model
+    coverage for Claude Opus 4.8, Fal Krea, NVIDIA, MiniMax streaming music,
+    voice catalogs, GitHub Copilot agent runtime support, and Codex Supervisor,
+    plus clearer CLI/auth/doctor/provider failure handling.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:openclaw:2026-5-28

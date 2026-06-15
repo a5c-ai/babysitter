@@ -18,6 +18,12 @@
  * - Electron Microscopy of Nanomaterials: https://www.sciencedirect.com/topics/materials-science/transmission-electron-microscopy
  * - Scanning Probe Microscopy for Nanoscience: https://www.nature.com/articles/nnano.2007.300
  * - X-ray Techniques for Nanomaterial Characterization: https://www.sciencedirect.com/topics/engineering/x-ray-diffraction-analysis
+ *
+ * @graph
+ *   domains: [domain:nanotechnology]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -32,22 +38,14 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Characterization Planning
-  let characterizationPlan = await ctx.task(characterizationPlanningTask, {
+  const characterizationPlan = await ctx.task(characterizationPlanningTask, {
     nanomaterial,
     characterizationGoals,
     samplePreparation
   });
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      characterizationPlan = await ctx.task(characterizationPlanningTask, { ...{
-    nanomaterial,
-    characterizationGoals,
-    samplePreparation
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Breakpoint: Review characterization plan
+  await ctx.breakpoint({
     question: `Review characterization plan for ${nanomaterial.type}. ${characterizationPlan.techniques.length} techniques selected. Approve to proceed?`,
     title: 'Characterization Plan Review',
     context: {
@@ -60,15 +58,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: characterizationPlan
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Sample Preparation Protocol
   const samplePrepProtocol = await ctx.task(samplePreparationTask, {
     nanomaterial,
@@ -88,6 +80,7 @@ export async function process(inputs, ctx) {
     });
     characterizationResults.electronMicroscopy = emResults;
   }
+
   // 3b: Spectroscopy (XPS, Raman, UV-Vis)
   if (characterizationPlan.techniques.includes('spectroscopy')) {
     const spectroscopyResults = await ctx.task(spectroscopyTask, {
@@ -97,6 +90,7 @@ export async function process(inputs, ctx) {
     });
     characterizationResults.spectroscopy = spectroscopyResults;
   }
+
   // 3c: Particle Sizing (DLS, NTA)
   if (characterizationPlan.techniques.includes('particle-sizing')) {
     const sizingResults = await ctx.task(particleSizingTask, {
@@ -106,6 +100,7 @@ export async function process(inputs, ctx) {
     });
     characterizationResults.particleSizing = sizingResults;
   }
+
   // 3d: Thermal Analysis (TGA, DSC)
   if (characterizationPlan.techniques.includes('thermal-analysis')) {
     const thermalResults = await ctx.task(thermalAnalysisTask, {
@@ -115,15 +110,17 @@ export async function process(inputs, ctx) {
     });
     characterizationResults.thermalAnalysis = thermalResults;
   }
+
   // 3e: Surface Analysis (Zeta potential, BET)
   if (characterizationPlan.techniques.includes('surface-analysis')) {
-    let surfaceResults = await ctx.task(surfaceAnalysisTask, {
+    const surfaceResults = await ctx.task(surfaceAnalysisTask, {
       nanomaterial,
       samplePrepProtocol,
       surfaceMethods: characterizationPlan.surfaceMethods
     });
     characterizationResults.surfaceAnalysis = surfaceResults;
   }
+
   // Phase 4: Cross-Validation Analysis
   let crossValidation = null;
   if (crossValidationRequired) {
@@ -134,32 +131,19 @@ export async function process(inputs, ctx) {
     });
 
     // Quality Gate: Cross-validation must pass
-        let lastFeedback_phase4Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase4Review) {
-          surfaceResults = await ctx.task(surfaceAnalysisTask, { ...{
-      nanomaterial,
-      samplePrepProtocol,
-      surfaceMethods: characterizationPlan.surfaceMethods
-    }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-        }
-  const phase4Review = await ctx.breakpoint({
+    if (!crossValidation.validated) {
+      await ctx.breakpoint({
         question: `Cross-validation issues detected: ${crossValidation.discrepancies.length} discrepancies. Review and determine resolution?`,
         title: 'Cross-Validation Warning',
         context: {
           runId: ctx.runId,
           discrepancies: crossValidation.discrepancies,
           recommendations: crossValidation.recommendations
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase4Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase4Review.approved) break;
-        lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 5: Uncertainty Quantification
   const uncertaintyAnalysis = await ctx.task(uncertaintyQuantificationTask, {
     characterizationResults,
@@ -168,7 +152,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Results Integration and Reporting
-  let integratedReport = await ctx.task(resultsIntegrationTask, {
+  const integratedReport = await ctx.task(resultsIntegrationTask, {
     nanomaterial,
     characterizationGoals,
     characterizationResults,
@@ -176,18 +160,8 @@ export async function process(inputs, ctx) {
     uncertaintyAnalysis
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      integratedReport = await ctx.task(resultsIntegrationTask, { ...{
-    nanomaterial,
-    characterizationGoals,
-    characterizationResults,
-    crossValidation,
-    uncertaintyAnalysis
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Results approval
+  await ctx.breakpoint({
     question: `Characterization complete. ${Object.keys(characterizationResults).length} techniques executed. Overall uncertainty: ${uncertaintyAnalysis.overallUncertainty}. Approve results?`,
     title: 'Characterization Results Approval',
     context: {
@@ -198,15 +172,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/characterization-report.md', format: 'markdown', content: integratedReport.markdown },
         { path: 'artifacts/characterization-data.json', format: 'json', content: characterizationResults }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     characterizationResults,
@@ -226,7 +194,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const characterizationPlanningTask = defineTask('characterization-planning', (args, taskCtx) => ({
   kind: 'agent',

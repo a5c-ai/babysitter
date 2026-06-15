@@ -1,0 +1,195 @@
+---
+# MCP servers for IaC and platform engineering tools
+
+nodeKind: ToolServer
+id: tool-server:mcp-terraform-cloud
+attributes:
+  displayName: Terraform Cloud MCP Server
+  description: |
+    MCP server integrating AI assistants with the Terraform Cloud API.
+    Enables agents to manage workspaces, trigger plan and apply runs,
+    inspect state, and query the organization through natural language.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/severity1/terraform-cloud-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:terraform-cloud
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-pulumi-cloud
+attributes:
+  displayName: Pulumi MCP Server
+  description: |
+    Official Pulumi MCP server providing AI assistants with access to Pulumi Cloud
+    stacks, resources, registry documentation, and deployment operations.
+    Enables agents to preview and deploy infrastructure without leaving the editor.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/pulumi/mcp-server
+  maintainer: Pulumi
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:pulumi-cloud
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:cloud-infra
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-backstage
+attributes:
+  displayName: Backstage MCP Server
+  description: |
+    MCP server that exposes the Backstage Software Catalog API as LLM tools.
+    Enables AI agents to query catalog entities, component ownership, API specs,
+    and scaffolder templates from developer portals powered by Backstage.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/Coderrob/backstage-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:backstage
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:platform-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-port-dev
+attributes:
+  displayName: Port MCP Server
+  description: |
+    Official Port MCP server enabling AI agents to query the software catalog,
+    analyze scorecards, trigger self-service actions, and manage developer portal
+    resources through natural language interactions with the Port platform.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/port-labs/port-mcp-server
+  maintainer: Port Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:port-dev
+  lib_applies_to_domain:
+  - target: domain:devops
+  - target: domain:platform-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-argocd
+attributes:
+  displayName: Argo CD MCP Server
+  description: |
+    Official MCP server from argoproj-labs for interacting with Argo CD clusters.
+    Enables AI assistants to query application sync status, trace deployment
+    issues, trigger syncs, and explore resource trees through natural language.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/argoproj-labs/mcp-for-argocd
+  maintainer: Argo Project
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:argocd
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-flux
+attributes:
+  displayName: Flux Operator MCP Server
+  description: |
+    MCP server embedded in the Flux Operator project for AI-assisted GitOps.
+    Enables agents to inspect HelmReleases, Kustomizations, and Flux health,
+    trace deployment failures, and interact with Flux-managed Kubernetes clusters.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/controlplaneio-fluxcd/flux-operator
+  maintainer: ControlPlane
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:flux
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-docker-compose
+attributes:
+  displayName: Docker MCP Server
+  description: |
+    MCP server for Docker and Docker Compose stack management. Enables AI agents
+    to deploy compose stacks, manage containers, retrieve logs, and perform
+    container lifecycle operations through natural language conversations.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/QuantGeekDev/docker-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:docker-compose
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-kubernetes-local
+attributes:
+  displayName: Kubernetes MCP Server
+  description: |
+    MCP server for Kubernetes cluster management supporting local clusters such as
+    minikube, kind, and K3s. Enables AI agents to manage deployments, services,
+    pods, namespaces, and resources through natural language via kubectl.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/Flux159/mcp-server-kubernetes
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:minikube
+  - target: tool:kind
+  - target: tool:k3s
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-nomad
+attributes:
+  displayName: Nomad MCP Server
+  description: |
+    MCP server for HashiCorp Nomad workload orchestration. Enables AI agents to
+    manage jobs, deployments, namespaces, and ACLs; query cluster health; and
+    perform infrastructure operations on Nomad clusters through natural language.
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/danfedick/nomad-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:nomad
+  lib_applies_to_domain:
+  - target: domain:devops

@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:evidence-policy
+attributes:
+  canonicalDefinitionId: definition:evidence-policy.canonical
+  displayName: "EvidencePolicy"
+  kind: concept
+  references:
+    - "NodeKind:EvidencePolicy"
+  description: |
+    Which claims need evidence, freshness windows, reviewer rules
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+    - target: domain:software-engineering

@@ -1,0 +1,269 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:agent-stack
+attributes:
+  displayName: Agent stack (meta)
+  clusterNumber: 3
+  scope: 'Conceptual aggregation of NodeKinds that together describe the agentic compute stack: AgentProduct/Version/CoreImpl/RuntimeImpl/PlatformImpl, MCP transport surfaces, tool/skill/plugin extensions, and the lifecycle primitives (RunAttempt, LiveSession, OrchestratorState, ...) that drive an agent invocation. Members may live in several editorial clusters in ontology-schema.yaml (3-agent-stack, 2-compute-path, 7-extensions, 6-lifecycle); the per-MetaNodeKind `cluster` attribute records the truthful editorial slug.'
+  parentClusterId: null
+edges:
+  contains_meta_edge_kind:
+  - target: meta-edge-kind:composed-of
+  - target: meta-edge-kind:version-of
+  - target: meta-edge-kind:has-version
+  contains_meta_node_kind:
+  - target: meta-node-kind:agent-product
+  - target: meta-node-kind:agent-version
+  - target: meta-node-kind:agent-core-impl
+  - target: meta-node-kind:agent-runtime-impl
+  - target: meta-node-kind:agent-platform-impl
+  - target: meta-node-kind:agent-ui-impl
+  - target: meta-node-kind:agent-host-transport
+  - target: meta-node-kind:tool-descriptor
+  - target: meta-node-kind:tool-server
+  - target: meta-node-kind:subagent
+  - target: meta-node-kind:skill
+  - target: meta-node-kind:plugin
+  - target: meta-node-kind:mcp-transport
+  - target: meta-node-kind:mcp-resource
+  - target: meta-node-kind:mcp-prompt
+  - target: meta-node-kind:mcp-sampling
+  - target: meta-node-kind:mcp-root
+  - target: meta-node-kind:async-job
+  - target: meta-node-kind:human-checkpoint
+  - target: meta-node-kind:resume-token
+  - target: meta-node-kind:launch-contract
+  - target: meta-node-kind:run-attempt
+  - target: meta-node-kind:live-session
+  - target: meta-node-kind:orchestrator-state
+  - target: meta-node-kind:dispatch-preflight
+  - target: meta-node-kind:reconciliation
+  - target: meta-node-kind:workflow-definition
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-product
+attributes:
+  displayName: AgentProduct (meta)
+  name: AgentProduct
+  cluster: 3-agent-stack
+  prefix: agent
+  origin: derived
+  purpose: productized agent (Claude Code, Codex, ...) — the umbrella
+  exampleCount: 0
+  invariants:
+  - 'id starts with agent:'
+  - has_version count >= 1
+  - composed_of must include at least one core, runtime, platform role
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:agent-product--id
+  - target: meta-attribute:agent-product--display-name
+  - target: meta-attribute:agent-product--vendor
+  - target: meta-attribute:agent-product--homepage-url
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-version
+attributes:
+  displayName: AgentVersion (meta)
+  name: AgentVersion
+  cluster: 3-agent-stack
+  prefix: agent-version
+  origin: universal
+  purpose: a version of an AgentProduct
+  exampleCount: 0
+  invariants:
+  - agentProductId resolves
+  - eolAt >= releasedAt (when present)
+  - installMethods non-empty
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  has_example:
+  - target: meta-node-kind:agent-product
+  contains_meta_attribute:
+  - target: meta-attribute:agent-version--id
+  - target: meta-attribute:agent-version--agent-product-id
+  - target: meta-attribute:agent-version--version-range
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-core-impl
+attributes:
+  displayName: AgentCoreImpl (meta)
+  name: AgentCoreImpl
+  cluster: 3-agent-stack
+  prefix: agent-core-impl
+  origin: derived
+  purpose: concrete loop+transport-client impl
+  exampleCount: 0
+  invariants:
+  - composes carries role=core
+  - supportedTransportProtocols non-empty
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:agent-core-impl--id
+  - target: meta-attribute:agent-core-impl--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-runtime-impl
+attributes:
+  displayName: AgentRuntimeImpl (meta)
+  name: AgentRuntimeImpl
+  cluster: 3-agent-stack
+  prefix: agent-runtime-impl
+  origin: derived
+  purpose: concrete runtime+tools+hook-sockets impl
+  exampleCount: 0
+  invariants:
+  - composes carries role=runtime
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:agent-runtime-impl--id
+  - target: meta-attribute:agent-runtime-impl--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-platform-impl
+attributes:
+  displayName: AgentPlatformImpl (meta)
+  name: AgentPlatformImpl
+  cluster: 3-agent-stack
+  prefix: agent-platform-impl
+  origin: derived
+  purpose: concrete platform impl
+  exampleCount: 0
+  invariants:
+  - composes carries role=platform
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:agent-platform-impl--id
+  - target: meta-attribute:agent-platform-impl--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-host-transport
+attributes:
+  displayName: AgentHostTransport (meta)
+  name: AgentHostTransport
+  cluster: 2-compute-path
+  prefix: agent-host-transport
+  origin: standard
+  purpose: how a host talks to an agent process (stdio, http, ws, ...)
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:agent-host-transport--id
+  - target: meta-attribute:agent-host-transport--display-name
+  - target: meta-attribute:agent-host-transport--kind
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:tool-descriptor
+attributes:
+  displayName: ToolDescriptor (meta)
+  name: ToolDescriptor
+  cluster: ''
+  prefix: tool-descriptor
+  origin: universal
+  purpose: a callable tool with schema
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:tool-descriptor--id
+  - target: meta-attribute:tool-descriptor--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:tool-server
+attributes:
+  displayName: ToolServer (meta)
+  name: ToolServer
+  cluster: 7-extensions
+  prefix: tool-server
+  origin: universal
+  purpose: external process speaking a tool protocol
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:tool-server--id
+  - target: meta-attribute:tool-server--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:subagent
+attributes:
+  displayName: Subagent (meta)
+  name: Subagent
+  cluster: ''
+  prefix: subagent
+  origin: universal
+  purpose: 'A specialized worker / persona that an agent runtime can dispatch alongside
+    its primary loop. Canonical term follows Anthropic Claude Code ("subagent",
+    one word; docs.anthropic.com/en/docs/claude-code/sub-agents). The same
+    NodeKind covers two provenance variants — vendor-shipped built-ins (Claude
+    Code''s general-purpose / Explore / Plan; OpenAI built-in handoff patterns)
+    and user-installable custom definitions (Claude Code `.claude/agents/<name>.md`,
+    parallel to a Skill''s SKILL.md). Distinguished via the `provenance`
+    attribute. The dispatch *mechanism* a runtime uses to invoke a subagent is
+    recorded on `AgentRuntimeImpl.subagentDispatchMechanism` (task-tool /
+    handoff / sub_agents-array / agent-as-tool / none); the *definition format*
+    a platform loads custom subagents from is recorded on
+    `AgentPlatformImpl.subagentDefinitionFormat`.'
+  exampleCount: 0
+  invariants:
+  - provenance=built-in implies subjectId is set and resolves to an AgentVersion or AgentProduct
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:subagent--id
+  - target: meta-attribute:subagent--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:skill
+attributes:
+  displayName: Skill (meta)
+  name: Skill
+  cluster: 7-extensions
+  prefix: skill
+  origin: universal
+  purpose: directory-of-markdown content shape
+  exampleCount: 0
+  invariants: []
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:skill--id
+  - target: meta-attribute:skill--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:plugin
+attributes:
+  displayName: Plugin (meta)
+  name: Plugin
+  cluster: 7-extensions
+  prefix: plugin
+  origin: universal
+  purpose: universal plugin (union of skills/MCP/hooks/lsp/monitors/bin)
+  exampleCount: 0
+  invariants:
+  - every installs_into edge declares installMethod (V-11.1)
+  - portability=native or hybrid implies nativeFormat is set
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:plugin--id
+  - target: meta-attribute:plugin--display-name

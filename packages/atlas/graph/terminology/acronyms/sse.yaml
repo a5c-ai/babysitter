@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:sse
+attributes:
+  acronym: "SSE"
+  expandsToTermId: term:server-sent-events
+  description: |
+    Acronym for SSE.
+edges:
+  expands_to:
+    - term:server-sent-events

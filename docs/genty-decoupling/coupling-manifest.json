@@ -1,0 +1,801 @@
+{
+  "packages": {
+    "platform": {
+      "files": [
+        {
+          "path": "src/api/eventStream.ts",
+          "line": 9,
+          "symbols": [
+            { "name": "resolveExistingRunDir", "category": "run-lifecycle" },
+            { "name": "resolveRunsDir", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/api/utils.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/api/effects.ts",
+          "line": 15,
+          "symbols": [
+            { "name": "appendEvent", "category": "journal" },
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "readTaskDefinition", "category": "run-lifecycle" },
+            { "name": "readTaskResult", "category": "run-lifecycle" },
+            { "name": "serializeAndWriteTaskResult", "category": "run-lifecycle" },
+            { "name": "withRunLock", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/api/effects.ts",
+          "line": 18,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" },
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/api/effectsTypes.ts",
+          "line": 6,
+          "symbols": [
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/api/breakpoints.ts",
+          "line": 22,
+          "symbols": [
+            { "name": "addRule", "category": "governance" },
+            { "name": "appendEvent", "category": "journal" },
+            { "name": "callHook", "category": "run-lifecycle" },
+            { "name": "evaluateAutoApproval", "category": "governance" },
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "readRules", "category": "governance" },
+            { "name": "readTaskDefinition", "category": "run-lifecycle" },
+            { "name": "readTaskResult", "category": "run-lifecycle" },
+            { "name": "removeRule", "category": "governance" },
+            { "name": "serializeAndWriteTaskResult", "category": "run-lifecycle" },
+            { "name": "withRunLock", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/api/breakpoints.ts",
+          "line": 31,
+          "symbols": [
+            { "name": "AutoApprovalResult", "category": "types-only" },
+            { "name": "BreakpointConfig", "category": "types-only" },
+            { "name": "BreakpointRule", "category": "types-only" },
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/api/runs.ts",
+          "line": 21,
+          "symbols": [
+            { "name": "commitEffectResult", "category": "effect-orchestration" },
+            { "name": "createRun", "category": "run-lifecycle" },
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "orchestrateIteration", "category": "effect-orchestration" },
+            { "name": "readRunMetadata", "category": "run-lifecycle" },
+            { "name": "resolveExistingRunDir", "category": "run-lifecycle" },
+            { "name": "resolveRunsDir", "category": "run-lifecycle" },
+            { "name": "EffectAction", "category": "types-only" },
+            { "name": "IterationResult", "category": "types-only" },
+            { "name": "JournalEvent", "category": "types-only" },
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/governance/types.ts",
+          "line": 12,
+          "symbols": [
+            { "name": "PolicyRuleKind", "category": "types-only" },
+            { "name": "PolicyConditionOp", "category": "types-only" },
+            { "name": "PolicyAction", "category": "types-only" },
+            { "name": "PolicyCondition", "category": "types-only" },
+            { "name": "PolicyRule", "category": "types-only" },
+            { "name": "StatefulPolicyRule", "category": "types-only" },
+            { "name": "PolicyEvaluationContext", "category": "types-only" },
+            { "name": "PolicyDecision", "category": "types-only" },
+            { "name": "PolicyDecisionLog", "category": "types-only" },
+            { "name": "PolicyEngine", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/governance/types.ts",
+          "line": 14,
+          "symbols": [
+            { "name": "isStatefulRule", "category": "governance" }
+          ]
+        },
+        {
+          "path": "src/governance/bridge.ts",
+          "line": 6,
+          "symbols": [
+            { "name": "BreakpointRule", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/governance/postureBridge.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "ActionCategory", "category": "types-only" },
+            { "name": "ApprovalPosture", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/governance/__tests__/postureBridge.test.ts",
+          "line": 7,
+          "symbols": [
+            { "name": "ActionCategory", "category": "types-only" },
+            { "name": "ApprovalPosture", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/breakpoints/delegation.ts",
+          "line": 13,
+          "symbols": [
+            { "name": "writeFileAtomic", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/breakpoints/delegation.ts",
+          "line": 14,
+          "symbols": [
+            { "name": "parsePattern", "category": "utilities" },
+            { "name": "matchPattern", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/breakpoints/postures.ts",
+          "line": 12,
+          "symbols": [
+            { "name": "ActionCategory", "category": "types-only" },
+            { "name": "ApprovalPosture", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cost/effectCost.ts",
+          "line": 6,
+          "symbols": [
+            { "name": "EffectIndex", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cost/journal.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "appendEvent", "category": "journal" },
+            { "name": "AppendEventResult", "category": "types-only" },
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cost/__tests__/journal.test.ts",
+          "line": 2,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cost/__tests__/effectCost.test.ts",
+          "line": 5,
+          "symbols": [
+            { "name": "nextUlid", "category": "utilities" },
+            { "name": "createRunDir", "category": "run-lifecycle" },
+            { "name": "appendEvent", "category": "journal" },
+            { "name": "buildEffectIndex", "category": "effect-orchestration" }
+          ]
+        },
+        {
+          "path": "src/storage/types.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/storage/types.ts",
+          "line": 3,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" },
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/storage/__tests__/storage.test.ts",
+          "line": 5,
+          "symbols": [
+            { "name": "createRunDir", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/harness/capabilityRouter.ts",
+          "line": 10,
+          "symbols": [
+            { "name": "KNOWN_HARNESSES", "category": "harness-registry" }
+          ]
+        },
+        {
+          "path": "src/harness/index.ts",
+          "line": 32,
+          "symbols": [
+            { "name": "discoverHarnesses", "category": "harness-registry" },
+            { "name": "detectCallerHarness", "category": "harness-registry" },
+            { "name": "checkCliAvailable", "category": "harness-registry" },
+            { "name": "KNOWN_HARNESSES", "category": "harness-registry" },
+            { "name": "detectAdapter", "category": "harness-registry" },
+            { "name": "getAdapterByName", "category": "harness-registry" },
+            { "name": "listSupportedHarnesses", "category": "harness-registry" },
+            { "name": "getAdapter", "category": "harness-registry" },
+            { "name": "setAdapter", "category": "harness-registry" },
+            { "name": "resetAdapter", "category": "harness-registry" }
+          ]
+        },
+        {
+          "path": "src/harness/internal.ts",
+          "line": 18,
+          "symbols": [
+            { "name": "createClaudeCodeAdapter", "category": "harness-registry" },
+            { "name": "normalizeSessionStateDir", "category": "session" },
+            { "name": "PromptContext", "category": "types-only" },
+            { "name": "createInternalContext", "category": "harness-registry" }
+          ]
+        },
+        {
+          "path": "src/harness/invoker.ts",
+          "line": 15,
+          "symbols": [
+            { "name": "BabysitterRuntimeError", "category": "utilities" },
+            { "name": "checkCliAvailable", "category": "harness-registry" },
+            { "name": "ErrorCategory", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/harness/types.ts",
+          "line": 11,
+          "symbols": [
+            { "name": "PromptContext", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/piWrapper.ts",
+          "line": 17,
+          "symbols": [
+            { "name": "BabysitterRuntimeError", "category": "utilities" },
+            { "name": "ErrorCategory", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/harness/piWrapper/compaction.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "loadCompressionConfig", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/harness/piWrapper/moduleSupport.ts",
+          "line": 5,
+          "symbols": [
+            { "name": "BabysitterRuntimeError", "category": "utilities" },
+            { "name": "ErrorCategory", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/harness/agenticTools/config/state.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "createScopedRuntimeConfigState", "category": "run-lifecycle" },
+            { "name": "RuntimeConfigValueType", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/agent-core-loop.ts",
+          "line": 13,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/index.ts",
+          "line": 33,
+          "symbols": [
+            { "name": "DEFAULTS", "category": "run-lifecycle" },
+            { "name": "getAdapterByName", "category": "harness-registry" },
+            { "name": "resolveRunsDir", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/output.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "detectCallerHarness", "category": "harness-registry" },
+            { "name": "loadCompressionConfig", "category": "run-lifecycle" },
+            { "name": "densityFilterText", "category": "utilities" },
+            { "name": "estimateTokens", "category": "utilities" },
+            { "name": "CompressionConfig", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/prompts.ts",
+          "line": 3,
+          "symbols": [
+            { "name": "ExternalAgentDiscovery", "category": "types-only" },
+            { "name": "ExternalAgentInfo", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/prompts.ts",
+          "line": 11,
+          "symbols": [
+            { "name": "createPromptContextFromCatalog", "category": "process-creation" },
+            { "name": "composeProcessCreatePrompt", "category": "process-creation" },
+            { "name": "resolveActiveProcessLibrary", "category": "process-creation" },
+            { "name": "getDefaultProcessLibrarySpec", "category": "process-creation" },
+            { "name": "renderBreakpointHandling", "category": "process-creation" },
+            { "name": "renderResultsPosting", "category": "process-creation" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/resumeState.ts",
+          "line": 3,
+          "symbols": [
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "readRunMetadata", "category": "run-lifecycle" },
+            { "name": "readStateCache", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/utils.ts",
+          "line": 10,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" },
+            { "name": "IterationResult", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/utils.ts",
+          "line": 392,
+          "symbols": [
+            { "name": "CompressionConfig", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/utils.ts",
+          "line": 405,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" },
+            { "name": "IterationResult", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/utils.ts",
+          "line": 416,
+          "symbols": [
+            { "name": "discoverHarnesses", "category": "harness-registry" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/utils.ts",
+          "line": 417,
+          "symbols": [
+            { "name": "BabysitterRuntimeError", "category": "utilities" },
+            { "name": "ErrorCategory", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/dispatch.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/dispatch.ts",
+          "line": 2,
+          "symbols": [
+            { "name": "getEffectiveConcurrency", "category": "effect-orchestration" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/effects.ts",
+          "line": 53,
+          "symbols": [
+            { "name": "commitEffectResult", "category": "effect-orchestration" },
+            { "name": "createRun", "category": "run-lifecycle" },
+            { "name": "orchestrateIteration", "category": "effect-orchestration" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/externalPhaseHelpers.ts",
+          "line": 10,
+          "symbols": [
+            { "name": "createPromptContextFromCatalog", "category": "process-creation" },
+            { "name": "composeProcessCreatePrompt", "category": "process-creation" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/externalPhase.ts",
+          "line": 5,
+          "symbols": [
+            { "name": "buildEffectIndex", "category": "effect-orchestration" },
+            { "name": "commitEffectResult", "category": "effect-orchestration" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/internalPhase.ts",
+          "line": 4,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/internalTools.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "commitEffectResult", "category": "effect-orchestration" },
+            { "name": "createPromptContextFromCatalog", "category": "process-creation" },
+            { "name": "composeProcessCreatePrompt", "category": "process-creation" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/planProcess/phase.ts",
+          "line": 2,
+          "symbols": [
+            { "name": "discoverExternalAgents", "category": "external-agents" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/planProcess/runState.ts",
+          "line": 5,
+          "symbols": [
+            { "name": "createRun", "category": "run-lifecycle" },
+            { "name": "getSessionMarkerPath", "category": "session" },
+            { "name": "readSessionMarker", "category": "session" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/planProcess/validation.ts",
+          "line": 4,
+          "symbols": [
+            { "name": "discoverExternalAgents", "category": "external-agents" },
+            { "name": "resetGlobalTaskRegistry", "category": "process-creation" }
+          ]
+        },
+        {
+          "path": "src/interaction/interactionRouter.ts",
+          "line": 10,
+          "symbols": [
+            { "name": "InteractionKind", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/interaction/__tests__/interactionRouter.test.ts",
+          "line": 3,
+          "symbols": [
+            { "name": "InteractionKind", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/session/discovery.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "resolveSessionIdWithMarker", "category": "session" }
+          ]
+        },
+        {
+          "path": "src/observability/runStatus.ts",
+          "line": 11,
+          "symbols": [
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "readRunMetadata", "category": "run-lifecycle" },
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/health.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/timeline.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/__tests__/runStatus.test.ts",
+          "line": 29,
+          "symbols": [
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "readRunMetadata", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/runtime/index.ts",
+          "line": 26,
+          "symbols": [
+            { "name": "createRun", "category": "run-lifecycle" },
+            { "name": "orchestrateIteration", "category": "effect-orchestration" },
+            { "name": "commitEffectResult", "category": "effect-orchestration" },
+            { "name": "commitEffectCancellation", "category": "effect-orchestration" },
+            { "name": "createReplayEngine", "category": "run-lifecycle" },
+            { "name": "createProcessContext", "category": "run-lifecycle" },
+            { "name": "withProcessContext", "category": "run-lifecycle" },
+            { "name": "getActiveProcessContext", "category": "run-lifecycle" },
+            { "name": "requireProcessContext", "category": "run-lifecycle" },
+            { "name": "STATE_CACHE_SCHEMA_VERSION", "category": "run-lifecycle" },
+            { "name": "createStateCacheSnapshot", "category": "run-lifecycle" },
+            { "name": "journalHeadsEqual", "category": "run-lifecycle" },
+            { "name": "normalizeJournalHead", "category": "run-lifecycle" },
+            { "name": "normalizeSnapshot", "category": "run-lifecycle" },
+            { "name": "readStateCache", "category": "run-lifecycle" },
+            { "name": "rebuildStateCache", "category": "run-lifecycle" },
+            { "name": "writeStateCache", "category": "run-lifecycle" },
+            { "name": "hashInvocationKey", "category": "run-lifecycle" },
+            { "name": "EffectRequestedError", "category": "effect-orchestration" },
+            { "name": "EffectPendingError", "category": "effect-orchestration" },
+            { "name": "EffectCancelledError", "category": "effect-orchestration" },
+            { "name": "ParallelPendingError", "category": "effect-orchestration" },
+            { "name": "RunFailedError", "category": "run-lifecycle" },
+            { "name": "replaySchemaVersion", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/runtime/index.ts",
+          "line": 42,
+          "symbols": [
+            { "name": "OrchestrateOptions", "category": "types-only" },
+            { "name": "IterationResult", "category": "types-only" },
+            { "name": "EffectAction", "category": "types-only" },
+            { "name": "CommitEffectResultOptions", "category": "types-only" },
+            { "name": "CommitEffectResultArtifacts", "category": "types-only" },
+            { "name": "ProcessContext", "category": "types-only" },
+            { "name": "DefinedTask", "category": "types-only" },
+            { "name": "CreateRunOptions", "category": "types-only" },
+            { "name": "CreateRunResult", "category": "types-only" },
+            { "name": "ReplayEngine", "category": "types-only" },
+            { "name": "CreateReplayEngineOptions", "category": "types-only" },
+            { "name": "StateCacheSnapshot", "category": "types-only" },
+            { "name": "StateCacheJournalHead", "category": "types-only" },
+            { "name": "DerivedEffectSummary", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/__tests__/createRun.test.ts",
+          "line": 16,
+          "symbols": [
+            { "name": "IterationResult", "category": "types-only" },
+            { "name": "RunFailedError", "category": "run-lifecycle" },
+            { "name": "__resetCacheForTests", "category": "utilities" },
+            { "name": "__setAncestorResolverForTests", "category": "utilities" },
+            { "name": "getSessionMarkerPath", "category": "session" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/__tests__/createRun.test.ts",
+          "line": 258,
+          "symbols": [
+            { "name": "discoverHarnesses", "category": "harness-registry" },
+            { "name": "detectCallerHarness", "category": "harness-registry" },
+            { "name": "createRun", "category": "run-lifecycle" },
+            { "name": "orchestrateIteration", "category": "effect-orchestration" },
+            { "name": "commitEffectResult", "category": "effect-orchestration" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/__tests__/effects.test.ts",
+          "line": 2,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/__tests__/utils.test.ts",
+          "line": 24,
+          "symbols": [
+            { "name": "BabysitterRuntimeError", "category": "utilities" },
+            { "name": "ErrorCategory", "category": "utilities" },
+            { "name": "detectCallerHarness", "category": "harness-registry" }
+          ]
+        },
+        {
+          "path": "src/harness/internal/createRun/orchestration/__tests__/dispatch.test.ts",
+          "line": 2,
+          "symbols": [
+            { "name": "EffectAction", "category": "types-only" }
+          ]
+        }
+      ]
+    },
+    "cli": {
+      "files": [
+        {
+          "path": "src/prompts/commandTemplates.ts",
+          "line": 5,
+          "symbols": [
+            { "name": "renderCommandTemplate", "category": "process-creation" },
+            { "name": "renderTemplateString", "category": "process-creation" },
+            { "name": "PromptContext", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cli/ui.ts",
+          "line": 11,
+          "symbols": [
+            { "name": "BabysitterRuntimeError", "category": "utilities" },
+            { "name": "ErrorCategory", "category": "utilities" },
+            { "name": "formatErrorWithContext", "category": "utilities" },
+            { "name": "isBabysitterError", "category": "utilities" },
+            { "name": "suggestCommand", "category": "utilities" },
+            { "name": "toStructuredError", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/cli/args/types.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "ParsedArgs", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cli/args/index.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "resolveRunsDir", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/cli/args/argPositionals.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "applyPositionalArgs", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/cli/args/argFlags.ts",
+          "line": 4,
+          "symbols": [
+            { "name": "BOOLEAN_FLAGS", "category": "utilities" },
+            { "name": "FLAG_PARSERS", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/cli/commands/mcpServe.ts",
+          "line": 7,
+          "symbols": [
+            { "name": "createBabysitterMcpServer", "category": "run-lifecycle" }
+          ]
+        },
+        {
+          "path": "src/cli/commands/tui.ts",
+          "line": 18,
+          "symbols": [
+            { "name": "readRunMetadata", "category": "run-lifecycle" },
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "getRunDir", "category": "run-lifecycle" },
+            { "name": "buildEffectIndex", "category": "effect-orchestration" }
+          ]
+        },
+        {
+          "path": "src/cli/commands/harness/resumeRun.ts",
+          "line": 11,
+          "symbols": [
+            { "name": "resolveExistingRunDir", "category": "run-lifecycle" },
+            { "name": "resolveRunsDir", "category": "run-lifecycle" }
+          ]
+        }
+      ]
+    },
+    "core": {
+      "files": [
+        {
+          "path": "src/agenticTools/config/state.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "createScopedRuntimeConfigState", "category": "run-lifecycle" },
+            { "name": "RuntimeConfigValueType", "category": "types-only" }
+          ]
+        }
+      ]
+    },
+    "runtime": {
+      "files": [
+        {
+          "path": "src/backgroundProcessRegistry.ts",
+          "line": 9,
+          "symbols": [
+            { "name": "nextUlid", "category": "utilities" }
+          ]
+        },
+        {
+          "path": "src/cost/effectCost.ts",
+          "line": 6,
+          "symbols": [
+            { "name": "EffectIndex", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/cost/journal.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "appendEvent", "category": "journal" },
+            { "name": "AppendEventResult", "category": "types-only" },
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/runStatus.ts",
+          "line": 11,
+          "symbols": [
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "readRunMetadata", "category": "run-lifecycle" },
+            { "name": "JsonRecord", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/health.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/timeline.ts",
+          "line": 8,
+          "symbols": [
+            { "name": "loadJournal", "category": "run-lifecycle" },
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/observability/__tests__/health.test.ts",
+          "line": 3,
+          "symbols": [
+            { "name": "JournalEvent", "category": "types-only" }
+          ]
+        },
+        {
+          "path": "src/session/discovery.ts",
+          "line": 1,
+          "symbols": [
+            { "name": "resolveSessionIdWithMarker", "category": "session" }
+          ]
+        }
+      ]
+    },
+    "tui-plugins": {
+      "files": []
+    }
+  },
+  "summary": {
+    "totalFiles": 68,
+    "totalImports": 219,
+    "byCategory": {
+      "run-lifecycle": 57,
+      "effect-orchestration": 17,
+      "journal": 5,
+      "process-creation": 13,
+      "governance": 5,
+      "session": 5,
+      "external-agents": 2,
+      "harness-registry": 21,
+      "types-only": 72,
+      "utilities": 22
+    },
+    "byPackage": {
+      "platform": 185,
+      "cli": 22,
+      "core": 2,
+      "runtime": 10,
+      "tui-plugins": 0
+    }
+  }
+}

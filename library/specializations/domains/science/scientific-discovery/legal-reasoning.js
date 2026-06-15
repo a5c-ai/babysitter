@@ -8,6 +8,13 @@
  * // Input: { legalQuestion: "Is this contract enforceable?", jurisdiction: "US-CA", facts: {...} }
  * // Output: { legalAnalysis: { elements: [...], interpretation: {...} }, arguments: [...], conclusions: {...} }
  * @references IRAC method, Canons of statutory construction, Common law precedent doctrine
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -53,7 +60,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Rule Application
-  let ruleApplication = await ctx.task(applyRulesToFactsTask, {
+  const ruleApplication = await ctx.task(applyRulesToFactsTask, {
     rules: ruleIdentification.consolidatedRules,
     facts: inputs.facts,
     statutoryInterpretation: statutoryAnalysis,
@@ -61,28 +68,13 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Legal Soundness
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        ruleApplication = await ctx.task(applyRulesToFactsTask, { ...{
-    rules: ruleIdentification.consolidatedRules,
-    facts: inputs.facts,
-    statutoryInterpretation: statutoryAnalysis,
-    precedentGuidance: analogicalReasoning
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint('legal-analysis-review', {
+  if (ruleApplication.confidenceScore < 0.5) {
+    await ctx.breakpoint('legal-analysis-review', {
       message: 'Legal analysis has significant uncertainty',
       uncertainAreas: ruleApplication.uncertainElements,
-      additionalResearchNeeded: ruleApplication.researchGaps,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      additionalResearchNeeded: ruleApplication.researchGaps
+    });
+  }
 
   // Phase 7: Argument Construction
   const argumentConstruction = await ctx.task(constructArgumentsTask, {

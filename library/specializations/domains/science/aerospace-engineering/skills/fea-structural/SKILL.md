@@ -18,6 +18,11 @@ metadata:
     - fea
     - stress-analysis
     - simulation
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:computational-geometry]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Finite Element Analysis Skill

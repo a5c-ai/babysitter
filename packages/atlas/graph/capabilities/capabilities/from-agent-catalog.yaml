@@ -1,0 +1,100 @@
+nodeKind: Capability
+id: capability:skills
+attributes:
+  displayName: "Skills"
+  description: |
+    Harness can discover or activate reusable skills (SKILL.md or
+    equivalent skill bundles).
+  appliesToNodeKinds: ["AgentVersion"]
+  category: agent
+edges: {}
+---
+nodeKind: Capability
+id: capability:tool-approval
+attributes:
+  displayName: "Tool approval"
+  description: |
+    Harness enforces explicit user approval for shell or tool
+    execution before the call is dispatched.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: agent
+edges: {}
+---
+nodeKind: Capability
+id: capability:interactive-mode
+attributes:
+  displayName: "Interactive mode"
+  description: |
+    Harness runs as an interactive CLI session with a persistent
+    REPL-style turn loop.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: session
+edges: {}
+---
+nodeKind: Capability
+id: capability:stdin-injection
+attributes:
+  displayName: "STDIN injection"
+  description: |
+    Harness accepts prompts or commands via standard input,
+    enabling external programs to feed turns into a running
+    interactive session.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: agent
+edges: {}
+---
+nodeKind: Capability
+id: capability:runtime-hooks
+attributes:
+  displayName: "Runtime hooks"
+  description: |
+    Harness supports shell or runtime lifecycle hooks fired around
+    session, prompt, and tool-call boundaries.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: extensibility
+edges: {}
+---
+nodeKind: Capability
+id: capability:stop-hook
+attributes:
+  displayName: "Stop hook"
+  description: |
+    Harness exposes a blocking Stop / after-response lifecycle hook
+    that can defer or modify session termination.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: extensibility
+edges: {}
+---
+nodeKind: Capability
+id: capability:proxy-transport-emulation
+attributes:
+  displayName: "Proxy transport emulation"
+  description: |
+    Can expose one harness-facing protocol (e.g. Anthropic Messages)
+    while targeting a distinct upstream provider contract
+    (e.g. OpenAI Responses, Gemini GenerateContent).
+  appliesToNodeKinds: ["TransportProxy", "ModelTransportProtocol"]
+  category: transport
+edges: {}
+---
+nodeKind: Capability
+id: capability:model-discovery
+attributes:
+  displayName: "Model discovery"
+  description: |
+    Can enumerate or surface configured models through a discovery
+    endpoint (e.g. `/v1/models`).
+  appliesToNodeKinds: ["Provider", "TransportProxy"]
+  category: transport
+edges: {}
+---
+nodeKind: Capability
+id: capability:token-counting
+attributes:
+  displayName: "Token counting"
+  description: |
+    Can count tokens directly or expose a fallback token-counting
+    interface for prompt budgeting.
+  appliesToNodeKinds: ["ModelTransportProtocol", "TransportProxy"]
+  category: transport
+edges: {}

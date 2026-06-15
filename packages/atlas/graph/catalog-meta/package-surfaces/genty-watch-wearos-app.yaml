@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:genty-watch-wearos-app
+attributes:
+  packageId: "@a5c-ai/genty-watch-wearos-app"
+  packageName: "@a5c-ai/genty-watch-wearos-app"
+  displayName: "Genty Wear OS App"
+  description: "Wear OS companion surface for adapters. Provides glanceable agent status and breakpoint notifications on Wear OS smartwatches."
+  role: "watch-companion-app"
+  whenToUse: "Build this when you want wrist-based notifications and quick agent status checks on Wear OS devices."
+  status: active

@@ -1,0 +1,41 @@
+nodeKind: AgentVersion
+id: agent-version:codex-app-server@current
+attributes:
+  agentProductId: agent:codex-app-server
+  versionRange: ">=0.119.0"
+  currentVersion: "0.135.0"
+  releasedAt: "2026-05-28"
+  upstreamReleaseTag: "rust-v0.135.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.135.0"
+  cliCommand: "codex app-server"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  appServer:
+    realtimeV1WebsocketCompatible: true
+    smokeTestedCommand: "npx -y @openai/codex@0.135.0 app-server --help"
+edges:
+  version_of:
+    - agent:codex-app-server
+  composed_of:
+    - target: agent-core-impl:codex-app-server.core@current
+      role: core
+    - target: agent-runtime-impl:codex-app-server.runtime@current
+      role: runtime
+    - target: agent-platform-impl:codex-app-server.platform@current
+      role: platform
+  sourced_from:
+    - evidence:codex-rust-v0-135-0-release
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.119.0'
+      level: full
+      notes: Codex app-server hosts multi-turn agent sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.119.0'
+      level: full
+      notes: Codex app-server streams output via WebSocket; 0.135.0 keeps app-server WebSocket support and adds richer remote transport status reporting.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.119.0'
+      level: full
+      notes: Codex app-server dispatches sandboxed tool calls.

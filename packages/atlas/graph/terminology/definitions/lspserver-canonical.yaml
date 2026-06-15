@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:lspserver.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:lspserver
+  text: |
+    a Language Server Protocol server bundled in a plugin (Claude Code .lsp.json)
+  status: canonical
+edges:
+  defines:
+    - term:lspserver

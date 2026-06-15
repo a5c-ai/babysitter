@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:lifecycle-state.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:lifecycle-state
+  text: |
+    a state in a state machine
+  status: canonical
+edges:
+  defines:
+    - term:lifecycle-state

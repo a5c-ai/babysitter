@@ -1,0 +1,26 @@
+nodeKind: AgentProduct
+id: agent:antigravity-sdk
+attributes:
+  displayName: "Google Antigravity SDK"
+  vendor: "Google"
+  homepageUrl: "https://github.com/google-antigravity/antigravity-sdk-python"
+  primarySurface: sdk
+  supportTier: catalog-backed
+  productKind: sdk
+  stackScope: core-runtime
+  description: |
+    Google's programmatic Python SDK for constructing AI agents powered by
+    Antigravity and Gemini. Three-layer architecture: Agent (simplified),
+    Session (conversation/tool dispatch), Adapter (transport abstraction).
+    Supports custom tool functions, MCP server integration, multimodal
+    ingestion, and declarative policies. Includes compiled Go runtime binary
+    distributed via PyPI wheels. Requires Python >= 3.10.
+  repoUrl: "https://github.com/google-antigravity/antigravity-sdk-python"
+edges:
+  has_version:
+    - agentVersion:antigravity-sdk:0-1-1
+  composed_of:
+    - target: language:python
+      role: sdk
+    - target: language:go
+      role: runtime-binary

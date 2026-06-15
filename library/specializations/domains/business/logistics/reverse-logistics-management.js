@@ -14,6 +14,11 @@
  * @references
  * - Reverse Logistics Association: https://www.reverselogisticstrends.com/
  * - CSCMP: https://cscmp.org/
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

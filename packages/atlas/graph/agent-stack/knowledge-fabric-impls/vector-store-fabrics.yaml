@@ -1,0 +1,168 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:chroma-fabric
+attributes:
+  displayName: "ChromaDB as Knowledge Fabric"
+  description: |
+    ChromaDB as a knowledge fabric storage backend. Local-first, embeddable
+    in Python and JavaScript, with collections supporting metadata filtering.
+    Chroma stores documents alongside their embeddings and metadata, returning
+    nearest-neighbor results via cosine similarity or other distance metrics.
+    Runs in-memory, as a local persistent store, or as a client-server
+    deployment. First-class integrations with LangChain, LlamaIndex, and
+    OpenAI make it the default prototyping backend for RAG pipelines. As a
+    knowledge fabric, Chroma provides the vector storage layer for semantic
+    retrieval of organizational knowledge.
+  knowledgeFileFormats:
+    - embeddings
+    - document-chunks
+  retrievalStrategy: semantic-search
+  knowledgePersistence: vector-store
+  knowledgeScopes:
+    - project
+    - organization
+  autoExtractionSupport: false
+  notes: |
+    Chroma is often the first vector store developers reach for due to its
+    simplicity and zero-config local mode. As a knowledge fabric backend,
+    it excels for small-to-medium knowledge bases (< 1M documents) where
+    operational simplicity matters. For larger deployments, distributed
+    stores like Milvus or managed services like Pinecone are preferred.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:chromadb
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:pinecone-fabric
+attributes:
+  displayName: "Pinecone as Knowledge Fabric"
+  description: |
+    Pinecone as a managed vector knowledge fabric. Serverless architecture
+    with namespaces for multi-tenancy, metadata filtering, and hybrid
+    sparse-dense search. Pinecone handles indexing, storage, and low-latency
+    similarity search at scale with operational guarantees (uptime SLAs,
+    automatic scaling). As a knowledge fabric, Pinecone provides the
+    production-grade vector storage layer for enterprise RAG systems where
+    reliability and scale matter more than self-hosting flexibility.
+  knowledgeFileFormats:
+    - embeddings
+    - document-chunks
+  retrievalStrategy: semantic-search
+  knowledgePersistence: managed-vector-store
+  knowledgeScopes:
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    Pinecone is the most widely adopted managed vector database for production
+    AI applications. Its serverless tier reduces operational overhead to near
+    zero. Namespaces enable multi-tenant knowledge isolation. The trade-off
+    is vendor lock-in and cost at scale compared to self-hosted alternatives.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:pinecone
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:weaviate-fabric
+attributes:
+  displayName: "Weaviate as Knowledge Fabric"
+  description: |
+    Weaviate as a schema-aware knowledge fabric. Combines vector, keyword, and
+    hybrid BM25+vector search with built-in vectorization modules for text,
+    images, and multi-modal data. GraphQL and REST APIs provide flexible
+    querying. Weaviate's generative search modules pipe retrieved context
+    directly into LLM prompts, making it a native RAG backend. Multi-tenancy,
+    filtering, and horizontal scaling support enterprise deployments. As a
+    knowledge fabric, Weaviate uniquely combines structured schema awareness
+    with semantic search.
+  knowledgeFileFormats:
+    - embeddings
+    - document-chunks
+    - structured-objects
+  retrievalStrategy: hybrid
+  knowledgePersistence: vector-store
+  knowledgeScopes:
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    Weaviate's distinguishing feature as a knowledge fabric is its schema-aware
+    object model — knowledge is not just embedded vectors but typed objects with
+    properties and cross-references. This enables both semantic similarity search
+    and structured filtering. The built-in generative search module (generate)
+    makes it a complete RAG backend without external orchestration.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:weaviate
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:qdrant-fabric
+attributes:
+  displayName: "Qdrant as Knowledge Fabric"
+  description: |
+    Qdrant as a performance-focused knowledge fabric. Rust-native vector
+    similarity search engine with payload-based filtering alongside vector
+    search, quantization for memory efficiency, and distributed deployment.
+    gRPC and REST APIs with clients for Python, TypeScript, Go, and Rust.
+    Snapshot and recovery features support knowledge fabric durability. As a
+    knowledge fabric backend, Qdrant excels where query latency and resource
+    efficiency are critical constraints.
+  knowledgeFileFormats:
+    - embeddings
+    - document-chunks
+  retrievalStrategy: semantic-search
+  knowledgePersistence: vector-store
+  knowledgeScopes:
+    - project
+    - organization
+  autoExtractionSupport: false
+  notes: |
+    Qdrant's payload indexing enables rich metadata filtering without
+    sacrificing vector search performance. Snapshot recovery ensures knowledge
+    fabric durability across restarts. The Rust implementation provides
+    predictable latency and memory usage, making Qdrant a strong choice
+    for latency-sensitive knowledge retrieval applications.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:qdrant
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:milvus-fabric
+attributes:
+  displayName: "Milvus as Knowledge Fabric"
+  description: |
+    Milvus as a distributed, GPU-accelerated knowledge fabric. Designed for
+    billion-scale similarity search with multiple index types (IVF, HNSW,
+    DiskANN), hybrid scalar-vector queries, and multi-vector search. Separate
+    storage and compute scaling for elastic deployments. Partition keys and
+    time travel features support multi-tenant knowledge isolation and
+    temporal knowledge queries. Zilliz Cloud offers managed deployment.
+    As a knowledge fabric, Milvus is the choice for enterprise-scale
+    knowledge bases requiring high-throughput vector operations.
+  knowledgeFileFormats:
+    - embeddings
+    - document-chunks
+  retrievalStrategy: semantic-search
+  knowledgePersistence: distributed-vector-store
+  knowledgeScopes:
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    Milvus's time travel feature is unique among vector databases — it allows
+    querying the knowledge base as it existed at a past point in time. This
+    is valuable for knowledge fabric auditing and understanding how
+    organizational knowledge evolved. The distributed architecture handles
+    billion-scale collections but requires more operational investment.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:milvus

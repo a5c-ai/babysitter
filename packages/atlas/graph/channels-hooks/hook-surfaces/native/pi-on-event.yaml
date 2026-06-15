@@ -1,0 +1,23 @@
+nodeKind: HookSurface
+id: hook-surface:pi.on-event
+attributes:
+  eventName: "onEvent (Pi)"
+  displayName: "onEvent (Pi)"
+  kind: native
+  originVendor: a5c
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [event]
+    properties:
+      event: { type: string }
+      payload: { type: object }
+  description: |
+    Pi's generic onEvent hook. Pi exposes a single onEvent dispatcher
+    that routes to handler scripts by event name. Canonicalizes to
+    post-tool-use for cross-product policies.
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use

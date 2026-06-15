@@ -3,6 +3,13 @@
  * @description Base44-Inspired Conversational Development - Use natural language prompts to build apps with AI agents
  * @inputs { appIdea: string, conversationalRounds: number, refinementStrategy: string }
  * @outputs { success: boolean, generatedApp: object, conversationHistory: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:ai-agents-conversational]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

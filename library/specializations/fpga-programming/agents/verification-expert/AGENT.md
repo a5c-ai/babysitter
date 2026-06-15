@@ -11,6 +11,11 @@ expertise:
   - Code and functional coverage
   - Verification planning
   - Debug and root cause analysis
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # Verification Expert Agent

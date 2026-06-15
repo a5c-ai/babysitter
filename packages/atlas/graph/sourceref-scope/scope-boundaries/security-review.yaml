@@ -1,0 +1,21 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:security-review.scope
+attributes:
+  subjectId: skill:security-review
+  inScope: |
+    Static review of pending diffs for OWASP-Top-10-class vulnerabilities
+    in application code — injection (SQL, command, template), broken
+    auth/session handling, IDOR, SSRF, XXE, hardcoded secrets, insecure
+    deserialization, and missing input validation. Produces structured
+    review comments tied to specific lines.
+  outOfScope: |
+    Penetration testing, dynamic analysis, fuzzing, dependency-vulnerability
+    scanning (delegated to SCA tools), threat modeling of unmodified code,
+    cryptographic primitive design review, and compliance attestation
+    (SOC2, ISO 27001).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - skill:security-review

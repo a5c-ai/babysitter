@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:graph-databases, skill-area:data-analysis, skill-area:data-visualization]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-scientist, role:analytics-engineer]
 ---
 
 # Network Analysis Skill

@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:gap
+attributes:
+  canonicalDefinitionId: definition:gap.canonical
+  displayName: "Gap"
+  kind: concept
+  references:
+    - "NodeKind:Gap"
+  description: |
+    Tracked debt-loop finding (level 1-7); first-class graph entity so gap state is queryable
+edges:
+  applies_to:
+    - target: domain:software-engineering

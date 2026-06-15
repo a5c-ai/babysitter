@@ -1,0 +1,395 @@
+nodeKind: MetaAttribute
+id: meta-attribute:meta-attribute--display-name
+attributes:
+  displayName: MetaAttribute.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:meta-attribute
+  type: string
+  required: false
+  description: displayName on MetaAttribute.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-attribute--name
+attributes:
+  displayName: MetaAttribute.name
+  name: name
+  parentNodeKindId: meta-node-kind:meta-attribute
+  type: string
+  required: true
+  description: name on MetaAttribute.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-attribute--parent-node-kind-id
+attributes:
+  displayName: MetaAttribute.parentNodeKindId
+  name: parentNodeKindId
+  parentNodeKindId: meta-node-kind:meta-attribute
+  type: ref<MetaNodeKind>
+  required: true
+  description: parentNodeKindId on MetaAttribute.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-attribute--type
+attributes:
+  displayName: MetaAttribute.type
+  name: type
+  parentNodeKindId: meta-node-kind:meta-attribute
+  type: string
+  required: true
+  description: AttributeType expression (e.g. `enum<...>`, `list<id>`, `markdown`, `iso-date`).
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-attribute--required
+attributes:
+  displayName: MetaAttribute.required
+  name: required
+  parentNodeKindId: meta-node-kind:meta-attribute
+  type: bool
+  required: true
+  description: required on MetaAttribute.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-enum--id
+attributes:
+  displayName: MetaEnum.id
+  name: id
+  parentNodeKindId: meta-node-kind:meta-enum
+  type: id
+  required: true
+  description: id on MetaEnum.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-enum
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-enum--display-name
+attributes:
+  displayName: MetaEnum.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:meta-enum
+  type: string
+  required: false
+  description: displayName on MetaEnum.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-enum
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-enum--name
+attributes:
+  displayName: MetaEnum.name
+  name: name
+  parentNodeKindId: meta-node-kind:meta-enum
+  type: string
+  required: true
+  description: name on MetaEnum.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-enum
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-enum--values
+attributes:
+  displayName: MetaEnum.values
+  name: values
+  parentNodeKindId: meta-node-kind:meta-enum
+  type: list<map<string
+  required: true
+  description: Each map carries `value` + `description`.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-enum
+---
+nodeKind: MetaAttribute
+id: meta-attribute:term--id
+attributes:
+  displayName: Term.id
+  name: id
+  parentNodeKindId: meta-node-kind:term
+  type: id
+  required: true
+  description: id on Term.
+edges:
+  defined_on:
+  - target: meta-node-kind:term
+---
+nodeKind: MetaAttribute
+id: meta-attribute:term--display-name
+attributes:
+  displayName: Term.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:term
+  type: string
+  required: true
+  description: displayName on Term.
+edges:
+  defined_on:
+  - target: meta-node-kind:term
+---
+nodeKind: MetaAttribute
+id: meta-attribute:definition--id
+attributes:
+  displayName: Definition.id
+  name: id
+  parentNodeKindId: meta-node-kind:definition
+  type: id
+  required: true
+  description: id on Definition.
+edges:
+  defined_on:
+  - target: meta-node-kind:definition
+---
+nodeKind: MetaAttribute
+id: meta-attribute:definition--term-id
+attributes:
+  displayName: Definition.termId
+  name: termId
+  parentNodeKindId: meta-node-kind:definition
+  type: ref<Term>
+  required: true
+  description: termId on Definition.
+edges:
+  defined_on:
+  - target: meta-node-kind:definition
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:defines-meta-cluster
+attributes:
+  displayName: defines_meta_cluster (meta)
+  name: defines_meta_cluster
+  source:
+  - meta-node-kind:ontology-schema
+  target:
+  - meta-node-kind:meta-cluster
+  cardinality: 1:N
+  origin: universal
+  description: an OntologySchema defines (registers) a MetaCluster as part of its meta-shape
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:ontology-schema
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-cluster
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:contains-meta-node-kind
+attributes:
+  displayName: contains_meta_node_kind (meta)
+  name: contains_meta_node_kind
+  source:
+  - meta-node-kind:meta-cluster
+  target:
+  - meta-node-kind:meta-node-kind
+  cardinality: N:N
+  origin: universal
+  description: a meta-cluster groups one or more MetaNodeKind records
+  inverse: meta-edge-kind:in-cluster
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-cluster
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:contains-meta-attribute
+attributes:
+  displayName: contains_meta_attribute (meta)
+  name: contains_meta_attribute
+  source:
+  - meta-node-kind:meta-node-kind
+  target:
+  - meta-node-kind:meta-attribute
+  cardinality: N:N
+  origin: universal
+  description: a MetaNodeKind contains a MetaAttribute (one attribute declared on the underlying NodeKind)
+  inverse: meta-edge-kind:defined-on
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-node-kind
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:in-cluster
+attributes:
+  displayName: in_cluster (meta)
+  name: in_cluster
+  source:
+  - meta-node-kind:meta-node-kind
+  target:
+  - meta-node-kind:meta-cluster
+  cardinality: N:1
+  origin: universal
+  description: inverse of contains_meta_node_kind (a MetaNodeKind belongs to a MetaCluster)
+  inverse: meta-edge-kind:contains-meta-node-kind
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-node-kind
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-cluster
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:defined-on
+attributes:
+  displayName: defined_on (meta)
+  name: defined_on
+  source:
+  - meta-node-kind:meta-attribute
+  target:
+  - meta-node-kind:meta-node-kind
+  cardinality: N:1
+  origin: universal
+  description: inverse of contains_meta_attribute (a MetaAttribute is defined on a MetaNodeKind)
+  inverse: meta-edge-kind:contains-meta-attribute
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-attribute
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:used-on-attribute
+attributes:
+  displayName: used_on_attribute (meta)
+  name: used_on_attribute
+  source:
+  - meta-node-kind:meta-enum
+  target:
+  - meta-node-kind:meta-attribute
+  cardinality: N:N
+  origin: universal
+  description: a MetaEnum is used as the value-set for one or more MetaAttributes
+  inverse: meta-edge-kind:enum-value-for
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-enum
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-attribute
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:enum-value-for
+attributes:
+  displayName: enum_value_for (meta)
+  name: enum_value_for
+  source:
+  - meta-node-kind:meta-attribute
+  target:
+  - meta-node-kind:meta-enum
+  cardinality: N:1
+  origin: universal
+  description: inverse of used_on_attribute (a MetaAttribute draws its values from a MetaEnum)
+  inverse: meta-edge-kind:used-on-attribute
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-attribute
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-enum
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:source-of-meta-edge
+attributes:
+  displayName: source_of_meta_edge (meta)
+  name: source_of_meta_edge
+  source:
+  - meta-node-kind:meta-edge-kind
+  target:
+  - meta-node-kind:meta-node-kind
+  cardinality: N:N
+  origin: universal
+  description: inverse of has_outgoing_edge (a MetaEdgeKind has a MetaNodeKind as a source)
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-edge-kind
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:target-of-meta-edge
+attributes:
+  displayName: target_of_meta_edge (meta)
+  name: target_of_meta_edge
+  source:
+  - meta-node-kind:meta-edge-kind
+  target:
+  - meta-node-kind:meta-node-kind
+  cardinality: N:N
+  origin: universal
+  description: inverse of has_incoming_edge (a MetaEdgeKind has a MetaNodeKind as a target)
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-edge-kind
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:inverse-of
+attributes:
+  displayName: inverse_of (meta)
+  name: inverse_of
+  source:
+  - meta-node-kind:meta-edge-kind
+  target:
+  - meta-node-kind:meta-edge-kind
+  cardinality: N:1
+  origin: universal
+  description: a MetaEdgeKind names its inverse MetaEdgeKind (symmetric — both endpoints carry inverse_of pointing at each other)
+  inverse: meta-edge-kind:inverse-of
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:meta-edge-kind
+  target_of_meta_edge:
+  - target: meta-node-kind:meta-edge-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:cardinality
+attributes:
+  displayName: EdgeKind cardinality
+  name: cardinality
+  values:
+  - value: '1:1'
+    description: One source maps to exactly one target.
+  - value: 1:N
+    description: One source maps to many targets.
+  - value: N:1
+    description: Many sources map to one target.
+  - value: N:N
+    description: Many-to-many.
+  usedOnAttributes:
+  - meta-attribute:meta-edge-kind--cardinality
+edges:
+  used_on_attribute:
+  - target: meta-attribute:meta-edge-kind--cardinality
+---
+nodeKind: MetaEnum
+id: meta-enum:origin
+attributes:
+  displayName: origin (NodeKind / EdgeKind classifier)
+  name: origin
+  values:
+  - value: universal
+    description: Applies to the agentic stack at large.
+  - value: standardized
+    description: Names a published external spec we adopt.
+  - value: convergent
+    description: Emerging consensus across multiple vendors.
+  - value: a5c
+    description: Specific to the a5c product/codebase.
+  usedOnAttributes:
+  - meta-attribute:meta-node-kind--origin
+edges:
+  used_on_attribute:
+  - target: meta-attribute:meta-node-kind--origin

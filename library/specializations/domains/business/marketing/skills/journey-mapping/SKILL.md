@@ -13,6 +13,11 @@ metadata:
   domain: business
   category: Market Research
   skill-id: SK-020
+graph:
+  domains: [domain:marketing]
+  skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+  workflows: [workflow:brand-campaign-launch]
+  roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
 ---
 
 # Customer Journey Mapping Skill

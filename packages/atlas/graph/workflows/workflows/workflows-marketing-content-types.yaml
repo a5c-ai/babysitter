@@ -1,0 +1,255 @@
+---
+nodeKind: Workflow
+id: workflow:video-content-production-cycle
+attributes:
+  displayName: "Video Content Production Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Manages the script-to-publish pipeline for marketing video content —
+    developing video concepts aligned with content strategy, writing and
+    reviewing scripts, coordinating filming or screen-capture sessions, managing
+    post-production editing and motion graphics, optimizing videos for
+    platform-specific requirements across YouTube, social, and webinar formats,
+    adding captions and metadata for discoverability, and scheduling publication
+    with promotional support. Produces video content briefs, production
+    timelines, and post-publish performance analyses. Excludes paid video
+    advertising and live streaming.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:technical-writer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:content-marketing
+    - target: skill-area:brand-strategy
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team
+    - target: org-unit:design-team
+---
+nodeKind: Workflow
+id: workflow:podcast-production-cycle
+attributes:
+  displayName: "Podcast Production Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Manages the end-to-end production of branded podcast episodes — planning
+    episode topics and guest lineups, preparing interview guides and talking
+    points, coordinating recording sessions, managing audio editing and sound
+    design, writing show notes and episode descriptions with SEO keywords,
+    distributing across podcast platforms, promoting episodes through owned
+    channels, and analyzing listener engagement metrics like completion rate and
+    subscriber growth. Produces episode production checklists, distribution
+    confirmations, and listener analytics dashboards. Excludes podcast
+    advertising sales and sponsorship management.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:content-marketing
+    - target: skill-area:brand-strategy
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:newsletter-growth-management
+attributes:
+  displayName: "Newsletter Growth Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Grows and optimizes email newsletter programs — acquiring subscribers
+    through lead magnets and content upgrades, segmenting audiences by
+    engagement level and interest signals, A/B testing subject lines and send
+    times, monitoring deliverability metrics including inbox placement and domain
+    reputation, managing list hygiene through re-engagement campaigns and sunset
+    policies, and exploring monetization through sponsored sections or premium
+    tiers. Produces subscriber growth reports, engagement trend analyses, and
+    deliverability health scorecards. Excludes transactional email and marketing
+    automation sequences.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:content-marketing
+    - target: skill-area:marketing-automation
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:social-media-organic-management
+attributes:
+  displayName: "Social Media Organic Management"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: single-team
+  description: |
+    Manages organic social media presence across platforms — planning and
+    scheduling posts aligned with content pillars and brand voice, engaging with
+    community comments and mentions, monitoring social listening signals for
+    brand health and trend opportunities, adapting content format and tone per
+    platform norms, managing crisis response protocols for negative sentiment
+    spikes, and reporting on organic reach, engagement rate, and follower growth
+    by platform. Produces social content calendars, community engagement reports,
+    and platform-specific strategy recommendations. Excludes paid social
+    advertising and influencer partnerships.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:content-marketing
+    - target: skill-area:brand-strategy
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:webinar-production-cycle
+attributes:
+  displayName: "Webinar Production Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Orchestrates webinar events from topic selection through post-event
+    follow-up — identifying high-value topics through audience research and
+    sales feedback, securing speakers and managing rehearsals, building
+    registration landing pages and email promotion sequences, managing day-of
+    production logistics including Q&A moderation, segmenting attendees by
+    engagement level for follow-up nurture tracks, repurposing recordings into
+    blog posts and social clips, and measuring pipeline influence attribution.
+    Produces event briefs, registration reports, and post-webinar ROI analyses.
+    Excludes in-person events and paid conference sponsorships.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:devrel
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:event-management
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:thought-leadership-publication
+attributes:
+  displayName: "Thought Leadership Publication"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Produces and places thought leadership content to build executive and brand
+    authority — identifying high-impact publication targets and conference
+    speaking opportunities, ghostwriting bylined articles and opinion pieces for
+    executives, preparing speaking proposals and pitch decks, coordinating with
+    PR for media placement and journalist outreach, managing editorial calendars
+    for contributed content, and tracking share of voice and citation metrics
+    against competitors. Produces editorial pipelines, publication placement
+    reports, and speaker opportunity assessments. Excludes press releases and
+    crisis communications.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:ai-champion
+  requires_skill_area:
+    - target: skill-area:brand-strategy
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:customer-relations
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:user-generated-content-program
+attributes:
+  displayName: "User-Generated Content Program"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Manages programs that collect, curate, and amplify user-generated content —
+    designing UGC campaigns with clear participation incentives and brand
+    guidelines, monitoring submissions across social platforms and review sites,
+    managing rights acquisition and licensing workflows, curating high-quality
+    content for marketing reuse across ads and organic channels, building creator
+    community relationships, and measuring UGC impact on conversion rates and
+    brand sentiment. Produces UGC collection reports, rights management logs, and
+    content performance comparisons of UGC vs brand-produced assets. Excludes
+    influencer contracts and paid partnerships.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:content-marketing
+    - target: skill-area:brand-strategy
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:community
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:content-team
+    - target: org-unit:marketing-team

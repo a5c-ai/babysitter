@@ -2,6 +2,14 @@
 name: plugin-loader-generator
 description: Generate dynamic plugin loading system with discovery, validation, and lifecycle management.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:plugin-systems]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development, workflow:product-discovery]
+  topics: [topic:developer-experience]
+
 ---
 
 # Plugin Loader Generator

@@ -1,0 +1,35 @@
+{
+  "issueNumber": 181,
+  "title": "[runtime] Duplicate RUN_COMPLETED event emitted on post-completion state rebuild",
+  "labels": [
+    "bug",
+    "sdk",
+    "effort:medium",
+    "ready-for-dev",
+    "priority:medium"
+  ],
+  "issueBody": "Duplicate RUN_COMPLETED event emitted on post-completion state rebuild. After a process returns successfully, the runtime appends two consecutive RUN_COMPLETED events to the journal with identical data payloads (same outputRef). Observed in run 01KRYZMKJA036Z3135EMW1D4Q4 of cradle/project-install: seq 44 at 2026-05-19T02:51:37.953Z and seq 45 at 2026-05-19T02:51:41.707Z, both RUN_COMPLETED with data.outputRef state/output.json. run:status reports metadata.stateRebuilt true with metadata.stateRebuildReason post_completion, suggesting the second emission happens during the post-completion state-rebuild path rather than from the process exit. Expected behavior: after a process returns successfully, the runtime emits exactly one RUN_COMPLETED event into the journal. Post-completion state rebuilds update state.json only and do not append additional RUN_COMPLETED events. Actual behavior: two RUN_COMPLETED events are appended in succession with identical data. This inflates doctor/retrospective event counts, breaks the single-event invariant for downstream RUN_COMPLETED consumers, and can cause off-by-one journal walkers. Reproduction: complete a Babysitter run, count RUN_COMPLETED events in journal, observe 2 instead of 1, inspect duplicate data payloads, and confirm run:status metadata.stateRebuilt true with stateRebuildReason post_completion.",
+  "triageComment": "Triage identified primary completion emission in packages/sdk/src/runtime/orchestrateIteration.ts around the appendEvent RUN_COMPLETED call followed by rebuildStateCache(reason: post_completion). packages/sdk/src/runtime/replay/stateCache.ts rebuilds only the state cache and does not append journal events itself. The likely runtime gap is terminal idempotency: after a completed journal is replayed, orchestrateIteration can run the completed process path again and append RUN_COMPLETED again instead of short-circuiting when the journal already has a terminal lifecycle event and no pending effects. Suggested approach: add a regression test in packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts that completes a run, invokes the terminal/replay path again, and asserts the journal has exactly one RUN_COMPLETED. Fix orchestrateIteration or replay initialization to detect a terminal lifecycle state with no pending effects before executing the process function again. Keep rebuildStateCache as a pure cache update path. Related context: #120 journal ULID collision, #77 journal write race, and commit 4c75ad2f2 fix: rebuild state cache after terminal events and fix doctor checksum docs.",
+  "expectedBehavior": "A successful run appends exactly one RUN_COMPLETED event. Replaying or iterating an already completed run with no pending effects must return completed status/output without appending another terminal lifecycle event. Post-completion state rebuilds may update state/state.json but must not add journal lifecycle events.",
+  "actualBehavior": "A completed run can receive two consecutive RUN_COMPLETED events with identical data.outputRef when the completed journal is replayed after post-completion state rebuild.",
+  "targetFiles": [
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/runLifecycleState.ts",
+    "packages/sdk/src/runtime/replay/createReplayEngine.ts",
+    "packages/sdk/src/runtime/replay/stateCache.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/cli/main/runState.ts"
+  ],
+  "testTargets": [
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts"
+  ],
+  "qualityCommands": [
+    "npm exec --workspace=@a5c-ai/babysitter-sdk -- vitest run src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "npm run test:sdk",
+    "npm run build:sdk"
+  ],
+  "maxVerificationAttempts": 2,
+  "branch": "staging",
+  "plannedProcessEntry": ".a5c/processes/issue-181-run-completed-idempotency.mjs#process"
+}

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:service-level-agreement.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:service-level-agreement
+  text: |
+    Service Level Agreement (SLA): a contract specifying expected service availability, response time targets, and remedies for breach.
+  status: canonical
+edges:
+  defines:
+    - term:service-level-agreement

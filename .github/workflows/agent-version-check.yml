@@ -1,0 +1,149 @@
+# Agent Version Check — daily scan for new agent CLI releases
+#
+# An agent discovers all supported agents from the atlas graph, checks for
+# version updates, and creates PRs/issues for new versions.
+
+name: Agent Version Check
+
+on:
+  push:
+    branches: [main, staging]
+    paths: ['.github/workflows/agent-version-check.yml']
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — detect versions but do not create PRs or issues'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: agent-version-check
+  cancel-in-progress: false
+
+jobs:
+  check-versions:
+    name: Check Agent Versions
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            You are an agent version tracker. Check for new releases of the ORIGINAL
+            upstream agent CLI products — NOT our babysitter plugin packages.
+            ${{ inputs.dry_run == 'true' && 'DRY RUN MODE: report findings but do NOT create PRs or issues.' || '' }}
+
+            STEP 1: Build atlas.
+            ```
+            npm run build --workspace=@a5c-ai/atlas
+            ```
+
+            STEP 2: Get the target list using the SAME logic as
+            `scripts/sync-external-plugin-repos.mjs` uses in `buildTargetsFromCatalog()`.
+            Read that file to understand the pattern, then run:
+            ```
+            node -e "
+              import(new URL('file://' + process.cwd() + '/packages/atlas/dist/catalog/sdk.js').href)
+                .then(m => {
+                  const targets = m.listPluginTargetDescriptors()
+                    .filter(t => t.externalRepo)
+                    .map(t => ({
+                      id: t.adapterName || t.targetId,
+                      displayName: t.displayName,
+                      cliCommand: t.cliCommand,
+                      externalPackageName: t.externalPackageName,
+                      externalRepo: t.externalRepo,
+                    }));
+                  console.log(JSON.stringify(targets, null, 2));
+                });
+            "
+            ```
+            This gives you every agent that has an external repo — these are the
+            upstream host agents. The `externalPackageName` is the npm package to
+            check (if set). For agents without an npm package, search the web.
+
+            Also check adapter source for additional install commands:
+            ```
+            grep -r 'npm install -g' packages/adapters/codecs/src/ | grep -v node_modules | grep -v test
+            ```
+            Merge both lists. EXCLUDE all @a5c-ai/* packages.
+
+            STEP 3: For EACH upstream agent, check the latest published version.
+            `npm view <package>@latest version` for npm packages.
+            Search the web for agents distributed differently (pip, binary, etc.).
+
+            STEP 4: Compare against AgentVersion records in the graph.
+            Read files in `packages/atlas/graph/agent-stack/agent-versions/` and
+            `packages/atlas/graph/agent-stack/products/` to see what versions
+            are already recorded.
+
+            STEP 5: For new versions not in the graph:
+            - Search the web for release notes, changelog, blog posts
+            - Create or update the AgentVersion YAML
+            - Note capability changes, new CLI flags, breaking changes, transport/API changes
+
+            STEP 6: If graph files changed:
+            - Rebuild: `npm run build --workspace=@a5c-ai/atlas`
+            - Branch: `agent-versions/daily-$(date +%Y-%m-%d)`
+            - Commit all changes, create ONE PR against staging
+
+            STEP 7: For each new agent+version pair, check for existing issue:
+            `gh issue list --label "agent-version-update" --search "<agent> <version>"`
+
+            If none exists, create an issue. The issue body must NOT be a static
+            template — fill it with the ACTUAL research you did. Include:
+
+            - The exact version numbers (old and new)
+            - Links to the actual release notes / changelog / blog post you found
+            - A summary of REAL changes you read from those release notes —
+              new features, breaking changes, new CLI flags, deprecated flags,
+              API/transport changes, new tool capabilities, new supported models
+            - Which parts of our system are likely affected based on what changed
+              (be specific: "new --foo flag means launchBehavior needs updating",
+              "switched from REST to WebSocket means transport-adapter proxy affected")
+            - Whether the new version changes install method or package name
+            - Any migration steps mentioned in the release notes
+
+            End the issue body with the assimilation checklist — but make the
+            checklist items SPECIFIC to what actually changed, not generic.
+            For example, if the release notes mention a new CLI flag, the
+            checklist should say "Update launchBehavior: add --newFlag to
+            promptExtraFlags" not just "Update launchBehavior if changed".
+
+            Use label `agent-version-update,graph-update`.
+
+            STEP 8: Print a summary table with ALL agents checked.
+
+            IMPORTANT: Cover every upstream agent systematically. Do not stop after one.
+            One PR for all changes in this run.
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}

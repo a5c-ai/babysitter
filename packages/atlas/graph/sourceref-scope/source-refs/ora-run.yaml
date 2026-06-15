@@ -1,0 +1,114 @@
+---
+nodeKind: SourceRef
+id: source-ref:ora-docs
+attributes:
+  displayName: "Ora docs"
+  description: "Ora public documentation page for the agent-readiness ranking product."
+  repoUrl: https://ora.run
+  ref: live
+  path: /docs
+  homepageUrl: https://ora.run/docs
+  kind: web-page
+  notes: |
+    Public docs entrypoint used to locate Ora's OpenAPI and MCP discovery surfaces.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:ora-openapi
+attributes:
+  displayName: "Ora OpenAPI spec"
+  description: "Machine-readable OpenAPI surface for Ora scan, score, badge, discovery, and feedback APIs."
+  repoUrl: https://ora.run
+  ref: live
+  path: /api/openapi.json
+  downloadUrl: https://ora.run/api/openapi.json
+  homepageUrl: https://ora.run/docs
+  kind: openapi
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:ora-mcp
+attributes:
+  displayName: "Ora MCP metadata"
+  description: "Ora MCP discovery document listing feedback tools available to AI agents."
+  repoUrl: https://ora.run
+  ref: live
+  path: /.well-known/mcp.json
+  downloadUrl: https://ora.run/.well-known/mcp.json
+  homepageUrl: https://ora.run/docs
+  kind: mcp-metadata
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:ora-discover-api
+attributes:
+  displayName: "Ora discovery API"
+  description: "Ora product discovery endpoint used to find agent-ready tools by intent."
+  repoUrl: https://ora.run
+  ref: live
+  path: /api/discover
+  homepageUrl: https://ora.run/api/discover
+  kind: api-endpoint
+  notes: |
+    Queried with role/workflow intents to populate Ora score records and tool-support candidates.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:e2b-mcp-server
+attributes:
+  displayName: "E2B MCP server"
+  description: "E2B MCP server source used for the sandbox tool-server record discovered during Ora coverage enrichment."
+  repoUrl: https://github.com/e2b-dev/mcp-server
+  ref: main
+  path: packages/python
+  kind: github-repo-subtree
+  homepageUrl: https://github.com/e2b-dev/mcp-server/tree/main/packages/python
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:browserbase-mcp
+attributes:
+  displayName: "Browserbase MCP server"
+  description: "Browserbase MCP server repository for cloud browser automation with Stagehand."
+  repoUrl: https://github.com/browserbase/mcp-server-browserbase
+  ref: main
+  path: .
+  kind: github-repo
+  homepageUrl: https://www.browserbase.com/mcp
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:browserless-mcp-docs
+attributes:
+  displayName: "Browserless MCP docs"
+  description: "Browserless documentation for hosted browser automation MCP server."
+  repoUrl: https://docs.browserless.io
+  ref: live
+  path: /mcp/browserless-mcp-server
+  kind: vendor-doc
+  homepageUrl: https://docs.browserless.io/mcp/browserless-mcp-server
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:plain-mcp-blog
+attributes:
+  displayName: "Plain MCP server announcement"
+  description: "Plain product announcement for MCP access to support threads, customer context, and support analytics."
+  repoUrl: https://www.plain.com
+  ref: live
+  path: /blog/mcp-server
+  kind: vendor-blog
+  homepageUrl: https://www.plain.com/blog/mcp-server
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:amplitude-mcp-docs
+attributes:
+  displayName: "Amplitude MCP docs"
+  description: "Amplitude documentation for its MCP server over analytics, dashboards, experiments, and cohorts."
+  repoUrl: https://amplitude.com
+  ref: live
+  path: /docs/amplitude-ai/amplitude-mcp
+  kind: vendor-doc
+  homepageUrl: https://amplitude.com/docs/amplitude-ai/amplitude-mcp
+edges: {}

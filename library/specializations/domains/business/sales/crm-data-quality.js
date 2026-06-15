@@ -14,6 +14,11 @@
  * @references
  * - Salesforce Data Quality: https://www.salesforce.com/products/sales-cloud/
  * - Data Quality Management: https://www.gartner.com/en/documents/data-quality
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

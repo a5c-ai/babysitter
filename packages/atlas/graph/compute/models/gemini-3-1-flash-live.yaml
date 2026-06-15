@@ -1,0 +1,49 @@
+# Issue #884 — Track Gemini 3.1 Flash Live model variant.
+nodeKind: ModelVersion
+id: model:gemini-3-1-flash-live@current
+attributes:
+  displayName: "Gemini 3.1 Flash Live"
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:gemini-3
+  kind: audio
+  contextWindowTokens: 0
+  modalities:
+    - audio
+    - text
+  modalityDirections:
+    - kind: audio
+      direction: bidirectional
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: "2026-06-01"
+  lifecycleStatus: preview
+  lifecycleStatusChangedAt: "2026-06-01"
+  modelCardUrl: https://ai.google.dev/gemini-api/docs/models
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Gemini 3.1 Flash Live is a high-quality, low-latency Live API model for
+    real-time dialogue and voice-first AI applications. Audio-to-audio model
+    for real-time dialogue. Marked New / Preview on the Google model overview
+    page. Exact API model string and token limits should be confirmed from
+    Google API reference before adding precise claims.
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:gemini-3
+  served_by:
+    - provider:google
+  speaks:
+    - model-transport:gemini-generate-content
+  supports:
+    - target: capability:streaming
+      level: full
+      evidenceSourceIds:
+        - evidence:gemini-3-1-flash-live-issue-884

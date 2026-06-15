@@ -7,6 +7,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:bias-fairness-analysis, skill-area:bias-fairness-testing]
+  roles: [role:data-scientist, role:ml-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # fairlearn-bias-detector

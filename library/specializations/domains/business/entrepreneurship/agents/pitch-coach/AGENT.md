@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Fundraising
   agent-id: AG-006
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:financial-planning, skill-area:business-model-design, skill-area:investment-analysis]
+  workflows: [workflow:product-discovery]
+  roles: [role:financial-analyst, role:strategic-planner, role:partnerships-manager]
 ---
 
 # Pitch Coach Agent

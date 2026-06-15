@@ -1,0 +1,422 @@
+---
+nodeKind: Tool
+id: tool:slack
+attributes:
+  displayName: "Slack"
+  homepageUrl: "https://slack.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Team messaging and collaboration platform for real-time communication.
+    Organizes conversations into channels, supports direct messages, file sharing,
+    and integrates with hundreds of third-party apps and services.
+edges:
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+  alternative_to:
+    - target: tool:discord
+      comparison: "Team chat — Slack targets workplaces; Discord targets communities"
+    - target: tool:microsoft-teams
+      comparison: "Team chat — Slack is standalone; Teams is Microsoft 365-integrated"
+---
+nodeKind: Tool
+id: tool:discord
+attributes:
+  displayName: "Discord"
+  homepageUrl: "https://discord.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Communication platform combining text, voice, and video chat for communities.
+    Organizes conversations into servers and channels, supports bots, roles,
+    and rich media sharing for gaming, developer, and professional communities.
+edges:
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+  alternative_to:
+    - target: tool:slack
+      comparison: "Team chat — Discord targets communities; Slack targets workplaces"
+    - target: tool:microsoft-teams
+      comparison: "Team chat — Discord is community-first; Teams is enterprise-first"
+---
+nodeKind: Tool
+id: tool:figma
+attributes:
+  displayName: "Figma"
+  homepageUrl: "https://www.figma.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Collaborative interface design tool for building UI and UX workflows.
+    Supports vector editing, component libraries, prototyping, and real-time
+    multi-user collaboration for product design teams.
+edges:
+  tool_used_by:
+    - target: skill-area:ui-ux-design
+  used_for:
+    - skill-area:ui-ux-design
+---
+nodeKind: Tool
+id: tool:stripe
+attributes:
+  displayName: "Stripe"
+  homepageUrl: "https://stripe.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Payment processing platform and developer-first financial infrastructure.
+    Provides APIs for accepting payments, managing subscriptions, invoicing,
+    and integrating revenue operations into software products.
+edges:
+  tool_used_by:
+    - target: skill-area:payment-processing
+  used_for:
+    - skill-area:payment-processing
+  alternative_to:
+    - target: tool:paypal
+      comparison: "Payment processing platforms"
+    - target: tool:square
+      comparison: "Payment processing platforms"
+    - target: tool:paddle
+      comparison: "Payment processing platforms"
+    - target: tool:braintree
+      comparison: "Payment processing platforms"
+---
+nodeKind: Tool
+id: tool:zoom
+attributes:
+  displayName: "Zoom"
+  homepageUrl: "https://zoom.us"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Video conferencing and online meeting platform for remote collaboration.
+    Supports video calls, webinars, screen sharing, recordings,
+    and AI-powered meeting summaries and transcription.
+edges:
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+  alternative_to:
+    - target: tool:calendly
+      comparison: "Communication tools — Zoom is video conferencing; Calendly is meeting scheduling"
+---
+nodeKind: Tool
+id: tool:calendly
+attributes:
+  displayName: "Calendly"
+  homepageUrl: "https://calendly.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Scheduling automation platform for managing meeting bookings.
+    Eliminates back-and-forth scheduling by sharing availability links,
+    configuring event types, and syncing with calendar and CRM tools.
+edges:
+  supports_work:
+    - target: role:talent-recruiter
+      confidence: high
+      evidence: "Ora surfaced Calendly for recruiting interview scheduling workflows."
+    - target: workflow:recruiting-pipeline-review
+      confidence: medium
+      evidence: "Interview scheduling state supports recruiting pipeline review."
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+  alternative_to:
+    - target: tool:zoom
+      comparison: "Communication tools — Calendly is meeting scheduling; Zoom is video conferencing"
+---
+nodeKind: Tool
+id: tool:snyk
+attributes:
+  displayName: "Snyk"
+  homepageUrl: "https://snyk.io"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Developer security platform for finding and fixing vulnerabilities.
+    Scans open-source dependencies, container images, IaC configurations,
+    and source code for security issues in CI/CD pipelines.
+edges:
+  tool_used_by:
+    - target: skill-area:application-security
+  used_for:
+    - skill-area:application-security
+  alternative_to:
+    - target: tool:sonarqube
+      comparison: "Code security — Snyk focuses on dependencies and containers; SonarQube on source code quality"
+    - target: tool:trivy
+      comparison: "Security scanning — Snyk is a commercial platform; Trivy is open-source CLI"
+    - target: tool:checkov
+      comparison: "Security scanning — Snyk is a commercial platform; Checkov is open-source IaC-focused"
+    - target: tool:tfsec
+      comparison: "Security scanning tools"
+    - target: tool:owasp-zap
+      comparison: "Security scanning — Snyk is SCA and code scanning; OWASP ZAP is DAST for web apps"
+---
+nodeKind: Tool
+id: tool:sonarqube
+attributes:
+  displayName: "SonarQube"
+  homepageUrl: "https://www.sonarsource.com/products/sonarqube/"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Static code analysis platform for continuous code quality inspection.
+    Detects bugs, code smells, security vulnerabilities, and technical debt
+    across 30+ programming languages in developer workflows and CI pipelines.
+edges:
+  tool_used_by:
+    - target: skill-area:code-quality
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - target: tool:snyk
+      comparison: "Code security — SonarQube scans source code quality; Snyk focuses on dependencies and containers"
+    - target: tool:trivy
+      comparison: "Code security — SonarQube scans source code; Trivy scans dependencies and containers"
+    - target: tool:owasp-zap
+      comparison: "Security testing — SonarQube is SAST (static); OWASP ZAP is DAST (runtime)"
+---
+nodeKind: Tool
+id: tool:intercom
+attributes:
+  displayName: "Intercom"
+  homepageUrl: "https://www.intercom.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Customer messaging and engagement platform for support and sales teams.
+    Combines live chat, email, and AI-powered bots to manage customer
+    conversations, onboarding flows, and help center content.
+edges:
+  tool_used_by:
+    - target: skill-area:customer-support
+  used_for:
+    - skill-area:customer-support
+  alternative_to:
+    - target: tool:servicenow
+      comparison: "Customer support — Intercom is messaging-first; ServiceNow is enterprise ITSM"
+---
+nodeKind: Tool
+id: tool:shopify
+attributes:
+  displayName: "Shopify"
+  homepageUrl: "https://www.shopify.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    E-commerce platform for building and managing online stores.
+    Provides storefronts, product catalog, inventory, payments, and shipping
+    management with an extensible app ecosystem and Liquid templating.
+edges:
+  tool_used_by:
+    - target: skill-area:e-commerce
+  used_for:
+    - skill-area:e-commerce
+---
+nodeKind: Tool
+id: tool:outlook
+attributes:
+  displayName: "Microsoft Outlook"
+  homepageUrl: "https://www.microsoft.com/en-us/microsoft-365/outlook"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Email client and personal information manager from Microsoft.
+    Integrates email, calendar, contacts, and tasks via Microsoft 365
+    and the Microsoft Graph API for enterprise productivity workflows.
+edges:
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+---
+nodeKind: Tool
+id: tool:todoist
+attributes:
+  displayName: "Todoist"
+  homepageUrl: "https://todoist.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Task management and to-do list application for personal productivity.
+    Organizes tasks into projects with labels, priorities, due dates,
+    and recurring schedules, synced across devices and integrated with other apps.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:basecamp
+      comparison: "Project tools — Todoist is personal task management; Basecamp is all-in-one team collaboration"
+    - target: tool:airtable
+      comparison: "Project tools — Todoist is task management; Airtable is a no-code database"
+---
+nodeKind: Tool
+id: tool:airtable
+attributes:
+  displayName: "Airtable"
+  homepageUrl: "https://www.airtable.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    No-code database and spreadsheet hybrid for building custom apps.
+    Combines the familiarity of spreadsheets with relational database features,
+    offering multiple views, automations, and an extensible API.
+edges:
+  tool_used_by:
+    - target: skill-area:project-planning
+  used_for:
+    - skill-area:project-planning
+  alternative_to:
+    - target: tool:basecamp
+      comparison: "Project tools — Airtable is a no-code database; Basecamp is project collaboration"
+    - target: tool:todoist
+      comparison: "Project tools — Airtable is a no-code database; Todoist is task management"
+---
+nodeKind: Tool
+id: tool:render
+attributes:
+  displayName: "Render"
+  homepageUrl: "https://render.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Cloud platform for deploying web services, static sites, and databases.
+    Offers automatic deploys from Git, managed PostgreSQL, Redis, and
+    Cron jobs with zero-downtime infrastructure management.
+edges:
+  tool_used_by:
+    - target: skill-area:cloud-deployment
+  used_for:
+    - skill-area:cloud-deployment
+---
+nodeKind: Tool
+id: tool:pagerduty
+attributes:
+  displayName: "PagerDuty"
+  homepageUrl: "https://www.pagerduty.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Digital operations management platform for incident response.
+    Provides on-call scheduling, alert routing, escalation policies,
+    and post-incident reviews to reduce MTTR and operational risk.
+edges:
+  tool_used_by:
+    - target: skill-area:incident-management
+  used_for:
+    - skill-area:incident-management
+---
+nodeKind: Tool
+id: tool:storybook
+attributes:
+  displayName: "Storybook"
+  homepageUrl: "https://storybook.js.org"
+  kind: other
+  description: |
+    Open-source tool for building UI components in isolation.
+    Provides a sandbox for developing, documenting, and visually testing
+    React, Vue, Angular, and other frontend components independently.
+edges:
+  supports_work:
+    - target: role:product-designer
+      confidence: medium
+      evidence: "Component examples and visual states support design-system review."
+    - target: workflow:design-system-maintenance
+      confidence: high
+      evidence: "Storybook is a canonical component-system projection surface."
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:frontend-development
+  used_for:
+    - skill-area:frontend-development
+  alternative_to:
+    - target: tool:chromatic
+      comparison: "Frontend UI tools — Storybook is the component sandbox; Chromatic is visual testing for Storybook"
+    - target: tool:percy
+      comparison: "Frontend testing — Storybook is component development; Percy is visual regression testing"
+---
+nodeKind: Tool
+id: tool:huggingface
+attributes:
+  displayName: "Hugging Face"
+  homepageUrl: "https://huggingface.co"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    AI model hub and platform for building machine learning applications.
+    Hosts tens of thousands of pre-trained models and datasets, provides
+    Inference API, Spaces hosting, and collaborative ML development tools.
+edges:
+  tool_used_by:
+    - target: skill-area:machine-learning
+  used_for:
+    - skill-area:machine-learning
+---
+nodeKind: Tool
+id: tool:firecrawl
+attributes:
+  displayName: "Firecrawl"
+  homepageUrl: "https://www.firecrawl.dev"
+  kind: other
+  description: |
+    Web scraping and crawling API for extracting structured data from websites.
+    Turns websites into clean markdown or JSON by handling JavaScript rendering,
+    pagination, sitemaps, and structured extraction at scale.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:data-collection
+  used_for:
+    - skill-area:data-collection
+---
+nodeKind: Tool
+id: tool:context7
+attributes:
+  displayName: "Context7"
+  homepageUrl: "https://context7.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Library documentation service providing up-to-date developer documentation.
+    Enables AI coding assistants to retrieve current API references and
+    usage examples for programming libraries and frameworks on demand.
+edges:
+  tool_used_by:
+    - target: skill-area:developer-experience
+  used_for:
+    - skill-area:developer-experience
+---
+nodeKind: Tool
+id: tool:microsoft-teams
+attributes:
+  displayName: "Microsoft Teams"
+  homepageUrl: "https://www.microsoft.com/en-us/microsoft-teams/"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Enterprise collaboration platform from Microsoft combining chat, meetings, and apps.
+    Integrates with Microsoft 365, enabling teams to chat, video-call, share files,
+    and collaborate within channels and private conversations.
+edges:
+  tool_used_by:
+    - target: skill-area:communication
+  used_for:
+    - skill-area:communication
+  alternative_to:
+    - target: tool:slack
+      comparison: "Team chat — Teams is Microsoft 365-integrated; Slack is standalone"
+    - target: tool:discord
+      comparison: "Team chat — Teams is enterprise-first; Discord is community-first"

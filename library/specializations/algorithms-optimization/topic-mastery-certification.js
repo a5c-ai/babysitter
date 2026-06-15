@@ -7,6 +7,12 @@
  *
  * @references
  * - Algorithm Mastery Frameworks
+ * @graph
+ *   domains: [domain:computer-science]
+ *   specializations: [specialization:algorithms-optimization]
+ *   skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms]
+ *   roles: [role:backend-engineer, role:computational-scientist]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -29,26 +35,17 @@ export async function process(inputs, ctx) {
 
   let certificate = null;
   if (scoring.passed) {
-    let cert = await ctx.task(certificateGenerationTask, { candidateId, topic, scoring, outputDir });
+    const cert = await ctx.task(certificateGenerationTask, { candidateId, topic, scoring, outputDir });
     artifacts.push(...cert.artifacts);
     certificate = cert.certificate;
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      cert = await ctx.task(certificateGenerationTask, { ...{ candidateId, topic, scoring, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Certification assessment complete for ${topic}. Score: ${scoring.totalScore}/100. Certified: ${scoring.passed}. Review?`,
     title: 'Topic Mastery Certification Complete',
-    context: { runId: ctx.runId, topic, score: scoring.totalScore, certified: scoring.passed },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, topic, score: scoring.totalScore, certified: scoring.passed }
+  });
+
   return {
     success: true,
     topic,

@@ -6,6 +6,13 @@ backlog-id: AG-UX-001
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:accessibility-testing, skill-area:accessibility-first-design]
+  roles: [role:qa-engineer, role:product-designer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+  topics: [topic:accessibility]
 ---
 
 # wcag-accessibility-auditor

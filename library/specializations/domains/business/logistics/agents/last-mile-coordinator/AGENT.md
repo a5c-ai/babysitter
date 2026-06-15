@@ -13,6 +13,10 @@ required-skills:
   - last-mile-delivery-optimizer
   - route-optimization-engine
   - shipment-visibility-tracker
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:quantitative-modeling, skill-area:customer-success]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:customer-success-manager]
 ---
 
 # Last-Mile Coordinator

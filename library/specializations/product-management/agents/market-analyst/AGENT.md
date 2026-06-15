@@ -9,6 +9,12 @@ expertise:
   - Industry analyst research
   - Win/loss analysis
   - Market segmentation
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:competitive-intelligence, skill-area:market-research]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Market Analyst Agent

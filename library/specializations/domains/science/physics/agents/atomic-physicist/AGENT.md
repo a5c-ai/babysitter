@@ -12,6 +12,11 @@ expertise:
 metadata:
   version: "1.0"
   category: physics
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # Atomic Physicist Agent

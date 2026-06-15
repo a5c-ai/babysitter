@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-003
   category: Financial Analysis
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:financial-modeling, skill-area:business-analysis, skill-area:budgeting-forecasting]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:financial-analyst]
 ---
 
 # Financial Calculator

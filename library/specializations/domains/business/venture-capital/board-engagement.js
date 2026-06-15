@@ -3,6 +3,11 @@
  * @description Effective board participation including pre-meeting preparation, strategic guidance, executive session facilitation, and follow-up action tracking
  * @inputs { companyName: string, boardMeeting: object, companyData: object, priorMeetings: array }
  * @outputs { success: boolean, preMeetingPackage: object, meetingNotes: object, actionItems: array, artifacts: array }
+  * @graph
+ *   domains: [domain:venture-capital]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,104 @@
+---
+nodeKind: Workflow
+id: workflow:data-quality-scorecard-review
+attributes:
+  displayName: "Data Quality Scorecard Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Compiles and reviews a multi-dimensional data-quality scorecard across key
+    datasets — evaluating completeness, accuracy, freshness, consistency,
+    uniqueness, and schema-conformance dimensions; trending scores over time;
+    attributing regressions to specific pipeline stages or source systems; and
+    escalating datasets that breach SLA thresholds. Produces a prioritised
+    remediation backlog. Excludes pipeline repair work.
+edges:
+  involves_role:
+    - target: role:data-engineer
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-lineage
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:data-engineering
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:data-governance-team
+---
+nodeKind: Workflow
+id: workflow:analytics-instrumentation-audit
+attributes:
+  displayName: "Analytics Instrumentation Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits the correctness and completeness of analytics event instrumentation
+    across product surfaces — validating that every tracked event conforms to
+    the naming taxonomy, checking property payloads against the schema registry,
+    identifying orphaned events that no dashboard consumes, surfacing gaps where
+    key user actions lack instrumentation, and verifying consent-gating
+    compliance. Produces a coverage heatmap and remediation ticket list.
+    Excludes dashboard redesign.
+edges:
+  involves_role:
+    - target: role:data-engineer
+    - target: role:frontend-engineer
+    - target: role:qa-lead
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:mobile
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:self-serve-analytics-enablement
+attributes:
+  displayName: "Self-Serve Analytics Enablement"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Expands and maintains the self-serve analytics surface available to
+    non-technical stakeholders — curating semantic-layer definitions, publishing
+    governed datasets with clear documentation, onboarding new teams to the BI
+    tool, reviewing access-control policies, gathering feedback on data
+    discoverability, and retiring stale or misleading reports. Produces an
+    updated data catalogue and enablement plan. Excludes warehouse schema
+    redesign.
+edges:
+  involves_role:
+    - target: role:data-engineer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:business-intelligence
+    - target: domain:data-science
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:business-intelligence-team
+    - target: org-unit:data-platform-team

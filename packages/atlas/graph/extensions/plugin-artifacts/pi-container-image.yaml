@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:pi-container-image
+attributes:
+  artifactId: plugin-artifact:pi-container-image
+  displayName: "Pi container image"
+  targetId: plugin-target:pi
+  artifactKind: container-image
+  pathPattern: "ghcr.io/a5c-ai/pi"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:pi

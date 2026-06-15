@@ -1,0 +1,48 @@
+---
+nodeKind: Tool
+id: tool:opentelemetry-collector
+attributes:
+  displayName: "OpenTelemetry Collector"
+  homepageUrl: "https://opentelemetry.io/docs/collector/"
+  kind: observability
+  description: |
+    Vendor-neutral agent/gateway for receiving, processing, and
+    exporting traces, metrics, and logs.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+  used_for:
+    - skill-area:observability-instrumentation
+  alternative_to:
+    - target: tool:opentelemetry
+      comparison: "OpenTelemetry ecosystem — the Collector is the data pipeline; OTel is the instrumentation SDK"
+    - target: tool:fluent-bit
+      comparison: "Observability pipelines — OTel Collector handles traces+metrics+logs; Fluent Bit focuses on logs"
+    - target: tool:vector
+      comparison: "Observability pipelines — OTel Collector is vendor-neutral; Vector is Datadog-backed"
+---
+nodeKind: Tool
+id: tool:fluent-bit
+attributes:
+  displayName: "Fluent Bit"
+  homepageUrl: "https://fluentbit.io"
+  kind: observability
+  description: |
+    Lightweight log and metrics processor/forwarder; common Kubernetes
+    log shipper with broad input/output plugin set.
+edges:
+  belongs_to_language:
+    - language:c
+  tool_used_by:
+    - target: skill-area:observability-pipeline
+  used_for:
+    - skill-area:observability-instrumentation
+  alternative_to:
+    - target: tool:fluentd
+      comparison: "Log shipping — Fluent Bit is a lightweight alternative; Fluentd has 500+ plugins"
+    - target: tool:vector
+      comparison: "Log shipping — Fluent Bit is lightweight; Vector handles logs+metrics+traces"
+    - target: tool:opentelemetry-collector
+      comparison: "Observability pipelines — Fluent Bit focuses on logs; OTel Collector handles traces+metrics+logs"

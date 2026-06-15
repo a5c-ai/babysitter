@@ -2,6 +2,13 @@
 name: nextjs
 description: Next.js specific patterns including App Router, React Server Components, Server Actions, streaming, caching, and Vercel deployment.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:server-side-rendering, skill-area:data-fetching-caching]
+  roles: [role:frontend-engineer, role:fullstack-engineer]
+  topics: [topic:incremental-static-regeneration, topic:streaming-ssr]
+
 ---
 
 # Next.js Skill

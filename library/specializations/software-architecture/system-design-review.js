@@ -3,6 +3,13 @@
  * @description Structured system design review process for evaluating software architectures against quality attributes, identifying risks, and ensuring alignment with business goals
  * @inputs { systemName: string, architectureDocumentation: object, qualityAttributes: array, stakeholders: array, reviewType: string }
  * @outputs { success: boolean, reviewScore: number, riskCatalog: object, recommendations: array, actionPlan: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:principal-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:caching-strategies]
+ *   topics: [topic:microservices, topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

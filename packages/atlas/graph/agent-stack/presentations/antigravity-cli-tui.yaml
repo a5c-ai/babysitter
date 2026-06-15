@@ -1,0 +1,26 @@
+nodeKind: Presentation
+id: presentation:antigravity-cli-tui
+attributes:
+  displayName: "Antigravity CLI TUI"
+  kind: tui
+  description: |
+    Terminal UI bundled with Google's Antigravity CLI, successor to
+    Gemini CLI's TUI. Built in Go, renders streaming output, tool-use
+    turns, YOLO-mode prompts, multi-model status, and a thinking toggle.
+  renderingTechnology: go-terminal
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  bundleSize: "~30 MB"
+  updateChannel: auto
+  accessibilityShortcuts:
+    - "Ctrl+C: cancel"
+    - "Ctrl+D: exit"
+edges:
+  bundled_with:
+    - agent-platform-impl:antigravity-cli.platform@current
+  succeeds:
+    - target: presentation:gemini-cli-tui
+      notes: 'Go-based TUI successor to Gemini CLI TUI; adds multi-model status display and workflow-driven hook indicators.
+        '

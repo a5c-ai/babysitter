@@ -9,6 +9,12 @@ expertise:
   - Active Directory attacks
   - Cloud environment attacks
   - MITRE ATT&CK mapping
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:penetration-testing-ethical-hacking, skill-area:identity-security]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # Red Team Operator Agent

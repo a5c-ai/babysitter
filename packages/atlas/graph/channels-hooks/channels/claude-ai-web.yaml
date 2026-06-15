@@ -1,0 +1,16 @@
+nodeKind: Channel
+id: channel:claude-ai-web
+attributes:
+  displayName: "Claude.ai web channel"
+  kind: mcp-channel
+  endpoint: "https://claude.ai/mcp"
+  brokeringPrimitive: |
+    The Claude.ai web client opens an MCP connection to the user's
+    selected connectors. The browser brokers tool calls between the
+    model and the connectors; the connection persists for the
+    duration of the chat.
+  persistent: true
+  description: |
+    The Claude.ai web app's MCP surface, used to expose user-installed
+    connectors to the model during a chat.
+edges:

@@ -18,6 +18,10 @@ metadata:
   domain: business
   category: Stakeholder Communications
   agent-id: AG-011
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:financial-planning, skill-area:brand-strategy, skill-area:stakeholder-management]
+  roles: [role:financial-analyst, role:marketing-strategist, role:partnerships-manager]
 ---
 
 # Investor Communications Expert Agent

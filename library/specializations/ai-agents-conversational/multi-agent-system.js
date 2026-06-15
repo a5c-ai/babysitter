@@ -18,6 +18,9 @@
  * - AutoGen: https://microsoft.github.io/autogen/
  * - LangGraph Multi-Agent: https://langchain-ai.github.io/langgraph/tutorials/multi_agent/
  * - Multi-Agent Patterns: https://blog.langchain.dev/langgraph-multi-agent-workflows/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

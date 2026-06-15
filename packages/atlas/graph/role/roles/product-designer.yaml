@@ -1,0 +1,21 @@
+nodeKind: Role
+id: role:product-designer
+attributes:
+  displayName: "Product Designer"
+  isAgentic: false
+  seniority: mid
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:web-development
+  description: |
+    Owns UX and visual design for product surfaces.
+edges:
+  requires_expertise:
+    - target: skill-area:design-systems
+    - target: skill-area:figma-prototyping
+    - target: skill-area:web-accessibility
+    - target: skill-area:typography
+    - target: skill-area:color-theory
+    - target: skill-area:motion-design
+  applies_to:
+    - target: domain:web-development

@@ -1,0 +1,56 @@
+---
+nodeKind: Workflow
+id: workflow:data-pipeline-monitoring
+attributes:
+  displayName: "Data Pipeline Monitoring"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "continuous"
+  complexity: single-team
+  description: |
+    Monitors data pipeline health, detects schema drift or data-quality
+    anomalies, and alerts owners for investigation and repair.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:kafka-stream-processing
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:ml-ops
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:data-governance-review
+attributes:
+  displayName: "Data Governance Review"
+  workflowKind: data
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews data classification, access controls, retention policies,
+    and compliance posture across data stores and pipelines.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:database-administrator
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:databases
+    - target: domain:security
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:security-team
+    - target: org-unit:database-team

@@ -1,0 +1,56 @@
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-2-announcement-issue-535
+attributes:
+  displayName: "AWS announcement for Amazon Nova 2 foundation models"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://aws.amazon.com/about-aws/whats-new/2025/12/nova-2-foundation-models-amazon-bedrock/
+  sourcePathOrUrl: https://aws.amazon.com/about-aws/whats-new/2025/12/nova-2-foundation-models-amazon-bedrock/
+  locator: "Nova 2 Pro Preview availability, launch date, one-million-token context, extended thinking, built-in tools, remote MCP tools, Bedrock global cross-region inference, and Nova Forge early access"
+  capturedAt: '2026-05-29T00:00:00Z'
+  observedAt: '2026-05-29T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-models-page-issue-535
+attributes:
+  displayName: "Amazon Nova models product page"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://aws.amazon.com/nova/models/
+  sourcePathOrUrl: https://aws.amazon.com/nova/models/
+  locator: "Amazon Nova model-family product positioning and current public page state"
+  capturedAt: '2026-05-29T00:00:00Z'
+  observedAt: '2026-05-29T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:bedrock-model-card-index-nova2-issue-535
+attributes:
+  displayName: "Amazon Bedrock model-card index for Nova 2"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-cards.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-cards.html
+  locator: "Reviewed model-card index listed Nova 2 Lite and Nova 2 Sonic but no Nova 2 Pro card"
+  capturedAt: '2026-05-29T00:00:00Z'
+  observedAt: '2026-05-29T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 14
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-29T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web

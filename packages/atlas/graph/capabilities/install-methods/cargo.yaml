@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:cargo
+attributes:
+  displayName: "cargo"
+  kind: cargo
+  platforms: [darwin, linux, win32]
+  command: "cargo install {{crate-name}}"
+  prerequisiteCheck: "cargo --version"
+edges: {}

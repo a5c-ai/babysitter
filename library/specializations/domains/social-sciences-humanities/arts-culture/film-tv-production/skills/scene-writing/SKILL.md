@@ -4,6 +4,10 @@ id: SK-FTV-003
 version: 1.0.0
 description: Write individual screenplay scenes with proper industry formatting, visual action, and dramatic structure
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:content-strategy, skill-area:natural-language-processing, skill-area:visual-design]
+  roles: [role:ux-writer, role:creative-director]
 ---
 
 # Scene Writing Skill

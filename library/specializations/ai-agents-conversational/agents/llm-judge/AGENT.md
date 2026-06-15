@@ -8,6 +8,13 @@ expertise:
   - Scoring rubrics
   - Judge calibration
   - Agreement analysis
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:eval-driven-development, skill-area:agent-simulation-testing]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # LLM Judge

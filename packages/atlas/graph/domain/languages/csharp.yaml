@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:csharp
+attributes:
+  displayName: "C#"
+  paradigms:
+    - object-oriented
+    - functional
+    - imperative
+  description: |
+    C# is a statically-typed, multi-paradigm language developed by Microsoft
+    as part of the .NET platform. It combines object-oriented programming
+    with functional features (LINQ, pattern matching, records, and tuples)
+    and strong async/await support via the Task Parallel Library.
+
+    C# is the dominant language for .NET web development (ASP.NET Core),
+    game development (Unity), enterprise desktop apps (WPF, WinUI), and
+    cross-platform mobile (MAUI/Xamarin). Modern C# (9–13) adds top-level
+    statements, init-only properties, required members, and primary
+    constructors. The NuGet ecosystem and Visual Studio / Rider IDEs
+    provide rich tooling. Interoperates with F# and VB.NET on the CLR.
+edges: {}

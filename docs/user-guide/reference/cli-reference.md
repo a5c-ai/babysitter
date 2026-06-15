@@ -1,10 +1,10 @@
 # Babysitter CLI Reference
 
-**Version:** 1.0
-**SDK Version:** 0.0.123+
+**Version:** 1.1
+**CLI/SDK Version:** 5.0.0
 **Last Updated:** 2026-01-25
 
-Complete reference documentation for the Babysitter command-line interface (SDK CLI).
+Complete reference documentation for the core Babysitter command-line interface.
 
 > **Looking for slash commands?** See [Slash Commands Reference](./slash-commands.md) for `/babysitter:call`, `/babysitter:yolo`, and other Claude Code commands.
 
@@ -17,14 +17,22 @@ Complete reference documentation for the Babysitter command-line interface (SDK 
 - [Global Options](#global-options)
 - [Run Management Commands](#run-management-commands)
   - [run:create](#runcreate)
+  - [run:assign-process](#runassign-process)
   - [run:status](#runstatus)
   - [run:events](#runevents)
   - [run:iterate](#runiterate)
   - [run:rebuild-state](#runrebuild-state)
+  - [run:recover-process-error](#runrecover-process-error)
 - [Task Commands](#task-commands)
   - [task:list](#tasklist)
   - [task:show](#taskshow)
   - [task:post](#taskpost)
+- [Breakpoint Rule Commands](#breakpoint-rule-commands)
+  - [breakpoint:approve-rule](#breakpointapprove-rule)
+  - [breakpoint:remove-rule](#breakpointremove-rule)
+  - [breakpoint:list-rules](#breakpointlist-rules)
+  - [breakpoint:should-auto-approve](#breakpointshould-auto-approve)
+  - [breakpoint:history](#breakpointhistory)
 - [Exit Codes](#exit-codes)
 - [Output Formats](#output-formats)
 - [Examples](#examples)
@@ -33,11 +41,16 @@ Complete reference documentation for the Babysitter command-line interface (SDK 
 
 ## Overview
 
-The Babysitter CLI provides deterministic orchestration for event-sourced workflows. It enables run lifecycle management, task introspection, and result posting.
+The Babysitter CLI provides deterministic orchestration for event-sourced workflows. It enables run lifecycle management, task introspection, plugin/profile management, and result posting.
 
 **Binary Names:**
 - `babysitter` (primary)
 - `babysitter-sdk` (alias)
+
+**Package split:**
+- Install `@a5c-ai/babysitter` for the recommended end-user `babysitter` command.
+- Install `@a5c-ai/babysitter-sdk` if you need the SDK/library directly or want the underlying CLI implementation package.
+- Install `@a5c-ai/genty-platform` for runtime commands such as `call`, `resume`, `plan`, `start-server`, and `tui`.
 
 **Design Principles:**
 - Deterministic operations (same inputs = same outputs)
@@ -52,20 +65,26 @@ The Babysitter CLI provides deterministic orchestration for event-sourced workfl
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g @a5c-ai/babysitter-sdk@latest
+npm install -g @a5c-ai/babysitter@latest
+```
+
+### Optional Runtime CLI
+
+```bash
+npm install -g @a5c-ai/genty-platform@latest
 ```
 
 ### Via npx (No Install)
 
 ```bash
-npx -y @a5c-ai/babysitter-sdk@latest <command>
+npx -y @a5c-ai/babysitter@latest <command>
 ```
 
 ### Verify Installation
 
 ```bash
 babysitter --version
-# Output: 0.0.123
+# Output: 5.0.0
 ```
 
 ### Alias Setup
@@ -75,7 +94,7 @@ babysitter --version
 CLI="babysitter"
 
 # Or for npx usage
-CLI="npx -y @a5c-ai/babysitter-sdk@latest"
+CLI="npx -y @a5c-ai/babysitter@latest"
 ```
 
 ---
@@ -86,12 +105,17 @@ These options are available on all commands:
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--runs-dir <path>` | Override the runs directory | `.` (current directory) |
+| `--runs-dir <path>` | Override the runs directory | `~/.a5c/runs` |
 | `--json` | Output in JSON format | `false` |
 | `--verbose` | Enable verbose logging (paths, resolved options) | `false` |
 | `--dry-run` | Preview changes without applying (where supported) | `false` |
-| `--help` | Show help for command | - |
-| `--version` | Show version number | - |
+| `--help`, `-h` | Show agent-facing help (default; covers commands intended for agent/automation use) | - |
+| `--help-human` | Show human-facing help for the core CLI surface (for example `session:*`, `plugin:*`, `harness:*`, `configure`) | - |
+| `--version`, `-v` | Show version number | - |
+
+> The default `--help` (and the usage text printed on a wrong-syntax invocation or a bare command name) lists **agent-facing** commands only — the surface a babysitter skill or hook would call. Run `babysitter --help-human` to see the commands intended for direct human use.
+
+> Runtime/orchestration commands such as `agent-platform call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/genty-platform` package and are not covered by this reference unless explicitly noted.
 
 ### Path Handling
 
@@ -179,6 +203,124 @@ babysitter run:create \
 
 ---
 
+### run:assign-process
+
+Assigns a process to an existing run.
+
+#### Synopsis
+
+```bash
+babysitter run:assign-process <runDir> \
+  --entry <path>#<export> \
+  [--process-id <id>] \
+  [--process-revision <rev>] \
+  [--force] \
+  [--json] \
+  [--dry-run] \
+  [--verbose]
+```
+
+#### Description
+
+Assigns a process entrypoint to an existing bare run (one created without `--entry`). Updates the run's `entrypoint`, `processPath`, and `processId` fields in `run.json` and appends a `PROCESS_ASSIGNED` journal event. If the run already has a process assigned, the command rejects unless `--force` is provided.
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<runDir>` | Yes | Run ID or path to run directory |
+
+#### Options
+
+| Option | Required | Description |
+|--------|----------|-------------|
+| `--entry <path>#<export>` | Yes | Entry point file and export name |
+| `--process-id <id>` | No | Process identifier (retains existing if omitted) |
+| `--process-revision <rev>` | No | Process revision/version |
+| `--force` | No | Override if a process is already assigned |
+| `--json` | No | Output in JSON format |
+| `--dry-run` | No | Preview changes without applying |
+| `--verbose` | No | Enable verbose logging |
+
+#### Output (Human)
+
+```
+[run:assign-process] runId=run-20260125-143012 runDir=.a5c/runs/run-20260125-143012 entry=.a5c/processes/build/main.js#buildProcess processId=dev/build
+```
+
+#### Output (JSON)
+
+```json
+{
+  "runId": "run-20260125-143012",
+  "runDir": ".a5c/runs/run-20260125-143012",
+  "entry": ".a5c/processes/build/main.js#buildProcess",
+  "processId": "dev/build",
+  "previousEntrypoint": {
+    "importPath": "bare-run"
+  },
+  "assigned": true
+}
+```
+
+#### Dry Run Output (JSON)
+
+```json
+{
+  "dryRun": true,
+  "runDir": ".a5c/runs/run-20260125-143012",
+  "runId": "run-20260125-143012",
+  "entry": ".a5c/processes/build/main.js#buildProcess",
+  "processId": "dev/build",
+  "previousEntrypoint": {
+    "importPath": "bare-run"
+  },
+  "force": false
+}
+```
+
+#### Error Responses (JSON)
+
+| Error Code | Condition |
+|------------|-----------|
+| `RUN_NOT_FOUND` | Run directory does not exist |
+| `PROCESS_ALREADY_ASSIGNED` | Run already has a process and `--force` was not provided |
+
+#### Examples
+
+```bash
+# Assign a process to a bare run
+babysitter run:assign-process .a5c/runs/run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build
+
+# Assign with JSON output
+babysitter run:assign-process run-20260125-143012 \
+  --entry .a5c/processes/tdd/main.js#tddProcess \
+  --process-id tdd/feature \
+  --json
+
+# Preview without applying
+babysitter run:assign-process run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build \
+  --dry-run --json
+
+# Force reassign a process to a run that already has one
+babysitter run:assign-process run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build \
+  --force --json
+
+# With process revision
+babysitter run:assign-process run-20260125-143012 \
+  --entry .a5c/processes/build/main.js#buildProcess \
+  --process-id dev/build \
+  --process-revision 2.1.0
+```
+
+---
+
 ### run:status
 
 Returns the current status of a run.
@@ -230,7 +372,7 @@ babysitter run:status <runId> [--json]
 | `running` | Run in progress |
 | `waiting` | Blocked on breakpoint or sleep |
 | `completed` | Run finished successfully |
-| `failed` | Run terminated with error |
+| `failed` | Run terminated with error. JSON includes `reason: "process_runtime_error"` when the failure came from a typed process-code exception. |
 
 #### Examples
 
@@ -308,6 +450,9 @@ babysitter run:events run-20260125-143012 --limit 20 --reverse
 
 # Filter by type
 babysitter run:events run-20260125-143012 --filter-type EFFECT_RESOLVED --json
+
+# Inspect process runtime exceptions
+babysitter run:events run-20260125-143012 --filter-type PROCESS_RUNTIME_ERROR --json
 ```
 
 ---
@@ -424,6 +569,34 @@ babysitter run:rebuild-state run-20260125-143012
 
 # Check result
 babysitter run:status run-20260125-143012 --json
+```
+
+---
+
+### run:recover-process-error
+
+Clears the latest typed `PROCESS_RUNTIME_ERROR` marker and optionally patches the offending task result.
+
+#### Synopsis
+
+```bash
+babysitter run:recover-process-error <runId> \
+  [--patch-effect <effectId>:<jsonPath>=<json>] \
+  [--dry-run] \
+  [--json]
+```
+
+#### Description
+
+Use this when process code threw after consuming a bad result. The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json`, rewrites the journal with only that typed marker removed, rebuilds state, and leaves the run ready for `run:iterate`. Patch paths without a leading `value` or `result` segment apply to the value returned by `ctx.task`; use `value.<path>` or `result.<path>` only when patching the stored wrapper explicitly.
+
+Without `--patch-effect`, recovery is honest: if the underlying result is still bad, the next `run:iterate` records a new `PROCESS_RUNTIME_ERROR`.
+
+#### Examples
+
+```bash
+babysitter run:recover-process-error run-20260125-143012 --dry-run --json
+babysitter run:recover-process-error run-20260125-143012 --patch-effect 'ef-live:checks=[]' --json
 ```
 
 ---
@@ -548,6 +721,8 @@ babysitter task:show run-20260125-143012 ef-build-001
 ### task:post
 
 Posts a result for an executed task. This is how you commit external execution results into the run.
+
+For shell tasks with a top-level `outputSchema`, successful `--status ok` values are validated before commit. Schema failures exit non-zero and do not write `result.json` or append `EFFECT_RESOLVED`.
 
 #### Synopsis
 
@@ -815,6 +990,9 @@ done
 # Create
 babysitter run:create --process-id <id> --entry <path>#<export> [--prompt <text>] --json
 
+# Assign process to bare run
+babysitter run:assign-process <runDir> --entry <path>#<export> [--process-id <id>] --json
+
 # Status
 babysitter run:status <runId> --json
 
@@ -843,8 +1021,76 @@ babysitter task:post <runId> <effectId> --status ok --value <file> --json
 
 ---
 
+---
+
+## Breakpoint Rule Commands
+
+Commands for managing breakpoint auto-approval rules. Rules are stored at `~/.a5c/breakpoint-approvals/rules.json`.
+
+### breakpoint:approve-rule
+
+Add or update an auto-approval rule.
+
+```bash
+babysitter breakpoint:approve-rule <pattern> [--action auto-approve|never-auto-approve] [--source <source>] [--note <note>] [--json]
+```
+
+| Argument/Flag | Required | Description |
+|---------------|----------|-------------|
+| `<pattern>` | Yes | Pattern to match breakpointIds. Supports glob (`confirm.*`) and attribute predicates (`*.review(tags contains 'design')`). |
+| `--action` | No | Rule action: `auto-approve` (default) or `never-auto-approve`. |
+| `--source` | No | Who created the rule (e.g., `cli`, `agent`, `analyze-history`). |
+| `--note` | No | Human-readable note about why this rule exists. |
+| `--json` | No | Emit JSON output. |
+
+### breakpoint:remove-rule
+
+Remove an auto-approval rule by ID.
+
+```bash
+babysitter breakpoint:remove-rule <ruleId> [--json]
+```
+
+### breakpoint:list-rules
+
+List all configured auto-approval rules.
+
+```bash
+babysitter breakpoint:list-rules [--json]
+```
+
+### breakpoint:should-auto-approve
+
+Check whether a breakpoint should be auto-approved given current rules.
+
+```bash
+babysitter breakpoint:should-auto-approve <breakpointId> [--tags <csv>] [--expert <expert>] [--json]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--tags` | Comma-separated list of tags to evaluate against rules. |
+| `--expert` | Expert identifier to evaluate against rules. |
+
+### breakpoint:history
+
+View breakpoint approval history from run journals.
+
+```bash
+babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit <n>] [--json]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--breakpoint-id` | Filter history to a specific breakpointId. |
+| `--runs-dir` | Override runs directory (default: `.a5c/runs`). |
+| `--limit` | Maximum number of entries to display (default: 50). |
+
+---
+
 ## Related Documentation
 
+- [Breakpoints Feature Guide](../features/breakpoints.md) - Breakpoint usage, auto-approval rules, and patterns
 - [Glossary](./glossary.md) - Term definitions
 - [Configuration Reference](./configuration.md) - Environment variables and settings
 - [Troubleshooting](./troubleshooting.md) - Common issues and solutions

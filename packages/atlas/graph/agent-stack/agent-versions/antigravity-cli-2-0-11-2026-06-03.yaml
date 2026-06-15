@@ -1,0 +1,48 @@
+nodeKind: AgentVersion
+id: agentVersion:antigravity:2-0-11
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 2.0.11"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.0.11"
+  currentVersion: "2.0.11"
+  releasedAt: "2026-06-03"
+  sourcePackage: "antigravity-cli"
+  upstreamReleaseTag: "v2.0.11"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/v2.0.11"
+  cliCommand: "antigravity"
+  summary: "Google Antigravity CLI 2.0.11, successor to Gemini CLI. Go-based CLI agent supporting Gemini 3.5 Flash (default), Claude Sonnet 4.6, and GPT-OSS-120B models with SKILL.md plugin system, workflow-driven hooks, rules, and MCP integration."
+  assimilationNotes:
+    - "Antigravity CLI is the successor product to Gemini CLI, rewritten in Go."
+    - "Default model is Gemini 3.5 Flash; Claude Sonnet 4.6 and GPT-OSS-120B are also supported as configurable model targets."
+    - "Plugin system uses SKILL.md files, workflows, rules, and MCP servers — replacing the shell-hook model from Gemini CLI with a workflow-driven hook model."
+    - "Transport remains the Gemini Generate Content API, same as Gemini CLI."
+    - "Install via brew install antigravity-cli or curl installer."
+  releaseHighlights:
+    - "Go-based CLI successor to Gemini CLI."
+    - "Multi-model support: Gemini 3.5 Flash (default), Claude Sonnet 4.6, GPT-OSS-120B."
+    - "SKILL.md + workflows + rules + MCP plugin system."
+    - "Workflow-driven hook model."
+  installMethods:
+    - install:brew
+    - install:curl
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: true
+edges:
+  version_of:
+    - agent:antigravity-cli

@@ -18,6 +18,10 @@ metadata:
   phase: 3
   experience: 10+ years additive manufacturing
   background: Metal and polymer AM, prototyping, production AM
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Additive Manufacturing Specialist Agent

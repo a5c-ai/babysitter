@@ -8,6 +8,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:security-testing, skill-area:identity-security]
+  roles: [role:security-engineer, role:compliance-officer]
+  workflows: [workflow:security-audit]
+
 ---
 
 # Phishing Simulation Skill

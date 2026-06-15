@@ -1,0 +1,438 @@
+---
+nodeKind: Responsibility
+id: responsibility:model-training-quality
+attributes:
+  displayName: "Model training quality"
+  cadence: continuous
+  description: |
+    Ensure ML model training produces reliable, reproducible results —
+    monitor training loss convergence, validate against holdout sets,
+    track experiment lineage, and enforce training best practices.
+edges:
+  held_by:
+    - target: role:ml-engineer
+    - target: role:applied-scientist
+    - target: role:nlp-engineer
+  requires_expertise:
+    - target: skill-area:machine-learning-frameworks
+    - target: skill-area:model-evaluation
+---
+nodeKind: Responsibility
+id: responsibility:annotation-accuracy
+attributes:
+  displayName: "Annotation accuracy"
+  cadence: continuous
+  description: |
+    Maintain high-quality data annotations — inter-annotator agreement
+    metrics, calibration sessions, edge case documentation, and continuous
+    quality auditing of labeled datasets.
+edges:
+  held_by:
+    - target: role:annotation-lead
+    - target: role:ai-trainer
+  requires_expertise:
+    - target: skill-area:data-collection
+    - target: skill-area:data-quality
+---
+nodeKind: Responsibility
+id: responsibility:data-labeling-consistency
+attributes:
+  displayName: "Data labeling consistency"
+  cadence: continuous
+  description: |
+    Enforce consistent labeling guidelines across annotation teams —
+    maintain labeling rubrics, resolve ambiguous cases, and track
+    consistency metrics across batches and annotators.
+edges:
+  held_by:
+    - target: role:annotation-lead
+    - target: role:ai-trainer
+    - target: role:data-steward
+  requires_expertise:
+    - target: skill-area:data-collection
+---
+nodeKind: Responsibility
+id: responsibility:inference-latency-sla
+attributes:
+  displayName: "Inference latency SLA"
+  cadence: continuous
+  description: |
+    Ensure ML model inference meets latency targets — monitor P50/P99
+    response times, optimize serving infrastructure, and enforce
+    performance budgets for model endpoints.
+edges:
+  held_by:
+    - target: role:ml-engineer
+    - target: role:machine-learning-ops-engineer
+  requires_expertise:
+    - target: skill-area:model-serving
+    - target: skill-area:inference-optimization
+---
+nodeKind: Responsibility
+id: responsibility:model-drift-monitoring
+attributes:
+  displayName: "Model drift monitoring"
+  cadence: continuous
+  description: |
+    Detect and respond to model performance degradation — data drift,
+    concept drift, and prediction drift monitoring with automated alerts
+    and retraining triggers.
+edges:
+  held_by:
+    - target: role:ml-engineer
+    - target: role:machine-learning-ops-engineer
+    - target: role:data-scientist
+  requires_expertise:
+    - target: skill-area:model-monitoring-drift-detection
+    - target: skill-area:model-evaluation
+---
+nodeKind: Responsibility
+id: responsibility:a-b-test-integrity
+attributes:
+  displayName: "A/B test integrity"
+  cadence: continuous
+  description: |
+    Ensure statistical rigor of A/B experiments — proper randomization,
+    sample size calculation, multiple comparison correction, and preventing
+    peeking bias. Guard against p-hacking and premature conclusions.
+edges:
+  held_by:
+    - target: role:data-scientist
+    - target: role:growth-engineer
+    - target: role:conversion-rate-optimizer
+  requires_expertise:
+    - target: skill-area:experiment-design-AB-testing
+    - target: skill-area:statistical-analysis
+---
+nodeKind: Responsibility
+id: responsibility:experimentation-governance
+attributes:
+  displayName: "Experimentation governance"
+  cadence: continuous
+  description: |
+    Govern the organization's experimentation platform — experiment
+    approval workflows, mutual exclusion groups, metric guardrails,
+    and experiment velocity reporting.
+edges:
+  held_by:
+    - target: role:data-scientist
+    - target: role:product-manager
+    - target: role:conversion-rate-optimizer
+  requires_expertise:
+    - target: skill-area:a-b-testing
+    - target: skill-area:feature-management
+---
+nodeKind: Responsibility
+id: responsibility:search-relevance-quality
+attributes:
+  displayName: "Search relevance quality"
+  cadence: continuous
+  description: |
+    Monitor and improve search result quality — relevance metrics (nDCG,
+    MRR), query analysis, relevance judgment collection, and A/B testing
+    of ranking changes.
+edges:
+  held_by:
+    - target: role:search-engineer
+  requires_expertise:
+    - target: skill-area:search-infrastructure
+    - target: skill-area:search-indexing
+---
+nodeKind: Responsibility
+id: responsibility:recommendation-quality
+attributes:
+  displayName: "Recommendation quality"
+  cadence: continuous
+  description: |
+    Ensure recommendation systems deliver relevant, diverse, and fair
+    results — monitor click-through and engagement metrics, evaluate
+    coverage and novelty, and prevent filter bubbles.
+edges:
+  held_by:
+    - target: role:recommendation-engineer
+    - target: role:data-scientist
+  requires_expertise:
+    - target: skill-area:machine-learning-frameworks
+    - target: skill-area:ab-testing-experimentation
+---
+nodeKind: Responsibility
+id: responsibility:content-safety
+attributes:
+  displayName: "Content safety"
+  cadence: continuous
+  description: |
+    Protect users from harmful content — maintain content policy, operate
+    moderation queues, tune automated classifiers, and handle appeals.
+    Covers hate speech, CSAM, misinformation, and self-harm content.
+edges:
+  held_by:
+    - target: role:compliance-engineer
+    - target: role:ml-engineer
+  requires_expertise:
+    - target: skill-area:natural-language-processing
+    - target: skill-area:policy-enforcement
+---
+nodeKind: Responsibility
+id: responsibility:brand-consistency
+attributes:
+  displayName: "Brand consistency"
+  cadence: continuous
+  description: |
+    Maintain visual and verbal brand coherence across all touchpoints —
+    enforce brand guidelines, review creative assets, and ensure consistent
+    tone, color, and typography usage.
+edges:
+  held_by:
+    - target: role:brand-designer
+    - target: role:brand-manager
+    - target: role:content-designer
+  requires_expertise:
+    - target: skill-area:visual-design
+    - target: skill-area:brand-strategy
+---
+nodeKind: Responsibility
+id: responsibility:accessibility-wcag-compliance
+attributes:
+  displayName: "WCAG accessibility compliance"
+  cadence: continuous
+  description: |
+    Ensure products meet WCAG 2.1 AA (or higher) accessibility standards —
+    automated scanning, manual audits, screen reader testing, and
+    remediation tracking with compliance reporting.
+edges:
+  held_by:
+    - target: role:accessibility-engineer
+    - target: role:accessibility-specialist
+    - target: role:frontend-engineer
+  requires_expertise:
+    - target: skill-area:web-accessibility
+    - target: skill-area:accessibility-testing
+---
+nodeKind: Responsibility
+id: responsibility:performance-budget-enforcement
+attributes:
+  displayName: "Performance budget enforcement"
+  cadence: continuous
+  description: |
+    Enforce page weight, bundle size, and Core Web Vitals budgets —
+    CI checks for regressions, lighthouse scoring, and alerting when
+    performance thresholds are breached.
+edges:
+  held_by:
+    - target: role:frontend-engineer
+    - target: role:performance-engineer
+    - target: role:motion-designer
+  requires_expertise:
+    - target: skill-area:frontend-performance
+    - target: skill-area:core-web-vitals
+---
+nodeKind: Responsibility
+id: responsibility:dependency-security
+attributes:
+  displayName: "Dependency security"
+  cadence: continuous
+  description: |
+    Monitor and remediate vulnerabilities in third-party dependencies —
+    automated scanning (Dependabot, Snyk), upgrade prioritization, and
+    vulnerability SLA tracking.
+edges:
+  held_by:
+    - target: role:appsec-engineer
+    - target: role:security-engineer
+  requires_expertise:
+    - target: skill-area:dependency-vulnerability-mgmt
+    - target: skill-area:supply-chain-security
+---
+nodeKind: Responsibility
+id: responsibility:supply-chain-integrity
+attributes:
+  displayName: "Software supply chain integrity"
+  cadence: continuous
+  description: |
+    Protect the software supply chain — SBOM generation, provenance
+    attestation, build reproducibility, and container image signing.
+    Prevents supply-chain attacks through verified build pipelines.
+edges:
+  held_by:
+    - target: role:security-engineer
+    - target: role:appsec-engineer
+    - target: role:release-engineer
+  requires_expertise:
+    - target: skill-area:supply-chain-security
+    - target: skill-area:SBOM-management
+---
+nodeKind: Responsibility
+id: responsibility:zero-day-response
+attributes:
+  displayName: "Zero-day response"
+  cadence: on-demand
+  description: |
+    Rapidly respond to zero-day vulnerabilities — impact assessment,
+    emergency patching, mitigation deployment, and stakeholder
+    communication within defined SLAs.
+edges:
+  held_by:
+    - target: role:security-engineer
+    - target: role:red-team-lead
+    - target: role:sre
+  requires_expertise:
+    - target: skill-area:incident-response
+    - target: skill-area:vulnerability-management
+---
+nodeKind: Responsibility
+id: responsibility:security-incident-triage
+attributes:
+  displayName: "Security incident triage"
+  cadence: on-demand
+  description: |
+    Triage security alerts and incidents — classify severity, determine
+    scope, coordinate initial response, and escalate to appropriate
+    teams based on incident type and impact.
+edges:
+  held_by:
+    - target: role:soc-analyst
+    - target: role:threat-analyst
+    - target: role:blue-team-lead
+  requires_expertise:
+    - target: skill-area:security-monitoring-siem
+    - target: skill-area:incident-response
+---
+nodeKind: Responsibility
+id: responsibility:data-retention-compliance
+attributes:
+  displayName: "Data retention compliance"
+  cadence: continuous
+  description: |
+    Enforce data retention and deletion policies — automated lifecycle
+    rules, legal hold management, and audit trails for data disposition
+    across all storage systems.
+edges:
+  held_by:
+    - target: role:data-steward
+    - target: role:data-governance-lead
+    - target: role:compliance-engineer
+  requires_expertise:
+    - target: skill-area:data-governance
+    - target: skill-area:compliance-automation
+---
+nodeKind: Responsibility
+id: responsibility:gdpr-compliance
+attributes:
+  displayName: "GDPR compliance"
+  cadence: continuous
+  description: |
+    Ensure compliance with GDPR — data subject access requests, right-to-
+    erasure implementation, consent management, data processing agreements,
+    and privacy impact assessments.
+edges:
+  held_by:
+    - target: role:privacy-engineer
+    - target: role:compliance-officer
+    - target: role:data-governance-lead
+  requires_expertise:
+    - target: skill-area:compliance-automation
+    - target: skill-area:data-governance
+---
+nodeKind: Responsibility
+id: responsibility:soc2-compliance
+attributes:
+  displayName: "SOC 2 compliance"
+  cadence: continuous
+  description: |
+    Maintain SOC 2 Type II compliance — control implementation, evidence
+    collection, auditor liaison, and continuous monitoring for security,
+    availability, and confidentiality trust service criteria.
+edges:
+  held_by:
+    - target: role:compliance-officer
+    - target: role:security-engineer
+  requires_expertise:
+    - target: skill-area:compliance-automation
+    - target: skill-area:compliance-scanning
+---
+nodeKind: Responsibility
+id: responsibility:pci-compliance
+attributes:
+  displayName: "PCI DSS compliance"
+  cadence: continuous
+  description: |
+    Maintain PCI DSS compliance for payment processing — network
+    segmentation, encryption, access controls, vulnerability management,
+    and annual self-assessment or QSA audit.
+edges:
+  held_by:
+    - target: role:security-engineer
+    - target: role:compliance-officer
+  requires_expertise:
+    - target: skill-area:network-segmentation
+    - target: skill-area:compliance-scanning
+---
+nodeKind: Responsibility
+id: responsibility:hipaa-compliance
+attributes:
+  displayName: "HIPAA compliance"
+  cadence: continuous
+  description: |
+    Ensure HIPAA compliance for protected health information — access
+    controls, audit logging, encryption, BAA management, and breach
+    notification procedures.
+edges:
+  held_by:
+    - target: role:compliance-officer
+    - target: role:security-engineer
+    - target: role:privacy-engineer
+  requires_expertise:
+    - target: skill-area:compliance-automation
+    - target: skill-area:data-governance
+---
+nodeKind: Responsibility
+id: responsibility:uptime-sla
+attributes:
+  displayName: "Uptime SLA"
+  cadence: continuous
+  description: |
+    Guarantee and report on service uptime commitments — monitor
+    availability, calculate SLA attainment, manage planned maintenance
+    windows, and trigger escalation for SLA breaches.
+edges:
+  held_by:
+    - target: role:sre
+    - target: role:platform-engineer
+    - target: role:infrastructure-engineer
+  requires_expertise:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+---
+nodeKind: Responsibility
+id: responsibility:error-budget-management
+attributes:
+  displayName: "Error budget management"
+  cadence: continuous
+  description: |
+    Track error budget consumption and enforce policies — pause feature
+    launches when budgets are exhausted, allocate reliability work, and
+    negotiate error budget thresholds with stakeholders.
+edges:
+  held_by:
+    - target: role:sre
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:sli-slo-management
+---
+nodeKind: Responsibility
+id: responsibility:on-call-rotation-fairness
+attributes:
+  displayName: "On-call rotation fairness"
+  cadence: continuous
+  description: |
+    Ensure equitable distribution of on-call burden — rotation scheduling,
+    load balancing across team members, compensation tracking, and
+    toil reduction to prevent burnout.
+edges:
+  held_by:
+    - target: role:engineering-manager
+    - target: role:sre
+    - target: role:tech-lead
+  requires_expertise:
+    - target: skill-area:alerting-oncall
+    - target: skill-area:incident-management

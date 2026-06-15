@@ -18,6 +18,11 @@ metadata:
     - debris
     - risk-assessment
     - compliance
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Orbital Debris Assessment Skill

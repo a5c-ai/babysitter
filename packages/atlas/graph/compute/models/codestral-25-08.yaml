@@ -1,0 +1,66 @@
+nodeKind: ModelVersion
+id: model:codestral-25-08@current
+attributes:
+  displayName: "Codestral 25.08"
+  costPerMTokInput: 0.3
+  costPerMTokOutput: 0.9
+  providerModelIds:
+    - codestral-2508
+    - codestral-latest
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  versionRange: '>=25.08.0 <26.0.0'
+  kind: code-completion
+  contextWindowTokens: 256000
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-07-31'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-07-31'
+  modelCardUrl: https://docs.mistral.ai/models/codestral-25-08
+  supportsFineTuning: true
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:mistral
+  supersedes:
+    - target: model:codestral-25-01@current
+  served_by:
+    - provider:mistral
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=25.08.0 <26.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:mistral-codestral-25-08-model-card
+    - target: capability:supports-text-streaming
+      versionRange: '>=25.08.0 <26.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:mistral-codestral-25-08-model-card
+    - target: capability:can-multi-turn
+      versionRange: '>=25.08.0 <26.0.0'
+      level: partial
+      notes: |
+        Optimized for fill-in-the-middle, code correction, and test generation;
+        multi-turn chat works but is not the primary use case.
+      evidenceSourceIds:
+        - evidence:mistral-codestral-25-08-model-card
+    - target: capability:requires-tool-approval
+      versionRange: '>=25.08.0 <26.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:mistral-codestral-25-08-model-card

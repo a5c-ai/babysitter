@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:transport-proxy.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:transport-proxy
+  text: |
+    optional interposer (recording, integrity, multiplexing)
+  status: canonical
+edges:
+  defines:
+    - term:transport-proxy

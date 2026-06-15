@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:go-install
+attributes:
+  displayName: "go install"
+  kind: go-install
+  platforms: [darwin, linux, win32]
+  command: "go install {{module-path}}@{{version}}"
+  prerequisiteCheck: "go version"
+edges: {}

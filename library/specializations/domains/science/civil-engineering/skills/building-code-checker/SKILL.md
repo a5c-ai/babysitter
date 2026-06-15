@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Code Compliance
   skill-id: CIV-SK-030
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Building Code Checker Skill

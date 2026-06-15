@@ -16,6 +16,11 @@
  * - Balanced Scorecard: https://hbr.org/1992/01/the-balanced-scorecard-measures-that-drive-performance-2
  * - OKRs: https://www.whatmatters.com/
  * - Key Performance Indicators: David Parmenter
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

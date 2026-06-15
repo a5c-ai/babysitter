@@ -1,0 +1,11 @@
+nodeKind: HTTPServerExtension
+id: http-server:default-localhost
+attributes:
+  displayName: "Default localhost HTTP server (dashboard + API)"
+  port: 8080
+  bindAddress: "127.0.0.1"
+  hotReloadable: true
+  dashboardEnabled: true
+  apiEnabled: true
+  authMode: none
+  corsPolicy: "same-origin"

@@ -14,6 +14,11 @@
  * @references
  * - WERC Best Practices: https://www.werc.org/
  * - Warehouse Operations: https://www.koganpage.com/logistics-operations-management
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,24 @@
+nodeKind: Language
+id: language:ocaml
+attributes:
+  displayName: "OCaml"
+  paradigms:
+    - functional
+    - object-oriented
+    - imperative
+  description: |
+    OCaml is a statically-typed, multi-paradigm language in the ML family,
+    combining functional programming with imperative and object-oriented
+    features. Its Hindley-Milner type system with module system and functors
+    provides powerful abstraction mechanisms.
+
+    OCaml is the implementation language for several influential tools:
+    the Coq proof assistant, the Flow and Hack type checkers at Meta, the
+    Reason/ReScript language transpilers, and the Semgrep static analysis
+    tool. Jane Street uses OCaml extensively for trading systems. The opam
+    package manager and Dune build system support modern OCaml development.
+    The language compiles to native code with competitive performance.
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:software-engineering

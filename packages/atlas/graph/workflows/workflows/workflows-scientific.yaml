@@ -1,0 +1,57 @@
+---
+nodeKind: Workflow
+id: workflow:experiment-reproducibility-review
+attributes:
+  displayName: "Experiment Reproducibility Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-experiment"
+  complexity: single-team
+  description: |
+    Validates that computational experiments can be reproduced — checking
+    environment pinning, random seed management, data versioning, and
+    result consistency across runs. Excludes experiment design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:scientific-computing
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:ml-team
+---
+nodeKind: Workflow
+id: workflow:hpc-job-scheduling-review
+attributes:
+  displayName: "HPC Job Scheduling Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Reviews HPC cluster utilization and job queue health — rebalancing
+    priority queues, identifying stalled jobs, optimizing resource
+    allocation, and updating fair-share policies. Excludes hardware procurement.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:scientific-computing
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:infra-engineering

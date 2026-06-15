@@ -1,0 +1,177 @@
+---
+nodeKind: Tool
+id: tool:airbyte
+attributes:
+  displayName: "Airbyte"
+  homepageUrl: "https://airbyte.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Open-source data integration and ETL platform for syncing data from APIs, databases, and files.
+    Provides 300+ pre-built connectors and a low-code connector builder for custom sources and destinations.
+    Supports both self-hosted and cloud-managed deployments for modern data stack architectures.
+edges:
+  used_for:
+    - skill-area:etl-pipelines
+    - skill-area:event-driven-architecture
+  alternative_to:
+    - target: tool:fivetran
+      comparison: "ETL/ELT platforms — Airbyte is open-source; Fivetran is fully managed"
+---
+nodeKind: Tool
+id: tool:fivetran
+attributes:
+  displayName: "Fivetran"
+  homepageUrl: "https://www.fivetran.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Fully managed data pipeline service for automated data movement and transformation.
+    Provides schema drift detection, automatic schema migration, and normalized data delivery to warehouses.
+    Offers 500+ connectors and zero-maintenance pipelines with built-in incremental data loading.
+edges:
+  used_for:
+    - skill-area:etl-pipelines
+    - skill-area:event-driven-architecture
+  alternative_to:
+    - target: tool:airbyte
+      comparison: "ETL/ELT platforms — Fivetran is fully managed; Airbyte is open-source"
+---
+nodeKind: Tool
+id: tool:dagster
+attributes:
+  displayName: "Dagster"
+  homepageUrl: "https://dagster.io"
+  kind: other
+  description: |
+    Cloud-native data orchestration platform for building, testing, and monitoring data pipelines.
+    Treats data assets as first-class citizens with Software-Defined Assets for lineage and dependency tracking.
+    Supports local development, asset materialization, partitioned datasets, and rich observability.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - skill-area:etl-pipelines
+    - skill-area:event-driven-architecture
+  alternative_to:
+    - target: tool:prefect
+      comparison: "Data orchestration — Dagster is asset-centric; Prefect is task-centric"
+    - target: tool:airflow
+      comparison: "Data orchestration — Dagster is asset-centric; Airflow is DAG-centric"
+    - target: tool:apache-beam
+      comparison: "Data pipeline tools"
+    - target: tool:temporal
+      comparison: "Workflow orchestration platforms"
+---
+nodeKind: Tool
+id: tool:prefect
+attributes:
+  displayName: "Prefect"
+  homepageUrl: "https://www.prefect.io"
+  kind: other
+  description: |
+    Modern workflow orchestration platform for building, scheduling, and monitoring data workflows.
+    Offers a Python-native API for defining flows and tasks with automatic retries, caching, and concurrency.
+    Provides a managed cloud UI for visibility into workflow state, runs, and infrastructure.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - skill-area:etl-pipelines
+    - skill-area:event-driven-architecture
+  alternative_to:
+    - target: tool:dagster
+      comparison: "Data orchestration — Prefect is task-centric; Dagster is asset-centric"
+    - target: tool:airflow
+      comparison: "Data orchestration — Prefect is Python-native; Airflow uses DAGs"
+    - target: tool:apache-beam
+      comparison: "Data pipeline tools"
+    - target: tool:temporal
+      comparison: "Workflow orchestration platforms"
+---
+nodeKind: Tool
+id: tool:apache-beam
+attributes:
+  displayName: "Apache Beam"
+  homepageUrl: "https://beam.apache.org"
+  kind: other
+  description: |
+    Unified programming model for defining and executing batch and streaming data processing pipelines.
+    Write once, run anywhere across Apache Flink, Spark, Google Dataflow, and other supported runners.
+    Supports Python, Java, and Go SDKs for data transformation, aggregation, and windowing operations.
+edges:
+  belongs_to_language:
+    - language:java
+  used_for:
+    - skill-area:etl-pipelines
+    - skill-area:event-driven-architecture
+  alternative_to:
+    - target: tool:dagster
+      comparison: "Data pipeline tools"
+    - target: tool:prefect
+      comparison: "Data pipeline tools"
+    - target: tool:airflow
+      comparison: "Data pipeline tools"
+---
+nodeKind: Tool
+id: tool:sst
+attributes:
+  displayName: "SST"
+  homepageUrl: "https://sst.dev"
+  kind: other
+  description: |
+    Open-source framework for building full-stack serverless applications on AWS.
+    Provides a live Lambda development environment, infrastructure as code via Pulumi/CDK, and a component library.
+    Supports deploying Next.js, Remix, Astro, and other frameworks with zero-config serverless backends.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:serverless-compute
+  alternative_to:
+    - target: tool:serverless-framework
+      comparison: "Serverless frameworks — SST uses Pulumi/CDK; Serverless Framework uses YAML"
+    - target: tool:sam-cli
+      comparison: "Serverless frameworks — SST is framework-agnostic; SAM is AWS CloudFormation-based"
+---
+nodeKind: Tool
+id: tool:serverless-framework
+attributes:
+  displayName: "Serverless Framework"
+  homepageUrl: "https://www.serverless.com"
+  kind: other
+  description: |
+    Open-source CLI and development framework for building and deploying serverless applications.
+    Supports AWS Lambda, Azure Functions, Google Cloud Functions, and other FaaS providers via plugins.
+    Provides YAML-based service definitions, packaging, deployment, and local development with serverless-offline.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:serverless-compute
+  alternative_to:
+    - target: tool:sst
+      comparison: "Serverless frameworks — Serverless Framework uses YAML; SST uses Pulumi/CDK"
+    - target: tool:sam-cli
+      comparison: "Serverless frameworks — Serverless Framework is multi-cloud; SAM is AWS-only"
+---
+nodeKind: Tool
+id: tool:sam-cli
+attributes:
+  displayName: "AWS SAM CLI"
+  homepageUrl: "https://github.com/aws/aws-sam-cli"
+  kind: other
+  description: |
+    CLI tool for building, testing, and deploying serverless applications on AWS with SAM templates.
+    Enables local Lambda invocation, API Gateway emulation, and step-through debugging with Docker.
+    Integrates with CloudFormation for infrastructure-as-code deployment of Lambda, API Gateway, and DynamoDB.
+edges:
+  belongs_to_language:
+    - language:python
+  used_for:
+    - skill-area:serverless-compute
+  alternative_to:
+    - target: tool:sst
+      comparison: "Serverless frameworks — SAM is AWS CloudFormation-based; SST is framework-agnostic"
+    - target: tool:serverless-framework
+      comparison: "Serverless frameworks — SAM is AWS-only; Serverless Framework is multi-cloud"

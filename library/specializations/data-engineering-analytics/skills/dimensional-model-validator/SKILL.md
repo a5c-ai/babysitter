@@ -11,6 +11,12 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:data-warehouse-modeling, skill-area:data-quality-testing]
+  roles: [role:analytics-engineer, role:data-engineer]
+  workflows: [workflow:data-pipeline-deployment]
 ---
 
 # Dimensional Model Validator

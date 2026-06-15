@@ -8,6 +8,12 @@ expertise:
   - Code snippet generation
   - Accessibility documentation
   - Version history tracking
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:design-systems, skill-area:technical-writing]
+  roles: [role:product-designer, role:technical-writer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Design Documentation Agent

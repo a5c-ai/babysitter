@@ -1,0 +1,21 @@
+nodeKind: AutomationRule
+id: automation-rule:nightly-triage
+attributes:
+  displayName: "Nightly backlog triage"
+  triggerType: timer
+  cron: "0 3 * * *"
+  timezone: "UTC"
+  lifecycleState: active
+  targetProjectId: "project:babysitter-core"
+  targetBoardProjectId: "board:babysitter-triage"
+  taskTemplateTitle: "Nightly triage: review new backlog items"
+  taskTemplatePriority: medium
+  taskTemplateStatus: backlog
+  routingAction: canonical-issue-create
+  sourceKind: config-file
+  createdAt: "2026-04-15"
+  description: |
+    Fires every night at 03:00 UTC. Creates a canonical kanban issue on
+    the babysitter-core project; the derived triage board projects the
+    issue onto its `inbox` column. Defined in
+    `.a5c/automations/nightly-triage.json` (sourceKind = config-file).

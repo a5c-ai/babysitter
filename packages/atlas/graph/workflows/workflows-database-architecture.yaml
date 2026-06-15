@@ -1,0 +1,184 @@
+---
+nodeKind: Workflow
+id: workflow:schema-migration
+attributes:
+  displayName: "Schema Migration"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Plans and executes database schema changes with zero-downtime deployment —
+    migration authoring, backward-compatibility validation, staged rollout,
+    and rollback readiness. Excludes data backfill operations.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:db-migrator
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:database-migrations-zero-downtime
+    - target: skill-area:postgres-tuning
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:database-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:query-performance-review
+attributes:
+  displayName: "Query Performance Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Identifies slow and resource-intensive database queries, analyzes execution
+    plans, recommends index changes, and validates improvements. Excludes
+    schema redesign.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:database-team
+---
+nodeKind: Workflow
+id: workflow:backup-recovery-drill
+attributes:
+  displayName: "Backup Recovery Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Validates database backup integrity and disaster-recovery procedures
+    through controlled restore exercises — measuring RTO/RPO, documenting
+    gaps, and updating runbooks. Excludes daily backup scheduling.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:platform-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:postgres-tuning
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:database-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:tech-radar-update
+attributes:
+  displayName: "Tech Radar Update"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates emerging technologies, frameworks, and patterns — classifying
+    them into adopt/trial/assess/hold rings and communicating strategic
+    direction to all engineering teams. Excludes vendor contract decisions.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+    - target: role:ai-champion
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:typescript-generic-programming
+    - target: skill-area:agentic-loops
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:architectural-fitness-function-review
+attributes:
+  displayName: "Architectural Fitness Function Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Defines, measures, and reports on automated fitness functions that validate
+    architecture characteristics — coupling metrics, dependency direction,
+    module boundaries, and deployment independence. Excludes architecture
+    decision-making.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:graphql-schema-design
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:approve-architecture
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:cross-team-integration-testing
+attributes:
+  displayName: "Cross-Team Integration Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Coordinates end-to-end integration tests spanning multiple services owned
+    by different teams — contract testing, environment orchestration, failure
+    injection, and result triage. Excludes unit and component tests.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:platform-engineer
+    - target: role:database-administrator
+  requires_skill_area:
+    - target: skill-area:react-testing
+    - target: skill-area:chaos-engineering
+    - target: skill-area:database-migrations-zero-downtime
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:databases
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:approve-deploys
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:frontend-team
+    - target: org-unit:database-team
+    - target: org-unit:architecture-guild

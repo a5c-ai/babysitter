@@ -1,0 +1,22 @@
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-codex
+attributes:
+  mappingId: hook-mapping:pre-tool-use-codex
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:codex:ge-0-119-0
+  nativeName: OnToolCall
+  versionRange: ">=1.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: codex
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+  emits_hook:
+    - target: agentVersion:codex:ge-0-119-0

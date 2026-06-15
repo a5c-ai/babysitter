@@ -2,6 +2,11 @@
 name: godot-csharp
 description: Godot C# programming skill for .NET integration, scripting patterns, and performance optimization.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Godot C# Skill

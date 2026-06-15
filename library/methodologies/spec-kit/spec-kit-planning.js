@@ -3,6 +3,13 @@
  * @description Spec Kit planning workflow: technical architecture design + task decomposition + cross-artifact analysis. Converts a specification into an implementation-ready task list following GitHub's Spec-Driven Development.
  * @inputs { specification: object, constitution: object, projectType?: string, constraints?: object, existingArchitecture?: object }
  * @outputs { success: boolean, plan: object, tasks: array, analysis: object, dependencyGraph: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:domain-driven-design, skill-area:c4-modeling, skill-area:adr-writing]
+ *   workflows: [workflow:architecture-decision-record]
+ *   topics: [topic:domain-driven-design, topic:clean-architecture]
+ *   roles: [role:architect, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

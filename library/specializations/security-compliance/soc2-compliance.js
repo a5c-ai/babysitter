@@ -34,6 +34,9 @@
  * - SOC 2 Type II Audit Guide: https://www.aicpa.org/soc4so
  * - Cloud Security Alliance SOC 2 Guidance: https://cloudsecurityalliance.org/
  * - NIST Cybersecurity Framework to SOC 2 Mapping: https://www.nist.gov/cyberframework
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

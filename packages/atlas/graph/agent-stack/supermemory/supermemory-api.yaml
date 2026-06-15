@@ -1,0 +1,62 @@
+# Supermemory REST API and MCP Server deep-research atlas node.
+
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:supermemory.api
+attributes:
+  displayName: "Supermemory REST API & MCP Server"
+  agentVersionId: agentVersion:supermemory:current
+  fabricKind: cloud-api-and-mcp
+  description: |
+    Cloud REST API (api.supermemory.ai) and MCP Server 4.0 for agent
+    memory operations. REST API provides document ingestion, memory
+    management, profile retrieval, and hybrid search. MCP server
+    (mcp.supermemory.ai/mcp) exposes four tools: addMemory, search,
+    getProjects, whoAmI. Built on Cloudflare Workers with Durable
+    Objects for persistent sessions. SDKs for TypeScript (npm
+    supermemory) and Python (pip supermemory).
+  apiBaseUrl: "https://api.supermemory.ai"
+  mcpUrl: "https://mcp.supermemory.ai/mcp"
+  authentication:
+    primary: "OAuth via /.well-known/oauth-protected-resource"
+    alternative: "Bearer token with sm_ prefix"
+  keyEndpoints:
+    - "POST /v3/documents -- ingest content (text, URL, PDF, image, video)"
+    - "GET /v3/profile -- retrieve user profile (static + dynamic)"
+    - "GET /v3/search -- semantic/hybrid search with metadata filtering"
+    - "POST /v3/memories -- create/update memories"
+    - "DELETE /v3/memories -- soft-delete (forget)"
+  mcpTools:
+    - "addMemory -- save information with optional project scoping"
+    - "search -- retrieve memories and profiles"
+    - "getProjects -- list available projects"
+    - "whoAmI -- authenticated user details"
+  sdkUsage: |
+    TypeScript: client.add(), client.profile(), client.search.memories()
+    Python: client.add(), client.profile(), client.search()
+    Both support containerTag for user/project scoping.
+  processingPipeline: "Queued -> Extracting -> Chunking -> Embedding -> Indexing -> Done"
+  knowledgeGraphRelationships:
+    - "Update -- new info contradicts old, tracks isLatest"
+    - "Extend -- new info enriches without replacing"
+    - "Derive -- system infers connections from patterns"
+  ingestionOptions:
+    taskType: "memory (full context layer) or superrag (managed RAG)"
+    dreaming: "dynamic (batch related docs) or instant (process immediately)"
+    containerTag: "scope to user/project (max 100 chars)"
+    metadata: "key-value pairs for filtering"
+  ourEquivalent: |
+    Our MCP client can consume Supermemory's MCP server directly by
+    adding its endpoint to .mcp.json. However, for orchestrated agent
+    runs, the SMFS approach (supermemory-smfs.yaml) is preferred over
+    raw MCP tools because it avoids adding cognitive load to the agent
+    prompt. The REST API is most useful for the orchestrator layer
+    (genty-platform) to perform structured memory operations like
+    profile retrieval at run start or batch memory ingestion at run end.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  part_of:
+    - target: agent:supermemory
+  integrates_with:
+    - target: protocol:mcp
+    - target: tool:supermemory-sdk

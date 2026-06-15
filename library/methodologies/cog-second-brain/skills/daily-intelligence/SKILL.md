@@ -7,15 +7,14 @@ allowed-tools:
   - web-search
   - web-fetch
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# COG Daily Intelligence Skill
-
-Generate personalized daily intelligence briefs using verified sources with strict freshness and accuracy requirements.
-
-## Capabilities
-
-- Gather intelligence sources filtered by role and interests
 - Enforce 7-day freshness requirement on all sources
 - Apply verification-first methodology: every claim needs a source
 - Target 95%+ source accuracy

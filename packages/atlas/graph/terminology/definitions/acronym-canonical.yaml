@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:acronym.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:acronym
+  text: |
+    abbreviation expanding to a term
+  status: canonical
+edges:
+  defines:
+    - term:acronym

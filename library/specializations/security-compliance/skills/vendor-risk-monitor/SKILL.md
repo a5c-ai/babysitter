@@ -8,6 +8,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:vulnerability-management, skill-area:security-monitoring-siem]
+  roles: [role:compliance-officer, role:security-engineer]
+  workflows: [workflow:compliance-audit, workflow:vulnerability-management]
+
 ---
 
 # Vendor Risk Monitor Skill

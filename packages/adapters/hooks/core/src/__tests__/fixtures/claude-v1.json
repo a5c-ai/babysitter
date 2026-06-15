@@ -1,0 +1,246 @@
+{
+  "version": "v1",
+  "adapter": "claude",
+  "description": "Claude Code native hook event payloads for compatibility regression testing",
+  "events": [
+    {
+      "nativeEventName": "SessionStart",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "session_type": "interactive",
+        "cwd": "/home/user/project",
+        "transcript_path": "/home/user/.claude/transcript.jsonl",
+        "model": "claude-opus-4-6",
+        "permission_mode": "default",
+        "source": "startup",
+        "initial_prompt": "Help me refactor the auth module"
+      },
+      "env": {
+        "HOOKS_PROXY_SESSION_ID": "sess-claude-abc123",
+        "HOOKS_PROXY_CWD": "/home/user/project"
+      },
+      "expected": {
+        "phase": "session.start",
+        "supportLevel": "native",
+        "adapter": "claude"
+      }
+    },
+    {
+      "nativeEventName": "PreToolUse",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "cwd": "/home/user/project",
+        "model": "claude-opus-4-6",
+        "tool_name": "Bash",
+        "tool_call_id": "tc-bash-001",
+        "tool_input": {
+          "command": "npm test"
+        }
+      },
+      "env": {
+        "HOOKS_PROXY_SESSION_ID": "sess-claude-abc123"
+      },
+      "expected": {
+        "phase": "tool.before",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["tool_name", "tool_call_id", "tool_input"]
+      }
+    },
+    {
+      "nativeEventName": "Stop",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "cwd": "/home/user/project",
+        "model": "claude-opus-4-6",
+        "reason": "end_turn",
+        "last_assistant_message": "I have completed the refactoring.",
+        "stop_hook_active": false
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.stop",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["reason", "last_assistant_message", "stop_hook_active"]
+      }
+    },
+    {
+      "nativeEventName": "PostToolUseFailure",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "npm test"
+        },
+        "error": "Command failed",
+        "exit_code": 1
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.after_failure",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["tool_name", "tool_input", "error", "exit_code"]
+      }
+    },
+    {
+      "nativeEventName": "PostToolBatch",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "batch_results": [
+          {
+            "tool_name": "Bash",
+            "tool_input": {
+              "command": "npm test"
+            },
+            "success": true,
+            "output": "ok"
+          }
+        ]
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.after_batch",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["batch_results"]
+      }
+    },
+    {
+      "nativeEventName": "StopFailure",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "error_type": "rate_limit",
+        "error_message": "Too many requests",
+        "retry_after": 60
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.stop_failure",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["error_type", "error_message", "retry_after"]
+      }
+    },
+    {
+      "nativeEventName": "UserPromptExpansion",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "expansion_type": "slash_command",
+        "command_name": "review",
+        "command_args": ["--quick"],
+        "command_source": "project",
+        "prompt": "/review --quick"
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.prompt_expansion",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["expansion_type", "command_name", "command_args", "command_source", "prompt"]
+      }
+    },
+    {
+      "nativeEventName": "TaskCreated",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "task_id": "task-1",
+        "task_kind": "agent",
+        "task_title": "Implement hook",
+        "task_labels": ["hooks-adapter"]
+      },
+      "env": {},
+      "expected": {
+        "phase": "task.created",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["task_id", "task_kind", "task_title", "task_labels"]
+      }
+    },
+    {
+      "nativeEventName": "TaskCompleted",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "task_id": "task-1",
+        "task_kind": "agent",
+        "task_status": "ok",
+        "task_result": {
+          "passed": true
+        }
+      },
+      "env": {},
+      "expected": {
+        "phase": "task.completed",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["task_id", "task_kind", "task_status", "task_result"]
+      }
+    },
+    {
+      "nativeEventName": "TeammateIdle",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "agent_id": "agent-1",
+        "agent_type": "worker",
+        "idle_reason": "queue_empty"
+      },
+      "env": {},
+      "expected": {
+        "phase": "team.idle",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["agent_id", "agent_type", "idle_reason"]
+      }
+    },
+    {
+      "nativeEventName": "Setup",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "trigger": "init"
+      },
+      "env": {},
+      "expected": {
+        "phase": "session.setup",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["trigger"]
+      }
+    },
+    {
+      "nativeEventName": "InstructionsLoaded",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "file_path": "AGENTS.md",
+        "memory_type": "project",
+        "load_reason": "session_start",
+        "globs": ["**/AGENTS.md"],
+        "trigger_file_path": "src/index.ts",
+        "parent_file_path": "AGENTS.md"
+      },
+      "env": {},
+      "expected": {
+        "phase": "session.instructions_loaded",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["file_path", "memory_type", "load_reason", "globs", "trigger_file_path", "parent_file_path"]
+      }
+    },
+    {
+      "nativeEventName": "ConfigChange",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "config_path": ".claude/settings.json",
+        "change_type": "update",
+        "setting_key": "hooks"
+      },
+      "env": {},
+      "expected": {
+        "phase": "session.config_changed",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["config_path", "change_type", "setting_key"]
+      }
+    }
+  ]
+}

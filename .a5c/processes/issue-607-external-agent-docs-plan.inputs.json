@@ -1,0 +1,41 @@
+{
+  "issueNumber": 607,
+  "baseBranch": "staging",
+  "workBranch": "agent/issue-607-external-agent-docs",
+  "targetFiles": [
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-reference/command-surfaces.md",
+    "docs/plugins.md"
+  ],
+  "sourceDocs": [
+    "docs/adapters-babysitter-integrations/external-agent-tasks.md",
+    "docs/adapters-babysitter-integrations/process-authoring.md",
+    "docs/adapters-babysitter-integrations/effect-resolution.md",
+    "docs/adapters-babysitter-integrations/plugin-mode.md"
+  ],
+  "relatedIssues": [
+    602,
+    603,
+    604,
+    605
+  ],
+  "requiredCoverage": [
+    "external agent task section in docs/agent-reference/process-authoring.md",
+    "internal versus external agent task examples",
+    "required adapter and optional model/provider/timeout/approvalMode/maxTurns fields",
+    "fallbackToInternal behavior and non-fallback failure behavior",
+    "external agent dispatch notes in docs/agent-reference/command-surfaces.md",
+    "adapters/amuxBridge routing overview",
+    "common failure modes and troubleshooting",
+    "short plugin-mode adapters integration note in docs/plugins.md"
+  ],
+  "qualityGateCommands": [
+    "npm run docs:lint",
+    "npm run docs:snippets"
+  ],
+  "targetedChecks": [
+    "rg -n \"external agent|agent\\.external|external: true|fallbackToInternal|adapters|amuxBridge|adapter\" docs/agent-reference/process-authoring.md docs/agent-reference/command-surfaces.md docs/plugins.md",
+    "git diff --check",
+    "git diff --name-only"
+  ]
+}

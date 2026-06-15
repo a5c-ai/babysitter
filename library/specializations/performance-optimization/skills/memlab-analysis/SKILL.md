@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: memory-profiling
   backlog-id: SK-017
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:performance-optimization]
+  skillAreas: [skill-area:profiling-memory, skill-area:frontend-performance-testing]
+  roles: [role:frontend-engineer, role:backend-engineer]
+  topics: [topic:observability-driven-development]
 ---
 
 # memlab-analysis

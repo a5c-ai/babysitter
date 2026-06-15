@@ -17,6 +17,11 @@
  * - Goldratt, E.M. & Cox, J. (2014). The Goal
  * - Goldratt, E.M. (1990). Theory of Constraints
  * - Dettmer, H.W. (1997). Goldratt's Theory of Constraints
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

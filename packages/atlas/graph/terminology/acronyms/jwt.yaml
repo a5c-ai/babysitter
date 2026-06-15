@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:jwt
+attributes:
+  acronym: "JWT"
+  expandsToTermId: term:json-web-token
+  description: |
+    Acronym for JWT.
+edges:
+  expands_to:
+    - term:json-web-token

@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:gemini-cli.scope
+attributes:
+  subjectId: agent:gemini-cli
+  inScope: |
+    Developer terminal coding workflow targeting Google Gemini models.
+    Local file edits, shell commands, MCP servers, and headless / non-
+    interactive runs on a single developer's workstation.
+  outOfScope: |
+    Production runtime, multi-tenant hosting, browser-only environments,
+    CI without explicit non-interactive setup, and routing models from
+    other vendors through the same harness.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:gemini-cli

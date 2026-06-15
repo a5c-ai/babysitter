@@ -5,6 +5,12 @@
  * @outputs { success: boolean, world: object, artifacts: array }
  * @recommendedSkills SK-FTV-008 (world-building), SK-FTV-009 (shot-composition), SK-FTV-012 (genre-analysis-film)
  * @recommendedAgents AG-FTV-004 (world-builder-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

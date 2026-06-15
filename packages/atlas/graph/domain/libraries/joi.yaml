@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:joi
+attributes:
+  displayName: "Joi"
+  belongsToLanguageId: language:javascript
+  category: validation
+  description: |
+    Schema description and data validator for JavaScript, originally from the hapi ecosystem.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:data-validation-sanitization

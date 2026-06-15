@@ -2,6 +2,13 @@
 name: shadcn
 description: shadcn/ui component patterns, customization, theming, and integration.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:ui-component-libraries, skill-area:design-systems]
+  roles: [role:frontend-engineer, role:product-designer]
+  topics: [topic:component-based-architecture]
+
 ---
 
 # shadcn/ui Skill

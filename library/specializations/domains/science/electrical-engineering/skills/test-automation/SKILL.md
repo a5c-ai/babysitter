@@ -7,6 +7,10 @@ backlog-id: SK-018
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:electrical-engineering]
+  skillAreas: [skill-area:hardware-abstraction-layer, skill-area:device-drivers, skill-area:firmware-development]
+  roles: [role:embedded-engineer, role:systems-integration-engineer]
 ---
 
 # Test Equipment Automation Skill

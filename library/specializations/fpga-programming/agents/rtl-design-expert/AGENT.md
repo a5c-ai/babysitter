@@ -11,6 +11,11 @@ expertise:
   - Clock and reset design patterns
   - Parameterizable and reusable RTL
   - Synthesis-friendly coding styles
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # RTL Design Expert Agent

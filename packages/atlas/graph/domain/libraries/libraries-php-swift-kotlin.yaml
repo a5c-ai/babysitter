@@ -1,0 +1,302 @@
+---
+nodeKind: Library
+id: library:doctrine
+attributes:
+  displayName: "Doctrine ORM"
+  belongsToLanguageId: language:php
+  category: orm
+  description: |
+    Full-featured PHP ORM and DBAL implementing the Data Mapper pattern
+    with entity mapping, associations, migrations, and a fluent DQL query
+    language built on top of PDO-compatible database drivers.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:eloquent
+---
+nodeKind: Library
+id: library:eloquent
+attributes:
+  displayName: "Eloquent ORM"
+  belongsToLanguageId: language:php
+  category: orm
+  description: |
+    Laravel's built-in Active Record ORM providing an expressive, fluent
+    interface for interacting with relational databases through model
+    classes, query builder, and eager/lazy relationship loading.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:phpunit
+attributes:
+  displayName: "PHPUnit"
+  belongsToLanguageId: language:php
+  category: testing
+  description: |
+    The de-facto standard unit testing framework for PHP, offering
+    assertions, test doubles (mocks, stubs, spies), code coverage
+    reports, and a rich plugin ecosystem via extensions.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:pest-php
+---
+nodeKind: Library
+id: library:pest-php
+attributes:
+  displayName: "Pest"
+  belongsToLanguageId: language:php
+  category: testing
+  description: |
+    Elegant PHP testing framework with a clean, expressive syntax
+    inspired by Jest; runs on top of PHPUnit with built-in parallel
+    execution, type coverage, and architecture testing plugins.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:laravel-horizon
+attributes:
+  displayName: "Laravel Horizon"
+  belongsToLanguageId: language:php
+  category: other
+  description: |
+    Dashboard and queue manager for Laravel-powered Redis queues,
+    providing real-time job monitoring, throughput metrics, failure
+    tracking, and auto-scaling of queue workers.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:sidekiq
+---
+nodeKind: Library
+id: library:laravel-sanctum
+attributes:
+  displayName: "Laravel Sanctum"
+  belongsToLanguageId: language:php
+  category: auth
+  description: |
+    Lightweight authentication system for SPAs, mobile applications,
+    and simple token-based APIs; issues personal access tokens and
+    manages first-party session cookies for Laravel applications.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:authentication-authorization
+  alternative_to:
+    - library:devise
+---
+nodeKind: Library
+id: library:filament
+attributes:
+  displayName: "Filament"
+  belongsToLanguageId: language:php
+  category: other
+  description: |
+    Rapid application development framework for Laravel that generates
+    admin panels, form builders, and table components using Livewire
+    and Alpine.js with a rich component library and plugin ecosystem.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:strapi
+---
+nodeKind: Library
+id: library:inertia-laravel
+attributes:
+  displayName: "Inertia.js (Laravel Adapter)"
+  belongsToLanguageId: language:php
+  category: other
+  description: |
+    Laravel server-side adapter for Inertia.js that connects Laravel
+    controllers to React, Vue, or Svelte frontends without building a
+    separate API, sharing props and routing through a single response cycle.
+edges:
+  belongs_to_language:
+    - language:php
+  library_used_by:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:livewire
+---
+nodeKind: Library
+id: library:alamofire
+attributes:
+  displayName: "Alamofire"
+  belongsToLanguageId: language:swift
+  category: http-client
+  description: |
+    Elegant Swift HTTP networking library wrapping URLSession with
+    chainable request/response methods, multipart form uploads,
+    authentication adapters, and built-in response serialization.
+edges:
+  belongs_to_language:
+    - language:swift
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:axios
+---
+nodeKind: Library
+id: library:kingfisher
+attributes:
+  displayName: "Kingfisher"
+  belongsToLanguageId: language:swift
+  category: other
+  description: |
+    Powerful Swift image downloading and caching library for UIKit and
+    SwiftUI, supporting async/await, processors, memory and disk cache
+    layers, and animated GIF/WebP rendering on iOS and macOS.
+edges:
+  belongs_to_language:
+    - language:swift
+  library_used_by:
+    - target: skill-area:ios-native
+  alternative_to:
+    - library:sharp
+---
+nodeKind: Library
+id: library:snapkit
+attributes:
+  displayName: "SnapKit"
+  belongsToLanguageId: language:swift
+  category: other
+  description: |
+    Swift DSL for Auto Layout that removes boilerplate constraint code,
+    providing a fluent, type-safe API to define and update UIView layout
+    constraints programmatically on iOS and macOS.
+edges:
+  belongs_to_language:
+    - language:swift
+  library_used_by:
+    - target: skill-area:ios-native
+  alternative_to:
+    - library:shadcn
+---
+nodeKind: Library
+id: library:combine
+attributes:
+  displayName: "Combine"
+  belongsToLanguageId: language:swift
+  category: other
+  description: |
+    Apple's declarative Swift framework for processing values over time
+    using publishers, operators, and subscribers; enables reactive
+    data flows across UIKit, SwiftUI, and networking layers.
+edges:
+  belongs_to_language:
+    - language:swift
+  library_used_by:
+    - target: skill-area:ios-native
+  alternative_to:
+    - library:rxjs
+---
+nodeKind: Library
+id: library:koin
+attributes:
+  displayName: "Koin"
+  belongsToLanguageId: language:kotlin
+  category: other
+  description: |
+    Lightweight Kotlin dependency injection framework using a DSL-based
+    module system with no annotation processing or code generation;
+    supports Android, Ktor, and Compose Multiplatform targets.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:android-native
+  alternative_to:
+    - library:hilt
+    - library:dagger-java
+---
+nodeKind: Library
+id: library:hilt
+attributes:
+  displayName: "Hilt"
+  belongsToLanguageId: language:kotlin
+  category: other
+  description: |
+    Android dependency injection library built on Dagger that provides
+    a standard way to incorporate DI into applications with compile-time
+    correctness, reduced boilerplate, and component integration for ViewModel, WorkManager, and Navigation.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:android-native
+---
+nodeKind: Library
+id: library:room
+attributes:
+  displayName: "Room"
+  belongsToLanguageId: language:kotlin
+  category: orm
+  description: |
+    Android persistence library that provides an abstraction layer over
+    SQLite with compile-time SQL validation, Flow and LiveData integration,
+    and migration support for robust local database management.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:ecto
+---
+nodeKind: Library
+id: library:retrofit-kt
+attributes:
+  displayName: "Retrofit (Kotlin)"
+  belongsToLanguageId: language:kotlin
+  category: http-client
+  description: |
+    Type-safe HTTP client for Android and Kotlin built on OkHttp, using
+    annotated interfaces to describe REST APIs with coroutine suspend
+    function support and pluggable converters (Gson, Moshi, kotlinx.serialization).
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:ktor
+    - library:retrofit
+---
+nodeKind: Library
+id: library:coroutines
+attributes:
+  displayName: "Kotlin Coroutines"
+  belongsToLanguageId: language:kotlin
+  category: other
+  description: |
+    Official Kotlin library for asynchronous programming using suspend
+    functions, structured concurrency, channels, and Flow; integrates
+    with Android Lifecycle, Room, Retrofit, and other Jetpack components.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:tokio

@@ -1,0 +1,130 @@
+# Public zod-validated wire schemas exposed by
+# @a5c-ai/tasks-adapter/src/types.ts. Modeled types are the ones that
+# cross the package boundary (CLI ↔ backend ↔ MCP tool boundary). Internal
+# helpers (Code Snippet helpers, lock-file shapes) are not modeled.
+# Wired via @a5c-ai/tasks-adapter PackageSurface `has_payload_schema` edge.
+nodeKind: SharedContextSpec
+id: shared-context-spec:tasks-adapter-breakpoint-context
+attributes:
+  displayName: "BreakpointContext (zod)"
+  contextKind: "wire-payload"
+  typescriptInterface: "BreakpointContext"
+  producerIface: "@a5c-ai/tasks-adapter CLI / SDK callers (createBreakpoint)"
+  consumerIfaces:
+    - "@a5c-ai/tasks-adapter backends/server.ts ServerBreakpointBackend"
+    - "@a5c-ai/tasks-adapter backends/git-native.ts"
+    - "@a5c-ai/tasks-adapter mcp/tools/ask-breakpoint.ts"
+  fieldSchema:
+    - "description:string:required:Plain-text breakpoint context"
+    - "codeSnippets:list<string|{filename,code,language?}>:required:Code snippets bundle"
+    - "fileReferences:list<string>:required:File-path references"
+    - "tags:list<string>:required:Free-form tags"
+    - "title|summary|markdown|domain:string:optional:Renderable metadata"
+    - "urgency:enum<low|medium|high>:optional"
+    - "interactionKind:enum<clarification|approval|intervention|notification|handoff>:optional"
+    - "links:list<{label,url,kind?}>:optional:Rich reference links"
+    - "sections|artifacts:list<...>:optional:Structured context blocks"
+    - "metadata:map<string,unknown>:optional:Open-ended bag (catchall unknowns)"
+  sourceCitation: "packages/tasks-adapter/src/types.ts:76-92"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:tasks-adapter-breakpoint-routing
+attributes:
+  displayName: "BreakpointRouting (zod)"
+  contextKind: "wire-payload"
+  typescriptInterface: "BreakpointRouting"
+  producerIface: "@a5c-ai/tasks-adapter CLI ask command"
+  consumerIfaces:
+    - "@a5c-ai/tasks-adapter backends/* SubmitBreakpointParams.routing"
+  fieldSchema:
+    - "strategy:enum<single|first-response-wins|collect-all|quorum>:required"
+    - "targetResponders:list<string>:required:Responder ids"
+    - "timeoutMs:positive-int:required:Wait timeout in ms"
+    - "presentToUser:bool:required:Whether the answer is shown back to the original user"
+    - "breakpointId:string:optional:Caller-supplied id"
+    - "autoApproveAfterN:int:optional:Quorum auto-approve threshold"
+  sourceCitation: "packages/tasks-adapter/src/types.ts:96-104"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:tasks-adapter-breakpoint-answer
+attributes:
+  displayName: "BreakpointAnswer (zod)"
+  contextKind: "wire-payload"
+  typescriptInterface: "BreakpointAnswer"
+  producerIface: "responders (CLI answer / MCP answer-breakpoint tool)"
+  consumerIfaces:
+    - "@a5c-ai/tasks-adapter backends/server.ts (POST /questions/:id/answers body)"
+    - "callers awaiting BreakpointWaitResult.answer"
+  fieldSchema:
+    - "id|breakpointId|responderId|responderName:string:required"
+    - "text:string:required:Answer body"
+    - "approved:bool:optional:Approval-mode boolean"
+    - "confidence:number<0..100>:required:Self-rated confidence"
+    - "references:list<string>:required"
+    - "followUpQuestions:list<string>:required"
+    - "answeredAt:datetime:required:ISO-8601 timestamp"
+    - "rating:{helpful,comment?,ratedAt}:optional:Post-hoc rating"
+    - "decisionMemory:{applicabilityContext,reasoning,enrichedContext?,savedAt}:optional"
+  sourceCitation: "packages/tasks-adapter/src/types.ts:137-151"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:tasks-adapter-proven-breakpoint-answer
+attributes:
+  displayName: "ProvenBreakpointAnswer (zod)"
+  contextKind: "wire-payload"
+  typescriptInterface: "ProvenBreakpointAnswer"
+  producerIface: "responders signing answers via Ed25519 key (auth key generate / push)"
+  consumerIfaces:
+    - "@a5c-ai/tasks-adapter proven verifier"
+    - "@a5c-ai/tasks-adapter mcp/tools/verify-answer.ts"
+  fieldSchema:
+    - "<extends BreakpointAnswer>:embed:required"
+    - "signature:string:required:Detached Ed25519 signature over signedFields"
+    - "publicKeyFingerprint:string:required"
+    - "signedAt:datetime:required"
+    - "signedFields:list<string>:required:Canonical field list signed"
+  sourceCitation: "packages/tasks-adapter/src/types.ts:155-161"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:tasks-adapter-responder-profile
+attributes:
+  displayName: "ResponderProfile (zod)"
+  contextKind: "wire-payload"
+  typescriptInterface: "ResponderProfile"
+  producerIface: "@a5c-ai/tasks-adapter backends/* listResponders"
+  consumerIfaces:
+    - "@a5c-ai/tasks-adapter CLI responders {list,show}"
+    - "@a5c-ai/tasks-adapter mcp/tools/list-responders.ts"
+  fieldSchema:
+    - "id|name|title:string:required"
+    - "domains|tags:list<string>:required"
+    - "availability:bool:required"
+    - "responseTimeSla:positive-number:required:Target response SLA (ms)"
+    - "publicKeyFingerprint:string:optional:Set when responder uses signed answers"
+  sourceCitation: "packages/tasks-adapter/src/types.ts:108-118"
+edges: {}
+---
+nodeKind: SharedContextSpec
+id: shared-context-spec:tasks-adapter-backend-iface
+attributes:
+  displayName: "BreakpointBackend (interface)"
+  contextKind: "interface-contract"
+  typescriptInterface: "BreakpointBackend"
+  producerIface: "@a5c-ai/tasks-adapter backends/server.ts ServerBreakpointBackend / backends/git-native.ts"
+  consumerIfaces:
+    - "@a5c-ai/tasks-adapter CLI commands (ask, breakpoints, responders, responder-loop)"
+    - "@a5c-ai/tasks-adapter mcp/backend-resolver.ts"
+  fieldSchema:
+    - "submitBreakpoint:fn(SubmitBreakpointParams)->Promise<Breakpoint>:required"
+    - "waitForAnswer:fn(id,WaitForAnswerOptions)->Promise<BreakpointWaitResult>:required"
+    - "submitAnswer:fn(id,SubmitAnswerParams)->Promise<BreakpointAnswer>:required"
+    - "listResponders:fn(ListRespondersParams)->Promise<list<ResponderProfile>>:required"
+    - "claimBreakpoint:fn(id,responderId)->Promise<void>:optional:Single-claim grammar"
+    - "listPendingBreakpoints:fn(responderId)->Promise<list<Breakpoint>>:required"
+    - "getBreakpointStatus:fn(id)->Promise<{ status, ... }>:required"
+  sourceCitation: "packages/tasks-adapter/src/backend.ts (full module)"
+edges: {}

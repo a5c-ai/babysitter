@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:eval-run
+attributes:
+  canonicalDefinitionId: definition:eval-run.canonical
+  displayName: "EvalRun"
+  kind: concept
+  references:
+    - "NodeKind:EvalRun"
+  description: |
+    One execution of a benchmark against a target
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:data-science

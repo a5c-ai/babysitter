@@ -1,0 +1,105 @@
+---
+nodeKind: Workflow
+id: workflow:clinical-trial-data-management
+attributes:
+  displayName: "Clinical Trial Data Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-trial-phase"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end lifecycle of clinical trial data -- ingesting
+    electronic case report forms from investigator sites, enforcing
+    protocol-specific validation rules, reconciling laboratory and imaging
+    data with clinical observations, running edit-check queries against
+    CDISC/SDTM standards, and generating submission-ready datasets for
+    regulatory authorities. Produces validated trial databases, discrepancy
+    reports, and data lock certification. Excludes protocol design and
+    patient recruitment.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:staff-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:database-migrations-zero-downtime
+  applies_to_domain:
+    - target: domain:healthcare
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:patient-safety-event-review
+attributes:
+  displayName: "Patient Safety Event Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Reviews reported patient safety events and adverse incidents -- triaging
+    incoming event reports by severity classification, conducting root-cause
+    analysis with clinical and engineering teams, correlating device
+    telemetry or software logs with patient outcomes, evaluating whether
+    corrective action is required, and filing regulatory reports (FDA
+    MedWatch, MHRA Yellow Card) within mandated timelines. Produces incident
+    investigation reports, corrective action plans, and regulatory
+    submission records. Excludes clinical treatment decisions.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:healthcare
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:ehr-integration-testing
+attributes:
+  displayName: "EHR Integration Testing"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates interoperability between the organization's systems and
+    electronic health record platforms -- executing HL7 FHIR conformance
+    test suites, verifying CDA document round-tripping, testing
+    patient-matching algorithms across identity domains, validating
+    medication-list synchronization with pharmacy systems, and confirming
+    audit-log completeness for HIPAA access tracking. Produces conformance
+    test reports, interface error catalogs, and go/no-go integration
+    readiness assessments. Excludes EHR vendor selection.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:test-writer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:oauth-flows
+  applies_to_domain:
+    - target: domain:healthcare
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:approve-deploys
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering

@@ -129,7 +129,7 @@ These variables are set by Claude Code and used by the plugin.
 
 | Variable | Description | Set By |
 |----------|-------------|--------|
-| `BABYSITTER_SESSION_ID` | Cross-harness session identifier (written to `CLAUDE_ENV_FILE` by session-start hook) | Babysitter |
+| `AGENT_SESSION_ID` | Cross-harness session identifier (written to `CLAUDE_ENV_FILE` by session-start hook) | Babysitter |
 | `CLAUDE_PLUGIN_ROOT` | Plugin installation directory | Claude Code |
 | `CLAUDE_ENV_FILE` | Path to environment persistence file | Claude Code |
 
@@ -137,11 +137,11 @@ These are automatically available in hooks and skills. Use them for session isol
 
 ```bash
 # In a hook script
-echo "Session: $BABYSITTER_SESSION_ID"
+echo "Session: $AGENT_SESSION_ID"
 echo "Plugin root: $CLAUDE_PLUGIN_ROOT"
 
 # State file path pattern
-STATE_FILE="${CLAUDE_PLUGIN_ROOT}/state/${BABYSITTER_SESSION_ID}.md"
+STATE_FILE="${BABYSITTER_STATE_DIR:-$HOME/.a5c/state}/${AGENT_SESSION_ID}.md"
 ```
 
 ---
@@ -208,35 +208,19 @@ Each run has the following structure:
 Location: Managed by Claude Code plugin system
 
 ```
-plugins/babysitter/
+plugins/babysitter-unified/
 ├── plugin.json           # Plugin manifest
+├── versions.json         # Unified SDK/plugin version marker
 ├── skills/
 │   └── babysit/
-│       ├── SKILL.md      # Skill instructions
-│       ├── scripts/
-│       │   └── setup-babysitter-run-resume.sh
-│       ├── reference/
-│       │   └── *.md
-│       └── process/
-│           ├── methodologies/
-│           └── specializations/
+│       └── SKILL.md      # Skill instructions
 ├── hooks/
-│   ├── hooks.json        # Hook registration
-│   ├── hook-dispatcher.sh
-│   ├── babysitter-stop-hook.sh
-│   ├── babysitter-session-start-hook.sh
-│   ├── on-iteration-start/
-│   │   └── native-orchestrator.sh
-│   ├── on-iteration-end/
-│   ├── on-run-start/
-│   ├── on-run-complete/
-│   ├── on-task-start/
-│   ├── on-task-complete/
-│   └── on-breakpoint/
-├── agents/
-│   └── babysitter.md
-└── state/                # Runtime state (session-specific)
-    └── ${SESSION_ID}.md
+│   ├── session-start.sh
+│   ├── stop.sh
+│   ├── pre-tool-use.sh
+│   └── user-prompt-submit.sh
+├── per-harness/          # Harness-specific generated surfaces and docs
+└── bin/                  # Shared install helpers
 ```
 
 ---
@@ -341,7 +325,7 @@ Derived state cache. Rebuilt from journal if missing.
 
 Hook registration for Claude Code integration.
 
-**Location:** `plugins/babysitter/hooks/hooks.json`
+**Location:** generated from `plugins/babysitter-unified/plugin.json`
 
 **Schema:**
 ```json
@@ -352,7 +336,7 @@ Hook registration for Claude Code integration.
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-session-start-hook.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
           }
         ]
       }
@@ -362,7 +346,7 @@ Hook registration for Claude Code integration.
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-stop-hook.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/stop.sh"
           }
         ]
       }
@@ -387,7 +371,7 @@ Hooks are discovered in priority order:
 
 1. **Per-repo hooks:** `.a5c/hooks/<hook-name>/*.sh`
 2. **Per-user hooks:** `~/.config/babysitter/hooks/<hook-name>/*.sh`
-3. **Plugin hooks:** `plugins/babysitter/hooks/<hook-name>/*.sh`
+3. **Plugin hooks:** `plugins/babysitter-unified/hooks/<hook-name>.sh`
 
 All executable files (`.sh`) in the hook directory are executed in lexicographic order.
 
@@ -584,7 +568,7 @@ await ctx.breakpoint({
 | Setting | Default Value |
 |---------|---------------|
 | Max iterations | `0` (unlimited) |
-| State file location | `$CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md` |
+| State file location | `${BABYSITTER_STATE_DIR:-~/.a5c/state}/${SESSION_ID}.md` |
 
 ---
 

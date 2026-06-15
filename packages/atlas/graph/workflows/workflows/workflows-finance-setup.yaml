@@ -1,0 +1,119 @@
+---
+nodeKind: Workflow
+id: workflow:erp-system-configuration
+attributes:
+  displayName: "ERP System Configuration"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Configures the enterprise resource planning system for financial
+    operations -- designing the chart of accounts structure with account
+    hierarchies aligned to management and statutory reporting requirements,
+    creating cost center and profit center hierarchies that map to
+    organizational and project structures, configuring multi-currency handling
+    with exchange rate sources and revaluation schedules, building approval
+    workflows for purchase orders, journal entries, and budget transfers with
+    threshold-based routing, setting up automated recurring journal entries for
+    standard accruals and allocations, configuring integration interfaces with
+    banking, payroll, and procurement platforms, and establishing user roles
+    and access controls aligned to segregation-of-duties requirements. Produces
+    ERP configuration guide and chart-of-accounts documentation. Excludes
+    ongoing transaction processing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:schema-evolution
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:financial-reporting-dashboard-setup
+attributes:
+  displayName: "Financial Reporting Dashboard Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Designs and implements self-service financial reporting dashboards --
+    gathering reporting requirements from finance leadership, department heads,
+    and board members, designing P&L dashboards with drill-down from
+    consolidated view to cost-center and product-line detail, building balance
+    sheet visualizations with trend overlays and ratio calculations (current
+    ratio, debt-to-equity, working capital), creating cash flow dashboards
+    with actual-versus-forecast variance highlighting and runway projections,
+    configuring automated data refresh pipelines from ERP and billing systems,
+    implementing role-based access controls to restrict sensitive financial
+    data visibility, and establishing dashboard maintenance procedures with
+    data-validation checks and anomaly alerts. Produces dashboard gallery, data
+    dictionary, and refresh schedule documentation. Excludes financial
+    analysis.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:expense-policy-and-controls-setup
+attributes:
+  displayName: "Expense Policy and Controls Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Designs and implements the organizational expense management framework --
+    defining expense categories aligned to the chart of accounts with clear
+    definitions and examples, establishing per-category spending limits and
+    per-diem rates based on role level and geographic location, designing
+    multi-tier approval chains with automatic routing based on amount
+    thresholds and expense type, configuring expense management platform rules
+    for receipt requirements, mileage calculations, and foreign-currency
+    conversion, creating policy exception workflows with documented
+    justification and audit-trail requirements, building compliance monitoring
+    dashboards to detect policy violations, duplicate submissions, and unusual
+    spending patterns, and developing employee training materials with policy
+    quick-reference guides. Produces expense policy document, approval matrix,
+    and platform configuration guide. Excludes day-to-day expense processing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team

@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:webapp-fullstack-python
+attributes:
+  displayName: "Full-stack Web App (Python)"
+  parentDomainId: domain:web-development
+  description: |
+    Full-stack Python web application development — Django, FastAPI, or
+    Flask backends paired with HTMX, Hotwire, or a JS frontend.
+edges:
+  specializes:
+    - domain:web-development

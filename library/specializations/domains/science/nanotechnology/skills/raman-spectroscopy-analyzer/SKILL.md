@@ -18,6 +18,11 @@ metadata:
     - LabSpec
     - Renishaw software
     - Custom spectral databases
+graph:
+  domains: [domain:nanotechnology]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Raman Spectroscopy Analyzer

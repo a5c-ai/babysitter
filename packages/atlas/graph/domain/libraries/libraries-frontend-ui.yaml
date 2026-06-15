@@ -1,0 +1,382 @@
+---
+nodeKind: Library
+id: library:zustand
+attributes:
+  displayName: "Zustand"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Small, fast, and scalable state management solution for React using
+    simplified flux principles; hook-based API with no boilerplate,
+    middleware support, and optional devtools integration.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:application-state-management
+  alternative_to:
+    - target: library:jotai
+      comparison: "React state management — Zustand is flux-like; Jotai is atomic"
+    - target: library:recoil
+      comparison: "React state management — Zustand is flux-like; Recoil is graph-based"
+---
+nodeKind: Library
+id: library:jotai
+attributes:
+  displayName: "Jotai"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Primitive and flexible state management for React using atomic
+    model inspired by Recoil; atoms compose bottom-up with no
+    extra re-renders and full TypeScript support.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:application-state-management
+  alternative_to:
+    - target: library:zustand
+      comparison: "React state management — Jotai is atomic; Zustand is flux-like"
+    - target: library:recoil
+      comparison: "React state management — Jotai is atomic; Recoil is graph-based"
+---
+nodeKind: Library
+id: library:recoil
+attributes:
+  displayName: "Recoil"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Facebook's experimental state management library for React
+    built around atoms and selectors; enables fine-grained subscriptions
+    and derived state with a graph-based data flow model.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:application-state-management
+  alternative_to:
+    - target: library:zustand
+      comparison: "React state management — Recoil is graph-based; Zustand is flux-like"
+    - target: library:jotai
+      comparison: "React state management — Recoil is graph-based; Jotai is atomic"
+---
+nodeKind: Library
+id: library:framer-motion
+attributes:
+  displayName: "Framer Motion"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Production-ready animation and gesture library for React with a
+    declarative API, layout animations, shared element transitions,
+    drag, and scroll-triggered effects.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:animation-transitions
+  alternative_to:
+    - library:d3
+---
+nodeKind: Library
+id: library:three
+attributes:
+  displayName: "Three.js"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Cross-browser JavaScript library and API for creating and displaying
+    animated 3D graphics in a web browser using WebGL with a high-level
+    scene graph, cameras, lights, and material system.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:data-visualization
+    - skill-area:animation-transitions
+  alternative_to:
+    - library:d3
+---
+nodeKind: Library
+id: library:d3
+attributes:
+  displayName: "D3.js"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Data-Driven Documents library for producing dynamic, interactive
+    data visualizations in the browser using SVG, Canvas, and HTML;
+    provides powerful data binding and transformation utilities.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:data-visualization
+  alternative_to:
+    - library:chart-js
+    - library:recharts
+---
+nodeKind: Library
+id: library:chart-js
+attributes:
+  displayName: "Chart.js"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Simple yet flexible JavaScript charting library for designers and
+    developers, rendering responsive charts on Canvas with support for
+    bar, line, pie, radar, scatter, and bubble chart types.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:data-visualization
+---
+nodeKind: Library
+id: library:recharts
+attributes:
+  displayName: "Recharts"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Composable charting library built with React and D3; provides
+    declarative chart components (line, bar, area, pie, scatter) with
+    responsive containers and a customizable tooltip/legend system.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:data-visualization
+---
+nodeKind: Library
+id: library:shadcn
+attributes:
+  displayName: "shadcn/ui"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Collection of accessible, reusable React components built on
+    Radix UI primitives and styled with Tailwind CSS; components are
+    copied directly into the project rather than installed as a package.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+  alternative_to:
+    - library:material-ui
+    - library:chakra-ui
+    - library:mantine
+    - library:ant-design
+---
+nodeKind: Library
+id: library:radix-ui
+attributes:
+  displayName: "Radix UI"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Unstyled, accessible React component primitives covering dialogs,
+    dropdowns, tooltips, and more; WAI-ARIA compliant with full keyboard
+    navigation and focus management built in.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+  alternative_to:
+    - library:headless-ui
+---
+nodeKind: Library
+id: library:headless-ui
+attributes:
+  displayName: "Headless UI"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Completely unstyled, fully accessible UI components for React and
+    Vue, designed to integrate seamlessly with Tailwind CSS; covers
+    menus, listboxes, comboboxes, switches, and dialogs.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+---
+nodeKind: Library
+id: library:material-ui
+attributes:
+  displayName: "Material UI"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Comprehensive React component library implementing Google's Material
+    Design specification; ships ready-to-use components, a themeable
+    design system, and MUI X data grid and date pickers.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+  alternative_to:
+    - library:chakra-ui
+    - library:mantine
+    - library:ant-design
+    - library:shadcn
+---
+nodeKind: Library
+id: library:chakra-ui
+attributes:
+  displayName: "Chakra UI"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Simple, modular, and accessible React component library with a
+    constraint-based style props API, dark mode support, and a
+    composable design that encourages building custom design systems.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+---
+nodeKind: Library
+id: library:mantine
+attributes:
+  displayName: "Mantine"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Full-featured React component and hooks library with 100+ components,
+    dark theme support, form management, rich text editor, date pickers,
+    and a flexible theming system based on CSS variables.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+---
+nodeKind: Library
+id: library:ant-design
+attributes:
+  displayName: "Ant Design"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Enterprise-grade React UI library with a comprehensive set of
+    components following Ant Design's design language; includes tables,
+    forms, charts (via Ant Design Charts), and a rich icon library.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:design-systems
+---
+nodeKind: Library
+id: library:tailwindcss
+attributes:
+  displayName: "Tailwind CSS"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Utility-first CSS framework providing low-level, composable utility
+    classes for building custom designs directly in markup; JIT compiler
+    generates only the styles used for minimal production bundle size.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ui-styling
+  alternative_to:
+    - library:sass
+    - library:styled-components
+    - library:emotion
+---
+nodeKind: Library
+id: library:daisyui
+attributes:
+  displayName: "daisyUI"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Tailwind CSS component plugin that adds semantic class names for
+    common UI patterns; provides 50+ themed components with multiple
+    built-in themes and full dark mode support.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ui-styling
+    - skill-area:design-systems
+  alternative_to:
+    - library:shadcn
+---
+nodeKind: Library
+id: library:styled-components
+attributes:
+  displayName: "styled-components"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    CSS-in-JS library for React and React Native using tagged template
+    literals to write actual CSS in JavaScript; supports dynamic styling
+    via props, theming, and automatic vendor prefixing.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:ui-styling
+  alternative_to:
+    - library:emotion
+---
+nodeKind: Library
+id: library:emotion
+attributes:
+  displayName: "Emotion"
+  belongsToLanguageId: language:typescript
+  category: other
+  description: |
+    Performant and flexible CSS-in-JS library supporting both string and
+    object styles; works framework-agnostically or via @emotion/react
+    with the css prop and server-side rendering support.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_for:
+    - skill-area:ui-styling
+---
+nodeKind: Library
+id: library:postcss
+attributes:
+  displayName: "PostCSS"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Tool for transforming CSS with JavaScript plugins; powers Tailwind
+    CSS, Autoprefixer, CSS Modules, and custom syntax transforms,
+    integrating into virtually every modern build pipeline.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ui-styling
+  alternative_to:
+    - library:sass
+---
+nodeKind: Library
+id: library:sass
+attributes:
+  displayName: "Sass"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Mature, stable CSS extension language providing variables, nested
+    rules, mixins, functions, and partials; compiles to standard CSS
+    via the Dart Sass reference implementation.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ui-styling

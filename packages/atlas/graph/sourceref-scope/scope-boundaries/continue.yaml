@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:continue.scope
+attributes:
+  subjectId: agent:continue
+  inScope: |
+    Open-source IDE side-panel agent for VS Code and JetBrains with BYO-model configuration, custom slash commands, context providers, and MCP tool servers.
+  outOfScope: |
+    Headless CI/CD execution, terminal-only workflows (use Aider), and hosted multi-tenant cloud orchestration.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:continue

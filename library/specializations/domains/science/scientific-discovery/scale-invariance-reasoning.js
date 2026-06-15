@@ -12,6 +12,13 @@
  *   scalingRelations: array,
  *   insights: array
  * }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -35,7 +42,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Test Scale Transformations
   ctx.log('info', 'Testing scale transformations');
-  let scaleTransformations = await ctx.task(testScaleTransformationsTask, {
+  const scaleTransformations = await ctx.task(testScaleTransformationsTask, {
     phenomenon,
     quantities,
     scales,
@@ -48,17 +55,9 @@ export async function process(inputs, ctx) {
     scaleTransformations,
     quantities,
     domain
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      scaleTransformations = await ctx.task(testScaleTransformationsTask, { ...{
-    phenomenon,
-    quantities,
-    scales,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Scale invariance analysis complete. Review before scaling relations?',
     title: 'Scale Invariance - Invariants Identified',
     context: {
@@ -67,15 +66,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/quantities.json', format: 'json' },
         { path: 'artifacts/invariant-laws.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Derive Scaling Relations
   ctx.log('info', 'Deriving scaling relations');
   const scalingRelations = await ctx.task(deriveScalingRelationsTask, {

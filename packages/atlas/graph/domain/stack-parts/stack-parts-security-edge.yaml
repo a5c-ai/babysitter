@@ -1,0 +1,35 @@
+---
+nodeKind: StackPart
+id: stack-part:waf
+attributes:
+  displayName: "Web Application Firewall (WAF)"
+  description: |
+    Edge-layer filter blocking OWASP-class web attacks via signatures
+    and rules. Examples: AWS WAF, Cloudflare WAF, ModSecurity, Azure
+    Front Door WAF.
+edges:
+  implemented_by:
+    - target: platform-service:aws-cloudfront
+---
+nodeKind: StackPart
+id: stack-part:bot-detection
+attributes:
+  displayName: "Bot Detection"
+  description: |
+    Service that classifies and challenges automated traffic. Examples:
+    Cloudflare Bot Management, DataDome, hCaptcha, Akamai Bot Manager.
+edges:
+  implemented_by:
+    - target: tool:datadome
+---
+nodeKind: StackPart
+id: stack-part:auth-broker
+attributes:
+  displayName: "Auth Broker (Managed Auth)"
+  description: |
+    Hosted authentication service distinct from a generic IdP — covers
+    user signup, password/MFA, social login, sessions, and JWT/SDK
+    integration. Examples: Clerk, Supabase Auth, Auth0, WorkOS.
+edges:
+  stack_part_used_by:
+    - target: skill-area:identity-security

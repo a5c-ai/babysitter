@@ -1,0 +1,21 @@
+nodeKind: HookSurface
+id: hook-surface:phase-change
+attributes:
+  eventName: "PhaseChange (a5c canonical)"
+  displayName: "PhaseChange (a5c canonical)"
+  kind: canonical
+  direction: event
+  blocking: false
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [fromPhase, toPhase, runId]
+    properties:
+      fromPhase: { type: string }
+      toPhase: { type: string }
+      runId: { type: string }
+      reason: { type: string }
+  description: |
+    Fires on every successful PhaseTransition within a Run.
+    Observer-style; cannot abort. For gating use PhaseChangeCheck.
+edges:

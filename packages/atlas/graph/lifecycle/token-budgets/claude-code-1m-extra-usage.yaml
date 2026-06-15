@@ -1,0 +1,16 @@
+nodeKind: TokenBudget
+id: token-budget:claude-code-call-1m-extra-usage
+attributes:
+  displayName: "Claude Code 1M context per-call budget (Extra Usage gated)"
+  scope: call
+  maxTotalTokens: 1000000
+  contextWindowTokens: 1000000
+  floorOutputTokens: 3000
+  safetyBufferTokens: 1000
+  enforcement: downscale-output
+  onExceededAction: reduce-max-tokens
+  description: |
+    1M-context-window variant. Gated by Extra Usage entitlement at the org
+    level — 429 with "Extra usage is required for long context" surfaces the
+    /extra-usage CLI hint (or claude.ai/settings/usage in non-interactive
+    mode). Same downscale-output overflow recovery as the 200k policy.

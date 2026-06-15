@@ -1,0 +1,159 @@
+{
+  "issueNumber": 637,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-637-hooks-mux-typed-handlers",
+  "planArtifactBranch": "plan/issue-637",
+  "title": "hooks-mux: add HTTP, MCP tool, prompt, and agent handler types",
+  "trigger": "manual dispatch",
+  "labels": [
+    "hooks-mux",
+    "priority:high",
+    "ready-for-dev",
+    "feature",
+    "effort:large",
+    "agent-platform",
+    "P1",
+    "risk:high"
+  ],
+  "dependentIssues": [
+    636,
+    576
+  ],
+  "relatedPrs": [
+    695
+  ],
+  "targetHandlerTypes": [
+    "command",
+    "http",
+    "mcp_tool",
+    "prompt",
+    "agent"
+  ],
+  "issueSummary": "hooks-mux currently routes every hook handler through shell command execution. Add typed handler support for HTTP webhooks, MCP tool calls, LLM prompt evaluation, and agent/subagent execution while preserving legacy command handler behavior.",
+  "issueContextNotes": [
+    "Issue body names new handler modules: handlers/http.ts, handlers/mcp-tool.ts, handlers/prompt.ts, handlers/agent.ts.",
+    "Issue body names runner.ts dispatch and plan.ts HandlerRef changes.",
+    "Comment notes dependency on #636 for missing event dispatch infrastructure.",
+    "Comment notes relation to #576 because mcp_tool must integrate with tool-mux rather than creating a duplicate MCP registry.",
+    "A previous closed PR #695 contains useful prior art and implementation notes, but current staging still shows HandlerRef typed only as command/shell and runHandler dispatching unconditionally to runShellHandler."
+  ],
+  "processLibraryFindings": {
+    "activeBinding": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "repoLocalPath": ".a5c/process-library/",
+    "repoLocalPathPresent": false,
+    "methodologyPathsUsed": [
+      "methodologies/atdd-tdd/atdd-tdd.js",
+      "methodologies/process-hardening/process-hardening-patterns.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "tdd-quality-convergence.js"
+    ],
+    "methodologySummary": [
+      "ATDD/TDD: establish acceptance and contract tests before production code.",
+      "Process hardening: use bounded repair loops and explicit final acceptance gates.",
+      "Verification before completion: require fresh command evidence before claiming success.",
+      "TDD quality convergence: iterate only on concrete verification or review gaps."
+    ]
+  },
+  "reuseAudit": {
+    "reuseAuditConfigPresent": false,
+    "keywords": [
+      "HandlerRef",
+      "handler type",
+      "command",
+      "shell",
+      "http",
+      "mcp_tool",
+      "prompt",
+      "agent",
+      "runHandler",
+      "runShellHandler",
+      "allowedEnvVars",
+      "MCP",
+      "tool registry",
+      "agent-platform",
+      "amuxBridge",
+      "timeout",
+      "fail-open",
+      "fail-closed"
+    ],
+    "matchingInfrastructure": [
+      "packages/hooks-mux/core/src/types/plan.ts",
+      "packages/hooks-mux/core/src/normalizer/runner.ts",
+      "packages/hooks-mux/core/src/normalizer/plan-resolver.ts",
+      "packages/hooks-mux/core/src/merge-engine/merge.ts",
+      "packages/hooks-mux/core/src/types/result.ts",
+      "packages/hooks-mux/core/src/api.ts",
+      "packages/hooks-mux/core/src/index.ts",
+      "packages/hooks-mux/core/src/programmatic/engine.ts",
+      "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+      "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
+      "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
+      "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
+      "packages/genty/platform/src/harness/adapters/amuxBridge.ts",
+      "packages/genty/platform/src/mcp/client/toolRegistry.ts",
+      "packages/genty/platform/src/mcp/client/executor.ts",
+      "docs/agent-stack/hooks/missing-capabilities.md"
+    ],
+    "planningConstraint": "Reuse hooks-mux runner, result, merge, timeout, diagnostics, API export, bridge, and MCP/tool registry surfaces. Do not create a parallel registry or broaden into unrelated hook capability issues."
+  },
+  "acceptanceCriteria": [
+    "HandlerRef supports a backward-compatible typed model where omitted type remains command.",
+    "runHandler dispatches by handler type and rejects or reports unsupported types deterministically.",
+    "Existing shell command handler behavior, timeout behavior, shell selection, priority ordering, async/once behavior, fail-open/fail-closed behavior, and merge semantics are preserved.",
+    "HTTP handlers POST normalized hook events, parse UnifiedHookResult JSON, enforce timeout/cancellation, validate URLs, and interpolate only explicitly allowed environment variables into headers.",
+    "MCP tool handlers use the existing tool-mux/MCP registry direction or a narrow injectable executor seam and do not create a second registry.",
+    "Prompt and agent handlers use bounded executor seams with timeout/depth/max-turn controls and deterministic unavailable behavior when no executor is configured.",
+    "Agent-platform ADAPTERS bridge preserves typed handler config when it currently narrows or drops fields.",
+    "Docs in docs/agent-stack/hooks/missing-capabilities.md accurately reflect implemented core support and any deferred live platform integration.",
+    "Contract tests cover legacy command behavior, each new handler type, unsupported types, timeouts, fail-open/fail-closed behavior, HTTP safety, MCP registry reuse assumptions, prompt/agent bounds, and bridge pass-through where changed."
+  ],
+  "nonGoals": [
+    "Do not implement #638 decision type semantics in this process.",
+    "Do not implement #639 matcher, async, once, or per-hook config gaps beyond preserving existing behavior.",
+    "Do not implement full #576 tool-mux registry work unless a narrow compatibility seam is required for this issue.",
+    "Do not add real external network dependencies to tests.",
+    "Do not modify unrelated source files or process artifacts."
+  ],
+  "targetFiles": [
+    "docs/agent-stack/hooks/missing-capabilities.md",
+    "packages/hooks-mux/core/src/types/plan.ts",
+    "packages/hooks-mux/core/src/normalizer/runner.ts",
+    "packages/hooks-mux/core/src/normalizer/plan-resolver.ts",
+    "packages/hooks-mux/core/src/api.ts",
+    "packages/hooks-mux/core/src/index.ts",
+    "packages/hooks-mux/core/src/normalizer/index.ts",
+    "packages/hooks-mux/core/src/handlers/http.ts",
+    "packages/hooks-mux/core/src/handlers/mcp-tool.ts",
+    "packages/hooks-mux/core/src/handlers/prompt.ts",
+    "packages/hooks-mux/core/src/handlers/agent.ts",
+    "packages/hooks-mux/core/src/handlers/shared.ts",
+    "packages/hooks-mux/core/src/__tests__/typed-handlers-contract.test.ts",
+    "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
+    "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
+    "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
+    "packages/genty/platform/src/harness/adapters/amuxBridge.ts",
+    "packages/genty/platform/src/harness/adapters/__tests__/amuxBridge.test.ts"
+  ],
+  "verificationCommands": [
+    "npm run build:hooks-mux",
+    "npm run test:hooks-mux",
+    "npm run lint:hooks-mux",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm --workspace @a5c-ai/genty-platform test -- src/harness/adapters/__tests__/amuxBridge.test.ts",
+    "git diff --check"
+  ],
+  "qualityGates": [
+    "Reuse-audit findings are rendered before implementation.",
+    "Dependency readiness for #636 and #576 is explicit before contract design.",
+    "Contract tests are written before production code and initially fail for the actual gaps.",
+    "All target handler types have deterministic tests with no real external services.",
+    "HTTP safety checks cover URL validation and allowedEnvVars-only interpolation.",
+    "MCP implementation does not duplicate the tool registry.",
+    "Prompt and agent handlers are bounded and cannot recurse or run indefinitely.",
+    "Fresh verification commands pass or have exact environment-only blockers.",
+    "Final review approves backwards compatibility, security controls, docs accuracy, and residual dependency notes."
+  ],
+  "maxRepairAttempts": 3
+}

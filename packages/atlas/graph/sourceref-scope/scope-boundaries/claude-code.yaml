@@ -1,0 +1,20 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:claude-code.scope
+attributes:
+  subjectId: agent:claude-code
+  inScope: |
+    Developer terminal/IDE workflows — interactive coding sessions with
+    file edits, shell commands, and tool-use on a single developer's
+    workstation. Supports headless/non-interactive runs, MCP servers,
+    plugins, and hooks for automation.
+  outOfScope: |
+    Production runtime / always-on services, multi-tenant hosting (each
+    session is single-user), CI/CD without explicit setup (requires
+    --print or hooks), browser-only environments, and end-user-facing
+    chatbot deployments.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:claude-code

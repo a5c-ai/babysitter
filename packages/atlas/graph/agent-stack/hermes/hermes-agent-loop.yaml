@@ -1,0 +1,52 @@
+# Hermes AIAgent core loop -- deep-research atlas node.
+
+nodeKind: AgentCoreImpl
+id: agent-core-impl:hermes.agent-loop
+attributes:
+  displayName: "Hermes AIAgent Loop"
+  agentVersionId: agentVersion:hermes:ge-0-0-0
+  loopKind: synchronous-iterative
+  description: |
+    The AIAgent class in run_agent.py (~4,400 lines) is the single monolithic
+    core loop powering all Hermes surfaces (CLI, gateway, ACP, batch, API).
+    Implements synchronous orchestration with interruptible API calls via
+    background threads, sequential or concurrent tool dispatch, prompt caching,
+    context compression, and subagent delegation.
+  keyFiles:
+    - run_agent.py
+    - agent/prompt_builder.py
+    - agent/context_engine.py
+    - agent/context_compressor.py
+    - agent/prompt_caching.py
+    - agent/auxiliary_client.py
+    - model_tools.py
+  turnLifecycle:
+    - "Generate task_id"
+    - "Append user message"
+    - "Build or reuse cached system prompt"
+    - "Preflight compression check (>50% context)"
+    - "Build API messages"
+    - "Inject ephemeral prompt layers"
+    - "Apply prompt caching markers (Anthropic)"
+    - "Make interruptible API call"
+    - "Parse response: tool calls loop, text response returns"
+  toolDispatch: "Central registry, auto-discovery at import. Sequential for single, ThreadPoolExecutor for multiple."
+  budgetDefault: 90
+  subagentBudgetDefault: 50
+  compressionThreshold: "50% preflight, 85% gateway"
+  compressionStrategy: "Memory flush, middle turn summarization, last N preserved, tool call/result pairs kept"
+  apiModes:
+    - chat_completions
+    - codex_responses
+    - anthropic_messages
+  ourEquivalent: |
+    Our agent core lives in the upstream harness (Claude Code, Codex, etc.).
+    genty-platform wraps harness cores via adapter bridge
+    (packages/genty/platform/src/harness/adapters/). The babysitter SDK
+    drives turn lifecycle through task definitions and effects rather than
+    owning the inference loop directly.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  part_of:
+    - target: agent:hermes

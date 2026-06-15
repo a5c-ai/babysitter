@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:genty-tv-androidtv-app
+attributes:
+  packageId: "@a5c-ai/genty-tv-androidtv-app"
+  packageName: "@a5c-ai/genty-tv-androidtv-app"
+  displayName: "Genty Android TV App"
+  description: "Android TV companion surface for adapters. Provides a large-screen display for monitoring agent sessions and run dashboards."
+  role: "tv-companion-app"
+  whenToUse: "Build this when you want a big-screen ambient display for agent monitoring on Android TV devices."
+  status: active

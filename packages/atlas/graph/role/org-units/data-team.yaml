@@ -1,0 +1,11 @@
+nodeKind: OrgUnit
+id: org-unit:data-team
+attributes:
+  displayName: "Data Team"
+  kind: team
+  description: |
+    Data team — owns analytics, data warehouse, and BI.
+edges:
+  has_member:
+    - target: role:data-engineer
+    - target: role:data-scientist

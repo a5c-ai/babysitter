@@ -1,0 +1,114 @@
+# Default model versions for agent harnesses.
+# These are the model versions referenced by defaults_to_model edges
+# from AgentVersion nodes.
+---
+nodeKind: ModelFamily
+id: model:codex-default
+attributes:
+  modelId: codex-default
+  label: "Codex Default Model"
+  providerId: openai
+  modalities:
+    - text
+    - image
+  status: current
+edges:
+  has_version:
+    - modelVersion:codex-default:ge-0-0-0
+---
+nodeKind: ModelVersion
+id: modelVersion:codex-default:ge-0-0-0
+attributes:
+  displayName: "Codex Default"
+  modelId: codex-default
+  providerId: openai
+  versionRange: ">=0.0.0"
+  label: "Codex Default"
+edges:
+  belongs_to_family:
+    - target: model:codex-default
+  provided_by:
+    - providerVersion:openai:ge-0-0-0
+---
+nodeKind: ModelFamily
+id: model:claude-code-default
+attributes:
+  modelId: claude-code-default
+  label: "Claude Code Default Model"
+  providerId: anthropic
+  modalities:
+    - text
+    - image
+  status: current
+edges:
+  has_version:
+    - modelVersion:claude-code-default:ge-0-0-0
+---
+nodeKind: ModelVersion
+id: modelVersion:claude-code-default:ge-0-0-0
+attributes:
+  displayName: "Claude Code Default"
+  modelId: claude-code-default
+  providerId: anthropic
+  versionRange: ">=0.0.0"
+  label: "Claude Code Default"
+edges:
+  belongs_to_family:
+    - target: model:claude-code-default
+  provided_by:
+    - providerVersion:anthropic:ge-0-0-0
+---
+nodeKind: ModelFamily
+id: model:copilot-default
+attributes:
+  modelId: copilot-default
+  label: "Copilot Default Model"
+  providerId: openai
+  modalities:
+    - text
+  status: current
+edges:
+  has_version:
+    - modelVersion:copilot-default:ge-0-0-0
+---
+nodeKind: ModelVersion
+id: modelVersion:copilot-default:ge-0-0-0
+attributes:
+  displayName: "Copilot Default"
+  modelId: copilot-default
+  providerId: openai
+  versionRange: ">=0.0.0"
+  label: "Copilot Default"
+edges:
+  belongs_to_family:
+    - target: model:copilot-default
+  provided_by:
+    - providerVersion:openai:ge-0-0-0
+---
+nodeKind: ModelFamily
+id: model:gemini-cli-default
+attributes:
+  modelId: gemini-cli-default
+  label: "Gemini CLI Default Model"
+  providerId: google
+  modalities:
+    - text
+    - image
+  status: current
+edges:
+  has_version:
+    - modelVersion:gemini-cli-default:ge-0-0-0
+---
+nodeKind: ModelVersion
+id: modelVersion:gemini-cli-default:ge-0-0-0
+attributes:
+  displayName: "Gemini CLI Default"
+  modelId: gemini-cli-default
+  providerId: google
+  versionRange: ">=0.0.0"
+  label: "Gemini CLI Default"
+edges:
+  belongs_to_family:
+    - target: model:gemini-cli-default
+  provided_by:
+    - providerVersion:google:ge-0-0-0

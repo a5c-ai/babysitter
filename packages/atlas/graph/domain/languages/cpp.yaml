@@ -1,0 +1,25 @@
+nodeKind: Language
+id: language:cpp
+attributes:
+  displayName: "C++"
+  paradigms:
+    - object-oriented
+    - imperative
+    - generic
+    - systems
+  description: |
+    C++ is a compiled, statically-typed, multi-paradigm language that extends
+    C with classes, templates, and a rich standard library (STL). Modern C++
+    (C++11 through C++23) introduced move semantics, range-based for loops,
+    lambda expressions, concepts, and modules.
+
+    It is the dominant language for game engines (Unreal Engine), high-
+    performance computing, audio/video processing, embedded systems, and
+    any domain where zero-overhead abstractions and deterministic memory
+    control matter. Template metaprogramming and CRTP are common advanced
+    patterns. RAII is the idiomatic resource management approach.
+    Interoperates with C via ABI compatibility and with Rust/Python via FFI.
+edges:
+  used_by_skill_area:
+    - target: skill-area:firmware-development
+    - target: skill-area:cuda-kernels

@@ -7,19 +7,12 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-bugfix
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
----
-
-# behavior-contract
-
-You are **behavior-contract** -- the bug formalization skill for Pilot Shell bugfix mode.
-
-## Overview
-
-This skill formalizes bugs as Behavior Contracts -- precise, testable descriptions of what is wrong (Bug Condition), what should happen (Postcondition), and what must not change (Invariants).
-
-## Contract Structure
-
-### Bug Condition
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 The exact input, state, or sequence that triggers the bug. Must be specific enough to write a failing test.
 
 **Example**: "When `processPayment()` receives an amount of exactly $0.00, it throws an unhandled TypeError instead of returning a zero-amount receipt."
@@ -33,6 +26,8 @@ The correct behavior that must hold after the fix is applied.
 Existing correct behaviors that must be preserved by the fix.
 
 **Example**:
+---
+
 - "Positive amounts still process correctly"
 - "Negative amounts still throw `InvalidAmountError`"
 - "Receipt format remains unchanged for all amount types"

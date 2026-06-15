@@ -1,0 +1,112 @@
+---
+nodeKind: SkillArea
+id: skill-area:incident-management
+attributes:
+  displayName: "Incident Management"
+  description: |
+    Coordinating the detection, response, and resolution of production incidents -
+    severity classification, incident commander roles, escalation paths, real-time
+    communication, and blameless postmortems. Reduces mean time to recovery and
+    builds organizational memory that prevents repeated failure patterns in SRE
+    and operations contexts.
+  domains:
+    - domain:devops
+    - specialization:sre
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: specialization:sre
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:runbook-authoring
+      strength: helpful
+    - target: skill-area:incident-response
+      strength: recommended
+    - target: skill-area:runbook-writing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:change-management-ops
+attributes:
+  displayName: "Change Management (Operations)"
+  description: |
+    Governing how changes are introduced into production and shared infrastructure -
+    change advisory processes, pre-change risk assessment, deployment windows,
+    communication protocols, and rollback readiness. Balances delivery speed with
+    operational stability and provides auditability for regulated or high-availability
+    environments across DevOps and platform engineering.
+  domains:
+    - domain:devops
+    - domain:platform-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:platform-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:incident-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:capacity-planning-ops
+attributes:
+  displayName: "Capacity Planning"
+  description: |
+    Forecasting infrastructure resource needs and ensuring systems can handle
+    projected load - demand modeling, headroom analysis, cost-performance tradeoffs,
+    and scaling trigger design. Prevents both over-provisioning waste and under-
+    provisioning outages by linking traffic growth, release cadence, and cloud
+    resource procurement across DevOps and cloud infrastructure.
+  domains:
+    - domain:devops
+    - domain:cloud-infra
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:cloud-infra
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:runbook-authoring
+attributes:
+  displayName: "Runbook Authoring"
+  description: |
+    Writing clear, actionable operational runbooks that guide on-call engineers
+    through diagnosis and remediation steps for known failure modes. Covers
+    procedure structure, alert linkage, decision trees, automation integration,
+    and continuous runbook maintenance to reflect current system reality in
+    SRE and operations practices.
+  domains:
+    - domain:devops
+    - specialization:sre
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: specialization:sre
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:vendor-management-ops
+attributes:
+  displayName: "Vendor Management (Operations)"
+  description: |
+    Selecting, integrating, and managing third-party services and tooling vendors
+    that support engineering and operations - evaluation criteria, contract and SLA
+    negotiation, operational dependency tracking, and exit planning. Ensures
+    vendor relationships support rather than constrain engineering autonomy and
+    system reliability goals.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary

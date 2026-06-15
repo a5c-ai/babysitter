@@ -17,6 +17,13 @@
  * - iOS Performance: https://developer.apple.com/documentation/xcode/improving-your-app-s-performance
  * - Android Performance: https://developer.android.com/topic/performance
  * - React Native Performance: https://reactnative.dev/docs/performance
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -59,21 +66,14 @@ export async function process(inputs, ctx) {
       appName, platforms, performanceTargets, framework, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Performance optimization complete for ${appName}. Review optimization results?`,
     title: 'Performance Review',
-    context: { runId: ctx.runId, appName, performanceTargets },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, performanceTargets }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

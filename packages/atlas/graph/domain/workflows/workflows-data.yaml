@@ -1,0 +1,107 @@
+nodeKind: Workflow
+id: workflow:data-pipeline-deployment
+attributes:
+  displayName: "Data Pipeline Deployment"
+  description: |
+    On-demand cross-team workflow for designing, testing, and deploying new or significantly
+    modified data pipelines into production. A data engineer authors pipeline code and
+    accompanying documentation, then opens a PR for peer review by other data engineers
+    and an analytics engineer who validates downstream schema compatibility. Integration
+    tests run against a staging data environment to verify correctness, idempotency, and
+    performance at scale. A data quality check is configured in the monitoring layer before
+    the pipeline is promoted to production. Post-deployment, the pipeline's latency,
+    error rate, and data freshness metrics are monitored for 48 hours. The workflow ensures
+    pipelines are reliable, observable, and well-understood before they serve downstream
+    consumers.
+  workflowKind: data
+  triggerType: on-demand
+  typicalCadence: "per-pipeline"
+  complexity: complex
+edges:
+  involves_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:ml-ops-engineer
+    - role:devops-engineer
+    - role:data-analyst
+  applies_to_domain:
+    - domain:data-engineering
+    - domain:databases
+    - domain:cloud-infra
+  triggers_responsibility:
+    - responsibility:data-quality
+    - responsibility:deployment-management
+    - responsibility:documentation
+    - responsibility:risk-assessment
+---
+nodeKind: Workflow
+id: workflow:ml-model-lifecycle
+attributes:
+  displayName: "ML Model Lifecycle"
+  description: |
+    Continuous cross-team workflow managing a machine learning model from initial research
+    and experimentation through production deployment, monitoring, and eventual retirement.
+    Data scientists develop and evaluate candidate models in experiment tracking environments,
+    comparing performance against baselines. The best candidate undergoes code review,
+    bias and fairness assessment, and reproducibility checks before being handed to ML Ops
+    for productionisation. ML Ops engineers package the model, configure serving infrastructure,
+    set up performance and drift monitoring, and deploy via a canary strategy. Model
+    performance is tracked continuously, with automated retraining pipelines triggered when
+    drift thresholds are breached. Retirement is planned when the model is superseded or
+    its use case is deprecated.
+  workflowKind: data
+  triggerType: continuous
+  typicalCadence: "per-model"
+  complexity: complex
+edges:
+  involves_role:
+    - role:data-scientist
+    - role:ml-engineer
+    - role:ml-ops-engineer
+    - role:data-engineer
+    - role:research-scientist
+    - role:platform-engineer
+  applies_to_domain:
+    - domain:ml-ops
+    - domain:data-science
+    - domain:cloud-infra
+  triggers_responsibility:
+    - responsibility:deployment-management
+    - responsibility:data-quality
+    - responsibility:risk-assessment
+    - responsibility:metric-definition
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:data-quality-monitoring
+attributes:
+  displayName: "Data Quality Monitoring"
+  description: |
+    Continuous single-team workflow that proactively detects and resolves data quality
+    issues before they propagate to downstream consumers, dashboards, or ML models.
+    Automated data quality checks run after each pipeline execution, evaluating freshness,
+    completeness, uniqueness, referential integrity, and distribution drift against defined
+    expectations. Failures trigger alerts routed to the owning data engineer's on-call
+    rotation. The engineer investigates root causes — upstream source changes, schema
+    drift, or pipeline bugs — applies fixes, and documents the incident. Quality metrics
+    and SLA compliance are reported weekly to data consumers. The workflow builds trust in
+    the data platform and reduces costly downstream errors caused by silent data corruption.
+  workflowKind: data
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:data-analyst
+    - role:bi-developer
+  applies_to_domain:
+    - domain:data-engineering
+    - domain:databases
+    - domain:observability
+  triggers_responsibility:
+    - responsibility:data-quality
+    - responsibility:on-call
+    - responsibility:metric-definition
+    - responsibility:sla-management

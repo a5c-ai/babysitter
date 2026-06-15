@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-sentry.scope
+attributes:
+  subjectId: tool-server:mcp-sentry
+  inScope: |
+    Sentry error / performance monitoring access — issues, events, releases, alerts, search.
+  outOfScope: |
+    Other observability platforms (Datadog, New Relic), log aggregation, and APM rollups outside Sentry.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-sentry

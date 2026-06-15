@@ -1,0 +1,50 @@
+/**
+ * Re-export shim — canonical implementation lives in @a5c-ai/genty-runtime.
+ * Internal agent-platform consumers continue to import via relative paths
+ * through this barrel file.
+ */
+export {
+  startDaemon,
+  stopDaemon,
+  getDaemonStatus,
+  loadDaemonConfig,
+  writeDaemonConfig,
+  createFileWatcher,
+  createWebhookListener,
+  createTimerScheduler,
+  runDaemonLoop,
+  readDaemonLoopStatus,
+  appendDaemonLog,
+  readDaemonLog,
+  DurableTriggerQueue,
+  type DaemonConfig,
+  type DaemonStartOptions,
+  type DaemonStartOutput,
+  type DaemonStopOptions,
+  type DaemonStopOutput,
+  type DaemonStatusOptions,
+  type DaemonStatusOutput,
+  type DaemonMetadata,
+  type TriggerConfig,
+  type TriggerEvent,
+  type FileTriggerEvent,
+  type AutomationTriggerEvent,
+  type FileTriggerConfig,
+  type FileWatcherHandle,
+  type WebhookListenerOptions,
+  type WebhookListenerHandle,
+  type TriggerCallback,
+  type TriggerAdmissionConfig,
+  type TriggerAdmissionResult,
+  type TriggerAdmissionStatus,
+  type TriggerRateLimitConfig,
+  type TimerSchedulerHandle,
+  type DaemonLoopOptions,
+  type DaemonLoopStatus,
+  type DaemonLogEntry,
+  type DurableTriggerQueueOptions,
+  type DurableTriggerRecord,
+  type DurableTriggerState,
+} from "@a5c-ai/genty-runtime/daemon";
+export { executeAutomationTrigger } from "./automationExecutor";
+export { isAutomationTriggerEvent } from "./types";

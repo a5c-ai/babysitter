@@ -1,0 +1,222 @@
+---
+nodeKind: Domain
+id: domain:healthcare
+attributes:
+  displayName: "Healthcare"
+  description: |
+    Healthcare operations, clinical systems, patient safety, and health informatics.
+edges:
+  contains:
+    - specialization:clinical-informatics
+---
+nodeKind: Domain
+id: domain:education
+attributes:
+  displayName: "Education"
+  description: |
+    Educational technology, curriculum design, learning management, and assessment.
+edges:
+  contains:
+    - specialization:instructional-design
+---
+nodeKind: Domain
+id: domain:arts-culture
+attributes:
+  displayName: "Arts & Culture"
+  description: |
+    Arts administration, cultural heritage, curation, and creative production.
+edges:
+  contains:
+    - specialization:arts-culture
+---
+nodeKind: Domain
+id: domain:media-entertainment
+attributes:
+  displayName: "Media & Entertainment"
+  description: |
+    Media production, content distribution, streaming, and entertainment tech.
+edges:
+  contains:
+    - specialization:media
+---
+nodeKind: Domain
+id: domain:social-sciences
+attributes:
+  displayName: "Social Sciences"
+  description: |
+    Social research methods, behavioral analytics, and policy analysis.
+edges:
+  contains:
+    - specialization:social-sciences
+---
+nodeKind: Domain
+id: domain:supply-chain
+attributes:
+  displayName: "Supply Chain"
+  description: |
+    End-to-end supply chain management, procurement, and logistics optimization.
+edges:
+  contains:
+    - specialization:supply-chain-optimization
+---
+nodeKind: Domain
+id: domain:decision-intelligence
+attributes:
+  displayName: "Decision Intelligence"
+  description: |
+    Decision analytics, forecasting, simulation, and optimization.
+edges:
+  contains:
+    - specialization:decision-intelligence
+---
+nodeKind: Domain
+id: domain:real-estate
+attributes:
+  displayName: "Real Estate"
+  description: |
+    Property technology, facility management, and real estate operations.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:agriculture
+attributes:
+  displayName: "Agriculture"
+  description: |
+    AgTech, precision agriculture, and farm-to-table supply chain.
+edges:
+  contains:
+    - specialization:environmental-engineering
+    - specialization:supply-chain-optimization
+---
+nodeKind: Domain
+id: domain:energy
+attributes:
+  displayName: "Energy"
+  description: |
+    Energy systems, grid management, renewable energy, and utilities.
+edges:
+  contains:
+    - specialization:electrical-engineering
+    - specialization:environmental-engineering
+---
+nodeKind: Domain
+id: domain:telecommunications
+attributes:
+  displayName: "Telecommunications"
+  description: |
+    Telecom infrastructure, 5G, spectrum management, and network operations.
+edges:
+  contains:
+    - specialization:network-programming
+    - specialization:electrical-engineering
+---
+nodeKind: Domain
+id: domain:government
+attributes:
+  displayName: "Government"
+  description: |
+    GovTech, civic technology, public sector digitization, and e-government.
+edges:
+  contains:
+    - specialization:legal-compliance
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:insurance
+attributes:
+  displayName: "Insurance"
+  description: |
+    InsurTech, underwriting, claims processing, and actuarial systems.
+edges:
+  contains:
+    - specialization:statistical-methods
+    - specialization:legal-compliance
+---
+nodeKind: Domain
+id: domain:retail
+attributes:
+  displayName: "Retail"
+  description: |
+    Retail operations, e-commerce, point-of-sale, and inventory management.
+edges:
+  contains:
+    - specialization:supply-chain-optimization
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:hospitality
+attributes:
+  displayName: "Hospitality"
+  description: |
+    Hotel and restaurant tech, reservation systems, and guest experience.
+edges:
+  contains:
+    - specialization:customer-experience
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:transportation
+attributes:
+  displayName: "Transportation"
+  description: |
+    Fleet management, route optimization, and mobility platforms.
+edges:
+  contains:
+    - specialization:logistics
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:travel
+attributes:
+  displayName: "Travel"
+  description: |
+    Travel planning, booking systems, and itinerary optimization spanning flights,
+    accommodation, ground transport, and experiences. Covers OTA platforms, GDS
+    integration, dynamic packaging, loyalty programs, and traveler personalization.
+    Intersects hospitality, transportation, and consumer mobile product domains.
+edges:
+  contains:
+    - specialization:travel
+---
+nodeKind: Domain
+id: domain:philosophy
+attributes:
+  displayName: "Philosophy"
+  description: |
+    Systematic inquiry into metaphysics, epistemology, ethics, logic, and
+    philosophy of mind and language. Covers formal logic and argumentation,
+    moral and political philosophy, analytic and continental traditions, and
+    applied ethics in technology, law, and medicine. Provides foundational
+    reasoning frameworks used across AI alignment, law, and decision theory.
+edges:
+  contains:
+    - specialization:applied-ethics
+---
+nodeKind: Domain
+id: domain:humanities
+attributes:
+  displayName: "Humanities"
+  description: |
+    Interpretive and historical disciplines studying human culture, expression,
+    and society — including history, anthropology, linguistics, literary studies,
+    and cultural studies. Employs close reading, archival research, comparative
+    analysis, and critical theory. Increasingly intersects with computational
+    methods (digital humanities), NLP, and corpus linguistics.
+edges:
+  contains:
+    - specialization:digital-humanities
+---
+nodeKind: Domain
+id: domain:content-operations
+attributes:
+  displayName: "Content Operations"
+  description: |
+    Content strategy, production workflows, and editorial operations at scale.
+    Covers content governance, taxonomy design, CMS management, and
+    content performance measurement across channels.
+edges:
+  contains:
+    - specialization:media
+    - specialization:digital-marketing-strategy

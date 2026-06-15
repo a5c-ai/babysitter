@@ -8,6 +8,10 @@ required-skills:
   - SK-FTV-005 (storyboard-prompting)
   - SK-FTV-006 (video-prompt-engineering)
   - SK-FTV-009 (shot-composition)
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:visual-design, skill-area:prompt-engineering, skill-area:video-processing]
+  roles: [role:creative-director, role:media-engineer]
 ---
 
 # Visual Director Agent

@@ -1,0 +1,17 @@
+nodeKind: Library
+id: library:pandas
+attributes:
+  displayName: "pandas"
+  belongsToLanguageId: language:python
+  category: data-structures
+  description: |
+    Python data analysis library providing fast, flexible DataFrame and Series structures.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-analysis
+  alternative_to:
+    - library:polars
+    - library:dask

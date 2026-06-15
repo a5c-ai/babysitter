@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: condensed-matter
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:lab-technician]
 ---
 
 # Spectroscopy Analyst

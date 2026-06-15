@@ -17,10 +17,17 @@ Desktop.ini
 # Node
 node_modules/
 dist/
+build/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
+generated/
+artifacts/generated-plugins/
+packages/atlas/graph/generated-library/
+packages/atlas/graph/wiki/library/
+packages/atlas/graph/wiki/docs/
+packages/atlas/graph/wiki/docs.md
 
 
 _ci_artifacts/**
@@ -39,7 +46,7 @@ _ci_artifacts/**
 .a5c/processes/index.js
 e2e-tests/fixtures/todo-app/**
 **/.a5c/runs/**
-packages/sdk/test-fixtures/cli/.a5c/logs/hooks.log
+packages/babysitter-sdk/test-fixtures/cli/.a5c/logs/hooks.log
 e2e-tests/fixtures/todo-app-nextjs/
 e2e-tests/fixtures/*/**
 **/node_modules/**
@@ -50,6 +57,7 @@ e2e-tests/fixtures/*/**
 test-machine.sh
 bug.task.md
 .claude/settings.json
+.claude/worktrees/
 .claude/sound-hooks/config.json
 .claude/sound-hooks/scripts/play.sh
 .claude/sound-hooks/sounds/notification.mp3
@@ -69,3 +77,27 @@ e2e-artifacts/ci-run-*/
 .a5c/logs/
 # --- end babysitter managed ---
 .claude/scheduled_tasks.lock
+.tmp-restore-library-files.txt
+tmp/
+tmp-*.mjs
+plugins/babysitter-gemini/.babysitter-install-attempted
+.docusaurus/
+*.d.ts.map
+*.ts.map
+*.map
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+packages/babysitter-sdk/**/*.d.ts
+packages/babysitter-sdk/src/**/*.js
+legacy/
+.claude/skills/welcome/SKILL.md
+tmp-e2e-artifact*/**
+tmp-*/**
+packages/atlas/webui/.atlas-local/atlas-webui/local-dev.db
+coverage/
+artifacts/external-plugin-repos/
+{}
+/artifacts/
+packages/kradle/web/test-results/
+.hermes-win-patch/

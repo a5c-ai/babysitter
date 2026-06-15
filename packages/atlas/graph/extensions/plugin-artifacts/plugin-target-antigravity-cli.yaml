@@ -1,0 +1,94 @@
+nodeKind: PluginTarget
+id: plugin-target:antigravity-cli
+attributes:
+  displayName: "Antigravity CLI"
+  hostAgent: agent:antigravity-cli
+  adapterFamily: workflow-hook
+  adapterName: antigravity
+  manifestFormat: "plugin.json + SKILL.md"
+  commandFormat: skill-manifest
+  skillHandling: native
+  hookRegistrationFormat: antigravity
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: "SKILL.md"
+  pluginRootEnvVarForExtension: null
+  marketplacePath: null
+  pluginRootEnvVar: ANTIGRAVITY_SKILL_PATH
+  scriptVariants:
+    - bash
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: false
+  installLayout: null
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: plugin-scripts
+    activationMessage: restart
+    emitCjsWrappers: false
+  componentSupport:
+    agents: unsupported
+    context: native
+  cliCommand: "agy"
+  callerEnvVars:
+    - "ANTIGRAVITY_SESSION_ID"
+    - "ANTIGRAVITY_CWD"
+    - "ANTIGRAVITY_PROJECT_DIR"
+  configPaths:
+    - ".antigravity"
+  processNames:
+    - "antigravity"
+    - "antigravity-cli"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/hooks-adapter-antigravity"
+  externalRepo: "a5c-ai/babysitter-antigravity"
+  externalPackageName: "@a5c-ai/babysitter-antigravity"
+  generatedSourceDir: "antigravity-cli"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "SKILL.md"
+  promptCapabilities:
+    - hooks
+    - stop-hook
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: stop-hook
+  hookDriven: true
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); ANTIGRAVITY_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: google
+  hooksMuxFamily: workflow-hook
+  sessionIdQuality: derived
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: true
+  supportsBlock: true
+  supportsAsk: true
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "--prompt"
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: true
+    needsIdleKill: false
+
+edges:
+  hosted_by:
+    - target: agent:antigravity-cli

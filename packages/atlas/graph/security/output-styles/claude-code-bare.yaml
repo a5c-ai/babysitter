@@ -1,0 +1,10 @@
+nodeKind: OutputStyle
+id: output-style:claude-code-bare-user
+attributes:
+  displayName: "Bare (no coding instructions)"
+  name: "bare"
+  source: user
+  filePath: "~/.claude/output-styles/bare.md"
+  description: "Minimal register — drops default coding-task system-prompt sections."
+  keepCodingInstructions: false
+  invocationMode: user-selected

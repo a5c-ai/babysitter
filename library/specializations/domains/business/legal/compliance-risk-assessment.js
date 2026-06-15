@@ -21,6 +21,12 @@
  * - COSO ERM Framework: https://www.coso.org/guidance-erm
  * - ISO 31000 Risk Management: https://www.iso.org/iso-31000-risk-management.html
  * - OIG Compliance Program Guidance: https://oig.hhs.gov/compliance/compliance-guidance/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

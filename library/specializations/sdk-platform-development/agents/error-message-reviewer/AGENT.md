@@ -7,6 +7,12 @@ expertise:
   - UX writing principles
   - Developer experience optimization
   - Actionable error design
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:error-handling-exception-management, skill-area:api-design]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Error Message Reviewer Agent

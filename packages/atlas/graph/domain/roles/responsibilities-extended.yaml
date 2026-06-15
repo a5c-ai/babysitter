@@ -1,0 +1,176 @@
+nodeKind: Responsibility
+id: responsibility:strategic-planning
+attributes:
+  displayName: "Strategic Planning"
+  description: |
+    Developing long-range plans that align organizational capabilities, resources,
+    and priorities with market opportunities and business objectives. Facilitating
+    strategy workshops, synthesizing competitive intelligence, and translating
+    agreed direction into roadmaps, OKRs, and measurable milestones.
+  cadence: annual
+---
+nodeKind: Responsibility
+id: responsibility:financial-analysis
+attributes:
+  displayName: "Financial Analysis"
+  description: |
+    Building financial models, forecasts, and variance analyses that inform
+    capital allocation, budget decisions, and investor communications. Evaluating
+    investment opportunities, tracking actuals against plan, and surfacing
+    actionable insights to finance and business leadership.
+  cadence: monthly
+---
+nodeKind: Responsibility
+id: responsibility:talent-acquisition
+attributes:
+  displayName: "Talent Acquisition"
+  description: |
+    Sourcing, screening, and hiring candidates across technical and non-technical
+    roles through structured, equitable interview and assessment processes. Building
+    diverse candidate pipelines, partnering with hiring managers on role definition,
+    and optimizing funnel metrics to meet headcount targets efficiently.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:market-research
+attributes:
+  displayName: "Market Research"
+  description: |
+    Gathering and analyzing data on market size, customer segments, competitive
+    landscape, and emerging trends to support strategic and product decisions.
+    Commissioning surveys, analyzing third-party reports, and synthesizing findings
+    into presentations that guide go-to-market and investment choices.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:content-creation
+attributes:
+  displayName: "Content Creation"
+  description: |
+    Producing written, visual, and multimedia content — including articles, case
+    studies, social posts, and product copy — that engages target audiences and
+    advances brand and business objectives. Managing editorial calendars, maintaining
+    brand voice consistency, and measuring content performance through defined KPIs.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:supply-chain-optimization
+attributes:
+  displayName: "Supply Chain Optimization"
+  description: |
+    Analyzing end-to-end supply chain flows to reduce cost, improve lead times,
+    and strengthen resilience across sourcing, production, and distribution.
+    Modeling demand and inventory scenarios, piloting process improvements, and
+    monitoring supplier and logistics performance metrics continuously.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:regulatory-compliance
+attributes:
+  displayName: "Regulatory Compliance"
+  description: |
+    Ensuring organizational processes, products, and contracts adhere to applicable
+    laws, regulations, and industry standards. Monitoring regulatory changes,
+    maintaining compliance evidence, and coordinating remediation of identified gaps
+    in a timely manner to avoid operational or legal exposure.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:brand-management
+attributes:
+  displayName: "Brand Management"
+  description: |
+    Stearding the brand identity, voice, and positioning across all customer and
+    stakeholder touchpoints to build and protect brand equity over time. Maintaining
+    brand guidelines, reviewing creative output for consistency, and tracking brand
+    health metrics such as awareness, sentiment, and share of voice.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:partnership-development
+attributes:
+  displayName: "Partnership Development"
+  description: |
+    Identifying, evaluating, and cultivating strategic partnerships with technology
+    providers, distribution channels, and ecosystem players that expand market reach
+    or enhance product capabilities. Negotiating partnership frameworks, defining
+    mutual success metrics, and maintaining ongoing partner relationships.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:research-design
+attributes:
+  displayName: "Research Design"
+  description: |
+    Formulating research questions, selecting appropriate methodologies, and designing
+    experimental or study protocols that yield valid and reproducible findings.
+    Defining data collection instruments, control conditions, and statistical analysis
+    plans to ensure research integrity and interpretability of results.
+  cadence: sprint
+---
+nodeKind: Responsibility
+id: responsibility:technical-program-management
+attributes:
+  displayName: "Technical Program Management"
+  description: |
+    Coordinating the planning, execution, and delivery of complex, cross-team
+    engineering programs by tracking dependencies, managing risk registers, and
+    maintaining program-level roadmaps and status reporting. Aligning technical
+    initiatives with product strategy and ensuring delivery on time and within scope.
+  cadence: weekly
+---
+nodeKind: Responsibility
+id: responsibility:procurement
+attributes:
+  displayName: "Procurement"
+  description: |
+    Managing the end-to-end sourcing and purchasing of goods and services, from
+    defining requirements and soliciting supplier proposals through contract execution
+    and purchase-order management. Ensuring procurement activities follow internal
+    governance policies, regulatory requirements, and financial controls.
+  cadence: continuous
+---
+nodeKind: Responsibility
+id: responsibility:investor-relations
+attributes:
+  displayName: "Investor Relations"
+  description: |
+    Managing communications with current and prospective investors, including
+    earnings disclosures, investor presentations, and responses to shareholder
+    inquiries. Maintaining regulatory compliance for public disclosures and building
+    long-term trust through transparent and consistent financial storytelling.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:customer-journey-mapping
+attributes:
+  displayName: "Customer Journey Mapping"
+  description: |
+    Documenting and analyzing the end-to-end experience customers have across all
+    touchpoints and channels, from initial awareness through purchase, onboarding,
+    and retention. Identifying friction points, emotional highs and lows, and
+    improvement opportunities that inform product, marketing, and service design.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:training-development
+attributes:
+  displayName: "Training & Development"
+  description: |
+    Designing, delivering, and evaluating learning programs that build employee
+    skills, reinforce organizational culture, and support compliance requirements.
+    Assessing skill gaps, selecting or creating training content, and measuring
+    the impact of learning initiatives on performance and retention outcomes.
+  cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:regulatory-filing
+attributes:
+  displayName: "Regulatory Filing"
+  description: |
+    Preparing and submitting regulatory filings, compliance reports, and
+    statutory declarations to government bodies and regulatory agencies.
+    Includes tracking filing deadlines, managing submission workflows, and
+    maintaining audit trails for all regulatory correspondence.
+  cadence: periodic
+edges: {}

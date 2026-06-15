@@ -16,6 +16,11 @@
  * - Montgomery, D.C. (2019). Introduction to Statistical Quality Control
  * - AIAG SPC Manual
  * - Wheeler, D.J. (1995). Advanced Topics in Statistical Process Control
+  * @graph
+ *   domains: [domain:operations]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

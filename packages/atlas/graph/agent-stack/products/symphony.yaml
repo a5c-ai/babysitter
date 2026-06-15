@@ -1,0 +1,28 @@
+nodeKind: AgentProduct
+id: agent:symphony
+attributes:
+  displayName: "OpenAI Symphony"
+  vendor: "OpenAI"
+  homepageUrl: "https://github.com/openai/symphony"
+  primarySurface: headless
+  supportTier: none
+  productKind: agent-orchestrator
+  stackScope: orchestration
+  description: |
+    Service specification for orchestrating coding agents on project work.
+    Polls an issue tracker (Linear), creates isolated per-issue workspaces,
+    and runs coding agent sessions with bounded concurrency. Loads workflow
+    policy from in-repo WORKFLOW.md. Provides operator observability,
+    exponential backoff retry, and filesystem-driven restart recovery.
+    Language-agnostic spec with reference TypeScript implementation.
+edges:
+  has_version:
+    - agent-version:symphony@current
+  integrates_with:
+    - target: skill-area:project-planning
+    - target: skill-area:multi-agent-coordination
+    - target: skill-area:operations-automation
+    - target: topic:agent-dispatch
+    - target: topic:agent-run-lifecycle
+    - target: topic:agent-orchestration-products
+    - target: methodology:spec-driven-development

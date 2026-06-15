@@ -1,0 +1,266 @@
+nodeKind: Framework
+id: framework:koa
+attributes:
+  displayName: "Koa"
+  homepageUrl: "https://koajs.com"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    Koa is a lightweight, expressive Node.js web framework built by the creators of Express.
+    It leverages async/await for cleaner middleware composition, eliminating callbacks and
+    simplifying error handling for HTTP servers and APIs.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:nestjs
+      comparison: "Node.js backend frameworks"
+    - target: framework:fastify
+      comparison: "Node.js backend frameworks"
+    - target: framework:hono
+      comparison: "Node.js backend frameworks"
+    - target: framework:hapi
+      comparison: "Node.js backend frameworks"
+---
+nodeKind: Framework
+id: framework:hapi
+attributes:
+  displayName: "Hapi"
+  homepageUrl: "https://hapi.dev"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    Hapi is a rich, enterprise-grade Node.js framework for building production APIs and web services.
+    It offers a configuration-centric approach with built-in support for validation, authentication,
+    caching, and a powerful plugin system for modular application architecture.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:nestjs
+      comparison: "Node.js backend frameworks"
+    - target: framework:fastify
+      comparison: "Node.js backend frameworks"
+    - target: framework:hono
+      comparison: "Node.js backend frameworks"
+    - target: framework:koa
+      comparison: "Node.js backend frameworks"
+---
+nodeKind: Framework
+id: framework:gatsby
+attributes:
+  displayName: "Gatsby"
+  homepageUrl: "https://www.gatsbyjs.com"
+  belongsToLanguageId: language:javascript
+  category: static-site
+  description: |
+    Gatsby is a React-based static site generator and web framework with GraphQL data sourcing.
+    It pre-renders pages at build time for blazing-fast performance and integrates with a rich
+    plugin ecosystem for CMSes, APIs, and third-party data sources.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+    - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nextjs
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:nuxt
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:sveltekit
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:remix
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:astro
+      comparison: "JavaScript meta-frameworks"
+---
+nodeKind: Framework
+id: framework:docusaurus
+attributes:
+  displayName: "Docusaurus"
+  homepageUrl: "https://docusaurus.io"
+  belongsToLanguageId: language:typescript
+  category: static-site
+  description: |
+    Docusaurus is a TypeScript-based static site generator by Meta, optimized for documentation websites.
+    It provides versioned docs, localization, MDX authoring, and a theming system built on React,
+    enabling teams to publish fast, accessible, and searchable documentation sites.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:technical-documentation
+  alternative_to:
+    - framework:vitepress
+---
+nodeKind: Framework
+id: framework:vitepress
+attributes:
+  displayName: "VitePress"
+  homepageUrl: "https://vitepress.dev"
+  belongsToLanguageId: language:typescript
+  category: static-site
+  description: |
+    VitePress is a Vite-powered static site generator designed for documentation, built on Vue 3.
+    It offers near-instant dev server startup, hot module replacement, and Markdown-first authoring
+    with full Vue component support and a clean, customizable default theme.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:technical-documentation
+  alternative_to:
+    - framework:docusaurus
+---
+nodeKind: Framework
+id: framework:redwood
+attributes:
+  displayName: "RedwoodJS"
+  homepageUrl: "https://redwoodjs.com"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    RedwoodJS is a full-stack JavaScript/TypeScript framework for startups and ambitious web apps.
+    It integrates React on the frontend with GraphQL and Prisma on the backend, providing a
+    unified project structure with code generation, testing, and deployment automation built in.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:blitz
+    - framework:t3-stack
+---
+nodeKind: Framework
+id: framework:blitz
+attributes:
+  displayName: "Blitz.js"
+  homepageUrl: "https://blitzjs.com"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    Blitz.js is a batteries-included full-stack React framework inspired by Ruby on Rails.
+    It features Zero-API data layer that lets you import server code directly into React components,
+    eliminating REST/GraphQL boilerplate while supporting incremental adoption into Next.js projects.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:redwood
+    - framework:t3-stack
+---
+nodeKind: Framework
+id: framework:preact
+attributes:
+  displayName: "Preact"
+  homepageUrl: "https://preactjs.com"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    Preact is a fast, 3kB alternative to React with the same modern API and component model.
+    It is designed for performance-critical applications where bundle size matters, and offers
+    seamless compatibility with the React ecosystem via the preact/compat alias.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+    - target: skill-area:design-systems
+  alternative_to:
+    - target: framework:react
+      comparison: "Frontend UI frameworks"
+    - target: framework:vue
+      comparison: "Frontend UI frameworks"
+    - target: framework:angular
+      comparison: "Frontend UI frameworks"
+    - target: framework:svelte
+      comparison: "Frontend UI frameworks"
+---
+nodeKind: Framework
+id: framework:alpine
+attributes:
+  displayName: "Alpine.js"
+  homepageUrl: "https://alpinejs.dev"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    Alpine.js is a minimal, CDN-delivered JavaScript framework for adding interactivity to HTML.
+    It uses declarative attributes (x-data, x-bind, x-on) directly in markup to handle reactive
+    state and DOM behavior without a build step, ideal for server-rendered HTML enhancement.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+    - target: skill-area:design-systems
+  alternative_to:
+    - framework:htmx
+    - framework:stimulus
+    - framework:livewire
+---
+nodeKind: Framework
+id: framework:htmx
+attributes:
+  displayName: "htmx"
+  homepageUrl: "https://htmx.org"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    htmx is a library that extends HTML with attributes for AJAX, CSS transitions, WebSockets,
+    and server-sent events, enabling rich dynamic UIs with minimal JavaScript.
+    It follows a hypermedia-driven approach, returning HTML fragments from the server instead of JSON.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:alpine
+    - framework:stimulus
+    - framework:turbo-rails
+---
+nodeKind: Framework
+id: framework:slidev
+attributes:
+  displayName: "Slidev"
+  homepageUrl: "https://sli.dev"
+  belongsToLanguageId: language:javascript
+  category: presentation
+  description: |
+    Slidev is a developer-focused presentation tool built on Vite and Vue, using Markdown to author slides.
+    It supports code highlighting, animations, LaTeX math, diagrams via Mermaid, and presenter mode,
+    letting developers create interactive, web-hosted slide decks entirely in their code editor.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:technical-documentation
+  alternative_to:
+    - framework:docusaurus
+---
+nodeKind: Framework
+id: framework:inertia
+attributes:
+  displayName: "Inertia.js"
+  homepageUrl: "https://inertiajs.com"
+  belongsToLanguageId: language:javascript
+  category: web-framework
+  description: |
+    Inertia.js is a protocol and adapter library for building classic server-driven single-page apps.
+    It connects server-side frameworks (Laravel, Rails) with client-side components (React, Vue, Svelte)
+    without a separate API layer, routing server-side responses directly to frontend page components.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:livewire

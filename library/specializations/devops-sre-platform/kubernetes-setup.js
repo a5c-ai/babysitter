@@ -30,6 +30,13 @@
  * - AKS Best Practices: https://learn.microsoft.com/en-us/azure/aks/best-practices
  * - Kubernetes Security: https://kubernetes.io/docs/concepts/security/
  * - Cloud Native Security: https://www.cncf.io/blog/2020/11/18/cloud-native-security-whitepaper/
+ * @graph
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:change-management]
+ *   roles: [role:devops-engineer, role:platform-engineer]
+ *   skillAreas: [skill-area:configuration-management, skill-area:deployment-infrastructure-management]
+ *   topics: [topic:infrastructure-as-code]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,249 @@
+nodeKind: AgentVersion
+id: agentVersion:openclaw:ge-2026-5-27
+attributes:
+  agentId: "openclaw"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "OpenClaw"
+  summary: "OpenClaw CLI coding agent"
+  sourcePackage: "openclaw"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:openclaw
+  versionRange: ">=2026.5.27"
+  currentVersion: "2026.5.27"
+  releasedAt: "2026-05-28"
+  releaseNotesUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.5.27"
+  cliCommand: "openclaw"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  adapterMetadata:
+    releaseNotes:
+      version: "2026.5.27"
+      highlights:
+        - "Security and content boundaries were tightened for group prompt text, repeated-dot hostnames, side-effecting command wrappers, unsafe Node env overrides, no-auth Tailscale exposure, and node/device-role approvals."
+        - "Codex app-server runs are more reliable: runtime models resolve first, workspace memory routes through tools, shared clients survive startup/helper failures, hook relay generations survive restarts, and false runtime live switches are avoided."
+        - "Gateway and reply paths reuse more session, plugin, auth, tool-search, and metadata caches while visible replies avoid hidden cleanup timeouts."
+        - "OpenAI-compatible embedding providers are core; DeepInfra catalog browsing, Pixverse video generation, VLLM thinking params, Claude CLI OAuth overlays, and direct Anthropic model IDs were updated."
+        - "Telegram, iMessage, Slack, Matrix, QQBot, Discord, and Google Chat received channel delivery and approval reliability fixes."
+        - "Release/package paths now honor npm dist exclusions, package Docker runtime workspace templates, and run stricter postpublish checks."
+      gatewayStartup: >
+        Gateway ready signals no longer wait on unused handler trees or ACPX
+        probes. Startup hot paths reuse channel catalog reads, immutable plugin
+        metadata snapshots, plugin SDK alias maps, and skip irrelevant
+        filesystem probes.
+      replyPathCacheCoverage:
+        - session
+        - plugin
+        - auth
+        - channel
+        - tool-search
+        - metadata
+        - usage-cost
+        - warning
+        - scheduled-service
+        - filesystem
+      transcriptBackedSurfaces:
+        - meeting summaries
+        - source-provider chunks
+        - cleaned user turns
+        - media provenance
+        - Codex mirrors
+        - WebChat replies
+        - CLI/TUI replay
+      channelApprovals:
+        reactionApprovalChannels:
+          - Signal
+          - iMessage
+          - WhatsApp
+        talkControls: "Realtime Talk runs can be inspected, steered, cancelled, or followed up from Web UI and Discord voice."
+      browserSecurity:
+        browserSnapshots: "SSRF policy enforcement"
+        fetchedFiles: "wrapped as external content"
+        replyScrubbing: "serialized tool-call text is scrubbed from replies"
+      securityContentBoundaries:
+        groupPromptText: "kept out of system prompts"
+        hostnameNormalization: "repeated-dot hostnames are normalized"
+        blockedCommandWrappers: "side-effecting command wrappers are blocked"
+        blockedRuntimeEnvOverrides: "unsafe Node runtime env overrides are blocked"
+        tailscaleExposure: "no-auth Tailscale exposure is rejected"
+        deviceRoleApprovals: "node/device-role approvals require admin authority"
+      codexAppServer:
+        modelResolution: "runtime models resolve first"
+        workspaceMemoryRouting: "workspace memory routes through tools"
+        sharedClients: "shared app-server clients survive startup/helper failures"
+        hookRelayGenerations: "hook relay generations survive restarts"
+        runtimeLiveSwitches: "false runtime live switches are avoided"
+      providerRecovery:
+        namedAuthProfiles: true
+        openaiSamplingParams: true
+        codexAppServerRecovery:
+          - resume
+          - timeout
+          - usage-limit
+        dynamicToolSchemaGuards: true
+        xaiUsageLimitSurfacing: true
+        ollamaTopPNormalization: true
+      providerCatalog:
+        openaiCompatibleEmbeddingProviders: "core"
+        deepInfraCatalogBrowsing: true
+        pixverseVideoGeneration: true
+        vllmThinkingParams: true
+        claudeCliOauthOverlays: true
+        directAnthropicModelIds: true
+      channelDelivery:
+        fixedChannels:
+          - Telegram
+          - iMessage
+          - Slack
+          - Matrix
+          - QQBot
+          - Discord
+          - Google Chat
+      releasePackaging:
+        npmDistExclusions: true
+        dockerRuntimeWorkspaceTemplates: true
+        stricterPostpublishChecks: true
+      pluginSdk:
+        - "Generic channel-message poll sender for channel plugins."
+        - "Row-level session workflow helpers; loadSessionStore deprecated."
+        - "Embedding provider capability contract and registration API."
+      meetingNotes:
+        sourceProviderContract: true
+        cliAccess: "read-only openclaw meeting-notes"
+        importModes:
+          - manual-transcript
+        autoStartCaptureConfig: true
+        liveSources:
+          - discord-voice
+      providerAuth:
+        xaiGrokWebSearch: >
+          Grok web_search reuses xAI OAuth auth profiles and threads the active
+          agent auth profile through web search.
+        mediaProviderTimeouts: true
+    authMethods:
+      - type: api_key
+        name: "Provider API Key"
+        envVars: [ANTHROPIC_API_KEY, OPENAI_API_KEY, XAI_API_KEY]
+    authFiles:
+      - "~/.openclaw/config.json"
+    hostEnvSignals:
+      - OPENCLAW_SESSION
+      - OPENCLAW_RUN_ID
+    sessionDir: "~/.openclaw/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+    capabilityFlags:
+      canResume: false
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: true
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: false
+      supportsStructuredOutput: false
+      structuredSessionTransport: none
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: true
+      supportsStdinInjection: true
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: true
+      pluginFormats: [mcp-server]
+      supportedPlatforms: [darwin, linux, win32]
+      requiresGitRepo: false
+      requiresPty: false
+      supportsChannelMessagePollSender: true
+      supportsMeetingNotesSourceProviders: true
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.openclaw/config.json"
+      bareCliBehavior: "classic onboarding before authored config exists"
+    displayName: "OpenClaw"
+    defaultModelId: "default"
+  hookSupport:
+    interactive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+    nonInteractive:
+      sessionStart: unsupported
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: false
+    sessionResume: true
+    positionalPrompt: false
+edges:
+  version_of:
+    - agent:openclaw
+  composed_of:
+    - target: agent-core-impl:openclaw.core@current
+      role: core
+    - target: agent-runtime-impl:openclaw.runtime@current
+      role: runtime
+    - target: agent-platform-impl:openclaw.platform@current
+      role: platform
+    - target: agent-ui-impl:openclaw.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:openclaw.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:openclaw-soul-memory
+  sourced_from: []
+  supports:
+    - target: capability:skills
+      versionRange: ">=2026.5.27"
+      level: full
+      notes: OpenClaw fallback metadata; runtime hooks and stop hooks remain unsupported in current shared metadata.
+    - target: capability:supports-thinking
+      versionRange: ">=2026.5.27"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:interactive-mode
+      versionRange: ">=2026.5.27"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:stdin-injection
+      versionRange: ">=2026.5.27"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:vision-input
+      versionRange: ">=2026.5.27"
+      level: full
+      notes: OpenClaw fallback metadata.
+    - target: capability:can-resume
+      versionRange: ">=2026.5.27"
+      level: full
+      notes: OpenClaw fallback metadata.

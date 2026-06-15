@@ -1,0 +1,11 @@
+nodeKind: Reconciliation
+id: reconciliation:timer-driven
+attributes:
+  displayName: "Timer-driven reconciliation pass"
+  trigger: timer
+  startedAt: "2026-05-01T10:30:00Z"
+  endedAt: "2026-05-01T10:30:02Z"
+  refreshedIssueCount: 14
+  stoppedRunsCount: 1
+  cleanedWorkspacesCount: 1
+  outcome: clean

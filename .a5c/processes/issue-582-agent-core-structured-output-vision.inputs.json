@@ -1,0 +1,84 @@
+{
+  "issueNumber": 582,
+  "baseBranch": "staging",
+  "implementationBranch": "issue/582-agent-core-structured-output-vision",
+  "processId": "repo/issue-582-agent-core-structured-output-vision",
+  "issueContext": {
+    "title": "agent-core: structured output (JSON mode) + vision/multimodal input",
+    "labels": [
+      "enhancement",
+      "priority:high",
+      "ready-for-dev",
+      "effort:large",
+      "agent-core",
+      "P1",
+      "risk:high"
+    ],
+    "body": "## Summary\nNo JSON mode, schema validation, or typed returns. No image input support.\n\n### Structured Output\nNeed outputFormat option (json_schema, json_object), schema definitions.\n\n### Vision/Multimodal\nNeed vision support in session options (base64, URLs), image params in tool results.\n\nRef: `docs/agent-layer-gaps.md`",
+    "comments": [
+      {
+        "author": "tmuskal",
+        "createdAt": "2026-05-30T06:54:45Z",
+        "body": "**Depends on:** #575 (streaming foundation needed for vision/multimodal responses)\n**Related:** #588 (tool system needs image params in ToolResult for vision)"
+      },
+      {
+        "author": "a5c-ai",
+        "createdAt": "2026-05-30T10:10:27Z",
+        "body": "Triage says agent-core needs a provider-normalized API for structured JSON output and multimodal/vision input. Affected files: packages/agent-core/src/session.ts, packages/agent-core/src/types.ts, packages/agent-core/src/session.test.ts, docs/agent-layer-gaps.md. Current session.ts models provider messages as Array<{ role: string; content: string }> and prompt(text: string) builds a single text user message before calling OpenAI/Azure/Anthropic APIs. OpenAI/Azure request bodies send only model, messages, and max_completion_tokens; Anthropic sends text messages only. AgentCoreSessionOptions has no structured output or image fields, AgentCorePromptResult only exposes output: string, and ToolResult is text-only. Recommended approach: add optional public structured-output types, multimodal prompt types, provider-normalized internal request representation, provider payload tests, validation errors, plain text backward compatibility, and coordinate but do not duplicate #588."
+      }
+    ],
+    "relatedIssues": {
+      "dependsOn": [
+        {
+          "number": 575,
+          "summary": "Streaming foundation needed for vision/multimodal responses"
+        }
+      ],
+      "related": [
+        {
+          "number": 588,
+          "summary": "Tool system needs image params in ToolResult for vision"
+        }
+      ]
+    }
+  },
+  "targetFiles": [
+    "packages/agent-core/src/types.ts",
+    "packages/agent-core/src/session.ts",
+    "packages/agent-core/src/session.test.ts",
+    "packages/agent-core/src/index.ts",
+    "packages/agent-core/README.md",
+    "packages/genty/platform/src/harness/types.ts",
+    "packages/genty/platform/src/harness/internal/createRun/agent-core-loop.ts",
+    "packages/genty/platform/src/harness/invoker.ts",
+    "docs/agent-layer-gaps.md"
+  ],
+  "runtimeCallPathSeeds": [
+    "createAgentCoreSession(options)",
+    "AgentCoreSessionHandle.prompt(text, timeout?)",
+    "buildSystemPrompt(options)",
+    "resolveEndpoint(options)",
+    "callCompletionApi(endpoint, messages, timeout)",
+    "provider response parsing",
+    "AgentCorePromptResult return",
+    "agent-platform harness consumers"
+  ],
+  "qualityGates": [
+    "Contract tests are written before implementation and cover provider payloads plus backward compatibility.",
+    "OpenAI and Azure structured output mappings include json_object and json_schema request bodies.",
+    "Anthropic structured-output behavior is implemented or explicitly documented as the chosen fallback strategy.",
+    "Vision input supports image URL and base64 content parts with validation before provider dispatch.",
+    "Plain prompt(text, timeout?) behavior remains source-compatible and test-covered.",
+    "Docs distinguish issue #582 agent-core session/options/result scope from #588 ToolResult image support."
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run build --workspace=@a5c-ai/agent-core",
+    "npm run test --workspace=@a5c-ai/genty-platform"
+  ],
+  "githubHandoff": {
+    "targetPrTitle": "Implement agent-core structured output and vision input",
+    "closeIssue": 582,
+    "base": "staging"
+  }
+}

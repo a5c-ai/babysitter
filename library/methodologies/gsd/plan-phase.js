@@ -3,6 +3,12 @@
  * @description GSD phase planning with verification loop - creates atomic task plans
  * @inputs { phaseId: string, phaseName: string, context: object, requirements: array }
  * @outputs { success: boolean, plans: array, verified: boolean }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

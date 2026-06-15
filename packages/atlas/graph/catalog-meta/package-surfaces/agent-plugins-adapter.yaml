@@ -1,0 +1,19 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-extensions-adapter
+attributes:
+  packageId: "@a5c-ai/extensions-adapter"
+  packageName: "@a5c-ai/extensions-adapter"
+  displayName: "Extensions Adapter"
+  description: "Cross-harness plugin compiler that compiles a single plugin.json manifest into native plugin formats for 9+ AI coding agents (Claude Code, Codex, Gemini, Copilot, Cursor, etc.)."
+  role: "plugin-compiler"
+  whenToUse: "Use this when you need to author a plugin once and compile it to work across multiple AI coding harnesses, or when building plugin distribution tooling."
+  workspacePath: packages/extensions-adapter
+  moduleType: typescript
+  surfaceKinds:
+    - plugin-consumer
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:adapters-hooks-project

@@ -1,0 +1,47 @@
+nodeKind: ActivityEntry
+id: activity-entry:gh-1234-decomposition-added
+attributes:
+  displayName: GH
+  actorKind: agent
+  actorId: agent-version:claude-code-opus-4-7
+  actorDisplayName: claude-code (Opus 4.7)
+  entityKind: issue
+  entityId: issue:github-1234
+  action: decomposition-added
+  summary: Agent proposed a 3-step decomposition for GH
+  createdAt: '2026-05-02T09:32:11Z'
+edges:
+  activity_for_issue:
+  - target: issue:github-1234
+---
+nodeKind: ActivityEntry
+id: activity-entry:aca-390-run-dispatched
+attributes:
+  displayName: ACA-390 run dispatched
+  actorKind: system
+  actorId: system:adapters-orchestrator
+  actorDisplayName: adapters orchestrator
+  entityKind: issue
+  entityId: issue:linear-aca-390
+  action: run-dispatched
+  summary: Orchestrator dispatched a RunAttempt for ACA-390 after dependencies cleared.
+  createdAt: '2026-05-02T08:18:42Z'
+edges:
+  activity_for_issue:
+  - target: issue:linear-aca-390
+---
+nodeKind: ActivityEntry
+id: activity-entry:adapters-board-2026-05-02
+attributes:
+  displayName: adapters board snapshot generated
+  actorKind: system
+  actorId: system:adapters-orchestrator
+  actorDisplayName: adapters orchestrator
+  entityKind: board
+  entityId: board-snapshot:adapters-2026-05-02
+  action: snapshot-generated
+  summary: Daily kanban snapshot for the adapters project generated.
+  createdAt: '2026-05-02T00:00:05Z'
+edges:
+  activity_for_board_snapshot:
+  - target: board-snapshot:adapters-2026-05-02

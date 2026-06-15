@@ -1,0 +1,452 @@
+---
+nodeKind: Workflow
+id: workflow:full-stack-system-reliability-review
+attributes:
+  displayName: "Full-Stack System Reliability Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews end-to-end system reliability across the full technology
+    stack -- analyzing frontend error rates, API latency percentiles,
+    and database query performance together as correlated signals,
+    evaluating SLO attainment across web, API, and data tiers, reviewing
+    cloud infrastructure capacity headroom and auto-scaling policy
+    effectiveness, auditing observability coverage for blind spots in
+    tracing, logging, and metrics pipelines, assessing CI/CD pipeline
+    reliability and deployment success rates, stress-testing failover
+    procedures across availability zones, and correlating incident
+    frequency with recent change velocity. Produces cross-stack
+    reliability scorecard, SLO attainment report, and prioritized
+    hardening backlog. Excludes feature development.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+    - target: role:incident-commander
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:databases
+    - target: domain:cloud-infra
+    - target: domain:observability
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:capacity-planning
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:infra-engineering
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:enterprise-data-platform-health-check
+attributes:
+  displayName: "Enterprise Data Platform Health Check"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Assesses the health of the enterprise data platform across
+    ingestion, storage, processing, and serving layers -- evaluating
+    ETL/ELT pipeline freshness and failure rates, auditing data
+    warehouse query performance and cost trends, reviewing ML feature
+    store consistency and staleness metrics, assessing data catalog
+    coverage and metadata accuracy, analyzing data quality rule pass
+    rates across critical business entities, evaluating observability of
+    data pipelines including lineage completeness and anomaly detection
+    coverage, and benchmarking platform SLAs against consumer
+    satisfaction surveys. Produces data platform health scorecard, cost
+    efficiency analysis, and improvement roadmap. Excludes new pipeline
+    development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:data-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-lineage
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:data-science
+    - target: domain:databases
+    - target: domain:ml-ops
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:ml-platform-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:product-launch-readiness
+attributes:
+  displayName: "Product Launch Readiness"
+  workflowKind: release
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Evaluates cross-functional readiness for a product launch across
+    engineering, marketing, and security -- validating web and mobile
+    feature completeness against launch criteria, reviewing marketing
+    campaign asset readiness and channel activation schedules, assessing
+    customer support team training completion and knowledge base
+    coverage, auditing security posture including penetration test
+    findings and vulnerability remediation status, evaluating load test
+    results against expected launch traffic projections, verifying
+    analytics instrumentation for launch KPI measurement, and conducting
+    go/no-go checklist review with all stakeholder teams. Produces
+    launch readiness scorecard, risk register, and go/no-go
+    recommendation. Excludes feature development and campaign execution.
+edges:
+  involves_role:
+    - target: role:product-owner
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:load-testing
+    - target: skill-area:web-vitals
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:web-development
+    - target: domain:mobile
+    - target: domain:marketing
+    - target: domain:customer-experience
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:security-review
+    - target: responsibility:approve-deploys
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:engineering
+    - target: org-unit:marketing-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:compliance-technology-stack-audit
+attributes:
+  displayName: "Compliance Technology Stack Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits the technology stack supporting compliance and regulatory
+    obligations -- reviewing security control implementation against SOC
+    2, ISO 27001, and industry-specific frameworks, evaluating legal
+    hold and e-discovery toolchain readiness, assessing financial
+    reporting system controls against SOX ITGCs, auditing data privacy
+    infrastructure for GDPR/CCPA compliance including consent management
+    and data subject request fulfillment, reviewing GRC platform
+    configuration accuracy against control framework mappings, evaluating
+    automated compliance monitoring coverage and alert fidelity, and
+    assessing evidence collection automation maturity. Produces
+    compliance tech stack assessment, control gap matrix, and
+    remediation prioritization. Excludes policy authoring.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:principal-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:identity-security
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:legal
+    - target: domain:finance
+    - target: domain:cybersecurity-grc
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:dependency-audit
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:compliance-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:ai-powered-product-feature-review
+attributes:
+  displayName: "AI-Powered Product Feature Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Reviews AI-powered product features before release for quality,
+    safety, and user experience -- evaluating model accuracy and latency
+    on production-representative evaluation sets, reviewing prompt
+    engineering and guardrail effectiveness against adversarial inputs,
+    assessing user interface design for appropriate trust calibration and
+    error communication, auditing data pipeline integrity from feature
+    store to model serving, reviewing A/B test design and statistical
+    methodology for measuring feature impact, evaluating PII handling
+    and data retention in model inference logs, and stress-testing
+    fallback behavior when model services degrade. Produces AI feature
+    readiness report, safety evaluation summary, and user experience
+    assessment. Excludes model training and UI implementation.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:product-owner
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:ml-fine-tuning
+    - target: skill-area:threat-modeling
+  applies_to_domain:
+    - target: domain:ml-ops
+    - target: domain:web-development
+    - target: domain:data-science
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:ai-safety-guardrails
+    - target: responsibility:security-review
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:ml-platform-team
+    - target: org-unit:product-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:multi-cloud-migration-assessment
+attributes:
+  displayName: "Multi-Cloud Migration Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Assesses workload readiness and risk for multi-cloud migration --
+    inventorying application dependencies and cloud-service bindings for
+    portability analysis, evaluating network architecture requirements
+    including inter-cloud connectivity, latency budgets, and data egress
+    costs, reviewing security posture translation across cloud provider
+    IAM models and encryption key management, assessing database
+    migration complexity including schema compatibility and data transfer
+    volume estimation, benchmarking target cloud service equivalents for
+    compute, storage, and managed services, modeling total cost of
+    ownership under multi-cloud vs single-cloud scenarios, and mapping
+    regulatory data residency constraints to target deployment regions.
+    Produces migration readiness scorecard, workload placement matrix,
+    and risk-prioritized migration wave plan. Excludes migration
+    execution.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:network-security
+    - target: skill-area:containerization
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:networking
+    - target: domain:security
+    - target: domain:devops
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:capacity-planning
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:engineering
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:developer-productivity-index-review
+attributes:
+  displayName: "Developer Productivity Index Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews developer productivity metrics across the engineering
+    organization -- analyzing DORA metrics (deployment frequency, lead
+    time, change failure rate, MTTR) by team and service, evaluating
+    developer experience survey results covering toolchain satisfaction,
+    cognitive load, and flow-state frequency, reviewing build and CI
+    pipeline wait times and flakiness rates, assessing internal developer
+    platform adoption and self-service success rates, measuring code
+    review cycle time and feedback quality indicators, evaluating
+    observability tool usage patterns and mean-time-to-debug trends, and
+    benchmarking productivity metrics against industry cohorts. Produces
+    developer productivity index report, toolchain friction analysis, and
+    improvement initiative recommendations. Excludes tooling
+    implementation.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:gitops
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+    - target: domain:observability
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:retro-facilitation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:platform-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:end-to-end-customer-journey-audit
+attributes:
+  displayName: "End-to-End Customer Journey Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits the complete customer journey from acquisition to retention --
+    mapping touchpoint performance across marketing campaigns,
+    website/app conversion funnels, sales engagement sequences,
+    onboarding flows, and post-purchase support interactions, analyzing
+    drop-off rates and friction points at each journey stage, evaluating
+    cross-channel attribution model accuracy, reviewing NPS and CSAT
+    trends correlated with journey stage and customer segment, assessing
+    personalization engine effectiveness across touchpoints, auditing
+    data handoff integrity between marketing, sales, and customer
+    success systems, and modeling customer lifetime value by acquisition
+    cohort. Produces customer journey health map, friction point
+    inventory, and cross-functional improvement priorities. Excludes
+    campaign or feature development.
+edges:
+  involves_role:
+    - target: role:product-owner
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-warehouse-modeling
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:customer-experience
+    - target: domain:marketing
+    - target: domain:sales
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:customer-success
+    - target: org-unit:marketing-team
+    - target: org-unit:sales-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:technical-debt-portfolio-review
+attributes:
+  displayName: "Technical Debt Portfolio Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews and prioritizes the organization-wide technical debt
+    portfolio -- inventorying debt items from static analysis findings,
+    deprecated dependency usage, and architecture deviation records,
+    quantifying debt impact through incident correlation, developer
+    velocity drag, and security exposure metrics, classifying debt by
+    type (code, architecture, infrastructure, data, test) and ownership,
+    evaluating debt interest rate by measuring how each item compounds
+    maintenance costs over time, reviewing debt payment progress against
+    quarterly reduction targets, assessing the ratio of debt-reducing
+    work to feature work across teams, and modeling paydown scenarios
+    with estimated velocity improvement projections. Produces technical
+    debt inventory, impact-prioritized paydown roadmap, and quarterly
+    progress report. Excludes debt remediation implementation.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:dead-code-elimination
+    - target: skill-area:dependency-upgrade-strategies
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:databases
+    - target: domain:web-development
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:cost-optimization
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:organization-wide-toolchain-audit
+attributes:
+  displayName: "Organization-Wide Toolchain Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits the engineering toolchain across the organization for
+    redundancy, cost, security, and effectiveness -- inventorying all
+    developer tools, SaaS subscriptions, and internal platforms with
+    ownership and cost attribution, identifying overlapping tools serving
+    the same function across different teams, evaluating license
+    utilization rates against contract commitments, auditing tool
+    security posture including SSO integration, API key management, and
+    data residency compliance, reviewing tool deprecation and migration
+    plans for end-of-life products, assessing observability and
+    monitoring tool coverage gaps, and surveying developer satisfaction
+    and adoption metrics for each toolchain category. Produces toolchain
+    inventory, consolidation opportunity analysis, cost optimization
+    recommendations, and security compliance report. Excludes tool
+    procurement and migration execution.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:container-security
+    - target: skill-area:identity-security
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+    - target: domain:security
+    - target: domain:observability
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:platform-team
+    - target: org-unit:security-team
+    - target: org-unit:procurement-team

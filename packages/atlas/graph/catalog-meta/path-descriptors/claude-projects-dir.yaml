@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:claude-projects-dir
+attributes:
+  pathId: path:claude-projects-dir
+  displayName: "Claude Code projects (session-state) directory"
+  path: "~/.claude/projects/<hash>/"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:claude-code.platform@1.x
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:claude-code.platform@1.x

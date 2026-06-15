@@ -1,0 +1,60 @@
+nodeKind: ModelVersion
+id: model:qwen3-5-omni-plus@current
+attributes:
+  displayName: "Qwen3.5-Omni-Plus"
+  costPerMTokInput: 1.4
+  costPerMTokOutput: 8.3
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: true
+  modelFamilyId: model-family:qwen-3-5-omni
+  versionRange: '>=3.5.0 <3.6.0'
+  kind: multimodal
+  contextWindowTokens: 256000
+  modalities:
+    - text
+    - image
+    - audio
+    - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+    - kind: audio
+      direction: output
+  releaseDate: '2026-03-30'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-03-30'
+  modelCardUrl: https://help.aliyun.com/zh/model-studio/models
+  supportsFineTuning: false
+  providerModelIds:
+    alibabaModelStudio: qwen3.5-omni-plus
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3-5-omni
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3-5-omni
+  served_by:
+    - provider:alibaba-cloud
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=3.5.0 <3.6.0'
+      level: full
+    - target: capability:supports-text-streaming
+      versionRange: '>=3.5.0 <3.6.0'
+      level: full
+    - target: capability:can-multi-turn
+      versionRange: '>=3.5.0 <3.6.0'
+      level: full

@@ -2,6 +2,14 @@
 name: eslint
 description: ESLint configuration, custom rules, and plugin development.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:code-review-practice]
+  roles: [role:frontend-engineer, role:tech-lead]
+  workflows: [workflow:code-review]
+  topics: [topic:code-review-best-practices]
+
 ---
 
 # ESLint Skill

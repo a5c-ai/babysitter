@@ -1,0 +1,76 @@
+nodeKind: ModelVersion
+id: model:command-r-plus@current
+attributes:
+  displayName: "Command R+"
+  costPerMTokInput: 2.5
+  costPerMTokOutput: 10.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:cohere-command
+  versionRange: '>=1.0.0 <2.0.0'
+  kind: chat
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-08-30'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-08-30'
+  modelCardUrl: https://huggingface.co/CohereForAI/c4ai-command-r-plus-08-2024
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:cohere-command
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:cohere-command
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus
+  - target: capability:supports-text-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus
+  - target: capability:can-multi-turn
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus
+  - target: capability:supports-native-tools
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus
+  - target: capability:requires-tool-approval
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'Open-weights model deployed via third-party providers; tool execution
+      by convention requires approval at the agent/runtime layer.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-command-r-plus

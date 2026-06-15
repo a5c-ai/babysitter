@@ -1,0 +1,92 @@
+---
+nodeKind: Workflow
+id: workflow:contract-review-cycle
+attributes:
+  displayName: "Contract Review Cycle"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-contract"
+  complexity: cross-team
+  description: |
+    Manages the legal review of commercial contracts — evaluating liability
+    exposure, validating compliance with organizational policies, reviewing
+    data processing terms against privacy requirements, assessing IP
+    assignment clauses, and coordinating redline negotiations with
+    counterparties. Produces risk assessment and recommended modifications.
+    Excludes contract execution and ongoing compliance monitoring.
+edges:
+  involves_role:
+    - target: role:license-auditor
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:legal
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:legal-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:regulatory-change-assessment
+attributes:
+  displayName: "Regulatory Change Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-regulation"
+  complexity: cross-team
+  description: |
+    Assesses the organizational impact of new or changing regulations —
+    analyzing applicability to current operations, mapping affected business
+    processes and systems, estimating compliance gap severity and remediation
+    cost, and producing implementation timelines with responsible-party
+    assignments. Produces impact assessment and compliance roadmap. Excludes
+    compliance implementation work.
+edges:
+  involves_role:
+    - target: role:license-auditor
+    - target: role:security-reviewer
+    - target: role:planner
+  applies_to_domain:
+    - target: domain:legal
+    - target: domain:operations
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:legal-team
+    - target: org-unit:security-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:ip-portfolio-review
+attributes:
+  displayName: "IP Portfolio Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews the intellectual property portfolio status — auditing patent
+    filing timelines, evaluating trademark renewal schedules, assessing trade
+    secret protection adequacy, reviewing open-source license compliance
+    across codebases, and identifying patentable innovations from recent R&D
+    work. Produces portfolio health report and filing recommendations.
+    Excludes patent drafting.
+edges:
+  involves_role:
+    - target: role:license-auditor
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:legal
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:dependency-audit
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:legal-team
+    - target: org-unit:engineering

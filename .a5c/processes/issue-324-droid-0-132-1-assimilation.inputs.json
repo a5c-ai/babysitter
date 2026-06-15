@@ -1,0 +1,12 @@
+{
+  "issueNumber": 324,
+  "title": "Assimilate Droid 0.132.1",
+  "labels": ["agent-version-update", "graph-update"],
+  "targetPackage": "@factory/cli",
+  "targetVersion": "0.132.1",
+  "stalePackage": "@factory/droid-cli",
+  "qualityCommands": [
+    "npm exec -- vitest run --config vitest.config.ts packages/adapters/adapters/tests/droid-adapter.test.ts",
+    "npm run verify:metadata"
+  ]
+}

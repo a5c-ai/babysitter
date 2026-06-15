@@ -1,0 +1,62 @@
+nodeKind: MCPResource
+id: mcp-resource:filesystem-readonly
+attributes:
+  displayName: "Filesystem (read-only)"
+  uri: "file:///"
+  mimeType: "application/octet-stream"
+  subscribable: false
+  description: |
+    Generic filesystem resource exposed by `@modelcontextprotocol/server-filesystem`
+    when started in read-only mode. Files under the advertised root(s) are listable
+    via `resources/list` and fetchable via `resources/read`.
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:context7-docs
+attributes:
+  displayName: "Context7 — library docs"
+  uri: "context7://{library}/{version}"
+  mimeType: "text/markdown"
+  subscribable: false
+  description: |
+    Documentation snapshots exposed by the `context7` MCP server. Each library
+    has a stable URI scheme; the server resolves the freshest snapshot for the
+    given version. Useful for grounding tool-using agents in up-to-date docs.
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:github-issue
+attributes:
+  displayName: "GitHub issue snapshot"
+  uri: "github://repos/{owner}/{repo}/issues/{number}"
+  mimeType: "application/json"
+  subscribable: true
+  description: |
+    Per-issue snapshot exposed by the GitHub MCP server. Subscribable: emits
+    `notifications/resources/updated` when the issue changes (comments, labels,
+    state) so client agents can refresh their context.
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:slack-channel-history
+attributes:
+  displayName: "Slack channel history"
+  uri: "slack://channels/{channel-id}/history"
+  mimeType: "application/json"
+  subscribable: true
+  description: |
+    Channel-history resource exposed by the Slack MCP server. Subscribable: server
+    pushes update notifications as new messages arrive.
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:notion-page
+attributes:
+  displayName: "Notion page"
+  uri: "notion://pages/{page-id}"
+  mimeType: "text/markdown"
+  subscribable: true
+  description: |
+    Notion page resource. The server materializes pages as markdown for agent
+    consumption; subscribable so context refreshes when the page is edited.
+edges: {}

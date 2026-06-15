@@ -3,6 +3,12 @@
  * @description Design crystallization and precipitation systems for product purification and solid-liquid separation
  * @inputs { processName: string, soluteProperties: object, solventSystem: object, productRequirements: object, outputDir: string }
  * @outputs { success: boolean, crystallizerDesign: object, operatingProcedure: object, downstreamDesign: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -5,6 +5,13 @@ version: 1.0.0
 category: Data Governance
 skill-id: SK-DEA-010
 allowed-tools: Read, Grep, Glob, Bash, WebFetch
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:data-lineage, skill-area:data-governance]
+  roles: [role:data-engineer, role:analytics-engineer]
+  workflows: [workflow:data-quality-monitoring]
+  topics: [topic:data-mesh]
 ---
 
 # Data Lineage Mapper

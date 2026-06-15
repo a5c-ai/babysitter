@@ -1,0 +1,1563 @@
+# Deep Stack Profiles — Volume 7
+# 30 richly-connected stack profiles covering language-specific full-stacks,
+# architecture patterns, workflow/automation, hybrid/edge, and miscellaneous
+# application stacks.
+---
+nodeKind: StackProfile
+id: stack-profile:haskell-web-service
+attributes:
+  displayName: "Haskell Web Service (Haskell, Servant, PostgreSQL, Docker, Nix)"
+  description: |
+    A strongly-typed web service built with Haskell and the Servant library,
+    which derives API documentation and client code from type-level route
+    definitions. PostgreSQL handles persistence via persistent or raw SQL,
+    while Aeson manages JSON serialization with compile-time guarantees.
+    Nix provides reproducible builds and dependency management, eliminating
+    "works on my machine" issues across development and CI environments.
+    Docker packages the final binary into minimal containers. The tradeoff
+    is a steep learning curve around monad transformers and type-level
+    programming, but the payoff is exceptionally reliable, refactor-friendly
+    service code.
+  composes:
+    - language:haskell
+    - library:servant
+    - library:aeson
+    - library:conduit
+    - library:lens
+    - library:mtl
+    - library:quickcheck
+    - library:hspec
+    - tool:nix
+    - tool:docker
+edges:
+  composed_of:
+    - language:haskell
+    - library:servant
+    - library:aeson
+    - library:conduit
+    - library:lens
+    - library:mtl
+    - library:quickcheck
+    - library:hspec
+    - tool:nix
+    - tool:docker
+  used_by_role:
+    - role:backend-engineer
+    - role:research-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:code-review
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:unit-testing
+    - skill-area:containerization
+    - skill-area:error-handling-exception-management
+---
+nodeKind: StackProfile
+id: stack-profile:scala-akka-microservice
+attributes:
+  displayName: "Scala Akka Microservice (Scala, Akka, Slick, PostgreSQL, Docker, SBT)"
+  description: |
+    A reactive microservice built on Scala and the Akka actor model, providing
+    location-transparent concurrency and fault-tolerance through supervision
+    hierarchies. Slick serves as the functional-relational mapping layer for
+    PostgreSQL, offering type-safe query composition. Circe handles JSON
+    encoding/decoding with compile-time derivation, while Cats provides
+    functional programming abstractions like Monad and Traverse. SBT manages
+    multi-module builds and dependency resolution. Docker containers are
+    produced for deployment. The tradeoff is significant JVM startup time
+    and the complexity of reasoning about actor mailbox semantics under load.
+  composes:
+    - language:scala
+    - library:akka
+    - library:slick
+    - library:circe
+    - library:cats
+    - library:cats-effect
+    - library:scalatest
+    - tool:sbt
+    - tool:docker
+edges:
+  composed_of:
+    - language:scala
+    - library:akka
+    - library:slick
+    - library:circe
+    - library:cats
+    - library:cats-effect
+    - library:scalatest
+    - tool:sbt
+    - tool:docker
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:concurrency-multithreading
+    - skill-area:event-driven-architecture
+    - skill-area:backend-data-persistence
+    - skill-area:unit-testing
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:ocaml-web-backend
+attributes:
+  displayName: "OCaml Web Backend (OCaml, Docker)"
+  description: |
+    A web backend written in OCaml, leveraging the language's powerful type
+    inference and pattern matching to build correct-by-construction HTTP
+    handlers. OCaml's algebraic data types and exhaustive pattern matching
+    catch entire classes of bugs at compile time that would be runtime errors
+    in most other languages. PostgreSQL handles persistence through OCaml's
+    strong FFI ecosystem. Docker packages the native binary into a minimal
+    Alpine container, yielding tiny images with fast startup. The tradeoff
+    is a smaller ecosystem compared to mainstream languages, requiring more
+    hand-rolled infrastructure code, but the result is exceptionally fast,
+    memory-efficient services with strong correctness guarantees.
+  composes:
+    - language:ocaml
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:psql
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:ocaml
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:psql
+    - tool:github-actions
+  used_by_role:
+    - role:backend-engineer
+    - role:research-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:code-review
+  applies_to:
+    - domain:backend
+    - domain:systems-programming
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:containerization
+    - skill-area:unit-testing
+    - skill-area:error-handling-exception-management
+---
+nodeKind: StackProfile
+id: stack-profile:zig-systems-service
+attributes:
+  displayName: "Zig Systems Service (Zig, Docker)"
+  description: |
+    A high-performance systems-level HTTP service written in Zig, targeting
+    scenarios where C-level control over memory allocation and zero-cost
+    abstractions are essential. Zig's comptime metaprogramming replaces
+    the need for macros or code generation, producing self-documenting
+    generic code. The service handles persistence through direct SQL
+    protocol implementation, avoiding ORM overhead entirely. Docker
+    packages the statically-linked binary into a scratch container,
+    resulting in images under 10 MB. The tradeoff is Zig's evolving
+    ecosystem and lack of mature web frameworks, requiring developers
+    to build more HTTP plumbing from scratch, but the reward is
+    predictable latency and minimal resource consumption.
+  composes:
+    - language:zig
+    - tool:docker
+    - language:c
+    - language:sql
+    - tool:docker-compose
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:zig
+    - tool:docker
+    - language:c
+    - language:sql
+    - tool:docker-compose
+    - tool:github-actions
+  used_by_role:
+    - role:backend-engineer
+    - role:embedded-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:performance-profiling-cycle
+  applies_to:
+    - domain:systems-programming
+    - domain:backend
+  requires_skill_area:
+    - skill-area:concurrency-multithreading
+    - skill-area:performance-testing
+    - skill-area:containerization
+    - skill-area:protocol-design
+    - skill-area:error-handling-exception-management
+---
+nodeKind: StackProfile
+id: stack-profile:crystal-web-app
+attributes:
+  displayName: "Crystal Web App (Crystal, PostgreSQL, Docker)"
+  description: |
+    A web application built with Crystal, a compiled language with Ruby-like
+    syntax that delivers C-level performance through LLVM compilation. Crystal's
+    type inference provides safety without verbose annotations, and its fiber-
+    based concurrency model handles thousands of connections efficiently.
+    PostgreSQL provides the persistence layer, accessed through Crystal's
+    built-in database drivers. Docker containers package the statically-
+    compiled binary for deployment. The tradeoff is Crystal's smaller
+    community and fewer production battle-tested libraries compared to
+    Ruby or Go, but the developer experience is remarkably productive
+    for performance-sensitive web services.
+  composes:
+    - language:crystal
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:psql
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:crystal
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:psql
+    - tool:github-actions
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:code-review
+  applies_to:
+    - domain:backend
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:concurrency-multithreading
+    - skill-area:containerization
+    - skill-area:unit-testing
+---
+nodeKind: StackProfile
+id: stack-profile:julia-data-service
+attributes:
+  displayName: "Julia Data Service (Julia, Python, PostgreSQL, Docker)"
+  description: |
+    A data-oriented microservice built with Julia, exposing analytical
+    endpoints that leverage Julia's just-in-time compilation and multiple
+    dispatch for numerical computing workloads. PostgreSQL stores structured
+    datasets, while Julia's native array operations and broadcasting syntax
+    make data transformations concise and performant. Python interop through
+    PyCall enables reuse of the Python ML ecosystem where Julia packages
+    are lacking. Docker containers bundle the Julia sysimage for faster
+    startup in production. The tradeoff is Julia's time-to-first-plot
+    latency and the overhead of maintaining a polyglot Python/Julia
+    boundary, but the throughput for compute-heavy analytics endpoints
+    can be orders of magnitude faster than pure Python.
+  composes:
+    - language:julia
+    - language:python
+    - language:sql
+    - library:numpy
+    - library:pandas
+    - tool:docker
+    - tool:docker-compose
+    - tool:psql
+edges:
+  composed_of:
+    - language:julia
+    - language:python
+    - language:sql
+    - library:numpy
+    - library:pandas
+    - tool:docker
+    - tool:docker-compose
+    - tool:psql
+  used_by_role:
+    - role:data-engineer
+    - role:research-scientist
+    - role:data-scientist
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:feature-development
+  applies_to:
+    - domain:data-science
+    - domain:data-engineering
+  requires_skill_area:
+    - skill-area:data-analysis
+    - skill-area:python-data-pipelines
+    - skill-area:backend-api-design
+    - skill-area:containerization
+    - skill-area:statistical-analysis
+---
+nodeKind: StackProfile
+id: stack-profile:fsharp-web-api
+attributes:
+  displayName: "F# Web API (F#, ASP.NET Core, PostgreSQL, Docker, .NET)"
+  description: |
+    A functional-first web API built with F# on the ASP.NET Core runtime,
+    combining the expressiveness of ML-family type systems with the mature
+    .NET ecosystem. F# discriminated unions and computation expressions
+    model domain logic precisely, while ASP.NET Core handles HTTP routing,
+    middleware, and dependency injection. Entity Framework Core provides
+    PostgreSQL access with LINQ query composition. Serilog captures
+    structured logging, and xUnit with FsCheck enables property-based
+    testing. Docker containers target the .NET runtime for deployment.
+    The tradeoff is that F# is less popular than C# in the .NET world,
+    meaning fewer examples and some interop friction with C#-first libraries.
+  composes:
+    - language:fsharp
+    - library:aspnet-core
+    - library:entity-framework
+    - library:serilog
+    - library:xunit
+    - tool:dotnet-cli
+    - tool:docker
+    - language:sql
+edges:
+  composed_of:
+    - language:fsharp
+    - library:aspnet-core
+    - library:entity-framework
+    - library:serilog
+    - library:xunit
+    - tool:dotnet-cli
+    - tool:docker
+    - language:sql
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:code-review
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:object-relational-mapping
+    - skill-area:unit-testing
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:nim-microservice
+attributes:
+  displayName: "Nim Microservice (Nim, Docker)"
+  description: |
+    A lightweight microservice written in Nim, a compiled language that
+    combines Python-like syntax with C-level performance and zero-overhead
+    abstractions. Nim's macro system enables powerful compile-time code
+    generation, while its deterministic memory management (via ARC/ORC)
+    avoids garbage collection pauses. The service exposes REST endpoints
+    and stores data in an embedded database, compiled as a single static
+    binary. Docker packages the binary into a minimal container for
+    deployment. The tradeoff is Nim's small ecosystem and limited
+    production adoption, requiring developers to write more infrastructure
+    code themselves, but the resulting services are remarkably small,
+    fast, and easy to deploy.
+  composes:
+    - language:nim
+    - tool:docker
+    - language:sql
+    - language:c
+    - tool:docker-compose
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:nim
+    - tool:docker
+    - language:sql
+    - language:c
+    - tool:docker-compose
+    - tool:github-actions
+  used_by_role:
+    - role:backend-engineer
+    - role:embedded-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:performance-profiling-cycle
+  applies_to:
+    - domain:backend
+    - domain:systems-programming
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:concurrency-multithreading
+    - skill-area:containerization
+    - skill-area:performance-testing
+    - skill-area:error-handling-exception-management
+---
+nodeKind: StackProfile
+id: stack-profile:clojure-ring-service
+attributes:
+  displayName: "Clojure Ring Service (Java, Docker)"
+  description: |
+    A web service built with Clojure's Ring HTTP abstraction running on the
+    JVM, treating HTTP requests and responses as plain immutable data maps.
+    Clojure's persistent data structures and REPL-driven development enable
+    rapid iteration, while the JVM provides mature garbage collection,
+    JIT compilation, and access to the entire Java ecosystem. PostgreSQL
+    handles persistence through JDBC, and the service leverages Clojure's
+    built-in concurrency primitives (atoms, refs, agents) for thread-safe
+    state management. Docker containers package the uberjar for deployment.
+    The tradeoff is JVM startup time and the learning curve of Lisp syntax,
+    but the interactive development workflow and data-oriented design
+    philosophy yield highly maintainable, composable service code.
+  composes:
+    - language:java
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:psql
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:java
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:psql
+    - tool:github-actions
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:code-review
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:concurrency-multithreading
+    - skill-area:containerization
+    - skill-area:middleware-design
+---
+nodeKind: StackProfile
+id: stack-profile:erlang-otp-telecom
+attributes:
+  displayName: "Erlang / OTP Telecom (Erlang, Docker)"
+  description: |
+    A telecom-grade service built on Erlang/OTP, leveraging the BEAM virtual
+    machine's preemptive scheduling, lightweight process model, and built-in
+    distribution primitives for fault-tolerant, soft-real-time systems. OTP
+    supervision trees provide automatic restart of failed processes, while
+    Mnesia delivers a distributed, replicated database tightly integrated
+    with the runtime. Cowboy serves as the HTTP/WebSocket server. Erlang's
+    hot code loading enables zero-downtime deployments, and its "let it
+    crash" philosophy produces systems that self-heal under failure.
+    Docker containers package releases built with Rebar3. The tradeoff
+    is Erlang's unfamiliar syntax and the BEAM's limited raw throughput
+    for CPU-bound work, but for concurrent, distributed, always-on
+    services, nothing else comes close.
+  composes:
+    - language:erlang
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:prometheus
+    - tool:grafana
+edges:
+  composed_of:
+    - language:erlang
+    - tool:docker
+    - language:sql
+    - tool:docker-compose
+    - tool:prometheus
+    - tool:grafana
+  used_by_role:
+    - role:backend-engineer
+    - role:sre
+    - role:architect
+  follows_workflow:
+    - workflow:production-readiness-review
+    - workflow:on-call-rotation
+  applies_to:
+    - domain:telecommunications
+    - domain:backend
+  requires_skill_area:
+    - skill-area:concurrency-multithreading
+    - skill-area:event-driven-architecture
+    - skill-area:observability-instrumentation
+    - skill-area:error-handling-exception-management
+    - skill-area:protocol-design
+---
+nodeKind: StackProfile
+id: stack-profile:hexagonal-architecture-stack
+attributes:
+  displayName: "Hexagonal Architecture — Ports & Adapters (TypeScript, NestJS, Prisma, PostgreSQL, Docker, Vitest)"
+  description: |
+    A TypeScript application structured around hexagonal architecture (ports
+    and adapters), where the domain core is isolated from all infrastructure
+    concerns through explicit port interfaces. NestJS modules map cleanly to
+    bounded contexts, with Prisma serving as the persistence adapter and
+    Express as the HTTP adapter. Vitest runs fast unit tests against the
+    domain core without any infrastructure, while integration tests wire
+    up real adapters. Docker Compose orchestrates the full stack for local
+    development. The tradeoff is significant upfront boilerplate defining
+    port interfaces and adapter mappings, but the architecture pays
+    dividends in testability, swappable infrastructure, and long-term
+    maintainability of complex domain logic.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:express
+    - tool:vitest
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:express
+    - tool:vitest
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:tech-lead
+  follows_workflow:
+    - workflow:architecture-decision
+    - workflow:feature-development
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:hexagonal-architecture
+    - skill-area:domain-driven-design
+    - skill-area:backend-api-design
+    - skill-area:unit-testing
+    - skill-area:integration-testing
+---
+nodeKind: StackProfile
+id: stack-profile:clean-architecture-stack
+attributes:
+  displayName: "Clean Architecture (Go, Chi, PostgreSQL, Docker, Testify)"
+  description: |
+    A Go application organized according to Clean Architecture principles,
+    with concentric layers enforcing a strict dependency rule: entities at
+    the core, use cases orchestrating business logic, and adapters at the
+    outer ring handling HTTP (Chi router), database (pgx for PostgreSQL),
+    and external service integration. Each layer communicates through
+    interfaces, enabling the domain to be tested in complete isolation.
+    Testify provides assertion helpers and mocking for comprehensive test
+    suites. Docker containers ship the statically-linked Go binary. The
+    tradeoff is more packages and interfaces than idiomatic Go typically
+    uses, but the separation ensures that business rules remain stable
+    even as frameworks and databases change.
+  composes:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:sqlx-go
+    - library:zap
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:sqlx-go
+    - library:zap
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:architecture-decision
+    - workflow:code-review
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:domain-driven-design
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:unit-testing
+    - skill-area:containerization
+---
+nodeKind: StackProfile
+id: stack-profile:vertical-slice-architecture
+attributes:
+  displayName: "Vertical Slice Architecture (C#, .NET, MediatR, PostgreSQL, Docker)"
+  description: |
+    A C# application organized by feature slices rather than technical layers,
+    where each vertical slice contains its own handler, validation, data access,
+    and response mapping. MediatR dispatches commands and queries to their
+    respective slice handlers, eliminating cross-cutting service classes that
+    bloat traditional layered architectures. Entity Framework Core provides
+    PostgreSQL access, FluentValidation enforces input rules per-slice, and
+    AutoMapper handles DTO projection. Docker containers target the .NET
+    runtime. The tradeoff is code duplication across slices and the need for
+    team discipline to avoid slices growing into mini-monoliths, but the
+    pattern excels at enabling parallel feature development.
+  composes:
+    - language:csharp
+    - library:aspnet-core
+    - library:mediatr
+    - library:entity-framework
+    - library:fluentvalidation
+    - library:automapper
+    - library:xunit
+    - tool:dotnet-cli
+    - tool:docker
+edges:
+  composed_of:
+    - language:csharp
+    - library:aspnet-core
+    - library:mediatr
+    - library:entity-framework
+    - library:fluentvalidation
+    - library:automapper
+    - library:xunit
+    - tool:dotnet-cli
+    - tool:docker
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:tech-lead
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:architecture-decision
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:domain-driven-design
+    - skill-area:backend-api-design
+    - skill-area:object-relational-mapping
+    - skill-area:unit-testing
+    - skill-area:data-validation-sanitization
+---
+nodeKind: StackProfile
+id: stack-profile:modular-monolith
+attributes:
+  displayName: "Modular Monolith (TypeScript, NestJS, Prisma, PostgreSQL, BullMQ, Docker)"
+  description: |
+    A TypeScript monolith deliberately structured into independent modules with
+    explicit boundaries, combining the deployment simplicity of a monolith with
+    the organizational clarity of microservices. Each NestJS module owns its
+    Prisma schema slice and communicates with others only through published
+    events or well-defined service interfaces. BullMQ handles async work
+    within module boundaries, and Redis backs both the job queue and
+    cross-module event bus. PostgreSQL schemas enforce data ownership per
+    module. Docker Compose runs the complete system locally. The tradeoff
+    is the constant vigilance needed to prevent module boundaries from
+    eroding, but when maintained, this pattern avoids distributed-system
+    complexity while preserving the option to extract modules later.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:bullmq
+    - library:ioredis
+    - library:express
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+    - tool:vitest
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:bullmq
+    - library:ioredis
+    - library:express
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+    - tool:vitest
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:tech-lead
+  follows_workflow:
+    - workflow:architecture-decision
+    - workflow:monolith-extraction-planning
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:monolith-vs-microservices
+    - skill-area:domain-driven-design
+    - skill-area:messaging-queuing
+    - skill-area:backend-api-design
+    - skill-area:schema-evolution
+---
+nodeKind: StackProfile
+id: stack-profile:micro-frontend
+attributes:
+  displayName: "Micro-Frontend (React, Webpack, TypeScript, Docker)"
+  description: |
+    A frontend architecture decomposing a large web application into
+    independently deployable micro-frontends, each owned by a separate team.
+    Webpack Module Federation enables runtime composition, allowing shell
+    and remote applications to share dependencies and expose components
+    without build-time coupling. Each micro-frontend is a React + TypeScript
+    application with its own CI/CD pipeline and Docker container. Shared
+    design tokens and a component library maintain visual consistency.
+    The shell application handles routing and authentication, loading
+    remotes on demand. The tradeoff is increased operational complexity,
+    bundle size management challenges, and the need for strict interface
+    contracts between teams, but the architecture enables true team
+    autonomy at scale.
+  composes:
+    - language:typescript
+    - framework:react
+    - tool:webpack
+    - library:tailwindcss
+    - library:zustand
+    - tool:docker
+    - tool:vitest
+    - tool:eslint
+edges:
+  composed_of:
+    - language:typescript
+    - framework:react
+    - tool:webpack
+    - library:tailwindcss
+    - library:zustand
+    - tool:docker
+    - tool:vitest
+    - tool:eslint
+  used_by_role:
+    - role:frontend-engineer
+    - role:architect
+    - role:tech-lead
+  follows_workflow:
+    - workflow:design-sprint
+    - workflow:release-management
+  applies_to:
+    - domain:frontend
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:react-components
+    - skill-area:web-performance
+    - skill-area:ci-cd
+    - skill-area:frontend-performance
+---
+nodeKind: StackProfile
+id: stack-profile:backend-for-frontend
+attributes:
+  displayName: "Backend for Frontend — BFF (TypeScript, Express, GraphQL, React, Docker)"
+  description: |
+    A Backend for Frontend pattern where a thin TypeScript/Express server
+    aggregates and reshapes data from multiple downstream microservices into
+    a single GraphQL API tailored to the React frontend's exact needs. The
+    BFF eliminates over-fetching by composing precisely the data shapes each
+    page component requires, using GraphQL resolvers that fan out to REST
+    or gRPC backends. Apollo Client on the frontend provides normalized
+    caching and optimistic updates. Docker containers deploy the BFF
+    alongside the frontend. The tradeoff is an additional service to
+    maintain and the risk of the BFF becoming a "god layer" if not
+    scoped carefully, but the pattern dramatically improves frontend
+    performance and developer experience.
+  composes:
+    - language:typescript
+    - library:express
+    - library:graphql-tools
+    - library:apollo-client
+    - framework:react
+    - library:zod
+    - tool:docker
+    - tool:graphql-codegen
+edges:
+  composed_of:
+    - language:typescript
+    - library:express
+    - library:graphql-tools
+    - library:apollo-client
+    - framework:react
+    - library:zod
+    - tool:docker
+    - tool:graphql-codegen
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:graphql-schema-review
+    - workflow:api-design-review
+  applies_to:
+    - domain:fullstack
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:graphql-schema-design
+    - skill-area:backend-api-design
+    - skill-area:data-fetching-caching
+    - skill-area:react-components
+    - skill-area:middleware-design
+---
+nodeKind: StackProfile
+id: stack-profile:strangler-fig-migration
+attributes:
+  displayName: "Strangler Fig Migration (TypeScript, NestJS, Express, PostgreSQL, Redis, Docker)"
+  description: |
+    A migration architecture implementing the Strangler Fig pattern to
+    incrementally replace a legacy monolith with modern TypeScript services.
+    An Express reverse proxy intercepts all traffic, routing requests to
+    either the legacy system or new NestJS microservices based on feature
+    flags and path matching. Redis caches routing decisions and shared
+    session state between old and new systems. PostgreSQL serves both
+    the legacy schema and new service schemas, with CDC (change data
+    capture) keeping them synchronized during the transition. Docker
+    Compose orchestrates the complete hybrid environment locally. The
+    tradeoff is maintaining two systems simultaneously with careful
+    data consistency management, but the pattern eliminates big-bang
+    migration risk.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - library:express
+    - library:ioredis
+    - library:prisma
+    - library:bullmq
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - library:express
+    - library:ioredis
+    - library:prisma
+    - library:bullmq
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:architect
+    - role:backend-engineer
+    - role:tech-lead
+  follows_workflow:
+    - workflow:strangler-fig-migration
+    - workflow:legacy-migration-sprint
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:strangler-fig-pattern
+    - skill-area:parallel-run-migration
+    - skill-area:schema-evolution
+    - skill-area:middleware-design
+    - skill-area:database-migrations-zero-downtime
+---
+nodeKind: StackProfile
+id: stack-profile:saga-distributed-transaction
+attributes:
+  displayName: "Saga / Distributed Transaction (Go, Kafka, PostgreSQL, Redis, gRPC, Docker)"
+  description: |
+    A distributed transaction orchestration system implementing the Saga
+    pattern in Go, where long-running business processes spanning multiple
+    microservices are coordinated through a sequence of local transactions
+    with compensating actions for rollback. Kafka serves as the durable
+    event backbone, ensuring exactly-once delivery semantics for saga
+    step transitions. Each participant service exposes gRPC endpoints
+    for forward and compensating operations, with PostgreSQL storing
+    local transaction state. Redis provides distributed locking and
+    idempotency keys. Prometheus and Grafana monitor saga completion
+    rates and latency. The tradeoff is significant complexity in
+    designing compensation logic and handling partial failures, but
+    the pattern enables consistent distributed workflows without
+    two-phase commit.
+  composes:
+    - language:go
+    - language:protobuf
+    - library:grpc-js
+    - library:pgx
+    - library:ioredis
+    - tool:docker
+    - tool:prometheus
+    - tool:grafana
+edges:
+  composed_of:
+    - language:go
+    - language:protobuf
+    - library:grpc-js
+    - library:pgx
+    - library:ioredis
+    - tool:docker
+    - tool:prometheus
+    - tool:grafana
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:event-driven-architecture-review
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:event-driven-architecture
+    - skill-area:messaging-queuing
+    - skill-area:concurrency-multithreading
+    - skill-area:error-handling-exception-management
+    - skill-area:observability-instrumentation
+---
+nodeKind: StackProfile
+id: stack-profile:cqrs-read-model
+attributes:
+  displayName: "CQRS Read Model (TypeScript, Elasticsearch, Kafka, PostgreSQL, NestJS, Docker)"
+  description: |
+    A CQRS (Command Query Responsibility Segregation) implementation where
+    the write side persists events and aggregates in PostgreSQL through
+    NestJS command handlers, while a separate read side projects denormalized
+    views into Elasticsearch for fast, flexible querying. Kafka transports
+    domain events from the write side to read-model projectors, which
+    build optimized search indices and materialized views. TypeScript
+    ensures type safety across both sides of the CQRS boundary. Docker
+    Compose orchestrates PostgreSQL, Kafka, Elasticsearch, and the
+    application services for local development. The tradeoff is eventual
+    consistency between write and read models and the operational burden
+    of running Kafka and Elasticsearch, but the pattern unlocks independent
+    scaling and optimization of reads and writes.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - tool:elasticsearch
+    - library:prisma
+    - library:ioredis
+    - library:bullmq
+    - tool:docker
+    - tool:docker-compose
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - tool:elasticsearch
+    - library:prisma
+    - library:ioredis
+    - library:bullmq
+    - tool:docker
+    - tool:docker-compose
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:data-engineer
+  follows_workflow:
+    - workflow:event-driven-architecture-review
+    - workflow:event-storming-session
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:cqrs
+    - skill-area:event-sourcing
+    - skill-area:search-indexing
+    - skill-area:kafka-stream-processing
+    - skill-area:streaming-realtime-processing
+---
+nodeKind: StackProfile
+id: stack-profile:ddd-nestjs-stack
+attributes:
+  displayName: "Domain-Driven Design — DDD (TypeScript, NestJS, Prisma, PostgreSQL, Docker, Vitest)"
+  description: |
+    A TypeScript application built on Domain-Driven Design tactical patterns,
+    where NestJS modules represent bounded contexts containing aggregates,
+    value objects, domain events, and repository interfaces. Prisma implements
+    the repository pattern for PostgreSQL persistence, mapping between domain
+    models and database schemas. Domain services encapsulate cross-aggregate
+    operations, while application services orchestrate use cases. Vitest
+    tests the domain layer in isolation, verifying invariants and event
+    emission without infrastructure dependencies. Docker Compose runs
+    the full environment. The tradeoff is substantial upfront modeling
+    effort and the risk of over-engineering simple CRUD operations, but
+    for genuinely complex domains the pattern prevents the "big ball of
+    mud" that plagues long-lived codebases.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:zod
+    - library:express
+    - tool:vitest
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:zod
+    - library:express
+    - tool:vitest
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:tech-lead
+  follows_workflow:
+    - workflow:event-storming-session
+    - workflow:architecture-decision
+  applies_to:
+    - domain:software-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:domain-driven-design
+    - skill-area:event-sourcing
+    - skill-area:backend-api-design
+    - skill-area:unit-testing
+    - skill-area:schema-evolution
+---
+nodeKind: StackProfile
+id: stack-profile:nocode-lowcode-platform-backend
+attributes:
+  displayName: "No-Code / Low-Code Platform Backend (TypeScript, PostgreSQL, Redis, Docker, React)"
+  description: |
+    The backend powering a no-code or low-code platform, where end users
+    visually compose workflows, forms, and data models that are interpreted
+    at runtime by a TypeScript execution engine. PostgreSQL stores platform
+    metadata (schemas, workflow definitions, permissions) as JSONB documents
+    alongside user-generated data in dynamically provisioned tables. Redis
+    caches compiled workflow graphs and manages real-time collaboration
+    sessions. A React-based visual builder communicates through a REST/
+    WebSocket API. Docker Compose runs the full platform locally. The
+    tradeoff is the meta-programming complexity of building a system
+    that builds systems, requiring careful sandboxing and performance
+    guardrails, but the platform enables non-developers to ship
+    internal tools without engineering bottlenecks.
+  composes:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:ioredis
+    - library:bullmq
+    - framework:react
+    - tool:docker
+    - tool:docker-compose
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nestjs
+    - library:prisma
+    - library:ioredis
+    - library:bullmq
+    - framework:react
+    - tool:docker
+    - tool:docker-compose
+  used_by_role:
+    - role:fullstack-engineer
+    - role:platform-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:process-automation-assessment
+    - workflow:feature-development
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:schema-evolution
+    - skill-area:plugin-systems
+    - skill-area:websocket-design
+    - skill-area:background-job-processing
+---
+nodeKind: StackProfile
+id: stack-profile:approval-workflow-engine
+attributes:
+  displayName: "Approval Workflow Engine (Go, PostgreSQL, Redis, React, gRPC, Docker)"
+  description: |
+    A workflow engine purpose-built for multi-step approval processes such
+    as expense approvals, access requests, and change advisory boards. Go
+    implements the core state machine, with PostgreSQL storing workflow
+    definitions, instance state, and audit trails as immutable event logs.
+    Redis provides distributed locking for concurrent workflow transitions
+    and caches active workflow graphs. gRPC enables efficient service-to-
+    service integration, while a React frontend renders dynamic approval
+    forms and status dashboards. Prometheus tracks workflow throughput
+    and SLA compliance. Docker containers deploy the complete system.
+    The tradeoff is the complexity of modeling arbitrary approval
+    topologies (parallel, sequential, conditional) while maintaining
+    audit integrity.
+  composes:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:grpc-js
+    - language:protobuf
+    - framework:react
+    - tool:docker
+    - tool:prometheus
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:grpc-js
+    - language:protobuf
+    - framework:react
+    - tool:docker
+    - tool:prometheus
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:process-automation-assessment
+    - workflow:feature-development
+  applies_to:
+    - domain:operations
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:event-driven-architecture
+    - skill-area:backend-api-design
+    - skill-area:backend-data-persistence
+    - skill-area:concurrency-multithreading
+    - skill-area:observability-instrumentation
+---
+nodeKind: StackProfile
+id: stack-profile:data-pipeline-orchestration
+attributes:
+  displayName: "Data Pipeline Orchestration (Python, Airflow, dbt, PostgreSQL, Docker)"
+  description: |
+    A data pipeline orchestration platform built around Apache Airflow for
+    workflow scheduling and dbt for SQL-based data transformations, creating
+    a modern ELT stack where raw data lands in PostgreSQL and is progressively
+    refined through dbt models into analytics-ready tables. Airflow DAGs
+    coordinate extraction from source systems, dbt model runs, data quality
+    checks, and downstream notifications. Python scripts handle custom
+    extraction logic and API integrations. SQLAlchemy provides programmatic
+    database access for pipeline metadata. Docker Compose runs the complete
+    Airflow cluster (scheduler, webserver, workers) alongside PostgreSQL
+    for local development. The tradeoff is Airflow's operational complexity
+    and the learning curve of dbt's ref-based dependency graph, but the
+    combination provides unmatched visibility into data lineage.
+  composes:
+    - language:python
+    - tool:airflow
+    - library:sqlalchemy
+    - library:alembic
+    - library:pandas
+    - library:boto3
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:python
+    - tool:airflow
+    - library:sqlalchemy
+    - library:alembic
+    - library:pandas
+    - library:boto3
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:data-pipeline-monitoring
+  applies_to:
+    - domain:data-engineering
+    - domain:business-intelligence
+  requires_skill_area:
+    - skill-area:etl-pipelines
+    - skill-area:python-data-pipelines
+    - skill-area:dbt-modeling
+    - skill-area:data-quality
+    - skill-area:task-scheduling-cron-jobs
+---
+nodeKind: StackProfile
+id: stack-profile:etl-reverse-etl
+attributes:
+  displayName: "ETL / Reverse ETL (Python, Airbyte, dbt, PostgreSQL, Airflow)"
+  description: |
+    A bidirectional data integration platform combining Airbyte for extract-
+    load (EL) from hundreds of SaaS sources, dbt for SQL transformations (T),
+    and a reverse ETL pipeline that pushes enriched data back into operational
+    tools like CRMs and marketing platforms. Airflow orchestrates the full
+    cycle: Airbyte syncs land raw data in PostgreSQL, dbt models refine it
+    into business entities, and Python scripts push curated segments back
+    to destination APIs. Pandas handles data manipulation for custom
+    reverse-ETL connectors. Docker Compose runs Airbyte, Airflow, and
+    PostgreSQL locally. The tradeoff is managing schema drift across
+    dozens of source connectors and the complexity of bidirectional
+    sync conflict resolution, but the platform eliminates data silos
+    between analytics and operations.
+  composes:
+    - language:python
+    - tool:airbyte
+    - tool:airflow
+    - library:sqlalchemy
+    - library:pandas
+    - library:boto3
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:python
+    - tool:airbyte
+    - tool:airflow
+    - library:sqlalchemy
+    - library:pandas
+    - library:boto3
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:data-analyst
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:etl-pipeline-cost-optimization
+  applies_to:
+    - domain:data-engineering
+    - domain:business-intelligence
+  requires_skill_area:
+    - skill-area:etl-pipelines
+    - skill-area:python-data-pipelines
+    - skill-area:data-quality
+    - skill-area:schema-evolution
+    - skill-area:data-governance
+---
+nodeKind: StackProfile
+id: stack-profile:offline-first-mobile
+attributes:
+  displayName: "Offline-First Mobile (TypeScript, React, Docker backend)"
+  description: |
+    A mobile application architected for offline-first operation, where the
+    local database is the source of truth and cloud sync happens opportunistically.
+    TypeScript and React power the cross-platform UI, with an embedded local
+    database storing all user data on-device. A background sync engine
+    reconciles local mutations with the server using conflict-free replicated
+    data types (CRDTs) or last-write-wins strategies. The Docker-hosted
+    backend provides REST APIs for sync, authentication, and push notifications.
+    Zustand manages UI state while the sync engine handles persistence state.
+    The tradeoff is the significant complexity of conflict resolution and
+    the need to test extensively under intermittent connectivity, but the
+    result is an app that works reliably in low-connectivity environments
+    like field operations or developing regions.
+  composes:
+    - language:typescript
+    - framework:react
+    - library:zustand
+    - library:zod
+    - library:express
+    - library:ioredis
+    - tool:docker
+    - tool:docker-compose
+edges:
+  composed_of:
+    - language:typescript
+    - framework:react
+    - library:zustand
+    - library:zod
+    - library:express
+    - library:ioredis
+    - tool:docker
+    - tool:docker-compose
+  used_by_role:
+    - role:mobile-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:mobile-release-train
+    - workflow:feature-development
+  applies_to:
+    - domain:mobile
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:mobile-offline-sync
+    - skill-area:mobile-local-databases
+    - skill-area:mobile-state-management
+    - skill-area:react-native-development
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:edge-function-cdn
+attributes:
+  displayName: "Edge Function CDN (TypeScript, Cloudflare Workers, Wrangler)"
+  description: |
+    A serverless edge computing stack where TypeScript functions execute at
+    Cloudflare's global network edge, running within milliseconds of end
+    users across 300+ data centers. Cloudflare Workers provide the V8-based
+    runtime, with KV offering eventually-consistent global key-value storage
+    and D1 providing edge-local SQLite-compatible relational queries. Hono
+    serves as the lightweight HTTP framework, optimized for edge constraints
+    like 128 MB memory limits and 30-second CPU time budgets. TypeScript
+    ensures type safety across request handlers and middleware. The tradeoff
+    is the constrained runtime environment (no Node.js APIs, limited storage
+    options) and eventual consistency of distributed state, but the latency
+    improvements and zero cold-start characteristics make this ideal for
+    API gateways, A/B testing, personalization, and real-time content
+    transformation at the edge.
+  composes:
+    - language:typescript
+    - tool:cloudflare-workers
+    - framework:hono
+    - library:zod
+    - tool:vitest
+    - tool:github-actions
+edges:
+  composed_of:
+    - language:typescript
+    - tool:cloudflare-workers
+    - framework:hono
+    - library:zod
+    - tool:vitest
+    - tool:github-actions
+  used_by_role:
+    - role:fullstack-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:release-management
+  applies_to:
+    - domain:serverless
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:serverless-compute
+    - skill-area:serverless-cold-start-optimization
+    - skill-area:cdn-edge
+    - skill-area:web-performance
+    - skill-area:typescript-generic-programming
+---
+nodeKind: StackProfile
+id: stack-profile:hybrid-cloud-onprem
+attributes:
+  displayName: "Hybrid Cloud — On-Prem + Cloud (Kubernetes, Terraform, Vault, Prometheus, ArgoCD, Helm)"
+  description: |
+    A hybrid infrastructure platform spanning on-premises data centers and
+    cloud providers, unified through Kubernetes as the common orchestration
+    layer. Terraform provisions cloud resources and network connectivity
+    (VPNs, peering) between environments, while Helm charts and ArgoCD
+    ensure identical application deployments across all clusters. Vault
+    manages secrets, certificates, and dynamic credentials with a single
+    policy engine spanning both environments. Prometheus federates metrics
+    from all clusters into a central Grafana dashboard. Kustomize handles
+    environment-specific overlays for on-prem hardware constraints versus
+    cloud elasticity. The tradeoff is enormous operational complexity in
+    maintaining network connectivity, certificate management, and consistent
+    state across environments, but the pattern satisfies data sovereignty
+    requirements and enables cloud-bursting for peak demand.
+  composes:
+    - tool:kubernetes
+    - tool:terraform
+    - tool:vault
+    - tool:prometheus
+    - tool:argocd
+    - tool:helm
+    - tool:grafana
+    - tool:kustomize
+    - language:yaml
+    - language:hcl
+edges:
+  composed_of:
+    - tool:kubernetes
+    - tool:terraform
+    - tool:vault
+    - tool:prometheus
+    - tool:argocd
+    - tool:helm
+    - tool:grafana
+    - tool:kustomize
+    - language:yaml
+    - language:hcl
+  used_by_role:
+    - role:platform-engineer
+    - role:cloud-architect
+    - role:sre
+  follows_workflow:
+    - workflow:kubernetes-cluster-upgrade
+    - workflow:infrastructure-cost-optimization
+  applies_to:
+    - domain:cloud-infra
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:cloud-infrastructure
+    - skill-area:containerization
+    - skill-area:configuration-management
+    - skill-area:observability-instrumentation
+    - skill-area:secrets-rotation
+---
+nodeKind: StackProfile
+id: stack-profile:browser-extension
+attributes:
+  displayName: "Browser Extension (TypeScript, React, Webpack, Vitest)"
+  description: |
+    A cross-browser extension built with TypeScript and React, packaging
+    popup UIs, content scripts, background service workers, and options
+    pages into a single distributable extension. Webpack bundles multiple
+    entry points (background, content, popup) with shared code splitting
+    and hot-reload support during development. React renders the popup
+    and options interfaces, while content scripts inject UI overlays into
+    target web pages using Shadow DOM for style isolation. TypeScript
+    provides type-safe messaging between extension contexts (background,
+    content, popup) through Chrome's runtime messaging API. Vitest tests
+    business logic in isolation. The tradeoff is managing the complex
+    lifecycle across multiple execution contexts and the divergent APIs
+    between Chrome and Firefox, but extensions provide unique capabilities
+    like page manipulation and cross-site data that web apps cannot access.
+  composes:
+    - language:typescript
+    - framework:react
+    - tool:webpack
+    - library:zustand
+    - library:tailwindcss
+    - library:shadcn
+    - tool:vitest
+    - tool:eslint
+edges:
+  composed_of:
+    - language:typescript
+    - framework:react
+    - tool:webpack
+    - library:zustand
+    - library:tailwindcss
+    - library:shadcn
+    - tool:vitest
+    - tool:eslint
+  used_by_role:
+    - role:frontend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:release-management
+  applies_to:
+    - domain:web-development
+    - domain:frontend
+  requires_skill_area:
+    - skill-area:frontend-development
+    - skill-area:react-components
+    - skill-area:browser-compatibility
+    - skill-area:web-security
+    - skill-area:application-state-management
+---
+nodeKind: StackProfile
+id: stack-profile:slack-discord-bot
+attributes:
+  displayName: "Slack / Discord Bot (TypeScript, Express, Redis, PostgreSQL, Docker)"
+  description: |
+    A chatbot platform serving both Slack and Discord workspaces through a
+    unified TypeScript backend, handling slash commands, interactive modals,
+    event subscriptions, and scheduled messages. Express routes incoming
+    webhooks and verifies request signatures, while Redis queues outbound
+    messages and caches conversation state for multi-turn interactions.
+    PostgreSQL stores user preferences, command history, and analytics data.
+    BullMQ processes background jobs like scheduled reminders and batch
+    notifications. The bot supports rich message formatting, button
+    interactions, and modal dialogs through a platform-abstraction layer.
+    Docker containers deploy the complete system. The tradeoff is managing
+    divergent APIs between Slack and Discord and handling rate limits
+    gracefully, but a well-built bot dramatically improves team automation
+    and developer experience within collaboration tools.
+  composes:
+    - language:typescript
+    - library:express
+    - library:ioredis
+    - library:bullmq
+    - library:prisma
+    - library:zod
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+edges:
+  composed_of:
+    - language:typescript
+    - library:express
+    - library:ioredis
+    - library:bullmq
+    - library:prisma
+    - library:zod
+    - tool:docker
+    - tool:docker-compose
+    - language:sql
+  used_by_role:
+    - role:backend-engineer
+    - role:devops-engineer
+    - role:developer-advocate
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:developer-feedback-cycle
+  applies_to:
+    - domain:software-engineering
+    - domain:community
+  requires_skill_area:
+    - skill-area:webhook-verification
+    - skill-area:backend-api-design
+    - skill-area:messaging-queuing
+    - skill-area:background-job-processing
+    - skill-area:rate-limiting
+---
+nodeKind: StackProfile
+id: stack-profile:webhook-relay-proxy
+attributes:
+  displayName: "Webhook Relay / Proxy (Go, Redis, PostgreSQL, Prometheus, Docker)"
+  description: |
+    A high-throughput webhook relay service built in Go that receives
+    inbound webhooks from third-party services, validates signatures,
+    persists payloads for auditability, and fans out deliveries to
+    subscriber endpoints with configurable retry policies. Redis serves
+    as the in-flight delivery queue with at-least-once guarantees, while
+    PostgreSQL stores the complete webhook event log, delivery attempts,
+    and subscriber configurations. Chi provides a lightweight HTTP router,
+    and pgx handles efficient PostgreSQL operations. Prometheus tracks
+    delivery success rates, latency percentiles, and queue depth. Docker
+    containers deploy the relay alongside its dependencies. The tradeoff
+    is the operational burden of managing retry storms and backpressure
+    when downstream services are unavailable, but the relay provides
+    a single reliable ingestion point for all third-party integrations.
+  composes:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:sqlx-go
+    - library:zap
+    - library:ioredis
+    - tool:prometheus
+    - tool:docker
+    - tool:docker-compose
+edges:
+  composed_of:
+    - language:go
+    - library:chi
+    - library:pgx
+    - library:sqlx-go
+    - library:zap
+    - library:ioredis
+    - tool:prometheus
+    - tool:docker
+    - tool:docker-compose
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:production-readiness-review
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:backend
+    - domain:api-development
+  requires_skill_area:
+    - skill-area:webhook-verification
+    - skill-area:rate-limiting
+    - skill-area:messaging-queuing
+    - skill-area:observability-instrumentation
+    - skill-area:backend-api-design

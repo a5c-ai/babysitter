@@ -3,6 +3,13 @@
  * @description CC10X REVIEW Workflow - Multi-dimensional code analysis with confidence-gated reporting (>=80%), covering security, quality, performance, and maintainability
  * @inputs { request: string, projectRoot?: string, targetFiles?: array, memory?: object, confidenceThreshold?: number }
  * @outputs { success: boolean, dimensions: object, issues: array, overallScore: number, routerContract: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

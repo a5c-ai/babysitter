@@ -2,6 +2,11 @@
 name: fpga-architect
 description: Senior FPGA architect for system-level design decisions including architecture selection, partitioning, resource budgeting, and interface design.
 role: Principal FPGA Architect
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # fpga-architect

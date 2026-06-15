@@ -1,0 +1,28 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:ws
+attributes:
+  displayName: "WebSocket"
+  kind: ws
+  description: |
+    Bidirectional WebSocket transport between a host and an agent
+    process. Used when the host and agent need full-duplex streaming
+    (interactive UIs, live dashboards, multi-turn dialogues) without
+    repeatedly opening HTTP connections.
+  inboundMessageFormat: |
+    JSON messages framed one-per-text-frame. Per-agent envelope; a
+    typical inbound shape is `{type: "user_message"|"tool_result"|
+    "cancel", id?, ...}`. Binary frames are not used unless the agent
+    explicitly negotiates a binary sub-protocol.
+  outboundMessageFormat: |
+    JSON messages, one per text frame. Typical outbound event types
+    `{type: "assistant_delta"|"tool_call"|"turn_complete"|"error", ...}`.
+    Streaming is native — partial deltas arrive as separate frames.
+  signalForwarding: |
+    No OS-signal channel. Cancel is typically expressed as an in-band
+    JSON message (e.g. `{type: "cancel", id}`) or by sending a WS Close
+    frame to terminate the entire session. Reconnection re-establishes
+    a fresh session; resumption is implementation-defined.
+  ptySemantics: |
+    Not applicable — WebSocket carries structured messages, not terminal
+    byte streams.
+edges: {}

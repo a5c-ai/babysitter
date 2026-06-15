@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:omp.scope
+attributes:
+  subjectId: agent:omp
+  inScope: |
+    Developer terminal workflow for the OMP harness — single-user coding
+    sessions with file edits, shell tools, hooks, and orchestration of
+    sub-agents on a workstation.
+  outOfScope: |
+    Production runtime, multi-tenant hosting, CI without explicit
+    headless setup, browser-only environments, and embedding into
+    end-user-facing chat products.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:omp

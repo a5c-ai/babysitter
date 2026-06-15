@@ -1,0 +1,94 @@
+nodeKind: EvidenceSource
+id: evidence:provider-protocol-cohere-chat-stream-docs
+attributes:
+  displayName: Cohere v2 chat stream documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.cohere.com/reference/chat-stream
+  sourcePathOrUrl: https://docs.cohere.com/reference/chat-stream
+  locator: Chat stream API reference and streaming event guide
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:provider-protocol-mistral-chat-api-docs
+attributes:
+  displayName: Mistral chat API documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.mistral.ai/api/endpoint/chat
+  sourcePathOrUrl: https://docs.mistral.ai/api/endpoint/chat
+  locator: Chat completions API reference
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:provider-protocol-ollama-api-docs
+attributes:
+  displayName: Ollama HTTP API documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/ollama/ollama/blob/main/docs/api.md
+  sourcePathOrUrl: https://github.com/ollama/ollama/blob/main/docs/api.md
+  locator: API endpoints for generate, chat, embed, and streaming responses
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:openai-agents-sdk-streaming-docs
+attributes:
+  displayName: OpenAI Agents SDK streaming documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://openai.github.io/openai-agents-python/streaming/
+  sourcePathOrUrl: https://openai.github.io/openai-agents-python/streaming/
+  locator: Runner streaming event taxonomy
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:openai-agents-sdk-handoffs-docs
+attributes:
+  displayName: OpenAI Agents SDK handoffs documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://openai.github.io/openai-agents-python/handoffs/
+  sourcePathOrUrl: https://openai.github.io/openai-agents-python/handoffs/
+  locator: Handoffs represented as tools to the model
+  capturedAt: '2026-05-05T00:00:00Z'
+  observedAt: '2026-05-05T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-05T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc

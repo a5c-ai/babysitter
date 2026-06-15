@@ -1,0 +1,13 @@
+---
+nodeKind: Topic
+id: topic:agent-orchestration-products
+attributes:
+  displayName: "Agent Orchestration Products"
+  description: |
+    Products and services that orchestrate coding agents at a higher level
+    than individual agent CLIs — task boards (Vibe Kanban), issue-driven
+    schedulers (Symphony), workflow automation (n8n), multi-agent platforms
+    (Paperclip), and process orchestrators (Babysitter).
+edges:
+  applies_to:
+    - domain:software-engineering

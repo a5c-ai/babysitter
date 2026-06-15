@@ -1,0 +1,266 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:adapters.ui@current
+attributes:
+  displayName: "adapters UI (current) — multi-surface"
+  agentVersionId: agent-version:adapters@current
+  packageRef: source-ref:adapters-github
+  uiKind: multi-surface
+  presentationsBundled:
+    - presentation:adapters-tui
+    - presentation:adapters-cli
+    - presentation:adapters-webui
+    - presentation:adapters-mobile-ios
+    - presentation:adapters-mobile-android
+    - presentation:adapters-tv-androidtv
+    - presentation:adapters-tv-appletv
+    - presentation:adapters-watch-watchos
+    - presentation:adapters-watch-wearos
+  themeSupport: full-customizable
+  accessibilitySupport: wcag-aa
+  notes: |
+    adapters is a multi-surface UI suite. Each presentation is its own
+    package (tui, cli, webui, mobile-{ios,android}, tv-{androidtv,appletv},
+    watch-{watchos,wearos}). All surfaces share the adapters ui package
+    (`@a5c-ai/genty-ui`) for client + protocol + session-flow projection.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  bundled_with:
+    - target: presentation:adapters-tui
+    - target: presentation:adapters-cli
+    - target: presentation:adapters-webui
+    - target: presentation:adapters-mobile-ios
+    - target: presentation:adapters-mobile-android
+    - target: presentation:adapters-tv-androidtv
+    - target: presentation:adapters-tv-appletv
+    - target: presentation:adapters-watch-watchos
+    - target: presentation:adapters-watch-wearos
+  supports_interaction_primitive:
+    - target: interaction-primitive:adapters-kanban-board
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-hook-inbox
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-session-list
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-session-detail
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-new-run
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-pair-device
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-workspace-detail
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-breakpoint-approval
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-tool-call-interaction
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-prompt-history
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:command-palette
+      attributes: { mechanism: keybinding, invocationToken: "Cmd+K" }
+    - target: interaction-primitive:model-picker
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:prompt-input
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-cli-auth-check
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-auth-setup
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-plugin-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-plugin-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-plugin-enable
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-plugin-disable
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-plugin-marketplace
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-mcp-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-mcp-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-mcp-uninstall
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-skill-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-skill-add
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-skill-remove
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-skill-where
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-skill-agents
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-agent-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-agent-add
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-agent-remove
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-agent-where
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-agent-agents
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-run
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-update
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-detect
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-uninstall
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-adapters-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-adapters-detect
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-adapters-info
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-models-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-models-info
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-models-refresh
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-models-current
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-models-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-hooks-discover
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-hooks-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-hooks-add
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-hooks-remove
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-hooks-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-hooks-handle
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-gateway-serve
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-gateway-status
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-gateway-tokens-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-gateway-tokens-create
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-gateway-tokens-revoke
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-help
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-version
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-sessions-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-sessions-show
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-sessions-search
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-sessions-export
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-sessions-cost
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-config-get
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-config-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-config-schema
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-config-validate
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-config-reload
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-profiles-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-profiles-show
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-profiles-set
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-profiles-delete
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-profiles-apply
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-list
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-create
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-archive
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-cleanup
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-recover
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-delete
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-workspaces-sync-sessions
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-launch
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-detect-host
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-doctor
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-tui
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-remote-install
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-cli-remote-update
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-harness-mock-error-rate-limit
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-error-auth-required
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-error-crash
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-error-timeout
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-error-oom
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-runtime-hook-allow-bash
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-runtime-hook-deny-write
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-runtime-hook-timeout
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-interactive-yolo
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-interactive-prompt
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-interactive-deny
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-harness-mock-interactive-timeout
+      attributes: { mechanism: harness-mock }
+    - target: interaction-primitive:adapters-tui-command-palette
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-tui-prompt-input
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:adapters-tui-model-picker
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:transport-adapter-adapters-proxy
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-triggers-enrich
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-triggers-evaluate
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:adapters-triggers-help
+      attributes: { mechanism: cli-subcommand }
+    - target: interaction-primitive:voice-dictation
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:tts-narration
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:wake-word
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:cost-readout
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:drag-drop-files
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:paste-url
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:share-session
+      attributes: { mechanism: ui-control }
+    - target: interaction-primitive:follow-agent
+      attributes: { mechanism: ui-control }

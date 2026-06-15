@@ -1,0 +1,192 @@
+---
+nodeKind: Workflow
+id: workflow:market-risk-daily-report
+attributes:
+  displayName: "Market Risk Daily Report"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Produces the daily market risk report -- calculating Value-at-Risk
+    across portfolios using historical simulation and Monte Carlo methods,
+    computing Greeks exposures (delta, gamma, vega, theta) for derivatives
+    books, running overnight stress tests against predefined and ad-hoc
+    scenarios, monitoring position and P&L limit utilization against risk
+    appetite thresholds, flagging limit breaches for immediate escalation,
+    and reconciling end-of-day risk figures with front-office marks.
+    Delivers risk dashboard, limit utilization summary, and stress-test
+    exception report. Excludes risk model calibration and new scenario
+    design.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:quantitative-analyst
+    - target: role:compliance-officer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:financial-risk-management
+    - target: domain:capital-markets
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:model-validation
+  performed_by_org_unit:
+    - target: org-unit:market-risk-team
+    - target: org-unit:trading-desk
+---
+nodeKind: Workflow
+id: workflow:credit-risk-assessment
+attributes:
+  displayName: "Credit Risk Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-counterparty"
+  complexity: cross-team
+  description: |
+    Assesses counterparty credit risk for new and existing exposures --
+    scoring counterparty creditworthiness using internal rating models and
+    external agency ratings, calculating current and potential future
+    exposure across OTC derivatives and lending facilities, reviewing
+    collateral adequacy and margin call thresholds, evaluating netting
+    agreement enforceability across jurisdictions, stress-testing credit
+    exposures under adverse macroeconomic scenarios, and recommending
+    credit limit adjustments or risk mitigation actions such as CDS
+    hedging. Produces credit risk assessment report with exposure summary
+    and limit recommendations. Excludes trade execution and collateral
+    operations.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:compliance-officer
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:financial-risk-management
+    - target: domain:capital-markets
+    - target: domain:regulatory-finance
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:regulatory-reporting
+  performed_by_org_unit:
+    - target: org-unit:market-risk-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:liquidity-risk-monitoring
+attributes:
+  displayName: "Liquidity Risk Monitoring"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors organizational liquidity risk posture -- forecasting cash
+    inflows and outflows across time horizons from overnight to 12-month,
+    identifying funding gaps and concentration risks in liability maturity
+    profiles, calculating Liquidity Coverage Ratio and Net Stable Funding
+    Ratio for regulatory compliance, stress-testing liquidity under
+    market-wide and idiosyncratic scenarios, monitoring intraday liquidity
+    usage against central bank requirements, and evaluating contingency
+    funding plan activation triggers. Produces liquidity dashboard,
+    LCR/NSFR reports, and early-warning alerts. Excludes treasury
+    execution and funding decisions.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:compliance-officer
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:financial-risk-management
+    - target: domain:finance
+    - target: domain:regulatory-finance
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:regulatory-reporting
+  performed_by_org_unit:
+    - target: org-unit:market-risk-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:model-risk-management-review
+attributes:
+  displayName: "Model Risk Management Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews model risk across the organization per SR 11-7 / SS1/23
+    supervisory guidance -- maintaining the model inventory with tiering
+    by materiality, conducting independent validation of pricing, risk,
+    and credit models against benchmark outputs and conceptual soundness
+    criteria, tracking validation findings through remediation to closure,
+    assessing model limitations and compensating controls, reviewing model
+    performance monitoring backtests for degradation, and preparing model
+    risk reports for the model risk committee. Produces model inventory
+    updates, validation findings log, and remediation tracking dashboard.
+    Excludes model development and production deployment.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:quantitative-analyst
+    - target: role:compliance-officer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:financial-risk-management
+    - target: domain:quantitative-finance
+    - target: domain:regulatory-finance
+  triggers_responsibility:
+    - target: responsibility:model-validation
+    - target: responsibility:backtesting-validation
+  performed_by_org_unit:
+    - target: org-unit:market-risk-team
+    - target: org-unit:quant-research
+---
+nodeKind: Workflow
+id: workflow:stress-testing-scenario-design
+attributes:
+  displayName: "Stress Testing Scenario Design"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Designs and calibrates stress-testing scenarios for regulatory and
+    internal risk management -- constructing macroeconomic stress
+    narratives incorporating GDP, interest rate, credit spread, and equity
+    shock paths, designing reverse stress tests that identify scenarios
+    capable of breaching capital or liquidity thresholds, translating
+    macro narratives into granular risk-factor shocks for portfolio-level
+    impact assessment, incorporating historical crisis analogs and
+    emerging risk themes, preparing CCAR/DFAST and ICAAP scenario
+    submissions, and reviewing scenario severity against peer benchmarks.
+    Produces scenario specification documents, reverse stress test
+    results, and regulatory submission packages. Excludes scenario
+    execution and capital adequacy calculation.
+edges:
+  involves_role:
+    - target: role:risk-analyst
+    - target: role:quantitative-analyst
+    - target: role:portfolio-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:mathematical-reasoning
+  applies_to_domain:
+    - target: domain:financial-risk-management
+    - target: domain:capital-markets
+    - target: domain:regulatory-finance
+  triggers_responsibility:
+    - target: responsibility:risk-reporting
+    - target: responsibility:model-validation
+  performed_by_org_unit:
+    - target: org-unit:market-risk-team
+    - target: org-unit:portfolio-management-team

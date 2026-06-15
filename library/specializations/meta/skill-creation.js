@@ -3,6 +3,13 @@
  * @description Create a new skill with SKILL.md, README.md, and supporting files
  * @inputs { skillName: string, description: string, allowedTools: array, category: string, specialization: string, outputDir: string }
  * @outputs { success: boolean, skillPath: string, files: array, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:prompt-engineering, skill-area:plugin-systems]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:platform-engineer, role:tech-lead, role:architect]
+ *   workflows: [workflow:feature-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -190,7 +197,13 @@ export const skillMdGenerationTask = defineTask('skill-md-generation', (args, ta
         '     author: babysitter-sdk',
         '     version: "1.0.0"',
         '     category: category',
+        '   graph:',
+        '     domains: [domain:software-engineering]',
+        '     skillAreas: [skill-area:your-skill-area]',
+        '     topics: [topic:your-topic]',
+        '     roles: [role:your-role]',
         '   ---',
+        '   Read packages/atlas/graph/domain/ to find valid graph node IDs. At minimum include one domain: node in the graph frontmatter.',
         '2. Overview section',
         '3. Capabilities section with examples',
         '4. Prerequisites section',
@@ -282,6 +295,7 @@ export const skillValidationTask = defineTask('skill-validation', (args, taskCtx
         '  - name field matches directory name',
         '  - description is comprehensive',
         '  - allowed-tools are valid',
+        '  - Has graph: frontmatter block with at least one domain: node ID',
         '  - Has required sections',
         'Validate README.md:',
         '  - Has overview section',

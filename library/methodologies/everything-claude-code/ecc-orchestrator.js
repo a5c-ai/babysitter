@@ -3,6 +3,12 @@
  * @description Everything Claude Code Orchestrator - Full lifecycle from planning through TDD, implementation, multi-dimensional review, security scan, and deployment with continuous learning and context engineering
  * @inputs { request: string, projectRoot?: string, mode?: string, securityEnabled?: boolean, learningEnabled?: boolean, maxRemediationCycles?: number, confidenceThreshold?: number }
  * @outputs { success: boolean, planResult: object, tddResult: object, implementationResult: object, reviewResults: object, securityResults: object, learningExtracted: object, deploymentResult: object, summary: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

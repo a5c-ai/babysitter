@@ -1,0 +1,42 @@
+---
+nodeKind: Quota
+id: quota:tenant-acme-monthly-tokens
+attributes:
+  displayName: "Acme tenant monthly token quota"
+  quotaKind: tpm
+  limit: 100000000
+  window: "30d"
+  scope: tenant
+  notes: |
+    Hard monthly cap of 100M tokens across all models for tenant 'acme'.
+edges:
+  constrains:
+    - target: tenant:acme
+---
+nodeKind: Quota
+id: quota:per-user-rpm
+attributes:
+  displayName: "Per-user requests-per-minute"
+  quotaKind: rpm
+  limit: 60
+  window: "1m"
+  scope: role
+  notes: |
+    Standard 60 rpm per end-user across the public API.
+edges:
+  constrains:
+    - target: role:end-user
+---
+nodeKind: Quota
+id: quota:eval-team-daily-spend
+attributes:
+  displayName: "Eval team daily request cap"
+  quotaKind: rpd
+  limit: 50000
+  window: "1d"
+  scope: tenant
+  notes: |
+    Soft daily request cap for the eval team's experimentation budget.
+edges:
+  constrains:
+    - target: org-unit:ml-platform-team

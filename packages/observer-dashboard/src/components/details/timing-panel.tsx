@@ -17,20 +17,33 @@ function getStepColor(index: number): string {
   return STEP_COLORS[index % STEP_COLORS.length];
 }
 
+function getTimestampMs(value: string | undefined): number | null {
+  if (!value) return null;
+  const ms = new Date(value).getTime();
+  return Number.isFinite(ms) ? ms : null;
+}
+
 /**
- * Compute effective wall-clock duration for a task.
- * When task.duration is 0 (e.g. startedAt === finishedAt from task:post),
- * fall back to requestedAt -> resolvedAt wall-clock time.
- * For still-running tasks (no resolvedAt), use Date.now().
+ * Compute effective execution duration for a task.
+ * Prefer the parsed task duration, then explicit execution timestamps, and only
+ * fall back to requested/resolved when no execution window is available.
  */
 function getEffectiveDuration(t: TaskEffect): number {
   if (t.duration && t.duration > 0) return t.duration;
-  const start = t.requestedAt ? new Date(t.requestedAt).getTime() : 0;
-  if (!start) return 0;
-  const end = t.resolvedAt
-    ? new Date(t.resolvedAt).getTime()
-    : (t.status === "requested" ? Date.now() : start);
-  return Math.max(end - start, 0);
+
+  const execStart = getTimestampMs(t.startedAt);
+  const execEnd = getTimestampMs(t.finishedAt);
+  if (execStart != null && execEnd != null) {
+    return Math.max(execEnd - execStart, 0);
+  }
+
+  const requestedAt = getTimestampMs(t.requestedAt);
+  const resolvedAt = getTimestampMs(t.resolvedAt);
+  if (requestedAt != null && resolvedAt != null) {
+    return Math.max(resolvedAt - requestedAt, 0);
+  }
+
+  return 0;
 }
 
 /**

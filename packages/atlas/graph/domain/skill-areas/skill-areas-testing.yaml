@@ -1,0 +1,232 @@
+---
+nodeKind: SkillArea
+id: skill-area:unit-testing
+attributes:
+  displayName: "Unit Testing"
+  description: |
+    Designing fast, deterministic unit tests — AAA structure, doubles,
+    coverage discipline, and mutation-resistant assertions.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:integration-testing
+attributes:
+  displayName: "Integration Testing"
+  description: |
+    Testing across module boundaries and real dependencies (DBs,
+    queues) — test containers, fixtures, and isolation strategies.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  requires_skill_area:
+    - skill-area:unit-testing
+---
+nodeKind: SkillArea
+id: skill-area:e2e-testing
+attributes:
+  displayName: "End-to-End Testing"
+  description: |
+    Browser/UI E2E testing with Playwright/Cypress — flake control,
+    parallelization, fixtures, and CI orchestration.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  uses_tool:
+    - tool:playwright
+    - tool:cypress
+---
+nodeKind: SkillArea
+id: skill-area:contract-testing
+attributes:
+  displayName: "Contract Testing"
+  description: |
+    Consumer-driven contract testing (Pact, Spring Cloud Contract)
+    between services to catch integration drift.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mutation-testing
+attributes:
+  displayName: "Mutation Testing"
+  description: |
+    Measuring test-suite efficacy by injecting faults — Stryker,
+    PIT, mutmut — and reading mutation scores.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:fuzz-testing
+attributes:
+  displayName: "Fuzz Testing"
+  description: |
+    Coverage-guided fuzzing (libFuzzer, AFL, Go fuzz) and structure-
+    aware fuzzers for parsers and protocols.
+  domains:
+    - specialization:qa-testing-automation
+    - specialization:security-research
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:performance-testing
+attributes:
+  displayName: "Performance Testing"
+  description: |
+    Microbenchmarks and service-level perf tests — workload modeling,
+    warmup, and steady-state measurement.
+  domains:
+    - specialization:qa-testing-automation
+    - specialization:performance-optimization
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:load-testing
+attributes:
+  displayName: "Load Testing"
+  description: |
+    Distributed load generation (k6, Gatling, Locust) — scenario
+    design, ramp profiles, and SLO-validated runs.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:accessibility-testing
+attributes:
+  displayName: "Accessibility Testing"
+  description: |
+    Automated and manual a11y testing — axe, screen-reader walkthroughs,
+    and keyboard-only verification.
+  domains:
+    - specialization:qa-testing-automation
+    - topic:accessibility
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  requires_skill_area:
+    - skill-area:web-accessibility
+---
+nodeKind: SkillArea
+id: skill-area:visual-regression-testing
+attributes:
+  displayName: "Visual Regression Testing"
+  description: |
+    Snapshot-based visual diffing for UI — Percy, Chromatic, Playwright
+    screenshots — with stable rendering and review flows.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:service-mocking
+attributes:
+  displayName: "Service Mocking"
+  description: |
+    Replacing upstream services with deterministic doubles during tests -
+    HTTP stubs, fake brokers, sandbox APIs, and contract-aligned mock behavior.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  requires_skill_area:
+    - skill-area:integration-testing
+---
+nodeKind: SkillArea
+id: skill-area:acceptance-testing
+attributes:
+  displayName: "Acceptance Testing"
+  description: |
+    Validating business-visible outcomes against user stories and acceptance
+    criteria - scenario coverage, stakeholder-readable cases, and release gates.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+    - target: specialization:atdd-tdd
+      confidence: secondary
+    - target: specialization:cleanroom
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:e2e-testing
+---
+nodeKind: SkillArea
+id: skill-area:regression-testing
+attributes:
+  displayName: "Regression Testing"
+  description: |
+    Building regression suites that lock in previously-fixed behavior -
+    coverage selection, bug reproduction harnesses, and change-risk triage.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary
+  requires_skill_area:
+    - skill-area:integration-testing
+---
+nodeKind: SkillArea
+id: skill-area:smoke-testing
+attributes:
+  displayName: "Smoke Testing"
+  description: |
+    Running fast confidence checks after deploys or release candidates -
+    core-path validation, environment sanity, and go/no-go release signals.
+  domains:
+    - specialization:qa-testing-automation
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:qa-testing-automation
+      confidence: primary

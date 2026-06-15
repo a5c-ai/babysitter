@@ -1,0 +1,17 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-tools-adapter
+attributes:
+  packageId: "@a5c-ai/tools-adapter"
+  packageName: "@a5c-ai/tools-adapter"
+  displayName: "Tools Adapter"
+  description: "Tool lifecycle layer providing a registry, dispatch, schema translation, and hook bridging on top of transport-adapter codecs. Routes tool calls between agents and MCP servers."
+  role: "tool-routing"
+  whenToUse: "Depend on this when you need to register, dispatch, or translate tool schemas across harnesses, or when bridging MCP tool calls into the adapters pipeline."
+  workspacePath: packages/tools-adapter
+  moduleType: typescript
+  surfaceKinds:
+    - tool-registry
+    - mcp-tool-routing
+  sourceOfTruthRole: wrapper-over-graph
+  publishedTo: npm
+  versionPolicy: semver

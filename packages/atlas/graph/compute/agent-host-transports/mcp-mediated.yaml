@@ -1,0 +1,32 @@
+nodeKind: AgentHostTransport
+id: agent-host-transport:mcp-mediated
+attributes:
+  displayName: "MCP-mediated"
+  kind: mcp-mediated
+  description: |
+    The host speaks MCP to the agent process, treating the agent itself
+    as an MCP server. Useful when an agent product is designed to be
+    embedded in another agent's tool surface, or when a dashboard needs
+    to drive the agent through the same wire protocol it uses for tool
+    servers.
+  inboundMessageFormat: |
+    Standard MCP JSON-RPC requests. Driving the agent is expressed as
+    `tools/call` (or, on newer specs, `prompts/get` plus `sampling/create`)
+    against tools the agent registers (e.g. `run_task`, `send_message`).
+    The actual JSON-RPC framing depends on the underlying MCPTransport
+    (stdio / streamable-http / http-sse / websocket).
+  outboundMessageFormat: |
+    Standard MCP JSON-RPC responses and notifications. Streaming output
+    is delivered via `notifications/progress` and tool-result content
+    blocks; final result is the JSON-RPC `tools/call` response. From
+    spec revision 2025-06-18, structured tool output and resource links
+    are first-class.
+  signalForwarding: |
+    Cancel is expressed via the JSON-RPC `notifications/cancelled`
+    notification carrying the request id to cancel. Session-level
+    shutdown follows the underlying MCPTransport's lifecycle (stdin EOF
+    on stdio; DELETE / 404 on streamable-http).
+  ptySemantics: |
+    Not applicable — MCP is a structured JSON-RPC channel; no terminal
+    semantics.
+edges: {}

@@ -2,6 +2,13 @@
 name: code-signing-specialist
 description: Expert in code signing workflows across all platforms, certificate management, and timestamping
 expertise: [code-signing, certificates, authenticode, developer-id, gpg]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:application-security-testing, skill-area:desktop-system-integration]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:hmac-signing]
 ---
 
 # code-signing-specialist

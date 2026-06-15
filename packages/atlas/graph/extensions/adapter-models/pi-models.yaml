@@ -1,0 +1,34 @@
+nodeKind: AdapterModel
+id: adapter-model:pi:default
+attributes:
+  harness: pi
+  modelId: default
+  displayName: Default Model
+  deprecated: false
+  contextWindow: 128000
+  maxOutputTokens: 8192
+  supportsThinking: false
+  supportsToolCalling: true
+  supportsParallelToolCalls: false
+  supportsToolCallStreaming: true
+  supportsJsonMode: false
+  supportsStructuredOutput: false
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: false
+  supportsImageOutput: false
+  supportsFileInput: false
+  cliArgKey: "--model"
+  cliArgValue: default
+  lastUpdated: "2026-05-27"
+  source: bundled
+  codexResponses:
+    cacheAffinityHeader: "session-id"
+    legacyProxyIncompatibleHeader: "session_id"
+    contextWindowFixes:
+      - modelId: openai-codex/gpt-5.3-codex-spark
+        contextWindow: 128000
+        introducedIn: "0.76.0"
+edges:
+  model_for:
+    - target: agent:pi

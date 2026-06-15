@@ -1,0 +1,29 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-agent-platform
+attributes:
+  packageId: "@a5c-ai/genty-platform"
+  packageName: "@a5c-ai/genty-platform"
+  displayName: "Genty Platform"
+  description: "Agent platform layer providing harness integration, governance, interaction, and storage. Exposes subpath modules for anycli, API, CLI, cost tracking, daemon, governance, harness, interaction, observability, and runtime. Hosts the `babysitter-harness` binary."
+  role: "agent-platform"
+  whenToUse: "Depend on this when you need platform-level agent services like harness integration, governance policies, cost tracking, or the daemon runtime."
+  workspacePath: packages/genty/platform
+  moduleType: typescript
+  surfaceKinds:
+    - agent-runtime
+    - bin-entrypoint
+    - cli
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/genty/platform/package.json (subpath exports for
+  # ./anycli, ./api, ./cli, ./cost, ./daemon, ./governance, ./harness,
+  # ./interaction, ./observability, ./runtime). Bin: babysitter-harness.
+edges:
+  references_path:
+    - target: path:a5c-runs-dir
+# `babysitter-harness` runtime command set
+  # (HARNESS_RUNTIME_COMMANDS in sdk program.ts) is shared between the
+  # sdk and agent packages; the harness bin lives in agent-platform.
+  exposes_subcommand:
+    - target: interaction-primitive:babysitter-sdk-cli-harness-runtime

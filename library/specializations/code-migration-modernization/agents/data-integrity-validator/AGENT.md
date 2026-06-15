@@ -7,6 +7,13 @@ model: opus
 skills:
   - data-migration-validator
   - etl-pipeline-builder
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:database-migrations-zero-downtime, skill-area:etl-pipelines]
+  roles: [role:data-engineer, role:qa-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Data Integrity Validator Agent

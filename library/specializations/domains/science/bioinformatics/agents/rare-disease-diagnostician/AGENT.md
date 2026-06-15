@@ -12,6 +12,12 @@ expertise:
 metadata:
   version: "1.0"
   category: bioinformatics
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:graph-algorithms, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:biomedical-engineer, role:research-scientist]
 ---
 
 # Rare Disease Diagnostician Agent

@@ -1,0 +1,14 @@
+nodeKind: ExtensionInterface
+id: extension-interface:optimization
+attributes:
+  interfaceVersion: "1.0.0"
+  description: Optimization
+  displayName: "Optimization"
+  concern: "Cost, latency, and quality optimization across model and tool choices."
+  surface: |
+    `route(task) -> ModelVersion`, `budget(run)`, `score(outcome)`.
+    Drives multi-model routing and adaptive sampling.
+  builtInDefault: |
+    Static default model from settings.json; no routing; no budget.
+  notableImpls: []
+edges: {}

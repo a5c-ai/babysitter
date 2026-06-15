@@ -1,0 +1,30 @@
+nodeKind: Skill
+id: skill:python-django-debug
+attributes:
+  displayName: "Python Django Debug"
+  description: |
+    Systematic debugging skill for Django applications: reproduces the
+    failing request, isolates middleware vs view vs ORM, inspects query
+    plans, and proposes a minimal fix.
+  keyword: python-django-debug
+  entrypoint: SKILL.md
+  domains:
+    - specialization:backend-python-django
+  roles:
+    - role:debugger
+  requiresLanguages:
+    - language:python
+  requiresFrameworks:
+    - framework:django
+  sourceRef: source-ref:a5c-plugins-python-django-debug
+edges:
+  applies_to:
+    - target: specialization:backend-python-django
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection
+  sourced_from:
+    - target: source-ref:a5c-plugins-python-django-debug
+  addresses:
+    - target: skill-area:integration-testing
+    - target: skill-area:postgres-tuning

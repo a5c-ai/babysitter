@@ -1,0 +1,11 @@
+nodeKind: ProactiveSurface
+id: proactive-surface:claude-code-prompt-suggestion
+attributes:
+  displayName: "Prompt suggestion"
+  surfaceKind: prompt-suggestion
+  trigger: turn-end
+  outputChannel: sidebar
+  description: |
+    Generates a suggested next user prompt at turn end (foreground source
+    "prompt_suggestion"). Disabled in coordinator/bare modes and on bg
+    failures.

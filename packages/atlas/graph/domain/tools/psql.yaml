@@ -1,0 +1,13 @@
+nodeKind: Tool
+id: tool:psql
+attributes:
+  displayName: "psql"
+  homepageUrl: "https://www.postgresql.org/docs/current/app-psql.html"
+  kind: sql-tool
+  description: |
+    PostgreSQL interactive command-line client.
+edges:
+  belongs_to_language:
+    - target: language:sql
+  used_for:
+    - target: skill-area:backend-data-persistence

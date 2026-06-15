@@ -6,6 +6,13 @@ backlog-id: AG-012
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:devops-engineer]
+  skillAreas: [skill-area:containerization]
+  topics: [topic:test-driven-development, topic:twelve-factor-app]
+
 ---
 
 # test-environment-expert

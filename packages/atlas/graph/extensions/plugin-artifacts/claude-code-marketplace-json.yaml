@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-marketplace-json
+attributes:
+  artifactId: plugin-artifact:claude-code-marketplace-json
+  displayName: "Claude Code marketplace.json"
+  targetId: plugin-target:claude-code
+  artifactKind: manifest
+  pathPattern: ".claude-plugin/marketplace.json"
+  installerSurface: "marketplace.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

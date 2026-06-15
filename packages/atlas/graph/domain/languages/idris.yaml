@@ -1,0 +1,15 @@
+nodeKind: Language
+id: language:idris
+attributes:
+  displayName: "Idris"
+  paradigms:
+    - functional
+    - pure
+    - dependently-typed
+  description: |
+    Idris — a general-purpose pure-functional language with full
+    dependent types, used for theorem-proving and verified programming.
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:mathematics

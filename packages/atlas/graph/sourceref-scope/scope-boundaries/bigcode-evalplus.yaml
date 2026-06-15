@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:bigcode-evalplus.scope
+attributes:
+  subjectId: benchmark:bigcode-evalplus
+  inScope: |
+    EvalPlus harness — augments HumanEval and MBPP test suites with thousands of additional generated tests to catch overfitting on the original test sets.
+  outOfScope: |
+    Repository-scale tasks, multi-file refactoring, agentic tool-use, and benchmarks beyond HumanEval/MBPP coverage.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:bigcode-evalplus

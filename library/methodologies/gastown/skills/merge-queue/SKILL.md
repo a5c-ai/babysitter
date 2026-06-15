@@ -2,17 +2,14 @@
 name: merge-queue
 description: Process the Refinery merge queue - collect agent work, detect and resolve conflicts, merge in dependency order, and verify integration.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Merge Queue (Refinery)
-
-## Overview
-
-The Refinery is Gas Town's per-rig merge queue processor. It collects completed work from agents, detects conflicts between branches, resolves them (auto where possible), merges in dependency order, and verifies the integration.
-
-## When to Use
-
-- After convoy beads are complete and ready to merge
 - When multiple agents have worked on overlapping areas
 - When integration testing is needed before landing
 - When conflict resolution requires coordination

@@ -1,0 +1,25 @@
+nodeKind: Language
+id: language:protobuf
+attributes:
+  displayName: "Protocol Buffers"
+  paradigms:
+    - declarative
+    - schema
+    - idl
+  description: |
+    Protocol Buffers (protobuf) is Google's language-neutral, platform-neutral
+    Interface Definition Language (IDL) and binary serialization format.
+    Messages are defined in .proto files and compiled by protoc into
+    language-specific code for Go, Python, Java, C++, TypeScript, and many
+    other languages.
+
+    Protobuf encoding is significantly more compact and faster to serialize/
+    deserialize than JSON or XML, making it ideal for high-throughput RPC
+    and storage. It is the wire format for gRPC, Google Cloud APIs, and many
+    internal service meshes. Proto3 simplified the schema language; editions
+    (proto3.5+) refine field presence semantics. The buf CLI and BSR (Buf
+    Schema Registry) provide modern tooling for schema management and
+    breaking-change detection.
+edges:
+  applies_to:
+    - target: domain:software-engineering

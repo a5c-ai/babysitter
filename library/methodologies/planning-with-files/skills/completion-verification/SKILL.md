@@ -1,3 +1,12 @@
+---
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
+---
+
 # Completion Verification
 
 Verify all phases are complete with weighted quality scoring before allowing session exit.

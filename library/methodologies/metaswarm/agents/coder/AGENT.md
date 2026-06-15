@@ -8,17 +8,15 @@ expertise:
   - Spec-driven coding
   - File scope compliance
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Coder Agent
-
-## Role
-
-Implements work units using strict TDD methodology: write tests first, watch them fail, then implement. Operates within declared file scope and produces completion reports.
-
-## Expertise
-
-- TDD discipline (red-green-refactor)
 - TypeScript/JavaScript implementation
 - Spec-driven coding against DoD items
 - File scope compliance (never modify files outside declared scope)

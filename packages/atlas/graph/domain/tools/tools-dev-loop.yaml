@@ -1,0 +1,65 @@
+---
+nodeKind: Tool
+id: tool:tilt
+attributes:
+  displayName: "Tilt"
+  homepageUrl: "https://tilt.dev"
+  kind: orchestrator
+  description: |
+    Multi-service local Kubernetes dev tool that watches source files
+    and rebuilds/redeploys with live-reload semantics.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:containerization
+  used_for:
+    - target: skill-area:local-development
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:skaffold
+      comparison: "Kubernetes dev loops — Tilt has a UI dashboard; Skaffold is CLI-first"
+---
+nodeKind: Tool
+id: tool:skaffold
+attributes:
+  displayName: "Skaffold"
+  homepageUrl: "https://skaffold.dev"
+  kind: orchestrator
+  description: |
+    Google CLI for continuous Kubernetes development — build, push,
+    deploy, and tail logs in a watch loop.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:containerization
+  used_for:
+    - target: skill-area:local-development
+    - target: skill-area:developer-experience
+  alternative_to:
+    - target: tool:tilt
+      comparison: "Kubernetes dev loops — Skaffold is CLI-first; Tilt has a UI dashboard"
+---
+nodeKind: Tool
+id: tool:colima
+attributes:
+  displayName: "Colima"
+  homepageUrl: "https://github.com/abiosoft/colima"
+  kind: container
+  description: |
+    Container runtime for macOS/Linux backed by Lima; Docker- and
+    containerd-compatible without Docker Desktop.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:containerization
+  used_for:
+    - target: skill-area:local-development
+    - target: skill-area:containerization
+  implements_stack_part:
+    - target: stack-part:container-runtime
+  alternative_to:
+    - target: tool:docker-compose
+      comparison: "Local container tools — Colima provides the container runtime; Docker Compose orchestrates containers"

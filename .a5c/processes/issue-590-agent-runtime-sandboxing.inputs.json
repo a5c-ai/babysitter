@@ -1,0 +1,105 @@
+{
+  "issueNumber": 590,
+  "title": "agent-runtime: process isolation, sandboxing, and network policy",
+  "baseBranch": "staging",
+  "branchName": "agent/issue-590",
+  "labels": [
+    "enhancement",
+    "priority:high",
+    "ready-for-dev",
+    "effort:large",
+    "agent-runtime",
+    "P2",
+    "risk:high"
+  ],
+  "issueBody": "## Summary\nNo process isolation in agent-runtime:\n\n### Local Executor\nSpawns with full parent env access. No namespaces, chroot, seccomp, or capabilities restriction. Child processes can read/write host filesystem, access credentials, consume unbounded resources.\n\n### Network\nNo network policy enforcement, DNS filtering, proxy/firewall integration, or subnet isolation.\n\n### SSH/Docker gaps\n- SSH: no host key verification (StrictHostKeyChecking=no), no retry, no pooling\n- Docker: no daemon availability check, no image pull verification, no resource limits (--cpus/--memory)\n\nRef: `docs/agent-layer-gaps.md`",
+  "comments": [
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T06:54:55Z",
+      "body": "**Related:** #585 (K8s executor needs sandboxing)\n**Related:** #593 (background process state transitions need isolation awareness)"
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T07:40:34Z",
+      "body": "Triage summary: agent-runtime lacks a shared execution policy/sandboxing layer, leaving local, Docker, SSH, and background execution with unsafe defaults around environment, filesystem, network, and resources. Root cause: execution is thin adapters around child_process.spawn, docker run, and ssh with no shared sandbox or policy abstraction. Recommended approach: add explicit execution policy model covering env allow/deny lists, filesystem mounts/bounds, network mode/egress policy, OS resource limits, sandbox mode, Docker security/preflight behavior, and SSH host-key policy. Wire through ExecutionConfig and all executors. Make local execution clearly unsafe-by-default or restricted-by-policy. Update tests to assert secure defaults and explicit opt-in for insecure legacy behavior."
+    }
+  ],
+  "relatedIssues": [
+    {
+      "issueNumber": 585,
+      "title": "agent-runtime: crash recovery, persistent queue, K8s executor",
+      "relationship": "Related but not duplicate. K8s executor needs sandboxing, but persistent queue/crash recovery is out of scope for issue #590."
+    },
+    {
+      "issueNumber": 593,
+      "title": "agent-runtime: background process gaps — state transitions, signals, backpressure",
+      "relationship": "Related but not duplicate. Background process lifecycle states/signals/backpressure are broader than #590, but #590 should add isolation-aware policy hooks and output/resource caps where needed."
+    }
+  ],
+  "reuseAuditFindings": {
+    "reuseAuditConfig": "No .a5c/reuse-audit.json found in this checkout.",
+    "processLibrary": "No .a5c/process-library/ directory found. Existing process patterns reviewed from .a5c/processes/issue-181-run-completed-idempotency.mjs and .a5c/processes/issue-485-sonnet-proxy-tool-translation.mjs.",
+    "matchingInfrastructure": [
+      "packages/agent-runtime/src/execution/types.ts defines ExecutionConfig unions without policy fields.",
+      "packages/agent-runtime/src/execution/modes/local.ts uses child_process.spawn and currently inherits process.env.",
+      "packages/agent-runtime/src/execution/modes/docker.ts builds docker run arguments but lacks security/resource/preflight policy.",
+      "packages/agent-runtime/src/execution/modes/ssh.ts builds ssh arguments and currently disables strict host-key checking.",
+      "packages/agent-runtime/src/execution/modes/kubernetes.ts builds a structural Job manifest and can map policy to manifest fields where possible.",
+      "packages/agent-runtime/src/backgroundProcessRegistry.ts spawns shell background processes with merged parent env and unbounded output buffers.",
+      "packages/agent-runtime/src/resources/manager.ts tracks logical budgets but does not enforce OS resource limits.",
+      "packages/agent-runtime/src/execution/__tests__/provider.test.ts currently tests Docker/SSH command construction and encodes insecure SSH behavior.",
+      "docs/agent-layer-gaps.md documents the L5 process isolation, Docker, SSH, resource, and background-process gaps."
+    ],
+    "noMatchingExistingInfrastructureFoundFor": [
+      "shared execution policy model",
+      "environment allowlist/denylist resolver",
+      "filesystem root/mount validation helper",
+      "network policy enforcement or normalization",
+      "Docker daemon/image preflight seam",
+      "SSH known_hosts or pinned host-key policy",
+      "local namespace/chroot/seccomp enforcement",
+      "OS-level CPU/memory/pids enforcement connected to ResourceManager"
+    ]
+  },
+  "targetFiles": [
+    "packages/agent-runtime/src/execution/types.ts",
+    "packages/agent-runtime/src/execution/provider.ts",
+    "packages/agent-runtime/src/execution/index.ts",
+    "packages/agent-runtime/src/execution/modes/local.ts",
+    "packages/agent-runtime/src/execution/modes/docker.ts",
+    "packages/agent-runtime/src/execution/modes/ssh.ts",
+    "packages/agent-runtime/src/execution/modes/kubernetes.ts",
+    "packages/agent-runtime/src/backgroundProcessRegistry.ts",
+    "packages/agent-runtime/src/background/state.ts",
+    "packages/agent-runtime/src/resources/manager.ts",
+    "packages/agent-runtime/src/resources/types.ts",
+    "packages/agent-runtime/src/execution/__tests__/provider.test.ts",
+    "packages/agent-runtime/src/resources/__tests__/manager.test.ts",
+    "docs/agent-layer-gaps.md",
+    "packages/agent-core/src/backgroundProcessRegistry.ts",
+    "packages/genty/platform/src/harness/backgroundProcessRegistry.ts"
+  ],
+  "testTargets": [
+    "packages/agent-runtime/src/execution/__tests__/provider.test.ts",
+    "packages/agent-runtime/src/execution/__tests__/policy.test.ts",
+    "packages/agent-runtime/src/backgroundProcessRegistry.test.ts",
+    "packages/agent-runtime/src/resources/__tests__/manager.test.ts"
+  ],
+  "qualityCommands": [
+    "npm run test --workspace=@a5c-ai/agent-runtime",
+    "npm run build --workspace=@a5c-ai/agent-runtime",
+    "npm run verify:metadata"
+  ],
+  "maxVerificationAttempts": 2,
+  "acceptanceCriteria": [
+    "ExecutionConfig exposes a shared, typed execution policy model for env, filesystem, network, resources, sandbox behavior, Docker, SSH, and Kubernetes-compatible fields.",
+    "Local execution no longer inherits parent environment by default and fails fast for requested isolation guarantees it cannot enforce.",
+    "Docker execution has deterministic secure defaults, preflight seams, resource limit flags, read-only/cap/security/user/network/DNS policy support, and explicit insecure opt-ins.",
+    "SSH execution verifies host keys by default and only emits StrictHostKeyChecking=no under an explicit insecure opt-in.",
+    "Background process spawning uses the same env/cwd/resource/output policy semantics where in scope and exposes output truncation/limit metadata.",
+    "ResourceManager has a coherent policy/admission seam for OS resource limits without absorbing issue #585 crash recovery scope.",
+    "Tests cover secure defaults, explicit insecure legacy opt-ins, unsupported local guarantees, and Docker/SSH command construction without requiring live Docker/SSH/Kubernetes dependencies.",
+    "Documentation records secure defaults, migration behavior, local limitations, and remaining unsupported enforcement guarantees."
+  ]
+}

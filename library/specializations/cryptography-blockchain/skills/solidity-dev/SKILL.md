@@ -2,6 +2,11 @@
 name: solidity-dev
 description: Deep expertise in Solidity language features, patterns, and best practices for secure smart contract development. Covers ERC standards, gas optimization, upgradeable contracts, and security patterns.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-development-testing, skill-area:smart-contract-security]
+  roles: [role:backend-engineer, role:security-engineer]
 ---
 
 # Solidity Development Skill

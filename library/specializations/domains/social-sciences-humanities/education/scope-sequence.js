@@ -5,6 +5,13 @@
  * @outputs { success: boolean, scope: object, sequence: object, pacingGuide: object, artifacts: array }
  * @recommendedSkills SK-EDU-008 (standards-alignment-mapping), SK-EDU-002 (learning-objectives-writing)
  * @recommendedAgents AG-EDU-002 (curriculum-development-specialist)
+ *
+ * @graph
+ *   domains: [domain:education]
+ *   specializations: [specialization:instructional-design]
+ *   skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

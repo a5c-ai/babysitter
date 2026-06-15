@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: People
   agent-id: AG-011
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:talent-acquisition-strategy, skill-area:hiring-interviewing, skill-area:organizational-design]
+  workflows: [workflow:product-discovery]
+  roles: [role:hr-manager, role:talent-recruiter, role:strategic-planner]
 ---
 
 # Startup Talent Acquisition Agent

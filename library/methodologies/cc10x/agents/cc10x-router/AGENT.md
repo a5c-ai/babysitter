@@ -9,17 +9,15 @@ expertise:
   - Remediation loop management
   - Session memory persistence
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# CC10X Router Agent
-
-## Role
-
-Single entry point for all CC10X development workflows. Detects user intent, loads persistent memory, dispatches to the appropriate workflow, validates agent contracts, manages remediation loops, and persists learnings.
-
-## Expertise
-
-- Intent classification with priority routing (ERROR > PLAN > REVIEW > BUILD)
 - DAG-based task orchestration (forward-only, no cycles)
 - Router Contract validation (STATUS, BLOCKING, REQUIRES_REMEDIATION)
 - Remediation loop management (2-cycle cap)

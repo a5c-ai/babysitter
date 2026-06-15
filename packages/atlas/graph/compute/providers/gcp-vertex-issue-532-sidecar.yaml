@@ -1,0 +1,6 @@
+extendsNode:
+  nodeKind: Provider
+  id: provider:gcp-vertex
+edges:
+  serves:
+    - model:claude-opus-4-8@current

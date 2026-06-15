@@ -1,0 +1,14 @@
+nodeKind: Specialization
+id: specialization:production-contract
+attributes:
+  displayName: "Production Contract"
+  description: |
+    Process authoring convention that records the user-visible assertion a run
+    must satisfy in production terms. It keeps implementation, validation, and
+    review focused on observable product behavior rather than test-suite status
+    alone.
+edges:
+  specializes:
+    - domain:software-engineering
+  documented_by:
+    - target: page:library-production-contract

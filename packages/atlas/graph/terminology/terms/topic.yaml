@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:topic
+attributes:
+  canonicalDefinitionId: definition:topic.canonical
+  displayName: "Topic"
+  kind: concept
+  references:
+    - "NodeKind:Topic"
+  description: |
+    Granular topic (oauth-flows, ssl-certs, ...)
+edges:
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:software-engineering

@@ -1,0 +1,34 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-gemini-plugin-json
+attributes:
+  artifactId: plugin-artifact:babysitter-gemini-plugin-json
+  displayName: "babysitter-gemini plugin.json"
+  targetId: plugin-target:gemini-cli
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json + gemini-extension.json"
+  scriptVariants:
+    - "shell-hooks"
+  contextFiles:
+    - plugins/babysitter-gemini/plugin.json
+    - plugins/babysitter-gemini/gemini-extension.json
+edges:
+  emits_artifact:
+    - target: plugin-target:gemini-cli
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-gemini-extension-json
+attributes:
+  artifactId: plugin-artifact:babysitter-gemini-extension-json
+  displayName: "babysitter-gemini gemini-extension.json"
+  targetId: plugin-target:gemini-cli
+  artifactKind: manifest
+  pathPattern: "gemini-extension.json"
+  installerSurface: "gemini-extension.json"
+  scriptVariants:
+    - "gemini-extension"
+  contextFiles:
+    - plugins/babysitter-gemini/gemini-extension.json
+edges:
+  emits_artifact:
+    - target: plugin-target:gemini-cli

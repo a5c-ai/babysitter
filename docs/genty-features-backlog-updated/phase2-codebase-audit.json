@@ -1,0 +1,1123 @@
+[
+  {
+    "gapId": "GAP-AGENT-001",
+    "title": "Sub-Harness Invocation with Isolation",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/invoker.ts and invoker/launch.ts exist. piWrapper supports PiSessionHandle with subscribe() for streaming. subprocess intrinsic exists at packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts with SubprocessInvocation/SubprocessResult types. However, context isolation, model override per invocation, and background execution with progress tracking are not fully wired.",
+    "existsAt": ["packages/genty/platform/src/harness/invoker.ts", "packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts", "packages/genty/platform/src/harness/piWrapper.ts"]
+  },
+  {
+    "gapId": "GAP-AGENT-003",
+    "title": "Process Orchestration with Effect Routing",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Process orchestration exists via processContext.ts. capabilityRouter.ts in genty platform provides task-to-harness matching. However, no coordinator process template pattern or dynamic harness selection based on capabilities is wired in the orchestration loop.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/processContext.ts", "packages/genty/platform/src/harness/capabilityRouter.ts"]
+  },
+  {
+    "gapId": "GAP-AGENT-004",
+    "title": "Built-in Process Templates",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "library/methodologies/ has many methodology definitions (gsd, bdd, atdd-tdd, etc.). processes/ has process definitions. However, templates are not packaged with specific harness+capability configurations as described in target state.",
+    "existsAt": ["library/methodologies/", "library/processes/"]
+  },
+  {
+    "gapId": "GAP-AGENT-005",
+    "title": "Cross-Run Communication",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No AGENT_MESSAGE event type in journal events. No message routing between runs. The journal type field is a generic string, and no cross-run messaging is implemented."
+  },
+  {
+    "gapId": "GAP-AGENT-006",
+    "title": "Cross-Run State Sharing",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "SessionContext in packages/genty/platform/src/session/context.ts provides cross-run shared knowledge and notes. SessionHistory in session/history.ts stores accumulated decisions and run summaries. This is a significant step toward cross-run state sharing, though full session-level state that persists automatically across all runs is not complete.",
+    "existsAt": ["packages/genty/platform/src/session/context.ts", "packages/genty/platform/src/session/history.ts"]
+  },
+  {
+    "gapId": "GAP-AGENT-007",
+    "title": "Delegation Policy Layer",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full governance engine at packages/genty/platform/src/governance/ with policy engine (engine.ts), categories (A/B/C/D tiers), sandbox policy (sandboxPolicy.ts), posture bridge (postureBridge.ts), permission events, and mandate system. SDK-level policy engine at packages/babysitter-sdk/src/runtime/policy/ with PolicyRule types including rate-limit, permission, resource-limit, trust-level. Agentic tool filtering via sandbox.ts in plugins.",
+    "existsAt": ["packages/genty/platform/src/governance/engine.ts", "packages/genty/platform/src/governance/sandboxPolicy.ts", "packages/genty/platform/src/governance/postureBridge.ts", "packages/babysitter-sdk/src/runtime/policy/engine.ts"]
+  },
+  {
+    "gapId": "GAP-AGENT-008",
+    "title": "Harness Selection Policies",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "selectionPolicies.ts in genty platform provides 4 named policies: cost-optimized, latency-optimized, capability-first, user-preferred. capabilityRouter.ts provides selectHarness with scoring against task requirements. Full routing with capability matching, model preference, tool requirements.",
+    "existsAt": ["packages/genty/platform/src/harness/selectionPolicies.ts", "packages/genty/platform/src/harness/capabilityRouter.ts"]
+  },
+  {
+    "gapId": "GAP-BRK-001",
+    "title": "Breakpoint Approval Chains and Escalation",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "approvalChains.ts in genty platform provides multi-stage approval chains with ApprovalChainStep (expert, timeoutMs, escalateTo), QuorumConfig, and chain validation. Fully implemented with escalation paths and timeout-based escalation.",
+    "existsAt": ["packages/genty/platform/src/breakpoints/approvalChains.ts"]
+  },
+  {
+    "gapId": "GAP-BRK-002",
+    "title": "Breakpoint Delegation to External Systems",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "delegation.ts and delegationTypes.ts in genty platform provide webhook-based breakpoint routing with DelegationRule (pattern, webhookUrl, method, headers, timeoutMs, retries). Full async approval workflow with configurable timeouts.",
+    "existsAt": ["packages/genty/platform/src/breakpoints/delegation.ts", "packages/genty/platform/src/breakpoints/delegationTypes.ts"]
+  },
+  {
+    "gapId": "GAP-BRK-003",
+    "title": "Breakpoint Analytics and SLA Tracking",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No breakpoint analytics or SLA tracking found in the codebase. breakpoint:history in rules.ts handles rule matching but not analytics."
+  },
+  {
+    "gapId": "GAP-ECO-001",
+    "title": "CC Plugin Compatibility Layer",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/plugins/ has loader.ts, sandbox.ts, types.ts, and version-check.ts. Plugin manifest reading, sandbox enforcement, and version compatibility exist. However, no explicit CC plugin.json manifest adapter that maps CC hook types to babysitter hook types.",
+    "existsAt": ["packages/genty/platform/src/plugins/"]
+  },
+  {
+    "gapId": "GAP-ECO-002",
+    "title": "CC Marketplace Protocol Support",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "Babysitter has its own marketplace system in packages/babysitter-sdk/src/blueprints/marketplace.ts with git-based cloning. No CC marketplace format compatibility adapter found."
+  },
+  {
+    "gapId": "GAP-ECO-003",
+    "title": "Plugin Trust, Provenance, and Blocklist",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Plugin sandbox enforcement in packages/genty/platform/src/plugins/sandbox.ts provides permission tracking per plugin (fs:read, fs:write, net:outbound, etc.). Governance engine provides trust-level policy rules. However, no explicit blocklist, provenance tracking, or impersonation detection.",
+    "existsAt": ["packages/genty/platform/src/plugins/sandbox.ts", "packages/genty/platform/src/governance/engine.ts"]
+  },
+  {
+    "gapId": "GAP-ECO-004",
+    "title": "Plugin Auto-Update and Versioning",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/plugins/version-check.ts provides semver compatibility checks. packages/babysitter-sdk/src/blueprints/registry.ts tracks installed plugins with versions. However, no auto-update mechanism, startup reconciliation, or rollback on failed updates.",
+    "existsAt": ["packages/genty/platform/src/plugins/version-check.ts", "packages/babysitter-sdk/src/blueprints/registry.ts"]
+  },
+  {
+    "gapId": "GAP-ECO-005",
+    "title": "Plugin Validation and Diagnostics",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Plugin loader in packages/genty/platform/src/plugins/loader.ts reads manifests. version-check.ts does compatibility checking. However, no dedicated plugin:validate command, structured error types, or diagnostic UI.",
+    "existsAt": ["packages/genty/platform/src/plugins/loader.ts", "packages/genty/platform/src/plugins/version-check.ts"]
+  },
+  {
+    "gapId": "GAP-ROUTE-001",
+    "title": "Smart Effect Routing Engine",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "capabilityRouter.ts provides full routing with TaskRequirements (requiredCapabilities, preferredModel, requiredTools, requiredPermissions, preferredHarness) and HarnessCandidate scoring. selectionPolicies.ts adds policy-based evaluation (cost-optimized, latency-optimized, capability-first, user-preferred). modelSelection.ts bridges task model preferences with routing.",
+    "existsAt": ["packages/genty/platform/src/harness/capabilityRouter.ts", "packages/genty/platform/src/harness/selectionPolicies.ts", "packages/genty/platform/src/harness/modelSelection.ts"]
+  },
+  {
+    "gapId": "GAP-ROUTE-002",
+    "title": "Effect Priority and Scheduling",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "parallelStrategies.ts in SDK provides strategy patterns (all-or-nothing, best-effort, first-success, quorum). Scheduler hints exist in task definitions. However, no priority queue or deadline-based scheduling for effects.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/parallelStrategies.ts", "packages/babysitter-sdk/src/runtime/types.ts"]
+  },
+  {
+    "gapId": "GAP-ROUTE-003",
+    "title": "Effect Result Caching and Deduplication",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Replay engine in packages/babysitter-sdk/src/runtime/replay/ provides within-run deduplication via journal. hashInvocationKey.ts in runtime/invocation/ creates deterministic keys. No cross-run cache or configurable TTL.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/replay/", "packages/babysitter-sdk/src/runtime/invocation/hashInvocationKey.ts"]
+  },
+  {
+    "gapId": "GAP-HADAPT-001",
+    "title": "Capability-Based Task Routing",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "capabilityRouter.ts provides buildTaskRequirements() and selectHarness() that scores harnesses against task requirements (capabilities, model, tools, permissions). HarnessCapability enum in types.ts. All adapters implement getCapabilities(). TaskRequirements interface fully defined.",
+    "existsAt": ["packages/genty/platform/src/harness/capabilityRouter.ts", "packages/babysitter-sdk/src/harness/types.ts"]
+  },
+  {
+    "gapId": "GAP-HADAPT-002",
+    "title": "Model Selection Per Task",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "modelSelection.ts in genty platform bridges task-level model preferences (from execution.model in TaskDef) with harness capability routing via selectHarness. TaskDefInput interface accepts model preference.",
+    "existsAt": ["packages/genty/platform/src/harness/modelSelection.ts"]
+  },
+  {
+    "gapId": "GAP-HADAPT-003",
+    "title": "Cost-Based Routing Policies",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "selectionPolicies.ts has a 'cost-optimized' policy. packages/babysitter-sdk/src/cost/ has full pricing tables (MODEL_PRICING) and cost collection. packages/genty/platform/src/session/cost.ts has SessionBudget with maxCostUsd and alertThresholds. However, automatic model downgrade when nearing budget limits is not wired.",
+    "existsAt": ["packages/genty/platform/src/harness/selectionPolicies.ts", "packages/babysitter-sdk/src/cost/pricing.ts", "packages/genty/platform/src/session/cost.ts"]
+  },
+  {
+    "gapId": "GAP-HADAPT-004",
+    "title": "Harness Fallback Chains",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "fallbackChains.ts in genty platform provides FallbackChain type (ordered harness list with maxRetries), FallbackResolution, and fallback attempt tracking. Fully implemented with chain creation, next-harness resolution, and exhaustion detection.",
+    "existsAt": ["packages/genty/platform/src/harness/fallbackChains.ts"]
+  },
+  {
+    "gapId": "GAP-HADAPT-005",
+    "title": "Harness Health Monitoring and Circuit Breaker",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "observability/health.ts provides RunHealthSnapshot with health scoring from journal events. The health module detects stuck runs, error rates, and degraded status. However, no continuous per-harness health monitoring or circuit-breaker pattern with cooldown period.",
+    "existsAt": ["packages/genty/platform/src/observability/health.ts"]
+  },
+  {
+    "gapId": "GAP-JSON-001",
+    "title": "JSON API for Run Creation and Management",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full programmatic API in packages/genty/platform/src/api/runs.ts with ApiResult envelopes for createRun, orchestrateIteration, loadJournal, readRunMetadata. MCP tools in packages/babysitter-sdk/src/mcp/tools/runs.ts expose run_create, run_iterate, run_status. All return JSON.",
+    "existsAt": ["packages/genty/platform/src/api/runs.ts", "packages/babysitter-sdk/src/mcp/tools/runs.ts"]
+  },
+  {
+    "gapId": "GAP-JSON-002",
+    "title": "JSON Effect Dispatch and Response Protocol",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/api/effects.ts provides full typed API with ApiResult envelopes for listing, showing, cancelling, and batch-committing effects. effectsTypes.ts defines ListEffectsInput/Output, ShowEffectInput/Output, CancelEffectInput/Output, BatchCommitEffectsInput/Output.",
+    "existsAt": ["packages/genty/platform/src/api/effects.ts", "packages/genty/platform/src/api/effectsTypes.ts"]
+  },
+  {
+    "gapId": "GAP-JSON-003",
+    "title": "JSON Breakpoint Interaction API",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/api/breakpoints.ts provides full JSON API for listing pending breakpoints, getting breakpoint context, posting approval/rejection with feedback, and auto-approval rule management. All via ApiResult envelopes.",
+    "existsAt": ["packages/genty/platform/src/api/breakpoints.ts"]
+  },
+  {
+    "gapId": "GAP-JSON-004",
+    "title": "JSON Session Management API",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "MCP tools in packages/babysitter-sdk/src/mcp/tools/sessions.ts expose session_init, session_resume, session_state as JSON tools. packages/genty/platform/src/session/ provides programmatic context, history, persistence, cost, and discovery. However, no dedicated REST API layer or unified session CRUD API beyond MCP.",
+    "existsAt": ["packages/babysitter-sdk/src/mcp/tools/sessions.ts", "packages/genty/platform/src/session/"]
+  },
+  {
+    "gapId": "GAP-JSON-005",
+    "title": "JSON Event Stream (SSE/WebSocket)",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/api/eventStream.ts provides subscription management with SubscribeRunEventsInput/Output. packages/genty/platform/src/storage/journalWatcher.ts provides real-time journal event streaming via fs.watch with polling fallback. WebSocket transport in packages/genty/platform/src/mcp/transport/websocket.ts for network delivery.",
+    "existsAt": ["packages/genty/platform/src/api/eventStream.ts", "packages/genty/platform/src/storage/journalWatcher.ts", "packages/genty/platform/src/mcp/transport/websocket.ts"]
+  },
+  {
+    "gapId": "GAP-MCPC-001",
+    "title": "MCP Channel Integration (Inbound Messaging)",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full channel manager in packages/genty/platform/src/mcp/channels/channelManager.ts detects channel capability on MCP servers. inboundQueue.ts provides InboundMessageQueue with WakeCallback for sleeping runs. allowlist.ts for channel enablement. Types define ChannelCapability, ChannelConfig, ChannelMessage.",
+    "existsAt": ["packages/genty/platform/src/mcp/channels/channelManager.ts", "packages/genty/platform/src/mcp/channels/inboundQueue.ts"]
+  },
+  {
+    "gapId": "GAP-MCPC-002",
+    "title": "MCP Channel Outbound Messaging",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "outbound.ts provides OutboundChannelSender with template-based message formatting. DEFAULT_CHANNEL_TOOL_MAPPINGS maps slack/discord/email to their MCP tool names (slack_send_message, discord_send_message, gmail_create_draft).",
+    "existsAt": ["packages/genty/platform/src/mcp/channels/outbound.ts"]
+  },
+  {
+    "gapId": "GAP-MCPC-003",
+    "title": "Channel Permission Relay (Breakpoint Approval via Channels)",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "permissionRelay.ts provides ChannelPermissionRelay class with relay(), handleResponse(), racing claim pattern (createApprovalRace), and security config with terminalOnlyTags. However, the relay is only exported through the barrel index — it is not wired into the actual breakpoint resolution flow in the orchestration loop. The racing pattern between channel and local interaction is not connected to the CLI's local interaction handling.",
+    "existsAt": ["packages/genty/platform/src/mcp/channels/permissionRelay.ts"]
+  },
+  {
+    "gapId": "GAP-MCPC-004",
+    "title": "MCP Server Management UI and Connection Lifecycle",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/mcp/client/manager.ts provides McpClientManager with connect/disconnect lifecycle, status tracking, and reconnection. config.ts reads MCP server configurations. toolRegistry.ts registers discovered tools. executor.ts invokes tools. Full McpServerConnection lifecycle.",
+    "existsAt": ["packages/genty/platform/src/mcp/client/manager.ts", "packages/genty/platform/src/mcp/client/config.ts", "packages/genty/platform/src/mcp/client/toolRegistry.ts"]
+  },
+  {
+    "gapId": "GAP-OBS-001",
+    "title": "Run Health Snapshot",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/health.ts provides computeRunHealthFromEvents with RunHealthSnapshot, RunHealthStatus, RunHealthMetrics, HealthConfig. Configurable thresholds for stuck detection, error rates, max pending age. runStatus.ts wraps with getRunHealthSnapshot loading journal. getOrchestrationStatus combines metadata, health, and effects.",
+    "existsAt": ["packages/genty/platform/src/observability/health.ts", "packages/genty/platform/src/observability/runStatus.ts"]
+  },
+  {
+    "gapId": "GAP-OBS-002",
+    "title": "Phase Timeline Visualization",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/timeline.ts synthesizes PhaseTimeline from journal events with planning, execution, verification, and completion phases. PhaseEntry with name, startedAt, endedAt, durationMs. IterationTimeline. Milestone tracking.",
+    "existsAt": ["packages/genty/platform/src/observability/timeline.ts"]
+  },
+  {
+    "gapId": "GAP-OBS-003",
+    "title": "Prompt Plan Observability",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Prompt strata model in packages/babysitter-sdk/src/prompts/strata.ts provides composeByStrataWithMeta which returns strata labels and checksums per section. However, no instructions:inspect command or dashboard rendering of the orchestration plan state."
+  },
+  {
+    "gapId": "GAP-OBS-004",
+    "title": "Policy Decision Trail",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/governance/decisionTrail.ts provides PolicyEvalRecord and DecisionTrailEntry for full audit trail per effect dispatch. packages/babysitter-sdk/src/runtime/policy/logging.ts writes governance-decisions.jsonl. packages/genty/platform/src/governance/logging.ts provides additional logging.",
+    "existsAt": ["packages/genty/platform/src/governance/decisionTrail.ts", "packages/babysitter-sdk/src/runtime/policy/logging.ts"]
+  },
+  {
+    "gapId": "GAP-OBS-005",
+    "title": "Context Introspection",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/cli/commands/tokensStats.ts provides post-hoc token analysis. packages/babysitter-sdk/src/cost/ has pricing tables and cost collection. packages/genty/platform/src/session/cost.ts has session-level cost tracking with budget thresholds. However, no real-time dashboard integration during active orchestration."
+  },
+  {
+    "gapId": "GAP-OBS-006",
+    "title": "Analytics and Feature Flags",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Structured JSONL logging exists. capabilityCollector.ts collects feature flags into prompt context. However, no analytics platform integration, no configurable sinks, no unified feature flag evaluation system."
+  },
+  {
+    "gapId": "GAP-OBS-007",
+    "title": "Audit Export",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No export commands for machine-readable (JSON, CSV) or human-readable (Markdown) run summaries found. Journal data remains as raw JSON files."
+  },
+  {
+    "gapId": "GAP-OBS-008",
+    "title": "Agent Progress Summarization",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No progress summarization module found. No per-iteration or run-level progress summary generation."
+  },
+  {
+    "gapId": "GAP-OBS-NEW-001",
+    "title": "Embedded SDK Dashboard Webhook and Alert System",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/webhooks.ts provides WebhookRegistration types, registry management (registerWebhook, unregisterWebhook, listWebhooks), alert level evaluation, and event building. However: no HTTP delivery logic (no fetch() to actually send webhooks), no built-in Slack/PagerDuty/email integrations, no alert throttling or deduplication. Only imported by barrel export and test file.",
+    "existsAt": ["packages/genty/platform/src/observability/webhooks.ts"]
+  },
+  {
+    "gapId": "GAP-OBS-NEW-002",
+    "title": "Embedded SDK Dashboard API for External Dashboards",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/api/ provides full REST-like API: runs.ts (run listing/status), effects.ts (effect listing/details), breakpoints.ts (breakpoint interaction), eventStream.ts (subscription management). MCP tools in packages/babysitter-sdk/src/mcp/tools/ expose these as JSON tools.",
+    "existsAt": ["packages/genty/platform/src/api/", "packages/babysitter-sdk/src/mcp/tools/"]
+  },
+  {
+    "gapId": "GAP-PAR-001",
+    "title": "Concurrent Effect Execution",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/tasks/concurrentExecution.ts provides buildEffectExecutionWaves and hasConcurrentEffectsCapability. effectGroup.ts builds effect groups with shared IDs. asyncEffects.ts classifies actions into blocking/background. However, true concurrent harness invocations are not fully wired in the orchestration loop."
+  },
+  {
+    "gapId": "GAP-PAR-002",
+    "title": "Async Effect Execution",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/runtime/asyncEffects.ts provides classifyWaitingActions splitting into blocking and background groups. EffectStatus includes 'cancelled'. BackgroundEffectEntry/BackgroundEffectStatus in packages/genty/platform/src/harness/backgroundTracker.ts tracks background effects. BackgroundProcessRegistry in genty-runtime manages async processes.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/asyncEffects.ts", "packages/genty/platform/src/harness/backgroundTracker.ts"]
+  },
+  {
+    "gapId": "GAP-PAR-003",
+    "title": "Multi-Harness Parallel Dispatch",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "concurrentExecution.ts builds execution waves. effectGroupRegistry.ts manages named groups with persistent identity. However, no coordinator process pattern for ongoing team management across iterations."
+  },
+  {
+    "gapId": "GAP-PAR-005",
+    "title": "Parallel File Operations",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Agentic tools still execute one at a time within a session. No file operation batching found."
+  },
+  {
+    "gapId": "GAP-PAR-006",
+    "title": "Streaming Parallelism",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "piWrapper.ts subscribe() enables event streaming from Pi sessions. JournalWatcher provides real-time event streaming. However, no overlapped tool execution or pipeline parallelism between orchestration phases."
+  },
+  {
+    "gapId": "GAP-PAR-009",
+    "title": "Parallel Effect Execution Strategies",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/runtime/parallelStrategies.ts provides 4 named strategies: all-or-nothing, best-effort, first-success, quorum. concurrentExecution.ts builds execution waves from parallel groups. asyncEffects.ts classifies background vs blocking. Scheduler hints are written and used.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/parallelStrategies.ts", "packages/babysitter-sdk/src/tasks/concurrentExecution.ts"]
+  },
+  {
+    "gapId": "GAP-PAR-010",
+    "title": "Fork-Join Process Pattern",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No fork-join pattern found. subprocess intrinsic exists but does not support forked branches with state inheritance and synchronization points."
+  },
+  {
+    "gapId": "GAP-PERF-001",
+    "title": "Prompt Caching (Ephemeral)",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/strata.ts provides strata-aware prompt assembly with stability tags and cache-break detection via checksums. This enables cache optimization at the prompt assembly level. However, actual ephemeral cache_control integration with the API is adapter-specific and not uniformly wired.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/strata.ts"]
+  },
+  {
+    "gapId": "GAP-PERF-002",
+    "title": "Session Compaction",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/piWrapper/compaction.ts provides buildCompactionSettings. SDK compression module has density-filter and library-cache. packages/genty/platform/src/session/continuityState.ts preserves structured state across compaction. However, no multiple compaction strategies or auto-compact triggers."
+  },
+  {
+    "gapId": "GAP-PERF-004",
+    "title": "Streaming Message Rendering",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "piWrapper.ts subscribe() enables real-time event streaming from Pi sessions. JournalWatcher provides incremental journal streaming. However, CLI harness invocations still wait for completion (invoker.ts), and no dashboard rendering exists."
+  },
+  {
+    "gapId": "GAP-PERF-005",
+    "title": "Cache-Aware Prompt Assembly",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/strata.ts provides full cache-aware assembly: PART_STRATA_MAP tags all parts with volatility scores, STRATUM_ORDER ensures stable-first sorting, composeByStrataWithMeta returns per-stratum checksums for cache-break detection. Each prompt part tagged with stratum (stable/runtime/turnLocal).",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/strata.ts"]
+  },
+  {
+    "gapId": "GAP-PERF-006",
+    "title": "Incremental Orchestration Streaming",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/storage/journalWatcher.ts provides real-time event streaming from journal directory. packages/genty/platform/src/api/eventStream.ts provides subscription management with afterSeq and pollIntervalMs. WebSocket transport enables network delivery.",
+    "existsAt": ["packages/genty/platform/src/storage/journalWatcher.ts", "packages/genty/platform/src/api/eventStream.ts"]
+  },
+  {
+    "gapId": "GAP-PERF-007",
+    "title": "Aggressive Parallelism",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "concurrentExecution.ts builds execution waves. parallelStrategies.ts provides strategies. asyncEffects.ts classifies background effects. However, the orchestration loop (orchestrateIteration.ts) does not yet auto-detect independent effects for concurrent execution."
+  },
+  {
+    "gapId": "GAP-PERF-008",
+    "title": "Structured Continuity State",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/continuityState.ts provides full structured continuity: ContinuityPhase (name, startedAt, description), key decisions, working files, and accumulated findings. Designed to persist across compaction and inject into resume prompts.",
+    "existsAt": ["packages/genty/platform/src/session/continuityState.ts"]
+  },
+  {
+    "gapId": "GAP-PROC-001",
+    "title": "Process Chaining and Pipelines",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/skills/chain.ts provides SkillChainBuilder with topological sorting of steps, dependency tracking (dependsOn), and chain validation. This is skill-level chaining, not full process-level pipelines with typed input/output flow, but provides the foundational pattern.",
+    "existsAt": ["packages/genty/platform/src/skills/chain.ts"]
+  },
+  {
+    "gapId": "GAP-PROC-002",
+    "title": "Process Nesting and Sub-Process Invocation",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts provides full ctx.subprocess() intrinsic. SubprocessInvocation type includes processPath, exportName, processId, prompt, inputs, inputSchema, outputSchema, harness, model, maxIterations, shareSession. processContext.ts exposes subprocess on the context object.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts", "packages/babysitter-sdk/src/runtime/processContext.ts"]
+  },
+  {
+    "gapId": "GAP-PROC-003",
+    "title": "Process Versioning and Migration",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No process version metadata, mismatch detection, or migration strategies found in the codebase."
+  },
+  {
+    "gapId": "GAP-PROC-004",
+    "title": "Process Parameter Schemas and Validation",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/runtime/schemaValidator.ts provides validateAgainstSchema for JSON Schema (draft-07 subset: type checks, required fields, nested properties). SubprocessInvocation includes inputSchema and outputSchema fields for typed process composition.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/schemaValidator.ts"]
+  },
+  {
+    "gapId": "GAP-PROF-001",
+    "title": "Auto-Configure Orchestration from User Profile",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/profiles/ has full user profile system (userProfile.ts, userProfileRender.ts, userTypes.ts) and project profile system (projectProfile.ts, projectProfileMerge.ts). packages/babysitter-sdk/src/prompts/parts/userProfile.ts renders profile into prompts. However, profile data is not automatically used to configure breakpoint frequency, model selection, or process recommendations.",
+    "existsAt": ["packages/babysitter-sdk/src/profiles/", "packages/babysitter-sdk/src/prompts/parts/userProfile.ts"]
+  },
+  {
+    "gapId": "GAP-PROMPT-001",
+    "title": "Prompt Strata Model",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/strata.ts provides the complete strata model: STRATUM_ORDER (stable, runtime, turnLocal), tagPart factory, PART_STRATA_MAP mapping all 30+ prompt parts to their strata with volatility scores, composeByStrata/composeByStrataWithMeta for strata-aware assembly with checksums.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/strata.ts"]
+  },
+  {
+    "gapId": "GAP-PROMPT-002",
+    "title": "Deterministic Capability Projection",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/capabilityCollector.ts queries all installed surfaces (plugins via readPluginRegistry, process library via resolveActiveProcessLibrary, adapter capabilities, feature flags) and produces a sorted, deterministic capability array (CollectedCapabilities.all).",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/capabilityCollector.ts"]
+  },
+  {
+    "gapId": "GAP-PROMPT-003",
+    "title": "Runtime Personality Overlays",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/modeSelector.ts provides 4 orchestration modes (interactive, autonomous, plan, fast) each with distinct configuration for breakpoint approval, plan display, parallelism, and verbosity. Mode switching supported via getModeConfig/switchMode.",
+    "existsAt": ["packages/genty/platform/src/harness/modeSelector.ts"]
+  },
+  {
+    "gapId": "GAP-PROMPT-004",
+    "title": "Prompt Inspection Tooling",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "strata.ts provides composeByStrataWithMeta returning per-stratum checksums and section metadata. instructions commands exist in CLI. However, no dedicated instructions:inspect command showing the complete assembled prompt with token counts per section and cache-stability annotations."
+  },
+  {
+    "gapId": "GAP-PROMPT-005",
+    "title": "Continuity Overlays for Resume",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/continuityOverlay.ts provides BuildContinuityContextOptions and builds ContinuityContext from run journal, task artifacts, and session history. Includes resolved effect summaries, pending effects, key decisions, and modified files. packages/babysitter-sdk/src/prompts/parts/continuityOverlay.ts renders it into prompts.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/continuityOverlay.ts", "packages/babysitter-sdk/src/prompts/parts/continuityOverlay.ts"]
+  },
+  {
+    "gapId": "GAP-PROMPT-006",
+    "title": "Instructions Loaded Hook",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "InstructionsLoaded hook type exists in the adapters layer (packages/adapters/codecs/src/claude-code/runtime-hooks/). However, it is adapter-specific (Claude Code), not a generalized SDK-level on-instructions-loaded hook. The SDK hook types in packages/babysitter-sdk/src/hooks/types.ts do not include it.",
+    "existsAt": ["packages/adapters/codecs/src/claude-code/runtime-hooks/"]
+  },
+  {
+    "gapId": "GAP-PROMPT-007",
+    "title": "Context Compression Families",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "SDK compression module has density-filter and library-cache. Strata model groups prompt parts by stability. However, no semantic family grouping (per-effect, per-file, per-iteration) for compression."
+  },
+  {
+    "gapId": "GAP-PROMPT-008",
+    "title": "Coding Philosophy Prompt Section",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/parts/codingPhilosophy.ts exists with a render function. packages/babysitter-sdk/src/prompts/templates/coding-philosophy.md contains the template content. Mapped in strata.ts PART_STRATA_MAP as stable stratum.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/parts/codingPhilosophy.ts", "packages/babysitter-sdk/src/prompts/templates/coding-philosophy.md"]
+  },
+  {
+    "gapId": "GAP-PROMPT-009",
+    "title": "Tool Preference and Usage Rules",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/parts/toolPreferences.ts exists. packages/babysitter-sdk/src/prompts/templates/tool-preferences.md contains the template. Mapped in strata.ts PART_STRATA_MAP as stable stratum.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/parts/toolPreferences.ts", "packages/babysitter-sdk/src/prompts/templates/tool-preferences.md"]
+  },
+  {
+    "gapId": "GAP-PROMPT-010",
+    "title": "Safety and Reversibility Prompt Framework",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/parts/criticalRules.ts and templates/critical-rules.md exist with safety-related rules. packages/babysitter-sdk/src/prompts/parts/nonNegotiables.ts provides non-negotiable safety rules. However, no dedicated safetyGuidelines section with reversibility assessment framework and blast radius reasoning."
+  },
+  {
+    "gapId": "GAP-PROMPT-011",
+    "title": "Output Efficiency Rules",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/parts/outputEfficiency.ts exists. packages/babysitter-sdk/src/prompts/templates/output-efficiency.md contains the template. Mapped in strata.ts PART_STRATA_MAP as stable stratum.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/parts/outputEfficiency.ts", "packages/babysitter-sdk/src/prompts/templates/output-efficiency.md"]
+  },
+  {
+    "gapId": "GAP-PROMPT-012",
+    "title": "Git Safety Protocol Prompt Section",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/prompts/parts/gitSafety.ts exists. packages/babysitter-sdk/src/prompts/templates/git-safety.md contains the template. Mapped in strata.ts PART_STRATA_MAP as stable stratum.",
+    "existsAt": ["packages/babysitter-sdk/src/prompts/parts/gitSafety.ts", "packages/babysitter-sdk/src/prompts/templates/git-safety.md"]
+  },
+  {
+    "gapId": "GAP-REMOTE-001",
+    "title": "Daemon Mode",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full daemon implementation in packages/genty/platform/src/daemon/: lifecycle.ts (start/stop/status with foreground and background modes), loop.ts (event-driven loop), fileWatcher.ts (debounced fs.watch triggers), timerScheduler.ts (cron-based triggers), webhookListener.ts (HTTP trigger endpoint), durableQueue.ts, automationExecutor.ts.",
+    "existsAt": ["packages/genty/platform/src/daemon/"]
+  },
+  {
+    "gapId": "GAP-REMOTE-003",
+    "title": "Remote Sessions (WebSocket)",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/mcp/transport/websocket.ts provides WebSocket server transport with per-connection Transport instances, session multiplexing via WebSocketSessionManager, Bearer token authentication, ping/pong keepalive, rate limiting, and session grace period for reconnection. Imported by CLI mcpServe.ts. However, the target state requires 'Run directory synchronization for remote execution' which is NOT implemented — the transport only carries MCP messages, not run directory state.",
+    "existsAt": ["packages/genty/platform/src/mcp/transport/websocket.ts", "packages/genty/platform/src/mcp/transport/session.ts"]
+  },
+  {
+    "gapId": "GAP-REMOTE-004",
+    "title": "Cron Triggers and Scheduling",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/daemon/timerScheduler.ts provides full cron scheduling with parseCron supporting standard cron fields and macros (@yearly, @daily, etc.), timezone support, and setInterval-based checking. Daemon loop integrates timer triggers with durable queue persistence.",
+    "existsAt": ["packages/genty/platform/src/daemon/timerScheduler.ts"]
+  },
+  {
+    "gapId": "GAP-REMOTE-006",
+    "title": "MCP Client Integration",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full MCP client in packages/genty/platform/src/mcp/client/: manager.ts (connect/disconnect lifecycle, status tracking, reconnection), config.ts (reads MCP server configs), toolRegistry.ts (registers discovered tools), executor.ts (invokes tools). Pluggable transport factory.",
+    "existsAt": ["packages/genty/platform/src/mcp/client/"]
+  },
+  {
+    "gapId": "GAP-REMOTE-007",
+    "title": "Host Contract Layer",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/hostContract.ts defines HostCapabilityManifest types, resolveHostCapabilities(), validateHostContract(), and buildManifestFromDiscovery(). However, this is a type-definition and validation utility only — it does NOT implement the startRun/getStatus/postEffect/subscribe methods described in the target state. The module has zero consumers (not imported anywhere). Not exposed via MCP server or HTTP.",
+    "existsAt": ["packages/genty/platform/src/harness/hostContract.ts"]
+  },
+  {
+    "gapId": "GAP-REMOTE-008",
+    "title": "Streaming Orchestration Protocol",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "JournalWatcher provides real-time event streaming. eventStream.ts provides subscription management with event filtering. WebSocket transport enables network delivery. Event types include journal events which cover effect-requested, effect-resolved, etc.",
+    "existsAt": ["packages/genty/platform/src/api/eventStream.ts", "packages/genty/platform/src/storage/journalWatcher.ts"]
+  },
+  {
+    "gapId": "GAP-REMOTE-009",
+    "title": "Host-Mediated Interaction",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "HostContract defines the formal interface. packages/genty/platform/src/api/breakpoints.ts provides JSON API for breakpoint interaction with context, options, and feedback. Breakpoint context sent via API, responses posted back. permissionRelay.ts routes approvals through channels.",
+    "existsAt": ["packages/genty/platform/src/api/breakpoints.ts", "packages/genty/platform/src/harness/hostContract.ts"]
+  },
+  {
+    "gapId": "GAP-RUN-001",
+    "title": "Run Comparison and Diffing",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No run:diff command, compareRuns function, or run comparison module found."
+  },
+  {
+    "gapId": "GAP-RUN-002",
+    "title": "Run Archival and Restore",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No run:archive or run:restore commands found. Only cleanup exists (packages/babysitter-sdk/src/storage/cleanup.ts, packages/babysitter-sdk/src/session/cleanup.ts)."
+  },
+  {
+    "gapId": "GAP-RUN-003",
+    "title": "Run Forking and Branching",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No run:fork, runFork, or journal fork-from-point capability found."
+  },
+  {
+    "gapId": "GAP-SEC-001",
+    "title": "Governance Policy Layer",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full governance engine at packages/genty/platform/src/governance/engine.ts with createPolicyEngine(), evaluatePolicy() processing rules with precedence (deny > warn > allow). PolicyRule types include rate-limit, permission, resource-limit, trust-level at packages/babysitter-sdk/src/runtime/policy/types.ts. Decision logging via governance-decisions.jsonl. Categories (A/B/C/D tiers) in governance/categories.ts.",
+    "existsAt": ["packages/genty/platform/src/governance/engine.ts", "packages/babysitter-sdk/src/runtime/policy/engine.ts", "packages/babysitter-sdk/src/runtime/policy/types.ts"]
+  },
+  {
+    "gapId": "GAP-SEC-002",
+    "title": "Trust Classes for Plugins",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/plugins/sandbox.ts provides PluginPermission types (fs:read, fs:write, net:outbound, etc.) and permission enforcement per plugin. governance/sandboxPolicy.ts provides sandbox rules with allow/block/prompt actions. However, no explicit TrustLevel field in plugin registry or trust-level-gated hook dispatch.",
+    "existsAt": ["packages/genty/platform/src/plugins/sandbox.ts", "packages/genty/platform/src/governance/sandboxPolicy.ts"]
+  },
+  {
+    "gapId": "GAP-SEC-003",
+    "title": "Permission Request and Denial Hooks",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "InteractionKind type defined in packages/babysitter-sdk/src/breakpoints/types.ts with clarification, approval, intervention, notification, handoff. packages/genty/platform/src/interaction/interactionRouter.ts maps each kind to UX hints (urgency, requiresDecision, presentAlwaysApprove, uiStyle). on-permission-denied hook type with full payload in SDK hook types.",
+    "existsAt": ["packages/genty/platform/src/interaction/interactionRouter.ts", "packages/babysitter-sdk/src/breakpoints/types.ts", "packages/babysitter-sdk/src/hooks/types.ts"]
+  },
+  {
+    "gapId": "GAP-SEC-004",
+    "title": "Sandbox Toggle",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/governance/sandboxPolicy.ts provides SandboxPolicy with rules (fs.read, fs.write, net.outbound, exec.shell, etc.) and defaultAction (allow/block/prompt). packages/genty/platform/src/governance/sandboxBridge.ts bridges sandbox policy with governance engine. piSecureSandbox.ts provides Docker-based isolation.",
+    "existsAt": ["packages/genty/platform/src/governance/sandboxPolicy.ts", "packages/genty/platform/src/governance/sandboxBridge.ts"]
+  },
+  {
+    "gapId": "GAP-SEC-005",
+    "title": "Approval Posture Model",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/breakpoints/postures.ts defines DEFAULT_POSTURES per ActionCategory (read=permissive, write/network=cautious, execute=guarded, destroy/auth=locked). Each posture has allowAutoApprove, minConsecutiveApprovalsForAutoN, requireExplicitRule, requiredApproverLevel. postureBridge.ts converts postures to PolicyRule[].",
+    "existsAt": ["packages/genty/platform/src/breakpoints/postures.ts", "packages/genty/platform/src/governance/postureBridge.ts"]
+  },
+  {
+    "gapId": "GAP-SEC-006",
+    "title": "OAuth Integration",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No OAuth flow, credential storage, or token refresh lifecycle found in the MCP or config modules."
+  },
+  {
+    "gapId": "GAP-SEC-007",
+    "title": "Privacy Settings",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "Only BABYSITTER_ALLOW_SECRET_LOGS env var exists. No configurable privacy settings, PII filtering, data retention policies, or field redaction found."
+  },
+  {
+    "gapId": "GAP-SESSION-001",
+    "title": "Session-to-Run One-to-Many Relationship",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/context.ts provides SessionContext with cross-run shared knowledge. session/history.ts stores SessionRunSummary array (multiple runs per session). session/types.ts defines SessionState with runIds linking to associated runs. Session discovery finds all sessions and their associated runs.",
+    "existsAt": ["packages/genty/platform/src/session/context.ts", "packages/genty/platform/src/session/history.ts", "packages/genty/platform/src/session/types.ts"]
+  },
+  {
+    "gapId": "GAP-SESSION-002",
+    "title": "Session State Persistence and History",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/history.ts stores SessionHistory with decisions (SessionDecision[]), run summaries (SessionRunSummary[]), and context snapshots (SessionContextSnapshot[]). persistence.ts stores rich state: findings, file modifications, breakpoint patterns, preferences. All persisted as JSON files.",
+    "existsAt": ["packages/genty/platform/src/session/history.ts", "packages/genty/platform/src/session/persistence.ts"]
+  },
+  {
+    "gapId": "GAP-SESSION-003",
+    "title": "Session Templates and Presets",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No session template system found. No .a5c/session-templates/ directory or SessionTemplate type."
+  },
+  {
+    "gapId": "GAP-SESSION-004",
+    "title": "Session-Level Cost Tracking and Budgets",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/cost.ts provides SessionBudget (maxCostUsd, alertThresholds), SessionCostSummary with per-run and aggregate cost tracking. Supports budget threshold alerts (50%, 80%, 100%). Uses atomic file persistence.",
+    "existsAt": ["packages/genty/platform/src/session/cost.ts"]
+  },
+  {
+    "gapId": "GAP-SESSION-005",
+    "title": "Session Sharing and Collaboration",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No session export/import or collaborative session capability found."
+  },
+  {
+    "gapId": "GAP-STATE-001",
+    "title": "Long-Term Memory Extraction",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/memoryExtraction.ts provides memory extraction (extractMemoriesFromSession), persistence (persistMemories), querying (queryMemories), and pruning (pruneMemories) with file-based storage. Categories and confidence levels implemented. However, the target state requires 'Extracted memories injected into new run prompts as context' — no prompt section renders long-term memories (zero references in packages/babysitter-sdk/src/prompts/). Memories are stored but never consumed during prompt assembly.",
+    "existsAt": ["packages/genty/platform/src/session/memoryExtraction.ts"]
+  },
+  {
+    "gapId": "GAP-STATE-002",
+    "title": "Memory Consolidation",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "Memory extraction exists (GAP-STATE-001) but no consolidation module that merges related learnings across runs, prunes stale memories, or weights consolidated memories for injection."
+  },
+  {
+    "gapId": "GAP-STATE-003",
+    "title": "Session State Persistence",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/persistence.ts stores rich persistent state: SessionFinding (architecture, bug, pattern, dependency), file modifications, breakpoint patterns, and user preferences. Uses atomic temp-file + rename pattern.",
+    "existsAt": ["packages/genty/platform/src/session/persistence.ts"]
+  },
+  {
+    "gapId": "GAP-STATE-006",
+    "title": "Session Rewind and History",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No run:rewind or journal fork-from-point capability found. ReplayEngine in packages/babysitter-sdk/src/runtime/replay/ replays from start but cannot fork from an arbitrary point."
+  },
+  {
+    "gapId": "GAP-STATE-008",
+    "title": "Run Health Model",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/health.ts provides computeRunHealthFromEvents with configurable thresholds (stuckThresholdMs, degradedErrorRate, failedErrorRate, maxPendingAge). Returns RunHealthSnapshot with status, metrics, and issues. Detects stuck runs, error rates, no-op iterations.",
+    "existsAt": ["packages/genty/platform/src/observability/health.ts"]
+  },
+  {
+    "gapId": "GAP-SUBOBS-001",
+    "title": "Streaming Output Capture from Invoked Harnesses",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "piWrapper.ts subscribe() enables real-time event streaming from Pi sessions. JournalWatcher provides incremental journal event streaming. However, CLI-based invokeHarness() (non-Pi) still captures output only after process exit."
+  },
+  {
+    "gapId": "GAP-SUBOBS-002",
+    "title": "Subagent Progress Tracking",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "BackgroundEffectStatus in backgroundTracker.ts tracks running/completed/error/timed_out state. BackgroundProcessRegistry tracks process lifecycle. However, no percentage progress, ETA estimation, or progress bar support."
+  },
+  {
+    "gapId": "GAP-SUBOBS-003",
+    "title": "Per-Subagent Token and Cost Tracking",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/cost/effectCost.ts provides EffectCostSummary with per-effect breakdown (effectId, taskId, kind, inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens, costUsd, model). packages/babysitter-sdk/src/cost/ provides full pricing tables and journal-based cost collection.",
+    "existsAt": ["packages/genty/platform/src/cost/effectCost.ts", "packages/babysitter-sdk/src/cost/"]
+  },
+  {
+    "gapId": "GAP-SUBOBS-004",
+    "title": "Subagent Health and Timeout Monitoring",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "backgroundTracker.ts tracks timed_out state. invoker/processControl.ts provides cancelRunningProcess with gracePeriodMs. However, no continuous health monitoring, hang detection based on output silence, or auto-recovery."
+  },
+  {
+    "gapId": "GAP-SUBOBS-005",
+    "title": "Embedded SDK Dashboard Subagent Drill-Down",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No embedded SDK dashboard exists. No Ink, no React terminal rendering. The API layer (packages/genty/platform/src/api/) provides the data needed but no UI rendering."
+  },
+  {
+    "gapId": "GAP-TOOLS-007",
+    "title": "JS/TS REPL Tool",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No js_repl or node_repl tool found in agenticTools. Only python and bash execution tools exist."
+  },
+  {
+    "gapId": "GAP-TOOLS-008",
+    "title": "Web Search Agentic Tool",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/agenticTools/web/tools.ts provides web_search tool with query, max_results, domains (whitelist), exclude_domains (blacklist) parameters. Includes HTML text extraction and relevance filtering.",
+    "existsAt": ["packages/genty/platform/src/harness/agenticTools/web/tools.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-012",
+    "title": "LSP Integration for Code-Aware Routing",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No LSP client module or language server integration found in the codebase."
+  },
+  {
+    "gapId": "GAP-TOOLS-014",
+    "title": "Programmatic Task CRUD Beyond CLI",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/tasks/crud.ts provides TaskSummary, TaskDetail, ListTasksOptions with programmatic CRUD. packages/genty/platform/src/api/effects.ts provides full effect CRUD API. MCP tools expose task operations (task_list, task_show, task_cancel, task_post). SDK tasks module has registry, serializer, batching.",
+    "existsAt": ["packages/genty/platform/src/tasks/crud.ts", "packages/genty/platform/src/api/effects.ts", "packages/babysitter-sdk/src/mcp/tools/tasks.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-017",
+    "title": "Git Worktree Isolation for Parallel Effect Execution",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No worktree manager, worktree lifecycle management, or parallel-effects worktree isolation found in the SDK or platform."
+  },
+  {
+    "gapId": "GAP-TOOLS-018",
+    "title": "Structured Planning Phase in Process Definitions",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/planMode.ts provides full PlanStep (id, title, description, status, dependsOn, verificationCriteria, effectId), PlanStepStatus tracking, plan approval/modification mid-execution, and per-step verification. library/methodologies/gsd/ has planning phases.",
+    "existsAt": ["packages/genty/platform/src/harness/planMode.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-020",
+    "title": "Scheduled Orchestration Triggers",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full scheduling in packages/genty/platform/src/daemon/: timerScheduler.ts (cron expressions), automationExecutor.ts (executes automation rules), loop.ts (integrates triggers), config.ts (automation rule configuration with trigger types).",
+    "existsAt": ["packages/genty/platform/src/daemon/"]
+  },
+  {
+    "gapId": "GAP-TOOLS-021",
+    "title": "External Event Triggers for Orchestration",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/daemon/webhookListener.ts provides HTTP webhook endpoint. fileWatcher.ts provides filesystem event triggers with glob matching and debounce. automationExecutor.ts maps triggers to process definitions. All event payloads available as run inputs.",
+    "existsAt": ["packages/genty/platform/src/daemon/webhookListener.ts", "packages/genty/platform/src/daemon/fileWatcher.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-023",
+    "title": "Multi-Step Workflow Composition Within Effects",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Subprocess intrinsic allows nesting. SkillChainBuilder provides ordered step chains with dependencies. parallelStrategies.ts provides result aggregation strategies. However, no ctx.workflow() intrinsic with conditional branching, retry policies, and step-to-step data transformation."
+  },
+  {
+    "gapId": "GAP-TOOLS-025",
+    "title": "MCP Tool Discovery and Invocation from Orchestrated Tasks",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "Full MCP client in packages/genty/platform/src/mcp/client/: toolRegistry.ts discovers tools on MCP servers, executor.ts invokes them, manager.ts manages connections. Discovery tools in agenticTools/discovery/ expose tool_search and tool_fetch.",
+    "existsAt": ["packages/genty/platform/src/mcp/client/", "packages/genty/platform/src/harness/agenticTools/discovery/tools.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-026",
+    "title": "Structured User Interaction from Within Effects",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "InteractionKind enum exists. AskUserQuestion tool supports both simple and structured modes. However, no ctx.ask() intrinsic in processContext — process definitions cannot dispatch structured interaction effects. The interaction exists at the tool level, not the effect level."
+  },
+  {
+    "gapId": "GAP-TOOLS-027",
+    "title": "Skill Discovery and Invocation from Process Definitions",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/skills/ provides SkillRouter (scoring and matching), SkillDiscoveryService (scanning SKILL.md files), and SkillChainBuilder (composing skills). MCP tool skill_discover exposes skill discovery. Skills are composable via the chain builder.",
+    "existsAt": ["packages/genty/platform/src/skills/"]
+  },
+  {
+    "gapId": "GAP-TOOLS-028",
+    "title": "Sleep/Delay Effect Enhancement",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/babysitter-sdk/src/runtime/intrinsics/sleep.ts provides sleepUntil intrinsic. asyncEffects.ts classifies background effects. However, no ctx.sleep(duration) for relative delays, no ctx.waitFor(condition), no ctx.retryWithBackoff()."
+  },
+  {
+    "gapId": "GAP-TOOLS-029",
+    "title": "Structured Output Tool",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No typed output block system (code, image, table, diff, file, markdown) found. Task results remain as unstructured JSON."
+  },
+  {
+    "gapId": "GAP-TOOLS-030",
+    "title": "Effect Cancellation",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "EffectStatus includes 'cancelled' in runtime/types.ts. commitEffectCancellation() in packages/babysitter-sdk/src/runtime/commitEffectResult.ts writes cancellation events with EffectCancelledError. MCP task_cancel tool. API cancelEffect in effects.ts. invoker/processControl.ts provides cancelRunningProcess with SIGTERM/SIGKILL escalation.",
+    "existsAt": ["packages/babysitter-sdk/src/runtime/commitEffectResult.ts", "packages/genty/platform/src/api/effects.ts", "packages/genty/platform/src/harness/invoker/processControl.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-031",
+    "title": "MCP Resource Browsing and Reading",
+    "inventoryStatus": "Missing",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "MCP client manager exists and can connect to servers. However, no dedicated mcp_list_resources or mcp_read_resource agentic tools found in the tools directory."
+  },
+  {
+    "gapId": "GAP-TOOLS-032",
+    "title": "MCP Authentication",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No OAuth flow, mcp:auth command, or token storage for MCP server authentication found."
+  },
+  {
+    "gapId": "GAP-TOOLS-033",
+    "title": "Runtime Configuration Tool",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/agenticTools/config/tool.ts provides 'config' agentic tool with get/set/list/reset actions. state.ts manages run-scoped config entries. Supports model/provider selection, compression settings, breakpoint rules.",
+    "existsAt": ["packages/genty/platform/src/harness/agenticTools/config/tool.ts", "packages/genty/platform/src/harness/agenticTools/config/state.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-034",
+    "title": "Dynamic Tool Discovery and Search",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/deferredToolRegistry.ts provides two-tier tool index: tier 1 (name + description), tier 2 (full JSON Schema on demand). ToolSource categories: builtin, mcp, plugin, custom. agenticTools/discovery/tools.ts exposes tool_search and tool_fetch tools.",
+    "existsAt": ["packages/genty/platform/src/harness/deferredToolRegistry.ts", "packages/genty/platform/src/harness/agenticTools/discovery/tools.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-035",
+    "title": "Grep Output Modes and Context Params",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/agenticTools/tools/fileSystem.ts grep tool has output_mode (content/files_with_matches/count), before_context (-B), after_context (-A), line_numbers (-n), head_limit, offset, multiline params. Full ripgrep integration.",
+    "existsAt": ["packages/genty/platform/src/harness/agenticTools/tools/fileSystem.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-036",
+    "title": "Bash Background Execution",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/agenticTools/tools/execution.ts bash tool has run_in_background and description params. Background execution via BackgroundProcessRegistry (getBackgroundRegistry().spawn). background/tools.ts provides background_status tool for checking results.",
+    "existsAt": ["packages/genty/platform/src/harness/agenticTools/tools/execution.ts", "packages/genty/platform/src/harness/agenticTools/background/tools.ts"]
+  },
+  {
+    "gapId": "GAP-TOOLS-037",
+    "title": "Fetch Content Processing",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "packages/genty/platform/src/harness/agenticTools/tools/execution.ts fetch tool has url, timeout, raw params only. No prompt parameter for content processing or summarization."
+  },
+  {
+    "gapId": "GAP-TOOLS-038",
+    "title": "Ask Tool Interaction Model Alignment",
+    "inventoryStatus": "Missing",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/agenticTools/tools/delegation.ts AskUserQuestion tool has mode param with 'simple' (CC-compatible single question, free-text) and 'structured' (babysitter model with options/multi-select) modes.",
+    "existsAt": ["packages/genty/platform/src/harness/agenticTools/tools/delegation.ts"]
+  },
+  {
+    "gapId": "GAP-USER-001",
+    "title": "Operator Command Layer",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/operatorCommands.ts provides OperatorCommand registry with categories (inspect, manage, debug, tokens) and commandTemplate with placeholders. Commands surfaceable during breakpoint interactions.",
+    "existsAt": ["packages/genty/platform/src/harness/operatorCommands.ts"]
+  },
+  {
+    "gapId": "GAP-USER-006",
+    "title": "Real-Time Cost Tracking",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/cost/effectCost.ts provides per-effect cost breakdown. packages/babysitter-sdk/src/cost/pricing.ts has full model pricing tables. packages/genty/platform/src/session/cost.ts provides session-level cost with budget thresholds and auto-pause.",
+    "existsAt": ["packages/genty/platform/src/cost/effectCost.ts", "packages/babysitter-sdk/src/cost/pricing.ts", "packages/genty/platform/src/session/cost.ts"]
+  },
+  {
+    "gapId": "GAP-USER-012",
+    "title": "Plan Mode with Verification",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/planMode.ts provides full plan mode: PlanStep with status tracking, dependsOn for step ordering, verificationCriteria per step, plan approval/modification breakpoints, and per-step verification.",
+    "existsAt": ["packages/genty/platform/src/harness/planMode.ts"]
+  },
+  {
+    "gapId": "GAP-USER-017",
+    "title": "Plugin Management Integration",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "Plugin CLI commands exist (packages/babysitter-sdk/src/cli/commands/plugin/ with marketplaceCommands, packageCommands, registryCommands). Plugin loader and sandbox in genty platform. However, no plugin discovery as agentic tool or marketplace browsing during orchestration."
+  },
+  {
+    "gapId": "GAP-UX-001",
+    "title": "Ink/React Terminal Rendering Foundation",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No Ink dependency found in package.json files. No React terminal components. CLI outputs flat JSON/text. No component model for terminal rendering."
+  },
+  {
+    "gapId": "GAP-UX-001a",
+    "title": "Effect Tree Visualization",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No EffectTree component or tree visualization found. task:list outputs flat JSON arrays."
+  },
+  {
+    "gapId": "GAP-UX-001b",
+    "title": "Structured Diff Rendering",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No StructuredDiff component or diff rendering found."
+  },
+  {
+    "gapId": "GAP-UX-001c",
+    "title": "Permission and Breakpoint Approval UI",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/interaction/askUserQuestion.ts provides interactive prompts with arrow-key selectors. interactionRouter.ts maps InteractionKind to UX hints. However, no Ink-based BreakpointApproval component with risk visualization or auto-approval recommendations."
+  },
+  {
+    "gapId": "GAP-UX-001d",
+    "title": "Message Type Rendering",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No type-specific message rendering or Ink components found."
+  },
+  {
+    "gapId": "GAP-UX-001e",
+    "title": "Progress and Status Line",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No Ink StatusLine component found. No persistent terminal indicators."
+  },
+  {
+    "gapId": "GAP-UX-001f",
+    "title": "Streaming Output Panels",
+    "inventoryStatus": "Missing",
+    "auditStatus": "NOT_STARTED",
+    "evidence": "No Ink StreamingPanel component found."
+  },
+  {
+    "gapId": "GAP-UX-005",
+    "title": "Structured Orchestration Status View",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/runStatus.ts provides getOrchestrationStatus combining metadata, health snapshot, and pending effects into a single view. Supports JSON output. getPendingWorkItems for detailed inspection.",
+    "existsAt": ["packages/genty/platform/src/observability/runStatus.ts"]
+  },
+  {
+    "gapId": "GAP-UX-006",
+    "title": "Pending Work Inspector",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/runStatus.ts getPendingWorkItems provides detailed pending effect inspection. tasks/batching.ts groups effects. tasks/grouping.ts provides getEffectiveConcurrency. All support JSON output.",
+    "existsAt": ["packages/genty/platform/src/observability/runStatus.ts"]
+  },
+  {
+    "gapId": "GAP-UX-007",
+    "title": "Rich Breakpoint Interaction",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/interaction/interactionRouter.ts provides per-kind UX hints. postures.ts provides risk-appropriate posture resolution. operatorCommands.ts enables in-breakpoint command execution. API breakpoints.ts provides full context and options.",
+    "existsAt": ["packages/genty/platform/src/interaction/interactionRouter.ts", "packages/genty/platform/src/breakpoints/postures.ts"]
+  },
+  {
+    "gapId": "GAP-UX-008",
+    "title": "Resume Dashboard",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/session/discovery.ts finds available sessions and runs. continuityState.ts provides rich context for resume. continuityOverlay.ts renders resume context into prompts. However, no visual run picker or TUI-based resume selection."
+  },
+  {
+    "gapId": "GAP-UX-009",
+    "title": "Failure Triage View",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/observability/health.ts detects failures and provides health snapshots with issues. SDK runtime/errorSuggestions.ts and errorTemplates.ts provide error analysis. However, no synthesized triage view with root cause analysis, fix suggestions, or timeline visualization."
+  },
+  {
+    "gapId": "GAP-UX-010",
+    "title": "Typed Effect Interaction Patterns",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "InteractionKind enum with 5 kinds (clarification, approval, intervention, notification, handoff). AskUserQuestion supports simple and structured modes. However, no full typed interaction schemas (ChoiceInteraction, MultiChoiceInteraction, etc.) as effect types with harness-specific renderers."
+  },
+  {
+    "gapId": "GAP-UX-011",
+    "title": "Command Discoverability",
+    "inventoryStatus": "Partial",
+    "auditStatus": "PARTIALLY_IMPLEMENTED",
+    "evidence": "CLI --help exists. MCP skill_discover tool. operatorCommands.ts provides categorized commands. However, no babysitter help --search or contextual suggestions based on run state."
+  },
+  {
+    "gapId": "GAP-UX-014",
+    "title": "Operator Mode Selection",
+    "inventoryStatus": "Partial",
+    "auditStatus": "IMPLEMENTED",
+    "evidence": "packages/genty/platform/src/harness/modeSelector.ts provides 4 modes (interactive, autonomous, plan, fast) with getModeConfig/switchMode. Each mode configures breakpoint approval, plan display, parallelism, and verbosity differently.",
+    "existsAt": ["packages/genty/platform/src/harness/modeSelector.ts"]
+  }
+]

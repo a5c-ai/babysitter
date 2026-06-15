@@ -1,16 +1,16 @@
 /**
- * Typed GlobalRegistry — replaces raw `(globalThis as any).__key` casts with
- * type-safe accessors that persist across HMR reloads.
+ * Typed GlobalRegistry for the observer-dashboard namespace.
  *
- * Usage:
- *   const cache = getGlobal('__observer_run_cache__', () => new Map<string, CacheEntry>());
+ * Built on the generic {@link createGlobalRegistry} factory to avoid
+ * duplicating accessor logic across packages.
  *
- * The first call lazily initialises the value on `globalThis`; subsequent calls
- * (including after HMR) return the existing instance.
+ * Uses a separate `__observer_registry__` globalThis key to avoid collision
+ * with the kanban registry used by adapters.
  */
 
 import type { EventEmitter } from "events";
 import type { FSWatcher } from "fs";
+import { createGlobalRegistry } from "./create-global-registry";
 
 // ---------------------------------------------------------------------------
 // 1. Declare the shape of every key we store on globalThis.
@@ -65,53 +65,11 @@ declare global {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Typed accessor — the only public API.
+// 3. Typed accessors — the only public API.
 // ---------------------------------------------------------------------------
 
-/**
- * Return an HMR-safe global value, lazily initialising it via `factory` on
- * first access.
- *
- * The value is stored on `globalThis.__observer_registry__` under the given
- * key so it survives hot-module reloads.
- *
- * @param key     One of the keys declared in {@link GlobalRegistryMap}.
- * @param factory Called once to create the initial value if it does not exist.
- * @returns       The (possibly pre-existing) value.
- */
-export function getGlobal<K extends keyof GlobalRegistryMap>(
-  key: K,
-  factory: () => GlobalRegistryMap[K],
-): GlobalRegistryMap[K] {
-  if (!globalThis.__observer_registry__) {
-    globalThis.__observer_registry__ = {};
-  }
+const registry = createGlobalRegistry<GlobalRegistryMap>("__observer_registry__");
 
-  const registry = globalThis.__observer_registry__;
-
-  if (registry[key] === undefined) {
-    registry[key] = factory();
-  }
-
-  return registry[key] as GlobalRegistryMap[K];
-}
-
-/**
- * Clear a single key from the global registry.
- *
- * Primarily useful during shutdown / test teardown.
- */
-export function clearGlobal<K extends keyof GlobalRegistryMap>(key: K): void {
-  if (globalThis.__observer_registry__) {
-    delete globalThis.__observer_registry__[key];
-  }
-}
-
-/**
- * Clear the entire global registry.
- *
- * Primarily useful in tests.
- */
-export function clearAllGlobals(): void {
-  globalThis.__observer_registry__ = undefined;
-}
+export const getGlobal = registry.getGlobal;
+export const clearGlobal = registry.clearGlobal;
+export const clearAllGlobals = registry.clearAllGlobals;

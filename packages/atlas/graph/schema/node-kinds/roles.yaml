@@ -1,0 +1,298 @@
+# NodeKinds for cluster 10-roles.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:role
+  name: Role
+  origin: universal
+  prefix: role
+  cluster: 10-roles
+  purpose: human or agentic role
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: isAgentic
+    type: bool
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: requiredCapabilities
+    type: list<id>
+    required: false
+  - name: requiredDomains
+    type: list<id>
+    required: false
+  - name: seniority
+    type: string
+    required: false
+  - name: automatability
+    type: float
+    required: false
+    notes: "0.0 = never automatable (destructive decisions, legal liability), 0.5 = potentially automatable with advanced AI, 1.0 = fully automatable and commonly automated today"
+  incomingEdges:
+  - requires_skill
+  - delegates_to
+  - played_by
+  - constrains
+  - submitted_by
+  - escalates_to
+  - work_supported_by_tool
+  outgoingEdges:
+  - holds_responsibility
+  - requires_skill
+  - delegates_to
+  - member_of
+  - escalation_target_for
+  invariants:
+  - isAgentic required (V-5.1)
+  - delegates_to acyclic (V-5.2)
+  - at least one holds_responsibility (V-5.3)
+  examples: []
+- id: node:responsibility
+  name: Responsibility
+  origin: universal
+  prefix: responsibility
+  cluster: 10-roles
+  purpose: atomic accountable unit
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: cadence
+    type: string
+    required: false
+  - name: requiredSkills
+    type: list<id>
+    required: false
+  incomingEdges:
+  - holds_responsibility
+  - work_supported_by_tool
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:org-unit
+  name: OrgUnit
+  origin: universal
+  prefix: org-unit
+  cluster: 10-roles
+  purpose: team/department/squad
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<team
+    department: null
+    squad: null
+    guild>: null
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - member_of
+  - owned_by
+  - represents
+  - with_organization
+  outgoingEdges: []
+  invariants: []
+  examples: []
+- id: node:tenant
+  name: Tenant
+  origin: standard
+  prefix: tenant
+  cluster: 10-roles
+  purpose: an isolated multi-tenant subject (workspace/account/project) within a hosted product
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: tenantKind
+    type: enum<workspace,account,project,organization>
+    required: false
+  - name: isolationLevel
+    type: enum<logical,physical,hybrid>
+    required: false
+    evidence: vendor-doc-or-better
+  - name: regions
+    type: list<string>
+    required: false
+  - name: parentTenantId
+    type: ref<Tenant>
+    required: false
+  - name: externalId
+    type: string
+    required: false
+  - name: tier
+    type: string
+    required: false
+  - name: status
+    type: string
+    required: false
+  - name: createdAt
+    type: iso-timestamp
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - constrains
+  - applies_to_tenant
+  - owns_budget
+  - compliance_for
+  - workspace_owned_by
+  outgoingEdges:
+  - owned_by
+  - owns_workspace
+  - complies_with
+  - scopes_runs
+  invariants:
+  - id starts with tenant: null
+  examples: []
+- id: node:customer
+  name: Customer
+  origin: standard
+  prefix: customer
+  cluster: 10-roles
+  purpose: a commercial counterparty (the buyer/payer) — distinct from organizational OrgUnit
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: customerKind
+    type: enum<self-serve,enterprise,partner,internal>
+    required: false
+  - name: contractTier
+    type: string
+    required: false
+  - name: legalName
+    type: string
+    required: false
+  - name: region
+    type: string
+    required: false
+  - name: segment
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - represents
+  invariants:
+  - id starts with customer: null
+  examples: []
+- id: node:end-user
+  name: EndUser
+  origin: standard
+  prefix: end-user
+  cluster: 10-roles
+  purpose: an individual human user (distinct from Role which is a position; distinct from Customer which is commercial)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: userKind
+    type: enum<human,service-account,bot>
+    required: false
+  - name: tenantId
+    type: ref<Tenant>
+    required: false
+  - name: externalId
+    type: string
+    required: false
+  - name: status
+    type: string
+    required: false
+  - name: createdAt
+    type: iso-timestamp
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges: []
+  invariants:
+  - id starts with end-user: null
+  examples: []
+- id: node:vendor-relationship
+  name: VendorRelationship
+  origin: standard
+  prefix: vendor-rel
+  cluster: 10-roles
+  purpose: a contractual relationship between an organization and an upstream vendor (Provider, ToolServer host, etc.)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: vendorName
+    type: string
+    required: false
+  - name: relationshipKind
+    type: enum<paid,free-tier,trial,partner,reseller>
+    required: false
+  - name: contractUrl
+    type: url
+    required: false
+  - name: contractType
+    type: string
+    required: false
+  - name: startDate
+    type: iso-date
+    required: false
+  - name: startedAt
+    type: iso-date
+    required: false
+  - name: endedAt
+    type: iso-date
+    required: false
+  - name: status
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - with_organization
+  invariants:
+  - id starts with vendor-rel: null
+  examples: []
+

@@ -1,6 +1,6 @@
 requirements:
 
-based on the SDK in this repo in the packages/sdk (npm @a5c-ai/babysitter-sdk) and claude plugin (REPO_ROOT/plugins/babysitter). look at sdk.md and BABYSITTER_PLUGIN_SPECIFICATION.md for more information.
+based on the SDK in this repo in the packages/babysitter-sdk (npm @a5c-ai/babysitter-sdk) and claude plugin (REPO_ROOT/plugins/babysitter). look at sdk.md and BABYSITTER_PLUGIN_SPECIFICATION.md for more information.
 
 create a UX for the system that will be used for:
 1. observability of the runs, tasks, and breakpoints.

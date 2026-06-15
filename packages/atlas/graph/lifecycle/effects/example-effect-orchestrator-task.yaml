@@ -1,0 +1,23 @@
+nodeKind: Effect
+id: effect:01kqex-effect-task-001
+attributes:
+  kind: orchestrator_task
+  status: ok
+  runId: run:01kqex-example-run-001
+  invocationId: invocation:01kqex-invocation-001
+  requestedAt: "2026-04-28T10:05:00Z"
+  resolvedAt: "2026-04-28T10:07:30Z"
+  request:
+    taskKind: shell
+    description: "Run npm test"
+  result:
+    exitCode: 0
+    summary: "All tests passed"
+  currentStateId: lifecycle-state:effect.ok
+edges:
+  in_state:
+    - lifecycle-state:effect.ok
+  governed_by:
+    - state-machine:effect
+  requested_by:
+    - invocation:01kqex-invocation-001

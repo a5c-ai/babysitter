@@ -1,0 +1,224 @@
+---
+nodeKind: Library
+id: library:tox
+attributes:
+  displayName: "tox"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Test automation and environment management tool for Python that runs
+    tests across multiple Python versions and configurations, managing
+    virtual environments and integrating with CI systems.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:nox
+---
+nodeKind: Library
+id: library:nox
+attributes:
+  displayName: "Nox"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Flexible test automation tool similar to tox but configured in Python
+    (noxfile.py), supporting multiple sessions, parametrize, reuse of
+    virtual environments, and easy CI integration.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:coverage-py
+attributes:
+  displayName: "Coverage.py"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Code coverage measurement tool for Python programs that tracks which
+    lines, branches, and arcs are executed, generating HTML, XML, and
+    JSON reports for CI/CD integration.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:pytest
+---
+nodeKind: Library
+id: library:faker-python
+attributes:
+  displayName: "Faker (Python)"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Python library for generating fake data — names, addresses, phone
+    numbers, URLs, text, and more — with locale support and extensible
+    custom providers for test data generation.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:factory-boy
+---
+nodeKind: Library
+id: library:factory-boy
+attributes:
+  displayName: "factory_boy"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Fixture library for Python inspired by Ruby's factory_girl, allowing
+    creation of complex objects for tests with factories that integrate
+    natively with Django ORM, SQLAlchemy, and MongoDB.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:responses
+attributes:
+  displayName: "responses"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Utility library for mocking the Python requests library in unit tests,
+    allowing definition of expected requests and responses without making
+    real HTTP calls during testing.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:vcrpy
+---
+nodeKind: Library
+id: library:vcrpy
+attributes:
+  displayName: "VCR.py"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Records and replays HTTP interactions via cassette files, enabling
+    deterministic testing of code that makes HTTP requests without live
+    network access after the first recording.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:freezegun
+attributes:
+  displayName: "freezegun"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Library that lets you freeze time in Python tests by mocking datetime
+    and time modules, enabling deterministic testing of time-sensitive
+    code with decorator and context manager support.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:time-machine
+---
+nodeKind: Library
+id: library:time-machine
+attributes:
+  displayName: "time-machine"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Fast alternative to freezegun for mocking datetime in Python using
+    a C extension to intercept CPython's internal time functions, offering
+    better performance and broader compatibility.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:parameterized
+attributes:
+  displayName: "parameterized"
+  belongsToLanguageId: language:python
+  category: testing
+  description: |
+    Library that adds parameterized testing to Python's unittest, pytest,
+    and nose, allowing test functions to be called with multiple argument
+    sets using a simple decorator.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:pytest
+---
+nodeKind: Library
+id: library:isort
+attributes:
+  displayName: "isort"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Python import sorting library and command-line tool that automatically
+    organizes imports into sections (standard library, third-party, local)
+    with support for various output styles and configuration profiles.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:code-analysis-linting
+  alternative_to:
+    - library:ruff-lib
+---
+nodeKind: Library
+id: library:ruff-lib
+attributes:
+  displayName: "Ruff"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Extremely fast Python linter and formatter written in Rust, replacing
+    Flake8, isort, pyupgrade, and more with 100x faster execution, native
+    LSP support, and comprehensive rule sets.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:code-analysis-linting
+---
+nodeKind: Library
+id: library:mypy-lib
+attributes:
+  displayName: "mypy"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Optional static type checker for Python that verifies type annotations,
+    catches common bugs at compile time, and supports gradual typing to
+    incrementally add type safety to existing codebases.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:code-analysis-linting
+  alternative_to:
+    - library:ruff-lib

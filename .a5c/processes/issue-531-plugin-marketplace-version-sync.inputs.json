@@ -1,0 +1,58 @@
+{
+  "issueNumber": 531,
+  "baseBranch": "staging",
+  "implementationBranch": "fix/issue-531-plugin-marketplace-version-sync",
+  "maxAttempts": 3,
+  "targetFiles": [
+    "scripts/bump-version.mjs",
+    "scripts/sync-workspace-versions.mjs",
+    "scripts/generate-plugins.mjs",
+    "scripts/sync-external-plugin-repos.mjs",
+    ".github/workflows/sync-external-plugins.yml",
+    ".github/workflows/publish-packages-from-tag.yml",
+    ".claude-plugin/marketplace.json",
+    ".cursor-plugin/marketplace.json",
+    ".agents/plugins/marketplace.json",
+    ".github/plugin/marketplace.json",
+    "plugins/babysitter-unified/plugin.json",
+    "plugins/babysitter-unified/versions.json",
+    "packages/extension-mux/src/targets/adapters"
+  ],
+  "verificationCommands": [
+    "npm run build:extension-mux",
+    "npm run test:extension-mux",
+    "npm run generate:plugins",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "acceptanceCriteria": [
+    "scripts/bump-version.mjs updates every version-bearing Babysitter marketplace/install manifest that participates in plugin update comparison.",
+    "scripts/sync-workspace-versions.mjs and the staging sync workflow propagate the resolved release or staging prerelease version into unified plugin version files before generated external plugin output is produced.",
+    "Generated marketplace output uses the unified release version instead of stale hard-coded labels.",
+    "A deterministic regression guardrail fails when plugin content or gitCommitSha advances while the marketplace version label remains unchanged.",
+    "The implementation preserves unrelated local changes and avoids broad manifest churn outside the release/plugin version surfaces needed for #531."
+  ],
+  "knownIssueContext": {
+    "title": "claude plugin update is a silent no-op - plugin version in marketplace.json never bumps across releases",
+    "labels": [
+      "bug",
+      "priority:high",
+      "effort:medium",
+      "ready-for-dev",
+      "plugins",
+      "ci"
+    ],
+    "reportedFailure": "Claude compares the marketplace manifest version label and reports the installed plugin is already current when that label stays stale, even if the plugin cache gitCommitSha points at old content.",
+    "reportedWorkaround": "claude plugin uninstall babysitter@a5c.ai && claude plugin install babysitter@a5c.ai",
+    "affectedComponents": [
+      "plugins",
+      "ci",
+      "unified plugin generation",
+      "external plugin repository sync",
+      "Claude marketplace/install surface",
+      "sibling marketplace surfaces"
+    ]
+  }
+}

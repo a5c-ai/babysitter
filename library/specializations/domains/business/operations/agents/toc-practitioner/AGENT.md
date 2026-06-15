@@ -9,6 +9,11 @@ expertise:
   - Throughput improvement
   - Buffer management
   - Policy constraint resolution
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:capacity-planning-ops, skill-area:strategic-analysis, skill-area:change-management]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:strategic-planner]
 ---
 
 # TOC Practitioner

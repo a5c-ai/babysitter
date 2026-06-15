@@ -2,6 +2,11 @@
 name: unity-ui-toolkit
 description: Unity UI Toolkit skill for runtime UI development, USS styling, UXML templates, and custom visual elements.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:ui-menu-systems, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unity UI Toolkit Skill

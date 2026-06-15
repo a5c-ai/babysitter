@@ -8,6 +8,10 @@ expertise:
   - Litigation and regulatory review
   - Intellectual property assessment
   - Capitalization and equity analysis
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Legal Reviewer

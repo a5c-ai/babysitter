@@ -20,6 +20,12 @@
  * - Fractography and Failure Analysis: https://www.springer.com/
  * - Engineering Failure Analysis Journal: https://www.journals.elsevier.com/engineering-failure-analysis
  * - Failure Analysis: A Practical Guide: https://www.asminternational.org/
+ *
+ * @graph
+ *   domains: [domain:mechanical-engineering]
+ *   skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

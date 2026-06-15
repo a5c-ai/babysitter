@@ -1,0 +1,408 @@
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-contextwindowtokens
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: contextWindowTokens
+  value: '400000'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current contextWindowTokens is 400000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-maxoutputtokens
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: maxOutputTokens
+  value: '128000'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current maxOutputTokens is 128000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-costpermtokinput
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: costPerMTokInput
+  value: '1.75'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current costPerMTokInput is 1.75.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-costpermtokcachedinput
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: costPerMTokCachedInput
+  value: '0.175'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current costPerMTokCachedInput is 0.175.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-costpermtokoutput
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: costPerMTokOutput
+  value: '14.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current costPerMTokOutput is 14.0.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-kind
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current kind is reasoning.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: OpenAI lists GPT-5.3-Codex in the model page reasoning category.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: knowledgeCutoffDate
+  value: '2025-08-31'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current knowledgeCutoffDate is 2025-08-31.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-lifecyclestatus
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: OpenAI lists the model as a default model page entry, not a preview label.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-releasedate-first-observed
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: releaseDate
+  value: '2026-05-27'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current releaseDate is catalog first-observed date 2026-05-27 because the public OpenAI model page did not state a release date.
+  confidence: low
+  provenanceKind: observation
+  evidenceStrength: limited
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: ModelVersion.releaseDate is schema-required; do not treat this as a vendor-published release date.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-modalities
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current modalities is text, image.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-modalitydirections
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-supportsfinetuning
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current supportsFineTuning is False.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current supportsThinkingBudgetTokens is False.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: OpenAI model page lists reasoning effort levels, not a token-budget control.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-thinkingeffortlevels
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high, xhigh
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current thinkingEffortLevels is low, medium, high, xhigh.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-versionrange
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: versionRange
+  value: '>=5.3.0 <5.4.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current versionRange is >=5.3.0 <5.4.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Version range follows existing Atlas GPT-5 minor-version current alias convention.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-transport
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: speaks
+  value: model-transport:openai-responses
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current is supported on the OpenAI Responses endpoint.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The model page marks Responses as supported and Chat Completions/Batch/Fine-tuning as not supported.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-3-codex-current-feature-support
+attributes:
+  subjectId: model:gpt-5.3-codex@current
+  attribute: supports
+  value: streaming, function calling, structured outputs, prompt caching
+  subjectKind: ModelVersion
+  statement: model:gpt-5.3-codex@current supports streaming, function calling, structured outputs, and cached input pricing.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  claimedAt: '2026-05-27T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: The model page lists Streaming, Function calling, and Structured outputs as supported and gives a cached input token price.
+edges:
+  backed_by_evidence:
+  - evidence:openai-gpt-5-3-codex-model-doc-2026-05
+  about_subject:
+  - model:gpt-5.3-codex@current

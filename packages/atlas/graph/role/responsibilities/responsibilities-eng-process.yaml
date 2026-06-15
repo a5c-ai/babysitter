@@ -1,0 +1,116 @@
+---
+nodeKind: Responsibility
+id: responsibility:run-architecture-review
+attributes:
+  displayName: "Run architecture review"
+  cadence: scheduled
+  description: |
+    Convene and facilitate periodic architecture review sessions; capture
+    decisions as ADRs.
+edges:
+  held_by:
+    - target: role:tech-lead
+    - target: role:staff-engineer
+    - target: role:cto
+  requires_expertise:
+    - target: skill-area:adr-writing
+    - target: skill-area:c4-modeling
+---
+nodeKind: Responsibility
+id: responsibility:retro-facilitation
+attributes:
+  displayName: "Retro facilitation"
+  cadence: scheduled
+  description: |
+    Facilitate sprint/iteration retrospectives and track action items to
+    closure.
+edges:
+  held_by:
+    - target: role:engineering-manager
+    - target: role:product-owner
+---
+nodeKind: Responsibility
+id: responsibility:cost-optimization
+attributes:
+  displayName: "Cost optimization"
+  cadence: continuous
+  description: |
+    Identify and execute on cloud/LLM cost reduction opportunities; report
+    monthly variance.
+edges:
+  held_by:
+    - target: role:cost-tracker
+    - target: role:devops-engineer
+    - target: role:sre-lead
+---
+nodeKind: Responsibility
+id: responsibility:vendor-evaluation
+attributes:
+  displayName: "Vendor evaluation"
+  cadence: on-demand
+  description: |
+    Evaluate third-party vendors against security, cost, and integration
+    criteria; produce recommendation.
+edges:
+  held_by:
+    - target: role:staff-engineer
+    - target: role:security-engineer
+    - target: role:cto
+---
+nodeKind: Responsibility
+id: responsibility:code-review-coverage
+attributes:
+  displayName: "Code review coverage"
+  cadence: continuous
+  description: |
+    Ensure every change has at least one informed reviewer with no
+    rubber-stamping.
+edges:
+  held_by:
+    - target: role:code-reviewer
+    - target: role:tech-lead
+    - target: role:engineering-manager
+  requires_expertise:
+    - target: skill-area:code-review-practice
+---
+nodeKind: Responsibility
+id: responsibility:dx-tooling-maintenance
+attributes:
+  displayName: "DX tooling maintenance"
+  cadence: continuous
+  description: |
+    Maintain shared developer-experience tooling: linters, generators,
+    scaffolds, local-dev.
+edges:
+  held_by:
+    - target: role:devops-engineer
+    - target: role:staff-engineer
+---
+nodeKind: Responsibility
+id: responsibility:adr-curation
+attributes:
+  displayName: "ADR curation"
+  cadence: continuous
+  description: |
+    Maintain the ADR catalog: index, supersession links, lifecycle status.
+edges:
+  held_by:
+    - target: role:adr-writer
+    - target: role:staff-engineer
+  requires_expertise:
+    - target: skill-area:adr-writing
+---
+nodeKind: Responsibility
+id: responsibility:data-quality-monitoring
+attributes:
+  displayName: "Data quality monitoring"
+  cadence: continuous
+  description: |
+    Monitor pipeline freshness, completeness, and conformance; alert on
+    regressions.
+edges:
+  held_by:
+    - target: role:data-engineer
+    - target: role:data-scientist
+  requires_expertise:
+    - target: skill-area:data-quality

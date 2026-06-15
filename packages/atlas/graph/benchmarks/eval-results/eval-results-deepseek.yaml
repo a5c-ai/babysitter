@@ -1,0 +1,90 @@
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.deepseek-v3.001
+attributes:
+  evalRunId: eval-run:mmlu.deepseek-v3.2024-12
+  metricName: accuracy
+  score: 0.885
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-12-26T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.deepseek-v3.2024-12
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.deepseek-v3.001
+attributes:
+  evalRunId: eval-run:human-eval.deepseek-v3.2024-12
+  metricName: pass@1
+  score: 0.652
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-12-26T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.deepseek-v3.2024-12
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:swe-bench.deepseek-v3.001
+attributes:
+  evalRunId: eval-run:swe-bench.deepseek-v3.2024-12
+  metricName: resolved_rate
+  score: 0.420
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-12-26T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench.deepseek-v3.2024-12
+  scored_against:
+    - target: benchmark:swe-bench-verified
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.deepseek-r1.001
+attributes:
+  evalRunId: eval-run:mmlu.deepseek-r1.2025-01
+  metricName: accuracy
+  score: 0.908
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-01-20T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.deepseek-r1.2025-01
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:math.deepseek-r1.001
+attributes:
+  evalRunId: eval-run:math.deepseek-r1.2025-01
+  metricName: pass@1
+  score: 0.973
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-01-20T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:math.deepseek-r1.2025-01
+  scored_against:
+    - target: benchmark:math
+---
+nodeKind: EvalResult
+id: eval-result:gpqa.deepseek-r1.001
+attributes:
+  evalRunId: eval-run:gpqa.deepseek-r1.2025-01
+  metricName: accuracy
+  score: 0.715
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2025-01-20T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:gpqa.deepseek-r1.2025-01
+  scored_against:
+    - target: benchmark:gpqa

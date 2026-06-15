@@ -9,6 +9,13 @@ expertise:
   - Feature selection methods
   - Leakage prevention
   - Training-serving skew avoidance
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:feature-engineering, skill-area:feature-engineering-pipelines]
+  roles: [role:data-scientist, role:ml-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:experiment-design]
+
 ---
 
 # feature-engineer

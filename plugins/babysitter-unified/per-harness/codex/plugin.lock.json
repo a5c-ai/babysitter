@@ -1,0 +1,153 @@
+{
+  "lockVersion": 1,
+  "pluginId": "ai.a5c.babysitter",
+  "pluginVersion": "0.1.5",
+  "generatedBy": "@a5c-ai/babysitter-codex",
+  "generatedAt": "2026-03-11T00:00:00.000Z",
+  "skills": [
+    {
+      "id": "assimilate",
+      "vendoredPath": "skills/assimilate",
+      "source": {
+        "type": "local",
+        "path": "skills/assimilate"
+      }
+    },
+    {
+      "id": "babysit",
+      "vendoredPath": "skills/babysit",
+      "source": {
+        "type": "local",
+        "path": "skills/babysit"
+      }
+    },
+    {
+      "id": "call",
+      "vendoredPath": "skills/call",
+      "source": {
+        "type": "local",
+        "path": "skills/call"
+      }
+    },
+    {
+      "id": "doctor",
+      "vendoredPath": "skills/doctor",
+      "source": {
+        "type": "local",
+        "path": "skills/doctor"
+      }
+    },
+    {
+      "id": "forever",
+      "vendoredPath": "skills/forever",
+      "source": {
+        "type": "local",
+        "path": "skills/forever"
+      }
+    },
+    {
+      "id": "help",
+      "vendoredPath": "skills/help",
+      "source": {
+        "type": "local",
+        "path": "skills/help"
+      }
+    },
+    {
+      "id": "issue",
+      "vendoredPath": "skills/issue",
+      "source": {
+        "type": "local",
+        "path": "skills/issue"
+      }
+    },
+    {
+      "id": "model",
+      "vendoredPath": "skills/model",
+      "source": {
+        "type": "local",
+        "path": "skills/model"
+      }
+    },
+    {
+      "id": "observe",
+      "vendoredPath": "skills/observe",
+      "source": {
+        "type": "local",
+        "path": "skills/observe"
+      }
+    },
+    {
+      "id": "plan",
+      "vendoredPath": "skills/plan",
+      "source": {
+        "type": "local",
+        "path": "skills/plan"
+      }
+    },
+    {
+      "id": "project-install",
+      "vendoredPath": "skills/project-install",
+      "source": {
+        "type": "local",
+        "path": "skills/project-install"
+      }
+    },
+    {
+      "id": "resume",
+      "vendoredPath": "skills/resume",
+      "source": {
+        "type": "local",
+        "path": "skills/resume"
+      }
+    },
+    {
+      "id": "retrospect",
+      "vendoredPath": "skills/retrospect",
+      "source": {
+        "type": "local",
+        "path": "skills/retrospect"
+      }
+    },
+    {
+      "id": "team-install",
+      "vendoredPath": "skills/team-install",
+      "source": {
+        "type": "local",
+        "path": "skills/team-install"
+      }
+    },
+    {
+      "id": "user-install",
+      "vendoredPath": "skills/user-install",
+      "source": {
+        "type": "local",
+        "path": "skills/user-install"
+      }
+    },
+    {
+      "id": "yolo",
+      "vendoredPath": "skills/yolo",
+      "source": {
+        "type": "local",
+        "path": "skills/yolo"
+      }
+    }
+  ],
+  "metadata": {
+    "runtime": {
+      "name": "@a5c/babysitter-codex-runtime",
+      "version": "0.1.4"
+    },
+    "content": {
+      "name": "@a5c/babysitter-codex-content",
+      "version": "0.1.4",
+      "processLibrary": {
+        "repo": "https://github.com/a5c-ai/babysitter.git",
+        "processSubpath": "library",
+        "referenceSubpath": "library/reference",
+        "snapshotCommit": "unknown"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-c1a00d5c3b0b
+attributes:
+  displayName: 'Catalog source reference: https://docs.cline.bot/'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.cline.bot/
+  sourcePathOrUrl: https://docs.cline.bot/
+  locator: Source reference for catalog entities in graph/extensions/plugin-artifacts/plugin-target-cline.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

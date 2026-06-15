@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Biomechanics and Structural Analysis
   skill-id: BME-SK-012
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Material Model Library Skill

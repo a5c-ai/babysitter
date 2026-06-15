@@ -1,0 +1,17 @@
+nodeKind: PartialStateRecovery
+id: partial-state-recovery:in-memory-only
+attributes:
+  displayName: "Symphony in-memory-only restart semantics"
+  persistentStateKinds:
+    - terminal-workspaces-cleaned
+    - completed-issue-set
+    - run-journals
+  inMemoryStateKinds:
+    - running-sessions
+    - retry-timers
+    - claimed-set
+  restartRecoverySteps:
+    - "Re-read tracker for active issues"
+    - "Re-claim any in-progress issues without live sessions"
+    - "Reset retry queue (lost on restart)"
+    - "Resume polling"

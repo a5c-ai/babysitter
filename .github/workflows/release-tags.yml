@@ -1,0 +1,53 @@
+name: Create Release Tags
+
+on:
+  # Called by Publish after all validation and publish jobs succeed
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-tag-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create_release_tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Create immutable release tag
+        run: |
+          set -euo pipefail
+          SHORT_SHA=$(git rev-parse --short=12 HEAD)
+          VERSION=$(node -p "require('./package.json').version")
+          BRANCH="${GITHUB_REF_NAME}"
+          if [ "${BRANCH}" = "staging" ]; then
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+            NEXT_PATCH=$((PATCH + 1))
+            VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
+            TAG="babysitter/${BRANCH}/v${VERSION}"
+          else
+            TAG="babysitter/${BRANCH}/v${VERSION}-${SHORT_SHA}"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"

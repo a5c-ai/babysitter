@@ -17,6 +17,12 @@
  * - Embedded Diagnostics: https://interrupt.memfault.com/blog/device-diagnostics
  * - Crash Dumps: https://interrupt.memfault.com/blog/cortex-m-fault-debug
  * - UDS Protocol: https://www.embedded.com/unified-diagnostic-services-uds/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:bug-triage]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -43,10 +43,10 @@ All reference URLs organized by category. Last verified: 2026-04-03.
 
 | File | Path | Description |
 |------|------|-------------|
-| Gemini CLI Adapter | `packages/sdk/src/harness/geminiCli.ts` | SDK adapter with session binding, hook handlers, install support |
-| Gemini CLI Adapter Tests | `packages/sdk/src/harness/__tests__/geminiCli.test.ts` | Unit tests for the adapter |
-| Harness Types | `packages/sdk/src/harness/types.ts` | `HarnessAdapter`, `HookHandlerArgs`, `SessionBindOptions` type definitions |
-| Install Support | `packages/sdk/src/harness/installSupport.ts` | `getGeminiExtensionDir`, `installCliViaNpm`, `isGeminiPluginInstalled` helpers |
+| Gemini CLI Adapter | `packages/babysitter-sdk/src/harness/geminiCli.ts` | SDK adapter with session binding, hook handlers, install support |
+| Gemini CLI Adapter Tests | `packages/babysitter-sdk/src/harness/__tests__/geminiCli.test.ts` | Unit tests for the adapter |
+| Harness Types | `packages/babysitter-sdk/src/harness/types.ts` | `HarnessAdapter`, `HookHandlerArgs`, `SessionBindOptions` type definitions |
+| Install Support | `packages/babysitter-sdk/src/harness/installSupport.ts` | `getGeminiExtensionDir`, `installCliViaNpm`, `isGeminiPluginInstalled` helpers |
 
 ## Plugin Files (within babysitter repo)
 

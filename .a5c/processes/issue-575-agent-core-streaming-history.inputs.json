@@ -1,0 +1,147 @@
+{
+  "issueNumber": 575,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-575-agent-core-streaming-history",
+  "title": "agent-core: streaming responses + multi-turn conversation history",
+  "labels": [
+    "bug",
+    "priority:high",
+    "effort:large",
+    "agent-core",
+    "P0",
+    "risk:high"
+  ],
+  "summary": "Issue #575 reports two production-blocking gaps in packages/agent-core/src/session.ts: prompt() waits for a full provider response and emits one text_delta, and each prompt rebuilds messages from scratch instead of preserving multi-turn conversation context.",
+  "issueFindings": [
+    "OpenAI/Azure and Anthropic calls are currently non-streaming fetch calls followed by response.json().",
+    "prompt() emits session_start, one text_delta containing the full response, then session_end.",
+    "messages are rebuilt inside each prompt() call from system prompt plus the current user prompt only.",
+    "There is no persisted user/assistant history, no public getHistory()/clearHistory() control, and no deterministic trimming policy.",
+    "packages/agent-core/src/session.test.ts currently confirms the second prompt request only includes the new user message.",
+    "Queued follow-up text via steer()/followUp() must continue to apply to the next prompt exactly once.",
+    "This blocks #582 and is related to #578, #587, #594, and #257, but transport-mux streaming fixes are out of scope unless an agent-core integration boundary requires a small shared extraction."
+  ],
+  "targetFiles": [
+    "packages/agent-core/src/session.ts",
+    "packages/agent-core/src/types.ts",
+    "packages/agent-core/src/session.test.ts",
+    "packages/agent-core/README.md",
+    "packages/agent-core/src/context/token-estimator.ts",
+    "packages/genty/platform/src/harness/invoker.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "packages/transport-mux/src/engines/openai.ts",
+    "packages/transport-mux/src/engines/anthropic.ts",
+    "packages/transport-mux/tests/transports/openai-chat.test.ts",
+    "packages/transport-mux/tests/transports/anthropic.test.ts",
+    "docs/agent-layer-gaps.md"
+  ],
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "status": "not-present-in-checkout",
+    "localAlternativesUsed": [
+      "docs/agent-reference/process-authoring.md",
+      ".a5c/processes/issue-136-session-resolution-leak.mjs",
+      ".a5c/processes/issue-483-gemini-live-stack-regression.mjs"
+    ],
+    "methodologyReferencesToPreserve": [
+      "test-driven-development",
+      "verification-before-completion",
+      "root-cause-diagnosis",
+      "sdk-platform-development",
+      "qa-testing-automation",
+      "compatibility-review"
+    ]
+  },
+  "reuseAuditFindings": [
+    "packages/transport-mux/src/engines/openai.ts already parses OpenAI/Azure SSE data lines, [DONE], content deltas, finish reasons, and usage.",
+    "packages/transport-mux/src/engines/anthropic.ts already parses Anthropic message stream events including content_block_delta text_delta and message_delta usage.",
+    "transport-mux tests provide realistic OpenAI chat and Anthropic stream fixtures that can inform agent-core tests without changing transport-mux behavior.",
+    "packages/agent-core/src/context/token-estimator.ts and packages/genty/platform/src/compression/compaction.ts provide existing rough token-estimation patterns for deterministic trimming decisions.",
+    "packages/agent-core/README.md already documents prompt() as streaming events and abort()/dispose() behavior that the current implementation does not fully satisfy.",
+    "packages/genty/platform/src/harness/invoker.ts creates and disposes an agent-core session for the direct agent-core harness path and must remain compatible."
+  ],
+  "acceptanceFocus": [
+    "OpenAI/Azure chat completions are requested with stream: true and SSE chunks emit multiple incremental text_delta events as they arrive.",
+    "Anthropic messages are requested with stream: true and message streaming chunks emit equivalent normalized text_delta events.",
+    "AgentCorePromptResult.output remains the full concatenated assistant text with existing success, duration, and exitCode semantics.",
+    "Event ordering remains session_start, zero or more text_delta events, session_end on success, and error on failure.",
+    "A second prompt includes prior successful user/assistant turns plus the new user prompt.",
+    "Successful assistant output is appended to history only after completion; failed, timed-out, or aborted prompts do not corrupt future history with partial assistant text.",
+    "Public getHistory()/clearHistory() or equivalent controls exist, are typed, return defensive copies, and are documented.",
+    "History growth is bounded by deterministic turn and token-aware trimming behavior with focused tests.",
+    "followUp()/steer() behavior remains compatible and queued text is persisted into history exactly once.",
+    "Downstream agent-platform direct agent-core harness tests remain compatible."
+  ],
+  "nonGoals": [
+    "Do not implement structured output, vision, abort enhancements, or token accounting beyond what streaming/history require.",
+    "Do not redesign agent-platform session management; #594 covers broader platform session management.",
+    "Do not fix transport-mux issue #257 unless a small shared parser extraction is required by agent-core tests.",
+    "Do not add shell-oriented process subtasks for this repository workflow."
+  ],
+  "qualityGates": [
+    "Regression tests fail against the pre-fix behavior or clearly encode the prior broken expectation.",
+    "OpenAI/Azure streaming tests cover split SSE frames, multiple data chunks, [DONE], final output concatenation, request body stream: true, and event ordering.",
+    "Anthropic streaming tests cover content_block_delta text deltas, message_delta/message_stop completion behavior, final output concatenation, and event ordering.",
+    "Multi-turn tests cover prior user/assistant history inclusion on the second prompt.",
+    "History API tests cover getHistory(), clearHistory(), defensive copying, system prompt handling, trimming, and failed prompt behavior.",
+    "followUp()/steer() tests cover queued instruction persistence exactly once.",
+    "Targeted agent-core tests pass.",
+    "agent-core package tests pass.",
+    "agent-core build passes.",
+    "Relevant agent-platform direct harness tests pass if public types or session behavior changed.",
+    "git diff --check passes.",
+    "Compatibility review finds no event-contract regression or unbounded-history risk."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/session.test.ts",
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run build --workspace=@a5c-ai/agent-core",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "git diff --check"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #575, comments, labels, related issues, docs/agent-layer-gaps.md, and agent-core README session API documentation."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Scan existing streaming parsers, fixtures, history/token helpers, public API boundaries, and old behavior tests before adding new infrastructure."
+    },
+    {
+      "name": "Architecture trace",
+      "purpose": "Map prompt(), provider request shaping, event emission, queued follow-ups, history semantics, failure behavior, and downstream agent-platform integration."
+    },
+    {
+      "name": "Regression plan",
+      "purpose": "Add failing tests for provider streaming, multi-turn history, history controls, trimming, follow-up persistence, and failure behavior before implementation."
+    },
+    {
+      "name": "Implementation loop",
+      "purpose": "Implement isolated provider streaming parsers and persistent bounded history in agent-core, iterating up to three times based on verification and review."
+    },
+    {
+      "name": "Verification gate",
+      "purpose": "Run targeted session tests, package tests, build, relevant downstream tests, and diff hygiene checks."
+    },
+    {
+      "name": "Compatibility review",
+      "purpose": "Review event contracts, provider parser robustness, history semantics, public API typing, README consistency, and downstream agent-platform compatibility."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm acceptance criteria, quality gates, changed files, release-note candidate, and residual risks."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if implementation uncovers a real public API conflict, such as whether history should include failed user turns or whether clearHistory() should preserve the current sessionId.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended API-compatible contract",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "expectedProcessEntrypoint": ".a5c/processes/issue-575-agent-core-streaming-history.mjs#process"
+}

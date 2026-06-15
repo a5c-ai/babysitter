@@ -1,0 +1,76 @@
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-159-release
+attributes:
+  displayName: "Claude Agent SDK v0.3.159 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.159
+  sourcePathOrUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.159
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.159"
+  capturedAt: "2026-05-31T20:10:00Z"
+  observedAt: "2026-05-31T20:10:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:10:00Z"
+  notes: |
+    Official release notes identify Claude Agent SDK v0.3.159 as the TypeScript
+    SDK parity update for Claude Code v2.1.159. No package rename, install
+    method change, or SDK-only migration step is called out for v0.3.159.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:claude-agent-sdk@current
+    - agentVersion:claude-agent-sdk:0-3-159
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-154-stdio-mcp-reconcile
+attributes:
+  displayName: "Claude Agent SDK v0.3.154 stdio MCP reconcile fix"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.154
+  sourcePathOrUrl: https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.154
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.154"
+  capturedAt: "2026-05-31T20:10:00Z"
+  observedAt: "2026-05-31T20:10:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:10:00Z"
+  notes: |
+    Issue #801 records that the related v0.3.154 release fixed stdio MCP
+    servers being incorrectly restarted on every reconcile pass because
+    config-equality comparisons produced false positives.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:claude-agent-sdk@current
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-159-issue-801-tracker
+attributes:
+  displayName: "GitHub issue #801 Claude Agent SDK v0.3.159 tracker"
+  kindLabel: issue-tracker
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/issues/801
+  sourcePathOrUrl: https://github.com/a5c-ai/babysitter/issues/801
+  locator: "a5c-ai/babysitter issue #801"
+  capturedAt: "2026-05-31T20:10:00Z"
+  observedAt: "2026-05-31T20:10:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:10:00Z"
+  notes: |
+    Issue #801 requests updating Atlas graph YAML for Claude Agent SDK 0.3.159,
+    preserving @anthropic-ai/claude-agent-sdk package/install metadata, recording
+    Claude Code 2.1.159 parity, and noting the recent 0.3.154 stdio MCP
+    reconcile fix.
+edges:
+  has_trust_level:
+    - trust-level:repo
+  references:
+    - agent-version:claude-agent-sdk@current

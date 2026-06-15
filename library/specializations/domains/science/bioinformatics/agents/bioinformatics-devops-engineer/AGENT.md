@@ -12,6 +12,12 @@ expertise:
 metadata:
   version: "1.0"
   category: bioinformatics
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:python-data-pipelines, skill-area:containerization, skill-area:cloud-infrastructure]
+  workflows: [workflow:experiment-design]
+  roles: [role:devops-engineer, role:research-engineer]
 ---
 
 # Bioinformatics DevOps Engineer Agent

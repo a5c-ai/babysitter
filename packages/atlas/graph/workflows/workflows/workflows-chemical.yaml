@@ -1,0 +1,66 @@
+---
+nodeKind: Workflow
+id: workflow:process-simulation-review
+attributes:
+  displayName: "Process Simulation Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-design-iteration"
+  complexity: single-team
+  description: |
+    Reviews chemical process simulations (Aspen Plus, HYSYS) for model
+    fidelity -- validating thermodynamic property packages, checking
+    mass/energy balance closures, verifying reaction kinetics against
+    experimental data, auditing recycle convergence behavior, and
+    confirming equipment sizing calculations match vendor specifications.
+    Excludes process design decisions.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:data-scientist
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:chemical-engineering
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:hazop-safety-analysis
+attributes:
+  displayName: "HAZOP Safety Analysis"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-design-phase"
+  complexity: cross-team
+  description: |
+    Conducts Hazard and Operability studies on process flow diagrams --
+    systematically applying guide words to each process node, identifying
+    deviation consequences, assessing existing safeguard adequacy via
+    protection layer analysis, assigning SIL targets for safety
+    instrumented functions, and generating action items with severity
+    rankings for risk reduction. Excludes safeguard implementation.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:chemical-engineering
+    - target: domain:environmental-engineering
+  triggers_responsibility:
+    - target: responsibility:threat-modeling
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering

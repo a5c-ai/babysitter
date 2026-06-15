@@ -9,6 +9,14 @@ expertise:
   - Tool and resource design
   - Security best practices
   - Performance optimization
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:protocol-design]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Protocol Expert Agent

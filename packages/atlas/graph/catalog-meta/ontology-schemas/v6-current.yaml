@@ -1,0 +1,11 @@
+nodeKind: OntologySchema
+id: ontology:v6-current
+attributes:
+  displayName: v6 graph ontology (current)
+edges:
+  has_version:
+    - agent-version:babysitter@current
+  defines_meta_cluster:
+    - target: meta-cluster:agent-stack
+    - target: meta-cluster:lifecycle
+    - target: meta-cluster:capabilities-policy

@@ -13,6 +13,12 @@ export interface ApproveBreakpointResult {
 
 const nextUlid = monotonicFactory();
 
+function resolveContainedPath(parentDir: string, childName: string): string | null {
+  const parent = path.resolve(parentDir);
+  const child = path.resolve(parent, childName);
+  return child === parent || child.startsWith(`${parent}${path.sep}`) ? child : null;
+}
+
 /**
  * Determine the next journal sequence number by scanning existing files.
  */
@@ -106,10 +112,14 @@ export async function approveBreakpoint(
     if (!found) {
       return { success: false, error: `Run not found: ${runId}` };
     }
-    const runDir = found.runDir;
+    const runDir = path.resolve(found.runDir);
 
     // --- Verify the task directory exists ---
-    const taskDir = path.join(runDir, "tasks", effectId);
+    const tasksDir = path.resolve(runDir, "tasks");
+    const taskDir = resolveContainedPath(tasksDir, effectId);
+    if (!taskDir) {
+      return { success: false, error: "Invalid task path" };
+    }
     try {
       await fs.access(taskDir);
     } catch {
@@ -128,7 +138,7 @@ export async function approveBreakpoint(
       startedAt: now,
       finishedAt: now,
     };
-    const resultPath = path.join(taskDir, "result.json");
+    const resultPath = path.resolve(taskDir, "result.json");
     await fs.writeFile(resultPath, JSON.stringify(resultPayload, null, 2), "utf-8");
 
     // --- Append EFFECT_RESOLVED journal entry ---

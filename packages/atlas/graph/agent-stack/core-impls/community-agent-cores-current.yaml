@@ -1,0 +1,118 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:psclaudecode.core@current
+attributes:
+  displayName: "PSClaudeCode Core (current)"
+  agentVersionId: agent-version:psclaudecode@current
+  packageRef: source-ref:psclaudecode-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Product description identifies PSClaudeCode as a PowerShell implementation
+    of the Claude Code agent loop with tools, permissions, file editing,
+    command execution, and Anthropic API calls.
+  contextManagementStrategy: user-managed
+  subagentInvokerPolicy: not-applicable
+  resultSynthesisPolicy: model-direct
+  stopDetectionStrategy: model-stop-token
+  transportClientLibrary: Anthropic API via PowerShell
+  supportedTransportProtocols:
+    - model-transport:anthropic-messages
+  parallelToolCallHandling: sequentialized
+  streamingFidelity: partial
+  thinkingChannelHandling: model-dependent
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:psclaudecode
+      role: core
+  depends_on:
+    - target: source-ref:psclaudecode-github
+---
+nodeKind: AgentCoreImpl
+id: agent-core-impl:cyclop-one.core@current
+attributes:
+  displayName: "Cyclop One Core (current)"
+  agentVersionId: agent-version:cyclop-one@current
+  packageRef: source-ref:cyclop-one-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Product description identifies Cyclop One as an autonomous desktop agent
+    powered by Claude vision that reasons over screen captures and performs
+    mouse and keyboard actions at the OS level.
+  contextManagementStrategy: user-managed
+  subagentInvokerPolicy: not-applicable
+  resultSynthesisPolicy: model-direct
+  stopDetectionStrategy: model-stop-token
+  transportClientLibrary: Claude vision desktop control loop
+  supportedTransportProtocols:
+    - model-transport:anthropic-messages
+  parallelToolCallHandling: sequentialized
+  streamingFidelity: partial
+  thinkingChannelHandling: model-dependent
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:cyclop-one
+      role: core
+  depends_on:
+    - target: source-ref:cyclop-one-github
+---
+nodeKind: AgentCoreImpl
+id: agent-core-impl:cli-anything.core@current
+attributes:
+  displayName: "CLI Anything Core (current)"
+  agentVersionId: agent-version:cli-anything@current
+  packageRef: source-ref:cli-anything-github
+  loopIteratorPolicy: custom
+  loopIteratorNotes: |
+    Product description identifies CLI Anything as a wrapper generator that
+    turns existing software into agent-callable CLI interfaces with structured
+    command-line protocols.
+  contextManagementStrategy: none
+  subagentInvokerPolicy: not-applicable
+  resultSynthesisPolicy: post-processed
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: generated CLI wrapper protocol
+  supportedTransportProtocols:
+    - model-transport:passthrough
+  parallelToolCallHandling: not-supported
+  streamingFidelity: text-only
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:cli-anything
+      role: core
+  depends_on:
+    - target: source-ref:cli-anything-github
+---
+nodeKind: AgentCoreImpl
+id: agent-core-impl:nanny.core@current
+attributes:
+  displayName: "Nanny Core (current)"
+  agentVersionId: agent-version:nanny@current
+  packageRef: source-ref:nanny-github
+  loopIteratorPolicy: process-function-driven
+  loopIteratorNotes: |
+    Product description identifies Nanny as a minimal orchestration loop for
+    smart agents with task queuing, retry logic, status tracking, sequencing,
+    and reporting.
+  contextManagementStrategy: none
+  subagentInvokerPolicy: process-task-driven
+  resultSynthesisPolicy: process-function-defined
+  stopDetectionStrategy: process-function-completion
+  transportClientLibrary: none
+  supportedTransportProtocols: []
+  parallelToolCallHandling: delegated-to-remote
+  streamingFidelity: partial
+  thinkingChannelHandling: delegated-to-remote
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:nanny
+      role: core
+  depends_on:
+    - target: source-ref:nanny-github

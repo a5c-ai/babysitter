@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tau-bench.scope
+attributes:
+  subjectId: benchmark:tau-bench
+  inScope: |
+    Conversational tool-use benchmark — agent must complete user-facing tasks (airline / retail) over multi-turn dialogue while invoking domain tools and respecting policy.
+  outOfScope: |
+    Single-turn evaluations, code-generation tasks, and benchmarks without a tool-use harness.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:tau-bench

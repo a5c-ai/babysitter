@@ -9,6 +9,14 @@ expertise:
   - Database schema design
   - Deployment and infrastructure
   - Monorepo organization
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:fullstack-engineer, role:tech-lead]
+  skillAreas: [skill-area:backend-api-design, skill-area:react-state-management]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:api-design, topic:design-patterns]
+
 ---
 
 # Full-Stack Architect Agent

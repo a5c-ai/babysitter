@@ -1,0 +1,94 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:sentry.get-issue
+attributes:
+  schema: '{}'
+  displayName: "Sentry: Get Issue"
+  description: Retrieve a Sentry issue by ID or short ID, including stacktrace and event metadata.
+  inputSchema:
+    type: object
+    required: [issue_id_or_url]
+    properties:
+      issue_id_or_url: { type: string }
+      organization_slug: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-sentry
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sentry.list-issues
+attributes:
+  schema: '{}'
+  displayName: "Sentry: List Issues"
+  description: List issues for a Sentry project with optional query filters.
+  inputSchema:
+    type: object
+    required: [organization_slug]
+    properties:
+      organization_slug: { type: string }
+      project_slug: { type: string }
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      issues: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-sentry
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sentry.search-issues
+attributes:
+  schema: '{}'
+  displayName: "Sentry: Search Issues"
+  description: Search across Sentry issues using the Sentry search query language.
+  inputSchema:
+    type: object
+    required: [organization_slug, query]
+    properties:
+      organization_slug: { type: string }
+      query: { type: string }
+      project_slug: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      issues: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-sentry
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:sentry.get-event
+attributes:
+  schema: '{}'
+  displayName: "Sentry: Get Event"
+  description: Retrieve a single event (occurrence) by event ID, including breadcrumbs and stacktrace.
+  inputSchema:
+    type: object
+    required: [event_id]
+    properties:
+      event_id: { type: string }
+      organization_slug: { type: string }
+      project_slug: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      event: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-sentry

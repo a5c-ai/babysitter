@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Portfolio Management
   id: SK-013
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:financial-planning, skill-area:roadmap-planning, skill-area:quantitative-modeling]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:strategic-planner, role:financial-analyst]
 ---
 
 # Portfolio Optimization

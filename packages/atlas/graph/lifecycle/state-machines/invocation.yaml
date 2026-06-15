@@ -1,0 +1,46 @@
+nodeKind: StateMachine
+id: state-machine:invocation
+attributes:
+  governsNodeKindId: "node-kind:Invocation"
+  displayName: "Invocation"
+  targetNodeKind: Invocation
+  description: |
+    Lifecycle for a single agent invocation (one CLI process spawn) from
+    spawned through any of the terminal states.
+  states:
+    - id: invocation.spawned
+      displayName: "Invocation / spawned"
+      terminal: false
+      description: The 'spawned' state of the invocation state machine.
+    - id: invocation.running
+      displayName: "Invocation / running"
+      terminal: false
+      description: The 'running' state of the invocation state machine.
+    - id: invocation.paused
+      displayName: "Invocation / paused"
+      terminal: false
+      description: The 'paused' state of the invocation state machine.
+    - id: invocation.interrupted
+      displayName: "Invocation / interrupted"
+      terminal: false
+      description: The 'interrupted' state of the invocation state machine.
+    - id: invocation.aborted
+      displayName: "Invocation / aborted"
+      terminal: true
+      description: The 'aborted' state of the invocation state machine.
+    - id: invocation.timed-out
+      displayName: "Invocation / timed-out"
+      terminal: true
+      description: The 'timed-out' state of the invocation state machine.
+    - id: invocation.completed
+      displayName: "Invocation / completed"
+      terminal: true
+      description: The 'completed' state of the invocation state machine.
+    - id: invocation.crashed
+      displayName: "Invocation / crashed"
+      terminal: true
+      description: The 'crashed' state of the invocation state machine.
+    - id: invocation.killed
+      displayName: "Invocation / killed"
+      terminal: true
+      description: The 'killed' state of the invocation state machine.

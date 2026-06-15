@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-011
   category: Problem Solving
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:strategic-analysis, skill-area:business-analysis, skill-area:problem-solving]
+  workflows: [workflow:market-analysis]
+  roles: [role:strategic-planner, role:business-analyst]
 ---
 
 # Issue Tree Generator

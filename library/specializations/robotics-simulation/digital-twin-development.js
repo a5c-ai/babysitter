@@ -16,6 +16,12 @@
  * @references
  * - Reality Gap: https://arxiv.org/abs/2011.12820
  * - Digital Twins: https://ieeexplore.ieee.org/document/9387482
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

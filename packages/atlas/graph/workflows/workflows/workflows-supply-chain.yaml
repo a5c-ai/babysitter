@@ -1,0 +1,103 @@
+---
+nodeKind: Workflow
+id: workflow:demand-forecasting-cycle
+attributes:
+  displayName: "Demand Forecasting Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Produces rolling demand forecasts by synthesizing historical sales
+    data, market signals, promotional calendars, and macroeconomic
+    indicators -- calibrating statistical and ML models against recent
+    actuals, generating SKU-level and aggregate demand projections across
+    planning horizons, running scenario analysis for demand shocks, and
+    publishing forecast accuracy scorecards. Produces updated demand plan
+    and bias-correction recommendations. Excludes inventory replenishment
+    execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:supply-chain
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:supplier-risk-assessment
+attributes:
+  displayName: "Supplier Risk Assessment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates supply-chain risk exposure across the active supplier
+    portfolio -- scoring suppliers on financial health, geopolitical
+    exposure, single-source concentration, lead-time variability, quality
+    defect trends, and ESG compliance. Identifies critical dependencies
+    lacking secondary sources, models disruption impact scenarios, and
+    produces a risk-ranked supplier scorecard with mitigation action items.
+    Excludes supplier contract negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:supply-chain
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:inventory-optimization-review
+attributes:
+  displayName: "Inventory Optimization Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews inventory positions against demand forecasts and
+    service-level targets -- analyzing days-of-supply coverage by product
+    tier, identifying excess and obsolete stock, evaluating safety-stock
+    parameter accuracy, modeling reorder-point adjustments for demand
+    volatility changes, and benchmarking carrying costs against industry
+    norms. Produces inventory health dashboard updates and parameter
+    adjustment recommendations. Excludes warehouse operations and physical
+    counts.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-warehouse-modeling
+  applies_to_domain:
+    - target: domain:supply-chain
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:analytics-team

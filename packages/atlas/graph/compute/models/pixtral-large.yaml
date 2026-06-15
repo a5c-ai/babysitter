@@ -1,0 +1,48 @@
+# Issue #903 — Track Pixtral Large model (lifecycle update).
+nodeKind: ModelVersion
+id: model:pixtral-large@current
+attributes:
+  displayName: "Pixtral Large"
+  providerModelIds:
+    - pixtral-large-latest
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  kind: multimodal
+  contextWindowTokens: 0
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: "2024-11-01"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2024-11-01"
+  modelCardUrl: https://docs.mistral.ai/getting-started/models/models_overview/
+  huggingFaceUrl: https://huggingface.co/mistralai/Pixtral-Large-Instruct-2411
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Pixtral Large is a multimodal vision-text model from Mistral AI. Exact
+    context window, OCR/image limits, pricing, and cross-provider availability
+    should be confirmed from Mistral docs before adding precise claims.
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:mistral
+  served_by:
+    - provider:mistral
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:vision-input
+      level: full

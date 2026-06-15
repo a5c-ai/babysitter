@@ -7,6 +7,10 @@ metadata:
   version: "1.0.0"
   category: production-planning
   backlog-id: SK-IE-031
+graph:
+  domains: [domain:industrial-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+  roles: [role:operations-analyst, role:research-engineer]
 ---
 
 # oee-calculator

@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: strategy-execution
   phase: 6
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:risk-assessment, skill-area:strategic-analysis, skill-area:strategic-planning]
+  workflows: [workflow:strategic-planning]
+  roles: [role:strategic-planner, role:risk-analyst]
 ---
 
 # Strategy Stress Testing Skill

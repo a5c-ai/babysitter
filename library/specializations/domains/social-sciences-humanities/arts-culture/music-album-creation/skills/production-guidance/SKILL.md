@@ -3,6 +3,10 @@ name: production-guidance
 description: Provide detailed production specifications including instrumentation, arrangement, mix characteristics, effects, and era-specific production aesthetics
 allowed-tools: Read, Write, Edit, WebSearch
 id: SK-MAC-008
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:audio-processing, skill-area:media-encoding, skill-area:content-strategy]
+  roles: [role:creative-director, role:media-engineer]
 ---
 
 # Production Guidance

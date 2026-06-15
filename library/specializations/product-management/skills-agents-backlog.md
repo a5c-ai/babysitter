@@ -18,7 +18,7 @@ This document identifies specialized skills and agents (subagents) that could en
 ## Overview
 
 ### Current State
-All 17 implemented processes in this specialization currently use the `general-purpose` agent for task execution. While functional, this approach lacks domain-specific optimizations that specialized skills and agents could provide.
+All 19 implemented processes in this specialization currently use the `general-purpose` agent for task execution. While functional, this approach lacks domain-specific optimizations that specialized skills and agents could provide.
 
 ### Implemented Processes
 1. `quarterly-roadmap.js` - Strategic roadmap planning
@@ -38,6 +38,8 @@ All 17 implemented processes in this specialization currently use the `general-p
 15. `stakeholder-alignment.js` - Stakeholder communication
 16. `customer-advisory-board.js` - CAB management
 17. `product-council-review.js` - Product review processes
+18. `prd-to-spec.js` - Orchestrate PRD-to-SPEC pipeline (discovery, SPEC generation, self-review, execution prompt) — dispatched from the `prd-to-spec` skill via `/babysitter:call` or `/babysitter:yolo`
+19. `task-to-prd.js` - Orchestrate task-to-PRD pipeline (Five Whys, interactive clarification, parallel verification, finalize) — dispatched from the `task-to-prd` skill via `/babysitter:call` or `/babysitter:yolo`
 
 ### Goals
 - Provide deep expertise in product management frameworks and methodologies

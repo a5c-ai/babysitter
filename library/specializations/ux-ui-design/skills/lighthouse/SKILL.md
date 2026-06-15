@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: performance-auditing
   backlog-id: SK-UX-004
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:web-vitals, skill-area:accessibility-testing]
+  roles: [role:frontend-engineer, role:qa-engineer]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
+  topics: [topic:accessibility]
 ---
 
 # lighthouse

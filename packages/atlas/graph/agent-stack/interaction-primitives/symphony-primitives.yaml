@@ -1,0 +1,114 @@
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:symphony-poll-tick
+attributes:
+  displayName: "Symphony Poll Tick"
+  description: |
+    Periodic issue tracker polling primitive. Symphony's main loop polls
+    Linear (or other issue trackers) on a configurable interval to discover
+    new actionable issues. Each poll tick evaluates issue labels, assignment,
+    and state to determine which issues should be picked up for agent
+    processing. Implements exponential backoff on failures.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:symphony-workspace-create
+attributes:
+  displayName: "Symphony Workspace Create"
+  description: |
+    Per-issue workspace creation primitive. When Symphony picks up a new
+    issue, it creates an isolated workspace directory with a dedicated
+    git worktree, clones the repository state, and prepares the environment
+    for the coding agent session. Workspace directories persist across
+    restarts for recovery.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:symphony-agent-session
+attributes:
+  displayName: "Symphony Agent Session"
+  description: |
+    Coding agent session lifecycle primitive. Manages spawning a coding
+    agent CLI (e.g. Codex) in an isolated workspace, feeding it the issue
+    description and WORKFLOW.md instructions, monitoring its progress,
+    and collecting its output (code changes, PR submission). Sessions
+    have bounded duration and retry with exponential backoff on failure.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:symphony-reconciliation
+attributes:
+  displayName: "Symphony Reconciliation"
+  description: |
+    State reconciliation primitive for restart recovery. On startup,
+    Symphony scans filesystem workspace directories to reconstruct
+    in-progress issue state, detecting orphaned workspaces, incomplete
+    agent sessions, and stale locks. Reconciliation enables Symphony
+    to resume gracefully after crashes without duplicating work.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:symphony-workflow-md
+attributes:
+  displayName: "Symphony WORKFLOW.md Policy"
+  description: |
+    WORKFLOW.md policy loading primitive. Symphony reads a WORKFLOW.md
+    file from the target repository to configure agent behavior — coding
+    standards, testing requirements, PR conventions, and review policies.
+    This file-driven configuration allows per-repo customization of how
+    agents approach development work without modifying Symphony itself.
+  kind: automation
+  surface: headless
+  category: interaction-primitive-category:configuration
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:symphony-status-surface
+attributes:
+  displayName: "Symphony Status Surface"
+  description: |
+    Operator observability dashboard for monitoring Symphony's runtime
+    state. Displays active issues being processed, agent session status,
+    workspace health, poll cycle metrics, retry counts, and error logs.
+    Provides the operator visibility into the autonomous issue processing
+    pipeline without requiring direct log inspection.
+  kind: editor-ui
+  surface: headless
+  category: interaction-primitive-category:observability
+  availableInModes: [headless]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

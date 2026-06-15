@@ -5,6 +5,13 @@
  * @outputs { success: boolean, deliberationProcess: object, ethicalAssessment: object, recommendations: array, artifacts: array }
  * @recommendedSkills SK-PHIL-012 (bioethics-deliberation), SK-PHIL-003 (ethical-framework-application), SK-PHIL-014 (socratic-dialogue-facilitation)
  * @recommendedAgents AG-PHIL-002 (ethics-consultant-agent)
+ *
+ * @graph
+ *   domains: [domain:philosophy]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,12 @@ expertise:
   - RFx management
   - Supplier evaluation and selection
   - Contract negotiation
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:strategic-analysis, skill-area:market-research]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:strategic-planner]
 ---
 
 # Strategic Sourcing Manager

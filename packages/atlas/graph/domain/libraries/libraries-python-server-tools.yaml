@@ -1,0 +1,222 @@
+---
+nodeKind: Library
+id: library:flask-sqlalchemy
+attributes:
+  displayName: "Flask-SQLAlchemy"
+  belongsToLanguageId: language:python
+  category: orm
+  description: |
+    Flask extension that adds SQLAlchemy ORM support, simplifying database
+    configuration, session management, and model definitions within Flask
+    applications with sensible defaults.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:alembic
+attributes:
+  displayName: "Alembic"
+  belongsToLanguageId: language:python
+  category: orm
+  description: |
+    Lightweight database migration tool for SQLAlchemy that generates
+    versioned migration scripts, supports auto-generation from model
+    changes, and handles branch merging for team workflows.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:efcore-migrations
+---
+nodeKind: Library
+id: library:uvicorn
+attributes:
+  displayName: "Uvicorn"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Lightning-fast ASGI server implementation for Python using uvloop and
+    httptools, designed to run async web frameworks like FastAPI and Starlette
+    in production with minimal overhead.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:deployment
+  alternative_to:
+    - library:gunicorn
+---
+nodeKind: Library
+id: library:gunicorn
+attributes:
+  displayName: "Gunicorn"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Pre-fork WSGI HTTP server for UNIX systems that runs multiple worker
+    processes, supports various worker classes including async with gevent,
+    and integrates well with Django and Flask deployments.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:deployment
+---
+nodeKind: Library
+id: library:pydantic-settings
+attributes:
+  displayName: "Pydantic Settings"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Pydantic extension for application settings management, loading
+    configuration from environment variables, .env files, and JSON with
+    full type validation and nested settings support.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:python-dotenv
+---
+nodeKind: Library
+id: library:python-dotenv
+attributes:
+  displayName: "python-dotenv"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Reads key-value pairs from a .env file and sets them as environment
+    variables, enabling twelve-factor-style configuration for Python
+    applications without shell scripts.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:jinja2
+attributes:
+  displayName: "Jinja2"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Fast, expressive, and extensible templating engine for Python with
+    sandboxed execution, template inheritance, macro support, and filters;
+    used by Flask, Ansible, and many other tools.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:technical-documentation
+  alternative_to:
+    - library:mako
+---
+nodeKind: Library
+id: library:mako
+attributes:
+  displayName: "Mako"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Hyperfast Python templating language with clean Python-like syntax,
+    support for template inheritance, module caching, and Unicode; used
+    by Pyramid and SQLAlchemy's migration tooling (via Alembic).
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:technical-documentation
+---
+nodeKind: Library
+id: library:cookiecutter
+attributes:
+  displayName: "Cookiecutter"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Command-line utility that creates projects from templates (cookiecutters),
+    using Jinja2 for template rendering with support for prompts, hooks,
+    and a large directory of community templates.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - library:copier
+---
+nodeKind: Library
+id: library:copier
+attributes:
+  displayName: "Copier"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Library and CLI tool for rendering project templates with support for
+    updating existing projects from upstream template changes, multi-stage
+    tasks, and conditional questions.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cli-tooling
+---
+nodeKind: Library
+id: library:bandit
+attributes:
+  displayName: "Bandit"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Security-focused static analysis tool for Python that finds common
+    security issues using configurable plugins, reporting severity and
+    confidence levels for each finding.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:vulnerability-scanning
+  alternative_to:
+    - library:safety
+---
+nodeKind: Library
+id: library:safety
+attributes:
+  displayName: "Safety"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Python dependency vulnerability scanner that checks installed packages
+    against the Safety DB and CVE databases, integrating with CI pipelines
+    and requirements files for automated security auditing.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:vulnerability-scanning
+---
+nodeKind: Library
+id: library:pre-commit
+attributes:
+  displayName: "pre-commit"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Framework for managing and maintaining multi-language pre-commit hooks,
+    supporting hooks from any language via a plugin ecosystem and integrating
+    with git to enforce code quality before commits.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:code-analysis-linting
+  alternative_to:
+    - library:husky

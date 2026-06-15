@@ -1,0 +1,52 @@
+# Issue #903 — Track Mistral Small 4 model.
+nodeKind: ModelVersion
+id: model:mistral-small-4@current
+attributes:
+  displayName: "Mistral Small 4 (119B)"
+  providerModelIds:
+    - mistral-small-4-119b-2603
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  kind: multimodal
+  contextWindowTokens: 0
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: "2026-03-01"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2026-03-01"
+  modelCardUrl: https://docs.mistral.ai/getting-started/models/models_overview/
+  huggingFaceUrl: https://huggingface.co/mistralai/Mistral-Small-4-119B-Instruct-2603
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Mistral Small 4 is a 119B-parameter general multimodal/instruct model.
+    Exact context window and pricing should be confirmed from Mistral docs
+    before adding precise claims. Cross-provider availability on Azure AI
+    Foundry, Bedrock, Vertex, Together, and Fireworks should be verified
+    separately.
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:mistral
+  served_by:
+    - provider:mistral
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:supports-tool-use
+      level: full
+    - target: capability:vision-input
+      level: full

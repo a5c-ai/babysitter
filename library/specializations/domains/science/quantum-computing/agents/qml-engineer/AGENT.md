@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: quantum-ml
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:mathematical-reasoning, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:ml-engineer, role:research-engineer]
 ---
 
 # QML Engineer

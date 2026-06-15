@@ -3,6 +3,12 @@ name: qt-test-fixture-generator
 description: Generate Qt Test fixtures with mock QObject signals and slots, data-driven tests, and GUI testing setup
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [qt, testing, unit-test, mock, fixtures]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:component-testing]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # qt-test-fixture-generator

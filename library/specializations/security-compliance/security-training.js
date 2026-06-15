@@ -28,6 +28,9 @@
  * - CISA Security Awareness: https://www.cisa.gov/topics/cybersecurity-best-practices/organizational-security/security-awareness
  * - NIST Cybersecurity Framework Training: https://www.nist.gov/cyberframework
  * - OWASP Security Education: https://owasp.org/www-project-security-culture/
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,285 @@
+---
+nodeKind: Capability
+id: capability:supports-agents-md
+attributes:
+  displayName: "Supports AGENTS.md / CLAUDE.md memory files"
+  description: |
+    The agent reads / writes a markdown file (AGENTS.md, CLAUDE.md,
+    .cursor/rules.md, etc.) as long-term memory at session bootstrap
+    and on /memory edit. Distinct from skills (model-invoked) and
+    plugins (extension-installed) — this is automatic-load context.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: skills
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-parallel-execution
+attributes:
+  displayName: "Supports parallel execution"
+  description: |
+    Multiple subagent invocations can run concurrently inside the same
+    session. Distinct from supports-parallel-tool-calls (which is about
+    parallel tool dispatches in a single turn) and from
+    supports-subagent-dispatch (which is just the dispatch primitive).
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: subagents
+edges: {}
+---
+nodeKind: Capability
+id: capability:requires-git-repo
+attributes:
+  displayName: "Requires git repo"
+  description: |
+    The agent will not start (or operates with degraded functionality)
+    when launched outside a git repository. Used by Workspace materialization
+    selection and by Execution-mode pre-flight checks.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: process
+edges: {}
+---
+nodeKind: Capability
+id: capability:requires-pty
+attributes:
+  displayName: "Requires PTY"
+  description: |
+    The agent requires a real pseudo-terminal (not just a pipe). Affects
+    Agent Host Transport selection — pairs with `agent-host-transport:stdio-pty`
+    rather than plain `stdio`. Used by interactive TUIs.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: process
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-image-output
+attributes:
+  displayName: "Supports image output"
+  description: |
+    The agent can emit image content blocks back to the user (model-
+    generated images, charts, screenshots). Distinct from vision-input
+    (image accepted) and from file-attachments (images via attachment).
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: vision-io
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-file-attachments
+attributes:
+  displayName: "Supports file attachments"
+  description: |
+    The agent UI accepts pasted / drag-dropped files (PDFs, docs, code
+    files) into the prompt. The runtime materializes them into the
+    context manager via files-api or inline base64.
+  appliesToNodeKinds: ["AgentVersion", "AgentUIImpl"]
+  category: vision-io
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-json-mode
+attributes:
+  displayName: "Supports JSON mode"
+  description: |
+    The provider accepts a `response_format: json` (or vendor equivalent)
+    flag that constrains output to be valid JSON. Distinct from
+    structured-output (which carries a schema).
+  appliesToNodeKinds: ["ModelVersion", "Provider"]
+  category: structured-output
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-structured-output
+attributes:
+  displayName: "Supports structured output"
+  description: |
+    The provider enforces a JSON-Schema (or grammar / regex) on model
+    output. Anthropic: `response_format: { type: json_schema, ... }`.
+    OpenAI: `response_format: { type: json_schema, schema, strict }`.
+    Google: `responseMimeType: application/json` with
+    `responseSchema`.
+  appliesToNodeKinds: ["ModelVersion", "Provider"]
+  category: structured-output
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-local-models
+attributes:
+  displayName: "Supports local models"
+  description: |
+    The agent can route inference to a local model server (Ollama,
+    llama.cpp, vLLM, LM Studio) instead of a hosted provider. Pairs
+    with the Local Model Source provider sub-component (Layer 2).
+  appliesToNodeKinds: ["AgentVersion", "AgentCoreImpl"]
+  category: local-inference
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-agent-teams
+attributes:
+  displayName: "Supports agent teams"
+  description: |
+    The agent runtime can coordinate a team-lead session with N teammate
+    Claude Code instances over a shared task list + mailbox + SendMessage
+    tool. Experimental in claude-code 2.1.32+ (CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1).
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: subagents
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-plugin-marketplaces
+attributes:
+  displayName: "Supports plugin marketplaces"
+  description: |
+    The agent recognizes a `.claude-plugin/marketplace.json` registry and
+    exposes `/plugin marketplace add|list|update|remove` plus
+    `/plugin install|disable|enable|uninstall` commands. Auto-update
+    governed by FORCE_AUTOUPDATE_PLUGINS=1.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: plugins
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-deep-links
+attributes:
+  displayName: "Supports URI deep-link launch"
+  description: |
+    The agent registers a URI scheme handler (claude-cli:// or
+    vscode://anthropic.claude-code/) so other applications can open a
+    new session with `q` / `cwd` / `repo` query parameters.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: launch
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-skill-dynamic-context-injection
+attributes:
+  displayName: "Supports skill dynamic context injection"
+  description: |
+    SKILL.md content may embed inline `` !`<cmd>` `` substitutions and
+    fenced ```! ``` blocks that the harness preprocesses before the
+    skill body reaches the model. Substitutions for $ARGUMENTS, $N,
+    ${CLAUDE_SESSION_ID}, ${CLAUDE_EFFORT}, ${CLAUDE_SKILL_DIR} are
+    resolved at the same stage.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: skills
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-skill-shell-execution-policy
+attributes:
+  displayName: "Supports skill shell execution policy"
+  description: |
+    The harness honors a `disableSkillShellExecution` setting that
+    suppresses the inline `!` command preprocessing for skills, plus
+    a per-skill `shell:` frontmatter field selecting bash vs.
+    powershell.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: skills
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-result-message-typing
+attributes:
+  displayName: "Supports typed ResultMessage taxonomy"
+  description: |
+    The agent SDK loop emits a typed terminal `ResultMessage` whose
+    subtype is one of: success, error_max_turns, error_max_budget_usd,
+    error_during_execution, error_max_structured_output_retries.
+    Pairs with the `max_turns` / `max_budget_usd` loop knobs documented
+    in https://docs.claude.com/en/api/agent-sdk/agent-loop.
+  appliesToNodeKinds: ["AgentVersion", "AgentCoreImpl"]
+  category: agent-loop
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-skill-frontmatter-paths-glob
+attributes:
+  displayName: "Supports skill paths glob frontmatter"
+  description: |
+    SKILL.md `paths:` frontmatter glob list scopes the skill to specific
+    repo paths — the skill is only auto-invocable when the active file
+    matches the glob.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: skills
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-skill-positional-arguments
+attributes:
+  displayName: "Supports skill positional arguments"
+  description: |
+    SKILL/command bodies may interpolate $1, $2, ... positional args
+    in addition to the entire-blob $ARGUMENTS substitution.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: skills
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-subagent-tool-allowlist
+attributes:
+  displayName: "Supports subagent tool allowlist"
+  description: |
+    Custom subagents loaded from `.claude/agents/<name>.md` may declare
+    a `tools:` frontmatter allowlist constraining which tools the
+    subagent may invoke during dispatch.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: subagents
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-claude-cli-url-scheme
+attributes:
+  displayName: "Supports claude-cli:// URL scheme"
+  description: |
+    The standalone Claude Code installer registers a `claude-cli://open`
+    URI handler with per-platform install paths. Distinct from the
+    VS Code extension variant.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: launch
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-deep-link-vscode-handler
+attributes:
+  displayName: "Supports VS Code deep-link handler"
+  description: |
+    The Claude Code VS Code extension registers
+    `vscode://anthropic.claude-code/open` so other tools can open a
+    session inside an editor tab with `q`/`cwd`/`repo` parameters.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: launch
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-agent-loop-budget-limit
+attributes:
+  displayName: "Supports agent-loop max_budget_usd"
+  description: |
+    The SDK agent loop accepts a `max_budget_usd` knob and emits a
+    terminal ResultMessage subtype `error_max_budget_usd` when the
+    budget is exhausted.
+  appliesToNodeKinds: ["AgentVersion", "AgentCoreImpl"]
+  category: agent-loop
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-agent-loop-turn-limit
+attributes:
+  displayName: "Supports agent-loop max_turns"
+  description: |
+    The SDK agent loop accepts a `max_turns` knob and emits a terminal
+    ResultMessage subtype `error_max_turns` when the cap is reached.
+  appliesToNodeKinds: ["AgentVersion", "AgentCoreImpl"]
+  category: agent-loop
+edges: {}
+---
+nodeKind: Capability
+id: capability:supports-env-var-feature-gating
+attributes:
+  displayName: "Supports env-var feature gating"
+  description: |
+    The runtime exposes a documented set of environment-variable feature
+    gates (e.g. CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS) that the user can
+    toggle to enable/disable experimental subsystems without a redeploy.
+    Modeled via the EnvVar NodeKind.
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: configuration
+edges: {}

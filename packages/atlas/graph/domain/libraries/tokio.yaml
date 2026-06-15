@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:tokio
+attributes:
+  displayName: "tokio"
+  belongsToLanguageId: language:rust
+  category: concurrency
+  description: |
+    Asynchronous runtime for Rust — a multi-threaded, work-stealing executor with reactor and timers.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:rust-async-runtime

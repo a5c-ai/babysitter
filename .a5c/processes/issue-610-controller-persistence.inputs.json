@@ -1,0 +1,119 @@
+{
+  "issueNumber": 610,
+  "baseBranch": "staging",
+  "workBranch": "agent/issue-610-controller-persistence",
+  "processId": "repo/issue-610-controller-persistence",
+  "featureName": "Kradle controller persistence wiring",
+  "scope": {
+    "externalControllers": [
+      "syncExternalBinding request option forwarding",
+      "approveExternalWriteIntent object-shaped arguments",
+      "cancelExternalWriteIntent and resolveExternalConflict regression coverage",
+      "reuse existing core persistFn wiring rather than duplicating it"
+    ],
+    "memoryController": [
+      "persist AgentMemorySnapshot resources returned by dispatch or snapshot creation",
+      "persist AgentRunMemoryImport resources returned by createMemoryImport",
+      "persist AgentMemoryUpdate resources returned by createMemoryUpdate",
+      "report apply failures instead of returning apparent success"
+    ],
+    "modelRoutes": [
+      "apply generated AIGatewayRoute manifests for persisted KradleModelRoute resources",
+      "prefer an existing resource gateway/controller apply boundary over route-side kubectl shelling",
+      "surface manifest apply failures to the caller or observable status"
+    ]
+  },
+  "targetFiles": [
+    "packages/kradle/core/src/api-controller.js",
+    "packages/kradle/core/src/agent-dispatch-controller.js",
+    "packages/kradle/core/src/agent-memory-controller.js",
+    "packages/kradle/core/src/model-route-controller.js",
+    "packages/kradle/core/src/http-server.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/sync/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/write-intents/[name]/approve/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/write-intents/[name]/cancel/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/conflicts/[id]/resolve/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/agents/memory/query/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/inference/routes/route.js",
+    "packages/kradle/cli/src/mcp-server.js",
+    "packages/kradle/core/tests/external-persistence.test.js",
+    "packages/kradle/core/tests/external-integration.test.js",
+    "packages/kradle/core/tests/agent-memory-controller.test.js",
+    "packages/kradle/core/tests/agent-dispatch-controller.test.js",
+    "packages/kradle/core/tests/model-route-controller.test.js",
+    "packages/kradle/web/tests/resource-contract.test.js"
+  ],
+  "runtimeTraceFiles": [
+    "packages/kradle/web/app/api/orgs/[org]/external/sync/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/write-intents/[name]/approve/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/write-intents/[name]/cancel/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/conflicts/[id]/resolve/route.js",
+    "packages/kradle/core/src/http-server.js",
+    "packages/kradle/core/src/api-controller.js",
+    "packages/kradle/core/src/external/sync-controller.js",
+    "packages/kradle/core/src/external/write-controller.js",
+    "packages/kradle/core/src/external/conflict-controller.js",
+    "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "packages/kradle/core/src/agent-dispatch-controller.js",
+    "packages/kradle/core/src/agent-memory-controller.js",
+    "packages/kradle/web/app/api/orgs/[org]/inference/routes/route.js",
+    "packages/kradle/core/src/model-route-controller.js",
+    "packages/kradle/core/src/kubernetes-resource-gateway.js",
+    "packages/kradle/core/src/kubernetes-controller.js"
+  ],
+  "knownAlreadyHandled": [
+    "createKradleApiController already constructs external sync/write/conflict controllers with persistFn callbacks.",
+    "packages/kradle/core/src/http-server.js already forwards full external sync options and object-shaped write-intent approve arguments.",
+    "model-route-controller already validates KradleModelRoute resources and generates valid AIGatewayRoute manifests; the missing piece is applying them."
+    ,
+    "Issue comments mention a prior planning/implementation PR; rerun the runtime trace on the current base branch before changing code so already-applied fixes are not duplicated."
+  ],
+  "acceptanceCriteria": [
+    "External sync POST through the live web route forwards bindingName, kind, localName, spec, externalEnvelope, and watermark to syncExternalBinding.",
+    "External write-intent approve through the live web route calls approveExternalWriteIntent with { intentName, approvedBy, resources }.",
+    "External conflict resolve remains covered so resolved conflicts are persisted through existing core persistFn wiring.",
+    "AgentMemorySnapshot, AgentRunMemoryImport, and AgentMemoryUpdate resources created by API/dispatch flows are applied durably in the org namespace.",
+    "Memory persistence apply failures are returned as explicit API/controller failures rather than silent success.",
+    "Creating or reconciling a KradleModelRoute generates and applies the matching AIGatewayRoute manifest through existing Kubernetes resource application infrastructure.",
+    "Model-route manifest apply failures are observable and covered by tests.",
+    "No route-side direct kubectl shell invocation is introduced.",
+    "Existing org-scoping, cache invalidation, audit/event emission, and resource validation behavior remain intact."
+  ],
+  "verificationCommands": [
+    "node --test packages/kradle/core/tests/external-persistence.test.js",
+    "node --test packages/kradle/core/tests/external-integration.test.js",
+    "node --test packages/kradle/core/tests/agent-memory-controller.test.js",
+    "node --test packages/kradle/core/tests/agent-dispatch-controller.test.js",
+    "node --test packages/kradle/core/tests/model-route-controller.test.js",
+    "node --test packages/kradle/web/tests/resource-contract.test.js",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "qualityGates": [
+    "Reuse audit completed before new persistence abstractions are introduced.",
+    "Runtime call paths from web/API entry points to applyResource or resourceGateway.apply are recorded.",
+    "Failing tests are authored before production code changes.",
+    "Targeted tests and the relevant SDK/web contract tests pass after implementation.",
+    "Code review approves persistence semantics, error propagation, idempotency, org scoping, and Kubernetes safety.",
+    "Final acceptance matrix maps each #610 requirement to changed files and fresh verification evidence."
+  ],
+  "processLibraryReferences": [
+    "methodologies/spec-kit-brownfield.js",
+    "methodologies/superpowers/verification-before-completion.js",
+    "specializations/backend-development/README.md",
+    "specializations/backend-development/skills/growing-outside-in-systems/SKILL.md",
+    "specializations/qa-testing-automation/agents/api-testing-expert/AGENT.md",
+    "specializations/devops-sre-platform/agents/kubernetes-expert/AGENT.md",
+    "specializations/qa-testing-automation/api-testing.js",
+    "specializations/devops-sre-platform/kubernetes-setup.js",
+    "active babysitter capability guidance for branch policy, PR lifecycle, and issue linking"
+  ],
+  "delivery": {
+    "prTitle": "Fix controller persistence wiring for external sync, memory, and model routes",
+    "linkIssue": "#610",
+    "postIssueComment": true
+  }
+}

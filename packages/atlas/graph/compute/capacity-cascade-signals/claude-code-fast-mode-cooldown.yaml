@@ -1,0 +1,13 @@
+nodeKind: CapacityCascadeSignal
+id: capacity-cascade-signal:claude-code-fast-mode-cooldown
+attributes:
+  displayName: "Fast-mode cooldown signal"
+  signalKind: fast-mode-cooldown
+  cooldownMs: 1800000
+  triggerHeader: "anthropic-ratelimit-unified-overage-disabled-reason"
+  actionOnSignal: enter-cooldown
+  description: |
+    On 429/529 with Retry-After above the SHORT_RETRY_THRESHOLD_MS (20s) or
+    on permanent overage rejection, fast mode is disabled and a cooldown is
+    set; subsequent calls resolve to the standard-speed model until cooldown
+    expires.

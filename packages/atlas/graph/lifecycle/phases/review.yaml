@@ -1,0 +1,11 @@
+nodeKind: Phase
+id: phase:review
+attributes:
+  order: 4
+  displayName: "Review"
+  phaseMachineId: phase-machine:default-process
+  description: |
+    The review phase of the default process phase machine.
+edges:
+  belongs_to_phase_machine:
+    - phase-machine:default-process

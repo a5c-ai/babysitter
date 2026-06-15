@@ -1,0 +1,16 @@
+---
+nodeKind: Tool
+id: tool:jupyter
+attributes:
+  displayName: "Jupyter"
+  homepageUrl: "https://jupyter.org"
+  kind: other
+  description: |
+    Interactive notebook ecosystem (JupyterLab, Notebook, Hub) for
+    Python/R/Julia and other kernels.
+edges:
+  belongs_to_language:
+    - target: language:python
+  used_for:
+    - skill-area:data-science-experimentation
+    - skill-area:ai-evaluation

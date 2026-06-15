@@ -13,6 +13,12 @@ expertise:
   - Storage system performance
   - NVMe and SSD optimization
   - Memory-mapped I/O
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:performance-optimization]
+  skillAreas: [skill-area:tcp-tuning, skill-area:profiling-cpu]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:observability-driven-development]
 ---
 
 # I/O Performance Expert Agent

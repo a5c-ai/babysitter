@@ -1,0 +1,18 @@
+{
+  "issueNumber": 601,
+  "baseBranch": "staging",
+  "workBranch": "plan/issue-601",
+  "relatedIssues": [584, 586],
+  "priorPlanningPr": 683,
+  "maxImplementationLoops": 2,
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run test --workspace=@a5c-ai/genty-platform",
+    "npm run test:realtime --workspace=@a5c-ai/genty-ui",
+    "npm run build:runtime",
+    "npm run test:adapters",
+    "npm run verify:metadata",
+    "git diff --check",
+    "if rg -n \"it\\.skip\\(\" packages/adapters/ui/src/screens/SessionDetailScreen.test.tsx; then echo \"Unexplained SessionDetailScreen skipped tests remain\" >&2; exit 1; fi"
+  ]
+}

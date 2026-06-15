@@ -1,0 +1,412 @@
+# NodeKinds for cluster 19-compliance-safety.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:compliance-framework
+  name: ComplianceFramework
+  origin: standard
+  prefix: compliance
+  cluster: 19-compliance-safety
+  purpose: a named compliance/regulatory framework (SOC 2, HIPAA, GDPR, EU AI Act, ISO 27001, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: frameworkKind
+    type: enum<security,privacy,ai-specific,industry>
+    required: false
+  - name: jurisdiction
+    type: string
+    required: false
+  - name: shortName
+    type: string
+    required: false
+  - name: version
+    type: string
+    required: false
+  - name: publishedAt
+    type: iso-date
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - conforms_to
+  - regulates
+  - complies_with
+  outgoingEdges:
+  - compliance_for
+  invariants:
+  - id starts with compliance: null
+  examples: []
+- id: node:regulator
+  name: Regulator
+  origin: standard
+  prefix: regulator
+  cluster: 19-compliance-safety
+  purpose: a regulatory body that publishes / enforces a ComplianceFramework
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: jurisdiction
+    type: string
+    required: false
+  - name: authorityKind
+    type: string
+    required: false
+  - name: homepageUrl
+    type: url
+    required: false
+    evidence: vendor-doc-or-better
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges: []
+  outgoingEdges:
+  - regulates
+  invariants:
+  - id starts with regulator: null
+  examples: []
+- id: node:content-policy
+  name: ContentPolicy
+  origin: standard
+  prefix: content-policy
+  cluster: 19-compliance-safety
+  purpose: a content / safety policy applied by an AgentVersion (allowed/disallowed content, refusal patterns, redaction rules)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: policyKind
+    type: enum<allow-list,deny-list,classifier,prompt-shield,output-filter,acceptable-use,data-handling,regulatory>
+    required: false
+  - name: severity
+    type: enum<advisory,blocking,redact,low,medium,high,critical>
+    required: false
+  - name: rules
+    type: markdown
+    required: false
+  - name: prohibits
+    type: list<string>
+    required: false
+  - name: restrictedDomains
+    type: list<string>
+    required: false
+  - name: version
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: notes
+    type: markdown
+    required: false
+  incomingEdges:
+  - assesses_policy
+  - evaluates_policy
+  outgoingEdges:
+  - policy_applied_by
+  - detects_jailbreak
+  - policy_assessed_by
+  - policy_evaluated_by
+  invariants:
+  - id starts with content-policy: null
+  examples: []
+- id: node:jailbreak-pattern
+  name: JailbreakPattern
+  origin: standard
+  prefix: jailbreak
+  cluster: 19-compliance-safety
+  purpose: a known prompt-injection / jailbreak technique catalog entry (DAN, role-play escapes, indirect injection, ...)
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: technique
+    type: string
+    required: false
+    notes: dan|role-play|indirect-injection|prefix-injection|jailbreak-prompt|encoding|multi-turn
+  - name: patternKind
+    type: string
+    required: false
+    notes: Alias for technique in legacy examples.
+  - name: severity
+    type: enum<low,medium,high,critical>
+    required: false
+  - name: signature
+    type: markdown
+    required: false
+    notes: Detection signature / regex / classifier hint.
+  - name: firstObservedAt
+    type: iso-date
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: references
+    type: list<url>
+    required: false
+  incomingEdges:
+  - detects_jailbreak
+  outgoingEdges: []
+  invariants:
+  - id starts with jailbreak: null
+  examples: []
+- id: node:output-guard
+  name: OutputGuard
+  origin: derived
+  originContext: catalog pass 53 / pi-mono packages/coding-agent/src/core/output-guard.ts + claude-code services/api/errors.ts getErrorMessageIfRefusal (refusal stop_reason handling, AUP violation messaging) + tool-output sanitization seen in claude-code tool implementations. Distinct from ContentPolicy (compliance-side, organization-mandated rules) — OutputGuard is the agent-core runtime gate that runs over generated tokens / tool results before they reach the user.
+  prefix: output-guard
+  cluster: 19-compliance-safety
+  purpose: an agent-core runtime guard that inspects model output / tool results for safety, refusal, secret leakage, format conformance — and rewrites or blocks before surfacing
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: appliesTo
+    type: enum<assistant-text,tool-result,thinking,all>
+    required: true
+    notes: Where the guard runs.
+  - name: phase
+    type: enum<streaming,post-call,both>
+    required: false
+    notes: Whether the guard runs incrementally on stream chunks or only on completed output.
+  - name: detectorKinds
+    type: list<enum<refusal-stop-reason,aup-violation,secret-leak,pii-leak,prompt-injection-echo,format-violation,profanity,custom>>
+    required: false
+    notes: claude-code distinguishes refusal (stopReason='refusal') from AUP violations.
+  - name: onTrigger
+    type: enum<rewrite,redact,block,emit-error,emit-system-message,fallback-model>
+    required: true
+  - name: emitsErrorCategoryId
+    type: ref<ErrorCategory>
+    required: false
+    notes: ErrorCategory raised when guard fires (e.g. content-refusal).
+  - name: rewriteTemplateId
+    type: ref<PromptTemplate>
+    required: false
+    notes: When onTrigger=rewrite, the user-facing replacement message (claude-code AUP refusal message).
+  - name: severity
+    type: enum<info,warn,block-call,block-session>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - applies_output_guard
+  outgoingEdges: []
+  invariants:
+  - id starts with output-guard: null
+  examples: []
+- id: node:output-style
+  name: OutputStyle
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code outputStyles/loadOutputStylesDir.ts +
+    constants/outputStyles.ts (OutputStyleConfig). Output styles are
+    user-installable markdown profiles (Explanatory, Learning, custom)
+    loaded from .claude/output-styles/*.md (project) and ~/.claude/output-styles/*.md
+    (user); frontmatter carries name/description/keep-coding-instructions/
+    force-for-plugin. Distinct from PromptTemplate (a generic template) — an
+    OutputStyle specifically modulates the systemPrompt section that shapes
+    the model's response register.
+  prefix: output-style
+  cluster: 19-compliance-safety
+  purpose: |
+    A markdown-defined output style profile (system-prompt addendum) that
+    modulates the agent's response register, level of explanation, formality.
+    Loaded from project + user dirs with project overriding user; can be
+    plugin-supplied with force-for-plugin; can declare keepCodingInstructions
+    to preserve / strip the default coding-task system-prompt sections.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: name
+    type: string
+    required: true
+    notes: claude-code frontmatter[name] or filename minus .md.
+  - name: source
+    type: enum<built-in,project,user,plugin>
+    required: true
+  - name: filePath
+    type: string
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  - name: prompt
+    type: markdown
+    required: false
+    notes: System-prompt addendum body (claude-code content.trim()).
+  - name: keepCodingInstructions
+    type: bool
+    required: false
+    notes: claude-code frontmatter[keep-coding-instructions] — when false, default coding-task instructions are stripped to avoid conflicting register.
+  - name: forceForPlugin
+    type: bool
+    required: false
+    notes: claude-code plugin-supplied output styles can force activation when their plugin is enabled.
+  - name: invocationMode
+    type: enum<user-selected,plugin-forced,session-default>
+    required: false
+  incomingEdges:
+  - has_output_style
+  - applies_output_style
+  outgoingEdges: []
+  invariants:
+  - id starts with output-style:
+  examples:
+  - graph/security/output-styles/claude-code-explanatory.yaml
+  - graph/security/output-styles/claude-code-learning.yaml
+  - graph/security/output-styles/claude-code-bare.yaml
+- id: node:permission-denial-reason
+  name: PermissionDenialReason
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code types/permissions.ts PermissionResult union
+    + permissionsResult.ts (behavior=allow|deny|ask) +
+    permissions/denialTracking.ts (DenialTrackingState — fallback-to-prompting
+    threshold) + agent SDK SDKPermissionDenial. A denial carries the
+    rule that fired (always-deny rule, classifier rejection, hook block,
+    user dialog deny) plus an interpretedMessage for the model.
+  prefix: permission-denial-reason
+  cluster: 19-compliance-safety
+  purpose: |
+    A normalized reason a tool call was denied (or asked-then-denied) —
+    rule-source (project/user/policy), classifier-blocked, hook-blocked,
+    user-dialog-deny, background-no-ui, denial-tracking-threshold-exceeded.
+    Lets analytics + recovery hooks reason about denial patterns.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: kind
+    type: enum<always-deny-rule,user-dialog-deny,classifier-blocked,hook-blocked,background-no-ui,denial-threshold-exceeded,plan-mode-write-blocked,bypass-mode-unavailable>
+    required: true
+  - name: ruleSource
+    type: enum<project,user,enterprise,policy-settings,session,plugin,builtin>
+    required: false
+  - name: behavior
+    type: enum<deny,ask-then-deny,auto-deny>
+    required: true
+  - name: interpretedMessage
+    type: markdown
+    required: false
+    notes: User-facing / model-facing explanation; surfaced in tool_result content.
+  - name: thresholdAttempts
+    type: int
+    required: false
+    notes: claude-code DenialTrackingState fallback-to-prompting threshold (per-subagent denial counter).
+  - name: triggeredBy
+    type: enum<canUseTool,validateInput,checkPermissions,PreToolUse-hook,classifier,permission-rule>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - denied_by_reason
+  outgoingEdges: []
+  invariants:
+  - id starts with permission-denial-reason:
+  examples:
+  - graph/security/permission-denial-reasons/claude-code-plan-mode-write.yaml
+  - graph/security/permission-denial-reasons/claude-code-classifier-blocked.yaml
+  - graph/security/permission-denial-reasons/claude-code-background-no-ui.yaml
+- id: node:output-mode-change
+  name: OutputModeChange
+  origin: derived
+  originContext: |
+    catalog pass 54 / claude-code tools/EnterPlanModeTool/EnterPlanModeTool.ts (sets
+    mode to plan via applyPermissionUpdate, calls
+    handlePlanModeTransition, updates ToolPermissionContext.prePlanMode) +
+    ExitPlanModeV2Tool (restores prePlanMode) + EnterWorktreeTool/ExitWorktreeTool
+    (CWD/worktree flips). An OutputModeChange records a mid-session mode flip
+    triggered by a tool call: source mode, target mode, originating tool,
+    surfaces invalidated, persistence (session vs run vs turn).
+  prefix: output-mode-change
+  cluster: 19-compliance-safety
+  purpose: |
+    A recorded mid-session mode flip (permission mode, output style, worktree
+    mode, coordinator mode) initiated by a tool call or user action. Captures
+    source mode, target mode, triggering tool, scope (turn|session|run), and
+    which caches/sections must be recomputed.
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: false
+  - name: changeKind
+    type: enum<permission-mode-flip,output-style-switch,worktree-enter,worktree-exit,coordinator-mode-flip,plan-mode-enter,plan-mode-exit>
+    required: true
+  - name: fromMode
+    type: string
+    required: false
+  - name: toMode
+    type: string
+    required: true
+  - name: triggeringToolId
+    type: ref<ToolDescriptor>
+    required: false
+    notes: e.g. EnterPlanMode, ExitPlanModeV2, EnterWorktree, ExitWorktree.
+  - name: scope
+    type: enum<turn,session,run>
+    required: true
+    notes: claude-code applyPermissionUpdate destination = session|turn|run.
+  - name: requiresUserApproval
+    type: bool
+    required: false
+  - name: invalidatesCaches
+    type: list<enum<system-prompt-sections,memory-file-caches,plans-directory,tool-inventory,output-style-caches>>
+    required: false
+  - name: occurredAt
+    type: iso-timestamp
+    required: false
+  - name: sessionId
+    type: ref<Session>
+    required: false
+  - name: description
+    type: markdown
+    required: false
+  incomingEdges:
+  - emitted_mode_change
+  outgoingEdges:
+  - mode_change_triggered_by_tool
+  invariants:
+  - id starts with output-mode-change:
+  examples:
+  - graph/security/output-mode-changes/claude-code-enter-plan-mode.yaml
+  - graph/security/output-mode-changes/claude-code-enter-worktree.yaml
+

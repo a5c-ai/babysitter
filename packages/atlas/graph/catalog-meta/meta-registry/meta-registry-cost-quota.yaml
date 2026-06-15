@@ -1,0 +1,475 @@
+---
+nodeKind: MetaCluster
+id: meta-cluster:cost-quota
+attributes:
+  displayName: Cost & quota (meta)
+  clusterNumber: 16
+  scope: 'Conceptual aggregation of NodeKinds describing the cost / quota / usage / budget control plane: CostModel (per-token / per-call / tiered pricing), Quota (RPM/TPM/concurrent constraints), UsageRecord (per-call billing events), and BudgetPolicy (period budget envelopes). Members live in editorial cluster cost-quota in ontology-schema.yaml.'
+  parentClusterId: null
+edges:
+  contains_meta_node_kind:
+  - target: meta-node-kind:cost-model
+  - target: meta-node-kind:quota
+  - target: meta-node-kind:usage-record
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:cost-model
+attributes:
+  displayName: CostModel (meta)
+  name: CostModel
+  cluster: cost-quota
+  prefix: cost-model
+  origin: standard
+  purpose: a structured cost specification (per-token / per-call / tiered) for a Provider or ModelVersion
+  exampleCount: 0
+  invariants:
+  - 'id starts with cost-model:'
+edges:
+  in_cluster:
+  - target: meta-cluster:cost-quota
+  contains_meta_attribute:
+  - target: meta-attribute:cost-model--id
+  - target: meta-attribute:cost-model--display-name
+  - target: meta-attribute:cost-model--cost-kind
+  - target: meta-attribute:cost-model--currency
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:quota
+attributes:
+  displayName: Quota (meta)
+  name: Quota
+  cluster: cost-quota
+  prefix: quota
+  origin: standard
+  purpose: a quota constraint (RPM/TPM/requests/concurrent) bound to a tenant, role, or capability scope
+  exampleCount: 0
+  invariants:
+  - 'id starts with quota:'
+edges:
+  in_cluster:
+  - target: meta-cluster:cost-quota
+  contains_meta_attribute:
+  - target: meta-attribute:quota--id
+  - target: meta-attribute:quota--quota-kind
+  - target: meta-attribute:quota--scope
+  - target: meta-attribute:quota--window
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:usage-record
+attributes:
+  displayName: UsageRecord (meta)
+  name: UsageRecord
+  cluster: cost-quota
+  prefix: usage-record
+  origin: standard
+  purpose: a recorded unit of resource consumption against a Quota / CostModel (per-call billing event)
+  exampleCount: 0
+  invariants:
+  - 'id starts with usage-record:'
+edges:
+  in_cluster:
+  - target: meta-cluster:cost-quota
+  contains_meta_attribute:
+  - target: meta-attribute:usage-record--id
+  - target: meta-attribute:usage-record--occurred-at
+  - target: meta-attribute:usage-record--input-tokens
+  - target: meta-attribute:usage-record--total-cost
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:budget-policy
+attributes:
+  displayName: BudgetPolicy (meta)
+  name: BudgetPolicy
+  cluster: cost-quota
+  prefix: budget-policy
+  origin: standard
+  purpose: a budget envelope and enforcement policy for a tenant or org-unit
+  exampleCount: 0
+  invariants:
+  - 'id starts with budget-policy:'
+edges:
+  in_cluster:
+  - target: meta-cluster:cost-quota
+  contains_meta_attribute:
+  - target: meta-attribute:budget-policy--id
+  - target: meta-attribute:budget-policy--display-name
+  - target: meta-attribute:budget-policy--total-budget
+  - target: meta-attribute:budget-policy--period
+---
+nodeKind: MetaAttribute
+id: meta-attribute:cost-model--id
+attributes:
+  displayName: CostModel.id
+  name: id
+  parentNodeKindId: meta-node-kind:cost-model
+  type: id
+  required: true
+  description: id on CostModel.
+edges:
+  defined_on:
+  - target: meta-node-kind:cost-model
+---
+nodeKind: MetaAttribute
+id: meta-attribute:cost-model--display-name
+attributes:
+  displayName: CostModel.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:cost-model
+  type: string
+  required: true
+  description: displayName on CostModel.
+edges:
+  defined_on:
+  - target: meta-node-kind:cost-model
+---
+nodeKind: MetaAttribute
+id: meta-attribute:cost-model--cost-kind
+attributes:
+  displayName: CostModel.costKind
+  name: costKind
+  parentNodeKindId: meta-node-kind:cost-model
+  type: enum<per-token,per-call,per-second,tiered,hybrid>
+  required: false
+  description: costKind on CostModel (pricing model shape).
+edges:
+  defined_on:
+  - target: meta-node-kind:cost-model
+---
+nodeKind: MetaAttribute
+id: meta-attribute:cost-model--currency
+attributes:
+  displayName: CostModel.currency
+  name: currency
+  parentNodeKindId: meta-node-kind:cost-model
+  type: string
+  required: false
+  description: currency on CostModel (ISO 4217 currency code, e.g. USD).
+edges:
+  defined_on:
+  - target: meta-node-kind:cost-model
+---
+nodeKind: MetaAttribute
+id: meta-attribute:quota--id
+attributes:
+  displayName: Quota.id
+  name: id
+  parentNodeKindId: meta-node-kind:quota
+  type: id
+  required: true
+  description: id on Quota.
+edges:
+  defined_on:
+  - target: meta-node-kind:quota
+---
+nodeKind: MetaAttribute
+id: meta-attribute:quota--quota-kind
+attributes:
+  displayName: Quota.quotaKind
+  name: quotaKind
+  parentNodeKindId: meta-node-kind:quota
+  type: enum<rpm,tpm,rpd,tpd,concurrent,storage,bandwidth>
+  required: false
+  description: quotaKind on Quota (rate / count / capacity dimension).
+edges:
+  defined_on:
+  - target: meta-node-kind:quota
+---
+nodeKind: MetaAttribute
+id: meta-attribute:quota--scope
+attributes:
+  displayName: Quota.scope
+  name: scope
+  parentNodeKindId: meta-node-kind:quota
+  type: enum<global,tenant,role,api-key,model>
+  required: false
+  description: scope on Quota (binding level for the constraint).
+edges:
+  defined_on:
+  - target: meta-node-kind:quota
+---
+nodeKind: MetaAttribute
+id: meta-attribute:quota--window
+attributes:
+  displayName: Quota.window
+  name: window
+  parentNodeKindId: meta-node-kind:quota
+  type: string
+  required: false
+  description: window on Quota (period token, e.g. 1m, 1d, rolling-7d).
+edges:
+  defined_on:
+  - target: meta-node-kind:quota
+---
+nodeKind: MetaAttribute
+id: meta-attribute:usage-record--id
+attributes:
+  displayName: UsageRecord.id
+  name: id
+  parentNodeKindId: meta-node-kind:usage-record
+  type: id
+  required: true
+  description: id on UsageRecord.
+edges:
+  defined_on:
+  - target: meta-node-kind:usage-record
+---
+nodeKind: MetaAttribute
+id: meta-attribute:usage-record--occurred-at
+attributes:
+  displayName: UsageRecord.occurredAt
+  name: occurredAt
+  parentNodeKindId: meta-node-kind:usage-record
+  type: iso-timestamp
+  required: false
+  description: occurredAt on UsageRecord (when consumption happened).
+edges:
+  defined_on:
+  - target: meta-node-kind:usage-record
+---
+nodeKind: MetaAttribute
+id: meta-attribute:usage-record--input-tokens
+attributes:
+  displayName: UsageRecord.inputTokens
+  name: inputTokens
+  parentNodeKindId: meta-node-kind:usage-record
+  type: int
+  required: false
+  description: inputTokens on UsageRecord.
+edges:
+  defined_on:
+  - target: meta-node-kind:usage-record
+---
+nodeKind: MetaAttribute
+id: meta-attribute:usage-record--total-cost
+attributes:
+  displayName: UsageRecord.totalCost
+  name: totalCost
+  parentNodeKindId: meta-node-kind:usage-record
+  type: float
+  required: false
+  description: totalCost on UsageRecord (in CostModel.currency).
+edges:
+  defined_on:
+  - target: meta-node-kind:usage-record
+---
+nodeKind: MetaAttribute
+id: meta-attribute:budget-policy--id
+attributes:
+  displayName: BudgetPolicy.id
+  name: id
+  parentNodeKindId: meta-node-kind:budget-policy
+  type: id
+  required: true
+  description: id on BudgetPolicy.
+edges:
+  defined_on:
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:budget-policy--display-name
+attributes:
+  displayName: BudgetPolicy.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:budget-policy
+  type: string
+  required: true
+  description: displayName on BudgetPolicy.
+edges:
+  defined_on:
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:budget-policy--total-budget
+attributes:
+  displayName: BudgetPolicy.totalBudget
+  name: totalBudget
+  parentNodeKindId: meta-node-kind:budget-policy
+  type: float
+  required: false
+  description: totalBudget on BudgetPolicy (envelope amount in currency).
+edges:
+  defined_on:
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaAttribute
+id: meta-attribute:budget-policy--period
+attributes:
+  displayName: BudgetPolicy.period
+  name: period
+  parentNodeKindId: meta-node-kind:budget-policy
+  type: string
+  required: false
+  description: period on BudgetPolicy (daily|weekly|monthly|quarterly|annual or freeform window).
+edges:
+  defined_on:
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:provides-cost-for
+attributes:
+  displayName: provides_cost_for (meta)
+  name: provides_cost_for
+  source:
+  - meta-node-kind:cost-model
+  target: []
+  cardinality: N:N
+  origin: standard
+  description: a CostModel provides cost data for a Provider, ModelVersion, or AgentVersion. Cross-cluster targets (Provider in catalog-provenance, ModelVersion in agent-stack adjacencies, AgentVersion in agent-stack — catalog update widening) are not re-emitted here.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:cost-model
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:constrains
+attributes:
+  displayName: constrains (meta)
+  name: constrains
+  source:
+  - meta-node-kind:quota
+  target: []
+  cardinality: N:N
+  origin: standard
+  description: a Quota constrains a Tenant / Role / capability scope. Cross-cluster targets (Tenant in catalog-provenance, Role in role-ontology) are not re-emitted here.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:quota
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:applies-to-tenant
+attributes:
+  displayName: applies_to_tenant (meta)
+  name: applies_to_tenant
+  source:
+  - meta-node-kind:quota
+  - meta-node-kind:budget-policy
+  target: []
+  cardinality: N:1
+  origin: standard
+  description: a Quota or BudgetPolicy applies to / is owned by a Tenant. Tenant lives in catalog-provenance and is not re-emitted here.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:quota
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:records-usage
+attributes:
+  displayName: records_usage (meta)
+  name: records_usage
+  source: []
+  target:
+  - meta-node-kind:usage-record
+  cardinality: N:1
+  origin: standard
+  description: a Run / RunAttempt / Invocation records a UsageRecord. Sources live in agent-stack and are not re-emitted here.
+edges:
+  target_of_meta_edge:
+  - target: meta-node-kind:usage-record
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:recorded-against
+attributes:
+  displayName: recorded_against (meta)
+  name: recorded_against
+  source:
+  - meta-node-kind:usage-record
+  target:
+  - meta-node-kind:cost-model
+  - meta-node-kind:quota
+  - meta-node-kind:budget-policy
+  cardinality: N:N
+  origin: standard
+  description: a UsageRecord is recorded against a CostModel / Quota / BudgetPolicy
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:usage-record
+  target_of_meta_edge:
+  - target: meta-node-kind:cost-model
+  - target: meta-node-kind:quota
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaEdgeKind
+id: meta-edge-kind:owns-budget
+attributes:
+  displayName: owns_budget (meta)
+  name: owns_budget
+  source:
+  - meta-node-kind:budget-policy
+  target: []
+  cardinality: N:1
+  origin: standard
+  description: a BudgetPolicy is owned by a Tenant or OrgUnit. Targets live in catalog-provenance and are not re-emitted here.
+edges:
+  source_of_meta_edge:
+  - target: meta-node-kind:budget-policy
+---
+nodeKind: MetaEnum
+id: meta-enum:cost-kind
+attributes:
+  displayName: CostModel kind
+  name: costKind
+  values:
+  - value: per-token
+    description: Pricing per input/output token (typical LLM cost model).
+  - value: per-call
+    description: Flat fee per API call.
+  - value: per-second
+    description: Time-based pricing (compute-second / GPU-second).
+  - value: tiered
+    description: Tiered pricing (volume thresholds change rate).
+  - value: hybrid
+    description: Combination (e.g. per-token plus per-call surcharge).
+  usedOnAttributes:
+  - meta-attribute:cost-model--cost-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:cost-model--cost-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:quota-kind
+attributes:
+  displayName: Quota kind
+  name: quotaKind
+  values:
+  - value: rpm
+    description: Requests per minute.
+  - value: tpm
+    description: Tokens per minute.
+  - value: rpd
+    description: Requests per day.
+  - value: tpd
+    description: Tokens per day.
+  - value: concurrent
+    description: Concurrent in-flight requests.
+  - value: storage
+    description: Storage capacity (bytes).
+  - value: bandwidth
+    description: Network bandwidth (bytes/sec).
+  usedOnAttributes:
+  - meta-attribute:quota--quota-kind
+edges:
+  used_on_attribute:
+  - target: meta-attribute:quota--quota-kind
+---
+nodeKind: MetaEnum
+id: meta-enum:quota-scope
+attributes:
+  displayName: Quota scope
+  name: scope
+  values:
+  - value: global
+    description: Provider-wide quota.
+  - value: tenant
+    description: Per-tenant quota.
+  - value: role
+    description: Per-role quota.
+  - value: api-key
+    description: Per-API-key quota.
+  - value: model
+    description: Per-model quota.
+  usedOnAttributes:
+  - meta-attribute:quota--scope
+edges:
+  used_on_attribute:
+  - target: meta-attribute:quota--scope

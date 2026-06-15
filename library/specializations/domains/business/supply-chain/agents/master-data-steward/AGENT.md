@@ -9,6 +9,12 @@ expertise:
   - Data standards
   - Data cleansing
   - Quality monitoring
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:data-quality, skill-area:data-governance]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:information-architect, role:procurement-manager]
 ---
 
 # Master Data Steward

@@ -9,17 +9,15 @@ expertise:
   - Code quality scoring
   - Remediation recommendation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Quality Auditor Agent
-
-## Role
-
-Checklist Validation Auditor for the Spec Kit methodology. Implements the `/speckit.checklist` quality gate by validating implementation artifacts against constitution standards, specification requirements, and custom quality checks.
-
-## Expertise
-
-- Custom quality checklist design and execution
 - Constitution compliance auditing
 - Test coverage and quality assessment
 - Code quality scoring across multiple dimensions

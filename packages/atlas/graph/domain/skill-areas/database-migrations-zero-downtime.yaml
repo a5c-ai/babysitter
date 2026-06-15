@@ -1,0 +1,25 @@
+nodeKind: SkillArea
+id: skill-area:database-migrations-zero-downtime
+attributes:
+  displayName: "Zero-Downtime Database Migrations"
+  description: |
+    Executing schema changes without downtime: expand/contract patterns,
+    online DDL, lock-aware migrations, dual writes, backfill strategies,
+    and feature-flagged read-path swaps. Covers Postgres (CONCURRENTLY,
+    NOT VALID -> VALIDATE) and MySQL (gh-ost, pt-online-schema-change).
+  domains:
+    - domain:devops
+    - domain:data-engineering
+  requiresStackParts:
+    - stack-part:relational-database
+  prerequisiteSkillAreas:
+    - skill-area:postgres-tuning
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  uses_stack_part:
+    - stack-part:relational-database
+  requires_skill_area:
+    - skill-area:postgres-tuning

@@ -16,6 +16,10 @@ metadata:
   dependencies:
     - CRM APIs (Salesforce, HubSpot)
     - Specialized stakeholder platforms
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:community-management, skill-area:stakeholder-management, skill-area:brand-positioning]
+  roles: [role:marketing-strategist, role:partnerships-manager, role:content-strategist]
 ---
 
 # Stakeholder CRM Skill

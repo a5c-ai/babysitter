@@ -2,6 +2,12 @@
 name: assessment-design-specialist
 description: Develop valid, reliable assessments and rubrics that accurately measure learning outcomes using psychometric principles
 required-skills: assessment-item-development, rubric-design-validation, learning-objectives-writing
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:data-analyst]
 ---
 
 # Assessment Design Specialist Agent

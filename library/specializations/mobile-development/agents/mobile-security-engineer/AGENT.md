@@ -2,6 +2,13 @@
 name: mobile-security-engineer
 description: Agent specialized in mobile application security, OWASP MASVS compliance, secure storage implementation, certificate pinning, biometric authentication, and security hardening across iOS and Android platforms.
 required-skills: mobile-security
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:mobile-security-testing, skill-area:authentication-authorization]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Mobile Security Engineer Agent

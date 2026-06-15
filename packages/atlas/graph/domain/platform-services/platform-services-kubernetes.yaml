@@ -1,0 +1,146 @@
+---
+nodeKind: PlatformService
+id: platform-service:k8s-deployment
+attributes:
+  displayName: "Kubernetes Deployment"
+  description: |
+    Declarative ReplicaSet manager for stateless workloads.
+  category: compute
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:kubernetes
+  integrates_with:
+    - target: platform-service:k8s-service
+      attributes: { nature: native }
+    - target: platform-service:k8s-configmap
+      attributes: { nature: native }
+    - target: platform-service:k8s-secret
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:k8s-service
+attributes:
+  displayName: "Kubernetes Service"
+  description: |
+    Stable virtual IP and DNS for a set of Pods (ClusterIP/NodePort/LoadBalancer).
+  category: networking
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds:
+    - stack-part:load-balancer
+edges:
+  provided_by:
+    - platform:kubernetes
+  implements_stack_part:
+    - stack-part:load-balancer
+    - target: stack-part:load-balancer
+  integrates_with:
+    - target: platform-service:k8s-ingress
+      attributes: { nature: native }
+---
+nodeKind: PlatformService
+id: platform-service:k8s-ingress
+attributes:
+  displayName: "Kubernetes Ingress"
+  description: |
+    L7 routing into the cluster (paths, hosts, TLS).
+  category: networking
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds:
+    - stack-part:reverse-proxy
+    - stack-part:api-gateway
+edges:
+  provided_by:
+    - platform:kubernetes
+  implements_stack_part:
+    - stack-part:reverse-proxy
+    - stack-part:api-gateway
+    - target: stack-part:reverse-proxy
+    - target: stack-part:api-gateway
+---
+nodeKind: PlatformService
+id: platform-service:k8s-configmap
+attributes:
+  displayName: "Kubernetes ConfigMap"
+  description: |
+    Non-secret configuration injected into Pods as env vars or volumes.
+  category: other
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:kubernetes
+---
+nodeKind: PlatformService
+id: platform-service:k8s-secret
+attributes:
+  displayName: "Kubernetes Secret"
+  description: |
+    Base64-encoded credential payload (encrypted at rest when KMS configured).
+  category: security
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds:
+    - stack-part:secrets-manager
+edges:
+  provided_by:
+    - platform:kubernetes
+  implements_stack_part:
+    - stack-part:secrets-manager
+    - target: stack-part:secrets-manager
+---
+nodeKind: PlatformService
+id: platform-service:k8s-pvc
+attributes:
+  displayName: "Kubernetes PersistentVolumeClaim"
+  description: |
+    Dynamic provisioning of block/file volumes via StorageClasses.
+  category: storage
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds:
+    - stack-part:block-storage
+edges:
+  provided_by:
+    - platform:kubernetes
+  implements_stack_part:
+    - stack-part:block-storage
+    - target: stack-part:block-storage
+---
+nodeKind: PlatformService
+id: platform-service:k8s-hpa
+attributes:
+  displayName: "Kubernetes HorizontalPodAutoscaler"
+  description: |
+    Scales Pod replicas on metrics (CPU, memory, custom).
+  category: compute
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:kubernetes
+---
+nodeKind: PlatformService
+id: platform-service:k8s-crd
+attributes:
+  displayName: "Kubernetes CustomResourceDefinition"
+  description: |
+    Extends the API with declarative custom resources backing operators.
+  category: other
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:kubernetes
+---
+nodeKind: PlatformService
+id: platform-service:k8s-operator
+attributes:
+  displayName: "Kubernetes Operator"
+  description: |
+    Controller pattern that reconciles a CRD-defined desired state.
+  category: other
+  providedByPlatformId: platform:kubernetes
+  implementsStackPartIds: []
+edges:
+  provided_by:
+    - platform:kubernetes

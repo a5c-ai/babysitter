@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:model-transport-protocol
+attributes:
+  canonicalDefinitionId: definition:model-transport-protocol.canonical
+  displayName: "ModelTransportProtocol"
+  kind: protocol
+  references:
+    - "NodeKind:ModelTransportProtocol"
+  description: |
+    An LLM wire protocol (Anthropic Messages, OpenAI Responses, Gemini, ...)
+edges:
+  applies_to:
+    - target: domain:ml-ai
+    - target: domain:software-engineering

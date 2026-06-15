@@ -1,0 +1,40 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-adapters-harness-mock
+attributes:
+  packageId: "@a5c-ai/adapters-harness-mock"
+  packageName: "@a5c-ai/adapters-harness-mock"
+  displayName: "Harness Mock"
+  description: "Mock harness simulator for testing adapters. Emulates Claude Code, Codex, and other CLI harnesses with configurable scenarios including interactive prompts, error injection, rate limiting, and hook behaviors."
+  role: "test-harness-emulator"
+  whenToUse: "Use in integration tests and E2E test suites to simulate harness behavior without requiring real AI coding agents."
+  workspacePath: packages/adapters/harness-mock
+  moduleType: typescript
+  surfaceKinds:
+    - test-fixture
+    - bin-entrypoint
+    - harness-emulator
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+edges:
+  references_path:
+    - target: path:adapters-harness-mock
+  exposes_subcommand:
+    - target: interaction-primitive:adapters-harness-mock-interactive-yolo
+    - target: interaction-primitive:adapters-harness-mock-interactive-prompt
+    - target: interaction-primitive:adapters-harness-mock-interactive-deny
+    - target: interaction-primitive:adapters-harness-mock-interactive-timeout
+    - target: interaction-primitive:adapters-harness-mock-error-rate-limit
+    - target: interaction-primitive:adapters-harness-mock-error-auth-required
+    - target: interaction-primitive:adapters-harness-mock-error-crash
+    - target: interaction-primitive:adapters-harness-mock-error-timeout
+    - target: interaction-primitive:adapters-harness-mock-error-oom
+    - target: interaction-primitive:adapters-harness-mock-runtime-hook-allow-bash
+    - target: interaction-primitive:adapters-harness-mock-runtime-hook-deny-write
+    - target: interaction-primitive:adapters-harness-mock-runtime-hook-timeout
+  has_payload_schema:
+    - target: shared-context-spec:adapters-harness-mock-harness-scenario
+    - target: shared-context-spec:adapters-harness-mock-stdin-interaction
+    - target: shared-context-spec:adapters-harness-mock-http-server-config
+    - target: shared-context-spec:adapters-harness-mock-websocket-config
+    - target: shared-context-spec:adapters-harness-mock-mock-event

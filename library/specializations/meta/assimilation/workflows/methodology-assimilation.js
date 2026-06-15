@@ -27,6 +27,11 @@
  *   finalQuality: number,
  *   iterations: number
  * }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:ai-agent-development]
+ *   topics: [topic:developer-experience, topic:knowledge-management]
+ *   roles: [role:platform-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -280,6 +285,7 @@ For each process in the architecture design, create a complete .js file that:
         'Reference skills by name from skills/ dir',
         'Preserve source methodology sequencing and philosophy',
         'Add quality gates where the source lacks them',
+        'Include a @graph JSDoc block in each process file header referencing relevant atlas graph node IDs (domains, skillAreas, topics, roles, workflows). Read packages/atlas/graph/domain/ to find valid IDs. At minimum include one domain: node.',
         'Return list of all files created'
       ],
       outputFormat: 'JSON with { filesCreated: [{ path, processId, phases, taskCount }], totalFiles: number }'
@@ -332,6 +338,7 @@ For each skill in the architecture design, create a directory with:
         'Follow the exact SKILL.md pattern from software-architecture/skills/',
         'Include tool use instructions specific to each skill',
         'Include process integration table showing which processes use each skill',
+        'Add a graph: frontmatter block to each SKILL.md with relevant atlas node IDs from packages/atlas/graph/domain/. At minimum include one domain: node.',
         'Return list of all files created'
       ],
       outputFormat: 'JSON with { skillsCreated: [{ dir, name, files: [] }], totalSkills: number }'
@@ -381,6 +388,7 @@ For each agent in the architecture design, create a directory with:
         'Preserve original agent roles and expertise from source methodology',
         'Add prompt templates that match the babysitter task definition pattern',
         'Map deviation rules from source where they exist',
+        'Add a graph: frontmatter block to each AGENT.md with relevant atlas node IDs from packages/atlas/graph/domain/. At minimum include one domain: node and one role: node.',
         'Return list of all files created'
       ],
       outputFormat: 'JSON with { agentsCreated: [{ dir, name, role, files: [] }], totalAgents: number }'
@@ -733,25 +741,18 @@ export async function process(inputs, ctx) {
       sourceRepo,
       methodologyName,
       methodologyDisplayName
+    });
+
     let lastFeedback_finalApproval2 = null;
     for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_finalApproval2) {
-        verifyResult = await ctx.task(verifyAssimilationTask, { ...{
-      outputBasePath,
-      architecture,
-      sourceResearch,
-      targetScore: targetQuality,
-      methodologyDisplayName
-    }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-      }
-  const finalApproval2 = await ctx.breakpoint({
-      question: `Research on ${methodologyDisplayName} is complete. Found ${sourceResearch.workflows?.length || 0} workflows, ${sourceResearch.agents?.length || 0} agents, ${sourceResearch.commands?.length || 0} commands. Proceed with architecture design?`,
-      title: 'Research Review',
-      context: { runId: ctx.runId },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_finalApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
+      const finalApproval2 = await ctx.breakpoint({
+        question: `Research on ${methodologyDisplayName} is complete. Found ${sourceResearch.workflows?.length || 0} workflows, ${sourceResearch.agents?.length || 0} agents, ${sourceResearch.commands?.length || 0} commands. Proceed with architecture design?`,
+        title: 'Research Review',
+        context: { runId: ctx.runId },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_finalApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
       });
       if (finalApproval2.approved) break;
       lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';

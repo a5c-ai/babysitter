@@ -1,0 +1,325 @@
+---
+nodeKind: Library
+id: library:celery
+attributes:
+  displayName: "Celery"
+  belongsToLanguageId: language:python
+  category: concurrency
+  description: |
+    Distributed task queue for Python supporting RabbitMQ, Redis, and other
+    brokers; enables async and scheduled background job processing.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:dramatiq
+---
+nodeKind: Library
+id: library:dramatiq
+attributes:
+  displayName: "Dramatiq"
+  belongsToLanguageId: language:python
+  category: concurrency
+  description: |
+    Simple, reliable background task processing library for Python with
+    support for RabbitMQ and Redis brokers and middleware pipelines.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-async-processing
+---
+nodeKind: Library
+id: library:redis-py
+attributes:
+  displayName: "redis-py"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Official Python client for Redis providing synchronous and async APIs,
+    connection pooling, pub/sub, pipelines, and cluster support.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:ioredis
+---
+nodeKind: Library
+id: library:aiohttp
+attributes:
+  displayName: "aiohttp"
+  belongsToLanguageId: language:python
+  category: http-client
+  description: |
+    Async HTTP client/server framework built on asyncio; supports streaming,
+    WebSockets, client sessions, and middleware for Python web services.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:httpx
+    - library:requests
+---
+nodeKind: Library
+id: library:websockets
+attributes:
+  displayName: "websockets"
+  belongsToLanguageId: language:python
+  category: http-server
+  description: |
+    Pure-Python asyncio library for building WebSocket servers and clients
+    with a clean coroutine-based API and TLS support.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:click
+attributes:
+  displayName: "Click"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Composable CLI framework for Python using decorators to define commands,
+    options, arguments, and help text with minimal boilerplate.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cli-design
+  alternative_to:
+    - library:typer
+---
+nodeKind: Library
+id: library:typer
+attributes:
+  displayName: "Typer"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Modern CLI library built on Click leveraging Python type hints for
+    automatic argument parsing, validation, and help generation.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cli-design
+---
+nodeKind: Library
+id: library:rich-lib
+attributes:
+  displayName: "Rich"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Python library for rich terminal output including syntax highlighting,
+    tables, progress bars, markdown rendering, and styled text.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - library:chalk
+---
+nodeKind: Library
+id: library:textual-lib
+attributes:
+  displayName: "Textual"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    TUI (text user interface) framework for Python built on Rich; enables
+    building full-featured terminal applications with widgets and CSS-like layouts.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - library:rich-lib
+---
+nodeKind: Library
+id: library:structlog
+attributes:
+  displayName: "structlog"
+  belongsToLanguageId: language:python
+  category: logging
+  description: |
+    Structured logging library for Python that wraps standard logging with
+    key-value context, processors pipeline, and JSON/console renderers.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+  alternative_to:
+    - library:loguru
+---
+nodeKind: Library
+id: library:loguru
+attributes:
+  displayName: "Loguru"
+  belongsToLanguageId: language:python
+  category: logging
+  description: |
+    Drop-in replacement for Python's standard logging module with a simpler
+    API, colored output, structured sinks, and automatic exception formatting.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+---
+nodeKind: Library
+id: library:arrow
+attributes:
+  displayName: "Arrow"
+  belongsToLanguageId: language:python
+  category: datetime
+  description: |
+    Friendly Python library for dates and times offering a cleaner API
+    than stdlib datetime with timezone handling and human-friendly parsing.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:date-time-manipulation
+  alternative_to:
+    - library:pendulum
+---
+nodeKind: Library
+id: library:pendulum
+attributes:
+  displayName: "Pendulum"
+  belongsToLanguageId: language:python
+  category: datetime
+  description: |
+    Drop-in replacement for Python datetimes with precise timezone support,
+    duration arithmetic, and natural language formatting via IANA tz database.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:date-time-manipulation
+---
+nodeKind: Library
+id: library:pillow
+attributes:
+  displayName: "Pillow"
+  belongsToLanguageId: language:python
+  category: image-processing
+  description: |
+    Friendly fork of PIL — the Python Imaging Library — supporting image
+    opening, manipulation, saving, and format conversion for 30+ formats.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:image-processing
+  alternative_to:
+    - library:opencv-python
+---
+nodeKind: Library
+id: library:opencv-python
+attributes:
+  displayName: "OpenCV-Python"
+  belongsToLanguageId: language:python
+  category: image-processing
+  description: |
+    Python bindings for OpenCV providing computer vision algorithms for image
+    and video processing, object detection, and feature extraction.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:image-processing
+---
+nodeKind: Library
+id: library:boto3
+attributes:
+  displayName: "Boto3"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Official AWS SDK for Python giving access to S3, EC2, DynamoDB, Lambda,
+    and all other AWS services via resource and client interfaces.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cloud-infrastructure
+  alternative_to:
+    - library:google-cloud-python
+    - library:azure-sdk-python
+---
+nodeKind: Library
+id: library:google-cloud-python
+attributes:
+  displayName: "Google Cloud Python"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Suite of Google Cloud client libraries for Python covering GCS, BigQuery,
+    Pub/Sub, Firestore, Spanner, and other GCP services.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cloud-infrastructure
+---
+nodeKind: Library
+id: library:azure-sdk-python
+attributes:
+  displayName: "Azure SDK for Python"
+  belongsToLanguageId: language:python
+  category: other
+  description: |
+    Microsoft's Azure client libraries for Python with async support covering
+    Blob Storage, Key Vault, Cosmos DB, and Azure AI services.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:cloud-infrastructure
+---
+nodeKind: Library
+id: library:dask
+attributes:
+  displayName: "Dask"
+  belongsToLanguageId: language:python
+  category: concurrency
+  description: |
+    Parallel computing library for Python that scales NumPy, pandas, and
+    scikit-learn workflows to multi-core or distributed cluster environments.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:streaming-realtime-processing
+  alternative_to:
+    - library:ray
+    - library:polars
+---
+nodeKind: Library
+id: library:ray
+attributes:
+  displayName: "Ray"
+  belongsToLanguageId: language:python
+  category: concurrency
+  description: |
+    Distributed computing framework for Python providing task parallelism,
+    actors, and a cluster runtime powering ML training and serving at scale.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:streaming-realtime-processing

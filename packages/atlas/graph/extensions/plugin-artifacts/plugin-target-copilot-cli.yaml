@@ -1,0 +1,117 @@
+nodeKind: PluginTarget
+id: plugin-target:copilot-cli
+attributes:
+  displayName: "GitHub Copilot CLI"
+  hostAgent: agent:copilot-cli
+  adapterFamily: shell-hook
+  manifestFormat: "plugin.json"
+  commandFormat: "markdown-commands"
+  adapterName: copilot
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: github-copilot
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVarForExtension: null
+  marketplacePath: null
+  pluginRootEnvVar: COPILOT_PLUGIN_DIR
+  scriptVariants:
+    - bash
+    - powershell
+  distribution:
+    - github-repo
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: true
+  installLayout:
+    harnessHomeRelative: ".copilot"
+  packageMetadata:
+    moduleType: commonjs
+    binScriptExt: ".js"
+    installLifecycle: plugin-scripts
+    activationMessage: restart
+    extraPackageFiles:
+      - hooks.json
+      - AGENTS.md
+    emitCjsWrappers: false
+    customAgentFrontmatter:
+      deferred-tool-loading:
+        support: native
+        versionRange: ">=1.0.52"
+        notes: "Custom agents can opt into deferred tool loading through `deferred-tool-loading` frontmatter, enabling tool-search discovery for large tool lists."
+  componentSupport:
+    agents: native
+    context: native
+  cliCommand: "gh"
+  callerEnvVars:
+    - "COPILOT_SESSION_ID"
+  configPaths:
+    - ".github"
+    - ".copilot"
+  processNames:
+    - "copilot"
+    - "github-copilot"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/copilot-adapter"
+  externalRepo: "a5c-ai/babysitter-github-copilot"
+  externalPackageName: "@a5c-ai/babysitter-github"
+  generatedSourceDir: "github-copilot"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "AGENTS.md"
+  promptCapabilities:
+    - hooks
+    - mcp
+    - task-tool
+    - breakpoint-routing
+  loopControlTerm: in-turn
+  hookDriven: false
+  interactiveToolName: "AskUserQuestion tool"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); COPILOT_ENV_FILE / COPILOT_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: synthetic
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: all
+  description: |
+    GitHub Copilot CLI plugin target for the current `>=1.0.55-3` surface.
+    Since 1.0.52, non-interactive `plugin`, `mcp`, `help`, and `version`
+    subcommands are treated as stdin-safe administrative commands and do not
+    consume caller stdin. Generated wrappers should preserve closed-stdin
+    prompt delivery for headless prompt runs while avoiding stdin piping for
+    those administrative subcommands.
+  launchBehavior:
+    promptDelivery: stdin
+    promptFlag: null
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+    stdinSafeNonInteractiveSubcommands:
+      - plugin
+      - mcp
+      - help
+      - version
+
+edges:
+  hosted_by:
+    - target: agent:copilot-cli
+    - target: agent-platform-impl:copilot-cli.platform@current

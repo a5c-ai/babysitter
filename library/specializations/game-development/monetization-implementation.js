@@ -4,6 +4,12 @@
  * in-app purchases, virtual economy, battle pass, subscriptions, and ethical monetization practices.
  * @inputs { projectName: string, monetizationModel?: string, currencies?: array, outputDir?: string }
  * @outputs { success: boolean, monetizationDoc: string, storeIntegration: object, economyModel: object, artifacts: array }
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:game-prototype-iteration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -45,25 +51,16 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Ethics Review
   if (ethicalGuidelines) {
-    let ethicsReview = await ctx.task(ethicsReviewTask, { projectName, strategy, economyDesign, outputDir });
+    const ethicsReview = await ctx.task(ethicsReviewTask, { projectName, strategy, economyDesign, outputDir });
     artifacts.push(...ethicsReview.artifacts);
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      ethicsReview = await ctx.task(ethicsReviewTask, { ...{ projectName, strategy, economyDesign, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Monetization implementation complete for ${projectName}. ${storeImpl.productCount} products. IAP integration: ${iapIntegration.integrated}. Review?`,
     title: 'Monetization Review',
-    context: { runId: ctx.runId, strategy, economyDesign, storeImpl },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, strategy, economyDesign, storeImpl }
+  });
+
   return {
     success: true,
     projectName,

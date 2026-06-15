@@ -1,0 +1,212 @@
+nodeKind: SkillArea
+id: skill-area:visual-pattern-induction
+attributes:
+  displayName: "Visual Pattern Induction"
+  description: |
+    Inducing abstract transformation rules from a small number of
+    visual input/output grid examples and applying them to held-out
+    grids — fluid-intelligence-style reasoning over color/shape/spatial
+    primitives, as exercised by the ARC-AGI family of evaluations.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:autonomous-research-engineering
+attributes:
+  displayName: "Autonomous Research Engineering"
+  description: |
+    Running open-ended ML/AI research experiments end-to-end — reading
+    a problem statement, designing experiments, writing/modifying training
+    or evaluation code, launching jobs, interpreting metrics, and iterating
+    against a held-out scoring function (as exercised by RE-Bench-style
+    evaluations).
+  domains:
+    - specialization:ai-agents-conversational
+  requiresLanguages:
+    - language:python
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:research
+      confidence: secondary
+    - target: specialization:scientific-discovery
+      confidence: secondary
+  uses_language:
+    - language:python
+    - target: language:python
+---
+nodeKind: SkillArea
+id: skill-area:autonomous-coding-engagement
+attributes:
+  displayName: "Autonomous Coding Engagement"
+  description: |
+    Taking on a real freelance-style software engagement from a natural-
+    language brief — reading the repo, asking/inferring requirements,
+    implementing features across multiple files, validating against
+    acceptance tests or rubric, and producing a reviewable change set
+    (as exercised by SWE-Lancer-style evaluations).
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:deep-web-research
+attributes:
+  displayName: "Deep Web Research"
+  description: |
+    Answering hard, long-tail factual questions that require multi-hop
+    web search, source triangulation across many pages, and resolution
+    of ambiguous or contested facts (as exercised by BrowseComp and
+    AssistantBench-style evaluations) — distinct from generic browsing
+    in that the bottleneck is research strategy rather than UI grounding.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:multi-app-orchestration
+attributes:
+  displayName: "Multi-App Orchestration"
+  description: |
+    Completing tasks that span many distinct applications/APIs — chaining
+    actions across email, calendar, files, ticketing, code, and SaaS
+    surfaces, threading state between them, and recovering from per-app
+    failures (as exercised by AppWorld and TheAgentCompany-style
+    evaluations).
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:web-action-grounding
+attributes:
+  displayName: "Web Action Grounding"
+  description: |
+    Translating a natural-language web task into the correct concrete
+    DOM/UI actions — locating the right element, choosing the right
+    interaction (click/type/scroll/select), and verifying the resulting
+    page state (as exercised by Mind2Web-2, WorkArena, and WebVoyager-
+    style evaluations). Sibling to browser-automation; focus is on
+    grounding accuracy rather than driver mechanics.
+  domains:
+    - specialization:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:closed-book-frontier-reasoning
+attributes:
+  displayName: "Closed-Book Frontier Reasoning"
+  description: |
+    Answering frontier-difficulty questions across math, science, and
+    humanities without retrieval — exercising deep parametric knowledge
+    plus chain-of-thought reasoning at the edge of human-expert
+    difficulty (as exercised by HLE and FrontierMath-style evaluations).
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:travel-itinerary-planning
+attributes:
+  displayName: "Travel Itinerary Planning"
+  description: |
+    Constructing multi-day, multi-city travel itineraries that satisfy
+    hard constraints (budget, dates, transit feasibility, opening hours)
+    and soft preferences — gathering options across flights, lodging,
+    and activities, then producing a coherent schedule (as exercised
+    by TravelPlanner-style evaluations).
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:travel
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:medical-agent
+attributes:
+  displayName: "Medical Agent"
+  description: |
+    Conducting a clinically-shaped patient encounter as an agent —
+    eliciting history, ordering tests, interpreting results, and
+    converging on a diagnosis and management plan under a structured
+    rubric (as exercised by AgentClinic-style evaluations). Domain
+    expertise plus dialogue strategy plus tool use.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:healthcare
+      confidence: primary
+    - target: specialization:clinical-informatics
+      confidence: secondary
+    - target: specialization:biomedical-informatics
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:mobile-gui-automation
+attributes:
+  displayName: "Mobile GUI Automation"
+  description: |
+    Driving native iOS/Android applications through their UI — element
+    grounding on touch interfaces, gesture sequences, app-state
+    transitions, and verification across screens. Mobile counterpart
+    to browser-automation / web-action-grounding.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:code-cybersecurity
+attributes:
+  displayName: "Code Cybersecurity"
+  description: |
+    Identifying, exploiting, and remediating security vulnerabilities
+    in source code and running systems — static review for common
+    classes (injection, auth, deserialization, memory safety),
+    capture-the-flag-style exploitation, and patch authoring under
+    adversarial assumptions.
+  domains:
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:security-research
+      confidence: primary

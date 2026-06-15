@@ -1,0 +1,133 @@
+---
+nodeKind: SkillArea
+id: skill-area:document-processing
+attributes:
+  displayName: "Document Processing"
+  description: |
+    Programmatic creation, parsing, and manipulation of office and
+    portable documents (PDF, DOCX, PPTX, XLSX/CSV) — text/table
+    extraction, form filling, layout authoring, and OCR fallbacks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:containerization
+attributes:
+  displayName: "Containerization"
+  description: |
+    Packaging applications into OCI containers — multi-stage Dockerfiles,
+    minimal base images, build caching, .dockerignore hygiene, local
+    docker-compose dev loops, and image-build verification.
+  domains:
+    - domain:devops
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  uses_tool:
+    - tool:docker
+    - tool:podman
+    - tool:colima
+    - tool:tilt
+    - tool:skaffold
+---
+nodeKind: SkillArea
+id: skill-area:web-scraping
+attributes:
+  displayName: "Web Scraping"
+  description: |
+    Extracting structured data from web pages with headless browsers
+    (Playwright/Selenium/Puppeteer): pagination, login flows, anti-bot
+    heuristics, and structured-output extraction.
+  domains:
+    - specialization:web-development
+  requiresLanguages:
+    - language:python
+    - language:typescript
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:web-development
+      confidence: primary
+  uses_language:
+    - target: language:python
+    - target: language:typescript
+---
+nodeKind: SkillArea
+id: skill-area:terraform-infrastructure
+attributes:
+  displayName: "Terraform Infrastructure as Code"
+  description: |
+    Authoring, planning, and reviewing HashiCorp Terraform IaC: module
+    structure, state hygiene, drift detection, policy guards, and
+    multi-environment promotion.
+  domains:
+    - domain:devops
+  requiresLanguages:
+    - language:hcl
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  uses_tool:
+    - tool:terraform
+    - tool:pulumi
+    - tool:make
+    - tool:bazel
+  uses_language:
+    - target: language:hcl
+---
+nodeKind: SkillArea
+id: skill-area:json-data-wrangling
+attributes:
+  displayName: "JSON Data Wrangling"
+  description: |
+    Reshaping, filtering, and validating JSON with jq, JSON Schema, and
+    similar tools — transformation by example, schema-driven validation,
+    and structural diffing.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:vision-extraction
+attributes:
+  displayName: "Vision-Based Extraction"
+  description: |
+    Using vision-capable models to describe, classify, OCR, and extract
+    structured data from images and screenshots — chart parsing, UI
+    snapshots, and visual diff.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:internationalization
+attributes:
+  displayName: "Internationalization & Localization"
+  description: |
+    Extracting user-facing strings, driving i18n message catalogs
+    (gettext, ICU MessageFormat, Fluent), and reviewing translations
+    with consistency and pluralization checks.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary

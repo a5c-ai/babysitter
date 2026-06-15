@@ -20,6 +20,12 @@
  * - ABA Contract Analysis: https://www.americanbar.org/
  * - Legal AI Contract Review: https://www.kira.com/
  * - Contract Analysis Best Practices: https://www.lawgeex.com/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -117,7 +123,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Conducting risk assessment');
 
-  let riskAnalysis = await ctx.task(riskAssessmentTask, {
+  const riskAnalysis = await ctx.task(riskAssessmentTask, {
     parsedContract: contractParsing.parsedContent,
     extractedTerms,
     clauses: clauseIdentification.clauses,
@@ -133,20 +139,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Risk assessment complete. Overall risk: ${riskAssessment.overallRisk}, Score: ${riskAssessment.riskScore}/100`);
 
   // Quality Gate: High risk contract
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        riskAnalysis = await ctx.task(riskAssessmentTask, { ...{
-    parsedContract: contractParsing.parsedContent,
-    extractedTerms,
-    clauses: clauseIdentification.clauses,
-    contractType,
-    partyRole,
-    riskTolerance,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (riskAssessment.riskScore > 70) {
+    await ctx.breakpoint({
       question: `High risk contract detected (Score: ${riskAssessment.riskScore}/100). ${riskAssessment.criticalIssues.length} critical issues found. Review risk assessment before proceeding?`,
       title: 'High Risk Contract Alert',
       context: {
@@ -160,15 +154,9 @@ export async function process(inputs, ctx) {
           format: a.format || 'json',
           label: 'Risk Assessment'
         }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: PLAYBOOK COMPARISON (if playbook provided)
@@ -195,6 +183,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Found ${deviations.length} deviations from standard positions`);
   }
+
   // ============================================================================
   // PHASE 6: LIABILITY AND INDEMNIFICATION ANALYSIS
   // ============================================================================
@@ -248,6 +237,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', 'Redline document generated');
   }
+
   // ============================================================================
   // PHASE 9: RECOMMENDATION GENERATION
   // ============================================================================
@@ -276,7 +266,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating comprehensive review report');
 
-  let reviewReport = await ctx.task(reviewReportTask, {
+  const reviewReport = await ctx.task(reviewReportTask, {
     contractPath,
     contractType,
     partyRole,
@@ -294,26 +284,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reviewReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reviewReport = await ctx.task(reviewReportTask, { ...{
-    contractPath,
-    contractType,
-    partyRole,
-    contractParsing,
-    termExtraction,
-    clauseIdentification,
-    riskAssessment,
-    playbookAnalysis,
-    liabilityAnalysis,
-    ipAnalysis,
-    recommendations,
-    redlineResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review Approval
+  await ctx.breakpoint({
     question: `Contract review complete. Risk Score: ${riskAssessment.riskScore}/100, ${deviations.length} deviations, ${recommendations.recommendationsList.length} recommendations. Approve review report?`,
     title: 'Contract Review Final Approval',
     context: {
@@ -333,15 +305,9 @@ export async function process(inputs, ctx) {
         { path: reviewReport.summaryPath, format: 'json', label: 'Review Summary' },
         ...(redlineResult ? [{ path: redlineResult.redlinePath, format: 'docx', label: 'Redline Document' }] : [])
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -394,7 +360,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -17,6 +17,12 @@
  * - Unity Official Documentation
  * - Unreal Engine Documentation
  * - Godot Engine Documentation
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:game-loop]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:engineering-onboarding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

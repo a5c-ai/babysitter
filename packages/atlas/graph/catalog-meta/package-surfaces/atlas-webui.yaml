@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:atlas-webui
+attributes:
+  packageId: "@a5c-ai/atlas-webui"
+  packageName: "@a5c-ai/atlas-webui"
+  displayName: "Atlas Web Explorer"
+  description: "Read-only Next.js explorer for the Atlas catalog graph. Browse NodeKinds, EdgeKinds, and records with search, filtering, and relationship visualization."
+  role: "graph-explorer-ui"
+  whenToUse: "Deploy this when you need a browser-based interface to explore and inspect the Atlas catalog graph records and their relationships."
+  status: active

@@ -1,0 +1,438 @@
+/**
+ * @process repo/issue-636-hooks-mux-missing-events
+ * @description Implement issue #636: complete and verify the 13 missing/partial hook event surfaces across hooks-mux, adapters runtime hooks, SDK, and docs.
+ * @inputs { issueNumber: number, baseBranch: string, branchName: string, targetEvents: object[], targetFiles: string[], verificationCommands: string[] }
+ * @outputs { success: boolean, phases: string[], changedFiles: string[], verification: object, review: object, delivery: object }
+ *
+ * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
+ * - Current staging already contains hooks-mux canonical lifecycle entries and Claude adapter normalizer/renderer tests for many #636 events; do not
+ *   reimplement those surfaces blindly. Begin by producing a current-state support matrix from code, tests, atlas/catalog data, runtime hook registration,
+ *   and docs.
+ * - Issue #636 has prior merged planning/implementation PRs (#643, #696), an open refreshed plan PR (#720), and a later issue-thread comment saying
+ *   implementation tracking moved to PRs. Treat issue status and PR state as part of the first-phase audit before executing implementation work.
+ * - Matching existing infrastructure found in hooks-mux canonical lifecycle types, Claude adapter catalog-backed mappings, normalizer/renderer tests,
+ *   atlas hook mappings, agent-catalog SDK descriptors, adapters Claude runtime hook shim/socket registration, SDK runtime hook dispatch,
+ *   task intrinsic/result commit paths, and agent-platform orchestration effects.
+ * - `.a5c/process-library/` was not present in this checkout when this plan was refreshed; matching process-library methodology guidance was found under
+ *   `library/methodologies/atdd-tdd/atdd-tdd.js`, `library/methodologies/process-hardening/process-hardening-patterns.js`, and
+ *   `library/methodologies/superpowers/verification-before-completion.js`.
+ * - No `.a5c/reuse-audit.json` was present; keyword scan used: hook, mux, lifecycle, canonical phase, Claude, atlas, config changed,
+ *   PostToolUseFailure, PostToolBatch, StopFailure, UserPromptExpansion, TaskCreated, TaskCompleted, TeammateIdle, Setup, InstructionsLoaded.
+ * - The 13 target entries are treated as the 10 Claude Code lifecycle gaps/blocking gaps named by issue #636 plus 3 lower-priority advanced Atlas gaps
+ *   documented in `docs/agent-stack/hooks/missing-events.md`; contract reconciliation must separate representation support from runtime emission support
+ *   and must flag stale documentation separately from missing implementation.
+ *
+ * References used while authoring:
+ * - docs/agent-stack/hooks/missing-events.md
+ * - docs/agent-stack/hooks/coverage-matrix.md
+ * - docs/agent-reference/process-authoring.md
+ * - library/methodologies/atdd-tdd/atdd-tdd.js
+ * - library/methodologies/process-hardening/process-hardening-patterns.js
+ * - library/methodologies/superpowers/verification-before-completion.js
+ *
+ * @process methodologies/atdd-tdd/atdd-tdd
+ * @process methodologies/process-hardening/process-hardening-patterns
+ * @process methodologies/superpowers/verification-before-completion
+ * @agent platform-architect specializations/sdk-platform-development/agents/platform-architect/AGENT.md
+ * @agent test-strategy-architect specializations/qa-testing-automation/agents/test-strategy-architect/AGENT.md
+ * @agent compatibility-auditor specializations/sdk-platform-development/agents/compatibility-auditor/AGENT.md
+ */
+
+import { defineTask } from '@a5c-ai/babysitter-sdk';
+
+const MAX_IMPLEMENTATION_ATTEMPTS = 3;
+
+function approved(result) {
+  return result?.passed === true || result?.approved === true || result?.success === true;
+}
+
+const readIssueAndReuseAuditTask = defineTask('issue-636.read-issue-and-reuse-audit', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Read issue #636 and perform reuse audit',
+  labels: ['issue-636', 'hooks-mux', 'context', 'reuse-audit'],
+  agent: {
+    name: 'hooks-mux-context-researcher',
+    prompt: {
+      role: 'senior hooks-mux and Babysitter platform maintainer',
+      task: 'Read the issue, referenced docs, previous plan/implementation comments, and existing hook infrastructure before any design or implementation work.',
+      instructions: [
+        `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
+        `If #${args.issueNumber} is a PR rather than an issue, also run: gh pr view ${args.issueNumber} --json files,title,body,comments`,
+        'Read docs/agent-stack/hooks/missing-events.md and docs/agent-stack/hooks/coverage-matrix.md in full, but treat them as claims to verify against current code rather than as automatically current truth.',
+        'Check whether prior plan or implementation PRs for this issue have already landed or remain open; record their URLs, merge state, and what changed. Include PRs #643, #696, and #720 if present.',
+        'Check the latest issue-thread state, including whether the issue was closed as tracked elsewhere, before deciding whether execution should continue, narrow scope, or only refresh stale docs/tests.',
+        'Research process-library guidance. The prompt requested .a5c/process-library/; if that directory is absent, record that fact and use the checked-in library/ methodologies that match this task.',
+        'Run the repo-specific plan reuse audit from docs/agent-reference/process-authoring.md before drafting implementation work.',
+        'Extract keyword nouns and verbs from the issue and scan existing migrations, APIs, SDK dependencies, imports, atlas hook mappings, canonical phase types, adapters, normalizers, renderers, CLI invoke tests, adapters Claude runtime hook shim/socket registration, SDK runtime hook dispatch, task effect handling, and instruction discovery code.',
+        'Render a section exactly titled: Reuse-audit findings (REVIEW BEFORE PROCEEDING). Include matching existing infrastructure and note explicitly if no matching infrastructure exists for a target surface.',
+        'Produce a current-state support matrix for every target event with columns: canonical phase, atlas/catalog mapping, hooks-mux core, Claude adapter normalize/render, CLI invoke, adapters runtime registration, S../platform emission, docs status, and test coverage.',
+        'Do not edit files.',
+        'Return JSON: { title, labels, issueBody, comments, priorPRs, referencedDocs, processLibraryFindings, reuseAudit, currentStateMatrix, acceptanceCriteria, eventInventory, likelyFiles, knownAmbiguities, nonGoals }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const reconcileContractTask = defineTask('issue-636.reconcile-hook-contract', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Reconcile hook event contract and ambiguity list',
+  labels: ['issue-636', 'contract', 'atlas', 'quality-gate'],
+  agent: {
+    name: 'hooks-mux-contract-architect',
+    prompt: {
+      role: 'senior event-contract architect',
+      task: 'Produce the authoritative remaining-work contract for all 13 events before code changes.',
+      instructions: [
+        'Use the issue context and reuse audit below as source material:',
+        JSON.stringify(args.context, null, 2),
+        'Target events from process inputs:',
+        JSON.stringify(args.targetEvents, null, 2),
+        'Reconcile docs/agent-stack/hooks/missing-events.md with the current-state matrix, atlas graph mappings under packages/atlas/graph/channels-hooks/, generated agent-catalog descriptor behavior, and adapters Claude runtime hook registration.',
+        'Pay special attention to known conflicts: PostToolUseFailure blockability, PostToolBatch blockability, and ConfigChange canonical spelling (session.config_changed vs session.config_change).',
+        'For each event, define canonical phase, native name, scope, block capability, mutation/additionalContext support, payload keys, matcher fields, renderer behavior, and whether runtime emission outside hooks-mux is required.',
+        'Prefer existing canonical names in docs/agent-stack/hooks/missing-events.md when atlas data conflicts, but flag any conflict that could break generated catalog consumers.',
+        'If a maintainer decision is genuinely required, set needsMaintainerDecision true and provide one precise question. Otherwise set it false.',
+        'Classify each change as one of: alreadyCovered, docsOnlyStale, hooksMuxGap, agentMuxRuntimeGap, sdkRuntimeGap, agentPlatformGap, testsOnlyGap, or blockedByMissingRuntimeSurface.',
+        'Return JSON: { eventContracts, currentSupport, alreadyCovered, remainingWork, docsUpdates, atlasUpdates, coreTypeUpdates, adapterUpdates, rendererUpdates, agentMuxRuntimeUpdates, sdkRuntimeEmissionUpdates, agentPlatformEmissionUpdates, testExpectations, needsMaintainerDecision, question, risks }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const authorRegressionTestsTask = defineTask('issue-636.author-regression-tests', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Author failing hook coverage regression tests',
+  labels: ['issue-636', 'tests', 'atdd', 'hooks-mux'],
+  agent: {
+    name: 'hooks-mux-test-architect',
+    prompt: {
+      role: 'senior TypeScript test engineer',
+      task: 'Add or refresh focused regression tests that specify the remaining #636 hook contract before implementation changes.',
+      instructions: [
+        'Edit only test files, fixture files, and generated snapshot/metadata fixtures in this task.',
+        'Use the reconciled contract below:',
+        JSON.stringify(args.contract, null, 2),
+        'Cover canonical phase union validity, Claude mapping presence, block/mutation capabilities, payload normalization, renderer behavior for blockable/non-blockable outputs, CLI invoke inference where applicable, adapters Claude runtime hook registration/socket dispatch, and compatibility fixtures.',
+        'Add tests in existing co-located suites rather than creating a new harness unless current structure requires it.',
+        'Tests should prove real remaining gaps from issue #636. If a target event is already covered on staging, record the existing evidence instead of duplicating tests.',
+        'Do not implement production code in this task.',
+        'Return JSON: { changedFiles, testsAdded, existingCoverageEvidence, expectedInitialFailures, coverageByEvent, commandsToRun }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const implementHooksMuxTask = defineTask('issue-636.implement-hooks-mux', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Implement hooks-mux event support',
+  labels: ['issue-636', 'implementation', 'hooks-mux'],
+  agent: {
+    name: 'hooks-mux-implementer',
+    prompt: {
+      role: 'senior TypeScript hooks-mux maintainer',
+      task: 'Implement or repair the hooks-mux and atlas/agent-catalog portions of issue #636 that remain incomplete.',
+      instructions: [
+        'Edit the repository directly. Keep changes scoped to issue #636.',
+        'Use the reconciled contract and failing tests below:',
+        JSON.stringify({ contract: args.contract, regressionTests: args.regressionTests }, null, 2),
+        'Update CanonicalPhase and LifecycleScope only where the current-state matrix proves a real gap. Current staging may already include tool.after_failure, tool.after_batch, turn.stop_failure, turn.prompt_expansion, task.created, task.completed, team.idle, session.setup, session.instructions_loaded, message.received, model.before_request, model.after_response, and planner.before_tool_selection.',
+        'Update atlas hook mappings and generated agent-catalog-facing data so Claude mappings expose the 13 target events with the agreed canonical phases and capabilities.',
+        'Update Claude adapter payload types, buildPayload normalization, execution context fields, mapping tests, renderer support, and CLI native-event inference where safe and deterministic.',
+        'Preserve existing behavior for already supported events and adapter families.',
+        'Do not broaden this task to unrelated hook capabilities from docs/agent-stack/hooks/missing-capabilities.md.',
+        'Return JSON: { changedFiles, summary, eventCoverage, compatibilityNotes, verificationCommands }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const implementRuntimeEmissionTask = defineTask('issue-636.implement-runtime-emission', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Implement SDK and agent-platform runtime emission wiring',
+  labels: ['issue-636', 'implementation', 'sdk', 'agent-platform'],
+  agent: {
+    name: 'runtime-hook-emission-implementer',
+    prompt: {
+      role: 'senior Babysitter SDK and agent-platform runtime engineer',
+      task: 'Wire runtime registration and emission points required by the issue after hooks-mux can represent the events.',
+      instructions: [
+        'Edit the repository directly. Keep changes scoped to runtime hook emission needed by issue #636.',
+        'Use the reconciled contract below:',
+        JSON.stringify(args.contract, null, 2),
+        'Trace and update existing dispatch surfaces rather than inventing a parallel event system: packages/adapters/adapters/src/claude-code/runtime-hooks/ephemeral-config.ts, packages/adapters/adapters/src/claude-code/runtime-hooks/hook-socket-server.ts, packages/adapters/core/src/runtime-hooks.ts, packages/sdk/src/runtime/hooks/runtime.ts, packages/sdk/src/runtime/intrinsics/task.ts, packages/sdk/src/runtime/orchestrateIteration.ts, packages/sdk/src/runtime/processContext.ts, packages/sdk/src/prompts/babysitterMdDiscovery or instruction-loading callers, packages/genty/platform/src hook call sites, and packages/agent-core session error paths as applicable.',
+        'Implement only the emission points that are concretely required and testable in this repo. If multi-agent TeammateIdle infrastructure is not present, add the hooks-mux representation and a documented no-runtime-emitter gap instead of fabricating lifecycle behavior.',
+        'Ensure blockable runtime events actually honor deny/ask/continue semantics where the contract says they can block, especially task.created, task.completed, turn.prompt_expansion, tool.after_batch, and session.config_changed.',
+        'Non-blocking events must be fail-open and must not alter control flow except for additionalContext propagation where supported.',
+        'Return JSON: { changedFiles, runtimeRegistrations, runtimeCallPaths, blockSemantics, unimplementedRuntimeGaps, summary, verificationCommands }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const verifyTask = defineTask('issue-636.verify', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Run deterministic verification gates',
+  labels: ['issue-636', 'verification', 'quality-gate'],
+  agent: {
+    name: 'hooks-mux-verifier',
+    prompt: {
+      role: 'senior CI and release verification engineer',
+      task: 'Run fresh verification and report evidence without claiming success unless commands pass.',
+      instructions: [
+        'Run the verification commands exactly as listed unless a command is unavailable; if unavailable, record the exact blocker and choose the closest targeted command.',
+        JSON.stringify(args.verificationCommands, null, 2),
+        'At minimum verify hooks-mux build/test/lint, adapters build or targeted runtime-hook tests when adapters surfaces changed, SDK build/test for runtime emission changes, metadata/catalog generation checks, and git diff --check.',
+        'Read full command output, record exit codes, and count failures. Do not summarize a failing command as passed.',
+        'Also verify that every target event has explicit test coverage or recorded existing evidence, and that coverage-matrix/missing-events docs remain accurate or are updated if implementation changes their status.',
+        'Return JSON: { passed, commandResults, eventCoverage, docsStatus, evidenceGaps, changedFiles }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const reviewTask = defineTask('issue-636.review', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Review implementation against issue contract',
+  labels: ['issue-636', 'review', 'quality-gate'],
+  agent: {
+    name: 'hooks-mux-contract-reviewer',
+    prompt: {
+      role: 'senior hooks-mux code reviewer',
+      task: 'Review the final diff against issue #636, the reconciled contract, and verification evidence.',
+      instructions: [
+        'Use a code-review stance. Findings first, ordered by severity, with file/line references.',
+        'Compare implementation to the 13 target event contracts directly. Ignore optimistic implementation summaries if the diff or tests disagree.',
+        'Check for regressions in existing Claude events, adapter-family compatibility, atlas/generated catalog consistency, blocking semantics, output rendering, and runtime fail-open behavior.',
+        'Inputs:',
+        JSON.stringify({ contract: args.contract, verification: args.verification }, null, 2),
+        'Return JSON: { approved, findings, missingCoverage, residualRisks, summary }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const repairTask = defineTask('issue-636.repair', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Repair verification or review gaps',
+  labels: ['issue-636', 'repair', 'implementation'],
+  agent: {
+    name: 'hooks-mux-repair-engineer',
+    prompt: {
+      role: 'senior TypeScript maintainer',
+      task: 'Repair only the concrete gaps found by verification or review.',
+      instructions: [
+        'Edit the repository directly. Keep the repair narrowly scoped.',
+        'Contract, verification, and review context:',
+        JSON.stringify({ contract: args.contract, verification: args.verification, review: args.review, attempt: args.attempt }, null, 2),
+        'Do not rewrite unrelated architecture. Add or adjust tests first when the gap is behavioral.',
+        'Return JSON: { changedFiles, fixes, remainingRisks, verificationCommands }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+const deliveryTask = defineTask('issue-636.delivery', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Commit, push, and issue update',
+  labels: ['issue-636', 'delivery', 'github'],
+  agent: {
+    name: 'github-delivery-engineer',
+    prompt: {
+      role: 'senior maintainer responsible for GitHub delivery',
+      task: 'Prepare the direct staging implementation for delivery after all gates pass.',
+      instructions: [
+        'Only proceed if verification.passed is true and review.approved is true.',
+        'Do not stage unrelated dirty worktree files.',
+        `Use branch ${args.branchName}. The current manual dispatch explicitly requested direct implementation on ${args.baseBranch}, so do not create a feature branch or PR.`,
+        'Commit the scoped implementation and tests with a concise issue-linked message.',
+        `Push ${args.baseBranch} directly.`,
+        `Post a comment on #${args.issueNumber} summarizing implemented events, verification commands, residual gaps if any, and the pushed commit.`,
+        'Return JSON: { delivered, commit, pushedBranch, issueCommentUrl, skippedReason }.',
+      ],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+export async function process(inputs, ctx) {
+  const issueNumber = inputs?.issueNumber ?? 636;
+  const baseBranch = inputs?.baseBranch ?? 'staging';
+  const branchName = inputs?.branchName ?? baseBranch;
+  const targetEvents = inputs?.targetEvents ?? [];
+  const verificationCommands = inputs?.verificationCommands ?? [
+    'npm run build:hooks-mux',
+    'npm run test:hooks-mux',
+    'npm run lint:hooks-mux',
+    'npm run build:adapters',
+    'npm run build:sdk',
+    'npm run test:sdk',
+    'npm run verify:metadata',
+    'git diff --check',
+  ];
+
+  const context = await ctx.task(readIssueAndReuseAuditTask, {
+    issueNumber,
+    targetEvents,
+  }, {
+    key: 'issue-636.context-and-reuse-audit',
+  });
+
+  const contract = await ctx.task(reconcileContractTask, {
+    context,
+    targetEvents,
+  }, {
+    key: 'issue-636.contract',
+  });
+
+  if (contract?.needsMaintainerDecision === true) {
+    ctx.log('warn', 'Contract task reported a maintainer-decision need; non-interactive yolo mode continues with the reconciled contract returned by the task.');
+  }
+
+  const regressionTests = await ctx.task(authorRegressionTestsTask, {
+    contract,
+  }, {
+    key: 'issue-636.regression-tests',
+  });
+
+  const hooksMuxImplementation = await ctx.task(implementHooksMuxTask, {
+    contract,
+    regressionTests,
+  }, {
+    key: 'issue-636.hooks-mux-implementation',
+  });
+
+  const runtimeImplementation = await ctx.task(implementRuntimeEmissionTask, {
+    contract,
+    hooksMuxImplementation,
+  }, {
+    key: 'issue-636.runtime-emission',
+  });
+
+  let verification = await ctx.task(verifyTask, {
+    verificationCommands,
+    contract,
+    implementations: [hooksMuxImplementation, runtimeImplementation],
+  }, {
+    key: 'issue-636.verification.1',
+  });
+
+  let review = await ctx.task(reviewTask, {
+    contract,
+    verification,
+  }, {
+    key: 'issue-636.review.1',
+  });
+
+  const repairs = [];
+  for (let attempt = 2; attempt <= MAX_IMPLEMENTATION_ATTEMPTS; attempt += 1) {
+    if (approved(verification) && approved(review)) {
+      break;
+    }
+
+    const repair = await ctx.task(repairTask, {
+      contract,
+      verification,
+      review,
+      attempt,
+    }, {
+      key: `issue-636.repair.${attempt}`,
+    });
+    repairs.push(repair);
+
+    verification = await ctx.task(verifyTask, {
+      verificationCommands,
+      contract,
+      repair,
+    }, {
+      key: `issue-636.verification.${attempt}`,
+    });
+
+    review = await ctx.task(reviewTask, {
+      contract,
+      verification,
+      repair,
+    }, {
+      key: `issue-636.review.${attempt}`,
+    });
+  }
+
+  if (!approved(verification) || !approved(review)) {
+    ctx.log('error', 'Issue #636 quality gate failed after bounded repair attempts; non-interactive yolo mode will skip delivery.');
+  }
+
+  const delivery = approved(verification) && approved(review)
+    ? await ctx.task(deliveryTask, {
+      issueNumber,
+      baseBranch,
+      branchName,
+      verification,
+      review,
+    }, {
+      key: 'issue-636.delivery',
+    })
+    : { delivered: false, skippedReason: 'quality gate did not pass' };
+
+  return {
+    success: approved(verification) && approved(review) && delivery?.delivered !== false,
+    phases: [
+      'issue-context-and-reuse-audit',
+      'contract-reconciliation',
+      'regression-tests',
+      'hooks-mux-implementation',
+      'runtime-emission',
+      'verification',
+      'review',
+      'delivery',
+    ],
+    changedFiles: [
+      ...(regressionTests?.changedFiles ?? []),
+      ...(hooksMuxImplementation?.changedFiles ?? []),
+      ...(runtimeImplementation?.changedFiles ?? []),
+      ...repairs.flatMap((repair) => repair?.changedFiles ?? []),
+    ],
+    context,
+    contract,
+    regressionTests,
+    hooksMuxImplementation,
+    runtimeImplementation,
+    repairs,
+    verification,
+    review,
+    delivery,
+  };
+}

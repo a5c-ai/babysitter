@@ -8,6 +8,14 @@ expertise:
   - Parameter naming and typing
   - Error response design
   - Tool discoverability
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:mcp-tool-design]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # MCP Tool Designer Agent

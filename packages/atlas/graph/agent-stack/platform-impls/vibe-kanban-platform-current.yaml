@@ -1,0 +1,41 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:vibe-kanban.platform@current
+attributes:
+  displayName: "Vibe Kanban Platform (current)"
+  agentVersionId: agent-version:vibe-kanban@current
+  packageRef: source-ref:vibe-kanban-github
+  nativeExtensionFormat: none
+  nativeExtensionManifestPath: ""
+  nativeExtensionsDirectoryPath: []
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentDefinitionFormat: executor-config
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: ""
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: local
+  updateChannelMechanism: npm
+  supportedChannelKinds: []
+  notes: |
+    Distribution and deployment:
+    - NPX CLI: `npx vibe-kanban` for zero-install local usage
+    - Local mode: runs entirely on developer machine with SQLite
+    - Remote mode: server deployment with ElectricSQL for state sync
+      across multiple clients
+    - React frontend split into local-web, remote-web, and web-core
+      packages for shared component reuse
+    ElectricSQL provides real-time state synchronization in remote
+    deployment mode, enabling multiple developers to share the same
+    kanban board with live updates.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:vibe-kanban
+      role: platform
+  bundles:
+    - target: presentation:vibe-kanban-web

@@ -1,0 +1,14 @@
+nodeKind: CapabilityProfile
+id: capability-profile:cursor.default
+attributes:
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  displayName: "Cursor (default)"
+  default: true
+  description: |
+    Default capability profile for the Cursor IDE agent. Reflects the
+    capability set exposed when the user runs Cursor as a normal IDE
+    extension with no opt-in CLI agent flags set.
+  overrides: {}
+edges:
+  applies_to_version:
+    - agentVersion:cursor:ge-0-0-0

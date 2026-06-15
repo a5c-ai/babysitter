@@ -1,0 +1,276 @@
+---
+nodeKind: Claim
+id: claim:model-version-model-command-a-plus-05-2026-current-contextwindowtokens
+attributes:
+  subjectId: model:command-a-plus-05-2026@current
+  attribute: contextWindowTokens
+  value: "128000"
+  subjectKind: ModelVersion
+  statement: model:command-a-plus-05-2026@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-command-a-plus-doc
+    - evidence:cohere-command-a-plus-hf-model-card
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Command A+ model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-command-a-plus-doc
+    - evidence:cohere-command-a-plus-hf-model-card
+  about_subject:
+    - model:command-a-plus-05-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-model-command-a-plus-05-2026-current-kind
+attributes:
+  subjectId: model:command-a-plus-05-2026@current
+  attribute: kind
+  value: multimodal
+  subjectKind: ModelVersion
+  statement: model:command-a-plus-05-2026@current kind is multimodal.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-command-a-plus-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Command A+ model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-command-a-plus-doc
+  about_subject:
+    - model:command-a-plus-05-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-model-command-a-plus-05-2026-current-modalities
+attributes:
+  subjectId: model:command-a-plus-05-2026@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:command-a-plus-05-2026@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-command-a-plus-doc
+    - evidence:cohere-command-a-plus-hf-model-card
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Command A+ model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-command-a-plus-doc
+    - evidence:cohere-command-a-plus-hf-model-card
+  about_subject:
+    - model:command-a-plus-05-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-model-command-a-plus-05-2026-current-modelcardurl
+attributes:
+  subjectId: model:command-a-plus-05-2026@current
+  attribute: modelCardUrl
+  value: https://docs.cohere.com/docs/command-a-plus
+  subjectKind: ModelVersion
+  statement: model:command-a-plus-05-2026@current modelCardUrl is https://docs.cohere.com/docs/command-a-plus.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-command-a-plus-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Command A+ model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-command-a-plus-doc
+  about_subject:
+    - model:command-a-plus-05-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-model-command-a-plus-05-2026-current-served-by-cohere
+attributes:
+  subjectId: model:command-a-plus-05-2026@current
+  attribute: served_by
+  value: provider:cohere
+  subjectKind: ModelVersion
+  statement: model:command-a-plus-05-2026@current is served by provider:cohere.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-command-a-plus-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Command A+ provider availability.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-command-a-plus-doc
+  about_subject:
+    - model:command-a-plus-05-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-model-cohere-embed-v4-0-current-contextwindowtokens
+attributes:
+  subjectId: model:cohere-embed-v4-0@current
+  attribute: contextWindowTokens
+  value: "128000"
+  subjectKind: ModelVersion
+  statement: model:cohere-embed-v4-0@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-embed-v4-doc
+    - evidence:aws-bedrock-cohere-embed-v4-doc
+    - evidence:oracle-cohere-embed-4-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Embed v4.0 model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-embed-v4-doc
+    - evidence:aws-bedrock-cohere-embed-v4-doc
+    - evidence:oracle-cohere-embed-4-doc
+  about_subject:
+    - model:cohere-embed-v4-0@current
+---
+nodeKind: Claim
+id: claim:model-version-model-cohere-embed-v4-0-current-kind
+attributes:
+  subjectId: model:cohere-embed-v4-0@current
+  attribute: kind
+  value: embedding
+  subjectKind: ModelVersion
+  statement: model:cohere-embed-v4-0@current kind is embedding.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-embed-v4-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Embed v4.0 model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-embed-v4-doc
+  about_subject:
+    - model:cohere-embed-v4-0@current
+---
+nodeKind: Claim
+id: claim:model-version-model-cohere-embed-v4-0-current-modalities
+attributes:
+  subjectId: model:cohere-embed-v4-0@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:cohere-embed-v4-0@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-embed-v4-doc
+    - evidence:aws-bedrock-cohere-embed-v4-doc
+    - evidence:oracle-cohere-embed-4-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Embed v4.0 model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-embed-v4-doc
+    - evidence:aws-bedrock-cohere-embed-v4-doc
+    - evidence:oracle-cohere-embed-4-doc
+  about_subject:
+    - model:cohere-embed-v4-0@current
+---
+nodeKind: Claim
+id: claim:model-version-model-cohere-embed-v4-0-current-modelcardurl
+attributes:
+  subjectId: model:cohere-embed-v4-0@current
+  attribute: modelCardUrl
+  value: https://docs.cohere.com/docs/cohere-embed
+  subjectKind: ModelVersion
+  statement: model:cohere-embed-v4-0@current modelCardUrl is https://docs.cohere.com/docs/cohere-embed.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-embed-v4-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Embed v4.0 model-version attributes.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-embed-v4-doc
+  about_subject:
+    - model:cohere-embed-v4-0@current
+---
+nodeKind: Claim
+id: claim:model-version-model-cohere-embed-v4-0-current-served-by-cohere
+attributes:
+  subjectId: model:cohere-embed-v4-0@current
+  attribute: served_by
+  value: provider:cohere
+  subjectKind: ModelVersion
+  statement: model:cohere-embed-v4-0@current is served by provider:cohere.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-embed-v4-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Embed v4.0 provider availability.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-embed-v4-doc
+  about_subject:
+    - model:cohere-embed-v4-0@current
+---
+nodeKind: Claim
+id: claim:model-version-model-cohere-embed-v4-0-current-served-by-aws-bedrock
+attributes:
+  subjectId: model:cohere-embed-v4-0@current
+  attribute: served_by
+  value: provider:aws-bedrock
+  subjectKind: ModelVersion
+  statement: model:cohere-embed-v4-0@current is served by provider:aws-bedrock.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:aws-bedrock-cohere-embed-v4-doc
+  claimedAt: "2026-05-26T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Cohere Embed v4.0 Bedrock availability.
+edges:
+  backed_by_evidence:
+    - evidence:aws-bedrock-cohere-embed-v4-doc
+  about_subject:
+    - model:cohere-embed-v4-0@current

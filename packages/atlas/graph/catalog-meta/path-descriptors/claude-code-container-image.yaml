@@ -1,0 +1,12 @@
+nodeKind: PathDescriptor
+id: path:claude-code-container-image
+attributes:
+  pathId: path:claude-code-container-image
+  displayName: "Claude Code container image"
+  path: "ghcr.io/anthropics/claude-code"
+  pathKind: container-image
+  ownerKind: PluginArtifact
+  ownerId: plugin-artifact:claude-code-container-image
+  platform: container
+  scope: system
+  expansion: literal

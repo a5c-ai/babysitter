@@ -19,6 +19,13 @@
  * - Mythril Security Tool: https://github.com/Consensys/mythril
  * - SWC Registry: https://swcregistry.io/
  * - Trail of Bits Audit Guide: https://github.com/trailofbits/publications
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:smart-contract-development-testing]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -104,7 +111,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Conducting manual code review');
 
-  let manualReview = await ctx.task(manualCodeReviewTask, {
+  const manualReview = await ctx.task(manualCodeReviewTask, {
     projectName,
     auditPreparation,
     staticAnalysisResults: {
@@ -120,21 +127,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Critical Findings Review
   const criticalFindings = totalFindings.filter(f => f.severity === 'critical');
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        manualReview = await ctx.task(manualCodeReviewTask, { ...{
-    projectName,
-    auditPreparation,
-    staticAnalysisResults: {
-      slither: slitherAnalysis,
-      mythril: mythrilAnalysis,
-      custom: customDetectors
-    },
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (criticalFindings.length > 0) {
+    await ctx.breakpoint({
       question: `Found ${criticalFindings.length} critical vulnerabilities. Review critical findings before proceeding?`,
       title: 'Critical Vulnerabilities Found',
       context: {
@@ -147,15 +141,9 @@ export async function process(inputs, ctx) {
         })),
         recommendation: 'Address all critical findings immediately',
         files: manualReview.artifacts.map(a => ({ path: a.path, format: 'markdown' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: ACCESS CONTROL ANALYSIS
@@ -205,6 +193,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...economicAnalysis.artifacts);
     totalFindings.push(...economicAnalysis.findings);
   }
+
   // ============================================================================
   // PHASE 7: FORMAL VERIFICATION (if enabled)
   // ============================================================================
@@ -221,6 +210,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...formalVerification.artifacts);
     totalFindings.push(...formalVerification.findings);
   }
+
   // ============================================================================
   // PHASE 8: FINDING CLASSIFICATION AND DEDUPLICATION
   // ============================================================================
@@ -256,7 +246,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating comprehensive audit report');
 
-  let auditReport = await ctx.task(auditReportTask, {
+  const auditReport = await ctx.task(auditReportTask, {
     projectName,
     auditPreparation,
     findingClassification,
@@ -267,19 +257,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...auditReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      auditReport = await ctx.task(auditReportTask, { ...{
-    projectName,
-    auditPreparation,
-    findingClassification,
-    remediationRecommendations,
-    auditType,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Audit Complete
+  await ctx.breakpoint({
     question: `Security Audit Complete for ${projectName}. Total findings: ${findingClassification.totalFindings}. Critical: ${findingClassification.criticalCount}, High: ${findingClassification.highCount}. Risk Score: ${auditReport.riskScore}/100. Review and finalize audit report?`,
     title: 'Security Audit Complete',
     context: {
@@ -299,15 +278,9 @@ export async function process(inputs, ctx) {
         { path: auditReport.reportPath, format: 'markdown', label: 'Audit Report' },
         { path: findingClassification.findingsPath, format: 'json', label: 'All Findings' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -340,7 +313,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

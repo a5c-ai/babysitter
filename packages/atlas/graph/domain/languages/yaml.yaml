@@ -1,0 +1,21 @@
+nodeKind: Language
+id: language:yaml
+attributes:
+  displayName: "YAML"
+  paradigms:
+    - declarative
+    - configuration
+    - data
+  description: |
+    YAML (YAML Ain't Markup Language) is a human-readable data-serialization
+    format commonly used for configuration files and data exchange between
+    systems that support different languages.
+
+    YAML supports scalars, sequences (lists), and mappings (dictionaries),
+    with anchors and aliases for reuse within a document. It is the primary
+    configuration language for Kubernetes manifests, GitHub Actions workflows,
+    Docker Compose files, Ansible playbooks, and OpenAPI specifications.
+    Common pitfalls include indentation sensitivity, automatic type coercion
+    (the "Norway problem"), and multiline string quoting. Tools like
+    yamllint, yq, and Helm's template engine are standard in DevOps tooling.
+edges: {}

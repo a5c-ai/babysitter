@@ -1,0 +1,96 @@
+nodeKind: PluginTarget
+id: plugin-target:omp
+attributes:
+  displayName: "Oh-My-Pi"
+  hostAgent: agent:omp
+  adapterFamily: programmatic
+  adapterName: omp
+  manifestFormat: "state-only"
+  commandFormat: markdown-commands
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: null
+  hookRegistrationOutputPath: null
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  marketplacePath: null
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: OMP_PLUGIN_ROOT
+  scriptVariants:
+    - javascript
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: true
+  installLayout: null
+  packageMetadata:
+    moduleType: module
+    binScriptExt: ".cjs"
+    installLifecycle: none
+    activationMessage: restart
+    peerDependencyPackage: "@oh-my-pi/pi-coding-agent"
+    emitCjsWrappers: false
+  componentSupport:
+    agents: native
+    context: native
+  cliCommand: "pi"
+  callerEnvVars:
+    - "OMP_SESSION_ID"
+  configPaths:
+    - ".omp"
+  processNames:
+    - "omp"
+    - "oh-my-pi"
+  capabilities:
+    - SessionBinding
+    - StopHook
+    - Programmatic
+  adapterModule: "@a5c-ai/adapters-codecs/omp-adapter"
+  externalRepo: "a5c-ai/babysitter-omp"
+  externalPackageName: "@a5c-ai/babysitter-omp"
+  generatedSourceDir: "oh-my-pi"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "AGENTS.md"
+  promptCapabilities:
+    - skills
+    - slash-commands
+    - task-tool
+    - harness-routing
+    - programmatic-session
+    - mcp
+  loopControlTerm: skill-driven
+  hookDriven: false
+  interactiveToolName: "AskUserQuestion"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); OMP_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: in-process
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: true
+  supportsBlock: false
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: runtime_hook
+  toolInterceptionScope: none
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "-p"
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+
+edges:
+  hosted_by:
+    - target: agent:omp
+    - target: agent-platform-impl:omp.platform@current

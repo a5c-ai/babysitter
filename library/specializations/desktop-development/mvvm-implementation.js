@@ -17,6 +17,12 @@
  * - MobX: https://mobx.js.org/
  * - Redux: https://redux.js.org/
  * - MVVM Pattern: https://docs.microsoft.com/en-us/dotnet/architecture/maui/mvvm
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

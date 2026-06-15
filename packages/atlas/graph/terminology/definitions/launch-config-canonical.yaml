@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:launch-config.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:launch-config
+  text: |
+    named spawn recipe
+  status: canonical
+edges:
+  defines:
+    - term:launch-config

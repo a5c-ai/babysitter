@@ -1,0 +1,312 @@
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-contextwindowtokens
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: contextWindowTokens
+  value: '131072'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current contextWindowTokens is 131072.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-costpermtokinput
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: costPerMTokInput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current costPerMTokInput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-costpermtokoutput
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: costPerMTokOutput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current costPerMTokOutput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-finetuningkind
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-kind
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-lifecyclestatus
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-modalities
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-modalitydirections
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-modelcardurl
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/Qwen/Qwen2.5-72B-Instruct
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current modelCardUrl is https://huggingface.co/Qwen/Qwen2.5-72B-Instruct.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-supportsextendedthinking
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-supportsfinetuning
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current
+---
+nodeKind: Claim
+id: claim:model-version-model-qwen-2-5-72b-instruct-current-versionrange
+attributes:
+  subjectId: model:qwen-2-5-72b-instruct@current
+  attribute: versionRange
+  value: '>=2.5.0 <2.6.0'
+  subjectKind: ModelVersion
+  statement: model:qwen-2-5-72b-instruct@current versionRange is >=2.5.0 <2.6.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-qwen-2-5-72b-instruct
+  about_subject:
+  - model:qwen-2-5-72b-instruct@current

@@ -1,0 +1,658 @@
+nodeKind: ToolServer
+id: tool-server:kradle-mcp-server
+attributes:
+  displayName: Kradle MCP Server
+  description: MCP stdio server exported by @a5c-ai/kradle-cli. It exposes Kradle resource CRUD, snapshots, search, agent
+    stack/dispatch, secret grants, external sync/conflict, and audit query tools for agent clients.
+  protocol: mcp-stdio
+  provenance: built-in
+  category: devtools
+  maintainer: a5c.ai
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/kradle/cli
+  installCommand: npm install && npm test --workspace=@a5c-ai/kradle-cli
+  npmPackage: "@a5c-ai/kradle-cli"
+  tools:
+    - tool-descriptor:kradle.kradle-list-resources
+    - tool-descriptor:kradle.kradle-get-resource
+    - tool-descriptor:kradle.kradle-apply-resource
+    - tool-descriptor:kradle.kradle-delete-resource
+    - tool-descriptor:kradle.kradle-snapshot
+    - tool-descriptor:kradle.kradle-search
+    - tool-descriptor:kradle.kradle-list-stacks
+    - tool-descriptor:kradle.kradle-dispatch-agent
+    - tool-descriptor:kradle.kradle-list-secrets
+    - tool-descriptor:kradle.kradle-create-secret
+    - tool-descriptor:kradle.kradle-create-stack
+    - tool-descriptor:kradle.kradle-sync-external
+    - tool-descriptor:kradle.kradle-resolve-conflict
+    - tool-descriptor:kradle.kradle-audit-query
+edges:
+  integrates_with:
+    - target: platform-service:kradle-agent-dispatch
+    - target: platform-service:kradle-external-backends
+    - target: platform-service:kradle-company-brain
+    - target: platform-service:kradle-policy
+  lib_applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:devops
+  contains_tool_descriptor:
+    - target: tool-descriptor:kradle.kradle-list-resources
+    - target: tool-descriptor:kradle.kradle-get-resource
+    - target: tool-descriptor:kradle.kradle-apply-resource
+    - target: tool-descriptor:kradle.kradle-delete-resource
+    - target: tool-descriptor:kradle.kradle-snapshot
+    - target: tool-descriptor:kradle.kradle-search
+    - target: tool-descriptor:kradle.kradle-list-stacks
+    - target: tool-descriptor:kradle.kradle-dispatch-agent
+    - target: tool-descriptor:kradle.kradle-list-secrets
+    - target: tool-descriptor:kradle.kradle-create-secret
+    - target: tool-descriptor:kradle.kradle-create-stack
+    - target: tool-descriptor:kradle.kradle-sync-external
+    - target: tool-descriptor:kradle.kradle-resolve-conflict
+    - target: tool-descriptor:kradle.kradle-audit-query
+  exposes_prompt:
+    - target: mcp-prompt:kradle.kradle-workspace-setup
+    - target: mcp-prompt:kradle.kradle-stack-config
+    - target: mcp-prompt:kradle.kradle-troubleshoot
+  exposes_resource:
+    - target: mcp-resource:kradle.snapshot
+    - target: mcp-resource:kradle.stacks
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-list-resources
+attributes:
+  displayName: "Kradle: kradle_list_resources"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: List resources of a given kind
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      kind:
+        type: string
+    required:
+      - kind
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-get-resource
+attributes:
+  displayName: "Kradle: kradle_get_resource"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Get a single resource by kind and name
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      kind:
+        type: string
+      name:
+        type: string
+    required:
+      - kind
+      - name
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-apply-resource
+attributes:
+  displayName: "Kradle: kradle_apply_resource"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Create or update a resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "resource"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      resource:
+        type: object
+    required:
+      - resource
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-delete-resource
+attributes:
+  displayName: "Kradle: kradle_delete_resource"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Delete a resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      kind:
+        type: string
+      name:
+        type: string
+    required:
+      - kind
+      - name
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-snapshot
+attributes:
+  displayName: "Kradle: kradle_snapshot"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Get full organization snapshot
+  schema: |-
+    {
+      "type": "object",
+      "properties": {}
+    }
+  inputSchema:
+    type: object
+    properties: {}
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-search
+attributes:
+  displayName: "Kradle: kradle_search"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Search resources by query
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      query:
+        type: string
+    required:
+      - query
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-list-stacks
+attributes:
+  displayName: "Kradle: kradle_list_stacks"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: List agent stacks
+  schema: |-
+    {
+      "type": "object",
+      "properties": {}
+    }
+  inputSchema:
+    type: object
+    properties: {}
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-dispatch-agent
+attributes:
+  displayName: "Kradle: kradle_dispatch_agent"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Dispatch an agent run
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "agentDefinition": {
+          "type": "string"
+        },
+        "definitionRef": {
+          "type": "string"
+        },
+        "stackRef": {
+          "type": "string"
+        },
+        "agentStack": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object"
+        }
+      },
+      "anyOf": [
+        { "required": ["agentDefinition"] },
+        { "required": ["definitionRef"] },
+        { "required": ["stackRef"] },
+        { "required": ["agentStack"] }
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      agentDefinition:
+        type: string
+      definitionRef:
+        type: string
+      stackRef:
+        type: string
+      agentStack:
+        type: string
+      input:
+        type: object
+    anyOf:
+      - required:
+          - agentDefinition
+      - required:
+          - definitionRef
+      - required:
+          - stackRef
+      - required:
+          - agentStack
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-list-secrets
+attributes:
+  displayName: "Kradle: kradle_list_secrets"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: List AgentSecretGrant resources in an org namespace
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "org": {
+          "type": "string"
+        }
+      }
+    }
+  inputSchema:
+    type: object
+    properties:
+      org:
+        type: string
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-create-secret
+attributes:
+  displayName: "Kradle: kradle_create_secret"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Create an AgentSecretGrant resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "org": {
+          "type": "string"
+        },
+        "agentRef": {
+          "type": "string"
+        },
+        "secretRef": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "org",
+        "agentRef",
+        "secretRef"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      name:
+        type: string
+      org:
+        type: string
+      agentRef:
+        type: string
+      secretRef:
+        type: string
+      permissions:
+        type: array
+        items:
+          type: string
+    required:
+      - name
+      - org
+      - agentRef
+      - secretRef
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-create-stack
+attributes:
+  displayName: "Kradle: kradle_create_stack"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Create an AgentStack resource
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "org": {
+          "type": "string"
+        },
+        "spec": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "org"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      name:
+        type: string
+      org:
+        type: string
+      spec:
+        type: object
+    required:
+      - name
+      - org
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-sync-external
+attributes:
+  displayName: "Kradle: kradle_sync_external"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Trigger an external sync for a binding
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "bindingName": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "localName": {
+          "type": "string"
+        },
+        "spec": {
+          "type": "object"
+        },
+        "externalEnvelope": {
+          "type": "object"
+        },
+        "watermark": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bindingName",
+        "kind",
+        "localName"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      bindingName:
+        type: string
+      kind:
+        type: string
+      localName:
+        type: string
+      spec:
+        type: object
+      externalEnvelope:
+        type: object
+      watermark:
+        type: string
+    required:
+      - bindingName
+      - kind
+      - localName
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-resolve-conflict
+attributes:
+  displayName: "Kradle: kradle_resolve_conflict"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Resolve an external sync conflict
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "conflictName": {
+          "type": "string"
+        },
+        "strategy": {
+          "type": "string"
+        },
+        "resolvedValue": {}
+      },
+      "required": [
+        "conflictName",
+        "strategy"
+      ]
+    }
+  inputSchema:
+    type: object
+    properties:
+      conflictName:
+        type: string
+      strategy:
+        type: string
+      resolvedValue: {}
+    required:
+      - conflictName
+      - strategy
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:kradle.kradle-audit-query
+attributes:
+  displayName: "Kradle: kradle_audit_query"
+  category: kradle-mcp
+  vendor: a5c.ai
+  mode: mcp-tool
+  description: Query audit events with optional org/action/time filters
+  schema: |-
+    {
+      "type": "object",
+      "properties": {
+        "org": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "since": {
+          "type": "string"
+        },
+        "until": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        }
+      }
+    }
+  inputSchema:
+    type: object
+    properties:
+      org:
+        type: string
+      action:
+        type: string
+      since:
+        type: string
+      until:
+        type: string
+      limit:
+        type: number
+      offset:
+        type: number
+  streamable: false
+  timeoutMs: 30000
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:kradle.kradle-workspace-setup
+attributes:
+  displayName: kradle_workspace_setup
+  name: kradle_workspace_setup
+  arguments: []
+  description: Guide for setting up a new kradle workspace
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:kradle.kradle-stack-config
+attributes:
+  displayName: kradle_stack_config
+  name: kradle_stack_config
+  arguments: []
+  description: Help configuring an agent stack
+edges: {}
+---
+nodeKind: MCPPrompt
+id: mcp-prompt:kradle.kradle-troubleshoot
+attributes:
+  displayName: kradle_troubleshoot
+  name: kradle_troubleshoot
+  arguments: []
+  description: Diagnose common kradle issues
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:kradle.snapshot
+attributes:
+  displayName: Kradle Workspace Snapshot
+  uri: kradle://snapshot
+  mimeType: application/json
+  subscribable: false
+  description: Current org runtime snapshot
+edges: {}
+---
+nodeKind: MCPResource
+id: mcp-resource:kradle.stacks
+attributes:
+  displayName: Kradle Agent Stacks Resource
+  uri: kradle://stacks
+  mimeType: application/json
+  subscribable: false
+  description: List of configured agent stacks
+edges: {}

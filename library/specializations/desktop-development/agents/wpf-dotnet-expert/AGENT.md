@@ -2,6 +2,12 @@
 name: wpf-dotnet-expert
 description: Expert in WPF/XAML, MVVM patterns, .NET ecosystem, and Windows desktop development
 expertise: [wpf, xaml, mvvm, dotnet, csharp, windows]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:desktop-system-integration]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # wpf-dotnet-expert

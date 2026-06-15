@@ -1,0 +1,16 @@
+nodeKind: Definition
+id: definition:ontology-schema.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:ontology-schema
+  text: |
+    Stub. The catalog ontology itself (this `ontology-schema.yaml` plus the
+    `../../../schema/node-kinds/` and `../../../schema/edge-kinds.md` it mirrors) modeled as a
+    first-class entity so it can be claimed about, versioned via
+    `current catalog snapshot`, and pointed at by `Term term:ontology`.
+  status: canonical
+edges:
+  defines:
+    - target: term:ontology-schema
+  defined_in_context_of:
+    - target: layer:4-agent-core

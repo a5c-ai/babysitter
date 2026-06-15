@@ -1,0 +1,172 @@
+---
+nodeKind: StackProfile
+id: stack-profile:lamp-stack
+attributes:
+  displayName: "LAMP Stack (Linux, Apache, MySQL, PHP)"
+  description: |
+    The classic web application stack: Linux as the operating system,
+    Apache HTTP Server for request handling, MySQL as the relational
+    database, and PHP as the server-side scripting language. LAMP
+    dominated web hosting from the early 2000s through the 2010s and
+    remains widely deployed for WordPress, Drupal, and custom PHP
+    applications.
+
+    Variants include LEMP (Nginx replacing Apache) and LAPP (PostgreSQL
+    replacing MySQL). Shared hosting providers almost universally support
+    LAMP. The stack's maturity means extensive documentation, tooling,
+    and a massive installed base, though newer projects increasingly
+    favor framework-specific stacks with more opinionated structure.
+    Laravel is the dominant modern PHP framework on this stack.
+  composes:
+    - language:php
+    - language:sql
+    - framework:laravel
+edges:
+  composed_of:
+    - language:php
+    - language:sql
+    - framework:laravel
+---
+nodeKind: StackProfile
+id: stack-profile:jamstack
+attributes:
+  displayName: "Jamstack (JavaScript, APIs, Markup)"
+  description: |
+    An architecture pattern where the frontend is pre-rendered at build
+    time as static HTML/CSS/JavaScript and served from a CDN, with
+    dynamic functionality provided by JavaScript calling third-party APIs
+    and serverless functions. The J-A-M acronym stands for JavaScript,
+    APIs, and Markup.
+
+    Frameworks like Next.js, Astro, Gatsby, and Hugo generate the static
+    layer. Headless CMS services (Contentful, Sanity, Strapi) provide
+    content APIs. Netlify and Vercel popularized the deployment model.
+    The architecture excels at content-heavy sites where global CDN
+    distribution, security (no server to attack), and low operational
+    overhead matter.
+  composes:
+    - language:javascript
+    - language:typescript
+    - framework:nextjs
+edges:
+  composed_of:
+    - language:javascript
+    - language:typescript
+    - framework:nextjs
+---
+nodeKind: StackProfile
+id: stack-profile:serverless-aws
+attributes:
+  displayName: "Serverless AWS (Lambda, API Gateway, DynamoDB, S3)"
+  description: |
+    An AWS-native serverless architecture: Lambda functions handle
+    compute, API Gateway provides HTTP routing, DynamoDB serves as the
+    NoSQL data store, and S3 holds static assets and object storage.
+    EventBridge, SQS, and SNS wire event-driven communication between
+    components.
+
+    The Serverless Framework, AWS SAM, or AWS CDK manage infrastructure
+    as code. This stack eliminates server provisioning and scales
+    automatically per request. Cost is pay-per-invocation, making it
+    efficient for spiky or low-traffic workloads. Cold starts and
+    vendor lock-in are the primary tradeoffs. Step Functions add
+    workflow orchestration for complex multi-step processes.
+  composes:
+    - language:typescript
+    - language:python
+edges:
+  composed_of:
+    - language:typescript
+    - language:python
+---
+nodeKind: StackProfile
+id: stack-profile:data-lake-stack
+attributes:
+  displayName: "Data Lake Stack (Spark, Object Storage, Delta/Iceberg)"
+  description: |
+    A modern data lakehouse architecture: Apache Spark as the distributed
+    compute engine, cloud object storage (S3, GCS, ADLS) as the storage
+    layer, and Delta Lake or Apache Iceberg providing ACID transactions,
+    schema evolution, and time travel on top of Parquet files.
+
+    This stack replaces traditional data warehouses for large-scale
+    analytics. dbt transforms data within the lakehouse. Apache Airflow
+    or Dagster orchestrate ETL pipelines. The lakehouse pattern unifies
+    data engineering and data science workloads on a single copy of
+    data, avoiding the cost and complexity of maintaining separate lake
+    and warehouse systems.
+  composes:
+    - language:python
+    - language:sql
+    - framework:spark-java
+    - tool:airflow
+    - tool:databricks
+edges:
+  composed_of:
+    - language:python
+    - language:sql
+    - framework:spark-java
+    - tool:airflow
+    - tool:databricks
+---
+nodeKind: StackProfile
+id: stack-profile:event-driven-stack
+attributes:
+  displayName: "Event-Driven Stack (Kafka, Consumers, Schema Registry)"
+  description: |
+    A distributed event streaming architecture: Apache Kafka (or Redpanda)
+    as the central event log, consumer applications processing events in
+    real time, and Confluent Schema Registry enforcing Avro, Protobuf,
+    or JSON Schema contracts between producers and consumers.
+
+    Kafka Connect provides pre-built source and sink connectors for
+    databases, search engines, and cloud services. ksqlDB or Kafka Streams
+    enable stream processing without a separate compute cluster. This
+    stack is the backbone of event sourcing, CQRS, and real-time data
+    pipelines in organizations processing high-volume transactional or
+    operational events.
+  composes:
+    - language:java
+    - language:protobuf
+    - tool:kubernetes
+    - library:grpc-js
+    - library:redis
+    - tool:rabbitmq
+    - tool:docker
+edges:
+  composed_of:
+    - language:java
+    - language:protobuf
+    - tool:kubernetes
+    - library:grpc-js
+    - library:redis
+    - tool:rabbitmq
+    - tool:docker
+---
+nodeKind: StackProfile
+id: stack-profile:ai-agent-stack
+attributes:
+  displayName: "AI Agent Stack (LLM, Vector DB, Orchestration, Memory)"
+  description: |
+    A reference architecture for building AI agent applications: an LLM
+    provider (Anthropic, OpenAI) for reasoning, a vector database
+    (Pinecone, Chroma, Qdrant) for retrieval, an orchestration framework
+    (LangChain, LangGraph, CrewAI) for workflow composition, and a
+    memory layer (Zep, Mem0) for persistent context across sessions.
+
+    Supporting layers include an LLM proxy (LiteLLM, Portkey) for
+    multi-provider routing and cost control, an observability platform
+    (Helicone, LangSmith) for tracing and evaluation, and a UI layer
+    (Open WebUI, custom chat frontend) for human interaction. This stack
+    is rapidly evolving, with new frameworks and tools emerging monthly.
+  composes:
+    - language:python
+    - language:typescript
+    - framework:langchain
+edges:
+  composed_of:
+    - language:python
+    - language:typescript
+    - framework:langchain
+    - tool:chromadb
+    - tool:litellm

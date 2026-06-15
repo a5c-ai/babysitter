@@ -1,0 +1,151 @@
+---
+# MCP servers for .NET, Gradle, Maven, Neovim, RabbitMQ, NATS, and Kafka
+
+nodeKind: ToolServer
+id: tool-server:mcp-dotnet
+attributes:
+  displayName: .NET MCP Server
+  description: |
+    Community MCP server for .NET and C# development tooling.
+    Enables AI agents to build, run, test, and manage .NET projects,
+    inspect NuGet packages, and execute dotnet CLI commands programmatically.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/ktzsolt/dotnet-mcp-server
+  maintainer: Community
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:dotnet-cli
+  lib_applies_to_domain:
+    - target: domain:backend
+    - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-gradle
+attributes:
+  displayName: Gradle MCP Server
+  description: |
+    MCP server exposing Gradle build automation capabilities to AI agents.
+    Supports executing tasks, listing available tasks, inspecting build
+    configurations, and managing dependencies in Gradle-based JVM projects.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/IlyaGulya/gradle-mcp-server
+  maintainer: Community
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:gradle
+  lib_applies_to_domain:
+    - target: domain:backend
+    - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-maven
+attributes:
+  displayName: Maven MCP Server
+  description: |
+    MCP server providing Apache Maven build management capabilities.
+    Enables AI agents to run Maven lifecycle phases, resolve dependencies,
+    inspect POM configurations, and manage Java project builds.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/nickvdyck/maven-mcp-server
+  maintainer: Community
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:maven
+  lib_applies_to_domain:
+    - target: domain:backend
+    - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-neovim
+attributes:
+  displayName: Neovim MCP Server
+  description: |
+    MCP server that bridges AI agents with a running Neovim instance.
+    Enables reading and writing buffers, executing Lua/Vimscript commands,
+    navigating files, and controlling the editor state programmatically.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/tumayun/neovim-mcp
+  maintainer: Community
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:neovim
+  lib_applies_to_domain:
+    - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-rabbitmq
+attributes:
+  displayName: RabbitMQ MCP Server
+  description: |
+    MCP server providing access to RabbitMQ message broker management.
+    Enables AI agents to publish and consume messages, inspect queues,
+    manage exchanges and bindings, and monitor broker health via the
+    RabbitMQ Management HTTP API.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/kenliao94/mcp-server-rabbitmq
+  maintainer: Community
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:rabbitmq
+  lib_applies_to_domain:
+    - target: domain:backend
+    - target: domain:data-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-nats
+attributes:
+  displayName: NATS MCP Server
+  description: |
+    MCP server providing access to the NATS messaging system.
+    Enables AI agents to publish and subscribe to subjects, manage streams
+    and consumers via JetStream, inspect server connections, and query
+    NATS cluster health and configuration.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/itsrobli/mcp-server-nats
+  maintainer: Community
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:nats
+  lib_applies_to_domain:
+    - target: domain:backend
+    - target: domain:data-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-kafka
+attributes:
+  displayName: Kafka MCP Server
+  description: |
+    MCP server for Apache Kafka stream processing and topic management.
+    Enables AI agents to produce and consume messages, inspect topics
+    and consumer groups, manage offsets, and monitor Kafka cluster
+    state via the Confluent MCP integration.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/confluentinc/mcp-confluent
+  maintainer: Confluent
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: skill-area:kafka-stream-processing
+  lib_applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:backend

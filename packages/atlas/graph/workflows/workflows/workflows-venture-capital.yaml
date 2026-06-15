@@ -1,0 +1,105 @@
+---
+nodeKind: Workflow
+id: workflow:deal-flow-screening
+attributes:
+  displayName: "Deal Flow Screening"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Screens inbound deal flow against the fund's investment thesis --
+    triaging pitch decks and intro emails, scoring opportunities on market
+    size, team strength, traction metrics, and competitive
+    differentiation, de-duplicating against existing portfolio and
+    previously-passed deals, routing high-signal opportunities to partner
+    review, and maintaining the deal-flow CRM with stage progression and
+    pass reasons. Produces weekly deal-flow digest and conversion funnel
+    metrics. Excludes term-sheet negotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:venture-capital
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:due-diligence-deep-dive
+attributes:
+  displayName: "Due Diligence Deep Dive"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-deal"
+  complexity: cross-team
+  description: |
+    Conducts structured due diligence on investment candidates that pass
+    initial screening -- analyzing financial statements and unit
+    economics, validating technical architecture and scalability claims,
+    assessing IP portfolio and freedom-to-operate, evaluating team
+    background and reference checks, stress-testing market assumptions
+    with independent research, and red-flagging compliance or regulatory
+    risks. Produces investment memo with risk matrix and recommendation.
+    Excludes post-investment support.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:security-reviewer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:threat-modeling
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:venture-capital
+    - target: domain:legal
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:portfolio-company-review
+attributes:
+  displayName: "Portfolio Company Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews portfolio company health against investment milestones --
+    analyzing reported KPIs (MRR, burn rate, runway, NRR), benchmarking
+    growth against cohort peers, assessing board-deck narrative
+    consistency with financial data, evaluating follow-on funding
+    readiness, identifying companies needing operational intervention or
+    bridge support, and updating portfolio valuation marks. Produces
+    quarterly portfolio review deck and watch-list updates. Excludes
+    fund-level LP reporting.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:venture-capital
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:operations-team

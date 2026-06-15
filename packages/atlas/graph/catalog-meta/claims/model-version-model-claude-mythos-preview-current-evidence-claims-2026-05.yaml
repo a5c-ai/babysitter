@@ -1,0 +1,265 @@
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-displayname
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: displayName
+  value: "Claude Mythos Preview"
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current displayName is Claude Mythos Preview."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: vendor-confirmed
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for Claude Mythos Preview identity across official Anthropic, AWS, and Microsoft surfaces.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-modelid
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: providerModelId
+  value: claude-mythos-preview
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current provider model ID is claude-mythos-preview."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: vendor-confirmed
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-microsoft-foundry
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Microsoft Foundry publishes the API model identifier for its Foundry route.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-microsoft-foundry
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-release-date
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: releaseDate
+  value: "2026-04-07"
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current releaseDate is 2026-04-07."
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-red
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Date follows Anthropic research/system-card material date.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-red
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-lifecycle
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: lifecycleStatus
+  value: preview
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current lifecycleStatus is preview."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: vendor-confirmed
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Current ModelVersion.lifecycleStatus enum supports preview but not gated-preview; gating is represented separately as accessStatus.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-access-status
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: accessStatus
+  value: gated-research-preview
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current accessStatus is gated-research-preview."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: vendor-confirmed
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Anthropic describes invitation-only Project Glasswing access; Bedrock describes a gated research preview.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-context-window-unknown
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: contextWindowTokens
+  value: unknown
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current contextWindowTokens is unknown in public documentation."
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Public sources reviewed do not expose a context window for Claude Mythos Preview; do not infer from Opus or other Claude families.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-pricing-unknown
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: pricing
+  value: unknown
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current pricing is not public self-serve per-token pricing."
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Gated research access is not a public self-serve pricing tier; ModelVersion cost fields remain zero as the existing Atlas unknown/unpriced sentinel.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-provider-availability
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: served_by
+  value: "provider:anthropic, provider:aws-bedrock, provider:azure-foundry"
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current is served by Anthropic, AWS Bedrock, and Azure Foundry surfaces."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: vendor-confirmed
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Vertex exposure was not added because no official Vertex source was verified for this model.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-capability-tags
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: capabilityTags
+  value: "defensive-cybersecurity, autonomous-coding, long-running-agents, vulnerability-discovery-evaluation"
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current is positioned for defensive cybersecurity, autonomous coding, long-running agents, and vulnerability discovery/exploitation evaluation."
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-red
+    - evidence:claude-mythos-preview-bedrock
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Recorded as tags because the current compute-path schema has capability edges for generic model features but not these domain-specific capability labels.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-red
+    - evidence:claude-mythos-preview-bedrock
+  about_subject:
+    - model:claude-mythos-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-transport
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: speaks
+  value: model-transport:anthropic-messages
+  subjectKind: ModelVersion
+  statement: "model:claude-mythos-preview@current speaks the Anthropic Messages transport."
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: vendor-confirmed
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  claimedAt: "2026-05-26T19:29:29Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Bedrock and Foundry routes are hosted provider surfaces for Claude Messages-style model invocation, not new model transports in Atlas.
+edges:
+  backed_by_evidence:
+    - evidence:claude-mythos-preview-anthropic-models
+    - evidence:claude-mythos-preview-bedrock
+    - evidence:claude-mythos-preview-microsoft-foundry
+  about_subject:
+    - model:claude-mythos-preview@current

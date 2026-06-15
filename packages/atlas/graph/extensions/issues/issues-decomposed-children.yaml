@@ -1,0 +1,54 @@
+nodeKind: Issue
+id: issue:linear-aca-390-1
+attributes:
+  displayName: "ACA-390-1 — auth runtime packaging"
+  identifier: "ACA-390-1"
+  trackerKind: issue-tracker:linear
+  state: "done"
+edges:
+  from_tracker:
+    - target: issue-tracker:linear
+---
+nodeKind: Issue
+id: issue:linear-aca-390-2
+attributes:
+  displayName: "ACA-390-2 — browser-session runtime packaging"
+  identifier: "ACA-390-2"
+  trackerKind: issue-tracker:linear
+  state: "done"
+edges:
+  from_tracker:
+    - target: issue-tracker:linear
+---
+nodeKind: Issue
+id: issue:linear-aca-390-3
+attributes:
+  displayName: "ACA-390-3 — tarball smoke coverage"
+  identifier: "ACA-390-3"
+  trackerKind: issue-tracker:linear
+  state: "done"
+edges:
+  from_tracker:
+    - target: issue-tracker:linear
+---
+nodeKind: Issue
+id: issue:github-1234-1
+attributes:
+  displayName: "GH#1234-1 — reconciliation timer"
+  identifier: "1234-1"
+  trackerKind: issue-tracker:github-issues
+  state: "open"
+edges:
+  from_tracker:
+    - target: issue-tracker:github-issues
+---
+nodeKind: Issue
+id: issue:github-1234-2
+attributes:
+  displayName: "GH#1234-2 — state-cache test"
+  identifier: "1234-2"
+  trackerKind: issue-tracker:github-issues
+  state: "open"
+edges:
+  from_tracker:
+    - target: issue-tracker:github-issues

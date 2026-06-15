@@ -1,0 +1,15 @@
+nodeKind: Library
+id: library:react-testing-library
+attributes:
+  displayName: "React Testing Library"
+  belongsToLanguageId: language:javascript
+  category: testing
+  description: |
+    Lightweight testing utility for React that encourages writing tests against accessible queries rather than implementation details.
+edges:
+  belongs_to_language:
+    - language:javascript
+  library_used_by:
+    - target: skill-area:react-testing
+  alternative_to:
+    - library:jest-dom

@@ -7,19 +7,12 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-knowledge
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
----
-
-# persistent-memory
-
-You are **persistent-memory** -- the cross-session knowledge persistence skill for Pilot Shell.
-
-## Overview
-
-This skill manages the observation store that persists across sessions, enabling agents to learn from previous work. Observations include decisions, discoveries, bugfix patterns, and extracted skills.
-
-## Observation Types
-
-### Decision
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 A choice made during development with rationale.
 ```json
 { "type": "decision", "content": "Use Redux Toolkit over raw Redux", "rationale": "RTK reduces boilerplate by 60%", "tags": ["architecture", "state-management"] }
@@ -36,6 +29,8 @@ A bug resolution pattern for future reference.
 ```json
 { "type": "bugfix", "content": "Race condition in WebSocket reconnect", "rootCause": "Missing mutex on connection state", "fix": "Added connection state lock", "tags": ["concurrency", "websocket"] }
 ```
+
+---
 
 ## Storage
 

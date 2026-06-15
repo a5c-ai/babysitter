@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:omp-manifest
+attributes:
+  artifactId: plugin-artifact:omp-manifest
+  displayName: "Oh-My-Pi plugin manifest (state-only)"
+  targetId: plugin-target:omp
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "state-only"
+  contextFiles:
+    - packages/extensions-adapter/src/targets/oh-my-pi.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:omp

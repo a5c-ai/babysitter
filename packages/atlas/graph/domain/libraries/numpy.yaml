@@ -1,0 +1,15 @@
+nodeKind: Library
+id: library:numpy
+attributes:
+  displayName: "NumPy"
+  belongsToLanguageId: language:python
+  category: math
+  description: |
+    Fundamental package for scientific computing in Python — n-dimensional array, linalg, FFT, RNG.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:data-analysis
+  alternative_to:
+    - library:polars

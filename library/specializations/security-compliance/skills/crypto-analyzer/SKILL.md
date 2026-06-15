@@ -8,6 +8,14 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:encryption-decryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer, role:privacy-engineer]
+  workflows: [workflow:security-audit]
+  topics: [topic:ssl-certs]
+
 ---
 
 # Crypto Analyzer Skill

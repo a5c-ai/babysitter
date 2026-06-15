@@ -1,0 +1,26 @@
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-57-3-issue-804-release
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.57-3 release notes for issue #804"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.57-3
+  sourcePathOrUrl: https://github.com/github/copilot-cli/releases/tag/v1.0.57-3
+  locator: "github/copilot-cli release v1.0.57-3"
+  capturedAt: "2026-05-31T20:15:00Z"
+  observedAt: "2026-05-31T20:15:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:15:00Z"
+  notes: |
+    Issue #804 tracks GitHub Copilot CLI 1.0.57-3. Official release notes list
+    High-contrast diff backgrounds using darker colors for improved text
+    readability and a fix so Session resume works after a crash leaves partial data in the
+    session log. The install path remains `gh extension install
+    github/gh-copilot`.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:ge-1-0-55-3

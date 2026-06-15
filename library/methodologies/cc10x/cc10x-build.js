@@ -3,6 +3,12 @@
  * @description CC10X BUILD Workflow - TDD-enforced feature development with parallel code review, silent failure hunting, and integration verification
  * @inputs { request: string, projectRoot?: string, planFile?: string, memory?: object, confidenceThreshold?: number }
  * @outputs { success: boolean, tddEvidence: object, reviewResults: object, verificationResult: object, filesChanged: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -77,6 +83,9 @@ const tddGreenTask = defineTask('cc10x-build-tdd-green', (args, taskCtx) => ({
       context: { ...args },
       instructions: [
         'Write minimal code to make tests pass - no gold plating',
+        'Before Write/Edit authors planned new files under scripts/, supabase/migrations/, src/server/, or src/lib/, check each exact path with ls or rg/grep.',
+        'If an exact planned new path already exists, read the existing file, report findings to the orchestrator, and wait for scope direction such as use-existing, replace, append, or renumber.',
+        'Do not auto-resolve existing-file collisions.',
         'Use Write/Edit tools for all file modifications - never Bash for file creation',
         'Run tests with CI=true npm test or --run flag',
         'Tests MUST pass at this stage - exit code must be 0',

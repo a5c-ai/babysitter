@@ -18,6 +18,11 @@ metadata:
     - software
     - do-178c
     - airborne-software
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:compiler-implementation, skill-area:compliance-automation, skill-area:language-design]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # DO-178C Compliance Skill

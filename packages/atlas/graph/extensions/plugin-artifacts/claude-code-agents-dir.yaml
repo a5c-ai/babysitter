@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-agents-dir
+attributes:
+  artifactId: plugin-artifact:claude-code-agents-dir
+  displayName: "Claude Code agents directory"
+  targetId: plugin-target:claude-code
+  artifactKind: subagent-md
+  pathPattern: "agents/*.md"
+  installerSurface: "fs"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

@@ -5,6 +5,13 @@
  * @outputs { success: boolean, manuscript: object, revisions: array, submissionPackage: object, artifacts: array }
  * @recommendedSkills SK-HUM-010 (citation-scholarly-apparatus), SK-HUM-015 (grant-narrative-writing)
  * @recommendedAgents AG-HUM-009 (grants-publications-advisor), AG-HUM-007 (historical-narrator)
+ *
+ * @graph
+ *   domains: [domain:humanities]
+ *   specializations: [specialization:digital-humanities]
+ *   skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

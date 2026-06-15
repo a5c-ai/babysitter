@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:modality.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:modality
+  text: |
+    text/image/audio/video
+  status: canonical
+edges:
+  defines:
+    - term:modality

@@ -1,0 +1,22 @@
+nodeKind: Benchmark
+id: benchmark:tau-bench
+attributes:
+  displayName: "tau-bench"
+  homepageUrl: https://github.com/sierra-research/tau-bench
+  kind: tool-use
+  targetsKind: AgentVersion
+  description: |
+    Sierra Research's tau-bench — multi-turn agent benchmark in retail and airline customer-service domains.
+edges:
+  covers:
+    - target: skill-area:multi-turn-tool-use
+      attributes:
+        coverage: full
+        weight: 0.7
+    - target: skill-area:agentic-loops
+      attributes:
+        coverage: partial
+        weight: 0.3
+  applies_to:
+    - target: domain:retail
+    - target: domain:customer-experience

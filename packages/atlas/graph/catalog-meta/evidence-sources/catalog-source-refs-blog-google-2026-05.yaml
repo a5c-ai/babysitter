@@ -1,0 +1,37 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-5f4c598f3230
+attributes:
+  displayName: 'Catalog source reference: https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/
+  sourcePathOrUrl: https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/
+  locator: Source reference for catalog entities in graph/agent-stack/versions/gemini-cli-current.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-54eeef1e4fb4
+attributes:
+  displayName: 'Catalog source reference: https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/
+  sourcePathOrUrl: https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/
+  locator: Source reference for catalog entities in graph/benchmarks/eval-runs/eval-runs-google.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

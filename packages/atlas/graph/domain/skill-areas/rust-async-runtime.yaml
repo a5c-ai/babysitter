@@ -1,0 +1,27 @@
+nodeKind: SkillArea
+id: skill-area:rust-async-runtime
+attributes:
+  displayName: "Rust Async Runtime"
+  description: |
+    Working with Rust async runtimes: tokio executors, async-std, the
+    Future / Pin / Waker model, structured concurrency, select!,
+    cancellation, channels (mpsc, oneshot, broadcast), and integrating
+    blocking work via spawn_blocking.
+  domains:
+    - domain:systems-programming
+  requiresLanguages:
+    - language:rust
+  requiresLibraries:
+    - library:tokio
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:systems-programming
+      confidence: primary
+    - target: specialization:rust-systems
+      confidence: secondary
+  uses_language:
+    - language:rust
+    - target: language:rust
+  uses_library:
+    - library:tokio

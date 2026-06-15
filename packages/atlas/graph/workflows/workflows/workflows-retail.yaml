@@ -1,0 +1,73 @@
+---
+nodeKind: Workflow
+id: workflow:inventory-replenishment-cycle
+attributes:
+  displayName: "Inventory Replenishment Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Automates the inventory replenishment decision process -- analyzing
+    real-time point-of-sale velocity data against safety-stock thresholds,
+    running demand-forecasting models incorporating seasonality and
+    promotional calendars, generating purchase orders based on supplier
+    lead-time constraints, optimizing order quantities against warehouse
+    capacity and minimum-order requirements, and triggering cross-dock or
+    store-transfer recommendations for imbalanced stock. Produces
+    replenishment orders, demand forecast variance reports, and
+    stockout-risk dashboards. Excludes supplier contract negotiation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:ml-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:kafka-stream-processing
+  applies_to_domain:
+    - target: domain:retail
+    - target: domain:supply-chain
+    - target: domain:logistics
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:procurement-team
+---
+nodeKind: Workflow
+id: workflow:pos-system-upgrade
+attributes:
+  displayName: "POS System Upgrade"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Coordinates the rollout of point-of-sale system upgrades across retail
+    locations -- validating payment-terminal firmware compatibility,
+    executing PCI-DSS compliance verification for new software versions,
+    running end-to-end transaction-flow regression tests including EMV chip
+    and NFC contactless paths, staging phased rollout by store cluster with
+    automated rollback triggers, and verifying peripheral integrations
+    (receipt printers, barcode scanners, cash drawers). Produces rollout
+    schedules, compliance attestation records, and location-level upgrade
+    status dashboards. Excludes POS application feature development.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:secrets-rotation
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:retail
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:it-service-management
+    - target: org-unit:engineering

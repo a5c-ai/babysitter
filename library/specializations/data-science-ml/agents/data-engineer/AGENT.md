@@ -9,6 +9,13 @@ expertise:
   - Version control integration
   - Pipeline monitoring setup
   - Error handling strategies
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:data-preprocessing, skill-area:data-pipeline-testing]
+  roles: [role:data-engineer, role:ml-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:data-quality-monitoring]
+
 ---
 
 # data-engineer

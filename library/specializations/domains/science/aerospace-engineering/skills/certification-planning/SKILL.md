@@ -18,6 +18,11 @@ metadata:
     - regulatory
     - compliance
     - airworthiness
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:compliance-automation, skill-area:statistical-analysis, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Certification Planning Skill

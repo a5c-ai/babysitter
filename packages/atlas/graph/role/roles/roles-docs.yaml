@@ -1,0 +1,22 @@
+---
+nodeKind: Role
+id: role:technical-writer-convergent
+attributes:
+  displayName: "Technical Writer"
+  isAgentic: false
+  requiredCapabilities: []
+  requiredDomains: []
+  description: |
+    Authors and maintains user-facing and engineering-facing docs, tutorials, and reference material.
+    (Convergent-catalog update; complements the canonical `role:technical-writer` example with explicit SkillArea expertise edges.)
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:write-user-docs
+  requires_expertise:
+    - target: skill-area:tutorial-design
+    - target: skill-area:reference-docs
+    - target: skill-area:api-doc-generation
+    - target: skill-area:docs-as-code
+    - target: skill-area:runbook-writing

@@ -1,0 +1,197 @@
+# Specialization skill-area coverage bridge.
+#
+# These edges connect existing domain Specialization nodes to existing SkillArea
+# nodes so taxonomy coverage reflects already-modeled capabilities without
+# introducing new concepts.
+---
+nodeKind: SkillArea
+id: skill-area:acceptance-testing
+edges:
+  applies_to:
+    - target: specialization:production-contract
+      confidence: secondary
+      notes: "Production contracts express acceptance-level behavior that a run must satisfy."
+---
+nodeKind: SkillArea
+id: skill-area:learning-management-systems
+edges:
+  applies_to:
+    - target: specialization:education-technology
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:learning-analytics
+edges:
+  applies_to:
+    - target: specialization:education-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:energy-modeling
+edges:
+  applies_to:
+    - target: specialization:energy-systems
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:grid-simulation
+edges:
+  applies_to:
+    - target: specialization:energy-systems
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:BIM-modeling
+edges:
+  applies_to:
+    - target: specialization:construction-technology
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:construction-scheduling
+edges:
+  applies_to:
+    - target: specialization:construction-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:environmental-monitoring
+edges:
+  applies_to:
+    - target: specialization:environmental-monitoring
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:geospatial-data-analysis
+edges:
+  applies_to:
+    - target: specialization:environmental-monitoring
+      confidence: secondary
+    - target: specialization:agricultural-technology
+      confidence: secondary
+    - target: specialization:mining-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:EHR-integration
+edges:
+  applies_to:
+    - target: specialization:healthcare-informatics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:HL7-FHIR
+edges:
+  applies_to:
+    - target: specialization:healthcare-informatics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:financial-risk-modeling
+edges:
+  applies_to:
+    - target: specialization:financial-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:portfolio-construction
+edges:
+  applies_to:
+    - target: specialization:financial-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:media-encoding
+edges:
+  applies_to:
+    - target: specialization:media-technology
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:streaming-protocols
+edges:
+  applies_to:
+    - target: specialization:media-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:data-analytics
+edges:
+  applies_to:
+    - target: specialization:sports-analytics
+      confidence: primary
+    - target: specialization:transportation-systems
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:sensor-libraries
+edges:
+  applies_to:
+    - target: specialization:agricultural-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:route-optimization
+edges:
+  applies_to:
+    - target: specialization:transportation-systems
+      confidence: primary
+    - target: specialization:marine-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:risk-assessment
+edges:
+  applies_to:
+    - target: specialization:defense-systems
+      confidence: secondary
+    - target: specialization:mining-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:network-security
+edges:
+  applies_to:
+    - target: specialization:defense-systems
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:communication-protocols
+edges:
+  applies_to:
+    - target: specialization:defense-systems
+      confidence: secondary
+    - target: specialization:space-systems
+      confidence: secondary
+    - target: specialization:telecommunications-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:sensor-fusion
+edges:
+  applies_to:
+    - target: specialization:space-systems
+      confidence: secondary
+    - target: specialization:marine-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:environmental-monitoring
+edges:
+  applies_to:
+    - target: specialization:marine-technology
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:network-protocol-implementation
+edges:
+  applies_to:
+    - target: specialization:telecommunications-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:protocol-conformance-testing
+edges:
+  applies_to:
+    - target: specialization:telecommunications-engineering
+      confidence: secondary

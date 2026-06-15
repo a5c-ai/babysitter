@@ -1,0 +1,483 @@
+# =============================================================================
+# Software Engineering Topics
+# =============================================================================
+---
+nodeKind: Topic
+id: topic:code-complexity
+attributes:
+  displayName: "Code Complexity"
+  description: |
+    Code Complexity as a cross-cutting topic — measuring and managing
+    cyclomatic complexity, cognitive complexity, and coupling metrics to
+    maintain a codebase that is understandable, testable, and safe to change.
+    Informs refactoring priorities and review standards.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:qa-testing
+---
+nodeKind: Topic
+id: topic:dependency-hell
+attributes:
+  displayName: "Dependency Hell"
+  description: |
+    Dependency Hell as a cross-cutting topic — the cascading problems that
+    arise from conflicting, circular, or diamond dependency graphs in package
+    management. Strategies include lock files, version pinning, monorepo
+    tooling, and dependency update automation to keep the supply chain
+    manageable.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:monolith-vs-microservices
+attributes:
+  displayName: "Monolith vs. Microservices"
+  description: |
+    The trade-off between monolithic and microservices architectures —
+    evaluating team size, deployment velocity, operational maturity, and data
+    consistency requirements to choose the right decomposition strategy.
+    Neither is universally superior; context determines the better fit.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:serverless-vs-containers
+attributes:
+  displayName: "Serverless vs. Containers"
+  description: |
+    Comparing serverless functions and container orchestration for workload
+    hosting — evaluating cold-start latency, cost at scale, operational
+    overhead, vendor lock-in, and debugging complexity to select the
+    deployment model that best matches workload characteristics.
+edges:
+  belongs_to_domain:
+    - domain:cloud-infra
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:SQL-vs-NoSQL
+attributes:
+  displayName: "SQL vs. NoSQL"
+  description: |
+    Choosing between relational and non-relational databases — comparing
+    ACID guarantees, schema flexibility, query expressiveness, horizontal
+    scaling, and operational maturity against workload access patterns,
+    consistency requirements, and team expertise.
+edges:
+  belongs_to_domain:
+    - domain:databases
+    - domain:data-engineering
+---
+nodeKind: Topic
+id: topic:REST-vs-GraphQL
+attributes:
+  displayName: "REST vs. GraphQL"
+  description: |
+    Evaluating REST and GraphQL for API design — comparing over-fetching and
+    under-fetching trade-offs, caching strategies, schema evolution, tooling
+    ecosystems, and the organizational coordination costs each approach
+    imposes on frontend and backend teams.
+edges:
+  belongs_to_domain:
+    - domain:api-development
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:synchronous-vs-asynchronous
+attributes:
+  displayName: "Synchronous vs. Asynchronous"
+  description: |
+    The design choice between synchronous request-response and asynchronous
+    message-passing communication — evaluating latency tolerance, coupling,
+    failure isolation, debugging complexity, and consistency requirements
+    to select the right interaction style for each system boundary.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:distributed-systems
+---
+nodeKind: Topic
+id: topic:build-vs-buy
+attributes:
+  displayName: "Build vs. Buy"
+  description: |
+    The recurring decision between building custom software and purchasing
+    or adopting existing solutions — evaluating total cost of ownership,
+    maintenance burden, competitive differentiation, vendor risk, and
+    integration complexity to make defensible build-or-buy decisions.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:strategy
+---
+nodeKind: Topic
+id: topic:open-source-licensing
+attributes:
+  displayName: "Open Source Licensing"
+  description: |
+    Understanding open source licenses and their implications — comparing
+    permissive (MIT, Apache 2.0) and copyleft (GPL, AGPL) licenses,
+    evaluating license compatibility in dependency trees, and establishing
+    organizational policies for consuming and contributing to open source.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:legal
+---
+nodeKind: Topic
+id: topic:semantic-versioning-strategy
+attributes:
+  displayName: "Semantic Versioning Strategy"
+  description: |
+    Applying semantic versioning consistently — determining when changes
+    are major, minor, or patch, handling pre-release and build metadata,
+    communicating breaking changes, and aligning semver with release
+    cadence and consumer expectations.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:developer-experience
+---
+nodeKind: Topic
+id: topic:API-first-design
+attributes:
+  displayName: "API-First Design"
+  description: |
+    Designing APIs before implementation — writing OpenAPI or AsyncAPI
+    specifications upfront, using contract-first code generation, enabling
+    parallel frontend and backend development, and treating the API as a
+    product with its own lifecycle and versioning.
+edges:
+  belongs_to_domain:
+    - domain:api-development
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:documentation-as-code
+attributes:
+  displayName: "Documentation as Code"
+  description: |
+    Treating documentation with the same rigor as source code — storing docs
+    in version control, reviewing changes via pull requests, automating
+    builds with static site generators, running linters and link checkers
+    in CI, and keeping docs close to the code they describe.
+edges:
+  belongs_to_domain:
+    - domain:software-engineering
+    - domain:developer-experience
+---
+nodeKind: Topic
+id: topic:infrastructure-as-code-patterns
+attributes:
+  displayName: "Infrastructure as Code Patterns"
+  description: |
+    Patterns for managing infrastructure as code effectively — module
+    composition, state management strategies, drift detection, immutable
+    versus mutable infrastructure, and layered stacks that separate
+    networking, compute, and application concerns.
+edges:
+  belongs_to_domain:
+    - domain:cloud-infra
+    - domain:devops
+---
+nodeKind: Topic
+id: topic:gitops-principles
+attributes:
+  displayName: "GitOps Principles"
+  description: |
+    Using Git as the single source of truth for declarative infrastructure
+    and application state — pull-based reconciliation, drift detection and
+    self-healing, audit trails via commit history, and operational patterns
+    for managing secrets and multi-environment promotion.
+edges:
+  belongs_to_domain:
+    - domain:devops
+    - domain:cloud-infra
+
+# =============================================================================
+# AI / ML Topics
+# =============================================================================
+---
+nodeKind: Topic
+id: topic:prompt-injection
+attributes:
+  displayName: "Prompt Injection"
+  description: |
+    Prompt Injection as a cross-cutting AI safety topic — attacks that
+    manipulate LLM behavior by embedding adversarial instructions in user
+    input or retrieved context. Defenses include input sanitization,
+    instruction hierarchy, output filtering, and architectural separation
+    of trusted and untrusted content.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:cybersecurity
+---
+nodeKind: Topic
+id: topic:hallucination-mitigation
+attributes:
+  displayName: "Hallucination Mitigation"
+  description: |
+    Techniques for reducing and detecting LLM hallucinations — retrieval-
+    augmented generation, constrained decoding, citation grounding, self-
+    consistency checks, and human-in-the-loop verification workflows that
+    increase factual reliability in AI-generated content.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+---
+nodeKind: Topic
+id: topic:model-interpretability
+attributes:
+  displayName: "Model Interpretability"
+  description: |
+    Making ML model predictions understandable to humans — applying SHAP,
+    LIME, attention visualization, feature importance analysis, and
+    counterfactual explanations to build trust, satisfy regulatory
+    requirements, and debug model behavior.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:data-science
+---
+nodeKind: Topic
+id: topic:bias-in-AI
+attributes:
+  displayName: "Bias in AI"
+  description: |
+    Identifying and mitigating bias in AI systems — analyzing training data
+    for representational and measurement bias, evaluating model fairness
+    across demographic groups, applying debiasing techniques, and
+    establishing governance processes for ongoing bias monitoring.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+---
+nodeKind: Topic
+id: topic:AI-regulation
+attributes:
+  displayName: "AI Regulation"
+  description: |
+    The evolving landscape of AI regulation — understanding the EU AI Act,
+    NIST AI Risk Management Framework, executive orders, and sector-specific
+    rules that impose requirements on risk assessment, transparency,
+    documentation, and human oversight for AI systems.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:compliance
+---
+nodeKind: Topic
+id: topic:autonomous-agents-safety
+attributes:
+  displayName: "Autonomous Agents Safety"
+  description: |
+    Safety considerations for autonomous AI agents — implementing guardrails,
+    sandboxing, permission boundaries, human-in-the-loop checkpoints, and
+    kill switches that prevent unintended actions while preserving the
+    agent's ability to complete its assigned tasks.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:cybersecurity
+---
+nodeKind: Topic
+id: topic:multi-agent-communication
+attributes:
+  displayName: "Multi-Agent Communication"
+  description: |
+    Protocols and patterns for communication between AI agents — message
+    formats, shared memory, blackboard architectures, negotiation protocols,
+    and standards like A2A that enable agents built by different teams or
+    organizations to collaborate on complex tasks.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:distributed-systems
+---
+nodeKind: Topic
+id: topic:tool-use-patterns
+attributes:
+  displayName: "Tool Use Patterns"
+  description: |
+    Patterns for enabling LLMs and AI agents to use external tools — function
+    calling conventions, tool description design, error handling, parallel
+    and sequential tool invocation, and the Model Context Protocol (MCP)
+    for standardized tool integration.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:software-engineering
+---
+nodeKind: Topic
+id: topic:context-engineering
+attributes:
+  displayName: "Context Engineering"
+  description: |
+    Designing and optimizing the context provided to LLMs — selecting,
+    ordering, and compressing information to maximize model performance
+    within limited context windows. Covers prompt structure, system
+    instructions, retrieval strategies, and context caching.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+---
+nodeKind: Topic
+id: topic:retrieval-augmented-generation-patterns
+attributes:
+  displayName: "RAG Patterns"
+  description: |
+    Architecture patterns for retrieval-augmented generation — naive RAG,
+    advanced RAG with query rewriting and re-ranking, modular RAG with
+    routing, agentic RAG that decides when to retrieve, and graph RAG
+    that combines knowledge graphs with vector search for grounded answers.
+edges:
+  belongs_to_domain:
+    - domain:ml-ai
+    - domain:data-engineering
+
+# =============================================================================
+# Business Topics
+# =============================================================================
+---
+nodeKind: Topic
+id: topic:total-cost-of-ownership
+attributes:
+  displayName: "Total Cost of Ownership"
+  description: |
+    Calculating the full cost of a technology decision over its lifecycle —
+    including acquisition, implementation, operation, maintenance, training,
+    opportunity cost, and eventual decommissioning. Essential for honest
+    build-vs-buy and vendor selection analysis.
+edges:
+  belongs_to_domain:
+    - domain:strategy
+    - domain:finance
+---
+nodeKind: Topic
+id: topic:build-measure-learn
+attributes:
+  displayName: "Build-Measure-Learn"
+  description: |
+    The core feedback loop of the Lean Startup methodology — formulating
+    hypotheses, building minimum viable experiments, measuring outcomes
+    with actionable metrics, and learning whether to persevere, pivot, or
+    stop. Optimizes for speed of validated learning.
+edges:
+  belongs_to_domain:
+    - domain:entrepreneurship
+    - domain:strategy
+---
+nodeKind: Topic
+id: topic:product-market-fit
+attributes:
+  displayName: "Product-Market Fit"
+  description: |
+    The inflection point where a product satisfies strong market demand —
+    identifying signals like organic growth, retention curves, and the
+    Sean Ellis survey. Guides whether to invest in scaling or return to
+    discovery and iteration.
+edges:
+  belongs_to_domain:
+    - domain:entrepreneurship
+    - domain:strategy
+---
+nodeKind: Topic
+id: topic:north-star-metric
+attributes:
+  displayName: "North Star Metric"
+  description: |
+    Selecting a single metric that best captures the core value a product
+    delivers to customers — aligning teams around one measurable outcome,
+    decomposing it into input metrics that different teams can influence,
+    and using it to prioritize roadmap decisions.
+edges:
+  belongs_to_domain:
+    - domain:strategy
+---
+nodeKind: Topic
+id: topic:pirate-metrics-AARRR
+attributes:
+  displayName: "Pirate Metrics (AARRR)"
+  description: |
+    The AARRR framework — Acquisition, Activation, Retention, Referral,
+    Revenue — for analyzing the customer lifecycle funnel. Helps startups
+    and growth teams identify which stage is the biggest bottleneck and
+    focus experimentation where it will have the most impact.
+edges:
+  belongs_to_domain:
+    - domain:digital-marketing
+    - domain:entrepreneurship
+---
+nodeKind: Topic
+id: topic:jobs-to-be-done-framework
+attributes:
+  displayName: "Jobs to Be Done Framework"
+  description: |
+    Understanding customer needs through the lens of the "job" they are
+    hiring a product to do — conducting switch interviews, mapping job
+    steps, identifying underserved outcomes, and using JTBD insights to
+    drive product innovation and positioning.
+edges:
+  belongs_to_domain:
+    - domain:strategy
+    - domain:customer-experience
+---
+nodeKind: Topic
+id: topic:lean-canvas
+attributes:
+  displayName: "Lean Canvas"
+  description: |
+    A one-page business model template adapted from the Business Model
+    Canvas for startups — capturing problem, solution, key metrics,
+    unfair advantage, customer segments, channels, cost structure, and
+    revenue streams in a format optimized for iterative validation.
+edges:
+  belongs_to_domain:
+    - domain:entrepreneurship
+---
+nodeKind: Topic
+id: topic:business-model-canvas
+attributes:
+  displayName: "Business Model Canvas"
+  description: |
+    Alexander Osterwalder's strategic tool for describing, designing, and
+    analyzing business models — mapping value propositions, customer
+    segments, channels, relationships, revenue streams, key resources,
+    activities, partners, and cost structure on a single visual canvas.
+edges:
+  belongs_to_domain:
+    - domain:strategy
+    - domain:entrepreneurship
+---
+nodeKind: Topic
+id: topic:value-stream-mapping
+attributes:
+  displayName: "Value Stream Mapping"
+  description: |
+    Visualizing the end-to-end flow of value delivery — mapping each step
+    from customer request to fulfilled outcome, identifying wait times,
+    handoffs, and waste, and designing a future-state map that reduces
+    lead time and improves flow efficiency.
+edges:
+  belongs_to_domain:
+    - domain:operations
+    - domain:strategy
+---
+nodeKind: Topic
+id: topic:theory-of-constraints
+attributes:
+  displayName: "Theory of Constraints"
+  description: |
+    Eli Goldratt's methodology for identifying and exploiting the single
+    constraint that limits system throughput — the five focusing steps
+    (identify, exploit, subordinate, elevate, repeat) applied to software
+    delivery, manufacturing, and organizational processes.
+edges:
+  belongs_to_domain:
+    - domain:operations
+    - domain:strategy

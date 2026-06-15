@@ -1,0 +1,38 @@
+---
+nodeKind: EvidenceSource
+id: evidence:swe-bench-leaderboard-snapshot-2026-04
+attributes:
+  displayName: "SWE-bench Verified leaderboard (snapshot 2026-04)"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.swebench.com/
+  sourcePathOrUrl: https://www.swebench.com/
+  locator: "Verified split — top of leaderboard table"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:bfcl-leaderboard-snapshot-2026-04
+attributes:
+  displayName: "Berkeley Function Calling Leaderboard (snapshot 2026-04)"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://gorilla.cs.berkeley.edu/leaderboard.html
+  sourcePathOrUrl: https://gorilla.cs.berkeley.edu/leaderboard.html
+  locator: "BFCL aggregate accuracy column"
+  capturedAt: "2026-04-30T00:00:00Z"
+  observedAt: "2026-04-30T00:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-30T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

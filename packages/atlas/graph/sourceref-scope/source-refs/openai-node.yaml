@@ -1,0 +1,34 @@
+nodeKind: SourceRef
+id: source-ref:openai-node-npm
+attributes:
+  description: "OpenAI Node SDK npm package"
+  displayName: "OpenAI Node SDK (npm)"
+  repoUrl: https://www.npmjs.com/package/openai
+  ref: "6.39.1"
+  path: "."
+  packageManager: npm
+  packageName: openai
+  kind: npm-package
+  homepageUrl: https://www.npmjs.com/package/openai/v/6.39.1
+  notes: |
+    Canonical npm distribution for the `openai` JavaScript/TypeScript SDK.
+    Issue #327 assimilates npm `openai` 6.39.0, published 2026-05-21.
+    Issue #803 updates the tracked upstream to 6.39.1; the package name and
+    npm install surface remain unchanged.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:openai-node-github
+attributes:
+  description: "OpenAI Node SDK GitHub repository"
+  displayName: "OpenAI Node SDK (GitHub)"
+  repoUrl: https://github.com/openai/openai-node
+  ref: master
+  path: "."
+  packageManager: npm
+  packageName: openai
+  kind: github-repo
+  notes: |
+    Canonical source repository for the OpenAI Node SDK distributed as the
+    `openai` npm package.
+edges: {}

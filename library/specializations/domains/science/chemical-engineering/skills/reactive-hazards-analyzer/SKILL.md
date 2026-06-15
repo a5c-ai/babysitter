@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Safety
   skill-id: CE-SK-018
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # Reactive Hazards Analyzer Skill

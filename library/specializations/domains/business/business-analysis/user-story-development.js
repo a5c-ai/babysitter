@@ -3,6 +3,12 @@
  * @description Transform business requirements into well-formed user stories with acceptance criteria using INVEST principles. Supports agile product backlog management and sprint planning.
  * @inputs { projectName: string, requirements: array, personas: array, productBacklog: object, sprintContext: object }
  * @outputs { success: boolean, userStories: array, storyMap: object, acceptanceCriteria: object, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

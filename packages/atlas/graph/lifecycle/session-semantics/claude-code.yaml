@@ -1,0 +1,26 @@
+nodeKind: SessionSemantics
+id: session-semantics:claude-code
+attributes:
+  sessionSemanticsId: session-semantics:claude-code
+  agentId: agent:claude-code
+  versionRange: ">=0.0.0"
+  sessionDirStrategy: ".a5c/runs"
+  sessionIdSources:
+    - CLAUDE_ENV_FILE
+    - CLAUDE_CODE_SESSION_ID
+  resumeSemantics: |
+    Session binding is mediated by Claude env files plus a shared `.a5c/runs/`
+    directory. The harness drops a pid marker in the run dir on spawn; resume
+    rebinds by matching `CLAUDE_CODE_SESSION_ID` (or, on restart, `CLAUDE_ENV_FILE`).
+  stateFilePatterns:
+    - ".a5c/runs/**"
+  pidMarkerPolicy: env-or-run-dir
+  metadataFields:
+    - { key: session_id, envVars: [CLAUDE_CODE_SESSION_ID] }
+    - { key: env_file,   envVars: [CLAUDE_ENV_FILE] }
+    - { key: project_dir, envVars: [CLAUDE_PROJECT_DIR] }
+edges:
+  applies_to_version:
+    - target: agentVersion:claude:ge-0-0-0
+  references_path:
+    - target: path:a5c-runs-dir

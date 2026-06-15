@@ -3,6 +3,12 @@ name: native-notification-builder
 description: Build native OS notifications with actions, images, and progress indicators across platforms
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [notifications, cross-platform, native, desktop, ui]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-system-integration, skill-area:desktop-ui-frameworks]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # native-notification-builder

@@ -18,6 +18,13 @@
  * - Russell & Norvig (2020). Artificial Intelligence, Chapter 11: Planning
  * - Fikes & Nilsson (1971). STRIPS
  * - Boutilier et al. (1999). Decision-Theoretic Planning
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

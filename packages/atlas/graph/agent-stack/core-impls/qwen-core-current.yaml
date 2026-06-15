@@ -1,0 +1,56 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:qwen.core@current
+attributes:
+  displayName: Qwen Code Core (current)
+  agentVersionId: agent-version:qwen@current
+  packageRef: source-ref:qwen-code-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: |
+    Qwen Code is a fork of Google's Gemini CLI. The tool-use loop runs
+    over an OpenAI-compatible chat-completions API (DashScope or
+    self-hosted), executing model-emitted tool calls and posting
+    responses back until the model finishes. In 0.16.2, upstream closed
+    tool_use/tool_result invariant handling across failure paths, so catalog
+    consumers should treat failed tool executions as still requiring a matched
+    tool_result in the next model turn.
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: |
+    Qwen Code 0.16.2 redesigns auto-compaction thresholds around a three-tier
+    ladder. Catalog consumers should treat compaction as CLI-managed rather
+    than assuming direct 1M-token-context pass-through for long sessions.
+    The same release enables Token Plan cache control in the core request path.
+  subagentInvokerPolicy: not-applicable
+  subagentInvokerNotes: |
+    Qwen Code does not advertise subagent dispatch (supportsSubagentDispatch
+    is false in the adapter's capabilities). Upstream 0.16.2 does limit
+    background-agent concurrency for its native parallel fan-out UI/runtime
+    paths; adapters still does not expose those paths as subagent dispatch.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final text is streamed via the OpenAI-compatible streaming protocol.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: qwen-internal
+  supportedTransportProtocols:
+  - model-transport:openai-chat-completions
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+  notebookFormattingNotes: |
+    Qwen Code 0.16.2 preserves tab-indented notebook formatting in upstream
+    notebook edit/read paths. This repository does not implement that Qwen
+    notebook loop directly; the graph records the upstream runtime behavior.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:qwen
+    role: core
+  speaks:
+  - target: model-transport:openai-chat-completions
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full

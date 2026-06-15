@@ -15,6 +15,13 @@
  * @references
  * - HTTP/2 RFC 7540: https://www.rfc-editor.org/rfc/rfc7540
  * - HPACK RFC 7541: https://www.rfc-editor.org/rfc/rfc7541
+ * @graph
+ *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:http2-multiplexing]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers]
+ *   workflows: [workflow:protocol-implementation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

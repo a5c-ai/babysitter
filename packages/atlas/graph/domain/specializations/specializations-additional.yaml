@@ -1,0 +1,190 @@
+---
+nodeKind: Specialization
+id: specialization:backend-development
+attributes:
+  displayName: "Backend Development"
+  parentDomainId: domain:backend
+  description: |
+    General-purpose backend engineering spanning API design, service
+    architecture, data persistence, authentication, background processing,
+    and operational concerns like logging, monitoring, and deployment.
+    Covers language-agnostic backend patterns — request lifecycle, middleware
+    chains, connection pooling, rate limiting, and graceful shutdown — that
+    apply across frameworks and runtimes. Sourced from
+    library/specializations/backend-development/.
+edges:
+  specializes:
+    - domain:backend
+---
+nodeKind: Specialization
+id: specialization:desktop-development
+attributes:
+  displayName: "Desktop Development"
+  parentDomainId: domain:software-engineering
+  description: |
+    Building native and cross-platform desktop applications using frameworks
+    such as Electron, Tauri, Qt, GTK, WPF, SwiftUI for macOS, and .NET MAUI.
+    Covers windowing systems, native OS integration, file-system access,
+    system-tray and notification APIs, auto-update mechanisms, and platform-
+    specific packaging and distribution (MSI, DMG, AppImage, Snap). Addresses
+    performance concerns unique to desktop — GPU compositing, IPC between
+    main and renderer processes, and memory management for long-running
+    applications. Sourced from library/specializations/desktop-development/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:product-management
+attributes:
+  displayName: "Product Management"
+  parentDomainId: domain:project-management
+  description: |
+    Strategic and tactical product management — discovery, prioritization,
+    roadmap construction, stakeholder alignment, and metrics-driven iteration.
+    Covers frameworks like RICE, ICE, and opportunity-solution trees; user
+    research integration; competitive analysis; pricing strategy; and go-to-
+    market coordination. Bridges business objectives with engineering
+    execution through well-defined requirements, acceptance criteria, and
+    continuous product analytics feedback loops. Sourced from
+    library/specializations/product-management/.
+edges:
+  specializes:
+    - domain:project-management
+---
+nodeKind: Specialization
+id: specialization:observability
+attributes:
+  displayName: "Observability"
+  parentDomainId: domain:observability
+  description: |
+    Designing, instrumenting, and operating observability systems that provide
+    deep insight into distributed application behavior. Covers the three
+    pillars — structured logging, distributed tracing (OpenTelemetry, Jaeger),
+    and metrics (Prometheus, Datadog) — plus alerting strategies, SLI/SLO
+    management, dashboarding, and log aggregation pipelines. Addresses
+    observability-driven development, cost-effective telemetry at scale, and
+    correlation of signals across service boundaries. Sourced from
+    library/specializations/observability/.
+edges:
+  specializes:
+    - domain:observability
+---
+nodeKind: Specialization
+id: specialization:media
+attributes:
+  displayName: "Media Processing"
+  parentDomainId: domain:media-entertainment
+  description: |
+    Audio, video, and image processing pipelines — encoding/decoding,
+    transcoding, streaming protocols (HLS, DASH, WebRTC), and media asset
+    management. Covers FFmpeg workflows, real-time media manipulation,
+    adaptive bitrate streaming, content delivery via CDNs, and media
+    metadata extraction. Includes computer vision pre-processing, speech
+    processing, and generative media workflows. Sourced from
+    library/specializations/media/.
+edges:
+  specializes:
+    - domain:media-entertainment
+---
+nodeKind: Specialization
+id: specialization:collaboration
+attributes:
+  displayName: "Collaboration Tools & Practices"
+  parentDomainId: domain:software-engineering
+  description: |
+    Patterns and tools for effective engineering collaboration — code review
+    workflows, pair and mob programming, asynchronous communication norms,
+    knowledge sharing systems, and collaborative development environments.
+    Covers git workflow design, PR conventions, RFC processes, design-doc
+    cultures, and internal developer portals that reduce friction in multi-
+    team engineering organizations. Sourced from
+    library/specializations/collaboration/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:communication
+attributes:
+  displayName: "Technical Communication"
+  parentDomainId: domain:software-engineering
+  description: |
+    Effective communication in technical contexts — writing clear technical
+    proposals, status updates, incident reports, architectural decision
+    records, and stakeholder presentations. Covers structured argumentation,
+    audience-aware framing, visual communication (diagrams, charts), and
+    communication practices that scale across remote and distributed
+    engineering teams. Sourced from library/specializations/communication/.
+edges:
+  specializes:
+    - domain:software-engineering
+---
+nodeKind: Specialization
+id: specialization:data-science-ml
+attributes:
+  displayName: "Data Science & Machine Learning"
+  parentDomainId: domain:data-science
+  description: |
+    End-to-end data science and machine learning workflows — from exploratory
+    data analysis and feature engineering through model training, evaluation,
+    and deployment. Covers classical ML (scikit-learn, XGBoost), deep learning
+    (PyTorch, TensorFlow), NLP, computer vision, and time-series modeling.
+    Addresses experiment tracking, reproducibility, model interpretability,
+    and the transition from notebook prototypes to production-grade ML
+    systems. Sourced from library/specializations/data-science-ml/.
+edges:
+  specializes:
+    - domain:data-science
+---
+nodeKind: Specialization
+id: specialization:security-compliance
+attributes:
+  displayName: "Security & Compliance"
+  parentDomainId: domain:cybersecurity
+  description: |
+    Comprehensive security engineering and compliance automation — covering
+    application security (SAST/DAST/SCA), infrastructure hardening, identity
+    and access management, and regulatory compliance programs (SOC 2, ISO
+    27001, GDPR, HIPAA). Addresses security architecture reviews, threat
+    modeling, vulnerability management workflows, and security operations
+    center (SOC) practices. Bridges offensive and defensive security with
+    governance, risk, and compliance (GRC) requirements. Sourced from
+    library/specializations/security-compliance/.
+edges:
+  specializes:
+    - domain:cybersecurity
+---
+nodeKind: Specialization
+id: specialization:programming-languages
+attributes:
+  displayName: "Programming Languages"
+  parentDomainId: domain:computer-science
+  description: |
+    Deep expertise in programming language design, implementation, and
+    ecosystem mastery. Covers type systems, memory models, concurrency
+    primitives, build systems, package managers, and idiomatic patterns
+    across language families. Addresses polyglot development, language
+    interop (FFI, WASM), transpilation, and selecting the right language
+    for performance, safety, and team-productivity constraints. Sourced
+    from library/specializations/programming-languages/.
+edges:
+  specializes:
+    - domain:computer-science
+---
+nodeKind: Specialization
+id: specialization:research
+attributes:
+  displayName: "Technical Research"
+  parentDomainId: domain:scientific-discovery
+  description: |
+    Systematic technical research and literature synthesis — evaluating
+    emerging technologies, conducting proof-of-concept investigations, and
+    producing actionable recommendations. Covers academic paper analysis,
+    benchmark design, comparative technology assessments, and translating
+    research findings into engineering decisions. Bridges academic research
+    methods with practical engineering experimentation. Sourced from
+    library/specializations/research/.
+edges:
+  specializes:
+    - domain:scientific-discovery

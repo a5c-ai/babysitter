@@ -1,0 +1,18 @@
+nodeKind: TestSet
+id: test-set:gsm8k-test
+attributes:
+  displayName: "GSM8K test split"
+  benchmarkId: benchmark:gsm8k
+  caseCount: 1319
+  releasedAt: "2021-10-27"
+  composition: |
+    The held-out test split of GSM8K — 1,319 grade-school math word
+    problems requiring 2-8 reasoning steps. Standard split published
+    alongside the OpenAI GSM8K release.
+  homepageUrl: "https://github.com/openai/grade-school-math"
+  description: |
+    Canonical GSM8K test split used in nearly every published reasoning
+    eval since 2022.
+edges:
+  belongs_to_benchmark:
+    - benchmark:gsm8k

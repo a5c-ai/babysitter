@@ -1,0 +1,56 @@
+---
+nodeKind: MemoryStore
+id: memory-store:symphony-vector-pinecone
+attributes:
+  displayName: "Symphony semantic memory (Pinecone)"
+  kind: vector
+  scope: tenant
+  ttl: "365d"
+  notes: |
+    Long-term semantic memory for the symphony agent, indexed in Pinecone
+    with text-embedding-3-large.
+edges: {}
+---
+nodeKind: MemoryStore
+id: memory-store:symphony-conversation-buffer
+attributes:
+  displayName: "Symphony conversation buffer"
+  kind: conversation-buffer
+  scope: session
+  notes: |
+    Last-N-turns rolling conversation buffer; trimmed once exceeded.
+edges: {}
+---
+nodeKind: MemoryStore
+id: memory-store:symphony-summarized-history
+attributes:
+  displayName: "Symphony summarized history"
+  kind: summarized-history
+  scope: session
+  notes: |
+    Recursive-summary of older conversation turns once the buffer is
+    trimmed; preserves long-horizon context within a token budget.
+edges: {}
+---
+nodeKind: MemoryStore
+id: memory-store:symphony-prompt-cache
+attributes:
+  displayName: "Symphony Anthropic prompt cache"
+  kind: prompt-cache
+  scope: global
+  ttl: "5m"
+  notes: |
+    Anthropic ephemeral prompt cache for the system prompt + tool
+    definitions; 5-minute TTL.
+edges: {}
+---
+nodeKind: MemoryStore
+id: memory-store:symphony-knowledge-graph
+attributes:
+  displayName: "Symphony entity knowledge graph"
+  kind: knowledge-graph
+  scope: tenant
+  notes: |
+    Triple-store of extracted entities and relations from prior conversations,
+    used for entity-resolution and grounding.
+edges: {}

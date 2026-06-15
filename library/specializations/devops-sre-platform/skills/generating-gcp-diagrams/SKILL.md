@@ -4,6 +4,13 @@ description: Generates DrawIO XML diagrams for Google Cloud Platform architectur
 license: MIT
 compatibility: Requires image analysis capability for image conversion. Scripts require Python 3 and Bash. DrawIO Desktop optional for validation.
 allowed-tools: Read Write
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:deployment-infrastructure-management]
+  roles: [role:platform-engineer, role:architect]
+  topics: [topic:infrastructure-as-code]
+
 ---
 
 # GCP DrawIO Diagram Generator

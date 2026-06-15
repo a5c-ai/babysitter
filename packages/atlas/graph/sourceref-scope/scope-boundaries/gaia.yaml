@@ -1,0 +1,19 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:gaia.scope
+attributes:
+  subjectId: benchmark:gaia
+  inScope: |
+    General-AI-assistant questions requiring multi-step reasoning,
+    web-browsing, file inspection (PDF/Excel/image), and tool use.
+    466 real-world questions with verifiable single-answer ground truth,
+    split into 3 difficulty levels.
+  outOfScope: |
+    Pure code-generation benchmarks, single-turn QA without tool use,
+    creative-writing evaluations, conversational chatbot benchmarks,
+    and tasks requiring real-time / streaming inputs.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:gaia

@@ -1,0 +1,112 @@
+
+---
+nodeKind: ToolServer
+id: tool-server:mcp-dbt-candidate
+attributes:
+  displayName: dbt MCP candidate
+  description: |
+    Candidate MCP server for dbt project metadata, model lineage, tests, runs, and warehouse transformation workflows.
+    Recorded from Ora data-engineering discovery because Atlas did not have a dbt-specific ToolServer.
+  protocol: mcp-stdio
+  provenance: custom
+  category: analytics
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: getdbt.com
+    score: 0
+    grade: F
+edges:
+  integrates_with:
+    - target: tool:dbt-labs
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:data-engineer
+      confidence: medium
+      evidence: "dbt metadata and run status would support data engineering and analytics-engineering workflows."
+    - target: workflow:data-pipeline-monitoring
+      confidence: medium
+      evidence: "dbt tests, lineage, and run results are pipeline-monitoring projection points."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-attio-candidate
+attributes:
+  displayName: Attio MCP candidate
+  description: |
+    Candidate MCP server for Attio CRM account, company, person, and deal context.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: attio.com
+    score: 84
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:attio
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:account-executive
+      confidence: medium
+      evidence: "CRM records and account context support revenue operations and account management workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-klaviyo-candidate
+attributes:
+  displayName: Klaviyo MCP candidate
+  description: |
+    Candidate MCP server for Klaviyo campaign, segment, event, and performance analytics.
+  protocol: mcp-stdio
+  provenance: custom
+  category: productivity
+  maintainer: Candidate
+  sourceRef: source-ref:ora-discover-api
+  candidateStatus: needs-source-verification
+  ora:
+    domain: klaviyo.com
+    score: 79
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:klaviyo
+  sourced_from:
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: role:marketing-manager
+      confidence: medium
+      evidence: "Campaign and segment APIs support marketing automation and campaign analytics workflows."
+---
+nodeKind: ToolServer
+id: tool-server:mcp-tavily
+attributes:
+  displayName: Tavily MCP Server
+  description: |
+    MCP server association for Tavily search/retrieval workflows, added from Ora knowledge-search discovery.
+  protocol: mcp-stdio
+  provenance: custom
+  category: search
+  maintainer: Tavily
+  repoUrl: https://github.com/tavily-ai/tavily-mcp
+  sourceRef: source-ref:tavily-mcp
+  mcpTransports:
+    - mcp-transport:stdio
+  ora:
+    domain: tavily.com
+    score: 80
+    grade: B
+edges:
+  integrates_with:
+    - target: tool:tavily
+  sourced_from:
+    - target: source-ref:tavily-mcp
+    - target: source-ref:ora-discover-api
+  supports_work:
+    - target: workflow:developer-documentation-review
+      confidence: medium
+      evidence: "Search and retrieval support source discovery during documentation review."

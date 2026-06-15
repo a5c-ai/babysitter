@@ -5,6 +5,11 @@
  * @category Lessons Learned
  * @inputs { eventContext: object, eventType: string, participants: array, scope: object, outputDir: string }
  * @outputs { success: boolean, aarReport: object, lessonsLearned: array, actionItems: array, qualityScore: number, artifacts: array }
+  * @graph
+ *   domains: [domain:knowledge-management]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
+ *   workflows: [workflow:code-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

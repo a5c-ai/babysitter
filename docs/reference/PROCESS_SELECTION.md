@@ -84,7 +84,7 @@ GSD provides systematic project development with:
 ```bash
 babysitter run:create \
   --process-id gsd/new-project \
-  --entry gsd/new-project.js#process \
+  --entry library/methodologies/gsd/new-project.js#process \
   --inputs '{"projectName": "My New App"}'
 ```
 
@@ -105,7 +105,7 @@ TDD Quality Convergence provides:
 ```bash
 babysitter run:create \
   --process-id babysitter/tdd-quality-convergence \
-  --entry tdd-quality-convergence.js#process \
+  --entry library/tdd-quality-convergence.js#process \
   --inputs '{"feature": "User Authentication", "targetQuality": 90}'
 ```
 
@@ -125,7 +125,7 @@ Spec-Kit provides:
 ```bash
 babysitter run:create \
   --process-id methodologies/spec-driven-development \
-  --entry spec-driven-development.js#process \
+  --entry library/methodologies/spec-driven-development.js#process \
   --inputs '{"projectName": "Enterprise System", "developmentPhase": "greenfield"}'
 ```
 
@@ -147,7 +147,7 @@ babysitter run:create \
 ```bash
 babysitter run:create \
   --process-id methodologies/ralph \
-  --entry ralph.js#process \
+  --entry library/methodologies/ralph.js#process \
   --inputs '{"task": "Implement login feature", "maxIterations": 10}'
 ```
 
@@ -159,7 +159,7 @@ babysitter run:create \
 ```bash
 babysitter run:create \
   --process-id methodologies/devin \
-  --entry devin.js#process \
+  --entry library/methodologies/devin.js#process \
   --inputs '{"feature": "Shopping Cart", "targetQuality": 85}'
 ```
 
@@ -177,7 +177,7 @@ Scrum/Agile provides:
 ```bash
 babysitter run:create \
   --process-id methodologies/scrum \
-  --entry scrum/scrum.js#process \
+  --entry library/methodologies/scrum/scrum.js#process \
   --inputs '{"projectName": "Team Project", "sprintDuration": 2, "sprintCount": 6}'
 ```
 
@@ -197,7 +197,7 @@ Kanban provides:
 ```bash
 babysitter run:create \
   --process-id methodologies/kanban \
-  --entry kanban/kanban.js#process \
+  --entry library/methodologies/kanban/kanban.js#process \
   --inputs '{"projectName": "DevOps Pipeline", "cycles": 10}'
 ```
 
@@ -215,7 +215,7 @@ BDD provides:
 ```bash
 babysitter run:create \
   --process-id methodologies/bdd-specification-by-example \
-  --entry bdd-specification-by-example/bdd-process.js#process \
+  --entry library/methodologies/bdd-specification-by-example/bdd-process.js#process \
   --inputs '{"projectName": "E-commerce", "feature": "Checkout process"}'
 ```
 
@@ -233,7 +233,7 @@ DDD provides:
 ```bash
 babysitter run:create \
   --process-id methodologies/domain-driven-design \
-  --entry domain-driven-design/domain-driven-design.js#process \
+  --entry library/methodologies/domain-driven-design/domain-driven-design.js#process \
   --inputs '{"projectName": "E-Commerce Platform", "complexity": "complex"}'
 ```
 
@@ -250,7 +250,7 @@ babysitter run:create \
 ```bash
 babysitter run:create \
   --process-id methodologies/spec-kit-brownfield \
-  --entry spec-kit-brownfield.js#process \
+  --entry library/methodologies/spec-kit-brownfield.js#process \
   --inputs '{"featureName": "2FA", "existingCodebase": "./src"}'
 ```
 
@@ -262,7 +262,7 @@ babysitter run:create \
 ```bash
 babysitter run:create \
   --process-id gsd/map-codebase \
-  --entry gsd/map-codebase.js#process \
+  --entry library/methodologies/gsd/map-codebase.js#process \
   --inputs '{"projectPath": "./src"}'
 ```
 
@@ -279,7 +279,7 @@ Systematic project development preventing context degradation through:
 - **Execute Phase**: Parallel task execution with atomic commits
 - **Verify Phase**: UAT and automated diagnosis
 
-**Documentation:** [gsd/README.md](skills/babysit/process/gsd/README.md)
+**Documentation:** [gsd/README.md](../../library/methodologies/gsd/README.md)
 
 ---
 
@@ -291,7 +291,7 @@ Executable specifications that drive implementation:
 - **Tasks**: Ordered, actionable implementation tasks
 - **Quality Checklists**: "Unit tests for English"
 
-**Documentation:** [SPEC-KIT.md](skills/babysit/process/SPEC-KIT.md)
+**Documentation:** [SPEC-KIT.md](../../library/methodologies/spec-kit/README.md)
 
 ---
 
@@ -302,7 +302,7 @@ Test-driven development with iterative quality improvement:
 - Convergence loop until target quality reached
 - Parallel quality checks
 
-**Documentation:** [tdd-quality-convergence.md](skills/babysit/process/tdd-quality-convergence.md)
+**Documentation:** [tdd-quality-convergence.md](../../library/tdd-quality-convergence.md)
 
 ---
 
@@ -360,7 +360,7 @@ Collaborative approach capturing requirements as concrete examples:
 - Living documentation
 - Executable specifications
 
-**Documentation:** [bdd-specification-by-example/README.md](skills/babysit/process/methodologies/bdd-specification-by-example/README.md)
+**Documentation:** [bdd-specification-by-example/README.md](../../library/methodologies/bdd-specification-by-example/README.md)
 
 ---
 
@@ -371,7 +371,7 @@ Strategic and tactical design for complex domains:
 - Entities, Value Objects, Aggregates
 - Domain events and services
 
-**Documentation:** [domain-driven-design/README.md](skills/babysit/process/methodologies/domain-driven-design/README.md)
+**Documentation:** [domain-driven-design/README.md](../../library/methodologies/domain-driven-design/README.md)
 
 ---
 
@@ -381,7 +381,7 @@ Collaborative requirement discovery:
 - Workshop-based discovery
 - Foundation for BDD scenarios
 
-**Documentation:** [example-mapping/README.md](skills/babysit/process/methodologies/example-mapping/README.md)
+**Documentation:** [example-mapping/README.md](../../library/methodologies/example-mapping/README.md)
 
 ---
 
@@ -536,29 +536,29 @@ await runProcess('methodologies/kanban', {
 ## Documentation Links
 
 ### Core Documentation
-- [Process README](skills/babysit/process/README.md) - Overview of all methodologies
-- [GSD README](skills/babysit/process/gsd/README.md) - Get Shit Done workflows
-- [GSD Quick Start](skills/babysit/process/gsd/QUICK_START.md) - GSD quick reference
-- [SPEC-KIT](skills/babysit/process/SPEC-KIT.md) - Spec-driven development
-- [TDD Quality Convergence](skills/babysit/process/tdd-quality-convergence.md) - Test-driven with quality gates
+- [Process Library README](../../library/README.md) - Built-in library overview
+- [GSD README](../../library/methodologies/gsd/README.md) - Get Shit Done workflows
+- [GSD Quick Start](../../library/methodologies/gsd/QUICK_START.md) - GSD quick reference
+- [Spec-Kit](../../library/methodologies/spec-kit/README.md) - Spec-driven development
+- [TDD Quality Convergence](../../library/tdd-quality-convergence.md) - Test-driven with quality gates
 
 ### Methodology Documentation
-- [BDD/Specification by Example](skills/babysit/process/methodologies/bdd-specification-by-example/README.md)
-- [Domain-Driven Design](skills/babysit/process/methodologies/domain-driven-design/README.md)
-- [Example Mapping](skills/babysit/process/methodologies/example-mapping/README.md)
-- [Kanban](skills/babysit/process/methodologies/kanban/README.md)
-- [Feature-Driven Development](skills/babysit/process/methodologies/feature-driven-development/README.md)
-- [Hypothesis-Driven Development](skills/babysit/process/methodologies/hypothesis-driven-development/README.md)
-- [ATDD/TDD](skills/babysit/process/methodologies/atdd-tdd/README.md)
-- [Jobs To Be Done](skills/babysit/process/methodologies/jobs-to-be-done/README.md)
+- [BDD/Specification by Example](../../library/methodologies/bdd-specification-by-example/README.md)
+- [Domain-Driven Design](../../library/methodologies/domain-driven-design/README.md)
+- [Example Mapping](../../library/methodologies/example-mapping/README.md)
+- [Kanban](../../library/methodologies/kanban/README.md)
+- [Feature-Driven Development](../../library/methodologies/feature-driven-development/README.md)
+- [Hypothesis-Driven Development](../../library/methodologies/hypothesis-driven-development/README.md)
+- [ATDD/TDD](../../library/methodologies/atdd-tdd/README.md)
+- [Jobs To Be Done](../../library/methodologies/jobs-to-be-done/README.md)
 
 ### Domain Specializations
-- [Technical Documentation](skills/babysit/process/specializations/technical-documentation/README.md)
-- [Data Science/ML](skills/babysit/process/specializations/data-science-ml/README.md)
-- [DevOps/SRE](skills/babysit/process/specializations/devops-sre-platform/README.md)
-- [Security/Compliance](skills/babysit/process/specializations/security-compliance/README.md)
-- [QA/Testing](skills/babysit/process/specializations/qa-testing-automation/README.md)
-- [Software Architecture](skills/babysit/process/specializations/software-architecture/README.md)
+- [Technical Documentation](../../library/specializations/technical-documentation/README.md)
+- [Data Science/ML](../../library/specializations/data-science-ml/README.md)
+- [DevOps/SRE](../../library/specializations/devops-sre-platform/README.md)
+- [Security/Compliance](../../library/specializations/security-compliance/README.md)
+- [QA/Testing](../../library/specializations/qa-testing-automation/README.md)
+- [Software Architecture](../../library/specializations/software-architecture/README.md)
 
 ---
 

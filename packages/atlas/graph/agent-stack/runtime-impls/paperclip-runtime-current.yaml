@@ -1,0 +1,40 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:paperclip.runtime@current
+attributes:
+  displayName: "Paperclip Runtime (current)"
+  agentVersionId: agent-version:paperclip@current
+  packageRef: source-ref:paperclip-github
+  builtInTools: []
+  toolRegistryDiscovery: dynamic-config
+  hookSockets: []
+  internalSessionStateLocation: "persistent-database"
+  sessionFileFormat: json
+  sessionFilePathConvention: "database-managed"
+  approvalGatingPrimitive: none
+  subprocessSandboxStrategy: container
+  subagentDispatchMechanism: handoff
+  runtimeIdentity: host-process
+  supportedMCPTransports: []
+  supportsStreaming: true
+  notes: |
+    Paperclip runtime manages multiple autonomous agents with persistent
+    state, goal tracking, and inter-agent delegation. Designed for
+    zero-human operation with full workflow autonomy.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:paperclip
+      role: runtime
+  supports:
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Multi-agent handoffs for autonomous business operations.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Concurrent agent execution across business functions.
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full

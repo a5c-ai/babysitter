@@ -16,6 +16,12 @@
  * @references
  * - ISO 10993-1:2018 Biological evaluation of medical devices - Evaluation and testing within a risk management process
  * - FDA Guidance on Use of ISO 10993-1: https://www.fda.gov/regulatory-information/search-fda-guidance-documents/use-international-standard-iso-10993-1-biological-evaluation-medical-devices-part-1-evaluation-and
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

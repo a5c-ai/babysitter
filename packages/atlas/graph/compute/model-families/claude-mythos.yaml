@@ -1,0 +1,16 @@
+nodeKind: ModelFamily
+id: model-family:claude-mythos
+attributes:
+  displayName: "Claude Mythos"
+  providerId: anthropic
+  family: claude-mythos
+  generation: preview
+  modalities:
+    - text
+    - image
+  status: preview
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-mythos-preview@current

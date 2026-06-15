@@ -1,0 +1,15 @@
+nodeKind: ToolDispatchPolicy
+id: tool-dispatch-policy:claude-code-file-read
+attributes:
+  displayName: "FileRead dispatch policy"
+  isConcurrencySafe: true
+  isReadOnly: true
+  isDestructive: false
+  interruptBehavior: cancel
+  isOpenWorld: false
+  shouldDefer: false
+  alwaysLoad: true
+  parentDispatchPattern: parallel-reads-serial-writes
+edges:
+  dispatch_policy_for_tool:
+    - target: tool-descriptor:read

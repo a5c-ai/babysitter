@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:hyper
+attributes:
+  displayName: "hyper"
+  belongsToLanguageId: language:rust
+  category: http-server
+  description: |
+    Fast and correct HTTP/1 and HTTP/2 implementation for Rust.
+edges:
+  belongs_to_language:
+    - language:rust
+  library_used_by:
+    - target: skill-area:backend-api-design

@@ -1,0 +1,39 @@
+nodeKind: Subagent
+id: subagent:claude-code.general-purpose
+attributes:
+  displayName: "general-purpose (Claude Code)"
+  provenance: built-in
+  dispatchPattern: task-tool
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:implementer
+  systemPrompt: |
+    Default Claude Code subagent. Has full tool access and is invoked
+    via the `Task` tool when no other built-in matches. Used for
+    open-ended research, multi-step file edits, and ad-hoc work.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:write
+    - tool-descriptor:bash
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  triggers: |
+    Auto-invoked by Claude Code when the user issues `/agents` and
+    selects general-purpose, or when the orchestrator routes a task to
+    the default subagent.
+  agentType: general-purpose
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  description: |
+    The bundled `general-purpose` subagent that ships with Anthropic
+    Claude Code. Documented at
+    https://docs.anthropic.com/en/docs/claude-code/sub-agents.
+edges:
+  roles_played_by:
+    - target: role:implementer
+  implements:
+    - target: extension-interface:orchestration
+  dispatched_via_tool:
+    - target: tool-descriptor:agent

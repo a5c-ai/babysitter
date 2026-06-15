@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test
+
+      - name: E2E tests
+        run: npm run test:e2e
+
+      - name: Coverage gate (package vitest thresholds)
+        run: npx vitest run --coverage --config vitest.config.ts
+        if: matrix.node-version == 22
+
+      - name: Verify built CLI runs
+        run: node packages/cli/dist/index.js --help
+        if: matrix.node-version == 22
+
+      - name: Verify built mock-harness runs
+        run: node packages/harness-mock/dist/bin/mock-harness.js --help
+        if: matrix.node-version == 22

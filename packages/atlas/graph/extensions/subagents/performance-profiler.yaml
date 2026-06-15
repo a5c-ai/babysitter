@@ -1,0 +1,46 @@
+nodeKind: Subagent
+id: subagent:performance-profiler
+attributes:
+  displayName: "Performance Profiler"
+  provenance: custom
+  roleId: role:performance-profiler
+  systemPrompt: |
+    You diagnose performance problems. Read benchmarks, run profilers
+    (perf, py-spy, clinic.js, pprof), identify hot paths, propose
+    targeted optimizations with measured before/after numbers. Do not
+    optimize without evidence.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:bash
+    - tool-descriptor:grep
+    - tool-descriptor:edit
+    - tool-descriptor:glob
+  disallowedTools:
+    - tool-descriptor:web-fetch
+    - tool-descriptor:write
+  triggers: |
+    Invoke when the user reports a slow endpoint, regression in a
+    benchmark, or asks to profile a specific code path.
+  description: |
+    Performance-diagnosis subagent. Lives at
+    `.claude/agents/performance-profiler.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:performance-profiler
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:optimization

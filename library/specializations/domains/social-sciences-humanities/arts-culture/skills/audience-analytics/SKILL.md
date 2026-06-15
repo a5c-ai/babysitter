@@ -2,6 +2,10 @@
 name: audience-analytics
 description: Analyze visitor data, attendance patterns, and engagement metrics to inform programming decisions and measure organizational impact
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:data-analysis, skill-area:analytics-tracking, skill-area:digital-marketing-analytics]
+  roles: [role:data-analyst, role:marketing-manager]
 ---
 
 # Audience Analytics

@@ -3,6 +3,12 @@
  * @description Customer Advisory Board (CAB) Setup process with program purpose definition, member selection criteria, program structure design, meeting cadence planning, feedback mechanisms, and value exchange framework
  * @inputs { productName: string, programGoals: array, outputDir: string, boardSize: number, customerBase: object, meetingFrequency: string, industryFocus: array, programDuration: string }
  * @outputs { success: boolean, programCharter: object, selectionCriteria: object, memberProfiles: array, meetingStructure: object, feedbackMechanisms: array, valueExchange: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

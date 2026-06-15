@@ -1,0 +1,39 @@
+nodeKind: Subagent
+id: subagent:claude-code.explore
+attributes:
+  displayName: "Explore (Claude Code)"
+  provenance: built-in
+  dispatchPattern: task-tool
+  subjectId: agentVersion:claude:ge-0-0-0
+  roleId: role:explorer
+  systemPrompt: |
+    Read-only codebase exploration subagent bundled with Claude Code.
+    Restricted to search/read tools. Produces a structured map of
+    entry points, modules, and data flows.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  triggers: |
+    Auto-invoked when the user asks Claude Code to "explore" a
+    codebase or selects the Explore subagent from `/agents`.
+  agentType: explore
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  toolAllowlist:
+    - read
+    - grep
+    - glob
+  description: |
+    The bundled `Explore` subagent shipped by Anthropic Claude Code.
+    Documented at
+    https://docs.anthropic.com/en/docs/claude-code/sub-agents.
+edges:
+  roles_played_by:
+    - target: role:explorer
+  implements:
+    - target: extension-interface:reflection
+  dispatched_via_tool:
+    - target: tool-descriptor:agent

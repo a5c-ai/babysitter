@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: analytics
   priority: medium
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:statistical-analysis, skill-area:streaming-realtime-processing]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:data-analyst]
 ---
 
 # Demand Sensing Integrator

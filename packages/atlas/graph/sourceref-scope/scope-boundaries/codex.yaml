@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:codex.scope
+attributes:
+  subjectId: agent:codex
+  inScope: |
+    Developer terminal coding workflows targeting OpenAI o-series models.
+    Local file editing, shell command execution, and headless runs
+    suitable for scripted automation.
+  outOfScope: |
+    Production runtime, multi-tenant hosting, CI without explicit
+    --quiet / --json setup, browser-only environments, and tasks that
+    require non-OpenAI model routing through the same harness.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:codex

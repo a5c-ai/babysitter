@@ -1,0 +1,41 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:antigravity-cli.ui@current
+attributes:
+  displayName: "Antigravity CLI UI (current) — tui-and-cli"
+  agentVersionId: agentVersion:antigravity:2-0-11
+  packageRef: source-ref:antigravity-cli-github
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:antigravity-cli-tui
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    Google Antigravity CLI ships an interactive TUI and a scripted CLI;
+    YOLO and tool approval primitives are exposed at the UI layer.
+    Successor to Gemini CLI UI, built in Go with SKILL.md and
+    workflow-driven hook integration.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  succeeds:
+    - target: agent-ui-impl:gemini-cli.ui@current
+      notes: 'Antigravity CLI UI succeeds Gemini CLI UI; Go-based with SKILL.md plugin indicators and multi-model switching.
+        '
+  supports_interaction_primitive:
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:tool-approval-prompt
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:antigravity-yolo
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/yolo"
+    - target: interaction-primitive:thinking-toggle
+      attributes:
+        mechanism: keybinding
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control

@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Resource Management
   id: AG-015
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:capacity-planning-ops, skill-area:team-management, skill-area:stakeholder-management]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:hr-manager, role:operations-analyst]
 ---
 
 # Resource Manager Agent

@@ -17,6 +17,13 @@
  * - React Native Reanimated: https://docs.swmansion.com/react-native-reanimated/
  * - Flutter Animations: https://flutter.dev/docs/development/ui/animations
  * - iOS Animations: https://developer.apple.com/documentation/uikit/animation_and_haptics
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:animation-transitions]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

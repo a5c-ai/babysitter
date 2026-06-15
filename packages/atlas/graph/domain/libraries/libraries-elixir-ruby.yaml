@@ -1,0 +1,338 @@
+---
+nodeKind: Library
+id: library:ecto
+attributes:
+  displayName: "Ecto"
+  belongsToLanguageId: language:elixir
+  category: orm
+  description: |
+    Elixir database wrapper and query language — changesets, schemas,
+    migrations, and composable queries for PostgreSQL, MySQL, and SQLite.
+    Embraces explicit data validation over implicit magic.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:sqlalchemy
+---
+nodeKind: Library
+id: library:oban
+attributes:
+  displayName: "Oban"
+  belongsToLanguageId: language:elixir
+  category: other
+  description: |
+    Robust background job processing for Elixir backed by PostgreSQL.
+    Supports scheduling, retries, unique jobs, and telemetry-based
+    observability out of the box.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:hangfire
+    - library:sidekiq
+---
+nodeKind: Library
+id: library:tesla
+attributes:
+  displayName: "Tesla"
+  belongsToLanguageId: language:elixir
+  category: other
+  description: |
+    Flexible HTTP client library for Elixir built around a middleware
+    pipeline. Adapters for Hackney, Mint, and Finch; built-in support
+    for retries, logging, JSON encoding, and OAuth.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:axios
+---
+nodeKind: Library
+id: library:absinthe
+attributes:
+  displayName: "Absinthe"
+  belongsToLanguageId: language:elixir
+  category: other
+  description: |
+    GraphQL toolkit for Elixir — schema definition, resolvers, subscriptions
+    via Phoenix channels, and Dataloader integration for efficient batch
+    loading of related data.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:graphql-schema-design
+  alternative_to:
+    - library:mercurius
+---
+nodeKind: Library
+id: library:broadway
+attributes:
+  displayName: "Broadway"
+  belongsToLanguageId: language:elixir
+  category: other
+  description: |
+    Concurrent, multi-stage data ingestion and processing pipeline for
+    Elixir. Built on GenStage with producers for SQS, RabbitMQ, Kafka,
+    and Google Cloud Pub/Sub.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:bull
+---
+nodeKind: Library
+id: library:nx-elixir
+attributes:
+  displayName: "Nx"
+  belongsToLanguageId: language:elixir
+  category: other
+  description: |
+    Numerical computing library for Elixir — multi-dimensional tensors,
+    defn-compiled numerical definitions, and backends for CPU (EXLA/XLA)
+    and GPU acceleration.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:machine-learning-frameworks
+  alternative_to:
+    - library:numpy
+---
+nodeKind: Library
+id: library:livebook
+attributes:
+  displayName: "Livebook"
+  belongsToLanguageId: language:elixir
+  category: other
+  description: |
+    Interactive, collaborative notebook environment for Elixir built on
+    Phoenix LiveView. Supports live code execution, Kino widgets,
+    Mermaid diagrams, and Smart cells for data exploration.
+edges:
+  belongs_to_language:
+    - language:elixir
+  library_used_by:
+    - target: skill-area:data-analytics
+  alternative_to:
+    - library:nx-elixir
+---
+nodeKind: Library
+id: library:devise
+attributes:
+  displayName: "Devise"
+  belongsToLanguageId: language:ruby
+  category: auth
+  description: |
+    Full-featured authentication solution for Ruby on Rails — registration,
+    confirmation emails, password recovery, token-based auth, and
+    Warden-backed session management via configurable strategies.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:authentication
+  alternative_to:
+    - library:identity-server
+    - library:next-auth
+---
+nodeKind: Library
+id: library:sidekiq
+attributes:
+  displayName: "Sidekiq"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    High-performance background job processor for Ruby backed by Redis.
+    Provides a web UI, scheduled jobs, batches, and Pro/Enterprise
+    features for reliable at-least-once delivery.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:good-job
+---
+nodeKind: Library
+id: library:pundit
+attributes:
+  displayName: "Pundit"
+  belongsToLanguageId: language:ruby
+  category: auth
+  description: |
+    Minimal Ruby authorization library using plain policy objects.
+    Policies are simple POROs with predicate methods; scope classes
+    constrain ActiveRecord queries to authorized records.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:authentication-authorization
+  alternative_to:
+    - library:devise
+---
+nodeKind: Library
+id: library:pagy
+attributes:
+  displayName: "Pagy"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    Fast, lightweight Ruby pagination library with minimal memory
+    footprint. Supports multiple ORMs, custom page params, and
+    Bootstrap / Bulma / Tailwind CSS helpers.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:dry-rb
+---
+nodeKind: Library
+id: library:dry-rb
+attributes:
+  displayName: "dry-rb"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    Suite of Ruby gems (dry-validation, dry-types, dry-monads, dry-system)
+    promoting functional patterns, strict type safety, and composable
+    application architecture beyond Rails conventions.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:pydantic
+---
+nodeKind: Library
+id: library:rspec
+attributes:
+  displayName: "RSpec"
+  belongsToLanguageId: language:ruby
+  category: testing
+  description: |
+    Behaviour-driven development testing framework for Ruby — expressive
+    describe/it DSL, shared examples, matchers, mocking with rspec-mocks,
+    and detailed failure output.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - framework:jest
+---
+nodeKind: Library
+id: library:capybara
+attributes:
+  displayName: "Capybara"
+  belongsToLanguageId: language:ruby
+  category: testing
+  description: |
+    Acceptance testing library for Ruby web applications. Drives real
+    browsers via Selenium/Cuprite or headless rack-test, with a
+    fluent DSL for finding elements and simulating user interaction.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:e2e-testing
+  alternative_to:
+    - library:puppeteer
+---
+nodeKind: Library
+id: library:rubocop
+attributes:
+  displayName: "RuboCop"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    Ruby static code analyzer and formatter enforcing the Ruby Style Guide.
+    Extensible with cop departments for Performance, Rails, RSpec, and
+    Sorbet; supports autocorrection of many offenses.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:code-analysis-linting
+  alternative_to:
+    - library:sorbet
+---
+nodeKind: Library
+id: library:sorbet
+attributes:
+  displayName: "Sorbet"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    Gradual static type checker for Ruby developed at Stripe. Provides
+    type signatures via sigs, runtime type checking with Tapioca-generated
+    RBIs, and IDE integration through Spoom.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:code-analysis-linting
+---
+nodeKind: Library
+id: library:stimulus-reflex
+attributes:
+  displayName: "StimulusReflex"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    Rails library for building reactive interfaces without full-page
+    reloads. Extends Stimulus with server-side reflexes over WebSockets,
+    enabling CableReady DOM morphing from Ruby controller-like classes.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - library:hotwire-turbo
+---
+nodeKind: Library
+id: library:hotwire-turbo
+attributes:
+  displayName: "Hotwire Turbo"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    HTML-over-the-wire library (part of Hotwire) for Rails — Turbo Drive,
+    Turbo Frames, and Turbo Streams deliver server-rendered HTML updates
+    over WebSockets or HTTP without writing JavaScript.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:frontend-development
+---
+nodeKind: Library
+id: library:good-job
+attributes:
+  displayName: "GoodJob"
+  belongsToLanguageId: language:ruby
+  category: other
+  description: |
+    Multithreaded PostgreSQL-backed ActiveJob backend for Rails.
+    Uses advisory locks for concurrency, includes a dashboard UI,
+    and supports cron-style recurring jobs and job batches.
+edges:
+  belongs_to_language:
+    - language:ruby
+  library_used_by:
+    - target: skill-area:backend-api-design

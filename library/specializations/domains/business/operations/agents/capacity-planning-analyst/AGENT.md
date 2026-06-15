@@ -9,6 +9,11 @@ expertise:
   - Investment justification
   - Scenario modeling
   - Capacity risk assessment
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:capacity-planning-ops, skill-area:quantitative-modeling, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:procurement-manager, role:strategic-planner]
 ---
 
 # Capacity Planning Analyst

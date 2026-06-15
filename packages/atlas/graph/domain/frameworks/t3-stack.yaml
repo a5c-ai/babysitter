@@ -1,0 +1,18 @@
+nodeKind: Framework
+id: framework:t3-stack
+attributes:
+  displayName: "T3 Stack"
+  homepageUrl: "https://create.t3.gg"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    The T3 Stack — an opinionated full-stack TypeScript starter (create-t3-app)
+    pairing Next.js, tRPC, Tailwind CSS, Prisma, and NextAuth.js.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:redwood
+    - framework:blitz

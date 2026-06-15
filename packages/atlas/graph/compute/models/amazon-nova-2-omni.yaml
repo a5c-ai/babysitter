@@ -1,0 +1,56 @@
+# Issue #904 — Track Amazon Nova 2 Omni model version.
+nodeKind: ModelVersion
+id: model:amazon-nova-2-omni@current
+attributes:
+  displayName: "Amazon Nova 2 Omni"
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:amazon-nova-2
+  kind: multimodal
+  contextWindowTokens: 0
+  modalities:
+    - text
+    - image
+    - audio
+    - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+    - kind: audio
+      direction: output
+  releaseDate: "2026-06-01"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2026-06-01"
+  modelCardUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Amazon Nova 2 Omni is a multimodal model supporting text, image, audio,
+    and video inputs with text and audio outputs. Exact Bedrock runtime model
+    ID, context window, token limits, and pricing should be confirmed from
+    AWS Bedrock docs before adding precise claims.
+edges:
+  belongs_to_family:
+    - target: model-family:amazon-nova-2
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:amazon-nova-2
+  served_by:
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:bedrock-converse
+  supports:
+    - target: capability:streaming
+      level: full
+    - target: capability:vision-input
+      level: full

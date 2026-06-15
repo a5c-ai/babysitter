@@ -1,0 +1,26 @@
+nodeKind: Domain
+id: domain:data-science
+attributes:
+  displayName: "Data Science"
+  description: |
+    Data Science applies statistical analysis, machine learning, and
+    domain expertise to extract insight and predictive models from data.
+
+    It covers exploratory data analysis (pandas, R, Jupyter), feature
+    engineering, classical ML (scikit-learn, XGBoost), deep learning
+    (PyTorch, TensorFlow), experiment tracking, and communication of
+    findings through visualizations and reports. Data Science is upstream
+    of ML-Ops (productionizing models) and downstream of Data Engineering
+    (building the pipelines that supply clean data). Python and R are the
+    dominant languages; SQL is essential for data access.
+edges:
+  contains:
+    - specialization:data-engineering-analytics
+    - topic:context-aware-retrieval
+    - topic:evidence-based-graph
+    - topic:experiment-driven-development
+    - topic:graph-clustering
+    - topic:graph-embedding
+    - topic:graph-provenance
+    - topic:sparse-retrieval
+    - topic:data-mesh

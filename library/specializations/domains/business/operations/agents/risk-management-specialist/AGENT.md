@@ -9,6 +9,11 @@ expertise:
   - Control plan development
   - Risk mitigation tracking
   - Preventive action implementation
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:statistical-analysis, skill-area:change-management, skill-area:business-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:audit-analyst]
 ---
 
 # Risk Management Specialist

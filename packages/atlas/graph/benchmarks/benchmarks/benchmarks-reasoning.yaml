@@ -1,0 +1,158 @@
+nodeKind: Benchmark
+id: benchmark:hle
+attributes:
+  displayName: "Humanity's Last Exam (HLE)"
+  homepageUrl: https://lastexam.ai/
+  kind: knowledge
+  targetsKind: ModelVersion
+  description: |
+    Closed-book frontier-knowledge benchmark of expert-authored
+    questions across math, sciences, and humanities, designed to
+    remain unsaturated by current frontier models.
+edges:
+  covers:
+    - target: skill-area:closed-book-frontier-reasoning
+      attributes:
+        coverage: full
+        weight: 0.7
+    - target: skill-area:general-knowledge-reasoning
+      attributes:
+        coverage: partial
+        weight: 0.2
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:mathematics
+---
+nodeKind: Benchmark
+id: benchmark:frontier-math
+attributes:
+  displayName: "FrontierMath"
+  homepageUrl: https://epoch.ai/frontiermath
+  kind: math
+  targetsKind: ModelVersion
+  description: |
+    Epoch AI benchmark of original, expert-vetted research-level math
+    problems requiring deep mathematical reasoning, designed to be
+    hard for frontier models even with tool use.
+edges:
+  covers:
+    - target: skill-area:mathematical-reasoning
+      attributes:
+        coverage: full
+        weight: 0.6
+    - target: skill-area:closed-book-frontier-reasoning
+      attributes:
+        coverage: partial
+        weight: 0.3
+  applies_to:
+    - target: domain:mathematics
+---
+nodeKind: Benchmark
+id: benchmark:bbh
+attributes:
+  displayName: "BIG-Bench Hard (BBH)"
+  homepageUrl: https://github.com/suzgunmirac/BIG-Bench-Hard
+  kind: reasoning
+  targetsKind: ModelVersion
+  description: |
+    23 challenging tasks from BIG-Bench where prior LLMs underperformed
+    average human raters; widely used as a model reasoning benchmark.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+      attributes:
+        coverage: partial
+        weight: 0.4
+  applies_to:
+    - target: domain:computer-science
+---
+nodeKind: Benchmark
+id: benchmark:arc-agi-3
+attributes:
+  displayName: "ARC-AGI 3"
+  homepageUrl: https://arcprize.org/arc-agi/3
+  kind: interactive-reasoning
+  targetsKind: AgentVersion
+  description: |
+    Interactive visual-reasoning benchmark from François Chollet /
+    ARC Prize Foundation (2025). Agents play short novel grid-based
+    games to test fluid intelligence and pattern induction over
+    interactive environments rather than static IQ-style puzzles.
+edges:
+  covers:
+    - target: skill-area:visual-pattern-induction
+      attributes:
+        coverage: full
+        weight: 0.6
+    - target: skill-area:agentic-loops
+      attributes:
+        coverage: tangential
+        weight: 0.2
+  applies_to:
+    - target: domain:computer-science
+    - target: domain:ml-ai
+---
+nodeKind: Benchmark
+id: benchmark:hellaswag
+attributes:
+  displayName: "HellaSwag"
+  homepageUrl: https://rowanzellers.com/hellaswag/
+  kind: reasoning
+  targetsKind: ModelVersion
+  description: |
+    HellaSwag is a commonsense-reasoning benchmark — multiple-choice
+    sentence completion drawn from ActivityNet captions and WikiHow,
+    adversarially filtered against ELMo and BERT.
+edges: {}
+---
+nodeKind: Benchmark
+id: benchmark:mt-bench
+attributes:
+  displayName: "MT-Bench"
+  homepageUrl: https://lmsys.org/blog/2023-06-22-leaderboard/
+  kind: reasoning
+  targetsKind: ModelVersion
+  description: |
+    MT-Bench (LMSYS) is a multi-turn open-ended question set graded by
+    a strong-LLM judge to evaluate conversational quality across writing,
+    reasoning, math, coding, extraction, STEM, and humanities.
+edges:
+  covers:
+    - target: skill-area:general-knowledge-reasoning
+  applies_to:
+    - target: domain:computer-science
+---
+nodeKind: Benchmark
+id: benchmark:legal-bench
+attributes:
+  displayName: "LegalBench"
+  homepageUrl: https://hazyresearch.stanford.edu/legalbench/
+  kind: reasoning
+  targetsKind: ModelVersion
+  description: |
+    LegalBench (Stanford et al.) is a collaboratively-built benchmark
+    for evaluating legal reasoning in language models across 162 tasks
+    covering rule application, interpretation, and rhetoric.
+edges:
+  covers:
+    - target: skill-area:closed-book-frontier-reasoning
+  applies_to:
+    - target: domain:legal
+    - target: domain:legaltech
+---
+nodeKind: Benchmark
+id: benchmark:medqa
+attributes:
+  displayName: "MedQA"
+  homepageUrl: https://github.com/jind11/MedQA
+  kind: reasoning
+  targetsKind: ModelVersion
+  description: |
+    MedQA is a multiple-choice medical question-answering benchmark
+    drawn from US Medical Licensing Exam (USMLE) and Chinese / Taiwanese
+    equivalents — the standard reference for medical-domain LLM eval.
+edges:
+  covers:
+    - target: skill-area:medical-agent
+  applies_to:
+    - target: domain:healthcare

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:framework.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:framework
+  text: |
+    framework
+  status: canonical
+edges:
+  defines:
+    - term:framework

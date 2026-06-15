@@ -1,0 +1,139 @@
+# Stack Guide
+
+→ [Documentation Index](README.md) | Related: [Glossary](glossary.md) | [Unified Stack Architecture](unified-stack-architecture.md)
+
+## Purpose
+
+This guide is the fast path for navigating the unified stack. Use it when you need to know where to start reading, which package owns a concern, and which docs are normative versus supporting context.
+
+## Start Here
+
+If you are new to the stack, read these in order:
+
+1. [System Overview](system-overview.md)
+2. [Glossary](glossary.md)
+3. [Unified Stack Architecture](unified-stack-architecture.md)
+4. [V6 Architecture Specification](v6-architecture-specification.md)
+5. [Package Specifications](package-specs.md)
+
+Then branch into the area you are actually changing.
+
+Before proposing a new seam, run the active validation cue for the first executable V6 slice:
+
+- `npm run verify:v6:seams`
+
+## If You Need To Change Orchestration
+
+Read:
+
+- [V6 Architecture Specification](v6-architecture-specification.md)
+- [Package Specifications](package-specs.md)
+- [Testing Framework](testing-framework.md)
+
+Work mainly in:
+
+- `packages/babysitter-sdk`
+- `packages/babysitter`
+- `packages/genty/platform`
+- `library/`
+- project-local `.a5c/processes/`
+
+## If You Need To Change Harness Dispatch
+
+Read:
+
+- [docs/adapters/README](https://github.com/a5c-ai/babysitter/blob/main/docs/adapters/README.md)
+- [Agent-Adapter Integration](adapters-integration.md)
+- [Unified Stack Architecture](unified-stack-architecture.md)
+
+Work mainly in:
+
+- `packages/adapters/core`
+- `packages/adapters/adapters`
+- `packages/adapters/cli`
+- `packages/adapters/sdk`
+- `packages/adapters/gateway`
+
+## If You Need To Change Hook Behavior
+
+Read:
+
+- `packages/adapters/hooks/README.md`
+- `packages/adapters/hooks/ARCHITECTURE.md`
+- [Agent-Adapter Integration](adapters-integration.md)
+
+Work mainly in:
+
+- `packages/adapters/hooks/core`
+- `packages/adapters/hooks/cli`
+- `packages/adapters/hooks/adapter-*`
+- `plugins/babysitter-unified/hooks/`
+
+## If You Need To Change Plugin Packaging
+
+Read:
+
+- `packages/extensions-adapter/unified_plugin_system_spec.md`
+- `plugins/babysitter-unified/README.template.md`
+- per-harness plugin README files under `plugins/babysitter-unified/per-harness/`
+
+Work mainly in:
+
+- `packages/extensions-adapter`
+- `plugins/babysitter-unified`
+- concrete bundles under `plugins/babysitter-*`
+
+## If You Need To Change Human Approval Or Breakpoint Routing
+
+Read:
+
+- `packages/tasks-adapter/specs/architecture.md`
+- [Testing Framework](testing-framework.md)
+
+Work mainly in:
+
+- `packages/tasks-adapter`
+- `packages/babysitter-sdk` breakpoint integration
+- related hook and plugin surfaces if the transport changes
+
+## If You Need To Change UI Surfaces
+
+Read:
+
+- `packages/adapters/README.md`
+- package README files under `packages/adapters/*`
+
+Work mainly in:
+
+- `packages/adapters/ui`
+- `packages/adapters/webui`
+- `packages/adapters/tui`
+- `packages/adapters/mobile-*`
+- `packages/adapters/tv-*`
+- `packages/adapters/watch-*`
+- `docs-site/` or `packages/atlas/webui` where relevant
+
+## Source-Of-Truth Map
+
+Use this rule of thumb:
+
+| Concern | Primary source of truth | Supporting references |
+|---|---|---|
+| V6 architecture scope | `docs/v6-spec-and-roadmap/` | package READMEs, adversarial analyses |
+| Orchestration runtime behavior | `packages/babysitter-sdk`, `packages/babysitter`, `packages/genty/platform` | V6 docs, CLI docs |
+| Harness dispatch behavior | `packages/adapters/*` and `docs/adapters/` | V6 integration docs |
+| Hook normalization | `packages/adapters/hooks/*` | per-harness plugin docs |
+| Unified plugin packaging | `packages/extensions-adapter`, `plugins/babysitter-unified/` | install READMEs for concrete bundles |
+| Breakpoint routing | `packages/tasks-adapter` | SDK integration docs |
+
+## Practical Rules
+
+- Start from the package that already owns the behavior before proposing a new layer.
+- If a document describes a future package or layer, check whether V6 marks it as deferred.
+- Treat installable plugin bundles as real compatibility surfaces even when the unified plugin source exists.
+- Use package names and paths when discussing ownership; use architecture terms only when they map to a real current seam.
+- Treat validation commands as part of the architecture surface. If a seam has no repo path and no active validation cue, it is still design exploration.
+
+---
+
+**Related Documents**: [Current State](current-state.md) | [Glossary](glossary.md) | [Unified Stack Architecture](unified-stack-architecture.md)

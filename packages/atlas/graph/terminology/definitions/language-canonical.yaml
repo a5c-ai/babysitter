@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:language.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:language
+  text: |
+    programming language
+  status: canonical
+edges:
+  defines:
+    - term:language

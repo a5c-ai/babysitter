@@ -1,0 +1,22 @@
+nodeKind: Language
+id: language:java
+attributes:
+  displayName: "Java"
+  paradigms:
+    - imperative
+    - object-oriented
+  description: |
+    Java is a statically-typed, compiled-to-bytecode, object-oriented language
+    running on the JVM. It has been one of the most widely deployed programming
+    languages in the world for over 25 years, dominant in enterprise software,
+    Android development (pre-Kotlin), and data engineering.
+
+    Modern Java (17–21+) adds records, sealed classes, pattern matching,
+    virtual threads (Project Loom), and text blocks. The Spring Boot ecosystem
+    dominates enterprise Java. Java is central to Apache Kafka, Hadoop, Spark,
+    and Flink — making it critical in data engineering. Maven and Gradle are
+    the standard build tools. GraalVM native image enables ahead-of-time
+    compilation for fast startup in cloud functions and containers.
+edges:
+  used_by_skill_area:
+    - target: skill-area:kafka-stream-processing

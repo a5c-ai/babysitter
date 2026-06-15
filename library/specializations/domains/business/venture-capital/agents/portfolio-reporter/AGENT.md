@@ -8,6 +8,10 @@ expertise:
   - Portfolio analytics and reporting
   - Valuation reporting
   - Performance attribution
+graph:
+  domains: [domain:venture-capital]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Portfolio Reporter

@@ -3,6 +3,12 @@
  * @description Measure and evaluate deployed solution performance against defined success criteria and KPIs. Identify improvement opportunities and provide recommendations for optimization.
  * @inputs { projectName: string, solution: object, successCriteria: array, kpis: array, performanceData: object }
  * @outputs { success: boolean, performanceReport: object, kpiDashboard: object, recommendations: array, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

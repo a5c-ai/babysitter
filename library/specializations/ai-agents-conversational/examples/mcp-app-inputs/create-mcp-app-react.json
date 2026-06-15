@@ -1,0 +1,16 @@
+{
+  "appName": "data-dashboard",
+  "description": "Interactive data dashboard that visualizes JSON datasets with charts, tables, and filtering. Renders inline in Claude Desktop and other MCP-enabled hosts.",
+  "framework": "react",
+  "features": {
+    "charts": true,
+    "tables": true,
+    "filtering": true,
+    "export": false
+  },
+  "transport": "stdio",
+  "toolDescription": "Visualize a JSON dataset as an interactive dashboard with charts and tables",
+  "hostStyling": true,
+  "fullscreen": false,
+  "compositionPattern": "full-pipeline"
+}

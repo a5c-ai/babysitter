@@ -1,0 +1,104 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:napkin-fabric
+attributes:
+  displayName: "Napkin as Agent Knowledge Fabric"
+  description: |
+    Napkin as a local-first file-based agent knowledge fabric. Uses
+    progressively disclosed information architecture where agents start
+    with index files and drill into detail on demand. Knowledge is stored
+    as plain files on disk — no database, no external service. The
+    progressive disclosure pattern reduces context window waste by loading
+    only the knowledge an agent needs at each reasoning step. As a
+    knowledge fabric, Napkin trades retrieval sophistication for simplicity
+    and portability — any agent that can read files can use it.
+  knowledgeFileFormats:
+    - markdown
+    - structured-notes
+  retrievalStrategy: progressive-disclosure
+  knowledgePersistence: local-files
+  knowledgeScopes:
+    - project
+    - agent
+  autoExtractionSupport: false
+  notes: |
+    Napkin's distinguishing feature is progressive disclosure — rather
+    than dumping all knowledge into context, it provides summaries first
+    and lets the agent request detail. This mirrors how humans navigate
+    documentation and is particularly effective for agents with limited
+    context windows or when operating on large knowledge bases.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:napkin
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:mempalace-fabric
+attributes:
+  displayName: "MemPalace as Agent Memory Fabric"
+  description: |
+    MemPalace as a benchmarked agent memory knowledge fabric. Provides
+    persistent memory with quality scoring and retrieval ranking. Memories
+    are stored with relevance scores that decay or strengthen over time
+    based on usage patterns. The benchmarking focus means MemPalace
+    prioritizes measurable retrieval accuracy over feature breadth. As a
+    knowledge fabric, MemPalace bridges ephemeral conversation context
+    and persistent organizational knowledge through scored, retrievable
+    memory entries.
+  knowledgeFileFormats:
+    - structured-memories
+    - scored-entries
+  retrievalStrategy: scored-retrieval
+  knowledgePersistence: memory-service
+  knowledgeScopes:
+    - agent
+    - user
+  autoExtractionSupport: true
+  notes: |
+    MemPalace's key differentiator is its benchmarking focus — it is
+    evaluated against other memory systems for accuracy, recall, and
+    efficiency. This makes it a strong choice for agents where memory
+    reliability is critical and needs to be measured, rather than
+    assumed.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:mempalace
+  uses_memory_system:
+    - target: memory-system:mempalace-service
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:graphify-fabric
+attributes:
+  displayName: "Graphify as Agent Knowledge Fabric"
+  description: |
+    Graphify as a knowledge graph conversion fabric. Transforms code,
+    SQL schemas, documentation, and images into a queryable knowledge
+    graph that agents can traverse. Unlike vector-based retrieval, Graphify
+    preserves structural relationships between entities — function calls,
+    schema references, import chains, and documentation links. As a
+    knowledge fabric, Graphify excels at dependency-aware retrieval where
+    understanding relationships matters more than semantic similarity.
+  knowledgeFileFormats:
+    - code
+    - sql
+    - markdown
+    - images
+  retrievalStrategy: graph-traversal
+  knowledgePersistence: knowledge-graph
+  knowledgeScopes:
+    - project
+    - codebase
+  autoExtractionSupport: true
+  notes: |
+    Graphify's strength is structural knowledge — it understands that
+    function A calls function B, table X references table Y, and doc
+    page P describes module M. This makes it complementary to vector
+    search systems that find semantically similar content but miss
+    structural dependencies.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:graphify

@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:supports-text-streaming
+attributes:
+  displayName: "Supports text streaming"
+  description: |
+    The entity can stream text output token-by-token rather than
+    delivering only a complete response.
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: model
+edges: {}

@@ -1,0 +1,178 @@
+{
+  "issueNumber": 600,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-600-deduplicate-background-registry-shell-invocation",
+  "title": "Cross-layer: deduplicate background process registry and shell invocation",
+  "labels": [
+    "effort:medium",
+    "ready-for-dev",
+    "priority:medium",
+    "refactor",
+    "agent-core",
+    "agent-runtime",
+    "agent-platform",
+    "P2",
+    "risk:medium"
+  ],
+  "summary": "Issue #600 tracks duplicated background process registry/state behavior and duplicated shell invocation construction across agent-core, agent-runtime, and agent-platform. agent-core already re-exports the runtime background registry/state implementation, but agent-platform still carries copied registry/state code and shell argv construction remains repeated in several live execution paths.",
+  "trigger": "manual dispatch",
+  "branchForPlanPr": "plan/issue-600",
+  "processEntry": ".a5c/processes/issue-600-deduplicate-background-registry-shell-invocation.mjs#process",
+  "targetFiles": [
+    "packages/agent-runtime/src/backgroundProcessRegistry.ts",
+    "packages/agent-runtime/src/background/state.ts",
+    "packages/agent-core/src/backgroundProcessRegistry.ts",
+    "packages/agent-core/src/agenticTools/background/state.ts",
+    "packages/agent-core/src/agenticTools/tools/execution.ts",
+    "packages/agent-core/src/agenticTools/background/tools.ts",
+    "packages/agent-core/src/agenticTools/types.ts",
+    "packages/agent-core/src/session.ts",
+    "packages/agent-core/src/tools.test.ts",
+    "packages/agent-core/src/session.test.ts",
+    "packages/genty/platform/src/harness/backgroundProcessRegistry.ts",
+    "packages/genty/platform/src/harness/agenticTools/background/state.ts",
+    "packages/genty/platform/src/harness/agenticTools/background/tools.ts",
+    "packages/genty/platform/src/harness/agenticTools/tools/execution.ts",
+    "packages/genty/platform/src/harness/agenticTools/types.ts",
+    "packages/genty/platform/src/harness/index.ts",
+    "packages/genty/platform/src/harness/piWrapper.test.ts",
+    "packages/genty/platform/package.json",
+    "packages/agent-runtime/package.json",
+    "docs/agent-layer-gaps.md",
+    "docs/here-be-dragons.md"
+  ],
+  "knownCurrentState": {
+    "agentRuntimeCanonicalRegistry": "packages/agent-runtime/src/backgroundProcessRegistry.ts owns the full BackgroundProcessRegistry implementation and accepts an injectable spawnFn for tests.",
+    "agentRuntimeCanonicalState": "packages/agent-runtime/src/background/state.ts supports both WeakMap ownership and registryId reuse to avoid orphaning registries when options objects are recreated.",
+    "agentCoreCompatibility": "packages/agent-core/src/backgroundProcessRegistry.ts and packages/agent-core/src/agenticTools/background/state.ts already re-export from @a5c-ai/agent-runtime.",
+    "agentPlatformDuplication": "packages/genty/platform/src/harness/backgroundProcessRegistry.ts still carries a near copy of the runtime registry without spawnFn injection, and packages/genty/platform/src/harness/agenticTools/background/state.ts lacks runtime registryId behavior.",
+    "shellDuplication": "Shell selection and argv construction are repeated in agent-core session command execution, agent-core foreground bash tool execution, agent-platform foreground bash tool execution, and background process spawning."
+  },
+  "reuseAuditSeed": {
+    "keywordNounsAndVerbs": [
+      "background process registry",
+      "background state",
+      "registryId",
+      "shell invocation",
+      "spawn",
+      "cmd.exe /c",
+      "/bin/bash -c",
+      "compatibility shim",
+      "deep import",
+      "agent-core",
+      "agent-runtime",
+      "agent-platform"
+    ],
+    "existingInfrastructureToPrefer": [
+      "@a5c-ai/agent-runtime BackgroundProcessRegistry",
+      "@a5c-ai/agent-runtime background state helpers",
+      "agent-core re-export shim pattern",
+      "agent-platform existing dependency on @a5c-ai/agent-runtime",
+      "existing Vitest package tests for agent-core, agent-runtime, and agent-platform"
+    ],
+    "newInfrastructureConstraint": "Do not introduce a second registry or package-level shell helper if the runtime package can own the canonical helper without reversing dependency direction."
+  },
+  "acceptanceFocus": [
+    "agent-platform consumes the canonical @a5c-ai/agent-runtime background registry/state behavior instead of maintaining full copied implementations.",
+    "Compatibility re-export shims remain for public or known deep-import paths in agent-core and agent-platform.",
+    "A shared shell invocation helper/contract is used by agent-core session command execution, agent-core bash tool foreground/background execution, agent-platform bash tool foreground/background execution, and background process spawning.",
+    "Windows shell invocation remains cmd.exe with /c and POSIX shell invocation remains /bin/bash with -c.",
+    "cwd, env merging, timeout, stream capture, onComplete, max concurrency, cancel, killAll, dispose, and registryId reuse behavior are preserved or explicitly covered by tests.",
+    "Docs that currently warn about copied shell invocation or copied registries are updated to match the new architecture.",
+    "Endpoint resolution and SDK plugin registry duplication are assessed only as related context and are not implemented in this PR unless unavoidable."
+  ],
+  "nonGoals": [
+    "Do not redesign endpoint resolution across agent-core and adapters.",
+    "Do not unify the SDK plugin registry with the agent-platform plugin system in this issue.",
+    "Do not change the user-facing bash tool contract beyond removing internal duplication.",
+    "Do not change shell quoting semantics, shell:false behavior, or the choice of /bin/bash on non-Windows as part of this refactor.",
+    "Do not remove compatibility exports for backgroundProcessRegistry or background/state without maintainer approval."
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read issue #600, comments, labels, and directly related docs to lock scope and non-goals."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Search existing registry/state/shell infrastructure before introducing any new helper, and render reuse-audit findings for review."
+    },
+    {
+      "name": "Runtime call-path trace",
+      "purpose": "Trace foreground bash, background bash, session executeCommand, registry lifecycle, exports, and deep-import compatibility before modifications."
+    },
+    {
+      "name": "Regression tests",
+      "purpose": "Add failing tests first for shared shell argv construction, platform adoption of runtime background state, lifecycle behavior, registryId reuse, and compatibility import paths."
+    },
+    {
+      "name": "Design review",
+      "purpose": "Challenge package-boundary and compatibility assumptions before implementation begins."
+    },
+    {
+      "name": "Focused refactor",
+      "purpose": "Convert duplicated platform registry/state to runtime imports or shims and centralize shell invocation construction in one shared contract."
+    },
+    {
+      "name": "Verification loop",
+      "purpose": "Run targeted tests, package builds/tests, duplication scans, and iterate up to three attempts if verification or review fails."
+    },
+    {
+      "name": "Compatibility review",
+      "purpose": "Review public exports, deep imports, Windows/POSIX argv semantics, lifecycle behavior, and docs consistency."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm all acceptance criteria are met, no unapproved scope expansion occurred, and release-note level summary is available."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if implementation discovers a real public API or dependency-direction conflict, such as needing to remove a known deep import or expose a new runtime helper through package exports.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended scope",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "Regression tests are authored before implementation and fail for the expected pre-fix reason.",
+    "Runtime call paths are recorded as runtimeCallPaths in process output.",
+    "No full copied BackgroundProcessRegistry or background state helper remains in agent-platform when a runtime import or shim is sufficient.",
+    "Only one production shell selection/argv construction contract remains for command execution paths covered by the issue.",
+    "Compatibility shims continue to resolve for agent-core and agent-platform background registry/state imports.",
+    "Targeted Vitest tests for agent-runtime, agent-core, and agent-platform pass.",
+    "Package builds for agent-runtime, agent-core, and agent-platform pass.",
+    "Documentation warnings in docs/agent-layer-gaps.md and docs/here-be-dragons.md are no longer stale after the refactor.",
+    "Compatibility review approves Windows/POSIX behavior, lifecycle behavior, package boundaries, and public exports."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/tools.test.ts packages/agent-core/src/session.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/genty/platform/vitest.config.ts packages/genty/platform/src/harness/piWrapper.test.ts",
+    "npm run build --workspace=@a5c-ai/agent-runtime",
+    "npm run build --workspace=@a5c-ai/agent-core",
+    "npm run build --workspace=@a5c-ai/genty-platform",
+    "npm run verify:metadata"
+  ],
+  "processLibraryResearch": {
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "referencesUsed": [
+      "methodologies/pilot-shell/pilot-shell-feature.js",
+      "methodologies/pilot-shell/agents/plan-reviewer/AGENT.md",
+      "methodologies/pilot-shell/agents/spec-guard/AGENT.md",
+      "methodologies/pilot-shell/skills/strict-tdd/SKILL.md",
+      "methodologies/superpowers/test-driven-development.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "processes/shared/tdd-triplet.js",
+      "processes/shared/completeness-gate.js"
+    ],
+    "shapeSelected": "Flat phase list because the issue is a well-defined refactor with known affected files rather than an unknown-cause forensic bug."
+  },
+  "relatedIssuesAndPrs": [
+    576,
+    584,
+    598
+  ]
+}

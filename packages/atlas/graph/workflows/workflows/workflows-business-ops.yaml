@@ -1,0 +1,98 @@
+---
+nodeKind: Workflow
+id: workflow:vendor-performance-review
+attributes:
+  displayName: "Vendor Performance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates vendor and supplier performance against contractual SLAs —
+    analyzing uptime and reliability metrics, reviewing support
+    responsiveness, assessing cost efficiency trends, benchmarking against
+    alternative providers, and determining renewal or replacement
+    recommendations. Produces vendor scorecards and contract renegotiation
+    priorities. Excludes vendor selection for new capabilities.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:process-automation-assessment
+attributes:
+  displayName: "Process Automation Assessment"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Identifies and evaluates candidates for process automation — mapping
+    current manual workflows, estimating time savings and error reduction
+    potential, assessing technical feasibility, prioritizing automation
+    opportunities by ROI, and producing implementation specifications for
+    approved candidates. Produces prioritized automation backlog with business
+    cases. Excludes automation implementation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:business-continuity-drill
+attributes:
+  displayName: "Business Continuity Drill"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Executes a simulated business continuity scenario — testing disaster
+    recovery procedures, validating communication chain effectiveness,
+    measuring recovery time objectives against targets, exercising backup
+    system failover, and evaluating team readiness for various disruption
+    types. Produces drill results report with gap analysis and remediation
+    priorities. Excludes BCP plan authoring.
+edges:
+  involves_role:
+    - target: role:incident-commander
+    - target: role:engineering-manager
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:operations
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:incident-command
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:engineering
+    - target: org-unit:security-team

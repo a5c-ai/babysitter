@@ -2,6 +2,14 @@
 name: cross-env-setup
 description: Configure cross-env for cross-platform environment variable setting in npm scripts and CLI commands.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:cross-platform-desktop]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Cross-Env Setup

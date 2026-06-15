@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:cypress
+attributes:
+  displayName: "Cypress"
+  homepageUrl: "https://www.cypress.io"
+  kind: test-runner
+  language: language:javascript
+  description: |
+    Front-end testing tool for the modern web.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:e2e-testing
+  used_for:
+    - skill-area:e2e-testing
+    - skill-area:cross-browser-testing
+  alternative_to:
+    - target: tool:playwright
+      comparison: "E2E testing — Cypress runs in-browser; Playwright drives browsers externally"

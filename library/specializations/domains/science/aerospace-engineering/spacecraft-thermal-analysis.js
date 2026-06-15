@@ -17,6 +17,13 @@
  * - NASA Thermal Analysis Guidelines
  * - Thermal Desktop Documentation
  * - ECSS-E-ST-31C Thermal Control Standard
+ *
+ * @graph
+ *   domains: [domain:aerospace-engineering]
+ *   specializations: [specialization:aerospace-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:sensor-fusion]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -45,38 +52,23 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Thermal Model Development
-  let thermalModel = await ctx.task(thermalModelTask, {
+  const thermalModel = await ctx.task(thermalModelTask, {
     projectName,
     spacecraftConfig,
     requirements,
     thermalEnvironment
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      thermalModel = await ctx.task(thermalModelTask, { ...{
-    projectName,
-    spacecraftConfig,
-    requirements,
-    thermalEnvironment
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Model review
+  await ctx.breakpoint({
     question: `Thermal model complete for ${projectName}. Nodes: ${thermalModel.nodeCount}. Proceed with analysis?`,
     title: 'Thermal Model Review',
     context: {
       runId: ctx.runId,
       thermalModel: thermalModel.summary
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Hot Case Analysis
   const hotCaseAnalysis = await ctx.task(hotCaseAnalysisTask, {
     projectName,
@@ -85,7 +77,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Cold Case Analysis
-  let coldCaseAnalysis = await ctx.task(coldCaseAnalysisTask, {
+  const coldCaseAnalysis = await ctx.task(coldCaseAnalysisTask, {
     projectName,
     thermalModel,
     environment: thermalEnvironment.coldCase
@@ -95,31 +87,17 @@ export async function process(inputs, ctx) {
   const worstHotMargin = Math.min(...hotCaseAnalysis.temperatureMargins);
   const worstColdMargin = Math.min(...coldCaseAnalysis.temperatureMargins);
 
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        coldCaseAnalysis = await ctx.task(coldCaseAnalysisTask, { ...{
-    projectName,
-    thermalModel,
-    environment: thermalEnvironment.coldCase
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (worstHotMargin < 5 || worstColdMargin < 5) {
+    await ctx.breakpoint({
       question: `Temperature margins below 5C. Hot: ${worstHotMargin}C, Cold: ${worstColdMargin}C. Review TCS design?`,
       title: 'Temperature Margin Warning',
       context: {
         runId: ctx.runId,
         hotCase: hotCaseAnalysis,
         coldCase: coldCaseAnalysis
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Transient Analysis
   const transientAnalysis = await ctx.task(transientAnalysisTask, {
@@ -154,7 +132,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Generation
-  let reportGeneration = await ctx.task(thermalReportTask, {
+  const reportGeneration = await ctx.task(thermalReportTask, {
     projectName,
     requirements,
     thermalEnvironment,
@@ -167,23 +145,8 @@ export async function process(inputs, ctx) {
     thermalBalance
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportGeneration = await ctx.task(thermalReportTask, { ...{
-    projectName,
-    requirements,
-    thermalEnvironment,
-    thermalModel,
-    hotCaseAnalysis,
-    coldCaseAnalysis,
-    transientAnalysis,
-    tcsDesign,
-    heaterSizing,
-    thermalBalance
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Thermal Design Approval
+  await ctx.breakpoint({
     question: `Thermal analysis complete for ${projectName}. All components within limits. Approve TCS design?`,
     title: 'Thermal Analysis Approval',
     context: {
@@ -198,15 +161,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/thermal-report.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/thermal-report.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -226,7 +183,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions (abbreviated for remaining files)
+
+// Task Definitions (abbreviated for remaining files)
 
 export const thermalRequirementsTask = defineTask('thermal-requirements', (args, taskCtx) => ({
   kind: 'agent',

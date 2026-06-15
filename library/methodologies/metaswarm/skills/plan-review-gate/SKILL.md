@@ -2,17 +2,14 @@
 name: plan-review-gate
 description: Adversarial plan review by 3 independent reviewers (Feasibility, Completeness, Scope & Alignment) before presenting to user.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Plan Review Gate
-
-## Overview
-
-Three independent adversarial reviewers validate any implementation plan before it is presented to the user. Each reviews independently with no shared context.
-
-## When to Use
-
-- After the Architect creates an implementation plan
 - Before presenting a plan for user approval
 - When validating work unit decomposition quality
 

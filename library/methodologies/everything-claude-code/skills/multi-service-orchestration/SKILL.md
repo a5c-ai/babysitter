@@ -2,15 +2,14 @@
 name: multi-service-orchestration
 description: PM2 process management, backend/frontend cascade execution, parallel worktree builds, and cross-service integration testing.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Multi-Service Orchestration
-
-## Overview
-
-Multi-service management methodology adapted from the Everything Claude Code project. Handles service discovery, dependency resolution, PM2 management, cascade/parallel execution, and cross-service testing.
-
-## Service Discovery
 - Scan for service directories (packages/, services/, apps/)
 - Parse package.json for dependencies and scripts
 - Build dependency graph

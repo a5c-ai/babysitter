@@ -17,6 +17,12 @@
  * - OMPL: https://ompl.kavrakilab.org/
  * - move_base: http://wiki.ros.org/move_base
  * - Nav2: https://navigation.ros.org/
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,123 @@
+{
+  "issueNumber": 617,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-617-task-cancel-mcp-tool",
+  "title": "SDK: add task_cancel MCP tool for effect cancellation",
+  "summary": "Plan a focused SDK MCP feature implementation for issue #617. The MCP server exposes task_post, task_list, and task_show, but not task_cancel. Existing runtime and CLI cancellation support should be reused so host agents can cancel pending effects through MCP, cancelled effects become terminal in MCP task views, and replay surfaces the existing cancellation error contract.",
+  "trigger": "manual dispatch",
+  "issueLabels": [
+    "sdk",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev",
+    "feature",
+    "agent-core",
+    "P1",
+    "risk:medium"
+  ],
+  "targetFiles": [
+    "packages/sdk/src/mcp/tools/tasks.ts",
+    "packages/sdk/src/mcp/tools/runs.ts",
+    "packages/sdk/src/mcp/__tests__/server.test.ts",
+    "packages/sdk/src/mcp/__tests__/tools/tasks.test.ts",
+    "packages/sdk/src/mcp/__tests__/integration.test.ts",
+    "packages/sdk/src/runtime/commitEffectResult.ts",
+    "packages/sdk/src/runtime/intrinsics/taskHelpers.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/storage/types.ts",
+    "packages/sdk/src/cli/main/taskCommands.ts",
+    "docs/adapters-babysitter-integrations/plugin-mode.md"
+  ],
+  "processLibraryReferences": [
+    "docs/agent-reference/process-authoring.md",
+    "library/specializations/cli-mcp-development/processes-backlog.md#6-mcp-tool-implementation",
+    "library/specializations/sdk-platform-development/processes-backlog.md#13-sdk-testing-strategy",
+    "library/processes/shared/tdd-triplet.js",
+    "library/processes/shared/deterministic-quality-gate.js"
+  ],
+  "reuseAuditFindings": [
+    {
+      "area": "runtime cancellation commit",
+      "finding": "packages/sdk/src/runtime/commitEffectResult.ts already exports commitEffectCancellation, writes result.json with status cancelled, appends EFFECT_CANCELLED, rebuilds state cache, updates globalTaskRegistry, emits metrics, and checks run work-dir leaks.",
+      "planImpact": "task_cancel should call commitEffectCancellation instead of duplicating CLI task:cancel logic."
+    },
+    {
+      "area": "effect index and run status",
+      "finding": "packages/sdk/src/runtime/replay/effectIndex.ts and packages/sdk/src/mcp/tools/runs.ts already treat EFFECT_CANCELLED as terminal for pending-effect calculations.",
+      "planImpact": "Implementation should not redesign run_status or effect indexing unless tests reveal drift."
+    },
+    {
+      "area": "MCP task tools",
+      "finding": "packages/sdk/src/mcp/tools/tasks.ts imports commitEffectResult only, registers task_post/task_list/task_show, and buildTaskList currently treats only EFFECT_RESOLVED as terminal.",
+      "planImpact": "Primary implementation is to add task_cancel and update task list/show terminal-state handling."
+    },
+    {
+      "area": "CLI precedent",
+      "finding": "packages/sdk/src/cli/main/taskCommands.ts already implements task:cancel using commitEffectCancellation with reason support and JSON output.",
+      "planImpact": "MCP contract should mirror the CLI semantics while using MCP toolResult/toolError formatting."
+    },
+    {
+      "area": "runtime replay cancellation",
+      "finding": "packages/sdk/src/runtime/exceptions.ts defines EffectCancelledError, but packages/sdk/src/runtime/intrinsics/taskHelpers.ts should be checked because cancelled StoredTaskResult may currently rehydrate as a generic serialized error.",
+      "planImpact": "Add a runtime regression and narrow fix only if replay does not throw EffectCancelledError with effectId/reason."
+    },
+    {
+      "area": "tests",
+      "finding": "packages/sdk/src/mcp/__tests__/server.test.ts expects 15 tools; MCP task unit and integration tests cover post/list/show but not cancel.",
+      "planImpact": "Tests must be updated to cover the new 16th tool and cancelled terminal task behavior."
+    }
+  ],
+  "mcpContract": {
+    "toolName": "task_cancel",
+    "description": "Cancel a pending task effect",
+    "arguments": {
+      "runId": "string; the run ID the task belongs to",
+      "effectId": "string; the effect ID of the task to cancel",
+      "reason": "optional string; human-readable cancellation reason",
+      "runsDir": "optional string; override runs directory path"
+    },
+    "successResult": {
+      "status": "cancelled",
+      "effectId": "<effectId>",
+      "resultRef": "<tasks/effect/result.json>",
+      "reason": "<reason if provided>"
+    },
+    "errorBehavior": "Return MCP toolError with the thrown runtime message for unknown, already resolved, already cancelled, or otherwise non-requested effects."
+  },
+  "acceptanceFocus": [
+    "The MCP server registers task_cancel and the expected tool list/count is updated from 15 to 16.",
+    "task_cancel cancels a pending effect by reusing commitEffectCancellation and appends an EFFECT_CANCELLED event.",
+    "task_cancel writes a cancelled task result that preserves the optional reason.",
+    "task_list reports cancelled tasks as terminal, excludes them from pendingOnly output, and does not count them in pendingCount.",
+    "task_show returns cancelled task result data for cancelled effects.",
+    "run_status reports no pending effect after cancellation.",
+    "Replaying a cancelled ctx.task throws the existing EffectCancelledError with the effectId and reason if runtime replay currently lacks that behavior.",
+    "Invalid cancellation cases such as unknown effect and already resolved effect return MCP errors without appending duplicate terminal events.",
+    "Existing task_post behavior remains unchanged."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/mcp/__tests__/server.test.ts packages/sdk/src/mcp/__tests__/tools/tasks.test.ts packages/sdk/src/mcp/__tests__/integration.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/runtime/__tests__/commitEffectResult.test.ts packages/sdk/src/runtime/__tests__/effectIndex.test.ts packages/sdk/src/runtime/__tests__/taskIntrinsic.test.ts",
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": [
+    "Reuse-audit findings are reviewed before implementation and no duplicate cancellation path is introduced.",
+    "MCP unit tests cover registration, success, error conversion, task_list, and task_show cancellation behavior.",
+    "MCP integration tests prove real journal/result/state behavior through task_cancel.",
+    "Runtime replay tests cover EffectCancelledError propagation if tracing identifies that gap.",
+    "Focused MCP/runtime tests pass before broad SDK tests.",
+    "npm run test:sdk, npm run build:sdk, and npm run verify:metadata pass or have environment-only skips documented with exact failure output.",
+    "Reviewer approves the public MCP contract and confirms no unrelated plugin-mode or tasks-mux scope creep."
+  ],
+  "nonGoals": [
+    "Do not implement tasks-mux propagation for issue #577.",
+    "Do not redesign task_post or overload it with a cancel status.",
+    "Do not change CLI task:cancel behavior except for directly shared bug fixes proven necessary.",
+    "Do not rewrite journal storage layout or introduce a new event persistence mechanism.",
+    "Do not implement unrelated plugin-mode external dispatch, subprocess support, host tool discovery, or cross-plugin coordination gaps from plugin-mode.md."
+  ],
+  "readyEntrypoint": ".a5c/processes/issue-617-task-cancel-mcp-tool.mjs#process"
+}

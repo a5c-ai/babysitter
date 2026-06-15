@@ -1,0 +1,16 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:opencode-manifest
+attributes:
+  artifactId: plugin-artifact:opencode-manifest
+  displayName: "OpenCode plugin manifest"
+  targetId: plugin-target:opencode
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - event-hooks
+  contextFiles:
+    - packages/extensions-adapter/src/targets/opencode.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

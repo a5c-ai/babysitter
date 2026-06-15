@@ -6,6 +6,11 @@ backlog-id: SK-006
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:technical-documentation]
+  skillAreas: [skill-area:docs-as-code, skill-area:c4-modeling]
+  roles: [role:technical-writer, role:documentation-engineer]
 ---
 
 # Diagram Generation Skill

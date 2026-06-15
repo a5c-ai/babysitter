@@ -1,0 +1,172 @@
+nodeKind: EvidenceSource
+id: evidence:repo-sdk-fallback
+attributes:
+  displayName: "babysitter-sdk adapterFallbackMetadata"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/babysitter-sdk/src/harness/adapterFallbackMetadata.ts"
+  filePath: "packages/babysitter-sdk/src/harness/adapterFallbackMetadata.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+  locator: "lines 1-170"
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-adapters-host
+attributes:
+  displayName: "adapters host detection"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/core/src/host-detection.ts"
+  filePath: "packages/adapters/core/src/host-detection.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+  locator: "lines 1-200"
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-hooks-detector
+attributes:
+  displayName: "hooks-adapter discovery detector"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/hooks/core/src/discovery/detector.ts"
+  filePath: "packages/adapters/hooks/core/src/discovery/detector.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+  locator: "lines 1-140"
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-target-index
+attributes:
+  displayName: "extensions-adapter target index"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/index.ts"
+  filePath: "packages/extensions-adapter/src/targets/index.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+  locator: "lines 1-78"
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-target-claude
+attributes:
+  displayName: "extensions-adapter target: claude-code"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/claude-code.ts"
+  filePath: "packages/extensions-adapter/src/targets/claude-code.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-target-codex
+attributes:
+  displayName: "extensions-adapter target: codex"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/codex.ts"
+  filePath: "packages/extensions-adapter/src/targets/codex.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-target-cursor
+attributes:
+  displayName: "extensions-adapter target: cursor"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/cursor.ts"
+  filePath: "packages/extensions-adapter/src/targets/cursor.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-target-gemini
+attributes:
+  displayName: "extensions-adapter target: gemini"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/gemini.ts"
+  filePath: "packages/extensions-adapter/src/targets/gemini.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-target-copilot
+attributes:
+  displayName: "extensions-adapter target: github-copilot"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/github-copilot.ts"
+  filePath: "packages/extensions-adapter/src/targets/github-copilot.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-process-catalog
+attributes:
+  displayName: "Process Library Catalog (Next.js app)"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/catalog/src/app"
+  filePath: "packages/catalog/src/app"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-codex-windows-hooks
+attributes:
+  displayName: "Codex Windows shell-hook threshold (>=0.119.0)"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/extensions-adapter/src/targets/codex.ts"
+  filePath: "packages/extensions-adapter/src/targets/codex.ts"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+  locator: "windows-hook-threshold:0.119.0 platform nuance"
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-atlas-catalog-package
+attributes:
+  displayName: "atlas catalog package root"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/atlas"
+  filePath: "packages/atlas"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-transport-adapter-readme
+attributes:
+  displayName: "transport-adapter README"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/transport-adapter/README.md"
+  filePath: "packages/transport-adapter/README.md"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}
+---
+nodeKind: EvidenceSource
+id: evidence:repo-transport-adapter-architecture
+attributes:
+  displayName: "transport-adapter architecture doc"
+  kindLabel: file
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/transport-adapter/docs/architecture.md"
+  filePath: "packages/transport-adapter/docs/architecture.md"
+  trustLevel: trust-level:repo
+  observedAt: "2026-04-23T00:00:00Z"
+  observedBy: a5c-ai-team
+edges: {}

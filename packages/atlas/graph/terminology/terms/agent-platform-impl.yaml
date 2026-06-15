@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:agent-platform-impl
+attributes:
+  canonicalDefinitionId: definition:agent-platform-impl.canonical
+  displayName: "AgentPlatformImpl"
+  kind: concept
+  references:
+    - "NodeKind:AgentPlatformImpl"
+  description: |
+    Concrete platform impl
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

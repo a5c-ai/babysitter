@@ -1,0 +1,247 @@
+---
+nodeKind: SkillArea
+id: skill-area:ios-native
+attributes:
+  displayName: "iOS Native Development"
+  description: |
+    Building iOS apps with Swift/SwiftUI/UIKit — app lifecycle,
+    navigation, persistence, and Apple platform integrations.
+  domains:
+    - specialization:mobile-development
+  requiresLanguages:
+    - language:swift
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:mobile-ios
+      confidence: primary
+  uses_language:
+    - language:swift
+    - target: language:swift
+  prerequisite_for_learning:
+    - target: skill-area:react-native-development
+      strength: helpful
+    - target: skill-area:mobile-local-databases
+      strength: recommended
+    - target: skill-area:mobile-state-management
+      strength: recommended
+    - target: skill-area:push-notifications
+      strength: recommended
+    - target: skill-area:deep-linking
+      strength: recommended
+    - target: skill-area:mobile-offline-sync
+      strength: recommended
+    - target: skill-area:mobile-biometrics
+      strength: recommended
+    - target: skill-area:in-app-purchases
+      strength: recommended
+    - target: skill-area:app-store-deployment
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:android-native
+attributes:
+  displayName: "Android Native Development"
+  description: |
+    Building Android apps with Kotlin/Jetpack Compose — activity/
+    fragment lifecycle, navigation, room persistence, and coroutines.
+  domains:
+    - specialization:mobile-development
+  requiresLanguages:
+    - language:kotlin
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+  uses_language:
+    - language:kotlin
+    - target: language:kotlin
+  prerequisite_for_learning:
+    - target: skill-area:flutter-development
+      strength: helpful
+    - target: skill-area:mobile-local-databases
+      strength: recommended
+    - target: skill-area:mobile-state-management
+      strength: recommended
+    - target: skill-area:push-notifications
+      strength: recommended
+    - target: skill-area:deep-linking
+      strength: recommended
+    - target: skill-area:mobile-offline-sync
+      strength: recommended
+    - target: skill-area:mobile-biometrics
+      strength: recommended
+    - target: skill-area:in-app-purchases
+      strength: recommended
+    - target: skill-area:app-store-deployment
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:react-native-development
+attributes:
+  displayName: "React Native Development"
+  description: |
+    Cross-platform mobile apps with React Native — bridges, native
+    modules, navigation, Hermes runtime, and performance tuning.
+  domains:
+    - specialization:mobile-development
+  requiresLanguages:
+    - language:typescript
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:react-native-mobile
+      confidence: primary
+  uses_language:
+    - language:typescript
+    - target: language:typescript
+  prerequisite_for_learning:
+    - target: skill-area:mobile-sensor-integration
+      strength: recommended
+    - target: skill-area:mobile-location-services
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:flutter-development
+attributes:
+  displayName: "Flutter Development"
+  description: |
+    Building Flutter apps — widget tree, state management options
+    (Riverpod, Bloc), platform channels, and Skia/Impeller rendering.
+  domains:
+    - specialization:mobile-development
+  requiresLanguages:
+    - language:dart
+  requiresFrameworks:
+    - framework:flutter
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+    - target: specialization:flutter-mobile
+      confidence: primary
+  uses_language:
+    - language:dart
+    - target: language:dart
+  uses_framework:
+    - framework:flutter
+    - target: framework:flutter
+  prerequisite_for_learning:
+    - target: skill-area:mobile-sensor-integration
+      strength: recommended
+    - target: skill-area:mobile-location-services
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:mobile-state-management
+attributes:
+  displayName: "Mobile State Management"
+  description: |
+    State patterns for mobile apps — unidirectional flow, derived
+    state, persistence rehydration, and lifecycle-safe stores.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:push-notifications
+attributes:
+  displayName: "Push Notifications"
+  description: |
+    Push delivery via APNs and FCM — token management, payload
+    constraints, foreground/background behavior, and rich content.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+  uses_stack_part:
+    - stack-part:notification-service
+---
+nodeKind: SkillArea
+id: skill-area:app-store-deployment
+attributes:
+  displayName: "App Store Deployment"
+  description: |
+    Submitting to the App Store and Play Store — code signing,
+    provisioning, review guidelines, staged rollouts, and store
+    metadata.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:deep-linking
+attributes:
+  displayName: "Mobile Deep Linking"
+  description: |
+    Universal Links / App Links / custom-scheme deep links —
+    apple-app-site-association, assetlinks.json, and routing.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mobile-offline-sync
+attributes:
+  displayName: "Mobile Offline Sync"
+  description: |
+    Offline-first architectures — local-first data stores, conflict
+    resolution, sync engines, and background fetch.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:mobile-biometrics
+attributes:
+  displayName: "Mobile Biometrics"
+  description: |
+    Face ID / Touch ID / BiometricPrompt integration — keystore-backed
+    keys, fallback flows, and threat modeling for biometric auth.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:in-app-purchases
+attributes:
+  displayName: "In-App Purchases"
+  description: |
+    StoreKit / Google Play Billing integration — products,
+    subscriptions, server receipt verification, and refund handling.
+  domains:
+    - specialization:mobile-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:mobile-development
+      confidence: primary

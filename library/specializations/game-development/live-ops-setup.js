@@ -4,6 +4,12 @@
  * analytics, remote config, content delivery, community management, and ongoing support systems.
  * @inputs { projectName: string, liveOpsModel?: string, analyticsRequirements?: array, outputDir?: string }
  * @outputs { success: boolean, liveOpsDoc: string, analyticsSetup: object, contentPipeline: object, artifacts: array }
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:engineering-onboarding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

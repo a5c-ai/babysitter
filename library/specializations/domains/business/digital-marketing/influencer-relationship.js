@@ -3,6 +3,12 @@
  * @description Ongoing process for building and nurturing long-term relationships with influencers and brand ambassadors, ensuring sustained partnerships and authentic advocacy
  * @inputs { influencerDatabase: object, partnershipHistory: object, brandUpdates: array, productInformation: object, outputDir: string }
  * @outputs { success: boolean, updatedInfluencerProfiles: array, communicationLogs: array, ambassadorProgramDocumentation: object, renewalRecommendations: array, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

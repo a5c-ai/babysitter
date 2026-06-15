@@ -14,6 +14,11 @@ metadata:
   model-requirements:
     - Predictive modeling
     - Signal aggregation
+graph:
+  domains: [domain:sales]
+  skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+  workflows: [workflow:customer-journey-optimization]
+  roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
 ---
 
 # Customer Health Agent

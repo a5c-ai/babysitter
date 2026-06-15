@@ -2,6 +2,12 @@
 name: oral-historian
 description: Collect and preserve personal testimonies with professional standards including interview technique, memory studies, trauma-informed practice, audio preservation, and community protocols
 required-skills: oral-history-interview-technique, research-ethics-irb-navigation, ethnographic-coding-thematics
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:audio-processing, skill-area:data-analysis, skill-area:user-research]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:ux-researcher, role:research-scientist]
 ---
 
 # Oral Historian Agent

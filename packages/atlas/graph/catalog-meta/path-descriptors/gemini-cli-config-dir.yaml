@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:gemini-cli-config-dir
+attributes:
+  pathId: path:gemini-cli-config-dir
+  displayName: "Gemini CLI config directory"
+  path: "~/.gemini/"
+  pathKind: settings-file
+  ownerKind: AgentRuntimeImpl
+  ownerId: agent-runtime-impl:gemini-cli.runtime@current
+  platform: cross-platform
+  scope: user
+  evaluationContext: user
+  expansion: home
+
+edges:
+  owned_by:
+    - target: agent-runtime-impl:gemini-cli.runtime@current

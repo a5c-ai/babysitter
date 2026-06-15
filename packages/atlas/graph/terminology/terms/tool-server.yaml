@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:tool-server
+attributes:
+  canonicalDefinitionId: definition:tool-server.canonical
+  displayName: "ToolServer"
+  kind: tool
+  references:
+    - "NodeKind:ToolServer"
+  description: |
+    External process speaking a tool protocol
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:ml-ai

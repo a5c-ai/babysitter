@@ -1,0 +1,41 @@
+nodeKind: Layer
+id: layer:10-interaction
+attributes:
+  displayName: "Interaction"
+  position: 10
+  path: surfacing
+  scope: >-
+    User-facing action primitives exposed by a surface: commands,
+    keybindings, prompt controls, editor widgets, voice/multimodal triggers,
+    review/approve/resume affordances, collaborative actions, operational
+    buttons, and telemetry affordances.
+  summary: |
+    The interaction layer is the vocabulary a human or external caller can see
+    and invoke through a CLI, TUI, IDE, web UI, API, automation surface, or
+    notification surface. It captures **what action is exposed to the user**:
+    slash commands, command-palette entries, keybindings, prompt controls,
+    approval prompts, dashboard buttons, multimodal input, and visible status
+    or telemetry controls.
+
+    It does not own the control-plane work performed after an action is
+    invoked. Dispatch, handoff, retry, reconciliation, fan-out/fan-in, budget
+    enforcement, workspace lifecycle, durable resume, and result validation are
+    modeled as `OrchestrationPrimitive` nodes on `layer:13-orchestration`.
+    Interaction primitives may trigger orchestration primitives, but they are
+    not the orchestration layer themselves.
+  responsibilities:
+    - Expose user-facing commands, controls, triggers, approvals, and resumable interrupts.
+    - Translate human gestures into platform, runtime, or orchestration requests.
+    - Surface task state, progress, telemetry, collaboration, and handoff controls.
+    - Keep UI affordances distinct from the control-plane primitives they invoke.
+  examples:
+    - Slash commands, keybindings, prompt controls, approve/reject interrupt.
+    - Editor widget, dashboard button, GitHub Action trigger, webhook trigger.
+    - Voice prompt, multimodal attachment, status-line indicator, session picker.
+    - User-visible plan review or breakpoint prompt that triggers an orchestration approval gate.
+  fitNotes: |
+    If a concept is a visible affordance or invocation token, keep it here. If
+    it routes, schedules, dispatches, retries, gates, budgets, snapshots, or
+    validates agent work, model it as an orchestration primitive and connect the
+    interaction affordance to that primitive instead of overloading this layer.
+edges: {}

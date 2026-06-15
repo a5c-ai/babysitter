@@ -3,6 +3,12 @@
  * @description Analyze and optimize process energy consumption, implement energy management systems, and evaluate renewable integration
  * @inputs { processName: string, energyData: object, utilityData: object, processData: object, outputDir: string }
  * @outputs { success: boolean, auditResults: object, optimizationPlan: object, kpiDashboard: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:chemical-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,46 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:paperclip.platform@current
+attributes:
+  displayName: "Paperclip Platform (current)"
+  agentVersionId: agent-version:paperclip@current
+  packageRef: source-ref:paperclip-github
+  nativeExtensionFormat: paperclip-plugin
+  nativeExtensionManifestPath: plugin.json
+  nativeExtensionsDirectoryPath:
+    - plugins/
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentDefinitionFormat: adapter-config
+  subagentsDirectoryPath:
+    - adapters/
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: ""
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: company-scoped
+  updateChannelMechanism: npm
+  supportedChannelKinds: []
+  notes: |
+    Platform extensibility:
+    - Plugin SDK: @paperclip/plugin-sdk for building custom plugins
+    - create-paperclip-plugin: scaffolding CLI for new plugin projects
+    - Sandbox providers: isolated execution environments for plugins
+    - Adapter directory: pluggable coding agent integrations
+    - Company-scoped isolation: each company tenant has isolated state,
+      agents, and configurations
+    Distribution via npm; local dev with PGlite requires no external
+    database setup.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:paperclip
+      role: platform
+  bundles: []
+  supports:
+    - target: capability:supports-plugins
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Plugin SDK with create-paperclip-plugin scaffolding and sandbox providers.

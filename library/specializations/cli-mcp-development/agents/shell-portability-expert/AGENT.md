@@ -8,6 +8,14 @@ expertise:
   - BSD vs GNU utilities
   - Cross-platform patterns
   - Shell detection
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:cross-platform-desktop]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # Shell Portability Expert Agent

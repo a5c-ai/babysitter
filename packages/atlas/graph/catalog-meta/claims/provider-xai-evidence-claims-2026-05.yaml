@@ -1,0 +1,95 @@
+nodeKind: Claim
+id: claim:provider-xai-openai-compatible-chat-api
+attributes:
+  subjectId: provider:xai
+  attribute: endpoints
+  value: OpenAI-compatible REST API at https://api.x.ai with chat, models, files, batches, images, videos, and voice routes.
+  subjectKind: Provider
+  statement: provider:xai exposes an OpenAI-compatible inference REST API.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-api-reference-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 xAI provider API family and endpoint records.
+edges:
+  backed_by_evidence:
+    - evidence:xai-api-reference-docs
+  about_subject:
+    - provider:xai
+---
+nodeKind: Claim
+id: claim:provider-xai-api-key-auth
+attributes:
+  subjectId: provider:xai
+  attribute: authMethods
+  value: api-key
+  subjectKind: Provider
+  statement: provider:xai uses an Authorization Bearer API-key header for REST API authentication.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-api-reference-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 xAI provider auth signals.
+edges:
+  backed_by_evidence:
+    - evidence:xai-api-reference-docs
+  about_subject:
+    - provider:xai
+---
+nodeKind: Claim
+id: claim:provider-xai-model-discovery
+attributes:
+  subjectId: provider:xai
+  attribute: supports
+  value: capability:model-discovery
+  subjectKind: Provider
+  statement: provider:xai exposes a models route suitable for model discovery.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-api-reference-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 xAI provider capability support.
+edges:
+  backed_by_evidence:
+    - evidence:xai-api-reference-docs
+  about_subject:
+    - provider:xai
+---
+nodeKind: Claim
+id: claim:provider-xai-regions
+attributes:
+  subjectId: provider:xai
+  attribute: regions
+  value: global, us-east-1, eu-west-1
+  subjectKind: Provider
+  statement: provider:xai serves Grok 4.3 through documented us-east-1 and eu-west-1 clusters.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 xAI provider region signals.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - provider:xai

@@ -1,0 +1,11 @@
+nodeKind: Acronym
+id: acronym:a2a
+attributes:
+  acronym: "A2A"
+  expandsToTermId: term:agent-to-agent
+  description: |
+    Acronym for "Agent-to-Agent" (communication or delegation between
+    agents).
+edges:
+  expands_to:
+    - term:agent-to-agent

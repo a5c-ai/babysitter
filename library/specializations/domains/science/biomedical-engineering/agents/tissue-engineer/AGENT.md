@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Specialized Domain
   agent-id: BME-AG-020
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-scientist]
 ---
 
 # Tissue Engineer Agent

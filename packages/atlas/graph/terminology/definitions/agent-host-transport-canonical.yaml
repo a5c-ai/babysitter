@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:agent-host-transport.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:agent-host-transport
+  text: |
+    how a host talks to an agent process (stdio, http, ws, ...)
+  status: canonical
+edges:
+  defines:
+    - term:agent-host-transport

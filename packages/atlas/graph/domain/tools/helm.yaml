@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:helm
+attributes:
+  displayName: "Helm"
+  homepageUrl: "https://helm.sh"
+  kind: orchestrator
+  description: |
+    Package manager for Kubernetes - manages charts that describe related Kubernetes resources.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:k8s-operator-development
+  used_for:
+    - target: skill-area:configuration-management
+    - target: skill-area:deployment-automation
+  alternative_to:
+    - target: tool:kustomize
+      comparison: "Kubernetes config — Helm uses templated charts; Kustomize uses overlay patching"
+    - target: tool:helmfile
+      comparison: "Kubernetes deployment — Helm manages single charts; Helmfile orchestrates multi-chart deployments"

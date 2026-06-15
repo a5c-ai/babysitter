@@ -1,0 +1,19 @@
+nodeKind: BackgroundConsolidation
+id: background-consolidation:claude-code-extract-memories
+attributes:
+  displayName: "Extract-memories turn-end fork"
+  kind: extract-memories
+  forkLabel: "extract_memories"
+  querySource: "extract_memories"
+  skipTranscript: true
+  cacheSafeFork: true
+  toolRestrictions:
+    - "Edit/Write scoped to memory root via createAutoMemCanUseTool"
+  canUseToolFactory: "createAutoMemCanUseTool"
+  emitsTelemetryEvents:
+    - tengu_extract_memories_fired
+    - tengu_extract_memories_completed
+  featureGate: "tengu_passport_quail"
+edges:
+  consolidates_memory_system:
+    - target: memory-system:claude-code-auto-memory

@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:supports-thinking
+attributes:
+  displayName: "Supports thinking"
+  description: |
+    The entity can produce internal reasoning ("thinking") tokens
+    before emitting the final response. Implies the wire protocol
+    carries a distinct thinking channel.
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: model
+edges: {}

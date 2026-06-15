@@ -2,17 +2,14 @@
 name: hook-management
 description: Session-scoped hook lifecycle management with enable/disable/status controls, execution profiling, and color-coded performance alerts.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Hook Management
-
-## Overview
-
-Session-scoped hook lifecycle management for ClaudeKit's event-driven hook system. Provides enable/disable/status controls with execution profiling and performance alerts.
-
-## Hook Types
-
-### PreToolUse Hooks
 - **file-guard**: Blocks sensitive file access (195+ patterns)
 
 ### PostToolUse Hooks

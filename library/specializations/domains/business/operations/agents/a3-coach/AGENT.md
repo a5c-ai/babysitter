@@ -9,6 +9,11 @@ expertise:
   - Countermeasure review
   - PDCA cycle coaching
   - Capability development
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management, skill-area:business-analysis, skill-area:statistical-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:scrum-master]
 ---
 
 # A3 Coach

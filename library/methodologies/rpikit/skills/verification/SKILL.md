@@ -2,17 +2,14 @@
 name: verification
 description: Verification-before-completion discipline ensuring all success criteria are met, tests pass, and reviews complete before declaring work done.
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Verification Before Completion
-
-## Overview
-
-Ensures no step or phase is declared complete without running verification. All success criteria must be met before finishing.
-
-## When to Use
-
-- After each implementation step
 - At phase checkpoints
 - Before final completion declaration
 - When validating that all acceptance criteria are met

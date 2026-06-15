@@ -17,6 +17,13 @@
  * - App Store Search Ads: https://searchads.apple.com/
  * - Google Play Console: https://play.google.com/console
  * - ASO Best Practices: https://developer.apple.com/app-store/product-page/
+ * @graph
+ *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:app-store-deployment]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:mobile-app-submission, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -59,21 +66,14 @@ export async function process(inputs, ctx) {
       appName, platforms, targetMarkets, competitors, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `ASO strategy complete for ${appName}. Ready to implement optimizations?`,
     title: 'ASO Strategy Review',
-    context: { runId: ctx.runId, appName, platforms, targetMarkets },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, platforms, targetMarkets }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

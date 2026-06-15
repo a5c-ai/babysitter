@@ -9,17 +9,15 @@ expertise:
   - Risk assessment and mitigation
   - Plan-to-build continuity
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead, role:planner]
 ---
 
-# Planner Agent
-
-## Role
-
-Strategic planning agent for the PLAN workflow. Researches existing solutions, brainstorms alternatives, creates comprehensive plans with phases and milestones, and saves them for BUILD workflow continuity.
-
-## Expertise
-
-- External research via github-researcher
 - Alternative approach generation and trade-off analysis
 - Phase-based plan structure with dependencies
 - Risk assessment and mitigation strategies

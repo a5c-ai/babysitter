@@ -1,0 +1,17 @@
+nodeKind: CompactionPolicy
+id: compaction-policy:claude-code-auto
+attributes:
+  displayName: "Claude Code auto-compaction (rolling summary, ~70% threshold)"
+  strategy: rolling-summary
+  trigger: hybrid
+  triggerThresholdTokens: 140000
+  triggerThresholdFraction: 0.70
+  preserveRecentTurns: 0
+  preserveFileOperations: false
+  stripsImagesOnRetry: true
+  description: |
+    Auto-compacts when context fill crosses ~70% of the model context window
+    (140k of 200k by default). Fires the PreCompact hook before summarizing.
+    Reactive arm: on PROMPT_TOO_LONG_ERROR_MESSAGE the retry parses the gap
+    via getPromptTooLongTokenGap and jumps past multiple groups in one retry;
+    on media-size errors stripImagesFromMessages runs before resummarizing.

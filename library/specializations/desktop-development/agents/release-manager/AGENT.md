@@ -2,6 +2,12 @@
 name: release-manager
 description: Coordinates release process including versioning, changelog, signing, and distribution
 expertise: [release, versioning, changelog, distribution, ci-cd]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # release-manager

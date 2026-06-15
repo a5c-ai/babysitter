@@ -1,0 +1,39 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:antigravity-cli.knowledge@current
+attributes:
+  displayName: "Antigravity CLI Knowledge Fabric — GEMINI.md + Rules"
+  agentVersionId: agentVersion:antigravity:2-0-11
+  description: |
+    Antigravity CLI's knowledge fabric builds on the GEMINI.md pattern
+    inherited from Gemini CLI, adding a rules system for structured
+    project-level and user-level instructions. GEMINI.md files provide
+    persistent context injected at session bootstrap, while rules offer
+    finer-grained scoping and conditional activation. Both are retrieved
+    via file-hierarchy traversal from the workspace root upward. SKILL.md
+    files contribute additional knowledge scoped to specific workflows.
+  knowledgeFileFormats:
+    - "GEMINI.md"
+    - ".antigravity/rules/*.md"
+    - "SKILL.md"
+  knowledgeScopes:
+    - project
+    - user
+    - skill
+  autoExtractionSupport: false
+  retrievalStrategy: file-hierarchy
+  knowledgePersistence: filesystem
+  notes: |
+    Antigravity CLI extends the GEMINI.md knowledge pattern with a rules
+    system and SKILL.md-scoped knowledge. Retrieval remains file-hierarchy
+    based across project, user, and skill scopes. No auto-memory
+    extraction or vector-based retrieval has been documented.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  composes:
+    - target: agentVersion:antigravity:2-0-11
+      role: knowledge-fabric
+  succeeds:
+    - target: knowledge-fabric-impl:gemini-cli.knowledge@current
+      notes: 'Extends Gemini CLI knowledge fabric with rules system and SKILL.md-scoped knowledge.
+        '

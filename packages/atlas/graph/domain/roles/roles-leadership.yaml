@@ -1,0 +1,182 @@
+nodeKind: Role
+id: role:engineering-manager
+attributes:
+  displayName: "Engineering Manager"
+  isAgentic: false
+  automatability: 0.4
+  description: |
+    Leads a team of engineers, balancing people management with delivery accountability
+    to ensure the team operates at high velocity while maintaining morale and growth.
+    Conducts regular one-on-ones, manages performance, and actively supports career
+    development of direct reports. Coordinates with product and design counterparts
+    on roadmap planning, removes blockers, and represents the team's interests to
+    upper management.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:mentoring
+    - responsibility:hiring
+    - responsibility:sprint-planning
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: specialization:software-architecture
+      level: intermediate
+  delegates_to:
+    - role:backend-engineer
+    - role:frontend-engineer
+    - role:fullstack-engineer
+---
+nodeKind: Role
+id: role:tech-lead
+attributes:
+  displayName: "Tech Lead"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Provides technical direction for a team or product area, setting coding standards,
+    driving architecture decisions, and ensuring engineering quality across deliverables.
+    Remains hands-on as a contributor while dedicating significant time to reviewing
+    designs, unblocking teammates, and aligning with peer tech leads. Partners closely
+    with the engineering manager to balance technical ambition with delivery pragmatism.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:code-review
+    - responsibility:mentoring
+    - responsibility:risk-assessment
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: specialization:software-architecture
+      level: expert
+  delegates_to:
+    - role:backend-engineer
+    - role:frontend-engineer
+---
+nodeKind: Role
+id: role:vp-engineering
+attributes:
+  displayName: "VP of Engineering"
+  isAgentic: false
+  automatability: 0.1
+  description: |
+    Owns the engineering organization's health, culture, and delivery capacity across
+    multiple teams, translating executive strategy into engineering OKRs and headcount
+    plans. Manages engineering managers and senior technical leaders, ensuring alignment
+    between product direction and engineering investment. Drives cross-functional
+    initiatives around reliability, security, hiring, and operational excellence while
+    representing engineering at the executive table.
+  seniority: vp
+edges:
+  holds_responsibility:
+    - responsibility:hiring
+    - responsibility:budget-management
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+    - responsibility:capacity-planning
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: specialization:software-architecture
+      level: expert
+  delegates_to:
+    - role:engineering-manager
+    - role:tech-lead
+    - role:architect
+---
+nodeKind: Role
+id: role:cto
+attributes:
+  displayName: "Chief Technology Officer"
+  isAgentic: false
+  automatability: 0.1
+  description: |
+    Sets the long-term technology vision and strategy for the organization, ensuring
+    technical investments support business goals and competitive differentiation.
+    Serves as the most senior technical voice in executive discussions, balancing
+    innovation with operational discipline. Builds and stewards engineering culture,
+    attracts top talent, and manages the VP of Engineering and other technical
+    executives to execute on the strategy.
+  seniority: c-level
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:hiring
+    - responsibility:budget-management
+    - responsibility:vendor-evaluation
+    - responsibility:risk-assessment
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:software-engineering
+      level: authoritative
+    - target: specialization:software-architecture
+      level: authoritative
+  delegates_to:
+    - role:vp-engineering
+    - role:architect
+    - role:principal-engineer
+---
+nodeKind: Role
+id: role:architect
+attributes:
+  displayName: "Architect"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Designs and governs the overarching technical architecture of systems and platforms,
+    ensuring decisions optimize for scalability, reliability, maintainability, and
+    security across a portfolio of products. Produces Architecture Decision Records,
+    leads cross-team design reviews, and establishes patterns and reference implementations
+    that engineering teams adopt. Influences technology strategy and evaluates emerging
+    tools and paradigms for adoption fitness.
+  seniority: principal
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:risk-assessment
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:vendor-evaluation
+  requires_skill:
+    - target: specialization:software-architecture
+      level: authoritative
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:cloud-infra
+      level: expert
+    - target: domain:security
+      level: intermediate
+---
+nodeKind: Role
+id: role:principal-engineer
+attributes:
+  displayName: "Principal Engineer"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Operates as the highest individual-contributor technical role, driving organization-wide
+    technical initiatives and solving the most complex engineering challenges without
+    managerial authority. Shapes engineering culture by modeling excellent practices,
+    mentoring staff engineers, and publishing internal technical standards. Collaborates
+    with the CTO and VP of Engineering on multi-year technology strategy while remaining
+    deeply hands-on in critical codebases.
+  seniority: principal
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:mentoring
+    - responsibility:code-review
+    - responsibility:knowledge-sharing
+    - responsibility:performance-optimization
+  requires_skill:
+    - target: domain:software-engineering
+      level: authoritative
+    - target: specialization:software-architecture
+      level: expert
+    - target: specialization:performance-optimization
+      level: expert

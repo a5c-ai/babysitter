@@ -6,6 +6,13 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:configuration-management]
+  roles: [role:platform-engineer, role:devops-engineer]
+  topics: [topic:infrastructure-as-code]
+
 ---
 
 # Kubernetes Manifest Validator Skill

@@ -3,6 +3,12 @@
  * @description Implementation of Objectives and Key Results framework including goal setting, alignment, tracking, and review cycles
  * @inputs { organizationContext: object, strategicObjectives: array, teams: array, period: string, outputDir: string }
  * @outputs { success: boolean, okrHierarchy: object, alignmentMap: object, scoringFramework: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

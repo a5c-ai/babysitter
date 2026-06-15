@@ -2,17 +2,12 @@
 name: code-review-orchestration
 description: 6-agent parallel code review orchestration covering architecture, security, performance, testing, quality, and documentation dimensions with weighted scoring.
 allowed-tools: Read, Bash, Grep, Glob
----
-
-# Code Review Orchestration
-
-## Overview
-
-Orchestrates 6 specialized review agents running in parallel across independent dimensions. Each agent scores independently, and results are aggregated into a weighted final score with a clear recommendation.
-
-## Six Dimensions
-
-### Architecture (weight: 20%)
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 Module boundaries, dependency direction, design pattern adherence, architectural drift.
 
 ### Security (weight: 25%)
@@ -29,6 +24,8 @@ Naming, readability, error handling, type safety, DRY, comments.
 
 ### Documentation (weight: 10%)
 JSDoc, README updates, changelog, inline comments, type documentation.
+
+---
 
 ## Scoring and Recommendation
 

@@ -7,15 +7,14 @@ allowed-tools:
   - web-fetch
   - api-call
   - git-commit
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# COG Team Intelligence Skill
-
-Cross-reference GitHub, Linear, Slack, and PostHog data to generate unified team intelligence briefs with bidirectional sync support.
-
-## Capabilities
-
-- Gather activity data from GitHub (PRs, issues, commits, reviews)
 - Gather activity data from Linear (issues, cycles, projects)
 - Gather activity data from Slack (discussions, decisions, threads)
 - Gather analytics from PostHog (metrics, feature flags, experiments)

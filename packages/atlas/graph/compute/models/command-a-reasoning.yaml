@@ -1,0 +1,44 @@
+# Issue #905 — Track Cohere Command A Reasoning variant.
+nodeKind: ModelVersion
+id: model:command-a-reasoning@current
+attributes:
+  displayName: "Command A Reasoning"
+  providerModelIds:
+    - command-a-reasoning-08-2025
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:cohere-command
+  kind: text
+  contextWindowTokens: 0
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: "2025-08-01"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2025-08-01"
+  modelCardUrl: https://docs.cohere.com/docs/command-a-reasoning
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Command A Reasoning is a reasoning-capable variant in the Cohere Command A
+    family. Exact context window, pricing, and cross-provider availability
+    should be confirmed from Cohere docs before adding precise claims.
+edges:
+  belongs_to_family:
+    - target: model-family:cohere-command
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:cohere-command
+  served_by:
+    - provider:cohere
+  speaks:
+    - model-transport:cohere-chat
+  supports:
+    - target: capability:supports-tool-use
+      level: full

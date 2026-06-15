@@ -1,0 +1,9 @@
+nodeKind: EffortLevel
+id: effort-level:minimal
+attributes:
+  displayName: "Effort: minimal"
+  name: minimal
+  relativeReasoningCost: 0
+  description: |
+    Lowest reasoning tier — fastest, cheapest, near-zero extended thinking.
+    OpenAI gpt-5 / Codex specific (Anthropic effort taxonomy starts at low).

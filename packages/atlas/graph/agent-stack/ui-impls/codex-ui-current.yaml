@@ -1,0 +1,80 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:codex.ui@current
+attributes:
+  displayName: "Codex UI (current) — tui-and-cli"
+  agentVersionId: agentVersion:codex:ge-0-119-0
+  packageRef: source-ref:codex-github
+  uiKind: tui-and-cli
+  presentationsBundled:
+    - presentation:codex-cli-tui
+  themeSupport: light-dark
+  accessibilitySupport: basic
+  notes: |
+    OpenAI Codex CLI ships an interactive TUI plus scripted CLI; the user picks
+    sandbox mode, switches profiles, and approves tool calls from this UI layer.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive:
+    - target: interaction-primitive:codex-ask-for-approval
+      attributes:
+        mechanism: ui-control
+    - target: interaction-primitive:codex-sandbox-mode
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/sandbox"
+    - target: interaction-primitive:codex-profile-switch
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/profile"
+    - target: interaction-primitive:codex-model-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/model"
+    - target: interaction-primitive:codex-fast-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/fast"
+    - target: interaction-primitive:codex-personality-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/personality"
+    - target: interaction-primitive:codex-permissions-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/permissions"
+    - target: interaction-primitive:codex-agent-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/agent"
+    - target: interaction-primitive:codex-status-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/status"
+    - target: interaction-primitive:codex-mcp-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/mcp"
+    - target: interaction-primitive:codex-diff-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/diff"
+    - target: interaction-primitive:codex-theme-command
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/theme"
+    - target: interaction-primitive:model-picker
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/model"
+    - target: interaction-primitive:status-line
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/status"
+    - target: interaction-primitive:slash-help
+      attributes:
+        mechanism: slash-command
+        invocationToken: "/help"
+    - target: interaction-primitive:approval-prompt
+      attributes:
+        mechanism: ui-control

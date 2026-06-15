@@ -10,6 +10,11 @@ expertise:
   - Inline caching and type feedback
   - On-stack replacement (OSR)
   - Code cache management
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:profiling-cpu]
+  roles: [role:backend-engineer, role:principal-engineer]
 ---
 
 # JIT Compiler Specialist Agent

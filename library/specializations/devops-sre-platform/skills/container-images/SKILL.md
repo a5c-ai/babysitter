@@ -8,6 +8,13 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:containerization, skill-area:deployment-infrastructure-management]
+  roles: [role:devops-engineer, role:platform-engineer]
+  topics: [topic:immutable-infrastructure]
+
 ---
 
 # Container Images Skill

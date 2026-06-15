@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:agent-version-product
+attributes:
+  termAId: term:agent-version
+  termBId: term:agent-product
+  direction: bidirectional
+  note: |
+    AgentVersion is a versioned snapshot of an AgentProduct; informal usage often elides the distinction.
+edges:
+  synonym_a:
+    - term:agent-version
+  synonym_b:
+    - term:agent-product

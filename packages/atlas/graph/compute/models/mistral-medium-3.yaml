@@ -1,0 +1,78 @@
+nodeKind: ModelVersion
+id: model:mistral-medium-3@current
+attributes:
+  displayName: "Mistral Medium 3"
+  costPerMTokInput: 0.4
+  costPerMTokOutput: 2.0
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: chat
+  contextWindowTokens: 128000
+  modalities:
+  - text
+  - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-05-07'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-05-07'
+  modelCardUrl: https://mistral.ai/news/mistral-medium-3/
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:mistral
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch
+  - target: capability:supports-text-streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch
+  - target: capability:can-multi-turn
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch
+  - target: capability:supports-native-tools
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch
+  - target: capability:parallel-tool-calls
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch
+  - target: capability:requires-tool-approval
+    versionRange: '>=3.0.0 <4.0.0'
+    level: full
+    notes: 'Open-weights model deployed via third-party providers; tool execution
+      by convention requires approval at the agent/runtime layer.
+
+      '
+    evidenceSourceIds:
+    - evidence:mistral-medium-3-launch

@@ -1,0 +1,48 @@
+# NodeKinds for cluster 11-workflows.
+# Loaded by tools/validator/validate.py via the manifest in ../ontology-schema.yaml.
+# DO NOT add backward-compat shims — catalog pass 37 policy.
+
+nodeKinds:
+- id: node:workflow
+  name: Workflow
+  origin: universal
+  prefix: workflow
+  cluster: 11-workflows
+  purpose: a cross-cutting process that spans multiple roles, responsibilities, and skill areas — models existence and scope only, not internal steps
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: true
+  - name: workflowKind
+    type: enum<operational,development,governance,security,data,onboarding,release,support>
+    required: true
+  - name: triggerType
+    type: enum<event-driven,scheduled,on-demand,continuous>
+    required: false
+  - name: typicalCadence
+    type: string
+    required: false
+  - name: complexity
+    type: enum<simple,moderate,complex,single-team,cross-team>
+    required: false
+  incomingEdges:
+  - applies_to
+  - orch_workflow_implemented_by
+  - work_supported_by_tool
+  outgoingEdges:
+  - involves_role
+  - requires_skill_area
+  - applies_to_domain
+  - triggers_responsibility
+  - performed_by_org_unit
+  - follows_methodology
+  invariants:
+  - at least one involves_role (V-11.1)
+  - at least one applies_to_domain (V-11.2)
+  examples: []

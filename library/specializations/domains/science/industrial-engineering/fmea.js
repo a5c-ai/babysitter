@@ -16,6 +16,12 @@
  * - AIAG FMEA Handbook (4th Edition)
  * - SAE J1739 - FMEA Standard
  * - ISO 31000 Risk Management
+ *
+ * @graph
+ *   domains: [domain:industrial-engineering]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+ *   roles: [role:operations-analyst, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

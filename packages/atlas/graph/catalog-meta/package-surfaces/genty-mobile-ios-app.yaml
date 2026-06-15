@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:genty-mobile-ios-app
+attributes:
+  packageId: "@a5c-ai/genty-mobile-ios-app"
+  packageName: "@a5c-ai/genty-mobile-ios-app"
+  displayName: "Genty iOS App"
+  description: "Expo-based iOS companion app for adapters. Provides mobile monitoring and lightweight agent interaction using genty-ui shared components."
+  role: "mobile-companion-app"
+  whenToUse: "Build this when you need an iOS mobile surface for monitoring agent sessions and responding to breakpoints on the go."
+  status: active

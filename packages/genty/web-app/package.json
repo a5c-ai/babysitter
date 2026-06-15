@@ -1,0 +1,27 @@
+{
+  "name": "@a5c-ai/genty-web-app",
+  "version": "5.1.0",
+  "private": true,
+  "type": "module",
+  "description": "genty web application — browser-based agent control and monitoring",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "clean": "rm -rf dist",
+    "preview": "vite preview",
+    "test:e2e": "echo \"No e2e tests configured for genty-web-app yet\""
+  },
+  "dependencies": {
+    "@a5c-ai/genty-ui": "*",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^6.30.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "typescript": "^5.4.2",
+    "vite": "^6.3.0"
+  }
+}

@@ -5,6 +5,12 @@
  *   skills, install/dist method, harness wrapper support, and README.
  * @inputs { projectDir: string, harnessName: string, harnessCliCommand: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:ai-agent-development, skill-area:orchestration-loop]
+ *   topics: [topic:developer-experience, topic:integrations]
+ *   roles: [role:platform-engineer]
+ *   workflows: [workflow:feature-development]
  */
 
 import {
@@ -19,6 +25,8 @@ import {
   writePluginTestsTask,
   setupCiCdTask,
   createSyncScriptTask,
+  validateAssimilationTask,
+  fixValidationFailuresTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -214,7 +222,21 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...syncScript.filesCreated, ...syncScript.filesModified);
 
   // ==========================================================================
-  // PHASE 7: VERIFY
+  // PHASE 7: VALIDATE
+  // ==========================================================================
+
+  ctx.log('phase:validate', 'Running concrete validation checks for the assimilation');
+
+  let validation = await ctx.task(validateAssimilationTask, {
+    projectDir,
+    harnessName,
+    adapterName,
+    pluginDir,
+    integrationFiles,
+  });
+
+  // ==========================================================================
+  // PHASE 8: VERIFY
   // ==========================================================================
 
   ctx.log('phase:verify', 'Scoring assimilation quality');
@@ -225,31 +247,57 @@ export async function process(inputs, ctx) {
     targetQuality,
     integrationFiles,
     research,
+    validation,
   });
 
   finalQuality = verification.qualityScore;
   iterations = 1;
 
-  ctx.log('phase:verify:complete', `Quality: ${finalQuality}/${targetQuality}`);
+  ctx.log('phase:verify:complete', `Quality: ${finalQuality}/${targetQuality}; validation: ${validation.passed ? 'passed' : 'failed'}`);
 
   // ==========================================================================
-  // PHASE 8: CONVERGE
+  // PHASE 9: CONVERGE
   // ==========================================================================
 
-  while (finalQuality < targetQuality && iterations < maxIterations) {
+  while ((!validation.passed || finalQuality < targetQuality) && iterations < maxIterations) {
     iterations++;
-    ctx.log('phase:converge', `Refinement iteration ${iterations}`);
+    ctx.log('phase:converge', `Validation/refinement iteration ${iterations}`);
 
-    const refinement = await ctx.task(refineAssimilationTask, {
+    if (!validation.passed) {
+      ctx.log('phase:fix-validation', `Fixing validation failures for iteration ${iterations}`);
+
+      const validationFixes = await ctx.task(fixValidationFailuresTask, {
+        projectDir,
+        harnessName,
+        adapterName,
+        pluginDir,
+        validation,
+        integrationFiles,
+      });
+
+      integrationFiles.push(...validationFixes.filesCreated, ...validationFixes.filesModified);
+    }
+
+    if (finalQuality < targetQuality) {
+      const refinement = await ctx.task(refineAssimilationTask, {
+        projectDir,
+        harnessName,
+        iteration: iterations,
+        issues: verification.issues,
+        recommendations: verification.recommendations,
+        integrationFiles,
+      });
+
+      integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
+    }
+
+    validation = await ctx.task(validateAssimilationTask, {
       projectDir,
       harnessName,
-      iteration: iterations,
-      issues: verification.issues,
-      recommendations: verification.recommendations,
+      adapterName,
+      pluginDir,
       integrationFiles,
     });
-
-    integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
 
     verification = await ctx.task(verifyAssimilationTask, {
       projectDir,
@@ -257,14 +305,15 @@ export async function process(inputs, ctx) {
       targetQuality,
       integrationFiles,
       research,
+      validation,
     });
 
     finalQuality = verification.qualityScore;
-    ctx.log('phase:converge:score', `Quality: ${finalQuality}/${targetQuality} (iteration ${iterations})`);
+    ctx.log('phase:converge:score', `Quality: ${finalQuality}/${targetQuality}; validation: ${validation.passed ? 'passed' : 'failed'} (iteration ${iterations})`);
   }
 
   return {
-    success: finalQuality >= targetQuality,
+    success: validation.passed && finalQuality >= targetQuality,
     integrationFiles: [...new Set(integrationFiles)],
     finalQuality,
     iterations,

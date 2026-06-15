@@ -1,0 +1,23 @@
+nodeKind: StackProfile
+id: stack-profile:go-gin-postgres
+attributes:
+  displayName: "Go + Gin + Postgres"
+  description: |
+    Go web service stack: Gin HTTP framework with PostgreSQL as the
+    primary data store. This combination is popular for building lean,
+    high-throughput REST APIs and microservices that compile to small,
+    self-contained binaries well-suited for container deployment.
+
+    sqlx or pgx are common database drivers; migrations are typically
+    managed with golang-migrate or Atlas. The stack emphasizes simplicity —
+    minimal dependencies, flat project structure, and explicit error
+    handling. Docker and Kubernetes are the canonical deployment targets.
+    Integration tests commonly use testcontainers-go to spin up a real
+    PostgreSQL instance.
+  composes:
+    - language:go
+    - framework:gin
+edges:
+  composed_of:
+    - language:go
+    - framework:gin

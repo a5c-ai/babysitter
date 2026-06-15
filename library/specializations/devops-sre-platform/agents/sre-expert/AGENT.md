@@ -6,6 +6,13 @@ backlog-id: AG-002
 metadata:
   author: babysitter-sdk
   version: "1.0.0"
+graph:
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:sre]
+  skillAreas: [skill-area:incident-management, skill-area:sli-slo-management]
+  workflows: [workflow:incident-response, workflow:on-call-rotation]
+  topics: [topic:chaos-engineering, topic:observability-driven-development]
 ---
 
 # sre-expert

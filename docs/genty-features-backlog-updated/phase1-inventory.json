@@ -1,0 +1,2556 @@
+[
+  {
+    "gapId": "GAP-AGENT-001",
+    "title": "Sub-Harness Invocation with Isolation",
+    "category": "agent-delegation",
+    "priority": "High",
+    "effort": "XL",
+    "status": "Partial",
+    "currentState": "invokeHarness() spawns harness CLIs. Pi adapter supports programmatic sessions via PiSessionHandle. However: no context isolation between delegated tasks, no model override, no worktree management, no background execution with progress tracking.",
+    "targetState": "Sub-harness invocations create child runs with isolated context. Parent run tracks child runs. Model override per invocation. Child results aggregated into parent journal. Progress tracking for long-running sub-invocations.",
+    "dependencies": [
+      "GAP-HADAPT-001",
+      "GAP-SUBOBS-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/genty/platform/src/harness/piWrapper.ts",
+      "packages/babysitter-sdk/src/harness/"
+    ]
+  },
+  {
+    "gapId": "GAP-AGENT-003",
+    "title": "Process Orchestration with Effect Routing",
+    "category": "agent-delegation",
+    "priority": "High",
+    "effort": "XL",
+    "status": "Partial",
+    "currentState": "Orchestration via process definitions exists. Single harness per run. No coordinator process pattern that dynamically routes work to different harnesses based on capabilities.",
+    "targetState": "Coordinator process template in process library. Fan-out/fan-in delegation pattern with dynamic harness selection. Progress aggregation from workers. Coordinator sees status of all delegated work.",
+    "dependencies": [
+      "GAP-AGENT-001",
+      "GAP-HADAPT-001",
+      "GAP-ROUTE-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/harness/"
+    ]
+  },
+  {
+    "gapId": "GAP-AGENT-004",
+    "title": "Built-in Process Templates",
+    "category": "agent-delegation",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "Process library has methodologies and specializations. GSD phases cover plan/execute/verify. But not packaged as ready-to-use templates with specific harness and capability configurations.",
+    "targetState": "Process library includes explorer, planner, verifier, and reviewer templates. Each template pre-configures harness, model, and capability profile.",
+    "dependencies": [
+      "GAP-HADAPT-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/processLibrary/",
+      ".a5c/processes/"
+    ]
+  },
+  {
+    "gapId": "GAP-AGENT-005",
+    "title": "Cross-Run Communication",
+    "category": "agent-delegation",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "All communication is orchestrator-mediated: process code dispatches effects and receives results. No mechanism for a delegated harness invocation to communicate with another. Effects are request/response only.",
+    "targetState": "AGENT_MESSAGE journal event type. Message routing via effect IDs and run relationships. Subscribe/poll mechanism for delegated tasks. Enables coordination patterns like fan-out/fan-in and supervisor/worker.",
+    "dependencies": [
+      "GAP-AGENT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/tasks/"
+    ]
+  },
+  {
+    "gapId": "GAP-AGENT-006",
+    "title": "Cross-Run State Sharing",
+    "category": "agent-delegation",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No shared memory between invocations. State is per-run only. Each sub-harness invocation starts with a fresh context.",
+    "targetState": "Shared state store accessible by related runs. Parent can seed child runs with accumulated context. Child results accumulate into shared state. Session-level state persists across runs.",
+    "dependencies": [
+      "GAP-STATE-003",
+      "GAP-SESSION-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-AGENT-007",
+    "title": "Delegation Policy Layer",
+    "category": "agent-delegation",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No delegation policy. Worker harness invocations get full capabilities. Task execution hints (execution.permissions) are advisory, not enforced.",
+    "targetState": "Delegation policies define capability subsets per role. An explorer gets read-only tools. A planner gets analysis tools but no file writes. Enforced via agentic tool filtering.",
+    "dependencies": [
+      "GAP-SEC-001",
+      "GAP-HADAPT-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/tasks/"
+    ]
+  },
+  {
+    "gapId": "GAP-AGENT-008",
+    "title": "Harness Selection Policies",
+    "category": "agent-delegation",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Tasks routed to single harness specified at run creation. Task execution hints (execution.harness, execution.model) exist but are not used for routing decisions.",
+    "targetState": "Harness selection policies that consider task kind, capability requirements, model preference, cost constraints, and harness availability/health. At least 4 profiles: full, read-only, plan-only, verify-only.",
+    "dependencies": [
+      "GAP-HADAPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/registry.ts",
+      "packages/babysitter-sdk/src/harness/"
+    ]
+  },
+  {
+    "gapId": "GAP-BRK-001",
+    "title": "Breakpoint Approval Chains and Escalation",
+    "category": "breakpoint-workflows",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Single approver per breakpoint. No escalation.",
+    "targetState": "Multi-level approval chains per breakpoint type. Configurable escalation timeouts. Escalation notifications. Approval chain visible in breakpoint context.",
+    "dependencies": [
+      "GAP-SEC-001",
+      "GAP-SEC-005"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-BRK-002",
+    "title": "Breakpoint Delegation to External Systems",
+    "category": "breakpoint-workflows",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Breakpoints handled by CLI operator or auto-approval rules. No external routing.",
+    "targetState": "Breakpoint routing to external systems via webhook. Slack integration for approval messages. Email notifications. JIRA ticket creation for audit-required approvals. Async approval with configurable timeout.",
+    "dependencies": [
+      "GAP-JSON-003",
+      "GAP-OBS-NEW-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-BRK-003",
+    "title": "Breakpoint Analytics and SLA Tracking",
+    "category": "breakpoint-workflows",
+    "priority": "Low",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "breakpoint:history exists but no analytics or SLA tracking.",
+    "targetState": "Breakpoint analytics: average response time per type, approval/rejection rates, bottleneck identification, SLA violations. Analytics visible in embedded SDK dashboard.",
+    "dependencies": [
+      "GAP-OBS-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/rules.ts",
+      "packages/babysitter-sdk/src/logging/"
+    ]
+  },
+  {
+    "gapId": "GAP-ECO-001",
+    "title": "CC Plugin Compatibility Layer",
+    "category": "ecosystem",
+    "priority": "Critical",
+    "effort": "XL",
+    "status": "Missing",
+    "currentState": "Babysitter has its own plugin system (packages/babysitter-sdk/src/plugins/) managing harness integrations. It does NOT load or execute CC plugin components (commands, agents, skills, hooks, MCP/LSP servers).",
+    "targetState": "A CC plugin compatibility adapter that reads CC plugin.json manifests, loads CC plugin components into babysitter's runtime, maps CC hooks to babysitter hook types, exposes CC plugin skills as available task kinds, and connects CC plugin MCP servers.",
+    "dependencies": [
+      "GAP-ECO-002",
+      "GAP-ECO-003"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/plugins/"
+    ]
+  },
+  {
+    "gapId": "GAP-ECO-002",
+    "title": "CC Marketplace Protocol Support",
+    "category": "ecosystem",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Babysitter has its own marketplace system (blueprints/a5c/marketplace/) with marketplace.json. The protocol is similar (git-based) but NOT compatible with CC's marketplace format.",
+    "targetState": "Babysitter can add CC marketplaces as sources and install CC plugins from them. The plugin:add-marketplace command accepts CC marketplace URLs.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/blueprints/marketplace.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-ECO-003",
+    "title": "Plugin Trust, Provenance, and Blocklist",
+    "category": "ecosystem",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Babysitter's plugin system has no trust model. Any plugin can be installed from any marketplace. No blocklist, no provenance tracking, no impersonation detection.",
+    "targetState": "Trust classification per plugin. Blocklist checked at install and startup. Official marketplace names reserved. Provenance stored in plugin registry. Trust warnings surfaced during installation.",
+    "dependencies": [
+      "GAP-SEC-001"
+    ],
+    "keyFiles": []
+  },
+  {
+    "gapId": "GAP-ECO-004",
+    "title": "Plugin Auto-Update and Versioning",
+    "category": "ecosystem",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Babysitter has plugin:update command but no automatic updates. No version pinning beyond what's in the registry. No startup reconciliation.",
+    "targetState": "Configurable auto-update per marketplace. Version pinning via SHA or semver range. Startup reconciliation to detect drift. Rollback on failed updates.",
+    "dependencies": [
+      "GAP-ECO-002"
+    ],
+    "keyFiles": []
+  },
+  {
+    "gapId": "GAP-ECO-005",
+    "title": "Plugin Validation and Diagnostics",
+    "category": "ecosystem",
+    "priority": "Medium",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "Babysitter's readPluginPackage reads manifests but validation is minimal. No structured error types. No diagnostic UI. Plugin load failures produce generic errors.",
+    "targetState": "Structured plugin error types with actionable messages. A plugin:validate command that checks manifest, components, dependencies, and compatibility.",
+    "dependencies": [
+      "GAP-ECO-001"
+    ],
+    "keyFiles": []
+  },
+  {
+    "gapId": "GAP-ROUTE-001",
+    "title": "Smart Effect Routing Engine",
+    "category": "effect-routing",
+    "priority": "High",
+    "effort": "XL",
+    "status": "Missing",
+    "currentState": "All effects routed to single configured harness. No routing logic.",
+    "targetState": "Routing engine evaluates task required capabilities, model preference, cost constraints, harness availability and health, and historical performance. Selects optimal harness/model combination per effect.",
+    "dependencies": [
+      "GAP-HADAPT-001",
+      "GAP-HADAPT-003",
+      "GAP-HADAPT-005"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/harness/registry.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-ROUTE-002",
+    "title": "Effect Priority and Scheduling",
+    "category": "effect-routing",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Effects executed in dispatch order. No priority system.",
+    "targetState": "Effect priority levels (critical, high, normal, low). High-priority effects scheduled first. Deadline-based scheduling for time-sensitive effects.",
+    "dependencies": [
+      "GAP-PAR-009"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/runtime/types.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-ROUTE-003",
+    "title": "Effect Result Caching and Deduplication",
+    "category": "effect-routing",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Replay deduplicates within a run via journal. No cross-run caching.",
+    "targetState": "Cross-run effect cache indexed by invocation key. Identical effects return cached results without re-execution. Configurable cache TTL.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/replay/",
+      "packages/babysitter-sdk/src/storage/"
+    ]
+  },
+  {
+    "gapId": "GAP-HADAPT-001",
+    "title": "Capability-Based Task Routing",
+    "category": "harness-adaptation",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "Harnesses declare capabilities via HarnessCapability enum and getCapabilities() on all adapters. However, task definitions do not declare required capabilities, and there is no routing engine that matches task requirements to harness capabilities.",
+    "targetState": "Harnesses declare capabilities. Tasks declare required capabilities. Routing engine matches task requirements to available harnesses. Fallback to default harness when no match found.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/harness/discovery.ts",
+      "packages/babysitter-sdk/src/tasks/"
+    ]
+  },
+  {
+    "gapId": "GAP-HADAPT-002",
+    "title": "Model Selection Per Task",
+    "category": "harness-adaptation",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "execution.model hint exists in TaskDef but not used for routing. Single model per run.",
+    "targetState": "Per-task model selection. Process definitions specify model preferences (e.g., fast model for exploration, powerful model for code generation). Routing engine selects harness supporting the requested model.",
+    "dependencies": [
+      "GAP-HADAPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/genty/platform/src/harness/invoker.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-HADAPT-003",
+    "title": "Cost-Based Routing Policies",
+    "category": "harness-adaptation",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No cost awareness in routing. All tasks go to configured harness regardless of cost.",
+    "targetState": "Cost-aware routing considers harness/model pricing. Per-run and per-session cost budgets. Automatic downgrade to cheaper model when budget nearing limit.",
+    "dependencies": [
+      "GAP-HADAPT-001",
+      "GAP-SESSION-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-HADAPT-004",
+    "title": "Harness Fallback Chains",
+    "category": "harness-adaptation",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Single harness per run. Failure = run failure. No fallback.",
+    "targetState": "Configurable fallback chains per task kind. If primary harness fails, retry with next harness in chain. Fallback configured at run, session, or global level.",
+    "dependencies": [
+      "GAP-HADAPT-001",
+      "GAP-HADAPT-005"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/harness/registry.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-HADAPT-005",
+    "title": "Harness Health Monitoring and Circuit Breaker",
+    "category": "harness-adaptation",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "discoverHarnesses() checks CLI availability at startup. No runtime health monitoring.",
+    "targetState": "Continuous harness health monitoring during runs. Error rate tracking per harness. Circuit-breaker pattern: mark harness unhealthy after N consecutive failures, retry after cooldown period.",
+    "dependencies": [
+      "GAP-HADAPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/harness/discovery.ts",
+      "packages/genty/platform/src/harness/invoker.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-JSON-001",
+    "title": "JSON API for Run Creation and Management",
+    "category": "json-interaction",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "MCP server (mcp:serve) exposes createRun and other tools as JSON-in/JSON-out. SDK exports createRun, orchestrateIteration as importable functions. However, no standalone HTTP/REST API exists, MCP coverage is incomplete, and the programmatic API is undocumented.",
+    "targetState": "Programmatic API for run lifecycle: create, iterate, status, events. JSON request/response protocol. Usable from Node.js, Python, or any HTTP client without shell invocation.",
+    "dependencies": [
+      "GAP-REMOTE-007"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/runtime/"
+    ]
+  },
+  {
+    "gapId": "GAP-JSON-002",
+    "title": "JSON Effect Dispatch and Response Protocol",
+    "category": "json-interaction",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Effects posted via babysitter task:post CLI with --value-inline or file path. No streaming or programmatic API.",
+    "targetState": "JSON protocol for effect dispatch: request effect, receive pending notification, post result. Streaming support for long-running effects. Programmatic lifecycle management from any language.",
+    "dependencies": [
+      "GAP-JSON-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/serializer.ts",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-JSON-003",
+    "title": "JSON Breakpoint Interaction API",
+    "category": "json-interaction",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Breakpoints handled via CLI task:post or interactive CLI prompts. No programmatic approval API.",
+    "targetState": "JSON API for breakpoint interaction: list pending breakpoints, get breakpoint context, post approval/rejection with feedback. Enable web UIs and automated approval systems.",
+    "dependencies": [
+      "GAP-JSON-001",
+      "GAP-SEC-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-JSON-004",
+    "title": "JSON Session Management API",
+    "category": "json-interaction",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Sessions managed via CLI session:init, session:resume. No JSON API.",
+    "targetState": "JSON API for session lifecycle: create, resume, list, update, delete. Session state readable and writable via API. Enable web dashboards and external tools.",
+    "dependencies": [
+      "GAP-JSON-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-JSON-005",
+    "title": "JSON Event Stream (SSE/WebSocket)",
+    "category": "json-interaction",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No embedded SDK dashboard exists yet. No streaming event API.",
+    "targetState": "SSE or WebSocket endpoint for run events. Real-time journal event streaming. Subscriptions per run or per session. Enable external dashboards and monitoring tools.",
+    "dependencies": [
+      "GAP-JSON-001",
+      "GAP-REMOTE-008"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-MCPC-001",
+    "title": "MCP Channel Integration (Inbound Messaging)",
+    "category": "mcp-channels",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Babysitter has mcp:serve which exposes babysitter as an MCP SERVER. No MCP CLIENT capability for connecting to external MCP servers as channels. No channel notification handling.",
+    "targetState": "Babysitter can connect to MCP servers that act as messaging channels. Inbound messages queued as journal events, routed to active runs based on channel binding, available as context during breakpoint decisions, and trigger run wake-up if sleeping.",
+    "dependencies": [
+      "GAP-TOOLS-025"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-MCPC-002",
+    "title": "MCP Channel Outbound Messaging",
+    "category": "mcp-channels",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No MCP client capability. Cannot invoke external MCP server tools. Processes cannot send messages to external systems.",
+    "targetState": "Processes can invoke channel MCP tools as effects to send messages to Slack, email, calendar, etc.",
+    "dependencies": [
+      "GAP-MCPC-001",
+      "GAP-TOOLS-025"
+    ],
+    "keyFiles": []
+  },
+  {
+    "gapId": "GAP-MCPC-003",
+    "title": "Channel Permission Relay (Breakpoint Approval via Channels)",
+    "category": "mcp-channels",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Breakpoints are approved only via CLI interaction, auto-approval rules, or programmatic task:post. No external channel routing. Operator must be at the terminal.",
+    "targetState": "Breakpoint prompts routed to configured channels. Channel responses race against local interaction. First approval wins. Security: channel-based approval requires explicit opt-in per breakpoint tag/expert level.",
+    "dependencies": [
+      "GAP-MCPC-001",
+      "GAP-BRK-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/interaction/"
+    ]
+  },
+  {
+    "gapId": "GAP-MCPC-004",
+    "title": "MCP Server Management UI and Connection Lifecycle",
+    "category": "mcp-channels",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Babysitter's mcp:serve starts babysitter AS an MCP server. No MCP client connection management. No server lifecycle. No health monitoring.",
+    "targetState": "A mcp:connect command to add MCP server connections. Connection manager with startup/shutdown lifecycle, health monitoring with reconnection, server approval workflow, and tool/resource browsing per connected server.",
+    "dependencies": [
+      "GAP-TOOLS-025",
+      "GAP-MCPC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-001",
+    "title": "Run Health Snapshot",
+    "category": "observability",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "harness:doctor checks journal integrity, state cache validity, effect status, lock status, and session state. Output is forensic -- raw data for manual interpretation rather than synthesized health.",
+    "targetState": "Overall health score (0-100), top 3 issues with severity and recommended actions, health trend from recent iterations. Integration with RunHealthScore for continuous monitoring.",
+    "dependencies": [
+      "GAP-STATE-008"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/logging/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-002",
+    "title": "Phase Timeline Visualization",
+    "category": "observability",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "No embedded SDK dashboard exists yet. Understanding orchestration progression requires manual log analysis.",
+    "targetState": "Embedded SDK dashboard renders a timeline view showing phase transitions, duration per phase, key milestones, and current position in the orchestration lifecycle.",
+    "dependencies": [
+      "GAP-OBS-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/storage/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-003",
+    "title": "Prompt Plan Observability",
+    "category": "observability",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "instructions:* commands are partial and phase-centric. No way to see the complete assembled prompt with all sections or the current orchestration plan state.",
+    "targetState": "Full prompt assembly visible via instructions:inspect. Orchestration plan visible in embedded SDK dashboard with step-by-step progress.",
+    "dependencies": [
+      "GAP-PROMPT-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-004",
+    "title": "Policy Decision Trail",
+    "category": "observability",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Breakpoint approval rules evaluate auto-approval with a reason field, but evaluation is not logged persistently. No log of which policy rules were checked.",
+    "targetState": "Every auto-approval evaluation logged to JSONL. Includes breakpointId, rules checked, matched rule, decision, timestamp. Policy logs accessible via embedded SDK dashboard.",
+    "dependencies": [
+      "GAP-SEC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/breakpoints/rules.ts",
+      "packages/babysitter-sdk/src/logging/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-005",
+    "title": "Context Introspection",
+    "category": "observability",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "tokens:stats provides post-hoc analysis. compression:status shows compression layer state. No real-time visibility during active orchestration.",
+    "targetState": "Real-time token usage per iteration. Context window utilization percentage. Cost accumulation visible in embedded SDK dashboard. Threshold-based warnings when approaching limits.",
+    "dependencies": [
+      "GAP-SESSION-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-006",
+    "title": "Analytics and Feature Flags",
+    "category": "observability",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "Structured JSONL logging exists. No analytics platform integration, no feature flag evaluation system. Features scattered across env vars and config.",
+    "targetState": "Structured event pipeline with configurable sinks (file, HTTP, custom). Unified feature flag system with evaluation context (user, project, run).",
+    "dependencies": [
+      "GAP-ECO-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/logging/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-007",
+    "title": "Audit Export",
+    "category": "observability",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Journal is raw JSON files in .a5c/runs/<runId>/journal/. Not easy to export coherently. No standard export format.",
+    "targetState": "Export commands producing machine-readable (JSON, CSV) and human-readable (Markdown) summaries of run history, effect decisions, and operational data.",
+    "dependencies": [
+      "GAP-OBS-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-008",
+    "title": "Agent Progress Summarization",
+    "category": "observability",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No progress summarization. harness:retrospect analyzes runs post-hoc but does not generate live progress summaries during orchestration.",
+    "targetState": "Per-iteration progress summary generated automatically. Run-level progress summary available at any point. Summaries include tasks completed, effects resolved, files modified, key decisions, outstanding issues.",
+    "dependencies": [
+      "GAP-OBS-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-NEW-001",
+    "title": "Embedded SDK Dashboard Webhook and Alert System",
+    "category": "observer-integration",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No embedded SDK dashboard exists yet. No alerting or webhooks.",
+    "targetState": "Webhook configuration per event type (run-complete, run-failed, breakpoint-pending, health-degraded). Built-in integrations: Slack, PagerDuty, email. Custom webhook support. Alert throttling and deduplication.",
+    "dependencies": [
+      "GAP-STATE-008"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-OBS-NEW-002",
+    "title": "Embedded SDK Dashboard API for External Dashboards",
+    "category": "observer-integration",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No embedded SDK dashboard exists yet. No API layer.",
+    "targetState": "REST API exposing run listing and status, journal events, task details, metrics and statistics. API enables custom dashboards, Grafana integration, and external monitoring tools.",
+    "dependencies": [
+      "GAP-JSON-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-001",
+    "title": "Concurrent Effect Execution",
+    "category": "parallelization",
+    "priority": "High",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "ctx.parallel.all() batches effect requests, but these are dispatched to the external orchestrator as a list and executed one at a time. The parallelGroupId scheduler hint exists but is not used for concurrent execution.",
+    "targetState": "Effects within the same parallelGroupId execute concurrently via multiple harness invocations or Pi sessions. Results posted as they complete. True parallelism without SDK changes.",
+    "dependencies": [
+      "GAP-PAR-009"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/intrinsics/parallel.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts",
+      "packages/babysitter-sdk/src/runtime/types.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-002",
+    "title": "Async Effect Execution",
+    "category": "parallelization",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "All harness invocations via invokeHarness() are synchronous -- the orchestration loop blocks until the invocation returns. No mechanism to dispatch a task and continue with other work.",
+    "targetState": "Effects can be dispatched with a background flag. The orchestration loop continues processing other effects while background effects execute. Background effect status tracked via polling.",
+    "dependencies": [
+      "GAP-PAR-001",
+      "GAP-SUBOBS-002"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/babysitter-sdk/src/runtime/orchestrateIteration.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-003",
+    "title": "Multi-Harness Parallel Dispatch",
+    "category": "parallelization",
+    "priority": "High",
+    "effort": "XL",
+    "status": "Partial",
+    "currentState": "ctx.parallel.all() and ctx.parallel.map() provide one-shot parallel effect dispatch with deduplication. No persistent team identity across iterations, no inter-effect communication during execution.",
+    "targetState": "Named effect groups with persistent identity across iterations. Multiple harnesses working concurrently on related tasks. Coordinator process pattern for ongoing management. Fan-out/fan-in delegation.",
+    "dependencies": [
+      "GAP-PAR-001",
+      "GAP-PAR-002",
+      "GAP-HADAPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/batching.ts",
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-005",
+    "title": "Parallel File Operations",
+    "category": "parallelization",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Agentic tools execute one at a time. Blob writes are sequential per effect. No batching of file operations.",
+    "targetState": "File operations within the same effect can be batched and executed concurrently. Multiple reads dispatched in parallel. Write ordering preserved where dependencies exist.",
+    "dependencies": [
+      "GAP-PAR-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/storage/"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-006",
+    "title": "Streaming Parallelism",
+    "category": "parallelization",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "invokeHarness() waits for completion. Pi subscribe() enables event streaming but not overlapped execution. Each phase runs sequentially.",
+    "targetState": "Tool execution overlaps with result streaming. Model can begin processing results while remaining tools complete. Pipeline parallelism between orchestration phases.",
+    "dependencies": [
+      "GAP-PERF-004",
+      "GAP-PAR-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/genty/platform/src/harness/piWrapper.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-009",
+    "title": "Parallel Effect Execution Strategies",
+    "category": "parallelization",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Scheduler hints are written to task definitions but not read by the orchestration loop. All effects execute in dispatch order regardless of hints.",
+    "targetState": "Multiple execution strategies: parallel strategy (same parallelGroupId concurrently), sleep strategy (skip sleep effects until epoch passes), priority strategy, cost strategy.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/babysitter-sdk/src/runtime/orchestrateIteration.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PAR-010",
+    "title": "Fork-Join Process Pattern",
+    "category": "parallelization",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No equivalent. Sub-harness invocations do not inherit parent context. No synchronization points for parallel branches.",
+    "targetState": "Process definitions can express fork-join: spawn parallel branches that inherit parent state, execute independently, and rejoin. Branch results aggregated at join point.",
+    "dependencies": [
+      "GAP-PAR-003",
+      "GAP-PROC-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-001",
+    "title": "Prompt Caching (Ephemeral)",
+    "category": "performance",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Each harness invocation via invokeHarness() spawns a fresh CLI process with no mechanism to carry prompt cache state between invocations. Every iteration pays full prompt processing cost.",
+    "targetState": "Stable prompt strata are cached between iterations. Cache hit rate is measurable via tokens:stats. For a 20-iteration run with a 50K-token system prompt, redundant processing is eliminated.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-002",
+    "title": "Session Compaction",
+    "category": "performance",
+    "priority": "Critical",
+    "effort": "XL",
+    "status": "Partial",
+    "currentState": "The compression module provides FNV-1a hash-based dedup and library file caching. This is token-level compression, not session-level compaction. The harness never summarizes or condenses conversation history.",
+    "targetState": "Multiple compaction strategies: tool-output summarization, resolved effect pruning, iteration digest. Auto-compact trigger based on token budget thresholds. PreCompact/PostCompact hooks.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-004",
+    "title": "Streaming Message Rendering",
+    "category": "performance",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "invokeHarness() waits for the child process to complete before returning results. No embedded SDK dashboard exists yet for real-time model output.",
+    "targetState": "Harness invocation output streams in real-time. Pi adapter leverages PiSessionHandle.subscribe() for event streaming. CLI harnesses stream stdout from child processes. Embedded SDK dashboard shows live output.",
+    "dependencies": [
+      "GAP-SUBOBS-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/genty/platform/src/harness/piWrapper.ts",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-005",
+    "title": "Cache-Aware Prompt Assembly",
+    "category": "performance",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "The prompts module has PromptContext and per-harness context factories, but prompt sections are assembled without considering cache hit optimization.",
+    "targetState": "Prompt sections tagged with volatility levels and sorted by stability. Stable segments precede runtime segments which precede turn-local segments. Cache-break detection identifies which stratum changed.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-PERF-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-006",
+    "title": "Incremental Orchestration Streaming",
+    "category": "performance",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Progress is visible only after tool steps complete. No embedded SDK dashboard exists yet. No streaming protocol for live orchestration events.",
+    "targetState": "Journal events stream to observers in real-time as they are appended. Effect execution progress (started, 50%, complete) is visible mid-iteration. External consumers can subscribe.",
+    "dependencies": [
+      "GAP-JSON-005"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-007",
+    "title": "Aggressive Parallelism",
+    "category": "performance",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "ctx.parallel.all()/ctx.parallel.map() provides effect batching, but the babysit skill executes pending effects sequentially. Scheduler hints exist but are not used for runtime parallelism.",
+    "targetState": "The orchestration loop detects independent effects and executes them concurrently. Multiple harness invocations run simultaneously. Results posted as they complete.",
+    "dependencies": [
+      "GAP-PAR-001",
+      "GAP-PAR-009"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts",
+      "packages/genty/platform/src/harness/invoker.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PERF-008",
+    "title": "Structured Continuity State",
+    "category": "performance",
+    "priority": "High",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "State cache is a derived replay cache. Session resume preserves shallow state (run ID, iteration count, timestamps). Deep context (decisions made, files modified, key findings) is lost on compaction.",
+    "targetState": "Structured continuity state persists across compactions: key decisions, modified files, progress milestones, accumulated findings. State survives compaction and is injected into resume prompts.",
+    "dependencies": [
+      "GAP-PROMPT-005",
+      "GAP-STATE-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts",
+      "packages/babysitter-sdk/src/session/",
+      ".a5c/runs/<runId>/state/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROC-001",
+    "title": "Process Chaining and Pipelines",
+    "category": "process-composition",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Processes are standalone. Chaining requires manual agent-platform call sequences.",
+    "targetState": "Pipeline definitions chain processes. Output of process N becomes input of process N+1. Pipelines reusable and parameterized. Pipeline execution tracked as a single session.",
+    "dependencies": [
+      "GAP-PROC-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/cli/",
+      ".a5c/processes/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROC-002",
+    "title": "Process Nesting and Sub-Process Invocation",
+    "category": "process-composition",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No sub-process effect. Must use ctx.task() with agent kind as workaround.",
+    "targetState": "ctx.subprocess() effect that invokes a child process. Child process inherits parent context. Results returned to parent as effect result. Child runs tracked in parent journal.",
+    "dependencies": [
+      "GAP-AGENT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/runtime/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROC-003",
+    "title": "Process Versioning and Migration",
+    "category": "process-composition",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No versioning. Process changes can break in-flight runs on replay.",
+    "targetState": "Process definitions include version metadata. In-flight runs detect version mismatch. Migration strategies: replay with new version, fork, or continue with old version.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/",
+      ".a5c/processes/",
+      "packages/babysitter-sdk/src/processLibrary/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROC-004",
+    "title": "Process Parameter Schemas and Validation",
+    "category": "process-composition",
+    "priority": "Medium",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "inputs.json is untyped. No schema validation.",
+    "targetState": "Process definitions include input/output JSON schemas. Validation at run:create time. Validation between pipeline stages. Type-safe process composition.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/storage/",
+      ".a5c/processes/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROF-001",
+    "title": "Auto-Configure Orchestration from User Profile",
+    "category": "profile-orchestration",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Profile system exists but not used for orchestration decisions.",
+    "targetState": "User profile drives orchestration defaults: expert users get fewer breakpoints, preferred model selected based on tech stack, process recommendations based on expertise, verbosity matched to preferences.",
+    "dependencies": [
+      "GAP-ECO-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/profiles/",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-001",
+    "title": "Prompt Strata Model",
+    "category": "prompt-engineering",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "The prompts module has PromptContext with per-harness context factories and section render functions. However, there is no formal separation between stable, runtime, and volatile content.",
+    "targetState": "Prompt assembly follows a strata model: stable stratum (system identity, core rules, tool definitions), runtime stratum (capabilities, feature flags, workspace context), turn-local stratum (recent messages, current task). Each section tagged with its stratum.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/session/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-002",
+    "title": "Deterministic Capability Projection",
+    "category": "prompt-engineering",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Capability projection is inconsistent. Skills from skill:discover may or may not appear in prompts. Plugin hooks influence behavior but are not projected.",
+    "targetState": "A capability collector queries all installed surfaces (plugins, skills, process library bindings, harness adapters, feature flags) and projects them into the runtime stratum of the prompt. Capabilities are deterministic.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-ECO-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/blueprints/packageReader.ts",
+      "packages/babysitter-sdk/src/processLibrary/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-003",
+    "title": "Runtime Personality Overlays",
+    "category": "prompt-engineering",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Interactive/non-interactive/resume prompts exist but are bespoke. The wrapper commands imply different modes but prompt adaptation is minimal.",
+    "targetState": "Formal personality overlays per mode. A plan overlay emphasizes exploration and analysis. A yolo overlay emphasizes speed and action. A resume overlay emphasizes context restoration.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-004",
+    "title": "Prompt Inspection Tooling",
+    "category": "prompt-engineering",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "The instructions:* commands are partial and phase-centric. No way to see the full assembled prompt with all sections, token breakdown, or strata boundaries.",
+    "targetState": "An instructions:inspect command shows the complete prompt assembly with strata labels, token counts per section, and cache-stability annotations.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-005",
+    "title": "Continuity Overlays for Resume",
+    "category": "prompt-engineering",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "harness:resume-run uses session:resume which restores run ID association, iteration count, and timestamps. The resume prompt does not include deep context like accomplished tasks, pending effect summaries, or key decisions.",
+    "targetState": "Resume prompts include resolved effect summaries, pending effect descriptions with context, key state transitions and decisions, modified file list, health score and progress indicators.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-STATE-008"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/storage/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-006",
+    "title": "Instructions Loaded Hook",
+    "category": "prompt-engineering",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Instructions are static per run. No hook fires during prompt assembly. Plugins cannot modify or extend the assembled prompt.",
+    "targetState": "An on-instructions-loaded hook fires after prompt composition with the assembled prompt as payload. Hook handlers can modify, extend, or annotate the prompt.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts",
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-007",
+    "title": "Context Compression Families",
+    "category": "prompt-engineering",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "The compression module uses FNV-1a hash-based dedup and library file caching. Compression is token-density oriented with no semantic grouping.",
+    "targetState": "Context grouped into families: per-effect context, per-file context, per-iteration summary, cross-cutting concerns. Compression operates on families, preserving internal coherence.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-008",
+    "title": "Coding Philosophy Prompt Section",
+    "category": "prompt-engineering",
+    "priority": "High",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "CC includes detailed coding philosophy in its system prompt. When babysitter delegates to non-CC harnesses (Pi, Gemini, Codex), no equivalent rules exist. Process prompts do not include coding philosophy.",
+    "targetState": "A codingPhilosophy prompt section injected into task prompts for code-writing effects. Content adapted from CC's 'Doing Tasks' section. Configurable per process definition.",
+    "dependencies": [
+      "GAP-PROMPT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-009",
+    "title": "Tool Preference and Usage Rules",
+    "category": "prompt-engineering",
+    "priority": "High",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "CC's system prompt includes explicit tool preference rules. The agentic tools module defines tools for Pi sessions but does not include meta-instructions about tool selection.",
+    "targetState": "A toolPreferences prompt section injected when tasks involve agentic tool access. Includes dedicated tool preference over Bash, read-before-edit enforcement, efficient search patterns.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-PROMPT-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-010",
+    "title": "Safety and Reversibility Prompt Framework",
+    "category": "prompt-engineering",
+    "priority": "High",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "The breakpoint system gates on user approval for risky operations. However, process prompts do not instruct delegated agents to reason about reversibility or blast radius.",
+    "targetState": "A safetyGuidelines prompt section injected into task prompts that includes reversibility assessment framework, specific examples of destructive vs. safe operations, cyber risk boundaries, blast radius reasoning.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-SEC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/breakpoints/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-011",
+    "title": "Output Efficiency Rules",
+    "category": "prompt-engineering",
+    "priority": "Medium",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "Iteration prompts do not include output efficiency guidelines. Delegated agents often produce verbose explanations, repeat instructions, and include unnecessary preamble.",
+    "targetState": "An outputEfficiency prompt section injected into iteration prompts and task prompts. Content: lead with action not reasoning, skip filler, do not restate instructions. Configurable verbosity level per process.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-PERF-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/session/"
+    ]
+  },
+  {
+    "gapId": "GAP-PROMPT-012",
+    "title": "Git Safety Protocol Prompt Section",
+    "category": "prompt-engineering",
+    "priority": "Medium",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "CC includes detailed git safety rules in its system prompt. When delegating to other harnesses, no git safety rules exist in the task prompt.",
+    "targetState": "A gitSafety prompt section injected when task context indicates version control operations. Content: never force-push to main, never skip hooks, create new commits not amends, stage specific files.",
+    "dependencies": [
+      "GAP-PROMPT-001",
+      "GAP-PROMPT-010"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-001",
+    "title": "Daemon Mode",
+    "category": "remote-integration",
+    "priority": "High",
+    "effort": "XL",
+    "status": "Partial",
+    "currentState": "harness:forever provides infinite loop but requires an active terminal session. No file change monitoring, no trigger-based activation, no background service lifecycle.",
+    "targetState": "System service with start/stop/status lifecycle. File change watcher integration. Trigger-based activation (file changes, webhooks, timers). Journal-backed state persistence across activations.",
+    "dependencies": [
+      "GAP-REMOTE-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/genty/platform/src/harness/invoker.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-003",
+    "title": "Remote Sessions (WebSocket)",
+    "category": "remote-integration",
+    "priority": "High",
+    "effort": "XL",
+    "status": "Missing",
+    "currentState": "All execution is local. invokeHarness() spawns local CLI processes. MCP server uses stdio transport, not network transport.",
+    "targetState": "WebSocket transport for MCP server. Session multiplexing for concurrent remote users. Authentication and authorization. Run directory synchronization for remote execution.",
+    "dependencies": [
+      "GAP-REMOTE-007",
+      "GAP-JSON-005"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/mcpServeEntry.ts",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-004",
+    "title": "Cron Triggers and Scheduling",
+    "category": "remote-integration",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No scheduling. harness:forever is manual infinite loop. No cron expressions, no persistent triggers.",
+    "targetState": "Cron scheduling with persistent triggers surviving process restart. Standard cron expressions. trigger:list shows next scheduled execution time.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-006",
+    "title": "MCP Client Integration",
+    "category": "remote-integration",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "mcp:serve provides babysitter as MCP server. No MCP client. Cannot consume external MCP servers.",
+    "targetState": "MCP client with stdio and HTTP transport. mcp:connect registers MCP server endpoints. MCP server tools exposed as agentic tools via dynamic registration.",
+    "dependencies": [
+      "GAP-SEC-006"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-007",
+    "title": "Host Contract Layer",
+    "category": "remote-integration",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Harness adapters compose CLI commands ad-hoc based on each harness flag mapping. No formal contract that a host can program against.",
+    "targetState": "HostContract interface with startRun, getStatus, postEffect, subscribe methods. Implementation over existing CLI commands. Exposed via MCP server and HTTP.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/harness/registry.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-008",
+    "title": "Streaming Orchestration Protocol",
+    "category": "remote-integration",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No streaming protocol. Host visibility is coarse -- results only available after iteration completion.",
+    "targetState": "StreamEvent types (progress, effect-requested, effect-resolved, log). SSE endpoint on MCP server. Latency under 500ms from journal write to stream delivery.",
+    "dependencies": [
+      "GAP-REMOTE-007"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/storage/"
+    ]
+  },
+  {
+    "gapId": "GAP-REMOTE-009",
+    "title": "Host-Mediated Interaction",
+    "category": "remote-integration",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "Breakpoint approval exists. Host integration is narrow -- limited to CLI prompts and auto-approval rules.",
+    "targetState": "Host applications can render custom breakpoint UIs. Breakpoint context and options sent to host via HostContract. Host responses posted back as effect results.",
+    "dependencies": [
+      "GAP-REMOTE-007",
+      "GAP-SEC-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-RUN-001",
+    "title": "Run Comparison and Diffing",
+    "category": "run-lifecycle",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No run comparison. Must manually diff journal files.",
+    "targetState": "run:diff command comparing two runs. Shows input differences, first divergence point in journals, effect outcome differences, output deltas. Enables A/B testing.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-RUN-002",
+    "title": "Run Archival and Restore",
+    "category": "run-lifecycle",
+    "priority": "Low",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "harness:cleanup deletes old runs. No archival or restore.",
+    "targetState": "run:archive compresses and moves completed runs to archive directory. run:restore retrieves archived runs. Configurable retention policies.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-RUN-003",
+    "title": "Run Forking and Branching",
+    "category": "run-lifecycle",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No forking. Must create new run and replay manually.",
+    "targetState": "run:fork creates new run from specific journal point. Fork inherits journal history up to fork point. Multiple forks coexist. Fork relationships tracked.",
+    "dependencies": [
+      "GAP-STATE-006"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-001",
+    "title": "Governance Policy Layer",
+    "category": "security",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Security policy fragmented: breakpoint rules in ~/.a5c/breakpoint-approvals/rules.json, advisory execution.permissions in task definitions, env var limits. No unified evaluation point.",
+    "targetState": "PolicyEngine evaluates declarative rules at effect dispatch and task execution. Policy types: rate-limit, permission, resource-limit, trust-level. Policy decisions persisted for audit trail.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/config/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-002",
+    "title": "Trust Classes for Plugins",
+    "category": "security",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Plugins have installation, versioning, and migration support but no trust classification. No sandbox isolation for plugin execution.",
+    "targetState": "TrustLevel field in plugin registry. Trust levels enforced in hook dispatch and skill execution. Security review command for auditing plugin capabilities.",
+    "dependencies": [
+      "GAP-SEC-001",
+      "GAP-ECO-002"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/plugins/types.ts",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-003",
+    "title": "Permission Request and Denial Hooks",
+    "category": "security",
+    "priority": "High",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "All human interaction flows through the same breakpoint mechanism. A breakpoint for 'confirm destructive action' looks the same as one for 'please clarify requirements.'",
+    "targetState": "InteractionKind enum: clarification, approval, intervention, notification, handoff. Each kind routes through different UX flows with appropriate urgency and context.",
+    "dependencies": [
+      "GAP-SEC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/interaction/"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-004",
+    "title": "Sandbox Toggle",
+    "category": "security",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "piSecureSandbox provides Docker-based isolation for Pi bash execution. No general sandbox toggle for other harness adapters.",
+    "targetState": "General sandbox capability across harness adapters. Runtime toggle to enable/disable sandboxing per run or per effect. Sandbox enforcement in governance policy.",
+    "dependencies": [
+      "GAP-SEC-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/piSecureSandbox.ts",
+      "packages/babysitter-sdk/src/harness/"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-005",
+    "title": "Approval Posture Model",
+    "category": "security",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "The breakpoint system supports auto-approval rules with glob patterns, autoApproveAfterN, alwaysBreakOn profile tags. Postures are not formalized by action type.",
+    "targetState": "Approval posture templates per action category (read, write, execute, destroy). Postures define auto-approve threshold, escalation rules, required approver level.",
+    "dependencies": [
+      "GAP-SEC-001",
+      "GAP-SEC-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/patterns.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-006",
+    "title": "OAuth Integration",
+    "category": "security",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No OAuth in harness. Harness delegates auth to host CLI. External service credentials managed ad-hoc.",
+    "targetState": "OAuth flow for MCP server authentication. Secure credential storage with scoped access. Token refresh lifecycle management.",
+    "dependencies": [
+      "GAP-SEC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-SEC-007",
+    "title": "Privacy Settings",
+    "category": "security",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "BABYSITTER_ALLOW_SECRET_LOGS is the only privacy control. No configurable data handling policies.",
+    "targetState": "Privacy configuration with controls for log sensitivity levels, PII filtering in exports, data retention policies, sensitive field redaction in embedded SDK dashboard.",
+    "dependencies": [
+      "GAP-SEC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/logging/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-SESSION-001",
+    "title": "Session-to-Run One-to-Many Relationship",
+    "category": "session-management",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Session binds to single runId via YAML frontmatter. No multi-run sessions.",
+    "targetState": "Sessions contain multiple runs. Session state persists across runs. Session history browsable. Runs within a session share context and accumulated knowledge.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      ".a5c/runs/"
+    ]
+  },
+  {
+    "gapId": "GAP-SESSION-002",
+    "title": "Session State Persistence and History",
+    "category": "session-management",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Session state is thin YAML frontmatter. Lost between runs.",
+    "targetState": "Rich session state persisted in dedicated session storage. Includes accumulated decisions, user preferences, context snapshots, run summaries. Session history browsable via CLI.",
+    "dependencies": [
+      "GAP-SESSION-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/"
+    ]
+  },
+  {
+    "gapId": "GAP-SESSION-003",
+    "title": "Session Templates and Presets",
+    "category": "session-management",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No session templates. Each session configured from scratch.",
+    "targetState": "Session templates stored in .a5c/session-templates/. Templates specify default harness, model preferences, breakpoint rules, process bindings, cost budgets.",
+    "dependencies": [
+      "GAP-SESSION-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-SESSION-004",
+    "title": "Session-Level Cost Tracking and Budgets",
+    "category": "session-management",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Cost tracked per-run only. No session aggregation.",
+    "targetState": "Session-level cost aggregation across all runs. Configurable session budgets. Alerts at budget thresholds (50%, 80%, 100%). Auto-pause when budget exceeded.",
+    "dependencies": [
+      "GAP-SESSION-001",
+      "GAP-SUBOBS-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-SESSION-005",
+    "title": "Session Sharing and Collaboration",
+    "category": "session-management",
+    "priority": "Low",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Sessions are local to user. No sharing mechanism.",
+    "targetState": "Session export/import for sharing. Session context includes accumulated decisions, state, and run history. Collaborative sessions with multiple operators contributing via breakpoints.",
+    "dependencies": [
+      "GAP-SESSION-002",
+      "GAP-REMOTE-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/"
+    ]
+  },
+  {
+    "gapId": "GAP-STATE-001",
+    "title": "Long-Term Memory Extraction",
+    "category": "state-continuity",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No memory extraction. State is per-run journal only. harness:retrospect analyzes but does not persist extracted memories.",
+    "targetState": "Memory extraction from completed runs into ~/.a5c/memory/. Memories indexed by project, topic, and recency. Extracted memories injected into new run prompts as context.",
+    "dependencies": [
+      "GAP-SESSION-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-STATE-002",
+    "title": "Memory Consolidation",
+    "category": "state-continuity",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No consolidation. harness:retrospect analyzes individual runs but does not merge findings across runs into consolidated knowledge.",
+    "targetState": "Periodic memory consolidation merges related learnings across runs. Stale memories pruned based on recency and relevance. Consolidated memories weighted for prompt injection.",
+    "dependencies": [
+      "GAP-STATE-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/logging/"
+    ]
+  },
+  {
+    "gapId": "GAP-STATE-003",
+    "title": "Session State Persistence",
+    "category": "state-continuity",
+    "priority": "High",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "Session YAML-frontmatter state preserves run ID, iteration count, and timestamps. Deep context like decisions, preferences, and accumulated findings is lost.",
+    "targetState": "Session state includes key decisions made, user preferences, accumulated findings, file modification history, breakpoint approval patterns. State persists across runs within a session.",
+    "dependencies": [
+      "GAP-SESSION-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-STATE-006",
+    "title": "Session Rewind and History",
+    "category": "state-continuity",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Journal is append-only. No rewind capability. To explore alternatives, must create a new run from scratch.",
+    "targetState": "run:rewind creates a new run forked from a specific journal point. Session history browsable. Multiple alternative branches coexist.",
+    "dependencies": [
+      "GAP-STATE-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-STATE-008",
+    "title": "Run Health Model",
+    "category": "state-continuity",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No health scoring. harness:doctor diagnoses individual runs post-hoc but does not maintain continuous health model.",
+    "targetState": "RunHealthScore computed from journal: pending age score, retry churn score, progress score, no-op iteration detection. Surfaced in run:status and embedded SDK dashboard. Threshold-based warnings.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/orchestrateIteration.ts",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-SUBOBS-001",
+    "title": "Streaming Output Capture from Invoked Harnesses",
+    "category": "subagent-observability",
+    "priority": "Critical",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "CLI-based invokeHarness() captures output only after process exits. Pi adapter supports streaming via PiSessionHandle.subscribe(), but this is Pi-specific and not generalized across harnesses.",
+    "targetState": "Real-time stdout/stderr streaming from spawned harness processes. Stream events visible in embedded SDK dashboard. Progress updates captured mid-execution.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-SUBOBS-002",
+    "title": "Subagent Progress Tracking",
+    "category": "subagent-observability",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No progress tracking. Tasks are opaque until completion.",
+    "targetState": "Progress updates from subagents (percentage, current step, ETA). Progress visible in embedded SDK dashboard with progress bars. Estimated completion based on historical data.",
+    "dependencies": [
+      "GAP-SUBOBS-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/tasks/"
+    ]
+  },
+  {
+    "gapId": "GAP-SUBOBS-003",
+    "title": "Per-Subagent Token and Cost Tracking",
+    "category": "subagent-observability",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "tokens:stats tracks run-level tokens. No per-effect or per-subagent breakdown.",
+    "targetState": "Token usage and cost tracked per effect. Aggregated at run and session level. Visible in embedded SDK dashboard with per-effect cost breakdown. Cost anomaly detection.",
+    "dependencies": [
+      "GAP-SUBOBS-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-SUBOBS-004",
+    "title": "Subagent Health and Timeout Monitoring",
+    "category": "subagent-observability",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Basic timeout on invokeHarness(). No health monitoring or auto-recovery.",
+    "targetState": "Continuous health monitoring for running subagents. Hang detection (no output for configurable period). Token budget enforcement per subagent. Auto-recovery: retry, fallback, or abort with partial results.",
+    "dependencies": [
+      "GAP-SUBOBS-001",
+      "GAP-SUBOBS-003"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-SUBOBS-005",
+    "title": "Embedded SDK Dashboard Subagent Drill-Down",
+    "category": "subagent-observability",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No embedded SDK dashboard exists yet. No subagent visibility.",
+    "targetState": "Embedded SDK dashboard shows per-subagent live output streams, progress bars per task, cost meters with budget utilization, dependency graphs between effects, drill-down from run to individual subagent.",
+    "dependencies": [
+      "GAP-SUBOBS-001",
+      "GAP-SUBOBS-002",
+      "GAP-SUBOBS-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-007",
+    "title": "JS/TS REPL Tool",
+    "category": "tools-capabilities",
+    "priority": "Low",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "agenticTools.ts provides a python tool that spawns a Python subprocess. No JS/TS REPL. Agents needing JS evaluation must use bash with node -e.",
+    "targetState": "A js_repl agentic tool that evaluates JS/TS code in a Node.js subprocess with workspace context. Persistent session state between invocations within the same task.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-008",
+    "title": "Web Search Agentic Tool",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "No web_search tool in agenticTools.ts. Process definitions that need web search must delegate to a harness that has its own search tool.",
+    "targetState": "A web_search agentic tool with query, allowed_domains, blocked_domains parameters. Returns search results with titles, URLs, and snippets. Implementation options: API-based, MCP-routed, or harness-delegated.",
+    "dependencies": [
+      "GAP-TOOLS-025",
+      "GAP-HADAPT-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/harness/types.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-012",
+    "title": "LSP Integration for Code-Aware Routing",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Code-aware tasks are delegated to harnesses blindly. The orchestrator has no understanding of the codebase's type system, symbol references, or diagnostic state.",
+    "targetState": "An optional LSP client module that the orchestrator can use to query symbol definitions and references, validate code changes produce no new diagnostics, provide type context to task prompts, and support go-to-definition routing.",
+    "dependencies": [
+      "GAP-ROUTE-001",
+      "GAP-PROC-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-014",
+    "title": "Programmatic Task CRUD Beyond CLI",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Task management available via CLI commands and internally via the SDK's task module. No unified programmatic API for external consumers. MCP server exposes some task operations but not full CRUD.",
+    "targetState": "A TaskManager API class exposing: create task, query tasks by status/kind/labels, update metadata, cancel pending tasks, bulk operations. Available as both SDK export and MCP tool surface.",
+    "dependencies": [
+      "GAP-JSON-001",
+      "GAP-JSON-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/serializer.ts",
+      "packages/babysitter-sdk/src/tasks/registry.ts",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-017",
+    "title": "Git Worktree Isolation for Parallel Effect Execution",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Parallel effects share the same working directory. Code-modifying tasks that run in parallel risk file conflicts, dirty working trees, and non-deterministic results. No worktree management in SDK.",
+    "targetState": "A worktree manager that creates isolated git worktrees for parallel code tasks, tracks worktree lifecycle tied to effect IDs, merges results back, and cleans up on completion or failure.",
+    "dependencies": [
+      "GAP-PAR-001",
+      "GAP-AGENT-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-018",
+    "title": "Structured Planning Phase in Process Definitions",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "harness:plan stops after Phase 1 but the plan output is unstructured text. Process definitions have planning phases but produce free-form artifacts. No schema, no validation, no plan-to-effect compilation.",
+    "targetState": "A PlanSchema type defining structured plans with ordered steps, estimated effort, dependency graph, resource requirements, and risk assessment. A ctx.plan() intrinsic and plan-to-effect compilation.",
+    "dependencies": [
+      "GAP-PROC-004"
+    ],
+    "keyFiles": [
+      "library/",
+      "library/methodologies/gsd/",
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-020",
+    "title": "Scheduled Orchestration Triggers",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "All orchestration runs are explicitly triggered. No scheduling mechanism exists. The agent-platform forever command runs an infinite loop but requires an active session.",
+    "targetState": "A scheduling subsystem that defines recurring triggers with cron expressions, creates runs on schedule, manages trigger lifecycle, and integrates with the embedded SDK dashboard.",
+    "dependencies": [
+      "GAP-REMOTE-001",
+      "GAP-REMOTE-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/main.ts",
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/config/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-021",
+    "title": "External Event Triggers for Orchestration",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Runs are user-initiated only. No webhook endpoint, filesystem watcher, or event listener exists.",
+    "targetState": "An event ingestion layer that receives webhooks via HTTP, watches filesystem paths, listens for git events, maps events to process definitions, and creates runs with event payload as inputs.",
+    "dependencies": [
+      "GAP-REMOTE-001",
+      "GAP-TOOLS-020",
+      "GAP-OBS-NEW-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/hooks/",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/runtime/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-023",
+    "title": "Multi-Step Workflow Composition Within Effects",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "Individual effects are atomic -- no way to define a multi-step workflow within an effect that includes conditionals, retries, or step-to-step data transformation.",
+    "targetState": "A ctx.workflow() intrinsic that accepts a workflow definition with ordered steps, conditional branching, configurable retry policies, data transformation between steps, and timeouts. Deterministic and replayable.",
+    "dependencies": [
+      "GAP-PROC-001",
+      "GAP-PROC-002"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/runtime/replay/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-025",
+    "title": "MCP Tool Discovery and Invocation from Orchestrated Tasks",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "The SDK has an MCP server (mcp:serve) that exposes babysitter's own tools. The orchestrator cannot act as an MCP client -- it cannot discover tools on external MCP servers or invoke them from within process definitions.",
+    "targetState": "An MCP client module that discovers tools on configured MCP servers, registers them in the capability registry, enables ctx.mcpTool(server, tool, args) intrinsic, and routes invocations through the effect system.",
+    "dependencies": [
+      "GAP-HADAPT-001",
+      "GAP-REMOTE-006"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/harness/types.ts",
+      "packages/babysitter-sdk/src/harness/registry.ts",
+      "packages/babysitter-sdk/src/tasks/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-026",
+    "title": "Structured User Interaction from Within Effects",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "The interaction module has arrow-key selectors, multi-select, and free-text input for CLI use. However, these are not available as effect intrinsics -- process definitions cannot dispatch structured questions as effects.",
+    "targetState": "A ctx.ask() intrinsic that dispatches structured interaction effects with typed schemas: choice, multiChoice, freeText, confirm, fileSelect, parameterForm. All interactions flow through the journal.",
+    "dependencies": [
+      "GAP-UX-010",
+      "GAP-JSON-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/breakpoints/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-027",
+    "title": "Skill Discovery and Invocation from Process Definitions",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "skill:discover CLI command lists available skills. Skills are invoked via harness wrappers. Process definitions cannot programmatically discover or invoke skills. No ctx.skill() intrinsic.",
+    "targetState": "A skill registry queryable from process definitions. A ctx.skill(skillId, inputs) intrinsic that delegates skill execution to a capable harness. Skills become composable within processes.",
+    "dependencies": [
+      "GAP-HADAPT-001",
+      "GAP-PROC-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/blueprints/packageReader.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/harness/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-028",
+    "title": "Sleep/Delay Effect Enhancement",
+    "category": "tools-capabilities",
+    "priority": "Low",
+    "effort": "S",
+    "status": "Partial",
+    "currentState": "ctx.sleepUntil() intrinsic exists. Only absolute timestamps supported. No relative durations, no conditional wake, no retry-with-backoff pattern.",
+    "targetState": "Extended sleep API: ctx.sleep(duration) for relative delays, ctx.waitFor(condition, options) for conditional wake, ctx.retryWithBackoff(task, options) for exponential backoff. All journal-tracked and replayable.",
+    "dependencies": [
+      "GAP-TOOLS-020"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/runtime/replay/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-029",
+    "title": "Structured Output Tool",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Task results are stored as JSON in result.json. Large outputs go to blobs. No concept of typed output blocks -- everything is unstructured text or JSON.",
+    "targetState": "A structured output system where effects can produce typed output blocks: code, image, table, diff, file, markdown. Output blocks stored in task result and rendered by embedded SDK dashboard.",
+    "dependencies": [
+      "GAP-UX-001b",
+      "GAP-UX-001d"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/tasks/serializer.ts",
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-030",
+    "title": "Effect Cancellation",
+    "category": "tools-capabilities",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Once an effect is dispatched, it runs to completion or timeout. No cancellation mechanism. No EFFECT_CANCELLED journal event type. If a harness hangs, the entire run blocks until timeout.",
+    "targetState": "New EFFECT_CANCELLED journal event type. task:cancel CLI command. Cancel signal propagated to running harness process. Process code receives cancellation as a thrown EffectCancelledError.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-031",
+    "title": "MCP Resource Browsing and Reading",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Babysitter's mcp:serve exposes babysitter's own resources. No MCP client capability to LIST or READ resources from external MCP servers.",
+    "targetState": "Two agentic tools: mcp_list_resources and mcp_read_resource. Resources accessible from within Pi sessions and orchestrated tasks.",
+    "dependencies": [
+      "GAP-TOOLS-025",
+      "GAP-MCPC-004"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-032",
+    "title": "MCP Authentication",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "Babysitter's MCP server uses stdio transport with no auth. No MCP client auth. No OAuth flow support. Cannot connect to MCP servers that require authentication.",
+    "targetState": "OAuth flow support for MCP server connections. Token storage and refresh. mcp:auth CLI command. Headless auth support for CI/CD. Auth state persisted in ~/.a5c/mcp-auth/.",
+    "dependencies": [
+      "GAP-TOOLS-025",
+      "GAP-MCPC-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/mcp/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-033",
+    "title": "Runtime Configuration Tool",
+    "category": "tools-capabilities",
+    "priority": "Low",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "Babysitter has a configure CLI command but it's not available as an agentic tool. Pi sessions and orchestrated tasks cannot modify configuration during execution.",
+    "targetState": "A config agentic tool that can read and modify babysitter settings: compression settings, breakpoint auto-approval rules, model selection per-task, timeout overrides. Changes scoped to current run.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/config/",
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/breakpoints/rules.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-034",
+    "title": "Dynamic Tool Discovery and Search",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Babysitter's agentic tools are a fixed set of 16 tools loaded upfront into Pi sessions. All tool schemas included in initial prompt. No deferred loading or tool discovery from MCP servers.",
+    "targetState": "Deferred tool loading: tools listed by name only, full schema fetched on demand. tool_search agentic tool. MCP tool discovery. Tool categorization. Prompt optimization.",
+    "dependencies": [
+      "GAP-TOOLS-025",
+      "GAP-PROMPT-002"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-035",
+    "title": "Grep Output Modes and Context Params",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "Babysitter's grep tool always returns matching lines with line numbers. No way to request file paths only, match counts, or separate before/after context.",
+    "targetState": "Add output_mode (content/files_with_matches/count), before_context (-B), after_context (-A), line_numbers (-n), head_limit params to the grep agentic tool.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-036",
+    "title": "Bash Background Execution",
+    "category": "tools-capabilities",
+    "priority": "Medium",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "Babysitter's bash tool spawns a child process synchronously. Missing run_in_background and description params compared to CC's BashTool.",
+    "targetState": "Add run_in_background and description params to bash agentic tool. Background execution requires tracking processes by ID, collecting output asynchronously, and delivering completion notifications.",
+    "dependencies": [
+      "GAP-TOOLS-030"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-037",
+    "title": "Fetch Content Processing",
+    "category": "tools-capabilities",
+    "priority": "Low",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Babysitter's fetch tool returns raw HTTP responses. Body truncated at 50KB unless raw: true. No content processing or summarization.",
+    "targetState": "Add a prompt parameter to the fetch agentic tool. When provided, fetched content is processed using the prompt as instructions to extract or summarize relevant information.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-TOOLS-038",
+    "title": "Ask Tool Interaction Model Alignment",
+    "category": "tools-capabilities",
+    "priority": "Low",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "CC's AskUserQuestionTool uses single question, free-text response. Babysitter's ask tool uses structured multi-question format with options, multi-select, and recommended index.",
+    "targetState": "Support both interaction modes via a mode param: simple (CC-compatible single question, free-text) or structured (current babysitter model with options/multi-select).",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/interaction/"
+    ]
+  },
+  {
+    "gapId": "GAP-USER-001",
+    "title": "Operator Command Layer",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "L",
+    "status": "Partial",
+    "currentState": "50+ babysitter CLI commands are terminal-only. During orchestration, the operator interacts only through breakpoints (no embedded SDK dashboard exists yet).",
+    "targetState": "Key commands (run:status, task:list, tokens:stats, run:events) surfaceable during breakpoint interactions. Operators can inspect and act without breaking orchestration flow.",
+    "dependencies": [
+      "GAP-UX-005"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/interaction/"
+    ]
+  },
+  {
+    "gapId": "GAP-USER-006",
+    "title": "Real-Time Cost Tracking",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "tokens:stats provides post-hoc analysis from run journals. No real-time cost visibility during active orchestration.",
+    "targetState": "Real-time cost accumulation from task results. Per-model pricing (configurable). Cost visible in run:status and embedded SDK dashboard. Cost threshold breakpoints auto-pause when budget exceeded.",
+    "dependencies": [
+      "GAP-SUBOBS-003",
+      "GAP-SESSION-004"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-USER-012",
+    "title": "Plan Mode with Verification",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "harness:plan stops after Phase 1 (planning). No in-session toggle between plan and execute modes. No per-step verification or plan modification mid-execution.",
+    "targetState": "Plan phase generates structured task list. Breakpoint presents plan for approval. Execution phase runs each step with optional per-step breakpoints. Plan modifiable via breakpoint feedback.",
+    "dependencies": [
+      "GAP-TOOLS-018",
+      "GAP-UX-007"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/breakpoints/types.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-USER-017",
+    "title": "Plugin Management Integration",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "plugin:install, plugin:list-installed exist as terminal commands. Not integrated into the orchestration experience. No in-session browsing or management.",
+    "targetState": "Plugin discovery as agentic tool. Plugin install/configure via breakpoint with approval. Marketplace browsing via embedded SDK dashboard widget.",
+    "dependencies": [
+      "GAP-ECO-002"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/plugins/",
+      "packages/genty/platform/src/harness/agenticTools.ts",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001",
+    "title": "Ink/React Terminal Rendering Foundation",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "No embedded SDK dashboard exists yet. CLI commands output flat JSON or plain text tables. Interaction module uses raw readline for prompts. No Ink, no React, no component model for terminal rendering.",
+    "targetState": "Ink installed as dependency. Reusable component library for terminal rendering: Box, Text, Spinner, Table, StatusBar, ProgressBar, Tree. Embedded SDK dashboard and key CLI commands built with Ink components.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/cli/main.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001a",
+    "title": "Effect Tree Visualization",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "task:list outputs a flat JSON array of effects. run:status shows a summary with pendingByKind counts. No tree visualization, no parent/child rendering, no live updating.",
+    "targetState": "An Ink component EffectTree that renders hierarchical effect dependency tree with parent/child effects, parallel groups, status indicators, and timing information. Collapsible nodes for large trees.",
+    "dependencies": [
+      "GAP-UX-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001b",
+    "title": "Structured Diff Rendering",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Missing",
+    "currentState": "Task results with code changes are stored as raw text in result.json. No diff rendering. No embedded SDK dashboard exists yet.",
+    "targetState": "An Ink component StructuredDiff that renders unified diffs with syntax highlighting, line numbers, added/removed/context lines with color coding, file path headers, and collapsible hunks.",
+    "dependencies": [
+      "GAP-UX-001",
+      "GAP-RUN-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001c",
+    "title": "Permission and Breakpoint Approval UI",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Breakpoint interaction uses raw readline with arrow-key selectors. No context display beyond the question text. No risk visualization. Auto-approval recommendations not surfaced in the UI.",
+    "targetState": "An Ink-based BreakpointApproval component showing breakpoint context, auto-approval recommendation with reason, matched rule, consecutive approval count, risk indicators, and selectable options with keyboard navigation.",
+    "dependencies": [
+      "GAP-UX-001",
+      "GAP-BRK-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/breakpoints/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001d",
+    "title": "Message Type Rendering",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "run:events outputs raw JSON events. No embedded SDK dashboard exists yet. No type-specific rendering or color coding by event type.",
+    "targetState": "A message dispatcher component that renders each event type appropriately: EFFECT_REQUESTED, EFFECT_RESOLVED, RUN_COMPLETED, RUN_FAILED, and task-kind-specific results (agent, shell, breakpoint).",
+    "dependencies": [
+      "GAP-UX-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/storage/types.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001e",
+    "title": "Progress and Status Line",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "S",
+    "status": "Missing",
+    "currentState": "No status line. CLI commands exit after output. No embedded SDK dashboard exists yet. No persistent indicators during orchestration.",
+    "targetState": "An Ink StatusLine component rendered at terminal bottom showing run ID, iteration count, effect summary, token usage, estimated cost, elapsed time. Updates in real-time. Color-coded: green=healthy, yellow=slow, red=error.",
+    "dependencies": [
+      "GAP-UX-001",
+      "GAP-SUBOBS-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/session/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-001f",
+    "title": "Streaming Output Panels",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "L",
+    "status": "Missing",
+    "currentState": "invokeHarness() captures stdout/stderr only after the child process exits. No streaming during execution. No embedded SDK dashboard exists yet.",
+    "targetState": "An Ink StreamingPanel component that attaches to child process stdout/stderr pipes, renders output in a scrollable bounded panel, supports multiple panels for parallel effects, and truncates/virtualizes long output.",
+    "dependencies": [
+      "GAP-UX-001",
+      "GAP-SUBOBS-001"
+    ],
+    "keyFiles": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/genty/platform/src/harness/piWrapper.ts",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-005",
+    "title": "Structured Orchestration Status View",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Status fragmented across run:status (lifecycle state), tokens:stats (post-hoc tokens), harness:observe (separate dashboard). No single command provides unified orchestration visibility.",
+    "targetState": "run:status --rich combines run state, token stats, pending effects count, health indicators, and phase progression in one view. Works in --json mode for machine consumption.",
+    "dependencies": [
+      "GAP-STATE-008"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/dashboard/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-006",
+    "title": "Pending Work Inspector",
+    "category": "user-experience",
+    "priority": "High",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "task:list --pending provides a flat list. The batching module groups effects for execution but does not surface grouped views to the operator.",
+    "targetState": "task:list --grouped organizes pending effects by kind (task, breakpoint, sleep), priority, and age. Counts per group. Works in --json mode.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-007",
+    "title": "Rich Breakpoint Interaction",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Breakpoint auto-approval with patterns and rules. Approve/reject focused interaction. No risk summary or contextual guidance during approval.",
+    "targetState": "Breakpoints show context summary, risk level, recommended action, and alternative options. Always-approve workflow for trusted operations. Feedback capture for process improvement.",
+    "dependencies": [
+      "GAP-SEC-005",
+      "GAP-SEC-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/interaction/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-008",
+    "title": "Resume Dashboard",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "harness:resume-run exists but no visual run picker or context summary. Operator must know the run ID to resume.",
+    "targetState": "Resume command shows available runs with status, progress percentage, last activity, and key context. Operator selects from list. Selected run restored with rich context overlay.",
+    "dependencies": [
+      "GAP-PROMPT-005"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/interaction/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-009",
+    "title": "Failure Triage View",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "harness:doctor exists but repair requires manual log/state inspection. No synthesized failure triage with fix suggestions.",
+    "targetState": "Failure triage view shows failure point in orchestration timeline, root cause analysis from journal, actionable fix suggestions (retry, repair-journal, rebuild-state), and similar past failures.",
+    "dependencies": [
+      "GAP-OBS-001"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/storage/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-010",
+    "title": "Typed Effect Interaction Patterns",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "The interaction module provides arrow-key selectors, multi-select, and free-text input for CLI use. These rich interaction types are not available as orchestration effects from process definitions.",
+    "targetState": "Typed interaction effect schemas: ChoiceInteraction, MultiChoiceInteraction, TextInputInteraction, ConfirmInteraction, FileSelectInteraction, FormInteraction. Harness adapters implement renderers for each type.",
+    "dependencies": [
+      "GAP-JSON-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/breakpoints/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/harness/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-011",
+    "title": "Command Discoverability",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "CLI commands via --help. No in-session suggestions, no contextual command recommendations, no search across commands.",
+    "targetState": "babysitter help --search for command search. Contextual suggestions based on current run state. Command aliases and shortcuts for common workflows.",
+    "dependencies": [],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/cli/"
+    ]
+  },
+  {
+    "gapId": "GAP-UX-014",
+    "title": "Operator Mode Selection",
+    "category": "user-experience",
+    "priority": "Medium",
+    "effort": "M",
+    "status": "Partial",
+    "currentState": "Modes implied by wrapper choice (agent-platform plan, agent-platform yolo, agent-platform forever). Not selectable in-session. Changing mode requires starting a new run.",
+    "targetState": "Operator can switch modes mid-run via breakpoint interaction or session command. Mode changes affect prompt personality, breakpoint frequency, and parallelism aggressiveness.",
+    "dependencies": [
+      "GAP-PROMPT-003"
+    ],
+    "keyFiles": [
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/prompts/"
+    ]
+  }
+]

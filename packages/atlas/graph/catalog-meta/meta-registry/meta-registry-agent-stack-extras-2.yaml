@@ -1,0 +1,551 @@
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:live-session
+attributes:
+  displayName: LiveSession (meta)
+  name: LiveSession
+  cluster: 6-lifecycle
+  prefix: live-session
+  origin: derived
+  purpose: in-flight observable session (running agent subprocess, in-flight token totals, last stream event); distinct from durable Session NodeKind
+  exampleCount: 0
+  invariants:
+  - 'id starts with live-session:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:live-session--id
+  - target: meta-attribute:live-session--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:orchestrator-state
+attributes:
+  displayName: OrchestratorState (meta)
+  name: OrchestratorState
+  cluster: 6-lifecycle
+  prefix: orchestrator-state
+  origin: derived
+  purpose: orchestration control-plane state (poll/concurrency, claimed-issue set, codex totals, last reconcile)
+  exampleCount: 0
+  invariants:
+  - 'id starts with orchestrator-state:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:orchestrator-state--id
+  - target: meta-attribute:orchestrator-state--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:dispatch-preflight
+attributes:
+  displayName: DispatchPreflight (meta)
+  name: DispatchPreflight
+  cluster: 6-lifecycle
+  prefix: dispatch-preflight
+  origin: derived
+  purpose: orchestrator-startup validation gate (tracker creds, agent binary, workspace root) — runs once before any Run
+  exampleCount: 0
+  invariants:
+  - 'id starts with dispatch-preflight:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:dispatch-preflight--id
+  - target: meta-attribute:dispatch-preflight--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:reconciliation
+attributes:
+  displayName: Reconciliation (meta)
+  name: Reconciliation
+  cluster: 6-lifecycle
+  prefix: reconciliation
+  origin: derived
+  purpose: a reconciliation pass (timer/operator/terminal-state/completion) capturing trigger, outcome, and counts
+  exampleCount: 0
+  invariants:
+  - 'id starts with reconciliation:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:reconciliation--id
+  - target: meta-attribute:reconciliation--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:workflow-definition
+attributes:
+  displayName: WorkflowDefinition (meta)
+  name: WorkflowDefinition
+  cluster: 4-surfacing-path
+  prefix: workflow
+  origin: derived
+  purpose: a repo-versioned WORKFLOW.md contract (front-matter tracker binding, polling, workspace-root, agent-executable, hooks, prompt-template body)
+  exampleCount: 0
+  invariants:
+  - 'id starts with workflow:'
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:workflow-definition--id
+  - target: meta-attribute:workflow-definition--display-name
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-product--id
+attributes:
+  displayName: AgentProduct.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-product
+  type: id
+  required: true
+  description: id on AgentProduct.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-product
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-product--display-name
+attributes:
+  displayName: AgentProduct.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-product
+  type: string
+  required: true
+  description: displayName on AgentProduct.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-product
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-product--vendor
+attributes:
+  displayName: AgentProduct.vendor
+  name: vendor
+  parentNodeKindId: meta-node-kind:agent-product
+  type: string
+  required: true
+  description: vendor on AgentProduct.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-product
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-product--homepage-url
+attributes:
+  displayName: AgentProduct.homepageUrl
+  name: homepageUrl
+  parentNodeKindId: meta-node-kind:agent-product
+  type: url
+  required: true
+  description: homepageUrl on AgentProduct.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-product
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-version--id
+attributes:
+  displayName: AgentVersion.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-version
+  type: id
+  required: true
+  description: id on AgentVersion.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-version
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-version--agent-product-id
+attributes:
+  displayName: AgentVersion.agentProductId
+  name: agentProductId
+  parentNodeKindId: meta-node-kind:agent-version
+  type: ref<AgentProduct>
+  required: true
+  description: agentProductId on AgentVersion.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-version
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-version--version-range
+attributes:
+  displayName: AgentVersion.versionRange
+  name: versionRange
+  parentNodeKindId: meta-node-kind:agent-version
+  type: versionRange
+  required: true
+  description: versionRange on AgentVersion.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-version
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-core-impl--id
+attributes:
+  displayName: AgentCoreImpl.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-core-impl
+  type: id
+  required: true
+  description: id on AgentCoreImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-core-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-core-impl--display-name
+attributes:
+  displayName: AgentCoreImpl.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-core-impl
+  type: string
+  required: true
+  description: displayName on AgentCoreImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-core-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-runtime-impl--id
+attributes:
+  displayName: AgentRuntimeImpl.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-runtime-impl
+  type: id
+  required: true
+  description: id on AgentRuntimeImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-runtime-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-runtime-impl--display-name
+attributes:
+  displayName: AgentRuntimeImpl.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-runtime-impl
+  type: string
+  required: true
+  description: displayName on AgentRuntimeImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-runtime-impl
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:agent-ui-impl
+attributes:
+  displayName: AgentUIImpl (meta)
+  name: AgentUIImpl
+  cluster: 3-agent-stack
+  prefix: agent-ui-impl
+  origin: derived
+  purpose: |
+    User-facing UI layer of an agent product (TUI, CLI, web shell, IDE extension).
+    Owns presentations bundled with the product and the interaction primitives
+    the user has access to. Distinct from AgentPlatformImpl (extensibility surfaces)
+    and AgentRuntimeImpl (runtime environment). Added in catalog update to refine the
+    agent stack to a 4-layer model.
+  exampleCount: 0
+  invariants:
+  - 'id starts with agent-ui-impl:'
+  - if uiKind != headless then presentationsBundled non-empty
+edges:
+  in_cluster:
+  - target: meta-cluster:agent-stack
+  contains_meta_attribute:
+  - target: meta-attribute:agent-ui-impl--id
+  - target: meta-attribute:agent-ui-impl--display-name
+  - target: meta-attribute:agent-ui-impl--ui-kind
+  - target: meta-attribute:agent-ui-impl--presentations-bundled
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-ui-impl--id
+attributes:
+  displayName: AgentUIImpl.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-ui-impl
+  type: id
+  required: true
+  description: id on AgentUIImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-ui-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-ui-impl--display-name
+attributes:
+  displayName: AgentUIImpl.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-ui-impl
+  type: string
+  required: true
+  description: displayName on AgentUIImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-ui-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-ui-impl--ui-kind
+attributes:
+  displayName: AgentUIImpl.uiKind
+  name: uiKind
+  parentNodeKindId: meta-node-kind:agent-ui-impl
+  type: enum<tui-only,cli-only,tui-and-cli,web,ide-extension,mobile-app,multi-surface,headless>
+  required: true
+  description: High-level shape of the UI layer; `headless` = no UI (SDK/orchestrator).
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-ui-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-ui-impl--presentations-bundled
+attributes:
+  displayName: AgentUIImpl.presentationsBundled
+  name: presentationsBundled
+  parentNodeKindId: meta-node-kind:agent-ui-impl
+  type: list<ref<Presentation>>
+  required: false
+  description: Presentations the UI layer ships with (TUI, IDE-extension, web, ...).
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-ui-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-platform-impl--id
+attributes:
+  displayName: AgentPlatformImpl.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-platform-impl
+  type: id
+  required: true
+  description: id on AgentPlatformImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-platform-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-platform-impl--display-name
+attributes:
+  displayName: AgentPlatformImpl.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-platform-impl
+  type: string
+  required: true
+  description: displayName on AgentPlatformImpl.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-platform-impl
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-host-transport--id
+attributes:
+  displayName: AgentHostTransport.id
+  name: id
+  parentNodeKindId: meta-node-kind:agent-host-transport
+  type: id
+  required: true
+  description: id on AgentHostTransport.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-host-transport
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-host-transport--display-name
+attributes:
+  displayName: AgentHostTransport.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:agent-host-transport
+  type: string
+  required: true
+  description: displayName on AgentHostTransport.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-host-transport
+---
+nodeKind: MetaAttribute
+id: meta-attribute:agent-host-transport--kind
+attributes:
+  displayName: AgentHostTransport.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:agent-host-transport
+  type: enum<stdio
+  required: true
+  description: kind on AgentHostTransport.
+edges:
+  defined_on:
+  - target: meta-node-kind:agent-host-transport
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool-descriptor--id
+attributes:
+  displayName: ToolDescriptor.id
+  name: id
+  parentNodeKindId: meta-node-kind:tool-descriptor
+  type: id
+  required: true
+  description: id on ToolDescriptor.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool-descriptor
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool-descriptor--display-name
+attributes:
+  displayName: ToolDescriptor.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:tool-descriptor
+  type: string
+  required: true
+  description: displayName on ToolDescriptor.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool-descriptor
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool-server--id
+attributes:
+  displayName: ToolServer.id
+  name: id
+  parentNodeKindId: meta-node-kind:tool-server
+  type: id
+  required: true
+  description: id on ToolServer.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool-server
+---
+nodeKind: MetaAttribute
+id: meta-attribute:tool-server--display-name
+attributes:
+  displayName: ToolServer.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:tool-server
+  type: string
+  required: true
+  description: displayName on ToolServer.
+edges:
+  defined_on:
+  - target: meta-node-kind:tool-server
+---
+nodeKind: MetaAttribute
+id: meta-attribute:subagent--id
+attributes:
+  displayName: Subagent.id
+  name: id
+  parentNodeKindId: meta-node-kind:subagent
+  type: id
+  required: true
+  description: id on Subagent.
+edges:
+  defined_on:
+  - target: meta-node-kind:subagent
+---
+nodeKind: MetaAttribute
+id: meta-attribute:subagent--display-name
+attributes:
+  displayName: Subagent.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:subagent
+  type: string
+  required: true
+  description: displayName on Subagent.
+edges:
+  defined_on:
+  - target: meta-node-kind:subagent
+---
+nodeKind: MetaAttribute
+id: meta-attribute:skill--id
+attributes:
+  displayName: Skill.id
+  name: id
+  parentNodeKindId: meta-node-kind:skill
+  type: id
+  required: true
+  description: id on Skill.
+edges:
+  defined_on:
+  - target: meta-node-kind:skill
+---
+nodeKind: MetaAttribute
+id: meta-attribute:skill--display-name
+attributes:
+  displayName: Skill.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:skill
+  type: string
+  required: true
+  description: displayName on Skill.
+edges:
+  defined_on:
+  - target: meta-node-kind:skill
+---
+nodeKind: MetaAttribute
+id: meta-attribute:plugin--id
+attributes:
+  displayName: Plugin.id
+  name: id
+  parentNodeKindId: meta-node-kind:plugin
+  type: id
+  required: true
+  description: id on Plugin.
+edges:
+  defined_on:
+  - target: meta-node-kind:plugin
+---
+nodeKind: MetaAttribute
+id: meta-attribute:plugin--display-name
+attributes:
+  displayName: Plugin.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:plugin
+  type: string
+  required: true
+  description: displayName on Plugin.
+edges:
+  defined_on:
+  - target: meta-node-kind:plugin
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-transport--id
+attributes:
+  displayName: MCPTransport.id
+  name: id
+  parentNodeKindId: meta-node-kind:mcp-transport
+  type: id
+  required: true
+  description: id on MCPTransport.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-transport
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-transport--display-name
+attributes:
+  displayName: MCPTransport.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:mcp-transport
+  type: string
+  required: true
+  description: displayName on MCPTransport.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-transport
+---
+nodeKind: MetaAttribute
+id: meta-attribute:mcp-transport--kind
+attributes:
+  displayName: MCPTransport.kind
+  name: kind
+  parentNodeKindId: meta-node-kind:mcp-transport
+  type: enum<stdio
+  required: true
+  description: kind on MCPTransport.
+edges:
+  defined_on:
+  - target: meta-node-kind:mcp-transport

@@ -1,0 +1,242 @@
+---
+nodeKind: TransportProtocol
+id: transportProtocol:terminal-cli
+attributes:
+  transportId: "terminal-cli"
+  label: "Interactive terminal CLI"
+  protocolKind: "cli-stdio"
+  interactive: "true"
+  streaming: "true"
+  requestShape: "stdin / CLI arguments"
+  responseShape: "stdout / terminal session"
+  evidenceRefs:
+    - "repo-sdk-fallback"
+    - "repo-adapters-host"
+---
+nodeKind: TransportProtocol
+id: transportProtocol:shell-hook-runtime
+attributes:
+  transportId: "shell-hook-runtime"
+  label: "Shell hook lifecycle runtime"
+  protocolKind: "shell-hooks"
+  interactive: "true"
+  streaming: "true"
+  requestShape: "hook invocation payload"
+  responseShape: "shell hook status and output"
+  evidenceRefs:
+    - "repo-target-index"
+    - "repo-target-claude"
+    - "repo-target-codex"
+---
+nodeKind: TransportProtocol
+id: transportProtocol:anthropic
+attributes:
+  transportId: "anthropic"
+  label: "Anthropic Messages API"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /v1/messages"
+  responseShape: "Anthropic message response"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: true
+    costTracking: true
+    toolSchemaFormat: "anthropic"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-architecture"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:openai-chat
+attributes:
+  transportId: "openai-chat"
+  label: "OpenAI Chat Completions"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /v1/chat/completions"
+  responseShape: "chat.completion"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: true
+    costTracking: true
+    toolSchemaFormat: "openai"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-migration"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:openai-responses
+attributes:
+  transportId: "openai-responses"
+  label: "OpenAI Responses API"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /v1/responses or WebSocket response.create on /v1/responses"
+  responseShape: "response object or response.* event stream"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: true
+    costTracking: true
+    toolSchemaFormat: "openai"
+    supportsWebSocket: true
+  configRouting: |
+    Newer Codex clients prefer the top-level `openai_base_url` config key
+    supplied via user config or `-c openai_base_url=...`; project-local
+    `.codex/config.toml` routing keys can be ignored. Keep OPENAI_BASE_URL
+    only as a backward-compatible fallback.
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-migration"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:google
+attributes:
+  transportId: "google"
+  label: "Google GenerateContent"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /v1beta/models/*"
+  responseShape: "candidates[]"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: false
+    costTracking: true
+    toolSchemaFormat: "google"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-architecture"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:passthrough
+attributes:
+  transportId: "passthrough"
+  label: "Passthrough upstream protocol"
+  status: "scorecard-gated"
+  protocolKind: "http-proxy"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "provider-native path"
+  responseShape: "provider-native response"
+  codecCapabilities:
+    supportsTools: false
+    supportsStreaming: false
+    supportsTokenCounting: false
+    costTracking: false
+    toolSchemaFormat: "none"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:bedrock-converse
+attributes:
+  transportId: "bedrock-converse"
+  label: "Bedrock Converse"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /converse"
+  responseShape: "Bedrock output.message"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: false
+    costTracking: true
+    toolSchemaFormat: "anthropic"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-architecture"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:vertex-native
+attributes:
+  transportId: "vertex-native"
+  label: "Vertex native GenerateContent"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /v1/projects/...:generateContent"
+  responseShape: "Vertex candidates[]"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: false
+    costTracking: true
+    toolSchemaFormat: "google"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-architecture"
+    - "repo-transport-adapter-scorecard"
+edges:
+  used_by:
+    - target: agent:adapters
+
+---
+nodeKind: TransportProtocol
+id: transportProtocol:azure-foundry
+attributes:
+  transportId: "azure-foundry"
+  label: "Azure Foundry Chat Completions"
+  status: "scorecard-gated"
+  protocolKind: "http-json"
+  interactive: "false"
+  streaming: "true"
+  requestShape: "POST /models/chat/completions"
+  responseShape: "Azure Foundry chat completion"
+  codecCapabilities:
+    supportsTools: true
+    supportsStreaming: true
+    supportsTokenCounting: true
+    costTracking: true
+    toolSchemaFormat: "openai"
+  evidenceRefs:
+    - "repo-transport-adapter-readme"
+    - "repo-transport-adapter-architecture"
+    - "repo-transport-adapter-scorecard"
+
+edges:
+  used_by:
+    - target: agent:adapters

@@ -1,0 +1,34 @@
+nodeKind: AgentVersion
+id: agentVersion:antigravity-sdk:0-1-1
+attributes:
+  agentId: "antigravity-sdk"
+  agentProductId: agent:antigravity-sdk
+  displayName: "Antigravity SDK 0.1.1"
+  runtimeFamily: "sdk"
+  releaseChannel: "alpha"
+  versionRange: "0.1.1"
+  currentVersion: "0.1.1"
+  releasedAt: "2026-05-28"
+  sourcePackage: "google-antigravity"
+  upstreamReleaseTag: "v0.1.1"
+  summary: "Alpha release of Google Antigravity Python SDK for programmatic agent construction"
+  installMethods:
+    - install:pip
+  releaseHighlights:
+    - "Three-layer Agent/Session/Adapter architecture"
+    - "Custom Python tool functions via decorator registration"
+    - "MCP server integration (McpStdioServer)"
+    - "Multimodal ingestion (images, video, audio, documents)"
+    - "Declarative policies (deny, allow, ask_user)"
+    - "Background triggers (every() for periodic tasks)"
+    - "Compiled Go runtime binary in pip wheels"
+  assimilationNotes:
+    - "Requires pip install (not just git clone) for Go runtime binary"
+    - "Python >= 3.10 required"
+    - "Apache-2.0 license"
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:antigravity-sdk
+  installed_via:
+    - target: install:pip

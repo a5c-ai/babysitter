@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:mcp-streamable-http
+attributes:
+  displayName: "MCP streamable HTTP"
+  description: |
+    The entity speaks MCP over the streamable-HTTP transport (chunked
+    response with optional SSE upgrade for notifications).
+  appliesToNodeKinds: ["AgentVersion", "ToolServer"]
+  category: agent
+edges: {}

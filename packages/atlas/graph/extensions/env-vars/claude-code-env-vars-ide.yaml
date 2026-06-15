@@ -1,0 +1,47 @@
+nodeKind: EnvVar
+id: env-var:claude-code-auto-connect-ide
+attributes:
+  displayName: CLAUDE_CODE_AUTO_CONNECT_IDE
+  description: Override automatic IDE connection; false prevents, true forces.
+  name: CLAUDE_CODE_AUTO_CONNECT_IDE
+  category: ide
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-ide-skip-auto-install
+attributes:
+  displayName: CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL
+  description: Skip auto-installation of IDE extensions.
+  name: CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL
+  category: ide
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-ide-skip-valid-check
+attributes:
+  displayName: CLAUDE_CODE_IDE_SKIP_VALID_CHECK
+  description: Set to 1 to skip validation of IDE lockfile entries during connection.
+  name: CLAUDE_CODE_IDE_SKIP_VALID_CHECK
+  category: ide
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-ide-host-override
+attributes:
+  displayName: CLAUDE_CODE_IDE_HOST_OVERRIDE
+  description: Override the host address used to connect to the IDE extension.
+  name: CLAUDE_CODE_IDE_HOST_OVERRIDE
+  category: ide
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

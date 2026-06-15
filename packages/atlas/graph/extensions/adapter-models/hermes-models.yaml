@@ -1,0 +1,27 @@
+nodeKind: AdapterModel
+id: adapter-model:hermes:hermes-3-llama-3.1-405b
+attributes:
+  harness: hermes
+  modelId: hermes-3-llama-3.1-405b
+  displayName: Hermes 3 Llama 3.1 405B
+  deprecated: false
+  contextWindow: 128000
+  maxOutputTokens: 8192
+  supportsThinking: false
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: false
+  supportsStructuredOutput: false
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: false
+  supportsImageOutput: false
+  supportsFileInput: false
+  cliArgKey: "--model"
+  cliArgValue: hermes-3-llama-3.1-405b
+  lastUpdated: "2025-01-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:hermes

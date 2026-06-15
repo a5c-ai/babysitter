@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: numerical-analysis
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:dynamic-programming]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # PDE Solver Library

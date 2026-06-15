@@ -1,0 +1,220 @@
+---
+nodeKind: StackProfile
+id: stack-profile:rust-actix-postgres
+attributes:
+  displayName: "Rust + Actix Web + Diesel + PostgreSQL"
+  description: |
+    A Rust web application stack using Actix Web as the actor-based HTTP
+    framework, Diesel as the compile-time verified ORM, and PostgreSQL as
+    the primary relational data store.
+
+    Actix Web provides high-throughput request handling with an actor model
+    for concurrent processing. Diesel's derive macros generate type-safe
+    query builders at compile time, catching schema mismatches before
+    runtime. This stack is popular for services where correctness,
+    predictable latency, and memory safety are non-negotiable. Deployment
+    commonly targets Docker containers or bare metal, with the resulting
+    binary being a single static executable.
+  composes:
+    - language:rust
+    - framework:actix-web
+    - library:diesel-rs
+edges:
+  composed_of:
+    - language:rust
+    - framework:actix-web
+    - library:diesel-rs
+---
+nodeKind: StackProfile
+id: stack-profile:elixir-phoenix-postgres
+attributes:
+  displayName: "Elixir + Phoenix + Ecto + PostgreSQL"
+  description: |
+    An Elixir web application stack combining Phoenix as the web framework,
+    Ecto as the database wrapper and query generator, and PostgreSQL as the
+    relational database. Phoenix Channels provide real-time WebSocket
+    communication, and LiveView enables server-rendered interactive UIs.
+
+    The BEAM virtual machine underpins the stack with lightweight processes,
+    preemptive scheduling, and fault isolation via OTP supervision trees.
+    This combination excels at high-concurrency, low-latency workloads
+    like chat, collaboration, and real-time dashboards. Ecto's changeset
+    validation and multi-repo support make data access explicit and
+    testable. Deployment targets include Fly.io, Gigalixir, and Docker.
+  composes:
+    - language:elixir
+    - framework:phoenix
+    - library:ecto
+edges:
+  composed_of:
+    - language:elixir
+    - framework:phoenix
+    - library:ecto
+---
+nodeKind: StackProfile
+id: stack-profile:dotnet-blazor-stack
+attributes:
+  displayName: ".NET Blazor + Entity Framework + SQL Server"
+  description: |
+    A .NET full-stack web application stack: Blazor for interactive web UIs
+    using C# instead of JavaScript, Entity Framework Core as the ORM, and
+    SQL Server (or PostgreSQL) as the database. Blazor Server renders UI
+    on the server with SignalR for real-time updates; Blazor WebAssembly
+    runs .NET in the browser via WASM.
+
+    This stack targets enterprises with existing .NET investments. Entity
+    Framework's migrations, LINQ queries, and change tracking provide a
+    productive data access layer. ASP.NET Core Identity handles
+    authentication. The stack benefits from Visual Studio tooling, strong
+    typing throughout, and the .NET ecosystem for background processing
+    (Hangfire), caching, and messaging. Deployment targets include Azure
+    App Service, Docker, and IIS.
+  composes:
+    - language:csharp
+    - framework:blazor
+    - library:entity-framework
+edges:
+  composed_of:
+    - language:csharp
+    - framework:blazor
+    - library:entity-framework
+---
+nodeKind: StackProfile
+id: stack-profile:kotlin-ktor-exposed
+attributes:
+  displayName: "Kotlin + Ktor + Exposed + PostgreSQL"
+  description: |
+    A Kotlin server-side stack: Ktor as the asynchronous web framework
+    built on coroutines, Exposed as the lightweight SQL library with both
+    DSL and DAO APIs, and PostgreSQL as the data store.
+
+    Ktor's plugin-based architecture keeps the framework lean — you add
+    only the features you need (serialization, authentication, sessions,
+    WebSockets). Exposed provides type-safe SQL access with a Kotlin DSL
+    that reads like native SQL while catching errors at compile time.
+    This stack is popular among Android developers extending to backend
+    work and teams that prefer Kotlin's null-safety and coroutine
+    concurrency model over Java's thread-based approach. Deployment
+    targets include Docker, Kubernetes, and GCP Cloud Run.
+  composes:
+    - language:kotlin
+    - library:ktor
+    - library:exposed
+edges:
+  composed_of:
+    - language:kotlin
+    - library:ktor
+    - library:exposed
+---
+nodeKind: StackProfile
+id: stack-profile:remix-prisma-stack
+attributes:
+  displayName: "Remix + Prisma + PostgreSQL"
+  description: |
+    A TypeScript full-stack web application stack: Remix as the web
+    framework with nested routes, loaders, and actions for server-side
+    data fetching; Prisma as the type-safe ORM; and PostgreSQL as the
+    relational database.
+
+    Remix emphasizes progressive enhancement and web standards — forms
+    work without JavaScript, loaders replace client-side data fetching,
+    and error boundaries provide granular error handling. Prisma's
+    schema-first approach generates a fully typed client that pairs
+    naturally with TypeScript. This stack is well-suited for content-rich
+    applications, dashboards, and SaaS products that need excellent
+    initial load performance. Deployment targets include Vercel, Fly.io,
+    and Cloudflare Workers.
+  composes:
+    - language:typescript
+    - framework:remix
+    - library:prisma
+edges:
+  composed_of:
+    - language:typescript
+    - framework:remix
+    - library:prisma
+---
+nodeKind: StackProfile
+id: stack-profile:nuxt-supabase-stack
+attributes:
+  displayName: "Nuxt + Supabase + TypeScript"
+  description: |
+    A TypeScript full-stack web application stack: Nuxt as the Vue-based
+    meta-framework with file-based routing, SSR, and auto-imports;
+    Supabase as the open-source Firebase alternative providing PostgreSQL,
+    real-time subscriptions, authentication, and edge functions.
+
+    Nuxt's server routes and Supabase's auto-generated REST/GraphQL APIs
+    eliminate most boilerplate backend code. Row-level security in
+    Supabase enforces authorization at the database layer. This stack
+    excels for rapid SaaS development where Vue's reactivity model and
+    Supabase's managed infrastructure reduce time to production.
+    Deployment targets include Vercel, Netlify, and Cloudflare Pages
+    via Nuxt adapters.
+  composes:
+    - language:typescript
+    - framework:nuxt
+    - framework:supabase
+edges:
+  composed_of:
+    - language:typescript
+    - framework:nuxt
+    - framework:supabase
+---
+nodeKind: StackProfile
+id: stack-profile:htmx-go-stack
+attributes:
+  displayName: "Go + HTMX + Templ + SQLite"
+  description: |
+    A minimalist full-stack web application stack: Go as the server-side
+    language, HTMX for declarative AJAX interactions without writing
+    JavaScript, Templ for type-safe HTML templating in Go, and SQLite
+    as the embedded database.
+
+    This stack embraces hypermedia as the engine of application state —
+    the server returns HTML fragments that HTMX swaps into the DOM,
+    eliminating the need for a JavaScript framework, JSON APIs, or
+    client-side state management. Templ compiles Go templates at build
+    time with full type checking. SQLite provides a zero-ops database
+    that travels with the binary. The result is a single-binary
+    deployment with minimal infrastructure requirements. Popular for
+    internal tools, content sites, and applications where operational
+    simplicity matters more than horizontal scalability.
+  composes:
+    - language:go
+    - framework:htmx
+edges:
+  composed_of:
+    - language:go
+    - framework:htmx
+---
+nodeKind: StackProfile
+id: stack-profile:rag-stack
+attributes:
+  displayName: "RAG Application Stack (Python + LangChain + ChromaDB + FastAPI)"
+  description: |
+    A reference stack for building retrieval-augmented generation
+    applications: Python as the primary language, LangChain for LLM
+    orchestration and chain composition, ChromaDB as the vector store
+    for document embeddings, and FastAPI as the API layer.
+
+    Documents are ingested, chunked, and embedded into ChromaDB. At query
+    time, relevant chunks are retrieved via similarity search and assembled
+    into a context window for the LLM. LangChain's retrieval chain
+    abstractions handle the retrieval-generation pipeline. FastAPI exposes
+    the RAG pipeline as a typed REST API with automatic OpenAPI
+    documentation. This stack is the most common starting point for
+    teams building document Q&A, knowledge base search, and AI-assisted
+    research tools. Production deployments often swap ChromaDB for
+    Pinecone or Qdrant and add Celery for async document ingestion.
+  composes:
+    - language:python
+    - framework:langchain
+    - framework:fastapi
+    - tool:chromadb
+edges:
+  composed_of:
+    - language:python
+    - framework:langchain
+    - framework:fastapi
+    - tool:chromadb

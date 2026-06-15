@@ -3,6 +3,12 @@
  * @description Generate and validate custom quality checklists ("unit tests for English")
  * @inputs { targetType: string, target: object, constitution: object }
  * @outputs { success: boolean, checklist: object, validation: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

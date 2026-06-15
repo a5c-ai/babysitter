@@ -1,0 +1,273 @@
+#!/usr/bin/env node
+
+const fs = require("node:fs");
+const path = require("node:path");
+
+const rootDir = path.resolve(__dirname, "..");
+const dependencyFields = ["dependencies", "peerDependencies", "optionalDependencies"];
+
+const packageFamilies = {
+  "orchestration-core": [
+    "@a5c-ai/babysitter-sdk",
+    "@a5c-ai/babysitter",
+    "@a5c-ai/genty-platform",
+    "@a5c-ai/genty-core",
+    "@a5c-ai/genty-runtime",
+    "@a5c-ai/genty",
+  ],
+  "dispatch-core": [
+    "@a5c-ai/adapters",
+    "@a5c-ai/comm-adapter",
+    "@a5c-ai/adapters-codecs",
+    "@a5c-ai/adapters-cli",
+    "@a5c-ai/adapters-gateway",
+    "@a5c-ai/adapters-observability",
+    "@a5c-ai/adapters-harness-mock",
+    "@a5c-ai/config-adapter",
+    "@a5c-ai/launch-adapter",
+    "@a5c-ai/tools-adapter",
+    "@a5c-ai/transport-adapter",
+  ],
+  "dispatch-surfaces": [
+    "@a5c-ai/genty-ui",
+    "@a5c-ai/genty-web-app",
+    "@a5c-ai/genty-tui",
+    "@a5c-ai/genty-mobile-android-app",
+    "@a5c-ai/genty-mobile-ios-app",
+    "@a5c-ai/genty-tv-androidtv-app",
+    "@a5c-ai/genty-tv-appletv-app",
+    "@a5c-ai/genty-watch-watchos-app",
+    "@a5c-ai/genty-watch-wearos-app",
+    "@a5c-ai/genty-desktop-app",
+  ],
+  "support-systems": [
+    "@a5c-ai/extensions-adapter",
+    "@a5c-ai/atlas",
+    "@a5c-ai/tasks-adapter",
+    "@a5c-ai/hooks-adapter-core",
+    "@a5c-ai/hooks-adapter-cli",
+    "@a5c-ai/hooks-adapter-claude",
+    "@a5c-ai/hooks-adapter-codex",
+    "@a5c-ai/hooks-adapter-copilot",
+    "@a5c-ai/hooks-adapter-cursor",
+    "@a5c-ai/hooks-adapter-gemini",
+    "@a5c-ai/hooks-adapter-genty",
+    "@a5c-ai/hooks-adapter-hermes",
+    "@a5c-ai/hooks-adapter-antigravity",
+    "@a5c-ai/hooks-adapter-oh-my-pi",
+    "@a5c-ai/hooks-adapter-openclaw",
+    "@a5c-ai/hooks-adapter-opencode",
+    "@a5c-ai/hooks-adapter-pi",
+    "@a5c-ai/triggers-adapter",
+  ],
+  "downstream-consumers": [
+    "@a5c-ai/babysitter-observer-dashboard",
+    "@a5c-ai/genty-tui-plugins",
+  ],
+  "atlas-family": [
+    "@a5c-ai/atlas-webui",
+  ],
+  "kradle-family": [
+    "@a5c-ai/kradle",
+    "@a5c-ai/kradle-sdk",
+    "@a5c-ai/kradle-cli",
+    "@a5c-ai/kradle-web",
+    "@a5c-ai/kradle-jitsi-agent-sidecar",
+    "@a5c-ai/kradle-installer",
+  ],
+};
+
+const familyRules = {
+  "orchestration-core": {
+    allow: new Set(["orchestration-core", "dispatch-core", "support-systems"]),
+    rationale:
+      "orchestration packages may compose dispatch and support systems, but they must not depend on UI/downstream surfaces or install bundles",
+  },
+  "dispatch-core": {
+    allow: new Set(["dispatch-core", "support-systems"]),
+    rationale:
+      "dispatch packages stay reusable and must not depend on orchestration packages, downstream consumers, or install bundles",
+  },
+  "dispatch-surfaces": {
+    allow: new Set(["dispatch-core", "dispatch-surfaces", "support-systems"]),
+    rationale:
+      "UI and app surfaces are downstream of dispatch; they must not reach back into orchestration packages",
+  },
+  "support-systems": {
+    allow: new Set(["support-systems"]),
+    rationale:
+      "cross-harness support systems remain narrowly scoped and should not pull in orchestration, dispatch surface, or distribution concerns",
+  },
+  "downstream-consumers": {
+    allow: new Set([
+      "orchestration-core",
+      "dispatch-core",
+      "dispatch-surfaces",
+      "support-systems",
+      "downstream-consumers",
+    ]),
+    rationale:
+      "downstream consumers can depend on core layers, but they must not become upstream dependencies for those layers",
+  },
+  "atlas-family": {
+    allow: new Set(["support-systems", "atlas-family"]),
+    rationale:
+      "atlas packages form a self-contained graph SDK family; may depend on support systems but not orchestration core",
+  },
+  "kradle-family": {
+    allow: new Set(["support-systems", "kradle-family", "dispatch-surfaces"]),
+    rationale:
+      "kradle packages form a self-contained Kubernetes forge family; may depend on support systems and shared UI surfaces (genty-ui) but not orchestration core",
+  },
+};
+
+const familyByPackage = new Map(
+  Object.entries(packageFamilies).flatMap(([family, packageNames]) =>
+    packageNames.map((packageName) => [packageName, family]),
+  ),
+);
+
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function findPackageJsonsFromWorkspacePattern(pattern) {
+  const normalizedPattern = pattern.replace(/\/+$/, "");
+  if (!normalizedPattern.includes("*")) {
+    const manifestPath = path.join(rootDir, normalizedPattern, "package.json");
+    return fs.existsSync(manifestPath) ? [manifestPath] : [];
+  }
+
+  const [prefix, suffix] = normalizedPattern.split("*");
+  const baseDir = path.join(rootDir, prefix);
+  if (!fs.existsSync(baseDir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(baseDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => path.join(baseDir, entry.name, suffix, "package.json"))
+    .filter((manifestPath) => fs.existsSync(manifestPath));
+}
+
+function findFirstClassPluginPackageJsons() {
+  const pluginsDir = path.join(rootDir, "plugins");
+  if (!fs.existsSync(pluginsDir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(pluginsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /^babysitter-/.test(entry.name))
+    .map((entry) => path.join(pluginsDir, entry.name, "package.json"))
+    .filter((manifestPath) => fs.existsSync(manifestPath));
+}
+
+function loadRepoPackages() {
+  const rootPackageJson = readJson(path.join(rootDir, "package.json"));
+  const workspacePackageJsons = (rootPackageJson.workspaces ?? []).flatMap(
+    findPackageJsonsFromWorkspacePattern,
+  );
+  const manifestPaths = [...new Set([...workspacePackageJsons, ...findFirstClassPluginPackageJsons()])];
+
+  return manifestPaths
+    .map((manifestPath) => {
+      const packageJson = readJson(manifestPath);
+      return {
+        name: packageJson.name,
+        manifestPath,
+        relativeManifestPath: path.relative(rootDir, manifestPath),
+        packageJson,
+      };
+    })
+    .filter((repoPackage) => Boolean(repoPackage.name))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function listInternalDependencies(repoPackage, knownPackageNames) {
+  const internalDependencies = [];
+
+  for (const field of dependencyFields) {
+    const deps = repoPackage.packageJson[field];
+    if (!deps || typeof deps !== "object") {
+      continue;
+    }
+
+    for (const dependencyName of Object.keys(deps)) {
+      if (knownPackageNames.has(dependencyName)) {
+        internalDependencies.push({
+          name: dependencyName,
+          field,
+        });
+      }
+    }
+  }
+
+  return internalDependencies.sort((a, b) => a.name.localeCompare(b.name) || a.field.localeCompare(b.field));
+}
+
+function main() {
+  const repoPackages = loadRepoPackages();
+  const knownPackageNames = new Set(repoPackages.map((repoPackage) => repoPackage.name));
+  const errors = [];
+
+  for (const repoPackage of repoPackages) {
+    if (!familyByPackage.has(repoPackage.name)) {
+      errors.push(
+        `Unclassified package ${repoPackage.name} (${repoPackage.relativeManifestPath}). Add it to scripts/check-architecture-boundaries.cjs before introducing new repo package boundaries.`,
+      );
+    }
+  }
+
+  for (const packageName of familyByPackage.keys()) {
+    if (!knownPackageNames.has(packageName)) {
+      errors.push(
+        `Architecture rule references missing package ${packageName}. Remove or rename the entry in scripts/check-architecture-boundaries.cjs so the gate matches the repo.`,
+      );
+    }
+  }
+
+  for (const repoPackage of repoPackages) {
+    const sourceFamily = familyByPackage.get(repoPackage.name);
+    if (!sourceFamily) {
+      continue;
+    }
+
+    const rule = familyRules[sourceFamily];
+    const internalDependencies = listInternalDependencies(repoPackage, knownPackageNames);
+
+    for (const dependency of internalDependencies) {
+      const targetFamily = familyByPackage.get(dependency.name);
+      if (!targetFamily) {
+        continue;
+      }
+
+      if (!rule.allow.has(targetFamily)) {
+        errors.push(
+          [
+            `${repoPackage.name} (${repoPackage.relativeManifestPath}) declares ${dependency.name} in ${dependency.field},`,
+            `but ${sourceFamily} packages may not depend on ${targetFamily} packages.`,
+            `Rule: ${rule.rationale}.`,
+          ].join(" "),
+        );
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    console.error("Architecture boundary check failed.\n");
+    for (const error of errors) {
+      console.error(`- ${error}`);
+    }
+    process.exit(1);
+  }
+
+  const summary = Object.entries(packageFamilies)
+    .map(([family, packageNames]) => `${family}: ${packageNames.length}`)
+    .join(", ");
+
+  console.log(`Architecture boundary check passed. Families covered: ${summary}.`);
+}
+
+main();

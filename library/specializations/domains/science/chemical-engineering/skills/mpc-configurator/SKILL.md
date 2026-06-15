@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Control
   skill-id: CE-SK-021
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:dynamic-programming]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # MPC Configurator Skill

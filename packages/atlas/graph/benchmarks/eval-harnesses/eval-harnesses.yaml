@@ -1,0 +1,54 @@
+---
+nodeKind: EvalHarness
+id: eval-harness:inspect-ai
+attributes:
+  displayName: "Inspect AI"
+  harnessKind: inspect-ai
+  homepageUrl: https://github.com/UKGovernmentBEIS/inspect_ai
+  description: |
+    UK AISI's evaluation framework for LLM agent and capability evals.
+    Solver/scorer abstraction; first-class log and replay format.
+edges: {}
+---
+nodeKind: EvalHarness
+id: eval-harness:lm-eval-harness
+attributes:
+  displayName: "EleutherAI lm-evaluation-harness"
+  harnessKind: lm-eval-harness
+  homepageUrl: https://github.com/EleutherAI/lm-evaluation-harness
+  description: |
+    Reference harness for benchmark suites such as MMLU, ARC, HellaSwag,
+    GSM8K. Drives the Open LLM Leaderboard.
+edges: {}
+---
+nodeKind: EvalHarness
+id: eval-harness:openai-evals
+attributes:
+  displayName: "OpenAI Evals"
+  harnessKind: custom
+  homepageUrl: https://github.com/openai/evals
+  description: |
+    OpenAI's open-source eval framework with a YAML registry and
+    model-graded eval support.
+edges: {}
+---
+nodeKind: EvalHarness
+id: eval-harness:helm
+attributes:
+  displayName: "Stanford HELM"
+  harnessKind: helm
+  homepageUrl: https://github.com/stanford-crfm/helm
+  description: |
+    Holistic Evaluation of Language Models; broad multi-metric framework.
+edges: {}
+---
+nodeKind: EvalHarness
+id: eval-harness:promptfoo
+attributes:
+  displayName: "promptfoo"
+  harnessKind: custom
+  homepageUrl: https://www.promptfoo.dev
+  description: |
+    CLI- and CI-friendly eval harness for prompts, with built-in
+    LLM-as-judge scorers and red-team suites.
+edges: {}

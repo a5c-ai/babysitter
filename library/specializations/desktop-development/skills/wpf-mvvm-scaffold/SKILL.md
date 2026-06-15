@@ -3,6 +3,12 @@ name: wpf-mvvm-scaffold
 description: Generate WPF MVVM architecture with ViewModelBase, RelayCommand, INotifyPropertyChanged, and dependency injection setup
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [wpf, mvvm, dotnet, csharp, architecture]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:desktop-system-integration]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # wpf-mvvm-scaffold

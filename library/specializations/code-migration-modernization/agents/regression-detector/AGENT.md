@@ -8,6 +8,13 @@ skills:
   - migration-validator
   - characterization-test-generator
   - contract-test-generator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:regression-testing, skill-area:contract-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Regression Detector Agent

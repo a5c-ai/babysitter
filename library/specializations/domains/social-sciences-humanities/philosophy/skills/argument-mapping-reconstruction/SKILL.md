@@ -8,6 +8,12 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:natural-language-processing, skill-area:data-visualization, skill-area:deep-web-research]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:computational-scientist]
 ---
 
 # Argument Mapping and Reconstruction Skill

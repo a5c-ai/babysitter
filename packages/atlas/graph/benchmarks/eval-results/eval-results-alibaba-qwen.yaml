@@ -1,0 +1,75 @@
+---
+nodeKind: EvalResult
+id: eval-result:mmlu.qwen-2-5-72b.001
+attributes:
+  evalRunId: eval-run:mmlu.qwen-2-5-72b.2024-09
+  metricName: accuracy
+  score: 0.861
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-09-19T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mmlu.qwen-2-5-72b.2024-09
+  scored_against:
+    - target: benchmark:mmlu
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.qwen-2-5-72b.001
+attributes:
+  evalRunId: eval-run:human-eval.qwen-2-5-72b.2024-09
+  metricName: pass@1
+  score: 0.866
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-09-19T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.qwen-2-5-72b.2024-09
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:human-eval.qwen-2-5-coder-32b.001
+attributes:
+  evalRunId: eval-run:human-eval.qwen-2-5-coder-32b.2024-11
+  metricName: pass@1
+  score: 0.927
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-11-12T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:human-eval.qwen-2-5-coder-32b.2024-11
+  scored_against:
+    - target: benchmark:human-eval
+---
+nodeKind: EvalResult
+id: eval-result:livecodebench.qwen-2-5-coder-32b.001
+attributes:
+  evalRunId: eval-run:livecodebench.qwen-2-5-coder-32b.2024-11
+  metricName: pass@1
+  score: 0.317
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-11-12T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:livecodebench.qwen-2-5-coder-32b.2024-11
+  scored_against:
+    - target: benchmark:livecodebench
+---
+nodeKind: EvalResult
+id: eval-result:mbpp.qwen-2-5-coder-32b.001
+attributes:
+  evalRunId: eval-run:mbpp.qwen-2-5-coder-32b.2024-11
+  metricName: pass@1
+  score: 0.902
+  unit: "fraction"
+  passFail: pass
+  reportedAt: "2024-11-12T00:00:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:mbpp.qwen-2-5-coder-32b.2024-11
+  scored_against:
+    - target: benchmark:mbpp

@@ -31,6 +31,9 @@
  * Evidence: fix-db took 3 runs (17.6 min total). Single well-designed run would
  * have taken ~8 min. Missing CWD check in first diagnostic caused 2 unnecessary
  * follow-up runs.
+  * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:bug-triage]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

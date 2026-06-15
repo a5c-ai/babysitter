@@ -10,6 +10,14 @@ expertise:
   - Release management
   - Build optimization
   - Environment management
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:devops-engineer]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:deployment-infrastructure-management]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:infrastructure-as-code, topic:microservices]
+
 ---
 
 # DevOps Architect Agent

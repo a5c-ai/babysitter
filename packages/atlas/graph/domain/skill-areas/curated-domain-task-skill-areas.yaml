@@ -1,0 +1,611 @@
+---
+nodeKind: SkillArea
+id: skill-area:device-drivers
+attributes:
+  displayName: "Device Drivers"
+  description: |
+    Implementing low-level drivers over hardware peripherals - register access,
+    interrupt handling, DMA coordination, and failure-aware device control.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+  requires_skill_area:
+    - skill-area:firmware-development
+---
+nodeKind: SkillArea
+id: skill-area:communication-protocols
+attributes:
+  displayName: "Communication Protocols"
+  description: |
+    Working with device and transport protocols - framing, timing,
+    handshakes, retries, and interoperability over constrained links.
+  domains:
+    - specialization:embedded-systems
+    - specialization:network-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:network-programming
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:peripheral-interfacing
+  prerequisite_for_learning:
+    - target: skill-area:protocol-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:sensor-libraries
+attributes:
+  displayName: "Sensor Libraries"
+  description: |
+    Integrating sensor-facing libraries and interfaces - calibration,
+    sampling, conversion, filtering, and hardware-software boundaries.
+  domains:
+    - specialization:embedded-systems
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+  requires_skill_area:
+    - skill-area:peripheral-interfacing
+---
+nodeKind: SkillArea
+id: skill-area:hardware-interface-testing
+attributes:
+  displayName: "Hardware Interface Testing"
+  description: |
+    Testing interactions with physical hardware surfaces - signal integrity,
+    peripheral correctness, harness setup, and reproducible device checks.
+  domains:
+    - specialization:embedded-systems
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:firmware-development
+---
+nodeKind: SkillArea
+id: skill-area:real-time-behavior-testing
+attributes:
+  displayName: "Real-time Behavior Testing"
+  description: |
+    Validating timing-sensitive behavior - deadlines, jitter, scheduling
+    guarantees, interrupt latency, and deterministic execution windows.
+  domains:
+    - specialization:embedded-systems
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:real-time-os
+---
+nodeKind: SkillArea
+id: skill-area:power-consumption-testing
+attributes:
+  displayName: "Power Consumption Testing"
+  description: |
+    Measuring device energy behavior - sleep-state correctness, duty-cycle
+    impact, instrumentation, and regression detection for power budgets.
+  domains:
+    - specialization:embedded-systems
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:low-power-design
+---
+nodeKind: SkillArea
+id: skill-area:environmental-stress-testing
+attributes:
+  displayName: "Environmental Stress Testing"
+  description: |
+    Exercising systems across harsh operating conditions - temperature,
+    vibration, power variance, environmental noise, and long-duration load.
+  domains:
+    - specialization:embedded-systems
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:safety-critical-testing
+attributes:
+  displayName: "Safety Critical Testing"
+  description: |
+    Verifying systems where failure has high consequence - hazard scenarios,
+    fail-safe behavior, coverage rigor, and audit-friendly evidence.
+  domains:
+    - specialization:embedded-systems
+    - domain:security
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:firmware-testing
+attributes:
+  displayName: "Firmware Testing"
+  description: |
+    Testing firmware behavior on target or simulated hardware - boot flows,
+    device state transitions, update safety, and peripheral correctness.
+  domains:
+    - specialization:embedded-systems
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:firmware-development
+---
+nodeKind: SkillArea
+id: skill-area:protocol-conformance-testing
+attributes:
+  displayName: "Protocol Conformance Testing"
+  description: |
+    Verifying compliance with protocol specifications - edge-case framing,
+    interoperability matrices, timing rules, and standards adherence.
+  domains:
+    - specialization:embedded-systems
+    - specialization:network-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:embedded-systems
+      confidence: primary
+    - target: specialization:network-programming
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:communication-protocols
+---
+nodeKind: SkillArea
+id: skill-area:game-engines
+attributes:
+  displayName: "Game Development Engines"
+  description: |
+    Working within game-engine runtimes - scene setup, runtime services,
+    tooling pipelines, scripting boundaries, and engine lifecycle concerns.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:graphics-rendering
+attributes:
+  displayName: "Graphics Rendering"
+  description: |
+    Building real-time rendering paths - materials, lighting, draw ordering,
+    post-processing, and GPU-facing render architecture.
+  domains:
+    - specialization:game-development
+    - specialization:gpu-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+    - target: specialization:gpu-programming
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:shader-programming
+---
+nodeKind: SkillArea
+id: skill-area:game-audio-systems
+attributes:
+  displayName: "Audio Engine"
+  description: |
+    Designing in-game audio systems - event-triggered playback, mixing,
+    spatialization, streaming assets, and runtime audio state.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:game-ai-pathfinding
+attributes:
+  displayName: "Game AI and Pathfinding"
+  description: |
+    Implementing game-agent behavior - navigation meshes, steering,
+    decision logic, tactical state, and runtime simulation constraints.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:ui-menu-systems
+attributes:
+  displayName: "UI and Menu Systems"
+  description: |
+    Building game-facing interface systems - HUDs, menus, controller input,
+    navigation states, feedback, and session-to-session continuity.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:save-load-systems
+attributes:
+  displayName: "Save and Load Systems"
+  description: |
+    Designing durable player-state persistence - serialization boundaries,
+    checkpoints, migration, corruption recovery, and slot management.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:game-analytics-monetization
+attributes:
+  displayName: "Game Analytics and Monetization"
+  description: |
+    Instrumenting gameplay economics - event tracking, funnels, retention,
+    offers, progression signals, and monetization-aware balancing.
+  domains:
+    - specialization:game-development
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:analytics-tracking
+---
+nodeKind: SkillArea
+id: skill-area:smart-contract-development-testing
+attributes:
+  displayName: "Smart Contract Development and Testing"
+  description: |
+    Authoring and validating smart-contract logic - state machines, test
+    harnesses, upgrade safety, invariants, and deployment correctness.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+  requires_skill_area:
+    - skill-area:smart-contract-security
+---
+nodeKind: SkillArea
+id: skill-area:token-nft-management
+attributes:
+  displayName: "Token and NFT Management"
+  description: |
+    Managing tokenized digital assets - issuance, ownership metadata,
+    transfers, marketplace flows, and lifecycle constraints.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:blockchain-node-network-setup
+attributes:
+  displayName: "Blockchain Node and Network Setup"
+  description: |
+    Operating blockchain-node environments - networking, synchronization,
+    peer topology, configuration, and runtime health management.
+  domains:
+    - specialization:cryptography-blockchain
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:on-chain-data-oracle-integration
+attributes:
+  displayName: "On-chain Data and Oracle Integration"
+  description: |
+    Bridging external data into chain-based systems - feed trust,
+    settlement timing, verification boundaries, and oracle dependence.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:wallet-integration-key-management
+attributes:
+  displayName: "Wallet Integration and Key Management"
+  description: |
+    Integrating wallet flows and custody boundaries - key handling,
+    signing requests, account state, and user-authorization surfaces.
+  domains:
+    - specialization:cryptography-blockchain
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:key-derivation
+    - skill-area:signature-schemes
+---
+nodeKind: SkillArea
+id: skill-area:cross-chain-interoperability
+attributes:
+  displayName: "Layer 2 and Cross-chain Interoperability"
+  description: |
+    Working across multiple chain layers or networks - bridging semantics,
+    settlement assumptions, message passing, and trust tradeoffs.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:blockchain-analytics-explorer
+attributes:
+  displayName: "Blockchain Analytics and Explorer Setup"
+  description: |
+    Building or operating chain-observability surfaces - indexed data,
+    trace browsing, explorer UX, and on-chain analytics workflows.
+  domains:
+    - specialization:cryptography-blockchain
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:transaction-fee-optimization
+attributes:
+  displayName: "Transaction Fee Optimization"
+  description: |
+    Managing cost and throughput in transaction submission - fee markets,
+    batching, timing, inclusion guarantees, and user-cost tradeoffs.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:dao-governance-implementation
+attributes:
+  displayName: "DAO Governance Implementation"
+  description: |
+    Implementing decentralized governance mechanisms - proposals, voting,
+    quorum rules, delegation, and execution guarantees.
+  domains:
+    - specialization:cryptography-blockchain
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:cryptography-blockchain
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:vulnerability-scanning-remediation
+attributes:
+  displayName: "Vulnerability Scanning and Remediation"
+  description: |
+    Finding and resolving known weaknesses - scan coverage, triage quality,
+    remediation flow, retesting, and prioritization under risk.
+  domains:
+    - domain:cybersecurity
+    - specialization:security-research
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:dependency-vulnerability-mgmt
+---
+nodeKind: SkillArea
+id: skill-area:penetration-testing-ethical-hacking
+attributes:
+  displayName: "Penetration Testing and Ethical Hacking"
+  description: |
+    Conducting offensive security assessments - recon, exploit chaining,
+    evidence capture, reporting, and safe execution boundaries.
+  domains:
+    - domain:cybersecurity
+    - specialization:security-research
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:threat-modeling
+---
+nodeKind: SkillArea
+id: skill-area:security-monitoring-siem
+attributes:
+  displayName: "Security Monitoring and SIEM"
+  description: |
+    Operating security telemetry and detections - event ingestion,
+    correlation, alert fidelity, and investigation-friendly signal design.
+  domains:
+    - domain:cybersecurity
+    - domain:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: domain:observability
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:observability-pipeline
+---
+nodeKind: SkillArea
+id: skill-area:endpoint-security-edr
+attributes:
+  displayName: "Endpoint Security and EDR"
+  description: |
+    Securing endpoint fleets - detection agents, host telemetry,
+    containment actions, hardening baselines, and remediation workflows.
+  domains:
+    - domain:cybersecurity
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:application-security-testing
+attributes:
+  displayName: "Application Security Testing (SAST/DAST)"
+  description: |
+    Evaluating application code and runtime behavior for weaknesses - static
+    analysis, dynamic probing, exploitability context, and remediation loops.
+  domains:
+    - domain:cybersecurity
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:sast
+    - skill-area:dast
+---
+nodeKind: SkillArea
+id: skill-area:incident-response-forensics
+attributes:
+  displayName: "Incident Response and Forensics"
+  description: |
+    Responding to security events with evidence discipline - containment,
+    timeline reconstruction, root-cause analysis, and post-incident review.
+  domains:
+    - domain:cybersecurity
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:incident-response
+---
+nodeKind: SkillArea
+id: skill-area:data-protection-dlp
+attributes:
+  displayName: "Data Protection and DLP"
+  description: |
+    Protecting sensitive data across storage and movement - classification,
+    leak prevention, access boundaries, and policy-backed safeguards.
+  domains:
+    - domain:cybersecurity
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:encryption-decryption
+---
+nodeKind: SkillArea
+id: skill-area:threat-intelligence-hunting
+attributes:
+  displayName: "Threat Intelligence and Hunting"
+  description: |
+    Proactively identifying attacker behavior - intel ingestion, hunting
+    hypotheses, indicator tracking, and environment-specific detection logic.
+  domains:
+    - domain:cybersecurity
+    - specialization:security-research
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:cybersecurity
+      confidence: primary
+    - target: specialization:security-research
+      confidence: secondary

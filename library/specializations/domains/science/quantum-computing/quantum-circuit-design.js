@@ -3,6 +3,13 @@
  * @description QC-ALGO-001: Design, implement, and optimize quantum circuits for specific computational problems
  * @inputs { problemDescription: string, targetBackend: string, optimizationLevel: number }
  * @outputs { success: boolean, circuit: object, resourceEstimate: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:quantum-computing]
+ *   specializations: [specialization:quantum-computing]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:compiler-implementation, skill-area:language-design]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

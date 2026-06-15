@@ -1,0 +1,17 @@
+nodeKind: TestSet
+id: test-set:gpqa-diamond
+attributes:
+  displayName: "GPQA Diamond"
+  benchmarkId: benchmark:mmlu
+  caseCount: 198
+  releasedAt: "2023-11-29"
+  composition: |
+    The "diamond" subset of GPQA — 198 graduate-level questions in
+    biology, chemistry, and physics, written and validated by domain
+    experts. Diamond is the hardest tier; experts (PhD students in the
+    same field) achieve ~65% accuracy.
+  homepageUrl: "https://github.com/idavidrein/gpqa"
+  description: |
+    GPQA Diamond is the hardest subset of the Graduate-level Google-Proof
+    Q&A (GPQA) benchmark introduced by Rein et al., 2023.
+edges: {}

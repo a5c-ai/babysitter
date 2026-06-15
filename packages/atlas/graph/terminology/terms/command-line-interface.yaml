@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:command-line-interface
+attributes:
+  canonicalDefinitionId: definition:command-line-interface.canonical
+  displayName: "Command-Line Interface"
+  kind: tool
+  description: |
+    A text-based interface for invoking programs from a terminal.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

@@ -3,6 +3,13 @@
  * @description Navigate biological hierarchies from genes to proteins to cells to organisms, analyzing emergent properties and cross-level interactions
  * @inputs { phenomenon: string, startLevel: string, targetLevel: string, system: object, outputDir: string }
  * @outputs { success: boolean, hierarchicalAnalysis: object, emergentProperties: array, crossLevelInteractions: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,124 @@
+---
+nodeKind: Workflow
+id: workflow:campaign-launch
+attributes:
+  displayName: "Campaign Launch"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-campaign"
+  complexity: cross-team
+  description: |
+    Orchestrates the end-to-end launch of a marketing campaign — coordinating
+    creative asset delivery, channel activation, audience targeting validation,
+    budget allocation, legal sign-off, and go-live timing across email, paid,
+    social, and content channels. Produces a launch checklist and post-launch
+    monitoring plan. Excludes long-term performance optimization.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:brand-audit
+attributes:
+  displayName: "Brand Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates brand consistency across all customer touchpoints — reviewing
+    visual identity adherence, messaging alignment, tone-of-voice compliance,
+    competitive positioning, and brand perception metrics from surveys and
+    social listening. Produces a brand health scorecard and remediation
+    recommendations. Excludes creative redesign work.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:technical-writer
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:public-relations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:content-calendar-planning
+attributes:
+  displayName: "Content Calendar Planning"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Plans and coordinates the editorial calendar for upcoming content
+    production — mapping themes to business goals, assigning content briefs
+    to creators, scheduling publication dates across channels, and identifying
+    gaps in topic coverage or funnel-stage representation. Produces a
+    prioritized content backlog. Excludes content creation itself.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:devrel
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:devrel-team
+---
+nodeKind: Workflow
+id: workflow:marketing-attribution-review
+attributes:
+  displayName: "Marketing Attribution Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews the accuracy and completeness of marketing attribution models —
+    validating UTM tagging consistency, analyzing multi-touch vs last-touch
+    model divergence, auditing data pipeline integrity from ad platforms to
+    CRM, and reconciling reported conversions against actual revenue. Produces
+    attribution confidence scores and model adjustment recommendations.
+    Excludes attribution model redesign.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:business-intelligence
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:business-intelligence-team

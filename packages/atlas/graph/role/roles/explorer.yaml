@@ -1,0 +1,21 @@
+nodeKind: Role
+id: role:explorer
+attributes:
+  displayName: "Explorer"
+  isAgentic: true
+  requiredCapabilities:
+    - capability:supports-tool-use
+  requiredDomains: []
+  description: |
+    The Explorer role.
+edges:
+  holds_responsibility:
+    - responsibility:knowledge-sharing
+    - responsibility:documentation
+  requires_expertise:
+    - target: skill-area:context-management
+    - target: skill-area:dead-code-elimination
+    - target: skill-area:reference-docs
+    - target: skill-area:tool-use
+  requires_capability:
+    - target: capability:supports-tool-use

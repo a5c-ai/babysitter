@@ -1,0 +1,10 @@
+nodeKind: Topic
+id: topic:rate-limiting
+attributes:
+  displayName: "Rate Limiting"
+  description: |
+    Rate Limiting as a cross-cutting topic of expertise.
+edges:
+  applies_to:
+    - domain:web-development
+    - domain:security

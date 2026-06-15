@@ -1,0 +1,111 @@
+# How Kradle fits into the agentic stack alongside adapters and babysitter.
+# Kradle owns the repository/policy/dispatch plane; adapters owns the session
+# plane; babysitter owns the process orchestration plane.
+
+# ═══════════════════════════════════════════
+# Cross-product orchestration flow
+# ═══════════════════════════════════════════
+
+# Kradle's orchestration primitives connect to adapters and babysitter
+# primitives to form the full dispatch→execute→merge flow.
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-to-adapter-handoff
+attributes:
+  displayName: "Kradle→Agent Adapter Handoff"
+  description: |
+    After Kradle assembles context and provisions a workspace, it hands
+    off to adapters for the actual agent session. Kradle creates the
+    dispatch run, adapters manages the chat/tool loop, and Kradle
+    receives the artifacts back when the session completes. This is
+    the boundary between the forge plane and the agent execution plane.
+  kind: session-lifecycle
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+  orch_triggers:
+    - target: orch-primitive:agent-dispatch
+---
+nodeKind: OrchestrationPrimitive
+id: orch-primitive:kradle-to-babysitter-handoff
+attributes:
+  displayName: "Kradle→Babysitter Handoff"
+  description: |
+    For multi-step workflows (e.g., fix→test→review→merge), Kradle
+    delegates to babysitter's process orchestration. Babysitter manages
+    the step-by-step iteration while Kradle provides the repository
+    context, workspace isolation, and merge governance.
+  kind: multi-agent-coordination
+  trigger: on-state-change
+edges:
+  realizes:
+    - target: layer:10-interaction
+
+# ═══════════════════════════════════════════
+# Kradle interaction patterns
+# These describe HOW Kradle participates in common agentic workflows.
+# ═══════════════════════════════════════════
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:kradle-issue-to-pr
+attributes:
+  displayName: "Kradle Issue→Agent→PR"
+  description: |
+    End-to-end automation: a Kradle issue triggers agent dispatch, the
+    agent works in an isolated worktree, and the result surfaces as a
+    pull request with CI and review gates. The full cycle from problem
+    statement to deployable code change, governed by org policy.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:kradle
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:kradle-ci-failure-fix
+attributes:
+  displayName: "Kradle CI Failure→Agent Fix"
+  description: |
+    Auto-remediation pattern: when a CI pipeline fails, a trigger rule
+    dispatches a coding agent to analyze the failure and propose a fix.
+    The agent receives the pipeline logs, test output, and repo context
+    as its prompt, then creates a fix PR targeting the failing branch.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:kradle
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:kradle-memory-assisted-dispatch
+attributes:
+  displayName: "Kradle Memory-Assisted Dispatch"
+  description: |
+    Context-enriched dispatch: before launching an agent, Kradle queries
+    the company brain for relevant memories from prior sessions, similar
+    issues, and organizational patterns. The memory context is injected
+    into the prompt alongside the repo state, giving the agent access
+    to institutional knowledge that spans sessions and team members.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:kradle
+---
+nodeKind: InteractionPattern
+id: interaction-pattern:kradle-governed-agent-work
+attributes:
+  displayName: "Kradle Governed Agent Work"
+  description: |
+    Policy-governed agent execution: Kradle enforces org-level policies
+    on every agent dispatch — tool allowlists, secret access grants,
+    file scope boundaries, and mandatory review gates. Agents operate
+    within the same RBAC model as human developers, using K8s
+    ServiceAccounts and RoleBindings rather than separate permission
+    systems.
+edges:
+  realizes:
+    - target: layer:10-interaction
+  integrates_with:
+    - target: platform:kradle

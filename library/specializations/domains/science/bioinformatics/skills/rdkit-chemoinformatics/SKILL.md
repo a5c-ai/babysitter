@@ -18,6 +18,12 @@ metadata:
     - chemoinformatics
     - molecules
     - properties
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:python-data-pipelines, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:biomedical-engineer]
 ---
 
 # RDKit Chemoinformatics Skill

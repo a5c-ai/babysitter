@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:scope-boundary
+attributes:
+  canonicalDefinitionId: definition:scope-boundary.canonical
+  displayName: "ScopeBoundary"
+  kind: concept
+  references:
+    - "NodeKind:ScopeBoundary"
+  description: |
+    InScope/outOfScope declaration with optional evidence
+edges:
+  applies_to:
+    - target: domain:software-engineering

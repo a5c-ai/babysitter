@@ -1,0 +1,124 @@
+# Enrichment edges for stub domains (F17).
+# Adds 3-5 edges each to the top 10 most important stub domains.
+# The indexer merges edges from duplicate node IDs, so we re-declare
+# each domain here solely to attach new edges. Record attributes are
+# ignored (the original definition wins).
+
+# ── domain:gaming-industry ───────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:gaming-industry
+edges:
+  employs_role:
+    - role:game-developer
+    - role:game-designer
+  uses_workflow:
+    - workflow:game-prototype-iteration
+    - workflow:game-asset-pipeline
+    - workflow:game-build-pipeline
+
+# ── domain:crypto-defi ───────────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:crypto-defi
+edges:
+  employs_role:
+    - role:blockchain-engineer
+  uses_workflow:
+    - workflow:smart-contract-audit
+    - workflow:crypto-protocol-review
+  requires_skill:
+    - skill-area:smart-contract-development-testing
+
+# ── domain:personal-finance ──────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:personal-finance
+edges:
+  employs_role:
+    - role:financial-analyst
+  uses_workflow:
+    - workflow:financial-planning
+    - workflow:budget-planning
+    - workflow:payment-reconciliation-audit
+
+# ── domain:electric-vehicles ─────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:electric-vehicles
+edges:
+  contains:
+    - specialization:embedded-systems
+    - specialization:automotive-engineering
+  uses_workflow:
+    - workflow:vehicle-cybersecurity-assessment
+
+# ── domain:home-automation ───────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:home-automation
+edges:
+  employs_role:
+    - role:embedded-engineer
+    - role:firmware-engineer
+  contains:
+    - specialization:embedded-systems
+    - specialization:network-programming
+
+# ── domain:food-delivery ─────────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:food-delivery
+edges:
+  employs_role:
+    - role:mobile-engineer
+    - role:logistics-coordinator
+  uses_workflow:
+    - workflow:field-dispatch-optimization
+  contains:
+    - specialization:mobile-development
+
+# ── domain:fitness-tech ──────────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:fitness-tech
+edges:
+  employs_role:
+    - role:mobile-engineer
+    - role:data-scientist
+  contains:
+    - specialization:mobile-development
+
+# ── domain:5g-networking ─────────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:5g-networking
+edges:
+  employs_role:
+    - role:networking-engineer
+    - role:network-administrator
+  contains:
+    - specialization:telecommunications-engineering
+  requires_skill:
+    - skill-area:network-protocol-implementation
+
+# ── domain:nuclear-energy ────────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:nuclear-energy
+edges:
+  contains:
+    - specialization:energy-systems
+    - specialization:real-time-systems
+    - specialization:regulatory-compliance
+
+# ── domain:fashion-tech ──────────────────────────────────────────────
+---
+nodeKind: Domain
+id: domain:fashion-tech
+edges:
+  employs_role:
+    - role:data-scientist
+  contains:
+    - specialization:mobile-development
+    - specialization:ux-ui-design

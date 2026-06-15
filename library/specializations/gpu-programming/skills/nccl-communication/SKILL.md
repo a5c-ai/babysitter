@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: multi-gpu
   backlog-id: SK-007
+graph:
+  domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # nccl-communication

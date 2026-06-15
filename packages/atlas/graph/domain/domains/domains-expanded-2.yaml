@@ -1,0 +1,551 @@
+---
+nodeKind: Domain
+id: domain:quantum-machine-learning
+attributes:
+  displayName: "Quantum Machine Learning"
+  description: |
+    Intersection of quantum computing and machine learning — variational
+    quantum circuits, quantum kernel methods, quantum-enhanced optimization,
+    and hybrid classical-quantum training loops. Explores speedups for
+    sampling, feature mapping, and combinatorial optimization problems.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:quantum-computing
+---
+nodeKind: Domain
+id: domain:edge-computing
+attributes:
+  displayName: "Edge Computing"
+  description: |
+    Computation and data processing at the network edge — CDN logic, IoT
+    gateways, on-device inference, and fog architectures. Reduces latency,
+    bandwidth, and cloud dependency for real-time workloads.
+edges:
+  contains:
+    - specialization:embedded-systems
+    - specialization:devops-sre-platform
+---
+nodeKind: Domain
+id: domain:5g-networking
+attributes:
+  displayName: "5G Networking"
+  description: |
+    Fifth-generation cellular network technology — network slicing, massive
+    MIMO, millimeter-wave propagation, and mobile edge computing. Enables
+    ultra-reliable low-latency communications for autonomous systems,
+    remote surgery, and industrial IoT.
+edges:
+  contains:
+    - specialization:network-programming
+---
+nodeKind: Domain
+id: domain:digital-twins
+attributes:
+  displayName: "Digital Twins"
+  description: |
+    Virtual replicas of physical assets, processes, or systems that are
+    continuously synchronized with real-world data. Used for simulation,
+    predictive maintenance, and what-if analysis in manufacturing,
+    infrastructure, and urban planning.
+edges:
+  contains:
+    - specialization:robotics-simulation
+    - specialization:industrial-engineering
+---
+nodeKind: Domain
+id: domain:synthetic-biology
+attributes:
+  displayName: "Synthetic Biology"
+  description: |
+    Engineering biological systems from standardized genetic parts —
+    gene circuit design, metabolic pathway engineering, directed evolution,
+    and bio-foundry automation. Bridges molecular biology with engineering
+    design principles.
+edges:
+  contains:
+    - specialization:bioinformatics
+    - specialization:biomedical-engineering
+---
+nodeKind: Domain
+id: domain:precision-medicine
+attributes:
+  displayName: "Precision Medicine"
+  description: |
+    Tailoring medical treatment to individual patient characteristics —
+    pharmacogenomics, biomarker-driven therapy selection, and patient
+    stratification. Integrates genomic, clinical, and lifestyle data
+    for personalized care.
+edges:
+  contains:
+    - specialization:biomedical-informatics
+    - specialization:clinical-informatics
+---
+nodeKind: Domain
+id: domain:drug-discovery
+attributes:
+  displayName: "Drug Discovery"
+  description: |
+    Computational and experimental approaches to identifying new therapeutic
+    compounds — virtual screening, QSAR modeling, high-throughput screening,
+    lead optimization, and ADMET prediction. Accelerated by ML and
+    molecular simulation.
+edges:
+  contains:
+    - specialization:bioinformatics
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:protein-engineering
+attributes:
+  displayName: "Protein Engineering"
+  description: |
+    Designing and optimizing protein structures for industrial, therapeutic,
+    and research applications — directed evolution, rational design, and
+    AI-driven structure prediction (AlphaFold-class). Underpins enzyme
+    engineering and antibody design.
+edges:
+  contains:
+    - specialization:bioinformatics
+---
+nodeKind: Domain
+id: domain:brain-computer-interfaces
+attributes:
+  displayName: "Brain-Computer Interfaces"
+  description: |
+    Direct communication pathways between neural activity and external
+    devices — EEG/ECoG signal acquisition, neural decoding, stimulation
+    protocols, and real-time closed-loop control. Applications span
+    assistive technology, neurorehabilitation, and augmented cognition.
+edges:
+  contains:
+    - specialization:biomedical-engineering
+    - specialization:embedded-systems
+---
+nodeKind: Domain
+id: domain:wearable-tech
+attributes:
+  displayName: "Wearable Technology"
+  description: |
+    Devices worn on the body that collect physiological and environmental
+    data — smartwatches, biosensors, AR glasses, and fitness trackers.
+    Covers sensor fusion, low-power design, and real-time health monitoring.
+edges:
+  contains:
+    - specialization:embedded-systems
+    - specialization:mobile-development
+---
+nodeKind: Domain
+id: domain:smart-cities
+attributes:
+  displayName: "Smart Cities"
+  description: |
+    Urban infrastructure augmented with IoT, data analytics, and AI —
+    intelligent traffic management, smart grids, environmental monitoring,
+    and citizen-facing digital services. Requires integration across
+    multiple municipal systems.
+edges:
+  contains:
+    - specialization:data-engineering-analytics
+---
+nodeKind: Domain
+id: domain:industrial-automation
+attributes:
+  displayName: "Industrial Automation"
+  description: |
+    Automating manufacturing and process control — PLCs, SCADA systems,
+    robotic assembly lines, and Industry 4.0 integration. Covers OT/IT
+    convergence, safety-critical control, and predictive maintenance.
+edges:
+  contains:
+    - specialization:robotics-simulation
+    - specialization:embedded-systems
+---
+nodeKind: Domain
+id: domain:additive-manufacturing-3d-printing
+attributes:
+  displayName: "Additive Manufacturing / 3D Printing"
+  description: |
+    Layer-by-layer fabrication technologies — FDM, SLA, SLS, metal printing,
+    and bioprinting. Covers slicing software, material science, topology
+    optimization, and quality assurance for printed parts.
+edges:
+  contains:
+    - specialization:mechanical-engineering
+    - specialization:materials-science
+---
+nodeKind: Domain
+id: domain:photonics
+attributes:
+  displayName: "Photonics"
+  description: |
+    Science and engineering of light — optical communication, laser systems,
+    photonic integrated circuits, LiDAR, and quantum optics. Enables
+    high-bandwidth data transmission, sensing, and imaging technologies.
+edges:
+  contains:
+    - specialization:electrical-engineering
+    - specialization:physics
+---
+nodeKind: Domain
+id: domain:semiconductor-design
+attributes:
+  displayName: "Semiconductor Design"
+  description: |
+    Integrated circuit design from RTL to GDSII — digital and analog IC
+    design, physical design, verification, and tape-out. Covers process
+    nodes, standard cell libraries, and EDA toolchains.
+edges:
+  contains:
+    - specialization:electrical-engineering
+    - specialization:fpga-programming
+---
+nodeKind: Domain
+id: domain:game-design
+attributes:
+  displayName: "Game Design"
+  description: |
+    Conceptual and systems design of interactive games — mechanics,
+    dynamics, aesthetics, level design, narrative design, and economy
+    balancing. Distinct from game development engineering; focused on
+    player experience and engagement.
+edges:
+  contains:
+    - specialization:game-development
+---
+nodeKind: Domain
+id: domain:music-production
+attributes:
+  displayName: "Music Production"
+  description: |
+    Recording, mixing, mastering, and distributing music — DAW workflows,
+    synthesis, sampling, audio effects processing, and spatial audio.
+    Covers both traditional studio production and AI-assisted composition.
+edges:
+  contains:
+    - specialization:media
+---
+nodeKind: Domain
+id: domain:film-production
+attributes:
+  displayName: "Film Production"
+  description: |
+    End-to-end filmmaking — pre-production planning, cinematography,
+    on-set workflows, editorial, VFX compositing, color grading, and
+    distribution. Includes virtual production and LED-volume techniques.
+edges:
+  contains:
+    - specialization:media
+---
+nodeKind: Domain
+id: domain:animation
+attributes:
+  displayName: "Animation"
+  description: |
+    Creating motion-based visual content — 2D animation, 3D character
+    animation, rigging, motion capture, and procedural animation.
+    Spans entertainment, advertising, education, and UI/UX motion design.
+edges:
+  contains:
+    - specialization:media
+    - specialization:game-development
+---
+nodeKind: Domain
+id: domain:graphic-design
+attributes:
+  displayName: "Graphic Design"
+  description: |
+    Visual communication through typography, layout, color, and imagery —
+    brand identity systems, print design, packaging, iconography, and
+    digital illustration. Bridges aesthetic craft with strategic messaging.
+edges:
+  contains:
+    - specialization:ux-ui-design
+---
+nodeKind: Domain
+id: domain:ux-writing
+attributes:
+  displayName: "UX Writing"
+  description: |
+    Crafting microcopy and in-product text that guides users — button
+    labels, error messages, onboarding flows, empty states, and
+    conversational UI. Blends language clarity with interaction design.
+edges:
+  contains:
+    - specialization:ux-ui-design
+    - specialization:technical-documentation
+---
+nodeKind: Domain
+id: domain:copywriting
+attributes:
+  displayName: "Copywriting"
+  description: |
+    Persuasive writing for marketing, advertising, and sales — headlines,
+    landing pages, email campaigns, ad copy, and CTAs. Focuses on
+    conversion-oriented language and brand voice consistency.
+edges:
+  contains:
+    - specialization:digital-marketing
+    - specialization:marketing
+---
+nodeKind: Domain
+id: domain:content-moderation
+attributes:
+  displayName: "Content Moderation"
+  description: |
+    Policies, tools, and processes for reviewing user-generated content —
+    trust-and-safety rules, automated classifiers, human review queues,
+    appeals workflows, and regulatory compliance (DSA, CSAM). Balances
+    safety with free expression.
+edges:
+  contains:
+    - specialization:ai-agents-conversational
+    - specialization:legal-compliance
+---
+nodeKind: Domain
+id: domain:podcast-production
+attributes:
+  displayName: "Podcast Production"
+  description: |
+    Audio content creation for episodic distribution — recording, editing,
+    mixing, show notes, RSS feed management, and audience growth strategy.
+    Covers both interview-based and narrative podcast formats.
+edges:
+  contains:
+    - specialization:media
+---
+nodeKind: Domain
+id: domain:live-events-production
+attributes:
+  displayName: "Live Events Production"
+  description: |
+    Planning and executing live events — conferences, concerts, broadcasts,
+    and hybrid virtual/in-person events. Covers AV engineering, streaming
+    infrastructure, stage management, and attendee experience.
+edges:
+  contains:
+    - specialization:media
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:wealth-management
+attributes:
+  displayName: "Wealth Management"
+  description: |
+    Holistic financial advisory for high-net-worth individuals — portfolio
+    construction, estate planning, tax optimization, and multi-generational
+    wealth transfer. Combines investment management with personalized
+    financial planning.
+edges:
+  contains:
+    - specialization:corporate-finance
+    - specialization:finance-accounting
+---
+nodeKind: Domain
+id: domain:tax-technology
+attributes:
+  displayName: "Tax Technology"
+  description: |
+    Software and systems for tax compliance and planning — automated tax
+    calculation engines, e-filing, transfer pricing, and multi-jurisdiction
+    regulatory compliance. Bridges accounting, legal, and engineering.
+edges:
+  contains:
+    - specialization:finance-accounting
+    - specialization:legal-compliance
+---
+nodeKind: Domain
+id: domain:payroll
+attributes:
+  displayName: "Payroll"
+  description: |
+    Compensation processing systems — gross-to-net calculation, tax
+    withholding, benefits deductions, direct deposit, and statutory
+    reporting. Covers multi-country payroll, contractor payments, and
+    payroll compliance.
+edges:
+  contains:
+    - specialization:finance-accounting
+    - specialization:human-resources
+---
+nodeKind: Domain
+id: domain:identity-verification
+attributes:
+  displayName: "Identity Verification"
+  description: |
+    Confirming the real-world identity of users — document verification,
+    biometric matching, liveness detection, KYC workflows, and digital
+    identity standards. Critical for financial services, healthcare,
+    and government applications.
+edges:
+  contains:
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:fraud-detection
+attributes:
+  displayName: "Fraud Detection"
+  description: |
+    Identifying and preventing fraudulent transactions and behavior —
+    rule engines, anomaly detection, graph-based fraud networks, device
+    fingerprinting, and real-time risk scoring. Spans payments, insurance,
+    and account security.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:security-compliance
+---
+nodeKind: Domain
+id: domain:anti-money-laundering
+attributes:
+  displayName: "Anti-Money Laundering"
+  description: |
+    AML compliance programs — transaction monitoring, suspicious activity
+    reporting, customer due diligence, sanctions screening, and beneficial
+    ownership tracking. Regulated by FinCEN, FCA, and equivalent bodies.
+edges:
+  contains:
+    - specialization:legal-compliance
+    - specialization:data-science-ml
+---
+nodeKind: Domain
+id: domain:credit-scoring
+attributes:
+  displayName: "Credit Scoring"
+  description: |
+    Assessing borrower creditworthiness — traditional scorecards, ML-based
+    risk models, alternative data sources, and fair lending compliance.
+    Covers both consumer and commercial credit decisioning.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:corporate-finance
+---
+nodeKind: Domain
+id: domain:claims-processing
+attributes:
+  displayName: "Claims Processing"
+  description: |
+    Insurance claim lifecycle management — intake, adjudication, fraud
+    detection, settlement calculation, and payment. Covers auto, health,
+    property, and specialty lines. Increasingly automated with AI triage.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:underwriting
+attributes:
+  displayName: "Underwriting"
+  description: |
+    Risk assessment and pricing for insurance and lending — actuarial
+    modeling, risk selection, exposure analysis, and pricing adequacy.
+    Covers both manual underwriting and algorithmic decision systems.
+edges:
+  contains:
+    - specialization:data-science-ml
+    - specialization:corporate-finance
+---
+nodeKind: Domain
+id: domain:telemedicine
+attributes:
+  displayName: "Telemedicine"
+  description: |
+    Remote healthcare delivery via digital platforms — video consultations,
+    remote patient monitoring, e-prescriptions, and asynchronous clinical
+    workflows. Covers platform engineering, HIPAA compliance, and clinical
+    integration.
+edges:
+  contains:
+    - specialization:healthcare
+    - specialization:clinical-informatics
+---
+nodeKind: Domain
+id: domain:clinical-trials
+attributes:
+  displayName: "Clinical Trials"
+  description: |
+    Design, execution, and analysis of clinical research studies — protocol
+    design, patient recruitment, data management (EDC), adverse event
+    monitoring, and regulatory submissions. Governed by FDA/EMA/ICH-GCP.
+edges:
+  contains:
+    - specialization:biomedical-informatics
+    - specialization:clinical-informatics
+---
+nodeKind: Domain
+id: domain:pharmacy
+attributes:
+  displayName: "Pharmacy"
+  description: |
+    Pharmaceutical dispensing and medication management systems — e-prescribing,
+    drug interaction checking, formulary management, inventory control, and
+    pharmacy benefit administration. Bridges clinical care and supply chain.
+edges:
+  contains:
+    - specialization:healthcare
+---
+nodeKind: Domain
+id: domain:veterinary
+attributes:
+  displayName: "Veterinary"
+  description: |
+    Animal healthcare technology — practice management systems, veterinary
+    telehealth, electronic medical records for animals, diagnostic imaging,
+    and livestock health monitoring. Growing intersection with wearable
+    tech and IoT.
+edges:
+  contains:
+    - specialization:healthcare
+---
+nodeKind: Domain
+id: domain:property-management
+attributes:
+  displayName: "Property Management"
+  description: |
+    Managing residential and commercial real estate — tenant screening,
+    lease management, rent collection, maintenance requests, and building
+    operations. Covers both single-property and portfolio-scale management.
+edges:
+  contains:
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:facility-management
+attributes:
+  displayName: "Facility Management"
+  description: |
+    Operating and maintaining buildings and infrastructure — HVAC, lighting,
+    space planning, janitorial services, and workplace safety. Covers smart
+    building integration, energy management, and occupancy optimization.
+edges:
+  contains:
+    - specialization:operations
+    - specialization:industrial-engineering
+---
+nodeKind: Domain
+id: domain:fleet-management-ops
+attributes:
+  displayName: "Fleet Management"
+  description: |
+    Managing vehicle fleets — GPS tracking, route optimization, driver
+    management, fuel monitoring, maintenance scheduling, and compliance
+    (ELD, DOT). Covers commercial trucking, delivery, and service fleets.
+edges:
+  contains:
+    - specialization:logistics
+    - specialization:operations
+---
+nodeKind: Domain
+id: domain:waste-management
+attributes:
+  displayName: "Waste Management"
+  description: |
+    Collection, transport, processing, and disposal of waste — route
+    optimization, recycling sorting, landfill management, and circular
+    economy initiatives. Increasingly data-driven with IoT sensors
+    and AI-optimized logistics.
+edges:
+  contains:
+    - specialization:environmental-engineering
+    - specialization:logistics

@@ -18,6 +18,12 @@ metadata:
     - alignment
     - rna-seq
     - splice-aware
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:graph-algorithms, skill-area:python-data-pipelines, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:biomedical-engineer]
 ---
 
 # STAR RNA-seq Aligner Skill

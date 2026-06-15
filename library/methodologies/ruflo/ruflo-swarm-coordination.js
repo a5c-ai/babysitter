@@ -3,6 +3,13 @@
  * @description Ruflo Swarm Coordination - Topology selection, consensus mechanisms, anti-drift enforcement, and agent lifecycle management
  * @inputs { agents: array, taskDecomposition: array, topology?: string, consensusProtocol?: string, maxDriftScore?: number }
  * @outputs { success: boolean, swarmState: object, agentStates: array, consensusHistory: array, driftReport: object, summary: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:ai-agents-conversational]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

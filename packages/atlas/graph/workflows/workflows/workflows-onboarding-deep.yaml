@@ -1,0 +1,181 @@
+---
+nodeKind: Workflow
+id: workflow:team-rotation-program
+attributes:
+  displayName: "Team Rotation Program"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Manages structured team rotations for new hires during their first year —
+    defining rotation schedules across 2-4 teams based on the engineer's growth
+    goals and organizational needs, coordinating with receiving team leads on
+    meaningful project scopes sized for rotation duration, setting explicit
+    learning objectives for each rotation leg, facilitating mid-rotation
+    check-ins between the rotator and both home and host managers, and capturing
+    rotation feedback to refine the program. Produces rotation calendars,
+    learning objective tracking sheets, and program effectiveness surveys.
+    Excludes permanent team assignment decisions.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:vp-engineering
+    - target: role:explorer
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:mentorship-pairing-cycle
+attributes:
+  displayName: "Mentorship Pairing Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Matches mentors with mentees and tracks mentorship progress across the
+    engineering organization — collecting mentor availability and expertise
+    profiles, gathering mentee development goals and preferred learning styles,
+    running compatibility matching based on skill gaps, seniority delta, and team
+    diversity, scheduling kickoff meetings with structured goal-setting templates,
+    conducting monthly check-ins to assess relationship health and goal progress,
+    and running end-of-cycle retrospectives to measure outcomes against
+    objectives. Produces pairing rosters, mentorship goal trackers, and cycle
+    retrospective reports. Excludes performance review integration.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:code-review-practice
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:ai-knowledge-sharing
+  performed_by_org_unit:
+    - target: org-unit:training-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:codebase-orientation-walkthrough
+attributes:
+  displayName: "Codebase Orientation Walkthrough"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: single-team
+  description: |
+    Delivers a structured deep-dive into the codebase architecture for newly
+    onboarded engineers — walking through the repository layout and module
+    boundaries, explaining the build system and CI pipeline from first
+    principles, demonstrating local development environment setup with smoke
+    tests, reviewing key architectural decisions and their ADR documentation,
+    tracing a representative request end-to-end through the system layers, and
+    pairing on a small starter task that touches each layer. Produces onboarding
+    checklists with completion timestamps, architecture map annotations, and
+    new-hire feedback for documentation improvement. Excludes role-specific
+    training.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:explorer
+    - target: role:fullstack-engineer
+  requires_skill_area:
+    - target: skill-area:c4-modeling
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:first-production-deploy-milestone
+attributes:
+  displayName: "First Production Deploy Milestone"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: single-team
+  description: |
+    Guides a new engineer through their first production deployment end-to-end —
+    selecting an appropriately scoped task (bug fix or small feature) from the
+    team backlog, pairing on implementation with emphasis on testing and
+    observability conventions, walking through the code review process with
+    constructive mentoring, demonstrating the deployment pipeline stages
+    (staging, canary, production), supervising the actual production rollout with
+    rollback readiness, and celebrating the milestone to reinforce psychological
+    safety. Produces deploy checklists, first-deploy retrospective notes, and
+    onboarding velocity metrics. Excludes ongoing deployment responsibilities.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:fullstack-engineer
+    - target: role:code-reviewer
+  requires_skill_area:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:code-review-practice
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:release-engineering
+---
+nodeKind: Workflow
+id: workflow:role-transition-onboarding
+attributes:
+  displayName: "Role Transition Onboarding"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Onboards engineers through internal role transitions such as IC-to-manager,
+    team switches, or specialization changes — mapping skill gaps between the
+    prior and new role expectations, creating a 30-60-90-day transition plan with
+    explicit deliverables at each checkpoint, arranging shadow sessions with
+    experienced peers in the target role, scheduling stakeholder introduction
+    meetings, establishing interim support structures (buddy system, skip-level
+    check-ins), and conducting a transition retrospective at the 90-day mark.
+    Produces transition plans, shadow session logs, and 90-day retrospective
+    summaries. Excludes promotion decisions.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:cto
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:tutorial-design
+  applies_to_domain:
+    - target: domain:human-resources
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:hr-team
+    - target: org-unit:engineering

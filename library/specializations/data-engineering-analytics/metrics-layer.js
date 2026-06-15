@@ -27,6 +27,8 @@
  * - Looker LookML: https://cloud.google.com/looker/docs/what-is-lookml
  * - Semantic Layer Best Practices: https://www.getdbt.com/analytics-engineering/semantic-layer/
  * - Metric Store Architecture: https://www.thoughtworks.com/radar/techniques/metric-store
+ * @graph
+ *   domains: [domain:data-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

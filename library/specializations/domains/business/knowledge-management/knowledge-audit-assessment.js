@@ -5,6 +5,11 @@
  * @category Knowledge Governance and Strategy
  * @inputs { auditScope: object, organizationalContext: object, existingAssets: array, stakeholders: array, outputDir: string }
  * @outputs { success: boolean, auditReport: object, knowledgeInventory: array, gapAnalysis: object, qualityScore: number, artifacts: array }
+  * @graph
+ *   domains: [domain:knowledge-management]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
+ *   workflows: [workflow:code-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

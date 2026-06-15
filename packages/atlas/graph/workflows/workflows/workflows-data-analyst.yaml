@@ -1,0 +1,154 @@
+---
+nodeKind: Workflow
+id: workflow:ad-hoc-analysis-request-cycle
+attributes:
+  displayName: "Ad-Hoc Analysis Request Cycle"
+  workflowKind: data
+  triggerType: on-demand
+  typicalCadence: "per-request"
+  complexity: single-team
+  description: |
+    Manages the end-to-end lifecycle of ad-hoc data analysis requests --
+    receiving and triaging incoming analysis requests from stakeholders,
+    scoping effort and clarifying business questions and success criteria,
+    identifying data sources and assessing data availability and quality,
+    performing exploratory data analysis and statistical testing,
+    synthesizing findings into actionable insights with visualizations,
+    delivering results through presentations or self-service notebooks,
+    and conducting follow-up sessions to validate interpretation and
+    identify next steps. Produces analysis deliverable, insight summary,
+    and follow-up action items. Excludes recurring report automation and
+    dashboard development.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:postgres-tuning
+  applies_to_domain:
+    - target: domain:business-intelligence
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:business-intelligence-team
+---
+nodeKind: Workflow
+id: workflow:dashboard-development-cycle
+attributes:
+  displayName: "Dashboard Development Cycle"
+  workflowKind: data
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Develops data dashboards from requirements through stakeholder
+    acceptance -- gathering dashboard requirements including target
+    audience, key questions, and decision contexts, designing data models
+    and semantic layers that support required aggregations and
+    drill-downs, selecting visualization types that effectively
+    communicate each metric, building interactive dashboard prototypes
+    and conducting usability reviews with stakeholders, implementing data
+    refresh pipelines and access controls, validating metric accuracy
+    against source-of-truth systems, and documenting dashboard usage
+    guidance and metric definitions. Produces dashboard, data model
+    documentation, and metric glossary. Excludes data infrastructure
+    provisioning and ETL pipeline development.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:data-scientist
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:business-intelligence
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:business-intelligence-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:data-quality-investigation
+attributes:
+  displayName: "Data Quality Investigation"
+  workflowKind: data
+  triggerType: event-driven
+  typicalCadence: "per-incident"
+  complexity: cross-team
+  description: |
+    Investigates data quality anomalies and drives remediation --
+    triaging data quality alerts from automated monitoring or stakeholder
+    reports, profiling affected datasets to characterize anomaly scope
+    and impact, tracing root cause through data lineage from source
+    systems through transformation layers, assessing downstream impact on
+    reports, dashboards, and business decisions, implementing corrective
+    data fixes and validating against expected values, recommending
+    preventive controls including schema validation, freshness checks,
+    and distribution monitoring, and communicating impact assessment and
+    remediation timeline to affected stakeholders. Produces root-cause
+    analysis, impact assessment, and prevention recommendations. Excludes
+    data pipeline refactoring and monitoring tool configuration.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:data-engineer
+    - target: role:business-analyst
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:data-engineering
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:postmortem-writeup
+  performed_by_org_unit:
+    - target: org-unit:data-platform-team
+    - target: org-unit:data-governance-team
+---
+nodeKind: Workflow
+id: workflow:metrics-definition-alignment
+attributes:
+  displayName: "Metrics Definition Alignment"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Aligns business metric definitions across the organization --
+    inventorying metrics in use across teams and identifying naming
+    collisions and calculation discrepancies, facilitating
+    cross-functional workshops to agree on canonical metric definitions,
+    documenting metric specifications including business logic, data
+    sources, grain, and refresh cadence, establishing a governed metrics
+    catalog with ownership and change-control processes, validating that
+    BI tools and dashboards reference the canonical definitions
+    consistently, and auditing metric implementations against
+    specifications to detect drift. Produces canonical metrics catalog,
+    metric specification documents, and audit findings. Excludes metric
+    implementation in BI tools and data model changes.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:business-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:business-intelligence
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:adr-curation
+  performed_by_org_unit:
+    - target: org-unit:data-governance-team
+    - target: org-unit:analytics-team

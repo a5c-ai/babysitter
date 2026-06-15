@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:bun
+attributes:
+  displayName: "Bun"
+  homepageUrl: "https://bun.sh"
+  kind: package-manager
+  language: language:javascript
+  releasedAt: "2022"
+  description: |
+    All-in-one JavaScript runtime, bundler, transpiler, and package manager.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:developer-environment
+  alternative_to:
+    - target: tool:npm
+      comparison: "JavaScript package managers / runtimes"
+    - target: tool:pnpm
+      comparison: "JavaScript package managers / runtimes"
+    - target: tool:yarn
+      comparison: "JavaScript package managers / runtimes"

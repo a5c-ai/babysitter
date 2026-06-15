@@ -1,0 +1,20 @@
+nodeKind: HookSurface
+id: hook-surface:phase-change-check
+attributes:
+  eventName: "PhaseChangeCheck (a5c canonical)"
+  displayName: "PhaseChangeCheck (a5c canonical)"
+  kind: canonical
+  direction: pre
+  blocking: true
+  family: in-process
+  payloadSchema:
+    type: object
+    required: [fromPhase, toPhase, runId]
+    properties:
+      fromPhase: { type: string }
+      toPhase: { type: string }
+      runId: { type: string }
+  description: |
+    Blocking gate fired before a PhaseTransition. Handlers may abort
+    the transition.
+edges:

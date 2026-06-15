@@ -17,6 +17,12 @@
  * - FDA AI/ML-Based Software as a Medical Device (SaMD) Action Plan
  * - GMLP Guiding Principles: https://www.fda.gov/medical-devices/software-medical-device-samd/good-machine-learning-practice-medical-device-development-guiding-principles
  * - FDA Predetermined Change Control Plan Guidance
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

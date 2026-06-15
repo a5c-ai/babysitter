@@ -1,0 +1,691 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-3174a27f3299
+attributes:
+  displayName: 'Catalog source reference: https://github.com/ClickHouse/mcp-clickhouse'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/ClickHouse/mcp-clickhouse
+  sourcePathOrUrl: https://github.com/ClickHouse/mcp-clickhouse
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/clickhouse-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-acf9470bac36
+attributes:
+  displayName: 'Catalog source reference: https://github.com/Flux159/mcp-server-kubernetes'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/Flux159/mcp-server-kubernetes
+  sourcePathOrUrl: https://github.com/Flux159/mcp-server-kubernetes
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/kubernetes-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-dfb83ac8493b
+attributes:
+  displayName: 'Catalog source reference: https://github.com/GLips/Figma-Context-MCP'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/GLips/Figma-Context-MCP
+  sourcePathOrUrl: https://github.com/GLips/Figma-Context-MCP
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/figma-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-a46a1140105e
+attributes:
+  displayName: 'Catalog source reference: https://github.com/awslabs/mcp'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/awslabs/mcp
+  sourcePathOrUrl: https://github.com/awslabs/mcp
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/aws-bedrock-mcp-tools.yaml,
+    graph/extensions/tool-descriptors/aws-s3-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-894c1630a0a5
+attributes:
+  displayName: 'Catalog source reference: https://github.com/cloudflare/mcp-server-cloudflare'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/cloudflare/mcp-server-cloudflare
+  sourcePathOrUrl: https://github.com/cloudflare/mcp-server-cloudflare
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/cloudflare-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-767b4ac07aa3
+attributes:
+  displayName: 'Catalog source reference: https://github.com/deepseek-ai/DeepSeek-R1'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/deepseek-ai/DeepSeek-R1
+  sourcePathOrUrl: https://github.com/deepseek-ai/DeepSeek-R1
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-deepseek.yaml,
+    graph/benchmarks/eval-runs/eval-runs-deepseek.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-62992f51e92d
+attributes:
+  displayName: 'Catalog source reference: https://github.com/deepseek-ai/DeepSeek-V3'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/deepseek-ai/DeepSeek-V3
+  sourcePathOrUrl: https://github.com/deepseek-ai/DeepSeek-V3
+  locator: Source reference for catalog entities in graph/benchmarks/eval-results/eval-results-deepseek.yaml,
+    graph/benchmarks/eval-runs/eval-runs-deepseek.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-867fb8785c0b
+attributes:
+  displayName: 'Catalog source reference: https://github.com/docker/mcp-servers'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/docker/mcp-servers
+  sourcePathOrUrl: https://github.com/docker/mcp-servers
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/docker-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-0633b2e268f4
+attributes:
+  displayName: 'Catalog source reference: https://github.com/elastic/mcp-server-elasticsearch'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/elastic/mcp-server-elasticsearch
+  sourcePathOrUrl: https://github.com/elastic/mcp-server-elasticsearch
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/elasticsearch-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-94a47c21191e
+attributes:
+  displayName: 'Catalog source reference: https://github.com/exa-labs/exa-mcp-server'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/exa-labs/exa-mcp-server
+  sourcePathOrUrl: https://github.com/exa-labs/exa-mcp-server
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/exa-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-31a3003744d9
+attributes:
+  displayName: 'Catalog source reference: https://github.com/getsentry/sentry-mcp'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/getsentry/sentry-mcp
+  sourcePathOrUrl: https://github.com/getsentry/sentry-mcp
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/sentry-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-452124a1ecf6
+attributes:
+  displayName: 'Catalog source reference: https://github.com/github/github-mcp-server'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/github/github-mcp-server
+  sourcePathOrUrl: https://github.com/github/github-mcp-server
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/github-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-eb86bd37e605
+attributes:
+  displayName: 'Catalog source reference: https://github.com/makenotion/notion-mcp-server'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/makenotion/notion-mcp-server
+  sourcePathOrUrl: https://github.com/makenotion/notion-mcp-server
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/notion-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-22772dcfc948
+attributes:
+  displayName: 'Catalog source reference: https://github.com/mendableai/firecrawl-mcp-server'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/mendableai/firecrawl-mcp-server
+  sourcePathOrUrl: https://github.com/mendableai/firecrawl-mcp-server
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/firecrawl-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-f1b19ba00527
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/brave-search-mcp-tools.yaml,
+    graph/extensions/tool-servers/brave-search-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-f29eaf9eb2ee
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/everything'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/everything-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-14f793356fbd
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/fetch-mcp-tools.yaml,
+    graph/extensions/tool-servers/fetch-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-93b709dbceac
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/filesystem-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-7c82ec619de2
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/google-drive-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-2ee74cf803c2
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/gitlab-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-84a59a9834ff
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/google-maps-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-765765956ef4
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/memory'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/memory-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-0b02a5a061a6
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/postgres-mcp-tools.yaml,
+    graph/extensions/tool-servers/postgres-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-b5afd7d54843
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/puppeteer-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-1b0bea6e7705
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/sequential-thinking-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-5d7987a714e5
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/slack'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/slack-mcp-tools.yaml,
+    graph/extensions/tool-servers/slack-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-f52637308c0e
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/sqlite-mcp-tools.yaml,
+    graph/extensions/tool-servers/sqlite-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-d67b54f4c4ec
+attributes:
+  displayName: 'Catalog source reference: https://github.com/modelcontextprotocol/servers/tree/main/src/time'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/time
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/time
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/time-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-670ac104ffea
+attributes:
+  displayName: 'Catalog source reference: https://github.com/mongodb-js/mongodb-mcp-server'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/mongodb-js/mongodb-mcp-server
+  sourcePathOrUrl: https://github.com/mongodb-js/mongodb-mcp-server
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/mongodb-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-4893853d1ceb
+attributes:
+  displayName: 'Catalog source reference: https://github.com/ppl-ai/modelcontextprotocol'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/ppl-ai/modelcontextprotocol
+  sourcePathOrUrl: https://github.com/ppl-ai/modelcontextprotocol
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/perplexity-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-02e68ab11cd5
+attributes:
+  displayName: 'Catalog source reference: https://github.com/redis/mcp-redis'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/redis/mcp-redis
+  sourcePathOrUrl: https://github.com/redis/mcp-redis
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/redis-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-608d041a7898
+attributes:
+  displayName: 'Catalog source reference: https://github.com/sooperset/mcp-atlassian'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/sooperset/mcp-atlassian
+  sourcePathOrUrl: https://github.com/sooperset/mcp-atlassian
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/jira-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-73c0391ca5f3
+attributes:
+  displayName: 'Catalog source reference: https://github.com/stripe/agent-toolkit'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/stripe/agent-toolkit
+  sourcePathOrUrl: https://github.com/stripe/agent-toolkit
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/stripe-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-c18b6b69b496
+attributes:
+  displayName: 'Catalog source reference: https://github.com/supabase-community/supabase-mcp'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/supabase-community/supabase-mcp
+  sourcePathOrUrl: https://github.com/supabase-community/supabase-mcp
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/supabase-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-8bb261093279
+attributes:
+  displayName: 'Catalog source reference: https://github.com/tavily-ai/tavily-mcp'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/tavily-ai/tavily-mcp
+  sourcePathOrUrl: https://github.com/tavily-ai/tavily-mcp
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/tavily-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:catalog-source-ref-b88e00bc122a
+attributes:
+  displayName: 'Catalog source reference: https://github.com/upstash/context7'
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/upstash/context7
+  sourcePathOrUrl: https://github.com/upstash/context7
+  locator: Source reference for catalog entities in graph/extensions/tool-descriptors/context7-mcp-tools.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:official-web

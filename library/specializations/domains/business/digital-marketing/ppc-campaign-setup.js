@@ -3,6 +3,12 @@
  * @description End-to-end process for setting up and launching paid search campaigns on Google Ads and Microsoft Advertising, including account structure design, keyword research, ad copy creation, bidding strategy configuration, and conversion tracking implementation
  * @inputs { campaignBrief: object, budget: number, targetAudience: object, landingPages: array, conversionGoals: array, outputDir: string }
  * @outputs { success: boolean, campaigns: array, keywordLists: array, adCopyAssets: array, trackingDocumentation: object, launchChecklist: array, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:engineering-onboarding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

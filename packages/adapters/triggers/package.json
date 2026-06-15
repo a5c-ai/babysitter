@@ -1,0 +1,76 @@
+{
+  "name": "@a5c-ai/triggers-adapter",
+  "version": "5.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Event trigger normalization, enrichment, and filtering adapter for automation actions",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/adapters/triggers#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/adapters/triggers"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "adapters",
+    "github-actions",
+    "gitlab",
+    "bitbucket",
+    "webhooks",
+    "triggers"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "bin": {
+    "adapters-triggers": "./dist/cli.js",
+    "triggers-adapter": "./dist/triggers-adapter.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./action": {
+      "import": {
+        "types": "./dist/action.d.ts",
+        "default": "./dist/action.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "npm run test:unit && npm run test:e2e",
+    "prepublishOnly": "npm run verify:release",
+    "verify:release": "npm run build && npm run test:unit && npm run test:e2e && npm run test:coverage",
+    "test:unit": "vitest run --config vitest.config.ts tests",
+    "test:e2e": "npm run build && vitest run tests/action.test.ts tests/dist-cli.smoke.test.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage --coverage.include=src/**/*.ts tests src"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.4"
+  },
+  "atlas": {
+    "layers": [
+      "cross-cutting"
+    ],
+    "muxes": []
+  }
+}

@@ -1,0 +1,205 @@
+# =============================================================================
+# Expanded Specializations 2 — industry-vertical gaps
+# =============================================================================
+---
+nodeKind: Specialization
+id: specialization:education-technology
+attributes:
+  displayName: "Education Technology"
+  parentDomainId: domain:edtech
+  description: |
+    Technology for education — learning management systems, adaptive learning
+    platforms, assessment engines, xAPI/SCORM content delivery, and analytics
+    that improve learner outcomes at scale.
+edges:
+  specializes:
+    - domain:edtech
+---
+nodeKind: Specialization
+id: specialization:energy-systems
+attributes:
+  displayName: "Energy Systems"
+  parentDomainId: domain:energy
+  description: |
+    Engineering energy generation, storage, distribution, and optimization
+    systems — grid modeling, renewable integration, battery management,
+    demand-response algorithms, and carbon accounting.
+edges:
+  specializes:
+    - domain:energy
+---
+nodeKind: Specialization
+id: specialization:construction-technology
+attributes:
+  displayName: "Construction Technology"
+  parentDomainId: domain:construction
+  description: |
+    Technology applied to the construction industry — BIM modeling, 4D/5D
+    scheduling and cost integration, clash detection, site safety systems,
+    drone surveys, and digital twin platforms for built assets.
+edges:
+  specializes:
+    - domain:construction
+---
+nodeKind: Specialization
+id: specialization:environmental-monitoring
+attributes:
+  displayName: "Environmental Monitoring"
+  parentDomainId: domain:environmental-engineering
+  description: |
+    Systems for monitoring environmental conditions — sensor networks for
+    air quality, water quality, soil health, noise levels, and biodiversity
+    tracking, with GIS integration and regulatory compliance reporting.
+edges:
+  specializes:
+    - domain:environmental-engineering
+---
+nodeKind: Specialization
+id: specialization:healthcare-informatics
+attributes:
+  displayName: "Healthcare Informatics"
+  parentDomainId: domain:healthcare
+  description: |
+    Applying informatics to healthcare delivery — EHR integration, clinical
+    decision support, interoperability standards (HL7, FHIR), population
+    health analytics, and privacy-preserving data exchange across care
+    settings.
+edges:
+  specializes:
+    - domain:healthcare
+---
+nodeKind: Specialization
+id: specialization:financial-engineering
+attributes:
+  displayName: "Financial Engineering"
+  parentDomainId: domain:quantitative-finance
+  description: |
+    Quantitative methods applied to financial products and risk management —
+    derivatives pricing, stochastic modeling, portfolio optimization,
+    algorithmic trading systems, and regulatory capital computation.
+edges:
+  specializes:
+    - domain:quantitative-finance
+---
+nodeKind: Specialization
+id: specialization:media-technology
+attributes:
+  displayName: "Media Technology"
+  parentDomainId: domain:media-entertainment
+  description: |
+    Technology powering media production and distribution — video encoding
+    and streaming, content management systems, digital asset management,
+    recommendation engines, and real-time broadcast infrastructure.
+edges:
+  specializes:
+    - domain:media-entertainment
+---
+nodeKind: Specialization
+id: specialization:sports-analytics
+attributes:
+  displayName: "Sports Analytics"
+  parentDomainId: domain:sports-fitness
+  description: |
+    Data-driven analysis in professional and amateur sports — player
+    performance tracking, game strategy modeling, injury prediction,
+    wearable sensor analytics, and fan engagement optimization.
+edges:
+  specializes:
+    - domain:sports-fitness
+---
+nodeKind: Specialization
+id: specialization:agricultural-technology
+attributes:
+  displayName: "Agricultural Technology"
+  parentDomainId: domain:agriculture
+  description: |
+    Technology applied to agriculture — precision farming, crop monitoring
+    via satellite and drone imagery, IoT soil sensors, yield prediction
+    models, autonomous machinery, and supply chain traceability from
+    farm to consumer.
+edges:
+  specializes:
+    - domain:agriculture
+---
+nodeKind: Specialization
+id: specialization:transportation-systems
+attributes:
+  displayName: "Transportation Systems"
+  parentDomainId: domain:transportation
+  description: |
+    Engineering transportation infrastructure and operations — traffic
+    simulation, fleet management, route optimization, autonomous vehicle
+    integration, transit scheduling, and intelligent transportation
+    system (ITS) architectures.
+edges:
+  specializes:
+    - domain:transportation
+---
+nodeKind: Specialization
+id: specialization:defense-systems
+attributes:
+  displayName: "Defense Systems"
+  parentDomainId: domain:defense-tech
+  description: |
+    Technology for defense and national security — command and control
+    systems, ISR (intelligence, surveillance, reconnaissance) platforms,
+    secure communications, mission planning software, and systems
+    engineering for defense acquisition programs.
+edges:
+  specializes:
+    - domain:defense-tech
+---
+nodeKind: Specialization
+id: specialization:space-systems
+attributes:
+  displayName: "Space Systems"
+  parentDomainId: domain:space-tech
+  description: |
+    Engineering space systems — satellite design and operations, ground
+    station software, orbital mechanics computation, launch vehicle
+    telemetry, mission control systems, and space situational awareness.
+edges:
+  specializes:
+    - domain:space-tech
+---
+nodeKind: Specialization
+id: specialization:marine-technology
+attributes:
+  displayName: "Marine Technology"
+  parentDomainId: domain:maritime
+  description: |
+    Technology for maritime and ocean engineering — vessel management
+    systems, port logistics software, underwater sensor networks,
+    autonomous underwater vehicles, marine environmental monitoring,
+    and maritime safety and navigation systems.
+edges:
+  specializes:
+    - domain:maritime
+---
+nodeKind: Specialization
+id: specialization:mining-technology
+attributes:
+  displayName: "Mining Technology"
+  parentDomainId: domain:mining
+  description: |
+    Technology applied to mining operations — geological modeling,
+    mine planning and scheduling software, autonomous haul trucks and
+    drills, ore grade control, environmental compliance monitoring,
+    and worker safety systems.
+edges:
+  specializes:
+    - domain:mining
+---
+nodeKind: Specialization
+id: specialization:telecommunications-engineering
+attributes:
+  displayName: "Telecommunications Engineering"
+  parentDomainId: domain:telecommunications
+  description: |
+    Engineering telecommunications networks and services — network planning,
+    spectrum management, protocol implementation (5G NR, VoIP, SIP),
+    OSS/BSS platforms, and service assurance for carrier-grade
+    infrastructure.
+edges:
+  specializes:
+    - domain:telecommunications

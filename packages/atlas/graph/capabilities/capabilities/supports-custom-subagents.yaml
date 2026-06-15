@@ -1,0 +1,22 @@
+nodeKind: Capability
+id: capability:supports-custom-subagents
+attributes:
+  displayName: "Supports custom subagents"
+  description: |
+    The agent platform can load user-defined subagent definitions from disk
+    (parallel to a Skill's SKILL.md). The on-disk format is recorded on
+    `AgentPlatformImpl.subagentDefinitionFormat` (e.g. `claude-code-md` for
+    Claude Code's `.claude/agents/<name>.md` Markdown-with-YAML-frontmatter
+    format). Distinct from `capability:supports-subagent-dispatch` — a runtime
+    can dispatch built-in subagents without supporting custom definitions, and
+    a platform can declare custom-subagent loading even on top of a runtime
+    that uses a non-task-tool dispatch mechanism.
+
+    References:
+      - Anthropic Claude Code custom subagents:
+        https://docs.anthropic.com/en/docs/claude-code/sub-agents
+        ('.claude/agents/<name>.md' project-scope; '~/.claude/agents/<name>.md'
+        user-scope.)
+  appliesToNodeKinds: ["AgentVersion", "AgentPlatformImpl"]
+  category: extension
+edges: {}

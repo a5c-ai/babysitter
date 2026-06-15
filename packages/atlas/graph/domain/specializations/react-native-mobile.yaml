@@ -1,0 +1,11 @@
+nodeKind: Specialization
+id: specialization:react-native-mobile
+attributes:
+  displayName: "React Native Mobile"
+  parentDomainId: domain:mobile
+  description: |
+    Cross-platform mobile development with React Native — Expo, native
+    modules, and shared JS/TS code across iOS and Android.
+edges:
+  specializes:
+    - domain:mobile

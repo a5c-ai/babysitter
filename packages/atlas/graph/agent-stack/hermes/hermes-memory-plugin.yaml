@@ -1,0 +1,54 @@
+# Hermes memory provider plugin system -- deep-research atlas node.
+
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:hermes.memory-plugin
+attributes:
+  displayName: "Hermes Memory Provider Plugin"
+  agentVersionId: agentVersion:hermes:ge-0-0-0
+  fabricKind: file-and-plugin
+  description: |
+    Pluggable memory provider architecture extending Hermes with persistent
+    cross-session knowledge beyond built-in MEMORY.md and USER.md files.
+    Single-select provider model: only one external memory provider active
+    at a time. Providers implement MemoryProvider ABC with rich lifecycle
+    hooks for prefetch, sync, compression awareness, and session end.
+  keyFiles:
+    - agent/memory_provider.py
+    - agent/memory_manager.py
+    - plugins/memory/
+  builtInMemory:
+    - "MEMORY.md (project-scoped persistent notes)"
+    - "USER.md (user profile, preferences, history)"
+    - "Session history with FTS5 full-text search"
+    - "Session lineage tracking across compression"
+  pluginLifecycleHooks:
+    - "is_available() -- activation check, no network calls"
+    - "initialize(session_id, **kwargs) -- agent startup"
+    - "get_tool_schemas() -- tool injection"
+    - "handle_tool_call(tool_name, args) -- tool routing"
+    - "system_prompt_block() -- static provider info in prompt"
+    - "prefetch(query) -- recalled context before API call"
+    - "queue_prefetch(query) -- pre-warm for next turn"
+    - "sync_turn(user, assistant) -- persist conversation (non-blocking)"
+    - "on_session_end(messages) -- final extraction/flush"
+    - "on_pre_compress(messages) -- save insights before discard"
+    - "on_memory_write(action, target, content) -- mirror writes"
+    - "shutdown() -- clean up connections"
+  configSchema: |
+    Providers declare config fields via get_config_schema() for interactive
+    setup. Secrets written to .env, non-secrets to provider-specific config
+    files. Profile isolation enforced via hermes_home kwarg.
+  threadingContract: "sync_turn() must be non-blocking; backend latency in daemon threads."
+  singleProviderRule: "Only one external memory provider active at a time."
+  ourEquivalent: |
+    packages/babysitter-sdk/src/ provides memoryExtraction and crossRunState for durable
+    memory across babysitter runs. CLAUDE.md/MEMORY.md file conventions match
+    Hermes' file-based memory. Atlas graph provides structured organizational
+    knowledge that Hermes lacks. Hermes' rich lifecycle hooks (prefetch,
+    on_pre_compress, queue_prefetch) are more granular than our current
+    memory extraction, representing an integration opportunity.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  part_of:
+    - target: agent:hermes

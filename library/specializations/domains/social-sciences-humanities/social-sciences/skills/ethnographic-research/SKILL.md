@@ -8,6 +8,11 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:user-research, skill-area:data-analysis, skill-area:document-processing]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:ux-researcher, role:research-scientist]
 ---
 
 # Ethnographic Research Skill

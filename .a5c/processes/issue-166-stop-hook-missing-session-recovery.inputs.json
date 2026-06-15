@@ -1,0 +1,69 @@
+{
+  "issueNumber": 166,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-166-stop-hook-missing-session-recovery",
+  "title": "[Hooks] Stop hook silently allows-exit when session state file disappears mid-run despite unresolved phases",
+  "labels": [
+    "bug",
+    "sdk",
+    "hooks-mux",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev"
+  ],
+  "summary": "The Claude Code stop hook can return success and allow exit when a previously valid session state file disappears during a non-terminal orchestration run. The implementation process should add recovery or loud failure before the missing-session-file branch silently exits, plus audit logging around session state removal/deactivation paths.",
+  "targetFiles": [
+    "packages/sdk/src/harness/hooks/stopHookHandler.ts",
+    "packages/sdk/src/harness/hooks/stopHookContinuation.ts",
+    "packages/sdk/src/harness/hooks/sessionBinding.ts",
+    "packages/sdk/src/harness/hooks/utils.ts",
+    "packages/sdk/src/session/cleanup.ts",
+    "packages/sdk/src/session/write.ts",
+    "packages/sdk/src/session/parse.ts",
+    "packages/sdk/src/session/types.ts",
+    "packages/sdk/src/cli/commands/session/resume.ts",
+    "packages/sdk/src/cli/commands/session/associate.ts",
+    "packages/sdk/src/cli/commands/__tests__/hookRun.test.ts",
+    "packages/sdk/src/session/__tests__/cleanup.test.ts",
+    "packages/sdk/src/cli/__tests__/cliMain.test.ts"
+  ],
+  "relatedIssues": [
+    138,
+    139,
+    158,
+    170
+  ],
+  "processLibraryReferences": [
+    "cradle/bugfix.js",
+    "babysitter/tdd-quality-convergence.js",
+    "specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "specializations/sdk-platform-development/error-handling-debugging-support.js",
+    "specializations/collaboration/github/issue-linking.js",
+    "specializations/collaboration/github/pr-policies.js",
+    "processes/shared/ci/idempotency-and-safe-abort.js"
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/commands/__tests__/hookRun.test.ts packages/sdk/src/session/__tests__/cleanup.test.ts packages/sdk/src/cli/__tests__/cliMain.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk"
+  ],
+  "acceptanceFocus": [
+    "Missing session state file for a hook-bound non-terminal run must not silently approve exit.",
+    "When the hook can safely recover run identity and run directory, it should recreate or repair the session binding and continue blocking orchestration.",
+    "When the hook cannot safely recover an active run but has evidence that recovery is required, it should fail visibly/non-zero with a clear diagnostic.",
+    "Legitimate no-session/no-run cases must keep their existing allow-exit behavior.",
+    "Session state removal or deactivation paths touched by the fix should emit auditable reason metadata or logs."
+  ],
+  "qualityGates": [
+    "Regression tests fail before implementation and pass after implementation.",
+    "Targeted hook/session tests pass.",
+    "SDK build passes.",
+    "SDK test suite passes or any pre-existing unrelated failures are documented with evidence.",
+    "Reviewer approves recovery semantics and compatibility with existing hook/session behavior."
+  ],
+  "nonGoals": [
+    "Do not fix unrelated resume path issues from #138 except where needed for shared recovery helpers.",
+    "Do not change broad orchestration lifecycle semantics outside the stop-hook/session binding path.",
+    "Do not introduce shell-oriented workflow tasks in this repository process."
+  ]
+}

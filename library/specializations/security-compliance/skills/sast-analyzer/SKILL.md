@@ -7,6 +7,13 @@ metadata:
   version: "1.0.0"
   category: security-testing
   backlog-id: SK-SEC-002
+graph:
+  domains: [domain:security, domain:software-engineering]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:sast, skill-area:application-security-testing, skill-area:backend-security]
+  topics: [topic:defense-in-depth, topic:zero-trust-architecture]
+  roles: [role:security-engineer, role:backend-engineer, role:devops-engineer]
+  workflows: [workflow:pull-request-lifecycle, workflow:vulnerability-management]
 ---
 
 # sast-analyzer

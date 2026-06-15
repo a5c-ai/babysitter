@@ -129,23 +129,18 @@ try {
 // --- Check 4: architecture-boundary classification ---
 // New repo packages must be classified in check-architecture-boundaries.cjs
 // (same "new package not registered" class as the lockfile/metadata gaps).
-// The classification script and its rule map describe the staging package tree
-// and do not exist on main-based branches yet; the check applies only where
-// the script is present in the tree.
-if (fs.existsSync(path.join(repoRoot, 'scripts/check-architecture-boundaries.cjs'))) {
-  try {
-    execFileSync('node', ['./scripts/check-architecture-boundaries.cjs'], {
-      cwd: repoRoot,
-      stdio: 'pipe',
-    });
-  } catch (err) {
-    const msg = (err.stdout || err.stderr || '').toString().trim();
-    failures.push(
-      'Architecture boundary check failed:\n' +
-        (msg ? `    ${msg.split('\n').join('\n    ')}` : `    ${err.message}`) +
-        '\n  Fix: classify the new package in scripts/check-architecture-boundaries.cjs.',
-    );
-  }
+try {
+  execFileSync('node', ['./scripts/check-architecture-boundaries.cjs'], {
+    cwd: repoRoot,
+    stdio: 'pipe',
+  });
+} catch (err) {
+  const msg = (err.stdout || err.stderr || '').toString().trim();
+  failures.push(
+    'Architecture boundary check failed:\n' +
+      (msg ? `    ${msg.split('\n').join('\n    ')}` : `    ${err.message}`) +
+      '\n  Fix: classify the new package in scripts/check-architecture-boundaries.cjs.',
+  );
 }
 
 if (failures.length) {

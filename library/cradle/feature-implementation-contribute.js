@@ -16,6 +16,11 @@
  * 7. Run Tests & Lint - Verify implementation doesn't break anything (parallel)
  * 8. Review Breakpoint - Let user review all changes before PR
  * 9. Submit PR - Create pull request from fork to upstream (with breakpoint)
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:bug-fixing-from-issues, skill-area:code-review-practice]
+ *   workflows: [workflow:bug-triage, workflow:feature-development]
+ *   roles: [role:backend-engineer, role:devops-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -434,6 +439,9 @@ export const applyImplementationTask = defineTask('apply-implementation', (args,
       },
       instructions: [
         'Read affected files to understand current state',
+        'Before authoring planned new files under scripts/, supabase/migrations/, src/server/, or src/lib/, check each exact path with ls or rg/grep.',
+        'If an exact planned new path already exists, read the existing file, report findings to the orchestrator, and wait for scope direction such as use-existing, replace, append, or renumber.',
+        'Do not auto-resolve existing-file collisions.',
         'Apply the implementation as described',
         'Follow SDK conventions (no any types, proper JSDoc, etc.)',
         'Commit with message: "feat(<component>): <summary>"',

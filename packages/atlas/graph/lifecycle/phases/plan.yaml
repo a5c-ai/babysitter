@@ -1,0 +1,11 @@
+nodeKind: Phase
+id: phase:plan
+attributes:
+  order: 2
+  displayName: "Plan"
+  phaseMachineId: phase-machine:default-process
+  description: |
+    The plan phase of the default process phase machine.
+edges:
+  belongs_to_phase_machine:
+    - phase-machine:default-process

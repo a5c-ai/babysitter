@@ -1,0 +1,671 @@
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-quality-ref
+attributes:
+  subjectId: source-ref:a5c-plugins-quality
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-quality ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-quality
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-quality-repourl
+attributes:
+  subjectId: source-ref:a5c-plugins-quality
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/plugins
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-quality repoUrl is https://github.com/a5c-ai/plugins.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-quality
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-anycli-examples-ref
+attributes:
+  subjectId: source-ref:a5c-anycli-examples
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-anycli-examples ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-anycli-examples
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-anycli-examples-repourl
+attributes:
+  subjectId: source-ref:a5c-anycli-examples
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/anycli
+  subjectKind: SourceRef
+  statement: source-ref:a5c-anycli-examples repoUrl is https://github.com/a5c-ai/anycli.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-anycli-examples
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-python-django-debug-ref
+attributes:
+  subjectId: source-ref:a5c-plugins-python-django-debug
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-python-django-debug ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-python-django-debug
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-python-django-debug-repourl
+attributes:
+  subjectId: source-ref:a5c-plugins-python-django-debug
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/plugins
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-python-django-debug repoUrl is https://github.com/a5c-ai/plugins.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-python-django-debug
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-security-review-ref
+attributes:
+  subjectId: source-ref:a5c-plugins-security-review
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-security-review ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-security-review
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-security-review-repourl
+attributes:
+  subjectId: source-ref:a5c-plugins-security-review
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/plugins
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-security-review repoUrl is https://github.com/a5c-ai/plugins.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-security-review
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-example-skill-source-ref
+attributes:
+  subjectId: source-ref:example-skill-source
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:example-skill-source ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:example-skill-source
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-example-skill-source-repourl
+attributes:
+  subjectId: source-ref:example-skill-source
+  attribute: repoUrl
+  value: https://example.invalid/TODO
+  subjectKind: SourceRef
+  statement: source-ref:example-skill-source repoUrl is https://example.invalid/TODO.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:example-skill-source
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-github-mcp-servers-ref
+attributes:
+  subjectId: source-ref:github-mcp-servers
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:github-mcp-servers ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:github-mcp-servers
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-github-mcp-servers-repourl
+attributes:
+  subjectId: source-ref:github-mcp-servers
+  attribute: repoUrl
+  value: https://github.com/modelcontextprotocol/servers
+  subjectKind: SourceRef
+  statement: source-ref:github-mcp-servers repoUrl is https://github.com/modelcontextprotocol/servers.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:github-mcp-servers
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-mcp-filesystem-ref
+attributes:
+  subjectId: source-ref:mcp-filesystem
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:mcp-filesystem ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:mcp-filesystem
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-mcp-filesystem-repourl
+attributes:
+  subjectId: source-ref:mcp-filesystem
+  attribute: repoUrl
+  value: https://github.com/modelcontextprotocol/servers
+  subjectKind: SourceRef
+  statement: source-ref:mcp-filesystem repoUrl is https://github.com/modelcontextprotocol/servers.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:mcp-filesystem
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-marketplace-a11y-ref
+attributes:
+  subjectId: source-ref:a5c-marketplace-a11y
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-marketplace-a11y ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-marketplace-a11y
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-marketplace-a11y-repourl
+attributes:
+  subjectId: source-ref:a5c-marketplace-a11y
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/babysitter
+  subjectKind: SourceRef
+  statement: source-ref:a5c-marketplace-a11y repoUrl is https://github.com/a5c-ai/babysitter.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-marketplace-a11y
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-marketplace-adr-ref
+attributes:
+  subjectId: source-ref:a5c-marketplace-adr
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-marketplace-adr ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-marketplace-adr
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-marketplace-adr-repourl
+attributes:
+  subjectId: source-ref:a5c-marketplace-adr
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/babysitter
+  subjectKind: SourceRef
+  statement: source-ref:a5c-marketplace-adr repoUrl is https://github.com/a5c-ai/babysitter.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-marketplace-adr
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-marketplace-basic-security-ref
+attributes:
+  subjectId: source-ref:a5c-marketplace-basic-security
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-marketplace-basic-security ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-marketplace-basic-security
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-marketplace-basic-security-repourl
+attributes:
+  subjectId: source-ref:a5c-marketplace-basic-security
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/babysitter
+  subjectKind: SourceRef
+  statement: source-ref:a5c-marketplace-basic-security repoUrl is https://github.com/a5c-ai/babysitter.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-marketplace-basic-security
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-example-native-claude-ref
+attributes:
+  subjectId: source-ref:a5c-plugins-example-native-claude
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-example-native-claude ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-example-native-claude
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-example-native-claude-repourl
+attributes:
+  subjectId: source-ref:a5c-plugins-example-native-claude
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/plugins
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-example-native-claude repoUrl is https://github.com/a5c-ai/plugins.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-example-native-claude
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-example-portable-ref
+attributes:
+  subjectId: source-ref:a5c-plugins-example-portable
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-example-portable ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-example-portable
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-a5c-plugins-example-portable-repourl
+attributes:
+  subjectId: source-ref:a5c-plugins-example-portable
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/plugins
+  subjectKind: SourceRef
+  statement: source-ref:a5c-plugins-example-portable repoUrl is https://github.com/a5c-ai/plugins.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:a5c-plugins-example-portable
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-mcp-servers-registry-ref
+attributes:
+  subjectId: source-ref:mcp-servers-registry
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:mcp-servers-registry ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:mcp-servers-registry
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-mcp-servers-registry-repourl
+attributes:
+  subjectId: source-ref:mcp-servers-registry
+  attribute: repoUrl
+  value: https://github.com/modelcontextprotocol/servers
+  subjectKind: SourceRef
+  statement: source-ref:mcp-servers-registry repoUrl is https://github.com/modelcontextprotocol/servers.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:mcp-servers-registry
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-packages-extensions-adapter-ref
+attributes:
+  subjectId: source-ref:packages-extensions-adapter
+  attribute: ref
+  value: main
+  subjectKind: SourceRef
+  statement: source-ref:packages-extensions-adapter ref is main.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:packages-extensions-adapter
+---
+nodeKind: Claim
+id: claim:a5c-mcp-source-ref-source-ref-packages-extensions-adapter-repourl
+attributes:
+  subjectId: source-ref:packages-extensions-adapter
+  attribute: repoUrl
+  value: https://github.com/a5c-ai/babysitter
+  subjectKind: SourceRef
+  statement: source-ref:packages-extensions-adapter repoUrl is https://github.com/a5c-ai/babysitter.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for SourceRef repository/ref attributes.
+edges:
+  backed_by_evidence:
+  - evidence:a5c-mcp-source-ref-catalog-source-2026-05
+  about_subject:
+  - source-ref:packages-extensions-adapter

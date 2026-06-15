@@ -2,6 +2,14 @@
 name: code-signing-setup
 description: Configure code signing for macOS and Windows binaries with notarization.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:signature-schemes]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience, topic:hmac-signing]
+
 ---
 
 # Code Signing Setup

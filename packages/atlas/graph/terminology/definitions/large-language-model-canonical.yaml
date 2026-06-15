@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:large-language-model.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:large-language-model
+  text: |
+    A large language model: a neural model trained on broad text corpora with billions of parameters, suitable for chat, reasoning, and tool use.
+  status: canonical
+edges:
+  defines:
+    - term:large-language-model

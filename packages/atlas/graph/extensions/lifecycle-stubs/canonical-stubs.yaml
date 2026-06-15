@@ -1,0 +1,193 @@
+---
+nodeKind: Quota
+id: quota:acme-monthly-tokens
+attributes:
+  displayName: "Acme monthly token quota"
+edges:
+  applies_to_tenant:
+    - target: tenant:acme
+---
+nodeKind: UsageRecord
+id: usage-record:01kqex-run-tokens
+attributes:
+  displayName: "Token usage record for example run"
+edges: {}
+---
+nodeKind: RunAttempt
+id: run-attempt:01kqex-attempt-1
+attributes:
+  attemptNumber: 1
+  startedAt: "2026-04-28T10:00:05Z"
+  status: completed
+edges:
+  attempt_of_run:
+    - target: run:01kqex-example-run-001
+---
+nodeKind: IssueDispatchState
+id: issue-dispatch-state:linear-aca-390-ready
+attributes:
+  readiness: ready
+edges:
+  dispatched_as_run_attempt:
+    - target: run-attempt:01kqex-attempt-1
+---
+nodeKind: SessionFlowProjection
+id: session-flow:01kqex-session-001-default
+attributes:
+  displayName: "Default session-flow projection"
+edges:
+  projects_session:
+    - target: session:01kqex-session-001
+---
+nodeKind: ActivityEntry
+id: activity-entry:01kqex-run-001-create
+attributes:
+  actorKind: agent
+  entityKind: project
+  entityId: project:babysitter
+  action: created
+  createdAt: "2026-04-28T10:00:00Z"
+edges:
+  activity_for_project:
+    - target: project:babysitter
+  activity_for_workspace:
+    - target: workspace:local-developer-default
+---
+nodeKind: LifecycleState
+id: lifecycle-state:run.waiting
+attributes:
+  displayName: "Run — waiting"
+  terminal_state: false
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+  transitions_to:
+    - target: lifecycle-state:run.running
+---
+nodeKind: LifecycleState
+id: lifecycle-state:run.running
+attributes:
+  displayName: "Run — running"
+  terminal_state: false
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+  transitions_to:
+    - target: lifecycle-state:run.completed
+---
+nodeKind: LifecycleState
+id: lifecycle-state:run.completed
+attributes:
+  displayName: "Run — completed"
+  terminal_state: true
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+---
+nodeKind: LifecycleState
+id: lifecycle-state:effect.pending
+attributes:
+  displayName: "Effect — pending"
+  terminal_state: false
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+  transitions_to:
+    - target: lifecycle-state:effect.ok
+---
+nodeKind: LifecycleState
+id: lifecycle-state:effect.ok
+attributes:
+  displayName: "Effect — ok"
+  terminal_state: true
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+---
+nodeKind: LifecycleState
+id: lifecycle-state:invocation.running
+attributes:
+  displayName: "Invocation — running"
+  terminal_state: false
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+---
+nodeKind: LifecycleState
+id: lifecycle-state:session.active
+attributes:
+  displayName: "Session — active"
+  terminal_state: false
+edges:
+  belongs_to_machine:
+    - target: state-machine:run
+---
+nodeKind: BackgroundMonitor
+id: background-monitor:plugin-watch
+attributes:
+  displayName: "Plugin file-watcher"
+  manifestPath: "plugins/example-portable-extension/monitor.json"
+  command: "node monitor.js"
+  triggers:
+    - file-change
+  lifecycle: persistent
+  outputs:
+    - file
+edges: {}
+---
+nodeKind: BinaryProvider
+id: binary-provider:plugin-bin
+attributes:
+  displayName: "Example portable plugin bin"
+  binDir: "plugins/example-portable-extension/bin"
+  executables:
+    - name: "babysit"
+      platform: "linux"
+      target: "babysit-bin"
+  pathPolicy: append
+edges: {}
+---
+nodeKind: SettingsTemplate
+id: settings-template:plugin-defaults
+attributes:
+  displayName: "Plugin default settings template"
+  targetSettingsPath: ".claude/settings.json"
+  fragmentPath: "plugins/example-portable-extension/settings.json"
+  mergeStrategy: deep-merge
+  conflictPolicy: keep-existing
+  scope: project
+  revertOnUninstall: true
+edges: {}
+---
+nodeKind: PhaseTransition
+id: phase-transition:plan-to-execute
+attributes:
+  fromPhaseId: phase:plan
+  toPhaseId: phase:execute
+edges:
+  transition_of:
+    - target: phase:plan
+---
+nodeKind: PhaseTransition
+id: phase-transition:execute-to-review
+attributes:
+  fromPhaseId: phase:execute
+  toPhaseId: phase:review
+edges:
+  transition_of:
+    - target: phase:execute
+---
+nodeKind: AgentFlowSegment
+id: agent-flow-segment:claude-example-segment-1
+attributes:
+  laneId: agent-flow-lane:claude-example--agent-action
+  kind: tool-call
+edges: {}
+---
+nodeKind: Span
+id: span:claude-example-trace-1
+attributes:
+  displayName: "Example OpenTelemetry span"
+edges:
+  projected_by_segment:
+    - target: agent-flow-segment:claude-example-segment-1

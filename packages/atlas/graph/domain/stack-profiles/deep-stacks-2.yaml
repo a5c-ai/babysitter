@@ -1,0 +1,857 @@
+---
+nodeKind: StackProfile
+id: stack-profile:content-management-platform
+attributes:
+  displayName: "Content Management Platform (Strapi/Directus + Next.js + PostgreSQL)"
+  description: |
+    A headless CMS architecture pairing Strapi or Directus as the content
+    management backend with Next.js as the frontend rendering layer,
+    PostgreSQL for structured content storage, S3-compatible object storage
+    for media assets, and Redis for API response caching and session state.
+
+    This stack decouples content authoring from presentation, enabling the
+    same content API to serve web, mobile, and third-party consumers. Strapi
+    provides a customizable admin panel with role-based access control and
+    webhook-driven publishing workflows. Next.js renders pages via SSR, SSG,
+    or ISR depending on freshness requirements. The tradeoff is operational
+    complexity versus flexibility: teams gain full control over the frontend
+    experience at the cost of maintaining two deployable services instead of
+    a monolithic CMS like WordPress. Best suited for marketing sites, blogs,
+    documentation portals, and multi-channel content distribution.
+  composes:
+    - framework:strapi
+    - framework:directus
+    - framework:nextjs
+    - framework:react
+    - language:typescript
+    - language:sql
+    - library:prisma
+    - library:redis
+edges:
+  composed_of:
+    - framework:strapi
+    - framework:directus
+    - framework:nextjs
+    - framework:react
+    - language:typescript
+    - language:sql
+    - library:prisma
+    - library:redis
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:content-strategist
+  follows_workflow:
+    - workflow:content-release-pipeline
+    - workflow:editorial-workflow-management
+  applies_to:
+    - domain:content-operations
+    - domain:media-publishing
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:caching-strategies
+    - skill-area:backend-api-design
+    - skill-area:frontend-development
+    - skill-area:content-strategy
+---
+nodeKind: StackProfile
+id: stack-profile:real-time-collaboration
+attributes:
+  displayName: "Real-Time Collaboration (WebSocket + CRDT + React + PostgreSQL)"
+  description: |
+    An architecture for building collaborative editing and real-time shared
+    state applications. WebSocket connections provide bidirectional
+    communication between clients and server, CRDT libraries like Yjs handle
+    conflict-free merging of concurrent edits, React renders the live UI,
+    PostgreSQL persists document state, and Redis serves as the pub/sub
+    backbone for broadcasting changes across server instances.
+
+    The key design challenge is reconciling optimistic local edits with
+    remote changes without user-visible conflicts. Yjs provides a mature
+    CRDT implementation that handles text, JSON, and array types with
+    automatic conflict resolution. The server acts as both relay and
+    persistence layer, storing periodic snapshots and incremental updates.
+    This stack powers document editors, collaborative whiteboards, shared
+    spreadsheets, and multiplayer design tools. The primary tradeoff is
+    increased complexity in state management and debugging compared to
+    request-response architectures.
+  composes:
+    - library:socket-io
+    - framework:react
+    - language:typescript
+    - language:sql
+    - library:redis
+    - library:express
+    - library:prisma
+    - library:zustand
+edges:
+  composed_of:
+    - library:socket-io
+    - framework:react
+    - language:typescript
+    - language:sql
+    - library:redis
+    - library:express
+    - library:prisma
+    - library:zustand
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:feature-development
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:software-engineering
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:websocket-design
+    - skill-area:streaming-realtime-processing
+    - skill-area:application-state-management
+    - skill-area:concurrency-multithreading
+    - skill-area:react-state-management
+---
+nodeKind: StackProfile
+id: stack-profile:video-streaming-platform
+attributes:
+  displayName: "Video Streaming Platform (FFmpeg + HLS/DASH + CDN + React + Node.js)"
+  description: |
+    A video streaming architecture: FFmpeg handles transcoding of uploaded
+    video into adaptive bitrate HLS or DASH segments, a CDN distributes
+    those segments globally with low latency, React provides the player UI
+    with adaptive quality switching, and Node.js with Express serves the
+    API layer for metadata, authentication, and upload management.
+
+    The ingest pipeline accepts raw video uploads to S3-compatible storage,
+    triggers FFmpeg transcoding jobs that produce multiple quality variants,
+    and writes manifest files (m3u8 for HLS, mpd for DASH) that reference
+    the segmented output. Redis caches video metadata and viewer session
+    state. PostgreSQL stores catalog data, user profiles, and analytics
+    events. This stack suits VOD platforms, course hosting, live streaming
+    services, and any product where video is a primary content type. The
+    main tradeoff is high compute cost for transcoding and significant
+    CDN bandwidth expenses at scale.
+  composes:
+    - framework:react
+    - library:express
+    - language:typescript
+    - language:javascript
+    - library:redis
+    - library:sharp
+    - library:bullmq
+    - library:multer
+edges:
+  composed_of:
+    - framework:react
+    - library:express
+    - language:typescript
+    - language:javascript
+    - library:redis
+    - library:sharp
+    - library:bullmq
+    - library:multer
+  used_by_role:
+    - role:media-engineer
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:streaming-quality-review
+    - workflow:content-distribution-optimization
+  applies_to:
+    - domain:media-entertainment
+    - domain:edtech
+  requires_skill_area:
+    - skill-area:video-processing
+    - skill-area:streaming-protocols
+    - skill-area:cdn-edge
+    - skill-area:background-job-processing
+    - skill-area:media-encoding
+---
+nodeKind: StackProfile
+id: stack-profile:search-discovery
+attributes:
+  displayName: "Search & Discovery (Elasticsearch/Meilisearch + Python/Node.js + Redis)"
+  description: |
+    A search-centric architecture: Elasticsearch or Meilisearch provides
+    full-text search with faceting, typo tolerance, and relevance tuning;
+    Python or Node.js implements the indexing pipeline and query API;
+    Redis caches frequent queries and handles rate limiting; and React
+    renders the search UI with instant results, autocomplete, and filters.
+
+    The indexing pipeline extracts, transforms, and loads documents from
+    primary data stores (PostgreSQL, APIs, file systems) into the search
+    engine. Meilisearch offers a simpler developer experience with instant
+    indexing and good defaults, while Elasticsearch provides more advanced
+    features like aggregations, nested documents, and distributed scaling.
+    This stack powers e-commerce product search, documentation search,
+    marketplace discovery, and internal knowledge base tools. The key
+    tradeoff is maintaining index freshness: near-real-time sync between
+    the source of truth and the search index requires careful pipeline
+    design.
+  composes:
+    - tool:elasticsearch
+    - tool:meilisearch
+    - language:python
+    - language:typescript
+    - framework:react
+    - library:redis
+    - framework:fastapi
+    - library:express
+edges:
+  composed_of:
+    - tool:elasticsearch
+    - tool:meilisearch
+    - language:python
+    - language:typescript
+    - framework:react
+    - library:redis
+    - framework:fastapi
+    - library:express
+  used_by_role:
+    - role:backend-engineer
+    - role:data-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:backend-performance-profiling
+    - workflow:feature-development
+  applies_to:
+    - domain:software-engineering
+    - domain:retail
+  requires_skill_area:
+    - skill-area:search-indexing
+    - skill-area:search-infrastructure
+    - skill-area:caching-strategies
+    - skill-area:data-fetching-caching
+    - skill-area:backend-api-design
+---
+nodeKind: StackProfile
+id: stack-profile:api-gateway-microservices
+attributes:
+  displayName: "API Gateway & Microservices (Kong/Envoy + gRPC + Kubernetes + Go)"
+  description: |
+    A microservices architecture with Kong or Envoy as the API gateway
+    handling routing, rate limiting, authentication, and observability at
+    the edge; gRPC for strongly-typed inter-service communication with
+    Protocol Buffers; Kubernetes for container orchestration; PostgreSQL
+    for per-service data stores; and Go as the primary service language.
+
+    The gateway centralizes cross-cutting concerns (TLS termination, JWT
+    validation, request transformation) so individual services remain
+    focused on business logic. gRPC provides efficient binary serialization,
+    bidirectional streaming, and automatic client/server code generation.
+    Kubernetes handles service discovery, scaling, and health management.
+    OpenTelemetry instruments distributed traces across service boundaries.
+    This stack suits organizations breaking a monolith into services or
+    building platform APIs consumed by multiple teams. The primary tradeoff
+    is operational complexity: service mesh, distributed tracing, and
+    per-service databases require mature DevOps practices.
+  composes:
+    - tool:kong
+    - tool:kubernetes
+    - language:go
+    - language:protobuf
+    - library:grpc-js
+    - library:pgx
+    - tool:helm
+    - tool:opentelemetry
+    - tool:docker
+edges:
+  composed_of:
+    - tool:kong
+    - tool:kubernetes
+    - language:go
+    - language:protobuf
+    - library:grpc-js
+    - library:pgx
+    - tool:helm
+    - tool:opentelemetry
+    - tool:docker
+  used_by_role:
+    - role:platform-engineer
+    - role:backend-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:microservice-decomposition
+    - workflow:api-design-review
+  applies_to:
+    - domain:platform-engineering
+    - domain:backend
+  requires_skill_area:
+    - skill-area:backend-api-design
+    - skill-area:k8s-operator-development
+    - skill-area:service-mesh-config
+    - skill-area:observability-instrumentation
+    - skill-area:event-driven-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:blockchain-dapp
+attributes:
+  displayName: "Blockchain DApp (Solidity + Hardhat + ethers.js + React + IPFS)"
+  description: |
+    A decentralized application stack: Solidity as the smart contract
+    language targeting the Ethereum Virtual Machine, Hardhat as the
+    development environment for compiling, testing, and deploying contracts,
+    ethers.js for client-side blockchain interaction, React for the
+    frontend dApp UI, and IPFS for decentralized file storage of metadata,
+    images, and documents referenced by on-chain records.
+
+    The development workflow involves writing and unit-testing Solidity
+    contracts in Hardhat's local network, deploying to testnets for
+    integration testing, then mainnet for production. ethers.js connects
+    the React frontend to MetaMask or other wallet providers for
+    transaction signing. Subgraph indexers (The Graph) enable efficient
+    querying of on-chain events. This stack powers DeFi protocols, NFT
+    marketplaces, DAOs, and tokenized asset platforms. The key tradeoffs
+    are gas cost optimization, immutability of deployed contracts requiring
+    proxy upgrade patterns, and the steep learning curve of blockchain
+    security.
+  composes:
+    - framework:react
+    - language:javascript
+    - language:typescript
+    - library:express
+    - library:tailwindcss
+    - tool:docker
+edges:
+  composed_of:
+    - framework:react
+    - language:javascript
+    - language:typescript
+    - library:express
+    - library:tailwindcss
+    - tool:docker
+  used_by_role:
+    - role:blockchain-engineer
+    - role:fullstack-engineer
+    - role:security-engineer
+  follows_workflow:
+    - workflow:smart-contract-audit
+    - workflow:crypto-protocol-review
+  applies_to:
+    - domain:blockchain
+    - domain:fintech
+  requires_skill_area:
+    - skill-area:smart-contract-development-testing
+    - skill-area:wallet-integration-key-management
+    - skill-area:token-nft-management
+    - skill-area:web-security
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:cicd-platform
+attributes:
+  displayName: "CI/CD Platform (GitHub Actions + Docker + Kubernetes + Terraform + ArgoCD)"
+  description: |
+    A continuous integration and delivery platform: GitHub Actions provides
+    event-driven CI pipelines triggered by pushes, PRs, and schedules;
+    Docker packages applications into portable container images; Kubernetes
+    runs workloads in production; Terraform manages cloud infrastructure
+    as code; and ArgoCD implements GitOps-based continuous delivery by
+    syncing Kubernetes manifests from Git repositories.
+
+    The pipeline flow is: code push triggers GitHub Actions, which runs
+    tests, builds a Docker image, pushes it to a container registry, and
+    updates a Kubernetes manifest in a GitOps repo. ArgoCD detects the
+    manifest change and reconciles the cluster state. Terraform manages
+    the underlying cloud resources (VPCs, databases, DNS). Helm templates
+    parameterize Kubernetes manifests across environments. This stack is
+    the modern standard for teams practicing GitOps. The primary tradeoff
+    is the learning curve of Kubernetes and the operational burden of
+    maintaining the delivery platform itself.
+  composes:
+    - tool:github-actions
+    - tool:docker
+    - tool:kubernetes
+    - tool:terraform
+    - tool:argocd
+    - tool:helm
+    - language:yaml
+    - language:hcl
+    - language:bash
+edges:
+  composed_of:
+    - tool:github-actions
+    - tool:docker
+    - tool:kubernetes
+    - tool:terraform
+    - tool:argocd
+    - tool:helm
+    - language:yaml
+    - language:hcl
+    - language:bash
+  used_by_role:
+    - role:devops-engineer
+    - role:platform-engineer
+    - role:sre
+  follows_workflow:
+    - workflow:ci-cd-pipeline-migration
+    - workflow:helm-chart-promotion
+  applies_to:
+    - domain:devops
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:gitops
+    - skill-area:deployment-automation
+    - skill-area:github-actions-authoring
+    - skill-area:containerization
+    - skill-area:terraform-infrastructure
+---
+nodeKind: StackProfile
+id: stack-profile:document-processing-pipeline
+attributes:
+  displayName: "Document Processing Pipeline (OCR + NLP + Python + Elasticsearch + FastAPI)"
+  description: |
+    A document ingestion and intelligence pipeline: OCR engines extract
+    text from scanned PDFs and images, NLP models classify, extract
+    entities, and summarize content, Python orchestrates the processing
+    workflow, Elasticsearch indexes processed documents for full-text
+    search and faceted retrieval, and FastAPI exposes the pipeline as a
+    REST API for upstream applications.
+
+    The ingest flow accepts documents via upload or S3 event triggers,
+    runs OCR with Tesseract or cloud vision APIs, applies spaCy or
+    Hugging Face transformers for NER, classification, and summarization,
+    stores structured metadata in PostgreSQL, and indexes the full text
+    in Elasticsearch. Celery or BullMQ handles async job processing for
+    large batch ingestion. This stack powers legal document review, invoice
+    processing, compliance document analysis, and enterprise search. The
+    main tradeoffs are OCR accuracy on degraded documents and the compute
+    cost of running transformer models at scale.
+  composes:
+    - language:python
+    - framework:fastapi
+    - tool:elasticsearch
+    - library:celery
+    - library:pydantic
+    - library:hf-transformers
+    - library:pillow
+    - library:boto3
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - tool:elasticsearch
+    - library:celery
+    - library:pydantic
+    - library:hf-transformers
+    - library:pillow
+    - library:boto3
+  used_by_role:
+    - role:data-engineer
+    - role:backend-engineer
+    - role:ml-engineer
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:data-quality-monitoring
+  applies_to:
+    - domain:data-engineering
+    - domain:legaltech
+  requires_skill_area:
+    - skill-area:natural-language-processing
+    - skill-area:document-processing
+    - skill-area:search-indexing
+    - skill-area:background-job-processing
+    - skill-area:data-preprocessing
+---
+nodeKind: StackProfile
+id: stack-profile:geospatial-analytics
+attributes:
+  displayName: "Geospatial Analytics (PostGIS + Python + Leaflet/Mapbox + GeoPandas)"
+  description: |
+    A geospatial data analysis and visualization stack: PostGIS extends
+    PostgreSQL with spatial data types, indexing, and query functions;
+    Python with GeoPandas provides the data manipulation layer for spatial
+    joins, buffers, and coordinate transformations; and Leaflet or Mapbox
+    GL JS renders interactive maps in the browser with layer controls,
+    popups, and custom tile sources.
+
+    The pipeline ingests geospatial data from shapefiles, GeoJSON, GPS
+    feeds, or satellite imagery, stores it in PostGIS with spatial indexes
+    for efficient bounding-box and nearest-neighbor queries, processes it
+    with GeoPandas for analysis, and serves results through a FastAPI
+    endpoint for the frontend map. This stack powers logistics route
+    optimization, urban planning tools, environmental monitoring dashboards,
+    and location intelligence platforms. The key tradeoff is the learning
+    curve of spatial data models and coordinate reference systems, plus the
+    storage and query cost of high-resolution geometries.
+  composes:
+    - language:python
+    - language:sql
+    - language:typescript
+    - framework:fastapi
+    - library:pandas
+    - library:numpy
+    - library:matplotlib
+    - framework:react
+edges:
+  composed_of:
+    - language:python
+    - language:sql
+    - language:typescript
+    - framework:fastapi
+    - library:pandas
+    - library:numpy
+    - library:matplotlib
+    - framework:react
+  used_by_role:
+    - role:data-scientist
+    - role:data-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:dashboard-development-cycle
+  applies_to:
+    - domain:logistics
+    - domain:government
+  requires_skill_area:
+    - skill-area:geospatial-data-analysis
+    - skill-area:data-visualization
+    - skill-area:data-analysis
+    - skill-area:backend-data-persistence
+    - skill-area:postgres-tuning
+---
+nodeKind: StackProfile
+id: stack-profile:healthcare-hipaa-compliant
+attributes:
+  displayName: "Healthcare / HIPAA Compliant (Node.js + PostgreSQL + Vault + React)"
+  description: |
+    A HIPAA-compliant application stack for healthcare software: Node.js
+    with Express or Fastify as the API layer with strict audit logging,
+    PostgreSQL with column-level encryption for protected health information
+    (PHI), HashiCorp Vault for secrets management and encryption-as-a-service,
+    and React for the clinician-facing or patient-facing UI with role-based
+    access controls.
+
+    Every API request is logged with actor identity, resource accessed, and
+    timestamp for the audit trail required by HIPAA. Vault provides transit
+    encryption so the application never handles raw encryption keys. Database
+    connections use TLS, and row-level security in PostgreSQL enforces
+    tenant isolation for multi-provider deployments. This stack suits EHR
+    integrations, telemedicine platforms, patient portals, and clinical data
+    tools. The primary tradeoff is development velocity: HIPAA compliance
+    adds mandatory access controls, encryption, audit logging, and breach
+    notification procedures that increase both code complexity and
+    operational overhead.
+  composes:
+    - language:typescript
+    - framework:react
+    - library:express
+    - tool:vault
+    - language:sql
+    - library:prisma
+    - library:helmet
+    - library:winston
+edges:
+  composed_of:
+    - language:typescript
+    - framework:react
+    - library:express
+    - tool:vault
+    - language:sql
+    - library:prisma
+    - library:helmet
+    - library:winston
+  used_by_role:
+    - role:backend-engineer
+    - role:security-engineer
+    - role:compliance-engineer
+  follows_workflow:
+    - workflow:hipaa-compliance-audit
+    - workflow:security-review
+  applies_to:
+    - domain:healthcare
+    - domain:healthtech
+  requires_skill_area:
+    - skill-area:backend-security
+    - skill-area:encryption-decryption
+    - skill-area:authentication-authorization
+    - skill-area:backend-api-design
+    - skill-area:data-protection-dlp
+---
+nodeKind: StackProfile
+id: stack-profile:game-backend
+attributes:
+  displayName: "Game Backend (Rust/Go + WebSocket + Redis + PostgreSQL)"
+  description: |
+    A game server backend stack: Rust or Go provides the high-performance
+    server runtime for game state management and authoritative simulation,
+    WebSocket connections maintain persistent bidirectional channels between
+    clients and server for real-time gameplay, Redis serves as the in-memory
+    store for session state, matchmaking queues, and leaderboards, and
+    PostgreSQL persists player profiles, inventories, and progression data.
+
+    The game loop runs server-side at a fixed tick rate, processing client
+    inputs, updating world state, and broadcasting state deltas to connected
+    players. Redis pub/sub distributes events across multiple server
+    instances for horizontal scaling. Message serialization uses Protocol
+    Buffers or FlatBuffers for minimal bandwidth. This stack suits
+    multiplayer online games, turn-based strategy servers, and real-time
+    competitive games. The main tradeoffs are tick-rate tuning for latency
+    versus server cost, and the complexity of deterministic state
+    synchronization across unreliable network connections.
+  composes:
+    - language:rust
+    - language:go
+    - library:tokio
+    - library:redis
+    - language:sql
+    - language:protobuf
+    - library:serde
+    - tool:docker
+edges:
+  composed_of:
+    - language:rust
+    - language:go
+    - library:tokio
+    - library:redis
+    - language:sql
+    - language:protobuf
+    - library:serde
+    - tool:docker
+  used_by_role:
+    - role:game-developer
+    - role:backend-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:multiplayer-netcode-testing
+    - workflow:game-build-pipeline
+  applies_to:
+    - domain:gaming
+  requires_skill_area:
+    - skill-area:multiplayer-networking
+    - skill-area:websocket-design
+    - skill-area:concurrency-multithreading
+    - skill-area:game-loop
+    - skill-area:caching-strategies
+---
+nodeKind: StackProfile
+id: stack-profile:desktop-application
+attributes:
+  displayName: "Desktop Application (Electron/Tauri + React + SQLite + TypeScript)"
+  description: |
+    A cross-platform desktop application stack: Electron or Tauri as the
+    desktop runtime wrapping a web-based UI, React for the application
+    interface, SQLite as the local embedded database, and TypeScript
+    throughout for type safety across main and renderer processes.
+
+    Electron bundles Chromium and Node.js, offering full web API
+    compatibility at the cost of large binary size (~150MB+) and higher
+    memory usage. Tauri uses the system webview and a Rust backend,
+    producing much smaller binaries (~10MB) with lower memory overhead
+    but requiring Rust knowledge for native functionality. Both support
+    auto-updates, system tray integration, native menus, and file system
+    access. SQLite provides offline-capable local storage without requiring
+    a database server. This stack suits developer tools, productivity apps,
+    creative applications, and any software requiring offline capability
+    and OS integration. The key tradeoff is Electron's resource overhead
+    versus Tauri's narrower browser compatibility.
+  composes:
+    - framework:electron
+    - framework:tauri
+    - framework:react
+    - language:typescript
+    - language:rust
+    - library:zustand
+    - library:prisma
+    - library:tailwindcss
+edges:
+  composed_of:
+    - framework:electron
+    - framework:tauri
+    - framework:react
+    - language:typescript
+    - language:rust
+    - library:zustand
+    - library:prisma
+    - library:tailwindcss
+  used_by_role:
+    - role:desktop-developer
+    - role:frontend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:desktop-app-release
+    - workflow:cross-platform-testing
+  applies_to:
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:desktop-ui-frameworks
+    - skill-area:cross-platform-desktop
+    - skill-area:desktop-system-integration
+    - skill-area:react-state-management
+    - skill-area:application-state-management
+---
+nodeKind: StackProfile
+id: stack-profile:cli-tool-suite
+attributes:
+  displayName: "CLI Tool Suite (Commander/Clap + Ink/Bubbletea + SQLite + TypeScript/Rust/Go)"
+  description: |
+    A command-line application stack: argument parsing libraries (Commander
+    for Node.js, Clap for Rust, Cobra for Go) handle subcommands, flags,
+    and shell completions; terminal UI frameworks (Ink for React-in-terminal,
+    Bubbletea for Go) render rich interactive interfaces; SQLite provides
+    local persistent state; and TypeScript, Rust, or Go serve as the
+    implementation language depending on distribution and performance needs.
+
+    TypeScript with Commander and Ink suits rapid prototyping and npm-based
+    distribution. Rust with Clap produces fast single-binary tools with
+    minimal startup overhead. Go with Cobra and Bubbletea balances
+    compilation speed, cross-platform binaries, and a rich TUI ecosystem.
+    This stack powers developer CLIs, infrastructure management tools,
+    database migration runners, and interactive configuration wizards.
+    The main tradeoff is distribution strategy: npm packages are easy to
+    install but require Node.js, while compiled binaries need per-platform
+    build pipelines.
+  composes:
+    - library:commander
+    - library:clap
+    - library:cobra
+    - framework:ink
+    - framework:bubbletea
+    - language:typescript
+    - language:rust
+    - language:go
+edges:
+  composed_of:
+    - library:commander
+    - library:clap
+    - library:cobra
+    - framework:ink
+    - framework:bubbletea
+    - language:typescript
+    - language:rust
+    - language:go
+  used_by_role:
+    - role:software-engineer
+    - role:devops-engineer
+    - role:developer-advocate
+  follows_workflow:
+    - workflow:cli-release-cycle
+    - workflow:feature-development
+  applies_to:
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:cli-design
+    - skill-area:command-line-interface-tools
+    - skill-area:cli-tooling
+    - skill-area:error-handling-exception-management
+    - skill-area:parsing-data-formats
+---
+nodeKind: StackProfile
+id: stack-profile:batch-processing
+attributes:
+  displayName: "Batch Processing (Airflow + dbt + PostgreSQL + Python + S3)"
+  description: |
+    A batch data processing stack: Apache Airflow orchestrates DAGs of
+    dependent tasks on schedules or triggers, dbt transforms raw data
+    into clean analytical models using SQL with version control and
+    testing, PostgreSQL (or a warehouse like Snowflake/BigQuery) serves
+    as the target data store, Python implements custom extraction and
+    loading logic, and S3-compatible object storage stages intermediate
+    files and raw data.
+
+    Airflow schedules and monitors the full pipeline: extract from APIs
+    or databases, load raw data to staging, run dbt transformations, and
+    trigger downstream consumers. dbt's ref() macro builds a dependency
+    graph of models, enabling incremental builds and automated data tests.
+    This stack powers business intelligence pipelines, reporting systems,
+    data warehouse loading, and regulatory data submissions. The primary
+    tradeoff is latency: batch processing introduces inherent delay
+    between data generation and availability, making it unsuitable for
+    real-time use cases but excellent for correctness-critical analytical
+    workloads.
+  composes:
+    - tool:airflow
+    - language:python
+    - language:sql
+    - library:sqlalchemy
+    - library:pandas
+    - library:boto3
+    - library:pydantic
+    - tool:docker
+edges:
+  composed_of:
+    - tool:airflow
+    - language:python
+    - language:sql
+    - library:sqlalchemy
+    - library:pandas
+    - library:boto3
+    - library:pydantic
+    - tool:docker
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:data-scientist
+  follows_workflow:
+    - workflow:data-pipeline-deployment
+    - workflow:dbt-model-review
+  applies_to:
+    - domain:data-engineering
+    - domain:business-intelligence
+  requires_skill_area:
+    - skill-area:etl-pipelines
+    - skill-area:dbt-modeling
+    - skill-area:python-data-pipelines
+    - skill-area:data-warehouse-modeling
+    - skill-area:data-quality
+---
+nodeKind: StackProfile
+id: stack-profile:graphql-api-platform
+attributes:
+  displayName: "GraphQL API Platform (Apollo Server + Prisma + PostgreSQL + React + TypeScript)"
+  description: |
+    A GraphQL-centric API stack: Apollo Server provides the GraphQL
+    runtime with schema-first or code-first definition, Prisma generates
+    a type-safe database client from a schema file, PostgreSQL serves as
+    the relational data store, React with Apollo Client consumes the
+    GraphQL API, and TypeScript ensures end-to-end type safety from
+    database schema through API resolvers to client queries.
+
+    Apollo Server's plugin system supports caching, tracing, and
+    authentication middleware. Prisma's relation mapping and migration
+    engine keep the database schema in sync with the application model.
+    Apollo Client provides a normalized cache that deduplicates entities
+    across queries, reducing redundant network requests. Code generation
+    tools (graphql-codegen) produce typed hooks from GraphQL operations.
+    This stack excels for applications with complex, deeply nested data
+    models where different clients need different views of the same data.
+    The primary tradeoff is the N+1 query problem in resolvers, requiring
+    DataLoader batching, and the added complexity of a query language
+    versus simple REST endpoints.
+  composes:
+    - library:prisma
+    - library:apollo-client
+    - framework:react
+    - language:typescript
+    - language:graphql
+    - language:sql
+    - library:graphql-tools
+    - library:type-graphql
+    - library:zod
+edges:
+  composed_of:
+    - library:prisma
+    - library:apollo-client
+    - framework:react
+    - language:typescript
+    - language:graphql
+    - language:sql
+    - library:graphql-tools
+    - library:type-graphql
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:graphql-schema-review
+    - workflow:api-design-review
+  applies_to:
+    - domain:api-development
+    - domain:fullstack
+  requires_skill_area:
+    - skill-area:graphql-schema-design
+    - skill-area:backend-api-design
+    - skill-area:data-fetching-caching
+    - skill-area:react-state-management
+    - skill-area:backend-data-persistence

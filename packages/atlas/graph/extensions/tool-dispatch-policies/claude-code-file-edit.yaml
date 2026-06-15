@@ -1,0 +1,14 @@
+nodeKind: ToolDispatchPolicy
+id: tool-dispatch-policy:claude-code-file-edit
+attributes:
+  displayName: "FileEdit dispatch policy"
+  isConcurrencySafe: false
+  isReadOnly: false
+  isDestructive: false
+  interruptBehavior: block
+  shouldDefer: false
+  requiresPermissionGate: true
+  parentDispatchPattern: strict-serial
+edges:
+  dispatch_policy_for_tool:
+    - target: tool-descriptor:edit

@@ -1,0 +1,646 @@
+nodeKind: Workflow
+id: workflow:game-prototype-iteration
+attributes:
+  displayName: "Game Prototype Iteration"
+  description: |
+    Rapid iteration loop for building and evaluating game prototypes within a sprint.
+    Game developers scope a focused mechanic or experience hypothesis, build a minimal
+    playable prototype, and conduct internal playtests to validate fun and feasibility.
+    Feedback from playtests drives immediate refinements or pivots in the next iteration.
+    Prototypes that pass the fun threshold are promoted to full feature development while
+    failed experiments are documented as learning artefacts for the team.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-sprint"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:game-developer
+    - role:product-designer
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:gaming
+---
+nodeKind: Workflow
+id: workflow:game-asset-pipeline
+attributes:
+  displayName: "Game Asset Pipeline"
+  description: |
+    End-to-end workflow for ingesting, processing, and deploying game assets — art, audio,
+    animations, and shaders — from creative production into the game engine. The creative
+    director approves final assets from artists and composers, which are then exported in
+    engine-compatible formats and validated against technical budgets (poly count, texture
+    atlas size, audio bitrate). Automated import scripts run validation checks and flag
+    regressions. Approved assets are committed to the asset repository and versioned
+    alongside code, ensuring consistent builds across platforms.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-sprint"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:game-developer
+    - role:creative-director
+    - role:technical-artist
+  applies_to_domain:
+    - domain:gaming
+---
+nodeKind: Workflow
+id: workflow:playtesting-feedback-loop
+attributes:
+  displayName: "Playtesting Feedback Loop"
+  description: |
+    Structured process for gathering, synthesising, and acting on playtest feedback at
+    key milestones throughout game development. Internal or external playtesters play a
+    designated build while designers observe sessions and collect structured survey responses.
+    The game developer and product designer analyse themes in feedback, triage actionable
+    issues by severity and frequency, and translate findings into backlog items. A post-session
+    debrief aligns the team on priority changes before the next milestone build.
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "per-milestone"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:game-developer
+    - role:product-designer
+    - role:ux-researcher
+  applies_to_domain:
+    - domain:gaming
+---
+nodeKind: Workflow
+id: workflow:firmware-release-cycle
+attributes:
+  displayName: "Firmware Release Cycle"
+  description: |
+    Governed release process for producing, validating, and distributing firmware images
+    to embedded hardware devices. The embedded engineer freezes the release branch, runs
+    the full hardware-in-the-loop regression suite, and generates a signed firmware image
+    with a cryptographic hash. QA validates the image on representative device samples
+    across temperature and voltage corners. Release notes document fixed defects and
+    changed register maps. The image is published to the firmware distribution server and
+    a staged OTA rollout deploys it to the device fleet with automated health monitoring.
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "per-release-cycle"
+  complexity: complex
+edges:
+  involves_role:
+    - role:embedded-engineer
+    - role:qa-engineer
+    - role:release-manager
+    - role:security-engineer
+  applies_to_domain:
+    - domain:embedded-systems
+---
+nodeKind: Workflow
+id: workflow:hardware-software-integration
+attributes:
+  displayName: "Hardware-Software Integration"
+  description: |
+    Milestone-driven workflow for bringing up software on new or revised hardware revisions,
+    validating that firmware, drivers, and application layers function correctly on the
+    physical device. The embedded engineer and systems integration engineer jointly review
+    the hardware bring-up checklist, flash the latest firmware, and execute a structured
+    test sequence covering peripherals, communication buses, power states, and timing margins.
+    Defects are triaged against hardware errata and software bugs, with root-cause classification
+    informing whether fixes land in firmware, drivers, or board revisions.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: complex
+edges:
+  involves_role:
+    - role:embedded-engineer
+    - role:systems-integration-engineer
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:embedded-systems
+---
+nodeKind: Workflow
+id: workflow:desktop-app-release
+attributes:
+  displayName: "Desktop App Release"
+  description: |
+    Full release lifecycle for shipping a new version of a desktop application to end users
+    across supported operating systems. The desktop developer cuts a release branch, runs
+    the automated test suite on all target OS and architecture combinations, and generates
+    signed installer packages. Release notes and in-app update manifests are authored and
+    reviewed. The release is staged to a canary channel for early adopters, monitored for
+    crash-rate regressions, and then promoted to the stable channel. Delta update packages
+    minimise download sizes for existing users upgrading from recent versions.
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "per-release-cycle"
+  complexity: complex
+edges:
+  involves_role:
+    - role:desktop-developer
+    - role:qa-engineer
+    - role:release-manager
+    - role:security-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:cross-platform-testing
+attributes:
+  displayName: "Cross-Platform Testing"
+  description: |
+    Systematic testing workflow that validates application behaviour and visual fidelity
+    across all supported operating systems, hardware configurations, and screen densities
+    before a release candidate is approved. The desktop developer and QA engineer define
+    a platform matrix, and automated UI and functional tests are executed against each
+    configuration in a CI grid. Platform-specific failures are triaged against known
+    OS quirks and rendering differences. A final manual verification pass on physical
+    devices confirms that no edge-case regressions slipped through automation.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:desktop-developer
+    - role:qa-engineer
+    - role:devops-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:mobile-app-submission
+attributes:
+  displayName: "Mobile App Submission"
+  description: |
+    End-to-end release workflow for preparing, validating, and submitting a mobile app
+    update to the Apple App Store and Google Play Store. The mobile engineer finalises
+    the release build, signs it with the appropriate certificates and provisioning profiles,
+    and runs the automated UI test suite on physical device farms. Store-specific metadata —
+    screenshots, release notes, age ratings, and privacy labels — is updated in the store
+    consoles. The build is submitted for review, and the engineer monitors review status,
+    responds to any rejections, and coordinates the staged rollout after approval.
+  workflowKind: release
+  triggerType: on-demand
+  typicalCadence: "per-release"
+  complexity: complex
+edges:
+  involves_role:
+    - role:mobile-engineer
+    - role:qa-engineer
+    - role:release-manager
+    - role:product-manager
+  applies_to_domain:
+    - domain:mobile
+---
+nodeKind: Workflow
+id: workflow:mobile-beta-testing
+attributes:
+  displayName: "Mobile Beta Testing"
+  description: |
+    Structured beta programme workflow for distributing pre-release mobile builds to a
+    cohort of internal and external testers before public release. The mobile engineer
+    packages and distributes a beta build via TestFlight or the Play Console internal
+    track, then invites testers from the designated cohort. QA engineers triage incoming
+    crash reports and feedback, reproducing critical issues and filing them as high-priority
+    bugs. The beta cycle iterates until crash-free rate and user-reported issue volume
+    fall within acceptable thresholds, signalling readiness for production submission.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-release-cycle"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:mobile-engineer
+    - role:qa-engineer
+    - role:product-manager
+  applies_to_domain:
+    - domain:mobile
+---
+nodeKind: Workflow
+id: workflow:sdk-api-design
+attributes:
+  displayName: "SDK / API Design"
+  description: |
+    Collaborative design workflow for creating stable, ergonomic public SDK and API
+    interfaces that will be consumed by external developers or internal platform teams.
+    The platform engineer drafts an interface proposal covering method signatures, data
+    models, error semantics, versioning strategy, and backward compatibility guarantees.
+    The architect reviews the proposal for consistency with existing platform conventions
+    and long-term extensibility. Iterative feedback rounds incorporate input from potential
+    consumers before the interface is frozen. Final design documentation and code stubs
+    are committed as the authoritative contract ahead of implementation.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: complex
+edges:
+  involves_role:
+    - role:platform-engineer
+    - role:architect
+    - role:tech-lead
+    - role:technical-writer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:sdk-release-lifecycle
+attributes:
+  displayName: "SDK Release Lifecycle"
+  description: |
+    Comprehensive release process governing the versioning, packaging, documentation,
+    and distribution of a software development kit to its consumer ecosystem. The platform
+    engineer prepares the changelog, increments the semantic version, and generates
+    language-specific package artefacts (npm, PyPI, Maven, etc.). The release manager
+    coordinates the release window, updates migration guides for breaking changes, and
+    ensures sample applications build cleanly against the new version. A staged release
+    to a canary registry allows early adopters to validate before the general availability
+    announcement goes out to the developer community.
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "per-release-cycle"
+  complexity: complex
+edges:
+  involves_role:
+    - role:platform-engineer
+    - role:release-manager
+    - role:technical-writer
+    - role:developer-advocate
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:developer-documentation-review
+attributes:
+  displayName: "Developer Documentation Review"
+  description: |
+    Structured review workflow ensuring that developer-facing documentation — API references,
+    guides, tutorials, and changelogs — is accurate, complete, and consistent with each
+    release. The documentation engineer audits recently changed APIs against published docs,
+    identifies gaps and outdated examples, and drafts updates. The tech lead reviews
+    technical accuracy while a peer editor checks clarity and structure. Review feedback is
+    addressed before the documentation is published alongside the corresponding release,
+    preventing developer confusion from stale or missing content.
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:documentation-engineer
+    - role:tech-lead
+    - role:technical-writer
+    - role:backend-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:performance-profiling-cycle
+attributes:
+  displayName: "Performance Profiling Cycle"
+  description: |
+    Iterative workflow for identifying, diagnosing, and resolving performance bottlenecks
+    in application code and infrastructure. The backend engineer and SRE define performance
+    budgets and baseline benchmarks, then run profiling tools against representative
+    workloads to capture CPU, memory, I/O, and latency profiles. Hot paths and resource
+    contention points are analysed, and optimisations are implemented and A/B benchmarked
+    against the baseline. Improvements are validated in staging under production-like load
+    before being merged, and updated benchmarks are committed as the new performance baseline.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-sprint"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:sre
+    - role:platform-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:load-testing-cycle
+attributes:
+  displayName: "Load Testing Cycle"
+  description: |
+    Pre-release workflow for stress-testing system behaviour under realistic and peak
+    traffic volumes before a new version reaches production. The QA engineer and SRE
+    collaborate on a load test plan that defines user scenarios, ramp-up curves, and
+    success criteria (latency p95, error rate, throughput). Automated load generators
+    execute the plan against a staging environment with production-equivalent infrastructure.
+    Bottlenecks uncovered during testing are triaged and resolved by backend engineers,
+    and the test is re-run until all success criteria are met and the release is cleared.
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:qa-engineer
+    - role:sre
+    - role:backend-engineer
+    - role:devops-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:agent-evaluation-cycle
+attributes:
+  displayName: "Agent Evaluation Cycle"
+  description: |
+    Rigorous evaluation workflow for measuring the accuracy, reliability, and safety of
+    AI agent systems across defined benchmark tasks and adversarial scenarios. The ML
+    engineer assembles an evaluation harness with a curated dataset of prompts, expected
+    outputs, and rubric-based scoring functions. The backend engineer integrates the
+    harness into CI so every model or prompt change triggers an automated eval run.
+    Regression thresholds enforce that new versions do not degrade on prior benchmarks,
+    while exploratory eval sessions probe edge cases and failure modes that inform the
+    next iteration of the agent's architecture or system prompt.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-sprint"
+  complexity: complex
+edges:
+  involves_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:research-engineer
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:prompt-engineering-iteration
+attributes:
+  displayName: "Prompt Engineering Iteration"
+  description: |
+    Focused iteration loop for systematically improving the quality and reliability of
+    prompts powering AI-driven product features. The ML engineer hypothesises changes
+    to the system prompt, few-shot examples, or instruction structure, then runs an
+    automated evaluation suite to measure impact against quality metrics. A version-
+    controlled prompt registry tracks all variants and their eval scores. Winning
+    candidates graduate to a shadow-traffic A/B test in production, and only prompts
+    that improve user-facing metrics are promoted to the live configuration.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-sprint"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:ml-engineer
+    - role:backend-engineer
+    - role:product-manager
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:schema-migration
+attributes:
+  displayName: "Schema Migration"
+  description: |
+    Safe, audited workflow for evolving database schemas in production without downtime
+    or data loss. The data engineer authors a migration script and a corresponding rollback
+    script, both reviewed by a backend engineer for correctness and performance impact on
+    large tables. Migrations are tested against a production-sized data snapshot in a
+    staging environment with execution-time profiling. The migration is applied to production
+    in a maintenance window or via a zero-downtime strategy (expand-contract pattern),
+    and automated integrity checks verify row counts and index health after completion.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: complex
+edges:
+  involves_role:
+    - role:data-engineer
+    - role:backend-engineer
+    - role:sre
+    - role:tech-lead
+  applies_to_domain:
+    - domain:data-engineering
+---
+nodeKind: Workflow
+id: workflow:data-backfill-procedure
+attributes:
+  displayName: "Data Backfill Procedure"
+  description: |
+    Operational workflow for populating historical data gaps or re-processing existing
+    records after a pipeline logic change or schema migration. The data engineer scopes
+    the backfill range, estimates compute and storage costs, and designs an idempotent
+    backfill job that can be paused and resumed safely. The job runs in a low-priority
+    batch window to avoid competing with live workloads. Progress is monitored via row
+    counts and data quality checks, and the backfill is marked complete only after a
+    reconciliation query confirms consistency between source and destination.
+  workflowKind: operational
+  triggerType: on-demand
+  typicalCadence: "on-demand"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:data-engineer
+    - role:sre
+    - role:backend-engineer
+  applies_to_domain:
+    - domain:data-engineering
+---
+nodeKind: Workflow
+id: workflow:protocol-implementation-review
+attributes:
+  displayName: "Protocol Implementation Review"
+  description: |
+    Rigorous review workflow for validating that a new network protocol implementation
+    adheres to its specification, handles edge cases correctly, and performs within
+    latency and throughput budgets. The backend engineer prepares a reference to the
+    relevant RFC or specification alongside the implementation. The architect conducts
+    a structured walkthrough of state machines, message framing, error handling, and
+    security considerations. Fuzz testing and conformance test suites are run against
+    the implementation, and interoperability is verified against at least one reference
+    implementation before the code is merged.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: complex
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:architect
+    - role:security-engineer
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:networking
+---
+nodeKind: Workflow
+id: workflow:simulation-validation-cycle
+attributes:
+  displayName: "Simulation Validation Cycle"
+  description: |
+    Iterative workflow for validating robotic or physical system controllers in simulation
+    before deployment to hardware. The research engineer configures the simulation
+    environment with accurate physics parameters, sensor models, and disturbance profiles.
+    A battery of scenario tests exercises nominal operation, edge cases, and failure
+    recovery paths, measuring whether system behaviour meets safety and performance
+    specifications. Discrepancies between simulated and expected behaviour are investigated
+    and fed back into controller tuning or model correction until the system passes all
+    validation scenarios.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: complex
+edges:
+  involves_role:
+    - role:research-engineer
+    - role:embedded-engineer
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:robotics
+---
+nodeKind: Workflow
+id: workflow:crypto-protocol-review
+attributes:
+  displayName: "Cryptographic Protocol Review"
+  description: |
+    Security-focused review workflow for evaluating the correctness, security properties,
+    and implementation soundness of cryptographic protocols and primitives before they are
+    deployed in production. The security engineer documents the threat model, security
+    goals, and cryptographic assumptions for the protocol. The architect reviews the
+    design against known attack classes — chosen-plaintext, replay, downgrade, and
+    side-channel attacks. A formal or semi-formal analysis of the protocol's security
+    properties is conducted, and the implementation is audited for constant-time
+    operations, safe randomness, and correct parameter selection.
+  workflowKind: security
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: complex
+edges:
+  involves_role:
+    - role:security-engineer
+    - role:architect
+    - role:backend-engineer
+    - role:compliance-officer
+  applies_to_domain:
+    - domain:security
+---
+nodeKind: Workflow
+id: workflow:legacy-migration-sprint
+attributes:
+  displayName: "Legacy Migration Sprint"
+  description: |
+    Time-boxed migration sprint for incrementally extracting, re-platforming, or replacing
+    legacy system components with modern equivalents while keeping the production system
+    operational. The architect and tech lead define the migration scope, strangler-fig
+    strategy, and rollback criteria before the sprint begins. Engineers implement the
+    replacement component alongside the legacy code, run parallel validation to verify
+    behavioural parity, and switch traffic incrementally using feature flags. Each sprint
+    ends with a decommission of the migrated legacy slice and updated architecture
+    documentation reflecting the new system topology.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-milestone"
+  complexity: complex
+edges:
+  involves_role:
+    - role:architect
+    - role:tech-lead
+    - role:backend-engineer
+    - role:qa-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:framework-upgrade-cycle
+attributes:
+  displayName: "Framework Upgrade Cycle"
+  description: |
+    Quarterly workflow for upgrading core frameworks and runtime versions to stay current
+    with security patches, performance improvements, and ecosystem support. The backend
+    engineer and tech lead review the framework changelog for breaking changes and
+    deprecations, then update dependencies in a dedicated upgrade branch. The full
+    automated test suite is run to surface regressions, and breaking changes are addressed
+    through codemods or targeted refactors. Upgrade notes document any behaviour changes
+    that application developers need to be aware of before the upgrade is merged.
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:backend-engineer
+    - role:tech-lead
+    - role:frontend-engineer
+    - role:devops-engineer
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:documentation-sprint
+attributes:
+  displayName: "Documentation Sprint"
+  description: |
+    Focused sprint for creating or substantially improving a body of technical documentation,
+    such as onboarding guides, architecture overviews, runbooks, or API references. The
+    documentation engineer and technical writer inventory documentation gaps identified
+    through developer surveys and support tickets, then prioritise a documentation backlog
+    for the sprint. Each documentation item goes through a draft, peer review for technical
+    accuracy, and editorial review for clarity before being published. The sprint closes
+    with a documentation health score update and a plan for maintaining freshness going
+    forward.
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "per-release"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:documentation-engineer
+    - role:technical-writer
+    - role:tech-lead
+    - role:developer-advocate
+  applies_to_domain:
+    - domain:software-engineering
+---
+nodeKind: Workflow
+id: workflow:design-sprint
+attributes:
+  displayName: "Design Sprint"
+  description: |
+    Five-day structured design workflow for rapidly understanding a problem, exploring
+    solution concepts, building a prototype, and validating it with real users before
+    committing to full implementation. The product designer facilitates daily phases
+    covering problem mapping, solution sketching, storyboarding, prototyping, and user
+    testing. The UX researcher recruits participants and conducts moderated testing
+    sessions on day five. Results are synthesised into a decision brief that either
+    greenlights the concept for development, recommends a pivot, or identifies key
+    unknowns requiring further exploration before proceeding.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: complex
+edges:
+  involves_role:
+    - role:product-designer
+    - role:ux-researcher
+    - role:product-manager
+    - role:tech-lead
+  applies_to_domain:
+    - domain:web-development
+---
+nodeKind: Workflow
+id: workflow:usability-testing-cycle
+attributes:
+  displayName: "Usability Testing Cycle"
+  description: |
+    Recurring evaluation workflow for testing whether real users can accomplish key tasks
+    with an interface effectively, efficiently, and with satisfaction. The UX researcher
+    develops a test plan with scenarios, success criteria, and a screener for recruiting
+    representative participants. Moderated or unmoderated sessions are conducted remotely
+    or in person, capturing task completion rates, time-on-task, error rates, and verbal
+    think-aloud data. Findings are synthesised into a usability report and ranked by
+    severity. The product designer and development team triage issues into the design
+    backlog and schedule fixes before the next release milestone.
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-release"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:ux-researcher
+    - role:product-designer
+    - role:product-manager
+  applies_to_domain:
+    - domain:web-development

@@ -1,0 +1,53 @@
+nodeKind: AgentVersion
+id: agent-version:droid@current
+attributes:
+  agentProductId: agent:droid
+  sourcePackage: "@factory/cli"
+  versionRange: ">=0.136.1"
+  currentVersion: "0.136.1"
+  releasedAt: "2026-05-29"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.136.1"
+  assimilationNotes:
+    - "npm latest moved from 0.135.0 to 0.136.1; no public Factory GitHub release or changelog entry was found for 0.136.1."
+    - "Factory docs published after 0.135.0 document hooks storage moving to .factory/hooks.json instead of .factory/hooks/hooks.json, and document os-sandboxing beta plus Factory Router docs."
+    - "Repository metadata still points at Factory-AI/factory apps/cli and package name remains @factory/cli."
+    - "No public evidence was found for CLI flag, transport, MCP, auth, or install-method changes in this release."
+  cliCommand: "droid"
+  installMethods:
+    - install:npm
+    - install:brew
+    - install:curl
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:droid
+  composed_of:
+    - target: agent-core-impl:droid.core@current
+      role: core
+    - target: agent-runtime-impl:droid.runtime@current
+      role: runtime
+    - target: agent-platform-impl:droid.platform@current
+      role: platform
+    - target: agent-ui-impl:droid.ui@current
+      role: ui
+  sourced_from:
+    - target: evidence:droid-cli-0-136-1-release
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.136.1'
+      level: full
+      notes: Droid operates as a multi-turn coding agent.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.136.1'
+      level: full
+      notes: Droid streams model output in the terminal.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.136.1'
+      level: full
+      notes: Droid drives file edits and commands via tool-use.
+    - target: capability:supports-mcp
+      versionRange: '>=0.136.1'
+      level: full
+      notes: Droid supports MCP server integration.
+  uses_memory_system:
+    - target: memory-system:file-based-markdown-pattern

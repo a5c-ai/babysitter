@@ -18,6 +18,10 @@ metadata:
     - autonomous-driving
     - simulation
     - validation
+graph:
+  domains: [domain:automotive-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+  roles: [role:systems-integration-engineer, role:embedded-engineer]
 ---
 
 # Driving Scenario Simulation Skill

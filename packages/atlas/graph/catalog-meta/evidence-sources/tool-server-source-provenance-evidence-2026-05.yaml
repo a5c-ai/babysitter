@@ -1,0 +1,94 @@
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run4-extensions-tool-servers-brave-search-mcp-yaml
+attributes:
+  displayName: Deferred source for brave-search-mcp
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  locator: migrated source comment for graph/extensions/tool-servers/brave-search-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run4-extensions-tool-servers-fetch-mcp-yaml
+attributes:
+  displayName: Deferred source for fetch-mcp
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  locator: migrated source comment for graph/extensions/tool-servers/fetch-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run4-extensions-tool-servers-postgres-mcp-yaml
+attributes:
+  displayName: Deferred source for postgres-mcp
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+  locator: migrated source comment for graph/extensions/tool-servers/postgres-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run4-extensions-tool-servers-slack-mcp-yaml
+attributes:
+  displayName: Deferred source for slack-mcp
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+  locator: migrated source comment for graph/extensions/tool-servers/slack-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:source-provenance-run4-extensions-tool-servers-sqlite-mcp-yaml
+attributes:
+  displayName: Deferred source for sqlite-mcp
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  sourcePathOrUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+  locator: migrated source comment for graph/extensions/tool-servers/sqlite-mcp.yaml
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+  - trust-level:vendor-doc

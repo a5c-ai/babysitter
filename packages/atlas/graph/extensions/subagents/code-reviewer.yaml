@@ -1,0 +1,50 @@
+nodeKind: Subagent
+id: subagent:code-reviewer
+attributes:
+  displayName: "Code Reviewer"
+  provenance: custom
+  roleId: role:code-reviewer
+  systemPrompt: |
+    You are a senior code reviewer. Read the diff. Identify correctness,
+    security, and performance issues. Quote specific line numbers. Be
+    concise; do not restate the obvious. Output **structured review
+    comments** grouped by severity (blocker / major / minor / nit).
+  tools:
+    - tool-descriptor:github.create-issue
+  triggers: |
+    Invoke when the user asks for a review on staged changes, an open PR,
+    or a specific commit range.
+  description: |
+    Read-only reviewer subagent that produces structured review comments.
+    Example user-installable definition (parallel to a Skill SKILL.md);
+    matches the `code-reviewer` shape documented as a custom subagent in
+    Anthropic Claude Code's docs
+    (https://docs.anthropic.com/en/docs/claude-code/sub-agents) — file lives
+    at `.claude/agents/code-reviewer.md` (project-scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:code-reviewer
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  contained_in_plugin:
+    - target: plugin:example-portable-extension
+  implements:
+    - target: extension-interface:governance
+  requires_capability:
+    - target: capability:parallel-tool-calls
+      level: recommended
+  sourced_from:
+    - target: source-ref:a5c-plugins-quality

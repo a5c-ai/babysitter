@@ -1,0 +1,1024 @@
+# =============================================================================
+# Education / LMS SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:instructional-design
+attributes:
+  displayName: "Instructional Design"
+  description: |
+    Designing effective learning experiences by applying pedagogical frameworks
+    such as ADDIE, SAM, and Bloom's taxonomy — structuring learning objectives,
+    selecting delivery methods, and sequencing content for measurable outcomes.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:education
+      confidence: primary
+    - target: domain:edtech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:e-learning-development
+attributes:
+  displayName: "E-Learning Development"
+  description: |
+    Building digital learning content using authoring tools such as Articulate
+    Storyline, Adobe Captivate, and Rise — creating interactive modules, branching
+    scenarios, multimedia lessons, and mobile-responsive courseware.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:edtech
+      confidence: primary
+    - target: domain:education
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:SCORM-compliance
+attributes:
+  displayName: "SCORM Compliance"
+  description: |
+    Implementing the Sharable Content Object Reference Model for LMS
+    interoperability — packaging content as SCORM 1.2 or 2004 modules,
+    handling CMI data model fields, and debugging runtime communication
+    between content and the LMS.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:edtech
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:xAPI-implementation
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:xAPI-implementation
+attributes:
+  displayName: "xAPI Implementation"
+  description: |
+    Implementing the Experience API (xAPI / Tin Can) standard for tracking
+    learning activities beyond the LMS — configuring Learning Record Stores,
+    crafting statement vocabularies, and aggregating data from diverse
+    learning touchpoints.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:edtech
+      confidence: primary
+    - target: domain:education
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:learning-analytics
+attributes:
+  displayName: "Learning Analytics"
+  description: |
+    Collecting, analyzing, and visualizing learner data to improve educational
+    outcomes — tracking engagement, completion, assessment scores, and learning
+    paths to surface actionable insights for instructors and administrators.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:edtech
+      confidence: primary
+    - target: domain:education
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:data-analytics
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:adaptive-learning-systems
+attributes:
+  displayName: "Adaptive Learning Systems"
+  description: |
+    Building systems that personalize educational content delivery based on
+    learner performance — implementing mastery-based progression, knowledge
+    state estimation (BKT, IRT), and real-time content recommendation engines.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:edtech
+      confidence: primary
+    - target: domain:ml-ai
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:assessment-design
+attributes:
+  displayName: "Assessment Design"
+  description: |
+    Designing valid and reliable assessments for measuring learning outcomes —
+    constructing formative and summative items, calibrating difficulty,
+    applying psychometric analysis, and building question banks with metadata.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:education
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:rubric-development
+attributes:
+  displayName: "Rubric Development"
+  description: |
+    Creating analytic and holistic rubrics that define clear performance criteria
+    and levels of achievement — supporting consistent grading, self-assessment,
+    peer review, and transparent evaluation across educational programs.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:education
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:accessibility-in-education
+attributes:
+  displayName: "Accessibility in Education"
+  description: |
+    Ensuring educational content and platforms meet accessibility standards
+    such as WCAG, Section 508, and Universal Design for Learning (UDL) —
+    providing alt text, captions, keyboard navigation, screen reader
+    compatibility, and accommodations for diverse learners.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:education
+      confidence: primary
+    - target: domain:edtech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:gamification-design
+attributes:
+  displayName: "Gamification Design"
+  description: |
+    Applying game mechanics to non-game contexts — designing point systems,
+    badges, leaderboards, quests, and progression loops to drive engagement,
+    motivation, and behavior change in learning and enterprise applications.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:education
+      confidence: primary
+    - target: domain:edtech
+      confidence: secondary
+
+# =============================================================================
+# Energy / Environment SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:energy-modeling
+attributes:
+  displayName: "Energy Modeling"
+  description: |
+    Simulating energy production, consumption, and distribution scenarios
+    using tools like EnergyPlus, OpenStudio, and custom models — forecasting
+    load curves, optimizing generation mix, and evaluating renewable
+    integration strategies.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:energy
+      confidence: primary
+    - target: domain:cleantech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:grid-simulation
+attributes:
+  displayName: "Grid Simulation"
+  description: |
+    Modeling electrical grid behavior including power flow, frequency
+    stability, fault analysis, and distributed energy resource integration
+    using tools like PSS/E, PowerWorld, or GridLAB-D.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:energy
+      confidence: primary
+    - target: domain:power-grid
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:battery-management-systems
+attributes:
+  displayName: "Battery Management Systems"
+  description: |
+    Designing and programming battery management systems (BMS) — cell
+    balancing, state-of-charge estimation, thermal management, degradation
+    modeling, and safety monitoring for lithium-ion and next-generation
+    battery chemistries.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:energy
+      confidence: primary
+    - target: domain:electrical-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:solar-panel-optimization
+attributes:
+  displayName: "Solar Panel Optimization"
+  description: |
+    Maximizing photovoltaic system output through panel orientation analysis,
+    MPPT algorithm tuning, shading loss mitigation, inverter sizing, and
+    predictive maintenance using irradiance and weather data.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:energy
+      confidence: primary
+    - target: domain:cleantech
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:wind-turbine-control
+attributes:
+  displayName: "Wind Turbine Control"
+  description: |
+    Implementing control systems for wind turbines — pitch and yaw control,
+    SCADA integration, power curve optimization, turbulence load management,
+    and predictive maintenance scheduling based on vibration and performance data.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:energy
+      confidence: primary
+    - target: domain:mechanical-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:carbon-footprint-calculation
+attributes:
+  displayName: "Carbon Footprint Calculation"
+  description: |
+    Quantifying greenhouse gas emissions across scopes 1, 2, and 3 using
+    standards such as the GHG Protocol — collecting activity data, applying
+    emission factors, handling unit conversions, and producing auditable
+    carbon inventories.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:sustainability-esg
+      confidence: primary
+    - target: domain:environmental-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:ESG-reporting
+attributes:
+  displayName: "ESG Reporting"
+  description: |
+    Preparing Environmental, Social, and Governance disclosures aligned with
+    frameworks like GRI, SASB, TCFD, and CSRD — collecting ESG metrics,
+    managing materiality assessments, and automating report generation for
+    investors and regulators.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:sustainability-esg
+      confidence: primary
+    - target: domain:compliance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:environmental-monitoring
+attributes:
+  displayName: "Environmental Monitoring"
+  description: |
+    Deploying and managing sensor networks for real-time environmental data
+    collection — air quality indices, noise levels, soil moisture, biodiversity
+    tracking, and integration with GIS platforms for spatial analysis.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:environmental-engineering
+      confidence: primary
+    - target: domain:iot
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:water-quality-analysis
+attributes:
+  displayName: "Water Quality Analysis"
+  description: |
+    Monitoring and analyzing water quality parameters — turbidity, pH,
+    dissolved oxygen, heavy metals, and microbial contamination — using
+    automated sampling systems, lab information management, and regulatory
+    compliance reporting.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:environmental-engineering
+      confidence: primary
+    - target: domain:water-management
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:waste-stream-optimization
+attributes:
+  displayName: "Waste Stream Optimization"
+  description: |
+    Analyzing and optimizing waste generation, collection, sorting, and
+    disposal processes — applying circular economy principles, improving
+    recycling rates, reducing landfill volumes, and tracking regulatory
+    compliance across waste categories.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:environmental-engineering
+      confidence: primary
+    - target: domain:waste-management
+      confidence: secondary
+
+# =============================================================================
+# Construction / BIM SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:BIM-modeling
+attributes:
+  displayName: "BIM Modeling"
+  description: |
+    Creating and managing Building Information Models using tools such as
+    Revit, ArchiCAD, and Tekla — producing 3D parametric models that encode
+    geometry, materials, cost data, and scheduling for integrated project
+    delivery.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+    - target: domain:civil-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:structural-analysis
+attributes:
+  displayName: "Structural Analysis"
+  description: |
+    Analyzing structural systems for load paths, stress distribution, and
+    stability using finite element analysis tools such as SAP2000, ETABS, and
+    STAAD.Pro — verifying code compliance and optimizing member sizing for
+    buildings, bridges, and infrastructure.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:civil-engineering
+      confidence: primary
+    - target: domain:construction
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:MEP-coordination
+attributes:
+  displayName: "MEP Coordination"
+  description: |
+    Coordinating mechanical, electrical, and plumbing systems within BIM
+    models — running clash detection, resolving spatial conflicts between
+    disciplines, and ensuring constructability before fabrication begins.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+    - target: domain:mechanical-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:cost-estimation
+attributes:
+  displayName: "Cost Estimation"
+  description: |
+    Preparing quantity takeoffs and cost estimates for construction projects —
+    applying unit-rate databases, handling contingency and escalation,
+    producing parametric and detailed estimates, and integrating with
+    BIM models for 5D cost visualization.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:construction-scheduling
+attributes:
+  displayName: "Construction Scheduling"
+  description: |
+    Developing and managing construction schedules using CPM, resource
+    leveling, and 4D BIM simulation — defining activity sequences, tracking
+    progress with earned value, and producing look-ahead schedules for
+    site coordination.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+    - target: domain:project-management
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:site-safety-management
+attributes:
+  displayName: "Site Safety Management"
+  description: |
+    Implementing health and safety management systems on construction sites —
+    conducting risk assessments, enforcing PPE and permit-to-work procedures,
+    investigating incidents, and ensuring OSHA / ISO 45001 compliance.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:geotechnical-analysis
+attributes:
+  displayName: "Geotechnical Analysis"
+  description: |
+    Analyzing subsurface conditions for foundation design — interpreting bore
+    logs, conducting bearing capacity and settlement calculations, evaluating
+    slope stability, and recommending ground improvement techniques.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:civil-engineering
+      confidence: primary
+    - target: domain:construction
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:surveying
+attributes:
+  displayName: "Surveying"
+  description: |
+    Performing land and construction surveys using total stations, GNSS
+    receivers, and photogrammetry — producing topographic maps, setting out
+    control networks, and verifying as-built positions against design models.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+    - target: domain:civil-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:building-energy-simulation
+attributes:
+  displayName: "Building Energy Simulation"
+  description: |
+    Simulating building thermal performance and energy consumption using
+    EnergyPlus, IES VE, or DesignBuilder — evaluating HVAC strategies,
+    envelope performance, daylighting, and compliance with energy codes
+    such as ASHRAE 90.1 and Passivhaus.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+    - target: domain:energy
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:construction-document-management
+attributes:
+  displayName: "Construction Document Management"
+  description: |
+    Managing construction documentation workflows — transmittals, RFIs,
+    submittals, change orders, and as-built records using platforms like
+    Procore, Aconex, or BIM 360, with version control and audit trails.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:construction
+      confidence: primary
+
+# =============================================================================
+# Communication / Collaboration SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:technical-writing-advanced
+attributes:
+  displayName: "Technical Writing (Advanced)"
+  description: |
+    Advanced technical writing practices beyond basic documentation —
+    information architecture for large doc sets, single-sourcing with DITA or
+    docs-as-code pipelines, structured authoring, and content strategy for
+    technical audiences.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:content-operations
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:technical-writing
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:API-documentation-design
+attributes:
+  displayName: "API Documentation Design"
+  description: |
+    Designing developer-facing API documentation — structuring OpenAPI/Swagger
+    specs, writing code samples in multiple languages, maintaining changelog
+    accuracy, and creating interactive API explorers that reduce integration
+    friction.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:api-development
+      confidence: primary
+    - target: domain:developer-experience
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:api-doc-generation
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:developer-portal-design
+attributes:
+  displayName: "Developer Portal Design"
+  description: |
+    Designing and building developer portals that serve as the single
+    entry point for API consumers — onboarding flows, sandbox environments,
+    interactive tutorials, credential management, and analytics on developer
+    adoption and engagement.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:developer-experience
+      confidence: primary
+    - target: domain:api-development
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:README-driven-development
+attributes:
+  displayName: "README-Driven Development"
+  description: |
+    Writing the README before writing code to clarify scope, API surface, and
+    usage patterns — using the document as a forcing function for design
+    decisions and as living documentation that evolves with the project.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:developer-experience
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:changelog-writing
+attributes:
+  displayName: "Changelog Writing"
+  description: |
+    Maintaining clear, audience-appropriate changelogs that communicate
+    breaking changes, new features, deprecations, and fixes — following
+    conventions like Keep a Changelog, automating generation from commit
+    history, and linking to migration guides.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:developer-experience
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:changelog-management
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:RFC-writing
+attributes:
+  displayName: "RFC Writing"
+  description: |
+    Writing Request for Comments documents to propose and discuss significant
+    technical changes — structuring problem statements, alternatives analysis,
+    trade-off matrices, and decision records that drive asynchronous consensus
+    across engineering teams.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:ADR-writing
+attributes:
+  displayName: "ADR Writing"
+  description: |
+    Authoring Architecture Decision Records that capture the context,
+    decision, and consequences of significant architectural choices — using
+    templates like MADR, linking superseded decisions, and maintaining a
+    searchable decision log.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:adr-writing
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:design-document-writing
+attributes:
+  displayName: "Design Document Writing"
+  description: |
+    Writing design documents that communicate system architecture, component
+    interactions, data flows, and non-functional requirements — following
+    organizational templates, incorporating diagrams, and gathering structured
+    feedback before implementation begins.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:incident-communication
+attributes:
+  displayName: "Incident Communication"
+  description: |
+    Communicating during and after production incidents — drafting customer-
+    facing status updates, coordinating internal war-room messaging, writing
+    post-incident reviews, and maintaining communication templates that
+    balance transparency with precision.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:site-reliability
+      confidence: primary
+    - target: domain:devops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:status-page-management
+attributes:
+  displayName: "Status Page Management"
+  description: |
+    Operating public and internal status pages — defining component
+    hierarchies, automating incident detection and status transitions,
+    configuring subscriber notifications, and maintaining uptime metrics
+    that build customer trust.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:site-reliability
+      confidence: primary
+    - target: domain:devops
+      confidence: secondary
+
+# =============================================================================
+# Testing / Quality (Deep) SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:mutation-testing-design
+attributes:
+  displayName: "Mutation Testing Design"
+  description: |
+    Designing mutation testing strategies that evaluate test suite
+    effectiveness — selecting mutation operators, configuring tools like
+    Stryker or PIT, interpreting mutation scores, and integrating mutation
+    analysis into CI pipelines without excessive build times.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:mutation-testing
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:property-based-testing
+attributes:
+  displayName: "Property-Based Testing"
+  description: |
+    Writing property-based tests that verify invariants over randomly
+    generated inputs — using frameworks like Hypothesis, fast-check, or
+    QuickCheck to discover edge cases that example-based tests miss,
+    with shrinking for minimal failing cases.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:fuzz-testing-strategy
+attributes:
+  displayName: "Fuzz Testing Strategy"
+  description: |
+    Designing fuzz testing campaigns for security and robustness — selecting
+    coverage-guided (AFL, libFuzzer) or grammar-based fuzzers, building
+    harnesses, triaging crashes, and integrating continuous fuzzing into
+    CI/CD pipelines like OSS-Fuzz.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:cybersecurity
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:fuzz-testing
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:snapshot-testing-strategy
+attributes:
+  displayName: "Snapshot Testing Strategy"
+  description: |
+    Developing snapshot testing strategies that balance change detection with
+    maintainability — choosing what to snapshot, managing snapshot churn,
+    combining with visual regression tools, and establishing review
+    practices for snapshot updates.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:frontend
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:test-data-management
+attributes:
+  displayName: "Test Data Management"
+  description: |
+    Managing test data across environments — generating synthetic datasets,
+    masking production data for privacy compliance, maintaining referential
+    integrity in fixtures, and automating test data provisioning and cleanup
+    for repeatable test runs.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:data-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:test-environment-management
+attributes:
+  displayName: "Test Environment Management"
+  description: |
+    Provisioning and managing test environments — spinning up ephemeral
+    environments per PR, managing shared staging resources, configuring
+    service virtualization, and ensuring environment parity with production
+    for reliable test results.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:devops
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:test-pyramid-design
+attributes:
+  displayName: "Test Pyramid Design"
+  description: |
+    Designing a balanced test pyramid — determining the right ratio of unit,
+    integration, and end-to-end tests for a codebase, identifying anti-
+    patterns like ice-cream-cone distributions, and optimizing feedback
+    speed versus confidence trade-offs.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:testing-in-production
+attributes:
+  displayName: "Testing in Production"
+  description: |
+    Safely testing in production environments — implementing canary analysis,
+    traffic mirroring / shadow testing, feature-flag-guarded experiments,
+    and observability-driven verification that complement pre-production
+    testing without risking customer impact.
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:qa-testing
+      confidence: primary
+    - target: domain:site-reliability
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:synthetic-monitoring
+attributes:
+  displayName: "Synthetic Monitoring"
+  description: |
+    Running scripted user journeys from distributed probes to detect
+    availability and performance regressions before real users are affected —
+    configuring check frequencies, managing alert thresholds, and correlating
+    synthetic results with real-user monitoring data.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:observability
+      confidence: primary
+    - target: domain:site-reliability
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:real-user-monitoring
+attributes:
+  displayName: "Real User Monitoring"
+  description: |
+    Capturing and analyzing actual user interactions — collecting Core Web
+    Vitals, navigation timings, error rates, and session replays from
+    production traffic to understand real-world performance and prioritize
+    improvements that affect the most users.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:observability
+      confidence: primary
+    - target: domain:frontend
+      confidence: secondary
+
+# =============================================================================
+# Leadership / Management SkillAreas
+# =============================================================================
+---
+nodeKind: SkillArea
+id: skill-area:engineering-management
+attributes:
+  displayName: "Engineering Management"
+  description: |
+    Leading engineering teams — balancing technical direction with people
+    management, setting team goals aligned with business outcomes, managing
+    headcount and budgets, and creating an environment where engineers
+    can do their best work.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:human-resources
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:team-topologies-implementation
+attributes:
+  displayName: "Team Topologies Implementation"
+  description: |
+    Applying Team Topologies principles — organizing stream-aligned, enabling,
+    complicated-subsystem, and platform teams, defining interaction modes
+    (collaboration, X-as-a-service, facilitating), and evolving team
+    structures as the system architecture changes.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:cognitive-load-management
+attributes:
+  displayName: "Cognitive Load Management"
+  description: |
+    Managing cognitive load on engineering teams — reducing intrinsic
+    complexity through better abstractions, limiting extraneous load from
+    tooling and processes, and monitoring team cognitive capacity as a
+    leading indicator of delivery health.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:technical-mentoring
+attributes:
+  displayName: "Technical Mentoring"
+  description: |
+    Mentoring engineers through deliberate practice — conducting structured
+    code reviews, pairing on challenging problems, designing stretch
+    assignments, and creating feedback loops that accelerate skill growth
+    while maintaining psychological safety.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:education
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:code-review-culture
+attributes:
+  displayName: "Code Review Culture"
+  description: |
+    Building a healthy code review culture — establishing review guidelines
+    that balance thoroughness with speed, training reviewers to give
+    actionable feedback, measuring review cycle time, and using automation
+    to handle style and formatting so humans focus on logic and design.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:blameless-postmortem-facilitation
+attributes:
+  displayName: "Blameless Postmortem Facilitation"
+  description: |
+    Facilitating blameless post-incident reviews — guiding teams through
+    timeline reconstruction, identifying contributing factors, distinguishing
+    root causes from proximate causes, and producing action items that
+    improve system resilience without assigning personal blame.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:site-reliability
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:one-on-one-meetings
+attributes:
+  displayName: "1-on-1 Meetings"
+  description: |
+    Conducting effective one-on-one meetings with direct reports — building
+    trust, surfacing blockers early, giving and receiving feedback, supporting
+    career development, and maintaining a consistent cadence that adapts
+    to individual needs.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+    - target: domain:software-engineering
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:skip-level-meetings
+attributes:
+  displayName: "Skip-Level Meetings"
+  description: |
+    Running skip-level meetings that give senior leaders direct insight
+    into team health and individual concerns — creating psychological
+    safety for candid feedback, avoiding undermining direct managers,
+    and acting on systemic issues surfaced through these conversations.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:human-resources
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:engineering-ladder-design
+attributes:
+  displayName: "Engineering Ladder Design"
+  description: |
+    Designing engineering career ladders that define clear expectations for
+    each level — mapping competencies across technical skill, impact,
+    communication, and leadership dimensions, calibrating across teams,
+    and using the ladder to guide promotions and development conversations.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:human-resources
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:developer-productivity-measurement
+attributes:
+  displayName: "Developer Productivity Measurement"
+  description: |
+    Measuring engineering productivity without gaming — selecting metrics
+    like DORA, SPACE framework indicators, and developer experience
+    surveys, avoiding vanity metrics, and using data to identify systemic
+    bottlenecks rather than individual performance.
+  expertiseLevels: [practitioner, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:developer-experience
+      confidence: secondary

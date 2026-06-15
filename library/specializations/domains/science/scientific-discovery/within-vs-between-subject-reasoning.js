@@ -3,6 +3,13 @@
  * @description Differentiate within-individual vs cross-individual effects in psychological and social science research
  * @inputs { researchQuestion: string, data: object, variables: array, designType: string, outputDir: string }
  * @outputs { success: boolean, analysis: object, withinEffects: array, betweenEffects: array, partitionedVariance: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -8,6 +8,13 @@ expertise:
   - Hybrid search optimization
   - Query transformation
   - Evaluation metrics
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:retrieval-augmented-generation, skill-area:model-evaluation]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Retrieval Optimizer

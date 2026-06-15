@@ -1,0 +1,93 @@
+---
+nodeKind: Workflow
+id: workflow:penetration-test-cycle
+attributes:
+  displayName: "Penetration Test Cycle"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Plans and executes a penetration testing engagement — scoping targets,
+    conducting reconnaissance, exploiting discovered vulnerabilities,
+    documenting attack chains, producing a findings report with CVSS scores,
+    and tracking remediation to closure. Excludes vulnerability scanning
+    automation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:vulnerability-scanner
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:oauth-flows
+    - target: skill-area:webhook-verification
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:red-team-exercise
+attributes:
+  displayName: "Red Team Exercise"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "semi-annual"
+  complexity: cross-team
+  description: |
+    Conducts an adversarial red team exercise against production systems —
+    simulating real-world attack scenarios, testing detection and response
+    capabilities, evaluating security control effectiveness, and debriefing
+    with blue team for lessons learned. Excludes vulnerability remediation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:incident-commander
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:k8s-rbac
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:respond-incidents
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:incident-response-team
+---
+nodeKind: Workflow
+id: workflow:bug-bounty-triage
+attributes:
+  displayName: "Bug Bounty Triage"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-report"
+  complexity: single-team
+  description: |
+    Triages incoming bug bounty reports — validating reproducibility,
+    assessing severity, deduplicating against known issues, coordinating
+    with engineering for fixes, communicating with researchers, and managing
+    reward payouts. Excludes the fix implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:vulnerability-scanner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:incident-response
+  applies_to_domain:
+    - target: domain:cybersecurity
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team

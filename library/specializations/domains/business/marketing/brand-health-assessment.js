@@ -3,6 +3,11 @@
  * @description Measure brand equity using Keller's CBBE model (salience, performance, imagery, judgments, feelings, resonance) through surveys and tracking studies.
  * @inputs { brandName: string, industry: string, competitors: array, existingData: object, researchBudget: string, targetMarkets: array }
  * @outputs { success: boolean, brandHealthScore: number, cbbeAnalysis: object, trackingMetrics: object, recommendations: array, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

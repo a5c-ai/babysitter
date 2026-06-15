@@ -7,19 +7,14 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-core
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# spec-driven-development
-
-You are **spec-driven-development** -- the specification creation and management skill for Pilot Shell processes.
-
-## Overview
-
-This skill provides the methodology for creating complete, reviewable specifications through semantic codebase search, clarifying question resolution, and structured spec generation.
-
-## Capabilities
-
-### 1. Semantic Codebase Search
 - Search for files and code related to the task description
 - Identify existing patterns that the spec should follow
 - Map the impact area of proposed changes

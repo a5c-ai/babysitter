@@ -11,6 +11,11 @@ expertise:
   - Multi-core firmware architecture
   - Firmware modularity and reusability
   - Performance vs resource trade-offs
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Firmware Architect Agent

@@ -3,6 +3,13 @@
  * @description COG Second Brain - Intelligence cycle: daily brief, team brief, comprehensive analysis
  * @inputs { vaultPath: string, mode: string, userName: string, rolePack?: string, integrations?: object, targetQuality?: number }
  * @outputs { success: boolean, brief: object, sources: array, qualityScore: number }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

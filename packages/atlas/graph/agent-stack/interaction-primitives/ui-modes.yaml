@@ -1,0 +1,272 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:tool-approval-prompt
+attributes:
+  displayName: "Tool approval prompt"
+  description: |
+    Interactive prompt asking the user to approve a pending tool call
+    (allow once / allow always / deny). Common across coding agents.
+  surface: prompt-ui
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:thinking-toggle
+attributes:
+  displayName: "Thinking toggle"
+  description: |
+    UI affordance to toggle extended thinking on/off and adjust
+    thinking budget level.
+  surface: prompt-ui
+  availableInModes: [chat, plan, composer]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:vim-mode
+attributes:
+  displayName: "Vim mode"
+  description: "Vim-style modal editing in the chat input."
+  surface: prompt-ui
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+  keyboardShortcut: "Esc / i (vim modes)"
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:cursor-at-mention
+attributes:
+  displayName: "@ mention (Cursor)"
+  description: "Cursor's @-mention to attach files, docs, or symbols."
+  surface: prompt-ui
+  availableInModes: [chat, composer, edit]
+  requiresPermission: false
+  keyboardShortcut: "@"
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:cursor-cmd-k
+attributes:
+  displayName: "Cmd-K (Cursor)"
+  description: "Cursor's inline-edit command palette."
+  surface: keybinding
+  availableInModes: [edit]
+  requiresPermission: false
+  keyboardShortcut: "Cmd+K / Ctrl+K"
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:cursor-cmd-l
+attributes:
+  displayName: "Cmd-L (Cursor)"
+  description: "Cursor's chat-pane keybinding."
+  surface: keybinding
+  availableInModes: [chat, composer]
+  requiresPermission: false
+  keyboardShortcut: "Cmd+L / Ctrl+L"
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:cursor-inline-edit
+attributes:
+  displayName: "Inline edit (Cursor)"
+  description: "Cursor's in-editor selection-based AI edit."
+  surface: editor-ui
+  availableInModes: [edit]
+  requiresPermission: false
+  keyboardShortcut: "Cmd+K / Ctrl+K (with selection)"
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-ask-for-approval
+attributes:
+  displayName: "ask-for-approval (Codex)"
+  description: "Codex CLI's interactive approval prompt for tool calls."
+  surface: prompt-ui
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-profile-switch
+attributes:
+  displayName: "Profile switch (Codex)"
+  description: "Codex CLI's profile-switch command."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-sandbox-mode
+attributes:
+  displayName: "Sandbox mode (Codex)"
+  description: "Codex CLI's sandbox-mode toggle controlling exec scope."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-model-command
+attributes:
+  displayName: "Model command (Codex)"
+  description: "Codex CLI's /model slash command for selecting or viewing the active model."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-fast-command
+attributes:
+  displayName: "Fast command (Codex)"
+  description: "Codex CLI's /fast slash command for switching to faster execution behavior."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-personality-command
+attributes:
+  displayName: "Personality command (Codex)"
+  description: "Codex CLI's /personality slash command for selecting an interaction profile."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-permissions-command
+attributes:
+  displayName: "Permissions command (Codex)"
+  description: "Codex CLI's /permissions slash command for inspecting or changing approval and sandbox posture."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-agent-command
+attributes:
+  displayName: "Agent command (Codex)"
+  description: "Codex CLI's /agent slash command for agent profile control."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-status-command
+attributes:
+  displayName: "Status command (Codex)"
+  description: "Codex CLI's /status slash command for displaying session and runtime status."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-mcp-command
+attributes:
+  displayName: "MCP command (Codex)"
+  description: "Codex CLI's /mcp slash command for listing configured MCP servers and their tools."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-diff-command
+attributes:
+  displayName: "Diff command (Codex)"
+  description: "Codex CLI's /diff slash command for reviewing workspace changes."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:codex-theme-command
+attributes:
+  displayName: "Theme command (Codex)"
+  description: "Codex CLI's /theme slash command for changing terminal UI appearance."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:gemini-yolo
+attributes:
+  displayName: "YOLO mode (Gemini CLI)"
+  description: "Gemini CLI's auto-approve-all mode."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:hermes-auto-approve
+attributes:
+  displayName: "Auto-approve (Hermes)"
+  description: "Hermes' auto-approval toggle for tool calls."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:openclaw-auto-approve
+attributes:
+  displayName: "Auto-approve (Openclaw)"
+  description: "Openclaw's auto-approval toggle for tool calls."
+  surface: cli
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction

@@ -3,6 +3,12 @@ name: file-watcher-setup
 description: Set up cross-platform file system watching with debouncing and efficient change detection
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [files, watcher, cross-platform, filesystem, events]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # file-watcher-setup

@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: error-management
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:graph-algorithms, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # QEC Specialist

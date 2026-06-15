@@ -13,6 +13,12 @@ metadata:
   domain: business
   category: Market Creation
   skill-id: SK-008
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:growth-strategy, skill-area:business-model-design, skill-area:competitive-intelligence]
+  workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+  roles: [role:strategic-planner, role:management-consultant]
 ---
 
 # Blue Ocean Strategy Skill

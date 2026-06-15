@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Schedule Management
   id: SK-001
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:data-visualization, skill-area:stakeholder-management]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:technical-program-manager, role:scrum-master]
 ---
 
 # Gantt Chart Generator

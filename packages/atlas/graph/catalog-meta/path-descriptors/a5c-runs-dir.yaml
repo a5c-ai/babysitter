@@ -1,0 +1,17 @@
+nodeKind: PathDescriptor
+id: path:a5c-runs-dir
+attributes:
+  pathId: .a5c-runs
+  displayName: "Shared a5c run/session directory"
+  path: ".a5c/runs"
+  pathKind: session-state-dir
+  ownerKind: GraphDocument
+  ownerId: graph:agent-catalog
+  platform: cross-platform
+  scope: project
+  evaluationContext: project
+  expansion: literal
+  notes: |
+    Shared fallback run/session directory for harness metadata. Holds
+    journal.ndjson, effects/, locks/, completion-proof.json, metadata.json
+    per `.a5c/runs/<runId>/` (see Run.runDir).

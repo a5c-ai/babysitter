@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:electron
+attributes:
+  displayName: "Electron"
+  homepageUrl: "https://www.electronjs.org"
+  belongsToLanguageId: language:javascript
+  category: desktop
+  description: |
+    Electron — a Chromium + Node.js framework for desktop apps.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:desktop-ui-frameworks
+  alternative_to:
+    - target: framework:tauri
+      comparison: "Desktop application frameworks"

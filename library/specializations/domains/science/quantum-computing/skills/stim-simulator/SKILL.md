@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: error-management
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:physics-simulation, skill-area:graph-algorithms, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Stim Simulator

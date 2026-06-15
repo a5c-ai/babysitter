@@ -1,0 +1,20 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:livecodebench.scope
+attributes:
+  subjectId: benchmark:livecodebench
+  inScope: |
+    Contamination-resistant competitive-programming problems collected
+    on a rolling basis from LeetCode / AtCoder / CodeForces. Python,
+    C++, Java solutions evaluated by hidden test cases. Includes
+    code-generation, self-repair, code-execution, and test-prediction
+    sub-tasks.
+  outOfScope: |
+    Repository-scale software-engineering tasks (use SWE-bench), agentic
+    tool-use, ML-engineering tasks, natural-language reasoning, and
+    benchmark snapshots before the contamination cutoff.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:volatile-data
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - benchmark:livecodebench

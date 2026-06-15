@@ -1,0 +1,12 @@
+nodeKind: MCPConfigScope
+id: mcp-config-scope:claude-code-project
+attributes:
+  displayName: "Project-scoped MCP config"
+  scope: project
+  priority: 30
+  editableBy: project-maintainer
+  persistsTo: ".mcp.json"
+  pluginSourced: false
+  description: |
+    Project-level MCP server config — checked into the repo, applies to all
+    contributors. Overrides user/local but is overridden by managed/enterprise.

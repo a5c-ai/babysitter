@@ -1,0 +1,19 @@
+nodeKind: Role
+id: role:incident-commander
+attributes:
+  displayName: "Incident Commander"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:software-engineering
+  description: |
+    Coordinates response during production incidents — owns comms, escalation, and timeline.
+edges:
+  requires_expertise:
+    - target: skill-area:incident-response
+    - target: skill-area:runbook-writing
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to:
+    - target: domain:software-engineering

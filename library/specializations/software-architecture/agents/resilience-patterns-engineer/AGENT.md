@@ -10,6 +10,14 @@ expertise:
   - Fallback mechanisms
   - Rate limiting
   - Backpressure handling
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:sre]
+  skillAreas: [skill-area:chaos-engineering, skill-area:messaging-queuing]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:circuit-breakers, topic:bulkhead-pattern, topic:retry-pattern]
+
 ---
 
 # Resilience Patterns Engineer Agent

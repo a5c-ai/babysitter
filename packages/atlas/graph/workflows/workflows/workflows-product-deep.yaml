@@ -1,0 +1,63 @@
+---
+nodeKind: Workflow
+id: workflow:okr-alignment-review
+attributes:
+  displayName: "OKR Alignment Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews alignment between team-level OKRs and company-level objectives —
+    scoring key result progress, identifying misaligned or orphaned OKRs,
+    facilitating cross-team dependency mapping, surfacing resourcing conflicts,
+    and producing a realignment recommendation report for leadership. Excludes
+    individual OKR authoring.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:adr-writing
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:competitive-landscape-analysis
+attributes:
+  displayName: "Competitive Landscape Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Conducts structured competitive analysis for engineering-relevant product
+    areas — cataloging competitor feature sets, comparing API surface and
+    developer experience, benchmarking performance and pricing models,
+    identifying technical differentiation opportunities, and distributing
+    findings to product and engineering leadership. Excludes marketing
+    positioning.
+edges:
+  involves_role:
+    - target: role:product-owner
+    - target: role:tech-lead
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:reference-docs
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:devrel-team

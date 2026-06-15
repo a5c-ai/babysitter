@@ -2,6 +2,11 @@
 name: unreal-chaos
 description: Unreal Engine Chaos physics skill for destruction, vehicle simulation, and cloth physics.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:physics-simulation, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unreal Chaos Skill

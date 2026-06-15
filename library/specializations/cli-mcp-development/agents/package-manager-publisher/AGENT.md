@@ -8,6 +8,14 @@ expertise:
   - Homebrew formulas
   - Chocolatey packages
   - Scoop manifests
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:deployment-infrastructure-management]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:developer-experience]
+
 ---
 
 # Package Manager Publisher Agent

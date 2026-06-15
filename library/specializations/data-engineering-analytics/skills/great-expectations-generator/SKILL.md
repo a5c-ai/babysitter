@@ -11,6 +11,12 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:data-quality, skill-area:data-validation-sanitization]
+  roles: [role:data-engineer, role:analytics-engineer]
+  workflows: [workflow:data-quality-monitoring]
 ---
 
 # Great Expectations Generator

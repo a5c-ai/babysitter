@@ -1,0 +1,21 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-adapters-webui
+attributes:
+  packageId: "@a5c-ai/genty-web-app"
+  packageName: "@a5c-ai/genty-web-app"
+  displayName: "Genty Web App"
+  description: "Vite-based web application providing a browser-based console for adapters. Surfaces agent sessions, dispatch management, and real-time monitoring in the browser."
+  role: "web-console"
+  whenToUse: "Deploy this when you need a browser-accessible management console for adapters sessions and dispatches."
+  workspacePath: packages/adapters/webui
+  moduleType: nextjs
+  surfaceKinds:
+    - webui
+    - browser-app
+  sourceOfTruthRole: application
+  publishedTo: npm
+  versionPolicy: semver
+  # Source: packages/adapters/webui/package.json (name, version 0.4.9)
+edges:
+  references_path:
+    - target: path:adapters-webui

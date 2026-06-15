@@ -2,6 +2,12 @@
 name: electron-architect
 description: Expert agent in Electron application architecture, IPC patterns, security best practices, performance optimization, and cross-platform desktop development
 expertise: [electron, nodejs, chromium, ipc, security, performance, cross-platform]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:desktop-system-integration]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # electron-architect

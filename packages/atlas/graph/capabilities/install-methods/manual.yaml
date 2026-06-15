@@ -1,0 +1,8 @@
+nodeKind: InstallMethod
+id: install:manual
+attributes:
+  displayName: "Manual install"
+  kind: manual
+  platforms: [darwin, linux, win32]
+  command: "{{instructionsUrl}}"
+edges: {}

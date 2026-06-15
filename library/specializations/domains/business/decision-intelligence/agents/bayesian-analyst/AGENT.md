@@ -11,6 +11,10 @@ expertise:
   - Decision tree integration
   - Value of information calculation
   - Belief revision guidance
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:statistical-analysis, skill-area:quantitative-modeling, skill-area:data-analysis]
+  roles: [role:data-scientist, role:research-scientist, role:data-analyst]
 ---
 
 # Bayesian Analyst

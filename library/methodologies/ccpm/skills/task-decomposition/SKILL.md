@@ -1,3 +1,12 @@
+---
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
+---
+
 # Task Decomposition
 
 Break epics into parallelizable tasks with acceptance criteria, effort estimates, and dependency graphs.

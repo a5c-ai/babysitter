@@ -1,0 +1,70 @@
+---
+nodeKind: Workflow
+id: workflow:construction-bim-coordination
+attributes:
+  displayName: "Construction BIM Coordination"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Coordinates Building Information Modeling across disciplines -- merging
+    architectural, structural, and MEP models into a federated BIM, running
+    automated clash detection to identify spatial conflicts between trades,
+    assigning clash resolutions to responsible subcontractors, tracking RFI
+    generation from unresolved clashes, and validating LOD (Level of
+    Development) compliance at each project milestone. Produces federated
+    model snapshots, clash reports with resolution status, and IFC export
+    packages for general contractor review. Excludes initial design
+    authoring.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:platform-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:construction
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:facilities-team
+---
+nodeKind: Workflow
+id: workflow:building-permit-compliance-review
+attributes:
+  displayName: "Building Permit Compliance Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Reviews building permit submissions and regulatory compliance --
+    validating construction documents against local building codes and
+    zoning ordinances, verifying structural calculations meet seismic and
+    wind load requirements, cross-checking fire safety plans with NFPA
+    standards, ensuring ADA accessibility compliance, and tracking permit
+    approval status across multiple jurisdictions. Produces compliance
+    checklists, code deviation logs, and permit submission packages.
+    Excludes design modification work.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:construction
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:compliance-team
+    - target: org-unit:facilities-team

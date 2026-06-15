@@ -1,0 +1,210 @@
+nodeKind: Role
+id: role:product-manager
+attributes:
+  displayName: "Product Manager"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Owns the product vision, strategy, and roadmap for a domain or product area,
+    translating market insights and customer feedback into prioritized engineering
+    work. Acts as the connective tissue between engineering, design, sales, and
+    executive stakeholders, ensuring the team builds the right things at the right
+    time. Defines success metrics, tracks outcomes post-launch, and iterates based
+    on data and qualitative research.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:sprint-planning
+    - responsibility:stakeholder-communication
+    - responsibility:backlog-grooming
+    - responsibility:metric-definition
+    - responsibility:user-research
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:ux-ui-design
+      level: novice
+---
+nodeKind: Role
+id: role:product-designer
+attributes:
+  displayName: "Product Designer"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Creates end-to-end design solutions from initial concept through high-fidelity
+    prototypes, ensuring that user needs are central to every decision. Collaborates
+    with UX researchers to ground designs in evidence and with engineers to ensure
+    feasibility and faithful implementation. Owns the visual language, interaction
+    patterns, and design system components within their product area.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:user-research
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: specialization:ux-ui-design
+      level: expert
+    - target: domain:web-development
+      level: novice
+---
+nodeKind: Role
+id: role:ux-researcher
+attributes:
+  displayName: "UX Researcher"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Plans and conducts qualitative and quantitative research studies — including
+    interviews, usability tests, surveys, and diary studies — to build deep
+    understanding of user needs, behaviors, and mental models. Synthesizes raw
+    observations into actionable insights and communicates findings to product
+    and design teams through artifacts such as personas, journey maps, and
+    research reports.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:user-research
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+  requires_skill:
+    - target: specialization:ux-ui-design
+      level: expert
+    - target: domain:data-science
+      level: novice
+---
+nodeKind: Role
+id: role:design-lead
+attributes:
+  displayName: "Design Lead"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Sets the design vision and standards for a product area or organization, mentoring
+    designers and ensuring consistency across teams through a shared design system.
+    Balances hands-on design work with leadership responsibilities including hiring,
+    critique facilitation, and stakeholder alignment. Partners with product and
+    engineering leadership to advocate for design's strategic role.
+  seniority: senior
+  requiredDomains:
+    - domain:web-development
+edges:
+  holds_responsibility:
+    - responsibility:mentoring
+    - responsibility:hiring
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+  requires_skill:
+    - target: specialization:ux-ui-design
+      level: authoritative
+    - target: specialization:web-development
+      level: novice
+  delegates_to:
+    - role:product-designer
+    - role:ux-researcher
+---
+nodeKind: Role
+id: role:technical-writer
+attributes:
+  displayName: "Technical Writer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Produces clear, accurate, and user-centered documentation for developer APIs,
+    SDKs, product features, and internal processes. Works closely with engineers
+    and product managers to understand technical details and translate them into
+    content that serves diverse audiences from end users to expert developers.
+    Maintains documentation infrastructure, enforces style guides, and advocates
+    for docs-as-code practices.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: specialization:technical-documentation
+      level: expert
+    - target: domain:software-engineering
+      level: novice
+---
+nodeKind: Role
+id: role:product-analyst
+attributes:
+  displayName: "Product Analyst"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Monitors and analyzes product usage data to surface insights that drive feature
+    decisions and roadmap prioritization. Builds dashboards, funnels, and cohort
+    analyses using BI tooling and SQL, and partners with product managers to define
+    and track KPIs. Bridges the gap between raw telemetry and actionable product
+    intelligence for leadership and cross-functional stakeholders.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:data-quality
+    - responsibility:stakeholder-communication
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:data-science
+      level: intermediate
+    - target: domain:databases
+      level: intermediate
+    - target: specialization:data-engineering-analytics
+      level: intermediate
+---
+nodeKind: Role
+id: role:growth-pm
+attributes:
+  displayName: "Growth Product Manager"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Owns the product strategy for acquisition, activation, retention, and monetization
+    levers, running rapid experimentation cycles to compound growth. Defines and
+    tracks north-star and guardrail metrics, designs A/B tests, and works with
+    engineering and data teams to build the experimentation infrastructure. Balances
+    short-term conversion wins with long-term user experience and brand health.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+    - responsibility:backlog-grooming
+    - responsibility:sprint-planning
+    - responsibility:user-research
+  requires_skill:
+    - target: domain:data-science
+      level: intermediate
+    - target: specialization:web-development
+      level: novice
+---
+nodeKind: Role
+id: role:product-ops
+attributes:
+  displayName: "Product Operations Manager"
+  isAgentic: false
+  automatability: 0.4
+  description: |
+    Optimizes the systems and processes through which product teams operate, from
+    roadmap planning rituals to tooling selection and cross-functional communication
+    cadences. Acts as the operational backbone of the product organization, enabling
+    product managers to focus on strategy and discovery. Owns the health of shared
+    processes like OKR tracking, release communication, and stakeholder reporting.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:sprint-planning
+    - responsibility:release-coordination
+    - responsibility:knowledge-sharing
+    - responsibility:metric-definition
+  requires_skill:
+    - target: domain:software-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: intermediate

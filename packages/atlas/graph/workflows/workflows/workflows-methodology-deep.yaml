@@ -1,0 +1,63 @@
+---
+nodeKind: Workflow
+id: workflow:bdd-specification-workshop
+attributes:
+  displayName: "BDD Specification Workshop"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-feature"
+  complexity: single-team
+  description: |
+    Facilitates behavior-driven development specification workshops — bringing
+    together product, development, and QA to collaboratively author Gherkin
+    scenarios, resolve ambiguities in acceptance criteria, identify edge cases
+    through example mapping, and produce an executable specification set before
+    implementation begins. Excludes test automation implementation.
+edges:
+  involves_role:
+    - target: role:qa-lead
+    - target: role:product-owner
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:e2e-testing
+    - target: skill-area:contract-testing
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:code-review-coverage
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:hypothesis-driven-experiment
+attributes:
+  displayName: "Hypothesis-Driven Experiment"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Structures engineering experiments around explicit hypotheses — defining
+    measurable success criteria, scoping minimum viable experiments, time-boxing
+    implementation, collecting quantitative and qualitative signals, analyzing
+    results against the hypothesis, and producing a go/no-go recommendation
+    for full investment. Excludes full feature implementation.
+edges:
+  involves_role:
+    - target: role:tech-lead
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:eval-driven-development
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:write-rfc-documents
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team

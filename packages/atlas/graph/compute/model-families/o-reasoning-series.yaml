@@ -1,0 +1,12 @@
+nodeKind: ModelFamily
+id: model-family:o-reasoning-series
+attributes:
+  displayName: "OpenAI o-series (reasoning)"
+  vendor: "OpenAI"
+  homepageUrl: "https://platform.openai.com/docs/models"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:o1@current
+    - model:o3@current

@@ -4,6 +4,13 @@
  * @inputs { projectName: string, framework?: string }
  * @outputs { success: boolean, lintConfig: object, rules: array, artifacts: array }
  * @references - ESLint: https://eslint.org/docs/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:code-review]
+ *   roles: [role:tech-lead, role:frontend-engineer]
+ *   skillAreas: [skill-area:code-analysis-linting]
+ *   topics: [topic:developer-experience, topic:code-review-best-practices]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,193 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:ask-user-question
+attributes:
+  displayName: "AskUserQuestion"
+  description: |
+    Tool the agent emits to ask the user a question with multiple-choice
+    options. Used by claude-code (`AskUserQuestion`) and re-exposed by
+    other agents over MCP.
+  kind: prompt-ui
+  surface: prompt-ui
+  category: interaction-primitive-category:human-in-loop
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:todo-write
+attributes:
+  displayName: "TodoWrite"
+  description: |
+    Tool the agent emits to create or update a structured todo list that
+    the UI surfaces to the user (e.g. claude-code's TodoWrite tool).
+  kind: prompt-ui
+  surface: editor-ui
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-mode
+attributes:
+  displayName: "/mode"
+  description: "Switch the active operating mode (plan / normal / yolo / etc.)."
+  kind: slash-command
+  surface: slash-command
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:command-palette
+attributes:
+  displayName: "Command Palette"
+  description: |
+    Ctrl+P / Cmd+P style command palette giving keyboard-first access to
+    discoverable commands across the TUI/IDE surface.
+  kind: keybinding
+  surface: keybinding
+  category: interaction-primitive-category:navigation
+  keyboardShortcut: "Cmd+P / Ctrl+P"
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:model-picker
+attributes:
+  displayName: "Model Picker"
+  description: |
+    UI control or keybinding for switching the active model (distinct
+    from the `/model` slash command — this is the chooser widget itself).
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:configuration
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:prompt-input
+attributes:
+  displayName: "Prompt Input"
+  description: |
+    The primary text input field/area where the user types prompts and
+    submits them to the agent.
+  kind: prompt-ui
+  surface: prompt-ui
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:approval-prompt
+attributes:
+  displayName: "Approval Prompt"
+  description: |
+    Generic UI prompt asking the user to approve a tool execution, file
+    change, or other agent action. Distinct from the more specific
+    tool-approval-prompt; covers any approval interaction surface.
+  kind: prompt-ui
+  surface: prompt-ui
+  category: interaction-primitive-category:approval
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:plan-review
+attributes:
+  displayName: "Plan Review"
+  description: |
+    Show-the-plan-and-approve interaction (e.g. claude-code's plan mode
+    surfaces a structured plan for the user to review/edit/accept before
+    execution).
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:approval
+  availableInModes: [plan]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:file-attachment
+attributes:
+  displayName: "File Attachment"
+  description: |
+    Drag-drop / paste / picker action that attaches an image or file
+    to the conversation as additional context for the agent.
+  kind: multimodal-input
+  surface: multimodal-input
+  category: interaction-primitive-category:content-input
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:resume-session
+attributes:
+  displayName: "Resume Session"
+  description: |
+    Pick up a paused or previously-ended session, restoring its context
+    and history.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:fork-session
+attributes:
+  displayName: "Fork Session"
+  description: |
+    Branch the current session into a new one, sharing history up to the
+    fork point and diverging afterwards.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:lifecycle
+  availableInModes: [chat, plan, composer]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:transcript-export
+attributes:
+  displayName: "Transcript Export"
+  description: |
+    Save the conversation/run transcript as a file (markdown, JSON,
+    HTML) for sharing or archival.
+  kind: editor-ui
+  surface: editor-ui
+  category: interaction-primitive-category:telemetry
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

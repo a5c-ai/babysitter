@@ -1,0 +1,26 @@
+nodeKind: FilesystemSafetyInvariant
+id: fs-safety-invariant:no-writes-outside-workspace
+attributes:
+  displayName: "Agent writes confined to workspace"
+  rule: "Agent subprocess must never write outside resolved workspace cwd."
+  scope: agent-session
+  enforcement: sandbox-policy
+  rationale: "Symphony invariant: orchestrator host filesystem is off-limits."
+---
+nodeKind: FilesystemSafetyInvariant
+id: fs-safety-invariant:terminal-cleanup
+attributes:
+  displayName: "Terminal-state workspaces are cleaned"
+  rule: "When tracker reports terminal state, workspace MUST be removed before next reconciliation completes."
+  scope: workspace
+  enforcement: reconciler
+  rationale: "Prevents stale per-issue worktrees from accumulating."
+---
+nodeKind: FilesystemSafetyInvariant
+id: fs-safety-invariant:no-overlapping-worktrees
+attributes:
+  displayName: "No overlapping per-issue worktrees"
+  rule: "At most one active workspace per (repo, issueIdentifier)."
+  scope: workspace
+  enforcement: dispatch-preflight
+  rationale: "Avoids two RunAttempts racing the same on-disk tree."

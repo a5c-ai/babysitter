@@ -4,6 +4,11 @@ description: Senior DeFi protocol architect with deep understanding of financial
 role: Principal DeFi Architect
 experience: 7+ years financial engineering, 5+ years DeFi
 background: Uniswap, Aave, MakerDAO protocol design methodology
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-development-testing, skill-area:on-chain-data-oracle-integration, skill-area:transaction-fee-optimization, skill-area:dao-governance-implementation]
+  roles: [role:architect, role:backend-engineer]
 ---
 
 # DeFi Protocol Architect Agent

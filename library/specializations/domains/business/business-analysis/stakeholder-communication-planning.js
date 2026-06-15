@@ -3,6 +3,12 @@
  * @description Develop comprehensive communication plans addressing stakeholder information needs, preferred channels, frequency, and messaging. Support change initiatives and project governance.
  * @inputs { projectName: string, stakeholders: array, communicationContext: object, changeInitiatives: array }
  * @outputs { success: boolean, communicationPlan: object, messageTemplates: array, channelMatrix: object, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,43 @@
+# NodeKinds for cluster 14-deferred.
+nodeKinds:
+- id: node:deferred-node
+  name: DeferredNode
+  origin: universal
+  prefix: deferred
+  cluster: 14-deferred
+  purpose: placeholder for a graph element not yet fully defined — to be resolved later
+  attributes:
+  - name: id
+    type: id
+    required: true
+  - name: displayName
+    type: string
+    required: true
+  - name: description
+    type: markdown
+    required: false
+  - name: targetNodeKind
+    type: string
+    required: true
+    notes: what kind of node this will become when resolved (e.g., Topic, SkillArea, LibraryProcess)
+  - name: reason
+    type: string
+    required: false
+  - name: priority
+    type: enum<low,medium,high,critical>
+    required: false
+  - name: suggestedBy
+    type: string
+    required: false
+  - name: createdAt
+    type: iso-date
+    required: false
+  - name: resolvedTo
+    type: id
+    required: false
+    notes: when resolved, the ID of the replacement node
+  incomingEdges: []
+  outgoingEdges:
+  - deferred_for
+  invariants: []
+  examples: []

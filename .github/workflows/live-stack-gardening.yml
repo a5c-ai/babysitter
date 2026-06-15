@@ -1,0 +1,82 @@
+# Live Stack Gardening — iterate on the test matrix until convergence
+#
+# Usage:
+#   - Dispatch manually to run a gardening iteration
+#   - The agent collects failures, investigates, fixes code, dispatches tests,
+#     and updates the wiki + issues
+#
+# This is the automated version of the manual fix→dispatch→collect→update loop.
+
+name: Live Stack Gardening
+
+on:
+  workflow_dispatch:
+    inputs:
+      instructions:
+        description: 'Additional instructions for the gardening agent (optional)'
+        required: false
+        type: string
+        default: ''
+      max_iterations:
+        description: 'Maximum gardening iterations (default: 3)'
+        required: false
+        type: string
+        default: '3'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+jobs:
+  garden:
+    runs-on: ubuntu-latest-l
+    timeout-minutes: 120
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - name: Clone wiki
+        run: |
+          git clone https://github.com/a5c-ai/babysitter.wiki.git /tmp/babysitter-wiki
+          echo "Wiki cloned to /tmp/babysitter-wiki"
+
+      - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
+        with:
+          harness: codex
+          provider: foundry
+          model: gpt-5.5
+          interaction-mode: bridged-hooks
+          babysitter-plugin: 'true'
+          max-turns: '9999'
+          process-file: .a5c/processes/live-stack-gardening.mjs
+          babysitter-prompt-prefix: '$babysitter:yolo '
+          prompt: |
+            Execute the live-stack gardening process at .a5c/processes/live-stack-gardening.mjs.
+
+            Inputs: { "repo": "a5c-ai/babysitter", "wikiPath": "/tmp/babysitter-wiki" }
+
+            Run up to ${{ inputs.max_iterations || '3' }} iterations of the gardening loop:
+            collect → investigate → fix → dispatch → collect results → update wiki → update issues.
+
+            Focus on maximizing PASS cells. Prioritize fixes by impact (cells flipped per fix).
+            Dispatch tests in PARALLEL — don't wait sequentially.
+
+            ${{ inputs.instructions || '' }}
+          trigger-query: ''
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+          GH_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}

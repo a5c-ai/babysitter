@@ -18,6 +18,11 @@ metadata:
     - fatigue
     - damage-tolerance
     - certification
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Fatigue and Damage Tolerance Skill

@@ -1,0 +1,12 @@
+nodeKind: SourceRef
+id: source-ref:adapters-remote
+attributes:
+  description: "adapters-remote adapter"
+  displayName: "adapters-remote adapter"
+  repoUrl: https://github.com/a5c-ai/babysitter
+  ref: main
+  path: packages/adapters/adapters/src/adapters-remote-adapter.ts
+  packageManager: npm
+  packageName: "@a5c-ai/adapters"
+  kind: file-in-package
+edges: {}

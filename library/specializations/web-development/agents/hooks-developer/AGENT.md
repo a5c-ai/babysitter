@@ -9,6 +9,13 @@ expertise:
   - Hook testing
   - Performance optimization
   - TypeScript generics
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer]
+  skillAreas: [skill-area:react-state-management, skill-area:react-components]
+  topics: [topic:custom-hooks, topic:composition-pattern]
+
 ---
 
 # Hooks Developer Agent

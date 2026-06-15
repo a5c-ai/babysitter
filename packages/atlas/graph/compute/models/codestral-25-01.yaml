@@ -1,0 +1,62 @@
+nodeKind: ModelVersion
+id: model:codestral-25-01@current
+attributes:
+  displayName: "Codestral 25.01"
+  costPerMTokInput: 0.3
+  costPerMTokOutput: 0.9
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:mistral
+  versionRange: '>=25.01.0 <26.0.0'
+  kind: code-completion
+  contextWindowTokens: 256000
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-01-13'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-01-13'
+  modelCardUrl: https://mistral.ai/news/codestral-2501/
+  supportsFineTuning: false
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:mistral
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:mistral
+  served_by:
+  - provider:mistral
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=25.1.0 <26.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-codestral-25-01
+  - target: capability:supports-text-streaming
+    versionRange: '>=25.1.0 <26.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-codestral-25-01
+  - target: capability:can-multi-turn
+    versionRange: '>=25.1.0 <26.0.0'
+    level: partial
+    notes: 'Optimized for fill-in-the-middle / code-completion; multi-turn chat works
+      but is not the primary use-case.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-codestral-25-01
+  - target: capability:requires-tool-approval
+    versionRange: '>=25.1.0 <26.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-codestral-25-01

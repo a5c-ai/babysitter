@@ -1,0 +1,357 @@
+---
+nodeKind: Tool
+id: tool:smithery
+attributes:
+  displayName: "Smithery"
+  homepageUrl: "https://smithery.ai"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    MCP server registry and marketplace for discovering installable agent tools.
+    Added from Ora discovery results for MCP-server and agent-tool lookup intents.
+  ora:
+    domain: smithery.ai
+    score: 0
+    grade: F
+    category: "Agent Tools"
+    tags: [mcp registry, mcp server, model context protocol, agent tools directory, mcp marketplace]
+    scoreUrl: https://ora.run/score/smithery.ai
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  used_for:
+    - target: skill-area:tool-use
+---
+nodeKind: Tool
+id: tool:tinybird
+attributes:
+  displayName: "Tinybird"
+  homepageUrl: "https://www.tinybird.co"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Real-time analytics and data API platform surfaced by Ora for analytics and data-product intents.
+  ora:
+    domain: tinybird.co
+    score: 75
+    grade: B
+    category: "Data & Analytics"
+    tags: [real-time analytics, data api, clickhouse, analytics api]
+    scoreUrl: https://ora.run/score/tinybird.co
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:data-analysis
+---
+nodeKind: Tool
+id: tool:power-bi
+attributes:
+  displayName: "Power BI"
+  homepageUrl: "https://powerbi.microsoft.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Microsoft business-intelligence and dashboarding platform surfaced by Ora for analytics and observability-style dashboard intents.
+  ora:
+    domain: powerbi.microsoft.com
+    score: 0
+    grade: F
+    category: "Data & Analytics"
+    tags: [business intelligence, bi, data visualization, dashboards, power bi]
+    scoreUrl: https://ora.run/score/powerbi.microsoft.com
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:data-analysis
+---
+nodeKind: Tool
+id: tool:digitalocean
+attributes:
+  displayName: "DigitalOcean"
+  homepageUrl: "https://www.digitalocean.com"
+  kind: orchestrator
+  languageApplicability: neutral
+  description: |
+    Developer cloud platform surfaced by Ora for infrastructure, Kubernetes, and operations intents.
+  ora:
+    domain: digitalocean.com
+    score: 68
+    grade: C
+    category: "Infrastructure & DevOps"
+    tags: [cloud, vps, hosting, kubernetes, droplets, servers]
+    scoreUrl: https://ora.run/score/digitalocean.com
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Cloud resource access supports platform provisioning and operations."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:cloud-infrastructure
+---
+nodeKind: Tool
+id: tool:nebius
+attributes:
+  displayName: "Nebius"
+  homepageUrl: "https://nebius.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    AI infrastructure and GPU cloud platform surfaced by Ora for cloud infrastructure intents.
+  ora:
+    domain: nebius.com
+    score: 62
+    grade: C
+    category: "Infrastructure & DevOps"
+    tags: [cloud, ai infrastructure, gpu, compute]
+    scoreUrl: https://ora.run/score/nebius.com
+edges:
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "AI infrastructure resources support model development and serving workflows."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:cloud-infrastructure
+---
+nodeKind: Tool
+id: tool:coreweave
+attributes:
+  displayName: "CoreWeave"
+  homepageUrl: "https://www.coreweave.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    GPU cloud and AI infrastructure platform surfaced by Ora for cloud infrastructure and ML operations intents.
+  ora:
+    domain: coreweave.com
+    score: 72
+    grade: B
+    category: "Infrastructure & DevOps"
+    tags: [gpu cloud, ai infrastructure, compute, gpu]
+    scoreUrl: https://ora.run/score/coreweave.com
+edges:
+  supports_work:
+    - target: role:ml-engineer
+      confidence: medium
+      evidence: "GPU compute resources support model training and inference workflows."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:cloud-infrastructure
+---
+nodeKind: Tool
+id: tool:wiz
+attributes:
+  displayName: "Wiz"
+  homepageUrl: "https://www.wiz.io"
+  kind: security
+  languageApplicability: neutral
+  description: |
+    Cloud security posture and CNAPP platform surfaced by Ora for Kubernetes and cloud-security operations intents.
+  ora:
+    domain: wiz.io
+    score: 0
+    grade: F
+    category: "Infrastructure & DevOps"
+    tags: [cloud security, cnapp, cloud posture, container security, kubernetes security]
+    scoreUrl: https://ora.run/score/wiz.io
+edges:
+  supports_work:
+    - target: role:security-reviewer
+      confidence: medium
+      evidence: "Cloud posture and container-security data supports security review."
+    - target: responsibility:dependency-audit
+      confidence: medium
+      evidence: "Runtime/cloud dependency exposure can inform dependency and supply-chain audit."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:container-security
+---
+nodeKind: Tool
+id: tool:deepl
+attributes:
+  displayName: "DeepL"
+  homepageUrl: "https://www.deepl.com"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Translation and localization platform surfaced by Ora for documentation and multilingual-product intents.
+  ora:
+    domain: deepl.com
+    score: 78
+    grade: B
+    category: "Productivity"
+    tags: [translation, language translation, localization, multilingual]
+    scoreUrl: https://ora.run/score/deepl.com
+edges:
+  supports_work:
+    - target: responsibility:write-user-docs
+      confidence: medium
+      evidence: "Translation/localization support helps produce multilingual documentation."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:technical-documentation
+---
+nodeKind: Tool
+id: tool:adobe-creative-cloud
+attributes:
+  displayName: "Adobe Creative Cloud"
+  homepageUrl: "https://www.adobe.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Creative tooling suite surfaced by Ora for design-system and product-design intents.
+  ora:
+    domain: adobe.com
+    score: 0
+    grade: F
+    category: "Productivity"
+    tags: [creative tools, design, pdf, photoshop, illustrator, creative cloud, firefly, ai design]
+    scoreUrl: https://ora.run/score/adobe.com
+edges:
+  supports_work:
+    - target: role:product-designer
+      confidence: medium
+      evidence: "Creative asset tooling supports visual design and brand-system work."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:interaction-design
+---
+nodeKind: Tool
+id: tool:hashicorp
+attributes:
+  displayName: "HashiCorp"
+  homepageUrl: "https://www.hashicorp.com"
+  kind: iac
+  languageApplicability: neutral
+  description: |
+    Infrastructure automation vendor suite surfaced by Ora for Terraform, Vault, and cloud-operations intents.
+  ora:
+    domain: hashicorp.com
+    score: 0
+    grade: F
+    category: "Infrastructure & DevOps"
+    tags: [infrastructure as code, terraform, vault, secrets management, consul]
+    scoreUrl: https://ora.run/score/hashicorp.com
+edges:
+  supports_work:
+    - target: role:cloud-architect
+      confidence: medium
+      evidence: "Terraform, Vault, and related infrastructure tooling support cloud architecture workflows."
+    - target: responsibility:architecture-governance
+      confidence: medium
+      evidence: "Infrastructure policy and IaC products are governance projection points."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:terraform-infrastructure
+---
+nodeKind: Tool
+id: tool:gitbook
+attributes:
+  displayName: "GitBook"
+  homepageUrl: "https://www.gitbook.com"
+  kind: knowledge-platform
+  languageApplicability: neutral
+  description: |
+    Documentation and developer-docs platform surfaced by Ora for technical-writing and docs workflow intents.
+  ora:
+    domain: gitbook.com
+    score: 65
+    grade: C
+    category: "Developer Tools"
+    tags: [documentation, docs, knowledge base, api docs, developer docs, wiki]
+    scoreUrl: https://ora.run/score/gitbook.com
+edges:
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "GitBook is an Ora-discovered documentation platform for user and developer docs."
+    - target: workflow:documentation-sprint
+      confidence: medium
+      evidence: "Space and page organization maps to sprintable docs work."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:technical-documentation
+---
+nodeKind: Tool
+id: tool:hex
+attributes:
+  displayName: "Hex"
+  homepageUrl: "https://hex.tech"
+  kind: sql-tool
+  languageApplicability: neutral
+  description: |
+    Collaborative data notebook and data app platform surfaced by Ora for analytics and data-science intents.
+  ora:
+    domain: hex.tech
+    score: 0
+    grade: F
+    category: "Data & Analytics"
+    tags: [data notebooks, sql notebooks, data analysis, collaboration, data apps, python notebooks]
+    scoreUrl: https://ora.run/score/hex.tech
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:data-analysis
+---
+nodeKind: Tool
+id: tool:snowflake
+attributes:
+  displayName: "Snowflake"
+  homepageUrl: "https://www.snowflake.com"
+  kind: sql-tool
+  languageApplicability: neutral
+  description: |
+    Cloud data warehouse platform surfaced by Ora for analytics, warehouse, and data-pipeline intents.
+  ora:
+    domain: snowflake.com
+    score: 0
+    grade: F
+    category: "Data & Analytics"
+    tags: [data warehouse, cloud data, data lake, analytics, data sharing]
+    scoreUrl: https://ora.run/score/snowflake.com
+edges:
+  supports_work:
+    - target: role:data-engineer
+      confidence: high
+      evidence: "Ora surfaced Snowflake for warehouse and data orchestration workflows."
+    - target: workflow:data-pipeline-monitoring
+      confidence: high
+      evidence: "Warehouse freshness and query metadata support data pipeline monitoring."
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:data-analysis
+---
+nodeKind: Tool
+id: tool:e2b
+attributes:
+  displayName: "E2B"
+  homepageUrl: "https://e2b.dev"
+  kind: ai-dev-tool
+  languageApplicability: neutral
+  description: |
+    Agent sandbox and code-execution platform surfaced by Ora for code interpreter and agent sandbox intents.
+  ora:
+    domain: e2b.dev
+    score: 69
+    grade: C
+    category: "Agent Tools"
+    tags: [code execution, sandbox, code interpreter, agent sandbox]
+    scoreUrl: https://ora.run/score/e2b.dev
+edges:
+  sourced_from:
+    - source-ref:ora-discover-api
+  tool_used_by:
+    - target: skill-area:agentic-loops

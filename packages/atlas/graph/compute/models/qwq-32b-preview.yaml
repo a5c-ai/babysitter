@@ -1,0 +1,87 @@
+nodeKind: ModelVersion
+id: model:qwq-32b-preview@current
+attributes:
+  displayName: "QwQ 32B Preview"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:qwen-2-5
+  versionRange: '>=0.1.0 <1.0.0'
+  kind: reasoning
+  contextWindowTokens: 32768
+  modalities:
+  - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-11-28'
+  lifecycleStatus: preview
+  lifecycleStatusChangedAt: '2024-11-28'
+  modelCardUrl: https://huggingface.co/Qwen/QwQ-32B-Preview
+  supportsFineTuning: true
+  fineTuningKind: full
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-2-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:qwen-2-5
+  served_by:
+  - provider:together-ai
+  - provider:fireworks-ai
+  - provider:hyperbolic
+  speaks:
+  - model-transport:openai-compat
+  supports:
+  - target: capability:streaming
+    versionRange: '>=0.1.0 <1.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview
+  - target: capability:supports-text-streaming
+    versionRange: '>=0.1.0 <1.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview
+  - target: capability:can-multi-turn
+    versionRange: '>=0.1.0 <1.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview
+  - target: capability:supports-thinking
+    versionRange: '>=0.1.0 <1.0.0'
+    level: full
+    notes: 'Reasoning model emits a chain-of-thought / `<think>` block before the
+      final answer.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview
+  - target: capability:extended-thinking
+    versionRange: '>=0.1.0 <1.0.0'
+    level: full
+    notes: 'Long-form deliberation is the model''s primary mode of operation.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview
+  - target: capability:supports-thinking-streaming
+    versionRange: '>=0.1.0 <1.0.0'
+    level: partial
+    notes: 'Reasoning tokens stream as part of the text stream; structured separation
+      depends on the inference server.
+
+      '
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview
+  - target: capability:requires-tool-approval
+    versionRange: '>=0.1.0 <1.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:hf-model-card-qwq-32b-preview

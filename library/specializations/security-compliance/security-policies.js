@@ -34,6 +34,9 @@
  * - ISO 27002:2022 Code of Practice: https://www.iso.org/standard/75652.html
  * - NIST SP 800-12 Security Handbook: https://csrc.nist.gov/publications/detail/sp/800-12/rev-1/final
  * - Policy Framework Best Practices: https://www.isaca.org/resources/isaca-journal/issues/2019/volume-1/developing-an-information-security-policy-framework
+ * @graph
+ *   domains: [domain:security, role:security-engineer]
+ *   workflows: [workflow:vulnerability-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

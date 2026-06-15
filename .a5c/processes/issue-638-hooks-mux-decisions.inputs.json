@@ -1,0 +1,63 @@
+{
+  "issueNumber": 638,
+  "baseBranch": "staging",
+  "targetBranch": "issue/638-hooks-mux-decisions",
+  "dependentIssues": [636, 637],
+  "maxFixAttempts": 3,
+  "userRequest": "Create an implementation plan for issue #638: hooks-mux: add defer/block/retry decisions + updatedInput mutation. This depends on foundational work being implemented in parallel.",
+  "scope": {
+    "include": [
+      "Add defer, block, and retry as first-class hooks-mux decisions with explicit merge precedence and diagnostics.",
+      "Map Claude updatedInput at the adapter boundary to one canonical internal mutation model, preferably existing toolMutation unless runtime tracing proves otherwise.",
+      "Render Claude defer/block/retry outputs only for supported event contracts and explicitly test degraded behavior where unsupported.",
+      "Wire agent-platform consumers for block, bounded retry, continue:false session abort, sessionTitle propagation, and updatedInput/toolMutation application.",
+      "Handle watchPaths only if runtime daemon watcher APIs can safely register dynamic paths; otherwise document and test the explicit deferral.",
+      "Update stale hook gap documentation after implementation."
+    ],
+    "exclude": [
+      "Do not implement missing hook events from #636 except where already landed interfaces must be consumed.",
+      "Do not implement new handler types from #637 except where already landed interfaces must be consumed.",
+      "Do not reimplement output fields that are already supported unless end-to-end propagation tests expose a real gap."
+    ]
+  },
+  "targetFiles": [
+    "docs/agent-stack/hooks/missing-capabilities.md",
+    "packages/hooks-mux/core/src/types/result.ts",
+    "packages/hooks-mux/core/src/merge-engine/merge.ts",
+    "packages/hooks-mux/core/src/merge-engine/__tests__/merge-engine.test.ts",
+    "packages/hooks-mux/core/src/normalizer",
+    "packages/hooks-mux/core/src/propagation/adapt-output.ts",
+    "packages/hooks-mux/adapter-claude/src/normalizer.ts",
+    "packages/hooks-mux/adapter-claude/src/renderer.ts",
+    "packages/hooks-mux/adapter-claude/src/__tests__/claude-adapter.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effectsHelpers.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts",
+    "packages/genty/platform/src/governance",
+    "packages/genty/platform/src/session",
+    "packages/genty/platform/src/daemon/fileWatcher.ts",
+    "packages/genty/platform/src/daemon/__tests__/fileWatcher.test.ts",
+    "packages/agent-runtime/src/daemon"
+  ],
+  "verificationCommands": [
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm test -- --run packages/hooks-mux/core/src/merge-engine/__tests__/merge-engine.test.ts packages/hooks-mux/adapter-claude/src/__tests__/claude-adapter.test.ts",
+    "npm test -- --run packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/genty/platform/src/governance/__tests__/permissionEvents.test.ts packages/genty/platform/src/daemon/__tests__/fileWatcher.test.ts"
+  ],
+  "qualityGates": [
+    "Runtime trace lists live call paths from hook handler result through merge, adapter rendering, and agent-platform consumers before implementation.",
+    "Failing tests are authored before implementation and cover every accepted #638 criterion.",
+    "No duplicate canonical mutation model is introduced without explicit justification; updatedInput and toolMutation compatibility is tested.",
+    "Decision precedence is deterministic and backward compatible for existing allow, deny, ask, continue, and noop behavior.",
+    "Retry behavior is bounded, auditable, and cannot silently re-execute unsafe effects forever.",
+    "watchPaths is either implemented end to end with daemon tests or explicitly documented as deferred with tests preventing false support.",
+    "Documentation reflects corrected current support and remaining gaps."
+  ],
+  "parallelDependencyPolicy": {
+    "relatedIssues": [636, 637],
+    "defaultAction": "Proceed only against stable landed interfaces. If #636 or #637 changes handler result or event surfaces in incompatible ways, raise a breakpoint before implementation.",
+    "compatibilityGuidance": "Prefer a small adapter seam over duplicating foundational work. Delete any temporary compatibility code if the dependency lands before final acceptance."
+  }
+}

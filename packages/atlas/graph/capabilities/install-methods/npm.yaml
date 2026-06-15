@@ -1,0 +1,9 @@
+nodeKind: InstallMethod
+id: install:npm
+attributes:
+  displayName: "npm (global)"
+  kind: npm
+  platforms: [darwin, linux, win32]
+  command: "npm install -g {{package}}"
+  prerequisiteCheck: "node --version"
+edges: {}

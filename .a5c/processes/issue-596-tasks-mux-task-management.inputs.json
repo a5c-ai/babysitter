@@ -1,0 +1,157 @@
+{
+  "issueNumber": 596,
+  "baseBranch": "staging",
+  "targetBranch": "implement/issue-596-tasks-mux-task-management",
+  "trigger": "manual dispatch",
+  "title": "tasks-mux: task management features - priorities, dependencies, search, bulk ops",
+  "labels": [
+    "enhancement",
+    "ready-for-dev",
+    "feature",
+    "priority:medium",
+    "effort:large",
+    "tasks-mux",
+    "P2",
+    "risk:high"
+  ],
+  "relatedIssues": [577, 597, 634, 630],
+  "issueSummary": "tasks-mux supports breakpoint routing but lacks broader task-management primitives: priority, dependencies, search/filtering, bulk operations, richer lifecycle states, history/timeline, comments, metrics/SLA, notifications, escalation chains, structured forms, state validation, audit log, export, and backup.",
+  "issueCommentsSummary": [
+    "#596 blocks #577 because tasks-mux wiring is less useful without these task-management primitives.",
+    "#597 should expose the features through CLI/MCP once the schema and backend contracts exist.",
+    "#596 is now a prerequisite for #634 and supports the unified routing hub direction from #630.",
+    "Prior planning PRs #655 and #729 exist; this artifact updates the open plan branch rather than duplicating implementation work."
+  ],
+  "requestedCapabilities": [
+    "priority values low, medium, high, critical",
+    "dependsOn task dependencies",
+    "search and filter API",
+    "bulk approve, close, and reassign operations",
+    "assigned, in-progress, blocked, and escalated states",
+    "status history and timeline tracking",
+    "discussion threads and comments",
+    "task metrics and SLA calculations",
+    "notification providers for email, Slack, Discord, and webhook targets",
+    "escalation chains with fallback responders on timeout",
+    "interactive structured forms",
+    "state machine validation",
+    "audit log",
+    "data export and backup"
+  ],
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/backends/git-native.ts",
+    "packages/tasks-mux/src/backends/server.ts",
+    "packages/tasks-mux/src/backends/github-issues.ts",
+    "packages/tasks-mux/src/backends/external-tracker.ts",
+    "packages/tasks-mux/src/backends/adapters.ts",
+    "packages/tasks-mux/src/backends/index.ts",
+    "packages/tasks-mux/src/cli/program.ts",
+    "packages/tasks-mux/src/cli/commands",
+    "packages/tasks-mux/src/mcp",
+    "packages/tasks-mux/src/client",
+    "packages/tasks-mux/src/router.ts",
+    "packages/tasks-mux/src/index.ts",
+    "packages/tasks-mux/README.md",
+    "packages/tasks-mux/docs",
+    "packages/tasks-mux/specs/architecture.md",
+    "packages/tasks-mux/src/__tests__"
+  ],
+  "referenceProcesses": [
+    ".a5c/processes/issue-606-tasks-mux-integration-tests.mjs",
+    ".a5c/processes/issue-631-adapters-responder-backend.mjs",
+    ".a5c/processes/issue-633-route-effect-resolution-through-tasks-mux.mjs",
+    ".a5c/processes/issue-635-sdk-task-responder-type-plan.mjs",
+    ".a5c/processes/tasks-mux-external-tracker-backend.mjs",
+    ".a5c/processes/tasks-mux-responder-type-system.mjs"
+  ],
+  "processLibraryReferences": [
+    "/home/runner/.a5c/process-library/babysitter-repo/library/cradle/feature-implementation-contribute.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/atdd-tdd/atdd-tdd.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/bdd-specification-by-example/examples/search-filtering.json",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/pilot-shell/README.md",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.md"
+  ],
+  "reuseAuditFindings": [
+    {
+      "area": "process library",
+      "finding": "The active process-library root is /home/runner/.a5c/process-library/babysitter-repo/library. No repo-local .a5c/process-library directory exists.",
+      "planImpact": "Implementation agents should use the active library references instead of assuming repo-local process-library files."
+    },
+    {
+      "area": "reuse audit config",
+      "finding": "No .a5c/reuse-audit.json exists in this checkout.",
+      "planImpact": "The process includes explicit keyword extraction and package scans in Phase 0."
+    },
+    {
+      "area": "schema",
+      "finding": "packages/tasks-mux/src/types.ts has BreakpointStatus pending/routed/claimed/answered/completed/expired/cancelled, Urgency low/medium/high, ResponderType, ExternalTrackerBackendConfig, and AgentMuxBackendConfig. It does not have priority critical, dependsOn, assigned/in-progress/blocked/escalated, history, comments, metrics, forms, audit, export, notification, or escalation chain schemas.",
+      "planImpact": "Additive schema extension must reuse existing responder/backend seams and preserve existing breakpoint JSON compatibility."
+    },
+    {
+      "area": "backend interface",
+      "finding": "packages/tasks-mux/src/backend.ts exposes submit/get/wait/listPending/answer/cancel/listResponders/claim only.",
+      "planImpact": "The first implementation slice should extend backend contracts and typed unsupported-feature behavior before CLI/MCP work."
+    },
+    {
+      "area": "git-native backend",
+      "finding": "packages/tasks-mux/src/backends/git-native.ts stores .breakpoints JSON and lists pending work by filesystem scan with malformed-file tolerance.",
+      "planImpact": "Search/filter, bulk operations, history, audit, export, and compatibility fixtures should start with git-native while retaining existing file format support."
+    },
+    {
+      "area": "related tasks-mux infrastructure",
+      "finding": "Responder type, external-tracker backend, adapters backend, server backend, GitHub Issues backend, CLI, MCP, and tests already exist on staging.",
+      "planImpact": "Do not recreate tracker or agent routing infrastructure; integrate through current public seams and capability tests."
+    },
+    {
+      "area": "docs",
+      "finding": "docs/agent-layer-gaps.md still lists the issue #596 task-management gaps.",
+      "planImpact": "Final acceptance should update or cross-reference the gap inventory based on implemented/deferred capabilities."
+    }
+  ],
+  "implementationSlices": [
+    "Phase 0: live issue read and reuse audit",
+    "Phase 1: additive architecture and compatibility design",
+    "Phase 2: failing acceptance, compatibility, backend capability, CLI, and MCP tests",
+    "Phase 3: core schemas, state machine validation, backend contract, typed unsupported features",
+    "Phase 4: git-native implementation and backend parity/capability reporting for server, GitHub Issues, external-tracker, and adapters",
+    "Phase 5: CLI, MCP, README, docs, and package surface parity",
+    "Phase 6: disabled-by-default notification/escalation/form providers plus audit, metrics, export, and backup guardrails",
+    "Phase 7: quality gates, adversarial review, and final acceptance"
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run test:sdk",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": [
+    "Reuse-audit findings are reviewed before implementation and new infrastructure reuses existing tasks-mux seams where available.",
+    "All issue-requested capabilities are implemented with tests or explicitly unsupported/deferred with rationale and follow-up references.",
+    "Existing breakpoint JSON, proven answers, CLI commands, MCP tools, and backend consumers remain backward compatible.",
+    "Shared backend capability tests cover git-native plus server, GitHub Issues, external-tracker, and adapters parity or typed unsupported-feature behavior.",
+    "Search/filter and bulk operations include pagination, sorting, partial failure, idempotency, and malformed-record handling tests.",
+    "State transition validation rejects invalid transitions and records history/audit entries for valid mutations.",
+    "CLI and MCP surfaces have parity tests, stable JSON output, and README/documentation coverage.",
+    "Notification and escalation providers are disabled by default, credential-safe, and tested only with mocks.",
+    "Metrics/SLA, export/backup, audit log, form, and comment behavior are deterministic and redact credentials.",
+    "git diff --check, tasks-mux tests/typecheck/build, npm run test:sdk, and npm run verify:metadata pass or document environment-only failures with exact output."
+  ],
+  "nonGoals": [
+    "Do not wire the full agent stack for #577 in this process unless required for local tasks-mux tests.",
+    "Do not enable real external notification or escalation delivery by default.",
+    "Do not remove or break existing breakpoint routing, proven answers, current CLI/MCP commands, or backend JSON files.",
+    "Do not require Slack, Discord, email, webhook, tracker, or agent credentials for the default test suite.",
+    "Do not duplicate external-tracker or adapters infrastructure that already exists on staging."
+  ],
+  "planningNotes": {
+    "processShape": "Flat phased feature implementation with ATDD/TDD and quality convergence. The gap is known, so a hypotheses tree is unnecessary.",
+    "repoOverride": "Use agent tasks instead of kind: shell subtasks. Keep breakpoints sparse and only for real scope or API decisions.",
+    "doNotImplementDuringPlanning": true,
+    "readyEntrypoint": ".a5c/processes/issue-596-tasks-mux-task-management.mjs#process"
+  }
+}

@@ -2,17 +2,14 @@
 name: security-hardening
 description: AIDefence security layer with prompt injection blocking, input validation, sandboxed execution, output sanitization, and STRIDE threat modeling.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Security Hardening
-
-## Overview
-
-Multi-layered security audit pipeline implementing the AIDefence architecture. Protects against prompt injection, path traversal, and other attack vectors while ensuring compliance with security best practices.
-
-## When to Use
-
-- Before deploying code to production
 - When processing untrusted inputs
 - Security audits of agent-generated code
 - Compliance verification (OWASP Top 10, CIS)

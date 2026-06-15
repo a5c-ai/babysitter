@@ -2,7 +2,14 @@
 name: specification-generation
 description: Convert requirements into structured technical specifications with architecture decisions
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
+
 # Specification Generation
 
 ## Capabilities

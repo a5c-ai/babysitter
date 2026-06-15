@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:ide
+attributes:
+  acronym: "IDE"
+  expandsToTermId: term:integrated-development-environment
+  description: |
+    Acronym for IDE.
+edges:
+  expands_to:
+    - term:integrated-development-environment

@@ -3,6 +3,12 @@
  * @description Metaswarm Orchestrated Execution Loop - The 4-phase cycle per work unit: Implement (TDD) -> Validate (independent quality gates) -> Adversarial Review (fresh, binary PASS/FAIL) -> Commit
  * @inputs { workUnit: object, projectRoot?: string, coverageThresholds?: object, maxRetries?: number, projectContext?: object }
  * @outputs { success: boolean, commitHash: string, attempts: number, qualityGateResults: array, reviewResults: array, filesModified: array }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -5,6 +5,12 @@
  * @outputs { success: boolean, song: object, lyricsPath: string, stylePath: string, coverPromptPath: string, artifacts: array }
  * @recommendedSkills SK-MAC-001 (lyric-writing), SK-MAC-002 (style-specification), SK-MAC-003 (cover-art-prompting), SK-MAC-010 (music-prompt-engineering)
  * @recommendedAgents AG-MAC-001 (lyricist-agent), AG-MAC-002 (music-producer-agent), AG-MAC-003 (visual-director-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

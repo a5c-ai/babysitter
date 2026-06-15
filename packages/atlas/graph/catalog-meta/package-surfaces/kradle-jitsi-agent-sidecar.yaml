@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:kradle-jitsi-agent-sidecar
+attributes:
+  packageId: "@a5c-ai/kradle-jitsi-agent-sidecar"
+  packageName: "@a5c-ai/kradle-jitsi-agent-sidecar"
+  displayName: "Kradle Jitsi Agent Sidecar"
+  description: "Sidecar runtime for meeting-aware agent Jobs in Kradle. Connects to Jitsi meetings, manages graceful join/leave lifecycle, and bridges meeting context into the agent runtime."
+  role: "meeting-agent-sidecar"
+  whenToUse: "Deploy as a sidecar container alongside agent Jobs that need to participate in Jitsi meetings for voice/video-aware agent interactions."
+  status: active

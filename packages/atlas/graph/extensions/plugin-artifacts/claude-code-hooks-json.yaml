@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-hooks-json
+attributes:
+  artifactId: plugin-artifact:claude-code-hooks-json
+  displayName: "Claude Code hooks.json"
+  targetId: plugin-target:claude-code
+  artifactKind: hook-script
+  pathPattern: "hooks/hooks.json"
+  installerSurface: "hooks.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

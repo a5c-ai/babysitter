@@ -15,6 +15,12 @@
  * @references
  * - Electron Windows Integration: https://www.electronjs.org/docs/latest/tutorial/windows-taskbar
  * - Windows App Features: https://docs.microsoft.com/en-us/windows/apps/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -64,32 +70,24 @@ export async function process(inputs, ctx) {
   }
 
   if (windowsFeatures.includes('overlay-icon')) {
-    let overlayIcon = await ctx.task(implementOverlayIconTask, { projectName, framework, outputDir });
+    const overlayIcon = await ctx.task(implementOverlayIconTask, { projectName, framework, outputDir });
     artifacts.push(...overlayIcon.artifacts);
     featureModules.overlayIcon = overlayIcon;
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      overlayIcon = await ctx.task(implementOverlayIconTask, { ...{ projectName, framework, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Windows features implemented: ${Object.keys(featureModules).join(', ')}. Review implementation?`,
     title: 'Windows Features Review',
-    context: { runId: ctx.runId, features: Object.keys(featureModules) },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, features: Object.keys(featureModules) }
+  });
+
   // Phase 7: Store Integration (if requested)
   let storeConfig = null;
   if (windowsFeatures.includes('store-integration')) {
     storeConfig = await ctx.task(implementStoreIntegrationTask, { projectName, framework, outputDir });
     artifacts.push(...storeConfig.artifacts);
   }
+
   // Phase 8: Validation
   const validation = await ctx.task(validateWindowsFeaturesTask, { projectName, framework, windowsFeatures, featureModules, outputDir });
   artifacts.push(...validation.artifacts);

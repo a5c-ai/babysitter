@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:source-ref-anthropic-skills-github-main
+attributes:
+  displayName: Anthropic Skills GitHub repository main branch
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/skills
+  sourcePathOrUrl: https://github.com/anthropics/skills/tree/main
+  locator: git ls-remote --heads https://github.com/anthropics/skills.git main returned d230a6dd6eb1a0dbee9fec55e2f00a96e28dff81 on 2026-05-04
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:source-ref-a5c-babysitter-github-main
+attributes:
+  displayName: a5c-ai Babysitter GitHub repository main branch
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/a5c-ai/babysitter
+  sourcePathOrUrl: https://github.com/a5c-ai/babysitter/tree/main
+  locator: git ls-remote --heads https://github.com/a5c-ai/babysitter.git main returned d97a2e46a84cbc3ca4589050a9bddbcbf792a785 on 2026-05-04
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:source-ref-langgraph-ecosystem-2026-05
+attributes:
+  displayName: LangGraph ecosystem source refs verified 2026-05-04
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/langchain-ai/langgraph
+  sourcePathOrUrl: https://docs.langchain.com/oss/python/langgraph/overview
+  locator: Verified with git ls-remote for langgraph/deepagents main branches and HTTP 200 for LangChain/LangSmith documentation pages on 2026-05-04.
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:source-ref-agent-products-2026-05
+attributes:
+  displayName: Agent product source refs verified 2026-05-04
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/zed-industries/zed
+  sourcePathOrUrl: https://windsurf.com/download
+  locator: Verified with git ls-remote for Zed/OpenHands/Cline main branches and HTTP 200 for Windsurf/Warp download pages on 2026-05-04.
+  capturedAt: '2026-05-04T00:00:00Z'
+  observedAt: '2026-05-04T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 90
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-05-04T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web

@@ -10,7 +10,7 @@ Ensure the babysitter SDK has complete, accurate documentation for all public in
 ## Scope
 
 ### CLI Commands
-Location: `packages/sdk/src/cli/`
+Location: `packages/babysitter-sdk/src/cli/`
 
 Document each command:
 - Command name and aliases
@@ -20,7 +20,7 @@ Document each command:
 - Exit codes
 
 ### Exported APIs
-Location: `packages/sdk/src/` (check `index.ts` for exports)
+Location: `packages/babysitter-sdk/src/` (check `index.ts` for exports)
 
 Document each export:
 - Function/class signature
@@ -35,23 +35,23 @@ Document each export:
 
 ```bash
 # Find CLI commands
-grep -r "command\|program\." packages/sdk/src/cli/ --include="*.ts" | head -30
+grep -r "command\|program\." packages/babysitter-sdk/src/cli/ --include="*.ts" | head -30
 
 # Find exports
-cat packages/sdk/src/index.ts
+cat packages/babysitter-sdk/src/index.ts
 
 # Find types
-ls packages/sdk/src/types/
+ls packages/babysitter-sdk/src/types/
 ```
 
 ### 2. Check Existing Documentation
 
 ```bash
 # README
-cat packages/sdk/README.md 2>/dev/null || echo "No README"
+cat packages/babysitter-sdk/README.md 2>/dev/null || echo "No README"
 
 # JSDoc in source
-grep -r "@param\|@returns\|@example" packages/sdk/src/ --include="*.ts" | head -20
+grep -r "@param\|@returns\|@example" packages/babysitter-sdk/src/ --include="*.ts" | head -20
 ```
 
 ### 3. Generate Documentation
@@ -125,8 +125,8 @@ babysitter <command> example
 | `defineTask` | Yes | Yes | Yes |
 
 ### Missing Documentation
-1. `packages/sdk/src/cli/commands/newCommand.ts` - No JSDoc
-2. `packages/sdk/src/index.ts` - Export `utilFunction` undocumented
+1. `packages/babysitter-sdk/src/cli/commands/newCommand.ts` - No JSDoc
+2. `packages/babysitter-sdk/src/index.ts` - Export `utilFunction` undocumented
 
 ### Recommendations
 - Add @example to all public functions

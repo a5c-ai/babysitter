@@ -1,0 +1,15 @@
+nodeKind: ToolDispatchPolicy
+id: tool-dispatch-policy:claude-code-bash
+attributes:
+  displayName: "Bash dispatch policy"
+  isConcurrencySafe: false
+  isReadOnly: false
+  isDestructive: false
+  interruptBehavior: cancel
+  isOpenWorld: true
+  shouldDefer: false
+  requiresPermissionGate: true
+  parentDispatchPattern: strict-serial
+edges:
+  dispatch_policy_for_tool:
+    - target: tool-descriptor:bash

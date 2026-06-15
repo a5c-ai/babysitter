@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Ecosystem
   agent-id: AG-015
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:strategic-planning]
+  workflows: [workflow:product-discovery]
+  roles: [role:strategic-planner, role:partnerships-manager, role:product-manager]
 ---
 
 # Accelerator Program Director Agent

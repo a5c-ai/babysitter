@@ -16,6 +16,13 @@
  *
  * @references
  * - Synthetix Staking Rewards: https://docs.synthetix.io/contracts/source/contracts/stakingrewards/
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:contract-lifecycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

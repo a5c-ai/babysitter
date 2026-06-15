@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:settings-template.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:settings-template
+  text: |
+    a plugin-shipped settings.json fragment merged into host settings on install
+  status: canonical
+edges:
+  defines:
+    - term:settings-template

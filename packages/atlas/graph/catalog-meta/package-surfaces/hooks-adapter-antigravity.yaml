@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-antigravity
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-antigravity"
+  packageName: "@a5c-ai/hooks-adapter-antigravity"
+  displayName: "Hooks Adapter - Antigravity"
+  description: "Antigravity CLI harness adapter for the hooks-adapter system. Translates Antigravity-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Antigravity CLI as the active harness. Extend this to customize hook behavior specific to Antigravity."
+  status: active

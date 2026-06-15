@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-lsp-json
+attributes:
+  artifactId: plugin-artifact:claude-code-lsp-json
+  displayName: "Claude Code plugin .lsp.json"
+  targetId: plugin-target:claude-code
+  artifactKind: settings-fragment
+  pathPattern: ".lsp.json"
+  installerSurface: "lsp.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code

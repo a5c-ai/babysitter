@@ -9,6 +9,14 @@ expertise:
   - Build system and bundler configuration
   - Micro-frontend architecture
   - Accessibility and internationalization
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer, role:tech-lead]
+  skillAreas: [skill-area:design-systems, skill-area:react-state-management]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:micro-frontend-architecture, topic:design-patterns]
+
 ---
 
 # Frontend Architect Agent

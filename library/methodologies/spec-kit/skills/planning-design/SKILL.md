@@ -2,17 +2,14 @@
 name: planning-design
 description: Design technical architecture, select technology stack, and define implementation strategy from specifications and constitution constraints.
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Planning Design
-
-## Overview
-
-Convert a specification into a concrete technical plan with architecture decisions, technology selections, implementation strategy, and risk assessment. All decisions must trace back to specification requirements and comply with constitution constraints.
-
-## When to Use
-
-- After specification is approved, before task decomposition
 - When evaluating technology stack options for a feature
 - When designing system architecture for new components
 - When assessing implementation risks and defining mitigations

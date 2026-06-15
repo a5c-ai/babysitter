@@ -1,0 +1,275 @@
+---
+nodeKind: Tool
+id: tool:glean
+attributes:
+  displayName: "Glean"
+  homepageUrl: "https://www.glean.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Enterprise AI search platform that connects to all company tools —
+    Confluence, Slack, Google Drive, GitHub, Jira, Notion, and 100+
+    integrations — and provides unified semantic search with personalized
+    ranking based on the user's role, team, and activity. Uses deep
+    learning models trained on organizational interaction patterns to
+    surface the most relevant results. Includes a generative AI assistant
+    that answers questions grounded in company knowledge with citations.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:dashworks
+      comparison: "Enterprise AI search platforms"
+---
+nodeKind: Tool
+id: tool:guru
+attributes:
+  displayName: "Guru"
+  homepageUrl: "https://www.getguru.com"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    AI-powered knowledge management platform that organizes company
+    knowledge into verified cards with ownership, expiration dates,
+    and trust scoring. Features browser extension and Slack integration
+    for in-context knowledge delivery. Verification workflows ensure
+    knowledge stays accurate with assigned experts and automatic
+    staleness detection. Designed for GTM teams, support orgs, and
+    onboarding flows where knowledge currency is critical.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:kapa-ai
+      comparison: "Knowledge platforms — Guru is verified knowledge cards; Kapa.ai turns docs into AI assistants"
+---
+nodeKind: Tool
+id: tool:danswer
+attributes:
+  displayName: "Danswer (Onyx)"
+  homepageUrl: "https://github.com/onyx-dot-app/onyx"
+  kind: other
+  description: |
+    Open-source enterprise question-answering system (rebranded as Onyx)
+    that connects to organizational data sources and provides RAG-powered
+    search with cited answers. Supports 25+ connectors including Confluence,
+    Slack, Google Drive, GitHub, Notion, and Jira. Self-hostable with
+    Docker Compose, uses hybrid retrieval (dense + sparse) with
+    cross-encoder re-ranking. Includes document-level access control
+    that respects source permissions.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:quivr
+      comparison: "Open-source RAG platforms"
+    - target: tool:private-gpt
+      comparison: "OSS RAG — Danswer is multi-source enterprise; PrivateGPT is local-only"
+---
+nodeKind: Tool
+id: tool:quivr
+attributes:
+  displayName: "Quivr"
+  homepageUrl: "https://github.com/QuivrHQ/quivr"
+  kind: other
+  description: |
+    Open-source second brain platform for teams that combines RAG with
+    personal and shared knowledge management. Upload documents, connect
+    data sources, and ask questions grounded in your organization's
+    knowledge. Supports multiple LLM backends, vector store options,
+    and multi-user workspaces. Built with Python/FastAPI backend and
+    Next.js frontend.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:danswer
+      comparison: "Open-source RAG platforms"
+    - target: tool:private-gpt
+      comparison: "OSS RAG — Quivr is team-oriented; PrivateGPT is fully local"
+---
+nodeKind: Tool
+id: tool:private-gpt
+attributes:
+  displayName: "PrivateGPT"
+  homepageUrl: "https://github.com/zylon-ai/private-gpt"
+  kind: other
+  description: |
+    Fully local, privacy-first document Q&A system that runs entirely
+    on your hardware with no data leaving the machine. Ingests documents
+    (PDF, DOCX, TXT, Markdown), embeds them locally using open-source
+    models, and answers questions using a local LLM. Supports Ollama,
+    llama.cpp, and HuggingFace backends. Ideal for air-gapped
+    environments, regulated industries, and sensitive document analysis
+    where cloud APIs are not permitted.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:danswer
+      comparison: "OSS RAG — PrivateGPT is local-only; Danswer is multi-source enterprise"
+    - target: tool:quivr
+      comparison: "OSS RAG — PrivateGPT is fully local; Quivr is team-oriented"
+---
+nodeKind: Tool
+id: tool:kapa-ai
+attributes:
+  displayName: "Kapa.ai"
+  homepageUrl: "https://www.kapa.ai"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    Developer documentation to AI assistant platform that turns docs,
+    tutorials, API references, and community forums into an LLM-powered
+    support bot. Ingests documentation sources, builds a RAG pipeline,
+    and deploys a chatbot that answers technical questions with accurate
+    citations back to source docs. Used by developer tool companies
+    to provide AI-powered developer support grounded in their actual
+    documentation.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:guru
+      comparison: "Knowledge platforms — Kapa.ai turns docs into AI assistants; Guru is verified knowledge cards"
+---
+nodeKind: Tool
+id: tool:dashworks
+attributes:
+  displayName: "Dashworks"
+  homepageUrl: "https://www.dashworks.ai"
+  kind: other
+  languageApplicability: neutral
+  description: |
+    AI-powered enterprise search that unifies knowledge across SaaS
+    applications — Google Workspace, Slack, Notion, Confluence, Jira,
+    GitHub, and more. Provides a single search bar with AI-generated
+    answers citing sources across all connected tools. Features
+    real-time indexing, access control inheritance from source systems,
+    and team-aware personalization.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:glean
+      comparison: "Enterprise AI search platforms"
+---
+nodeKind: Tool
+id: tool:haystack
+attributes:
+  displayName: "Haystack"
+  homepageUrl: "https://haystack.deepset.ai"
+  kind: other
+  description: |
+    Open-source NLP framework by deepset for building production-grade
+    RAG pipelines, semantic search, and question answering systems.
+    Provides a composable pipeline architecture with components for
+    document preprocessing, embedding, retrieval (dense, sparse, hybrid),
+    re-ranking, and generation. Supports multiple LLM and vector store
+    backends. Pipeline-as-code design with YAML serialization for
+    reproducibility and deployment.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:cognita
+      comparison: "RAG frameworks — Haystack is a composable pipeline framework; Cognita is a modular RAG app"
+    - target: tool:verba
+      comparison: "RAG frameworks — Haystack is a pipeline framework; Verba is a turnkey RAG chatbot"
+---
+nodeKind: Tool
+id: tool:cognita
+attributes:
+  displayName: "Cognita"
+  homepageUrl: "https://github.com/truefoundry/cognita"
+  kind: other
+  description: |
+    Open-source RAG framework by TrueFoundry for building production-ready
+    retrieval-augmented generation applications. Provides modular components
+    for data ingestion, parsing, chunking, embedding, retrieval, and
+    generation with a UI for experimentation. Supports multiple vector
+    stores, embedding models, and LLMs. Designed for teams that need
+    to iterate on RAG configurations without rewriting pipeline code.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:haystack
+      comparison: "RAG frameworks — Cognita is a modular RAG app; Haystack is a composable pipeline framework"
+    - target: tool:verba
+      comparison: "RAG frameworks — Cognita has a UI for experimentation; Verba is a turnkey chatbot"
+---
+nodeKind: Tool
+id: tool:verba
+attributes:
+  displayName: "Verba"
+  homepageUrl: "https://github.com/weaviate/Verba"
+  kind: other
+  description: |
+    Weaviate's open-source RAG application — a turnkey retrieval-augmented
+    generation chatbot built on top of the Weaviate vector database.
+    Provides document ingestion, chunking, embedding, and conversational
+    retrieval out of the box with a polished UI. Supports multiple
+    embedding providers (OpenAI, Cohere, HuggingFace) and LLM backends.
+    Useful as a reference implementation for building RAG apps with
+    Weaviate and as a rapid prototyping tool for knowledge Q&A.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  used_for:
+    - skill-area:knowledge-fabric-design
+    - skill-area:rag-pipeline-engineering
+  alternative_to:
+    - target: tool:haystack
+      comparison: "RAG frameworks — Verba is a turnkey RAG chatbot; Haystack is a pipeline framework"
+    - target: tool:cognita
+      comparison: "RAG frameworks — Verba is a turnkey chatbot; Cognita has a UI for experimentation"

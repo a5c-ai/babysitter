@@ -1,0 +1,27 @@
+nodeKind: Subagent
+id: subagent:cursor.background-agent
+attributes:
+  displayName: "Background Agent (Cursor)"
+  provenance: built-in
+  subjectId: agentVersion:cursor:ge-0-0-0
+  roleId: role:implementer
+  systemPrompt: |
+    Long-running cloud-hosted agent. Picks up tasks delegated from the
+    IDE or via the Cursor dashboard, runs in a sandboxed VM with
+    repository access, and opens PRs.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:write
+    - tool-descriptor:bash
+  triggers: |
+    Auto-invoked when the user delegates a task to a Cursor background
+    agent from the IDE or web dashboard.
+  description: |
+    Cursor's hosted "Background Agent" feature. Documented at
+    https://docs.cursor.com/background-agents.
+edges:
+  roles_played_by:
+    - target: role:implementer
+  implements:
+    - target: extension-interface:orchestration

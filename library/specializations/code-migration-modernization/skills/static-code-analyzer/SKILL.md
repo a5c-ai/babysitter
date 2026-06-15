@@ -2,6 +2,13 @@
 name: static-code-analyzer
 description: Deep static analysis of codebases for quality, complexity, and migration readiness assessment
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:sast]
+  roles: [role:backend-engineer, role:security-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Static Code Analyzer Skill

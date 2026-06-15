@@ -16,6 +16,12 @@
  * - Domain Randomization: https://arxiv.org/abs/1703.06907
  * - Sim-to-Real: https://arxiv.org/abs/1812.05671
  * - Real-World Robot Learning: https://arxiv.org/abs/1910.02998
+ * @graph
+ *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

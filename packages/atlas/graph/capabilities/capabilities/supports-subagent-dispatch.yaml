@@ -1,0 +1,20 @@
+nodeKind: Capability
+id: capability:supports-subagent-dispatch
+attributes:
+  displayName: "Supports subagent dispatch"
+  description: |
+    The agent runtime can dispatch subagents at all (regardless of mechanism).
+    Concrete dispatch mechanism is recorded on
+    `AgentRuntimeImpl.subagentDispatchMechanism` (task-tool / handoff /
+    sub_agents-array / agent-as-tool / none).
+
+    References:
+      - Anthropic Claude Code subagents (Task tool):
+        https://docs.anthropic.com/en/docs/claude-code/sub-agents
+      - OpenAI Agents SDK (handoff / agent-as-tool):
+        https://openai.github.io/openai-agents-python/
+      - Google ADK (`sub_agents=[...]`):
+        https://google.github.io/adk-docs/
+  appliesToNodeKinds: ["AgentVersion", "AgentRuntimeImpl"]
+  category: extension
+edges: {}

@@ -8,6 +8,13 @@ expertise:
   - Training configuration
   - Model evaluation
   - Deployment integration
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:ml-fine-tuning, skill-area:model-evaluation]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # Fine-Tuning Specialist

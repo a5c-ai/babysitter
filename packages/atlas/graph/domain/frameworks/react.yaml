@@ -1,0 +1,28 @@
+nodeKind: Framework
+id: framework:react
+attributes:
+  displayName: "React"
+  homepageUrl: "https://react.dev"
+  belongsToLanguageId: language:javascript
+  category: web-frontend
+  releasedAt: "2013"
+  description: |
+    The React framework.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_by_skill_area:
+    - target: skill-area:react-state-management
+    - target: skill-area:react-testing
+    - target: skill-area:react-components
+    - target: skill-area:frontend-development
+    - target: skill-area:design-systems
+  alternative_to:
+    - target: framework:vue
+      comparison: "UI frameworks"
+    - target: framework:angular
+      comparison: "UI frameworks"
+    - target: framework:svelte
+      comparison: "UI frameworks"
+    - target: framework:preact
+      comparison: "Frontend UI frameworks"

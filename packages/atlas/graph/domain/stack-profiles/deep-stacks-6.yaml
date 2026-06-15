@@ -1,0 +1,1589 @@
+# Deep Stack Profiles — Volume 6
+# 30 richly-connected stack profiles covering enterprise & government,
+# media & content, education & research, social & community,
+# devops & automation, security, and specialized backend domains.
+---
+nodeKind: StackProfile
+id: stack-profile:enterprise-service-bus
+attributes:
+  displayName: "Enterprise Service Bus (Java, Spring Boot, RabbitMQ, Redis, PostgreSQL, Docker)"
+  description: |
+    A message-oriented middleware backbone that routes, transforms, and
+    orchestrates enterprise service calls across dozens of internal systems.
+    Spring Boot microservices expose REST and AMQP endpoints, with RabbitMQ
+    handling reliable asynchronous messaging between bounded contexts.
+    Redis provides distributed caching for canonical data lookups and
+    idempotency keys, while PostgreSQL stores routing rules, message audit
+    trails, and dead-letter metadata. Docker containers enable consistent
+    deployment across on-premise and cloud environments. The tradeoff is
+    operational complexity in managing exchange topologies and ensuring
+    exactly-once delivery semantics across heterogeneous backends.
+  composes:
+    - language:java
+    - library:spring-boot
+    - tool:rabbitmq
+    - library:redis
+    - tool:psql
+    - tool:docker
+    - library:spring-data
+    - library:spring-security
+edges:
+  composed_of:
+    - language:java
+    - library:spring-boot
+    - tool:rabbitmq
+    - library:redis
+    - tool:psql
+    - tool:docker
+    - library:spring-data
+    - library:spring-security
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:event-driven-architecture-review
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:backend
+    - domain:operations
+  requires_skill_area:
+    - skill-area:event-driven-architecture
+    - skill-area:messaging-queuing
+    - skill-area:caching-strategies
+    - skill-area:containerization
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:government-portal
+attributes:
+  displayName: "Government Portal (.NET, Blazor, PostgreSQL, Keycloak, Docker, Azure)"
+  description: |
+    A citizen-facing government services portal built on .NET with Blazor
+    Server for interactive, accessibility-compliant web interfaces that
+    meet WCAG 2.1 AA standards. Keycloak provides federated identity
+    management supporting government SSO standards and multi-factor
+    authentication. PostgreSQL stores citizen records, application forms,
+    and case management data with row-level security. Azure cloud services
+    host the platform with sovereign data residency guarantees. Docker
+    containers ensure reproducible builds across staging and production.
+    The tradeoff is Blazor Server's persistent SignalR connection overhead
+    at scale and the complexity of government compliance certifications.
+  composes:
+    - language:csharp
+    - framework:blazor
+    - tool:psql
+    - tool:keycloak
+    - tool:docker
+    - library:aspnet-core
+    - library:entity-framework
+    - library:signalr
+edges:
+  composed_of:
+    - language:csharp
+    - framework:blazor
+    - tool:psql
+    - tool:keycloak
+    - tool:docker
+    - library:aspnet-core
+    - library:entity-framework
+    - library:signalr
+  used_by_role:
+    - role:fullstack-engineer
+    - role:security-engineer
+    - role:compliance-engineer
+  follows_workflow:
+    - workflow:accessibility-standards-compliance
+    - workflow:security-review
+  applies_to:
+    - domain:government
+    - domain:compliance
+  requires_skill_area:
+    - skill-area:web-accessibility
+    - skill-area:identity-security
+    - skill-area:backend-data-persistence
+    - skill-area:containerization
+    - skill-area:authentication-authorization
+---
+nodeKind: StackProfile
+id: stack-profile:compliance-audit-trail
+attributes:
+  displayName: "Compliance & Audit Trail (Go, PostgreSQL, RabbitMQ, Vault, Elasticsearch, Prometheus)"
+  description: |
+    An immutable audit trail system that captures, indexes, and monitors
+    every compliance-relevant event across the organization. Go services
+    ingest events from RabbitMQ queues and write append-only records to
+    PostgreSQL with cryptographic hash chains for tamper evidence.
+    Elasticsearch provides full-text search over millions of audit entries
+    for investigator queries and regulatory reporting. HashiCorp Vault
+    manages encryption keys and secrets for data-at-rest protection.
+    Prometheus tracks ingestion lag, storage growth, and query latency.
+    The tradeoff is storage cost growth over time and the difficulty of
+    balancing retention policies with regulatory hold requirements.
+  composes:
+    - language:go
+    - tool:psql
+    - tool:rabbitmq
+    - tool:vault
+    - tool:elasticsearch
+    - tool:prometheus
+    - library:zerolog
+    - library:chi
+edges:
+  composed_of:
+    - language:go
+    - tool:psql
+    - tool:rabbitmq
+    - tool:vault
+    - tool:elasticsearch
+    - tool:prometheus
+    - library:zerolog
+    - library:chi
+  used_by_role:
+    - role:compliance-engineer
+    - role:security-engineer
+    - role:audit-analyst
+  follows_workflow:
+    - workflow:compliance-audit
+    - workflow:access-control-audit
+  applies_to:
+    - domain:compliance
+    - domain:security
+  requires_skill_area:
+    - skill-area:compliance-automation
+    - skill-area:search-indexing
+    - skill-area:secrets-rotation
+    - skill-area:observability-instrumentation
+    - skill-area:event-driven-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:enterprise-search-platform
+attributes:
+  displayName: "Enterprise Search (Elasticsearch, Python, React, Redis, Kubernetes, FastAPI)"
+  description: |
+    A unified enterprise search platform that indexes documents, knowledge
+    base articles, code repositories, and internal communications into a
+    single searchable interface. Elasticsearch powers the core search engine
+    with custom analyzers, synonym dictionaries, and learning-to-rank models.
+    FastAPI serves the search API with query parsing, faceting, and
+    personalized result boosting. React delivers the search UI with
+    typeahead suggestions, faceted navigation, and highlighted snippets.
+    Redis caches frequent queries and user preference profiles. Kubernetes
+    orchestrates the Elasticsearch cluster alongside API and indexer pods.
+    The tradeoff is index maintenance overhead and tuning relevance models
+    across heterogeneous content types.
+  composes:
+    - tool:elasticsearch
+    - language:python
+    - framework:react
+    - library:redis
+    - tool:kubernetes
+    - framework:fastapi
+    - library:uvicorn
+    - library:pydantic
+edges:
+  composed_of:
+    - tool:elasticsearch
+    - language:python
+    - framework:react
+    - library:redis
+    - tool:kubernetes
+    - framework:fastapi
+    - library:uvicorn
+    - library:pydantic
+  used_by_role:
+    - role:backend-engineer
+    - role:data-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:production-readiness-review
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:knowledge-management
+    - domain:backend
+  requires_skill_area:
+    - skill-area:search-infrastructure
+    - skill-area:search-indexing
+    - skill-area:caching-strategies
+    - skill-area:api-design
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:master-data-management
+attributes:
+  displayName: "Master Data Management (Python, PostgreSQL, RabbitMQ, Airflow, FastAPI)"
+  description: |
+    A centralized master data management hub that maintains golden records
+    for customers, products, suppliers, and organizational hierarchies
+    across the enterprise. FastAPI exposes CRUD and match-merge APIs with
+    configurable survivorship rules for conflict resolution. PostgreSQL
+    stores the master records with full change history and lineage tracking.
+    RabbitMQ distributes change events to downstream consumers ensuring
+    eventual consistency across systems. Apache Airflow orchestrates batch
+    data quality jobs, deduplication pipelines, and cross-reference
+    reconciliation. The tradeoff is the political complexity of data
+    ownership governance and the computational cost of probabilistic
+    matching at scale.
+  composes:
+    - language:python
+    - tool:psql
+    - tool:rabbitmq
+    - tool:airflow
+    - framework:fastapi
+    - library:pydantic
+    - library:sqlalchemy
+    - library:uvicorn
+edges:
+  composed_of:
+    - language:python
+    - tool:psql
+    - tool:rabbitmq
+    - tool:airflow
+    - framework:fastapi
+    - library:pydantic
+    - library:sqlalchemy
+    - library:uvicorn
+  used_by_role:
+    - role:data-engineer
+    - role:analytics-engineer
+    - role:architect
+  follows_workflow:
+    - workflow:data-quality-monitoring
+    - workflow:data-governance-review
+  applies_to:
+    - domain:data-engineering
+    - domain:operations
+  requires_skill_area:
+    - skill-area:data-quality
+    - skill-area:etl-pipelines
+    - skill-area:api-design
+    - skill-area:data-governance
+    - skill-area:messaging-queuing
+---
+nodeKind: StackProfile
+id: stack-profile:podcast-network
+attributes:
+  displayName: "Podcast Network (Next.js, Boto3, PostgreSQL, Stripe, Redis, TypeScript)"
+  description: |
+    A multi-show podcast network platform where creators manage episodes,
+    schedule releases, and track listener analytics across shows. Next.js
+    serves the creator dashboard and public-facing podcast pages with
+    server-side rendering for SEO-optimized show directories. Boto3
+    handles audio file uploads to cloud object storage with presigned URLs
+    for secure direct uploads from the browser. PostgreSQL stores show
+    metadata, episode transcripts, and listener engagement metrics.
+    Stripe powers subscription billing for premium content tiers and
+    creator payouts. Redis caches RSS feed responses and manages real-time
+    download counters. The tradeoff is audio transcoding pipeline complexity
+    and IAB-compliant download measurement accuracy.
+  composes:
+    - framework:nextjs
+    - library:boto3
+    - tool:psql
+    - tool:stripe
+    - library:ioredis
+    - language:typescript
+    - library:prisma
+    - library:next-auth
+edges:
+  composed_of:
+    - framework:nextjs
+    - library:boto3
+    - tool:psql
+    - tool:stripe
+    - library:ioredis
+    - language:typescript
+    - library:prisma
+    - library:next-auth
+  used_by_role:
+    - role:fullstack-engineer
+    - role:media-engineer
+  follows_workflow:
+    - workflow:podcast-production-cycle
+    - workflow:content-release-pipeline
+  applies_to:
+    - domain:media-publishing
+    - domain:media-entertainment
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:payment-integration
+    - skill-area:backend-data-persistence
+    - skill-area:audio-processing
+    - skill-area:caching-strategies
+---
+nodeKind: StackProfile
+id: stack-profile:news-publishing-cms
+attributes:
+  displayName: "News / Publishing CMS (Next.js, Strapi, Elasticsearch, Redis, TypeScript)"
+  description: |
+    A modern digital newsroom platform combining Strapi as a headless CMS
+    with Next.js for high-performance article rendering and SEO. Editors
+    manage stories, photo galleries, and breaking news banners through
+    Strapi's admin panel with custom content types and editorial workflows.
+    Elasticsearch powers the site search with autocomplete, related articles,
+    and topic clustering. Redis caches article pages and API responses to
+    handle traffic spikes during breaking news events. Next.js incremental
+    static regeneration balances freshness with performance. The tradeoff
+    is managing content model migrations in Strapi and tuning Elasticsearch
+    relevance for journalistic content patterns.
+  composes:
+    - framework:nextjs
+    - framework:strapi
+    - tool:elasticsearch
+    - library:ioredis
+    - language:typescript
+    - library:tailwindcss
+    - library:axios
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - framework:strapi
+    - tool:elasticsearch
+    - library:ioredis
+    - language:typescript
+    - library:tailwindcss
+    - library:axios
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:content-strategist
+  follows_workflow:
+    - workflow:editorial-workflow-management
+    - workflow:content-release-pipeline
+  applies_to:
+    - domain:media-publishing
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:search-infrastructure
+    - skill-area:caching-strategies
+    - skill-area:frontend-development
+    - skill-area:seo-sem
+---
+nodeKind: StackProfile
+id: stack-profile:photo-gallery-dam
+attributes:
+  displayName: "Photo Gallery / DAM (React, Sharp, Boto3, PostgreSQL, Redis, FastAPI)"
+  description: |
+    A digital asset management system for photographers and creative teams
+    to upload, organize, transform, and distribute image assets at scale.
+    FastAPI handles asset ingestion with background workers that use Sharp
+    for on-the-fly image resizing, format conversion, and thumbnail
+    generation. React powers the gallery interface with lazy-loaded grid
+    views, lightbox previews, and bulk metadata editing. Boto3 manages
+    cloud object storage with lifecycle policies for tiered storage costs.
+    PostgreSQL stores asset metadata, tags, collections, and access
+    permissions. Redis caches image transformation results and CDN
+    invalidation queues. The tradeoff is storage cost management for
+    high-resolution originals and the complexity of color profile
+    preservation across format conversions.
+  composes:
+    - framework:react
+    - library:sharp
+    - library:boto3
+    - tool:psql
+    - library:redis
+    - framework:fastapi
+    - library:pydantic
+    - library:uvicorn
+edges:
+  composed_of:
+    - framework:react
+    - library:sharp
+    - library:boto3
+    - tool:psql
+    - library:redis
+    - framework:fastapi
+    - library:pydantic
+    - library:uvicorn
+  used_by_role:
+    - role:fullstack-engineer
+    - role:media-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:content-rights-management-audit
+    - workflow:design-review
+  applies_to:
+    - domain:media-entertainment
+    - domain:arts-culture
+  requires_skill_area:
+    - skill-area:image-processing
+    - skill-area:api-design
+    - skill-area:caching-strategies
+    - skill-area:frontend-development
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:music-streaming-backend
+attributes:
+  displayName: "Music Streaming (Rust, Redis, PostgreSQL, Boto3, React, TypeScript)"
+  description: |
+    A music streaming backend optimized for low-latency audio delivery and
+    catalog management. Rust powers the audio serving layer with zero-copy
+    byte range responses for adaptive bitrate streaming, achieving
+    sub-millisecond response times. PostgreSQL stores the music catalog,
+    user playlists, listening history, and royalty accounting records.
+    Redis manages session state, playback queues, and real-time listener
+    counts for popularity rankings. Boto3 interfaces with cloud object
+    storage for the audio file archive with intelligent tiering. React
+    delivers the web player with gapless playback, queue management, and
+    social sharing. The tradeoff is the complexity of royalty calculation
+    accuracy and the cost of maintaining multiple audio quality tiers.
+  composes:
+    - language:rust
+    - library:redis
+    - tool:psql
+    - library:boto3
+    - framework:react
+    - language:typescript
+    - library:tokio
+    - library:reqwest
+edges:
+  composed_of:
+    - language:rust
+    - library:redis
+    - tool:psql
+    - library:boto3
+    - framework:react
+    - language:typescript
+    - library:tokio
+    - library:reqwest
+  used_by_role:
+    - role:backend-engineer
+    - role:media-engineer
+  follows_workflow:
+    - workflow:streaming-quality-review
+    - workflow:content-rights-management-audit
+  applies_to:
+    - domain:media-entertainment
+    - domain:backend
+  requires_skill_area:
+    - skill-area:streaming-protocols
+    - skill-area:caching-strategies
+    - skill-area:backend-data-persistence
+    - skill-area:frontend-development
+    - skill-area:audio-processing
+---
+nodeKind: StackProfile
+id: stack-profile:live-streaming-broadcast
+attributes:
+  displayName: "Live Streaming / Broadcast (Node.js, Redis, React, Docker, Socket.IO)"
+  description: |
+    A live streaming and broadcast platform enabling real-time video
+    distribution with interactive chat and viewer engagement features.
+    Node.js handles stream ingestion, transcoding orchestration, and
+    HLS manifest generation for adaptive bitrate delivery. Socket.IO
+    powers the real-time chat, viewer polls, and donation overlays with
+    sub-second latency. React renders the player interface with chat
+    integration, stream quality selectors, and clip creation tools.
+    Redis manages viewer presence, chat rate limiting, and stream metadata
+    caching. Docker containers isolate transcoding workers for horizontal
+    scaling during peak concurrent viewer loads. The tradeoff is
+    transcoding infrastructure cost during high-concurrency events and
+    ensuring chat consistency across geographically distributed viewers.
+  composes:
+    - language:javascript
+    - library:ioredis
+    - framework:react
+    - tool:docker
+    - library:socket-io
+    - language:typescript
+    - library:express
+    - library:bullmq
+edges:
+  composed_of:
+    - language:javascript
+    - library:ioredis
+    - framework:react
+    - tool:docker
+    - library:socket-io
+    - language:typescript
+    - library:express
+    - library:bullmq
+  used_by_role:
+    - role:backend-engineer
+    - role:media-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:streaming-quality-review
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:media-entertainment
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:streaming-protocols
+    - skill-area:websocket-design
+    - skill-area:containerization
+    - skill-area:frontend-development
+    - skill-area:backend-async-processing
+---
+nodeKind: StackProfile
+id: stack-profile:research-data-platform
+attributes:
+  displayName: "Research Data Platform (Python, Jupyter, PostgreSQL, Boto3, FastAPI, React)"
+  description: |
+    A research data management platform that enables scientists to upload,
+    catalog, analyze, and share datasets with reproducible computational
+    notebooks. Jupyter provides the interactive analysis environment with
+    custom kernels for Python, R, and Julia workloads. FastAPI serves the
+    data catalog API with dataset versioning, DOI registration, and access
+    control. PostgreSQL stores dataset metadata, user permissions, and
+    experiment provenance graphs. Boto3 manages large dataset storage in
+    cloud object storage with lifecycle archival policies. React powers
+    the data catalog browser with search, preview, and collaboration
+    features. The tradeoff is managing compute costs for large-scale
+    notebook executions and enforcing reproducibility across diverse
+    dependency environments.
+  composes:
+    - language:python
+    - tool:jupyter
+    - tool:psql
+    - library:boto3
+    - framework:fastapi
+    - framework:react
+    - library:pandas
+    - library:numpy
+edges:
+  composed_of:
+    - language:python
+    - tool:jupyter
+    - tool:psql
+    - library:boto3
+    - framework:fastapi
+    - framework:react
+    - library:pandas
+    - library:numpy
+  used_by_role:
+    - role:research-scientist
+    - role:data-engineer
+    - role:computational-scientist
+  follows_workflow:
+    - workflow:experiment-reproducibility-review
+    - workflow:data-governance-review
+  applies_to:
+    - domain:data-science
+    - domain:education
+  requires_skill_area:
+    - skill-area:data-science-experimentation
+    - skill-area:data-governance
+    - skill-area:api-design
+    - skill-area:python-data-pipelines
+    - skill-area:data-visualization
+---
+nodeKind: StackProfile
+id: stack-profile:online-exam-assessment
+attributes:
+  displayName: "Online Exam / Assessment (Next.js, PostgreSQL, Redis, Docker, TypeScript)"
+  description: |
+    A secure online examination platform supporting timed assessments,
+    auto-grading, and proctoring integration for educational institutions
+    and certification bodies. Next.js delivers the exam interface with
+    server-side session validation to prevent answer tampering and
+    client-side timers with server reconciliation. PostgreSQL stores
+    question banks, exam configurations, student responses, and grading
+    rubrics with row-level security per institution. Redis manages exam
+    session state, countdown timers, and rate limiting for submission
+    endpoints. Docker containers isolate code execution sandboxes for
+    programming assessments. WebSocket connections via Socket.IO enable
+    real-time proctor monitoring dashboards. The tradeoff is preventing
+    exam fraud across diverse client environments and scaling concurrent
+    exam sessions during peak periods.
+  composes:
+    - framework:nextjs
+    - tool:psql
+    - library:ioredis
+    - tool:docker
+    - language:typescript
+    - library:prisma
+    - library:socket-io
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:psql
+    - library:ioredis
+    - tool:docker
+    - language:typescript
+    - library:prisma
+    - library:socket-io
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:digital-assessment-integrity-audit
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:education
+    - domain:edtech
+  requires_skill_area:
+    - skill-area:websocket-design
+    - skill-area:backend-security
+    - skill-area:server-side-rendering
+    - skill-area:containerization
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:lab-information-system
+attributes:
+  displayName: "Lab Information System (Python, FastAPI, PostgreSQL, Boto3, React, Docker)"
+  description: |
+    A laboratory information management system (LIMS) that tracks samples,
+    experiments, instruments, and results through configurable laboratory
+    workflows. FastAPI serves the REST API with role-based access control,
+    audit logging, and instrument integration endpoints. PostgreSQL stores
+    sample chains of custody, test results with measurement uncertainty,
+    and regulatory submission records. Boto3 manages raw data file storage
+    for chromatograms, spectra, and imaging data. React powers the lab
+    technician interface with barcode scanning integration, sample tracking
+    dashboards, and result approval workflows. Docker ensures consistent
+    deployment across multiple laboratory sites. The tradeoff is
+    integrating with diverse instrument vendor APIs and maintaining
+    validation documentation for regulated environments.
+  composes:
+    - language:python
+    - framework:fastapi
+    - tool:psql
+    - library:boto3
+    - framework:react
+    - tool:docker
+    - library:pydantic
+    - library:sqlalchemy
+edges:
+  composed_of:
+    - language:python
+    - framework:fastapi
+    - tool:psql
+    - library:boto3
+    - framework:react
+    - tool:docker
+    - library:pydantic
+    - library:sqlalchemy
+  used_by_role:
+    - role:backend-engineer
+    - role:lab-technician
+    - role:research-scientist
+  follows_workflow:
+    - workflow:lab-safety-audit
+    - workflow:quality-control-audit
+  applies_to:
+    - domain:healthcare
+    - domain:scientific-discovery
+  requires_skill_area:
+    - skill-area:api-design
+    - skill-area:backend-data-persistence
+    - skill-area:compliance-automation
+    - skill-area:containerization
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:forum-discussion-board
+attributes:
+  displayName: "Forum / Discussion Board (Next.js, PostgreSQL, Redis, Elasticsearch, TypeScript)"
+  description: |
+    A modern community forum platform with threaded discussions, user
+    reputation systems, and rich content embedding. Next.js renders
+    forum pages with server-side rendering for search engine indexing of
+    discussion content, combined with client-side interactivity for
+    real-time reply previews and inline editing. PostgreSQL stores threads,
+    posts, user profiles, and reputation scores with recursive CTEs for
+    efficient thread tree queries. Elasticsearch powers the forum search
+    with stemming, typo tolerance, and tag-based filtering. Redis caches
+    hot threads, user session data, and rate limits to prevent spam.
+    Tailwind CSS provides a responsive, accessible design system. The
+    tradeoff is moderating content at scale and preventing spam without
+    degrading the contributor experience.
+  composes:
+    - framework:nextjs
+    - tool:psql
+    - library:ioredis
+    - tool:elasticsearch
+    - language:typescript
+    - library:prisma
+    - library:tailwindcss
+    - library:zod
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:psql
+    - library:ioredis
+    - tool:elasticsearch
+    - language:typescript
+    - library:prisma
+    - library:tailwindcss
+    - library:zod
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+  follows_workflow:
+    - workflow:forum-community-management
+    - workflow:community-guidelines-development
+  applies_to:
+    - domain:community
+    - domain:web-development
+  requires_skill_area:
+    - skill-area:server-side-rendering
+    - skill-area:search-infrastructure
+    - skill-area:caching-strategies
+    - skill-area:backend-data-persistence
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:wiki-knowledge-base
+attributes:
+  displayName: "Wiki / Knowledge Base (Next.js, PostgreSQL, Elasticsearch, Boto3, Redis)"
+  description: |
+    A collaborative knowledge base platform where teams author, review,
+    and publish documentation with version history and cross-referencing.
+    Next.js serves the wiki pages with server-side rendering for SEO and
+    client-side Markdown editing with live preview. PostgreSQL stores
+    article content, revision history, access permissions, and link graphs
+    for detecting broken references. Elasticsearch indexes all articles
+    with custom analyzers for technical terminology and code snippet
+    search. Boto3 manages image and attachment storage with automatic
+    thumbnail generation. Redis caches rendered pages, table-of-contents
+    trees, and recently viewed article lists. The tradeoff is managing
+    content freshness signals for search ranking and preventing knowledge
+    fragmentation across overlapping articles.
+  composes:
+    - framework:nextjs
+    - tool:psql
+    - tool:elasticsearch
+    - library:boto3
+    - library:ioredis
+    - language:typescript
+    - library:prisma
+    - library:tailwindcss
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:psql
+    - tool:elasticsearch
+    - library:boto3
+    - library:ioredis
+    - language:typescript
+    - library:prisma
+    - library:tailwindcss
+  used_by_role:
+    - role:fullstack-engineer
+    - role:technical-writer
+    - role:documentation-engineer
+  follows_workflow:
+    - workflow:knowledge-base-maintenance
+    - workflow:documentation-freshness-audit
+  applies_to:
+    - domain:knowledge-management
+    - domain:content-operations
+  requires_skill_area:
+    - skill-area:search-infrastructure
+    - skill-area:server-side-rendering
+    - skill-area:technical-documentation
+    - skill-area:caching-strategies
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:social-network-backend
+attributes:
+  displayName: "Social Network Backend (Go, PostgreSQL, Redis, RabbitMQ, Elasticsearch, Boto3)"
+  description: |
+    A high-throughput social network backend handling user graphs, activity
+    feeds, content moderation, and notification fanout at scale. Go services
+    provide low-latency API endpoints for posting, following, and feed
+    retrieval with efficient goroutine-based concurrency. PostgreSQL stores
+    user profiles, social graphs, and content with partitioned tables for
+    time-series feed data. RabbitMQ handles asynchronous fanout of posts
+    to follower feeds and notification delivery pipelines. Redis powers
+    the timeline cache, online presence tracking, and trending topic
+    computation. Elasticsearch indexes user profiles and posts for
+    discovery search. Boto3 manages media uploads for photos and videos.
+    The tradeoff is feed generation latency for users with millions of
+    followers and content moderation pipeline throughput.
+  composes:
+    - language:go
+    - tool:psql
+    - library:redis
+    - tool:rabbitmq
+    - tool:elasticsearch
+    - library:boto3
+    - library:chi
+    - library:zerolog
+edges:
+  composed_of:
+    - language:go
+    - tool:psql
+    - library:redis
+    - tool:rabbitmq
+    - tool:elasticsearch
+    - library:boto3
+    - library:chi
+    - library:zerolog
+  used_by_role:
+    - role:backend-engineer
+    - role:architect
+    - role:data-engineer
+  follows_workflow:
+    - workflow:production-readiness-review
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:community
+    - domain:backend
+  requires_skill_area:
+    - skill-area:messaging-queuing
+    - skill-area:caching-strategies
+    - skill-area:search-infrastructure
+    - skill-area:backend-data-persistence
+    - skill-area:event-driven-architecture
+---
+nodeKind: StackProfile
+id: stack-profile:community-marketplace
+attributes:
+  displayName: "Community Marketplace (Next.js, Stripe, PostgreSQL, Elasticsearch, Redis)"
+  description: |
+    A peer-to-peer community marketplace where users list, discover, and
+    transact on goods or services with escrow-based payment protection.
+    Next.js powers the storefront with server-side rendering for product
+    listing SEO and dynamic client-side filtering. Stripe Connect handles
+    multi-party payments with split disbursements to sellers and platform
+    fee collection. PostgreSQL stores listings, user profiles, reviews,
+    and transaction records with full-text search for simple queries.
+    Elasticsearch provides advanced product search with faceted navigation,
+    geo-proximity filtering, and personalized recommendations. Redis
+    caches search results, user sessions, and real-time listing availability.
+    The tradeoff is managing payment disputes, seller verification, and
+    maintaining search index freshness as listings change frequently.
+  composes:
+    - framework:nextjs
+    - tool:stripe
+    - tool:psql
+    - tool:elasticsearch
+    - library:ioredis
+    - language:typescript
+    - library:prisma
+    - library:next-auth
+edges:
+  composed_of:
+    - framework:nextjs
+    - tool:stripe
+    - tool:psql
+    - tool:elasticsearch
+    - library:ioredis
+    - language:typescript
+    - library:prisma
+    - library:next-auth
+  used_by_role:
+    - role:fullstack-engineer
+    - role:frontend-engineer
+    - role:backend-engineer
+  follows_workflow:
+    - workflow:conversion-funnel-optimization
+    - workflow:payment-reconciliation-audit
+  applies_to:
+    - domain:retail
+    - domain:community
+  requires_skill_area:
+    - skill-area:payment-integration
+    - skill-area:search-infrastructure
+    - skill-area:server-side-rendering
+    - skill-area:caching-strategies
+    - skill-area:authentication-authorization
+---
+nodeKind: StackProfile
+id: stack-profile:infrastructure-cost-optimization
+attributes:
+  displayName: "Infrastructure Cost Optimization (Python, Terraform, PostgreSQL, Grafana, Prometheus)"
+  description: |
+    A FinOps platform that continuously monitors, analyzes, and optimizes
+    cloud infrastructure spending across multi-cloud environments. Python
+    scripts and scheduled jobs collect cost and usage data from cloud
+    provider APIs, normalize it into a common schema, and load it into
+    PostgreSQL for analysis. Terraform modules encode rightsizing
+    recommendations as infrastructure changes that can be reviewed and
+    applied through pull requests. Grafana dashboards visualize cost
+    trends, budget burn rates, and anomaly alerts with drill-down by
+    team, service, and resource type. Prometheus collects utilization
+    metrics to correlate with spending data for waste detection. The
+    tradeoff is the lag between cost data availability and actionable
+    recommendations, and the organizational challenge of attributing
+    shared infrastructure costs.
+  composes:
+    - language:python
+    - tool:terraform
+    - tool:psql
+    - tool:grafana
+    - tool:prometheus
+    - library:boto3
+    - library:pandas
+    - library:httpx
+edges:
+  composed_of:
+    - language:python
+    - tool:terraform
+    - tool:psql
+    - tool:grafana
+    - tool:prometheus
+    - library:boto3
+    - library:pandas
+    - library:httpx
+  used_by_role:
+    - role:platform-engineer
+    - role:cloud-architect
+    - role:sre
+  follows_workflow:
+    - workflow:infrastructure-cost-optimization
+    - workflow:cloud-cost-optimization-review
+  applies_to:
+    - domain:finops
+    - domain:cloud-infra
+  requires_skill_area:
+    - skill-area:cloud-infrastructure
+    - skill-area:terraform-infrastructure
+    - skill-area:metrics-dashboarding
+    - skill-area:data-analytics
+    - skill-area:python-data-pipelines
+---
+nodeKind: StackProfile
+id: stack-profile:incident-management-platform
+attributes:
+  displayName: "Incident Management (Go, PostgreSQL, Redis, PagerDuty, Slack, Prometheus)"
+  description: |
+    An incident management platform that automates alert routing, escalation,
+    status page updates, and post-incident review workflows. Go services
+    ingest alerts from Prometheus and third-party monitoring tools, apply
+    deduplication and correlation rules, and route incidents to on-call
+    responders via PagerDuty. Slack integration provides war room channels,
+    status updates, and command-based incident actions. PostgreSQL stores
+    incident timelines, action items, and post-mortem reports with full
+    audit trails. Redis manages alert deduplication windows, escalation
+    timers, and real-time incident status caches. The tradeoff is alert
+    fatigue from noisy integrations and the discipline required to maintain
+    accurate runbooks and escalation policies across team rotations.
+  composes:
+    - language:go
+    - tool:psql
+    - library:redis
+    - tool:pagerduty
+    - tool:slack
+    - tool:prometheus
+    - library:chi
+    - library:zerolog
+edges:
+  composed_of:
+    - language:go
+    - tool:psql
+    - library:redis
+    - tool:pagerduty
+    - tool:slack
+    - tool:prometheus
+    - library:chi
+    - library:zerolog
+  used_by_role:
+    - role:sre
+    - role:incident-commander
+    - role:devops-engineer
+  follows_workflow:
+    - workflow:incident-response
+    - workflow:post-incident-review
+  applies_to:
+    - domain:observability
+    - domain:devops
+  requires_skill_area:
+    - skill-area:incident-management
+    - skill-area:alerting-oncall
+    - skill-area:observability-instrumentation
+    - skill-area:messaging-queuing
+    - skill-area:runbook-authoring
+---
+nodeKind: StackProfile
+id: stack-profile:runbook-automation
+attributes:
+  displayName: "Runbook Automation (Python, Ansible, PostgreSQL, Redis, FastAPI, Docker)"
+  description: |
+    A self-service runbook automation platform that codifies operational
+    procedures into executable workflows accessible through a web interface.
+    FastAPI serves the runbook catalog and execution API with role-based
+    access control and approval gates for sensitive operations. Ansible
+    playbooks encode the actual infrastructure actions — server restarts,
+    certificate rotations, database failovers — with idempotent execution
+    guarantees. PostgreSQL stores runbook definitions, execution history,
+    and approval audit trails. Redis manages job queues, execution locks
+    to prevent concurrent conflicting operations, and real-time status
+    streaming. Docker containers isolate Ansible execution environments
+    with pinned dependency versions. The tradeoff is maintaining runbook
+    accuracy as infrastructure evolves and the risk of automated actions
+    in degraded system states.
+  composes:
+    - language:python
+    - tool:ansible
+    - tool:psql
+    - library:redis
+    - framework:fastapi
+    - tool:docker
+    - library:uvicorn
+    - library:pydantic
+edges:
+  composed_of:
+    - language:python
+    - tool:ansible
+    - tool:psql
+    - library:redis
+    - framework:fastapi
+    - tool:docker
+    - library:uvicorn
+    - library:pydantic
+  used_by_role:
+    - role:sre
+    - role:devops-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:runbook-review-cycle
+    - workflow:rollback-runbook-validation
+  applies_to:
+    - domain:devops
+    - domain:infrastructure
+  requires_skill_area:
+    - skill-area:operations-automation
+    - skill-area:configuration-management
+    - skill-area:containerization
+    - skill-area:api-design
+    - skill-area:runbook-authoring
+---
+nodeKind: StackProfile
+id: stack-profile:release-orchestration
+attributes:
+  displayName: "Release Orchestration (TypeScript, GitHub Actions, Docker, Kubernetes, ArgoCD, Helm)"
+  description: |
+    A release orchestration system that coordinates multi-service deployments
+    across environments with automated promotion gates and rollback
+    capabilities. GitHub Actions pipelines build, test, and publish container
+    images with semantic versioning and signed provenance attestations.
+    ArgoCD watches Helm chart repositories for version bumps and
+    synchronizes Kubernetes cluster state with declared manifests. Helm
+    templates parameterize deployments across dev, staging, and production
+    with environment-specific value overrides. TypeScript powers the
+    release dashboard and CLI tools for managing release trains, hotfix
+    branches, and canary promotion decisions. The tradeoff is coordinating
+    release timing across teams with interdependent services and managing
+    Helm chart version sprawl.
+  composes:
+    - language:typescript
+    - tool:github-actions
+    - tool:docker
+    - tool:kubernetes
+    - tool:argocd
+    - tool:helm
+    - library:zod
+    - library:commander
+edges:
+  composed_of:
+    - language:typescript
+    - tool:github-actions
+    - tool:docker
+    - tool:kubernetes
+    - tool:argocd
+    - tool:helm
+    - library:zod
+    - library:commander
+  used_by_role:
+    - role:devops-engineer
+    - role:release-manager
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:release-management
+    - workflow:canary-deployment
+  applies_to:
+    - domain:devops
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:ci-cd
+    - skill-area:containerization
+    - skill-area:gitops
+    - skill-area:deployment-automation
+    - skill-area:cli-design
+---
+nodeKind: StackProfile
+id: stack-profile:siem-platform
+attributes:
+  displayName: "SIEM Platform (Elasticsearch, Python, RabbitMQ, Redis, React, PostgreSQL)"
+  description: |
+    A security information and event management platform that aggregates,
+    correlates, and analyzes security events from across the organization's
+    infrastructure. Elasticsearch ingests and indexes millions of security
+    events per day from network devices, servers, applications, and cloud
+    services with custom detection rule pipelines. Python services run
+    correlation engines that match event patterns against MITRE ATT&CK
+    techniques and generate prioritized alerts. RabbitMQ buffers incoming
+    event streams for reliable processing during ingestion spikes.
+    React powers the analyst dashboard with timeline visualization,
+    investigation workbenches, and alert triage workflows. PostgreSQL
+    stores detection rules, investigation cases, and analyst notes.
+    Redis caches threat intelligence lookups and active alert states.
+    The tradeoff is storage costs for long retention periods and tuning
+    detection rules to minimize false positives without missing threats.
+  composes:
+    - tool:elasticsearch
+    - language:python
+    - tool:rabbitmq
+    - library:redis
+    - framework:react
+    - tool:psql
+    - library:pandas
+    - library:httpx
+edges:
+  composed_of:
+    - tool:elasticsearch
+    - language:python
+    - tool:rabbitmq
+    - library:redis
+    - framework:react
+    - tool:psql
+    - library:pandas
+    - library:httpx
+  used_by_role:
+    - role:security-engineer
+    - role:backend-engineer
+    - role:observability-engineer
+  follows_workflow:
+    - workflow:threat-intelligence-feed-review
+    - workflow:security-control-maturity-assessment
+  applies_to:
+    - domain:cybersecurity
+    - domain:security
+  requires_skill_area:
+    - skill-area:security-monitoring-siem
+    - skill-area:threat-detection
+    - skill-area:search-infrastructure
+    - skill-area:event-driven-architecture
+    - skill-area:data-analytics
+---
+nodeKind: StackProfile
+id: stack-profile:vulnerability-management-platform
+attributes:
+  displayName: "Vulnerability Management (Python, Trivy, Snyk, PostgreSQL, React, Docker)"
+  description: |
+    A centralized vulnerability management platform that continuously scans
+    infrastructure, containers, and dependencies, then prioritizes
+    remediation based on exploitability and business impact. Trivy scans
+    container images and IaC templates in CI pipelines, while Snyk monitors
+    application dependencies for known vulnerabilities. Python aggregation
+    services normalize findings from multiple scanners into a unified
+    vulnerability database in PostgreSQL with CVSS scoring, SLA tracking,
+    and exception management. React powers the security dashboard with
+    vulnerability trend charts, team-level scorecards, and remediation
+    workflow tracking. Docker containers run scheduled scans across the
+    asset inventory. The tradeoff is managing scanner noise, deduplicating
+    findings across tools, and driving remediation accountability across
+    development teams.
+  composes:
+    - language:python
+    - tool:trivy
+    - tool:snyk
+    - tool:psql
+    - framework:react
+    - tool:docker
+    - library:pydantic
+    - library:httpx
+edges:
+  composed_of:
+    - language:python
+    - tool:trivy
+    - tool:snyk
+    - tool:psql
+    - framework:react
+    - tool:docker
+    - library:pydantic
+    - library:httpx
+  used_by_role:
+    - role:security-engineer
+    - role:devops-engineer
+    - role:vulnerability-scanner
+  follows_workflow:
+    - workflow:vulnerability-management
+    - workflow:container-image-hardening
+  applies_to:
+    - domain:cybersecurity
+    - domain:security
+  requires_skill_area:
+    - skill-area:vulnerability-scanning-remediation
+    - skill-area:container-security
+    - skill-area:compliance-scanning
+    - skill-area:ci-security
+    - skill-area:data-visualization
+---
+nodeKind: StackProfile
+id: stack-profile:identity-governance
+attributes:
+  displayName: "Identity Governance (Keycloak, PostgreSQL, React, Go, Docker)"
+  description: |
+    An identity governance and administration platform managing user
+    lifecycle, access certifications, and privilege reviews across the
+    organization. Keycloak provides the identity provider with SAML,
+    OIDC, and LDAP federation supporting thousands of enterprise
+    applications. Go microservices implement access certification campaigns,
+    role mining algorithms, and segregation-of-duties policy enforcement.
+    PostgreSQL stores identity records, entitlement catalogs, certification
+    decisions, and audit logs with temporal tables for historical queries.
+    React powers the admin console with organizational hierarchy views,
+    access request workflows, and certification campaign dashboards.
+    Docker containers ensure consistent deployment across identity zones.
+    The tradeoff is maintaining accurate role definitions as the
+    organization evolves and the performance impact of evaluating
+    complex entitlement policies at authentication time.
+  composes:
+    - tool:keycloak
+    - tool:psql
+    - framework:react
+    - language:go
+    - tool:docker
+    - library:chi
+    - library:zerolog
+    - library:tailwindcss
+edges:
+  composed_of:
+    - tool:keycloak
+    - tool:psql
+    - framework:react
+    - language:go
+    - tool:docker
+    - library:chi
+    - library:zerolog
+    - library:tailwindcss
+  used_by_role:
+    - role:security-engineer
+    - role:backend-engineer
+    - role:compliance-engineer
+  follows_workflow:
+    - workflow:access-review
+    - workflow:access-control-audit
+  applies_to:
+    - domain:cybersecurity
+    - domain:compliance
+  requires_skill_area:
+    - skill-area:identity-security
+    - skill-area:authentication-authorization
+    - skill-area:access-control
+    - skill-area:backend-data-persistence
+    - skill-area:compliance-automation
+---
+nodeKind: StackProfile
+id: stack-profile:rate-limiting-api-throttle
+attributes:
+  displayName: "Rate Limiting / API Throttle (Go, Redis, Prometheus, Docker)"
+  description: |
+    A high-performance API rate limiting and traffic management service
+    that protects backend systems from abuse and ensures fair resource
+    allocation across API consumers. Go powers the rate limiting proxy
+    with sub-millisecond sliding window and token bucket algorithms
+    implemented against Redis for distributed state. Prometheus collects
+    rate limit hit ratios, quota utilization, and latency percentiles
+    for capacity planning and abuse detection. Multiple rate limit
+    policies support per-key, per-IP, per-tenant, and global limits
+    with configurable burst allowances. Docker enables deployment as a
+    sidecar or standalone gateway. Custom response headers communicate
+    remaining quota and retry-after timing to API consumers. The
+    tradeoff is Redis latency sensitivity for high-throughput APIs and
+    the complexity of defining fair rate limit policies across diverse
+    consumer patterns.
+  composes:
+    - language:go
+    - library:redis
+    - tool:prometheus
+    - tool:docker
+    - library:chi
+    - library:zerolog
+edges:
+  composed_of:
+    - language:go
+    - library:redis
+    - tool:prometheus
+    - tool:docker
+    - library:chi
+    - library:zerolog
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+  follows_workflow:
+    - workflow:api-rate-limiting-tuning
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:api-development
+    - domain:platform-engineering
+  requires_skill_area:
+    - skill-area:rate-limiting
+    - skill-area:caching-strategies
+    - skill-area:api-design
+    - skill-area:observability-instrumentation
+    - skill-area:performance-monitoring-profiling
+---
+nodeKind: StackProfile
+id: stack-profile:feature-flag-service
+attributes:
+  displayName: "Feature Flag Service (TypeScript, Redis, PostgreSQL, React, Docker, Prometheus)"
+  description: |
+    A self-hosted feature flag management service enabling progressive
+    rollouts, A/B testing integration, and kill switches for production
+    features. TypeScript powers the flag evaluation SDK and management API
+    with type-safe flag definitions and targeting rules based on user
+    attributes, percentages, and segments. Redis provides sub-millisecond
+    flag evaluation with local caching and pub/sub-based cache invalidation
+    across service instances. PostgreSQL stores flag configurations, audit
+    trails, and targeting rule history. React delivers the management
+    dashboard with flag lifecycle views, rollout progress charts, and
+    approval workflows. Prometheus tracks flag evaluation latency and
+    exposure counts for experiment analysis. Docker containers enable
+    consistent deployment of the flag service alongside application pods.
+    The tradeoff is managing flag lifecycle cleanup to prevent permanent
+    flags and ensuring SDK performance under high evaluation volumes.
+  composes:
+    - language:typescript
+    - library:ioredis
+    - tool:psql
+    - framework:react
+    - tool:docker
+    - tool:prometheus
+    - library:prisma
+    - library:zod
+edges:
+  composed_of:
+    - language:typescript
+    - library:ioredis
+    - tool:psql
+    - framework:react
+    - tool:docker
+    - tool:prometheus
+    - library:prisma
+    - library:zod
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:feature-flag-lifecycle
+    - workflow:feature-flag-rollout
+  applies_to:
+    - domain:platform-engineering
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:feature-management
+    - skill-area:caching-strategies
+    - skill-area:api-design
+    - skill-area:frontend-development
+    - skill-area:ab-testing-experimentation
+---
+nodeKind: StackProfile
+id: stack-profile:ab-testing-platform
+attributes:
+  displayName: "A/B Testing Platform (Python, PostgreSQL, Redis, React, FastAPI, Prometheus)"
+  description: |
+    A full-featured experimentation platform for designing, running, and
+    analyzing A/B tests with statistical rigor across web and mobile
+    surfaces. FastAPI serves the experiment configuration API and the
+    variant assignment endpoint with deterministic hashing for consistent
+    user bucketing. PostgreSQL stores experiment definitions, variant
+    configurations, and raw event data for statistical analysis.
+    Redis powers real-time variant assignment lookups and experiment
+    exposure caching. React delivers the experiment management console
+    with power analysis calculators, metric dashboards, and sequential
+    testing monitors. Python statistical libraries compute confidence
+    intervals, p-values, and sample ratio mismatch detection. Prometheus
+    tracks assignment latency and exposure rates. The tradeoff is ensuring
+    experiment isolation to prevent interaction effects and the statistical
+    literacy required to correctly interpret results.
+  composes:
+    - language:python
+    - tool:psql
+    - library:redis
+    - framework:react
+    - framework:fastapi
+    - tool:prometheus
+    - library:pandas
+    - library:numpy
+edges:
+  composed_of:
+    - language:python
+    - tool:psql
+    - library:redis
+    - framework:react
+    - framework:fastapi
+    - tool:prometheus
+    - library:pandas
+    - library:numpy
+  used_by_role:
+    - role:data-scientist
+    - role:backend-engineer
+    - role:product-manager
+  follows_workflow:
+    - workflow:ab-experiment-lifecycle
+    - workflow:growth-experiment-review
+  applies_to:
+    - domain:data-science
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:ab-testing-experimentation
+    - skill-area:statistical-analysis
+    - skill-area:api-design
+    - skill-area:data-visualization
+    - skill-area:backend-data-persistence
+---
+nodeKind: StackProfile
+id: stack-profile:url-shortener-link-analytics
+attributes:
+  displayName: "URL Shortener / Link Analytics (Go, Redis, PostgreSQL, React, Docker)"
+  description: |
+    A high-performance URL shortening service with comprehensive click
+    analytics, custom branded domains, and deep link routing. Go handles
+    redirect resolution with sub-millisecond latency using Redis as the
+    primary lookup store for active short URLs. PostgreSQL stores the
+    full URL mapping database, click event streams partitioned by date,
+    and aggregate analytics with geographic and device breakdowns.
+    React powers the dashboard with real-time click counters, geographic
+    heatmaps, referrer analysis, and UTM parameter tracking. Docker
+    containers enable global deployment across edge locations for low
+    redirect latency. Background Go workers process click events from
+    Redis streams into PostgreSQL analytics tables. The tradeoff is
+    maintaining redirect latency under load and the storage cost of
+    granular click-level analytics at scale.
+  composes:
+    - language:go
+    - library:redis
+    - tool:psql
+    - framework:react
+    - tool:docker
+    - library:chi
+    - library:zerolog
+    - library:sqlx-go
+edges:
+  composed_of:
+    - language:go
+    - library:redis
+    - tool:psql
+    - framework:react
+    - tool:docker
+    - library:chi
+    - library:zerolog
+    - library:sqlx-go
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:load-testing-cycle
+    - workflow:production-readiness-review
+  applies_to:
+    - domain:digital-marketing
+    - domain:backend
+  requires_skill_area:
+    - skill-area:caching-strategies
+    - skill-area:api-design
+    - skill-area:data-analytics
+    - skill-area:backend-data-persistence
+    - skill-area:frontend-development
+---
+nodeKind: StackProfile
+id: stack-profile:file-storage-object-gateway
+attributes:
+  displayName: "File Storage / Object Gateway (Go, Boto3, PostgreSQL, Redis, Docker)"
+  description: |
+    A multi-tenant object storage gateway that provides a unified API over
+    heterogeneous storage backends with access control, quota management,
+    and lifecycle policies. Go powers the gateway with high-concurrency
+    request handling, streaming multipart uploads, and content-addressable
+    deduplication. Boto3 interfaces with cloud object storage as the
+    primary backend, while the gateway adds metadata enrichment, virus
+    scanning hooks, and access token validation. PostgreSQL stores object
+    metadata, bucket policies, quota usage, and access audit logs.
+    Redis caches authentication tokens, presigned URL validations, and
+    hot object metadata for frequently accessed files. Docker enables
+    deployment as a stateless gateway tier behind a load balancer. The
+    tradeoff is maintaining consistency between the metadata database
+    and the underlying object store, and managing multipart upload
+    lifecycle cleanup.
+  composes:
+    - language:go
+    - library:boto3
+    - tool:psql
+    - library:redis
+    - tool:docker
+    - library:chi
+    - library:zerolog
+    - library:sqlx-go
+edges:
+  composed_of:
+    - language:go
+    - library:boto3
+    - tool:psql
+    - library:redis
+    - tool:docker
+    - library:chi
+    - library:zerolog
+    - library:sqlx-go
+  used_by_role:
+    - role:backend-engineer
+    - role:platform-engineer
+    - role:cloud-architect
+  follows_workflow:
+    - workflow:production-readiness-review
+    - workflow:data-retention-review
+  applies_to:
+    - domain:cloud-infra
+    - domain:backend
+  requires_skill_area:
+    - skill-area:api-design
+    - skill-area:backend-data-persistence
+    - skill-area:caching-strategies
+    - skill-area:containerization
+    - skill-area:cloud-infrastructure
+---
+nodeKind: StackProfile
+id: stack-profile:pdf-generation-service
+attributes:
+  displayName: "PDF Generation Service (Node.js, Puppeteer, Boto3, Redis, Docker, TypeScript)"
+  description: |
+    A scalable document generation service that renders HTML templates into
+    pixel-perfect PDF documents for invoices, reports, certificates, and
+    regulatory filings. Puppeteer drives headless Chromium instances to
+    render complex layouts with CSS grid, web fonts, and SVG charts that
+    match print-quality expectations. TypeScript powers the template engine
+    with type-safe data binding and Handlebars-based layout composition.
+    Boto3 stores generated PDFs in cloud object storage with presigned
+    download URLs and configurable retention policies. Redis manages the
+    job queue for asynchronous generation requests, deduplication of
+    identical renders, and caching of recently generated documents.
+    Docker containers provide isolated Chromium sandboxes with memory
+    limits to prevent runaway rendering. The tradeoff is Chromium memory
+    consumption per concurrent render and ensuring consistent font
+    rendering across container environments.
+  composes:
+    - language:typescript
+    - library:puppeteer
+    - library:boto3
+    - library:ioredis
+    - tool:docker
+    - library:express
+    - library:handlebars
+    - library:bullmq
+edges:
+  composed_of:
+    - language:typescript
+    - library:puppeteer
+    - library:boto3
+    - library:ioredis
+    - tool:docker
+    - library:express
+    - library:handlebars
+    - library:bullmq
+  used_by_role:
+    - role:backend-engineer
+    - role:fullstack-engineer
+  follows_workflow:
+    - workflow:production-readiness-review
+    - workflow:load-testing-cycle
+  applies_to:
+    - domain:backend
+    - domain:software-engineering
+  requires_skill_area:
+    - skill-area:backend-async-processing
+    - skill-area:containerization
+    - skill-area:api-design
+    - skill-area:caching-strategies
+    - skill-area:document-processing

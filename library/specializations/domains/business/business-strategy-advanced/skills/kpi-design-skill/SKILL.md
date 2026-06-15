@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: strategy-execution
   phase: 6
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:performance-management, skill-area:strategic-planning, skill-area:data-analytics]
+  workflows: [workflow:strategic-planning]
+  roles: [role:strategic-planner, role:people-analytics-specialist]
 ---
 
 # KPI Design Skill

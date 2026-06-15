@@ -1,19 +1,14 @@
 ---
 name: dispatching-parallel-agents
 description: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies.
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Dispatching Parallel Agents
-
-## Overview
-
-One agent per independent problem domain. Let them work concurrently.
-
-**Core principle:** Dispatch one agent per independent problem domain.
-
-## When to Use
-
-- 3+ test files failing with different root causes
 - Multiple subsystems broken independently
 - Each problem understood without context from others
 - No shared state between investigations

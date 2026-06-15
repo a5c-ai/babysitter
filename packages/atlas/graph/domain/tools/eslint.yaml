@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:eslint
+attributes:
+  displayName: "ESLint"
+  homepageUrl: "https://eslint.org"
+  kind: linter
+  language: language:javascript
+  releasedAt: "2013"
+  description: |
+    Pluggable JavaScript and TypeScript linter.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - target: tool:biome
+      comparison: "JavaScript linters / formatters"
+    - target: tool:prettier
+      comparison: "JavaScript linters / formatters"

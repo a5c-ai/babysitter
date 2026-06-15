@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Integration
   agent-id: CE-AG-020
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:sensor-fusion]
+  workflows: [workflow:experiment-design]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Process Integration Coordinator Agent

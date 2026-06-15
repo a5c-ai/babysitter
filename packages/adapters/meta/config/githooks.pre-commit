@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# agent-mux pre-commit hook — lint, typecheck, and run unit tests.
+set -e
+
+npm run lint
+npm run typecheck
+npx vitest run --reporter=dot

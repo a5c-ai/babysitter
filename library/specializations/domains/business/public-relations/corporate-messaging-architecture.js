@@ -5,6 +5,11 @@
  * @category Corporate Communications
  * @inputs { organization: object, brandStrategy: object, targetAudiences: object[], competitorPositioning: object }
  * @outputs { success: boolean, messagingArchitecture: object, audienceAdaptations: object[], channelGuidelines: object, quality: number }
+  * @graph
+ *   domains: [domain:public-relations]
+ *   skillAreas: [skill-area:brand-positioning, skill-area:content-marketing, skill-area:brand-strategy]
+ *   roles: [role:marketing-strategist, role:content-strategist]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

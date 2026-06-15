@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:math.scope
+attributes:
+  subjectId: benchmark:math
+  inScope: |
+    Hendrycks MATH dataset — 12.5k competition-level mathematics problems across algebra, geometry, number theory, calculus, etc., scored by exact-match on a normalized final answer.
+  outOfScope: |
+    Grade-school arithmetic (use GSM8K), proof-style mathematical reasoning, and code-generation tasks.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:math

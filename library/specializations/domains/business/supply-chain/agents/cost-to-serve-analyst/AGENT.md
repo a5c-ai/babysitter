@@ -9,6 +9,12 @@ expertise:
   - Cost driver identification
   - Profitability optimization
   - Cost modeling
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:financial-planning, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:financial-analyst, role:procurement-manager]
 ---
 
 # Cost-to-Serve Analyst

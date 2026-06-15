@@ -13,6 +13,11 @@ expertise:
   - Traffic management
   - Fleet monitoring and analytics
   - Scalability engineering
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # Fleet Management Agent

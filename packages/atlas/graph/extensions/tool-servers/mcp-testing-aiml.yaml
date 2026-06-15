@@ -1,0 +1,97 @@
+---
+# MCP servers for testing, frontend visual testing, and AI/ML tools
+
+nodeKind: ToolServer
+id: tool-server:mcp-k6
+attributes:
+  displayName: k6 MCP Server
+  description: |
+    Official MCP server for Grafana k6 load testing maintained by Grafana Labs.
+    Enables AI agents to validate k6 scripts, execute load test runs, browse
+    k6 documentation, and receive guided script generation assistance directly
+    from MCP-enabled editors and AI coding assistants.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/grafana/mcp-k6
+  maintainer: Grafana Labs
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:k6
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-langsmith
+attributes:
+  displayName: LangSmith MCP Server
+  description: |
+    Official MCP server for the LangSmith LLM observability platform, maintained
+    by LangChain AI. Enables AI agents to fetch traces, retrieve and manage
+    prompts, query datasets and experiments, and inspect billing usage from
+    LangSmith without leaving the coding assistant context.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/langchain-ai/langsmith-mcp-server
+  maintainer: LangChain AI
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: tool:langsmith
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-langfuse
+attributes:
+  displayName: Langfuse MCP Server
+  description: |
+    Official MCP server for Langfuse prompt management, maintained by the
+    Langfuse team. Exposes production-labelled prompts via the MCP Prompts
+    specification so AI agents can discover and retrieve prompt templates
+    directly. Built into Langfuse Cloud at /api/public/mcp; also available
+    as a standalone npm package for self-hosted deployments.
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/langfuse/mcp-server-langfuse
+  maintainer: Langfuse
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: tool:langfuse
+  lib_applies_to_domain:
+  - target: domain:machine-learning
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-browserstack
+attributes:
+  displayName: BrowserStack MCP Server
+  description: |
+    Official MCP server from BrowserStack that covers automated web testing,
+    mobile app testing, and Percy visual testing. Enables AI agents to run
+    Percy visual snapshots, compare against baselines, triage visual diffs,
+    and integrate screenshot capture into CI workflows using plain-English
+    prompts from Cursor, Claude, or any MCP-enabled assistant.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/browserstack/mcp-server
+  maintainer: BrowserStack
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:percy
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:frontend

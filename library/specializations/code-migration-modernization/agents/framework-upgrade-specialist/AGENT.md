@@ -8,6 +8,13 @@ skills:
   - framework-compatibility-checker
   - codemod-executor
   - dependency-updater
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:breaking-change-management, skill-area:dependency-upgrade-strategies]
+  roles: [role:backend-engineer, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Framework Upgrade Specialist Agent

@@ -1,0 +1,92 @@
+{
+  "name": "@a5c-ai/atlas",
+  "version": "5.1.0",
+  "description": "Atlas catalog graph data, SDK, and CLI.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/atlas"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/atlas#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "catalog": [
+        "dist/catalog/index.d.ts"
+      ],
+      "catalog/*": [
+        "dist/catalog/*"
+      ],
+      "indexer": [
+        "dist/indexer.d.ts"
+      ]
+    }
+  },
+  "bin": {
+    "atlas": "dist/cli.js",
+    "a5c-atlas": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./indexer": {
+      "types": "./dist/indexer.d.ts",
+      "default": "./dist/indexer.js"
+    },
+    "./catalog": {
+      "types": "./dist/catalog/index.d.ts",
+      "default": "./dist/catalog/index.js"
+    },
+    "./graph-index": "./dist/index.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build:index": "tsx src/indexer.ts --catalog-dir ./graph --out dist/index.json",
+    "generate:discovery-snapshot": "node ./scripts/generate-discovery-snapshot.cjs",
+    "build": "node scripts/generate-library-nodes.mjs && node scripts/generate-wiki-pages.mjs && node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && npm run build:index && node scripts/validate-library-bridge.mjs && tsc -p tsconfig.json && node scripts/copy-assets.cjs && npm run generate:discovery-snapshot",
+    "validate:library": "node scripts/validate-library-bridge.mjs",
+    "validate:library:strict": "node scripts/validate-library-bridge.mjs --strict",
+    "prepack": "npm run build",
+    "cli": "node dist/cli.js",
+    "verify:library-metadata": "node scripts/verify-library-metadata.mjs",
+    "validate:edges": "node scripts/validate-edges.mjs",
+    "deferred:list": "node scripts/list-deferred-nodes.mjs",
+    "claims:run": "node scripts/run-testable-claims.mjs",
+    "claims:untested": "node scripts/find-untested-claims.mjs",
+    "quality": "node scripts/graph-quality.mjs",
+    "validate:kradle-graph": "node scripts/validate-kradle-graph.mjs",
+    "validate:kradle-graph:audit": "node scripts/validate-kradle-graph.mjs --mode=audit",
+    "validate:kradle-graph:committed": "node scripts/validate-kradle-graph.mjs --mode=committed-baseline"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "atlas": {
+    "layers": [
+      "cross-cutting"
+    ],
+    "muxes": []
+  }
+}

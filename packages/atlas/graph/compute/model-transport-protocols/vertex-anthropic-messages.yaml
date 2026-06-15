@@ -1,0 +1,110 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:vertex-anthropic-messages
+attributes:
+  displayName: "Vertex AI — Anthropic Messages"
+  vendor: "Google Cloud + Anthropic"
+  specUrl: "https://docs.anthropic.com/en/api/claude-on-vertex-ai"
+  streamingFraming: sse
+  toolUseSchema: |
+    Wire-compatible with Anthropic Messages: tool calls appear as
+    `tool_use` content blocks (with `id`, `name`, `input`); tool
+    results are returned as `tool_result` blocks referencing the same
+    `id`.
+  thinkingChannel: content-block
+  cacheControl: explicit
+  firstSpecVersion: "2024-03-19"
+  currentSpecVersion: "vertex-2023-10-16"
+  status: standard
+  requestBodyShape: |
+    POST https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/anthropic/models/{MODEL}:rawPredict
+    POST https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/anthropic/models/{MODEL}:streamRawPredict
+    Headers:
+      - `Authorization: Bearer <gcloud-oauth-token>`
+      - `Content-Type: application/json`
+    Body — Anthropic Messages request shape with these adjustments:
+      - `anthropic_version` (required, e.g. "vertex-2023-10-16") instead
+        of the `anthropic-version` header
+      - no top-level `model` field (it is supplied via the URL path)
+      - all other fields (`messages`, `system`, `max_tokens`, `tools`,
+        `tool_choice`, `temperature`, `top_p`, `top_k`, `stop_sequences`,
+        `stream`, `thinking`, `metadata`) match Anthropic Messages
+  responseBodyShape: |
+    Non-streaming response (HTTP 200 `application/json`): the full
+    Anthropic Messages response payload —
+      {
+        "id": "msg_...",
+        "type": "message",
+        "role": "assistant",
+        "model": "...",
+        "content": [ ContentBlock, ... ],
+        "stop_reason": "end_turn"|"max_tokens"|"stop_sequence"|"tool_use",
+        "stop_sequence": null|string,
+        "usage": { "input_tokens": int, "output_tokens": int,
+                   "cache_creation_input_tokens"?: int,
+                   "cache_read_input_tokens"?: int }
+      }
+    Streaming (`:streamRawPredict`): SSE response framed identically to
+    Anthropic Messages streaming.
+  streamingEventTypes:
+    - message_start
+    - content_block_start
+    - content_block_delta
+    - content_block_stop
+    - message_delta
+    - message_stop
+    - ping
+    - error
+  toolCallWireFormat: |
+    A `tool_use` content block in `message.content`:
+      { "type": "tool_use", "id": "toolu_...", "name": "<tool_name>", "input": { ... } }
+  toolResultWireFormat: |
+    A `tool_result` content block in a subsequent user-role message:
+      { "type": "tool_result",
+        "tool_use_id": "toolu_...",
+        "content": string | ContentBlock[],
+        "is_error"?: bool }
+  errorEnvelope: |
+    Non-2xx response, `application/json` — Google API error envelope:
+      { "error": { "code": int,
+                   "message": string,
+                   "status": "INVALID_ARGUMENT"|"PERMISSION_DENIED"|"RESOURCE_EXHAUSTED"|"NOT_FOUND"|"INTERNAL"|"UNAVAILABLE",
+                   "details": [ ... ] } }
+    HTTP status mirrors `error.code`.
+  cacheControlWireFormat: |
+    Per-content-block annotation, identical to Anthropic Messages:
+      { "type": "text", "text": "...", "cache_control": { "type": "ephemeral", "ttl"?: "5m"|"1h" } }
+    Up to four cache breakpoints per request. Cache hit accounting is
+    reported as `usage.cache_creation_input_tokens` and
+    `usage.cache_read_input_tokens`.
+    on Vertex (rolled out after the 5m default).
+  rateLimitSignaling: |
+    On HTTP 429 `RESOURCE_EXHAUSTED`: GCP-standard quota error;
+    `retry-after` header may be returned. Quota state is observable via
+    GCP quotas / Cloud Monitoring rather than per-response headers.
+  reasoningWireFormat: |
+    Identical to Anthropic Messages — `thinking` and
+    `redacted_thinking` content blocks on the response message:
+      { "type": "thinking", "thinking": "<text>", "signature": "<opaque>" }
+      { "type": "redacted_thinking", "data": "<opaque>" }
+    Both must be echoed back verbatim on multi-turn tool-use loops or
+    extended-thinking continuations.
+  authHeaderFormat: |
+    GCP OAuth bearer token, sourced from a Google service account or
+    `gcloud auth application-default print-access-token`:
+      `Authorization: Bearer <gcloud-oauth-token>`
+    Project / region selection is encoded in the URL path, not
+    headers. No `x-api-key` header.
+  versioningHeader: |
+    No `anthropic-version` request header. Protocol version is
+    declared in-body as `anthropic_version: "vertex-2023-10-16"`.
+    Optional `anthropic_beta` opt-in features are passed in-body as
+    `anthropic_beta: ["<feature>", ...]`.
+    in-body field name (`anthropic_beta` vs `anthropic-beta`) against
+    current Vertex docs.
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:gcp-vertex
+  spoken_by:
+    - model:claude-opus-4-7@current

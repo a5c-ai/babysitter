@@ -4,6 +4,12 @@
  * decision making systems, pathfinding, NPC behaviors, and difficulty adaptation systems.
  * @inputs { projectName: string, aiType?: string, behaviors?: array, outputDir?: string }
  * @outputs { success: boolean, aiSystemDoc: string, behaviors: array, testResults: object, artifacts: array }
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:game-prototype-iteration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

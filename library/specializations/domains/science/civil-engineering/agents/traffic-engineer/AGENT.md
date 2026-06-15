@@ -13,6 +13,10 @@ metadata:
   domain: science
   category: Transportation Engineering
   agent-id: CIV-AG-011
+graph:
+  domains: [domain:civil-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Traffic Engineer Agent

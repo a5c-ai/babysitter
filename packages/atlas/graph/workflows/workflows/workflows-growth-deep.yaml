@@ -1,0 +1,113 @@
+---
+nodeKind: Workflow
+id: workflow:product-led-growth-metrics-review
+attributes:
+  displayName: "Product-Led Growth Metrics Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Reviews product-led growth funnel metrics across the full user lifecycle
+    -- analyzing activation rates by cohort to identify onboarding friction
+    points, evaluating retention curves (D1, D7, D30) against benchmarks and
+    prior-period performance, measuring expansion revenue from upsells and seat
+    additions triggered by in-product upgrade prompts, tracking referral loop
+    metrics including viral coefficient and time-to-invite, segmenting usage
+    patterns to identify power users and at-risk accounts for targeted
+    intervention, and correlating feature adoption with conversion and
+    retention outcomes. Produces PLG metrics dashboard and growth lever
+    prioritization. Excludes feature development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:referral-program-performance-review
+attributes:
+  displayName: "Referral Program Performance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews referral program performance and integrity -- analyzing referral
+    volume trends by channel and referrer segment, evaluating referred-user
+    conversion rates and quality metrics (retention, LTV) compared to organic
+    acquisition, monitoring fraud indicators including self-referrals,
+    disposable email patterns, and suspicious reward-claiming behavior,
+    assessing reward economics and cost-per-acquisition against other growth
+    channels, tracking referral link attribution accuracy across devices and
+    sessions, and identifying top-performing referrers for VIP recognition and
+    amplification opportunities. Produces referral program performance report
+    and fraud detection summary. Excludes program redesign.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:security-review
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:landing-page-optimization-cycle
+attributes:
+  displayName: "Landing Page Optimization Cycle"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Runs continuous optimization cycles on key landing pages -- analyzing
+    page-level conversion rates segmented by traffic source, device type, and
+    geographic region, reviewing A/B and multivariate test results for headline
+    copy, hero imagery, CTA button placement, and form field configurations,
+    evaluating page load performance metrics (LCP, CLS, FID) and their
+    correlation with bounce rates, auditing mobile responsiveness and
+    cross-browser rendering issues, benchmarking page performance against
+    competitor landing experiences, and prioritizing the next round of
+    experiments based on estimated lift and implementation effort. Produces
+    optimization cycle report and experiment queue. Excludes page design and
+    development.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:data-scientist
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:core-web-vitals
+    - target: skill-area:eval-driven-development
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:marketing-team
+    - target: org-unit:engineering

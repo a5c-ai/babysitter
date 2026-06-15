@@ -8,6 +8,13 @@ skills:
   - cloud-readiness-assessor
   - iac-generator
   - containerization-assistant
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:cloud-infrastructure, skill-area:serverless-cold-start-optimization]
+  roles: [role:devops-engineer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Serverless Migration Specialist Agent

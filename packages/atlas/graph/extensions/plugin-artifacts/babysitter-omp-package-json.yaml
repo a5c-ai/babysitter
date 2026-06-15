@@ -1,0 +1,35 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-omp-package-json
+attributes:
+  artifactId: plugin-artifact:babysitter-omp-package-json
+  displayName: "babysitter-omp package.json"
+  targetId: plugin-target:omp
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "package.json"
+  scriptVariants:
+    - "node-extensions"
+  contextFiles:
+    - plugins/babysitter-omp/package.json
+    - plugins/babysitter-omp/AGENTS.md
+edges:
+  emits_artifact:
+    - target: plugin-target:omp
+---
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-omp-extensions
+attributes:
+  artifactId: plugin-artifact:babysitter-omp-extensions
+  displayName: "babysitter-omp extensions bundle"
+  targetId: plugin-target:omp
+  artifactKind: hook-script
+  pathPattern: "extensions/*"
+  installerSurface: "extensions/"
+  scriptVariants:
+    - "node-extension-module"
+  contextFiles:
+    - plugins/babysitter-omp/extensions/
+    - plugins/babysitter-omp/hooks/
+edges:
+  emits_artifact:
+    - target: plugin-target:omp

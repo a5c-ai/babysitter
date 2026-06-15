@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Agentic AI Atlas">
+  <defs>
+    <radialGradient id="atlas-paper" cx="28%" cy="18%" r="82%">
+      <stop offset="0" stop-color="#fbf7ec"/>
+      <stop offset="1" stop-color="#e7dcc4"/>
+    </radialGradient>
+    <linearGradient id="atlas-edge" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f2c88f"/>
+      <stop offset="1" stop-color="#2b2a6b"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#atlas-paper)" stroke="url(#atlas-edge)" stroke-width="2.5"/>
+  <g transform="translate(10 10) scale(1.8333333)" fill="none" stroke="#2f261b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/>
+    <path d="M12 12V8"/>
+    <rect x="16" y="16" width="6" height="6" rx="1" fill="#f2c88f"/>
+    <rect x="2" y="16" width="6" height="6" rx="1" fill="#f2c88f"/>
+    <rect x="9" y="2" width="6" height="6" rx="1" fill="#f2c88f"/>
+  </g>
+</svg>

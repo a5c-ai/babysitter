@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Reaction Engineering
   skill-id: CE-SK-007
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Reactor Designer Skill

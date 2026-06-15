@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Simulation
   skill-id: CE-SK-005
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Equipment Sizing Calculator Skill

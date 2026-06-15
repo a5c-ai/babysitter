@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: procurement
   priority: medium
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:financial-planning, skill-area:quantitative-modeling]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager, role:financial-analyst]
 ---
 
 # TCO Calculator

@@ -1,0 +1,6 @@
+nodeKind: Provider
+id: provider:aws-bedrock
+patch: true
+edges:
+  serves:
+    - model:amazon-nova-2-pro-preview@current

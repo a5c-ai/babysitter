@@ -9,6 +9,11 @@ expertise:
   - Control plan development
   - Reaction plan creation
   - SPC software configuration
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analytics, skill-area:change-management]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:data-analyst, role:business-analyst]
 ---
 
 # SPC Implementation Specialist

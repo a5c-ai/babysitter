@@ -12,6 +12,12 @@ metadata:
   domain: business
   id: SK-013
   category: Stakeholder Communication
+graph:
+  domains: [domain:business-intelligence]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:stakeholder-management, skill-area:change-management, skill-area:business-analysis]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:organizational-development-specialist]
 ---
 
 # Communication Plan Generator

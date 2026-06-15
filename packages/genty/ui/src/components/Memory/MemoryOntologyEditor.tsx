@@ -1,0 +1,572 @@
+import React, { useState } from 'react';
+
+const NODE_KIND_COLOR_OPTIONS = [
+  { label: 'Blue', value: '#3b82f6', bg: '#dbeafe', text: '#1d4ed8' },
+  { label: 'Green', value: '#22c55e', bg: '#dcfce7', text: '#15803d' },
+  { label: 'Purple', value: '#a855f7', bg: '#f3e8ff', text: '#7e22ce' },
+  { label: 'Orange', value: '#f97316', bg: '#ffedd5', text: '#c2410c' },
+  { label: 'Rose', value: '#f43f5e', bg: '#ffe4e6', text: '#be123c' },
+  { label: 'Teal', value: '#14b8a6', bg: '#ccfbf1', text: '#0f766e' },
+  { label: 'Amber', value: '#f59e0b', bg: '#fef3c7', text: '#b45309' },
+  { label: 'Slate', value: '#64748b', bg: '#f1f5f9', text: '#334155' },
+];
+
+function colorForKind(color: string) {
+  return NODE_KIND_COLOR_OPTIONS.find((c) => c.value === color) || NODE_KIND_COLOR_OPTIONS[0];
+}
+
+function ColorPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+      {NODE_KIND_COLOR_OPTIONS.map((c) => (
+        <button
+          key={c.value}
+          type="button"
+          onClick={() => onChange(c.value)}
+          title={c.label}
+          aria-label={`Select color ${c.label}`}
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            backgroundColor: c.value,
+            border: value === c.value ? '3px solid #111' : '2px solid transparent',
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export interface NodeKindDef {
+  name: string;
+  description?: string;
+  color?: string;
+}
+
+export interface EdgeKindDef {
+  name: string;
+  sourceKinds?: string[];
+  targetKinds?: string[];
+}
+
+function NodeKindBadge({ kind }: { kind: NodeKindDef }) {
+  const palette = colorForKind(kind.color || '#3b82f6');
+  return (
+    <span
+      style={{
+        background: palette.bg,
+        color: palette.text,
+        fontSize: '0.75rem',
+        fontWeight: 600,
+        padding: '0.125rem 0.5rem',
+        borderRadius: '9999px',
+        display: 'inline-block',
+      }}
+    >
+      {kind.name}
+    </span>
+  );
+}
+
+export interface OntologyResource {
+  metadata?: { name?: string };
+  spec?: {
+    memoryRepository?: string;
+    ontologyPath?: string;
+    nodeKinds?: (NodeKindDef | string)[];
+    edgeKinds?: (EdgeKindDef | string)[];
+  };
+}
+
+export interface MemoryOntologyEditorProps {
+  org: string;
+  initialOntology?: OntologyResource | null;
+  memoryRepository?: string;
+}
+
+export function MemoryOntologyEditor({
+  org,
+  initialOntology = null,
+  memoryRepository = '',
+}: MemoryOntologyEditorProps) {
+  const existing = initialOntology;
+  const existingName = existing?.metadata?.name || '';
+  const [ontologyName, setOntologyName] = useState(existingName || 'default');
+  const [memRepo, setMemRepo] = useState(existing?.spec?.memoryRepository || memoryRepository || '');
+  const [ontologyPath, setOntologyPath] = useState(
+    existing?.spec?.ontologyPath || '.kradle/ontology.yaml'
+  );
+  const [nodeKinds, setNodeKinds] = useState<NodeKindDef[]>(
+    (existing?.spec?.nodeKinds || []).map((k) =>
+      typeof k === 'string' ? { name: k, description: '', color: '#3b82f6' } : k
+    )
+  );
+  const [edgeKinds, setEdgeKinds] = useState<EdgeKindDef[]>(
+    (existing?.spec?.edgeKinds || []).map((k) =>
+      typeof k === 'string' ? { name: k, sourceKinds: [], targetKinds: [] } : k
+    )
+  );
+
+  const [newNodeName, setNewNodeName] = useState('');
+  const [newNodeDesc, setNewNodeDesc] = useState('');
+  const [newNodeColor, setNewNodeColor] = useState('#3b82f6');
+  const [showNodeForm, setShowNodeForm] = useState(false);
+
+  const [newEdgeName, setNewEdgeName] = useState('');
+  const [newEdgeSource, setNewEdgeSource] = useState('');
+  const [newEdgeTarget, setNewEdgeTarget] = useState('');
+  const [showEdgeForm, setShowEdgeForm] = useState(false);
+
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveError, setSaveError] = useState('');
+
+  function addNodeKind() {
+    const name = newNodeName.trim();
+    if (!name) return;
+    if (nodeKinds.some((k) => k.name === name)) return;
+    setNodeKinds([...nodeKinds, { name, description: newNodeDesc.trim(), color: newNodeColor }]);
+    setNewNodeName('');
+    setNewNodeDesc('');
+    setNewNodeColor('#3b82f6');
+    setShowNodeForm(false);
+  }
+
+  function removeNodeKind(name: string) {
+    setNodeKinds(nodeKinds.filter((k) => k.name !== name));
+  }
+
+  function addEdgeKind() {
+    const name = newEdgeName.trim();
+    if (!name) return;
+    if (edgeKinds.some((k) => k.name === name)) return;
+    const sourceKinds = newEdgeSource
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const targetKinds = newEdgeTarget
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setEdgeKinds([...edgeKinds, { name, sourceKinds, targetKinds }]);
+    setNewEdgeName('');
+    setNewEdgeSource('');
+    setNewEdgeTarget('');
+    setShowEdgeForm(false);
+  }
+
+  function removeEdgeKind(name: string) {
+    setEdgeKinds(edgeKinds.filter((k) => k.name !== name));
+  }
+
+  async function handleSave() {
+    setSaveStatus('saving');
+    setSaveError('');
+    const resource = {
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
+      kind: 'AgentMemoryOntology',
+      metadata: { name: ontologyName },
+      spec: {
+        memoryRepository: memRepo || 'default',
+        ontologyPath: ontologyPath || '.kradle/ontology.yaml',
+        nodeKinds: nodeKinds.map((k) => ({ name: k.name, description: k.description, color: k.color })),
+        edgeKinds: edgeKinds.map((k) => ({
+          name: k.name,
+          sourceKinds: k.sourceKinds,
+          targetKinds: k.targetKinds,
+        })),
+      },
+    };
+    try {
+      const res = await fetch(`/api/orgs/${org}/resources`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resource),
+      });
+      if (res.ok) {
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 3000);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSaveError(data.message || data.error || `Save failed (${res.status})`);
+        setSaveStatus('error');
+      }
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : 'Unknown error');
+      setSaveStatus('error');
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.375rem 0.5rem',
+    borderRadius: '0.375rem',
+    border: '1px solid var(--border)',
+    fontSize: '0.8125rem',
+    boxSizing: 'border-box',
+  };
+  const btnPrimary: React.CSSProperties = {
+    padding: '0.375rem 0.875rem',
+    background: 'var(--accent)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '0.375rem',
+    fontSize: '0.8125rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+  };
+  const btnSecondary: React.CSSProperties = {
+    padding: '0.375rem 0.875rem',
+    background: 'var(--bg-subtle)',
+    color: 'var(--text)',
+    border: '1px solid var(--border)',
+    borderRadius: '0.375rem',
+    fontSize: '0.8125rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+  };
+  const btnDanger: React.CSSProperties = {
+    padding: '0.25rem 0.5rem',
+    background: 'transparent',
+    color: 'var(--danger)',
+    border: '1px solid #fca5a5',
+    borderRadius: '0.375rem',
+    fontSize: '0.75rem',
+    cursor: 'pointer',
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Ontology identity */}
+      <div className="card">
+        <div className="cardTitle">
+          <h3>Ontology identity</h3>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+              Name
+            </label>
+            <input
+              type="text"
+              value={ontologyName}
+              onChange={(e) => setOntologyName(e.target.value)}
+              placeholder="default"
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+              Memory repository
+            </label>
+            <input
+              type="text"
+              value={memRepo}
+              onChange={(e) => setMemRepo(e.target.value)}
+              placeholder="org-memory"
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+              Ontology path
+            </label>
+            <input
+              type="text"
+              value={ontologyPath}
+              onChange={(e) => setOntologyPath(e.target.value)}
+              placeholder=".kradle/ontology.yaml"
+              style={inputStyle}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Node kinds */}
+      <div className="card">
+        <div className="cardTitle">
+          <h3>Node kinds</h3>
+          <span
+            style={{
+              background: '#dbeafe',
+              color: '#1d4ed8',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '0.125rem 0.5rem',
+              borderRadius: '9999px',
+            }}
+          >
+            {nodeKinds.length}
+          </span>
+        </div>
+        {nodeKinds.length > 0 && (
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}
+            role="list"
+            aria-label="Node kinds"
+          >
+            {nodeKinds.map((kind) => (
+              <div
+                key={kind.name}
+                role="listitem"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.5rem 0.75rem',
+                  background: 'var(--bg-subtle)',
+                  borderRadius: '0.375rem',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <NodeKindBadge kind={kind} />
+                <span style={{ flex: 1, fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                  {kind.description || <em>No description</em>}
+                </span>
+                <button
+                  style={btnDanger}
+                  onClick={() => removeNodeKind(kind.name)}
+                  aria-label={`Remove node kind ${kind.name}`}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {showNodeForm ? (
+          <div
+            style={{
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+            }}
+          >
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+                Name <span style={{ color: 'var(--danger)' }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={newNodeName}
+                onChange={(e) => setNewNodeName(e.target.value)}
+                placeholder="e.g. Service"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+                Description
+              </label>
+              <input
+                type="text"
+                value={newNodeDesc}
+                onChange={(e) => setNewNodeDesc(e.target.value)}
+                placeholder="Optional description"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.375rem' }}>
+                Color
+              </label>
+              <ColorPicker value={newNodeColor} onChange={setNewNodeColor} />
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                style={btnPrimary}
+                onClick={addNodeKind}
+                disabled={!newNodeName.trim()}
+                aria-label="Add node kind"
+              >
+                Add node kind
+              </button>
+              <button
+                style={btnSecondary}
+                onClick={() => setShowNodeForm(false)}
+                aria-label="Cancel adding node kind"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button style={btnSecondary} onClick={() => setShowNodeForm(true)} aria-label="Add new node kind">
+            + Add node kind
+          </button>
+        )}
+      </div>
+
+      {/* Edge kinds */}
+      <div className="card">
+        <div className="cardTitle">
+          <h3>Edge kinds</h3>
+          <span
+            style={{
+              background: '#dcfce7',
+              color: '#15803d',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '0.125rem 0.5rem',
+              borderRadius: '9999px',
+            }}
+          >
+            {edgeKinds.length}
+          </span>
+        </div>
+        {edgeKinds.length > 0 && (
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}
+            role="list"
+            aria-label="Edge kinds"
+          >
+            {edgeKinds.map((kind) => (
+              <div
+                key={kind.name}
+                role="listitem"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.5rem 0.75rem',
+                  background: 'var(--bg-subtle)',
+                  borderRadius: '0.375rem',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <span style={{ fontWeight: 600, fontSize: '0.8125rem', minWidth: 120 }}>{kind.name}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flex: 1 }}>
+                  {kind.sourceKinds?.length ? (
+                    <>
+                      <strong>from:</strong> {kind.sourceKinds.join(', ')}
+                    </>
+                  ) : (
+                    'any source'
+                  )}{' '}
+                  {kind.targetKinds?.length ? (
+                    <>
+                      {' '}
+                      &rarr; <strong>to:</strong> {kind.targetKinds.join(', ')}
+                    </>
+                  ) : (
+                    '→ any target'
+                  )}
+                </span>
+                <button
+                  style={btnDanger}
+                  onClick={() => removeEdgeKind(kind.name)}
+                  aria-label={`Remove edge kind ${kind.name}`}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {showEdgeForm ? (
+          <div
+            style={{
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+            }}
+          >
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+                Name <span style={{ color: 'var(--danger)' }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={newEdgeName}
+                onChange={(e) => setNewEdgeName(e.target.value)}
+                placeholder="e.g. depends_on"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+                Source kinds
+              </label>
+              <input
+                type="text"
+                value={newEdgeSource}
+                onChange={(e) => setNewEdgeSource(e.target.value)}
+                placeholder="Service, Team (comma-separated, or leave empty for any)"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
+                Target kinds
+              </label>
+              <input
+                type="text"
+                value={newEdgeTarget}
+                onChange={(e) => setNewEdgeTarget(e.target.value)}
+                placeholder="Service, API (comma-separated, or leave empty for any)"
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                style={btnPrimary}
+                onClick={addEdgeKind}
+                disabled={!newEdgeName.trim()}
+                aria-label="Add edge kind"
+              >
+                Add edge kind
+              </button>
+              <button
+                style={btnSecondary}
+                onClick={() => setShowEdgeForm(false)}
+                aria-label="Cancel adding edge kind"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button style={btnSecondary} onClick={() => setShowEdgeForm(true)} aria-label="Add new edge kind">
+            + Add edge kind
+          </button>
+        )}
+      </div>
+
+      {/* Save */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button
+          style={{
+            ...btnPrimary,
+            padding: '0.5rem 1.5rem',
+            fontSize: '0.875rem',
+            opacity: saveStatus === 'saving' ? 0.7 : 1,
+            cursor: saveStatus === 'saving' ? 'not-allowed' : 'pointer',
+          }}
+          onClick={handleSave}
+          disabled={saveStatus === 'saving' || !ontologyName.trim()}
+          aria-label="Save ontology"
+        >
+          {saveStatus === 'saving' ? 'Saving...' : 'Save ontology'}
+        </button>
+        {saveStatus === 'saved' && (
+          <span style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: 500 }}>
+            Saved successfully
+          </span>
+        )}
+        {saveStatus === 'error' && (
+          <span style={{ color: 'var(--danger)', fontSize: '0.875rem' }}>{saveError}</span>
+        )}
+      </div>
+    </div>
+  );
+}

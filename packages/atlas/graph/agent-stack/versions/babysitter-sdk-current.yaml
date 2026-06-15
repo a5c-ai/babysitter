@@ -1,0 +1,36 @@
+nodeKind: AgentVersion
+id: agent-version:babysitter-sdk@current
+attributes:
+  agentProductId: agent:babysitter-sdk
+  versionRange: ">=5.0.0"
+  releasedAt: "2026-01-11"
+  cliCommand: "<sdk:babysitter-sdk>"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:babysitter-sdk
+  composed_of:
+    - target: agent-core-impl:babysitter-sdk.core@current
+      role: core
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+      role: runtime
+    - target: agent-governance-impl:babysitter-sdk-tool.governance@current
+      role: governance
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=5.0.0'
+      level: full
+      notes: babysitter-sdk enables multi-turn process orchestration.
+    - target: capability:supports-text-streaming
+      versionRange: '>=5.0.0'
+      level: full
+      notes: babysitter-sdk streams output from orchestrated agents.
+    - target: capability:programmatic-tool-calling
+      versionRange: '>=5.0.0'
+      level: full
+      notes: babysitter-sdk exposes programmatic task and tool-calling APIs.
+  uses_memory_system:
+    - target: memory-system:instruction-file-hierarchy

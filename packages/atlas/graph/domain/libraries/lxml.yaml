@@ -1,0 +1,13 @@
+nodeKind: Library
+id: library:lxml
+attributes:
+  displayName: "lxml"
+  belongsToLanguageId: language:python
+  category: parsing
+  description: |
+    XML and HTML processing library for Python combining libxml2/libxslt with a Pythonic API.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:backend-api-design

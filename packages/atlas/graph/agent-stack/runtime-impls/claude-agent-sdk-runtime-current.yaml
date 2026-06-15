@@ -1,0 +1,39 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:claude-agent-sdk.runtime@current
+attributes:
+  displayName: Claude Agent SDK Runtime (current)
+  agentVersionId: agent-version:claude-agent-sdk@current
+  packageRef: source-ref:claude-code-github
+  subagentDispatchMechanism: task-tool
+  builtInTools: []
+  toolRegistryDiscovery: dynamic-extension-loaded
+  hookSockets: []
+  internalSessionStateLocation: host-managed
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: host-managed
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: none
+  supportedMCPTransports:
+    - mcp-transport:stdio
+    - mcp-transport:streamable-http
+  supportsStreaming: true
+  notes: |
+    The Claude Agent SDK runtime is a thin Node/Python library — there is
+    no separate runtime daemon. Tools are supplied by the consumer; MCP
+    is brokered by the SDK over stdio and streamable-http. Approval
+    gating, transcript persistence, and subprocess sandboxing are all
+    delegated back to the host program.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:claude-agent-sdk
+      role: runtime
+  bundles: []
+  connects:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http

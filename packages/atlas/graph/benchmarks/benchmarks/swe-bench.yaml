@@ -1,0 +1,17 @@
+nodeKind: Benchmark
+id: benchmark:swe-bench
+attributes:
+  displayName: "SWE-bench"
+  homepageUrl: https://www.swebench.com/
+  kind: full-stack
+  targetsKind: AgentVersion
+  description: |
+    Real-world software engineering issues from open-source Python repos.
+edges:
+  covers:
+    - target: skill-area:bug-fixing-from-issues
+      attributes:
+        coverage: full
+        weight: 0.05
+  applies_to:
+    - target: domain:software-engineering

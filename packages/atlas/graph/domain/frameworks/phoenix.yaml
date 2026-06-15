@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:phoenix
+attributes:
+  displayName: "Phoenix"
+  homepageUrl: "https://www.phoenixframework.org"
+  belongsToLanguageId: language:elixir
+  category: web-backend
+  description: |
+    The Phoenix web framework for Elixir.
+edges:
+  belongs_to_language:
+    - language:elixir
+  used_by_skill_area:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - target: framework:phoenix-liveview
+      comparison: "Elixir web frameworks"

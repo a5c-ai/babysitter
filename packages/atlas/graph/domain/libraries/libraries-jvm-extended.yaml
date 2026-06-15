@@ -1,0 +1,230 @@
+---
+nodeKind: Library
+id: library:spring-data
+attributes:
+  displayName: "Spring Data"
+  belongsToLanguageId: language:java
+  category: orm
+  description: |
+    Umbrella project providing repository abstractions and data access
+    support for JPA, MongoDB, Redis, Cassandra, and other stores.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:spring-security
+attributes:
+  displayName: "Spring Security"
+  belongsToLanguageId: language:java
+  category: auth
+  description: |
+    Comprehensive authentication and authorization framework for Spring
+    applications with OAuth2, OIDC, SAML, and method-level security.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:authentication-authorization
+  alternative_to:
+    - library:devise
+---
+nodeKind: Library
+id: library:spring-cloud
+attributes:
+  displayName: "Spring Cloud"
+  belongsToLanguageId: language:java
+  category: other
+  description: |
+    Toolset for building distributed systems on Spring Boot including
+    service discovery, config server, circuit breakers, and API gateways.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:micronaut
+---
+nodeKind: Library
+id: library:micronaut
+attributes:
+  displayName: "Micronaut"
+  belongsToLanguageId: language:java
+  category: http-server
+  description: |
+    JVM microservices framework with compile-time DI and AOP; supports
+    GraalVM native images for fast startup and low memory footprint.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:quarkus
+    - library:spring-boot
+---
+nodeKind: Library
+id: library:quarkus
+attributes:
+  displayName: "Quarkus"
+  belongsToLanguageId: language:java
+  category: http-server
+  description: |
+    Kubernetes-native Java framework optimized for GraalVM and HotSpot;
+    provides fast boot, low RSS, and a rich extension ecosystem.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:ktor
+attributes:
+  displayName: "Ktor"
+  belongsToLanguageId: language:kotlin
+  category: http-server
+  description: |
+    Asynchronous Kotlin framework for building connected applications
+    including HTTP servers, clients, and WebSocket endpoints.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:exposed
+attributes:
+  displayName: "Exposed"
+  belongsToLanguageId: language:kotlin
+  category: orm
+  description: |
+    Lightweight Kotlin SQL library by JetBrains offering both DSL and
+    DAO patterns over JDBC for type-safe database access.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:kotest
+attributes:
+  displayName: "Kotest"
+  belongsToLanguageId: language:kotlin
+  category: testing
+  description: |
+    Flexible Kotlin testing framework with multiple spec styles,
+    property-based testing, data-driven tests, and coroutine support.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:junit
+    - library:scalatest
+---
+nodeKind: Library
+id: library:arrow-kt
+attributes:
+  displayName: "Arrow (Kotlin)"
+  belongsToLanguageId: language:kotlin
+  category: other
+  description: |
+    Functional programming library for Kotlin providing typed errors,
+    monad comprehensions, optics, and Effect-based concurrency.
+edges:
+  belongs_to_language:
+    - language:kotlin
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:cats
+---
+nodeKind: Library
+id: library:dagger-java
+attributes:
+  displayName: "Dagger"
+  belongsToLanguageId: language:java
+  category: other
+  description: |
+    Compile-time dependency injection framework for Java and Android;
+    generates DI code at build time with no reflection at runtime.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:solution-architecture
+  alternative_to:
+    - library:guice
+    - library:koin
+    - library:hilt
+---
+nodeKind: Library
+id: library:guice
+attributes:
+  displayName: "Google Guice"
+  belongsToLanguageId: language:java
+  category: other
+  description: |
+    Lightweight dependency injection framework for Java by Google using
+    annotations and bindings with runtime reflection.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:solution-architecture
+---
+nodeKind: Library
+id: library:slf4j
+attributes:
+  displayName: "SLF4J"
+  belongsToLanguageId: language:java
+  category: logging
+  description: |
+    Simple Logging Facade for Java providing a unified API over backend
+    implementations such as Logback, Log4j, and java.util.logging.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+  alternative_to:
+    - library:log4j
+---
+nodeKind: Library
+id: library:log4j
+attributes:
+  displayName: "Log4j 2"
+  belongsToLanguageId: language:java
+  category: logging
+  description: |
+    Widely used Java logging framework with async appenders, pattern
+    layouts, plugin architecture, and structured JSON logging.
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+---
+nodeKind: Library
+id: library:netty
+attributes:
+  displayName: "Netty"
+  belongsToLanguageId: language:java
+  category: other
+  description: |
+    Asynchronous, event-driven Java network application framework for
+    high-performance protocol servers and clients (TCP, UDP, HTTP/2).
+edges:
+  belongs_to_language:
+    - language:java
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:tokio

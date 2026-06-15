@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:amp.scope
+attributes:
+  subjectId: agent:amp
+  inScope: |
+    Sourcegraph's coding agent — CLI for headless use plus VS Code and JetBrains extensions, leveraging Sourcegraph's code-graph context and MCP tool servers.
+  outOfScope: |
+    Fully air-gapped operation without Sourcegraph backend, hosted multi-tenant agent platforms, and browser-driving workflows.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:amp

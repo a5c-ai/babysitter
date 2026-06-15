@@ -1,0 +1,143 @@
+nodeKind: Claim
+id: claim:model-version-model-grok-4-3-current-contextwindowtokens
+attributes:
+  subjectId: model:grok-4-3@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:grok-4-3@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 Grok 4.3 model attributes.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - model:grok-4-3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-3-current-costpermtokinput
+attributes:
+  subjectId: model:grok-4-3@current
+  attribute: costPerMTokInput
+  value: '1.25'
+  subjectKind: ModelVersion
+  statement: model:grok-4-3@current costPerMTokInput is 1.25.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 Grok 4.3 model attributes.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - model:grok-4-3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-3-current-costpermtokoutput
+attributes:
+  subjectId: model:grok-4-3@current
+  attribute: costPerMTokOutput
+  value: '2.5'
+  subjectKind: ModelVersion
+  statement: model:grok-4-3@current costPerMTokOutput is 2.5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 Grok 4.3 model attributes.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - model:grok-4-3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-3-current-modalities
+attributes:
+  subjectId: model:grok-4-3@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:grok-4-3@current modalities are text and image.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 Grok 4.3 model attributes.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - model:grok-4-3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-3-current-structured-output
+attributes:
+  subjectId: model:grok-4-3@current
+  attribute: supports
+  value: capability:supports-structured-output
+  subjectKind: ModelVersion
+  statement: model:grok-4-3@current supports structured outputs.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 Grok 4.3 capability support.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - model:grok-4-3@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-3-current-function-calling
+attributes:
+  subjectId: model:grok-4-3@current
+  attribute: supports
+  value: capability:supports-tool-use
+  subjectKind: ModelVersion
+  statement: model:grok-4-3@current supports function calling/tool use.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-3-model-docs
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #358 Grok 4.3 capability support.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-3-model-docs
+  about_subject:
+    - model:grok-4-3@current

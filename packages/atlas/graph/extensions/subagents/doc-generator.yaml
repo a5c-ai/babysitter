@@ -1,0 +1,46 @@
+nodeKind: Subagent
+id: subagent:doc-generator
+attributes:
+  displayName: "Doc Generator"
+  provenance: custom
+  roleId: role:doc-generator
+  systemPrompt: |
+    You produce reference documentation from source code. Read function
+    signatures, JSDoc/docstrings, types. Emit Markdown reference grouped
+    by module. Include parameters, return types, side-effects, and usage
+    examples derived from tests. Do not modify code.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+    - tool-descriptor:edit
+    - tool-descriptor:write
+  disallowedTools:
+    - tool-descriptor:bash
+  triggers: |
+    Invoke when the user asks for API docs, a reference page, or to
+    backfill docs for an undocumented module.
+  description: |
+    Documentation-authoring subagent. Reads source and emits Markdown
+    reference. Common user-installed pattern; lives at
+    `.claude/agents/doc-generator.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:doc-generator
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reflection

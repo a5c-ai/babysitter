@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:telemedicine-platform-review
+attributes:
+  displayName: "Telemedicine Platform Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews telemedicine platform reliability and clinical quality --
+    analyzing video consultation connection quality metrics (latency, packet
+    loss, resolution), evaluating clinical workflow completion rates and
+    provider satisfaction scores, auditing HIPAA-compliant data handling
+    across telehealth sessions, reviewing e-prescribing integration
+    accuracy, and tracking patient wait times against published service
+    levels. Produces platform reliability reports, clinical quality
+    dashboards, and regulatory compliance assessments. Excludes clinical
+    protocol development.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:sli-slo-management
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:healthtech
+    - target: domain:healthcare
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:remote-patient-monitoring-audit
+attributes:
+  displayName: "Remote Patient Monitoring Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Audits remote patient monitoring systems and clinical workflows --
+    validating wearable device data accuracy against clinical-grade
+    reference measurements, reviewing alert threshold configurations for
+    sensitivity and specificity, auditing clinician response time to
+    critical alerts against care protocols, evaluating data transmission
+    reliability from patient devices to clinical dashboards, and verifying
+    patient consent and data privacy compliance across RPM data flows.
+    Produces device accuracy reports, alert efficacy analyses, and clinical
+    workflow compliance scorecards. Excludes treatment plan modifications.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:healthtech
+    - target: domain:healthcare
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:compliance-team

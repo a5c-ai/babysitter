@@ -1,0 +1,224 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.list-workers
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: List Workers"
+  description: List Cloudflare Worker scripts in the account.
+  inputSchema:
+    type: object
+    properties:
+      account_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      workers: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.deploy-worker
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: Deploy Worker"
+  description: Deploy or update a Cloudflare Worker script.
+  inputSchema:
+    type: object
+    required: [name, script]
+    properties:
+      account_id: { type: string }
+      name: { type: string }
+      script: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      result: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.list-kv-namespaces
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: List KV Namespaces"
+  description: List Workers KV namespaces.
+  inputSchema:
+    type: object
+    properties:
+      account_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      namespaces: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.kv-get
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: KV Get"
+  description: Get a value from a Workers KV namespace by key.
+  inputSchema:
+    type: object
+    required: [namespace_id, key]
+    properties:
+      namespace_id: { type: string }
+      key: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      value: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.kv-put
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: KV Put"
+  description: Write a key/value pair into a Workers KV namespace.
+  inputSchema:
+    type: object
+    required: [namespace_id, key, value]
+    properties:
+      namespace_id: { type: string }
+      key: { type: string }
+      value: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      success: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.list-d1-databases
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: List D1 Databases"
+  description: List D1 SQL databases on the account.
+  inputSchema:
+    type: object
+    properties:
+      account_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      databases: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.d1-query
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: D1 Query"
+  description: Run an SQL query against a Cloudflare D1 database.
+  inputSchema:
+    type: object
+    required: [database_id, sql]
+    properties:
+      database_id: { type: string }
+      sql: { type: string }
+      params: { type: array }
+  outputSchema:
+    type: object
+    properties:
+      result: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.list-r2-buckets
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: List R2 Buckets"
+  description: List R2 object storage buckets.
+  inputSchema:
+    type: object
+    properties:
+      account_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      buckets: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.r2-list-objects
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: R2 List Objects"
+  description: List objects in an R2 bucket.
+  inputSchema:
+    type: object
+    required: [bucket]
+    properties:
+      bucket: { type: string }
+      prefix: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      objects: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:cloudflare.analytics-query
+attributes:
+  schema: '{}'
+  displayName: "Cloudflare: Analytics Query"
+  description: Query Cloudflare GraphQL analytics for a zone or account.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      variables: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      data: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-cloudflare

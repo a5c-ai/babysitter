@@ -1,0 +1,607 @@
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-aws-bedrock-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/awslabs/mcp is the migrated source reference for ToolDescriptor
+    tool-descriptor:bedrock.list-foundation-models in graph/extensions/tool-descriptors/aws-bedrock-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:bedrock.list-foundation-models
+  attribute: source
+  value: https://github.com/awslabs/mcp
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-aws-bedrock-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:bedrock.list-foundation-models
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-aws-bedrock-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-aws-s3-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/awslabs/mcp is the migrated source reference for ToolDescriptor
+    tool-descriptor:s3.list-buckets in graph/extensions/tool-descriptors/aws-s3-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:s3.list-buckets
+  attribute: source
+  value: https://github.com/awslabs/mcp
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-aws-s3-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:s3.list-buckets
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-aws-s3-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-brave-search-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+    is the migrated source reference for ToolDescriptor tool-descriptor:brave.web-search
+    in graph/extensions/tool-descriptors/brave-search-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:brave.web-search
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-brave-search-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:brave.web-search
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-brave-search-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-clickhouse-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/ClickHouse/mcp-clickhouse is the migrated source reference
+    for ToolDescriptor tool-descriptor:clickhouse.run-select-query in graph/extensions/tool-descriptors/clickhouse-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:clickhouse.run-select-query
+  attribute: source
+  value: https://github.com/ClickHouse/mcp-clickhouse
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-clickhouse-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:clickhouse.run-select-query
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-clickhouse-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-cloudflare-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/cloudflare/mcp-server-cloudflare is the migrated source
+    reference for ToolDescriptor tool-descriptor:cloudflare.list-workers in graph/extensions/tool-descriptors/cloudflare-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:cloudflare.list-workers
+  attribute: source
+  value: https://github.com/cloudflare/mcp-server-cloudflare
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-cloudflare-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:cloudflare.list-workers
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-cloudflare-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-context7-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/upstash/context7 is the migrated source reference
+    for ToolDescriptor tool-descriptor:context7.resolve-library-id in graph/extensions/tool-descriptors/context7-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:context7.resolve-library-id
+  attribute: source
+  value: https://github.com/upstash/context7
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-context7-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:context7.resolve-library-id
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-context7-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-docker-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/docker/mcp-servers is the migrated source reference
+    for ToolDescriptor tool-descriptor:docker.ps in graph/extensions/tool-descriptors/docker-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:docker.ps
+  attribute: source
+  value: https://github.com/docker/mcp-servers
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-docker-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:docker.ps
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-docker-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-elasticsearch-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/elastic/mcp-server-elasticsearch is the migrated source
+    reference for ToolDescriptor tool-descriptor:elasticsearch.list-indices in graph/extensions/tool-descriptors/elasticsearch-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:elasticsearch.list-indices
+  attribute: source
+  value: https://github.com/elastic/mcp-server-elasticsearch
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-elasticsearch-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:elasticsearch.list-indices
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-elasticsearch-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-everything-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+    is the migrated source reference for ToolDescriptor tool-descriptor:everything.echo
+    in graph/extensions/tool-descriptors/everything-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:everything.echo
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-everything-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:everything.echo
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-everything-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-exa-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/exa-labs/exa-mcp-server is the migrated source reference
+    for ToolDescriptor tool-descriptor:exa.web-search in graph/extensions/tool-descriptors/exa-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:exa.web-search
+  attribute: source
+  value: https://github.com/exa-labs/exa-mcp-server
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-exa-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:exa.web-search
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-exa-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-fetch-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch is
+    the migrated source reference for ToolDescriptor tool-descriptor:fetch.fetch in
+    graph/extensions/tool-descriptors/fetch-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:fetch.fetch
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-fetch-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:fetch.fetch
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-fetch-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-figma-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/GLips/Figma-Context-MCP is the migrated source reference
+    for ToolDescriptor tool-descriptor:figma.get-file in graph/extensions/tool-descriptors/figma-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:figma.get-file
+  attribute: source
+  value: https://github.com/GLips/Figma-Context-MCP
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-figma-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:figma.get-file
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-figma-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-filesystem-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+    is the migrated source reference for ToolDescriptor tool-descriptor:fs.read-file
+    in graph/extensions/tool-descriptors/filesystem-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:fs.read-file
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-filesystem-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:fs.read-file
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-filesystem-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-firecrawl-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/mendableai/firecrawl-mcp-server is the migrated source
+    reference for ToolDescriptor tool-descriptor:firecrawl.scrape in graph/extensions/tool-descriptors/firecrawl-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:firecrawl.scrape
+  attribute: source
+  value: https://github.com/mendableai/firecrawl-mcp-server
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-firecrawl-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:firecrawl.scrape
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-firecrawl-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-github-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/github/github-mcp-server is the migrated source reference
+    for ToolDescriptor tool-descriptor:github.create-issue in graph/extensions/tool-descriptors/github-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:github.create-issue
+  attribute: source
+  value: https://github.com/github/github-mcp-server
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-github-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:github.create-issue
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-github-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-gitlab-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+    is the migrated source reference for ToolDescriptor tool-descriptor:gitlab.search-repositories
+    in graph/extensions/tool-descriptors/gitlab-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:gitlab.search-repositories
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-gitlab-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:gitlab.search-repositories
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-gitlab-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-google-drive-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+    is the migrated source reference for ToolDescriptor tool-descriptor:gdrive.search
+    in graph/extensions/tool-descriptors/google-drive-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:gdrive.search
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-google-drive-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:gdrive.search
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-google-drive-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-google-maps-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+    is the migrated source reference for ToolDescriptor tool-descriptor:maps.geocode
+    in graph/extensions/tool-descriptors/google-maps-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:maps.geocode
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-google-maps-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:maps.geocode
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-google-maps-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-jira-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/sooperset/mcp-atlassian is the migrated source reference
+    for ToolDescriptor tool-descriptor:jira.search in graph/extensions/tool-descriptors/jira-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:jira.search
+  attribute: source
+  value: https://github.com/sooperset/mcp-atlassian
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-jira-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:jira.search
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-jira-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-kubernetes-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/Flux159/mcp-server-kubernetes is the migrated source
+    reference for ToolDescriptor tool-descriptor:kubectl.get in graph/extensions/tool-descriptors/kubernetes-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:kubectl.get
+  attribute: source
+  value: https://github.com/Flux159/mcp-server-kubernetes
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-kubernetes-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:kubectl.get
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-kubernetes-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-linear-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://linear.app/changelog/2025-05-01-mcp is the migrated source reference
+    for ToolDescriptor tool-descriptor:linear.list-issues in graph/extensions/tool-descriptors/linear-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:linear.list-issues
+  attribute: source
+  value: https://linear.app/changelog/2025-05-01-mcp
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-linear-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:linear.list-issues
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-linear-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-memory-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+    is the migrated source reference for ToolDescriptor tool-descriptor:memory.create-entities
+    in graph/extensions/tool-descriptors/memory-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:memory.create-entities
+  attribute: source
+  value: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-memory-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:memory.create-entities
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-memory-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-mongodb-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/mongodb-js/mongodb-mcp-server is the migrated source
+    reference for ToolDescriptor tool-descriptor:mongo.list-databases in graph/extensions/tool-descriptors/mongodb-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:mongo.list-databases
+  attribute: source
+  value: https://github.com/mongodb-js/mongodb-mcp-server
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-mongodb-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:mongo.list-databases
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-mongodb-mcp-tools-yaml
+---
+nodeKind: Claim
+id: claim:source-provenance-extensions-tool-descriptors-notion-mcp-tools-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: https://github.com/makenotion/notion-mcp-server is the migrated source
+    reference for ToolDescriptor tool-descriptor:notion.search in graph/extensions/tool-descriptors/notion-mcp-tools.yaml.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:notion.search
+  attribute: source
+  value: https://github.com/makenotion/notion-mcp-server
+  evidenceSourceIds:
+  - evidence:source-provenance-extensions-tool-descriptors-notion-mcp-tools-yaml
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:notion.search
+  backed_by_evidence:
+  - evidence:source-provenance-extensions-tool-descriptors-notion-mcp-tools-yaml

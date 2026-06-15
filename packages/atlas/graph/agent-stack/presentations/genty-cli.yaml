@@ -1,0 +1,20 @@
+---
+nodeKind: Presentation
+id: presentation:genty-cli
+attributes:
+  displayName: "genty CLI"
+  kind: cli
+  description: |
+    CLI entry point for the genty agent. Wraps agent-platform and adapters
+    surfaces into a single `genty` binary. Supports both interactive and
+    headless/CI modes; emits a normalized JSON event stream when invoked
+    with `--json`.
+  renderingTechnology: vte
+  themeSupport: none
+  accessibilitySupport: basic
+  offlineMode: 'no'
+  platforms: [darwin, linux, win32]
+  updateChannel: npm
+edges:
+  bundled_with:
+    - agent-platform-impl:genty.platform@current

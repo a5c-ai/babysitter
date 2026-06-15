@@ -1,0 +1,35 @@
+nodeKind: AgentVersion
+id: agent-version:a5c@current
+attributes:
+  agentProductId: agent:a5c
+  versionRange: ">=1.0.0"
+  releasedAt: "2026-01-01"
+  cliCommand: "a5c"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:a5c
+  composed_of:
+    - target: agent-core-impl:a5c.core@current
+      role: core
+    - target: agent-runtime-impl:a5c.runtime@current
+      role: runtime
+    - target: agent-platform-impl:a5c.platform@current
+      role: platform
+    - target: agent-ui-impl:a5c.ui@current
+      role: ui
+  sourced_from: []
+  supports:
+    - target: capability:supports-effort-passthrough
+      versionRange: "*"
+      level: full
+      notes: |
+        a5c dispatches to multiple harnesses (Claude Code, Codex,
+        Cursor, Gemini); effort tiers are owned by the bridged harness.
+        a5c.core@current carries `effortLevelDelegation=passthrough-to-harness`
+        and is correctly silent on `supports_effort_level`.
+  uses_memory_system:
+    - target: memory-system:claude-code-auto-memory
+    - target: memory-system:file-based-markdown-pattern

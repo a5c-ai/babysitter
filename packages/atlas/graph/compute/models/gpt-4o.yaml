@@ -1,0 +1,93 @@
+nodeKind: ModelVersion
+id: model:gpt-4o@current
+attributes:
+  displayName: "GPT-4o"
+  supportsExtendedThinking: false
+  modelFamilyId: model-family:gpt-4o
+  versionRange: '>=4.0.0 <5.0.0'
+  kind: multimodal
+  contextWindowTokens: 128000
+  costPerMTokInput: 2.5
+  costPerMTokOutput: 10.0
+  supportsThinking: false
+  supportsThinkingBudgetTokens: false
+  modalities:
+  - text
+  - image
+  - audio
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2024-05-13'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2024-05-13'
+  knowledgeCutoffDate: '2023-10-01'
+  safetyTier: openai-preparedness-medium
+  modelCardUrl: https://openai.com/index/gpt-4o-system-card/
+  supportsFineTuning: true
+  fineTuningKind: lora
+  regions:
+  - global
+edges:
+  belongs_to_family:
+    - target: model-family:gpt-4o
+  realizes:
+    - target: layer:1-model
+  version_of:
+  - model-family:gpt-4o
+  served_by:
+  - provider:openai
+  speaks:
+  - model-transport:openai-responses
+  - model-transport:openai-chat-completions
+  supports:
+  - target: capability:supports-batch-api
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:parallel-tool-calls
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-prompt-caching
+    versionRange: '>=4.0.0 <5.0.0'
+    level: partial
+    notes: 'OpenAI implicit prompt caching: server-side, automatic; no explicit cache_control
+      surface.
+
+      '
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-docs-streaming-2026
+  - target: capability:supports-text-streaming
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-tool-call-streaming
+    versionRange: '>=4.0.0 <5.0.0'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-models-page
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-responses-api
+  - target: capability:vision-input
+    versionRange: '*'
+    level: full
+    evidenceSourceIds:
+    - evidence:openai-responses-api

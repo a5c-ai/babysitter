@@ -8,6 +8,13 @@ expertise:
   - Input sanitization
   - Security hardening
   - Threat modeling
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:hallucination-mitigation-fact-checking, skill-area:safety-redteaming]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # Prompt Injection Defender

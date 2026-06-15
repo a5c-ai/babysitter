@@ -1,0 +1,71 @@
+nodeKind: EvidenceSource
+id: evidence:claude-mythos-preview-anthropic-models
+attributes:
+  displayName: "Anthropic Claude models overview, Claude Mythos Preview"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/models/overview
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/models/overview
+  locator: "Claude Mythos Preview / Project Glasswing access"
+  observedAt: "2026-05-26T19:29:29Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T19:29:29Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:claude-mythos-preview-anthropic-red
+attributes:
+  displayName: "Anthropic Red Team: Claude Mythos Preview"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://red.anthropic.com/2026/mythos-preview/
+  sourcePathOrUrl: https://red.anthropic.com/2026/mythos-preview/
+  locator: "Claude Mythos Preview system-card material dated 2026-04-07"
+  observedAt: "2026-05-26T19:29:29Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T19:29:29Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:claude-mythos-preview-bedrock
+attributes:
+  displayName: "AWS Bedrock model card: Anthropic Claude Mythos Preview"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-mythos-preview.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-mythos-preview.html
+  locator: "Claude Mythos Preview gated research preview model card"
+  observedAt: "2026-05-26T19:29:29Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T19:29:29Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:claude-mythos-preview-microsoft-foundry
+attributes:
+  displayName: "Microsoft Foundry Claude models documentation"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-claude
+  sourcePathOrUrl: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-claude
+  locator: "Claude Mythos Preview / claude-mythos-preview model ID"
+  observedAt: "2026-05-26T19:29:29Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-26T19:29:29Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

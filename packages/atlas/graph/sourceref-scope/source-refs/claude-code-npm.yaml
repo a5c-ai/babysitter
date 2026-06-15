@@ -1,0 +1,16 @@
+nodeKind: SourceRef
+id: source-ref:claude-code-npm
+attributes:
+  description: "Claude Code (npm)"
+  displayName: "Claude Code (npm)"
+  repoUrl: https://github.com/anthropics/claude-code
+  ref: main
+  path: "."
+  packageManager: npm
+  packageName: "@anthropic-ai/claude-code"
+  kind: npm-package
+  homepageUrl: https://docs.anthropic.com/en/docs/claude-code/overview
+  notes: |
+    Vendor-doc evidence at https://docs.anthropic.com/en/docs/claude-code/overview.
+    Public mirror at https://github.com/anthropics/claude-code.
+edges: {}

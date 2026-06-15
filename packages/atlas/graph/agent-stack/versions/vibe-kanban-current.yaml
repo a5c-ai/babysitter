@@ -1,0 +1,54 @@
+nodeKind: AgentVersion
+id: agent-version:vibe-kanban@current
+attributes:
+  agentProductId: agent:vibe-kanban
+  versionRange: '>=0.1.0'
+  releasedAt: '2025-06-01'
+  installMethods:
+    - install:manual
+  minSchemaVersion: 6.0.0
+edges:
+  version_of:
+    - agent:vibe-kanban
+  composed_of:
+    - target: agent-ui-impl:vibe-kanban.ui@current
+      role: ui
+    - target: agent-core-impl:vibe-kanban.core@current
+      role: core
+    - target: agent-platform-impl:vibe-kanban.platform@current
+      role: platform
+    - target: presentation:vibe-kanban-web
+      role: presentation
+  sourced_from: []
+  supports:
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Vibe Kanban streams agent output from spawned agent processes in real time.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Core feature — runs multiple agents in parallel across isolated worktrees.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Kanban cards maintain per-agent multi-turn conversation state.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Dispatches coding agents (Claude Code, Codex, Gemini CLI) as subagents per task card.
+    - target: capability:supports-mcp
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Agents spawned by Vibe Kanban inherit MCP server configurations from their respective harnesses.
+    - target: capability:can-fork
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Per-task git worktree isolation — each task card gets a dedicated workspace directory and branch.
+    - target: capability:vision-input
+      versionRange: '>=0.1.0'
+      level: partial
+      notes: PR review screenshots and visual diffs available in the review column for agents that support vision.
+  uses_memory_system:
+    - target: memory-system:vercel-ai-memory
+    - target: memory-system:file-based-markdown-pattern

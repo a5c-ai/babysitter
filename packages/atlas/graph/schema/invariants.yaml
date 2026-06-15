@@ -1,0 +1,305 @@
+# Catalog schema — machine-readable invariants.
+# Mirrors ../schema/validation-rules.md. Severity: fail blocks merge; warn logs only.
+
+catalogSchemaVersion: 1.0.0
+
+invariants:
+  # V-1 Structural rules
+  - id: V-1.1
+    severity: fail
+    description: every node has a NodeKind from the schema
+    appliesTo: all nodes
+    check: node.kind exists in nodeKinds[]
+
+  - id: V-1.2
+    severity: fail
+    description: every edge has an EdgeKind from the schema, and source/target NodeKinds are within the EdgeKind's allowed sets
+    appliesTo: all edges
+    check: edge.kind exists in edgeKinds[] and edge.source.kind in edgeKind.source and edge.target.kind in edgeKind.target
+
+  - id: V-1.3
+    severity: fail
+    description: every edge respects its declared cardinality
+    appliesTo: all edges
+    check: count(edges grouped by source/target) consistent with edgeKind.cardinality
+
+  - id: V-1.4
+    severity: fail
+    description: every required attribute on a node has a value
+    appliesTo: all nodes
+    check: for each required attribute on the node's NodeKind, node.attributes[name] is set
+
+  - id: V-1.5
+    severity: fail
+    description: every id is well-formed <kind-prefix>:<slug>
+    appliesTo: all nodes
+    check: node.id matches "^<prefix>:[a-z0-9][a-z0-9-]*[a-z0-9]$" where prefix is the NodeKind's declared prefix
+
+  - id: V-1.6
+    severity: fail
+    description: every ref<NodeKind> attribute resolves to a node of the declared NodeKind
+    appliesTo: all attributes of type ref<...>
+    check: graph.lookup(value).kind == declared NodeKind
+
+  - id: V-1.7
+    severity: fail
+    description: every attribute value type-checks against its declared AttributeType
+    appliesTo: all attributes
+    check: typeof(value) matches attributeTypes[name].validator
+
+  # V-2 Evidence rules
+  - id: V-2.1
+    severity: fail
+    description: every evidence-bound attribute is backed by at least one Claim with at least one EvidenceSource at or above the policy's minimumTrustLevel
+    appliesTo: all evidence-bound attributes
+    check: exists Claim where subjectId==node and attribute==name and len(evidenceSourceIds)>=1 and max(trustLevel(es)) >= policy.minimumTrustLevel
+
+  - id: V-2.2
+    severity: fail
+    description: every EvidenceSource is within its applicable freshnessWindowDays measured from observedAt or reviewedAt (whichever is later)
+    appliesTo: all EvidenceSource nodes
+    check: now - max(observedAt, reviewedAt) <= freshnessWindowDays
+
+  - id: V-2.3
+    severity: fail
+    description: every Claim has a reviewOwner matching the policy's reviewOwnerPattern when one is declared
+    appliesTo: all Claims gated by a policy with reviewOwnerPattern
+    check: claim.reviewOwner matches policy.reviewOwnerPattern
+
+  - id: V-2.4
+    severity: fail
+    description: no Claim on a safety-critical attribute (capability binding, install method, sandbox profile) is backed solely by synthetic-trust evidence
+    appliesTo: Claims on attributes flagged safety-critical
+    check: not all(es.trustLevel == synthetic for es in claim.evidenceSourceIds)
+
+  - id: V-2.5
+    severity: warn-then-fail
+    description: every EvidenceSource of kindLabel=web has a reachabilityCheck whose status=ok within the freshness window
+    appliesTo: EvidenceSource where kindLabel == web
+    check: reachabilityCheck.status == "ok" and reachabilityCheck.lastChecked within freshnessWindowDays
+    escalation: warns immediately; escalates to fail after 30 days stale
+
+  - id: V-2.6
+    severity: fail
+    description: a Claim whose expiresAt has passed is treated as missing for V-2.1 purposes
+    appliesTo: all Claims
+    check: claim.expiresAt is unset or claim.expiresAt > now
+
+  - id: V-2.7
+    severity: fail
+    description: a Claim with supersededBy must point to a newer Claim on the same subjectId and attribute
+    appliesTo: Claims with supersededBy set
+    check: successor.subjectId == claim.subjectId and successor.attribute == claim.attribute and successor.claimedAt > claim.claimedAt
+
+  # V-3 Versioning rules
+  - id: V-3.1
+    severity: fail
+    description: capability claims (supports edges and capability-attributes) are bound to a versionRange referring to an AgentVersion, not directly to an AgentProduct
+    appliesTo: all supports edges and capability-attributes
+    check: edge.source.kind == AgentVersion and edge.attributes.versionRange is set
+
+  - id: V-3.4
+    severity: fail
+    description: no two AgentVersion nodes for the same AgentProduct overlap on versionRange
+    appliesTo: AgentVersion nodes
+    check: for any two v1, v2 with same agentProductId, semver-intersect(v1.versionRange, v2.versionRange) is empty
+
+  # V-4 Domain ontology rules
+  - id: V-4.1
+    severity: fail
+    description: the Domain -> Specialization -> Topic hierarchy via contains edges is acyclic
+    appliesTo: contains edges among Domain/Specialization/Topic
+    check: graph(contains) is a DAG
+
+  - id: V-4.2
+    severity: fail
+    description: every Framework has exactly one belongs_to_language edge, or declares multiLanguage=true with at least one belongs_to_language edge
+    appliesTo: Framework nodes
+    check: count(belongs_to_language from f) == 1 or (f.multiLanguage == true and count >= 1)
+
+  - id: V-4.3
+    severity: fail
+    description: a StackProfile composes at least one Language and at least one Framework or Tool
+    appliesTo: StackProfile nodes
+    check: any(target.kind == Language for composes) and any(target.kind in [Framework, Tool] for composes)
+
+  # V-5 Role ontology rules
+  - id: V-5.1
+    severity: fail
+    description: Role.isAgentic is required (a bool, no default)
+    appliesTo: Role nodes
+    check: role.isAgentic is set and is bool
+
+  - id: V-5.2
+    severity: fail
+    description: the delegates_to graph on Role nodes is acyclic
+    appliesTo: delegates_to edges among Roles
+    check: graph(delegates_to) is a DAG
+
+  - id: V-5.3
+    severity: fail
+    description: every Role has at least one holds_responsibility edge
+    appliesTo: Role nodes
+    check: count(holds_responsibility from role) >= 1
+
+  - id: V-5.4
+    severity: warn
+    description: a Subagent linked by roles_played_by to a Role must satisfy that Role's requires_skill set, or the link declares partial=true
+    appliesTo: roles_played_by edges
+    check: subagent.skills covers role.requires_skill or edge.partial == true
+
+  # V-6 Terminology rules
+  - id: V-6.1
+    severity: fail
+    description: every Term has at least one associated Definition
+    appliesTo: Term nodes
+    check: exists Definition where Definition.termId == term.id
+
+  - id: V-6.2
+    severity: fail
+    description: every Term.canonicalDefinitionId resolves to a Definition node that exists
+    appliesTo: Term nodes
+    check: graph.lookup(term.canonicalDefinitionId).kind == Definition
+
+  - id: V-6.3
+    severity: fail
+    description: synonym_of edges within the same inContext form valid equivalence classes (symmetric, transitive, no contradictions with subsumes)
+    appliesTo: synonym_of edges
+    check: equivalence-class check + no overlap with subsumes graph
+
+  - id: V-6.4
+    severity: fail
+    description: a Term referenced by `references` must point to a NodeKind or Capability that exists in the current schema version
+    appliesTo: Term.references
+    check: target.kind in [NodeKind, Capability] and target exists in current CatalogVersion
+
+  # V-7 Channel and hook rules
+  - id: V-7.1
+    severity: fail
+    description: ChannelKind values are restricted to mcp-channel, a2a-channel, chat-channel, mailbox-channel
+    appliesTo: ChannelKind nodes
+    check: channelKind.value in {mcp-channel, a2a-channel, chat-channel, mailbox-channel}
+
+  - id: V-7.2
+    severity: fail
+    description: HookFamily values are restricted to shell-hook, in-process, observer
+    appliesTo: HookFamily nodes
+    check: hookFamily.value in {shell-hook, in-process, observer}
+
+  - id: V-7.3
+    severity: fail
+    description: every HookSurface has exactly one belongs_to_family edge
+    appliesTo: HookSurface nodes
+    check: count(belongs_to_family from hookSurface) == 1
+
+  - id: V-7.4
+    severity: fail
+    description: every Channel has exactly one has_kind edge
+    appliesTo: Channel nodes
+    check: count(has_kind from channel) == 1
+
+  # V-8 Trust rules
+  # V-8.1, V-8.2, V-8.4 removed: the Authority/Attestation NodeKinds and the
+  # Trust Chain (cross-stack signing) are out-of-scope for the Phase 1 ontology.
+  # Only V-8.3 (TrustLevel enum closure) survives because TrustLevel grades
+  # evidence quality and is unrelated to chain-signing.
+
+  - id: V-8.3
+    severity: fail
+    description: TrustLevel values are restricted to official-web, vendor-doc, community, synthetic
+    appliesTo: TrustLevel nodes
+    check: trustLevel.level in {official-web, vendor-doc, community, synthetic}
+
+  # V-9 Scope rules
+  - id: V-9.1
+    severity: fail
+    description: for any entity, its in_scope and out_of_scope edges to the same ScopeBoundary cannot coexist
+    appliesTo: in_scope and out_of_scope edges
+    check: not exists (entity, boundary) such that in_scope(entity, boundary) and out_of_scope(entity, boundary)
+
+  - id: V-9.2
+    severity: fail
+    description: every ScopeBoundary carrying out_of_scope items has at least one out_of_scope_reason edge per item or a default reason on the boundary
+    appliesTo: ScopeBoundary nodes
+    check: outOfScope non-empty implies len(outOfScopeReasonIds) >= 1
+
+  - id: V-9.3
+    severity: fail
+    description: OutOfScopeReason enum values (reasonKind) are listed in the schema; new reasons require a schema bump
+    appliesTo: OutOfScopeReason nodes
+    check: outOfScopeReason.reasonKind in {volatile-data, runtime-only, not-design-artifact, implementation-detail, future-phase, governance-deferred}
+
+  # V-10 Lifecycle rules
+  - id: V-10.1
+    severity: fail
+    description: every LifecycleState has exactly one belongs_to_machine edge
+    appliesTo: LifecycleState nodes
+    check: count(belongs_to_machine from state) == 1
+
+  - id: V-10.2
+    severity: fail
+    description: every StateMachine has at least one LifecycleState with terminal_state=true
+    appliesTo: StateMachine nodes
+    check: exists state where belongs_to_machine(state, sm) and state.terminal_state == true
+
+  - id: V-10.3
+    severity: fail
+    description: from every non-terminal LifecycleState, at least one transitions_to edge exists
+    appliesTo: LifecycleState nodes where terminal_state == false
+    check: count(transitions_to from state) >= 1
+
+  - id: V-10.4
+    severity: warn
+    description: transitions_to cycles are allowed only when annotated cycle=explicit on at least one edge in the cycle
+    appliesTo: transitions_to edges forming cycles
+    check: every cycle contains at least one edge where edge.cycle == "explicit"
+
+  # V-11 Extension rules
+  - id: V-11.1
+    severity: fail
+    description: every Plugin.installs_into edge declares an installMethod
+    appliesTo: installs_into edges
+    check: edge.installMethod is set
+
+  - id: V-11.2
+    severity: fail
+    description: a PortableExtension.compiles_to NativeExtension declares a host matching a known AgentProduct
+    appliesTo: compiles_to edges
+    check: edge.host resolves to an AgentProduct
+
+  - id: V-11.3
+    severity: fail
+    description: every extension claiming implements ExtensionInterface carries a Claim on interfaceVersion evidence-bound to the interface's release notes
+    appliesTo: implements edges
+    check: exists Claim where subjectId==extension and attribute=="interfaceVersion" and evidenceSourceIds non-empty
+
+  # V-12 General invariants
+  - id: V-12.1
+    severity: fail
+    description: no node is an island; every node has at least one edge unless its NodeKind opts out via isolatedAllowed=true
+    appliesTo: all nodes
+    check: count(edges where source==node or target==node) >= 1 or node.kind.isolatedAllowed == true
+
+  - id: V-12.2
+    severity: fail
+    description: displayName is unique per NodeKind; duplicates require a duplicateOf ref justifying the duplication
+    appliesTo: all nodes
+    check: for each (kind, displayName), at most one node, or duplicates carry duplicateOf ref
+
+  - id: V-12.3
+    severity: fail
+    description: id is globally unique across the graph
+    appliesTo: all nodes
+    check: count(nodes by id) == 1 for every id
+
+  - id: V-12.4
+    severity: fail
+    description: every example in graph/ validates against rules V-1 through V-11
+    appliesTo: example files
+    check: validator(example) returns no failures from V-1..V-11
+
+  - id: V-12.5
+    severity: fail
+    description: markdown node-kind specs and YAML node-kind records are in parity; every attribute documented in markdown is declared in YAML and vice versa
+    appliesTo: NodeKind specs
+    check: parity-check(md, yaml) returns empty diff

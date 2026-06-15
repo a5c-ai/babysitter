@@ -1,0 +1,30 @@
+# Dedicated issue #807 evidence record. Kept separate from current/date-bucket
+# files to avoid conflicts with concurrent graph-update PRs.
+nodeKind: EvidenceSource
+id: evidence:qwen-code-release-v0-17-0-issue-807
+attributes:
+  displayName: "Qwen Code v0.17.0 release notes for issue #807"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.17.0
+  sourcePathOrUrl: https://github.com/QwenLM/qwen-code/releases/tag/v0.17.0
+  locator: "QwenLM/qwen-code release v0.17.0 tracked by issue #807"
+  capturedAt: "2026-05-31T20:12:00Z"
+  observedAt: "2026-05-31T20:12:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:12:00Z"
+  notes: |
+    Issue #807 tracks Qwen Code v0.17.0 release notes. The release surfaces
+    startup warnings on stderr before TUI render, improves telemetry LogToSpan
+    bridge error information and TUI handling, adds a Feishu/Lark channel
+    adapter, adds foundation work for skill-based RT optimization, and tracks
+    model-sent slash command history entries.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:qwen@current
+    - agentVersion:qwen:0-17-0
+    - source-ref:qwen-code-github

@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: hardware-integration
   phase: 6
+graph:
+  domains: [domain:quantum-computing]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:physics-simulation, skill-area:sensor-fusion, skill-area:mathematical-reasoning]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Hardware Integrator

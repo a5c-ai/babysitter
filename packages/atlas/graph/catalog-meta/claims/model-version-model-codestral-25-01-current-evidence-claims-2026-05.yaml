@@ -1,0 +1,288 @@
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-contextwindowtokens
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: contextWindowTokens
+  value: '256000'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current contextWindowTokens is 256000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-costpermtokinput
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: costPerMTokInput
+  value: '0.3'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current costPerMTokInput is 0.3.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-costpermtokoutput
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: costPerMTokOutput
+  value: '0.9'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current costPerMTokOutput is 0.9.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-kind
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: kind
+  value: code-completion
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current kind is code-completion.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-lifecyclestatus
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-modalities
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-modalitydirections
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-modelcardurl
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: modelCardUrl
+  value: https://mistral.ai/news/codestral-2501/
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current modelCardUrl is https://mistral.ai/news/codestral-2501/.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-supportsextendedthinking
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-supportsfinetuning
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current
+---
+nodeKind: Claim
+id: claim:model-version-model-codestral-25-01-current-versionrange
+attributes:
+  subjectId: model:codestral-25-01@current
+  attribute: versionRange
+  value: '>=25.01.0 <26.0.0'
+  subjectKind: ModelVersion
+  statement: model:codestral-25-01@current versionRange is >=25.01.0 <26.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-codestral-25-01
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-codestral-25-01
+  about_subject:
+  - model:codestral-25-01@current

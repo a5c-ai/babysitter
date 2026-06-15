@@ -2,21 +2,18 @@
 name: debugging-patterns
 description: Root cause analysis frameworks including log-first investigation, git bisect correlation, and pattern-based diagnosis with confidence scoring.
 allowed-tools: Read, Bash, Grep, Glob, WebSearch
----
-
-# Debugging Patterns
-
-## Overview
-
-Provides structured frameworks for root cause analysis. The log-first methodology ensures evidence is gathered before hypotheses are formed.
-
-## Log-First Investigation
-
-1. Read ALL available logs, error output, and stack traces
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. DO NOT form hypotheses before reading evidence
 3. Identify the exact error: message, file, line, call stack
 4. Determine reproduction steps from evidence
 5. Check git log for recent changes correlating with bug introduction
+
+---
 
 ## Pattern-Based Diagnosis
 

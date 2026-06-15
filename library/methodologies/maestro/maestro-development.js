@@ -3,6 +3,12 @@
  * @description Maestro Development - Feature development cycle: story planning, parallel implementation, testing, architect review, merge
  * @inputs { stories: array, techSpec: object, projectRoot?: string, coderCount?: number, qualityThreshold?: number, knowledgeGraph?: object }
  * @outputs { success: boolean, completedStories: array, mergeResults: array, testCoverage: object, knowledgeGraph: object, metrics: object }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

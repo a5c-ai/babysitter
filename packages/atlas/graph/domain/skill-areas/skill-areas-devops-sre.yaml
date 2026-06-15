@@ -1,0 +1,183 @@
+---
+nodeKind: SkillArea
+id: skill-area:gitops
+attributes:
+  displayName: "GitOps"
+  description: |
+    Declarative cluster state in Git, reconciled by controllers
+    (Argo CD, Flux). Includes drift detection and progressive sync.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  uses_tool:
+    - tool:argocd
+    - tool:flux
+    - tool:kubernetes
+    - tool:jenkins
+  prerequisite_for_learning:
+    - target: skill-area:blue-green-deployment
+      strength: helpful
+    - target: skill-area:canary-rollouts
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:blue-green-deployment
+attributes:
+  displayName: "Blue/Green Deployment"
+  description: |
+    Two-environment cutover deploys with instantaneous switchover and
+    fast rollback; load-balancer or DNS-based switching.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:canary-rollouts
+attributes:
+  displayName: "Canary Rollouts"
+  description: |
+    Progressive delivery with traffic-shifted canaries, automated
+    analysis (SLO-based), and rollback gates.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  uses_stack_part:
+    - stack-part:feature-flag-service
+---
+nodeKind: SkillArea
+id: skill-area:chaos-engineering
+attributes:
+  displayName: "Chaos Engineering"
+  description: |
+    Hypothesis-driven fault injection — game days, blast-radius
+    control, steady-state metrics, and chaos experimentation tools.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [expert, authoritative]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:sli-slo-management
+attributes:
+  displayName: "SLI / SLO Management"
+  description: |
+    Defining SLIs/SLOs, error budgets, burn-rate alerts, and
+    operationalizing reliability targets across teams.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:chaos-engineering
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:incident-response
+attributes:
+  displayName: "Incident Response"
+  description: |
+    On-call rotations, paging, severity taxonomy, incident commander
+    practice, comms, and blameless postmortems.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:observability-pipeline
+attributes:
+  displayName: "Observability Pipeline"
+  description: |
+    Designing telemetry pipelines for metrics/logs/traces — collectors,
+    routing, sampling, redaction, and cost control.
+  domains:
+    - specialization:devops-sre-platform
+    - domain:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  uses_tool:
+    - tool:opentelemetry-collector
+    - tool:fluent-bit
+    - tool:prometheus
+    - tool:grafana
+---
+nodeKind: SkillArea
+id: skill-area:service-mesh-config
+attributes:
+  displayName: "Service Mesh Configuration"
+  description: |
+    Configuring Istio/Linkerd — mTLS, traffic-shifting, retries,
+    timeouts, circuit breaking, and observability integration.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  uses_tool:
+    - tool:istio
+    - tool:linkerd
+  uses_stack_part:
+    - stack-part:service-mesh
+---
+nodeKind: SkillArea
+id: skill-area:k8s-rbac
+attributes:
+  displayName: "Kubernetes RBAC"
+  description: |
+    Designing Kubernetes RBAC — Roles, ClusterRoles, bindings,
+    service accounts, and least-privilege automation patterns.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  uses_tool:
+    - tool:kubernetes
+---
+nodeKind: SkillArea
+id: skill-area:secrets-rotation
+attributes:
+  displayName: "Secrets Rotation"
+  description: |
+    Automated rotation of credentials, certificates, and tokens —
+    short-lived secrets, KMS-backed envelopes, and zero-downtime
+    rollover.
+  domains:
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:devops-sre-platform
+      confidence: primary
+  uses_stack_part:
+    - stack-part:secrets-manager
+  uses_tool:
+    - tool:sops

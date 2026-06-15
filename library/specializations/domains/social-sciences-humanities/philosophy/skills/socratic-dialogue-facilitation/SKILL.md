@@ -8,6 +8,12 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:user-research, skill-area:mentorship, skill-area:natural-language-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:ux-researcher, role:research-scientist]
 ---
 
 # Socratic Dialogue Facilitation Skill

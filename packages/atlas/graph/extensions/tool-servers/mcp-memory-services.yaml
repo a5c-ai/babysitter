@@ -1,0 +1,70 @@
+---
+# Memory Service MCP Servers
+# MCP servers for agent memory persistence, retrieval, and management
+
+nodeKind: ToolServer
+id: tool-server:mcp-mem0
+attributes:
+  displayName: Mem0 MCP Server
+  description: |
+    MCP server providing access to the Mem0 memory service API. Enables AI
+    agents to add, search, and retrieve memories across sessions using Mem0's
+    multi-scope memory (user, session, agent, organization). Exposes add_memory,
+    search_memory, get_all_memories, and delete_memory tools. Integrates with
+    Mem0 Cloud or self-hosted Mem0 deployments.
+  protocol: mcp
+  category: memory
+  repoUrl: https://github.com/mem0ai/mem0-mcp
+  maintainer: Mem0
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:mem0
+  lib_applies_to_domain:
+    - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-zep
+attributes:
+  displayName: Zep MCP Server
+  description: |
+    MCP server providing access to the Zep long-term memory service. Enables
+    AI agents to add facts, search memories with temporal weighting, and manage
+    conversation history through Zep's entity-enriched memory store. Exposes
+    add_memory, search_memory, get_memory, and delete_session tools. Supports
+    Zep Cloud and self-hosted Zep deployments.
+  protocol: mcp
+  category: memory
+  repoUrl: https://github.com/getzep/zep-mcp
+  maintainer: Zep
+  mcpTransports:
+    - mcp-transport:stdio
+edges:
+  integrates_with:
+    - target: tool:zep
+  lib_applies_to_domain:
+    - target: domain:software-engineering
+---
+nodeKind: ToolServer
+id: tool-server:mcp-cloudflare-memory
+attributes:
+  displayName: Cloudflare Agent Memory MCP Server
+  description: |
+    MCP server bridging AI agents to Cloudflare's Durable Objects-backed
+    persistent memory service. Enables ingest, remember, recall, and forget
+    operations against a Cloudflare-managed memory store. Team-shared memory
+    profiles make stored memories accessible to any agent or user in the same
+    namespace. Runs as a Cloudflare Worker with stdio or HTTP transport.
+  protocol: mcp
+  category: memory
+  repoUrl: https://github.com/cloudflare/mcp-server-cloudflare
+  maintainer: Cloudflare
+  mcpTransports:
+    - mcp-transport:stdio
+    - mcp-transport:http
+edges:
+  integrates_with:
+    - target: tool:cloudflare-agent-memory
+  lib_applies_to_domain:
+    - target: domain:software-engineering

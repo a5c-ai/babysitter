@@ -7,6 +7,11 @@ metadata:
   version: "1.0.0"
   category: research
   backlog-id: SK-META-001
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:ai-agent-development]
+  topics: [topic:knowledge-management, topic:developer-experience]
+  roles: [role:platform-engineer, role:tech-lead]
 ---
 
 # specialization-researcher

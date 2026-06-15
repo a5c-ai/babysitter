@@ -5,6 +5,13 @@
  * @outputs { success: boolean, selfStudy: object, evidencePortfolio: object, improvementPlan: object, artifacts: array }
  * @recommendedSkills SK-EDU-013 (quality-assurance-review), SK-EDU-015 (curriculum-gap-analysis), SK-EDU-009 (learning-analytics-interpretation)
  * @recommendedAgents AG-EDU-009 (quality-assurance-coordinator), AG-EDU-007 (learning-evaluation-analyst)
+ *
+ * @graph
+ *   domains: [domain:education]
+ *   specializations: [specialization:instructional-design]
+ *   skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

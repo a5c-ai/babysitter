@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:cyber-bench.scope
+attributes:
+  subjectId: benchmark:cyber-bench
+  inScope: |
+    Cybersecurity capability evaluations — CTF-style tasks (CTF-Bench / CyberSecEval) testing offensive and defensive reasoning. Scored by per-task success.
+  outOfScope: |
+    General software-engineering tasks, code-generation quality, and non-security agentic workflows.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - benchmark:cyber-bench

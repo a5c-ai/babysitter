@@ -1,0 +1,11 @@
+nodeKind: Topic
+id: topic:hmac-signing
+attributes:
+  displayName: "HMAC Signing"
+  description: |
+    HMAC request signing and verification — shared-secret authentication
+    of API requests and webhook payloads.
+edges:
+  applies_to:
+    - domain:security
+    - domain:web-development

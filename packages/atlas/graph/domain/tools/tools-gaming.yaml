@@ -1,0 +1,144 @@
+---
+nodeKind: Tool
+id: tool:unity
+attributes:
+  displayName: "Unity"
+  homepageUrl: "https://unity.com"
+  kind: game-engine
+  releasedAt: "2005"
+  description: |
+    Cross-platform game engine supporting 2D and 3D development with C# scripting,
+    visual editor, asset store, and deployment to 25+ platforms including mobile,
+    console, PC, and WebGL.
+edges:
+  belongs_to_language:
+    - language:csharp
+  used_for:
+    - target: skill-area:game-engines
+    - target: skill-area:game-loop
+    - target: skill-area:gameplay-programming
+    - target: skill-area:game-physics
+  applies_to:
+    - target: domain:gaming
+    - target: domain:gaming-industry
+    - target: domain:game-design
+    - target: specialization:game-development
+    - target: specialization:game-engine-dev
+    - target: specialization:computer-graphics
+  alternative_to:
+    - target: tool:unreal-engine
+      comparison: "game engines — Unity uses C#, Unreal uses C++; Unity stronger in mobile/indie, Unreal in AAA"
+    - target: tool:godot
+      comparison: "game engines — Unity is commercial with asset store, Godot is fully open-source"
+---
+nodeKind: Tool
+id: tool:unreal-engine
+attributes:
+  displayName: "Unreal Engine"
+  homepageUrl: "https://www.unrealengine.com"
+  kind: game-engine
+  releasedAt: "1998"
+  description: |
+    AAA game engine by Epic Games featuring Nanite virtualized geometry,
+    Lumen global illumination, Blueprints visual scripting, and C++ API.
+    Industry standard for high-fidelity games, film, and architectural
+    visualization.
+edges:
+  belongs_to_language:
+    - language:cpp
+  used_for:
+    - target: skill-area:game-engines
+    - target: skill-area:game-loop
+    - target: skill-area:graphics-rendering
+    - target: skill-area:game-physics
+    - target: skill-area:gameplay-programming
+  applies_to:
+    - target: domain:gaming
+    - target: domain:gaming-industry
+    - target: domain:game-design
+    - target: specialization:game-development
+    - target: specialization:game-engine-dev
+    - target: specialization:computer-graphics
+  alternative_to:
+    - target: tool:unity
+      comparison: "game engines — Unreal excels at AAA fidelity with C++, Unity at rapid iteration with C#"
+    - target: tool:godot
+      comparison: "game engines — Unreal is commercial AAA-grade, Godot is lightweight open-source"
+---
+nodeKind: Tool
+id: tool:godot
+attributes:
+  displayName: "Godot"
+  homepageUrl: "https://godotengine.org"
+  kind: game-engine
+  releasedAt: "2014"
+  description: |
+    Fully open-source game engine with GDScript, C#, and C++ support.
+    Features a scene-based architecture, built-in 2D and 3D editors,
+    and MIT license with no royalties.
+edges:
+  belongs_to_language:
+    - language:csharp
+    - language:cpp
+  used_for:
+    - target: skill-area:game-engines
+    - target: skill-area:game-loop
+    - target: skill-area:gameplay-programming
+  applies_to:
+    - target: domain:gaming
+    - target: domain:gaming-industry
+    - target: domain:game-design
+    - target: specialization:game-development
+    - target: specialization:game-engine-dev
+  alternative_to:
+    - target: tool:unity
+      comparison: "game engines — Godot is MIT-licensed and lightweight, Unity is commercial with larger ecosystem"
+    - target: tool:unreal-engine
+      comparison: "game engines — Godot is indie-friendly open-source, Unreal targets AAA production"
+---
+nodeKind: Tool
+id: tool:blender
+attributes:
+  displayName: "Blender"
+  homepageUrl: "https://www.blender.org"
+  kind: 3d-modeling
+  releasedAt: "1994"
+  description: |
+    Free and open-source 3D creation suite supporting modeling, sculpting,
+    animation, rigging, rendering, compositing, and video editing. Python
+    scripting API for automation and pipeline integration.
+edges:
+  belongs_to_language:
+    - language:python
+    - language:cpp
+  used_for:
+    - target: skill-area:graphics-rendering
+    - target: skill-area:game-engines
+  applies_to:
+    - target: domain:gaming
+    - target: domain:gaming-industry
+    - target: domain:game-design
+    - target: specialization:game-development
+    - target: specialization:computer-graphics
+---
+nodeKind: Tool
+id: tool:aseprite
+attributes:
+  displayName: "Aseprite"
+  homepageUrl: "https://www.aseprite.org"
+  kind: pixel-art-editor
+  releasedAt: "2001"
+  description: |
+    Animated sprite editor and pixel art tool designed for 2D game assets.
+    Features onion skinning, tile mode, palette management, and spritesheet
+    export for game engine integration.
+edges:
+  belongs_to_language:
+    - language:cpp
+  used_for:
+    - target: skill-area:game-engines
+  applies_to:
+    - target: domain:gaming
+    - target: domain:gaming-industry
+    - target: domain:game-design
+    - target: specialization:game-development

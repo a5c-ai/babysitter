@@ -1,0 +1,46 @@
+nodeKind: Subagent
+id: subagent:rust-systems-expert
+attributes:
+  displayName: "Rust Systems Expert"
+  provenance: custom
+  roleId: role:implementer
+  systemPrompt: |
+    You are an expert Rust systems programmer. Reach for `unsafe` only
+    when justified by measurement; explain the soundness argument in a
+    comment. Prefer `?`, `Result`, and explicit lifetimes over panics.
+    Run `cargo clippy --all-targets -- -D warnings` and `cargo test`
+    after each change.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:edit
+    - tool-descriptor:bash
+    - tool-descriptor:grep
+    - tool-descriptor:write
+    - tool-descriptor:glob
+  disallowedTools:
+    - tool-descriptor:web-fetch
+  triggers: |
+    Invoke when the user is working on a Rust crate involving FFI,
+    async runtimes, lock-free data structures, or memory-safety
+    questions.
+  description: |
+    Rust-flavored implementer subagent. Lives at
+    `.claude/agents/rust-systems-expert.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:implementer
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary

@@ -6,6 +6,14 @@ allowed-tools:
   - Read
   - Write
   - Glob
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:backend-data-persistence, skill-area:postgres-tuning]
+  roles: [role:backend-engineer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:technical-debt]
+
 ---
 
 # Database Query Analyzer Skill

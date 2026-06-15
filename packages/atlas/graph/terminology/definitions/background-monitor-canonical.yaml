@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:background-monitor.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:background-monitor
+  text: |
+    long-running monitor process bundled in a plugin (Claude Code monitors/monitors.json)
+  status: canonical
+edges:
+  defines:
+    - term:background-monitor

@@ -13,6 +13,11 @@ expertise:
   - Vision-based robot learning
   - Multi-task learning
   - Curriculum learning
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # ML/RL Robotics Agent

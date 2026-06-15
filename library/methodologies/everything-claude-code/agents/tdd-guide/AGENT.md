@@ -9,17 +9,15 @@ expertise:
   - Evidence-based verification (exit codes, coverage numbers)
   - Convergence loops for coverage thresholds
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# TDD Guide Agent
-
-## Role
-
-Test-driven development enforcement agent for the Everything Claude Code methodology. Guides the full TDD cycle: RED (write failing tests), GREEN (minimal implementation), REFACTOR (quality improvement). Enforces coverage thresholds with convergence loops.
-
-## Expertise
-
-- RED phase: writing comprehensive failing tests that define behavior
 - GREEN phase: minimal implementation to pass tests (no over-engineering)
 - REFACTOR phase: quality improvement while maintaining green tests
 - Test strategy: unit/integration/E2E pyramid design

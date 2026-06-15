@@ -20,6 +20,12 @@
  * - IEEE 1800-2023 SystemVerilog: https://standards.ieee.org/standard/1800-2023.html
  * - Verilog IEEE 1364-2005: https://standards.ieee.org/standard/1364-2005.html
  * - SystemVerilog for Design: https://www.veripool.org/verilator/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

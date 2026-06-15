@@ -1,0 +1,164 @@
+---
+nodeKind: Workflow
+id: workflow:anti-cheat-system-audit
+attributes:
+  displayName: "Anti-Cheat System Audit"
+  workflowKind: security
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits the anti-cheat detection pipeline for coverage, evasion gaps, and
+    false-positive rates — reviewing kernel-level integrity checks,
+    replay-analysis heuristics, machine-learning cheat classifiers, ban-appeal
+    accuracy, and third-party anti-cheat SDK update status. Produces a
+    prioritized remediation backlog. Excludes cheat-detection algorithm
+    development.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:ml-engineer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:gaming
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:game-economy-balancing-review
+attributes:
+  displayName: "Game Economy Balancing Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Reviews the in-game economy health — auditing currency source/sink ratios,
+    monitoring inflation indicators, analyzing player spending funnels,
+    validating drop-rate tables, and comparing live telemetry against designer
+    intent for virtual currencies, loot systems, and marketplace pricing.
+    Excludes game design decisions and content creation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:gaming
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:product-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:multiplayer-netcode-testing
+attributes:
+  displayName: "Multiplayer Netcode Testing"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates multiplayer networking correctness under adverse conditions —
+    running deterministic simulation replay tests, verifying rollback/prediction
+    consistency, stress-testing with synthetic latency and packet-loss profiles,
+    measuring desync rates across client/server and peer-to-peer topologies, and
+    certifying netcode against target tick-rate budgets. Excludes netcode
+    architecture design.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:performance-profiler
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:chaos-engineering
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:gaming
+    - target: domain:networking
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:game-asset-pipeline-optimization
+attributes:
+  displayName: "Game Asset Pipeline Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: single-team
+  description: |
+    Profiles and optimizes the game asset build pipeline — measuring texture
+    compression throughput, shader compilation times, mesh LOD generation
+    efficiency, audio transcoding parallelism, and incremental cook cache hit
+    rates. Identifies bottlenecks, tunes worker concurrency, and tracks
+    asset-pipeline duration trends against build-time budgets. Excludes asset
+    creation and art direction.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:performance-profiler
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:gaming
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity
+---
+nodeKind: Workflow
+id: workflow:game-analytics-instrumentation
+attributes:
+  displayName: "Game Analytics Instrumentation"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: cross-team
+  description: |
+    Governs the instrumentation of game telemetry events — defining event
+    taxonomies, validating schema compliance, verifying funnel-critical events
+    fire correctly on all platforms, auditing event volume and sampling rates,
+    and ensuring analytics pipelines ingest data within latency SLAs. Excludes
+    analytics dashboard creation and data analysis.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:implementer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:kafka-stream-processing
+  applies_to_domain:
+    - target: domain:gaming
+    - target: domain:data-science
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-prs-merge-decisions
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:engineering

@@ -1,0 +1,52 @@
+nodeKind: OpenQuestion
+id: open-question:a5c-public-command-reference-source-pinning
+attributes:
+  displayName: Pin public a5c command-reference evidence
+  description: |
+    The catalog has graph-local a5c UI primitive evidence, but the public
+    command-reference source for /a5c:install, /a5c:configure, /a5c:plugins,
+    /model, and command-palette behavior still needs a stable documentation URL
+    before confidence can be raised beyond repository-local evidence.
+  owner: "@a5c-ai/catalog-stewards"
+  affectedEntities:
+    - agent-ui-impl:a5c.ui@current
+  status: open
+  raisedAt: "2026-05-04T00:00:00Z"
+edges: {}
+---
+nodeKind: OpenQuestion
+id: open-question:a5c-implementation-source-file-pinning
+attributes:
+  displayName: Pin a5c implementation evidence to source files
+  description: |
+    Source-level a5c implementation facts should be pinned to exact repository
+    files for core loop policy, runtime tool-host behavior, platform plugin
+    registry behavior, and UI primitives so attribute-level claims can cite
+    stable source-file evidence instead of broad repository evidence.
+  owner: "@a5c-ai/catalog-stewards"
+  affectedEntities:
+    - agent-core-impl:a5c.core@current
+    - agent-runtime-impl:a5c.runtime@current
+    - agent-platform-impl:a5c.platform@current
+    - agent-ui-impl:a5c.ui@current
+  status: open
+  raisedAt: "2026-05-04T00:00:00Z"
+edges: {}
+---
+nodeKind: OpenQuestion
+id: open-question:codex-runtime-source-file-pinning
+attributes:
+  displayName: Pin Codex runtime internals to source files
+  description: |
+    Public Codex documentation and repository evidence cover the agent loop and
+    CLI surface, but implementation-specific runtime internals such as stop
+    detection, tool dispatch, and Responses event handling should be pinned to
+    exact source files before implementation claims are raised above public-doc
+    confidence.
+  owner: "@a5c-ai/catalog-stewards"
+  affectedEntities:
+    - agent-runtime-impl:codex.runtime@1.x
+    - agent-core-impl:codex.core@1.x
+  status: open
+  raisedAt: "2026-05-04T00:00:00Z"
+edges: {}

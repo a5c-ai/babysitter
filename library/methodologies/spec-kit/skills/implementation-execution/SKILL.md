@@ -2,17 +2,14 @@
 name: implementation-execution
 description: Execute development tasks to build features, producing code, tests, and configuration artifacts that satisfy specification requirements and comply with constitution standards.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Implementation Execution
-
-## Overview
-
-Execute development tasks from the task list against the specification and constitution. Produces code, tests, and configuration artifacts with progressive validation. Independent tasks execute in parallel; dependent tasks execute sequentially respecting the dependency graph.
-
-## When to Use
-
-- After task list is approved and analysis confirms readiness
 - When implementing feature code against a specification
 - When running per-task tests during implementation
 - When validating implementation against specification requirements

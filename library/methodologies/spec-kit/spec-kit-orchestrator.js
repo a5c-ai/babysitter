@@ -3,6 +3,13 @@
  * @description Full Spec Kit pipeline: constitution -> specify -> clarify -> plan -> tasks -> analyze -> implement -> checklist. Progressive refinement from intent to code following GitHub's Spec-Driven Development methodology.
  * @inputs { projectName: string, featureDescription: string, projectType?: string, existingConstitution?: object, mode?: 'greenfield' | 'brownfield' | 'creative', constraints?: object }
  * @outputs { success: boolean, constitution: object, specification: object, plan: object, tasks: array, analysis: object, implementation: object, checklist: object, artifacts: array }
+   * @graph
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   skillAreas: [skill-area:gitops, skill-area:containerization, skill-area:configuration-management]
+ *   workflows: [workflow:release-management]
+ *   topics: [topic:continuous-integration, topic:continuous-deployment]
+ *   roles: [role:devops-engineer, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

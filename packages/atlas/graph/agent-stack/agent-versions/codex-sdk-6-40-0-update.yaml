@@ -1,0 +1,33 @@
+nodeKind: AgentVersion
+id: agentVersion:codex-sdk:6-40-0
+attributes:
+  patch: true
+  releaseTracking:
+    issueNumber: 860
+    upstreamPackage: "openai"
+    upstreamProject: "openai/openai-node"
+    upstreamReleaseTag: "v6.40.0"
+    releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.40.0"
+    packageUrl: "https://www.npmjs.com/package/openai/v/6.40.0"
+    installMethodIds:
+      - install:npm
+    installMethodContinuity: "No package name or npm install method change; the modeled package remains openai."
+  responseShapeUpdates:
+    responsesAdditionalToolsItem: true
+    additionalToolsItemName: "additional_tools"
+    actionSearchQueryOptional: true
+    affectedSurfaces:
+      - responses-api-response-items
+      - action-search-typing
+  auditLogUpdates:
+    workloadIdentity: true
+    affectedSurface: audit-logs
+  removedCliSurfaces:
+    - migrate
+  releaseAssimilation:
+    summary: "OpenAI Node SDK 6.40.0 adds workload identity in audit logs, Responses additional_tools item support, optional ActionSearch.query, and removes the migrate CLI."
+    noInstallChange: true
+    noPackageChange: true
+edges:
+  sourced_from:
+    - evidence:openai-node-6-40-0-update-release

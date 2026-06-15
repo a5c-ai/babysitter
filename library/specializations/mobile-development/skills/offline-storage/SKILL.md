@@ -5,6 +5,13 @@ version: 1.0.0
 category: Data Persistence
 slug: offline-storage
 status: active
+graph:
+  domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:mobile-offline-sync, skill-area:mobile-local-databases]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility, topic:offline-first]
 ---
 
 # Mobile Offline Storage Skill

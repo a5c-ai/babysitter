@@ -2,6 +2,14 @@
 name: yaml-json-toml-loader
 description: Generate multi-format configuration file loaders for YAML, JSON, and TOML formats.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:parsing-data-formats]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # YAML/JSON/TOML Loader

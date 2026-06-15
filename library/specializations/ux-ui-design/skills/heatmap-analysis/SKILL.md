@@ -9,6 +9,12 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:ux-ui-design]
+  skillAreas: [skill-area:user-research, skill-area:data-analysis]
+  roles: [role:ux-researcher, role:product-analyst]
+  workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 
 # Heatmap Analysis Skill

@@ -1,0 +1,36 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:codex-app-server.platform@current
+attributes:
+  displayName: Codex App-Server Platform (current)
+  agentVersionId: agent-version:codex-app-server@current
+  subagentDefinitionFormat: none
+  packageRef: source-ref:codex-github
+  nativeExtensionFormat: codex-extension
+  nativeExtensionManifestPath: "~/.codex/extensions/<name>/extension.toml"
+  nativeExtensionsDirectoryPath:
+    - "~/.codex/extensions/"
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles:
+    - "~/.codex/config.toml"
+    - "~/.codex/auth.json"
+  pluginRegistryPath: ""
+  capabilityProfileRegistry: true
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: npm
+  supportedChannelKinds: []
+  notes: |
+    The codex-app-server platform exposes Codex's MCP brokering and
+    extension loading to JSON-RPC clients. It bundles no Presentation —
+    consumer clients (Symphony, custom hosts) build their own surfaces.
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:codex-app-server
+      role: platform
+  bundles: []

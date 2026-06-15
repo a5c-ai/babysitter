@@ -3,6 +3,11 @@
  * @description Develop comprehensive brand standards documentation including visual identity, voice and tone, messaging hierarchy, and usage rules across all touchpoints.
  * @inputs { brandName: string, brandStrategy: object, visualAssets: array, existingGuidelines: object, touchpoints: array, stakeholders: array }
  * @outputs { success: boolean, guidelinesDocument: string, visualIdentity: object, voiceAndTone: object, usageRules: object, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

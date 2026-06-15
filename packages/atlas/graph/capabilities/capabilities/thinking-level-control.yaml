@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:supports-thinking-level-control
+attributes:
+  displayName: "Supports thinking level control"
+  description: |
+    The model accepts qualitative thinking effort controls such as
+    `thinking_level` instead of a caller-specified numeric thinking token
+    budget.
+  appliesToNodeKinds: ["ModelVersion"]
+  category: model
+edges: {}

@@ -3,6 +3,11 @@
  * @description Structured process for incident detection, logging, categorization, investigation, and resolution following ITIL best practices
  * @inputs { incident: object, affectedServices: array, impactAssessment: object, knowledgeBase: object }
  * @outputs { success: boolean, incidentRecord: object, resolutionReport: object, postIncidentReview: object, artifacts: array }
+  * @graph
+ *   domains: [domain:customer-experience]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:open-question.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:open-question
+  text: |
+    named TBD with owner
+  status: canonical
+edges:
+  defines:
+    - term:open-question

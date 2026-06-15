@@ -2,6 +2,13 @@
 name: bundle-optimization
 description: Bundle analysis, code splitting, tree shaking, and size optimization.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:web-performance, skill-area:asset-pipeline]
+  roles: [role:frontend-engineer]
+  topics: [topic:tree-shaking, topic:code-splitting]
+
 ---
 
 # Bundle Optimization Skill

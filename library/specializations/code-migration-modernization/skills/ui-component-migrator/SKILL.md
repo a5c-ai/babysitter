@@ -2,6 +2,13 @@
 name: ui-component-migrator
 description: Migrate UI components between frameworks with structure, state, and style transformation
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:dependency-upgrade-strategies, skill-area:breaking-change-management]
+  roles: [role:frontend-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # UI Component Migrator Skill

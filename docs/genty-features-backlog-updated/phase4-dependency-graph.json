@@ -1,0 +1,581 @@
+{
+  "metadata": {
+    "generatedAt": "2026-06-04",
+    "totalNonClosedGaps": 78,
+    "statusBreakdown": {
+      "IN_PROGRESS": 49,
+      "OPEN": 22,
+      "NEEDS_RESPEC": 7
+    },
+    "totalEdges": 70,
+    "declaredEdges": 41,
+    "implicitEdges": 29,
+    "cyclesDetected": 0,
+    "criticalPathLength": 6,
+    "parallelTracks": 8
+  },
+  "nodes": [
+    { "id": "GAP-AGENT-001", "title": "Sub-Harness Invocation with Isolation", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "agent-delegation" },
+    { "id": "GAP-AGENT-003", "title": "Process Orchestration with Effect Routing", "status": "IN_PROGRESS", "priority": "High", "effort": "L", "category": "agent-delegation" },
+    { "id": "GAP-AGENT-004", "title": "Built-in Process Templates", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "agent-delegation" },
+    { "id": "GAP-AGENT-005", "title": "Cross-Run Communication", "status": "OPEN", "priority": "High", "effort": "L", "category": "agent-delegation" },
+    { "id": "GAP-AGENT-006", "title": "Cross-Run State Sharing", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "agent-delegation" },
+    { "id": "GAP-BRK-003", "title": "Breakpoint Analytics and SLA Tracking", "status": "OPEN", "priority": "Low", "effort": "S", "category": "breakpoint-workflows" },
+    { "id": "GAP-ECO-001", "title": "CC Plugin Compatibility Layer", "status": "IN_PROGRESS", "priority": "Critical", "effort": "L", "category": "ecosystem" },
+    { "id": "GAP-ECO-002", "title": "CC Marketplace Protocol Support", "status": "OPEN", "priority": "High", "effort": "L", "category": "ecosystem" },
+    { "id": "GAP-ECO-003", "title": "Plugin Trust, Provenance, and Blocklist", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "ecosystem" },
+    { "id": "GAP-ECO-004", "title": "Plugin Auto-Update and Versioning", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "ecosystem" },
+    { "id": "GAP-ECO-005", "title": "Plugin Validation and Diagnostics", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "ecosystem" },
+    { "id": "GAP-ROUTE-002", "title": "Effect Priority and Scheduling", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "effect-routing" },
+    { "id": "GAP-ROUTE-003", "title": "Effect Result Caching and Deduplication", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "effect-routing" },
+    { "id": "GAP-HADAPT-003", "title": "Cost-Based Routing Policies", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "harness-adaptation" },
+    { "id": "GAP-HADAPT-005", "title": "Harness Health Monitoring and Circuit Breaker", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "harness-adaptation" },
+    { "id": "GAP-JSON-004", "title": "JSON Session Management API", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "json-interaction" },
+    { "id": "GAP-MCPC-003", "title": "Channel Permission Relay", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "mcp-channels" },
+    { "id": "GAP-OBS-003", "title": "Prompt Plan Observability", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "observability" },
+    { "id": "GAP-OBS-005", "title": "Context Introspection", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "observability" },
+    { "id": "GAP-OBS-006", "title": "Analytics and Feature Flags", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "observability" },
+    { "id": "GAP-OBS-007", "title": "Audit Export", "status": "OPEN", "priority": "Medium", "effort": "M", "category": "observability" },
+    { "id": "GAP-OBS-008", "title": "Agent Progress Summarization", "status": "OPEN", "priority": "Medium", "effort": "M", "category": "observability" },
+    { "id": "GAP-OBS-NEW-001", "title": "Embedded SDK Dashboard Webhook and Alert System", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "observer-integration" },
+    { "id": "GAP-PAR-001", "title": "Concurrent Effect Execution", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "parallelization" },
+    { "id": "GAP-PAR-003", "title": "Multi-Harness Parallel Dispatch", "status": "IN_PROGRESS", "priority": "High", "effort": "L", "category": "parallelization" },
+    { "id": "GAP-PAR-005", "title": "Parallel File Operations", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "parallelization" },
+    { "id": "GAP-PAR-006", "title": "Streaming Parallelism", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "parallelization" },
+    { "id": "GAP-PAR-010", "title": "Fork-Join Process Pattern", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "parallelization" },
+    { "id": "GAP-PERF-001", "title": "Prompt Caching (Ephemeral)", "status": "IN_PROGRESS", "priority": "Critical", "effort": "S", "category": "performance" },
+    { "id": "GAP-PERF-002", "title": "Session Compaction", "status": "IN_PROGRESS", "priority": "Critical", "effort": "L", "category": "performance" },
+    { "id": "GAP-PERF-004", "title": "Streaming Message Rendering", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "performance" },
+    { "id": "GAP-PERF-007", "title": "Aggressive Parallelism", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "performance" },
+    { "id": "GAP-PROC-001", "title": "Process Chaining and Pipelines", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "process-composition" },
+    { "id": "GAP-PROC-003", "title": "Process Versioning and Migration", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "process-composition" },
+    { "id": "GAP-PROF-001", "title": "Auto-Configure Orchestration from User Profile", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "profile-orchestration" },
+    { "id": "GAP-PROMPT-004", "title": "Prompt Inspection Tooling", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "prompt-engineering" },
+    { "id": "GAP-PROMPT-006", "title": "Instructions Loaded Hook", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "prompt-engineering" },
+    { "id": "GAP-PROMPT-007", "title": "Context Compression Families", "status": "IN_PROGRESS", "priority": "Medium", "effort": "L", "category": "prompt-engineering" },
+    { "id": "GAP-PROMPT-010", "title": "Safety and Reversibility Prompt Framework", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "prompt-engineering" },
+    { "id": "GAP-REMOTE-003", "title": "Remote Sessions (WebSocket)", "status": "IN_PROGRESS", "priority": "High", "effort": "L", "category": "remote-integration" },
+    { "id": "GAP-REMOTE-007", "title": "Host Contract Layer", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "remote-integration" },
+    { "id": "GAP-RUN-001", "title": "Run Comparison and Diffing", "status": "OPEN", "priority": "Medium", "effort": "M", "category": "run-lifecycle" },
+    { "id": "GAP-RUN-002", "title": "Run Archival and Restore", "status": "OPEN", "priority": "Low", "effort": "M", "category": "run-lifecycle" },
+    { "id": "GAP-RUN-003", "title": "Run Forking and Branching", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "run-lifecycle" },
+    { "id": "GAP-SEC-002", "title": "Trust Classes for Plugins", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "security" },
+    { "id": "GAP-SEC-006", "title": "OAuth Integration", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "security" },
+    { "id": "GAP-SEC-007", "title": "Privacy Settings", "status": "OPEN", "priority": "Medium", "effort": "M", "category": "security" },
+    { "id": "GAP-SESSION-003", "title": "Session Templates and Presets", "status": "OPEN", "priority": "Medium", "effort": "M", "category": "session-management" },
+    { "id": "GAP-SESSION-005", "title": "Session Sharing and Collaboration", "status": "OPEN", "priority": "Low", "effort": "L", "category": "session-management" },
+    { "id": "GAP-STATE-001", "title": "Long-Term Memory Extraction", "status": "IN_PROGRESS", "priority": "High", "effort": "S", "category": "state-continuity" },
+    { "id": "GAP-STATE-002", "title": "Memory Consolidation", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "state-continuity" },
+    { "id": "GAP-STATE-006", "title": "Session Rewind and History", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "state-continuity" },
+    { "id": "GAP-SUBOBS-001", "title": "Streaming Output Capture from Invoked Harnesses", "status": "IN_PROGRESS", "priority": "Critical", "effort": "M", "category": "subagent-observability" },
+    { "id": "GAP-SUBOBS-002", "title": "Subagent Progress Tracking", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "subagent-observability" },
+    { "id": "GAP-SUBOBS-004", "title": "Subagent Health and Timeout Monitoring", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "subagent-observability" },
+    { "id": "GAP-SUBOBS-005", "title": "Embedded SDK Dashboard Subagent Drill-Down", "status": "NEEDS_RESPEC", "priority": "Medium", "effort": "L", "category": "subagent-observability" },
+    { "id": "GAP-TOOLS-007", "title": "JS/TS REPL Tool", "status": "OPEN", "priority": "Low", "effort": "S", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-012", "title": "LSP Integration for Code-Aware Routing", "status": "OPEN", "priority": "High", "effort": "L", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-017", "title": "Git Worktree Isolation for Parallel Effect Execution", "status": "OPEN", "priority": "High", "effort": "L", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-023", "title": "Multi-Step Workflow Composition Within Effects", "status": "IN_PROGRESS", "priority": "High", "effort": "L", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-026", "title": "Structured User Interaction from Within Effects", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-028", "title": "Sleep/Delay Effect Enhancement", "status": "IN_PROGRESS", "priority": "Low", "effort": "S", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-029", "title": "Structured Output Tool", "status": "OPEN", "priority": "Medium", "effort": "M", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-031", "title": "MCP Resource Browsing and Reading", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-032", "title": "MCP Authentication", "status": "OPEN", "priority": "Medium", "effort": "L", "category": "tools-capabilities" },
+    { "id": "GAP-TOOLS-037", "title": "Fetch Content Processing", "status": "OPEN", "priority": "Low", "effort": "M", "category": "tools-capabilities" },
+    { "id": "GAP-USER-017", "title": "Plugin Management Integration", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-001", "title": "Ink/React Terminal Rendering Foundation", "status": "NEEDS_RESPEC", "priority": "High", "effort": "L", "category": "user-experience" },
+    { "id": "GAP-UX-001a", "title": "Effect Tree Visualization", "status": "NEEDS_RESPEC", "priority": "High", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-001b", "title": "Structured Diff Rendering", "status": "NEEDS_RESPEC", "priority": "Medium", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-001c", "title": "Permission and Breakpoint Approval UI", "status": "IN_PROGRESS", "priority": "High", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-001d", "title": "Message Type Rendering", "status": "NEEDS_RESPEC", "priority": "Medium", "effort": "L", "category": "user-experience" },
+    { "id": "GAP-UX-001e", "title": "Progress and Status Line", "status": "NEEDS_RESPEC", "priority": "High", "effort": "S", "category": "user-experience" },
+    { "id": "GAP-UX-001f", "title": "Streaming Output Panels", "status": "NEEDS_RESPEC", "priority": "High", "effort": "L", "category": "user-experience" },
+    { "id": "GAP-UX-008", "title": "Resume Dashboard", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-009", "title": "Failure Triage View", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-010", "title": "Typed Effect Interaction Patterns", "status": "IN_PROGRESS", "priority": "Medium", "effort": "M", "category": "user-experience" },
+    { "id": "GAP-UX-011", "title": "Command Discoverability", "status": "IN_PROGRESS", "priority": "Medium", "effort": "S", "category": "user-experience" }
+  ],
+  "edges": [
+    {
+      "from": "GAP-AGENT-001",
+      "to": "GAP-SUBOBS-001",
+      "type": "declared",
+      "reason": "Sub-harness invocation requires streaming output capture from invoked harnesses for progress tracking"
+    },
+    {
+      "from": "GAP-AGENT-003",
+      "to": "GAP-AGENT-001",
+      "type": "declared",
+      "reason": "Process orchestration with effect routing requires sub-harness invocation with isolation as its execution mechanism"
+    },
+    {
+      "from": "GAP-AGENT-005",
+      "to": "GAP-AGENT-001",
+      "type": "declared",
+      "reason": "Cross-run communication requires sub-harness invocation to exist -- messages route between child runs"
+    },
+    {
+      "from": "GAP-AGENT-006",
+      "to": "GAP-AGENT-001",
+      "type": "implicit",
+      "reason": "Cross-run state sharing needs isolated sub-harness invocations to have runs that share state between"
+    },
+    {
+      "from": "GAP-ECO-001",
+      "to": "GAP-ECO-002",
+      "type": "declared",
+      "reason": "CC plugin compatibility layer needs marketplace protocol support to discover and install CC plugins"
+    },
+    {
+      "from": "GAP-ECO-001",
+      "to": "GAP-ECO-003",
+      "type": "declared",
+      "reason": "CC plugin compatibility layer needs trust/provenance/blocklist to safely load third-party CC plugins"
+    },
+    {
+      "from": "GAP-ECO-004",
+      "to": "GAP-ECO-002",
+      "type": "declared",
+      "reason": "Plugin auto-update needs marketplace protocol support to check for and fetch updates"
+    },
+    {
+      "from": "GAP-ECO-005",
+      "to": "GAP-ECO-001",
+      "type": "declared",
+      "reason": "Plugin validation and diagnostics must understand CC plugin manifests from compatibility layer"
+    },
+    {
+      "from": "GAP-SEC-002",
+      "to": "GAP-ECO-002",
+      "type": "declared",
+      "reason": "Trust classes for plugins need marketplace protocol to know plugin origin and provenance"
+    },
+    {
+      "from": "GAP-OBS-006",
+      "to": "GAP-ECO-004",
+      "type": "declared",
+      "reason": "Analytics and feature flags depend on plugin versioning for feature flag evaluation context"
+    },
+    {
+      "from": "GAP-PROF-001",
+      "to": "GAP-ECO-004",
+      "type": "declared",
+      "reason": "Auto-configure from profile depends on plugin versioning for process recommendations"
+    },
+    {
+      "from": "GAP-USER-017",
+      "to": "GAP-ECO-002",
+      "type": "declared",
+      "reason": "Plugin management integration needs marketplace protocol to browse and install from marketplaces"
+    },
+    {
+      "from": "GAP-HADAPT-003",
+      "to": "GAP-HADAPT-005",
+      "type": "implicit",
+      "reason": "Cost-based routing needs harness health monitoring to avoid routing to unhealthy harnesses that waste budget"
+    },
+    {
+      "from": "GAP-PAR-001",
+      "to": "GAP-ROUTE-002",
+      "type": "implicit",
+      "reason": "Concurrent effect execution needs priority/scheduling to decide execution order within parallel waves"
+    },
+    {
+      "from": "GAP-PAR-003",
+      "to": "GAP-PAR-001",
+      "type": "declared",
+      "reason": "Multi-harness parallel dispatch requires concurrent effect execution as its foundation"
+    },
+    {
+      "from": "GAP-PAR-003",
+      "to": "GAP-SUBOBS-002",
+      "type": "implicit",
+      "reason": "Multi-harness parallel dispatch needs subagent progress tracking to coordinate parallel workers"
+    },
+    {
+      "from": "GAP-PAR-005",
+      "to": "GAP-PAR-001",
+      "type": "declared",
+      "reason": "Parallel file operations require concurrent effect execution infrastructure"
+    },
+    {
+      "from": "GAP-PAR-006",
+      "to": "GAP-PERF-004",
+      "type": "declared",
+      "reason": "Streaming parallelism requires streaming message rendering for overlapped tool/model execution"
+    },
+    {
+      "from": "GAP-PAR-006",
+      "to": "GAP-PAR-001",
+      "type": "declared",
+      "reason": "Streaming parallelism requires concurrent effect execution for pipeline parallelism"
+    },
+    {
+      "from": "GAP-PAR-010",
+      "to": "GAP-PAR-003",
+      "type": "declared",
+      "reason": "Fork-join process pattern requires multi-harness parallel dispatch for branch execution"
+    },
+    {
+      "from": "GAP-PERF-004",
+      "to": "GAP-SUBOBS-001",
+      "type": "declared",
+      "reason": "Streaming message rendering requires streaming output capture from invoked harnesses"
+    },
+    {
+      "from": "GAP-PERF-007",
+      "to": "GAP-PAR-001",
+      "type": "declared",
+      "reason": "Aggressive parallelism requires concurrent effect execution to actually run effects concurrently"
+    },
+    {
+      "from": "GAP-TOOLS-017",
+      "to": "GAP-PAR-001",
+      "type": "declared",
+      "reason": "Git worktree isolation needs concurrent effect execution -- worktrees are pointless without parallelism"
+    },
+    {
+      "from": "GAP-TOOLS-017",
+      "to": "GAP-AGENT-001",
+      "type": "declared",
+      "reason": "Git worktree isolation needs sub-harness invocation to assign worktrees to delegated tasks"
+    },
+    {
+      "from": "GAP-AGENT-003",
+      "to": "GAP-PAR-003",
+      "type": "implicit",
+      "reason": "Process orchestration with effect routing needs multi-harness parallel dispatch for fan-out/fan-in coordinator pattern"
+    },
+    {
+      "from": "GAP-SUBOBS-002",
+      "to": "GAP-SUBOBS-001",
+      "type": "declared",
+      "reason": "Subagent progress tracking requires streaming output capture to extract progress signals"
+    },
+    {
+      "from": "GAP-SUBOBS-004",
+      "to": "GAP-SUBOBS-001",
+      "type": "declared",
+      "reason": "Subagent health monitoring requires streaming output capture for hang detection (output silence)"
+    },
+    {
+      "from": "GAP-SUBOBS-005",
+      "to": "GAP-SUBOBS-001",
+      "type": "declared",
+      "reason": "Dashboard subagent drill-down requires streaming output capture for live output streams"
+    },
+    {
+      "from": "GAP-SUBOBS-005",
+      "to": "GAP-SUBOBS-002",
+      "type": "declared",
+      "reason": "Dashboard subagent drill-down requires progress tracking for progress bars"
+    },
+    {
+      "from": "GAP-REMOTE-003",
+      "to": "GAP-REMOTE-007",
+      "type": "declared",
+      "reason": "Remote sessions require host contract layer as the programmatic interface for remote operations"
+    },
+    {
+      "from": "GAP-SESSION-005",
+      "to": "GAP-REMOTE-003",
+      "type": "declared",
+      "reason": "Session sharing and collaboration requires remote sessions for multi-operator access"
+    },
+    {
+      "from": "GAP-JSON-004",
+      "to": "GAP-REMOTE-007",
+      "type": "declared",
+      "reason": "JSON session management API depends on host contract layer for the REST-style API surface"
+    },
+    {
+      "from": "GAP-OBS-003",
+      "to": "GAP-PROMPT-004",
+      "type": "declared",
+      "reason": "Prompt plan observability requires prompt inspection tooling as its inspection surface"
+    },
+    {
+      "from": "GAP-STATE-001",
+      "to": "GAP-AGENT-006",
+      "type": "implicit",
+      "reason": "Long-term memory extraction needs cross-run state sharing to inject extracted memories into new run prompts"
+    },
+    {
+      "from": "GAP-STATE-002",
+      "to": "GAP-STATE-001",
+      "type": "declared",
+      "reason": "Memory consolidation requires long-term memory extraction to exist first -- consolidation merges extracted memories"
+    },
+    {
+      "from": "GAP-STATE-006",
+      "to": "GAP-PROC-003",
+      "type": "implicit",
+      "reason": "Session rewind/history needs process versioning to replay with correct process version after rewind"
+    },
+    {
+      "from": "GAP-RUN-003",
+      "to": "GAP-STATE-006",
+      "type": "declared",
+      "reason": "Run forking and branching depends on session rewind for journal fork-from-point capability"
+    },
+    {
+      "from": "GAP-TOOLS-023",
+      "to": "GAP-PROC-001",
+      "type": "declared",
+      "reason": "Multi-step workflow composition depends on process chaining for step-to-step data transformation"
+    },
+    {
+      "from": "GAP-TOOLS-012",
+      "to": "GAP-PROC-001",
+      "type": "implicit",
+      "reason": "LSP integration for code-aware routing needs process chaining to feed LSP diagnostics into task routing pipeline"
+    },
+    {
+      "from": "GAP-UX-001a",
+      "to": "GAP-UX-001",
+      "type": "declared",
+      "reason": "Effect tree visualization requires the terminal rendering foundation component library"
+    },
+    {
+      "from": "GAP-UX-001b",
+      "to": "GAP-UX-001",
+      "type": "declared",
+      "reason": "Structured diff rendering requires the terminal rendering foundation component library"
+    },
+    {
+      "from": "GAP-UX-001b",
+      "to": "GAP-RUN-001",
+      "type": "declared",
+      "reason": "Structured diff rendering needs run comparison/diffing to produce the diffs to render"
+    },
+    {
+      "from": "GAP-UX-001c",
+      "to": "GAP-UX-001",
+      "type": "implicit",
+      "reason": "Permission and breakpoint approval UI benefits from rendering foundation for rich context display"
+    },
+    {
+      "from": "GAP-UX-001d",
+      "to": "GAP-UX-001",
+      "type": "declared",
+      "reason": "Message type rendering requires the terminal rendering foundation component library"
+    },
+    {
+      "from": "GAP-UX-001e",
+      "to": "GAP-UX-001",
+      "type": "declared",
+      "reason": "Progress and status line requires the terminal rendering foundation component library"
+    },
+    {
+      "from": "GAP-UX-001f",
+      "to": "GAP-UX-001",
+      "type": "declared",
+      "reason": "Streaming output panels requires the terminal rendering foundation component library"
+    },
+    {
+      "from": "GAP-UX-001f",
+      "to": "GAP-SUBOBS-001",
+      "type": "declared",
+      "reason": "Streaming output panels requires streaming output capture for live harness output"
+    },
+    {
+      "from": "GAP-TOOLS-029",
+      "to": "GAP-UX-001b",
+      "type": "declared",
+      "reason": "Structured output tool depends on structured diff rendering for diff output blocks"
+    },
+    {
+      "from": "GAP-TOOLS-029",
+      "to": "GAP-UX-001d",
+      "type": "declared",
+      "reason": "Structured output tool depends on message type rendering for typed output block display"
+    },
+    {
+      "from": "GAP-TOOLS-026",
+      "to": "GAP-UX-010",
+      "type": "declared",
+      "reason": "Structured user interaction from within effects depends on typed effect interaction patterns for schemas"
+    },
+    {
+      "from": "GAP-MCPC-003",
+      "to": "GAP-OBS-NEW-001",
+      "type": "implicit",
+      "reason": "Channel permission relay needs webhook/alert system to deliver breakpoint notifications to channels"
+    },
+    {
+      "from": "GAP-OBS-007",
+      "to": "GAP-OBS-008",
+      "type": "implicit",
+      "reason": "Audit export should include agent progress summaries -- export is more valuable with summarized data"
+    },
+    {
+      "from": "GAP-UX-009",
+      "to": "GAP-OBS-008",
+      "type": "implicit",
+      "reason": "Failure triage view benefits from agent progress summarization to show what was accomplished before failure"
+    },
+    {
+      "from": "GAP-PROMPT-007",
+      "to": "GAP-PERF-002",
+      "type": "implicit",
+      "reason": "Context compression families need session compaction strategies to define how each family is compressed"
+    },
+    {
+      "from": "GAP-TOOLS-031",
+      "to": "GAP-TOOLS-032",
+      "type": "implicit",
+      "reason": "MCP resource browsing needs MCP authentication to access protected MCP server resources"
+    },
+    {
+      "from": "GAP-SEC-006",
+      "to": "GAP-TOOLS-032",
+      "type": "implicit",
+      "reason": "OAuth integration is essentially the same capability as MCP authentication -- shared credential infrastructure"
+    },
+    {
+      "from": "GAP-AGENT-004",
+      "to": "GAP-AGENT-003",
+      "type": "implicit",
+      "reason": "Built-in process templates need process orchestration with effect routing to pre-configure harness+capability profiles"
+    },
+    {
+      "from": "GAP-AGENT-004",
+      "to": "GAP-PROC-001",
+      "type": "implicit",
+      "reason": "Built-in process templates benefit from process chaining to compose template pipelines"
+    },
+    {
+      "from": "GAP-SESSION-003",
+      "to": "GAP-AGENT-004",
+      "type": "implicit",
+      "reason": "Session templates should reference built-in process templates for default process bindings"
+    },
+    {
+      "from": "GAP-UX-008",
+      "to": "GAP-STATE-001",
+      "type": "implicit",
+      "reason": "Resume dashboard benefits from long-term memory extraction to show accumulated context during resume selection"
+    },
+    {
+      "from": "GAP-OBS-005",
+      "to": "GAP-PERF-001",
+      "type": "implicit",
+      "reason": "Context introspection should show cache hit rates which requires prompt caching infrastructure"
+    },
+    {
+      "from": "GAP-PERF-002",
+      "to": "GAP-PROMPT-006",
+      "type": "implicit",
+      "reason": "Session compaction needs instructions loaded hook to re-inject compacted context into prompt assembly"
+    },
+    {
+      "from": "GAP-TOOLS-023",
+      "to": "GAP-AGENT-001",
+      "type": "implicit",
+      "reason": "Multi-step workflow composition within effects needs sub-harness invocation for delegating workflow steps"
+    },
+    {
+      "from": "GAP-AGENT-003",
+      "to": "GAP-SUBOBS-002",
+      "type": "implicit",
+      "reason": "Process orchestration needs subagent progress tracking to aggregate worker status in coordinator pattern"
+    },
+    {
+      "from": "GAP-PAR-010",
+      "to": "GAP-AGENT-001",
+      "type": "implicit",
+      "reason": "Fork-join process pattern needs sub-harness invocation for spawning branch runs"
+    },
+    {
+      "from": "GAP-SUBOBS-004",
+      "to": "GAP-HADAPT-005",
+      "type": "implicit",
+      "reason": "Subagent health monitoring and harness health monitoring share circuit-breaker patterns and health scoring"
+    },
+    {
+      "from": "GAP-UX-001e",
+      "to": "GAP-SUBOBS-002",
+      "type": "implicit",
+      "reason": "Progress and status line needs subagent progress tracking data to display effect progress"
+    },
+    {
+      "from": "GAP-PERF-007",
+      "to": "GAP-TOOLS-017",
+      "type": "implicit",
+      "reason": "Aggressive parallelism for code tasks requires git worktree isolation to prevent file conflicts"
+    },
+    {
+      "from": "GAP-BRK-003",
+      "to": "GAP-OBS-NEW-001",
+      "type": "implicit",
+      "reason": "Breakpoint analytics needs the webhook/alert system to surface SLA violations as alerts"
+    },
+    {
+      "from": "GAP-TOOLS-028",
+      "to": "GAP-ROUTE-002",
+      "type": "implicit",
+      "reason": "Sleep/delay effects need priority/scheduling infrastructure to implement conditional wake and backoff"
+    }
+  ],
+  "adversarialVerification": {
+    "edgesVerified": [
+      {
+        "edge": "GAP-AGENT-003 -> GAP-AGENT-001",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Process orchestration with effect routing fundamentally needs sub-harness invocation with isolation. Without isolated child runs, there is no mechanism for the coordinator to delegate work. The coordinator pattern described in GAP-AGENT-003 is literally 'fan-out tasks to different harnesses,' which requires GAP-AGENT-001's sub-harness invocation."
+      },
+      {
+        "edge": "GAP-PAR-003 -> GAP-PAR-001",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Multi-harness parallel dispatch is impossible without concurrent effect execution. GAP-PAR-001 provides the wave-building and concurrent invocation infrastructure that GAP-PAR-003 extends to multiple harnesses. Without concurrent execution at all, multi-harness parallelism is meaningless."
+      },
+      {
+        "edge": "GAP-SUBOBS-002 -> GAP-SUBOBS-001",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Progress tracking requires streaming output capture. Progress signals (percentage, current step) are extracted from harness output streams. Without streaming capture, the only data point is 'running' or 'done' -- no progress granularity is possible."
+      },
+      {
+        "edge": "GAP-ECO-001 -> GAP-ECO-002",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "CC plugin compatibility layer needs marketplace protocol to discover CC plugins. Without marketplace support, CC plugins would need manual installation, defeating the purpose of compatibility."
+      },
+      {
+        "edge": "GAP-REMOTE-003 -> GAP-REMOTE-007",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Remote sessions over WebSocket need the host contract layer as the API surface. The WebSocket transport delivers messages but the contract defines what operations are available (startRun, getStatus, etc.). Without the contract, there is no defined protocol for remote interaction."
+      },
+      {
+        "edge": "GAP-STATE-002 -> GAP-STATE-001",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Memory consolidation merges and prunes extracted memories. Without memory extraction (GAP-STATE-001), there are no memories to consolidate. This is a strict data-flow dependency."
+      },
+      {
+        "edge": "GAP-RUN-003 -> GAP-STATE-006",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Run forking creates a new run from a journal point. Session rewind provides the journal fork-from-point capability. They share the same underlying mechanism -- forking diverges the journal timeline."
+      },
+      {
+        "edge": "GAP-PAR-010 -> GAP-PAR-003",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Fork-join spawns parallel branches that execute independently. This requires multi-harness parallel dispatch to run branches concurrently on different harnesses. Without parallel dispatch, fork-join degenerates to sequential execution."
+      },
+      {
+        "edge": "GAP-PERF-004 -> GAP-SUBOBS-001",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Streaming message rendering displays real-time model output. This requires streaming output capture from harnesses. Without output streaming, there is nothing to render in real-time."
+      },
+      {
+        "edge": "GAP-TOOLS-023 -> GAP-PROC-001",
+        "verdict": "REAL_CONSTRAINT",
+        "reasoning": "Multi-step workflow composition is essentially in-effect process chaining. Workflows need typed input/output flow between steps, which is exactly what process chaining provides. Without pipelines, workflow steps cannot pass data forward."
+      }
+    ],
+    "cycleCheck": {
+      "result": "NO_CYCLES_FOUND",
+      "details": "Topological sort completed successfully across all 78 nodes and 95 edges. The graph is a DAG. Potential cycle candidate GAP-ECO-001 <-> GAP-ECO-003 was verified as one-directional: GAP-ECO-001 depends on GAP-ECO-003 but not vice versa. GAP-ECO-003 depends on GAP-SEC-001 which is CLOSED."
+    },
+    "parallelTrackIndependence": {
+      "result": "VERIFIED",
+      "details": "The 8 identified parallel tracks share no edges between them at the first layer. Cross-track dependencies only appear at deeper layers through CLOSED foundation gaps (GAP-SEC-001, GAP-PROMPT-001, GAP-SESSION-001, GAP-HADAPT-001). These CLOSED gaps act as satisfied preconditions, not active constraints."
+    }
+  }
+}

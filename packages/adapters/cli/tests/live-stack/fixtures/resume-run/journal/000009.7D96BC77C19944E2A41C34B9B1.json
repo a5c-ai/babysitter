@@ -1,0 +1,9 @@
+{
+  "type": "EFFECT_RESOLVED",
+  "recordedAt": "2026-05-01T00:00:00.000Z",
+  "data": {
+    "effectId": "E003",
+    "status": "ok"
+  },
+  "checksum": "622659a45414092b9c9d6d02eafe5010bc925b45036509b04dc7e41c7bc18050"
+}

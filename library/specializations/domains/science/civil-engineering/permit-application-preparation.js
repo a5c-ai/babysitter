@@ -3,6 +3,12 @@
  * @description Preparation of permit applications including building permits, environmental permits, and regulatory agency submissions
  * @inputs { projectId: string, designDocuments: object, siteInformation: object, environmentalDocumentation: object }
  * @outputs { success: boolean, permitApplications: array, supportingDocuments: array, agencyCorrespondence: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -80,7 +86,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Utility Permits
   ctx.log('info', 'Preparing utility permit applications');
-  let utilityPermits = await ctx.task(utilityPermitsTask, {
+  const utilityPermits = await ctx.task(utilityPermitsTask, {
     projectId,
     designDocuments,
     siteInformation,
@@ -93,17 +99,8 @@ export async function process(inputs, ctx) {
   const totalPermits = buildingPermit.applicationCount +
                        sitePermit.applicationCount +
                        environmentalPermits.applicationCount +
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      utilityPermits = await ctx.task(utilityPermitsTask, { ...{
-    projectId,
-    designDocuments,
-    siteInformation,
-    outputDir
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+                       utilityPermits.applicationCount;
+  await ctx.breakpoint({
     question: `Permit applications prepared for ${projectId}. Total permits: ${totalPermits}. Review applications before submission?`,
     title: 'Permit Application Review',
     context: {
@@ -116,15 +113,9 @@ export async function process(inputs, ctx) {
         utilityPermits: utilityPermits.applicationCount,
         estimatedReviewTime: permitRequirements.estimatedReviewTime
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Task 6: Supporting Documentation Assembly
   ctx.log('info', 'Assembling supporting documentation');
   const supportingDocs = await ctx.task(supportingDocsTask, {
@@ -186,7 +177,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task 1: Permit Requirements Identification
+
+// Task 1: Permit Requirements Identification
 export const permitRequirementsTask = defineTask('permit-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify permit requirements',

@@ -1,0 +1,246 @@
+export const dynamic = 'force-dynamic';
+
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
+import { PageFrame } from '../../../lib/page-frame.jsx';
+
+export const metadata = { title: 'For Agents | Kradle' };
+
+const MCP_TOOLS = [
+  { name: 'kradle_snapshot', description: 'Get full organization runtime snapshot', params: '—' },
+  { name: 'kradle_list_resources', description: 'List resources of a given kind', params: 'kind' },
+  { name: 'kradle_get_resource', description: 'Get a single resource by kind and name', params: 'kind, name' },
+  { name: 'kradle_apply_resource', description: 'Create or update a resource', params: 'resource (object)' },
+  { name: 'kradle_delete_resource', description: 'Delete a resource by kind and name', params: 'kind, name' },
+  { name: 'kradle_search', description: 'Search resources by query string', params: 'query' },
+  { name: 'kradle_list_stacks', description: 'List agent stack configurations', params: '—' },
+  { name: 'kradle_create_stack', description: 'Create an AgentStack resource', params: 'name, org, spec' },
+  { name: 'kradle_dispatch_agent', description: 'Dispatch an agent run from a stack', params: 'stackRef, input' },
+  { name: 'kradle_list_secrets', description: 'List AgentSecretGrant resources', params: 'org' },
+  { name: 'kradle_create_secret', description: 'Create an AgentSecretGrant', params: 'name, org, agentRef, secretRef' },
+  { name: 'kradle_sync_external', description: 'Trigger external backend sync', params: 'bindingName, kind, localName' },
+  { name: 'kradle_resolve_conflict', description: 'Resolve an external sync conflict', params: 'conflictName, strategy' },
+  { name: 'kradle_audit_query', description: 'Query audit events with filters', params: 'org, action, since, until' },
+  { name: 'kradle_model_catalog', description: 'List unified model catalog (internal + external)', params: 'org' },
+  { name: 'kradle_list_model_routes', description: 'List model routing rules', params: '—' },
+  { name: 'kradle_create_model_route', description: 'Create a model route for internal or external models', params: 'name, org, modelName, routeType' },
+  { name: 'kradle_list_virtual_models', description: 'List virtual model abstractions', params: '—' },
+  { name: 'kradle_create_virtual_model', description: 'Create a programmable virtual model with routing rules and hooks', params: 'name, org, modelName, routes' },
+];
+
+const MCP_PROMPTS = [
+  { name: 'kradle_workspace_setup', description: 'Guide for setting up a new kradle workspace' },
+  { name: 'kradle_stack_config', description: 'Help configuring an agent stack' },
+  { name: 'kradle_troubleshoot', description: 'Diagnose common kradle issues' },
+];
+
+const MCP_RESOURCES = [
+  { uri: 'kradle://snapshot', name: 'Workspace Snapshot', mimeType: 'application/json' },
+  { uri: 'kradle://stacks', name: 'Agent Stacks', mimeType: 'application/json' },
+  { uri: 'kradle://models', name: 'Model Catalog', mimeType: 'application/json' },
+];
+
+function CodeBlock({ children, title }) {
+  return <div style={{ marginBottom: '1rem' }}>
+    {title && <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>{title}</div>}
+    <pre style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '12px 16px', fontSize: '0.8rem', lineHeight: 1.6, overflow: 'auto', margin: 0 }}><code>{children}</code></pre>
+  </div>;
+}
+
+function Section({ title, children }) {
+  return <section className="card" style={{ marginBottom: '1rem' }}>
+    <div className="cardTitle"><h3>{title}</h3></div>
+    {children}
+  </section>;
+}
+
+export default async function ForAgentsPage({ params }) {
+  const routeParams = await params;
+  const org = routeParams.org;
+  const ui = await loadKradleUi(org);
+  const activeOrg = ui.model?.org?.slug || org || 'default';
+  return (
+    <PageFrame
+      org={activeOrg}
+      orgs={ui.model?.orgs || []}
+      eyebrow="integration"
+      title="For Agents"
+      text="Connect AI agents and developer tools to the Kradle platform via MCP (Model Context Protocol), HTTP API, or CLI."
+      currentPath="/for-agents"
+      breadcrumbs={[['/', 'Kradle'], ['/for-agents', 'For Agents']]}
+      actions={[['/api-docs', 'HTTP API Docs']]}
+    >
+      <DegradedBanner model={ui.model} />
+
+      <Section title="Quick start">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Install the Kradle CLI, then start the MCP server. Any MCP-compatible agent (Claude Code, Cursor, Windsurf, etc.) can connect over stdio.</p>
+        <CodeBlock title="Install">npm install -g @a5c-ai/kradle-cli</CodeBlock>
+        <CodeBlock title="Start MCP server">kradle mcp</CodeBlock>
+        <CodeBlock title="Start HTTP API server">kradle serve</CodeBlock>
+      </Section>
+
+      <Section title="Claude Code integration">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Add the Kradle MCP server to your Claude Code configuration:</p>
+        <CodeBlock title=".claude/settings.json">{`{
+  "mcpServers": {
+    "kradle": {
+      "command": "kradle",
+      "args": ["mcp"],
+      "env": {
+        "KRADLE_NAMESPACE": "kradle-system",
+        "KRADLE_ORG": "${activeOrg}"
+      }
+    }
+  }
+}`}</CodeBlock>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>After adding the configuration, restart Claude Code. The agent will discover 19 tools, 3 prompts, and 3 resources.</p>
+      </Section>
+
+      <Section title="Cursor / Windsurf / other MCP clients">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For editors that support MCP via <code>.mcp.json</code>:</p>
+        <CodeBlock title=".mcp.json">{`{
+  "mcpServers": {
+    "kradle": {
+      "command": "kradle",
+      "args": ["mcp"],
+      "env": {
+        "KRADLE_NAMESPACE": "kradle-system"
+      }
+    }
+  }
+}`}</CodeBlock>
+      </Section>
+
+      <Section title="Environment variables">
+        <div className="resourceTable">
+          {[
+            ['KRADLE_NAMESPACE', 'kradle-system', 'Kubernetes namespace for CRD operations'],
+            ['KRADLE_ORG', activeOrg, 'Default organization slug'],
+            ['KRADLE_CONTROLLER_URL', 'http://localhost:3080', 'URL of the Kradle API server (optional — falls back to kubectl)'],
+            ['KUBECONFIG', '~/.kube/config', 'Path to kubeconfig (used when no controller URL is set)'],
+          ].map(([name, defaultVal, desc]) => <div key={name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '0.75rem', alignItems: 'center' }}>
+            <code style={{ fontSize: '0.8rem', fontWeight: 600 }}>{name}</code>
+            <code style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{defaultVal}</code>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{desc}</span>
+          </div>)}
+        </div>
+      </Section>
+
+      <Section title="MCP tools (19)">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>These tools are available to any MCP-connected agent after running <code>kradle mcp</code>.</p>
+        <div className="resourceTable">
+          {MCP_TOOLS.map((tool) => <div key={tool.name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '0.75rem', alignItems: 'center' }}>
+            <code style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)' }}>{tool.name}</code>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{tool.description}</span>
+            <code style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tool.params}</code>
+          </div>)}
+        </div>
+      </Section>
+
+      <Section title="MCP prompts (3)">
+        <div className="resourceTable">
+          {MCP_PROMPTS.map((prompt) => <div key={prompt.name} className="resourceRow" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <code style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)' }}>{prompt.name}</code>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{prompt.description}</span>
+          </div>)}
+        </div>
+      </Section>
+
+      <Section title="MCP resources (3)">
+        <div className="resourceTable">
+          {MCP_RESOURCES.map((resource) => <div key={resource.uri} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', alignItems: 'center' }}>
+            <code style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)' }}>{resource.uri}</code>
+            <span style={{ fontSize: '0.8rem' }}>{resource.name}</span>
+            <code style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{resource.mimeType}</code>
+          </div>)}
+        </div>
+      </Section>
+
+      <Section title="Model Gateway">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The Kradle Model Gateway provides unified model routing through Envoy AI Gateway. Agents request models by logical name and the gateway routes to the correct backend — either an internal KServe InferenceService or an external cloud LLM.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The <a href={orgHref(activeOrg, '/inference')} style={{ color: 'var(--accent)', fontWeight: 600 }}>Inference page</a> includes a curated model catalog with 15+ popular open models (Llama 3.1, Mistral, Phi-3, Code Llama, BGE, Whisper, and more) that you can deploy to your cluster with one click. Browse by category, review resource requirements, and deploy directly from the UI.</p>
+        <CodeBlock title="Install Envoy AI Gateway (prerequisite)">{`kubectl apply -k "github.com/envoyproxy/ai-gateway/manifests?ref=main"`}</CodeBlock>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem' }}>Kradle manages KradleModelRoute resources that generate AIGatewayRoute configs automatically.</p>
+        <div className="resourceTable">
+          {[
+            ['Internal route', 'Routes to a KServe InferenceService on the cluster (sklearn, pytorch, huggingface, etc.)'],
+            ['External route', 'Routes to a cloud LLM endpoint (Anthropic, OpenAI, Azure OpenAI, Google Vertex, custom)'],
+            ['Unified catalog', 'GET /api/orgs/{org}/inference/catalog returns all available models regardless of backend'],
+            ['Logical names', 'Agents reference models by logical name; the gateway resolves endpoint, protocol, and auth'],
+            ['Rate limits', 'Per-route rate limiting (RPM / TPM) enforced at the gateway layer'],
+          ].map(([name, desc]) => <div key={name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem', alignItems: 'center' }}>
+            <code style={{ fontSize: '0.8rem', fontWeight: 600 }}>{name}</code>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{desc}</span>
+          </div>)}
+        </div>
+        <CodeBlock title="Example: list unified model catalog">{`curl -s http://localhost:3080/api/orgs/${activeOrg}/inference/catalog | jq '.models[].name'`}</CodeBlock>
+        <CodeBlock title="Example: create a model route">{`curl -X POST http://localhost:3080/api/orgs/${activeOrg}/inference/routes \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "modelName": "claude-3-5-sonnet",
+    "routeType": "external",
+    "provider": "anthropic",
+    "endpoint": "https://api.anthropic.com/v1",
+    "modelId": "claude-sonnet-4-20250514"
+  }'`}</CodeBlock>
+      </Section>
+
+      <Section title="Virtual Models">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>Virtual Models are programmable model abstractions that sit above Model Routes. They provide declarative routing rules, JS hooks for request/response transformation, session lifecycle management, weighted route selection, and observability injection.</p>
+        <div className="resourceTable">
+          {[
+            ['Routing rules', 'Declarative condition-based routing (field/operator/value) evaluated before weighted random selection'],
+            ['JS hooks', 'routeSelect, requestTransform, responseTransform, sessionLifecycle, observe hooks executed in sandboxed Function constructors'],
+            ['Session lifecycle', 'Max turns, escalation thresholds, and custom session event handling'],
+            ['Weighted routes', 'Traffic splitting across multiple model routes with configurable weights and priorities'],
+            ['Fallback chain', 'Ordered list of fallback route references when primary routing fails'],
+            ['Observability', 'Event bus integration for metrics, tracing, and custom observe hooks'],
+          ].map(([name, desc]) => <div key={name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem', alignItems: 'center' }}>
+            <code style={{ fontSize: '0.8rem', fontWeight: 600 }}>{name}</code>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{desc}</span>
+          </div>)}
+        </div>
+        <CodeBlock title="Example: create a virtual model">{`curl -X POST http://localhost:3080/api/orgs/${activeOrg}/inference/virtual-models \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "modelName": "smart-router",
+    "routes": [
+      { "modelRouteRef": "route-claude", "weight": 70 },
+      { "modelRouteRef": "route-gpt4", "weight": 30 }
+    ],
+    "rules": [{
+      "name": "code-tasks",
+      "conditions": [{ "field": "taskType", "operator": "eq", "value": "code" }],
+      "action": { "route": "route-claude" }
+    }],
+    "sessionConfig": { "enabled": true, "maxTurns": 10 }
+  }'`}</CodeBlock>
+      </Section>
+
+      <Section title="HTTP API">
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For direct API integration without MCP, the Kradle HTTP API is available at <code>KRADLE_CONTROLLER_URL</code> or via <code>kradle serve</code>.</p>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <a href={orgHref(activeOrg, '/api-docs')} className="actionButton" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', background: 'var(--accent)', color: '#fff', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 600 }}>
+            Open API Explorer
+          </a>
+        </div>
+        <CodeBlock title="Example: list stacks via curl">{`curl -s http://localhost:3080/api/orgs/${activeOrg}/resources?kind=AgentStack | jq '.items[].metadata.name'`}</CodeBlock>
+      </Section>
+
+      <Section title="CLI commands">
+        <CodeBlock>{`kradle serve              # Start HTTP API server on port 3080
+kradle mcp                # Start MCP server over stdio
+kradle status             # Show workspace status
+kradle models             # List model catalog (internal + external)
+kradle routes             # List model routes
+kradle virtual-models     # List virtual models
+kradle stacks             # List agent stacks
+kradle dispatch <stack>   # Dispatch an agent run
+kradle apply <file>       # Apply a resource from YAML/JSON
+kradle get <kind> <name>  # Get a specific resource
+kradle list <kind>        # List resources by kind
+kradle delete <kind> <name>  # Delete a resource
+kradle version            # Show CLI version`}</CodeBlock>
+      </Section>
+    </PageFrame>
+  );
+}

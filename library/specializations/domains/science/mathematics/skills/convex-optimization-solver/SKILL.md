@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: optimization
   phase: 6
+graph:
+  domains: [domain:mathematics]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:mathematical-reasoning, skill-area:dynamic-programming]
+  workflows: [workflow:experiment-design]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # Convex Optimization Solver

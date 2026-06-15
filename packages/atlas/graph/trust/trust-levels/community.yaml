@@ -1,0 +1,9 @@
+nodeKind: TrustLevel
+id: trust-level:community
+attributes:
+  displayName: "Community"
+  level: community
+  freshnessWindowDaysDefault: 180
+  description: |
+    Third-party community sources - blog posts, talks, maintainer notes.
+edges: {}

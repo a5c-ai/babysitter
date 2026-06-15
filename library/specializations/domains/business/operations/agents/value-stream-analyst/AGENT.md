@@ -9,6 +9,11 @@ expertise:
   - Implementation roadmap creation
   - Value stream performance tracking
   - Cross-functional coordination
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:change-management, skill-area:business-analysis, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:business-analyst, role:strategic-planner]
 ---
 
 # Value Stream Analyst

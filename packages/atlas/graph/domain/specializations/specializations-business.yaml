@@ -1,0 +1,96 @@
+---
+nodeKind: Specialization
+id: specialization:corporate-finance
+attributes:
+  displayName: "Corporate Finance"
+  parentDomainId: domain:finance
+  description: |
+    Capital structure decisions, valuation methodologies, and treasury operations
+    for corporate entities. Covers DCF and comparables-based valuation, M&A
+    transaction analysis, leveraged buyouts, capital allocation frameworks, and
+    investor relations. Includes financial modeling in Excel and Python, covenant
+    compliance, and regulatory reporting under GAAP/IFRS. Bridges strategic
+    planning with the quantitative rigor required by CFOs and investment committees.
+edges:
+  specializes:
+    - domain:finance
+---
+nodeKind: Specialization
+id: specialization:digital-marketing-strategy
+attributes:
+  displayName: "Digital Marketing Strategy"
+  parentDomainId: domain:digital-marketing
+  description: |
+    End-to-end digital channel strategy spanning SEO, SEM, paid social, email
+    automation, and conversion-rate optimization. Covers attribution modeling,
+    audience segmentation, content marketing funnels, and performance measurement
+    via GA4, Google Ads, and Meta Ads platforms. Integrates first-party data
+    strategy, privacy-compliant tracking, and AI-assisted personalization to drive
+    measurable pipeline and revenue outcomes across B2B and B2C contexts.
+edges:
+  specializes:
+    - domain:digital-marketing
+---
+nodeKind: Specialization
+id: specialization:talent-management
+attributes:
+  displayName: "Talent Management"
+  parentDomainId: domain:human-resources
+  description: |
+    Full talent lifecycle management from workforce planning and sourcing through
+    onboarding, development, succession planning, and off-boarding. Covers
+    competency framework design, performance calibration, employee engagement
+    measurement, and retention analytics. Applies people-analytics tooling and
+    HRIS platforms (Workday, SAP SuccessFactors) to reduce attrition and align
+    talent strategy with organizational goals.
+edges:
+  specializes:
+    - domain:human-resources
+---
+nodeKind: Specialization
+id: specialization:supply-chain-optimization
+attributes:
+  displayName: "Supply Chain Optimization"
+  parentDomainId: domain:supply-chain
+  description: |
+    Quantitative and systems-level approaches to reducing cost and improving
+    resilience across supply chain networks. Covers demand forecasting, inventory
+    optimization (EOQ, safety-stock models), network design, S&OP processes, and
+    supplier risk management. Integrates digital-twin simulation, ML-driven demand
+    sensing, and real-time visibility platforms to enable adaptive supply chain
+    responses to disruptions and demand volatility.
+edges:
+  specializes:
+    - domain:supply-chain
+---
+nodeKind: Specialization
+id: specialization:strategic-consulting
+attributes:
+  displayName: "Strategic Consulting"
+  parentDomainId: domain:strategy
+  description: |
+    Structured problem-solving and advisory frameworks used by management
+    consultants to diagnose organizational challenges and recommend strategic
+    actions. Covers hypothesis-driven analysis, issue trees, Porter's Five Forces,
+    scenario planning, and executive communication (McKinsey-style slide decks and
+    memos). Includes change management, operating model design, and post-merger
+    integration to translate strategic recommendations into measurable outcomes.
+edges:
+  specializes:
+    - domain:strategy
+---
+nodeKind: Specialization
+id: specialization:legal-compliance
+attributes:
+  displayName: "Legal & Compliance"
+  parentDomainId: domain:legal
+  description: |
+    Regulatory compliance programs, contract lifecycle management, and corporate
+    governance frameworks. Covers GDPR/CCPA data-privacy obligations, financial
+    regulations (SOX, AML/KYC), and sector-specific compliance (HIPAA, FDA, FCA).
+    Includes compliance automation, risk registers, internal audit workflows, and
+    legal-ops tooling to reduce manual effort in contract review, due diligence,
+    and regulatory reporting.
+edges:
+  specializes:
+    - domain:legal

@@ -1,0 +1,1414 @@
+[
+  {
+    "gapId": "GAP-SUBOBS-001",
+    "title": "Wire real-time stdout/stderr streaming for CLI harness child processes",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "invokeHarness() pipes child process stdout/stderr in real-time, not after exit",
+      "JournalWatcher receives incremental output events during CLI harness execution",
+      "Pi adapter streaming continues to work (no regression)",
+      "Output events are timestamped and associated with the correct effect ID"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/genty/platform/src/harness/invoker/launch.ts"
+    ],
+    "suggestedPrScope": "feat(platform): stream CLI harness stdout/stderr in real-time"
+  },
+  {
+    "gapId": "GAP-PERF-001",
+    "title": "Wire ephemeral cache_control API integration uniformly across adapters",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Stable strata sections include cache_control: { type: 'ephemeral' } in API calls",
+      "All harness adapters apply cache hints based on strata volatility scores",
+      "Cache-break detection via checksums triggers cache invalidation appropriately",
+      "Token cost reduction is measurable in test scenarios"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/prompts/strata.ts",
+      "packages/genty/platform/src/harness/piWrapper.ts",
+      "packages/adapters/codecs/src/claude-code/"
+    ],
+    "suggestedPrScope": "feat(sdk): wire ephemeral cache_control across all prompt adapters"
+  },
+  {
+    "gapId": "GAP-HADAPT-003",
+    "title": "Wire auto-downgrade model selection when approaching session budget limits",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "When session cost exceeds 80% of budget, model selection automatically downgrades to cheaper model",
+      "Downgrade respects task requirements (does not downgrade below minimum capability)",
+      "Budget alert thresholds trigger downgrade evaluation",
+      "Operator can override auto-downgrade via config tool"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/selectionPolicies.ts",
+      "packages/genty/platform/src/session/cost.ts",
+      "packages/genty/platform/src/harness/modelSelection.ts"
+    ],
+    "suggestedPrScope": "feat(platform): auto-downgrade model when approaching session budget"
+  },
+  {
+    "gapId": "GAP-MCPC-003",
+    "title": "Wire ChannelPermissionRelay into breakpoint resolution flow",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Breakpoint resolution checks for channel-based approvals via ChannelPermissionRelay",
+      "Racing claim pattern works: first response (local or channel) wins",
+      "Security config (terminalOnlyTags) is respected",
+      "Channel approvals are logged to governance-decisions.jsonl"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/mcp/channels/permissionRelay.ts",
+      "packages/genty/platform/src/breakpoints/"
+    ],
+    "suggestedPrScope": "feat(platform): wire channel permission relay into breakpoint resolution"
+  },
+  {
+    "gapId": "GAP-OBS-NEW-001",
+    "title": "Implement HTTP webhook delivery with throttling and deduplication",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Registered webhooks receive HTTP POST with event payload on run state changes",
+      "Delivery uses fetch() with configurable timeout and retry",
+      "Alert-level evaluation filters events by severity before delivery",
+      "Deduplication prevents duplicate deliveries within configurable window",
+      "Delivery failures are logged but do not block orchestration"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/observability/webhooks.ts"
+    ],
+    "suggestedPrScope": "feat(platform): implement HTTP webhook delivery with throttling"
+  },
+  {
+    "gapId": "GAP-PROMPT-010",
+    "title": "Add reversibility assessment framework and blast radius prompt section",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "New safetyGuidelines prompt section renders reversibility assessment guidance",
+      "Blast radius reasoning instructions included in prompt for destructive operations",
+      "Section mapped in PART_STRATA_MAP as stable stratum",
+      "Template file exists at packages/babysitter-sdk/src/prompts/templates/safety-guidelines.md"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/prompts/parts/",
+      "packages/babysitter-sdk/src/prompts/templates/",
+      "packages/babysitter-sdk/src/prompts/strata.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): add reversibility and blast radius prompt framework"
+  },
+  {
+    "gapId": "GAP-STATE-001",
+    "title": "Add prompt section that renders long-term memories into new run prompts",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "New longTermMemory prompt part renders extracted memories from memoryExtraction.ts",
+      "Memories are filtered by relevance (project, category) and recency",
+      "Section mapped in PART_STRATA_MAP as runtime stratum",
+      "Memories appear in assembled prompts for new runs"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/prompts/parts/",
+      "packages/babysitter-sdk/src/prompts/strata.ts",
+      "packages/genty/platform/src/session/memoryExtraction.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): inject long-term memories into new run prompts"
+  },
+  {
+    "gapId": "GAP-ECO-003",
+    "title": "Add plugin blocklist data store and provenance tracking at install time",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Blocklist stored as JSON file with plugin identifiers and block reasons",
+      "Plugin loader rejects blocklisted plugins at load time",
+      "Provenance metadata (source URL, install timestamp, installer) recorded at install",
+      "Provenance queryable via plugin:info command"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/plugins/",
+      "packages/babysitter-sdk/src/blueprints/registry.ts"
+    ],
+    "suggestedPrScope": "feat(platform): add plugin blocklist and provenance tracking"
+  },
+  {
+    "gapId": "GAP-SEC-002",
+    "title": "Add TrustLevel field to plugin registry with hook dispatch gating",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "PluginRegistryEntry includes TrustLevel field (trusted, verified, untrusted)",
+      "Hook dispatch checks TrustLevel before invoking plugin hooks",
+      "Untrusted plugins cannot register high-privilege hooks (execute, auth)",
+      "Trust level assignable at install time and modifiable via plugin:trust command"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/plugins/sandbox.ts",
+      "packages/babysitter-sdk/src/blueprints/registry.ts",
+      "packages/genty/platform/src/plugins/loader.ts"
+    ],
+    "suggestedPrScope": "feat(platform): add TrustLevel to plugin registry with hook gating"
+  },
+  {
+    "gapId": "GAP-JSON-004",
+    "title": "Add REST-style JSON session management API following api/ patterns",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "api/sessions.ts provides createSession, getSession, listSessions, deleteSession with ApiResult envelopes",
+      "Session CRUD operations map to existing session module functions",
+      "Consistent with api/runs.ts and api/effects.ts patterns",
+      "MCP tools can delegate to the new API layer"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/api/"
+    ],
+    "suggestedPrScope": "feat(platform): add JSON session management API"
+  },
+  {
+    "gapId": "GAP-AGENT-001",
+    "title": "Wire context isolation and model override into sub-harness invocation",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "SubprocessInvocation model field is respected when selecting harness for child run",
+      "Child runs execute in isolated context (separate journal, separate working state)",
+      "Background execution with progress tracking via BackgroundEffectStatus",
+      "Parent run receives child run completion events"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts",
+      "packages/genty/platform/src/harness/invoker/launch.ts"
+    ],
+    "suggestedPrScope": "feat(platform): add context isolation and model override to sub-harness invocation"
+  },
+  {
+    "gapId": "GAP-AGENT-006",
+    "title": "Ensure automatic cross-run state persistence for all run types",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "SessionContext automatically persists at run completion (all run types, not just interactive)",
+      "New runs within a session automatically receive accumulated state",
+      "State injection works for both babysitter:call and babysitter:yolo modes",
+      "Cross-run shared knowledge is available in subprocess invocations when shareSession=true"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/session/context.ts",
+      "packages/genty/platform/src/session/history.ts"
+    ],
+    "suggestedPrScope": "feat(platform): auto-persist cross-run state for all run types"
+  },
+  {
+    "gapId": "GAP-PROMPT-004",
+    "title": "Add instructions:inspect CLI command with token counts and cache annotations",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "instructions:inspect command displays assembled prompt sections with token counts per section",
+      "Cache-stability annotations show which sections are stable/runtime/turnLocal",
+      "Checksum values displayed for each section to identify cache breaks",
+      "Output supports both human-readable and JSON formats"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/cli/commands/",
+      "packages/babysitter-sdk/src/prompts/strata.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): add instructions:inspect command with token counts"
+  },
+  {
+    "gapId": "GAP-PROMPT-006",
+    "title": "Generalize InstructionsLoaded hook as SDK-level hook type",
+    "milestone": "M0",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "SDK hook types (packages/babysitter-sdk/src/hooks/types.ts) include on-instructions-loaded",
+      "Hook fires after prompt assembly with access to assembled prompt metadata",
+      "All harness adapters (not just CC adapter) support the hook",
+      "Existing CC adapter implementation delegates to the SDK-level hook"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/hooks/types.ts",
+      "packages/adapters/codecs/src/claude-code/runtime-hooks/"
+    ],
+    "suggestedPrScope": "feat(sdk): generalize InstructionsLoaded as SDK-level hook type"
+  },
+  {
+    "gapId": "GAP-REMOTE-007",
+    "title": "Implement host contract methods and expose via MCP/HTTP",
+    "milestone": "M0",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "hostContract.ts implements startRun(), getStatus(), postEffect(), subscribe() methods",
+      "Methods exposed as MCP tools or HTTP endpoints",
+      "At least one consumer exists (MCP server or API route)",
+      "HostCapabilityManifest validated at connection time"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/hostContract.ts",
+      "packages/babysitter-sdk/src/mcp/tools/"
+    ],
+    "suggestedPrScope": "feat(platform): implement host contract methods with MCP exposure"
+  },
+  {
+    "gapId": "GAP-PROC-001",
+    "title": "Upgrade skill-level chaining to process-level pipelines with typed I/O",
+    "milestone": "M0",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "ProcessPipeline type with typed input/output schemas between stages",
+      "Pipeline stages can reference process definitions (not just skills)",
+      "Topological sorting and dependency validation from SkillChainBuilder preserved",
+      "Pipeline execution passes typed data between stages with validation"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/skills/chain.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
+    ],
+    "suggestedPrScope": "feat(platform): upgrade to process-level pipelines with typed I/O"
+  },
+  {
+    "gapId": "GAP-SUBOBS-002",
+    "title": "Extract progress percentage and ETA from streaming harness output",
+    "milestone": "M1",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-SUBOBS-001"],
+    "acceptanceCriteria": [
+      "BackgroundEffectStatus includes progressPercent and estimatedCompletionTime fields",
+      "Progress extraction works from streaming output using configurable patterns",
+      "ETA estimation uses elapsed time and progress percentage",
+      "Progress data available via run status API"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/backgroundTracker.ts"
+    ],
+    "suggestedPrScope": "feat(platform): extract subagent progress percentage and ETA"
+  },
+  {
+    "gapId": "GAP-SUBOBS-004",
+    "title": "Add hang detection and auto-recovery for subagent execution",
+    "milestone": "M1",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-SUBOBS-001"],
+    "acceptanceCriteria": [
+      "Hang detection triggers when no output received for configurable duration",
+      "Auto-recovery attempts retry before escalating to cancellation",
+      "Recovery strategy configurable per task definition (retry, fallback, cancel)",
+      "Hang events logged to journal"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/backgroundTracker.ts",
+      "packages/genty/platform/src/harness/invoker/processControl.ts"
+    ],
+    "suggestedPrScope": "feat(platform): add hang detection and auto-recovery for subagents"
+  },
+  {
+    "gapId": "GAP-PERF-004",
+    "title": "Enable streaming message rendering for non-Pi harness invocations",
+    "milestone": "M1",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-SUBOBS-001"],
+    "acceptanceCriteria": [
+      "CLI harness invocations render output incrementally (not after completion)",
+      "Streaming renderer works for both terminal and API consumers",
+      "Observer dashboard can subscribe to incremental output events",
+      "No regression in Pi adapter streaming"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/invoker.ts",
+      "packages/genty/platform/src/harness/piWrapper.ts"
+    ],
+    "suggestedPrScope": "feat(platform): streaming message rendering for all harness types"
+  },
+  {
+    "gapId": "GAP-PAR-001",
+    "title": "Wire concurrent effect execution into the orchestration loop",
+    "milestone": "M1",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "orchestrateIteration.ts can execute effects concurrently using execution waves",
+      "Concurrent path is feature-flagged (sequential remains default)",
+      "Effect groups with shared IDs execute as a unit",
+      "Concurrent execution respects strategy (all-or-nothing, best-effort, etc.)",
+      "No race conditions in journal writes from concurrent effects"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/tasks/concurrentExecution.ts",
+      "packages/genty/platform/src/orchestration/"
+    ],
+    "suggestedPrScope": "feat(platform): wire concurrent effect execution into orchestration loop"
+  },
+  {
+    "gapId": "GAP-ROUTE-002",
+    "title": "Add priority queue and deadline-based scheduling for effects",
+    "milestone": "M1",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Effects have a priority field (high, normal, low) that influences execution order",
+      "Deadline-based scheduling allows effects to specify latest acceptable start time",
+      "Priority queue sorts pending effects by priority then age",
+      "Scheduler hints in task definitions are consumed"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/parallelStrategies.ts",
+      "packages/babysitter-sdk/src/runtime/types.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): add priority queue and deadline scheduling for effects"
+  },
+  {
+    "gapId": "GAP-PAR-003",
+    "title": "Build coordinator process pattern for multi-harness parallel dispatch",
+    "milestone": "M1",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PAR-001", "GAP-SUBOBS-002"],
+    "acceptanceCriteria": [
+      "Coordinator process template manages named teams of harness workers",
+      "Team composition persists across iterations (effectGroupRegistry)",
+      "Workers report progress to coordinator via streaming events",
+      "Coordinator aggregates results and makes routing decisions",
+      "Inter-effect communication during parallel execution"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/tasks/concurrentExecution.ts",
+      "packages/genty/platform/src/orchestration/",
+      "packages/babysitter-sdk/src/runtime/effectGroup.ts"
+    ],
+    "suggestedPrScope": "feat(platform): multi-harness parallel dispatch with coordinator pattern"
+  },
+  {
+    "gapId": "GAP-PERF-002",
+    "title": "Implement multiple compaction strategies with auto-compact triggers",
+    "milestone": "M1",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-PROMPT-006"],
+    "acceptanceCriteria": [
+      "At least 3 compaction strategies: tool-output summarization, resolved-effect pruning, stale-context removal",
+      "Auto-compact triggers when context exceeds configurable token threshold",
+      "continuityState.ts preserves key decisions and findings across compaction",
+      "Compaction events logged to journal for debugging",
+      "Strategy selection configurable per run or via orchestration mode"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/piWrapper/compaction.ts",
+      "packages/babysitter-sdk/src/compression/",
+      "packages/genty/platform/src/session/continuityState.ts"
+    ],
+    "suggestedPrScope": "feat(platform): implement multiple compaction strategies with auto-triggers"
+  },
+  {
+    "gapId": "GAP-ECO-002",
+    "title": "Implement CC marketplace protocol adapter for plugin discovery and install",
+    "milestone": "M2",
+    "remainingEffort": "L",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "PluginSource interface abstracts marketplace protocol differences",
+      "CC marketplace adapter can list available CC plugins",
+      "CC plugins installable via babysitter plugin:install with CC source",
+      "Installed CC plugin manifests stored in babysitter-native format",
+      "Marketplace browsing works in plugin management CLI"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/blueprints/marketplace.ts",
+      "packages/babysitter-sdk/src/blueprints/registry.ts",
+      "packages/genty/platform/src/plugins/"
+    ],
+    "suggestedPrScope": "feat(sdk): CC marketplace protocol adapter for plugin discovery"
+  },
+  {
+    "gapId": "GAP-ECO-004",
+    "title": "Add plugin auto-update mechanism with startup reconciliation and rollback",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-ECO-002"],
+    "acceptanceCriteria": [
+      "Startup reconciliation checks installed plugin versions against marketplace",
+      "Auto-update available plugins with user confirmation",
+      "Rollback on failed update restores previous version",
+      "Update history logged for debugging"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/plugins/version-check.ts",
+      "packages/babysitter-sdk/src/blueprints/registry.ts"
+    ],
+    "suggestedPrScope": "feat(platform): plugin auto-update with rollback"
+  },
+  {
+    "gapId": "GAP-ECO-005",
+    "title": "Add plugin:validate command with structured error types",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-ECO-001"],
+    "acceptanceCriteria": [
+      "plugin:validate command checks manifest, permissions, hook types, and dependencies",
+      "Structured PluginValidationError types with error codes and fix suggestions",
+      "Validation runs at install time and on-demand",
+      "JSON output mode for programmatic consumption"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/plugins/loader.ts",
+      "packages/babysitter-sdk/src/cli/commands/plugin/"
+    ],
+    "suggestedPrScope": "feat(platform): add plugin:validate with structured errors"
+  },
+  {
+    "gapId": "GAP-USER-017",
+    "title": "Add plugin discovery as agentic tool and marketplace browsing during orchestration",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-ECO-002"],
+    "acceptanceCriteria": [
+      "plugin_search agentic tool discovers plugins from marketplace during orchestration",
+      "plugin_install agentic tool installs plugins mid-run",
+      "Marketplace browsing respects plugin trust and blocklist",
+      "Installed plugins become available to subsequent effects in the same run"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/agenticTools/",
+      "packages/genty/platform/src/plugins/"
+    ],
+    "suggestedPrScope": "feat(platform): plugin discovery and install as agentic tools"
+  },
+  {
+    "gapId": "GAP-REMOTE-003",
+    "title": "Implement run directory synchronization for remote WebSocket sessions",
+    "milestone": "M2",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-REMOTE-007"],
+    "acceptanceCriteria": [
+      "Remote clients can create runs that execute on the server",
+      "Run directory state (journal, metadata) synchronized to remote client",
+      "Reconnection after disconnect resumes from last synchronized point",
+      "File-level delta sync for efficiency"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/mcp/transport/websocket.ts",
+      "packages/genty/platform/src/mcp/transport/session.ts"
+    ],
+    "suggestedPrScope": "feat(platform): run directory sync for remote WebSocket sessions"
+  },
+  {
+    "gapId": "GAP-OBS-003",
+    "title": "Wire prompt plan observability into instructions:inspect surface",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-PROMPT-004"],
+    "acceptanceCriteria": [
+      "instructions:inspect shows orchestration plan state alongside prompt sections",
+      "Active phase, completed phases, and pending phases visible",
+      "Plan state rendered from strata metadata and continuity state"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/cli/commands/"
+    ],
+    "suggestedPrScope": "feat(sdk): add prompt plan observability to instructions:inspect"
+  },
+  {
+    "gapId": "GAP-OBS-005",
+    "title": "Add real-time context introspection with cache hit rate display",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-PERF-001"],
+    "acceptanceCriteria": [
+      "Real-time token usage and cost visible during active orchestration",
+      "Cache hit rate displayed when prompt caching is active",
+      "Context size trends shown across iterations",
+      "Accessible via CLI command and API endpoint"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/cli/commands/tokensStats.ts",
+      "packages/babysitter-sdk/src/cost/"
+    ],
+    "suggestedPrScope": "feat(sdk): real-time context introspection with cache hit rates"
+  },
+  {
+    "gapId": "GAP-HADAPT-005",
+    "title": "Add per-harness health tracking with circuit breaker pattern",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Per-harness health tracked separately from run health",
+      "Circuit breaker marks harness unhealthy after N consecutive failures",
+      "Cooldown period before retrying unhealthy harness",
+      "Health status available to capability router for routing decisions"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/observability/health.ts",
+      "packages/genty/platform/src/harness/capabilityRouter.ts"
+    ],
+    "suggestedPrScope": "feat(platform): per-harness health monitoring with circuit breaker"
+  },
+  {
+    "gapId": "GAP-ROUTE-003",
+    "title": "Add cross-run effect result cache with configurable TTL",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Effect results cached by hashInvocationKey across runs",
+      "Configurable TTL per cache entry",
+      "Cache lookup before effect dispatch (skip execution on hit)",
+      "Cache invalidation on process definition change"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/invocation/hashInvocationKey.ts",
+      "packages/babysitter-sdk/src/runtime/replay/"
+    ],
+    "suggestedPrScope": "feat(sdk): cross-run effect result cache with TTL"
+  },
+  {
+    "gapId": "GAP-PROC-003",
+    "title": "Add process version metadata with mismatch detection on resume",
+    "milestone": "M2",
+    "remainingEffort": "L",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Process definitions include version field (semver)",
+      "Run metadata records process version at creation time",
+      "Resume detects version mismatch between run and current process definition",
+      "Migration strategies: abort, continue-with-warning, auto-migrate",
+      "Version history stored per process definition"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/genty/platform/src/orchestration/"
+    ],
+    "suggestedPrScope": "feat(sdk): process versioning with mismatch detection"
+  },
+  {
+    "gapId": "GAP-AGENT-004",
+    "title": "Package methodology definitions as pre-configured process templates",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-PROC-001"],
+    "acceptanceCriteria": [
+      "At least 4 templates: explorer, planner, verifier, reviewer",
+      "Each template specifies harness requirements, model preferences, and capability profiles",
+      "Templates loadable via process definition reference",
+      "Templates composable via process chaining"
+    ],
+    "filesToModify": [
+      "library/methodologies/",
+      "library/processes/"
+    ],
+    "suggestedPrScope": "feat(library): package methodology definitions as process templates"
+  },
+  {
+    "gapId": "GAP-PROF-001",
+    "title": "Wire user profile data to auto-configure orchestration parameters",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-ECO-004"],
+    "acceptanceCriteria": [
+      "User profile expertise level influences breakpoint frequency",
+      "Profile model preferences feed into harness selection",
+      "Process recommendations based on profile specialties",
+      "Auto-configuration overridable at run creation time"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/profiles/userProfile.ts",
+      "packages/genty/platform/src/harness/modeSelector.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): auto-configure orchestration from user profile"
+  },
+  {
+    "gapId": "GAP-TOOLS-026",
+    "title": "Add ctx.ask() intrinsic for dispatching interaction effects from processes",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "ctx.ask() intrinsic in processContext dispatches interaction effects",
+      "Supports all InteractionKind types (clarification, approval, etc.)",
+      "Interaction results returned to process code as typed response",
+      "Works with both simple and structured interaction modes"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/runtime/intrinsics/"
+    ],
+    "suggestedPrScope": "feat(sdk): add ctx.ask() intrinsic for process-level interaction"
+  },
+  {
+    "gapId": "GAP-TOOLS-031",
+    "title": "Add mcp_list_resources and mcp_read_resource agentic tools",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "mcp_list_resources tool lists resources from connected MCP servers",
+      "mcp_read_resource tool reads resource content by URI",
+      "Tools respect MCP server capabilities (only available if server supports resources)",
+      "Results formatted consistently with other agentic tools"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/agenticTools/"
+    ],
+    "suggestedPrScope": "feat(platform): add MCP resource browsing agentic tools"
+  },
+  {
+    "gapId": "GAP-UX-011",
+    "title": "Add babysitter help --search and contextual command suggestions",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "babysitter help --search <query> searches across all commands and skills",
+      "Contextual suggestions based on current run state (e.g., suggest run:resume when stopped runs exist)",
+      "Search results ranked by relevance",
+      "Suggestions surfaced during breakpoint interactions"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/cli/commands/",
+      "packages/genty/platform/src/harness/operatorCommands.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): add help --search and contextual command suggestions"
+  },
+  {
+    "gapId": "GAP-TOOLS-028",
+    "title": "Add ctx.sleep(duration), ctx.waitFor(condition), and ctx.retryWithBackoff()",
+    "milestone": "M2",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "ctx.sleep(durationMs) provides relative delay (not just absolute timestamp)",
+      "ctx.waitFor(conditionFn, options) polls condition with configurable interval",
+      "ctx.retryWithBackoff(fn, options) retries with exponential backoff",
+      "All three journal their invocations for replay"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/intrinsics/sleep.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): add sleep, waitFor, and retryWithBackoff intrinsics"
+  },
+  {
+    "gapId": "GAP-AGENT-003",
+    "title": "Wire capability router into orchestration loop and build coordinator template",
+    "milestone": "M3",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PAR-003", "GAP-SUBOBS-002", "GAP-AGENT-001"],
+    "acceptanceCriteria": [
+      "orchestrateIteration.ts uses capabilityRouter to select harness per effect",
+      "Coordinator process template dynamically routes work based on task requirements",
+      "Coordinator aggregates progress from workers via SUBOBS-002",
+      "selectionPolicies applied during harness selection",
+      "Feature-flagged alongside concurrent execution"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/orchestration/",
+      "packages/genty/platform/src/harness/capabilityRouter.ts"
+    ],
+    "suggestedPrScope": "feat(platform): wire capability router into orchestration with coordinator pattern"
+  },
+  {
+    "gapId": "GAP-AGENT-005",
+    "title": "Implement AGENT_MESSAGE journal event type and cross-run message routing",
+    "milestone": "M3",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-AGENT-001"],
+    "acceptanceCriteria": [
+      "AGENT_MESSAGE event type in journal event schema",
+      "Message routing between active runs via session context",
+      "Messages queued for sleeping/paused runs",
+      "Message delivery confirmation in journal",
+      "Messages filterable by sender run ID and message type"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/genty/platform/src/session/context.ts",
+      "packages/genty/platform/src/orchestration/"
+    ],
+    "suggestedPrScope": "feat(platform): cross-run communication via AGENT_MESSAGE events"
+  },
+  {
+    "gapId": "GAP-PAR-005",
+    "title": "Enable parallel file operations through multi-session or batching approach",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-PAR-001"],
+    "acceptanceCriteria": [
+      "File operations (read, write, grep) can execute in parallel within an orchestration iteration",
+      "Conflict detection prevents concurrent writes to the same file",
+      "Batching groups independent file operations for parallel execution",
+      "Performance improvement measurable in multi-file tasks"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/agenticTools/tools/fileSystem.ts",
+      "packages/babysitter-sdk/src/tasks/concurrentExecution.ts"
+    ],
+    "suggestedPrScope": "feat(platform): parallel file operations with conflict detection"
+  },
+  {
+    "gapId": "GAP-PAR-006",
+    "title": "Enable pipeline parallelism between orchestration phases",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-PERF-004", "GAP-PAR-001"],
+    "acceptanceCriteria": [
+      "Model processing can overlap with tool execution in pipeline fashion",
+      "Orchestration phases (plan, execute, verify) can overlap when independent",
+      "Pipeline parallelism is configurable and disableable",
+      "No correctness issues from overlapped execution"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/orchestration/"
+    ],
+    "suggestedPrScope": "feat(platform): pipeline parallelism between orchestration phases"
+  },
+  {
+    "gapId": "GAP-PERF-007",
+    "title": "Auto-detect independent effects for concurrent execution in orchestration loop",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-PAR-001", "GAP-TOOLS-017"],
+    "acceptanceCriteria": [
+      "Orchestration loop analyzes effect inputs/outputs to identify independent effects",
+      "Independent effects automatically scheduled for concurrent execution",
+      "Dependency analysis respects file-level conflicts",
+      "Auto-detection configurable via orchestration mode"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/orchestration/",
+      "packages/babysitter-sdk/src/tasks/concurrentExecution.ts"
+    ],
+    "suggestedPrScope": "feat(platform): auto-detect independent effects for concurrent execution"
+  },
+  {
+    "gapId": "GAP-TOOLS-017",
+    "title": "Implement git worktree manager for parallel effect isolation",
+    "milestone": "M3",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PAR-001", "GAP-AGENT-001"],
+    "acceptanceCriteria": [
+      "WorktreeManager creates/removes git worktrees for parallel code tasks",
+      "Worktrees assigned to delegated tasks via sub-harness invocation",
+      "Worktree lifecycle (create, lock, unlock, cleanup) managed automatically",
+      "Merge/rebase from worktree back to main branch on task completion",
+      "Conflict detection before merge"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/",
+      "packages/babysitter-sdk/src/runtime/"
+    ],
+    "suggestedPrScope": "feat(platform): git worktree isolation for parallel effect execution"
+  },
+  {
+    "gapId": "GAP-ECO-001",
+    "title": "Build CC plugin manifest adapter mapping CC hook types to babysitter hooks",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-ECO-002", "GAP-ECO-003"],
+    "acceptanceCriteria": [
+      "CC plugin.json manifest parsed and mapped to babysitter plugin format",
+      "CC hook types (PreToolUse, PostToolUse, etc.) mapped to babysitter equivalents",
+      "CC plugins load and execute through babysitter plugin sandbox",
+      "Compatibility maintained with at least CC plugin spec v1"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/plugins/"
+    ],
+    "suggestedPrScope": "feat(platform): CC plugin compatibility layer with manifest adapter"
+  },
+  {
+    "gapId": "GAP-OBS-006",
+    "title": "Build analytics sink pipeline and feature flag evaluation system",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-ECO-004"],
+    "acceptanceCriteria": [
+      "Configurable analytics sinks (file, HTTP, custom)",
+      "Feature flag evaluation with context (user, project, run)",
+      "Feature flag values influence orchestration behavior",
+      "Analytics events include run, session, and user dimensions"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/prompts/capabilityCollector.ts",
+      "packages/genty/platform/src/observability/"
+    ],
+    "suggestedPrScope": "feat(platform): analytics sink pipeline and feature flag evaluation"
+  },
+  {
+    "gapId": "GAP-OBS-008",
+    "title": "Build per-iteration and run-level progress summarization module",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Per-iteration summary generated from journal events and effect results",
+      "Run-level summary aggregates iteration summaries",
+      "Summaries include: what was accomplished, what failed, what remains",
+      "Summaries available via API and audit export"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/observability/"
+    ],
+    "suggestedPrScope": "feat(platform): agent progress summarization module"
+  },
+  {
+    "gapId": "GAP-OBS-007",
+    "title": "Build export pipeline for JSON, CSV, and Markdown run summaries",
+    "milestone": "M3",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-OBS-008"],
+    "acceptanceCriteria": [
+      "run:export command produces JSON, CSV, or Markdown output",
+      "Export includes journal events, effect results, cost summary, and progress summaries",
+      "Configurable filters (date range, event types, effect status)",
+      "Markdown output suitable for documentation or reporting"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/cli/commands/",
+      "packages/genty/platform/src/observability/"
+    ],
+    "suggestedPrScope": "feat(sdk): audit export pipeline for run summaries"
+  },
+  {
+    "gapId": "GAP-PROMPT-007",
+    "title": "Implement semantic compression families (per-effect, per-file, per-iteration)",
+    "milestone": "M3",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PERF-002"],
+    "acceptanceCriteria": [
+      "Compression families group related context by semantic relationship (effect, file, iteration)",
+      "Each family has a compression strategy (summarize, truncate, prune)",
+      "Family-aware compaction preserves cross-family references",
+      "Compression quality measured by context preservation vs token reduction"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/prompts/strata.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): semantic compression families for context compaction"
+  },
+  {
+    "gapId": "GAP-UX-001",
+    "title": "Build rendering foundation on tula-ui or observer-dashboard platform",
+    "milestone": "M4",
+    "remainingEffort": "L",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Rendering target decided and documented (tula-ui or observer-dashboard)",
+      "Base component library with Box, Text, Spinner, Table primitives",
+      "Data binding to run status, journal events, and effect state",
+      "Component library reusable across dashboard and in-session experience",
+      "At least one screen rendering live data"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/",
+      "packages/observer-dashboard/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): rendering foundation with base component library"
+  },
+  {
+    "gapId": "GAP-UX-001e",
+    "title": "Build progress and status line component on rendering foundation",
+    "milestone": "M4",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-UX-001", "GAP-SUBOBS-002"],
+    "acceptanceCriteria": [
+      "Persistent status line showing current phase, progress, and cost",
+      "Effect progress bars when SUBOBS-002 data available",
+      "Status updates in real-time from journal events",
+      "Minimal footprint (single line or compact view)"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): progress and status line component"
+  },
+  {
+    "gapId": "GAP-UX-001c",
+    "title": "Build rich breakpoint approval UI with risk visualization",
+    "milestone": "M4",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-UX-001"],
+    "acceptanceCriteria": [
+      "Breakpoint approval displays risk level with visual indicator",
+      "Auto-approval recommendations shown when governance allows",
+      "Context summary includes affected files, blast radius, and reversibility",
+      "Approval/rejection with feedback capture"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/",
+      "packages/genty/platform/src/interaction/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): rich breakpoint approval UI with risk display"
+  },
+  {
+    "gapId": "GAP-UX-001a",
+    "title": "Build effect tree visualization component",
+    "milestone": "M4",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-UX-001"],
+    "acceptanceCriteria": [
+      "Tree view of effects with parent-child relationships",
+      "Status indicators per effect (pending, running, completed, failed)",
+      "Expandable nodes showing effect details",
+      "Real-time updates as effects resolve"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): effect tree visualization component"
+  },
+  {
+    "gapId": "GAP-UX-001b",
+    "title": "Build structured diff rendering component",
+    "milestone": "M4",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-UX-001", "GAP-RUN-001"],
+    "acceptanceCriteria": [
+      "Side-by-side or inline diff view for run comparisons",
+      "Syntax highlighting for code diffs",
+      "Collapsible sections for large diffs",
+      "Integration with run:diff output"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): structured diff rendering component"
+  },
+  {
+    "gapId": "GAP-UX-001d",
+    "title": "Build message type rendering components for typed output",
+    "milestone": "M4",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-UX-001"],
+    "acceptanceCriteria": [
+      "Type-specific renderers for code, markdown, table, error, and info messages",
+      "Syntax highlighting for code blocks",
+      "Table rendering with sorting and filtering",
+      "Consistent styling across message types"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): message type rendering components"
+  },
+  {
+    "gapId": "GAP-UX-001f",
+    "title": "Build streaming output panels for live harness output",
+    "milestone": "M4",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-UX-001", "GAP-SUBOBS-001"],
+    "acceptanceCriteria": [
+      "Split-pane or tabbed view for multiple concurrent harness outputs",
+      "Real-time streaming from harness stdout/stderr via SUBOBS-001",
+      "Scrollback buffer with search",
+      "Panel management (open, close, resize, focus)"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): streaming output panels for live harness output"
+  },
+  {
+    "gapId": "GAP-UX-008",
+    "title": "Build resume dashboard with visual run picker",
+    "milestone": "M4",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Visual list of resumable sessions and runs",
+      "Rich context per run: phase, progress, cost, last activity",
+      "Continuity state preview before resume",
+      "One-click resume from selected run"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/session/discovery.ts",
+      "packages/tula/ui/src/components/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): resume dashboard with run picker"
+  },
+  {
+    "gapId": "GAP-UX-009",
+    "title": "Build failure triage view with root cause analysis and fix suggestions",
+    "milestone": "M4",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-OBS-008"],
+    "acceptanceCriteria": [
+      "Synthesized triage view combining health snapshot, error analysis, and progress summary",
+      "Root cause analysis identifies the failing effect and upstream cause",
+      "Fix suggestions from errorSuggestions.ts and errorTemplates.ts",
+      "Timeline visualization showing progression to failure"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/observability/health.ts",
+      "packages/babysitter-sdk/src/runtime/errorSuggestions.ts"
+    ],
+    "suggestedPrScope": "feat(platform): failure triage view with root cause analysis"
+  },
+  {
+    "gapId": "GAP-UX-010",
+    "title": "Define typed interaction schemas as effect types with harness renderers",
+    "milestone": "M4",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Typed interaction schemas: ChoiceInteraction, MultiChoiceInteraction, FormInteraction, ConfirmInteraction",
+      "Each schema is a first-class effect type (not just tool parameters)",
+      "Harness-specific renderers for terminal and web",
+      "Schema validation at effect dispatch time"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/genty/platform/src/interaction/"
+    ],
+    "suggestedPrScope": "feat(sdk): typed effect interaction schemas with harness renderers"
+  },
+  {
+    "gapId": "GAP-TOOLS-023",
+    "title": "Build ctx.workflow() intrinsic with conditional branching and retry policies",
+    "milestone": "M4",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PROC-001", "GAP-AGENT-001"],
+    "acceptanceCriteria": [
+      "ctx.workflow() intrinsic accepts declarative workflow definition",
+      "Workflow steps support conditional branching (if/else based on previous step output)",
+      "Retry policies configurable per step (maxRetries, backoff strategy)",
+      "Step-to-step data transformation with typed input/output",
+      "Workflow execution logged to journal for replay"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/intrinsics/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): ctx.workflow() intrinsic with branching and retry"
+  },
+  {
+    "gapId": "GAP-SUBOBS-005",
+    "title": "Build subagent drill-down view on respecified rendering platform",
+    "milestone": "M4",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-UX-001", "GAP-SUBOBS-001", "GAP-SUBOBS-002"],
+    "acceptanceCriteria": [
+      "Subagent drill-down shows per-effect detail: streaming output, progress, cost, health",
+      "Navigable from effect tree or run status view",
+      "Live updates from streaming output capture",
+      "Cost breakdown per subagent"
+    ],
+    "filesToModify": [
+      "packages/tula/ui/src/components/",
+      "packages/observer-dashboard/"
+    ],
+    "suggestedPrScope": "feat(tula-ui): subagent drill-down view with live output"
+  },
+  {
+    "gapId": "GAP-TOOLS-032",
+    "title": "Implement OAuth flow and token storage for MCP server authentication",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "mcp:auth command initiates OAuth authorization code flow",
+      "Tokens stored securely (OS keychain or encrypted file)",
+      "Token refresh handled automatically before expiration",
+      "Authenticated MCP connections use stored tokens",
+      "Token revocation supported"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/mcp/client/",
+      "packages/babysitter-sdk/src/cli/commands/"
+    ],
+    "suggestedPrScope": "feat(platform): OAuth flow and token storage for MCP authentication"
+  },
+  {
+    "gapId": "GAP-SEC-006",
+    "title": "Implement general OAuth integration with credential management",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-TOOLS-032"],
+    "acceptanceCriteria": [
+      "Shared credential manager module (reused from TOOLS-032)",
+      "OAuth flows for common providers (GitHub, Google, Slack)",
+      "Credential storage with encryption at rest",
+      "Token refresh lifecycle management",
+      "Credentials available to process definitions via secure context"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/mcp/client/",
+      "packages/babysitter-sdk/src/runtime/"
+    ],
+    "suggestedPrScope": "feat(platform): general OAuth integration with credential management"
+  },
+  {
+    "gapId": "GAP-SEC-007",
+    "title": "Implement configurable privacy settings with PII filtering and retention",
+    "milestone": "M5",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "Configurable privacy settings beyond BABYSITTER_ALLOW_SECRET_LOGS",
+      "PII filtering for journal events and analytics",
+      "Data retention policies with configurable TTL",
+      "Field-level redaction for sensitive data in exports",
+      "Privacy settings scoped per project"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/genty/platform/src/observability/"
+    ],
+    "suggestedPrScope": "feat(sdk): configurable privacy settings with PII filtering"
+  },
+  {
+    "gapId": "GAP-STATE-006",
+    "title": "Implement journal fork-from-point for session rewind capability",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PROC-003"],
+    "acceptanceCriteria": [
+      "run:rewind <seq> forks journal from specified sequence number",
+      "New run created with forked journal as starting state",
+      "Process version at rewind point used (via PROC-003 versioning)",
+      "Rewind events logged for auditability",
+      "Original run preserved unchanged"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/replay/",
+      "packages/genty/platform/src/orchestration/"
+    ],
+    "suggestedPrScope": "feat(sdk): journal fork-from-point for session rewind"
+  },
+  {
+    "gapId": "GAP-RUN-003",
+    "title": "Implement run forking that creates a new run from a journal divergence point",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-STATE-006"],
+    "acceptanceCriteria": [
+      "run:fork <runId> <seq> creates a new run branching from the specified point",
+      "Forked run inherits journal events up to the fork point",
+      "Forked run gets new run ID but references parent run",
+      "Forked run can proceed independently from the fork point"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/replay/",
+      "packages/genty/platform/src/api/runs.ts"
+    ],
+    "suggestedPrScope": "feat(platform): run forking from journal divergence point"
+  },
+  {
+    "gapId": "GAP-STATE-002",
+    "title": "Build memory consolidation module that merges and prunes extracted memories",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-STATE-001"],
+    "acceptanceCriteria": [
+      "Consolidation merges related memories from different runs",
+      "Stale memories pruned based on age, relevance, and access frequency",
+      "Consolidated memories weighted for injection priority",
+      "Consolidation runs as a background task after run completion",
+      "Memory corpus size bounded by configurable limit"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/session/memoryExtraction.ts"
+    ],
+    "suggestedPrScope": "feat(platform): memory consolidation with merge and prune"
+  },
+  {
+    "gapId": "GAP-PAR-010",
+    "title": "Implement fork-join process pattern with state inheritance and sync points",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PAR-003", "GAP-AGENT-001"],
+    "acceptanceCriteria": [
+      "ctx.forkJoin() intrinsic spawns parallel branches from parent state",
+      "Each branch inherits parent state at fork point",
+      "Join point synchronizes results from all branches",
+      "Configurable join strategy (all-complete, first-complete, quorum)",
+      "Branch failures handled by join strategy"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/intrinsics/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
+    ],
+    "suggestedPrScope": "feat(sdk): fork-join process pattern with state inheritance"
+  },
+  {
+    "gapId": "GAP-SESSION-003",
+    "title": "Build session template system with stored presets",
+    "milestone": "M5",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-AGENT-004"],
+    "acceptanceCriteria": [
+      "SessionTemplate type specifying harness, model, breakpoints, process bindings, budget",
+      ".a5c/session-templates/ directory stores templates as JSON files",
+      "session:create --template <name> initializes session from template",
+      "Templates reference built-in process templates from AGENT-004"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/session/"
+    ],
+    "suggestedPrScope": "feat(platform): session template system with presets"
+  },
+  {
+    "gapId": "GAP-SESSION-005",
+    "title": "Implement session export/import and multi-operator collaboration",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-REMOTE-003"],
+    "acceptanceCriteria": [
+      "session:export produces portable session archive",
+      "session:import loads session from archive",
+      "Multi-operator access via remote sessions with conflict resolution",
+      "Operator presence indicators during collaborative sessions"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/session/",
+      "packages/genty/platform/src/mcp/transport/"
+    ],
+    "suggestedPrScope": "feat(platform): session sharing and collaboration"
+  },
+  {
+    "gapId": "GAP-TOOLS-012",
+    "title": "Build LSP client module for code-aware task routing",
+    "milestone": "M5",
+    "remainingEffort": "L",
+    "dependencies": ["GAP-PROC-001"],
+    "acceptanceCriteria": [
+      "LSP client connects to language servers (TypeScript, Python, etc.)",
+      "Diagnostics from LSP feed into task requirements for routing",
+      "Symbol information available for code-aware effect scoping",
+      "Language server lifecycle managed (start, connect, disconnect, restart)"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/"
+    ],
+    "suggestedPrScope": "feat(platform): LSP client for code-aware task routing"
+  },
+  {
+    "gapId": "GAP-TOOLS-029",
+    "title": "Build typed output block system for structured task results",
+    "milestone": "M5",
+    "remainingEffort": "M",
+    "dependencies": ["GAP-UX-001b", "GAP-UX-001d"],
+    "acceptanceCriteria": [
+      "OutputBlock types: code, markdown, table, diff, file, image",
+      "Task results can contain typed output blocks",
+      "Output blocks rendered by message type components (UX-001d)",
+      "Diff blocks use structured diff rendering (UX-001b)"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/genty/platform/src/harness/agenticTools/"
+    ],
+    "suggestedPrScope": "feat(sdk): typed output block system for structured results"
+  },
+  {
+    "gapId": "GAP-TOOLS-037",
+    "title": "Add prompt parameter to fetch tool for LLM-based content processing",
+    "milestone": "M5",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "fetch tool accepts optional prompt parameter for content processing",
+      "When prompt provided, fetched content processed by LLM before returning",
+      "Processing reduces raw HTML to relevant extracted content",
+      "Token usage for processing tracked in cost accounting"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/agenticTools/tools/execution.ts"
+    ],
+    "suggestedPrScope": "feat(platform): add prompt-based content processing to fetch tool"
+  },
+  {
+    "gapId": "GAP-BRK-003",
+    "title": "Build breakpoint analytics with resolution time tracking and SLA alerts",
+    "milestone": "M5",
+    "remainingEffort": "S",
+    "dependencies": ["GAP-OBS-NEW-001"],
+    "acceptanceCriteria": [
+      "Breakpoint resolution times computed from journal events",
+      "SLA thresholds configurable per breakpoint kind",
+      "SLA violations surfaced as webhook alerts (via OBS-NEW-001)",
+      "Analytics available via run:stats command"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/observability/"
+    ],
+    "suggestedPrScope": "feat(platform): breakpoint analytics with SLA tracking"
+  },
+  {
+    "gapId": "GAP-TOOLS-007",
+    "title": "Build JS/TS REPL agentic tool following bash tool patterns",
+    "milestone": "M5",
+    "remainingEffort": "S",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "js_repl agentic tool executes JavaScript/TypeScript code",
+      "Execution in isolated Node.js context with configurable timeout",
+      "TypeScript compilation handled transparently",
+      "Output captured and returned as tool result"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/harness/agenticTools/tools/"
+    ],
+    "suggestedPrScope": "feat(platform): JS/TS REPL agentic tool"
+  },
+  {
+    "gapId": "GAP-RUN-001",
+    "title": "Build run comparison module with diff output",
+    "milestone": "M5",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "run:diff <runA> <runB> compares two runs",
+      "Comparison shows: task differences, cost delta, duration delta, outcome differences",
+      "Output in human-readable and JSON formats",
+      "Diff data consumable by structured diff rendering component"
+    ],
+    "filesToModify": [
+      "packages/genty/platform/src/observability/",
+      "packages/babysitter-sdk/src/cli/commands/"
+    ],
+    "suggestedPrScope": "feat(platform): run comparison and diffing"
+  },
+  {
+    "gapId": "GAP-RUN-002",
+    "title": "Build run archival and restore capability",
+    "milestone": "M5",
+    "remainingEffort": "M",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      "run:archive compresses run directory to a single archive file",
+      "run:restore extracts archive back to .a5c/runs/",
+      "Archive includes journal, metadata, effects, and artifacts",
+      "Archived runs excluded from run listing but discoverable via run:list --archived"
+    ],
+    "filesToModify": [
+      "packages/babysitter-sdk/src/storage/cleanup.ts",
+      "packages/babysitter-sdk/src/cli/commands/"
+    ],
+    "suggestedPrScope": "feat(sdk): run archival and restore"
+  }
+]

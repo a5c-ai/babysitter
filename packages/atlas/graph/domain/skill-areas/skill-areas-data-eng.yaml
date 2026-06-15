@@ -1,0 +1,145 @@
+---
+nodeKind: SkillArea
+id: skill-area:etl-pipelines
+attributes:
+  displayName: "ETL Pipelines"
+  description: |
+    Designing extract-transform-load pipelines — idempotency,
+    backfills, schema drift handling, and operational SLAs.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+  uses_stack_part:
+    - stack-part:scheduler
+---
+nodeKind: SkillArea
+id: skill-area:data-warehouse-modeling
+attributes:
+  displayName: "Data Warehouse Modeling"
+  description: |
+    Dimensional modeling, star/snowflake schemas, slowly-changing
+    dimensions, and modern lakehouse table design.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:spark-jobs
+attributes:
+  displayName: "Apache Spark Jobs"
+  description: |
+    Authoring Spark jobs (Scala/Python/SQL) — partitioning, broadcast
+    joins, AQE, and tuning shuffle and memory.
+  domains:
+    - specialization:data-engineering-analytics
+  requiresLanguages:
+    - language:scala
+    - language:python
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+  uses_language:
+    - language:scala
+    - language:python
+    - target: language:scala
+    - target: language:python
+---
+nodeKind: SkillArea
+id: skill-area:dbt-modeling
+attributes:
+  displayName: "dbt Modeling"
+  description: |
+    Analytics engineering with dbt — sources/models/tests, refs,
+    incremental materializations, and exposures.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:data-quality
+attributes:
+  displayName: "Data Quality"
+  description: |
+    Data-quality contracts, expectations, freshness/null/uniqueness
+    tests, and data SLOs in the warehouse.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:data-lineage
+attributes:
+  displayName: "Data Lineage"
+  description: |
+    Capturing and querying lineage across pipelines and warehouses;
+    OpenLineage/Marquez integrations and column-level lineage.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:batch-vs-stream-tradeoffs
+attributes:
+  displayName: "Batch vs Stream Tradeoffs"
+  description: |
+    Choosing batch, micro-batch, or streaming for a data pathway —
+    latency vs cost vs correctness, watermarks, and reprocessing.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:columnar-storage
+attributes:
+  displayName: "Columnar Storage Formats"
+  description: |
+    Working with Parquet, ORC, Arrow — encoding/compression,
+    predicate pushdown, schema evolution, and file sizing.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:data-governance
+attributes:
+  displayName: "Data Governance"
+  description: |
+    Catalogs, ownership, stewardship, classification, and access
+    review for analytical data assets.
+  domains:
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:data-engineering-analytics
+      confidence: primary

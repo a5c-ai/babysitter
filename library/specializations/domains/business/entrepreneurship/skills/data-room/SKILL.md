@@ -11,6 +11,11 @@ metadata:
   domain: business
   category: Due Diligence
   skill-id: SK-015
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:financial-modeling, skill-area:business-analysis, skill-area:investment-analysis]
+  workflows: [workflow:product-discovery]
+  roles: [role:financial-analyst, role:strategic-planner, role:business-analyst]
 ---
 
 # Data Room Organizer Skill

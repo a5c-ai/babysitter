@@ -1,0 +1,297 @@
+---
+nodeKind: Tool
+id: tool:mem0
+attributes:
+  displayName: "Mem0"
+  homepageUrl: "https://github.com/mem0ai/mem0"
+  kind: other
+  description: |
+    Memory layer for personalized AI experiences that automatically
+    extracts, stores, and retrieves relevant memories from conversations.
+    Provides user-level, session-level, and agent-level memory with a
+    simple add/search API. Supports multiple vector store backends and
+    integrates with LangChain, CrewAI, and other agent frameworks to
+    give LLM applications persistent context across sessions.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:organizational-intelligence
+  relates_to_topic:
+    - target: topic:memory-to-knowledge-bridge
+    - target: topic:context-to-fabric-sync
+    - target: topic:auto-memory
+    - target: topic:memory-scoping
+  alternative_to:
+    - target: tool:zep
+      comparison: "AI memory services — Mem0 focuses on memory extraction; Zep on conversation persistence"
+---
+nodeKind: Tool
+id: tool:zep
+attributes:
+  displayName: "Zep"
+  homepageUrl: "https://github.com/getzep/zep"
+  kind: other
+  description: |
+    Long-term memory server for AI assistants that persists, summarizes,
+    and retrieves conversation history and extracted facts. Enriches
+    memory with entity extraction and temporal awareness. Provides a
+    REST API and SDKs for Python and TypeScript. Designed for chat
+    applications where assistants need to recall prior interactions,
+    user preferences, and accumulated knowledge across sessions.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:organizational-intelligence
+  relates_to_topic:
+    - target: topic:memory-to-knowledge-bridge
+    - target: topic:context-to-fabric-sync
+    - target: topic:auto-memory
+    - target: topic:memory-consolidation
+  alternative_to:
+    - target: tool:mem0
+      comparison: "AI memory services — Zep focuses on conversation persistence; Mem0 on memory extraction"
+---
+nodeKind: Tool
+id: tool:chromadb
+attributes:
+  displayName: "Chroma"
+  homepageUrl: "https://www.trychroma.com"
+  kind: other
+  description: |
+    Open-source embedding database purpose-built for AI applications.
+    Stores documents with embeddings and metadata, supports filtering,
+    and returns nearest-neighbor results. Runs in-memory, as a local
+    persistent store, or as a client-server deployment. First-class
+    integrations with LangChain, LlamaIndex, and OpenAI make it a
+    common default for prototyping RAG pipelines.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:search-indexing
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  relates_to_topic:
+    - target: topic:dense-retrieval
+    - target: topic:embedding-pipeline
+  alternative_to:
+    - target: tool:weaviate
+      comparison: "Vector databases — Chroma is lightweight; Weaviate is production-grade"
+    - target: tool:pinecone
+      comparison: "Vector databases — Chroma is self-hosted; Pinecone is managed SaaS"
+    - target: tool:qdrant
+      comparison: "Vector databases — both open-source, Qdrant focuses on performance"
+    - target: tool:milvus
+      comparison: "Vector databases — Chroma targets prototyping; Milvus targets billion-scale"
+---
+nodeKind: Tool
+id: tool:weaviate
+attributes:
+  displayName: "Weaviate"
+  homepageUrl: "https://weaviate.io"
+  kind: other
+  description: |
+    AI-native vector search engine that combines vector, keyword, and
+    hybrid search with built-in vectorization modules for text, images,
+    and multi-modal data. Supports GraphQL and REST APIs, multi-tenancy,
+    filtering, and horizontal scaling. Weaviate's generative search
+    modules can pipe retrieved context directly into LLM prompts,
+    making it a production-grade backend for RAG architectures.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:search-indexing
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  relates_to_topic:
+    - target: topic:hybrid-retrieval
+    - target: topic:dense-retrieval
+    - target: topic:embedding-pipeline
+  alternative_to:
+    - target: tool:chromadb
+      comparison: "Vector databases — Weaviate is production-grade; Chroma is lightweight"
+    - target: tool:pinecone
+      comparison: "Vector databases — Weaviate is self-hosted; Pinecone is managed SaaS"
+    - target: tool:qdrant
+      comparison: "Vector databases — both self-hosted, Weaviate has built-in vectorization"
+    - target: tool:milvus
+      comparison: "Vector databases — both production-grade, Milvus focuses on scale"
+---
+nodeKind: Tool
+id: tool:pinecone
+attributes:
+  displayName: "Pinecone"
+  homepageUrl: "https://www.pinecone.io"
+  kind: other
+  description: |
+    Managed vector database for AI applications that handles indexing,
+    storage, and low-latency similarity search at scale. Provides a
+    serverless tier, metadata filtering, namespaces for multi-tenancy,
+    and sparse-dense hybrid search. Widely used in production RAG
+    systems where operational simplicity and uptime SLAs matter more
+    than self-hosting flexibility.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:search-indexing
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  relates_to_topic:
+    - target: topic:hybrid-retrieval
+    - target: topic:dense-retrieval
+    - target: topic:embedding-pipeline
+  alternative_to:
+    - target: tool:chromadb
+      comparison: "Vector databases — Pinecone is managed SaaS; Chroma is self-hosted"
+    - target: tool:weaviate
+      comparison: "Vector databases — Pinecone is managed SaaS; Weaviate is self-hosted"
+    - target: tool:qdrant
+      comparison: "Vector databases — Pinecone is managed; Qdrant is self-hosted"
+    - target: tool:milvus
+      comparison: "Vector databases — Pinecone is managed SaaS; Milvus is self-hosted"
+---
+nodeKind: Tool
+id: tool:qdrant
+attributes:
+  displayName: "Qdrant"
+  homepageUrl: "https://qdrant.tech"
+  kind: other
+  description: |
+    Open-source vector similarity search engine written in Rust with a
+    focus on performance and filtering. Supports payload-based filtering
+    alongside vector search, quantization for memory efficiency, and
+    distributed deployment. Provides gRPC and REST APIs with clients
+    for Python, TypeScript, Go, and Rust. A strong choice for self-hosted
+    vector search where query latency and resource efficiency matter.
+edges:
+  belongs_to_language:
+    - language:rust
+  tool_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:search-indexing
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  relates_to_topic:
+    - target: topic:dense-retrieval
+    - target: topic:embedding-pipeline
+  alternative_to:
+    - target: tool:chromadb
+      comparison: "Vector databases — Qdrant focuses on performance; Chroma on simplicity"
+    - target: tool:weaviate
+      comparison: "Vector databases — both self-hosted, Qdrant is Rust-based"
+    - target: tool:pinecone
+      comparison: "Vector databases — Qdrant is self-hosted; Pinecone is managed"
+    - target: tool:milvus
+      comparison: "Vector databases — both self-hosted, Qdrant is leaner"
+---
+nodeKind: Tool
+id: tool:milvus
+attributes:
+  displayName: "Milvus"
+  homepageUrl: "https://milvus.io"
+  kind: other
+  description: |
+    Open-source vector database designed for billion-scale similarity
+    search with GPU-accelerated indexing. Supports multiple index types
+    (IVF, HNSW, DiskANN), hybrid scalar-vector queries, and multi-vector
+    search. Runs as a distributed system with separate storage and compute
+    scaling. Zilliz Cloud offers a managed deployment. Common in
+    enterprise AI pipelines requiring high-throughput vector operations.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:retrieval-augmented-generation
+    - target: skill-area:search-indexing
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:rag-pipeline-engineering
+  relates_to_topic:
+    - target: topic:dense-retrieval
+    - target: topic:embedding-pipeline
+  alternative_to:
+    - target: tool:chromadb
+      comparison: "Vector databases — Milvus targets billion-scale; Chroma targets prototyping"
+    - target: tool:weaviate
+      comparison: "Vector databases — both production-grade, Milvus focuses on scale"
+    - target: tool:pinecone
+      comparison: "Vector databases — Milvus is self-hosted; Pinecone is managed SaaS"
+    - target: tool:qdrant
+      comparison: "Vector databases — both self-hosted, Milvus is distributed"
+---
+nodeKind: Tool
+id: tool:agentmemory
+attributes:
+  displayName: "agentmemory"
+  homepageUrl: "https://github.com/autonomous-ai/agentmemory"
+  kind: other
+  description: |
+    Cross-agent persistent memory library with benchmarked accuracy and
+    a privacy-first processing pipeline. Incoming observations pass through
+    SHA-256 content-addressable deduplication, a configurable privacy filter
+    that strips secrets, credentials, and PII, then LLM compression that
+    extracts structured facts, concepts, and narrative. Memories are vector-
+    embedded and dual-indexed with BM25 (keyword) and vector (semantic)
+    retrieval. Designed for multi-agent deployments where one agent's
+    discoveries should be available to others without duplication or
+    information leakage.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+    - target: skill-area:knowledge-fabric-design
+  relates_to_topic:
+    - target: topic:memory-to-knowledge-bridge
+    - target: topic:auto-memory
+    - target: topic:memory-deduplication
+    - target: topic:memory-security
+  alternative_to:
+    - target: tool:memories-sh
+      comparison: "AI agent memory — agentmemory has vector search and privacy filtering; memories.sh is plain file key-value"
+    - target: tool:mempalace
+      comparison: "AI agent memory — agentmemory has privacy filtering; MemPalace has quality scoring"
+    - target: tool:cloudflare-agent-memory
+      comparison: "AI agent memory — agentmemory is self-hosted; Cloudflare is managed cloud"
+    - target: tool:memori-labs
+      comparison: "AI agent memory systems"
+    - target: tool:vercel-ai-memory
+      comparison: "AI agent memory systems"
+---
+nodeKind: Tool
+id: tool:memories-sh
+attributes:
+  displayName: "memories.sh"
+  homepageUrl: "https://github.com/nichochar/memories"
+  kind: other
+  description: |
+    Durable state management for coding agents. Provides a shell-based
+    interface for agents to persist and retrieve key-value observations
+    across sessions. Memories are stored as plain files organized by
+    project, making them inspectable and version-controllable. The shell
+    interface (source memories.sh) makes it usable from any agent that
+    can execute Bash commands, including Claude Code, Aider, and custom
+    agent harnesses. Focuses on simplicity over sophistication — no vector
+    search, no LLM processing, just reliable key-value persistence.
+edges:
+  belongs_to_language:
+    - language:bash
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+  relates_to_topic:
+    - target: topic:memory-to-knowledge-bridge
+    - target: topic:auto-memory

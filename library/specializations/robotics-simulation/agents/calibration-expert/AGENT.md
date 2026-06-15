@@ -13,6 +13,11 @@ expertise:
   - Multi-sensor calibration
   - Calibration validation methods
   - Automated calibration workflows
+graph:
+  domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # Robot Calibration Expert Agent

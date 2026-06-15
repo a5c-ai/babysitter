@@ -1,0 +1,64 @@
+nodeKind: AdapterModel
+id: adapter-model:gemini:gemini-2.5-pro
+attributes:
+  harness: gemini
+  modelId: gemini-2.5-pro
+  displayName: Gemini 2.5 Pro
+  deprecated: false
+  contextWindow: 1000000
+  maxOutputTokens: 65536
+  maxThinkingTokens: 65536
+  supportsThinking: true
+  thinkingEffortLevels:
+    - low
+    - medium
+    - high
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: true
+  supportsStructuredOutput: true
+  supportsTextStreaming: true
+  supportsThinkingStreaming: true
+  supportsImageInput: true
+  supportsImageOutput: false
+  supportsFileInput: true
+  cliArgKey: "--model"
+  cliArgValue: gemini-2.5-pro
+  lastUpdated: "2025-03-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:gemini-cli
+---
+nodeKind: AdapterModel
+id: adapter-model:gemini:gemini-2.5-flash
+attributes:
+  harness: gemini
+  modelId: gemini-2.5-flash
+  displayName: Gemini 2.5 Flash
+  deprecated: false
+  contextWindow: 1000000
+  maxOutputTokens: 65536
+  supportsThinking: true
+  thinkingEffortLevels:
+    - low
+    - medium
+    - high
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: true
+  supportsStructuredOutput: true
+  supportsTextStreaming: true
+  supportsThinkingStreaming: true
+  supportsImageInput: true
+  supportsImageOutput: false
+  supportsFileInput: true
+  cliArgKey: "--model"
+  cliArgValue: gemini-2.5-flash
+  lastUpdated: "2025-03-01"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:gemini-cli

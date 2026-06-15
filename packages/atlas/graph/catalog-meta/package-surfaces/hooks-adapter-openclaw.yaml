@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-openclaw
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-openclaw"
+  packageName: "@a5c-ai/hooks-adapter-openclaw"
+  displayName: "Hooks Adapter - OpenClaw"
+  description: "OpenClaw harness adapter for the hooks-adapter system. Translates OpenClaw-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects OpenClaw as the active harness. Extend this to customize hook behavior specific to OpenClaw."
+  status: active

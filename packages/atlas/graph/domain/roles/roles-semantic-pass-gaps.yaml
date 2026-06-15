@@ -1,0 +1,197 @@
+---
+nodeKind: Role
+id: role:organizational-development-specialist
+attributes:
+  displayName: "Organizational Development Specialist"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Designs and facilitates organizational development interventions including change
+    management programs, org design initiatives, and leadership development. Conducts
+    organizational diagnostics, builds change readiness assessments, and coaches leaders
+    through transformations. Partners with HR and senior leadership to align organizational
+    capabilities with strategic direction.
+edges:
+  holds_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:change-approval
+    - responsibility:training-development
+  requires_skill:
+    - target: domain:human-resources
+      level: expert
+    - target: domain:strategy
+      level: intermediate
+---
+nodeKind: Role
+id: role:management-consultant
+attributes:
+  displayName: "Management Consultant"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Provides strategic and operational consulting to organizations on business improvement,
+    growth strategy, and performance transformation. Conducts rapid diagnostics, builds
+    business cases, and designs implementation roadmaps for complex organizational challenges.
+    Partners with senior executives to translate strategic insights into operational change.
+edges:
+  holds_responsibility:
+    - responsibility:strategic-planning
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:strategy
+      level: expert
+    - target: domain:operations
+      level: intermediate
+---
+nodeKind: Role
+id: role:people-analytics-specialist
+attributes:
+  displayName: "People Analytics Specialist"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Applies data analytics to HR and workforce decisions, building dashboards and
+    predictive models that inform talent strategy, org health, and performance management.
+    Designs people metrics frameworks, conducts workforce planning analyses, and presents
+    insights to HR and executive stakeholders to drive evidence-based talent decisions.
+edges:
+  holds_responsibility:
+    - responsibility:metric-definition
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:human-resources
+      level: expert
+    - target: domain:data-science
+      level: intermediate
+---
+nodeKind: Role
+id: role:quality-analyst
+attributes:
+  displayName: "Quality Analyst"
+  isAgentic: false
+  automatability: 0.4
+  description: |
+    Designs and executes quality assurance processes including test planning, defect
+    tracking, and quality gate enforcement across product development and delivery.
+    Maintains quality metrics dashboards, conducts root cause analysis on defects,
+    and audits processes to ensure conformance with quality standards and compliance requirements.
+edges:
+  holds_responsibility:
+    - responsibility:test-strategy
+    - responsibility:compliance-monitoring
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:software-engineering
+      level: intermediate
+    - target: domain:operations
+      level: intermediate
+---
+nodeKind: Role
+id: role:developer-advocate
+attributes:
+  displayName: "Developer Advocate"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Builds and nurtures developer communities around products and platforms through
+    technical content creation, conference talks, and developer experience programs.
+    Bridges developer feedback and product teams to shape roadmaps, produces tutorials
+    and sample code, and measures community health and adoption metrics.
+edges:
+  holds_responsibility:
+    - responsibility:content-creation
+    - responsibility:stakeholder-communication
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:community
+      level: intermediate
+---
+nodeKind: Role
+id: role:technical-artist
+attributes:
+  displayName: "Technical Artist"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Bridges art and engineering pipelines in games and VFX productions, developing
+    shaders, tools, and automated asset workflows that enable artists to create
+    high-fidelity content efficiently. Optimizes rendering performance, defines art
+    technical standards, and collaborates with graphics engineers on pipeline tooling.
+edges:
+  holds_responsibility:
+    - responsibility:performance-optimization
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:gaming
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:competitive-intelligence-analyst
+attributes:
+  displayName: "Competitive Intelligence Analyst"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Gathers, synthesizes, and distributes competitive and market intelligence to
+    inform strategic decisions across product, sales, and executive functions.
+    Monitors competitor activity, industry trends, and market signals using primary
+    and secondary research, producing actionable intelligence reports and early-warning alerts.
+edges:
+  holds_responsibility:
+    - responsibility:market-research
+    - responsibility:strategic-planning
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:strategy
+      level: expert
+    - target: domain:business-intelligence
+      level: intermediate
+---
+nodeKind: Role
+id: role:solution-architect
+attributes:
+  displayName: "Solution Architect"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Designs end-to-end technical solutions for complex business problems, evaluating
+    technology options and defining integration architectures that meet functional and
+    non-functional requirements. Produces solution blueprints, leads vendor evaluations,
+    and ensures designs align with enterprise architecture standards and strategic direction.
+edges:
+  holds_responsibility:
+    - responsibility:vendor-evaluation
+    - responsibility:documentation
+    - responsibility:stakeholder-communication
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:cloud-infra
+      level: intermediate
+---
+nodeKind: Role
+id: role:learning-development-specialist
+attributes:
+  displayName: "Learning & Development Specialist"
+  isAgentic: false
+  automatability: 0.2
+  description: |
+    Designs, delivers, and evaluates learning programs that build organizational
+    capability and employee skills. Conducts training needs analyses, develops
+    curriculum and instructional materials, and measures program effectiveness
+    through assessments and performance outcomes. Partners with subject matter experts
+    to translate complex knowledge into engaging learning experiences.
+edges:
+  holds_responsibility:
+    - responsibility:training-development
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:human-resources
+      level: expert
+    - target: domain:knowledge-management
+      level: intermediate

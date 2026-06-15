@@ -14,6 +14,11 @@ metadata:
   domain: science
   category: Specialized Domain
   agent-id: BME-AG-021
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:machine-learning-frameworks, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Medical Imaging Engineer Agent

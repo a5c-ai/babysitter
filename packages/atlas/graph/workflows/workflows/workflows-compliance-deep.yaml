@@ -1,0 +1,127 @@
+---
+nodeKind: Workflow
+id: workflow:gdpr-data-subject-request
+attributes:
+  displayName: "GDPR Data Subject Request"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-request"
+  complexity: cross-team
+  description: |
+    Processes data subject access, rectification, and deletion requests under
+    GDPR — intake verification, data inventory lookup across systems,
+    coordinated deletion or export, audit trail generation, and response
+    within regulatory timelines. Excludes ongoing data governance policy
+    design.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:database-administrator
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:oauth-flows
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:databases
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:data-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:sox-controls-review
+attributes:
+  displayName: "SOX Controls Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates IT general controls for SOX compliance — change management
+    evidence, access review attestations, segregation of duties validation,
+    and automated control testing results. Excludes financial statement audit
+    procedures.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:engineering-manager
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:k8s-rbac
+    - target: skill-area:secrets-rotation
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:pci-dss-scoping
+attributes:
+  displayName: "PCI DSS Scoping"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Defines and validates the cardholder data environment boundary — network
+    segmentation verification, data flow mapping, scope reduction analysis,
+    compensating control documentation, and evidence gathering for QSA review.
+    Excludes remediation implementation.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:cloud-architect
+    - target: role:principal-engineer
+  requires_skill_area:
+    - target: skill-area:service-mesh-config
+    - target: skill-area:k8s-rbac
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:cybersecurity
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:application-security-team
+---
+nodeKind: Workflow
+id: workflow:data-retention-review
+attributes:
+  displayName: "Data Retention Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits data retention policies across storage systems — verifying TTL
+    enforcement, identifying data exceeding retention periods, validating
+    archival pipelines, and ensuring deletion jobs complete within compliance
+    windows. Excludes initial retention policy authoring.
+edges:
+  involves_role:
+    - target: role:database-administrator
+    - target: role:security-reviewer
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:postgres-tuning
+  applies_to_domain:
+    - target: domain:databases
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:security-review
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:data-team
+    - target: org-unit:database-team
+    - target: org-unit:security-team

@@ -28,14 +28,14 @@ Before starting this tutorial, please ensure you have:
 - [ ] Completed the **[Beginner Tutorial: Build a Simple REST API](./beginner-rest-api.md)**
 - [ ] Understanding of **JavaScript async/await** patterns
 - [ ] Familiarity with **Jest** or similar testing frameworks
-- [ ] **Babysitter SDK** installed globally (`npm install -g @a5c-ai/babysitter-sdk@latest`)
+- [ ] **Babysitter CLI** installed globally (`npm install -g @a5c-ai/babysitter@latest`)
 - [ ] A project where you want to implement a custom build and deploy workflow
 
 ### Verify Prerequisites
 
 ```bash
-# Verify SDK installation
-npx @a5c-ai/babysitter-sdk@latest --version
+# Verify CLI installation
+babysitter --version
 ```
 
 ### About Breakpoints

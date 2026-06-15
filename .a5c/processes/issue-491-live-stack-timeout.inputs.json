@@ -1,0 +1,31 @@
+{
+  "issueNumber": 491,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-491",
+  "title": "Live-stack: BI Windows mini/DeepSeek too slow for 600s artifact monitor timeout",
+  "labels": ["bug", "effort:small", "ci", "adapters", "live-stack", "priority:low"],
+  "processLibrarySources": {
+    "requestedPath": ".a5c/process-library",
+    "requestedPathStatus": "Not present in this checkout.",
+    "selectedReferences": [
+      "library/specializations/qa-testing-automation/quality-gates.js",
+      "library/specializations/sdk-platform-development/error-handling-debugging-support.js",
+      ".a5c/processes/issue-367-global-babysitter-shim-preflight.mjs"
+    ]
+  },
+  "summary": "Raise the adapters prompt artifact completion monitor timeout from 600s to 900s after maintainer decision on issue #491.",
+  "targetFiles": [
+    "packages/adapters/launch/src/launch.ts",
+    "packages/adapters/cli/src/commands/launch.ts",
+    "packages/adapters/cli/tests/launch-resolution.test.ts"
+  ],
+  "acceptanceCriteria": [
+    "The artifact monitor timeout used by bridge-interactive prompt artifact completion is 900000ms.",
+    "The timeout value is exported for regression coverage.",
+    "Agent-mux launch tests covering launch resolution still pass."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/adapters/cli/tests/launch-resolution.test.ts",
+    "npm run build --workspace=@a5c-ai/agent-launch-mux"
+  ]
+}

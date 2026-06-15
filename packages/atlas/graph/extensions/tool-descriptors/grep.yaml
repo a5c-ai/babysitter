@@ -1,0 +1,27 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:grep
+attributes:
+  schema: '{}'
+  displayName: "Grep"
+  description: |
+    Content search across files, typically backed by ripgrep. Returns
+    matching files or content lines.
+  inputSchema:
+    type: object
+    required: [pattern]
+    properties:
+      pattern: { type: string, description: "Regular expression pattern to search for" }
+      path: { type: string, description: "File or directory to search (default cwd)" }
+      glob: { type: string, description: "Glob filter for filenames" }
+      type: { type: string, description: "ripgrep file type (e.g. js, py, rust)" }
+      output_mode: { type: string, enum: [content, files_with_matches, count] }
+      "-i": { type: boolean, description: "Case-insensitive" }
+      "-n": { type: boolean, description: "Show line numbers" }
+      "-A": { type: integer }
+      "-B": { type: integer }
+      "-C": { type: integer }
+      head_limit: { type: integer }
+      multiline: { type: boolean }
+  mode: normal
+  streamable: false
+edges: {}

@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: publication
   phase: 6
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-lineage]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-engineer, role:data-engineer]
 ---
 
 # Research Data Manager

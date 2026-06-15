@@ -16,6 +16,11 @@
  * @references
  * - Totango Customer Health: https://www.totango.com/
  * - ChurnZero Customer Success: https://churnzero.net/
+  * @graph
+ *   domains: [domain:sales]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -144,7 +149,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating Intervention Recommendations');
-  let interventions = await ctx.task(interventionRecommendationsTask, {
+  const interventions = await ctx.task(interventionRecommendationsTask, {
     accountName,
     compositeHealth,
     churnPrediction,
@@ -155,18 +160,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...(interventions.artifacts || []));
 
   // Breakpoint if high risk
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        interventions = await ctx.task(interventionRecommendationsTask, { ...{
-    accountName,
-    compositeHealth,
-    churnPrediction,
-    contractData,
-    outputDir
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (churnPrediction.riskLevel === 'high' || churnPrediction.riskLevel === 'critical') {
+    await ctx.breakpoint({
       question: `HIGH CHURN RISK detected for ${accountName}. Health Score: ${compositeHealth.overallScore}/100. Review intervention plan?`,
       title: 'Customer Health Alert',
       context: {
@@ -183,15 +178,9 @@ export async function process(inputs, ctx) {
           topConcerns: compositeHealth.topConcerns,
           recommendedActions: interventions.priority?.length || 0
         }
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -227,7 +216,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

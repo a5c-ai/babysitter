@@ -8,6 +8,13 @@
  * // Input: { symptoms: ["high latency", "intermittent errors"], context: { system: "API gateway" }, systemDescription: {...} }
  * // Output: { diagnosis: { primary: "...", confidence: 0.85 }, differentialDiagnosis: [...], rootCauseAnalysis: {...} }
  * @references Medical diagnostic reasoning, Root cause analysis, FMEA, 5 Whys methodology
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -59,34 +66,20 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Differential Refinement
-  let refinedDifferential = await ctx.task(refineDifferentialTask, {
+  const refinedDifferential = await ctx.task(refineDifferentialTask, {
     differentials: differentialGeneration.differentialDiagnoses,
     testResults: testResults.results,
     bayesianUpdate: true
   });
 
   // Quality Gate: Diagnostic Confidence
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        refinedDifferential = await ctx.task(refineDifferentialTask, { ...{
-    differentials: differentialGeneration.differentialDiagnoses,
-    testResults: testResults.results,
-    bayesianUpdate: true
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint('additional-investigation-needed', {
+  if (refinedDifferential.topDiagnosis.confidence < 0.6) {
+    await ctx.breakpoint('additional-investigation-needed', {
       message: 'Insufficient confidence for diagnosis',
       currentConfidence: refinedDifferential.topDiagnosis.confidence,
-      suggestedTests: refinedDifferential.recommendedAdditionalTests,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }  }
+      suggestedTests: refinedDifferential.recommendedAdditionalTests
+    });
+  }
 
   // Phase 8: Root Cause Analysis
   const rootCauseAnalysis = await ctx.task(analyzeRootCauseTask, {

@@ -15,6 +15,12 @@
  * - Rust Pattern Matching: https://doc.rust-lang.org/book/ch18-00-patterns.html
  * - OCaml Pattern Matching: https://ocaml.org/docs/pattern-matching
  * - Haskell Patterns: https://wiki.haskell.org/Pattern_matching
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -19,6 +19,13 @@
  * - React Server Components: https://nextjs.org/docs/app/building-your-application/rendering/server-components
  * - Prisma: https://www.prisma.io/
  * - NextAuth.js: https://next-auth.js.org/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:fullstack-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:server-side-rendering, skill-area:data-fetching-caching]
+ *   topics: [topic:streaming-ssr, topic:incremental-static-regeneration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -151,6 +158,9 @@ export async function process(inputs, ctx) {
   });
 
   artifacts.push(...clientComponents.artifacts);
+
+  // TypeScript hard gate (issue #65)
+  const tsCheck = await ctx.task(tsCheckTask, { projectName });
 
   // Cache-bust verification protocol (issue #89) - Next.js specific (.next + Turbopack HMR cache)
   const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, outputDir });
@@ -616,6 +626,8 @@ export const deploymentConfigTask = defineTask('deployment-config', (args, taskC
   },
   labels: ['web', 'nextjs', 'deployment', 'vercel']
 }));
+
+export const tsCheckTask = defineTask('typescript-check', (args, taskCtx) => ({ kind: 'shell', title: 'TypeScript compilation check', shell: { command: 'npx tsc --noEmit 2>&1', expectedExitCode: 0, timeout: 120000 }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['typescript', 'compilation', 'hard-gate'] }));
 
 export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next .next/cache node_modules/.cache 2>/dev/null; echo "Next.js cache cleared (including Turbopack HMR cache) at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'nextjs', 'cache-bust'] }));
 

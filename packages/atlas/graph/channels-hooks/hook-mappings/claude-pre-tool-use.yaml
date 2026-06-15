@@ -1,0 +1,30 @@
+nodeKind: HookMapping
+id: hook-mapping:pre-tool-use-claude-code
+attributes:
+  mappingId: hook-mapping:pre-tool-use-claude-code
+  hookId: hook-surface:pre-tool-use
+  targetId: agentVersion:claude:ge-0-0-0
+  nativeName: PreToolUse
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: true
+  adapterFamily: claude
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
+  payloadShape:
+    type: object
+    required: [tool_name, tool_input, session_id, transcript_path]
+    properties:
+      tool_name: { type: string }
+      tool_input: { type: object }
+      session_id: { type: string }
+      transcript_path: { type: string }
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+  emits_hook:
+    - target: agentVersion:claude:ge-0-0-0

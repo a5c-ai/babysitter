@@ -1,0 +1,71 @@
+---
+nodeKind: Workflow
+id: workflow:design-to-shelf-pipeline
+attributes:
+  displayName: "Design-to-Shelf Pipeline"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-season"
+  complexity: cross-team
+  description: |
+    Manages the fashion product pipeline from concept to retail placement --
+    tracking design submissions through trend board approval, coordinating
+    tech pack creation with material sourcing timelines, scheduling sample
+    production runs with factory capacity constraints, managing fit review
+    cycles with size grading adjustments, and synchronizing go-to-market
+    dates with buyer allocation windows. Produces line plan status
+    dashboards, critical path timelines, and SKU readiness reports. Excludes
+    retail merchandising and pricing.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:fashion-apparel
+    - target: domain:supply-chain
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:release-coordination
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:trend-forecasting-cycle
+attributes:
+  displayName: "Trend Forecasting Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Analyzes emerging fashion trends to inform collection planning --
+    aggregating signals from runway show data, social media sentiment
+    analysis, street-style image classification, search trend volumes, and
+    wholesale order pattern shifts, correlating signals with historical
+    sell-through performance, scoring trend longevity versus novelty risk,
+    and producing directional guidance for design teams on color palettes,
+    silhouettes, fabrics, and print motifs. Produces trend reports,
+    confidence-scored mood boards, and assortment mix recommendations.
+    Excludes individual garment design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:retrieval-augmented-generation
+  applies_to_domain:
+    - target: domain:fashion-apparel
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:ai-tooling-evaluation
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:product-team

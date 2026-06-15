@@ -1,0 +1,324 @@
+---
+nodeKind: Library
+id: library:puppeteer
+attributes:
+  displayName: "Puppeteer"
+  belongsToLanguageId: language:javascript
+  category: parsing
+  description: |
+    Node.js library for controlling headless Chrome/Chromium over the DevTools Protocol — browser automation, scraping, and screenshot generation.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:browser-automation
+    - skill-area:web-scraping
+  alternative_to:
+    - library:cheerio
+---
+nodeKind: Library
+id: library:cheerio
+attributes:
+  displayName: "Cheerio"
+  belongsToLanguageId: language:javascript
+  category: parsing
+  description: |
+    Fast, flexible server-side jQuery-like HTML/XML parsing and manipulation for Node.js.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:web-scraping
+---
+nodeKind: Library
+id: library:sharp
+attributes:
+  displayName: "Sharp"
+  belongsToLanguageId: language:javascript
+  category: image-processing
+  description: |
+    High-performance Node.js image processing library built on libvips — resize, convert, and transform images.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:image-processing
+  alternative_to:
+    - library:kingfisher
+---
+nodeKind: Library
+id: library:jest-dom
+attributes:
+  displayName: "jest-dom"
+  belongsToLanguageId: language:javascript
+  category: testing
+  description: |
+    Custom Jest matchers for asserting on DOM nodes — extends Jest with readable assertions like toBeVisible, toHaveTextContent, and toBeDisabled.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - library:react-testing-library
+---
+nodeKind: Library
+id: library:msw
+attributes:
+  displayName: "MSW (Mock Service Worker)"
+  belongsToLanguageId: language:javascript
+  category: testing
+  description: |
+    API mocking library for browser and Node.js using Service Worker intercepts — intercept and mock HTTP/GraphQL requests without changing application code.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - library:nock
+---
+nodeKind: Library
+id: library:nock
+attributes:
+  displayName: "Nock"
+  belongsToLanguageId: language:javascript
+  category: testing
+  description: |
+    HTTP server mocking and expectations library for Node.js — intercepts outgoing HTTP requests and asserts they match defined specs.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - library:msw
+---
+nodeKind: Library
+id: library:supertest
+attributes:
+  displayName: "Supertest"
+  belongsToLanguageId: language:javascript
+  category: testing
+  description: |
+    HTTP assertions library for testing Node.js servers — makes HTTP calls to an express/koa/fastify app and asserts on responses.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - library:msw
+---
+nodeKind: Library
+id: library:faker
+attributes:
+  displayName: "Faker.js"
+  belongsToLanguageId: language:javascript
+  category: testing
+  description: |
+    Generate massive amounts of fake, but realistic, data for testing and development — names, addresses, commerce, internet, and more.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:component-testing
+  alternative_to:
+    - library:faker-python
+---
+nodeKind: Library
+id: library:dayjs
+attributes:
+  displayName: "Day.js"
+  belongsToLanguageId: language:javascript
+  category: datetime
+  description: |
+    Minimalist JavaScript date/time library with Moment.js-compatible API — immutable, chainable, and only 2kB.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:moment
+    - library:date-fns
+    - library:luxon
+---
+nodeKind: Library
+id: library:moment
+attributes:
+  displayName: "Moment.js"
+  belongsToLanguageId: language:javascript
+  category: datetime
+  description: |
+    Parse, validate, manipulate, and display dates and times in JavaScript — the original comprehensive date library (now legacy/maintenance mode).
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:backend-api-design
+  alternative_to:
+    - library:dayjs
+    - library:date-fns
+    - library:luxon
+---
+nodeKind: Library
+id: library:immer
+attributes:
+  displayName: "Immer"
+  belongsToLanguageId: language:javascript
+  category: data-structures
+  description: |
+    Create the next immutable state by mutating the current one — uses Proxy to record mutations and produce a new immutable object tree.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:application-state-management
+  alternative_to:
+    - library:lodash
+---
+nodeKind: Library
+id: library:nodemon
+attributes:
+  displayName: "Nodemon"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Development utility that monitors Node.js application files for changes and automatically restarts the server.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:tsx
+---
+nodeKind: Library
+id: library:ts-node
+attributes:
+  displayName: "ts-node"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    TypeScript execution and REPL for Node.js — run TypeScript files directly without a separate compilation step.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:tsx
+    - library:swc
+---
+nodeKind: Library
+id: library:tsx
+attributes:
+  displayName: "tsx"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Enhanced TypeScript execute (tsx) — run TypeScript and ESM files with Node.js, powered by esbuild for fast cold starts.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:ts-node
+    - library:swc
+---
+nodeKind: Library
+id: library:tsup
+attributes:
+  displayName: "tsup"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Zero-config TypeScript bundler powered by esbuild — bundles libraries to CJS, ESM, and type declarations with minimal configuration.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization
+  alternative_to:
+    - library:tsx
+---
+nodeKind: Library
+id: library:husky
+attributes:
+  displayName: "Husky"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Git hooks made easy for Node.js projects — configure pre-commit, commit-msg, and other hooks directly in package.json.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - library:lint-staged
+    - library:pre-commit
+---
+nodeKind: Library
+id: library:lint-staged
+attributes:
+  displayName: "lint-staged"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Run linters and formatters only against staged Git files — speeds up pre-commit checks in large codebases.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - library:husky
+---
+nodeKind: Library
+id: library:commitlint
+attributes:
+  displayName: "commitlint"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Lint commit messages against Conventional Commits and custom rules — enforces consistent commit message conventions across a team.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - library:husky
+---
+nodeKind: Library
+id: library:changesets
+attributes:
+  displayName: "Changesets"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Manage versioning and changelogs in monorepos — authors add changesets describing changes, then changesets bumps versions and generates CHANGELOG entries.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:code-quality
+  alternative_to:
+    - library:semantic-release-lib
+---
+nodeKind: Library
+id: library:semantic-release-lib
+attributes:
+  displayName: "semantic-release"
+  belongsToLanguageId: language:javascript
+  category: other
+  description: |
+    Fully automated package versioning and publishing — analyzes commit messages following Conventional Commits to determine version bumps and generate release notes.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - skill-area:ci-pipeline-optimization

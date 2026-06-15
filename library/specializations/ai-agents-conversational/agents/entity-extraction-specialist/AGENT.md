@@ -8,6 +8,13 @@ expertise:
   - Entity normalization
   - Custom entity types
   - Context-aware extraction
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:natural-language-processing, skill-area:feature-engineering]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # Entity Extraction Specialist

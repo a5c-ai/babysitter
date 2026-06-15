@@ -2,6 +2,13 @@
 name: rag-hybrid-search
 description: Hybrid search combining semantic and keyword retrieval for RAG pipelines. Implement BM25 + dense vector search with fusion strategies.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob, WebFetch
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:retrieval-augmented-generation, skill-area:search-indexing]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:ml-model-lifecycle, workflow:feature-development]
+
 ---
 
 # rag-hybrid-search

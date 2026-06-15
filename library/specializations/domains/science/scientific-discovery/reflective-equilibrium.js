@@ -8,6 +8,13 @@
  * // Input: { principles: [{ name: "...", statement: "..." }], judgments: [{ case: "...", judgment: "..." }], context: {...} }
  * // Output: { equilibriumState: { achieved: true, coherenceLevel: 0.87 }, adjustments: [...], coherenceAnalysis: {...} }
  * @references Rawlsian reflective equilibrium, Wide reflective equilibrium, Coherentism in epistemology
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -73,7 +80,7 @@ export async function process(inputs, ctx) {
     });
 
     // Phase 6: Re-assess Conflicts
-    let reassessment = await ctx.task(reassessConflictsTask, {
+    const reassessment = await ctx.task(reassessConflictsTask, {
       principles: adjustmentApplication.updatedPrinciples,
       judgments: adjustmentApplication.updatedJudgments,
       previousConflicts: currentState.conflicts
@@ -87,29 +94,16 @@ export async function process(inputs, ctx) {
     };
 
     // Quality Gate: Progress Check
-        let lastFeedback = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback) {
-          reassessment = await ctx.task(reassessConflictsTask, { ...{
-      principles: adjustmentApplication.updatedPrinciples,
-      judgments: adjustmentApplication.updatedJudgments,
-      previousConflicts: currentState.conflicts
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint('equilibrium-regression', {
+    if (adjustmentApplication.newCoherence <= currentState.coherence - 0.1) {
+      await ctx.breakpoint('equilibrium-regression', {
         message: 'Equilibrium process is regressing',
         currentCoherence: adjustmentApplication.newCoherence,
         previousCoherence: currentState.coherence,
-        adjustment: adjustmentEvaluation.bestAdjustment,
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        adjustment: adjustmentEvaluation.bestAdjustment
+      });
+    }
   }
+
   // Phase 7: Equilibrium Verification
   const verification = await ctx.task(verifyEquilibriumTask, {
     finalPrinciples: currentState.principles,

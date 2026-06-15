@@ -1,0 +1,377 @@
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-authentication
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: authentication
+  value: 'Bearer tokens via `Authorization: Bearer <token>` on both the SSE
+
+    GET and the POST endpoint. The 2025-06-18 OAuth Resource Server
+
+    formalisation does not apply — this transport was deprecated before
+
+    that revision was published.
+
+    '
+  subjectKind: MCPTransport
+  statement: 'mcp-transport:http-sse authentication is Bearer tokens via `Authorization:
+    Bearer <token>` on both the SSE
+
+    GET and the POST endpoint. The 2025-06-18 OAuth Resource Server
+
+    formalisation does not apply — this transport was deprecated before
+
+    that revision was published.
+
+    .'
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-capabilitynegotiation
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: capabilityNegotiation
+  value: 'Same `initialize` request/response payloads as stdio and Streamable
+
+    HTTP — only the delivery path differs (POST request, SSE-event response).
+
+    '
+  subjectKind: MCPTransport
+  statement: 'mcp-transport:http-sse capabilityNegotiation is Same `initialize` request/response
+    payloads as stdio and Streamable
+
+    HTTP — only the delivery path differs (POST request, SSE-event response).
+
+    .'
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-connectionlifecycle
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: connectionLifecycle
+  value: "Two-endpoint design (legacy):\n  1. Client opens GET on the SSE endpoint;\
+    \ server responds with an\n     `endpoint` SSE event whose `data:` is the URL\
+    \ the client must\n     POST JSON-RPC requests to (typically a per-session URL).\n\
+    \  2. Client POSTs `initialize` to the announced endpoint; response\n     is delivered\
+    \ asynchronously as an SSE `message` event on the\n     open GET stream.\n  3.\
+    \ Client POSTs `notifications/initialized`. Session is ready.\n  4. Shutdown is\
+    \ by closing the SSE GET; no explicit DELETE.\n"
+  subjectKind: MCPTransport
+  statement: "mcp-transport:http-sse connectionLifecycle is Two-endpoint design (legacy):\n\
+    \  1. Client opens GET on the SSE endpoint; server responds with an\n     `endpoint`\
+    \ SSE event whose `data:` is the URL the client must\n     POST JSON-RPC requests\
+    \ to (typically a per-session URL).\n  2. Client POSTs `initialize` to the announced\
+    \ endpoint; response\n     is delivered asynchronously as an SSE `message` event\
+    \ on the\n     open GET stream.\n  3. Client POSTs `notifications/initialized`.\
+    \ Session is ready.\n  4. Shutdown is by closing the SSE GET; no explicit DELETE.\n\
+    ."
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-currentspecrevision
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: currentSpecRevision
+  value: '2025-11-25'
+  subjectKind: MCPTransport
+  statement: mcp-transport:http-sse currentSpecRevision is 2025-11-25.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-notificationmodel
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: notificationModel
+  value: 'Server-to-client notifications/requests/responses all flow on the
+
+    single SSE GET stream as `message` events. Client-to-server notifications
+
+    are POSTed to the announced endpoint and acknowledged with 202 Accepted.
+
+    '
+  subjectKind: MCPTransport
+  statement: 'mcp-transport:http-sse notificationModel is Server-to-client notifications/requests/responses
+    all flow on the
+
+    single SSE GET stream as `message` events. Client-to-server notifications
+
+    are POSTed to the announced endpoint and acknowledged with 202 Accepted.
+
+    .'
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-reconnectpolicy
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: reconnectPolicy
+  value: 'No formal session-resumption mechanism in the spec. On stream loss
+
+    the client is expected to reopen the SSE GET and run `initialize`
+
+    again; the server will issue a fresh per-session POST endpoint.
+
+    This lack of resumption is one of the reasons the 2025-03-26
+
+    revision deprecated this transport in favour of Streamable HTTP.
+
+    '
+  subjectKind: MCPTransport
+  statement: 'mcp-transport:http-sse reconnectPolicy is No formal session-resumption
+    mechanism in the spec. On stream loss
+
+    the client is expected to reopen the SSE GET and run `initialize`
+
+    again; the server will issue a fresh per-session POST endpoint.
+
+    This lack of resumption is one of the reasons the 2025-03-26
+
+    revision deprecated this transport in favour of Streamable HTTP.
+
+    .'
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-specrevisions
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: specRevisions
+  value: 2024-11-05, 2025-03-26
+  subjectKind: MCPTransport
+  statement: mcp-transport:http-sse specRevisions is 2024-11-05, 2025-03-26.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-specurl
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: specUrl
+  value: https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#http-sse-deprecated
+  subjectKind: MCPTransport
+  statement: mcp-transport:http-sse specUrl is https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#http-sse-deprecated.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-specversion
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: specVersion
+  value: '2025-03-26'
+  subjectKind: MCPTransport
+  statement: mcp-transport:http-sse specVersion is 2025-03-26.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-status
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: status
+  value: deprecated
+  subjectKind: MCPTransport
+  statement: mcp-transport:http-sse status is deprecated.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-streaming
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: streaming
+  value: partial
+  subjectKind: MCPTransport
+  statement: mcp-transport:http-sse streaming is partial.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse
+---
+nodeKind: Claim
+id: claim:mcp-transport-http-sse-mcp-transport-http-sse-streamingframing
+attributes:
+  subjectId: mcp-transport:http-sse
+  attribute: streamingFraming
+  value: 'SSE event stream on the GET, each event `event: message\ndata: <json>\n\n`
+
+    (or `event: endpoint` for the initial endpoint announcement).
+
+    Per-message JSON-RPC framing on the POST endpoint (one message per
+
+    request body). Standard JSON-RPC message-id discipline.
+
+    '
+  subjectKind: MCPTransport
+  statement: 'mcp-transport:http-sse streamingFraming is SSE event stream on the GET,
+    each event `event: message\ndata: <json>\n\n`
+
+    (or `event: endpoint` for the initial endpoint announcement).
+
+    Per-message JSON-RPC framing on the POST endpoint (one message per
+
+    request body). Standard JSON-RPC message-id discipline.
+
+    .'
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for MCPTransport attributes.
+edges:
+  backed_by_evidence:
+  - evidence:mcp-transport-http-sse-catalog-source-2026-05
+  about_subject:
+  - mcp-transport:http-sse

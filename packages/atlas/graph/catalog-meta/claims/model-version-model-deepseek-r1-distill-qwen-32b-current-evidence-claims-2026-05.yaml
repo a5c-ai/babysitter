@@ -1,0 +1,314 @@
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-contextwindowtokens
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: contextWindowTokens
+  value: '128000'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current contextWindowTokens is 128000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-costpermtokinput
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: costPerMTokInput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current costPerMTokInput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-costpermtokoutput
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: costPerMTokOutput
+  value: '0'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current costPerMTokOutput is 0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-finetuningkind
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: fineTuningKind
+  value: full
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current fineTuningKind is full.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-kind
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current kind is reasoning.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-lifecyclestatus
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-modalities
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: modalities
+  value: text
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current modalities is text.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-modalitydirections
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current modalityDirections is kind=text;direction=input,
+    kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-modelcardurl
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: modelCardUrl
+  value: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current modelCardUrl is https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-supportsextendedthinking
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: supportsExtendedThinking
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current supportsExtendedThinking is
+    True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-supportsfinetuning
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: supportsFineTuning
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current supportsFineTuning is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current supportsThinkingBudgetTokens
+    is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-r1-distill-qwen-32b-current-versionrange
+attributes:
+  subjectId: model:deepseek-r1-distill-qwen-32b@current
+  attribute: versionRange
+  value: '>=1.0.0 <2.0.0'
+  subjectKind: ModelVersion
+  statement: model:deepseek-r1-distill-qwen-32b@current versionRange is >=1.0.0 <2.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for model-card backed open model attributes.
+edges:
+  backed_by_evidence:
+  - evidence:hf-model-card-deepseek-r1-distill-qwen-32b
+  about_subject:
+  - model:deepseek-r1-distill-qwen-32b@current

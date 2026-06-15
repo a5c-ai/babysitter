@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:decision-verb
+attributes:
+  canonicalDefinitionId: definition:decision-verb.canonical
+  displayName: "DecisionVerb"
+  kind: operation
+  references:
+    - "NodeKind:DecisionVerb"
+  description: |
+    Stub. The ordered enum of hook decision verbs (`deny`, `ask`, `allow`,
+edges:
+  applies_to:
+    - target: domain:software-engineering

@@ -15,6 +15,12 @@
  * - Rust Error Messages: https://doc.rust-lang.org/error-index.html
  * - Elm Error Messages: https://elm-lang.org/news/compiler-errors-for-humans
  * - Clang Diagnostics: https://clang.llvm.org/docs/DiagnosticsReference.html
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

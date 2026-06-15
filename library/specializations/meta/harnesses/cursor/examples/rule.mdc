@@ -1,8 +1,8 @@
 ---
 description: TypeScript project conventions and coding standards for the babysitter SDK
 globs:
-  - "packages/sdk/src/**/*.ts"
-  - "!packages/sdk/src/**/*.test.ts"
+  - "packages/babysitter-sdk/src/**/*.ts"
+  - "!packages/babysitter-sdk/src/**/*.test.ts"
 alwaysApply: false
 ---
 

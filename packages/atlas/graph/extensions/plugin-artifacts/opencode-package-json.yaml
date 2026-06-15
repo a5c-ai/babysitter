@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:opencode-package-json
+attributes:
+  artifactId: plugin-artifact:opencode-package-json
+  displayName: "OpenCode package.json"
+  targetId: plugin-target:opencode
+  artifactKind: manifest
+  pathPattern: "package.json"
+  installerSurface: "package.json"
+edges:
+  emits_artifact:
+    - target: plugin-target:opencode

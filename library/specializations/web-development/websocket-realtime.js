@@ -4,6 +4,13 @@
  * @inputs { projectName: string, library?: string }
  * @outputs { success: boolean, websocketConfig: object, channels: array, artifacts: array }
  * @references - WebSocket API: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer, role:fullstack-engineer]
+ *   skillAreas: [skill-area:websocket-design, skill-area:streaming-realtime-processing]
+ *   topics: [topic:event-driven-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

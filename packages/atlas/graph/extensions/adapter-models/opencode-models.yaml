@@ -1,0 +1,63 @@
+nodeKind: AdapterModel
+id: adapter-model:opencode:claude-3-5-sonnet-20241022
+attributes:
+  harness: opencode
+  modelId: claude-3-5-sonnet-20241022
+  modelAlias: claude-sonnet
+  displayName: Claude 3.5 Sonnet
+  deprecated: false
+  contextWindow: 200000
+  maxOutputTokens: 8192
+  inputPricePerMillion: 3
+  outputPricePerMillion: 15
+  supportsThinking: false
+  thinkingEffortLevels: []
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: true
+  supportsStructuredOutput: true
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: true
+  supportsImageOutput: false
+  supportsFileInput: true
+  cliArgKey: "--model"
+  cliArgValue: claude-3-5-sonnet-20241022
+  lastUpdated: "2024-10-22"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:opencode
+---
+nodeKind: AdapterModel
+id: adapter-model:opencode:gpt-4o
+attributes:
+  harness: opencode
+  modelId: gpt-4o
+  modelAlias: gpt-4o
+  displayName: GPT-4o
+  deprecated: false
+  contextWindow: 128000
+  maxOutputTokens: 4096
+  inputPricePerMillion: 2.5
+  outputPricePerMillion: 10
+  supportsThinking: false
+  thinkingEffortLevels: []
+  supportsToolCalling: true
+  supportsParallelToolCalls: true
+  supportsToolCallStreaming: true
+  supportsJsonMode: true
+  supportsStructuredOutput: true
+  supportsTextStreaming: true
+  supportsThinkingStreaming: false
+  supportsImageInput: true
+  supportsImageOutput: false
+  supportsFileInput: true
+  cliArgKey: "--model"
+  cliArgValue: gpt-4o
+  lastUpdated: "2024-05-13"
+  source: bundled
+edges:
+  model_for:
+    - target: agent:opencode

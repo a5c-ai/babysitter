@@ -4,6 +4,12 @@
  * including CI/CD, asset processing, automated testing, and release build processes.
  * @inputs { projectName: string, platforms?: array, ciProvider?: string, outputDir?: string }
  * @outputs { success: boolean, pipelineConfig: object, buildTargets: array, documentation: string, artifacts: array }
+ * @graph
+ *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
+ *   workflows: [workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

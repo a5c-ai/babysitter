@@ -1,0 +1,73 @@
+---
+nodeKind: Workflow
+id: workflow:renewable-energy-project-assessment
+attributes:
+  displayName: "Renewable Energy Project Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Assesses renewable energy project viability and performance -- analyzing
+    solar irradiance or wind resource data from meteorological stations and
+    satellite models, running energy yield simulations with loss-factor
+    cascades (soiling, shading, inverter clipping, degradation), reviewing
+    power purchase agreement terms against levelized cost of energy models,
+    validating grid interconnection study results, and assessing
+    environmental impact assessment compliance with local permitting
+    requirements. Produces bankability reports, yield assessment confidence
+    intervals, and risk-adjusted financial models. Excludes project
+    construction management.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:principal-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:cleantech
+    - target: domain:sustainability-esg
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:esg-sustainability-team
+---
+nodeKind: Workflow
+id: workflow:circular-economy-audit
+attributes:
+  displayName: "Circular Economy Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Audits circular economy practices across the value chain -- measuring
+    material circularity indicators for product lines, tracking waste
+    diversion rates by stream (recycling, composting, energy recovery),
+    evaluating product-as-a-service and take-back program effectiveness,
+    assessing supplier packaging reduction commitments, and benchmarking
+    organizational circularity against Ellen MacArthur Foundation metrics
+    and EU taxonomy alignment. Produces circularity scorecards, material
+    flow analyses, and improvement opportunity roadmaps. Excludes product
+    redesign decisions.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:cleantech
+    - target: domain:sustainability-esg
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:operations-team

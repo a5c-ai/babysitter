@@ -1,0 +1,38 @@
+nodeKind: SkillArea
+id: skill-area:react-testing
+attributes:
+  displayName: "React Testing"
+  description: |
+    Testing React components and applications: unit tests with Jest or
+    Vitest + React Testing Library, end-to-end with Playwright or Cypress,
+    component-state assertions, query-by-role accessibility patterns, and
+    snapshot/visual regression strategies.
+  parentSpecializationId: specialization:frontend-react
+  domains:
+    - specialization:frontend-react
+  requiresLanguages:
+    - language:typescript
+    - language:javascript
+  requiresFrameworks:
+    - framework:react
+  requiresLibraries:
+    - library:react-testing-library
+  requiresStackParts: []
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:frontend-react
+      confidence: primary
+  uses_language:
+    - language:typescript
+    - target: language:typescript
+    - target: language:javascript
+  uses_framework:
+    - framework:react
+    - target: framework:react
+  uses_library:
+    - library:react-testing-library
+  uses_tool:
+    - tool:jest
+    - tool:vitest
+    - tool:playwright

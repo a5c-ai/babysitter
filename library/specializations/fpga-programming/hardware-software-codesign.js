@@ -17,6 +17,12 @@
  * - Zynq UltraScale+ Guide: https://docs.amd.com/r/en-US/ug1085-zynq-ultrascale-trm
  * - Vitis Unified Platform: https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration
  * - Intel SoC FPGA: https://www.intel.com/content/www/us/en/products/details/fpga/soc.html
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

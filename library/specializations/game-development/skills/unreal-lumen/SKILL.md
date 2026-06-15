@@ -2,6 +2,11 @@
 name: unreal-lumen
 description: Unreal Engine Lumen skill for global illumination, reflections, and dynamic lighting.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:graphics-rendering, skill-area:game-engines]
+  roles: [role:game-developer]
 ---
 
 # Unreal Lumen Skill

@@ -1,0 +1,130 @@
+---
+nodeKind: SkillArea
+id: skill-area:design-systems
+attributes:
+  displayName: "Design Systems"
+  description: |
+    Building and maintaining shared visual and interaction languages across product
+    surfaces - component libraries, design tokens, documentation, and governance
+    processes that keep design and code in sync. Reduces inconsistency and accelerates
+    delivery by giving teams a reusable foundation with clear contribution and versioning
+    contracts.
+  domains:
+    - domain:web-development
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+    - target: specialization:ux-ui-design
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:interaction-design
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:interaction-design
+attributes:
+  displayName: "Interaction Design"
+  description: |
+    Designing the moment-to-moment behavior of digital interfaces - defining how
+    controls respond to user actions, sequencing multi-step flows, and crafting
+    feedback states that make intent legible and outcomes predictable. Bridges
+    user goals and system capabilities through considered behavioral contracts and
+    interaction patterns.
+  domains:
+    - domain:web-development
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: secondary
+    - target: specialization:ux-ui-design
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:prototyping
+      strength: recommended
+    - target: skill-area:information-architect
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:visual-design
+attributes:
+  displayName: "Visual Design"
+  description: |
+    Creating the aesthetic surface of digital products through typography, color,
+    spacing, iconography, and layout composition. Builds brand cohesion and emotional
+    tone while ensuring hierarchy and readability guide users toward meaningful actions.
+    Operates within design system constraints while expressing product personality.
+  domains:
+    - domain:web-development
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: secondary
+    - target: specialization:ux-ui-design
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:design-systems
+      strength: recommended
+    - target: skill-area:figma-prototyping
+      strength: recommended
+    - target: skill-area:color-theory
+      strength: recommended
+    - target: skill-area:typography
+      strength: recommended
+    - target: skill-area:motion-design
+      strength: recommended
+    - target: skill-area:accessibility-first-design
+      strength: recommended
+    - target: skill-area:ui-ux-design
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:prototyping
+attributes:
+  displayName: "Prototyping"
+  description: |
+    Creating low- to high-fidelity representations of product concepts to explore
+    ideas, validate interactions, and communicate intent before full implementation.
+    Ranges from paper sketches and wireframes to interactive click-through prototypes
+    and coded explorations, enabling rapid feedback loops with stakeholders and users
+    at the appropriate level of investment.
+  domains:
+    - domain:web-development
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: secondary
+    - target: specialization:ux-ui-design
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:design-critique
+      strength: helpful
+---
+nodeKind: SkillArea
+id: skill-area:design-critique
+attributes:
+  displayName: "Design Critique"
+  description: |
+    Structured evaluation of design work through principled feedback grounded in
+    user goals, product strategy, and established design heuristics. Separates
+    personal preference from reasoned critique, builds team design vocabulary, and
+    creates psychological safety for sharing work in progress. Supports a culture
+    of continuous quality improvement across design and engineering.
+  domains:
+    - domain:web-development
+    - specialization:ux-ui-design
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: secondary
+    - target: specialization:ux-ui-design
+      confidence: primary

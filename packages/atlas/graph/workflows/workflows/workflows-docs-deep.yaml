@@ -1,0 +1,65 @@
+---
+nodeKind: Workflow
+id: workflow:migration-guide-authoring
+attributes:
+  displayName: "Migration Guide Authoring"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-major-release"
+  complexity: cross-team
+  description: |
+    Authors comprehensive migration guides for breaking changes — inventorying
+    all breaking changes and deprecations, writing step-by-step upgrade
+    instructions with code examples, providing codemods or automated fix
+    scripts, testing guides against real consumer codebases, and publishing
+    with version-specific navigation. Excludes the breaking change
+    implementation itself.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:devrel
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:breaking-change-management
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:changelog-maintenance
+  performed_by_org_unit:
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:tutorial-effectiveness-review
+attributes:
+  displayName: "Tutorial Effectiveness Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: single-team
+  description: |
+    Evaluates the effectiveness of developer tutorials and getting-started
+    guides — analyzing completion rates, drop-off points,
+    time-to-first-success metrics, support ticket correlation, freshness
+    against current API versions, and user satisfaction scores. Produces a
+    remediation backlog for underperforming tutorials. Excludes tutorial
+    authoring.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:devrel
+    - target: role:product-owner
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:devrel-team
+    - target: org-unit:engineering-productivity

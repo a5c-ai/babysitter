@@ -1,0 +1,56 @@
+---
+nodeKind: Workflow
+id: workflow:algorithm-benchmarking
+attributes:
+  displayName: "Algorithm Benchmarking"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-implementation"
+  complexity: single-team
+  description: |
+    Benchmarks competing algorithm implementations against standardized
+    datasets and hardware — measuring time complexity, space usage, cache
+    behavior, and scalability curves; producing comparison reports with
+    statistical significance analysis. Excludes algorithm design.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:implementer
+    - target: role:performance-profiler
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:scientific-computing
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:algorithmic-complexity-review
+attributes:
+  displayName: "Algorithmic Complexity Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-pull-request"
+  complexity: single-team
+  description: |
+    Reviews code changes that introduce or modify algorithmic logic —
+    verifying big-O complexity claims, checking for pathological inputs,
+    assessing worst-case resource consumption, and ensuring documentation
+    of complexity invariants. Excludes general code review.
+edges:
+  involves_role:
+    - target: role:code-reviewer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:typescript-generic-programming
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+    - target: responsibility:code-review-coverage
+  performed_by_org_unit:
+    - target: org-unit:engineering

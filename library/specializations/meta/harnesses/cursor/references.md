@@ -72,8 +72,8 @@
 ## Babysitter Integration
 
 - Babysitter Cursor Plugin: https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-cursor
-- Babysitter SDK: https://github.com/a5c-ai/babysitter/tree/main/packages/sdk
-- Cursor Harness Adapter: https://github.com/a5c-ai/babysitter/tree/main/packages/sdk/src/harness/adapters
+- Babysitter SDK: https://github.com/a5c-ai/babysitter/tree/main/packages/babysitter-sdk
+- Cursor Harness Adapter: https://github.com/a5c-ai/babysitter/tree/main/packages/babysitter-sdk/src/harness/adapters
 
 ## Version History (Extensibility Milestones)
 

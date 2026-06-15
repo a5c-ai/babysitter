@@ -1,0 +1,40 @@
+# Issue #906 — Track xAI Grok Build 0.1 coding model.
+nodeKind: ModelVersion
+id: model:grok-build-0-1@current
+attributes:
+  displayName: "Grok Build 0.1"
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:grok-4
+  kind: text
+  contextWindowTokens: 0
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: "2026-06-01"
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: "2026-06-01"
+  modelCardUrl: https://docs.x.ai/developers/models
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Grok Build 0.1 is xAI's coding-focused model variant. Likely API ID
+    is grok-build-0.1. Uses the xAI OpenAI-compatible chat/completions
+    API. Exact context window, pricing, and capability details should be
+    confirmed from xAI docs before adding precise claims.
+edges:
+  belongs_to_family:
+    - target: model-family:grok-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:grok-4
+  served_by:
+    - provider:xai
+  speaks:
+    - model-transport:openai-compat

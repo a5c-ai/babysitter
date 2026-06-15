@@ -252,7 +252,7 @@ Opens a web-based dashboard showing:
 - Journal events as they happen
 - Orchestration state visualization
 
-**Built by the community:** This tool was created by [@yoavmayer](https://github.com/yoavmayer) as an observability solution for watching babysitter and agent activity. It launches the `@yoavmayer/babysitter-observer-dashboard` package.
+**Package:** This command launches the first-party `@a5c-ai/babysitter-observer-dashboard` package. The core `babysitter` CLI does not provide a `babysitter observe` fallback; optional harness runtimes may expose their own `agent-platform observe` surface.
 
 **Technical:** Runs a local server and opens your browser. Blocking process — runs until stopped.
 
@@ -380,5 +380,7 @@ Start here
 
 - [CLI Reference](./cli-reference.md) — SDK command-line interface
 - [Quickstart](../getting-started/quickstart.md) — Your first run
-- [Process Library](../features/process-library.md) — 2,000+ pre-built processes
+<!-- slash-commands:process-library-link:start -->
+- [Process Library](../features/process-library.md) — 2,239 generated pre-built process files
+<!-- slash-commands:process-library-link:end -->
 - [Troubleshooting](./troubleshooting.md) — Common issues and solutions

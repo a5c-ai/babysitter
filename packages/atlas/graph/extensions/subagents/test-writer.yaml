@@ -1,0 +1,48 @@
+nodeKind: Subagent
+id: subagent:test-writer
+attributes:
+  displayName: "Test Writer"
+  provenance: custom
+  roleId: role:test-writer
+  systemPrompt: |
+    You write unit and integration tests. Read the target module, identify
+    public surface, edge cases, and failure modes. Emit tests in the
+    project's existing framework (Vitest/Jest/Pytest/Go-test). Cover happy
+    path, error paths, and boundary conditions. Do not modify production code.
+  tools:
+    - tool-descriptor:read
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+    - tool-descriptor:write
+    - tool-descriptor:edit
+    - tool-descriptor:bash
+  disallowedTools:
+    - tool-descriptor:web-fetch
+    - tool-descriptor:web-search
+  triggers: |
+    Invoke when the user asks to add tests for a function/module, raise
+    coverage, or backfill missing tests on an untested file.
+  description: |
+    Test-authoring subagent. Reads source, writes tests in the project's
+    existing framework. Common user-installed pattern; lives at
+    `.claude/agents/test-writer.md` (project scope).
+  agentType: custom
+  dispatchTool: Task
+  contextIsolation: isolated
+  parallelExecutable: true
+  returnValueShape: text
+  frontmatterFields:
+    - name
+    - description
+    - tools
+    - model
+    - color
+
+edges:
+  roles_played_by:
+    - target: role:test-writer
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+  implements:
+    - target: extension-interface:reliability

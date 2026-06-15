@@ -19,6 +19,13 @@
  * - Pearl, J. (2009). Causality: Models, Reasoning, and Inference
  * - Imbens, G.W. & Rubin, D.B. (2015). Causal Inference for Statistics
  * - Hernán, M.A. & Robins, J.M. (2020). Causal Inference: What If
+ *
+ * @graph
+ *   domains: [domain:scientific-discovery]
+ *   specializations: [specialization:scientific-research-methods]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:research-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

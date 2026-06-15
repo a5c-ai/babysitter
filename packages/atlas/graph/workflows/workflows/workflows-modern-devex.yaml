@@ -1,0 +1,98 @@
+---
+nodeKind: Workflow
+id: workflow:developer-onboarding-time-to-first-deploy
+attributes:
+  displayName: "Developer Onboarding Time-to-First-Deploy"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Measures and improves the elapsed time from a new developer joining the
+    organisation to their first production deploy — tracking environment-setup
+    duration, repo-clone-to-build time, first-PR-to-merge latency, CI
+    feedback-loop speed, and deploy-pipeline familiarity; identifying
+    bottlenecks in tooling, permissions, or documentation; and running
+    shadow-onboarding exercises. Produces a time-to-first-deploy benchmark
+    report and improvement backlog. Excludes HR onboarding logistics.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:onboard-new-engineer
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:inner-loop-optimization-review
+attributes:
+  displayName: "Inner-Loop Optimization Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates the developer inner loop (code-edit to local-verification cycle)
+    across major repositories — profiling build times, hot-reload latency,
+    local test-suite duration, IDE indexing performance, and container-startup
+    overhead; comparing against baseline targets; identifying the top-five
+    friction points; and proposing tooling or configuration changes to reduce
+    cycle time. Produces an inner-loop health scorecard and optimisation
+    roadmap. Excludes CI pipeline work.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:performance-profiler
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:ci-pipeline-cost-optimization
+attributes:
+  displayName: "CI Pipeline Cost Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Analyses CI/CD pipeline spend and efficiency — profiling per-repo compute
+    minutes, identifying jobs with excessive parallelism or idle wait,
+    evaluating cache-hit ratios for dependency and Docker-layer caches,
+    benchmarking self-hosted vs cloud runner cost-per-minute, detecting
+    duplicate or redundant workflow triggers, and modelling savings from
+    test-sharding or selective-testing strategies. Produces a
+    cost-per-merge-request report and optimisation recommendations. Excludes
+    pipeline architecture redesign.
+edges:
+  involves_role:
+    - target: role:devops-engineer
+    - target: role:cost-tracker
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:gitops
+  applies_to_domain:
+    - target: domain:devops
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:engineering-productivity
+    - target: org-unit:infra-engineering

@@ -1,0 +1,51 @@
+# Hermes ACP (Agent Client Protocol) adapter -- deep-research atlas node.
+
+nodeKind: Presentation
+id: presentation:hermes.acp
+attributes:
+  displayName: "Hermes ACP Adapter"
+  agentVersionId: agentVersion:hermes:ge-0-0-0
+  presentationKind: ide-integration
+  description: |
+    JSON-RPC stdio server wrapping the synchronous AIAgent into an async
+    protocol for IDE integration (VS Code, Zed, JetBrains). Stdout reserved
+    for ACP JSON-RPC transport, stderr for human-readable diagnostics. Bridges
+    synchronous AI callbacks to asynchronous ACP notifications via
+    asyncio.run_coroutine_threadsafe(). One of three programmatic integration
+    protocols (alongside TUI Gateway JSON-RPC and OpenAI-compatible API Server).
+  keyFiles:
+    - acp_adapter/entry.py
+    - acp_adapter/server.py
+    - acp_adapter/session.py
+    - acp_adapter/events.py
+    - acp_adapter/permissions.py
+    - acp_adapter/tools.py
+    - acp_adapter/auth.py
+  bootSequence:
+    - "Entry point invocation (acp_adapter.entry.main())"
+    - "Version/configuration parsing"
+    - "Environment loading from ~/.hermes/.env"
+    - "HermesACPAgent construction"
+    - "Server initialization with acp.run_agent()"
+  coreComponents:
+    HermesACPAgent: "Protocol implementation -- session creation, prompt execution, model switching"
+    SessionManager: "Thread-safe session state -- identifiers, agent instances, history, cancellation"
+    EventBridge: "Translates callbacks (tool progress, step, reasoning) into ACP notifications"
+    PermissionSystem: "Maps approval prompts to ACP permission requests (allow_once, allow_always)"
+  sessionPersistence: "~/.hermes/state.db -- survives process restarts, supports fork by deep-copying history"
+  protocols:
+    ACP: "JSON-RPC over stdio for IDE clients"
+    TUI_Gateway: "JSON-RPC over stdio/WebSocket for custom hosts"
+    API_Server: "HTTP + SSE for OpenAI-compatible frontends"
+  ourEquivalent: |
+    Our adapter-hermes (packages/adapters/hooks/adapter-hermes/) provides
+    hook normalization for Hermes events. Our transport layer
+    (packages/adapters/transport/) bridges stdio/JSON-RPC for different
+    harnesses. ACP represents Hermes' IDE integration surface; we achieve
+    similar through Claude Code's native IDE integration and our
+    hooks-adapter architecture that normalizes across all harnesses.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  part_of:
+    - target: agent:hermes

@@ -17,6 +17,9 @@
  * - Plan-and-Execute Pattern: https://blog.langchain.dev/planning-agents/
  * - LangGraph Plan-and-Execute: https://langchain-ai.github.io/langgraph/tutorials/plan-and-execute/plan-and-execute/
  * - Hierarchical Task Networks: https://en.wikipedia.org/wiki/Hierarchical_task_network
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

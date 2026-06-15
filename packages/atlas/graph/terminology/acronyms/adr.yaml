@@ -1,0 +1,10 @@
+nodeKind: Acronym
+id: acronym:adr
+attributes:
+  acronym: "ADR"
+  expandsToTermId: term:architecture-decision-record
+  description: |
+    Acronym for ADR.
+edges:
+  expands_to:
+    - term:architecture-decision-record

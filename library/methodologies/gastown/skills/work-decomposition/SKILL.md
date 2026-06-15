@@ -2,17 +2,14 @@
 name: work-decomposition
 description: Decompose goals into MEOWs (Molecular Expressions of Work) - trackable atomic units following Gas Town's bead-based work model.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Work Decomposition
-
-## Overview
-
-Break high-level goals into MEOWs (Molecular Expressions of Work) - the fundamental atomic units in Gas Town. Each MEOW becomes a bead (git-backed work unit) or wisp (ephemeral task).
-
-## When to Use
-
-- Before creating a convoy
 - When a goal is too large for a single agent
 - When parallel execution would benefit progress
 - When work needs tracked attribution

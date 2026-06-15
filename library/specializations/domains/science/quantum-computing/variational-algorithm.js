@@ -3,6 +3,13 @@
  * @description QC-ALGO-002: Implement and tune variational quantum algorithms (VQE/QAOA) for optimization and chemistry
  * @inputs { problemType: string, hamiltonian: object, ansatzType: string, optimizer: string }
  * @outputs { success: boolean, optimalParameters: array, energy: number, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:quantum-computing]
+ *   specializations: [specialization:quantum-computing]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:compiler-implementation, skill-area:language-design]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

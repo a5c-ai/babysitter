@@ -16,6 +16,9 @@
  * - Self-Instruct: https://arxiv.org/abs/2212.10560
  * - Evol-Instruct: https://arxiv.org/abs/2304.12244
  * - Genstruct: https://huggingface.co/NousResearch/Genstruct-7B
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:data-pipeline-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

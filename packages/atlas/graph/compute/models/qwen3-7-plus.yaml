@@ -1,0 +1,53 @@
+nodeKind: ModelVersion
+id: model:qwen3-7-plus@current
+attributes:
+  displayName: "Qwen3.7-Plus"
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: true
+  modelFamilyId: model-family:qwen-3-7
+  versionRange: '>=3.7.0 <3.8.0'
+  kind: reasoning
+  contextWindowTokens: 1000000
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-05-26'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-05-26'
+  modelCardUrl: https://help.aliyun.com/zh/model-studio/models
+  supportsFineTuning: false
+  providerModelIds:
+    alibabaModelStudio: qwen3.7-plus
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:qwen-3-7
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:qwen-3-7
+  served_by:
+    - provider:alibaba-cloud
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:streaming
+      versionRange: '>=3.7.0 <3.8.0'
+      level: full
+    - target: capability:supports-text-streaming
+      versionRange: '>=3.7.0 <3.8.0'
+      level: full
+    - target: capability:supports-tool-use
+      versionRange: '>=3.7.0 <3.8.0'
+      level: full
+    - target: capability:can-multi-turn
+      versionRange: '>=3.7.0 <3.8.0'
+      level: full
+    - target: capability:supports-native-tools
+      versionRange: '>=3.7.0 <3.8.0'
+      level: full

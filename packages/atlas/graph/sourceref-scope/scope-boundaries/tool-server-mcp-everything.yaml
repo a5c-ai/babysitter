@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:tool-server-mcp-everything.scope
+attributes:
+  subjectId: tool-server:mcp-everything
+  inScope: |
+    Reference MCP server exercising every protocol surface — prompts, resources, tools, sampling, elicitation — used as a conformance / smoke fixture for MCP clients.
+  outOfScope: |
+    Production data sources, persistent stores, and any non-test workload.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-everything

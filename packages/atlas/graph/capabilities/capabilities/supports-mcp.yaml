@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:supports-mcp
+attributes:
+  displayName: "Supports MCP"
+  description: |
+    The entity speaks the Model Context Protocol on at least one
+    transport. Specific transports (stdio, streamable-http) are
+    separate capabilities.
+  appliesToNodeKinds: ["AgentVersion"]
+  category: agent
+edges: {}

@@ -15,6 +15,11 @@
  *
  * @references
  * - PMI Resource Management: https://www.pmi.org/pmbok-guide-standards/foundational/pmbok
+  * @graph
+ *   domains: [domain:project-management]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
+ *   workflows: [workflow:project-kickoff, workflow:project-kickoff]
+ *   roles: [role:project-manager, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -37,7 +42,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Resource Availability Assessment
-  let availabilityAssessment = await ctx.task(resourceAvailabilityTask, {
+  const availabilityAssessment = await ctx.task(resourceAvailabilityTask, {
     projectName,
     resourcePool,
     requirements: requirementsIdentification,
@@ -46,17 +51,8 @@ export async function process(inputs, ctx) {
 
   // Breakpoint: Review resource gaps
   const gaps = availabilityAssessment.gaps || [];
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        availabilityAssessment = await ctx.task(resourceAvailabilityTask, { ...{
-    projectName,
-    resourcePool,
-    requirements: requirementsIdentification,
-    constraints
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (gaps.length > 0) {
+    await ctx.breakpoint({
       question: `Identified ${gaps.length} resource gaps for ${projectName}. Review acquisition options?`,
       title: 'Resource Gap Review',
       context: {
@@ -67,15 +63,9 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: availabilityAssessment
         }]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 3: Resource Optimization
   const resourceOptimization = await ctx.task(resourceOptimizationTask, {
@@ -109,24 +99,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Resource Management Plan
-  let managementPlan = await ctx.task(resourceManagementPlanTask, {
+  const managementPlan = await ctx.task(resourceManagementPlanTask, {
     projectName,
     allocationMatrix,
     acquisitionPlan,
     resourceCalendar
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      managementPlan = await ctx.task(resourceManagementPlanTask, { ...{
-    projectName,
-    allocationMatrix,
-    acquisitionPlan,
-    resourceCalendar
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Resource planning complete for ${projectName}. Total resources: ${allocationMatrix.totalResources}. Gaps addressed: ${acquisitionPlan.acquisitions?.length || 0}. Approve plan?`,
     title: 'Resource Plan Approval',
     context: {
@@ -137,15 +118,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/resource-plan.json`, format: 'json', content: managementPlan },
         { path: `artifacts/resource-plan.md`, format: 'markdown', content: managementPlan.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -162,7 +137,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const resourceRequirementsTask = defineTask('resource-requirements', (args, taskCtx) => ({
   kind: 'agent',

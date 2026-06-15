@@ -2,6 +2,11 @@
 name: cross-chain
 description: Cross-chain bridge and multi-chain development expertise. Supports LayerZero, Chainlink CCIP, Wormhole, and Axelar for omnichain messaging, token bridging, and cross-chain state verification.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:cross-chain-interoperability, skill-area:smart-contract-development-testing, skill-area:smart-contract-security]
+  roles: [role:backend-engineer, role:security-engineer]
 ---
 
 # Cross-Chain Development Skill

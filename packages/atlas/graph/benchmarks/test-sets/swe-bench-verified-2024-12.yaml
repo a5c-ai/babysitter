@@ -1,0 +1,12 @@
+nodeKind: TestSet
+id: test-set:swe-bench-verified-2024-12
+attributes:
+  displayName: "SWE-bench Verified 2024-12"
+  benchmarkId: benchmark:swe-bench-verified
+  caseCount: 500
+  releasedAt: "2024-12-01"
+  description: |
+    The December 2024 release of the SWE-bench Verified test set.
+edges:
+  belongs_to_benchmark:
+    - benchmark:swe-bench-verified

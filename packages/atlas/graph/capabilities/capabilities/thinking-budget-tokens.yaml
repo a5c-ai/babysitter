@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:supports-thinking-budget-tokens
+attributes:
+  displayName: "Supports thinking budget tokens"
+  description: |
+    The entity accepts a numeric budget for thinking tokens, enforced
+    server-side. Absence means thinking length is fixed or implicit.
+  appliesToNodeKinds: ["ModelVersion"]
+  category: model
+edges: {}

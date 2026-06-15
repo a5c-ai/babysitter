@@ -14,6 +14,11 @@ metadata:
   priority: P2
   integration-points:
     - Pipedrive REST API
+graph:
+  domains: [domain:sales]
+  skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+  workflows: [workflow:customer-journey-optimization]
+  roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
 ---
 
 # Pipedrive Connector

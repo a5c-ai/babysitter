@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:phase-transition.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:phase-transition
+  text: |
+    transition between two phases (gateable)
+  status: canonical
+edges:
+  defines:
+    - term:phase-transition

@@ -2,17 +2,14 @@
 name: architecture-patterns
 description: System and API design guidance covering component boundaries, data flow, integration patterns, and scalability considerations.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Architecture Patterns
-
-## Overview
-
-Guidance for system architecture and API design decisions within CC10X workflows. Used during PLAN and BUILD workflows for architectural choices.
-
-## Domain Areas
-
-### Component Design
 - Single responsibility boundaries
 - Interface contracts and type safety
 - Dependency injection patterns

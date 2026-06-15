@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:execution
+attributes:
+  canonicalDefinitionId: definition:execution.canonical
+  displayName: "Execution"
+  kind: primitive
+  references:
+    - "NodeKind:Execution"
+  description: |
+    Where/how work runs (local/docker/ssh/k8s/cloud/direct)
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

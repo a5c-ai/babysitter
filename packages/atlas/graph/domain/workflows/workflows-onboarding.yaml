@@ -1,0 +1,102 @@
+nodeKind: Workflow
+id: workflow:engineering-onboarding
+attributes:
+  displayName: "Engineering Onboarding"
+  description: |
+    Event-driven workflow triggered by a new engineer's first day that guides them through
+    their first 30-60-90 days at the company. The engineering manager assigns an onboarding
+    buddy, schedules key introductory meetings with product, design, and cross-functional
+    partners, and provides access to all necessary systems and tools. The new hire completes
+    structured learning milestones covering the codebase architecture, development workflows,
+    testing practices, and on-call processes. Their first coding contributions are scoped as
+    low-risk starter tasks that build familiarity with the CI/CD pipeline and code review
+    culture. Regular check-ins track progress and surface blockers early so the engineer
+    reaches full productivity quickly.
+  workflowKind: onboarding
+  triggerType: event-driven
+  typicalCadence: "per-hire"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:engineering-manager
+    - role:tech-lead
+    - role:backend-engineer
+    - role:scrum-master
+    - role:it-ops-engineer
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:devops
+  triggers_responsibility:
+    - responsibility:mentoring
+    - responsibility:knowledge-sharing
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:project-kickoff
+attributes:
+  displayName: "Project Kickoff"
+  description: |
+    On-demand workflow that formally launches a new engineering project or initiative,
+    aligning all participants on goals, scope, constraints, roles, and ways of working.
+    The project or engineering manager facilitates a kickoff meeting bringing together
+    stakeholders from product, design, engineering, and any relevant cross-functional teams.
+    Outputs include a shared project charter, a communication plan, a high-level timeline,
+    defined success metrics, and a risk register. Key dependencies and integration points
+    are identified and owners assigned. The kickoff creates shared context and prevents
+    misalignment from accumulating over the project lifetime, enabling faster delivery with
+    fewer surprises.
+  workflowKind: onboarding
+  triggerType: on-demand
+  typicalCadence: "per-project"
+  complexity: moderate
+edges:
+  involves_role:
+    - role:project-manager
+    - role:product-manager
+    - role:engineering-manager
+    - role:tech-lead
+    - role:product-designer
+    - role:scrum-master
+  applies_to_domain:
+    - domain:software-engineering
+    - domain:web-development
+  triggers_responsibility:
+    - responsibility:stakeholder-communication
+    - responsibility:sprint-planning
+    - responsibility:risk-assessment
+    - responsibility:documentation
+---
+nodeKind: Workflow
+id: workflow:team-formation
+attributes:
+  displayName: "Team Formation"
+  description: |
+    Complex cross-team workflow activated during organisational restructuring, new product
+    investment, or significant headcount growth that requires forming or reforming engineering
+    teams. Engineering leadership defines team topologies aligned with product domains and
+    cognitive load principles. Role requirements are mapped to hiring plans or internal
+    mobility opportunities. Reporting lines, communication norms, and responsibilities are
+    documented. Infrastructure, tooling, and access are provisioned for the new team.
+    Kick-off sessions establish team identity, working agreements, and initial backlog.
+    The workflow minimises disruption during reorganisations and sets new teams up for
+    rapid, autonomous delivery from day one.
+  workflowKind: onboarding
+  triggerType: on-demand
+  typicalCadence: "per-reorg"
+  complexity: complex
+edges:
+  involves_role:
+    - role:vp-engineering
+    - role:engineering-manager
+    - role:cto
+    - role:project-manager
+    - role:scrum-master
+    - role:it-ops-engineer
+  applies_to_domain:
+    - domain:platform-engineering
+    - domain:software-engineering
+  triggers_responsibility:
+    - responsibility:hiring
+    - responsibility:mentoring
+    - responsibility:stakeholder-communication
+    - responsibility:knowledge-sharing

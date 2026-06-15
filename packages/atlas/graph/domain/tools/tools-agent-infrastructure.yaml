@@ -1,0 +1,339 @@
+---
+nodeKind: Tool
+id: tool:agent-message-queue
+attributes:
+  languageApplicability: neutral
+  displayName: "Agent Message Queue"
+  homepageUrl: "https://github.com/nichochar/agent-message-queue"
+  kind: other
+  description: |
+    File-based Maildir-style message queue for local agent-to-agent
+    communication. Provides a simple filesystem-backed pub/sub mechanism
+    where agents drop messages as files and receivers poll directories.
+    No external services required — works anywhere with a filesystem.
+    Designed for local multi-agent setups where agents need to coordinate
+    without shared memory or network services.
+edges:
+  tool_used_by:
+    - target: skill-area:event-driven-architecture
+    - target: skill-area:multi-agent-coordination
+  relates_to_topic:
+    - target: topic:multi-agent-knowledge-sharing
+    - target: topic:agent-dispatch
+    - target: topic:a2a-protocol
+    - target: orch-primitive:session-handoff
+---
+nodeKind: Tool
+id: tool:utcp-code-mode
+attributes:
+  languageApplicability: neutral
+  displayName: "UTCP Code Mode"
+  homepageUrl: "https://github.com/anthropics/utcp"
+  kind: other
+  description: |
+    Universal Tool Calling Protocol library that enables AI agents to
+    call MCP and UTCP tools via code execution rather than structured
+    tool-use messages. Provides a programmatic interface for discovering,
+    invoking, and composing tool calls from within agent code. Useful for
+    building agent loops that need dynamic tool selection and chaining
+    without relying on the model's native tool-use protocol.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:tool-use
+  relates_to_topic:
+    - target: topic:agent-tool-use
+    - target: topic:agent-effect-system
+    - target: topic:claude-code-mcp
+---
+nodeKind: Tool
+id: tool:napkin
+attributes:
+  languageApplicability: neutral
+  displayName: "Napkin"
+  homepageUrl: "https://github.com/nichochar/napkin"
+  kind: other
+  description: |
+    Local-first file-based knowledge system for AI agents. Uses a
+    progressively disclosed information architecture where agents start
+    with summaries and drill into detail on demand. Knowledge is stored
+    as plain files on disk — no database, no server. Designed for agents
+    that need structured long-term knowledge without external services,
+    with a focus on reducing context window waste through progressive
+    disclosure patterns.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:context-management
+  relates_to_topic:
+    - target: topic:company-brain
+    - target: topic:knowledge-fabric-architecture
+---
+nodeKind: Tool
+id: tool:mempalace
+attributes:
+  languageApplicability: neutral
+  displayName: "MemPalace"
+  homepageUrl: "https://github.com/mempalace/mempalace"
+  kind: other
+  description: |
+    Best-benchmarked open-source AI memory system. Provides persistent
+    memory storage with quality scoring, retrieval ranking, and memory
+    consolidation. Agents can store, search, and prune memories with a
+    structured API that tracks memory relevance over time. Benchmarked
+    against other memory systems for accuracy, recall, and context
+    efficiency. Designed for agents that need reliable cross-session
+    memory with measurable quality guarantees.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:organizational-intelligence
+  relates_to_topic:
+    - target: topic:organizational-memory
+    - target: topic:memory-to-knowledge-bridge
+  alternative_to:
+    - target: tool:agentmemory
+      comparison: "AI agent memory — MemPalace has quality scoring; agentmemory has privacy filtering"
+    - target: tool:memories-sh
+      comparison: "AI agent memory — MemPalace has vector search; memories.sh is plain file key-value"
+    - target: tool:cloudflare-agent-memory
+      comparison: "AI agent memory — MemPalace is self-hosted; Cloudflare Agent Memory is managed"
+    - target: tool:memori-labs
+      comparison: "AI agent memory systems"
+    - target: tool:vercel-ai-memory
+      comparison: "AI agent memory systems"
+---
+nodeKind: Tool
+id: tool:lunaroute
+attributes:
+  languageApplicability: neutral
+  displayName: "LunaRoute"
+  homepageUrl: "https://github.com/lunaroute/lunaroute"
+  kind: other
+  description: |
+    High-performance local proxy for AI coding assistants. Sits between
+    the coding agent and the LLM API, providing session recording,
+    request/response logging, debugging tools, and traffic inspection.
+    Enables developers to replay agent sessions, analyze token usage,
+    debug prompt construction, and understand agent behavior without
+    modifying the agent itself. Runs as a lightweight local process
+    with no cloud dependency.
+edges:
+  tool_used_by:
+    - target: skill-area:observability-instrumentation
+    - target: skill-area:llm-observability
+  relates_to_topic:
+    - target: topic:agent-context-management
+    - target: topic:proxy-pattern
+---
+nodeKind: Tool
+id: tool:token-optimizer
+attributes:
+  languageApplicability: neutral
+  displayName: "Token Optimizer"
+  homepageUrl: "https://github.com/token-optimizer/token-optimizer"
+  kind: other
+  description: |
+    Tool for finding ghost tokens, fixing context quality decay, and
+    surviving compaction in AI coding sessions. Analyzes token usage
+    patterns to identify wasted context, invisible formatting overhead,
+    and degradation caused by repeated compaction cycles. Provides
+    actionable recommendations for improving prompt efficiency and
+    maintaining context quality over long agent sessions.
+edges:
+  tool_used_by:
+    - target: skill-area:context-management
+    - target: skill-area:embedding-optimization
+  relates_to_topic:
+    - target: topic:semantic-chunking
+    - target: topic:knowledge-fabric-architecture
+---
+nodeKind: Tool
+id: tool:graphify
+attributes:
+  languageApplicability: neutral
+  displayName: "Graphify"
+  homepageUrl: "https://github.com/graphify-ai/graphify"
+  kind: other
+  description: |
+    Converts code, SQL schemas, documentation, and images into a
+    queryable knowledge graph. Parses source artifacts, extracts
+    entities and relationships, and builds a graph that agents can
+    traverse and query. Supports multiple input formats and produces
+    a unified graph representation that captures cross-artifact
+    dependencies. Useful for codebase understanding, impact analysis,
+    and building navigable knowledge bases from heterogeneous sources.
+edges:
+  tool_used_by:
+    - target: skill-area:knowledge-graph-management
+    - target: skill-area:knowledge-fabric-design
+  relates_to_topic:
+    - target: topic:knowledge-graph-construction
+---
+nodeKind: Tool
+id: tool:tambo
+attributes:
+  languageApplicability: neutral
+  displayName: "Tambo"
+  homepageUrl: "https://github.com/tambo-ai/tambo"
+  kind: other
+  description: |
+    Generative UI SDK for React that enables dynamic AI-driven component
+    rendering. Provides a framework for building interfaces where AI
+    agents can generate, compose, and update React components in
+    real-time based on conversation context and user intent. Bridges
+    the gap between agent reasoning and visual output, enabling rich
+    interactive experiences beyond plain text responses.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:frontend-development
+---
+nodeKind: Tool
+id: tool:cloudflare-agent-memory
+attributes:
+  languageApplicability: neutral
+  displayName: "Cloudflare Agent Memory"
+  homepageUrl: "https://developers.cloudflare.com/agents/api-reference/store/"
+  kind: other
+  description: |
+    Cloudflare's managed persistent memory service for AI agents. Built on
+    Durable Objects (strongly consistent state) and Vectorize (vector search),
+    it exposes ingest, remember, recall, and forget operations through a REST
+    API. Supports team-shared memory profiles so multiple agents or users can
+    share a common memory namespace. Runs on Cloudflare's global network with
+    no self-hosted infrastructure required. Accessible from Cloudflare Workers
+    or any HTTP client, making it a zero-ops memory backend for agent
+    applications.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+    - target: skill-area:knowledge-fabric-design
+  relates_to_topic:
+    - target: topic:cloud-agent-memory
+    - target: topic:memory-scoping
+    - target: topic:memory-to-knowledge-bridge
+  alternative_to:
+    - target: tool:agentmemory
+      comparison: "AI agent memory — Cloudflare is managed cloud; agentmemory is self-hosted"
+    - target: tool:mempalace
+      comparison: "AI agent memory — Cloudflare is managed; MemPalace is self-hosted"
+    - target: tool:memories-sh
+      comparison: "AI agent memory — Cloudflare is cloud-based; memories.sh is local files"
+    - target: tool:memori-labs
+      comparison: "AI agent memory services"
+    - target: tool:vercel-ai-memory
+      comparison: "Managed AI agent memory services"
+---
+nodeKind: Tool
+id: tool:memories-sh
+attributes:
+  displayName: "memories.sh"
+  homepageUrl: "https://github.com/nichochar/memories"
+  kind: other
+  description: |
+    Local-first durable state layer for coding agents. Implements four
+    memory types — session (cleared per run), semantic (memory.md facts),
+    episodic (daily interaction logs), and procedural (workflow patterns)
+    — stored as plain files under ~/.memories/. Compatible with Cursor,
+    Claude Code, GitHub Copilot, Windsurf, Cline, Roo, and Gemini through
+    a shared filesystem layout. No cloud dependency, no vector database,
+    no LLM processing — just reliable local-first persistence that any
+    agent with filesystem access can use. Source as a shell library
+    (source memories.sh) or use the memories CLI.
+edges:
+  belongs_to_language:
+    - language:bash
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+  relates_to_topic:
+    - target: topic:unified-agent-memory
+    - target: topic:memory-type-taxonomy
+    - target: topic:auto-memory
+  alternative_to:
+    - target: tool:agentmemory
+      comparison: "AI agent memory — memories.sh is plain file key-value; agentmemory has vector search and privacy filtering"
+    - target: tool:mempalace
+      comparison: "AI agent memory — memories.sh is plain files; MemPalace has vector search"
+    - target: tool:cloudflare-agent-memory
+      comparison: "AI agent memory — memories.sh is local files; Cloudflare is cloud-based"
+    - target: tool:memori-labs
+      comparison: "AI agent memory systems"
+    - target: tool:vercel-ai-memory
+      comparison: "AI agent memory systems"
+---
+nodeKind: Tool
+id: tool:memori-labs
+attributes:
+  languageApplicability: neutral
+  displayName: "Memori Labs"
+  homepageUrl: "https://www.memorilabs.com"
+  kind: other
+  description: |
+    Agent-native memory infrastructure that structures memory from agent
+    execution traces. Memori Labs automatically extracts structured memory
+    entries from agent traces (tool calls, reasoning steps, task outcomes)
+    without requiring agents to explicitly write memory. LLM-agnostic REST
+    API organizes memories by entity, event, and procedure types. The
+    trace-driven extraction model means memory accumulates as a by-product
+    of normal agent operation — no dedicated memory management code required
+    in the agent itself.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:knowledge-fabric-design
+    - target: skill-area:organizational-intelligence
+  relates_to_topic:
+    - target: topic:cloud-agent-memory
+    - target: topic:auto-memory
+    - target: topic:memory-to-knowledge-bridge
+  alternative_to:
+    - target: tool:agentmemory
+      comparison: "AI agent memory systems"
+    - target: tool:mempalace
+      comparison: "AI agent memory systems"
+    - target: tool:memories-sh
+      comparison: "AI agent memory systems"
+    - target: tool:cloudflare-agent-memory
+      comparison: "AI agent memory services"
+    - target: tool:vercel-ai-memory
+      comparison: "AI agent memory services"
+---
+nodeKind: Tool
+id: tool:vercel-ai-memory
+attributes:
+  languageApplicability: neutral
+  displayName: "Vercel AI SDK Memory"
+  homepageUrl: "https://ai-sdk.dev/docs/agents/memory"
+  kind: other
+  description: |
+    Built-in memory system for Vercel AI SDK agent applications. Integrates
+    directly into the AI SDK agent loop so agents can read and write memories
+    using standard tool-use interfaces. Supports multiple storage backends
+    (Vercel KV, Postgres, Upstash Redis) via Vercel storage adapters. Memory
+    scoping follows the AI SDK's user/session/agent model. Designed for
+    Next.js AI applications where Vercel's managed storage handles persistence
+    without additional infrastructure. Reference documentation at
+    ai-sdk.dev/docs/agents/memory.
+edges:
+  tool_used_by:
+    - target: skill-area:ai-agent-development
+    - target: skill-area:context-management
+    - target: skill-area:knowledge-fabric-design
+  relates_to_topic:
+    - target: topic:cloud-agent-memory
+    - target: topic:memory-scoping
+    - target: topic:memory-to-knowledge-bridge
+  alternative_to:
+    - target: tool:agentmemory
+      comparison: "AI agent memory systems"
+    - target: tool:mempalace
+      comparison: "AI agent memory systems"
+    - target: tool:memories-sh
+      comparison: "AI agent memory systems"
+    - target: tool:cloudflare-agent-memory
+      comparison: "Managed AI agent memory services"
+    - target: tool:memori-labs
+      comparison: "AI agent memory services"

@@ -1,19 +1,14 @@
 ---
 name: brainstorming
 description: Use when starting any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Brainstorming Ideas Into Designs
-
-## Overview
-
-Collaborative design refinement through Socratic dialogue. Explore project context, ask clarifying questions one at a time, propose 2-3 approaches, present design in sections for incremental approval, then transition to planning.
-
-**Core principle:** No implementation until design is approved. Every project goes through this.
-
-## When to Use
-
-- Before ANY creative or implementation work
 - New features, components, modifications
 - Even "simple" projects (unexamined assumptions cause wasted work)
 

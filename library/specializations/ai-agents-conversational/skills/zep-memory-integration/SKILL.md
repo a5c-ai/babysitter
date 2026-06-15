@@ -8,6 +8,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:context-management, skill-area:retrieval-augmented-generation]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # Zep Memory Integration Skill

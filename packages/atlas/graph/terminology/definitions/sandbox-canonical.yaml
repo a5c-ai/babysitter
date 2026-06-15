@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:sandbox.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:sandbox
+  text: |
+    what work is allowed to do (policy primitive)
+  status: canonical
+edges:
+  defines:
+    - term:sandbox

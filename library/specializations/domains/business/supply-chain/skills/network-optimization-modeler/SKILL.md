@@ -12,6 +12,12 @@ metadata:
   domain: business
   category: logistics
   priority: future
+graph:
+  domains: [domain:supply-chain]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:quantitative-modeling, skill-area:strategic-analysis]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:strategic-planner]
 ---
 
 # Network Optimization Modeler

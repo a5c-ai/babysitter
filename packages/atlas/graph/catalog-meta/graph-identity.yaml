@@ -1,0 +1,9 @@
+nodeKind: Definition
+id: graph:agent-catalog
+attributes:
+  displayName: "Agent Catalog Knowledge Graph"
+  description: |
+    The atlas knowledge graph — the comprehensive catalog of agentic AI
+    ecosystem entities including products, frameworks, libraries, tools,
+    skill-areas, roles, workflows, and their interconnections.
+  category: graph-identity

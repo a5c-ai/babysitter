@@ -17,6 +17,10 @@ metadata:
     - bokeh
     - matplotlib
     - d3.js
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:data-analytics, skill-area:data-visualization, skill-area:strategic-analysis]
+  roles: [role:data-analyst, role:bi-developer, role:strategic-planner]
 ---
 
 # Decision Visualization

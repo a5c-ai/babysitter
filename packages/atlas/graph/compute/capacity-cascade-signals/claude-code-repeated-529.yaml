@@ -1,0 +1,12 @@
+nodeKind: CapacityCascadeSignal
+id: capacity-cascade-signal:claude-code-repeated-529
+attributes:
+  displayName: "Repeated 529 cascade trigger"
+  signalKind: foreground-fallback-trigger
+  thresholdAttempts: 3
+  actionOnSignal: trigger-fallback
+  telemetryEvent: tengu_api_529_fallback_triggered
+  description: |
+    After 3 consecutive 529 Overloaded errors on a foreground call, withRetry
+    throws FallbackTriggeredError; caller switches to the configured fallback
+    ModelVersion for the rest of the call.

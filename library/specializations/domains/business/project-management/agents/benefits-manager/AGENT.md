@@ -15,6 +15,11 @@ metadata:
   domain: business
   category: Benefits Management
   id: AG-008
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:financial-planning, skill-area:roadmap-planning, skill-area:stakeholder-management]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:financial-analyst, role:business-analyst]
 ---
 
 # Benefits Realization Manager Agent

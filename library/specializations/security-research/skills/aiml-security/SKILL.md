@@ -7,6 +7,12 @@ metadata:
   version: "1.0.0"
   category: ai-security
   backlog-id: SK-020
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:application-security-testing, skill-area:safety-redteaming]
+  roles: [role:security-engineer, role:ml-engineer]
+  workflows: [workflow:penetration-testing-cycle, workflow:vulnerability-management]
 ---
 
 # aiml-security

@@ -2,6 +2,13 @@
 name: seo
 description: Technical SEO, structured data, sitemaps, and meta tags.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:seo-sem, skill-area:content-strategy]
+  roles: [role:frontend-engineer, role:ux-writer]
+  topics: [topic:progressive-web-application]
+
 ---
 
 # SEO Skill

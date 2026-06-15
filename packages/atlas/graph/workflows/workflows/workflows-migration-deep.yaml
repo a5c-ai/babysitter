@@ -1,0 +1,33 @@
+---
+nodeKind: Workflow
+id: workflow:monolith-extraction-planning
+attributes:
+  displayName: "Monolith Extraction Planning"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Plans the extraction of modules from a monolithic codebase — mapping
+    dependency graphs, identifying seam points, sizing extraction effort per
+    module, defining API boundaries for extracted services, sequencing
+    extraction order based on risk and business value, and producing a phased
+    migration plan. Excludes the actual extraction execution.
+edges:
+  involves_role:
+    - target: role:principal-engineer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:monorepo-extraction
+    - target: skill-area:domain-driven-design
+    - target: skill-area:strangler-fig-pattern
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:approve-architecture
+    - target: responsibility:write-rfc-documents
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering

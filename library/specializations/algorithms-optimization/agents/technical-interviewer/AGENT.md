@@ -9,6 +9,11 @@ metadata:
   category: algorithms-optimization
   agent-id: AG-ALGO-008
   priority: high
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms, skill-area:string-matching, skill-area:mathematical-reasoning]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # Technical Interviewer Agent

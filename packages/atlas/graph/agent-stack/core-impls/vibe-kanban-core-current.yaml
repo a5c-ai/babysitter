@@ -1,0 +1,83 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:vibe-kanban.core@current
+attributes:
+  displayName: "Vibe Kanban Core (current)"
+  agentVersionId: agent-version:vibe-kanban@current
+  packageRef: source-ref:vibe-kanban-github
+  loopIteratorPolicy: event-driven-dispatch
+  loopIteratorNotes: |
+    Rust backend (crates: server, db, executors, services, git, review,
+    deployment) processes kanban column transitions as events. When a card
+    moves to in-progress, the executor crate dispatches the assigned coding
+    agent with the task description and worktree path. Parallel execution
+    is bounded by configurable concurrency limits.
+  contextManagementStrategy: per-task-workspace
+  compactionTriggerNotes: |
+    Each task card maintains its own context via an isolated git worktree
+    directory. Agent sessions are ephemeral per-card; persistent state
+    lives in the SQLx database and the git branch.
+  subagentInvokerPolicy: process-spawn
+  subagentInvokerNotes: |
+    Rust executors spawn coding agent CLIs (Claude Code, Codex, Gemini CLI)
+    as child processes in isolated worktree directories. Agent tool schemas
+    define structured interaction contracts between the orchestrator and
+    spawned agents. Supports 10+ registered agent types.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Agent output (code changes, PR creation, review comments) flows back
+    through the executor into the kanban card state. Cards auto-advance
+    to review column when the agent signals completion.
+  stopDetectionStrategy: process-exit
+  transportClientLibrary: vibe-kanban-rust-executors
+  supportedTransportProtocols:
+    - model-transport:anthropic-messages
+    - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+  notes: |
+    Core Rust crates:
+    - server: HTTP API and WebSocket server for the web frontend
+    - db: SQLx-based task state persistence (SQLite/Postgres)
+    - executors: agent dispatch and lifecycle management
+    - services: business logic for task transitions and reviews
+    - git: branch creation, checkout, worktree management, PR operations
+    - review: integrated code review with diff analysis
+    - deployment: workspace provisioning and cleanup
+    Shared types crate provides TypeScript-compatible type definitions.
+    Agent tool schemas define structured contracts for agent interactions.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:vibe-kanban
+      role: core
+  speaks:
+    - target: model-transport:anthropic-messages
+    - target: model-transport:openai-responses
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Agent tool schemas define structured interaction contracts.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Rust executors dispatch coding agents as child processes.
+    - target: capability:supports-parallel-execution
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Concurrent agent execution across isolated worktrees.
+    - target: capability:can-multi-turn
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:can-fork
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Per-task git worktree isolation via the git crate.
+  supports_orchestration_primitive:
+    - target: orch-primitive:task-create
+    - target: orch-primitive:workspace-create
+    - target: orch-primitive:human-review-gate
+    - target: orch-primitive:auto-merge
+    - target: orch-primitive:issue-tracker-sync

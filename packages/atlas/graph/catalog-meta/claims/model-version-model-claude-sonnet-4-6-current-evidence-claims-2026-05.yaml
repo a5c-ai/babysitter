@@ -1,0 +1,385 @@
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-contextwindowtokens
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current contextWindowTokens is 1000000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-costpermtokinput
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: costPerMTokInput
+  value: '3.0'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current costPerMTokInput is 3.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-costpermtokoutput
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: costPerMTokOutput
+  value: '15.0'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current costPerMTokOutput is 15.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-kind
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: kind
+  value: chat
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current kind is chat.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-knowledgecutoffdate
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: knowledgeCutoffDate
+  value: '2025-08-01'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current knowledgeCutoffDate is 2025-08-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-lifecyclestatus
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-modalities
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-modalitydirections
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-modelcardurl
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: modelCardUrl
+  value: https://www.anthropic.com/claude/sonnet
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current modelCardUrl is https://www.anthropic.com/claude/sonnet.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-safetytier
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: safetyTier
+  value: anthropic-asl-3
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current safetyTier is anthropic-asl-3.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-supportsadaptivethinking
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: supportsAdaptiveThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current supportsAdaptiveThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-supportsextendedthinking
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: supportsExtendedThinking
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current supportsExtendedThinking is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-supportsfinetuning
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'True'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current supportsThinkingBudgetTokens is True.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-thinkingeffortlevels
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: thinkingEffortLevels
+  value: low, medium, high
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current thinkingEffortLevels is low, medium,
+    high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-sonnet-4-6-current-versionrange
+attributes:
+  subjectId: model:claude-sonnet-4-6@current
+  attribute: versionRange
+  value: '>=4.6.0 <4.7.0'
+  subjectKind: ModelVersion
+  statement: model:claude-sonnet-4-6@current versionRange is >=4.6.0 <4.7.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:anthropic-models-doc
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:anthropic model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:anthropic-models-doc
+  about_subject:
+  - model:claude-sonnet-4-6@current

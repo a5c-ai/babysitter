@@ -1,0 +1,10 @@
+{
+  "name": "@a5c-ai/genty-tv-androidtv-app",
+  "private": true,
+  "type": "module",
+  "description": "Android TV companion surfaces for adapters",
+  "scripts": {
+    "androidtv": "echo Open the Android TV module in Android Studio or Gradle"
+  },
+  "version": "5.1.0"
+}

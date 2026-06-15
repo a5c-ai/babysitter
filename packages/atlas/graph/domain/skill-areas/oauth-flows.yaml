@@ -1,0 +1,16 @@
+nodeKind: SkillArea
+id: skill-area:oauth-flows
+attributes:
+  displayName: "OAuth Flows"
+  description: |
+    OAuth 2.1 + OIDC: authorization code with PKCE, refresh tokens,
+    token rotation, scope and audience validation, JWKS rotation,
+    confidential vs public clients, and migration off implicit / ROPC.
+  domains:
+    - topic:oauth-flows
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: topic:oauth-flows
+      confidence: primary

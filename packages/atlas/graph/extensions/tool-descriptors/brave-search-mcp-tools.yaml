@@ -1,0 +1,46 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:brave.web-search
+attributes:
+  schema: '{}'
+  displayName: "Brave: Web Search"
+  description: Run a web search via the Brave Search API.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      count: { type: integer }
+      offset: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:brave-search-mcp
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:brave.local-search
+attributes:
+  schema: '{}'
+  displayName: "Brave: Local Search"
+  description: Search local businesses and points of interest.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+      count: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:brave-search-mcp

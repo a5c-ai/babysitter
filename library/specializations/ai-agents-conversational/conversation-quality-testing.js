@@ -15,6 +15,9 @@
  * @references
  * - DSTC: https://dstc.community/
  * - Conversation Quality Metrics: https://aclanthology.org/2020.nlp4convai-1.8/
+ * @graph
+ *   domains: [domain:software-engineering, workflow:code-review]
+ *   workflows: [workflow:code-review, workflow:prompt-engineering-iteration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

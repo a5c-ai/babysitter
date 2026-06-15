@@ -1,0 +1,36 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:pikiclaw.platform@current
+attributes:
+  displayName: "PikiClaw Platform (current)"
+  agentVersionId: agent-version:pikiclaw@current
+  packageRef: source-ref:pikiclaw-app
+  nativeExtensionFormat: pikiclaw-plugin
+  nativeExtensionManifestPath: "cloud-managed"
+  nativeExtensionsDirectoryPath: []
+  skillFormat: none
+  skillsDirectoryPath: []
+  customSlashCommandsPath: []
+  subagentDefinitionFormat: none
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles: []
+  pluginRegistryPath: "https://pikiclaw.com/plugins"
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: app-store
+  supportedChannelKinds:
+    - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+    - target: agent:pikiclaw
+      role: platform
+  bundles:
+    - target: presentation:pikiclaw-mobile
+  supports:
+    - target: capability:supports-plugins
+      versionRange: '>=1.0.0'
+      level: full
+      notes: Plugin marketplace with one-tap install on mobile.

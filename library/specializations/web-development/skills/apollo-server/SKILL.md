@@ -2,6 +2,13 @@
 name: apollo-server
 description: Apollo Server configuration, plugins, caching, federation, and performance optimization.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:graphql-schema-design, skill-area:backend-api-design]
+  roles: [role:backend-engineer, role:fullstack-engineer]
+  topics: [topic:graphql-schema-design, topic:api-design]
+
 ---
 
 # Apollo Server Skill

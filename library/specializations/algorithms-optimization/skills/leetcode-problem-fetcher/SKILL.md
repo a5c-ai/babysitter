@@ -8,6 +8,11 @@ metadata:
   category: algorithms-optimization
   skill-id: SK-ALGO-001
   priority: high
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # leetcode-problem-fetcher

@@ -10,6 +10,11 @@ expertise:
   - Type error diagnosis and localization
   - Gradual typing and flow analysis
   - Effect systems and algebraic effects
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:principal-engineer]
 ---
 
 # Type System Engineer Agent

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:evidence-policy.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:evidence-policy
+  text: |
+    which claims need evidence, freshness windows, reviewer rules
+  status: canonical
+edges:
+  defines:
+    - term:evidence-policy

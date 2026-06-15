@@ -1,0 +1,98 @@
+nodeKind: ProtocolMessage
+id: protocol-message:ollama-chat-message
+attributes:
+  displayName: "Ollama /api/chat — non-streaming response"
+  messageType: AssistantMessage
+  subtype: none
+  direction: core-to-user
+  terminal: true
+  errorCategory: none
+  payloadSchema:
+    type: AssistantMessage
+    fields: ["model", "created_at", "message(role, content, tool_calls?)", "done=true", "total_duration", "eval_count"]
+  description: |
+    Full non-streaming chat completion envelope from /api/chat. The
+    embedded `message` carries role and content; `tool_calls` may be
+    present when the model emits structured calls.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:ollama-chat-stream-chunk
+attributes:
+  displayName: "Ollama /api/chat — streaming chunk"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["model", "created_at", "message(role, content)", "done=false"]
+  description: |
+    JSONL line delivered during a streaming chat call. Each line carries
+    a partial assistant content delta and `done: false`.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:ollama-chat-stream-done
+attributes:
+  displayName: "Ollama /api/chat — streaming terminal"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["model", "created_at", "done=true", "total_duration", "eval_count", "prompt_eval_count"]
+  description: |
+    Final JSONL line of a streaming chat call (done=true) carrying
+    timing and token-count accounting.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:ollama-generate-response
+attributes:
+  displayName: "Ollama /api/generate — non-streaming response"
+  messageType: AssistantMessage
+  subtype: none
+  direction: core-to-user
+  terminal: true
+  errorCategory: none
+  payloadSchema:
+    type: AssistantMessage
+    fields: ["model", "created_at", "response", "done=true", "context[]?", "total_duration"]
+  description: |
+    Full non-streaming completion envelope from /api/generate. Carries
+    the assistant `response` text and a `context` token-id array for
+    follow-up turns.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:ollama-generate-stream-chunk
+attributes:
+  displayName: "Ollama /api/generate — streaming chunk"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    type: StreamEvent
+    fields: ["model", "created_at", "response", "done=false"]
+  description: |
+    JSONL line delivered during a streaming /api/generate call carrying
+    partial response text.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:ollama-embed-response
+attributes:
+  displayName: "Ollama /api/embed — response"
+  messageType: AssistantMessage
+  subtype: none
+  direction: core-to-user
+  terminal: true
+  errorCategory: none
+  payloadSchema:
+    type: AssistantMessage
+    fields: ["model", "embeddings[][]", "total_duration", "prompt_eval_count"]
+  description: |
+    Embedding response envelope. The catalog reuses AssistantMessage as
+    the closest existing messageType for vendor responses that are not
+    chat / stream / result.

@@ -1,0 +1,104 @@
+nodeKind: Sandbox
+id: sandbox:default-container
+attributes:
+  displayName: "Default container sandbox"
+  filesystemPolicy: sandboxed
+  networkPolicy: allowlist
+  description: |
+    Standard container-backed sandbox with a workspace-only filesystem
+    overlay, a curated network allowlist for package managers, and a
+    deny-list for the obvious shell-out vectors.
+  fsAllowList:
+    - "/workspace/**"
+    - "/tmp/**"
+    - "/home/agent/.cache/**"
+  fsDenyList:
+    - "/etc/shadow"
+    - "/root/**"
+    - "**/.ssh/**"
+  netAllowList:
+    - "registry.npmjs.org"
+    - "*.pypi.org"
+    - "github.com"
+    - "api.anthropic.com"
+    - "api.openai.com"
+  netDenyList:
+    - "169.254.169.254"
+  execAllowedBinaries:
+    - node
+    - npm
+    - python
+    - python3
+    - pip
+    - git
+    - bash
+  execDeniedBinaries:
+    - sudo
+    - su
+    - mount
+    - kmod
+  envVarScope: inherit-allowlist
+  secretAccessScope: named
+  auditLogPolicy: structured-jsonl
+  policyEvaluationPoint: pre-call
+edges:
+  realizes:
+    - target: layer:9-sandbox
+---
+nodeKind: Sandbox
+id: sandbox:read-only-air-gapped
+attributes:
+  displayName: "Read-only air-gapped sandbox"
+  filesystemPolicy: read-only
+  networkPolicy: none
+  description: |
+    Maximally restrictive sandbox for review-only / dry-run workloads:
+    workspace mounted read-only, no network, env scrubbed, no secrets.
+  fsAllowList:
+    - "/workspace/**"
+  fsDenyList: []
+  netAllowList: []
+  netDenyList:
+    - "*"
+  execAllowedBinaries:
+    - cat
+    - ls
+    - grep
+    - rg
+    - jq
+  execDeniedBinaries:
+    - sh
+    - bash
+    - zsh
+  envVarScope: scrub-all-set-by-config
+  secretAccessScope: none
+  auditLogPolicy: otel-traced
+  policyEvaluationPoint: continuous
+edges:
+  realizes:
+    - target: layer:9-sandbox
+---
+nodeKind: Sandbox
+id: sandbox:permissive-developer
+attributes:
+  displayName: "Permissive developer sandbox"
+  filesystemPolicy: read-write
+  networkPolicy: full
+  description: |
+    Loose policy used for trusted local developer execution. Captures
+    audit telemetry but does not gate calls.
+  fsAllowList: []
+  fsDenyList:
+    - "**/.ssh/**"
+    - "**/.aws/credentials"
+  netAllowList: []
+  netDenyList: []
+  execAllowedBinaries: []
+  execDeniedBinaries: []
+  envVarScope: inherit-all
+  secretAccessScope: all
+  auditLogPolicy: structured-jsonl
+  policyEvaluationPoint: post-call-attestation
+edges:
+  realizes:
+    - target: layer:9-sandbox

@@ -2,6 +2,13 @@
 name: migration-validator
 description: Validate functional equivalence after migration with side-by-side comparison and behavioral verification
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:regression-testing, skill-area:integration-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Migration Validator Skill

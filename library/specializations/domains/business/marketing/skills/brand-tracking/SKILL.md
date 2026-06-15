@@ -17,6 +17,11 @@ metadata:
     - Qualtrics Brand XM
     - Latana API
     - Brand24 API
+graph:
+  domains: [domain:marketing]
+  skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+  workflows: [workflow:brand-campaign-launch]
+  roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
 ---
 
 # Brand Tracking Platform Skill

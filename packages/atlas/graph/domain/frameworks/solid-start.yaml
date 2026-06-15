@@ -1,0 +1,17 @@
+nodeKind: Framework
+id: framework:solid-start
+attributes:
+  displayName: "SolidStart"
+  homepageUrl: "https://start.solidjs.com"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  description: |
+    SolidStart — a full-stack framework for SolidJS.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - framework:qwik
+    - framework:astro

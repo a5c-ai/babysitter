@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:genty-tui-plugins
+attributes:
+  packageId: "@a5c-ai/genty-tui-plugins"
+  packageName: "@a5c-ai/genty-tui-plugins"
+  displayName: "Genty TUI Plugins"
+  description: "Babysitter-specific TUI plugins for the adapters terminal interface. Extends the Ink-based TUI with panels, widgets, and views tailored to babysitter run monitoring."
+  role: "tui-plugin-bundle"
+  whenToUse: "Depend on this when you need the built-in babysitter TUI plugins that display run status, task progress, and orchestration state in the terminal."
+  status: active

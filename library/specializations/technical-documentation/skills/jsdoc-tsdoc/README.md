@@ -20,7 +20,7 @@ This skill provides deep expertise in JSDoc (JavaScript) and TSDoc (TypeScript) 
 
 ```json
 {
-  "projectPath": "./packages/sdk",
+  "projectPath": "./packages/babysitter-sdk",
   "outputFormat": "html"
 }
 ```
@@ -29,7 +29,7 @@ This skill provides deep expertise in JSDoc (JavaScript) and TSDoc (TypeScript) 
 
 ```json
 {
-  "projectPath": "./packages/sdk",
+  "projectPath": "./packages/babysitter-sdk",
   "entryPoints": ["src/index.ts"],
   "outputDir": "docs/api",
   "coverageThreshold": 80,

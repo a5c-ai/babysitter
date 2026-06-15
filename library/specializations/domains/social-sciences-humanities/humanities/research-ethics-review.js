@@ -5,6 +5,13 @@
  * @outputs { success: boolean, ethicsApplication: object, consentMaterials: object, protocolDocuments: array, artifacts: array }
  * @recommendedSkills SK-HUM-006 (research-ethics-irb-navigation), SK-HUM-015 (grant-narrative-writing)
  * @recommendedAgents AG-HUM-008 (research-ethics-consultant), AG-HUM-009 (grants-publications-advisor)
+ *
+ * @graph
+ *   domains: [domain:humanities]
+ *   specializations: [specialization:digital-humanities]
+ *   skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

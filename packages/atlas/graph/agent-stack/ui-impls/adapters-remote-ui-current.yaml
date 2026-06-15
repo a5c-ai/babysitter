@@ -1,0 +1,19 @@
+nodeKind: AgentUIImpl
+id: agent-ui-impl:adapters-remote.ui@current
+attributes:
+  displayName: "adapters-remote UI (current) — headless"
+  agentVersionId: agent-version:adapters-remote@current
+  packageRef: source-ref:adapters-github
+  uiKind: headless
+  presentationsBundled: []
+  themeSupport: none
+  accessibilitySupport: none
+  notes: |
+    adapters-remote is a passthrough/proxy variant — it has no user-facing UI.
+    All user-facing surfaces are delegated to whichever upstream agent is being
+    multiplexed. This AgentUIImpl entry exists primarily as a documentation
+    marker that the variant is headless by design.
+edges:
+  realizes:
+    - target: layer:11-presentation
+  supports_interaction_primitive: []

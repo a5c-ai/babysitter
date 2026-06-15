@@ -3,6 +3,12 @@ name: dotnet-clickonce-config
 description: Configure ClickOnce deployment with auto-update, prerequisites, and publish settings for .NET applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [dotnet, clickonce, deployment, auto-update, windows]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # dotnet-clickonce-config

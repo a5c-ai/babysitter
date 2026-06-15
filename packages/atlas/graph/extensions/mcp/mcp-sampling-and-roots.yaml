@@ -1,0 +1,57 @@
+nodeKind: MCPSampling
+id: mcp-sampling:default-anthropic
+attributes:
+  displayName: "Default — Anthropic preference"
+  modelPreferences:
+    hints: ["claude-3-5-sonnet"]
+    costPriority: 0.3
+    speedPriority: 0.4
+    intelligencePriority: 0.9
+  systemPrompt: "You are a helpful assistant operating inside an MCP server context."
+  description: |
+    Default sampling preference advertised by MCP servers that prefer Claude
+    family models when the host offers a choice.
+edges: {}
+---
+nodeKind: MCPSampling
+id: mcp-sampling:cost-optimized
+attributes:
+  displayName: "Cost-optimized sampling"
+  modelPreferences:
+    costPriority: 0.9
+    speedPriority: 0.7
+    intelligencePriority: 0.2
+  description: |
+    Sampling preference for high-volume background jobs that prioritize cheap
+    inference over reasoning depth.
+edges: {}
+---
+nodeKind: MCPRoot
+id: mcp-root:project-workspace
+attributes:
+  displayName: "Project workspace root"
+  uri: "file:///workspace"
+  description: |
+    Filesystem root advertised by hosts that scope MCP servers to a single
+    project workspace (most common shape for IDE-hosted MCP servers).
+edges: {}
+---
+nodeKind: MCPRoot
+id: mcp-root:home-directory
+attributes:
+  displayName: "User home directory"
+  uri: "file:///home/{user}"
+  description: |
+    Home-directory root advertised by personal-assistant style hosts that grant
+    a server scope over the entire user home.
+edges: {}
+---
+nodeKind: MCPRoot
+id: mcp-root:read-only-docs
+attributes:
+  displayName: "Read-only documentation root"
+  uri: "file:///opt/docs"
+  description: |
+    Read-only root advertised when the server should only be able to surface
+    pre-baked documentation; the host enforces the read-only policy.
+edges: {}

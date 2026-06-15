@@ -1,0 +1,84 @@
+---
+nodeKind: Workflow
+id: workflow:design-ops-sprint
+attributes:
+  displayName: "Design Ops Sprint"
+  workflowKind: development
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: single-team
+  description: |
+    Plans and executes design operations work within a sprint cadence —
+    prioritizing design system contributions, reviewing component proposals,
+    auditing design token usage, resolving cross-team design conflicts, and
+    updating shared Figma libraries. Excludes product feature design.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:tech-lead
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:react-state-management
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:usability-testing-cycle
+attributes:
+  displayName: "Usability Testing Cycle"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-feature"
+  complexity: single-team
+  description: |
+    Plans and conducts moderated or unmoderated usability tests — recruiting
+    participants, writing test scripts, facilitating sessions, analyzing task
+    completion and error rates, synthesizing findings into prioritized design
+    recommendations. Excludes implementation of design changes.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:end-user
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:react-state-management
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:design-token-audit
+attributes:
+  displayName: "Design Token Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: single-team
+  description: |
+    Audits design token definitions and usage across the codebase — detecting
+    orphaned tokens, inconsistent overrides, theme coverage gaps, and
+    accessibility contrast violations. Produces a remediation backlog. Excludes
+    token creation.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:react-state-management
+  applies_to_domain:
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:code-review-coverage
+    - target: responsibility:dx-tooling-maintenance
+  performed_by_org_unit:
+    - target: org-unit:frontend-team
+    - target: org-unit:engineering

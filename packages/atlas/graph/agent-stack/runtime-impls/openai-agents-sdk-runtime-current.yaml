@@ -1,0 +1,45 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:openai-agents-sdk.runtime@current
+attributes:
+  displayName: "OpenAI Agents SDK Runtime (current)"
+  agentVersionId: agent-version:openai-agents-sdk@current
+  packageRef: source-ref:openai-agents-sdk-github
+  builtInTools: []
+  toolRegistryDiscovery: dynamic-config
+  hookSockets: []
+  internalSessionStateLocation: "host-process memory; user-managed via previous_response_id"
+  sessionFileFormat: json
+  sessionFilePathConvention: "host-application defined"
+  approvalGatingPrimitive: none
+  subprocessSandboxStrategy: none
+  runtimeIdentity: host-process
+  supportedMCPTransports: []
+  supportsStreaming: true
+  notes: |
+    The Agents SDK is a Python library — the runtime is the host Python
+    process running `Runner.run_streamed()` / `Runner.run()`. There is no
+    dedicated CLI surface; tools, handoffs, and persistence are configured
+    by the host application.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:openai-agents-sdk
+      role: runtime
+  supports:
+    - target: capability:streaming
+      versionRange: '>=0.1.0'
+      level: full
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=0.1.0'
+      level: full
+      notes: Handoffs spawn nested Runner.run calls.
+  emits_journal_event:
+    - target: journal-event:openai-agents-raw-responses-stream-event
+    - target: journal-event:openai-agents-run-item-message-output-created
+    - target: journal-event:openai-agents-run-item-tool-called
+    - target: journal-event:openai-agents-run-item-tool-output
+    - target: journal-event:openai-agents-run-item-handoff-requested
+    - target: journal-event:openai-agents-run-item-handoff-occurred
+    - target: journal-event:openai-agents-run-item-reasoning-item-created
+    - target: journal-event:openai-agents-agent-updated-stream-event

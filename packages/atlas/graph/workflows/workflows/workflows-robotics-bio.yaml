@@ -1,0 +1,59 @@
+---
+nodeKind: Workflow
+id: workflow:robotics-simulation-validation
+attributes:
+  displayName: "Robotics Simulation Validation"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: cross-team
+  description: |
+    Validates robotic system behavior in simulation before physical
+    deployment — running physics-based scenarios, comparing sim-to-real
+    transfer fidelity, regression-testing motion planning algorithms, and
+    certifying safety-critical behaviors in simulated environments. Excludes
+    physical robot testing.
+edges:
+  involves_role:
+    - target: role:ml-engineer
+    - target: role:test-writer
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:robotics
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:bioinformatics-pipeline-validation
+attributes:
+  displayName: "Bioinformatics Pipeline Validation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Validates bioinformatics analysis pipelines against reference datasets —
+    checking variant calling accuracy, alignment quality metrics,
+    reproducibility across compute environments, and compliance with
+    clinical-grade pipeline standards. Excludes pipeline development.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:ml-fine-tuning
+  applies_to_domain:
+    - target: domain:bioinformatics
+    - target: domain:scientific-computing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:research-engineering

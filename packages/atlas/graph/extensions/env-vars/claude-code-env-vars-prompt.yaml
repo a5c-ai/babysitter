@@ -1,0 +1,23 @@
+nodeKind: EnvVar
+id: env-var:claude-code-simple
+attributes:
+  displayName: CLAUDE_CODE_SIMPLE
+  description: Set to 1 to run with a minimal system prompt and only basic tools.
+  name: CLAUDE_CODE_SIMPLE
+  category: prompt
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-simple-system-prompt
+attributes:
+  displayName: CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT
+  description: Set to 1 to use a shorter system prompt on Opus 4.7.
+  name: CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT
+  category: prompt
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

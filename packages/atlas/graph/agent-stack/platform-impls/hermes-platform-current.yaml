@@ -1,0 +1,46 @@
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:hermes.platform@current
+attributes:
+  displayName: Hermes Platform (current)
+  agentVersionId: agent-version:hermes@current
+  subagentDefinitionFormat: none
+  packageRef: source-ref:hermes-agent-pypi
+  nativeExtensionFormat: none
+  nativeExtensionManifestPath: ''
+  nativeExtensionsDirectoryPath: []
+  skillFormat: anthropic-skill-md
+  skillsDirectoryPath:
+  - ~/.hermes/skills/
+  customSlashCommandsPath: []
+  subagentsDirectoryPath: []
+  hooksDirectoryOrConfigPath: []
+  settingsFiles:
+  - ~/.hermes/cli-config.yaml
+  pluginRegistryPath: ''
+  capabilityProfileRegistry: false
+  launchConfigRegistry: false
+  platformIdentityStrategy: api-key
+  updateChannelMechanism: pip
+  supportedChannelKinds:
+  - mcp-channel
+edges:
+  realizes:
+    - target: layer:6-agent-platform
+  composes:
+  - target: agent:hermes
+    role: platform
+  bundles:
+  - target: presentation:hermes-cli
+  supports:
+  - target: capability:can-resume
+    versionRange: '>=1.0.0'
+    level: partial
+    notes: 'SQLite-indexed JSONL sessions support resume; no fork.
+
+      '
+  - target: capability:supports-plugins
+    versionRange: '>=1.0.0'
+    level: none
+    notes: 'Plugins not in v1; MCP-only extensibility.
+
+      '

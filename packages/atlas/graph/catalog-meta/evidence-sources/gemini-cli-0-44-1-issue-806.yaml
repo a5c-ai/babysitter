@@ -1,0 +1,59 @@
+nodeKind: EvidenceSource
+id: evidence:gemini-cli-0-44-1-issue-806-release
+attributes:
+  displayName: "Gemini CLI v0.44.1 release notes for issue #806"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1
+  sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1
+  locator: "google-gemini/gemini-cli release v0.44.1"
+  capturedAt: "2026-05-31T20:15:00Z"
+  observedAt: "2026-05-31T20:15:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:15:00Z"
+  notes: |
+    Issue #806 tracks Gemini CLI 0.44.1 as the stable release that
+    cherry-picks PTY resize hardening from the 0.45 preview branch.
+    No launch flag, transport, model, MCP, package, or migration changes
+    were identified in the issue context or release notes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:gemini:ge-0-43-0
+    - agentVersion:gemini:0-44-1
+---
+nodeKind: AgentVersion
+id: agentVersion:gemini:ge-0-43-0
+attributes:
+  patch: true
+  currentVersion: "0.44.1"
+  releasedAt: "2026-05-28"
+  upstreamReleaseTag: "v0.44.1"
+  releaseNotesUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.44.1"
+  assimilationNotes:
+    - "Issue #806 confirms Gemini CLI 0.44.1 cherry-picks PTY resize hardening from the 0.45 preview branch."
+    - "Gemini terminal/PTY handling should retain resize-event regression coverage for native crash prevention."
+    - "No launchBehavior changes are required for issue #806 because package, CLI flags, transport, model, MCP, and install metadata are unchanged."
+  releaseHighlights:
+    - "PTY resize hardening to prevent native crashes during Gemini CLI terminal resize events."
+  issue806ReleaseAdditions:
+    releaseVersion: "0.44.1"
+    affectedSurface: terminal-pty-resize
+    regressionCoverage:
+      - "Resize events in Gemini CLI PTY-backed terminal sessions should not trigger native crashes."
+    unchangedSurfaces:
+      - launch-flags
+      - transport
+      - model-selection
+      - mcp
+      - install-method
+      - package-name
+    notes: "Install remains npm install -g @google/gemini-cli; no migration steps are required."
+edges:
+  sourced_from:
+    - evidence:gemini-cli-0-44-1-issue-806-release
+  has_trust_level:
+    - trust-level:official-web

@@ -1,0 +1,103 @@
+---
+nodeKind: Topic
+id: topic:claude-code-hooks
+attributes:
+  displayName: "Claude Code Hooks"
+  description: |
+    Claude Code Hooks as a cross-cutting topic - the pre- and post-action
+    interception points that allow automating responses to agent lifecycle
+    events without modifying the agent's core behavior. Covers PreToolUse
+    hooks for approval and input mutation, PostToolUse hooks for
+    side-effects and logging, Stop hooks for driving orchestration loops,
+    Notification hooks for user feedback, and hook configuration via
+    settings.json. Enables the Babysitter harness pattern and automated
+    CI/CD-style workflows within agent sessions.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:claude-code-skills
+attributes:
+  displayName: "Claude Code Skills"
+  description: |
+    Claude Code Skills as a cross-cutting topic - the plugin-distributed
+    slash-command units that extend an agent session with packaged
+    domain-specific behaviors. Covers skill YAML/Markdown authoring,
+    argument substitution patterns ($ARGUMENTS, $N, named variables),
+    trigger conditions and discovery metadata, skill-to-skill composition,
+    user-level vs project-level vs plugin-bundled skill scopes, and the
+    marketplace distribution model through .claude-plugin packages.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:claude-code-mcp
+attributes:
+  displayName: "Claude Code MCP Integration"
+  description: |
+    Claude Code MCP Integration as a cross-cutting topic - connecting Claude
+    Code sessions to Model Context Protocol (MCP) servers that expose tools,
+    resources, and prompts. Covers MCP server registration in settings.json,
+    authentication flows for remote MCP services, tool namespace management,
+    resource streaming for large context injection, MCP permission scoping,
+    and building custom MCP servers to extend agent capabilities with
+    domain-specific APIs and data sources.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:agent-context-management
+attributes:
+  displayName: "Agent Context Management"
+  description: |
+    Agent Context Management as a cross-cutting topic - strategies for
+    working effectively within the finite context window of an LLM agent
+    session. Covers context compaction triggers and summarization quality,
+    memory injection via hooks and MCP resources, structured context windows
+    (system prompt, tool results, conversation), long-session state
+    preservation patterns, relevance-ranked context retrieval, and the
+    trade-off between full-transcript fidelity and compacted-summary efficiency.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:agent-tool-use
+attributes:
+  displayName: "Agent Tool Use"
+  description: |
+    Agent Tool Use as a cross-cutting topic - how LLM agents call, compose,
+    and reason about tools during task execution. Covers tool schema design
+    for optimal model comprehension, permission approval flows (allow-listing,
+    interactive approval gates), parallel vs sequential tool invocation,
+    tool-result handling and error recovery, chain-of-tool reasoning patterns,
+    and security considerations for tools with side effects (file writes,
+    network calls, code execution).
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational
+---
+nodeKind: Topic
+id: topic:multi-agent-orchestration
+attributes:
+  displayName: "Multi-Agent Orchestration"
+  description: |
+    Multi-Agent Orchestration as a cross-cutting topic - coordinating multiple
+    specialized agent instances to accomplish complex tasks that exceed what a
+    single agent context can handle. Covers orchestrator/worker decomposition,
+    effect-based task dispatch (Babysitter SDK patterns), result aggregation
+    and quality scoring, inter-agent communication protocols, fan-out parallelism
+    with synchronization barriers, long-running orchestration with journal-based
+    state, and failure recovery in multi-agent pipelines.
+edges:
+  applies_to:
+    - domain:software-engineering
+    - specialization:ai-agents-conversational

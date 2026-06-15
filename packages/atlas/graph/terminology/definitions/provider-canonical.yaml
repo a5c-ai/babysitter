@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:provider.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:provider
+  text: |
+    entity serving inference for one or more model versions
+  status: canonical
+edges:
+  defines:
+    - term:provider

@@ -1,0 +1,13 @@
+nodeKind: Language
+id: language:rescript
+attributes:
+  displayName: "ReScript"
+  paradigms:
+    - functional
+  description: |
+    ReScript — a typed functional language with a JavaScript-friendly
+    syntax, compiling to readable JS. Successor to BuckleScript / Reason.
+edges:
+  applies_to:
+    - target: domain:frontend
+    - target: domain:web-development

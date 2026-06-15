@@ -1,0 +1,23 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:agent
+attributes:
+  schema: '{}'
+  displayName: "Agent (Task)"
+  description: |
+    Spawn a sub-agent (general-purpose Task) with its own prompt.
+    Returns the sub-agent's final message. Equivalent to Claude
+    Code's Task tool.
+  inputSchema:
+    type: object
+    required: [description, prompt, subagent_type]
+    properties:
+      description: { type: string, description: "Short (3-5 word) task description" }
+      prompt: { type: string, description: "Full task prompt for the sub-agent" }
+      subagent_type: { type: string, description: "Configured sub-agent type / role" }
+  outputSchema:
+    type: object
+    properties:
+      finalMessage: { type: string }
+  mode: normal
+  streamable: false
+edges: {}

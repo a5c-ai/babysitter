@@ -1,0 +1,11 @@
+nodeKind: Capability
+id: capability:supports-tool-use
+attributes:
+  displayName: "Supports tool use"
+  description: |
+    The agent or model supports calling tools (function-calling /
+    tool-use). Roles requiring tool-use as a hard requirement
+    reference this capability.
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: tool
+edges: {}

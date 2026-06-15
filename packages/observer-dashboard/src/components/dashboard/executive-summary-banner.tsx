@@ -128,8 +128,7 @@ export function ExecutiveSummaryBanner({
       aria-atomic="true"
       data-testid="executive-summary-banner"
       className={cn(
-        "flex items-center gap-2.5 rounded-lg border px-4 py-2.5 mb-6",
-        "backdrop-blur-sm transition-all duration-300",
+        "flex items-center gap-2.5 rounded-xl border px-4 py-3 mb-6 shadow-sm transition-all duration-300",
         styles.container
       )}
     >

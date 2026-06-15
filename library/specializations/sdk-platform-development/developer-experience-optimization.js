@@ -16,6 +16,13 @@
  * @references
  * - Developer Experience: https://www.postman.com/api-platform/developer-experience/
  * - API Design Patterns: https://www.oreilly.com/library/view/api-design-patterns/9781617295850/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+ *   roles: [role:platform-engineer]
+ *   topics: [topic:api-design, topic:developer-experience]
+ *   workflows: [workflow:sdk-release-lifecycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

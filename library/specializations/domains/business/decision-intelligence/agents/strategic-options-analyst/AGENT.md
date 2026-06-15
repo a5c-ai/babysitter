@@ -11,6 +11,10 @@ expertise:
   - Hedging strategy development
   - Option exercise triggers
   - Strategy portfolio construction
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:financial-modeling, skill-area:competitive-intelligence]
+  roles: [role:strategic-planner, role:financial-analyst, role:business-analyst]
 ---
 
 # Strategic Options Analyst

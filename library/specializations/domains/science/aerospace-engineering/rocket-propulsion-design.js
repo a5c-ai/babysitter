@@ -18,6 +18,13 @@
  * - NASA CEA (Chemical Equilibrium with Applications)
  * - JANNAF Rocket Propulsion Guidelines
  * - AIAA Liquid Propulsion Standards
+ *
+ * @graph
+ *   domains: [domain:aerospace-engineering]
+ *   specializations: [specialization:aerospace-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:sensor-fusion]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -38,39 +45,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Propellant Selection and Trade Study
-  let propellantSelection = await ctx.task(propellantSelectionTask, {
+  const propellantSelection = await ctx.task(propellantSelectionTask, {
     projectName,
     requirements: requirementsAnalysis,
     propellantOptions,
     engineType
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      propellantSelection = await ctx.task(propellantSelectionTask, { ...{
-    projectName,
-    requirements: requirementsAnalysis,
-    propellantOptions,
-    engineType
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review propellant selection
+  await ctx.breakpoint({
     question: `Review propellant selection for ${projectName}. Recommended: ${propellantSelection.selectedPropellant}. Approve selection?`,
     title: 'Propellant Selection Review',
     context: {
       runId: ctx.runId,
       tradeStudy: propellantSelection.tradeStudy,
       recommendation: propellantSelection.recommendation
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Combustion Analysis
   const combustionAnalysis = await ctx.task(combustionAnalysisTask, {
     projectName,
@@ -88,7 +80,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Nozzle Design
-  let nozzleDesign = await ctx.task(nozzleDesignTask, {
+  const nozzleDesign = await ctx.task(nozzleDesignTask, {
     projectName,
     combustionAnalysis,
     requirements: requirementsAnalysis,
@@ -96,17 +88,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check nozzle performance
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        nozzleDesign = await ctx.task(nozzleDesignTask, { ...{
-    projectName,
-    combustionAnalysis,
-    requirements: requirementsAnalysis,
-    chamberDesign
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (nozzleDesign.specificImpulse < missionRequirements.isp * 0.95) {
+    await ctx.breakpoint({
       question: `Designed Isp (${nozzleDesign.specificImpulse}s) below target (${missionRequirements.isp}s). Review design or accept deviation?`,
       title: 'Performance Shortfall Warning',
       context: {
@@ -114,15 +97,9 @@ export async function process(inputs, ctx) {
         designedIsp: nozzleDesign.specificImpulse,
         targetIsp: missionRequirements.isp,
         recommendation: 'Consider higher area ratio or chamber pressure'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Injector Design
   const injectorDesign = await ctx.task(injectorDesignTask, {
@@ -181,7 +158,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 12: Report Generation
-  let reportGeneration = await ctx.task(rocketReportTask, {
+  const reportGeneration = await ctx.task(rocketReportTask, {
     projectName,
     requirementsAnalysis,
     propellantSelection,
@@ -196,25 +173,8 @@ export async function process(inputs, ctx) {
     massBudget
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportGeneration = await ctx.task(rocketReportTask, { ...{
-    projectName,
-    requirementsAnalysis,
-    propellantSelection,
-    combustionAnalysis,
-    chamberDesign,
-    nozzleDesign,
-    injectorDesign,
-    feedSystemDesign,
-    coolingDesign,
-    structuralAnalysis,
-    performanceIntegration,
-    massBudget
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Approval
+  await ctx.breakpoint({
     question: `Rocket engine design complete for ${projectName}. Thrust: ${performanceIntegration.thrust}N, Isp: ${performanceIntegration.isp}s. Approve design?`,
     title: 'Engine Design Approval',
     context: {
@@ -229,15 +189,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/rocket-engine-design.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/rocket-engine-design.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -260,7 +214,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',

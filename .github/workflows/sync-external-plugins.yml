@@ -1,0 +1,79 @@
+name: Sync External Plugins
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: Branch whose external plugin repositories should be synced.
+        required: true
+        type: string
+      ref:
+        description: Commit, tag, or branch ref to checkout before generating plugins.
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-external-plugins-${{ inputs.branch || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  sync_external_plugins:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.ref }}
+          token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          npm ci --prefer-offline --legacy-peer-deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Generate plugin bundles
+        env:
+          SYNC_BRANCH: ${{ inputs.branch || github.ref_name }}
+        run: |
+          set -euo pipefail
+          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
+          TARGET_VERSION="$BASE_VERSION"
+          if [ "${SYNC_BRANCH}" = "staging" ]; then
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+            NEXT_PATCH=$((PATCH + 1))
+            SHORT_SHA=$(git rev-parse --short=12 HEAD)
+            TARGET_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
+          fi
+          node scripts/sync-workspace-versions.mjs --version "$TARGET_VERSION"
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/extensions-adapter
+          npm run generate:plugins
+
+      - name: Sync generated plugin repositories
+        env:
+          GH_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+          SYNC_BRANCH: ${{ inputs.branch || github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          case "$SYNC_BRANCH" in
+            develop|staging|main) ;;
+            *) echo "Unsupported sync branch: $SYNC_BRANCH" >&2; exit 1 ;;
+          esac
+          node scripts/sync-external-plugin-repos.mjs --push --branch="$SYNC_BRANCH"

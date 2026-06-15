@@ -199,6 +199,11 @@ SDK-defined exceptions include (names are illustrative):
 
   * not usually thrown; completion is represented by a normal return
 
+* `RunHalted` —
+
+  * thrown internally by `ctx.halt(reason, payload?)`
+  * represented as a recorded `RUN_HALTED` event for intentional early exits
+
 * `RunFailed` —
 
   * represented as a recorded `RUN_FAILED` event when an unhandled error escapes
@@ -344,6 +349,18 @@ type RunCompleted = JournalEventBase & {
 };
 ```
 
+#### RUN_HALTED
+
+```ts
+type RunHalted = JournalEventBase & {
+  type: "RUN_HALTED";
+  payload: {
+    reason: string;
+    payload?: Record<string, unknown>;
+  };
+};
+```
+
 #### RUN_FAILED
 
 ```ts
@@ -359,6 +376,41 @@ type RunFailed = JournalEventBase & {
   };
 };
 ```
+
+#### PROCESS_RUNTIME_ERROR
+
+```ts
+type ProcessRuntimeError = JournalEventBase & {
+  type: "PROCESS_RUNTIME_ERROR";
+  payload: {
+    error: {
+      name?: string;
+      message: string;
+      stack?: string;
+      data?: any;
+    };
+    iteration?: number;
+    runId?: string;
+    processId?: string;
+    journalHead?: { seq: number; ulid: string; checksum?: string } | null;
+    lastEffect?: {
+      effectId: string;
+      invocationKey?: string;
+      taskId?: string;
+      stepId?: string;
+      kind?: string;
+      status?: string;
+      resultRef?: string;
+    } | null;
+    recovery: {
+      command: "run:recover-process-error";
+      recoverable: true;
+    };
+  };
+};
+```
+
+`PROCESS_RUNTIME_ERROR` is emitted when process code throws an unhandled exception. It is distinct from `EFFECT_RESOLVED` with `status: "error"`, which records a task/effect failure, and from `RUN_FAILED`, which remains reserved for runtime/replay infrastructure failures.
 
 ### 4.2 Derived state
 
@@ -402,6 +454,7 @@ export interface TaskDef {
   kind: "node" | "breakpoint" | "orchestrator_task" | string;
   title?: string;
   description?: string;
+  outputSchema?: Record<string, unknown> | false | null; // shell result schema
 
   node?: {
     entry: string;                // path to node script
@@ -512,6 +565,8 @@ export const codeReviewAgentTask = defineTask<
 export interface ProcessContext {
   now(): Date;                               // uses provided `now` or Date.now
 
+  onCleanup(callback: () => void | Promise<void>): void;
+
   task<TArgs, TResult>(
     taskFn: DefinedTask<TArgs, TResult>,
     args: TArgs,
@@ -539,6 +594,22 @@ export interface ProcessContext {
   log?(...args: any[]): void;
 }
 ```
+
+`ctx.onCleanup(callback)` registers a process-local cleanup callback for
+scratch resources such as `/tmp/<descriptive-name>/` clones. Callbacks are not
+serialized into task definitions or journals. They run once when the process
+execution reaches a terminal completed, halted, failed, or process-error path, and they
+do not run during ordinary waiting iterations.
+
+#### Process Function Exit Conventions
+
+Process functions have three terminal exits:
+
+* Return normally to record `RUN_COMPLETED`. Completed runs may expose a `completionProof`.
+* Call `return ctx.halt("phase-or-reason", payload)` to record `RUN_HALTED`. Halted runs are intentional non-success exits; `run:status --json` reports `state: "halted"`, `reason`, `payload`, and `completionProof: null`.
+* Throw an uncaught `RunFailedError` to record `RUN_FAILED`. Other uncaught errors are reported as `process-error` and should be fixed before continuing.
+
+Legacy process returns shaped like `{ halt: true }` are still recognized as halted for migration, but the runtime emits a deprecation warning. Prefer `ctx.halt(...)` for new processes.
 
 ### 6.2 Intrinsic behavior details
 
@@ -795,11 +866,12 @@ function commitEffectResult(
 
 Behavior:
 
+* For successful `kind="shell"` results with a top-level `outputSchema`, validates `value` before any hook, artifact, journal, registry, or state-cache mutation. `outputSchema: false`, `null`, or absence disables this validation.
 * Writes `tasks/<effectId>/result.json` with `value` or normalized error
 * Writes `stdout.txt` / `stderr.txt` if provided
 * Appends `EFFECT_RESOLVED` event
 * Updates `state/state.json` (best-effort)
-* Emits a `commit.effect` metric for both success and rejection (`unknown_effect`, `already_resolved`, `invocation_mismatch`, `invalid_payload`, etc.) including whether stdout/stderr artifacts were written.
+* Emits a `commit.effect` metric for both success and rejection (`unknown_effect`, `already_resolved`, `invocation_mismatch`, `invalid_payload`, `validation_error`, etc.) including whether stdout/stderr artifacts were written.
 
 Error semantics:
 
@@ -823,7 +895,7 @@ The SDK runtime automatically calls the following hooks:
 | `on-run-start` | After `RUN_CREATED` event in `createRun()` | `{ runId, processId, entry, inputs, timestamp }` |
 | `on-iteration-start` | At the start of each `orchestrateIteration()` | `{ runId, iteration, timestamp }` |
 | `on-run-complete` | After `RUN_COMPLETED` event | `{ runId, status: "completed", output, duration, timestamp }` |
-| `on-run-fail` | After `RUN_FAILED` event | `{ runId, status: "failed", error, duration, timestamp }` |
+| `on-run-fail` | After `RUN_FAILED` or `RUN_HALTED` event | `{ runId, status: "failed" | "halted", error, reason?, payload?, duration, timestamp }` |
 | `on-iteration-end` | At the end of each iteration (finally block) | `{ runId, iteration, status, timestamp }` |
 | `on-task-start` | Before executing a task | `{ runId, effectId, taskId, kind, timestamp }` |
 | `on-task-complete` | After task execution completes | `{ runId, effectId, taskId, status, duration, timestamp }` |
@@ -1037,18 +1109,22 @@ if (result.status === "waiting") {
 
 ### 10.6 Deterministic docs + CLI walkthrough workflow
 
-To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/sdk/src/testing/README.md` should be paired with the deterministic harness jobs below (see `part7_test_plan.md` for the full matrix):
+To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/babysitter-sdk/src/testing/README.md` should be paired with the current repo workflow below:
 
-1. **Regenerate CLI walkthroughs**  
-   `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`  
-   Stores hashed stdout/JSON outputs under `_ci_artifacts/cli/<platform>/<node>/` so reviewers can diff transcripts.
-2. **Compile/execute code fences**  
-   `pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:extract && pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:tsc`  
-   Optional `docs:snippets:test` runs snippets (e.g., fake runner how-tos) against the seeded harness fixtures.
-3. **Verify fake-runner docs**  
-   `pnpm --filter @a5c-ai/babysitter-sdk run docs:testing-readme` – executes the examples in `packages/sdk/src/testing/README.md`, ensuring `installFixedClock`, `installDeterministicUlids`, and `runToCompletionWithFakeRunner` behave as documented.
+1. **Build the SDK CLI from a fresh checkout**  
+   `npm ci && npm run build --workspace=@a5c-ai/babysitter-sdk`
+2. **Regenerate generated docs artifacts and the CLI traceability index**  
+   `npm run docs:prepare`  
+   This writes `docs/generated/cli-examples-verification.md`, which maps the published walkthrough to the real repo scripts and artifacts.
+3. **Run the real CLI smoke harness**  
+   `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk`  
+   The harness implementation lives in `packages/babysitter-sdk/scripts/smoke-cli.js` and stages deterministic fixtures under `packages/babysitter-sdk/test-fixtures/cli/runs/smoke/`.
+4. **Validate published docs command surfaces**  
+   `npm run docs:snippets && npm run docs:qa`
+5. **Verify the deterministic harness helpers referenced by the docs**  
+   `npm run test --workspace=@a5c-ai/babysitter-sdk`
 
-All outputs (hashes, logs, manifests) feed CI jobs on Node 18/20 for macOS, Linux, and Windows. The docs map in `README.md` points contributors to the authoritative sections, and `packages/sdk/src/testing/README.md` contains the harness details referenced above.
+This repo currently uses the generated traceability index and the checked-in smoke/docs/test scripts as the review surface rather than separate `docs:testing-readme` or `docs:snippets:*` package-local jobs.
 
 --- 
 
@@ -1138,6 +1214,27 @@ Outputs:
 * `--json` prints the same data as a single JSON object so automation can parse it reliably.
 * initializes `run.json`, `inputs.json`, and `RUN_CREATED` event (metadata includes `processId`, `entrypoint.importPath/exportName`, `layoutVersion`, optional `processRevision`, and `request`).
 
+#### `babysitter run:assign-process <runDir>`
+
+Assign a process to an existing bare run (one created without `--entry`).
+
+```bash
+babysitter run:assign-process .a5c/runs/run-20260125-001 \
+  --entry ./process/build.js#process \
+  --process-id dev/build
+```
+
+Flags:
+
+* `--entry <path#export>` (required): module path plus optional export name.
+* `--process-id <id>` (optional): override the process identifier (defaults to existing value from bare run).
+* `--process-revision <rev>` (optional): pin a process revision.
+* `--force` (optional): allow re-assigning even if a process is already attached.
+* `--dry-run` (optional): preview the assignment without mutating.
+* `--json`: emit `{"runId","runDir","entry","processId","assigned"}`.
+
+Updates `run.json` under the run lock and appends a `PROCESS_ASSIGNED` journal event. Rejects if the run already has a process unless `--force`.
+
 #### `babysitter run:status <runDir>`
 
 Inspect a run's lifecycle summary: terminal state, the most recent journal entry, and how many effects remain unresolved by kind.
@@ -1149,10 +1246,10 @@ babysitter run:status runs/2026-01-09-001
 Human output is always a single line:
 
 ```
-[run:status] state=<created|waiting|completed|failed> last=<TYPE#SEQ ISO> pending[total]=<n> pending[node]=<x> pending[breakpoint]=<y> ...
+[run:status] state=<created|waiting|completed|halted|failed> last=<TYPE#SEQ ISO> pending[total]=<n> pending[node]=<x> pending[breakpoint]=<y> ...
 ```
 
-`state` is derived from the latest `RUN_*` event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` and `failed` reflect the final event type, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events (`RUN_COMPLETED`/`RUN_FAILED`) always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
+`state` is derived from the latest lifecycle event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` reflects `RUN_COMPLETED`, `halted` reflects `RUN_HALTED`, `failed` reflects `RUN_FAILED` or `PROCESS_RUNTIME_ERROR`, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. JSON status includes `reason: "process_runtime_error"` when the failed state came from a typed process exception; halted runs include their halt `reason` and optional `payload` with `completionProof: null`. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
 
 Status lines also append deterministic metadata pairs emitted by the runtime: `stateVersion=<n>` tracks the derived state revision, `journalHead=<seq#ulid>` identifies the latest event applied to that state, `stateRebuilt=true` appears when the CLI regenerates the cache on the fly, and the existing `pending[...]` rollups summarize unresolved work. These fields mirror what JSON consumers see so humans can correlate consecutive invocations without switching formats.
 
@@ -1161,12 +1258,15 @@ Status lines also append deterministic metadata pairs emitted by the runtime: `s
 ```json
 {
   "state": "waiting",
+  "reason": null,
+  "payload": null,
   "lastEvent": { "seq": 3, "type": "EFFECT_REQUESTED", "recordedAt": "2026-01-09T10:20:10.111Z", "path": "journal/000003.ABCDEF.json", "data": { "effectId": "ef-node", "kind": "node" } },
-  "pendingByKind": { "breakpoint": 1, "node": 2 }
+  "pendingByKind": { "breakpoint": 1, "node": 2 },
+  "completionProof": null
 }
 ```
 
-`lastEvent` becomes `null` for empty journals. Paths are normalized to POSIX separators relative to `<runDir>`.
+`reason` and `payload` are populated for halted runs. `completionProof` is non-null only when `state` is `completed`. `lastEvent` becomes `null` for empty journals. Paths are normalized to POSIX separators relative to `<runDir>`.
 
 #### `babysitter run:events <runDir>`
 
@@ -1188,9 +1288,22 @@ Options:
 
 If `<runDir>` cannot be read the command exits with code `1` and logs `[run:events] unable to read run metadata at <path>: <reason>` to help identify typos or cleaned-up runs.
 
+#### `babysitter run:recover-process-error <runDir>`
+
+Recover from the latest typed process exception without hand-editing the journal:
+
+```bash
+babysitter run:recover-process-error <runDir> --dry-run --json
+babysitter run:recover-process-error <runDir> --patch-effect '<effectId>:checks=[]'
+```
+
+The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json` with a scoped dot-path assignment, rewrites the journal with only that marker removed, rebuilds the state cache, and leaves the run ready for `run:iterate`. Patch paths without a leading `value` or `result` segment are applied to the task value returned by `ctx.task`, so `<effectId>:checks=[]` fixes a process that reads `verifyResult.checks`. Use `value.checks` or `result.checks` only when you need to address the stored artifact wrapper explicitly. Without `--patch-effect`, recovery is honest: if the bad task result is still malformed, the next `run:iterate` rethrows and records a new `PROCESS_RUNTIME_ERROR`. Malformed patch flags, missing result artifacts, and runs without a typed marker fail with exit code `1` and do not mutate artifacts.
+
 #### `babysitter run:iterate <runDir>`
 
 Execute exactly one iteration through the hook-driven orchestration loop. The CLI calls `on-iteration-start`, and if no hooks are configured, falls back to a single `orchestrateIteration` step.
+
+Terminal completed iterations exit `0` and include `completionProof`. Terminal halted or failed iterations exit `1`; halted JSON includes `status: "halted"`, `reason`, and optional `payload`, but never includes a completion proof.
 
 #### `babysitter run:continue <runDir>`
 
@@ -1282,6 +1395,26 @@ These commands operate on pending/resolved **effects** (tasks).
 Commit/post a task result after it was executed externally. The CLI validates that the effect exists and is still `status="requested"`, then appends `EFFECT_RESOLVED` + writes `tasks/<effectId>/result.json`.
 
 Human output logs `[task:post] status=<ok|error>` followed by stdout/stderr/result refs (when present). `--json` returns `{ status, committed, stdoutRef, stderrRef, resultRef }`. Exit codes follow the status: `ok` returns `0`, while `error` returns `1`. `--dry-run` returns `status=skipped` and makes no on-disk changes.
+
+For `kind="shell"` tasks, a top-level `outputSchema` validates successful posted values before commit:
+
+```ts
+export const liveVerifyTask = defineTask("live-verify", (args, taskCtx) => ({
+  kind: "shell",
+  title: "Live verification",
+  shell: { command: "node scripts/live-verify.js", expectedExitCode: 0 },
+  outputSchema: {
+    type: "object",
+    required: ["verified", "checks"],
+    properties: {
+      verified: { type: "boolean" },
+      checks: { type: "array" },
+    },
+  },
+}));
+```
+
+If `task:post --status ok --value-inline '{"verified":true}'` is used for that task, the shared SDK commit path rejects the post with `RunFailedError` details containing `reason: "validation_error"` and the schema errors. The rejected post does not write `result.json` or append `EFFECT_RESOLVED`.
 
 Options:
 

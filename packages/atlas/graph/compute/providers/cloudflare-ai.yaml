@@ -1,0 +1,51 @@
+nodeKind: Provider
+id: provider:cloudflare-ai
+attributes:
+  displayName: "Cloudflare Workers AI"
+  vendor: "Cloudflare"
+  versionRange: ">=2023-09-01"
+  authMethods:
+    - api-key
+    - oauth
+  authMethodNotes: |
+    Cloudflare Workers AI authenticates via an API token sent as
+    `Authorization: Bearer <token>`. Tokens are scoped per-account.
+    Workers bindings bypass token auth for same-account calls.
+  endpoints:
+    base: "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai"
+    run: "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
+    models: "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/models/search"
+    gateway: "https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_slug}"
+  pricing: |
+    See https://developers.cloudflare.com/workers-ai/platform/pricing/
+    for per-model neuron-based pricing. Many models have a generous
+    free-tier allocation.
+  pricingTiers:
+    - name: free
+      rateLimit: "Per-account daily neuron caps per model family"
+      priceMultiplier: 0.0
+      description: "Free allocation included with Workers plan."
+    - name: standard
+      rateLimit: "Per-account quotas; billed by neurons consumed"
+      priceMultiplier: 1.0
+      description: "Pay-as-you-go neuron billing."
+  rateLimitSignalingProtocol: |
+    Cloudflare returns standard rate-limit headers and HTTP 429 on
+    quota exhaustion. AI Gateway adds observability and retry headers
+    when enabled.
+  dataResidencyOptions:
+    - global
+  vendorFeatures:
+    - capability:supports-tool-use
+  slaTier: "cloudflare-enterprise-sla"
+  regions:
+    - global
+edges:
+  realizes:
+    - target: layer:2-provider
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: ">=2024-01-01"
+      level: partial
+      notes: Tool-use support via function-calling on select models.
+  serves: []

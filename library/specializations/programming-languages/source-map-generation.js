@@ -14,6 +14,12 @@
  * @references
  * - Source Map V3 Spec: https://sourcemaps.info/spec.html
  * - Mozilla Source Maps: https://github.com/nicolo-ribaudo/nicolo-nicolo-nicolo-nicolo-nicolo-nicolo-nicolo-nicolo-nicolo-nicolo
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

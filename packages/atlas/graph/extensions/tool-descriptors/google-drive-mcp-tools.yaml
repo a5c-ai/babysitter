@@ -1,0 +1,43 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:gdrive.search
+attributes:
+  schema: '{}'
+  displayName: "Google Drive: Search"
+  description: Search files in the user's Google Drive by query.
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      files: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-drive
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:gdrive.read-file
+attributes:
+  schema: '{}'
+  displayName: "Google Drive: Read File"
+  description: Return file contents (text/markdown/binary) for a file ID.
+  inputSchema:
+    type: object
+    required: [file_id]
+    properties:
+      file_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      content: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-google-drive

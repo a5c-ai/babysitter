@@ -17,6 +17,12 @@
  *   applicableCode: 'AWS D1.1'
  * });
  * @references AWS D1.1, ASME Section IX, AWS B2.1, ISO 15614
+ *
+ * @graph
+ *   domains: [domain:mechanical-engineering]
+ *   skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

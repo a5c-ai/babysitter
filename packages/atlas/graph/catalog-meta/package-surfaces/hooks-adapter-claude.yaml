@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:hooks-adapter-claude
+attributes:
+  packageId: "@a5c-ai/hooks-adapter-claude"
+  packageName: "@a5c-ai/hooks-adapter-claude"
+  displayName: "Hooks Adapter - Claude Code"
+  description: "Claude Code harness adapter for the hooks-adapter system. Translates Claude Code hook events (PreToolUse, PostToolUse, Stop, etc.) into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Claude Code as the active harness. Extend this to customize hook behavior specific to Claude Code."
+  status: active

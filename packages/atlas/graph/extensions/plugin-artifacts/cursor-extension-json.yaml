@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cursor-extension-json
+attributes:
+  artifactId: plugin-artifact:cursor-extension-json
+  displayName: "Cursor extension manifest"
+  targetId: plugin-target:cursor
+  artifactKind: manifest
+  pathPattern: "cursor-extension.json"
+  installerSurface: "extension-manifest"
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

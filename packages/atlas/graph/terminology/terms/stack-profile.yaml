@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:stack-profile
+attributes:
+  canonicalDefinitionId: definition:stack-profile.canonical
+  displayName: "StackProfile"
+  kind: concept
+  references:
+    - "NodeKind:StackProfile"
+  description: |
+    Named composition of language + framework + tooling
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:devops

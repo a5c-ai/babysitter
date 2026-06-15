@@ -10,6 +10,12 @@ expertise:
   - Service mesh traffic management
   - CDN and edge computing
   - HAProxy and NGINX mastery
+graph:
+  domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers]
 ---
 
 # Load Balancer Expert Agent

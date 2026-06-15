@@ -1,0 +1,164 @@
+nodeKind: Role
+id: role:research-engineer
+attributes:
+  displayName: "Research Engineer"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Bridges scientific research and production engineering by implementing, validating,
+    and scaling experimental findings into robust, reproducible software systems.
+    Designs and runs experiments, writes research-quality code, and contributes to
+    academic or internal publications alongside engineering deliverables. Collaborates
+    closely with scientists, data engineers, and product teams to translate discovery
+    into practical capability.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:research-design
+    - responsibility:code-review
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:scientific-discovery
+      level: expert
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:scientific-computing
+      level: intermediate
+---
+nodeKind: Role
+id: role:lab-technician
+attributes:
+  displayName: "Lab Technician"
+  isAgentic: false
+  automatability: 0.3
+  description: |
+    Executes laboratory procedures, maintains equipment, and collects high-quality
+    experimental data according to established protocols and safety standards.
+    Manages reagent inventory, documents experimental conditions meticulously, and
+    reports anomalies to senior researchers. Supports the smooth daily operation of
+    research facilities and contributes to the integrity of scientific outcomes.
+  seniority: entry
+edges:
+  holds_responsibility:
+    - responsibility:research-design
+    - responsibility:documentation
+    - responsibility:regulatory-compliance
+  requires_skill:
+    - target: domain:scientific-discovery
+      level: intermediate
+---
+nodeKind: Role
+id: role:computational-scientist
+attributes:
+  displayName: "Computational Scientist"
+  isAgentic: false
+  automatability: 0.6
+  description: |
+    Develops and applies numerical algorithms, simulation frameworks, and
+    high-performance computing techniques to solve complex scientific problems
+    across disciplines such as physics, chemistry, biology, and materials science.
+    Translates mathematical models into efficient implementations, validates results
+    against experimental data, and collaborates with domain scientists to interpret
+    and publish findings. Proficient in HPC cluster environments and large-scale
+    data analysis workflows.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:research-design
+    - responsibility:technical-program-management
+    - responsibility:documentation
+    - responsibility:knowledge-sharing
+  requires_skill:
+    - target: domain:computer-science
+      level: expert
+    - target: domain:scientific-computing
+      level: expert
+    - target: domain:scientific-discovery
+      level: intermediate
+---
+nodeKind: Role
+id: role:biomedical-engineer
+attributes:
+  displayName: "Biomedical Engineer"
+  isAgentic: false
+  automatability: 0.5
+  description: |
+    Designs, develops, and validates medical devices, diagnostic systems, and
+    clinical software by applying engineering principles to biological and
+    healthcare problems. Ensures products meet regulatory requirements such as
+    FDA 510(k), ISO 13485, and IEC 62304 throughout the development lifecycle.
+    Collaborates with clinicians, researchers, and regulatory affairs specialists
+    to translate clinical needs into safe, effective engineering solutions.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:research-design
+    - responsibility:regulatory-compliance
+    - responsibility:documentation
+    - responsibility:risk-assessment
+  requires_skill:
+    - target: domain:biomedical-engineering
+      level: expert
+    - target: domain:scientific-discovery
+      level: intermediate
+    - target: domain:software-engineering
+      level: novice
+---
+nodeKind: Role
+id: role:systems-integration-engineer
+attributes:
+  displayName: "Systems Integration Engineer"
+  isAgentic: false
+  automatability: 0.7
+  description: |
+    Designs and implements the interfaces, protocols, and middleware that enable
+    disparate software systems, hardware components, and external services to
+    function as a coherent whole. Develops integration test plans, diagnoses
+    interoperability issues, and maintains integration environments across
+    development, staging, and production. Acts as the technical authority on
+    system boundaries, data contracts, and end-to-end traceability.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:architecture-decision
+    - responsibility:code-review
+    - responsibility:documentation
+    - responsibility:risk-assessment
+    - responsibility:test-strategy
+  requires_skill:
+    - target: domain:software-engineering
+      level: expert
+    - target: domain:infrastructure
+      level: expert
+    - target: domain:networking
+      level: intermediate
+---
+nodeKind: Role
+id: role:technical-program-manager
+attributes:
+  displayName: "Technical Program Manager"
+  isAgentic: false
+  automatability: 0.4
+  description: |
+    Drives the planning, execution, and delivery of complex, multi-team technical
+    programs by coordinating across engineering, product, and business stakeholders.
+    Tracks dependencies, manages risk registers, and maintains program-level
+    roadmaps and status reporting that give leadership clear visibility into
+    progress and blockers. Ensures engineering initiatives align with product
+    strategy and are delivered on time, within scope, and to quality standards.
+  seniority: senior
+edges:
+  holds_responsibility:
+    - responsibility:technical-program-management
+    - responsibility:strategic-planning
+    - responsibility:stakeholder-communication
+    - responsibility:risk-assessment
+    - responsibility:release-coordination
+  requires_skill:
+    - target: domain:software-engineering
+      level: intermediate
+    - target: domain:platform-engineering
+      level: novice
+    - target: specialization:technical-documentation
+      level: expert

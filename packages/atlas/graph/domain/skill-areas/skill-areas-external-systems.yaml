@@ -1,0 +1,380 @@
+---
+nodeKind: SkillArea
+id: skill-area:project-planning
+attributes:
+  displayName: "Project Planning"
+  description: |
+    Planning and tracking project work — task breakdown, timeline estimation,
+    dependency management, resource allocation, and milestone tracking across
+    tools like Jira, Trello, Asana, ClickUp, and Linear.
+  domains:
+    - domain:project-management
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:project-management
+      confidence: primary
+    - target: specialization:waterfall
+      confidence: secondary
+    - target: specialization:ccpm
+      confidence: secondary
+    - target: specialization:rup
+      confidence: secondary
+    - target: specialization:spiral-model
+      confidence: secondary
+    - target: specialization:v-model
+      confidence: secondary
+    - target: specialization:impact-mapping
+      confidence: secondary
+    - target: specialization:jobs-to-be-done
+      confidence: secondary
+    - target: domain:software-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:agile-delivery
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:authentication
+attributes:
+  displayName: "Authentication"
+  description: |
+    Implementing authentication flows — OAuth 2.0, OIDC, SAML, passwordless,
+    MFA, session management, and token handling using identity providers
+    like Auth0, Clerk, Keycloak, and Okta.
+  domains:
+    - domain:security
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:security
+      confidence: primary
+    - target: domain:web-development
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:authentication-authorization
+      strength: required
+    - target: skill-area:vulnerability-scanning
+      strength: helpful
+    - target: skill-area:oauth-flows
+      strength: recommended
+    - target: skill-area:backend-auth
+      strength: recommended
+    - target: skill-area:backend-security
+      strength: recommended
+    - target: skill-area:encryption-decryption
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:transactional-email
+attributes:
+  displayName: "Transactional Email"
+  description: |
+    Sending and managing transactional emails — delivery infrastructure,
+    template management, deliverability optimization, bounce handling,
+    and analytics using services like SendGrid, Postmark, Resend, and Mailgun.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:event-driven-architecture
+attributes:
+  displayName: "Event-Driven Architecture"
+  description: |
+    Designing systems around event production, routing, and consumption —
+    message brokers, event sourcing, CQRS, pub/sub patterns, and stream
+    processing using Kafka, RabbitMQ, NATS, and cloud event services.
+  domains:
+    - domain:software-engineering
+    - domain:data-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: domain:data-engineering
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:streaming-realtime-processing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:error-tracking
+attributes:
+  displayName: "Error Tracking"
+  description: |
+    Capturing, aggregating, and triaging application errors — stack trace
+    analysis, error grouping, release tracking, and alerting using services
+    like Sentry, Bugsnag, Rollbar, and LogRocket.
+  domains:
+    - domain:observability
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:observability
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:payment-processing
+attributes:
+  displayName: "Payment Processing"
+  description: |
+    Integrating payment systems — checkout flows, subscription billing,
+    PCI compliance, refund handling, and multi-currency support using
+    Stripe, PayPal, Square, Paddle, and Braintree.
+  domains:
+    - domain:web-development
+    - domain:finance
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+    - target: domain:finance
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:customer-support
+attributes:
+  displayName: "Customer Support Systems"
+  description: |
+    Building and operating customer support infrastructure — ticket
+    management, knowledge bases, live chat, SLA tracking, and
+    escalation workflows using Zendesk, Freshdesk, and Intercom.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:feature-management
+attributes:
+  displayName: "Feature Management"
+  description: |
+    Feature flag systems, progressive rollouts, A/B testing infrastructure,
+    and experimentation platforms using LaunchDarkly, Flagsmith, Unleash,
+    and Split.io.
+  domains:
+    - domain:devops
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+    - target: domain:web-development
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:cdn-edge
+attributes:
+  displayName: "CDN & Edge Computing"
+  description: |
+    Content delivery networks, edge computing, caching strategies, and
+    global distribution using Cloudflare, Fastly, Akamai, and Vercel Edge.
+  domains:
+    - domain:cloud-infra
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:search-infrastructure
+attributes:
+  displayName: "Search Infrastructure"
+  description: |
+    Building and operating search systems — indexing, ranking, faceting,
+    autocomplete, and relevance tuning using Elasticsearch, Algolia,
+    Typesense, Meilisearch, and OpenSearch.
+  domains:
+    - domain:databases
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:databases
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:technical-documentation
+attributes:
+  displayName: "Technical Documentation"
+  description: |
+    Writing and maintaining technical documentation — API references,
+    architecture docs, runbooks, onboarding guides, and developer portals.
+  domains:
+    - domain:software-engineering
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+    - target: specialization:communication
+      confidence: secondary
+    - target: specialization:authoring
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:api-doc-generation
+      strength: recommended
+    - target: skill-area:runbook-writing
+      strength: recommended
+    - target: skill-area:tutorial-design
+      strength: recommended
+    - target: skill-area:reference-docs
+      strength: recommended
+    - target: skill-area:docs-as-code
+      strength: recommended
+    - target: skill-area:technical-writing
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:sales-operations
+attributes:
+  displayName: "Sales Operations"
+  description: |
+    Sales process automation, CRM management, pipeline analytics, lead
+    scoring, and revenue operations using Salesforce, HubSpot, and
+    purpose-built sales tools.
+  domains:
+    - domain:sales
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:sales
+      confidence: primary
+    - target: specialization:sales
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:frontend-performance
+attributes:
+  displayName: "Frontend Performance"
+  description: |
+    Optimizing web frontend performance — Core Web Vitals, bundle size,
+    lazy loading, image optimization, and rendering performance.
+  domains:
+    - domain:web-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:web-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:core-web-vitals
+      strength: required
+---
+nodeKind: SkillArea
+id: skill-area:local-development
+attributes:
+  displayName: "Local Development Environment"
+  description: |
+    Setting up and optimizing local development environments — dev containers,
+    hot reload, local databases, mock services, and environment parity.
+  domains:
+    - domain:software-engineering
+    - domain:devops
+  expertiseLevels: [novice, intermediate]
+edges:
+  applies_to:
+    - target: domain:software-engineering
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:networking
+attributes:
+  displayName: "Networking"
+  description: |
+    Network configuration and troubleshooting — DNS, TLS/SSL, load balancing,
+    VPN, firewall rules, and network security fundamentals.
+  domains:
+    - domain:networking
+    - domain:cloud-infra
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:networking
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:dns-design
+      strength: recommended
+    - target: skill-area:tcp-tuning
+      strength: helpful
+    - target: skill-area:udp-protocol-design
+      strength: recommended
+    - target: skill-area:http2-multiplexing
+      strength: recommended
+    - target: skill-area:websocket-design
+      strength: recommended
+    - target: skill-area:network-buffers
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:serverless-compute
+attributes:
+  displayName: "Serverless Compute"
+  description: |
+    Building and operating serverless applications — function design, cold
+    start optimization, event triggers, and cost management on AWS Lambda,
+    GCP Cloud Functions, Azure Functions, and Vercel/Netlify Functions.
+  domains:
+    - domain:cloud-infra
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:cloud-infra
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:itsm
+attributes:
+  displayName: "IT Service Management"
+  description: |
+    ITIL-based service management — incident management, change management,
+    service catalog, CMDB, and SLA management using ServiceNow and similar
+    platforms.
+  domains:
+    - domain:operations
+    - domain:devops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:operations
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:operations-automation
+attributes:
+  displayName: "Operations Automation"
+  description: |
+    Automating operational workflows — runbook automation, self-healing
+    systems, automated remediation, and operational intelligence.
+  domains:
+    - domain:devops
+    - domain:operations
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:devops
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:capacity-planning-ops
+      strength: recommended
+    - target: skill-area:vendor-management-ops
+      strength: recommended
+    - target: skill-area:itsm
+      strength: recommended

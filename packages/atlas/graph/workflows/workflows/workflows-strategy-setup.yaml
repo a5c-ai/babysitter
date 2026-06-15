@@ -1,0 +1,80 @@
+---
+nodeKind: Workflow
+id: workflow:strategic-planning-framework-setup
+attributes:
+  displayName: "Strategic Planning Framework Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Establishes the organization's strategic planning framework and cadence
+    from inception -- designing the annual and quarterly planning calendar with
+    clear phase gates and deliverable deadlines, creating standardized strategy
+    template packages including vision statements, SWOT analyses, and OKR
+    cascade formats, defining stakeholder participation matrices mapping who
+    contributes, reviews, and approves at each phase, configuring collaboration
+    tools and document repositories for plan versioning and comment tracking,
+    establishing facilitation playbooks for strategy workshops and
+    cross-functional alignment sessions, and training leadership on the
+    planning methodology and expectation-setting. Produces strategic planning
+    playbook, template library, and facilitation guides. Excludes the actual
+    strategic planning content.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:ai-champion
+  requires_skill_area:
+    - target: skill-area:adr-writing
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:retro-facilitation
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:competitive-intelligence-system-setup
+attributes:
+  displayName: "Competitive Intelligence System Setup"
+  workflowKind: setup
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Builds the competitive intelligence collection and distribution
+    infrastructure -- selecting and configuring monitoring tools for competitor
+    website changes, press releases, job postings, and patent filings,
+    establishing automated alert triggers with configurable thresholds for
+    significant competitive events, designing the competitive intelligence
+    database schema with competitor profiles, product comparisons, and
+    historical pricing records, creating distribution workflows that route
+    relevant intelligence to product, sales, and strategy stakeholders based on
+    topic relevance, building competitive battlecard templates with
+    standardized objection-handling formats, and defining update cadence and
+    ownership assignments for intelligence maintenance. Produces competitive
+    intelligence platform configuration, distribution rules, and battlecard
+    template library. Excludes ongoing intelligence analysis.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:explorer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:business-intelligence
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:product-team
+    - target: org-unit:engineering

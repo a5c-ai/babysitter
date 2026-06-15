@@ -1,0 +1,21 @@
+nodeKind: CapabilityProfile
+id: capability-profile:cursor.cli-permissive
+attributes:
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  displayName: "Cursor (CLI permissive)"
+  default: false
+  description: |
+    Permissive capability profile for Cursor's CLI agent mode. Loosens
+    tool-approval gates to allow non-interactive shell, file-write, and
+    network tools, suitable for CI / batch workflows where a human is
+    not in the loop.
+  overrides:
+    capability:requires-tool-approval:
+      enabled: false
+      level: unsupported
+      note: |
+        Tool approval is bypassed in this profile; intended only for
+        trusted, sandboxed environments.
+edges:
+  applies_to_version:
+    - agentVersion:cursor:ge-0-0-0

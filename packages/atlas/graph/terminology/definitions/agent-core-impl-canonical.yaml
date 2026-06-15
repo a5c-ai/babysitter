@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:agent-core-impl.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:agent-core-impl
+  text: |
+    concrete loop+transport-client impl
+  status: canonical
+edges:
+  defines:
+    - term:agent-core-impl

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:presentation.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:presentation
+  text: |
+    a concrete app shell (TUI, IDE, web, mobile, CI)
+  status: canonical
+edges:
+  defines:
+    - term:presentation

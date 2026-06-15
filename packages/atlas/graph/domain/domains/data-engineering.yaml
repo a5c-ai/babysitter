@@ -1,0 +1,17 @@
+nodeKind: Domain
+id: domain:data-engineering
+attributes:
+  displayName: "Data Engineering"
+  description: |
+    The Data Engineering domain — building and operating pipelines, batch
+    and streaming ETL/ELT, data warehouses and lakes, schema evolution,
+    data quality, and the orchestration tooling around them. Distinct from
+    Data Science (analysis/modeling) and ML-Ops (model lifecycle).
+edges:
+  contains:
+    - topic:event-mesh
+    - topic:message-driven-architecture
+    - topic:partitioning
+    - topic:publish-subscribe
+    - topic:publisher-subscriber-pattern
+    - topic:sharding

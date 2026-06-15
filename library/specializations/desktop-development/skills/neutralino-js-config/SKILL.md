@@ -3,6 +3,12 @@ name: neutralino-js-config
 description: Configure Neutralino.js for lightweight desktop applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [neutralino, javascript, cross-platform, lightweight, desktop]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # neutralino-js-config

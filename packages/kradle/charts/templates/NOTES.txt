@@ -1,0 +1,10 @@
+Kradle MVP package installed as {{ include "kradle.fullname" . }} in namespace {{ .Release.Namespace }}.
+
+Next local checks:
+  kubectl get crd repositories.kradle.a5c.ai # or enable apiService.enabled for aggregated APIService mode
+  kubectl get repositories.kradle.a5c.ai -n {{ .Release.Namespace }}
+  kubectl get deploy,statefulset,svc -n {{ .Release.Namespace }}
+
+For deterministic local validation without a cluster, run:
+  npm run e2e
+  npm run package:check

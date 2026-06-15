@@ -228,6 +228,20 @@ describe('TimingPanel', () => {
     expect(screen.getByText('3s')).toBeInTheDocument();
   });
 
+  it('does not fall back to wall-clock duration when explicit exec timestamps are zero-length', () => {
+    const task = createMockTaskDetail({
+      duration: 0,
+      requestedAt: '2026-02-16T10:00:00.000Z',
+      resolvedAt: '2026-02-16T10:05:00.000Z',
+      startedAt: '2026-02-16T10:02:00.000Z',
+      finishedAt: '2026-02-16T10:02:00.000Z',
+    });
+
+    render(<TimingPanel task={task} />);
+
+    expect(screen.getByText('<1s')).toBeInTheDocument();
+  });
+
   it('uses step colors cycling through STEP_COLORS array', () => {
     const now = Date.now();
     const tasks = Array.from({ length: 3 }, (_, i) =>

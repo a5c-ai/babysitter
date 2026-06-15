@@ -9,17 +9,15 @@ expertise:
   - Workload balancing
   - Agent health monitoring
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Swarm Coordinator Agent
-
-## Role
-
-Meta-orchestrator for the Metaswarm multi-agent swarm. Manages parallel GitHub issues, spawns dedicated Issue Orchestrators, detects conflicts before they reach PR stage, and maintains workload balance across worktrees.
-
-## Expertise
-
-- Multi-issue management (agent-ready label scanning)
 - Worktree allocation and utilization tracking
 - File, schema, and dependency conflict detection
 - Priority hierarchy enforcement (P0-P4)

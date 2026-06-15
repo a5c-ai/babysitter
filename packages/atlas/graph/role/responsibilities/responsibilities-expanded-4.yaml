@@ -1,0 +1,372 @@
+---
+nodeKind: Responsibility
+id: responsibility:curriculum-alignment
+attributes:
+  displayName: "Curriculum alignment"
+  cadence: quarterly
+  description: |
+    Ensure curricula align with educational standards, competency frameworks,
+    and accreditation requirements. Review scope and sequence against learning
+    objectives, verify content coverage, and track alignment metrics across
+    programs.
+edges:
+  held_by:
+    - target: role:instructional-designer
+    - target: role:curriculum-developer
+    - target: role:chief-learning-officer
+---
+nodeKind: Responsibility
+id: responsibility:student-outcome-tracking
+attributes:
+  displayName: "Student outcome tracking"
+  cadence: continuous
+  description: |
+    Monitor and report on student academic outcomes — completion rates,
+    assessment scores, time to degree, and post-graduation employment.
+    Identify at-risk cohorts, trigger interventions, and measure the
+    effectiveness of academic programs.
+edges:
+  held_by:
+    - target: role:academic-advisor
+    - target: role:registrar
+    - target: role:learning-experience-designer
+---
+nodeKind: Responsibility
+id: responsibility:accreditation-compliance
+attributes:
+  displayName: "Accreditation compliance"
+  cadence: annual
+  description: |
+    Maintain compliance with accreditation standards from regional and
+    programmatic accrediting bodies. Prepare self-study reports, track
+    compliance evidence, respond to accreditor findings, and ensure
+    continuous improvement cycles are documented.
+edges:
+  held_by:
+    - target: role:registrar
+    - target: role:academic-advisor
+    - target: role:curriculum-developer
+    - target: role:chief-learning-officer
+---
+nodeKind: Responsibility
+id: responsibility:learning-objective-measurement
+attributes:
+  displayName: "Learning objective measurement"
+  cadence: per-term
+  description: |
+    Define, measure, and report on learning objectives across courses and
+    programs. Design assessment instruments, analyze mastery data, and
+    produce evidence of learning effectiveness for stakeholders and
+    accreditation reviews.
+edges:
+  held_by:
+    - target: role:instructional-designer
+    - target: role:e-learning-developer
+    - target: role:curriculum-developer
+    - target: role:chief-learning-officer
+    - target: role:learning-experience-designer
+---
+nodeKind: Responsibility
+id: responsibility:energy-efficiency-compliance
+attributes:
+  displayName: "Energy efficiency compliance"
+  cadence: continuous
+  description: |
+    Ensure facilities and systems meet energy efficiency regulations and
+    standards — ASHRAE 90.1, ENERGY STAR, Title 24, and local energy codes.
+    Track energy performance metrics, file required reports, and implement
+    corrective actions for non-compliance.
+edges:
+  held_by:
+    - target: role:energy-analyst
+    - target: role:renewable-energy-engineer
+    - target: role:MEP-engineer
+    - target: role:environmental-compliance-officer
+---
+nodeKind: Responsibility
+id: responsibility:building-code-compliance
+attributes:
+  displayName: "Building code compliance"
+  cadence: per-milestone
+  description: |
+    Verify construction designs and completed work comply with applicable
+    building codes — International Building Code, local amendments, zoning
+    ordinances, and accessibility requirements. Maintain compliance
+    documentation and coordinate with code officials.
+edges:
+  held_by:
+    - target: role:BIM-coordinator
+    - target: role:structural-analyst
+    - target: role:MEP-engineer
+    - target: role:site-supervisor
+    - target: role:quantity-surveyor
+    - target: role:construction-project-manager
+    - target: role:building-inspector
+---
+nodeKind: Responsibility
+id: responsibility:fire-safety-compliance
+attributes:
+  displayName: "Fire safety compliance"
+  cadence: per-milestone
+  description: |
+    Ensure fire protection systems and life safety designs meet NFPA, IBC,
+    and local fire code requirements. Review fire alarm, sprinkler, and
+    smoke control designs, verify egress capacity, and coordinate fire
+    marshal inspections.
+edges:
+  held_by:
+    - target: role:MEP-engineer
+    - target: role:site-supervisor
+    - target: role:construction-project-manager
+    - target: role:building-inspector
+---
+nodeKind: Responsibility
+id: responsibility:structural-integrity-verification
+attributes:
+  displayName: "Structural integrity verification"
+  cadence: per-milestone
+  description: |
+    Verify structural designs meet safety factors, load requirements, and
+    code provisions. Review structural calculations, inspect construction
+    for conformance with approved plans, and validate that as-built
+    conditions match design intent.
+edges:
+  held_by:
+    - target: role:structural-analyst
+    - target: role:BIM-coordinator
+    - target: role:quantity-surveyor
+    - target: role:construction-project-manager
+    - target: role:building-inspector
+---
+nodeKind: Responsibility
+id: responsibility:environmental-permit-compliance
+attributes:
+  displayName: "Environmental permit compliance"
+  cadence: continuous
+  description: |
+    Maintain compliance with environmental permits — air emissions, water
+    discharge, stormwater management, and hazardous materials handling.
+    Track permit conditions, submit monitoring reports, and manage
+    renewal applications.
+edges:
+  held_by:
+    - target: role:environmental-compliance-officer
+    - target: role:sustainability-analyst
+    - target: role:carbon-accountant
+---
+nodeKind: Responsibility
+id: responsibility:carbon-emissions-reporting
+attributes:
+  displayName: "Carbon emissions reporting"
+  cadence: annual
+  description: |
+    Prepare and submit greenhouse gas emissions inventories following GHG
+    Protocol, CDP, or regulatory requirements. Calculate Scope 1, 2, and 3
+    emissions, verify data quality, engage third-party auditors, and
+    track progress against reduction targets.
+edges:
+  held_by:
+    - target: role:carbon-accountant
+    - target: role:sustainability-analyst
+    - target: role:energy-analyst
+    - target: role:environmental-compliance-officer
+    - target: role:climate-modeler
+---
+nodeKind: Responsibility
+id: responsibility:grid-reliability
+attributes:
+  displayName: "Grid reliability"
+  cadence: continuous
+  description: |
+    Maintain electrical grid reliability standards — monitor system
+    frequency, manage contingency reserves, coordinate planned outages,
+    and ensure compliance with NERC reliability standards. Track
+    reliability metrics like SAIDI, SAIFI, and CAIDI.
+edges:
+  held_by:
+    - target: role:grid-engineer
+---
+nodeKind: Responsibility
+id: responsibility:renewable-integration
+attributes:
+  displayName: "Renewable integration"
+  cadence: continuous
+  description: |
+    Manage the technical integration of renewable energy sources into the
+    grid — interconnection studies, curtailment management, forecasting
+    of variable generation, and coordination of energy storage dispatch
+    to maintain system balance.
+edges:
+  held_by:
+    - target: role:grid-engineer
+    - target: role:renewable-energy-engineer
+---
+nodeKind: Responsibility
+id: responsibility:engineering-roadmap
+attributes:
+  displayName: "Engineering roadmap"
+  cadence: quarterly
+  description: |
+    Define and maintain the engineering roadmap — prioritize technical
+    initiatives, balance feature delivery with infrastructure investment,
+    communicate plans to stakeholders, and track execution against
+    quarterly and annual objectives.
+edges:
+  held_by:
+    - target: role:engineering-program-manager
+    - target: role:chief-architect
+    - target: role:head-of-platform
+    - target: role:head-of-data
+    - target: role:head-of-AI
+    - target: role:director-of-engineering
+    - target: role:principal-data-engineer
+---
+nodeKind: Responsibility
+id: responsibility:cross-team-alignment
+attributes:
+  displayName: "Cross-team alignment"
+  cadence: continuous
+  description: |
+    Coordinate work across multiple teams to resolve dependencies, prevent
+    duplication, and ensure coherent execution. Facilitate cross-team
+    planning sessions, escalate blockers, and maintain shared visibility
+    into inter-team commitments.
+edges:
+  held_by:
+    - target: role:engineering-program-manager
+    - target: role:head-of-platform
+    - target: role:head-of-data
+    - target: role:staff-data-scientist
+    - target: role:VP-of-product
+---
+nodeKind: Responsibility
+id: responsibility:technical-strategy
+attributes:
+  displayName: "Technical strategy"
+  cadence: quarterly
+  description: |
+    Define the organization's long-term technical direction — evaluate
+    emerging technologies, set technology adoption criteria, align
+    technical investments with business strategy, and communicate the
+    technical vision to engineering and executive leadership.
+edges:
+  held_by:
+    - target: role:chief-architect
+    - target: role:head-of-security
+    - target: role:head-of-AI
+    - target: role:engineering-program-manager
+---
+nodeKind: Responsibility
+id: responsibility:architecture-governance
+attributes:
+  displayName: "Architecture governance"
+  cadence: continuous
+  description: |
+    Govern architectural decisions across the organization — chair the
+    architecture review board, maintain architectural decision records,
+    enforce technology standards, and ensure system designs meet
+    non-functional requirements for scalability, security, and reliability.
+edges:
+  held_by:
+    - target: role:chief-architect
+    - target: role:principal-data-engineer
+---
+nodeKind: Responsibility
+id: responsibility:platform-roadmap
+attributes:
+  displayName: "Platform roadmap"
+  cadence: quarterly
+  description: |
+    Define and maintain the internal developer platform roadmap — prioritize
+    platform capabilities, balance self-service features with reliability
+    investments, gather developer feedback, and align platform evolution
+    with organizational scaling needs.
+edges:
+  held_by:
+    - target: role:head-of-platform
+    - target: role:principal-data-engineer
+---
+nodeKind: Responsibility
+id: responsibility:data-strategy
+attributes:
+  displayName: "Data strategy"
+  cadence: quarterly
+  description: |
+    Define the organization's data strategy — data architecture standards,
+    data quality governance, data democratization approach, and investment
+    priorities for data infrastructure and analytics capabilities.
+edges:
+  held_by:
+    - target: role:head-of-data
+    - target: role:staff-data-scientist
+    - target: role:principal-data-engineer
+---
+nodeKind: Responsibility
+id: responsibility:AI-strategy
+attributes:
+  displayName: "AI strategy"
+  cadence: quarterly
+  description: |
+    Define the organization's AI and machine learning strategy — identify
+    high-impact use cases, set build-vs-buy criteria, establish responsible
+    AI guardrails, manage AI vendor relationships, and track ROI of AI
+    investments.
+edges:
+  held_by:
+    - target: role:head-of-AI
+---
+nodeKind: Responsibility
+id: responsibility:security-posture
+attributes:
+  displayName: "Security posture"
+  cadence: continuous
+  description: |
+    Maintain and improve the organization's overall security posture —
+    track vulnerability remediation rates, manage security tool coverage,
+    conduct risk assessments, and report security metrics to executive
+    leadership and the board.
+edges:
+  held_by:
+    - target: role:head-of-security
+---
+nodeKind: Responsibility
+id: responsibility:incident-postmortem-quality
+attributes:
+  displayName: "Incident postmortem quality"
+  cadence: per-incident
+  description: |
+    Ensure incident postmortems are thorough, blameless, and produce
+    actionable follow-ups. Review postmortem documents for root cause
+    depth, track action item completion, and identify systemic patterns
+    across incidents.
+edges:
+  held_by:
+    - target: role:head-of-security
+---
+nodeKind: Responsibility
+id: responsibility:engineering-hiring
+attributes:
+  displayName: "Engineering hiring"
+  cadence: continuous
+  description: |
+    Drive engineering recruitment — define role requirements, design
+    interview processes, calibrate hiring bars, manage hiring pipelines,
+    and ensure diversity in candidate sourcing. Track time-to-hire and
+    offer acceptance metrics.
+edges:
+  held_by:
+    - target: role:director-of-engineering
+---
+nodeKind: Responsibility
+id: responsibility:team-velocity-tracking
+attributes:
+  displayName: "Team velocity tracking"
+  cadence: per-sprint
+  description: |
+    Monitor and analyze team delivery velocity — track throughput, cycle
+    time, and work-in-progress metrics. Identify bottlenecks, support
+    continuous improvement, and provide capacity data for roadmap
+    planning.
+edges:
+  held_by:
+    - target: role:director-of-engineering

@@ -2,6 +2,12 @@
 name: documentary-linguist
 description: Conduct language documentation and linguistic analysis including phonetic transcription, grammatical analysis, language endangerment, corpus development, and elicitation methods
 required-skills: ipa-transcription-phonological, morphosyntactic-analysis, topic-modeling-text-mining
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:natural-language-processing, skill-area:audio-processing, skill-area:data-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:computational-scientist]
 ---
 
 # Documentary Linguist Agent

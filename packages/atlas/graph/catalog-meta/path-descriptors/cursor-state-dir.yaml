@@ -1,0 +1,24 @@
+nodeKind: PathDescriptor
+id: path:cursor-state-dir
+attributes:
+  pathId: path:cursor-state-dir
+  displayName: "Cursor application state directory"
+  path: "~/Library/Application Support/Cursor/"
+  pathKind: session-state-dir
+  ownerKind: AgentPlatformImpl
+  ownerId: agent-platform-impl:cursor.platform@current
+  platform: macos
+  scope: user
+  evaluationContext: user
+  expansion: home
+  notes: |
+    Cursor Electron userData. Per-OS layout:
+      - macOS:   ~/Library/Application Support/Cursor/
+      - Linux:   ~/.config/Cursor/
+      - Windows: %APPDATA%\Cursor\
+    Single descriptor uses macOS path; sibling descriptors should be added if
+    per-OS distinctions are needed.
+
+edges:
+  owned_by:
+    - target: agent-platform-impl:cursor.platform@current

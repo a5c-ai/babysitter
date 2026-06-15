@@ -1,0 +1,47 @@
+nodeKind: Claim
+id: claim:extended-agent-version-agent-version-devin-current-clicommand
+attributes:
+  subjectId: agent-version:devin@current
+  attribute: cliCommand
+  value: devin
+  subjectKind: AgentVersion
+  statement: agent-version:devin@current cliCommand is devin.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for extended agent version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  about_subject:
+  - agent-version:devin@current
+---
+nodeKind: Claim
+id: claim:extended-agent-version-agent-version-devin-current-versionrange
+attributes:
+  subjectId: agent-version:devin@current
+  attribute: versionRange
+  value: '>=1.0.0'
+  subjectKind: AgentVersion
+  statement: agent-version:devin@current versionRange is >=1.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for extended agent version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:agent-stack-extended-products-version-source-2026-05
+  about_subject:
+  - agent-version:devin@current

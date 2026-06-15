@@ -1,0 +1,623 @@
+{{- $kubevela := .Values.kubevela | default dict -}}
+{{- $kubevelaNamespace := $kubevela.namespace | default "vela-system" -}}
+{{- $kyverno := .Values.externalDependencies.kyverno | default dict -}}
+{{- $kyvernoReporter := $kyverno.policyReporter | default dict -}}
+{{- $assistant := .Values.assistant | default dict -}}
+{{- $assistantAnthropic := $assistant.anthropic | default dict -}}
+{{- $assistantKradle := $assistant.kradleAssistant | default dict -}}
+{{- $giteaToken := .Values.gitea.token | default dict -}}
+{{- $agentMux := .Values.agentMux | default dict -}}
+{{- $nats := .Values.externalDependencies.nats | default dict -}}
+{{- $natsEvents := $nats.eventTransport | default dict -}}
+{{- $demoNats := .Values.demo.nats | default dict -}}
+{{- $demoNatsEnabled := and (.Values.demo.enabled | default false) (eq ($demoNats.mode | default "disabled") "local-dev-nats") -}}
+{{- $natsUrl := $nats.url | default "" -}}
+{{- if and (not $natsUrl) $demoNatsEnabled -}}
+{{- $natsUrl = printf "nats://%s-nats.%s.svc.cluster.local:4222" (include "kradle.fullname" .) .Release.Namespace -}}
+{{- end -}}
+{{- $natsTransportEnabled := or $natsEvents.enabled $natsUrl $nats.existingSecret -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kradle.fullname" . }}-api
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: {{ include "kradle.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: api
+          image: {{ include "kradle.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/kradle-server.mjs"]
+          args: ["--port=3080"]
+          env:
+            - name: PORT
+              value: "3080"
+            - name: KRADLE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRADLE_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRADLE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRADLE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            - name: KRADLE_KUBEVELA_NAMESPACE
+              value: {{ $kubevelaNamespace | quote }}
+            - name: KRADLE_KYVERNO_MODE
+              value: {{ default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode | quote }}
+            - name: KRADLE_KYVERNO_NAMESPACE
+              value: {{ $kyverno.namespace | default "kyverno" | quote }}
+            - name: KRADLE_KYVERNO_POLICY_NAMESPACE
+              value: {{ $kyverno.policyNamespace | default .Release.Namespace | quote }}
+            - name: KRADLE_KYVERNO_REQUIRE_FOR_ENFORCE_MODE
+              value: {{ $kyverno.requireForEnforceMode | default true | quote }}
+            - name: KRADLE_KYVERNO_POLICY_REPORTER_ENABLED
+              value: {{ $kyvernoReporter.enabled | default false | quote }}
+            - name: KRADLE_KYVERNO_DISCOVER_EXISTING
+              value: {{ $kyverno.discoverExisting | default true | quote }}
+            - name: KRADLE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRADLE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $agentMux.url }}
+            - name: AGENT_MUX_URL
+              value: {{ $agentMux.url | quote }}
+            {{- end }}
+            {{- if $agentMux.gatewayUrl }}
+            - name: AGENT_GATEWAY_URL
+              value: {{ $agentMux.gatewayUrl | quote }}
+            {{- end }}
+            {{- if $natsTransportEnabled }}
+            - name: KRADLE_EVENT_TRANSPORT
+              value: "nats"
+            - name: KRADLE_EVENT_NATS_URL
+              {{- if $nats.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $nats.existingSecret | quote }}
+                  key: {{ default "url" $nats.key | quote }}
+                  optional: true
+              {{- else }}
+              value: {{ $natsUrl | quote }}
+              {{- end }}
+            - name: KRADLE_EVENT_NATS_SUBJECT
+              value: {{ $natsEvents.subject | default "kradle.events" | quote }}
+            - name: KRADLE_EVENT_NATS_STREAM
+              value: {{ $natsEvents.stream | default "KRADLE_EVENTS" | quote }}
+            - name: KRADLE_EVENT_REQUIRE_BROKER
+              value: {{ $natsEvents.requireBroker | default false | quote }}
+            {{- end }}
+            - name: KRADLE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+            - name: KRADLE_AUTH_DELEGATED_IDENTITY_ENABLED
+              value: {{ .Values.auth.delegatedIdentity.enabled | quote }}
+            - name: KRADLE_AUTH_DELEGATED_USER_HEADER
+              value: {{ .Values.auth.delegatedIdentity.userHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_GROUPS_HEADER
+              value: {{ .Values.auth.delegatedIdentity.groupsHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_EMAIL_HEADER
+              value: {{ .Values.auth.delegatedIdentity.emailHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_DEVELOPMENT
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.enabled | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_USER
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.user | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_EMAIL
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.email | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_GROUPS
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.groups | quote }}
+            - name: KRADLE_AUTH_GITHUB_ENABLED
+              value: {{ .Values.auth.github.enabled | quote }}
+            - name: KRADLE_AUTH_GITHUB_AUTHORIZATION_URL
+              value: {{ .Values.auth.github.authorizationUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_TOKEN_URL
+              value: {{ .Values.auth.github.tokenUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_USERINFO_URL
+              value: {{ .Values.auth.github.userInfoUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_SCOPES
+              value: {{ .Values.auth.github.scopes | quote }}
+            - name: KRADLE_AUTH_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-id
+                  optional: true
+            - name: KRADLE_AUTH_GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-secret
+                  optional: true
+            - name: KRADLE_AUTH_SSO_ENABLED
+              value: {{ .Values.auth.sso.enabled | quote }}
+            - name: KRADLE_AUTH_SSO_PROVIDER_NAME
+              value: {{ .Values.auth.sso.providerName | quote }}
+            - name: KRADLE_AUTH_SSO_ISSUER_URL
+              value: {{ .Values.auth.sso.issuerUrl | quote }}
+            - name: KRADLE_AUTH_SSO_AUTHORIZATION_URL
+              value: {{ .Values.auth.sso.authorizationUrl | quote }}
+            - name: KRADLE_AUTH_SSO_TOKEN_URL
+              value: {{ .Values.auth.sso.tokenUrl | quote }}
+            - name: KRADLE_AUTH_SSO_USERINFO_URL
+              value: {{ .Values.auth.sso.userInfoUrl | quote }}
+            - name: KRADLE_AUTH_SSO_SCOPES
+              value: {{ .Values.auth.sso.scopes | quote }}
+            - name: KRADLE_AUTH_SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-id
+                  optional: true
+            - name: KRADLE_AUTH_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-secret
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 3080
+          readinessProbe:
+            httpGet:
+              path: /healthz?quick=1
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kradle.fullname" . }}-controllers
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controllers
+spec:
+  replicas: {{ .Values.controllers.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: controllers
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: controllers
+    spec:
+      serviceAccountName: {{ include "kradle.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: controllers
+          image: {{ include "kradle.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/kradle-server.mjs"]
+          args: ["--port=3080"]
+          env:
+            - name: PORT
+              value: "3080"
+            - name: KRADLE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRADLE_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRADLE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRADLE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            - name: KRADLE_KUBEVELA_NAMESPACE
+              value: {{ $kubevelaNamespace | quote }}
+            - name: KRADLE_KYVERNO_MODE
+              value: {{ default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode | quote }}
+            - name: KRADLE_KYVERNO_NAMESPACE
+              value: {{ $kyverno.namespace | default "kyverno" | quote }}
+            - name: KRADLE_KYVERNO_POLICY_NAMESPACE
+              value: {{ $kyverno.policyNamespace | default .Release.Namespace | quote }}
+            - name: KRADLE_KYVERNO_REQUIRE_FOR_ENFORCE_MODE
+              value: {{ $kyverno.requireForEnforceMode | default true | quote }}
+            - name: KRADLE_KYVERNO_POLICY_REPORTER_ENABLED
+              value: {{ $kyvernoReporter.enabled | default false | quote }}
+            - name: KRADLE_KYVERNO_DISCOVER_EXISTING
+              value: {{ $kyverno.discoverExisting | default true | quote }}
+            - name: KRADLE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRADLE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $agentMux.url }}
+            - name: AGENT_MUX_URL
+              value: {{ $agentMux.url | quote }}
+            {{- end }}
+            {{- if $agentMux.gatewayUrl }}
+            - name: AGENT_GATEWAY_URL
+              value: {{ $agentMux.gatewayUrl | quote }}
+            {{- end }}
+            {{- if $natsTransportEnabled }}
+            - name: KRADLE_EVENT_TRANSPORT
+              value: "nats"
+            - name: KRADLE_EVENT_NATS_URL
+              {{- if $nats.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $nats.existingSecret | quote }}
+                  key: {{ default "url" $nats.key | quote }}
+                  optional: true
+              {{- else }}
+              value: {{ $natsUrl | quote }}
+              {{- end }}
+            - name: KRADLE_EVENT_NATS_SUBJECT
+              value: {{ $natsEvents.subject | default "kradle.events" | quote }}
+            - name: KRADLE_EVENT_NATS_STREAM
+              value: {{ $natsEvents.stream | default "KRADLE_EVENTS" | quote }}
+            - name: KRADLE_EVENT_REQUIRE_BROKER
+              value: {{ $natsEvents.requireBroker | default false | quote }}
+            {{- end }}
+            - name: KRADLE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+            - name: KRADLE_AUTH_DELEGATED_IDENTITY_ENABLED
+              value: {{ .Values.auth.delegatedIdentity.enabled | quote }}
+            - name: KRADLE_AUTH_DELEGATED_USER_HEADER
+              value: {{ .Values.auth.delegatedIdentity.userHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_GROUPS_HEADER
+              value: {{ .Values.auth.delegatedIdentity.groupsHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_EMAIL_HEADER
+              value: {{ .Values.auth.delegatedIdentity.emailHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_DEVELOPMENT
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.enabled | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_USER
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.user | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_EMAIL
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.email | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_GROUPS
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.groups | quote }}
+            - name: KRADLE_AUTH_GITHUB_ENABLED
+              value: {{ .Values.auth.github.enabled | quote }}
+            - name: KRADLE_AUTH_GITHUB_AUTHORIZATION_URL
+              value: {{ .Values.auth.github.authorizationUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_TOKEN_URL
+              value: {{ .Values.auth.github.tokenUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_USERINFO_URL
+              value: {{ .Values.auth.github.userInfoUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_SCOPES
+              value: {{ .Values.auth.github.scopes | quote }}
+            - name: KRADLE_AUTH_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-id
+                  optional: true
+            - name: KRADLE_AUTH_GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-secret
+                  optional: true
+            - name: KRADLE_AUTH_SSO_ENABLED
+              value: {{ .Values.auth.sso.enabled | quote }}
+            - name: KRADLE_AUTH_SSO_PROVIDER_NAME
+              value: {{ .Values.auth.sso.providerName | quote }}
+            - name: KRADLE_AUTH_SSO_ISSUER_URL
+              value: {{ .Values.auth.sso.issuerUrl | quote }}
+            - name: KRADLE_AUTH_SSO_AUTHORIZATION_URL
+              value: {{ .Values.auth.sso.authorizationUrl | quote }}
+            - name: KRADLE_AUTH_SSO_TOKEN_URL
+              value: {{ .Values.auth.sso.tokenUrl | quote }}
+            - name: KRADLE_AUTH_SSO_USERINFO_URL
+              value: {{ .Values.auth.sso.userInfoUrl | quote }}
+            - name: KRADLE_AUTH_SSO_SCOPES
+              value: {{ .Values.auth.sso.scopes | quote }}
+            - name: KRADLE_AUTH_SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-id
+                  optional: true
+            - name: KRADLE_AUTH_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-secret
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 3080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kradle.fullname" . }}-web
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: web
+    spec:
+      serviceAccountName: {{ include "kradle.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: web
+          image: {{ include "kradle.webImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            - name: KRADLE_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRADLE_ADMIN_ORG
+              value: {{ .Values.admin.org | quote }}
+            - name: KRADLE_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            {{- if .Values.auth.testSession.secret }}
+            - name: KRADLE_TEST_AUTH_SECRET
+              value: {{ .Values.auth.testSession.secret | quote }}
+            {{- else if .Values.auth.testSession.existingSecret }}
+            - name: KRADLE_TEST_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.testSession.existingSecret | quote }}
+                  key: {{ .Values.auth.testSession.key | default "test-auth-secret" | quote }}
+            {{- end }}
+            - name: KRADLE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRADLE_KUBEVELA_NAMESPACE
+              value: {{ $kubevelaNamespace | quote }}
+            - name: KRADLE_KYVERNO_MODE
+              value: {{ default (ternary "auto" (ternary "byo" "disabled" ($kyverno.enabled | default false)) ($kyverno.discoverExisting | default true)) $kyverno.mode | quote }}
+            - name: KRADLE_KYVERNO_NAMESPACE
+              value: {{ $kyverno.namespace | default "kyverno" | quote }}
+            - name: KRADLE_KYVERNO_POLICY_NAMESPACE
+              value: {{ $kyverno.policyNamespace | default .Release.Namespace | quote }}
+            - name: KRADLE_KYVERNO_REQUIRE_FOR_ENFORCE_MODE
+              value: {{ $kyverno.requireForEnforceMode | default true | quote }}
+            - name: KRADLE_KYVERNO_POLICY_REPORTER_ENABLED
+              value: {{ $kyvernoReporter.enabled | default false | quote }}
+            - name: KRADLE_KYVERNO_DISCOVER_EXISTING
+              value: {{ $kyverno.discoverExisting | default true | quote }}
+            - name: KRADLE_CONTROLLER_URL
+              value: {{ printf "http://%s-api.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.api.service.port | int) | quote }}
+            - name: KRADLE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRADLE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $agentMux.url }}
+            - name: AGENT_MUX_URL
+              value: {{ $agentMux.url | quote }}
+            {{- end }}
+            {{- if $agentMux.gatewayUrl }}
+            - name: AGENT_GATEWAY_URL
+              value: {{ $agentMux.gatewayUrl | quote }}
+            {{- end }}
+            {{- if $natsTransportEnabled }}
+            - name: KRADLE_EVENT_TRANSPORT
+              value: "nats"
+            - name: KRADLE_EVENT_NATS_URL
+              {{- if $nats.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $nats.existingSecret | quote }}
+                  key: {{ default "url" $nats.key | quote }}
+                  optional: true
+              {{- else }}
+              value: {{ $natsUrl | quote }}
+              {{- end }}
+            - name: KRADLE_EVENT_NATS_SUBJECT
+              value: {{ $natsEvents.subject | default "kradle.events" | quote }}
+            - name: KRADLE_EVENT_NATS_STREAM
+              value: {{ $natsEvents.stream | default "KRADLE_EVENTS" | quote }}
+            - name: KRADLE_EVENT_REQUIRE_BROKER
+              value: {{ $natsEvents.requireBroker | default false | quote }}
+            {{- end }}
+            {{- if $assistantAnthropic.existingSecret }}
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $assistantAnthropic.existingSecret | quote }}
+                  key: {{ default "anthropic-api-key" $assistantAnthropic.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $assistantKradle.existingSecret }}
+            - name: KRADLE_ASSISTANT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $assistantKradle.existingSecret | quote }}
+                  key: {{ default "kradle-assistant-api-key" $assistantKradle.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- with .Values.assistant }}
+            {{- if .existingSecret }}
+            {{- range $key := list "AZURE_API_KEY" "AGENT_MUX_API_BASE" "KRADLE_ASSISTANT_PROVIDER" "KRADLE_ASSISTANT_MODEL" "OPENAI_API_KEY" "GOOGLE_API_KEY" }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.assistant.existingSecret | quote }}
+                  key: {{ $key }}
+                  optional: true
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            - name: KRADLE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+            - name: KRADLE_AUTH_DELEGATED_IDENTITY_ENABLED
+              value: {{ .Values.auth.delegatedIdentity.enabled | quote }}
+            - name: KRADLE_AUTH_DELEGATED_USER_HEADER
+              value: {{ .Values.auth.delegatedIdentity.userHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_GROUPS_HEADER
+              value: {{ .Values.auth.delegatedIdentity.groupsHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_EMAIL_HEADER
+              value: {{ .Values.auth.delegatedIdentity.emailHeader | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_DEVELOPMENT
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.enabled | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_USER
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.user | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_EMAIL
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.email | quote }}
+            - name: KRADLE_AUTH_DELEGATED_LOCAL_GROUPS
+              value: {{ .Values.auth.delegatedIdentity.localDevelopment.groups | quote }}
+            - name: KRADLE_AUTH_GITHUB_ENABLED
+              value: {{ .Values.auth.github.enabled | quote }}
+            - name: KRADLE_AUTH_GITHUB_AUTHORIZATION_URL
+              value: {{ .Values.auth.github.authorizationUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_TOKEN_URL
+              value: {{ .Values.auth.github.tokenUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_USERINFO_URL
+              value: {{ .Values.auth.github.userInfoUrl | quote }}
+            - name: KRADLE_AUTH_GITHUB_SCOPES
+              value: {{ .Values.auth.github.scopes | quote }}
+            - name: KRADLE_AUTH_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-id
+                  optional: true
+            - name: KRADLE_AUTH_GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.github.existingSecret | quote }}
+                  key: github-client-secret
+                  optional: true
+            - name: KRADLE_AUTH_SSO_ENABLED
+              value: {{ .Values.auth.sso.enabled | quote }}
+            - name: KRADLE_AUTH_SSO_PROVIDER_NAME
+              value: {{ .Values.auth.sso.providerName | quote }}
+            - name: KRADLE_AUTH_SSO_ISSUER_URL
+              value: {{ .Values.auth.sso.issuerUrl | quote }}
+            - name: KRADLE_AUTH_SSO_AUTHORIZATION_URL
+              value: {{ .Values.auth.sso.authorizationUrl | quote }}
+            - name: KRADLE_AUTH_SSO_TOKEN_URL
+              value: {{ .Values.auth.sso.tokenUrl | quote }}
+            - name: KRADLE_AUTH_SSO_USERINFO_URL
+              value: {{ .Values.auth.sso.userInfoUrl | quote }}
+            - name: KRADLE_AUTH_SSO_SCOPES
+              value: {{ .Values.auth.sso.scopes | quote }}
+            - name: KRADLE_AUTH_SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-id
+                  optional: true
+            - name: KRADLE_AUTH_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-auth" (include "kradle.fullname" .)) .Values.auth.sso.existingSecret | quote }}
+                  key: sso-client-secret
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kradle.fullname" . }}-webhook-worker
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webhook-worker
+spec:
+  replicas: {{ .Values.webhookWorker.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: webhook-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: webhook-worker
+    spec:
+      serviceAccountName: {{ include "kradle.fullname" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: webhook-worker
+          image: {{ include "kradle.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/kradle-server.mjs"]
+          args: ["--mode=webhook-worker"]
+          env:
+            - name: KRADLE_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: KRADLE_GITEA_HTTP_URL
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRADLE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            - name: KRADLE_AUTH_COOKIE_NAME
+              value: {{ .Values.auth.session.cookieName | quote }}
+          {{- with .Values.webhookWorker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3080
+            initialDelaySeconds: 3
+            periodSeconds: 5

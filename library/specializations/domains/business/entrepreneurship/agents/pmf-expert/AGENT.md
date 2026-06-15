@@ -14,6 +14,11 @@ metadata:
   domain: business
   category: Product
   agent-id: AG-008
+graph:
+  domains: [domain:entrepreneurship]
+  skillAreas: [skill-area:market-research, skill-area:growth-strategy, skill-area:business-model-design]
+  workflows: [workflow:product-discovery]
+  roles: [role:product-manager, role:strategic-planner, role:business-analyst]
 ---
 
 # Product-Market Fit Expert Agent

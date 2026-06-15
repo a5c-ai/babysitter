@@ -1,0 +1,48 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:codex-websocket.core@current
+attributes:
+  displayName: Codex WebSocket Core (current)
+  agentVersionId: agent-version:codex-websocket@current
+  packageRef: source-ref:codex-github
+  loopIteratorPolicy: delegated-to-remote
+  loopIteratorNotes: |
+    The Codex App Server (`CODEX_APP_SERVER`) runs the chat loop
+    server-side over a persistent WebSocket. The client receives
+    structured events (text deltas, tool calls, thinking, stop) but
+    does not own loop iteration.
+  contextManagementStrategy: server-managed
+  compactionTriggerNotes: |
+    Server-side rolling summary; not exposed to the client.
+  subagentInvokerPolicy: platform-mediated
+  subagentInvokerNotes: |
+    Subagent dispatch (when used) is brokered by the server; client
+    sees structured events for child sessions.
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: |
+    Final answer streamed via the WebSocket; client emits structured
+    end event on session completion.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: codex-internal
+  supportedTransportProtocols:
+  - model-transport:openai-responses
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: passthrough
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:codex
+    role: core
+  speaks:
+  - target: model-transport:openai-responses
+  supports:
+  - target: capability:streaming
+    versionRange: '*'
+    level: full
+  - target: capability:supports-tool-use
+    versionRange: '*'
+    level: full
+  - target: capability:supports-thinking
+    versionRange: '*'
+    level: full

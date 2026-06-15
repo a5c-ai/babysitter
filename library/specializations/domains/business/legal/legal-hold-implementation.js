@@ -16,6 +16,12 @@
  * @references
  * - Relativity Legal Hold: https://www.relativity.com/
  * - Sedona Conference: https://thesedonaconference.org/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,8 @@
+nodeKind: OutOfScopeReason
+id: out-of-scope-reason:future-phase
+attributes:
+  reasonKind: "future-phase"
+  displayName: "Future Phase"
+  description: |
+    Deferred to a future schema phase.
+edges: {}

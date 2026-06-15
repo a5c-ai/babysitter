@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Safety
   skill-id: CE-SK-016
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Relief System Designer Skill

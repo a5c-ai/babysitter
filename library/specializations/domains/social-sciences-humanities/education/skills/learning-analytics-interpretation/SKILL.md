@@ -2,6 +2,12 @@
 name: learning-analytics-interpretation
 description: Analyze learner data from LMS reports, assessments, and engagement metrics to identify patterns and inform instructional decisions
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:data-analysis, skill-area:learning-development, skill-area:analytics-tracking]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:data-analyst, role:analytics-engineer]
 ---
 
 # Learning Analytics Interpretation

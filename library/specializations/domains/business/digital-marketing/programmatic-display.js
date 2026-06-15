@@ -3,6 +3,12 @@
  * @description Process for planning and executing programmatic display advertising campaigns through demand-side platforms (DSPs), including inventory strategy, audience targeting, brand safety configuration, and performance optimization
  * @inputs { strategyBrief: object, audienceData: object, creativeAssets: array, brandSafetyRequirements: object, outputDir: string }
  * @outputs { success: boolean, dspConfiguration: object, audienceDefinitions: array, performanceDashboards: array, optimizationReports: array, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:brand-campaign-launch]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

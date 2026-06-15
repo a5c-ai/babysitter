@@ -1,0 +1,15 @@
+nodeKind: SessionModel
+id: session-model:cursor
+attributes:
+  agentVersionId: agentVersion:cursor:ge-0-0-0
+  persistence: sqlite
+  controlPlane: self-managed
+  structuredTransport: persistent
+  canResume: true
+  canFork: false
+  format: sqlite
+edges:
+  state_machine_for:
+    - target: workspace:local-developer-default
+  requires_capability:
+    - target: capability:can-resume

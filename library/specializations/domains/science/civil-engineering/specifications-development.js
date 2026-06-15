@@ -3,6 +3,12 @@
  * @description Development of technical specifications for construction including CSI format organization, material requirements, and execution procedures
  * @inputs { projectId: string, designDocuments: object, projectRequirements: object, referenceStandards: array }
  * @outputs { success: boolean, specificationsManual: object, referenceList: array, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,339 @@
+nodeKind: MetaNodeKind
+id: meta-node-kind:term
+attributes:
+  displayName: Term (meta)
+  name: Term
+  cluster: 14-terminology
+  prefix: term
+  origin: universal
+  purpose: a named term in the ontology
+  exampleCount: 0
+  invariants:
+  - has at least one Definition (V-6.1)
+  - canonicalDefinitionId resolves (V-6.2)
+  - references resolve in current schema version (V-6.4)
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:term--id
+  - target: meta-attribute:term--display-name
+---
+nodeKind: MetaNodeKind
+id: meta-node-kind:definition
+attributes:
+  displayName: Definition (meta)
+  name: Definition
+  cluster: 14-terminology
+  prefix: definition
+  origin: universal
+  purpose: a definition of a term
+  exampleCount: 0
+  invariants:
+  - termId resolves
+  - no two Definitions for same termId share inContext
+edges:
+  in_cluster:
+  - target: meta-cluster:catalog-provenance
+  contains_meta_attribute:
+  - target: meta-attribute:definition--id
+  - target: meta-attribute:definition--term-id
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ontology-schema--id
+attributes:
+  displayName: OntologySchema.id
+  name: id
+  parentNodeKindId: meta-node-kind:ontology-schema
+  type: id
+  required: true
+  description: id on OntologySchema.
+edges:
+  defined_on:
+  - target: meta-node-kind:ontology-schema
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ontology-schema--display-name
+attributes:
+  displayName: OntologySchema.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:ontology-schema
+  type: string
+  required: false
+  description: displayName on OntologySchema.
+edges:
+  defined_on:
+  - target: meta-node-kind:ontology-schema
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ontology-schema--catalog-version-id
+attributes:
+  displayName: OntologySchema.catalogVersionId
+  name: catalogVersionId
+  parentNodeKindId: meta-node-kind:ontology-schema
+  type: ref<current catalog snapshot>
+  required: false
+  description: catalogVersionId on OntologySchema.
+edges:
+  defined_on:
+  - target: meta-node-kind:ontology-schema
+---
+nodeKind: MetaAttribute
+id: meta-attribute:ontology-schema--meta-clusters
+attributes:
+  displayName: OntologySchema.metaClusters
+  name: metaClusters
+  parentNodeKindId: meta-node-kind:ontology-schema
+  type: list<ref<MetaCluster>>
+  required: false
+  description: The set of MetaClusters that partition the meta-shape of this ontology snapshot.
+edges:
+  defined_on:
+  - target: meta-node-kind:ontology-schema
+---
+nodeKind: MetaAttribute
+id: meta-attribute:gap--id
+attributes:
+  displayName: Gap.id
+  name: id
+  parentNodeKindId: meta-node-kind:gap
+  type: id
+  required: true
+  description: id on Gap.
+edges:
+  defined_on:
+  - target: meta-node-kind:gap
+---
+nodeKind: MetaAttribute
+id: meta-attribute:gap--title
+attributes:
+  displayName: Gap.title
+  name: title
+  parentNodeKindId: meta-node-kind:gap
+  type: string
+  required: true
+  description: title on Gap.
+edges:
+  defined_on:
+  - target: meta-node-kind:gap
+---
+nodeKind: MetaAttribute
+id: meta-attribute:shared-context-spec--id
+attributes:
+  displayName: SharedContextSpec.id
+  name: id
+  parentNodeKindId: meta-node-kind:shared-context-spec
+  type: id
+  required: true
+  description: id on SharedContextSpec.
+edges:
+  defined_on:
+  - target: meta-node-kind:shared-context-spec
+---
+nodeKind: MetaAttribute
+id: meta-attribute:shared-context-spec--context-kind
+attributes:
+  displayName: SharedContextSpec.contextKind
+  name: contextKind
+  parentNodeKindId: meta-node-kind:shared-context-spec
+  type: string
+  required: false
+  description: contextKind on SharedContextSpec.
+edges:
+  defined_on:
+  - target: meta-node-kind:shared-context-spec
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-node-kind--id
+attributes:
+  displayName: MetaNodeKind.id
+  name: id
+  parentNodeKindId: meta-node-kind:meta-node-kind
+  type: id
+  required: true
+  description: id on MetaNodeKind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-node-kind--display-name
+attributes:
+  displayName: MetaNodeKind.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:meta-node-kind
+  type: string
+  required: true
+  description: displayName on MetaNodeKind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-node-kind--name
+attributes:
+  displayName: MetaNodeKind.name
+  name: name
+  parentNodeKindId: meta-node-kind:meta-node-kind
+  type: string
+  required: true
+  description: Canonical PascalCase NodeKind class name (e.g. `AgentProduct`, `Role`).
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-node-kind--cluster
+attributes:
+  displayName: MetaNodeKind.cluster
+  name: cluster
+  parentNodeKindId: meta-node-kind:meta-node-kind
+  type: string
+  required: false
+  description: Editorial cluster slug (e.g. `10-roles`).
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-node-kind--prefix
+attributes:
+  displayName: MetaNodeKind.prefix
+  name: prefix
+  parentNodeKindId: meta-node-kind:meta-node-kind
+  type: string
+  required: false
+  description: Declared id-prefix for nodes of this kind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-node-kind--origin
+attributes:
+  displayName: MetaNodeKind.origin
+  name: origin
+  parentNodeKindId: meta-node-kind:meta-node-kind
+  type: enum<standard,universal,a5c,derived>
+  required: false
+  description: origin on MetaNodeKind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-node-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-edge-kind--id
+attributes:
+  displayName: MetaEdgeKind.id
+  name: id
+  parentNodeKindId: meta-node-kind:meta-edge-kind
+  type: id
+  required: true
+  description: id on MetaEdgeKind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-edge-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-edge-kind--display-name
+attributes:
+  displayName: MetaEdgeKind.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:meta-edge-kind
+  type: string
+  required: true
+  description: displayName on MetaEdgeKind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-edge-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-edge-kind--name
+attributes:
+  displayName: MetaEdgeKind.name
+  name: name
+  parentNodeKindId: meta-node-kind:meta-edge-kind
+  type: string
+  required: true
+  description: Canonical snake_case EdgeKind name (e.g. `has_version`).
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-edge-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-edge-kind--cardinality
+attributes:
+  displayName: MetaEdgeKind.cardinality
+  name: cardinality
+  parentNodeKindId: meta-node-kind:meta-edge-kind
+  type: enum<1:1,1:N,N:1,N:N>
+  required: false
+  description: cardinality on MetaEdgeKind.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-edge-kind
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-cluster--id
+attributes:
+  displayName: MetaCluster.id
+  name: id
+  parentNodeKindId: meta-node-kind:meta-cluster
+  type: id
+  required: true
+  description: id on MetaCluster.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-cluster
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-cluster--display-name
+attributes:
+  displayName: MetaCluster.displayName
+  name: displayName
+  parentNodeKindId: meta-node-kind:meta-cluster
+  type: string
+  required: true
+  description: displayName on MetaCluster.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-cluster
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-cluster--cluster-number
+attributes:
+  displayName: MetaCluster.clusterNumber
+  name: clusterNumber
+  parentNodeKindId: meta-node-kind:meta-cluster
+  type: int
+  required: true
+  description: clusterNumber on MetaCluster.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-cluster
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-cluster--scope
+attributes:
+  displayName: MetaCluster.scope
+  name: scope
+  parentNodeKindId: meta-node-kind:meta-cluster
+  type: markdown
+  required: false
+  description: scope on MetaCluster.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-cluster
+---
+nodeKind: MetaAttribute
+id: meta-attribute:meta-attribute--id
+attributes:
+  displayName: MetaAttribute.id
+  name: id
+  parentNodeKindId: meta-node-kind:meta-attribute
+  type: id
+  required: true
+  description: id on MetaAttribute.
+edges:
+  defined_on:
+  - target: meta-node-kind:meta-attribute

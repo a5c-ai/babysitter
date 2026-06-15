@@ -1,0 +1,34 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:web-search
+attributes:
+  schema: '{}'
+  displayName: "Web Search"
+  description: |
+    Search the public web and return ranked results with snippets.
+    Available in many coding agents (Claude Code WebSearch, OpenAI
+    web tool, etc.).
+  inputSchema:
+    type: object
+    required: [query]
+    properties:
+      query: { type: string, description: "Search query string" }
+      allowed_domains:
+        type: array
+        items: { type: string }
+      blocked_domains:
+        type: array
+        items: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      results:
+        type: array
+        items:
+          type: object
+          properties:
+            title: { type: string }
+            url: { type: string }
+            snippet: { type: string }
+  mode: normal
+  streamable: false
+edges: {}

@@ -15,6 +15,13 @@
  * @references
  * - JMH: https://openjdk.java.net/projects/code-tools/jmh/
  * - Benchmark.js: https://benchmarkjs.com/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:performance-optimization]
+ *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:performance-testing]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:observability-driven-development]
+ *   workflows: [workflow:performance-profiling-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

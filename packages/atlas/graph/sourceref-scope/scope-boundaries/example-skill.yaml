@@ -1,0 +1,16 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:react-tdd.scope
+attributes:
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+    - out-of-scope-reason:future-phase
+  subjectId: skill:react-tdd
+  inScope: |
+    React 18+ function components with hooks, written in TypeScript,
+    tested with Jest + React Testing Library.
+  outOfScope: |
+    React Native, server components, class components, non-Jest test
+    runners (Vitest, Mocha).
+edges:
+  bounds_subject:
+    - skill:react-tdd

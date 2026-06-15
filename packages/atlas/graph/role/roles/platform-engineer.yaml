@@ -1,0 +1,20 @@
+nodeKind: Role
+id: role:platform-engineer
+attributes:
+  displayName: "Platform Engineer"
+  isAgentic: false
+  seniority: senior
+  requiredCapabilities: []
+  requiredDomains:
+    - domain:platform-engineering
+  description: |
+    Builds and operates internal developer platforms and paved roads.
+edges:
+  requires_expertise:
+    - target: skill-area:k8s-operator-development
+    - target: skill-area:k8s-rbac
+    - target: skill-area:gitops
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:plugin-systems
+  applies_to:
+    - target: domain:platform-engineering

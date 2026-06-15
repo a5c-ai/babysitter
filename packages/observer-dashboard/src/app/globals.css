@@ -1,294 +1,256 @@
 @import "tailwindcss";
+@import "@a5c-ai/compendium/css";
 
 /* ============================================
-   BABYSITTER OBSERVER — Design System
-   a5c.ai Brand Identity
-   Neon cyberpunk with professional restraint
-   Dark-mode-first premium developer tool
+   BABYSITTER OBSERVER — Compendium Edition
+   Preserve behavior, migrate the design system
+   from neon/glass to vellum/brass/void.
    ============================================ */
 
-/* Dark theme (default) */
 :root {
-  /* Backgrounds - deep dark, not pure black */
-  --background: #0a0a0b;
-  --background-secondary: #141417;
-  --background-tertiary: #1c1c21;
-  --foreground: #e4e4e7;
-  --foreground-secondary: #a1a1aa;
-  --foreground-muted: #71717a;
+  --font-display-ui: var(--font-display);
+  --font-body-ui: var(--font-body);
+  --font-mono-ui: var(--font-mono);
 
-  /* Card - subtle glass effect */
-  --card: rgba(15, 15, 20, 0.8);
-  --card-foreground: #e4e4e7;
-  --card-border: rgba(255, 0, 224, 0.08);
-  --card-hover: rgba(255, 0, 224, 0.04);
+  --background: var(--ground-void);
+  --background-secondary: color-mix(in srgb, var(--ground-void) 82%, var(--mahogany));
+  --background-tertiary: color-mix(in srgb, var(--ground-void) 72%, var(--leather));
+  --foreground: var(--glyph-bone);
+  --foreground-secondary: var(--glyph-fade);
+  --foreground-muted: color-mix(in srgb, var(--glyph-fade) 72%, black);
 
-  /* Primary - Magenta */
-  --primary: #FF00E0;
-  --primary-foreground: #ffffff;
-  --primary-hover: #ff33e6;
-  --primary-muted: rgba(255, 0, 224, 0.15);
+  --card: rgba(27, 22, 17, 0.88);
+  --card-foreground: var(--glyph-bone);
+  --card-border: rgba(242, 200, 143, 0.22);
+  --card-hover: rgba(242, 200, 143, 0.08);
 
-  /* Secondary - Neon Cyan */
-  --secondary: #00F0FF;
-  --secondary-foreground: #0a0a0b;
-  --secondary-muted: rgba(0, 240, 255, 0.12);
+  --primary: var(--accent-cinnabar);
+  --primary-foreground: var(--glyph-bone);
+  --primary-hover: #d25748;
+  --primary-muted: rgba(192, 58, 43, 0.18);
 
-  /* Muted */
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
+  --secondary: color-mix(in srgb, var(--brass-light) 16%, var(--ground-void));
+  --secondary-foreground: var(--glyph-bone);
+  --secondary-muted: rgba(242, 200, 143, 0.12);
 
-  /* Accent - Magenta */
-  --accent: #FF00E0;
-  --accent-foreground: #ffffff;
+  --muted: rgba(240, 230, 209, 0.06);
+  --muted-foreground: var(--glyph-fade);
 
-  /* Destructive */
-  --destructive: #FF3366;
-  --destructive-foreground: #ffffff;
+  --accent: var(--brass-light);
+  --accent-foreground: var(--mahogany);
 
-  /* Semantic - Status colors (neon palette) */
-  --success: #00FF88;
-  --success-muted: rgba(0, 255, 136, 0.15);
-  --warning: #FFD700;
-  --warning-muted: rgba(255, 215, 0, 0.15);
-  --error: #FF3366;
-  --error-muted: rgba(255, 51, 102, 0.18);
-  --info: #00F0FF;
-  --info-muted: rgba(0, 240, 255, 0.12);
-  --pending: #a1a1aa;
-  --pending-muted: rgba(161, 161, 170, 0.15);
+  --destructive: var(--gem-ruby);
+  --destructive-foreground: var(--glyph-bone);
 
-  /* Border - subtle magenta tint */
-  --border: rgba(255, 0, 224, 0.08);
-  --border-hover: rgba(255, 0, 224, 0.15);
-  --input: rgba(255, 0, 224, 0.08);
-  --ring: #FF00E0;
+  --success: var(--gem-emerald);
+  --success-muted: rgba(62, 166, 118, 0.14);
+  --warning: var(--gem-amber);
+  --warning-muted: rgba(224, 166, 58, 0.14);
+  --error: var(--gem-ruby);
+  --error-muted: rgba(216, 31, 61, 0.14);
+  --info: var(--gem-cyan);
+  --info-muted: rgba(22, 215, 230, 0.14);
+  --pending: color-mix(in srgb, var(--glyph-fade) 78%, white);
+  --pending-muted: rgba(168, 153, 128, 0.14);
 
-  /* Subtle backgrounds */
-  --background-muted: #1a1a1f;
+  --border: rgba(242, 200, 143, 0.18);
+  --border-hover: rgba(242, 200, 143, 0.34);
+  --input: rgba(242, 200, 143, 0.2);
+  --ring: rgba(201, 138, 62, 0.55);
+  --background-muted: color-mix(in srgb, var(--ground-void) 74%, var(--mahogany));
 
-  /* Neon glow effects */
-  --glow-primary: 0 0 20px rgba(255, 0, 224, 0.3), 0 0 40px rgba(255, 0, 224, 0.1);
-  --glow-success: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
-  --glow-error: 0 0 20px rgba(255, 51, 102, 0.3), 0 0 40px rgba(255, 51, 102, 0.1);
-  --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1);
-  --glow-warning: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+  --glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.26), 0 10px 28px rgba(192, 58, 43, 0.12);
+  --glow-success: 0 0 0 1px rgba(62, 166, 118, 0.22), 0 10px 24px rgba(62, 166, 118, 0.1);
+  --glow-error: 0 0 0 1px rgba(216, 31, 61, 0.24), 0 10px 24px rgba(216, 31, 61, 0.1);
+  --glow-cyan: 0 0 0 1px rgba(22, 215, 230, 0.2), 0 10px 24px rgba(22, 215, 230, 0.1);
+  --glow-warning: 0 0 0 1px rgba(224, 166, 58, 0.24), 0 10px 24px rgba(224, 166, 58, 0.1);
 
-  /* Neon drop-shadow tokens */
-  --drop-glow-primary: 0 0 4px rgba(255, 0, 224, 0.4);
-  --drop-glow-primary-sm: 0 0 3px rgba(255, 0, 224, 0.3);
-  --drop-glow-success: 0 0 4px rgba(0, 255, 136, 0.5);
-  --drop-glow-success-sm: 0 0 3px rgba(0, 255, 136, 0.3);
-  --drop-glow-error: 0 0 4px rgba(255, 51, 102, 0.5);
-  --drop-glow-error-sm: 0 0 3px rgba(255, 51, 102, 0.3);
-  --drop-glow-warning: 0 0 4px rgba(255, 215, 0, 0.5);
-  --drop-glow-warning-sm: 0 0 3px rgba(255, 215, 0, 0.3);
-  --drop-glow-cyan: 0 0 4px rgba(0, 240, 255, 0.5);
-  --drop-glow-cyan-sm: 0 0 3px rgba(0, 240, 255, 0.3);
-  --drop-glow-pending: 0 0 4px rgba(128, 128, 128, 0.3);
+  --drop-glow-primary: 0 0 3px rgba(192, 58, 43, 0.34);
+  --drop-glow-primary-sm: 0 0 2px rgba(192, 58, 43, 0.24);
+  --drop-glow-success: 0 0 3px rgba(62, 166, 118, 0.36);
+  --drop-glow-success-sm: 0 0 2px rgba(62, 166, 118, 0.24);
+  --drop-glow-error: 0 0 3px rgba(216, 31, 61, 0.34);
+  --drop-glow-error-sm: 0 0 2px rgba(216, 31, 61, 0.24);
+  --drop-glow-warning: 0 0 3px rgba(224, 166, 58, 0.36);
+  --drop-glow-warning-sm: 0 0 2px rgba(224, 166, 58, 0.24);
+  --drop-glow-cyan: 0 0 3px rgba(22, 215, 230, 0.34);
+  --drop-glow-cyan-sm: 0 0 2px rgba(22, 215, 230, 0.22);
+  --drop-glow-pending: 0 0 2px rgba(168, 153, 128, 0.22);
 
-  /* Neon box-shadow tokens for inset/hover glows */
-  --neon-inset-primary: inset 0 0 12px rgba(255, 0, 224, 0.06);
-  --neon-inset-success: inset 0 0 12px rgba(0, 255, 136, 0.06);
-  --neon-inset-error: inset 0 0 12px rgba(255, 51, 102, 0.06);
-  --neon-inset-warning: inset 0 0 12px rgba(255, 215, 0, 0.06);
-  --neon-inset-cyan: inset 0 0 12px rgba(0, 240, 255, 0.06);
+  --neon-inset-primary: inset 0 0 0 1px rgba(192, 58, 43, 0.18);
+  --neon-inset-success: inset 0 0 0 1px rgba(62, 166, 118, 0.16);
+  --neon-inset-error: inset 0 0 0 1px rgba(216, 31, 61, 0.16);
+  --neon-inset-warning: inset 0 0 0 1px rgba(224, 166, 58, 0.18);
+  --neon-inset-cyan: inset 0 0 0 1px rgba(22, 215, 230, 0.16);
 
-  /* Neon accent box-shadow tokens (status badge / button glows) */
-  --neon-glow-success-sm: 0 0 8px rgba(0, 255, 136, 0.15);
-  --neon-glow-error-sm: 0 0 8px rgba(255, 51, 102, 0.15);
-  --neon-glow-warning-sm: 0 0 8px rgba(255, 215, 0, 0.15);
-  --neon-glow-cyan-sm: 0 0 8px rgba(0, 240, 255, 0.15);
-  --neon-glow-primary-sm: 0 0 8px rgba(255, 0, 224, 0.15);
-  --neon-glow-primary-xs: 0 0 10px rgba(255, 0, 224, 0.1);
-  --neon-glow-warning-xs: 0 0 8px rgba(255, 215, 0, 0.1);
-  --neon-glow-error-xs: 0 0 8px rgba(255, 51, 102, 0.1);
-  --neon-glow-primary-ring: 0 0 12px rgba(255, 0, 224, 0.15);
-  --neon-glow-primary-focus: 0 0 12px rgba(255, 0, 224, 0.1);
-  --neon-glow-warning-badge: 0 0 12px rgba(255, 215, 0, 0.15);
+  --neon-glow-success-sm: 0 8px 20px rgba(62, 166, 118, 0.12);
+  --neon-glow-error-sm: 0 8px 20px rgba(216, 31, 61, 0.12);
+  --neon-glow-warning-sm: 0 8px 20px rgba(224, 166, 58, 0.12);
+  --neon-glow-cyan-sm: 0 8px 20px rgba(22, 215, 230, 0.12);
+  --neon-glow-primary-sm: 0 8px 20px rgba(192, 58, 43, 0.12);
+  --neon-glow-primary-xs: 0 4px 12px rgba(192, 58, 43, 0.12);
+  --neon-glow-warning-xs: 0 4px 12px rgba(224, 166, 58, 0.12);
+  --neon-glow-error-xs: 0 4px 12px rgba(216, 31, 61, 0.12);
+  --neon-glow-primary-ring: 0 0 0 1px rgba(192, 58, 43, 0.24), 0 0 0 4px rgba(192, 58, 43, 0.12);
+  --neon-glow-primary-focus: 0 0 0 1px rgba(192, 58, 43, 0.22), 0 0 0 3px rgba(192, 58, 43, 0.1);
+  --neon-glow-warning-badge: 0 6px 18px rgba(224, 166, 58, 0.14);
 
-  /* Glass background tokens */
-  --glass-bg: rgba(10, 10, 11, 0.85);
-  --glass-bg-heavy: rgba(10, 10, 11, 0.9);
-  --glass-border: rgba(255, 0, 224, 0.12);
-  --glass-border-subtle: rgba(255, 0, 224, 0.1);
-  --glass-border-faint: rgba(255, 0, 224, 0.06);
-  --glass-card-bg: rgba(20, 20, 23, 0.6);
-  --glass-shadow: 0 0 30px rgba(255, 0, 224, 0.08), 0 4px 16px rgba(0, 0, 0, 0.4);
-  --glass-shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --glass-bg: rgba(24, 18, 15, 0.88);
+  --glass-bg-heavy: rgba(24, 18, 15, 0.94);
+  --glass-border: rgba(242, 200, 143, 0.2);
+  --glass-border-subtle: rgba(242, 200, 143, 0.14);
+  --glass-border-faint: rgba(242, 200, 143, 0.08);
+  --glass-card-bg: rgba(36, 28, 23, 0.72);
+  --glass-shadow: 0 18px 42px rgba(8, 5, 3, 0.42);
+  --glass-shadow-toast: 0 14px 32px rgba(8, 5, 3, 0.32);
 
-  /* Kbd shadow tokens */
-  --kbd-shadow: 0 1px 0 rgba(255, 0, 224, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-  --kbd-border: rgba(255, 0, 224, 0.15);
+  --kbd-shadow: 0 1px 0 rgba(242, 200, 143, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.34);
+  --kbd-border: rgba(242, 200, 143, 0.24);
 
-  /* Step card composite shadows */
-  --step-inset-warning: inset 3px 0 8px rgba(255, 215, 0, 0.12);
-  --step-inset-cyan: inset 3px 0 8px rgba(0, 240, 255, 0.10);
-  --step-selected-shadow: inset 3px 0 12px rgba(255, 0, 224, 0.15), 0 0 12px rgba(255, 0, 224, 0.08);
-  --step-running-dot: 0 0 6px rgba(0, 240, 255, 0.6), 0 0 12px rgba(0, 240, 255, 0.3);
+  --step-inset-warning: inset 3px 0 0 rgba(224, 166, 58, 0.45);
+  --step-inset-cyan: inset 3px 0 0 rgba(22, 215, 230, 0.34);
+  --step-selected-shadow: inset 3px 0 0 rgba(192, 58, 43, 0.6), 0 12px 24px rgba(0, 0, 0, 0.26);
+  --step-running-dot: 0 0 0 2px rgba(22, 215, 230, 0.18), 0 0 10px rgba(22, 215, 230, 0.18);
 
-  /* Progress bar glow tokens */
-  --progress-glow-primary: 0 0 10px rgba(255, 0, 224, 0.4), inset 0 1px 2px rgba(255, 0, 224, 0.3);
-  --progress-glow-success: 0 0 10px rgba(0, 255, 136, 0.4), inset 0 1px 2px rgba(0, 255, 136, 0.3);
-  --progress-glow-error: 0 0 10px rgba(255, 51, 102, 0.4), inset 0 1px 2px rgba(255, 51, 102, 0.3);
-  --progress-glow-warning: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 1px 2px rgba(255, 215, 0, 0.3);
+  --progress-glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.24), 0 4px 14px rgba(192, 58, 43, 0.16);
+  --progress-glow-success: 0 0 0 1px rgba(62, 166, 118, 0.24), 0 4px 14px rgba(62, 166, 118, 0.16);
+  --progress-glow-error: 0 0 0 1px rgba(216, 31, 61, 0.24), 0 4px 14px rgba(216, 31, 61, 0.16);
+  --progress-glow-warning: 0 0 0 1px rgba(224, 166, 58, 0.24), 0 4px 14px rgba(224, 166, 58, 0.16);
 
-  /* Toast border status shadows */
-  --toast-glow-success: 0 0 12px rgba(0, 255, 136, 0.1);
-  --toast-glow-error: 0 0 12px rgba(255, 51, 102, 0.1);
-  --toast-glow-warning: 0 0 12px rgba(255, 215, 0, 0.1);
-  --toast-glow-cyan: 0 0 12px rgba(0, 240, 255, 0.1);
+  --toast-glow-success: 0 12px 24px rgba(62, 166, 118, 0.12);
+  --toast-glow-error: 0 12px 24px rgba(216, 31, 61, 0.12);
+  --toast-glow-warning: 0 12px 24px rgba(224, 166, 58, 0.12);
+  --toast-glow-cyan: 0 12px 24px rgba(22, 215, 230, 0.12);
 
-  /* Event stream filter shadow */
-  --event-filter-active: 0 0 8px rgba(255, 0, 224, 0.1);
+  --event-filter-active: 0 0 0 1px rgba(192, 58, 43, 0.22), 0 8px 20px rgba(192, 58, 43, 0.08);
+  --breakpoint-glow: 0 0 0 1px rgba(224, 166, 58, 0.3), 0 18px 30px rgba(224, 166, 58, 0.14);
 
-  /* Breakpoint panel glow */
-  --breakpoint-glow: 0 0 20px rgba(255, 215, 0, 0.15), 0 0 40px rgba(255, 215, 0, 0.05);
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.25);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,0.3);
-
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 200ms ease-out;
-
-  /* Radius */
-  --radius: 8px;
+  --shadow-sm: 0 6px 14px rgba(8, 5, 3, 0.18);
+  --shadow-md: 0 14px 28px rgba(8, 5, 3, 0.22);
+  --shadow-lg: 0 22px 40px rgba(8, 5, 3, 0.28);
+  --transition-fast: 160ms ease;
+  --transition-normal: 220ms ease;
+  --radius: 12px;
 }
 
-/* Light theme */
 [data-theme="light"],
 .light {
-  --background: #ffffff;
-  --background-secondary: #f4f4f5;
-  --background-tertiary: #e4e4e7;
-  --foreground: #18181b;
-  --foreground-secondary: #52525b;
-  --foreground-muted: #71717a;
+  --background: var(--tkc-paper);
+  --background-secondary: color-mix(in srgb, var(--tkc-paper-2) 82%, white);
+  --background-tertiary: color-mix(in srgb, var(--tkc-paper-3) 76%, white);
+  --foreground: var(--tkc-ink);
+  --foreground-secondary: var(--tkc-ink-soft);
+  --foreground-muted: var(--tkc-ink-quiet);
 
-  --card: #ffffff;
-  --card-foreground: #18181b;
-  --card-border: rgba(255, 0, 224, 0.15);
-  --card-hover: rgba(255, 0, 224, 0.06);
+  --card: rgba(255, 251, 244, 0.94);
+  --card-foreground: var(--tkc-ink);
+  --card-border: var(--tkc-rule-m);
+  --card-hover: rgba(91, 56, 23, 0.05);
 
-  --primary: #D600C0;
-  --primary-foreground: #ffffff;
-  --primary-hover: #FF00E0;
-  --primary-muted: rgba(214, 0, 192, 0.1);
+  --primary: var(--tkc-cinnabar);
+  --primary-foreground: var(--tkc-danger-fg);
+  --primary-hover: var(--tkc-danger-hover);
+  --primary-muted: color-mix(in srgb, var(--tkc-cinnabar) 16%, white);
 
-  --secondary: #00C8D6;
-  --secondary-foreground: #ffffff;
-  --secondary-muted: rgba(0, 200, 214, 0.1);
+  --secondary: color-mix(in srgb, var(--tkc-paper-2) 88%, white);
+  --secondary-foreground: var(--tkc-ink);
+  --secondary-muted: color-mix(in srgb, var(--tkc-brass) 12%, white);
 
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
+  --muted: rgba(91, 56, 23, 0.06);
+  --muted-foreground: var(--tkc-ink-quiet);
 
-  --accent: #D600C0;
-  --accent-foreground: #ffffff;
+  --accent: var(--tkc-brass);
+  --accent-foreground: var(--tkc-ink);
 
-  --destructive: #E6295A;
-  --destructive-foreground: #ffffff;
+  --destructive: var(--tkc-ruby);
+  --destructive-foreground: var(--tkc-danger-fg);
 
-  --success: #00CC6E;
-  --success-muted: rgba(0, 204, 110, 0.12);
-  --warning: #D4AF00;
-  --warning-muted: rgba(212, 175, 0, 0.12);
-  --error: #E6295A;
-  --error-muted: rgba(230, 41, 90, 0.12);
-  --info: #00C8D6;
-  --info-muted: rgba(0, 200, 214, 0.1);
-  --pending: #a1a1aa;
-  --pending-muted: rgba(161, 161, 170, 0.1);
+  --success: var(--tkc-emerald);
+  --success-muted: color-mix(in srgb, var(--tkc-emerald) 16%, white);
+  --warning: var(--tkc-amber);
+  --warning-muted: color-mix(in srgb, var(--tkc-amber) 16%, white);
+  --error: var(--tkc-ruby);
+  --error-muted: color-mix(in srgb, var(--tkc-ruby) 14%, white);
+  --info: var(--tkc-cyan);
+  --info-muted: color-mix(in srgb, var(--tkc-cyan) 16%, white);
+  --pending: color-mix(in srgb, var(--tkc-ink-quiet) 72%, white);
+  --pending-muted: rgba(138, 123, 100, 0.12);
 
-  --border: rgba(255, 0, 224, 0.15);
-  --border-hover: rgba(255, 0, 224, 0.25);
-  --input: rgba(255, 0, 224, 0.12);
-  --ring: #D600C0;
+  --border: var(--tkc-rule-m);
+  --border-hover: color-mix(in srgb, var(--tkc-rule) 68%, white);
+  --input: var(--tkc-rule-m);
+  --ring: rgba(192, 58, 43, 0.34);
+  --background-muted: color-mix(in srgb, var(--tkc-paper-2) 85%, white);
 
-  --background-muted: #e8e8ec;
+  --glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 10px 20px rgba(192, 58, 43, 0.08);
+  --glow-success: 0 0 0 1px rgba(62, 166, 118, 0.14), 0 10px 20px rgba(62, 166, 118, 0.08);
+  --glow-error: 0 0 0 1px rgba(142, 27, 27, 0.14), 0 10px 20px rgba(142, 27, 27, 0.08);
+  --glow-cyan: 0 0 0 1px rgba(46, 124, 138, 0.14), 0 10px 20px rgba(46, 124, 138, 0.08);
+  --glow-warning: 0 0 0 1px rgba(179, 126, 62, 0.14), 0 10px 20px rgba(179, 126, 62, 0.08);
 
-  --glow-primary: 0 0 20px rgba(214, 0, 192, 0.2), 0 0 40px rgba(214, 0, 192, 0.06);
-  --glow-success: 0 0 20px rgba(0, 204, 110, 0.2), 0 0 40px rgba(0, 204, 110, 0.06);
-  --glow-error: 0 0 20px rgba(230, 41, 90, 0.2), 0 0 40px rgba(230, 41, 90, 0.06);
-  --glow-cyan: 0 0 20px rgba(0, 200, 214, 0.2), 0 0 40px rgba(0, 200, 214, 0.06);
-  --glow-warning: 0 0 20px rgba(212, 175, 0, 0.2), 0 0 40px rgba(212, 175, 0, 0.06);
+  --drop-glow-primary: 0 0 2px rgba(192, 58, 43, 0.24);
+  --drop-glow-primary-sm: 0 0 1px rgba(192, 58, 43, 0.18);
+  --drop-glow-success: 0 0 2px rgba(62, 166, 118, 0.26);
+  --drop-glow-success-sm: 0 0 1px rgba(62, 166, 118, 0.18);
+  --drop-glow-error: 0 0 2px rgba(142, 27, 27, 0.24);
+  --drop-glow-error-sm: 0 0 1px rgba(142, 27, 27, 0.18);
+  --drop-glow-warning: 0 0 2px rgba(179, 126, 62, 0.26);
+  --drop-glow-warning-sm: 0 0 1px rgba(179, 126, 62, 0.18);
+  --drop-glow-cyan: 0 0 2px rgba(46, 124, 138, 0.24);
+  --drop-glow-cyan-sm: 0 0 1px rgba(46, 124, 138, 0.18);
+  --drop-glow-pending: 0 0 1px rgba(138, 123, 100, 0.14);
 
-  /* Neon drop-shadow tokens (light) */
-  --drop-glow-primary: 0 0 3px rgba(214, 0, 192, 0.25);
-  --drop-glow-primary-sm: 0 0 2px rgba(214, 0, 192, 0.2);
-  --drop-glow-success: 0 0 3px rgba(0, 204, 110, 0.3);
-  --drop-glow-success-sm: 0 0 2px rgba(0, 204, 110, 0.2);
-  --drop-glow-error: 0 0 3px rgba(230, 41, 90, 0.3);
-  --drop-glow-error-sm: 0 0 2px rgba(230, 41, 90, 0.2);
-  --drop-glow-warning: 0 0 3px rgba(212, 175, 0, 0.3);
-  --drop-glow-warning-sm: 0 0 2px rgba(212, 175, 0, 0.2);
-  --drop-glow-cyan: 0 0 3px rgba(0, 200, 214, 0.3);
-  --drop-glow-cyan-sm: 0 0 2px rgba(0, 200, 214, 0.2);
-  --drop-glow-pending: 0 0 3px rgba(128, 128, 128, 0.2);
+  --neon-inset-primary: inset 0 0 0 1px rgba(192, 58, 43, 0.1);
+  --neon-inset-success: inset 0 0 0 1px rgba(62, 166, 118, 0.1);
+  --neon-inset-error: inset 0 0 0 1px rgba(142, 27, 27, 0.1);
+  --neon-inset-warning: inset 0 0 0 1px rgba(179, 126, 62, 0.1);
+  --neon-inset-cyan: inset 0 0 0 1px rgba(46, 124, 138, 0.1);
 
-  /* Neon box-shadow tokens (light) */
-  --neon-inset-primary: inset 0 0 10px rgba(214, 0, 192, 0.04);
-  --neon-inset-success: inset 0 0 10px rgba(0, 204, 110, 0.04);
-  --neon-inset-error: inset 0 0 10px rgba(230, 41, 90, 0.04);
-  --neon-inset-warning: inset 0 0 10px rgba(212, 175, 0, 0.04);
-  --neon-inset-cyan: inset 0 0 10px rgba(0, 200, 214, 0.04);
+  --neon-glow-success-sm: 0 8px 18px rgba(62, 166, 118, 0.08);
+  --neon-glow-error-sm: 0 8px 18px rgba(142, 27, 27, 0.08);
+  --neon-glow-warning-sm: 0 8px 18px rgba(179, 126, 62, 0.08);
+  --neon-glow-cyan-sm: 0 8px 18px rgba(46, 124, 138, 0.08);
+  --neon-glow-primary-sm: 0 8px 18px rgba(192, 58, 43, 0.08);
+  --neon-glow-primary-xs: 0 4px 10px rgba(192, 58, 43, 0.08);
+  --neon-glow-warning-xs: 0 4px 10px rgba(179, 126, 62, 0.08);
+  --neon-glow-error-xs: 0 4px 10px rgba(142, 27, 27, 0.08);
+  --neon-glow-primary-ring: 0 0 0 1px rgba(192, 58, 43, 0.16), 0 0 0 4px rgba(192, 58, 43, 0.08);
+  --neon-glow-primary-focus: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 0 0 3px rgba(192, 58, 43, 0.08);
+  --neon-glow-warning-badge: 0 6px 16px rgba(179, 126, 62, 0.1);
 
-  /* Neon accent box-shadow tokens (light) */
-  --neon-glow-success-sm: 0 0 6px rgba(0, 204, 110, 0.1);
-  --neon-glow-error-sm: 0 0 6px rgba(230, 41, 90, 0.1);
-  --neon-glow-warning-sm: 0 0 6px rgba(212, 175, 0, 0.1);
-  --neon-glow-cyan-sm: 0 0 6px rgba(0, 200, 214, 0.1);
-  --neon-glow-primary-sm: 0 0 6px rgba(214, 0, 192, 0.1);
-  --neon-glow-primary-xs: 0 0 8px rgba(214, 0, 192, 0.06);
-  --neon-glow-warning-xs: 0 0 6px rgba(212, 175, 0, 0.06);
-  --neon-glow-error-xs: 0 0 6px rgba(230, 41, 90, 0.06);
-  --neon-glow-primary-ring: 0 0 10px rgba(214, 0, 192, 0.1);
-  --neon-glow-primary-focus: 0 0 10px rgba(214, 0, 192, 0.06);
-  --neon-glow-warning-badge: 0 0 10px rgba(212, 175, 0, 0.1);
+  --glass-bg: rgba(255, 251, 244, 0.92);
+  --glass-bg-heavy: rgba(245, 236, 221, 0.98);
+  --glass-border: var(--tkc-rule-m);
+  --glass-border-subtle: var(--tkc-rule-q);
+  --glass-border-faint: rgba(91, 56, 23, 0.08);
+  --glass-card-bg: rgba(255, 251, 244, 0.86);
+  --glass-shadow: 0 16px 32px rgba(39, 25, 12, 0.18);
+  --glass-shadow-toast: 0 12px 24px rgba(39, 25, 12, 0.12);
 
-  /* Glass background tokens (light) */
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-bg-heavy: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(214, 0, 192, 0.1);
-  --glass-border-subtle: rgba(214, 0, 192, 0.08);
-  --glass-border-faint: rgba(214, 0, 192, 0.04);
-  --glass-card-bg: rgba(244, 244, 245, 0.7);
-  --glass-shadow: 0 0 20px rgba(214, 0, 192, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08);
-  --glass-shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --kbd-shadow: 0 1px 0 rgba(91, 56, 23, 0.08), inset 0 -1px 0 rgba(91, 56, 23, 0.12);
+  --kbd-border: rgba(91, 56, 23, 0.18);
 
-  /* Kbd shadow tokens (light) */
-  --kbd-shadow: 0 1px 0 rgba(214, 0, 192, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  --kbd-border: rgba(214, 0, 192, 0.12);
+  --step-inset-warning: inset 3px 0 0 rgba(179, 126, 62, 0.38);
+  --step-inset-cyan: inset 3px 0 0 rgba(46, 124, 138, 0.28);
+  --step-selected-shadow: inset 3px 0 0 rgba(192, 58, 43, 0.45), 0 10px 22px rgba(39, 25, 12, 0.12);
+  --step-running-dot: 0 0 0 2px rgba(46, 124, 138, 0.12), 0 0 8px rgba(46, 124, 138, 0.14);
 
-  /* Step card composite shadows (light) */
-  --step-inset-warning: inset 3px 0 8px rgba(212, 175, 0, 0.08);
-  --step-inset-cyan: inset 3px 0 8px rgba(0, 200, 214, 0.06);
-  --step-selected-shadow: inset 3px 0 12px rgba(214, 0, 192, 0.1), 0 0 10px rgba(214, 0, 192, 0.05);
-  --step-running-dot: 0 0 4px rgba(0, 200, 214, 0.4), 0 0 8px rgba(0, 200, 214, 0.2);
+  --progress-glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 4px 12px rgba(192, 58, 43, 0.12);
+  --progress-glow-success: 0 0 0 1px rgba(62, 166, 118, 0.14), 0 4px 12px rgba(62, 166, 118, 0.12);
+  --progress-glow-error: 0 0 0 1px rgba(142, 27, 27, 0.14), 0 4px 12px rgba(142, 27, 27, 0.12);
+  --progress-glow-warning: 0 0 0 1px rgba(179, 126, 62, 0.14), 0 4px 12px rgba(179, 126, 62, 0.12);
 
-  /* Progress bar glow tokens (light) */
-  --progress-glow-primary: 0 0 8px rgba(214, 0, 192, 0.25), inset 0 1px 2px rgba(214, 0, 192, 0.2);
-  --progress-glow-success: 0 0 8px rgba(0, 204, 110, 0.25), inset 0 1px 2px rgba(0, 204, 110, 0.2);
-  --progress-glow-error: 0 0 8px rgba(230, 41, 90, 0.25), inset 0 1px 2px rgba(230, 41, 90, 0.2);
-  --progress-glow-warning: 0 0 8px rgba(212, 175, 0, 0.25), inset 0 1px 2px rgba(212, 175, 0, 0.2);
+  --toast-glow-success: 0 10px 20px rgba(62, 166, 118, 0.08);
+  --toast-glow-error: 0 10px 20px rgba(142, 27, 27, 0.08);
+  --toast-glow-warning: 0 10px 20px rgba(179, 126, 62, 0.08);
+  --toast-glow-cyan: 0 10px 20px rgba(46, 124, 138, 0.08);
 
-  /* Toast border status shadows (light) */
-  --toast-glow-success: 0 0 8px rgba(0, 204, 110, 0.06);
-  --toast-glow-error: 0 0 8px rgba(230, 41, 90, 0.06);
-  --toast-glow-warning: 0 0 8px rgba(212, 175, 0, 0.06);
-  --toast-glow-cyan: 0 0 8px rgba(0, 200, 214, 0.06);
+  --event-filter-active: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 8px 16px rgba(192, 58, 43, 0.06);
+  --breakpoint-glow: 0 0 0 1px rgba(179, 126, 62, 0.2), 0 14px 24px rgba(179, 126, 62, 0.1);
 
-  /* Event stream filter shadow (light) */
-  --event-filter-active: 0 0 6px rgba(214, 0, 192, 0.06);
-
-  /* Breakpoint panel glow (light) */
-  --breakpoint-glow: 0 0 16px rgba(212, 175, 0, 0.1), 0 0 30px rgba(212, 175, 0, 0.03);
-
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-sm: 0 6px 14px rgba(39, 25, 12, 0.08);
+  --shadow-md: 0 14px 28px rgba(39, 25, 12, 0.12);
+  --shadow-lg: 0 22px 40px rgba(39, 25, 12, 0.16);
 }
 
 /* Tailwind v4 theme */
@@ -376,8 +338,9 @@
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 4px);
   --radius-xl: calc(var(--radius) + 8px);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-sans: var(--font-body-ui), "EB Garamond", serif;
+  --font-serif: var(--font-display-ui), "Cormorant Garamond", serif;
+  --font-mono: var(--font-mono-ui), "JetBrains Mono", monospace;
 }
 
 /* Base */
@@ -385,69 +348,110 @@
   border-color: var(--border);
 }
 
+html {
+  background: var(--background);
+}
+
 body {
-  background-color: var(--background);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 20%, transparent), transparent 36%),
+    linear-gradient(180deg, var(--background), var(--background-secondary));
   color: var(--foreground);
-  font-family: var(--font-sans, "Inter", ui-sans-serif, system-ui, sans-serif);
+  font-family: var(--font-sans, "EB Garamond", serif);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar - thin, magenta-tinted */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    linear-gradient(90deg, transparent 0, rgba(201, 138, 62, 0.05) 48%, transparent 100%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 26px,
+      rgba(201, 138, 62, 0.045) 27px
+    );
+}
+
+body > div {
+  position: relative;
+  z-index: 1;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: color-mix(in srgb, var(--background-secondary) 86%, transparent);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 0, 224, 0.15);
-  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 72%, var(--background));
+  border: 2px solid color-mix(in srgb, var(--background-secondary) 86%, transparent);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 0, 224, 0.3);
+  background: color-mix(in srgb, var(--accent) 84%, var(--background));
 }
 
-[data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: rgba(214, 0, 192, 0.12);
-}
-
-[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(214, 0, 192, 0.22);
-}
-
-/* Focus */
 *:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--background) 85%, white),
+    0 0 0 4px var(--ring);
 }
 
-/* Monospace data elements */
 .font-mono {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-feature-settings: "liga" 1;
 }
 
-/* Neon text utilities */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--foreground);
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
 .neon-text {
-  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  text-shadow: 0 2px 10px rgba(201, 138, 62, 0.18);
 }
 
 .neon-text-subtle {
-  text-shadow: 0 0 8px rgba(255, 0, 224, 0.4);
+  text-shadow: 0 1px 6px rgba(201, 138, 62, 0.14);
 }
 
 .glow-border {
   box-shadow: var(--glow-primary);
 }
 
-/* Brand gradient background */
 .bg-gradient-brand {
-  background: linear-gradient(135deg, rgba(255, 0, 224, 0.03) 0%, rgba(0, 240, 255, 0.02) 100%);
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 14%, transparent), transparent 40%),
+    linear-gradient(180deg, transparent, color-mix(in srgb, var(--background-secondary) 84%, transparent));
 }
 
 /* Status pulse animation */
@@ -480,10 +484,9 @@ body {
   animation: slide-in-right 0.2s ease-out;
 }
 
-/* Breakpoint glow - magenta/warning neon pulse for pending breakpoints */
 @keyframes breakpoint-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 224, 0.04), 0 0 0 0 rgba(255, 215, 0, 0.02); }
-  50% { box-shadow: 0 0 14px 4px rgba(255, 0, 224, 0.12), 0 0 8px 2px rgba(255, 215, 0, 0.08); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 166, 58, 0.08), 0 0 0 0 rgba(201, 138, 62, 0.04); }
+  50% { box-shadow: 0 0 0 1px rgba(224, 166, 58, 0.18), 0 10px 24px rgba(224, 166, 58, 0.18); }
 }
 
 .animate-breakpoint-glow {
@@ -509,7 +512,7 @@ body {
   box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.25));
 }
 
-/* Timeline bar gradient — uses brand CSS vars */
+/* Timeline bar gradient */
 .bg-gradient-timeline {
   background: linear-gradient(90deg, var(--primary-muted) 0%, var(--secondary-muted) 100%);
 }
@@ -546,8 +549,7 @@ body {
     transition: none;
   }
 
-  /* Keep breakpoint glow visible but static */
   .animate-breakpoint-glow {
-    box-shadow: 0 0 14px 4px rgba(255, 0, 224, 0.12), 0 0 8px 2px rgba(255, 215, 0, 0.08);
+    box-shadow: 0 0 0 1px rgba(224, 166, 58, 0.18), 0 10px 24px rgba(224, 166, 58, 0.18);
   }
 }

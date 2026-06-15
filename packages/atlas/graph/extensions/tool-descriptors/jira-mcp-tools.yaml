@@ -1,0 +1,187 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:jira.search
+attributes:
+  schema: '{}'
+  displayName: "Jira: Search Issues (JQL)"
+  description: Search Jira issues using JQL.
+  inputSchema:
+    type: object
+    required: [jql]
+    properties:
+      jql: { type: string }
+      fields: { type: array, items: { type: string } }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      issues: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:jira.get-issue
+attributes:
+  schema: '{}'
+  displayName: "Jira: Get Issue"
+  description: Fetch a Jira issue by key (e.g. PROJ-123).
+  inputSchema:
+    type: object
+    required: [issue_key]
+    properties:
+      issue_key: { type: string }
+      fields: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      issue: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:jira.create-issue
+attributes:
+  schema: '{}'
+  displayName: "Jira: Create Issue"
+  description: Create a new Jira issue in a project.
+  inputSchema:
+    type: object
+    required: [project_key, summary, issue_type]
+    properties:
+      project_key: { type: string }
+      summary: { type: string }
+      issue_type: { type: string }
+      description: { type: string }
+      assignee: { type: string }
+      labels: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      issue_key: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:jira.update-issue
+attributes:
+  schema: '{}'
+  displayName: "Jira: Update Issue"
+  description: Update fields on an existing Jira issue.
+  inputSchema:
+    type: object
+    required: [issue_key]
+    properties:
+      issue_key: { type: string }
+      fields: { type: object }
+  outputSchema:
+    type: object
+    properties:
+      success: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:jira.add-comment
+attributes:
+  schema: '{}'
+  displayName: "Jira: Add Comment"
+  description: Add a comment to a Jira issue.
+  inputSchema:
+    type: object
+    required: [issue_key, body]
+    properties:
+      issue_key: { type: string }
+      body: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      comment_id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:jira.transition-issue
+attributes:
+  schema: '{}'
+  displayName: "Jira: Transition Issue"
+  description: Move a Jira issue through a workflow transition (e.g. To Do -> In Progress).
+  inputSchema:
+    type: object
+    required: [issue_key, transition]
+    properties:
+      issue_key: { type: string }
+      transition: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      success: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:confluence.search
+attributes:
+  schema: '{}'
+  displayName: "Confluence: Search"
+  description: Search Confluence pages with CQL.
+  inputSchema:
+    type: object
+    required: [cql]
+    properties:
+      cql: { type: string }
+      limit: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      results: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:confluence.get-page
+attributes:
+  schema: '{}'
+  displayName: "Confluence: Get Page"
+  description: Retrieve a Confluence page by ID.
+  inputSchema:
+    type: object
+    required: [page_id]
+    properties:
+      page_id: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      page: { type: object }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-jira

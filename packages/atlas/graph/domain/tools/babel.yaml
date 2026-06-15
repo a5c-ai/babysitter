@@ -1,0 +1,19 @@
+nodeKind: Tool
+id: tool:babel
+attributes:
+  displayName: "Babel"
+  homepageUrl: "https://babeljs.io"
+  kind: transpiler
+  language: language:javascript
+  description: |
+    JavaScript compiler - transforms next-generation syntax into a target ES version.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:esbuild
+      comparison: "JavaScript build tools — Babel is a transpiler; esbuild is a bundler"
+    - target: tool:rollup
+      comparison: "JavaScript build tools — Babel is a transpiler; Rollup is a bundler"

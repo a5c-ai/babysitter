@@ -1,0 +1,114 @@
+---
+nodeKind: Workflow
+id: workflow:pay-equity-analysis
+attributes:
+  displayName: "Pay Equity Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annually"
+  complexity: cross-team
+  description: |
+    Conducts statistical pay-equity analysis across the workforce --
+    extracting compensation data segmented by gender, ethnicity, role level,
+    tenure, geography, and performance rating, running multivariate
+    regression models to isolate unexplained pay gaps after controlling for
+    legitimate factors, identifying roles and demographic intersections with
+    statistically significant disparities, benchmarking internal pay ratios
+    against industry surveys, modeling remediation cost scenarios for closing
+    identified gaps, and preparing executive summary with recommended
+    adjustments. Produces pay equity analysis report and remediation cost
+    model. Excludes individual compensation change execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:dei-inclusion
+    - target: domain:human-resources
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:dei-team
+    - target: org-unit:hr-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:accessibility-standards-compliance
+attributes:
+  displayName: "Accessibility Standards Compliance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits digital products against WCAG 2.2 AA and Section 508
+    accessibility standards -- running automated accessibility scanners
+    across web and mobile surfaces, conducting manual keyboard-navigation
+    and screen-reader testing on critical user flows, reviewing
+    color-contrast ratios and focus-indicator visibility, assessing
+    multimedia content for captioning and audio-description compliance,
+    evaluating assistive-technology compatibility matrices, and tracking
+    remediation progress against VPAT commitments. Produces accessibility
+    audit scorecard and remediation backlog. Excludes assistive-technology
+    procurement.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:staff-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:accessibility-first-design
+    - target: skill-area:accessibility-testing
+  applies_to_domain:
+    - target: domain:dei-inclusion
+    - target: domain:web-development
+    - target: domain:mobile
+  triggers_responsibility:
+    - target: responsibility:review-prs-merge-decisions
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:dei-team
+    - target: org-unit:design-team
+    - target: org-unit:frontend-team
+---
+nodeKind: Workflow
+id: workflow:employee-resource-group-impact-review
+attributes:
+  displayName: "Employee Resource Group Impact Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "semi-annually"
+  complexity: cross-team
+  description: |
+    Evaluates the effectiveness and organizational impact of employee
+    resource groups -- analyzing ERG membership growth and engagement trends,
+    reviewing event attendance and programming quality surveys, measuring ERG
+    influence on hiring-pipeline diversity and retention metrics for
+    represented populations, assessing budget utilization against approved
+    allocations, gathering executive-sponsor feedback on strategic alignment,
+    benchmarking ERG maturity against industry best-practice frameworks, and
+    identifying resource or structural changes needed to increase impact.
+    Produces ERG impact assessment report and resource allocation
+    recommendations. Excludes ERG formation or dissolution decisions.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:dei-inclusion
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:retro-facilitation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:dei-team
+    - target: org-unit:hr-team

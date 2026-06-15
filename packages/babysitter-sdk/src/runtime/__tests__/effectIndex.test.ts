@@ -1,0 +1,327 @@
+import { describe, expect, test } from "vitest";
+import os from "os";
+import path from "path";
+import { promises as fs } from "fs";
+import { buildEffectIndex } from "../replay/effectIndex";
+import { JournalEvent } from "../../storage/types";
+import { RunFailedError } from "../exceptions";
+
+const runDir = path.join(os.tmpdir(), "babysitter-effect-index-tests");
+
+function makeEvent(seq: number, type: string, data: Record<string, unknown>): JournalEvent {
+  const filename = `${seq.toString().padStart(6, "0")}.TEST.json`;
+  return {
+    seq,
+    ulid: `01BX${seq.toString().padStart(4, "0")}`,
+    filename,
+    path: path.join(runDir, "journal", filename),
+    type,
+    recordedAt: new Date(1700000000000 + seq * 1000).toISOString(),
+    data,
+  };
+}
+
+describe("EffectIndex", () => {
+  test("builds lookup maps from journal data", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-1",
+        invocationKey: "proc:S000001:demo",
+        stepId: "S000001",
+        taskId: "demo",
+        kind: "node",
+        taskDefRef: "tasks/ef-1/task.json",
+      }),
+      makeEvent(2, "EFFECT_RESOLVED", {
+        effectId: "ef-1",
+        status: "ok",
+        resultRef: "tasks/ef-1/result.json",
+      }),
+    ];
+
+    const index = await buildEffectIndex({ runDir, events });
+    expect(index.getByEffectId("ef-1")?.status).toBe("resolved_ok");
+    expect(index.getByInvocation("proc:S000001:demo")).toBeDefined();
+  });
+
+  test("throws when duplicate invocation keys appear", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-dup",
+        invocationKey: "proc:S000001:dup",
+        stepId: "S000001",
+        taskId: "dup",
+        taskDefRef: "tasks/ef-dup/task.json",
+      }),
+      makeEvent(2, "EFFECT_REQUESTED", {
+        effectId: "ef-dup-2",
+        invocationKey: "proc:S000001:dup",
+        stepId: "S000002",
+        taskId: "dup",
+        taskDefRef: "tasks/ef-dup-2/task.json",
+      }),
+    ];
+
+    await expect(buildEffectIndex({ runDir, events })).rejects.toThrow(RunFailedError);
+  });
+
+  test("throws when journal sequence numbers skip", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-gap",
+        invocationKey: "proc:S000001:gap",
+        stepId: "S000001",
+        taskId: "gap",
+        taskDefRef: "tasks/ef-gap/task.json",
+      }),
+      { ...makeEvent(3, "EFFECT_RESOLVED", { effectId: "ef-gap", status: "ok" as const }) },
+    ];
+
+    await expect(buildEffectIndex({ runDir, events })).rejects.toThrow(RunFailedError);
+  });
+
+  test("throws when journal ULIDs regress", async () => {
+    const first = makeEvent(1, "EFFECT_REQUESTED", {
+      effectId: "ef-ulid",
+      invocationKey: "proc:S000001:ulid",
+      stepId: "S000001",
+      taskId: "ulid",
+      taskDefRef: "tasks/ef-ulid/task.json",
+    });
+    const second = {
+      ...makeEvent(2, "EFFECT_RESOLVED", { effectId: "ef-ulid", status: "ok" as const }),
+      ulid: "01AALOWER",
+    };
+
+    await expect(buildEffectIndex({ runDir, events: [first, second] })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      const runError = error as RunFailedError;
+      expect(runError.message).toContain("ULID order regression");
+      expect(runError.details?.path).toBe(second.path);
+      return true;
+    });
+  });
+
+  test("silently skips unknown journal event types", async () => {
+    const unknownEvent = makeEvent(1, "STOP_HOOK_INVOKED", { reason: "test" });
+    const index = await buildEffectIndex({ runDir, events: [unknownEvent] });
+    // Informational events should not affect the effect index
+    expect(index.listEffects()).toHaveLength(0);
+  });
+
+  test("accepts PROCESS_RUNTIME_ERROR as a typed lifecycle marker", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-process-error",
+        invocationKey: "proc:S000001:process-error",
+        stepId: "S000001",
+        taskId: "verify",
+        kind: "node",
+        taskDefRef: "tasks/ef-process-error/task.json",
+      }),
+      makeEvent(2, "EFFECT_RESOLVED", {
+        effectId: "ef-process-error",
+        status: "ok",
+        resultRef: "tasks/ef-process-error/result.json",
+      }),
+      makeEvent(3, "PROCESS_RUNTIME_ERROR", {
+        error: { message: "Cannot read properties of undefined" },
+        iteration: 2,
+        runId: "run-process-error",
+        processId: "process-id",
+        lastEffect: {
+          effectId: "ef-process-error",
+          status: "resolved_ok",
+        },
+        recovery: {
+          command: "run:recover-process-error",
+          recoverable: true,
+        },
+      }),
+    ];
+
+    const index = await buildEffectIndex({ runDir, events });
+    expect(index.getJournalHead()).toEqual({ seq: 3, ulid: "01BX0003" });
+    expect(index.getByEffectId("ef-process-error")?.status).toBe("resolved_ok");
+  });
+
+  test("validates EFFECT_REQUESTED payload fields", async () => {
+    const badEvent = makeEvent(1, "EFFECT_REQUESTED", {
+      effectId: "",
+      invocationKey: "",
+      stepId: "S000001",
+      taskId: "missing-fields",
+      taskDefRef: "",
+    });
+    await expect(buildEffectIndex({ runDir, events: [badEvent] })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      const runError = error as RunFailedError;
+      expect(runError.message).toContain("Malformed journal event missing effectId");
+      expect(runError.details?.path).toBe(badEvent.path);
+      return true;
+    });
+  });
+
+  test("rejects EFFECT_RESOLVED events that reference unknown effects", async () => {
+    const orphan = makeEvent(1, "EFFECT_RESOLVED", {
+      effectId: "ef-missing",
+      status: "ok",
+    });
+
+    await expect(buildEffectIndex({ runDir, events: [orphan] })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      const runError = error as RunFailedError;
+      expect(runError.message).toContain("unknown effectId");
+      expect(runError.details?.path).toBe(orphan.path);
+      return true;
+    });
+  });
+
+  test("EFFECT_CANCELLED is a supported event type", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-cancel",
+        invocationKey: "proc:S000001:cancel",
+        stepId: "S000001",
+        taskId: "cancel",
+        kind: "node",
+        taskDefRef: "tasks/ef-cancel/task.json",
+      }),
+      makeEvent(2, "EFFECT_CANCELLED", {
+        effectId: "ef-cancel",
+        reason: "no longer needed",
+      }),
+    ];
+
+    const index = await buildEffectIndex({ runDir, events });
+    const record = index.getByEffectId("ef-cancel");
+    expect(record).toBeDefined();
+    expect(record?.status).toBe("cancelled");
+  });
+
+  test("handleEffectCancelled sets status to cancelled", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-cancel-status",
+        invocationKey: "proc:S000001:cancel-status",
+        stepId: "S000001",
+        taskId: "cancel-status",
+        kind: "node",
+        taskDefRef: "tasks/ef-cancel-status/task.json",
+      }),
+      makeEvent(2, "EFFECT_CANCELLED", {
+        effectId: "ef-cancel-status",
+        reason: "superseded",
+      }),
+    ];
+
+    const index = await buildEffectIndex({ runDir, events });
+    const record = index.getByEffectId("ef-cancel-status");
+    expect(record?.status).toBe("cancelled");
+  });
+
+  test("rejects cancel of non-existent effect", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_CANCELLED", {
+        effectId: "ef-nonexistent",
+        reason: "gone",
+      }),
+    ];
+
+    await expect(buildEffectIndex({ runDir, events })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      const runError = error as RunFailedError;
+      expect(runError.message).toContain("unknown effectId");
+      return true;
+    });
+  });
+
+  test("rejects cancel of already-resolved effect", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-already-done",
+        invocationKey: "proc:S000001:already-done",
+        stepId: "S000001",
+        taskId: "already-done",
+        kind: "node",
+        taskDefRef: "tasks/ef-already-done/task.json",
+      }),
+      makeEvent(2, "EFFECT_RESOLVED", {
+        effectId: "ef-already-done",
+        status: "ok",
+        resultRef: "tasks/ef-already-done/result.json",
+      }),
+      makeEvent(3, "EFFECT_CANCELLED", {
+        effectId: "ef-already-done",
+        reason: "too late",
+      }),
+    ];
+
+    await expect(buildEffectIndex({ runDir, events })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      const runError = error as RunFailedError;
+      expect(runError.message).toContain("already");
+      return true;
+    });
+  });
+
+  test("cancelled effects not in pending list", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-pending-cancel",
+        invocationKey: "proc:S000001:pending-cancel",
+        stepId: "S000001",
+        taskId: "pending-cancel",
+        kind: "node",
+        taskDefRef: "tasks/ef-pending-cancel/task.json",
+      }),
+      makeEvent(2, "EFFECT_CANCELLED", {
+        effectId: "ef-pending-cancel",
+        reason: "withdrawn",
+      }),
+    ];
+
+    const index = await buildEffectIndex({ runDir, events });
+    const pending = index.listEffects().filter((e: { status: string }) => e.status === "requested");
+    expect(pending).toHaveLength(0);
+  });
+
+  test("rejects EFFECT_RESOLVED events with invalid status or refs", async () => {
+    const events = [
+      makeEvent(1, "EFFECT_REQUESTED", {
+        effectId: "ef-invalid-refs",
+        invocationKey: "proc:S000001:invalid",
+        stepId: "S000001",
+        taskId: "invalid",
+        taskDefRef: "tasks/ef-invalid-refs/task.json",
+      }),
+      makeEvent(2, "EFFECT_RESOLVED", {
+        effectId: "ef-invalid-refs",
+        status: "pending",
+        stdoutRef: 123,
+      }),
+    ];
+
+    await expect(buildEffectIndex({ runDir, events })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      const runError = error as RunFailedError;
+      expect(runError.message).toMatch(/Unknown EFFECT_RESOLVED status/);
+      expect(runError.details?.path).toBe(events[1].path);
+      return true;
+    });
+  });
+
+  test("surface RunFailedError with file path when journal JSON is corrupt", async () => {
+    const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "effect-index-corruption-"));
+    const journalDir = path.join(runDir, "journal");
+    await fs.mkdir(journalDir, { recursive: true });
+    const badPath = path.join(journalDir, "000001.BAD.json");
+    await fs.writeFile(badPath, "{ invalid json");
+
+    await expect(buildEffectIndex({ runDir })).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(RunFailedError);
+      expect((error as RunFailedError).details?.path).toBe(badPath);
+      return true;
+    });
+  });
+});

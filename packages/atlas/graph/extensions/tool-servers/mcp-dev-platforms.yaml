@@ -1,0 +1,107 @@
+---
+# MCP servers for developer platforms and CI/CD tools
+# Only includes servers with verified GitHub repositories
+
+nodeKind: ToolServer
+id: tool-server:mcp-buildkite
+attributes:
+  displayName: Buildkite MCP Server
+  description: |
+    Official MCP server for the Buildkite CI/CD platform.
+    Enables AI agents to retrieve pipeline and build status, inspect job
+    logs, trigger new builds, and manage Buildkite configurations.
+  protocol: mcp
+  category: ci
+  repoUrl: https://github.com/buildkite/buildkite-mcp-server
+  maintainer: Buildkite
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:buildkite
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-gitpod
+attributes:
+  displayName: Gitpod MCP Server
+  description: |
+    Official MCP server for the Gitpod cloud development environment platform.
+    Enables AI agents to list projects and environments, create new Gitpod
+    workspaces, and stop running environments via the Gitpod API.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/gitpod-io/gitpod-sdk-go
+  maintainer: Gitpod
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:gitpod
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-dagger
+attributes:
+  displayName: Dagger MCP Server
+  description: |
+    Built-in MCP server capability in the Dagger CLI that exposes any Dagger
+    module from the Daggerverse or a Git repository as a native MCP server.
+    Enables AI agents to invoke typed pipeline functions as MCP tools.
+  protocol: mcp
+  category: ci
+  repoUrl: https://github.com/dagger/dagger
+  maintainer: Dagger
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:dagger
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-drone-ci
+attributes:
+  displayName: Drone CI MCP Server
+  description: |
+    Community MCP server that exposes Drone CI as a set of AI-accessible
+    tools. Enables AI agents to retrieve build information, inspect logs,
+    and monitor pipeline status across Drone CI projects.
+  protocol: mcp
+  category: ci
+  repoUrl: https://github.com/madappa-sharath/drone-ci-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:drone-ci
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-woodpecker
+attributes:
+  displayName: Woodpecker CI MCP Server
+  description: |
+    Community MCP server for Woodpecker CI that connects AI assistants to
+    Woodpecker CI pipelines. Enables AI agents to inspect build status,
+    manage pipelines, and access repository CI information.
+  protocol: mcp
+  category: ci
+  repoUrl: https://github.com/j04n-f/woodpecker-mcp
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:woodpecker
+  lib_applies_to_domain:
+  - target: domain:software-engineering

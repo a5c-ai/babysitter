@@ -19,6 +19,10 @@ metadata:
     - NASGRO
     - AFGROW
     - MATLAB
+graph:
+  domains: [domain:mechanical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Fatigue Life Prediction Skill

@@ -3,6 +3,12 @@ name: global-shortcut-manager
 description: Register and manage global keyboard shortcuts across desktop platforms
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [keyboard, shortcuts, hotkeys, cross-platform, desktop]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-system-integration, skill-area:desktop-ui-frameworks]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # global-shortcut-manager

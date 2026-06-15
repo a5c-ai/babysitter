@@ -1,0 +1,104 @@
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:langchain-rag-fabric
+attributes:
+  displayName: "LangChain as RAG Knowledge Fabric"
+  description: |
+    LangChain as a RAG-based knowledge fabric implementation. Provides the
+    full pipeline from document loading (100+ loaders for PDFs, web pages,
+    databases, APIs) through text splitting, embedding, vector storage, and
+    retrieval chain construction. LangChain is not a knowledge store itself
+    but an orchestration layer that turns any combination of document sources
+    and vector stores into a queryable knowledge fabric. Retrieval chains
+    compose retriever + LLM into a question-answering system grounded in
+    organizational knowledge.
+  knowledgeFileFormats:
+    - any (via document loaders)
+  retrievalStrategy: hybrid
+  knowledgePersistence: delegated (via vector store backends)
+  knowledgeScopes:
+    - project
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    LangChain's strength as a knowledge fabric is flexibility — it can
+    compose any combination of document sources, embedding models, vector
+    stores, and retrieval strategies. The LangChain Expression Language (LCEL)
+    enables declarative retrieval chain construction. The trade-off is
+    complexity — LangChain adds abstraction layers that can obscure the
+    underlying retrieval behavior and make debugging harder.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: framework:langchain
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:llamaindex-rag-fabric
+attributes:
+  displayName: "LlamaIndex as RAG Knowledge Fabric"
+  description: |
+    LlamaIndex as a data-framework knowledge fabric. Provides data connectors
+    (LlamaHub) for ingesting from 100+ sources, multiple index types
+    (vector, list, tree, keyword, knowledge graph), query engines with
+    response synthesis, and composable sub-question decomposition. LlamaIndex
+    is purpose-built for connecting LLMs to data — turning unstructured
+    documents into queryable knowledge with minimal configuration. The
+    index abstraction is its core differentiator from LangChain's chain-based
+    approach.
+  knowledgeFileFormats:
+    - any (via data connectors)
+  retrievalStrategy: hybrid
+  knowledgePersistence: delegated (via storage backends)
+  knowledgeScopes:
+    - project
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    LlamaIndex's knowledge graph index is notable — it automatically extracts
+    entity-relationship triples from documents and builds a queryable graph.
+    This enables relationship-aware retrieval that pure vector search cannot
+    provide. The composable index architecture allows building hierarchical
+    knowledge fabrics where different index types handle different knowledge
+    types (code vs. docs vs. decisions).
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: library:llama-index
+---
+nodeKind: KnowledgeFabricImpl
+id: knowledge-fabric-impl:haystack-rag-fabric
+attributes:
+  displayName: "Haystack as RAG Knowledge Fabric"
+  description: |
+    Haystack (by deepset) as a pipeline-based knowledge fabric. Provides
+    composable pipeline architecture with typed components for document
+    preprocessing, embedding, retrieval (dense, sparse, hybrid), re-ranking,
+    and generation. Pipeline-as-code design with YAML serialization enables
+    reproducible knowledge fabric configurations. Supports multiple document
+    store backends (Elasticsearch, OpenSearch, Weaviate, Qdrant, Chroma,
+    Pinecone). As a knowledge fabric, Haystack's pipeline abstraction makes
+    retrieval configurations explicit, testable, and version-controllable.
+  knowledgeFileFormats:
+    - any (via converters)
+  retrievalStrategy: hybrid
+  knowledgePersistence: delegated (via document store backends)
+  knowledgeScopes:
+    - project
+    - organization
+    - enterprise
+  autoExtractionSupport: false
+  notes: |
+    Haystack's pipeline YAML serialization is its distinguishing knowledge
+    fabric feature — retrieval configurations become version-controlled
+    artifacts. This supports knowledge fabric reproducibility and evolution
+    tracking. The typed component system (v2) enforces interface contracts
+    between pipeline stages, reducing configuration errors compared to
+    LangChain's more dynamic composition model.
+edges:
+  realizes:
+    - target: layer:12-knowledge-fabric
+  integrates_with:
+    - target: tool:haystack

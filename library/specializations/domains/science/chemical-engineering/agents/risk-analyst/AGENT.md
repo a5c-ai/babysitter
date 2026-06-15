@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Safety
   agent-id: CE-AG-012
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Risk Analyst Agent

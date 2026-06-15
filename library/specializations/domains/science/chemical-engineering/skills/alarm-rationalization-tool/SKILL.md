@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Control
   skill-id: CE-SK-022
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:compliance-automation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Alarm Rationalization Tool Skill

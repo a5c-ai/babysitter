@@ -3,6 +3,12 @@
  * @description Design of traffic signals including signal timing, phasing, controller specifications, and detection systems per MUTCD
  * @inputs { projectId: string, intersectionGeometry: object, trafficData: object, pedestrianData: object }
  * @outputs { success: boolean, signalDesign: object, timingPlans: array, equipmentSpecs: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,71 @@
+---
+nodeKind: Workflow
+id: workflow:food-safety-audit
+attributes:
+  displayName: "Food Safety Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits food safety compliance across production facilities -- verifying
+    HACCP (Hazard Analysis Critical Control Points) plans are current and
+    properly implemented, reviewing CCP monitoring logs for temperature, pH,
+    and water activity deviations, inspecting sanitation standard operating
+    procedures against FSMA requirements, validating allergen control and
+    labeling accuracy, and assessing supplier food safety certifications
+    (SQF, BRC, FSSC 22000). Produces audit findings with severity
+    classifications, corrective action tracking, and regulatory readiness
+    scores. Excludes menu development.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:food-beverage
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:recipe-management-review
+attributes:
+  displayName: "Recipe Management Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: single-team
+  description: |
+    Reviews recipe formulations and nutritional specifications -- validating
+    ingredient declarations against regulatory databases (FDA 21 CFR, EU
+    1169/2011), computing nutritional panels from ingredient composition
+    tables, verifying allergen cross-contact risk assessments, ensuring
+    cost-of-goods targets are met with current commodity pricing, and
+    tracking formulation version history with change rationale
+    documentation. Produces validated recipe cards, nutritional fact panels,
+    and ingredient substitution impact analyses. Excludes consumer taste
+    testing.
+edges:
+  involves_role:
+    - target: role:staff-engineer
+    - target: role:planner
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:domain-driven-design
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:food-beverage
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:product-team
+    - target: org-unit:quality-engineering

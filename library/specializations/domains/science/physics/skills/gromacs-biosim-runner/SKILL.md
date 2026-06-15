@@ -18,6 +18,11 @@ metadata:
     - biomolecular
     - proteins
     - free-energy
+graph:
+  domains: [domain:physics]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:computational-scientist, role:research-engineer]
 ---
 
 # GROMACS Biosim Runner Skill

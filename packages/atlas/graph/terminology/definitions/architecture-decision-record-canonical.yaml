@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:architecture-decision-record.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:architecture-decision-record
+  text: |
+    Architecture Decision Record (ADR): a short markdown document capturing an architectural decision, its context, alternatives, and consequences.
+  status: canonical
+edges:
+  defines:
+    - term:architecture-decision-record

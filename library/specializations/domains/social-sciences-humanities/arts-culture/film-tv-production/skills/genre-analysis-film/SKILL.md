@@ -4,6 +4,10 @@ id: SK-FTV-012
 version: 1.0.0
 description: Analyze and apply film/TV genre conventions, tropes, and audience expectations
 specialization: film-tv-production
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:data-analysis, skill-area:content-strategy, skill-area:market-research]
+  roles: [role:research-analyst, role:creative-director]
 ---
 
 # Genre Analysis (Film) Skill

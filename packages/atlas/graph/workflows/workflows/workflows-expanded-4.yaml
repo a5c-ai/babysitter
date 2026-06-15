@@ -1,0 +1,609 @@
+---
+nodeKind: Workflow
+id: workflow:building-permit-process
+attributes:
+  displayName: "Building Permit Process"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    End-to-end building permit lifecycle -- assembling construction documents,
+    submitting permit applications to the authority having jurisdiction,
+    responding to plan review comments, coordinating revisions with design
+    teams, tracking approval status across multiple departments (zoning,
+    fire, structural, accessibility), and securing the permit-to-build.
+    Produces permit application packages, comment response logs, and
+    approval certificates. Excludes actual construction work.
+edges:
+  involves_role:
+    - target: role:construction-project-manager
+    - target: role:building-inspector
+    - target: role:BIM-coordinator
+  applies_to_domain:
+    - target: domain:construction
+    - target: domain:residential-construction
+  triggers_responsibility:
+    - target: responsibility:building-code-compliance
+    - target: responsibility:fire-safety-compliance
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:construction-inspection
+attributes:
+  displayName: "Construction Inspection"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-milestone"
+  complexity: standard
+  description: |
+    Inspecting construction work at defined milestones -- verifying
+    foundation, framing, mechanical, electrical, and plumbing work against
+    approved plans and building codes. Documenting inspection findings,
+    issuing correction notices for non-conforming work, scheduling
+    re-inspections, and approving work for progression. Produces inspection
+    reports and compliance sign-off records.
+edges:
+  involves_role:
+    - target: role:building-inspector
+    - target: role:site-supervisor
+    - target: role:construction-project-manager
+  applies_to_domain:
+    - target: domain:construction
+    - target: domain:structural-engineering
+  triggers_responsibility:
+    - target: responsibility:structural-integrity-verification
+    - target: responsibility:building-code-compliance
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+---
+nodeKind: Workflow
+id: workflow:BIM-coordination-workflow
+attributes:
+  displayName: "BIM Coordination Workflow"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: cross-team
+  description: |
+    Coordinating federated BIM models across architectural, structural, and
+    MEP disciplines -- merging discipline models, running automated clash
+    detection, triaging clashes by severity, assigning resolution owners,
+    tracking resolution status, and publishing updated federated models.
+    Produces clash reports, resolution logs, and model coordination
+    snapshots. Excludes initial design authoring.
+edges:
+  involves_role:
+    - target: role:BIM-coordinator
+    - target: role:MEP-engineer
+    - target: role:structural-analyst
+  applies_to_domain:
+    - target: domain:building-information-modeling
+    - target: domain:construction
+  triggers_responsibility:
+    - target: responsibility:building-code-compliance
+    - target: responsibility:structural-integrity-verification
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:facilities-team
+---
+nodeKind: Workflow
+id: workflow:energy-audit
+attributes:
+  displayName: "Energy Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: standard
+  description: |
+    Comprehensive assessment of energy consumption across facilities or
+    systems -- gathering utility data, conducting site walkthroughs,
+    analyzing equipment efficiency, benchmarking against standards (ASHRAE
+    Level I/II/III), identifying energy conservation measures, and
+    producing cost-benefit analyses for recommended improvements. Produces
+    audit reports with prioritized recommendations and ROI projections.
+edges:
+  involves_role:
+    - target: role:energy-analyst
+    - target: role:MEP-engineer
+  applies_to_domain:
+    - target: domain:energy
+    - target: domain:smart-buildings
+  triggers_responsibility:
+    - target: responsibility:energy-efficiency-compliance
+    - target: responsibility:carbon-emissions-reporting
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:esg-sustainability-team
+---
+nodeKind: Workflow
+id: workflow:environmental-impact-review
+attributes:
+  displayName: "Environmental Impact Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Evaluating the environmental consequences of proposed projects --
+    scoping potential impacts (air, water, soil, habitat, noise),
+    conducting baseline studies, modeling impact scenarios, identifying
+    mitigation measures, engaging public stakeholders, and submitting
+    environmental impact statements to regulatory agencies. Produces EIS
+    documents, mitigation plans, and monitoring commitments.
+edges:
+  involves_role:
+    - target: role:environmental-compliance-officer
+    - target: role:sustainability-analyst
+    - target: role:climate-modeler
+  applies_to_domain:
+    - target: domain:environmental-engineering
+    - target: domain:construction
+  triggers_responsibility:
+    - target: responsibility:environmental-permit-compliance
+    - target: responsibility:carbon-emissions-reporting
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:carbon-offset-verification
+attributes:
+  displayName: "Carbon Offset Verification"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: standard
+  description: |
+    Verifying carbon offset credits and emission reduction claims --
+    reviewing project documentation, validating baseline calculations,
+    confirming additionality, auditing monitoring data, and issuing
+    verification statements against standards (VCS, Gold Standard, ACR).
+    Produces verification reports and credit issuance recommendations.
+edges:
+  involves_role:
+    - target: role:carbon-accountant
+    - target: role:sustainability-analyst
+  applies_to_domain:
+    - target: domain:carbon-capture
+    - target: domain:sustainability-esg
+  triggers_responsibility:
+    - target: responsibility:carbon-emissions-reporting
+    - target: responsibility:environmental-permit-compliance
+  performed_by_org_unit:
+    - target: org-unit:esg-sustainability-team
+---
+nodeKind: Workflow
+id: workflow:curriculum-design-process
+attributes:
+  displayName: "Curriculum Design Process"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Designing or redesigning academic curricula -- conducting needs analysis,
+    defining program-level learning outcomes, mapping courses to competency
+    frameworks, selecting instructional strategies, developing assessment
+    blueprints, and submitting for institutional and accreditation approval.
+    Produces curriculum maps, course syllabi, and assessment rubrics.
+edges:
+  involves_role:
+    - target: role:curriculum-developer
+    - target: role:instructional-designer
+    - target: role:chief-learning-officer
+  applies_to_domain:
+    - target: domain:education
+    - target: domain:K12-education
+  triggers_responsibility:
+    - target: responsibility:curriculum-alignment
+    - target: responsibility:learning-objective-measurement
+  performed_by_org_unit:
+    - target: org-unit:training-team
+---
+nodeKind: Workflow
+id: workflow:course-development-lifecycle
+attributes:
+  displayName: "Course Development Lifecycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-course"
+  complexity: standard
+  description: |
+    Building a course from design through deployment -- translating learning
+    objectives into content outlines, authoring instructional materials,
+    developing multimedia assets, building assessments, conducting pilot
+    testing with learner cohorts, iterating on feedback, and publishing
+    to the learning management system. Produces course content packages,
+    assessment items, and learner feedback summaries.
+edges:
+  involves_role:
+    - target: role:e-learning-developer
+    - target: role:instructional-designer
+    - target: role:learning-experience-designer
+  applies_to_domain:
+    - target: domain:online-learning
+    - target: domain:corporate-training
+  triggers_responsibility:
+    - target: responsibility:learning-objective-measurement
+    - target: responsibility:curriculum-alignment
+  performed_by_org_unit:
+    - target: org-unit:training-team
+---
+nodeKind: Workflow
+id: workflow:student-enrollment
+attributes:
+  displayName: "Student Enrollment"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "per-term"
+  complexity: standard
+  description: |
+    Managing the student enrollment cycle -- opening registration periods,
+    processing course selections, enforcing prerequisites and capacity
+    limits, handling waitlists and section transfers, and reconciling
+    enrollment counts with financial aid and billing systems. Produces
+    enrollment reports, waitlist summaries, and section utilization metrics.
+edges:
+  involves_role:
+    - target: role:registrar
+    - target: role:academic-advisor
+    - target: role:admissions-officer
+  applies_to_domain:
+    - target: domain:higher-education
+    - target: domain:student-information-systems
+  triggers_responsibility:
+    - target: responsibility:student-outcome-tracking
+    - target: responsibility:accreditation-compliance
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:academic-assessment-cycle
+attributes:
+  displayName: "Academic Assessment Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "per-term"
+  complexity: standard
+  description: |
+    Administering and analyzing academic assessments -- scheduling
+    examination periods, distributing assessment instruments, proctoring
+    exams (in-person and online), grading and calibrating scores,
+    analyzing item performance, identifying at-risk students, and
+    reporting results to faculty and accreditation bodies. Produces
+    score reports, item analysis summaries, and program-level outcome data.
+edges:
+  involves_role:
+    - target: role:registrar
+    - target: role:curriculum-developer
+  applies_to_domain:
+    - target: domain:educational-assessment
+    - target: domain:higher-education
+  triggers_responsibility:
+    - target: responsibility:learning-objective-measurement
+    - target: responsibility:accreditation-compliance
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:technology-radar-review
+attributes:
+  displayName: "Technology Radar Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluating emerging technologies for organizational adoption -- gathering
+    technology proposals from engineering teams, categorizing into Adopt /
+    Trial / Assess / Hold quadrants, debating trade-offs in review sessions,
+    publishing the updated radar, and communicating adoption guidance to
+    all engineering teams. Produces the technology radar document and
+    adoption decision records.
+edges:
+  involves_role:
+    - target: role:chief-architect
+    - target: role:head-of-platform
+    - target: role:engineering-program-manager
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:technical-strategy
+    - target: responsibility:architecture-governance
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:architecture-review-board
+attributes:
+  displayName: "Architecture Review Board"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Reviewing proposed architectural changes through a cross-functional
+    board -- submitting architecture proposals (RFCs, design docs),
+    evaluating against architectural principles and non-functional
+    requirements, discussing trade-offs, issuing approval or requesting
+    revisions, and recording decisions as ADRs. Produces review minutes,
+    approval decisions, and architectural decision records.
+edges:
+  involves_role:
+    - target: role:chief-architect
+    - target: role:head-of-platform
+    - target: role:head-of-security
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:architecture-governance
+    - target: responsibility:technical-strategy
+  performed_by_org_unit:
+    - target: org-unit:architecture-guild
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:RFC-process
+attributes:
+  displayName: "RFC Process"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "ad-hoc"
+  complexity: cross-team
+  description: |
+    Requesting and reviewing technical proposals through formal RFCs --
+    drafting the proposal with problem statement, alternatives, and
+    recommendation, soliciting feedback from stakeholders across teams,
+    iterating on concerns, reaching consensus or escalating disagreements,
+    and publishing the final decision. Produces RFC documents, comment
+    threads, and decision records.
+edges:
+  involves_role:
+    - target: role:chief-architect
+    - target: role:engineering-program-manager
+    - target: role:staff-engineer
+  applies_to_domain:
+    - target: domain:software-engineering
+  triggers_responsibility:
+    - target: responsibility:architecture-governance
+    - target: responsibility:cross-team-alignment
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:architecture-guild
+---
+nodeKind: Workflow
+id: workflow:tech-strategy-planning
+attributes:
+  displayName: "Tech Strategy Planning"
+  workflowKind: strategic
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Defining the organization's technical strategy -- assessing the current
+    technology landscape, identifying capability gaps, evaluating build-vs-buy
+    decisions, setting multi-year technology investment priorities, and
+    aligning technical direction with business strategy. Produces the
+    technology strategy document, investment roadmap, and capability gap
+    analysis.
+edges:
+  involves_role:
+    - target: role:chief-architect
+    - target: role:head-of-AI
+    - target: role:head-of-platform
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:technical-strategy
+    - target: responsibility:engineering-roadmap
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:strategy-team
+---
+nodeKind: Workflow
+id: workflow:engineering-hiring-pipeline
+attributes:
+  displayName: "Engineering Hiring Pipeline"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "continuous"
+  complexity: cross-team
+  description: |
+    Managing the engineering recruitment pipeline end to end -- defining
+    role requirements and leveling, sourcing candidates, screening resumes,
+    conducting technical interviews, calibrating hiring decisions across
+    panels, extending offers, and onboarding new hires. Produces job
+    descriptions, interview rubrics, and hiring funnel metrics.
+edges:
+  involves_role:
+    - target: role:director-of-engineering
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:human-resources
+  triggers_responsibility:
+    - target: responsibility:engineering-hiring
+    - target: responsibility:hiring
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:hr-team
+---
+nodeKind: Workflow
+id: workflow:cross-functional-team-charter
+attributes:
+  displayName: "Cross-Functional Team Charter"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-initiative"
+  complexity: cross-team
+  description: |
+    Forming and chartering cross-functional teams for new initiatives --
+    defining team mission and success criteria, selecting members across
+    disciplines, establishing working agreements, setting communication
+    cadences, and aligning on decision-making authority. Produces team
+    charter documents, RACI matrices, and initial milestone plans.
+edges:
+  involves_role:
+    - target: role:engineering-program-manager
+    - target: role:director-of-engineering
+    - target: role:VP-of-product
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:cross-team-alignment
+    - target: responsibility:engineering-roadmap
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:product-team
+---
+nodeKind: Workflow
+id: workflow:quarterly-business-review
+attributes:
+  displayName: "Quarterly Business Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviewing business performance and adjusting plans quarterly --
+    aggregating KPI dashboards, analyzing revenue and cost trends,
+    reviewing OKR progress, identifying risks and opportunities,
+    making resource allocation adjustments, and setting priorities for
+    the next quarter. Produces QBR decks, updated forecasts, and
+    action item registers.
+edges:
+  involves_role:
+    - target: role:director-of-engineering
+    - target: role:VP-of-product
+    - target: role:engineering-program-manager
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:engineering-roadmap
+    - target: responsibility:cross-team-alignment
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:finance-team
+---
+nodeKind: Workflow
+id: workflow:OKR-setting-cycle
+attributes:
+  displayName: "OKR Setting Cycle"
+  workflowKind: strategic
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Setting and aligning Objectives and Key Results across the organization --
+    cascading company-level objectives to department and team levels,
+    facilitating alignment discussions, negotiating key results with
+    measurable targets, publishing the OKR tree, and establishing
+    check-in cadences. Produces the OKR document, alignment maps, and
+    tracking dashboards.
+edges:
+  involves_role:
+    - target: role:director-of-engineering
+    - target: role:VP-of-product
+    - target: role:engineering-program-manager
+  applies_to_domain:
+    - target: domain:strategy
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cross-team-alignment
+    - target: responsibility:engineering-roadmap
+  performed_by_org_unit:
+    - target: org-unit:strategy-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:annual-budget-cycle
+attributes:
+  displayName: "Annual Budget Cycle"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: cross-team
+  description: |
+    Planning and approving the annual operating budget -- gathering
+    department budget requests, analyzing historical spend, modeling
+    scenarios, negotiating allocations, obtaining executive and board
+    approval, and distributing approved budgets to cost center owners.
+    Produces budget proposals, variance analyses, and approved budget
+    allocations.
+edges:
+  involves_role:
+    - target: role:director-of-engineering
+    - target: role:engineering-program-manager
+  applies_to_domain:
+    - target: domain:finance
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:engineering-roadmap
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:strategy-team
+---
+nodeKind: Workflow
+id: workflow:vendor-contract-renewal
+attributes:
+  displayName: "Vendor Contract Renewal"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "annual"
+  complexity: standard
+  description: |
+    Managing vendor contract renewals -- tracking upcoming expirations,
+    evaluating vendor performance against SLAs, benchmarking pricing,
+    negotiating renewal terms, coordinating legal review of amended
+    contracts, and securing approval signatures. Produces renewal
+    evaluation reports, negotiation summaries, and executed contracts.
+edges:
+  involves_role:
+    - target: role:engineering-program-manager
+    - target: role:head-of-platform
+  applies_to_domain:
+    - target: domain:procurement
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cross-team-alignment
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:legal-team
+---
+nodeKind: Workflow
+id: workflow:open-source-license-audit
+attributes:
+  displayName: "Open Source License Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: standard
+  description: |
+    Auditing open source dependencies for license compliance -- scanning
+    dependency trees, classifying licenses by compatibility (permissive,
+    copyleft, proprietary-incompatible), flagging violations, coordinating
+    remediation with engineering teams, and updating the approved license
+    list. Produces license audit reports, violation logs, and remediation
+    action plans.
+edges:
+  involves_role:
+    - target: role:chief-architect
+    - target: role:head-of-security
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:architecture-governance
+    - target: responsibility:security-posture
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:legal-team

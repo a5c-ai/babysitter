@@ -1,0 +1,118 @@
+---
+nodeKind: SkillArea
+id: skill-area:content-strategy
+attributes:
+  displayName: "Content Strategy"
+  description: |
+    Defining how an organization uses content to achieve business goals — editorial
+    planning, content operations, governance, and measurement frameworks. Covers
+    audience modeling, content taxonomy design, channel-mix decisions, and the
+    workflows that enable consistent production at scale. Connects content investment
+    to measurable outcomes such as organic traffic, pipeline influence, brand
+    authority, and customer activation.
+  domains:
+    - domain:marketing
+    - domain:digital-marketing
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:marketing
+      confidence: primary
+    - target: domain:digital-marketing
+      confidence: secondary
+    - target: specialization:arts-culture
+      confidence: secondary
+    - target: specialization:digital-humanities
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:brand-positioning
+      strength: recommended
+    - target: skill-area:content-marketing
+      strength: recommended
+    - target: skill-area:digital-advertising
+      strength: recommended
+    - target: skill-area:marketing-automation
+      strength: recommended
+    - target: skill-area:brand-strategy
+      strength: recommended
+    - target: skill-area:market-research
+      strength: recommended
+    - target: skill-area:event-management
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:brand-positioning
+attributes:
+  displayName: "Brand Positioning"
+  description: |
+    Establishing and maintaining a distinctive, credible position in the market
+    through brand identity systems, messaging frameworks, and brand architecture
+    decisions. Covers category design, positioning statement development, narrative
+    testing, and the mechanisms for ensuring consistent expression across channels
+    and teams. Differentiates from brand strategy by focusing on the execution layer:
+    how positioning translates into words, visuals, and interactions.
+  domains:
+    - domain:marketing
+    - domain:public-relations
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:marketing
+      confidence: primary
+    - target: specialization:marketing
+      confidence: secondary
+    - target: specialization:public-relations
+      confidence: secondary
+    - target: domain:public-relations
+      confidence: secondary
+---
+nodeKind: SkillArea
+id: skill-area:digital-marketing-analytics
+attributes:
+  displayName: "Digital Marketing Analytics"
+  description: |
+    Measuring and optimizing digital marketing performance through attribution
+    modeling, multi-touch analysis, conversion rate optimization, and marketing
+    mix modeling. Covers pixel implementation, UTM discipline, GA4 and CDPconfiguration,
+    and the statistical methods needed to separate signal from noise in campaign data.
+    Provides the analytical foundation for channel investment decisions and
+    continuous performance improvement.
+  domains:
+    - domain:digital-marketing
+    - domain:business-intelligence
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: specialization:digital-marketing-strategy
+      confidence: secondary
+    - target: domain:business-intelligence
+      confidence: secondary
+  prerequisite_for_learning:
+    - target: skill-area:seo-sem
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:seo-sem
+attributes:
+  displayName: "SEO and SEM"
+  description: |
+    Driving qualified traffic from search engines through organic optimization and
+    paid search management — keyword research, on-page and technical SEO, link
+    acquisition strategy, Google Ads and Microsoft Ads campaign architecture, Quality
+    Score improvement, and bid management. Combines content strategy with technical
+    execution and performance analytics to maximize visibility and return from
+    search across the full funnel.
+  domains:
+    - domain:digital-marketing
+    - domain:marketing
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:digital-marketing
+      confidence: primary
+    - target: specialization:digital-marketing
+      confidence: secondary
+    - target: domain:marketing
+      confidence: secondary

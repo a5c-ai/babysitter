@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:workspace.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:workspace
+  text: |
+    project context with sessions+repos
+  status: canonical
+edges:
+  defines:
+    - term:workspace

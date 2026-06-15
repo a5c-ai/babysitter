@@ -1,0 +1,28 @@
+nodeKind: EvidenceSource
+id: evidence:opencode-1-15-13-issue-811-release
+attributes:
+  displayName: "OpenCode v1.15.13 release notes for issue #811"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.13
+  sourcePathOrUrl: https://github.com/anomalyco/opencode/releases/tag/v1.15.13
+  locator: "anomalyco/opencode release v1.15.13; issue #811 assimilation"
+  capturedAt: "2026-05-31T20:20:00Z"
+  observedAt: "2026-05-31T20:20:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:20:00Z"
+  notes: |
+    Issue #811 tracks OpenCode 1.15.13. The official release notes cover
+    Gateway Anthropic Opus 4.7+ adaptive reasoning preserving summarized
+    thinking instead of empty thinking blocks, custom session metadata through
+    the API and SDK, config loading from the opened location upward, and TUI
+    fixes for wrapped inline tool row alignment plus expandable failed-tool
+    error details. The install package remains opencode-ai.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:ge-0-0-0
+    - agentVersion:opencode:1-15-13

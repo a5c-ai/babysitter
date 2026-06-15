@@ -1,0 +1,75 @@
+---
+nodeKind: EvalRun
+id: eval-run:mmlu.qwen-2-5-72b.2024-09
+attributes:
+  target: "model:qwen-2-5-72b-instruct@current"
+  benchmarkId: benchmark:mmlu
+  targetId: model:qwen-2-5-72b-instruct@current
+  runAt: "2024-09-19T00:00:00Z"
+  runBy: "qwen-team"
+  configHash: "sha256:placeholder-qwen-2-5-72b-mmlu"
+edges:
+  evaluates_target:
+    - model:qwen-2-5-72b-instruct@current
+  for_benchmark:
+    - benchmark:mmlu
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.qwen-2-5-72b.2024-09
+attributes:
+  target: "model:qwen-2-5-72b-instruct@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:qwen-2-5-72b-instruct@current
+  runAt: "2024-09-19T00:00:00Z"
+  runBy: "qwen-team"
+  configHash: "sha256:placeholder-qwen-2-5-72b-humaneval"
+edges:
+  evaluates_target:
+    - model:qwen-2-5-72b-instruct@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:human-eval.qwen-2-5-coder-32b.2024-11
+attributes:
+  target: "model:qwen-2-5-coder-32b@current"
+  benchmarkId: benchmark:human-eval
+  targetId: model:qwen-2-5-coder-32b@current
+  runAt: "2024-11-12T00:00:00Z"
+  runBy: "qwen-team"
+  configHash: "sha256:placeholder-qwen-2-5-coder-32b-humaneval"
+edges:
+  evaluates_target:
+    - model:qwen-2-5-coder-32b@current
+  for_benchmark:
+    - benchmark:human-eval
+---
+nodeKind: EvalRun
+id: eval-run:livecodebench.qwen-2-5-coder-32b.2024-11
+attributes:
+  target: "model:qwen-2-5-coder-32b@current"
+  benchmarkId: benchmark:livecodebench
+  targetId: model:qwen-2-5-coder-32b@current
+  runAt: "2024-11-12T00:00:00Z"
+  runBy: "qwen-team"
+  configHash: "sha256:placeholder-qwen-2-5-coder-32b-lcb"
+edges:
+  evaluates_target:
+    - model:qwen-2-5-coder-32b@current
+  for_benchmark:
+    - benchmark:livecodebench
+---
+nodeKind: EvalRun
+id: eval-run:mbpp.qwen-2-5-coder-32b.2024-11
+attributes:
+  target: "model:qwen-2-5-coder-32b@current"
+  benchmarkId: benchmark:mbpp
+  targetId: model:qwen-2-5-coder-32b@current
+  runAt: "2024-11-12T00:00:00Z"
+  runBy: "qwen-team"
+  configHash: "sha256:placeholder-qwen-2-5-coder-32b-mbpp"
+edges:
+  evaluates_target:
+    - model:qwen-2-5-coder-32b@current
+  for_benchmark:
+    - benchmark:mbpp

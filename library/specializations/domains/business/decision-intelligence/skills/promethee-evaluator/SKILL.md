@@ -16,6 +16,10 @@ metadata:
     - pyDecision
     - pymcdm
     - visual-promethee
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:strategic-analysis, skill-area:data-analysis, skill-area:business-analysis]
+  roles: [role:data-analyst, role:business-analyst, role:strategic-planner]
 ---
 
 # PROMETHEE Evaluator

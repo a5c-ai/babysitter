@@ -1,0 +1,13 @@
+nodeKind: Benchmark
+id: benchmark:mle-bench
+attributes:
+  displayName: "MLE-bench"
+  homepageUrl: https://github.com/openai/mle-bench
+  kind: ml-engineering
+  targetsKind: AgentVersion
+  description: |
+    Machine learning engineering tasks drawn from Kaggle competitions.
+edges:
+  applies_to:
+    - target: domain:machine-learning
+    - target: domain:data-science

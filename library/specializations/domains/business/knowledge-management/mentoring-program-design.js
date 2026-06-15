@@ -5,6 +5,11 @@
  * @category Knowledge Sharing and Transfer
  * @inputs { programScope: object, targetAudience: object, mentoringGoals: array, organizationalContext: object, outputDir: string }
  * @outputs { success: boolean, programDesign: object, matchingCriteria: object, curriculumFramework: object, qualityScore: number, artifacts: array }
+  * @graph
+ *   domains: [domain:knowledge-management]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

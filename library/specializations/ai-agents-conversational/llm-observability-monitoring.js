@@ -17,6 +17,9 @@
  * - Langfuse: https://langfuse.com/docs
  * - OpenTelemetry: https://opentelemetry.io/docs/
  * - Helicone: https://docs.helicone.ai/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

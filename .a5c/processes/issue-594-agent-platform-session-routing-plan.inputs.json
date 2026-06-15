@@ -1,0 +1,89 @@
+{
+  "issueNumber": 594,
+  "baseBranch": "staging",
+  "implementationBranchName": "agent/issue-594-session-routing",
+  "title": "Agent-platform session management and routing gap wiring",
+  "summary": "Implement or reconcile the remaining issue #594 agent-platform gaps: plan-phase session context injection, live session history capture, configured session cost budget enforcement, compaction triggering, and opt-in capability/model/fallback/policy routing while preserving existing orchestration compatibility defaults.",
+  "relatedIssues": [
+    578,
+    580
+  ],
+  "priorPlanningPr": 657,
+  "currentPlanningPr": 717,
+  "targetFiles": [
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/runState.ts",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/prompts.ts",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/phase.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/dispatch.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/internalPhase.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/externalPhase.ts",
+    "packages/genty/platform/src/session/context.ts",
+    "packages/genty/platform/src/session/history.ts",
+    "packages/genty/platform/src/session/cost.ts",
+    "packages/genty/platform/src/compression/compaction.ts",
+    "packages/genty/platform/src/cost/effectCost.ts",
+    "packages/genty/platform/src/harness/capabilityRouter.ts",
+    "packages/genty/platform/src/harness/modelSelection.ts",
+    "packages/genty/platform/src/harness/fallbackChains.ts",
+    "packages/genty/platform/src/harness/selectionPolicies.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/effects.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/dispatch.test.ts",
+    "packages/genty/platform/src/session/__tests__/sessionContext.test.ts",
+    "packages/genty/platform/src/session/__tests__/sessionHistory.test.ts",
+    "packages/genty/platform/src/session/__tests__/cost.test.ts",
+    "docs/agent-layer-gaps.md"
+  ],
+  "sourceOfTruthDocs": [
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-layer-gaps.md"
+  ],
+  "processLibraryReferences": [
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-kit-brownfield.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/plan-and-execute.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/verification-before-completion.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/backward-compatibility-management.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/compatibility-testing.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js"
+  ],
+  "reportedGaps": [
+    "Session context is not available in plan phase prompts.",
+    "Session history helpers exist but decisions, run summaries, and context snapshots are not captured during orchestration.",
+    "Session compaction logic exists but is not triggered from live state size.",
+    "Session cost budgets exist but are not enforced in the orchestration loop.",
+    "Capability router, model selection, fallback chains, and selection policies exist but are not used for task dispatch."
+  ],
+  "compatibilityRequirements": [
+    "Treat #594 as stale-prone: reconcile current source first and do not duplicate wiring that already exists.",
+    "Missing, corrupt, or unrelated session context must not crash or contaminate planProcess prompts.",
+    "No-budget runs must preserve existing orchestration behavior and must not auto-pause.",
+    "Compaction must write overlay state only and never mutate original journal or task artifacts.",
+    "Default task dispatch must preserve the existing resolveTaskHarness behavior unless task metadata or execution policy explicitly opts in to policy-based routing.",
+    "Tests must use deterministic fakes and must not require provider credentials, network access, live MCP servers, or real external harnesses."
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/internal/createRun/__tests__/createRun.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/dispatch.test.ts packages/genty/platform/src/session/__tests__/sessionContext.test.ts packages/genty/platform/src/session/__tests__/sessionHistory.test.ts packages/genty/platform/src/session/__tests__/cost.test.ts",
+    "npm run build --workspace=@a5c-ai/genty-platform",
+    "npm run test --workspace=@a5c-ai/genty-platform",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:v6:seams",
+    "npm run verify:metadata"
+  ],
+  "acceptanceCriteria": [
+    "The run begins with a reuse audit and authoritative issue/comment read, including related #578/#580 and prior PR #657 context.",
+    "The implementation classifies each issue #594 gap as already wired, partially wired, still missing, or obsolete before changing code.",
+    "Plan-phase prompt construction includes bounded, session-scoped context when available and remains compatible when context is unavailable.",
+    "Live orchestration captures meaningful decisions, run summaries, and context snapshots using the existing session history helpers.",
+    "Configured budget enforcement is covered by tests; no-budget runs do not pause, and explicit autoPause budgets produce a clear pause/block signal.",
+    "Compaction triggering is covered by tests and writes overlay state without mutating source-of-truth journals/tasks.",
+    "Capability/model/fallback/policy routing is integrated only through explicit metadata or policy hints, with default routing compatibility tests.",
+    "Focused agent-platform tests and broad repo quality gates pass or document precise environment-only unavailable evidence.",
+    "docs/agent-layer-gaps.md is updated only when tests prove stale gap claims are now inaccurate."
+  ]
+}

@@ -17,6 +17,12 @@
  * - FDA 21 CFR 807.87 510(k) Content Requirements
  * - FDA Guidance on Format for Traditional and Abbreviated 510(k)s
  * - FDA eCopy Program: https://www.fda.gov/medical-devices/premarket-submissions/ecopy-program
+ *
+ * @graph
+ *   domains: [domain:biomedical-engineering]
+ *   skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+ *   workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+ *   roles: [role:biomedical-engineer, role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

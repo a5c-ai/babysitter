@@ -1,0 +1,22 @@
+nodeKind: Tool
+id: tool:github-actions
+attributes:
+  displayName: "GitHub Actions"
+  homepageUrl: "https://github.com/features/actions"
+  kind: ci
+  description: |
+    CI/CD platform integrated with GitHub repositories - workflows defined in YAML.
+edges:
+  belongs_to_language:
+    - target: language:yaml
+  used_for:
+    - target: skill-area:ci-cd
+  alternative_to:
+    - target: tool:gitlab-ci
+      comparison: "CI/CD platforms — GitHub Actions is GitHub-native; GitLab CI is GitLab-native"
+    - target: tool:circleci
+      comparison: "CI/CD platforms"
+    - target: tool:buildkite
+      comparison: "CI/CD — GitHub Actions is fully hosted; Buildkite is hybrid"
+    - target: tool:jenkins
+      comparison: "CI/CD — GitHub Actions is SaaS; Jenkins is self-hosted"

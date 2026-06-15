@@ -8,6 +8,14 @@ expertise:
   - E2E testing
   - Snapshot testing
   - Test harness design
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:e2e-testing]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+
 ---
 
 # CLI Testing Architect Agent

@@ -1,0 +1,152 @@
+---
+nodeKind: Workflow
+id: workflow:certificate-rotation
+attributes:
+  displayName: "Certificate Rotation"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Rotates TLS certificates across load balancers, service meshes, and internal
+    PKI — tracking expiry dates, automating renewal via ACME or internal CA,
+    validating chain-of-trust, and coordinating zero-downtime rollover across
+    environments. Excludes initial certificate provisioning.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:security-reviewer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:secrets-rotation
+    - target: skill-area:service-mesh-config
+  applies_to_domain:
+    - target: domain:infrastructure
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:cdn-cache-invalidation
+attributes:
+  displayName: "CDN Cache Invalidation"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-deployment"
+  complexity: single-team
+  description: |
+    Coordinates cache purge operations across CDN edge nodes after deployments
+    or content updates — selective path invalidation, cache-warming strategies,
+    origin-shield validation, and propagation verification. Excludes CDN
+    provider selection.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:implementer
+  requires_skill_area:
+    - target: skill-area:canary-rollouts
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:infrastructure
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:runbook-authoring
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:load-balancer-config-review
+attributes:
+  displayName: "Load Balancer Config Review"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-change"
+  complexity: single-team
+  description: |
+    Reviews and validates load balancer configuration changes — health check
+    tuning, connection draining settings, TLS termination policy, weight-based
+    routing rules, and rate limiting thresholds. Excludes initial provisioning
+    of load balancer infrastructure.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:service-mesh-config
+    - target: skill-area:rate-limiting
+  applies_to_domain:
+    - target: domain:infrastructure
+    - target: domain:networking
+  triggers_responsibility:
+    - target: responsibility:review-architecture-changes
+    - target: responsibility:terraform-state-mgmt
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:ip-allowlist-management
+attributes:
+  displayName: "IP Allowlist Management"
+  workflowKind: security
+  triggerType: event-driven
+  typicalCadence: "per-request"
+  complexity: single-team
+  description: |
+    Governs changes to IP allowlists and firewall rules across cloud
+    environments — request intake, business justification verification,
+    security impact assessment, rule implementation, and periodic stale-entry
+    cleanup. Excludes network architecture design.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:platform-engineer
+  requires_skill_area:
+    - target: skill-area:k8s-rbac
+    - target: skill-area:service-mesh-config
+  applies_to_domain:
+    - target: domain:security
+    - target: domain:networking
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:threat-modeling
+  performed_by_org_unit:
+    - target: org-unit:security-team
+    - target: org-unit:infra-engineering
+---
+nodeKind: Workflow
+id: workflow:cloud-cost-anomaly-detection
+attributes:
+  displayName: "Cloud Cost Anomaly Detection"
+  workflowKind: operational
+  triggerType: continuous
+  typicalCadence: "daily"
+  complexity: cross-team
+  description: |
+    Monitors cloud spend for unexpected spikes and anomalous patterns —
+    configuring cost alerts, investigating billing anomalies, attributing
+    spend to teams, and triggering remediation for runaway resources. Excludes
+    long-term cost optimization strategy.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:platform-engineer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:cloud-infra
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:respond-incidents
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:infra-engineering

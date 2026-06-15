@@ -10,6 +10,14 @@ expertise:
   - Rapid testing strategies
   - Edge case discovery
   - User experience testing
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer]
+  skillAreas: [skill-area:acceptance-testing, skill-area:functional-testing]
+  workflows: [workflow:bug-triage]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Exploratory Testing Expert Agent

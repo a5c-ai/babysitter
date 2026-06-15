@@ -1,0 +1,262 @@
+---
+nodeKind: Library
+id: library:riverpod
+attributes:
+  displayName: "Riverpod"
+  belongsToLanguageId: language:dart
+  category: state-management
+  description: |
+    A compile-safe, testable state management library for Flutter and Dart that
+    improves on Provider by eliminating global state, supporting multiple providers
+    of the same type, and enabling fine-grained reactivity through code generation.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:application-state-management
+  alternative_to:
+    - library:bloc
+    - library:provider
+    - library:get-x
+---
+nodeKind: Library
+id: library:bloc
+attributes:
+  displayName: "BLoC"
+  belongsToLanguageId: language:dart
+  category: state-management
+  description: |
+    Business Logic Component pattern implementation for Flutter providing a
+    predictable state management solution using streams, events, and states
+    with a clean separation between UI and business logic.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:application-state-management
+---
+nodeKind: Library
+id: library:provider
+attributes:
+  displayName: "Provider"
+  belongsToLanguageId: language:dart
+  category: state-management
+  description: |
+    A recommended Flutter state management and dependency injection library built
+    on top of InheritedWidget that simplifies widget tree composition, reactive
+    updates, and object lifecycle management via ChangeNotifier and Consumer.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:application-state-management
+---
+nodeKind: Library
+id: library:get-x
+attributes:
+  displayName: "GetX"
+  belongsToLanguageId: language:dart
+  category: state-management
+  description: |
+    A lightweight Flutter micro-framework combining state management, dependency
+    injection, and route management in a single package with minimal boilerplate,
+    reactive controllers, and a simple navigation API without BuildContext.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:application-state-management
+---
+nodeKind: Library
+id: library:dio
+attributes:
+  displayName: "Dio"
+  belongsToLanguageId: language:dart
+  category: http-client
+  description: |
+    A powerful HTTP client for Dart/Flutter supporting interceptors, global
+    configuration, FormData, request cancellation, file downloading, timeout
+    handling, and custom adapters for both browser and native platforms.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:axios
+---
+nodeKind: Library
+id: library:freezed
+attributes:
+  displayName: "Freezed"
+  belongsToLanguageId: language:dart
+  category: code-generation
+  description: |
+    A code generation package for Dart that produces immutable data classes with
+    deep copyWith support, union types (sealed classes), pattern matching helpers,
+    JSON serialization integration, and automatic equality and toString methods.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - library:json-serializable
+---
+nodeKind: Library
+id: library:json-serializable
+attributes:
+  displayName: "json_serializable"
+  belongsToLanguageId: language:dart
+  category: serialization
+  description: |
+    A Dart code generation library that automatically creates toJson/fromJson
+    serialization boilerplate for annotated data classes, supporting custom
+    converters, nullable fields, and seamless integration with build_runner.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:hive
+attributes:
+  displayName: "Hive"
+  belongsToLanguageId: language:dart
+  category: database
+  description: |
+    A lightweight and blazing fast key-value database written in pure Dart for
+    Flutter, supporting custom type adapters, lazy boxes, encryption, and
+    offline-first persistence with no native dependencies.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:isar
+    - library:drift
+---
+nodeKind: Library
+id: library:isar
+attributes:
+  displayName: "Isar"
+  belongsToLanguageId: language:dart
+  category: database
+  description: |
+    A super-fast, cross-platform NoSQL database for Flutter with a schema-based
+    approach, full ACID transactions, powerful query API, composite indexes,
+    and native support for iOS, Android, macOS, Linux, and Windows.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:drift
+attributes:
+  displayName: "Drift"
+  belongsToLanguageId: language:dart
+  category: database
+  description: |
+    A type-safe, reactive persistence library for Flutter and Dart built on
+    SQLite that uses code generation to provide a fluent query API, migrations,
+    streams for reactive queries, and multi-platform support.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:go-router
+attributes:
+  displayName: "GoRouter"
+  belongsToLanguageId: language:dart
+  category: routing
+  description: |
+    A declarative routing package for Flutter that uses URLs to navigate between
+    screens, supports deep linking, nested routes, redirects, path and query
+    parameters, and integrates with the Navigator 2.0 API.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:frontend-development
+  alternative_to:
+    - library:express
+---
+nodeKind: Library
+id: library:flame
+attributes:
+  displayName: "Flame"
+  belongsToLanguageId: language:dart
+  category: game-engine
+  description: |
+    A modular 2D game engine built on top of Flutter providing a component-based
+    game loop, collision detection, sprite sheets, particle systems, tiled map
+    support, audio management, and physics integration via Forge2D.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:game-engines
+  alternative_to:
+    - library:three
+---
+nodeKind: Library
+id: library:flutter-test
+attributes:
+  displayName: "flutter_test"
+  belongsToLanguageId: language:dart
+  category: testing
+  description: |
+    The official Flutter testing library bundled with the SDK that provides
+    widget testing utilities, a WidgetTester API, pump methods for driving the
+    widget lifecycle, finder utilities, and golden image comparison support.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:react-testing-library
+---
+nodeKind: Library
+id: library:mockito-dart
+attributes:
+  displayName: "Mockito (Dart)"
+  belongsToLanguageId: language:dart
+  category: testing
+  description: |
+    A Dart port of the Mockito mocking framework that generates null-safe mock
+    classes via build_runner code generation, providing when/thenReturn stubbing,
+    verify call verification, and argument captors for unit testing.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:moq
+    - library:mockito
+---
+nodeKind: Library
+id: library:build-runner
+attributes:
+  displayName: "build_runner"
+  belongsToLanguageId: language:dart
+  category: build-tool
+  description: |
+    A build system for Dart and Flutter that runs code generators and other
+    build steps defined by builder packages such as freezed, json_serializable,
+    and mockito, supporting watch mode, incremental builds, and caching.
+edges:
+  belongs_to_language:
+    - language:dart
+  library_used_by:
+    - target: skill-area:cli-tooling
+  alternative_to:
+    - library:tsup

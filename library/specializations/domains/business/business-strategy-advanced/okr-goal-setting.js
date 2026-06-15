@@ -3,6 +3,12 @@
  * @description Objectives and Key Results (OKR) implementation for strategic goal setting and alignment
  * @inputs { organizationName: string, strategyContext: object, organizationalStructure: object, currentOKRs: array }
  * @outputs { success: boolean, companyOKRs: array, teamOKRs: array, alignmentMatrix: object, reviewCadence: object, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

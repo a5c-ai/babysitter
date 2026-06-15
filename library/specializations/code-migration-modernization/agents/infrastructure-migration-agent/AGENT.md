@@ -8,6 +8,13 @@ skills:
   - iac-generator
   - containerization-assistant
   - configuration-migrator
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:cloud-infrastructure]
+  roles: [role:devops-engineer, role:platform-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Infrastructure Migration Agent

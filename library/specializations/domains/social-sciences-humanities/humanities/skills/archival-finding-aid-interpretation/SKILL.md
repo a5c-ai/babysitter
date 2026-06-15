@@ -2,6 +2,12 @@
 name: archival-finding-aid-interpretation
 description: Navigate finding aids, catalog systems, and archival hierarchies to locate relevant collections and documents efficiently
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:humanities]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-engineer]
 ---
 
 # Archival Finding Aid Interpretation

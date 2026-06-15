@@ -7,6 +7,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+graph:
+  domains: [domain:data-science]
+  specializations: [specialization:data-science-ml]
+  skillAreas: [skill-area:ml-governance-compliance, skill-area:explainability-interpretation]
+  roles: [role:data-scientist, role:ml-ops-engineer]
+  workflows: [workflow:ml-model-lifecycle]
+
 ---
 
 # model-card-generator

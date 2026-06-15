@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: inventory
   priority: medium
+graph:
+  domains: [domain:logistics]
+  skillAreas: [skill-area:procurement-management, skill-area:data-analytics, skill-area:financial-planning]
+  roles: [role:supply-chain-analyst, role:operations-analyst, role:procurement-manager]
 ---
 
 # Dead Stock Identifier

@@ -1,0 +1,63 @@
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-coder-480b-bedrock-model-ids
+attributes:
+  subjectId: model:qwen3-coder-480b-a35b-instruct@current
+  predicate: providerModelIds
+  value: qwen.qwen3-coder-480b-a35b-v1:0; qwen.qwen3-coder-480b-a35b-instruct
+  statement: "Qwen3-Coder-480B-A35B-Instruct is available on Amazon Bedrock as qwen.qwen3-coder-480b-a35b-v1:0 for bedrock-runtime and qwen.qwen3-coder-480b-a35b-instruct for Bedrock Mantle."
+  confidence: high
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:aws-bedrock-qwen3-coder-480b-2026-05
+  about:
+    - model:qwen3-coder-480b-a35b-instruct@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-coder-30b-context-and-bedrock-ids
+attributes:
+  subjectId: model:qwen3-coder-30b-a3b-instruct@current
+  predicate: modelMetadata
+  value: 262144-token context; qwen.qwen3-coder-30b-a3b-v1:0; qwen.qwen3-coder-30b-a3b-instruct
+  statement: "Qwen3-Coder-30B-A3B-Instruct has a 262,144-token native context window and is available on Amazon Bedrock as qwen.qwen3-coder-30b-a3b-v1:0 for bedrock-runtime and qwen.qwen3-coder-30b-a3b-instruct for Bedrock Mantle."
+  confidence: high
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:hf-model-card-qwen3-coder-30b-a3b-instruct
+    - evidence:aws-bedrock-qwen3-coder-30b-2026-05
+  about:
+    - model:qwen3-coder-30b-a3b-instruct@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-coder-next-provider-ids
+attributes:
+  subjectId: model:qwen3-coder-next@current
+  predicate: providerModelIds
+  value: qwen3-coder-next; qwen.qwen3-coder-next
+  statement: "Qwen3-Coder-Next is documented by Alibaba Cloud Model Studio as qwen3-coder-next and by Amazon Bedrock as qwen.qwen3-coder-next."
+  confidence: high
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-coder-2026-05
+    - evidence:aws-bedrock-qwen3-coder-next-2026-05
+  about:
+    - model:qwen3-coder-next@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-coder-next-context-agentic-coding
+attributes:
+  subjectId: model:qwen3-coder-next@current
+  predicate: modelMetadata
+  value: 262144-token context; tool calling; coding agent model
+  statement: "Qwen3-Coder-Next is an open-weight coding-agent model with a 262,144-token native context window and tool-calling support."
+  confidence: high
+  reviewedAt: "2026-05-26T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:hf-model-card-qwen3-coder-next
+    - evidence:alibaba-model-studio-qwen-coder-2026-05
+  about:
+    - model:qwen3-coder-next@current

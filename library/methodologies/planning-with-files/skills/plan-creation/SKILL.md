@@ -1,3 +1,12 @@
+---
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
+---
+
 # Plan Creation
 
 Create a structured task_plan.md with phases, goals, and checkbox tracking for persistent planning.

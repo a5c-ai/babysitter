@@ -1,0 +1,33 @@
+{
+  "name": "sample-plugin",
+  "version": "1.0.0",
+  "description": "A sample plugin demonstrating the Unified Plugin Format",
+  "author": "a5c.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "keywords": ["sample", "demo"],
+  "hooks": {
+    "SessionStart": true,
+    "Stop": true,
+    "UserPromptSubmit": true,
+    "PreToolUse": true
+  },
+  "commands": "commands",
+  "skills": [
+    { "name": "greet", "file": "skills/greet/SKILL.md" }
+  ],
+  "agents": "agents/AGENTS.md",
+  "contextFiles": {
+    "gemini": "context/GEMINI.md",
+    "github-copilot": "context/AGENTS.md",
+    "pi": "context/AGENTS.md",
+    "oh-my-pi": "context/AGENTS.md"
+  },
+  "include": [
+    "versions.json",
+    "assets/*"
+  ]
+}

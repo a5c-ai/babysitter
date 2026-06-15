@@ -1,0 +1,15 @@
+nodeKind: EvidenceSource
+id: evidence:anthropic-models-doc
+attributes:
+  displayName: "Anthropic models documentation"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.anthropic.com/en/docs/about-claude/models
+  observedAt: "2026-04-28T10:00:00Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-04-28T10:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web

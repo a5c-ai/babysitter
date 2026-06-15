@@ -1,0 +1,104 @@
+---
+nodeKind: Workflow
+id: workflow:exhibition-development-cycle
+attributes:
+  displayName: "Exhibition Development Cycle"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-project"
+  complexity: cross-team
+  description: |
+    Manages the end-to-end development of a cultural exhibition or
+    installation -- curating thematic narrative and selecting works,
+    coordinating loans and rights clearances, designing spatial layout and
+    visitor flow, producing interpretive materials and multimedia
+    interactives, managing fabrication timelines and vendor deliverables,
+    conducting accessibility audits, and orchestrating soft-opening and
+    press-preview logistics. Produces exhibition project plan, design
+    specifications, and launch checklist. Excludes ongoing exhibition
+    operations after opening.
+edges:
+  involves_role:
+    - target: role:product-designer
+    - target: role:planner
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:accessibility-testing
+  applies_to_domain:
+    - target: domain:arts-culture
+    - target: domain:project-management
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:design-team
+    - target: org-unit:content-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:grant-proposal-review
+attributes:
+  displayName: "Grant Proposal Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-cycle"
+  complexity: cross-team
+  description: |
+    Reviews and strengthens grant proposals before submission to funding
+    bodies -- evaluating alignment with funder priorities and eligibility
+    criteria, assessing budget justification and cost reasonableness,
+    verifying compliance with submission formatting and documentation
+    requirements, reviewing narrative coherence and impact articulation,
+    checking institutional approvals and partner commitments, and
+    coordinating internal review committee sign-off. Produces review
+    feedback, revised proposal, and submission-readiness checklist.
+    Excludes grant administration after award.
+edges:
+  involves_role:
+    - target: role:technical-writer
+    - target: role:planner
+    - target: role:engineering-manager
+  applies_to_domain:
+    - target: domain:arts-culture
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:finance-team
+    - target: org-unit:content-team
+---
+nodeKind: Workflow
+id: workflow:survey-methodology-review
+attributes:
+  displayName: "Survey Methodology Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-study"
+  complexity: cross-team
+  description: |
+    Reviews survey instrument design and methodology before field
+    deployment -- evaluating question wording for bias and ambiguity,
+    validating sampling strategy against target population, reviewing
+    skip-logic and branching correctness, assessing response-scale
+    appropriateness, checking IRB/ethics compliance, piloting with
+    cognitive interviews, and estimating statistical power for planned
+    analyses. Produces methodology review report and approved survey
+    instrument. Excludes data collection execution and analysis.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:social-sciences
+    - target: domain:knowledge-management
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:product-team

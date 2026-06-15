@@ -1,0 +1,20 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:claude-code-manifest
+attributes:
+  artifactId: plugin-artifact:claude-code-manifest
+  displayName: "Claude Code plugin manifest"
+  targetId: plugin-target:claude-code
+  artifactKind: manifest
+  pathPattern: ".claude-plugin/plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - markdown-commands
+  contextFiles:
+    - packages/extensions-adapter/src/targets/claude-code.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:claude-code
+  references_path:
+    - target: path:claude-code-plugin-manifest
+  sourced_from:
+    - target: source-ref:packages-extensions-adapter

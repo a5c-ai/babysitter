@@ -1,0 +1,17 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:babysitter-codex-hooks-json
+attributes:
+  artifactId: plugin-artifact:babysitter-codex-hooks-json
+  displayName: "babysitter-codex hooks.json"
+  targetId: plugin-target:codex
+  artifactKind: settings-fragment
+  pathPattern: "hooks.json"
+  installerSurface: "hooks.json"
+  scriptVariants:
+    - "shell-via-hooks-adapter-cli"
+  contextFiles:
+    - plugins/babysitter-unified/per-harness/codex/hooks/hooks.json
+    - packages/adapters/extensions/src/targets/adapters/codex.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:codex

@@ -1,0 +1,54 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:genty.runtime@current
+attributes:
+  displayName: "genty Runtime (current) — composed agent-runtime + SDK runtime"
+  agentVersionId: agent-version:genty@current
+  packageRef: source-ref:packages-genty
+  subagentDispatchMechanism: agent-as-tool
+  subagentChildSessionPolicy: persistent-child-session
+  subagentToolScopePolicy: explicit-allowlist
+  builtInTools:
+    - tool-descriptor:bash
+    - tool-descriptor:read
+    - tool-descriptor:write
+    - tool-descriptor:edit
+    - tool-descriptor:grep
+    - tool-descriptor:glob
+  toolRegistryDiscovery: dynamic-extension-loaded
+  hookSockets: []
+  internalSessionStateLocation: ".a5c/runs/<runId>/"
+  sessionFileFormat: event-sourced-jsonl
+  sessionFilePathConvention: ".a5c/runs/<runId>/journal/<seq>.<ulid>.json"
+  approvalGatingPrimitive: policy-engine
+  subprocessSandboxStrategy: wrapped-shell
+  runtimeIdentity: none
+  supportedMCPTransports:
+    - mcp-transport:stdio
+    - mcp-transport:streamable-http
+    - mcp-transport:http-sse
+  supportsStreaming: true
+  notes: |
+    genty runtime composes agent-runtime and babysitter-sdk runtime (journal-
+    replay, breakpoint policy engine, harness adapters) into a unified
+    runtime surface. Adds adapters bridging for multi-harness dispatch.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:genty
+      role: runtime
+  bundles:
+    - target: tool-descriptor:bash
+    - target: tool-descriptor:read
+    - target: tool-descriptor:write
+    - target: tool-descriptor:edit
+    - target: tool-descriptor:grep
+    - target: tool-descriptor:glob
+  connects:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse
+  speaks:
+    - target: mcp-transport:stdio
+    - target: mcp-transport:streamable-http
+    - target: mcp-transport:http-sse

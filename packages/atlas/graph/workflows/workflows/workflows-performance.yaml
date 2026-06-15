@@ -1,0 +1,61 @@
+---
+nodeKind: Workflow
+id: workflow:load-testing-cycle
+attributes:
+  displayName: "Load Testing Cycle"
+  workflowKind: development
+  triggerType: on-demand
+  typicalCadence: "per-release"
+  complexity: single-team
+  description: |
+    Plans and executes load tests against staging or production environments —
+    defining traffic profiles, ramping load generators, collecting
+    latency/throughput/error metrics, identifying bottlenecks, and comparing
+    results against performance budgets. Excludes performance tuning
+    implementation.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:platform-engineer
+    - target: role:test-writer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:slo-definition
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:quality-engineering
+---
+nodeKind: Workflow
+id: workflow:performance-regression-hunt
+attributes:
+  displayName: "Performance Regression Hunt"
+  workflowKind: development
+  triggerType: event-driven
+  typicalCadence: "per-regression"
+  complexity: single-team
+  description: |
+    Systematically bisects and diagnoses a detected performance regression —
+    narrowing the causal commit range, profiling before/after states,
+    attributing the regression to a specific subsystem, and verifying the fix
+    restores baseline metrics. Excludes preventive performance budgeting.
+edges:
+  involves_role:
+    - target: role:performance-profiler
+    - target: role:debugger
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:devops
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:triage-incoming-issues
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:engineering-productivity

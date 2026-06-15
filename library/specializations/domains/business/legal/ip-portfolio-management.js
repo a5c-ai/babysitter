@@ -16,6 +16,12 @@
  * @references
  * - AIPLA IP Management: https://www.aipla.org/
  * - WIPO IP Management: https://www.wipo.int/
+  * @graph
+ *   domains: [domain:legal]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -26,7 +32,8 @@ export async function process(inputs, ctx) {
     action = 'review', // 'review', 'maintain', 'optimize', 'report'
     assetType = 'all', // 'patents', 'trademarks', 'copyrights', 'trade-secrets', 'all'
     outputDir = 'ip-portfolio-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -77,7 +84,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback, attempt: attempt + 1 });
       }
-  const phase4Review = await ctx.breakpoint({
+      const phase4Review = await ctx.breakpoint({
       question: `Portfolio optimization analysis complete. ${optimization.recommendations.length} recommendations. ${optimization.abandonmentCandidates} assets flagged for potential abandonment. Review?`,
       title: 'IP Portfolio Optimization Review',
       context: {
@@ -93,9 +100,8 @@ export async function process(inputs, ctx) {
       });
       if (phase4Review.approved) break;
       lastFeedback = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
-
-  // Phase 5: Report Generation
+    }
+    // Phase 5: Report Generation
   const report = await ctx.task(portfolioReportTask, {
     portfolioId,
     inventory,
@@ -121,7 +127,6 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/legal/ip-portfolio-management', timestamp: startTime }
   };
 }
-
 export const portfolioInventoryTask = defineTask('portfolio-inventory', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Inventory IP portfolio',

@@ -1,0 +1,8 @@
+nodeKind: OutOfScopeReason
+id: out-of-scope-reason:volatile-data
+attributes:
+  reasonKind: "volatile-data"
+  displayName: "Volatile Data"
+  description: |
+    Data changes too quickly to maintain in the catalog.
+edges: {}

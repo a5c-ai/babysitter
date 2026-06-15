@@ -1,0 +1,129 @@
+{
+  "projectName": "AI Customer Intelligence Platform",
+  "domainDescription": "Comprehensive AI-powered customer relationship management platform that provides predictive insights, automated engagement, and intelligent analytics for enterprise customers. Integrates with existing CRM systems, marketing tools, and data warehouses to create a unified customer intelligence layer.",
+  "ontologyScope": "encyclopedic",
+  "graphDepth": "complete",
+  "wikiTarget": "full-reference",
+  "iterationDepth": "thorough",
+  "adversarialMode": "standard",
+
+  "domainContext": {
+    "industry": "Enterprise Software / Customer Intelligence",
+    "targetUsers": [
+      "Sales Teams",
+      "Marketing Professionals",
+      "Customer Success Managers",
+      "Data Analysts",
+      "Executive Leadership"
+    ],
+    "keyDomains": [
+      "Customer Behavior Analytics",
+      "Predictive Modeling",
+      "Campaign Management",
+      "Integration Architecture",
+      "Real-time Processing"
+    ],
+    "externalSystems": [
+      "Salesforce CRM",
+      "HubSpot",
+      "Marketo",
+      "Snowflake Data Warehouse",
+      "Segment CDP",
+      "Stripe Payments"
+    ]
+  },
+
+  "businessRequirements": {
+    "coreCapabilities": [
+      "360-degree customer view with real-time updates",
+      "Predictive lead scoring and churn prediction",
+      "Automated campaign triggering and optimization",
+      "Advanced segmentation with ML clustering",
+      "Real-time personalization engines",
+      "Cross-channel attribution analysis"
+    ],
+    "integrationRequirements": [
+      "Bi-directional sync with major CRM platforms",
+      "Real-time data ingestion from multiple sources",
+      "API-first architecture for custom integrations",
+      "Enterprise-grade security and compliance",
+      "Scalable data processing for large customers"
+    ],
+    "userExperience": [
+      "Intuitive dashboard with customizable widgets",
+      "Mobile-responsive design for field teams",
+      "Advanced filtering and search capabilities",
+      "Automated alerts and notifications",
+      "Self-service analytics and reporting"
+    ]
+  },
+
+  "technicalConstraints": {
+    "performance": [
+      "Sub-second response times for dashboard queries",
+      "Support for 10M+ customer profiles",
+      "Real-time processing of streaming events",
+      "99.9% uptime SLA requirements"
+    ],
+    "security": [
+      "SOC 2 Type II compliance",
+      "GDPR and CCPA data protection",
+      "Enterprise SSO integration",
+      "Role-based access control",
+      "Data encryption at rest and in transit"
+    ],
+    "scalability": [
+      "Microservices architecture for component scaling",
+      "Multi-tenant SaaS deployment model",
+      "Horizontal scaling for data processing",
+      "Global deployment with regional data residency"
+    ]
+  },
+
+  "expectedArtifacts": {
+    "encyclopedia": {
+      "conceptPages": [
+        "Customer Intelligence",
+        "Predictive Analytics",
+        "Real-time Processing",
+        "Integration Patterns",
+        "ML/AI Algorithms",
+        "Data Architecture",
+        "Security Framework",
+        "API Design"
+      ],
+      "processPages": [
+        "Data Ingestion Pipeline",
+        "Model Training Workflow",
+        "Campaign Automation",
+        "Customer Onboarding",
+        "Incident Response",
+        "Deployment Process"
+      ],
+      "patternPages": [
+        "Event-Driven Architecture",
+        "CQRS with Event Sourcing",
+        "Microservices Patterns",
+        "Data Pipeline Patterns",
+        "API Gateway Patterns",
+        "Security Patterns"
+      ]
+    },
+    "interfaces": {
+      "web": "React-based SPA with TypeScript",
+      "mobile": "React Native cross-platform app",
+      "api": "GraphQL API with REST fallbacks",
+      "cli": "Node.js CLI for admin operations",
+      "mcp": "Claude integration for AI assistance"
+    },
+    "testing": {
+      "coverage": "90%+ code coverage",
+      "e2e": "Playwright-based end-to-end tests",
+      "performance": "Load testing with k6",
+      "security": "OWASP ZAP security scans",
+      "integration": "Contract testing with Pact"
+    }
+  },
+
+  "notes": "This example demonstrates the full scope of ontology-driven development for a complex enterprise software platform. The encyclopedic scope ensures comprehensive domain coverage suitable for both implementation and knowledge management."
+}

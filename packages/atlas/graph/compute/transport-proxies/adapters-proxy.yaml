@@ -1,0 +1,26 @@
+nodeKind: TransportProxy
+id: transport-proxy:adapters-proxy
+attributes:
+  capabilities: []
+  displayName: "Agent-Adapter Proxy"
+  kinds:
+    - routing
+    - observability
+  bridges:
+    - model-transport:anthropic-messages
+    - model-transport:openai-responses
+  exposedEndpoints:
+    - "POST /v1/responses"
+    - "WebSocket /v1/responses"
+  routingRequirements:
+    - "Codex launchers must pass -c openai_base_url=<proxy>/v1 in addition to OPENAI_BASE_URL."
+    - "Responses WebSocket clients authenticate with Authorization: Bearer <proxy-token>."
+  signsResponses: false
+edges:
+  realizes:
+    - target: layer:3-transport
+  bridges:
+    - target: model-transport:anthropic-messages
+      direction: src
+    - target: model-transport:openai-responses
+      direction: dst

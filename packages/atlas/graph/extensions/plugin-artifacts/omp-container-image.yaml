@@ -1,0 +1,14 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:omp-container-image
+attributes:
+  artifactId: plugin-artifact:omp-container-image
+  displayName: "Oh-My-Pi (omp) container image"
+  targetId: plugin-target:omp
+  artifactKind: container-image
+  pathPattern: "ghcr.io/a5c-ai/omp"
+  installerSurface: "latest"
+  scriptVariants:
+    - preinstalled
+edges:
+  emits_artifact:
+    - target: plugin-target:omp

@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:interaction-primitive-category.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:interaction-primitive-category
+  text: |
+    editorial grouping for InteractionPrimitives (control, navigation, context, approval, voice, telemetry, multimodal, collaborative)
+  status: canonical
+edges:
+  defines:
+    - term:interaction-primitive-category

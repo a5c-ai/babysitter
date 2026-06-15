@@ -8,6 +8,13 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:performance-testing, skill-area:load-testing]
+  roles: [role:qa-engineer, role:sre]
+  topics: [topic:test-driven-development]
+
 ---
 
 # JMeter Performance Testing Skill

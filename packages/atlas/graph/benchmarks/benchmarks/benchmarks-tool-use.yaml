@@ -1,0 +1,40 @@
+---
+nodeKind: Benchmark
+id: benchmark:toolbench
+attributes:
+  displayName: "ToolBench"
+  homepageUrl: https://github.com/OpenBMB/ToolBench
+  kind: agent-platform
+  targetsKind: AgentVersion
+  description: |
+    ToolBench (OpenBMB) is a large-scale instruction-tuning and
+    evaluation suite for LLM tool-use, built on 16,000+ real-world
+    REST APIs from RapidAPI; the companion ToolEval harness scores
+    pass-rate and win-rate against a reference tool-using agent.
+edges:
+  covers:
+    - target: skill-area:tool-use
+    - target: skill-area:multi-turn-tool-use
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:api-development
+---
+nodeKind: Benchmark
+id: benchmark:berkeley-function-calling
+attributes:
+  displayName: "Berkeley Function Calling Leaderboard (BFCL)"
+  homepageUrl: https://gorilla.cs.berkeley.edu/leaderboard.html
+  kind: model-only
+  targetsKind: ModelVersion
+  description: |
+    BFCL (Berkeley Function Calling Leaderboard, from the Gorilla
+    project) is the canonical public leaderboard for LLM function-
+    calling and tool-use accuracy across simple, parallel, multiple,
+    and live function-calling categories. Versions v1, v2 (live),
+    and v3 (multi-turn / multi-step) have been released.
+edges:
+  covers:
+    - target: skill-area:tool-use
+      attributes:
+        coverage: full
+        weight: 1.0

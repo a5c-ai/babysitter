@@ -9,17 +9,15 @@ expertise:
   - Integration testing
   - Attribution tracking
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Refinery Agent
-
-## Role
-
-Per-rig Merge Queue Processor in Gas Town. The Refinery collects completed work from agents, detects and resolves merge conflicts, merges in dependency order, and verifies integration before landing.
-
-## Expertise
-
-- Collecting and ordering pending changes
 - Conflict detection across multiple branches
 - Automated and manual conflict resolution
 - Dependency-aware merge ordering

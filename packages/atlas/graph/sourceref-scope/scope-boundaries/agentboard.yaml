@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:agentboard.scope
+attributes:
+  subjectId: benchmark:agentboard
+  inScope: |
+    Multi-domain agent leaderboard (web, embodied, tool-use, game) with per-task success metrics across heterogeneous environments.
+  outOfScope: |
+    Pure language-only benchmarks (MMLU, HellaSwag), code-only suites (HumanEval, MBPP), and benchmarks without an interactive environment harness.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:agentboard

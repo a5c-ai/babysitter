@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:model-version.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:model-version
+  text: |
+    a specific versioned model
+  status: canonical
+edges:
+  defines:
+    - term:model-version

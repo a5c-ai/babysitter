@@ -9,6 +9,13 @@ expertise:
   - Design tokens docs
   - Accessibility docs
   - Migration guides
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:technical-writer, role:frontend-engineer]
+  skillAreas: [skill-area:design-systems, skill-area:react-components]
+  topics: [topic:component-based-architecture]
+
 ---
 
 # Component Documentation Agent

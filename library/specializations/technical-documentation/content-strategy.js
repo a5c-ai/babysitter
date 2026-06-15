@@ -5,6 +5,11 @@
  * @category Knowledge Management
  * @inputs { projectName: string, productType: string, targetAudiences: array, existingContent: array, documentationGoals: array, contentTypes: array, platforms: array, outputDir: string }
  * @outputs { success: boolean, strategyDocument: object, informationArchitecture: object, contentModel: object, taxonomy: object, governanceFramework: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs]
+ *   roles: [role:technical-writer, role:documentation-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

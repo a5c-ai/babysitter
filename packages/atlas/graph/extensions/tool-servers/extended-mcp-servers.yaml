@@ -1,0 +1,1370 @@
+nodeKind: ToolServer
+id: tool-server:mcp-everything
+attributes:
+  displayName: MCP Everything (reference)
+  description: "Reference MCP server exercising all protocol features. Demonstrates tools, resources, prompts, roots, and sampling capabilities. Used for testing and validating MCP client implementations."
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+  npmPackage: "@modelcontextprotocol/server-everything"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:everything.echo
+  - tool-descriptor:everything.add
+  - tool-descriptor:everything.long-running-operation
+  - tool-descriptor:everything.sample-llm
+  - tool-descriptor:everything.get-tiny-image
+  - tool-descriptor:everything.print-env
+  - tool-descriptor:everything.annotated-message
+  - tool-descriptor:everything.get-resource-reference
+  - tool-descriptor:everything.get-resource-links
+  - tool-descriptor:everything.structured-content
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:everything.echo
+  - target: tool-descriptor:everything.add
+  - target: tool-descriptor:everything.long-running-operation
+  - target: tool-descriptor:everything.sample-llm
+  - target: tool-descriptor:everything.get-tiny-image
+  - target: tool-descriptor:everything.print-env
+  - target: tool-descriptor:everything.annotated-message
+  - target: tool-descriptor:everything.get-resource-reference
+  - target: tool-descriptor:everything.get-resource-links
+  - target: tool-descriptor:everything.structured-content
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  exposes_prompt:
+  - target: mcp-prompt:summarize-thread
+  - target: mcp-prompt:explain-diff
+  - target: mcp-prompt:plan-tasks
+  - target: mcp-prompt:review-pr
+  exposes_root:
+  - target: mcp-root:project-workspace
+  - target: mcp-root:home-directory
+  - target: mcp-root:read-only-docs
+  exposes_sampling:
+  - target: mcp-sampling:default-anthropic
+  - target: mcp-sampling:cost-optimized
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-time
+attributes:
+  displayName: MCP Time
+  description: "MCP server providing time zone conversion and current time retrieval. Enables AI agents to get the current time in any timezone and convert between time zones. Supports stdio transport."
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/time
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:time.get-current-time
+  - tool-descriptor:time.convert-time
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:time.get-current-time
+  - target: tool-descriptor:time.convert-time
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-memory
+attributes:
+  displayName: MCP Memory (knowledge graph)
+  description: "MCP server providing persistent knowledge graph memory. Enables AI agents to create entities, relations, and observations for long-term information retention across sessions. Supports stdio transport."
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+  npmPackage: "@modelcontextprotocol/server-memory"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:memory.create-entities
+  - tool-descriptor:memory.create-relations
+  - tool-descriptor:memory.add-observations
+  - tool-descriptor:memory.delete-entities
+  - tool-descriptor:memory.delete-observations
+  - tool-descriptor:memory.delete-relations
+  - tool-descriptor:memory.read-graph
+  - tool-descriptor:memory.search-nodes
+  - tool-descriptor:memory.open-nodes
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:memory.create-entities
+  - target: tool-descriptor:memory.create-relations
+  - target: tool-descriptor:memory.add-observations
+  - target: tool-descriptor:memory.delete-entities
+  - target: tool-descriptor:memory.delete-observations
+  - target: tool-descriptor:memory.delete-relations
+  - target: tool-descriptor:memory.read-graph
+  - target: tool-descriptor:memory.search-nodes
+  - target: tool-descriptor:memory.open-nodes
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-puppeteer
+attributes:
+  displayName: MCP Puppeteer
+  description: "MCP server providing browser automation via Puppeteer. Enables AI agents to navigate web pages, take screenshots, click elements, fill forms, and evaluate JavaScript. Supports stdio transport."
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+  npmPackage: "@modelcontextprotocol/server-puppeteer"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:puppeteer.navigate
+  - tool-descriptor:puppeteer.screenshot
+  - tool-descriptor:puppeteer.click
+  - tool-descriptor:puppeteer.fill
+  - tool-descriptor:puppeteer.select
+  - tool-descriptor:puppeteer.hover
+  - tool-descriptor:puppeteer.evaluate
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:puppeteer.navigate
+  - target: tool-descriptor:puppeteer.screenshot
+  - target: tool-descriptor:puppeteer.click
+  - target: tool-descriptor:puppeteer.fill
+  - target: tool-descriptor:puppeteer.select
+  - target: tool-descriptor:puppeteer.hover
+  - target: tool-descriptor:puppeteer.evaluate
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: tool:playwright
+  - target: library:puppeteer
+  lib_applies_to_domain:
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-google-drive
+attributes:
+  displayName: MCP Google Drive
+  description: "MCP server providing access to Google Drive. Enables AI agents to search files and read document contents from Google Drive. Supports stdio transport."
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive
+  npmPackage: "@modelcontextprotocol/server-gdrive"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:gdrive.search
+  - tool-descriptor:gdrive.read-file
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:gdrive.search
+  - target: tool-descriptor:gdrive.read-file
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: provider:google
+  lib_applies_to_domain:
+  - target: domain:knowledge-management
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-google-maps
+attributes:
+  displayName: MCP Google Maps
+  description: "MCP server providing Google Maps Platform access. Enables AI agents to geocode addresses, search for places, get directions, compute distance matrices, and query elevation data. Supports stdio transport."
+  protocol: mcp
+  category: other
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps
+  npmPackage: "@modelcontextprotocol/server-google-maps"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:maps.geocode
+  - tool-descriptor:maps.reverse-geocode
+  - tool-descriptor:maps.search-places
+  - tool-descriptor:maps.place-details
+  - tool-descriptor:maps.directions
+  - tool-descriptor:maps.distance-matrix
+  - tool-descriptor:maps.elevation
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:maps.geocode
+  - target: tool-descriptor:maps.reverse-geocode
+  - target: tool-descriptor:maps.search-places
+  - target: tool-descriptor:maps.place-details
+  - target: tool-descriptor:maps.directions
+  - target: tool-descriptor:maps.distance-matrix
+  - target: tool-descriptor:maps.elevation
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: provider:google
+  lib_applies_to_domain:
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-s3
+attributes:
+  displayName: MCP AWS S3
+  description: "MCP server providing access to Amazon S3 object storage. Enables AI agents to list buckets, browse objects, read files, and upload content to S3. Supports stdio transport."
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/aws/aws-mcp-servers
+  maintainer: AWS
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:s3.list-buckets
+  - tool-descriptor:s3.list-objects
+  - tool-descriptor:s3.get-object
+  - tool-descriptor:s3.put-object
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:s3.list-buckets
+  - target: tool-descriptor:s3.list-objects
+  - target: tool-descriptor:s3.get-object
+  - target: tool-descriptor:s3.put-object
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: stack-part:object-storage
+  - target: platform-service:aws-s3
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-stripe
+attributes:
+  displayName: MCP Stripe
+  description: "MCP server providing access to the Stripe payments platform. Enables AI agents to manage customers, products, prices, payment links, and invoices. Supports stdio transport."
+  protocol: mcp
+  category: payment
+  repoUrl: https://github.com/stripe/agent-toolkit
+  npmPackage: "@stripe/agent-toolkit"
+  maintainer: Stripe
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:stripe.list-customers
+  - tool-descriptor:stripe.create-customer
+  - tool-descriptor:stripe.list-products
+  - tool-descriptor:stripe.create-product
+  - tool-descriptor:stripe.list-prices
+  - tool-descriptor:stripe.create-price
+  - tool-descriptor:stripe.create-payment-link
+  - tool-descriptor:stripe.create-invoice
+  - tool-descriptor:stripe.list-invoices
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: medium
+      evidence: "Stripe API access supports billing and payment integration operations."
+    - target: workflow:release-management
+      confidence: medium
+      evidence: "Billing integration readiness is often release-critical for commerce and SaaS systems."
+  contains_tool_descriptor:
+  - target: tool-descriptor:stripe.list-customers
+  - target: tool-descriptor:stripe.create-customer
+  - target: tool-descriptor:stripe.list-products
+  - target: tool-descriptor:stripe.create-product
+  - target: tool-descriptor:stripe.list-prices
+  - target: tool-descriptor:stripe.create-price
+  - target: tool-descriptor:stripe.create-payment-link
+  - target: tool-descriptor:stripe.create-invoice
+  - target: tool-descriptor:stripe.list-invoices
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: tool:stripe
+  lib_applies_to_domain:
+  - target: domain:fintech
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-linear
+attributes:
+  displayName: MCP Linear
+  description: "MCP server providing access to the Linear project management platform. Enables AI agents to list and manage issues, projects, and teams. Supports stdio transport."
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/jerhadf/linear-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:linear.list-issues
+  - tool-descriptor:linear.get-issue
+  - tool-descriptor:linear.create-issue
+  - tool-descriptor:linear.update-issue
+  - tool-descriptor:linear.list-projects
+  - tool-descriptor:linear.list-teams
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Linear issue, project, comment, and cycle access supports issue triage."
+    - target: workflow:bug-triage
+      confidence: high
+      evidence: "Issue tracker state and comments drive bug-triage workflow projections."
+    - target: workflow:release-management
+      confidence: medium
+      evidence: "Project/cycle metadata supports release-scope coordination."
+  contains_tool_descriptor:
+  - target: tool-descriptor:linear.list-issues
+  - target: tool-descriptor:linear.get-issue
+  - target: tool-descriptor:linear.create-issue
+  - target: tool-descriptor:linear.update-issue
+  - target: tool-descriptor:linear.list-projects
+  - target: tool-descriptor:linear.list-teams
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: issue-tracker:linear
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-notion
+attributes:
+  displayName: MCP Notion
+  description: "MCP server providing access to the Notion workspace platform. Enables AI agents to search, create, update pages, append block children, and query databases. Supports stdio transport."
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/makenotion/notion-mcp-server
+  maintainer: Notion
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:notion.search
+  - tool-descriptor:notion.get-page
+  - tool-descriptor:notion.create-page
+  - tool-descriptor:notion.update-page
+  - tool-descriptor:notion.append-block-children
+  - tool-descriptor:notion.query-database
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:technical-writer
+      confidence: medium
+      evidence: "Knowledge-base pages and database content support docs workflows."
+    - target: responsibility:write-user-docs
+      confidence: medium
+      evidence: "Notion can host drafts, specs, and user-facing documentation content."
+    - target: workflow:documentation-sprint
+      confidence: medium
+      evidence: "Workspace pages and project databases support docs sprint planning and execution."
+  contains_tool_descriptor:
+  - target: tool-descriptor:notion.search
+  - target: tool-descriptor:notion.get-page
+  - target: tool-descriptor:notion.create-page
+  - target: tool-descriptor:notion.update-page
+  - target: tool-descriptor:notion.append-block-children
+  - target: tool-descriptor:notion.query-database
+  integrates_with:
+  - target: tool:notion
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  exposes_resource:
+  - target: mcp-resource:notion-page
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-jira
+attributes:
+  displayName: MCP Atlassian (Jira & Confluence)
+  description: "MCP server providing access to Atlassian Jira and Confluence. Enables AI agents to search, create, update, and transition Jira issues, add comments, and read Confluence pages. Supports stdio transport."
+  protocol: mcp
+  category: productivity
+  repoUrl: https://github.com/sooperset/mcp-atlassian
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:jira.search
+  - tool-descriptor:jira.get-issue
+  - tool-descriptor:jira.create-issue
+  - tool-descriptor:jira.update-issue
+  - tool-descriptor:jira.add-comment
+  - tool-descriptor:jira.transition-issue
+  - tool-descriptor:confluence.search
+  - tool-descriptor:confluence.get-page
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: responsibility:triage-incoming-issues
+      confidence: high
+      evidence: "Jira issue search, transitions, comments, and attachments support triage."
+    - target: workflow:bug-triage
+      confidence: high
+      evidence: "Jira is a primary bug and support-ticket workflow surface."
+    - target: workflow:release-management
+      confidence: medium
+      evidence: "Jira versions, boards, and issue states support release readiness review."
+  contains_tool_descriptor:
+  - target: tool-descriptor:jira.search
+  - target: tool-descriptor:jira.get-issue
+  - target: tool-descriptor:jira.create-issue
+  - target: tool-descriptor:jira.update-issue
+  - target: tool-descriptor:jira.add-comment
+  - target: tool-descriptor:jira.transition-issue
+  - target: tool-descriptor:confluence.search
+  - target: tool-descriptor:confluence.get-page
+  integrates_with:
+  - target: tool:confluence
+  - target: issue-tracker:jira
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-sentry
+attributes:
+  displayName: MCP Sentry
+  description: "MCP server providing access to Sentry error tracking. Enables AI agents to list, search, and inspect issues and error events. Supports stdio transport."
+  protocol: mcp
+  category: monitoring
+  repoUrl: https://github.com/getsentry/sentry-mcp
+  maintainer: Sentry
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:sentry.get-issue
+  - tool-descriptor:sentry.list-issues
+  - tool-descriptor:sentry.search-issues
+  - tool-descriptor:sentry.get-event
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:incident-commander
+      confidence: medium
+      evidence: "Error events and release regression signals support incident assessment."
+    - target: workflow:incident-response
+      confidence: medium
+      evidence: "Application errors and traces help identify incident root causes."
+  contains_tool_descriptor:
+  - target: tool-descriptor:sentry.get-issue
+  - target: tool-descriptor:sentry.list-issues
+  - target: tool-descriptor:sentry.search-issues
+  - target: tool-descriptor:sentry.get-event
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: stack-part:tracing
+  lib_applies_to_domain:
+  - target: domain:observability
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-cloudflare
+attributes:
+  displayName: MCP Cloudflare
+  description: "MCP server providing access to Cloudflare's developer platform. Enables AI agents to manage Workers, KV namespaces, D1 databases, R2 object storage, and run analytics queries. Supports streamable HTTP transport."
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/cloudflare/mcp-server-cloudflare
+  maintainer: Cloudflare
+  mcpTransports:
+  - mcp-transport:streamable-http
+  tools:
+  - tool-descriptor:cloudflare.list-workers
+  - tool-descriptor:cloudflare.deploy-worker
+  - tool-descriptor:cloudflare.list-kv-namespaces
+  - tool-descriptor:cloudflare.kv-get
+  - tool-descriptor:cloudflare.kv-put
+  - tool-descriptor:cloudflare.list-d1-databases
+  - tool-descriptor:cloudflare.d1-query
+  - tool-descriptor:cloudflare.list-r2-buckets
+  - tool-descriptor:cloudflare.r2-list-objects
+  - tool-descriptor:cloudflare.analytics-query
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: high
+      evidence: "Cloudflare MCP access to DNS, Workers, R2, Pages, and zone settings supports platform operations."
+    - target: workflow:incident-response
+      confidence: medium
+      evidence: "Cloudflare operational state and security controls are incident-response inputs."
+  contains_tool_descriptor:
+  - target: tool-descriptor:cloudflare.list-workers
+  - target: tool-descriptor:cloudflare.deploy-worker
+  - target: tool-descriptor:cloudflare.list-kv-namespaces
+  - target: tool-descriptor:cloudflare.kv-get
+  - target: tool-descriptor:cloudflare.kv-put
+  - target: tool-descriptor:cloudflare.list-d1-databases
+  - target: tool-descriptor:cloudflare.d1-query
+  - target: tool-descriptor:cloudflare.list-r2-buckets
+  - target: tool-descriptor:cloudflare.r2-list-objects
+  - target: tool-descriptor:cloudflare.analytics-query
+  integrates_with:
+  - target: tool:cloudflare-workers
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  lib_applies_to_domain:
+  - target: domain:cloud-infra
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-github
+attributes:
+  displayName: MCP GitHub (official)
+  description: "Official MCP server for the GitHub platform. Enables AI agents to manage issues, pull requests, search repositories and code, create branches, fork repos, and manipulate file contents. Supports stdio and streamable HTTP transports."
+  protocol: mcp
+  category: version-control
+  repoUrl: https://github.com/github/github-mcp-server
+  maintainer: GitHub
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+  tools:
+  - tool-descriptor:github.create-issue
+  - tool-descriptor:github.list-issues
+  - tool-descriptor:github.get-issue
+  - tool-descriptor:github.update-issue
+  - tool-descriptor:github.add-issue-comment
+  - tool-descriptor:github.create-pull-request
+  - tool-descriptor:github.list-pull-requests
+  - tool-descriptor:github.search-repositories
+  - tool-descriptor:github.search-code
+  - tool-descriptor:github.search-users
+  - tool-descriptor:github.create-or-update-file
+  - tool-descriptor:github.get-file-contents
+  - tool-descriptor:github.fork-repository
+  - tool-descriptor:github.create-branch
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:code-reviewer
+      confidence: high
+      evidence: "GitHub repository, pull request, and issue access supports code-review work."
+    - target: responsibility:review-prs-merge-decisions
+      confidence: high
+      evidence: "Pull request metadata, diffs, checks, and comments are primary inputs to merge decisions."
+    - target: workflow:bug-triage
+      confidence: high
+      evidence: "GitHub issues and pull requests are common bug-triage surfaces."
+    - target: workflow:test-automation-pipeline
+      confidence: medium
+      evidence: "Repository checks and CI statuses project test automation outcomes."
+  contains_tool_descriptor:
+  - target: tool-descriptor:github.create-issue
+  - target: tool-descriptor:github.list-issues
+  - target: tool-descriptor:github.get-issue
+  - target: tool-descriptor:github.update-issue
+  - target: tool-descriptor:github.add-issue-comment
+  - target: tool-descriptor:github.create-pull-request
+  - target: tool-descriptor:github.list-pull-requests
+  - target: tool-descriptor:github.search-repositories
+  - target: tool-descriptor:github.search-code
+  - target: tool-descriptor:github.search-users
+  - target: tool-descriptor:github.create-or-update-file
+  - target: tool-descriptor:github.get-file-contents
+  - target: tool-descriptor:github.fork-repository
+  - target: tool-descriptor:github.create-branch
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: provider:github
+  - target: issue-tracker:github-issues
+  - target: vcs-host:github
+  - target: tool:github-actions
+  exposes_resource:
+  - target: mcp-resource:github-issue
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-gitlab
+attributes:
+  displayName: MCP GitLab
+  description: "MCP server providing access to the GitLab platform. Enables AI agents to search repositories, manage files, create issues and merge requests, fork repos, and create branches. Supports stdio transport."
+  protocol: mcp
+  category: version-control
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab
+  npmPackage: "@modelcontextprotocol/server-gitlab"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:gitlab.search-repositories
+  - tool-descriptor:gitlab.get-file-contents
+  - tool-descriptor:gitlab.create-or-update-file
+  - tool-descriptor:gitlab.create-issue
+  - tool-descriptor:gitlab.list-issues
+  - tool-descriptor:gitlab.create-merge-request
+  - tool-descriptor:gitlab.fork-repository
+  - tool-descriptor:gitlab.create-branch
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:gitlab.search-repositories
+  - target: tool-descriptor:gitlab.get-file-contents
+  - target: tool-descriptor:gitlab.create-or-update-file
+  - target: tool-descriptor:gitlab.create-issue
+  - target: tool-descriptor:gitlab.list-issues
+  - target: tool-descriptor:gitlab.create-merge-request
+  - target: tool-descriptor:gitlab.fork-repository
+  - target: tool-descriptor:gitlab.create-branch
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: tool:gitlab-ci
+  - target: vcs-host:gitlab
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-elasticsearch
+attributes:
+  displayName: MCP Elasticsearch
+  description: "MCP server providing access to Elasticsearch clusters. Enables AI agents to list indices, inspect mappings, run search queries, and execute ES|QL. Supports stdio transport."
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/elastic/mcp-server-elasticsearch
+  maintainer: Elastic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:elasticsearch.list-indices
+  - tool-descriptor:elasticsearch.get-mappings
+  - tool-descriptor:elasticsearch.search
+  - tool-descriptor:elasticsearch.esql
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:elasticsearch.list-indices
+  - target: tool-descriptor:elasticsearch.get-mappings
+  - target: tool-descriptor:elasticsearch.search
+  - target: tool-descriptor:elasticsearch.esql
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: stack-part:search-index
+  - target: tool:elasticsearch
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-mongodb
+attributes:
+  displayName: MCP MongoDB
+  description: "MCP server providing access to MongoDB databases. Enables AI agents to list databases and collections, run find and aggregate queries, count documents, and perform bulk inserts and updates. Supports stdio transport."
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/mongodb-js/mongodb-mcp-server
+  maintainer: MongoDB
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:mongo.list-databases
+  - tool-descriptor:mongo.list-collections
+  - tool-descriptor:mongo.find
+  - tool-descriptor:mongo.aggregate
+  - tool-descriptor:mongo.count
+  - tool-descriptor:mongo.insert-many
+  - tool-descriptor:mongo.update-many
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:mongo.list-databases
+  - target: tool-descriptor:mongo.list-collections
+  - target: tool-descriptor:mongo.find
+  - target: tool-descriptor:mongo.aggregate
+  - target: tool-descriptor:mongo.count
+  - target: tool-descriptor:mongo.insert-many
+  - target: tool-descriptor:mongo.update-many
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: stack-part:nosql-database
+  - target: tool:mongosh
+  - target: library:mongoose
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-redis
+attributes:
+  displayName: MCP Redis
+  description: "MCP server providing access to Redis key-value stores. Enables AI agents to get, set, delete keys, manage hash fields, and work with lists. Supports stdio transport."
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/redis/mcp-redis
+  maintainer: Redis
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:redis.get
+  - tool-descriptor:redis.set
+  - tool-descriptor:redis.delete
+  - tool-descriptor:redis.list-keys
+  - tool-descriptor:redis.hget
+  - tool-descriptor:redis.hset
+  - tool-descriptor:redis.lpush
+  - tool-descriptor:redis.lrange
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:redis.get
+  - target: tool-descriptor:redis.set
+  - target: tool-descriptor:redis.delete
+  - target: tool-descriptor:redis.list-keys
+  - target: tool-descriptor:redis.hget
+  - target: tool-descriptor:redis.hset
+  - target: tool-descriptor:redis.lpush
+  - target: tool-descriptor:redis.lrange
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: stack-part:cache
+  - target: tool:redis-cli
+  - target: library:redis
+  - target: library:redis-py
+  - target: library:ioredis
+  - target: specialization:redis-ops
+  lib_applies_to_domain:
+  - target: domain:databases
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-kubernetes
+attributes:
+  displayName: MCP Kubernetes
+  description: "MCP server providing access to Kubernetes clusters via kubectl. Enables AI agents to get, describe, and manage resources, view logs, apply manifests, and execute commands in pods. Supports stdio transport."
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/strowk/mcp-k8s-go
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:kubectl.get
+  - tool-descriptor:kubectl.describe
+  - tool-descriptor:kubectl.logs
+  - tool-descriptor:kubectl.apply
+  - tool-descriptor:kubectl.delete
+  - tool-descriptor:kubectl.exec
+  - tool-descriptor:kubectl.list-contexts
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:platform-engineer
+      confidence: high
+      evidence: "Cluster, workload, and event access supports platform operations."
+    - target: workflow:incident-response
+      confidence: medium
+      evidence: "Kubernetes events and workload status are incident-response inputs."
+  contains_tool_descriptor:
+  - target: tool-descriptor:kubectl.get
+  - target: tool-descriptor:kubectl.describe
+  - target: tool-descriptor:kubectl.logs
+  - target: tool-descriptor:kubectl.apply
+  - target: tool-descriptor:kubectl.delete
+  - target: tool-descriptor:kubectl.exec
+  - target: tool-descriptor:kubectl.list-contexts
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: full
+    notes: 'Cluster mutations: clients MUST gate writes on approval.'
+  integrates_with:
+  - target: tool:kubernetes
+  - target: tool:helm
+  - target: platform:kubernetes
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-docker
+attributes:
+  displayName: MCP Docker
+  description: "MCP server providing Docker container management. Enables AI agents to list, run, stop, and exec into containers, view logs, manage images, and trigger builds. Supports stdio transport."
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/docker/docker-mcp
+  maintainer: Docker
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:docker.ps
+  - tool-descriptor:docker.run
+  - tool-descriptor:docker.logs
+  - tool-descriptor:docker.images
+  - tool-descriptor:docker.build
+  - tool-descriptor:docker.stop
+  - tool-descriptor:docker.exec
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:docker.ps
+  - target: tool-descriptor:docker.run
+  - target: tool-descriptor:docker.logs
+  - target: tool-descriptor:docker.images
+  - target: tool-descriptor:docker.build
+  - target: tool-descriptor:docker.stop
+  - target: tool-descriptor:docker.exec
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: full
+    notes: Container lifecycle calls; clients should gate on approval.
+  integrates_with:
+  - target: tool:docker
+  - target: tool:docker-compose
+  lib_applies_to_domain:
+  - target: domain:devops
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-aws-bedrock
+attributes:
+  displayName: MCP AWS Bedrock
+  description: "MCP server providing access to AWS Bedrock AI services. Enables AI agents to list foundation models, invoke model inference, manage knowledge bases, and run RAG queries. Supports stdio transport."
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/aws/aws-mcp-servers
+  maintainer: AWS
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:bedrock.list-foundation-models
+  - tool-descriptor:bedrock.invoke-model
+  - tool-descriptor:bedrock.list-knowledge-bases
+  - tool-descriptor:bedrock.retrieve-and-generate
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:bedrock.list-foundation-models
+  - target: tool-descriptor:bedrock.invoke-model
+  - target: tool-descriptor:bedrock.list-knowledge-bases
+  - target: tool-descriptor:bedrock.retrieve-and-generate
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  integrates_with:
+  - target: provider:aws-bedrock
+  - target: platform:aws
+  lib_applies_to_domain:
+  - target: domain:data-science
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-perplexity
+attributes:
+  displayName: MCP Perplexity
+  description: "MCP server providing access to Perplexity AI search. Enables AI agents to ask questions, conduct deep research, and reason over web search results. Supports stdio transport."
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/ppl-ai/modelcontextprotocol
+  maintainer: Perplexity
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:perplexity.ask
+  - tool-descriptor:perplexity.research
+  - tool-descriptor:perplexity.reason
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:perplexity.ask
+  - target: tool-descriptor:perplexity.research
+  - target: tool-descriptor:perplexity.reason
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: partial
+    notes: Read-only search; approval only at install time.
+  integrates_with:
+  - target: stack-part:search-index
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-tavily
+attributes:
+  displayName: MCP Tavily
+  description: "MCP server providing web search and content extraction via Tavily API. Enables AI agents to search the web, extract page content, crawl sites, and generate sitemaps. Supports stdio transport."
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/tavily-ai/tavily-mcp
+  maintainer: Tavily
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:tavily.search
+  - tool-descriptor:tavily.extract
+  - tool-descriptor:tavily.crawl
+  - tool-descriptor:tavily.map
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:tavily.search
+  - target: tool-descriptor:tavily.extract
+  - target: tool-descriptor:tavily.crawl
+  - target: tool-descriptor:tavily.map
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: full
+    notes: Outbound network calls — clients should gate on approval.
+  integrates_with:
+  - target: stack-part:search-index
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-exa
+attributes:
+  displayName: MCP Exa
+  description: "MCP server providing neural web search via Exa API. Enables AI agents to search the web semantically, find similar pages, extract full page contents, and conduct multi-step research. Supports stdio transport."
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/exa-labs/exa-mcp-server
+  maintainer: Exa
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:exa.web-search
+  - tool-descriptor:exa.find-similar
+  - tool-descriptor:exa.get-contents
+  - tool-descriptor:exa.research
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:exa.web-search
+  - target: tool-descriptor:exa.find-similar
+  - target: tool-descriptor:exa.get-contents
+  - target: tool-descriptor:exa.research
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: partial
+    notes: Read-only search; approval only at install time.
+  integrates_with:
+  - target: stack-part:search-index
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-firecrawl
+attributes:
+  displayName: MCP Firecrawl
+  description: "MCP server providing web scraping and crawling via Firecrawl API. Enables AI agents to scrape pages, crawl sites, generate sitemaps, search, and extract structured data. Supports stdio transport."
+  protocol: mcp
+  category: search
+  repoUrl: https://github.com/mendableai/firecrawl-mcp-server
+  maintainer: Firecrawl
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:firecrawl.scrape
+  - tool-descriptor:firecrawl.crawl
+  - tool-descriptor:firecrawl.map
+  - tool-descriptor:firecrawl.search
+  - tool-descriptor:firecrawl.extract
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:firecrawl.scrape
+  - target: tool-descriptor:firecrawl.crawl
+  - target: tool-descriptor:firecrawl.map
+  - target: tool-descriptor:firecrawl.search
+  - target: tool-descriptor:firecrawl.extract
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: full
+    notes: Outbound crawl + scrape; clients should gate on approval.
+  integrates_with:
+  - target: tool:firecrawl
+  lib_applies_to_domain:
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-context7
+attributes:
+  displayName: MCP Context7
+  description: "MCP server providing up-to-date library documentation lookups. Enables AI agents to resolve library IDs and retrieve current documentation for programming libraries and frameworks. Supports stdio transport."
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/upstash/context7
+  npmPackage: "@upstash/context7-mcp"
+  maintainer: Upstash
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:context7.resolve-library-id
+  - tool-descriptor:context7.get-library-docs
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:context7.resolve-library-id
+  - target: tool-descriptor:context7.get-library-docs
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: partial
+    notes: Read-only docs lookups; approval typically needed only on first use.
+  integrates_with:
+  - target: tool:context7
+  exposes_resource:
+  - target: mcp-resource:context7-docs
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-sequential-thinking
+attributes:
+  displayName: MCP Sequential Thinking
+  description: "MCP server providing a structured sequential thinking scratchpad. Enables AI agents to break down complex problems into ordered reasoning steps with revision and branching support. Supports stdio transport."
+  protocol: mcp
+  category: ai
+  repoUrl: https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+  npmPackage: "@modelcontextprotocol/server-sequential-thinking"
+  maintainer: Anthropic
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:sequentialthinking.sequentialthinking
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:sequentialthinking.sequentialthinking
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: partial
+    notes: Local in-process scratchpad — approval only at install time.
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-figma
+attributes:
+  displayName: MCP Figma
+  description: "MCP server providing access to Figma design files. Enables AI agents to read file structures, inspect design nodes, export images, and list components. Supports stdio transport."
+  protocol: mcp
+  category: design
+  repoUrl: https://github.com/nicholasgriffintn/figma-mcp-server
+  maintainer: Community
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:figma.get-file
+  - tool-descriptor:figma.get-node
+  - tool-descriptor:figma.get-image
+  - tool-descriptor:figma.list-components
+  - tool-descriptor:figma.download-images
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  supports_work:
+    - target: role:product-designer
+      confidence: high
+      evidence: "Figma design and component access supports product design workflows."
+    - target: workflow:design-system-maintenance
+      confidence: high
+      evidence: "Design tokens, components, and files project design-system state."
+  contains_tool_descriptor:
+  - target: tool-descriptor:figma.get-file
+  - target: tool-descriptor:figma.get-node
+  - target: tool-descriptor:figma.get-image
+  - target: tool-descriptor:figma.list-components
+  - target: tool-descriptor:figma.download-images
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: partial
+    notes: Read-mostly; approval needed when scope token grants write.
+  integrates_with:
+  - target: tool:figma
+  - target: skill-area:figma-prototyping
+  lib_applies_to_domain:
+  - target: domain:frontend
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-supabase
+attributes:
+  displayName: MCP Supabase
+  description: "MCP server providing access to the Supabase platform. Enables AI agents to manage projects, execute SQL, apply migrations, deploy edge functions, and retrieve logs. Supports stdio transport."
+  protocol: mcp
+  category: cloud
+  repoUrl: https://github.com/supabase-community/supabase-mcp
+  maintainer: Supabase
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:supabase.list-projects
+  - tool-descriptor:supabase.get-project
+  - tool-descriptor:supabase.create-project
+  - tool-descriptor:supabase.execute-sql
+  - tool-descriptor:supabase.apply-migration
+  - tool-descriptor:supabase.list-tables
+  - tool-descriptor:supabase.get-project-api-keys
+  - tool-descriptor:supabase.deploy-edge-function
+  - tool-descriptor:supabase.get-logs
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:supabase.list-projects
+  - target: tool-descriptor:supabase.get-project
+  - target: tool-descriptor:supabase.create-project
+  - target: tool-descriptor:supabase.execute-sql
+  - target: tool-descriptor:supabase.apply-migration
+  - target: tool-descriptor:supabase.list-tables
+  - target: tool-descriptor:supabase.get-project-api-keys
+  - target: tool-descriptor:supabase.deploy-edge-function
+  - target: tool-descriptor:supabase.get-logs
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: full
+    notes: DB and auth mutations — approval required for writes.
+  integrates_with:
+  - target: framework:supabase
+  lib_applies_to_domain:
+  - target: domain:web-development
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-clickhouse
+attributes:
+  displayName: MCP ClickHouse
+  description: "MCP server providing access to ClickHouse analytical databases. Enables AI agents to run SELECT queries, list databases, and list tables. Supports stdio transport."
+  protocol: mcp
+  category: database
+  repoUrl: https://github.com/ClickHouse/mcp-clickhouse
+  maintainer: ClickHouse
+  mcpTransports:
+  - mcp-transport:stdio
+  tools:
+  - tool-descriptor:clickhouse.run-select-query
+  - tool-descriptor:clickhouse.list-databases
+  - tool-descriptor:clickhouse.list-tables
+  sourceRef: source-ref:mcp-servers-registry
+edges:
+  contains_tool_descriptor:
+  - target: tool-descriptor:clickhouse.run-select-query
+  - target: tool-descriptor:clickhouse.list-databases
+  - target: tool-descriptor:clickhouse.list-tables
+  implements:
+  - target: extension-interface:orchestration
+  requires_capability:
+  - target: capability:supports-mcp
+    level: required
+  sourced_from:
+  - target: source-ref:mcp-servers-registry
+  supports:
+  - target: capability:requires-tool-approval
+    versionRange: current
+    level: full
+    notes: DB queries; approval required for non-SELECT statements.
+  integrates_with:
+  - target: stack-part:data-warehouse
+  lib_applies_to_domain:
+  - target: domain:databases

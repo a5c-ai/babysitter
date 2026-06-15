@@ -1,0 +1,24 @@
+nodeKind: ToolServer
+id: tool-server:mcp-n8n
+attributes:
+  displayName: n8n MCP Server
+  description: |
+    MCP server for interacting with n8n workflow automation instances.
+    Enables AI agents to list, create, execute, and manage n8n workflows
+    programmatically, inspect execution history, and trigger webhooks.
+    Allows agents to orchestrate complex multi-step automations across
+    hundreds of integrated services through n8n's workflow engine.
+  protocol: mcp
+  category: automation
+  repoUrl: https://github.com/n8n-io/n8n-mcp-server
+  maintainer: n8n
+  mcpTransports:
+  - mcp-transport:stdio
+edges:
+  integrates_with:
+  - target: tool:n8n
+  lib_applies_to_domain:
+  - target: domain:software-engineering
+  - target: domain:operations
+  used_for:
+  - skill-area:operations-automation

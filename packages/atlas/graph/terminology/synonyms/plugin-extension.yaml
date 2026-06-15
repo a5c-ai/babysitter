@@ -1,0 +1,13 @@
+nodeKind: Synonym
+id: synonym:plugin-extension
+attributes:
+  termAId: term:plugin
+  termBId: term:extension-interface
+  direction: bidirectional
+  note: |
+    Informally "plugin" and "extension" are used interchangeably; canonical separation: Plugin = packaging, ExtensionInterface = contract.
+edges:
+  synonym_a:
+    - term:plugin
+  synonym_b:
+    - term:extension-interface

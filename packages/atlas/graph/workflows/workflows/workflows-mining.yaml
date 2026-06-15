@@ -1,0 +1,71 @@
+---
+nodeKind: Workflow
+id: workflow:resource-estimation-review
+attributes:
+  displayName: "Resource Estimation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews mineral resource and ore reserve estimations -- validating
+    geological block models against drill-hole assay databases, verifying
+    variogram parameters and kriging estimation quality, auditing cut-off
+    grade assumptions against current commodity prices and processing costs,
+    reconciling estimated versus actual mill-head grades from prior periods,
+    and ensuring compliance with JORC, NI 43-101, or SAMREC reporting codes.
+    Produces resource estimation audit reports, reconciliation analyses, and
+    material change disclosures. Excludes exploration program planning.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:principal-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:domain-driven-design
+  applies_to_domain:
+    - target: domain:mining
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:research-engineering
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:mine-safety-audit
+attributes:
+  displayName: "Mine Safety Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Audits mine safety systems and compliance -- inspecting ground control
+    plans against geotechnical monitoring data, verifying ventilation system
+    performance against dust and gas concentration limits, reviewing
+    emergency response and evacuation procedure readiness, auditing personal
+    protective equipment compliance and training certification currency, and
+    validating incident reporting against MSHA or local mining authority
+    requirements. Produces safety audit findings, risk heat maps, and
+    corrective action tracking dashboards. Excludes mine planning and
+    design.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:incident-commander
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:incident-response
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:mining
+    - target: domain:compliance
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:regulatory-filing
+  performed_by_org_unit:
+    - target: org-unit:operations-team
+    - target: org-unit:compliance-team

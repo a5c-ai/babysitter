@@ -16,6 +16,9 @@
  * - LangChain Memory: https://python.langchain.com/docs/modules/memory/
  * - Zep: https://docs.getzep.com/
  * - MemGPT: https://memgpt.readme.io/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -2,13 +2,17 @@
 name: framework-builder
 description: Consolidates scattered notes into structured knowledge frameworks with source attribution
 role: Knowledge Consolidation & Framework Building
----
-
-# Framework Builder Agent
-
-**Name:** Framework Builder
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Knowledge Consolidation & Framework Building
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
+
+---
 
 ## Identity
 

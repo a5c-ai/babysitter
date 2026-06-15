@@ -1,0 +1,49 @@
+nodeKind: Claim
+id: claim:source-provenance-run5-extensions-tool-descriptors-notebook-edit-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: graph/agent-stack/runtime-impls/claude-code-runtime-1-x.yaml
+    builtInTools is the migrated source reference for ToolDescriptor tool-descriptor:notebook-edit.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:notebook-edit
+  attribute: source
+  value: graph/agent-stack/runtime-impls/claude-code-runtime-1-x.yaml
+  evidenceSourceIds:
+  - evidence:source-provenance-run5-claude-code-runtime-built-in-tools
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:notebook-edit
+  backed_by_evidence:
+  - evidence:source-provenance-run5-claude-code-runtime-built-in-tools
+---
+nodeKind: Claim
+id: claim:source-provenance-run5-extensions-tool-descriptors-todo-write-yaml
+attributes:
+  subjectKind: ToolDescriptor
+  statement: graph/agent-stack/runtime-impls/claude-code-runtime-1-x.yaml
+    builtInTools is the migrated source reference for ToolDescriptor tool-descriptor:todo-write.
+  confidence: medium
+  provenanceKind: migrated-source-comment
+  evidenceStrength: moderate
+  status: accepted
+  subjectId: tool-descriptor:todo-write
+  attribute: source
+  value: graph/agent-stack/runtime-impls/claude-code-runtime-1-x.yaml
+  evidenceSourceIds:
+  - evidence:source-provenance-run5-claude-code-runtime-built-in-tools
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+  note: Maintains graph-native provenance for source, comment, or catalog-gap information.
+edges:
+  about_subject:
+  - tool-descriptor:todo-write
+  backed_by_evidence:
+  - evidence:source-provenance-run5-claude-code-runtime-built-in-tools

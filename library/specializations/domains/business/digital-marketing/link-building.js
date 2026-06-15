@@ -3,6 +3,12 @@
  * @description Process for developing and executing link building campaigns to improve domain authority and search rankings through high-quality backlink acquisition
  * @inputs { backlinkData: object, competitiveAnalysis: object, contentAssets: array, outreachTargets: array, outputDir: string }
  * @outputs { success: boolean, outreachCampaignDocumentation: object, linkAcquisitionReports: array, disavowFile: object, authorityMetricsTracking: object, artifacts: array }
+  * @graph
+ *   domains: [domain:digital-marketing]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
+ *   workflows: [workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

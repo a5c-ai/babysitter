@@ -1,0 +1,113 @@
+---
+nodeKind: Acronym
+id: acronym:bdd
+attributes:
+  acronym: "BDD"
+  expandsToTermId: term:behavior-driven-development
+  description: |
+    Acronym for "Behavior-Driven Development" (aka Specification by
+    Example).
+edges:
+  expands_to:
+    - term:behavior-driven-development
+---
+nodeKind: Acronym
+id: acronym:atdd
+attributes:
+  acronym: "ATDD"
+  expandsToTermId: term:acceptance-test-driven-development
+  description: |
+    Acronym for "Acceptance Test-Driven Development".
+edges:
+  expands_to:
+    - term:acceptance-test-driven-development
+---
+nodeKind: Acronym
+id: acronym:ccpm
+attributes:
+  acronym: "CCPM"
+  expandsToTermId: term:ccpm
+  description: |
+    Acronym for "Claude Code Project Manager", a spec-driven
+    methodology adapted from automazeio/ccpm.
+edges:
+  expands_to:
+    - term:ccpm
+---
+nodeKind: Acronym
+id: acronym:gsd
+attributes:
+  acronym: "GSD"
+  expandsToTermId: term:gsd
+  description: |
+    Acronym for "Get Shit Done", a pragmatic execution methodology.
+edges:
+  expands_to:
+    - term:gsd
+---
+nodeKind: Acronym
+id: acronym:bmad
+attributes:
+  acronym: "BMAD"
+  expandsToTermId: term:bmad-method
+  description: |
+    Acronym tied to "BMAD Method" (BMad Code Org's AI-driven agile
+    framework).
+edges:
+  expands_to:
+    - term:bmad-method
+---
+nodeKind: Acronym
+id: acronym:ddd
+attributes:
+  acronym: "DDD"
+  expandsToTermId: term:domain-driven-design
+  description: |
+    Acronym for "Domain-Driven Design" (Eric Evans).
+edges:
+  expands_to:
+    - term:domain-driven-design
+---
+nodeKind: Acronym
+id: acronym:fdd
+attributes:
+  acronym: "FDD"
+  expandsToTermId: term:feature-driven-development
+  description: |
+    Acronym for "Feature-Driven Development".
+edges:
+  expands_to:
+    - term:feature-driven-development
+---
+nodeKind: Acronym
+id: acronym:xp
+attributes:
+  acronym: "XP"
+  expandsToTermId: term:extreme-programming
+  description: |
+    Acronym for "Extreme Programming" (Kent Beck).
+edges:
+  expands_to:
+    - term:extreme-programming
+---
+nodeKind: Acronym
+id: acronym:rup
+attributes:
+  acronym: "RUP"
+  expandsToTermId: term:rup
+  description: |
+    Acronym for "Rational Unified Process".
+edges:
+  expands_to:
+    - term:rup
+---
+nodeKind: Acronym
+id: acronym:jtbd
+attributes:
+  acronym: "JTBD"
+  expandsToTermId: term:jobs-to-be-done
+  description: |
+    Acronym for "Jobs To Be Done".
+edges:
+  expands_to:
+    - term:jobs-to-be-done

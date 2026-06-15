@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:plugin-artifact.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:plugin-artifact
+  text: |
+    a single deliverable file (manifest, command, hook script, MCP config, container image) emitted by a PluginTarget / AgentVersion
+  status: canonical
+edges:
+  defines:
+    - term:plugin-artifact

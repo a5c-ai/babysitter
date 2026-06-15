@@ -1,0 +1,14 @@
+nodeKind: Term
+id: term:channel
+attributes:
+  canonicalDefinitionId: definition:channel.canonical
+  displayName: "Channel"
+  kind: primitive
+  references:
+    - "NodeKind:Channel"
+  description: |
+    Brokered communication surface
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:backend

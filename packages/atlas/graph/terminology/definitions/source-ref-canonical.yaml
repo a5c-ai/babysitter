@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:source-ref.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:source-ref
+  text: |
+    repo+ref+path pointer to source-of-truth for an artifact
+  status: canonical
+edges:
+  defines:
+    - term:source-ref

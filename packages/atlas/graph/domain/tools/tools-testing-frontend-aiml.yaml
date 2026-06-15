@@ -1,0 +1,396 @@
+---
+# Testing tools
+nodeKind: Tool
+id: tool:k6
+attributes:
+  displayName: "k6"
+  homepageUrl: "https://k6.io"
+  kind: test-runner
+  description: |
+    Open-source load testing tool built for developer-centric performance
+    testing of APIs, microservices, and websites. Scripts are written in
+    JavaScript with a clean async API; results are exported to Grafana Cloud,
+    Prometheus, and many other backends. Supports threshold assertions,
+    scenarios, and distributed cloud execution via Grafana Cloud k6.
+edges:
+  belongs_to_language:
+    - language:go
+  tool_used_by:
+    - target: skill-area:performance-testing
+  used_for:
+    - skill-area:api-testing
+  alternative_to:
+    - target: tool:locust
+      comparison: "Load testing — k6 uses JavaScript; Locust uses Python"
+    - target: tool:artillery
+      comparison: "Load testing — k6 uses JavaScript scripts; Artillery uses YAML scenarios"
+---
+nodeKind: Tool
+id: tool:locust
+attributes:
+  displayName: "Locust"
+  homepageUrl: "https://locust.io"
+  kind: test-runner
+  description: |
+    Python-based open-source load testing framework where user behaviour is
+    defined as plain Python code. Supports distributed, headless, and
+    web-UI-driven test runs with real-time statistics. Highly extensible via
+    event hooks; integrates naturally with pytest and CI pipelines.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:performance-testing
+  used_for:
+    - skill-area:api-testing
+  alternative_to:
+    - target: tool:k6
+      comparison: "Load testing — Locust uses Python; k6 uses JavaScript"
+    - target: tool:artillery
+      comparison: "Load testing — Locust uses Python code; Artillery uses YAML scenarios"
+---
+nodeKind: Tool
+id: tool:artillery
+attributes:
+  displayName: "Artillery"
+  homepageUrl: "https://www.artillery.io"
+  kind: test-runner
+  description: |
+    Modern, developer-friendly load-testing and smoke-testing toolkit for
+    HTTP, WebSocket, Socket.io, and gRPC endpoints. Test scenarios are
+    declared in YAML with JavaScript hooks for custom logic. Artillery Cloud
+    provides distributed execution and trend dashboards.
+edges:
+  belongs_to_language:
+    - language:javascript
+  tool_used_by:
+    - target: skill-area:performance-testing
+  used_for:
+    - skill-area:api-testing
+  alternative_to:
+    - target: tool:k6
+      comparison: "Load testing — Artillery uses YAML scenarios; k6 uses JavaScript scripts"
+    - target: tool:locust
+      comparison: "Load testing — Artillery uses YAML scenarios; Locust uses Python code"
+---
+nodeKind: Tool
+id: tool:pact
+attributes:
+  languageApplicability: neutral
+  displayName: "Pact"
+  homepageUrl: "https://pact.io"
+  kind: test-runner
+  description: |
+    Consumer-driven contract testing framework that ensures services can
+    communicate without relying on end-to-end integration environments.
+    Consumers generate JSON pact files that providers verify independently;
+    Pact Broker or PactFlow stores and manages contract evolution across teams.
+edges:
+  tool_used_by:
+    - target: skill-area:integration-testing
+    - target: skill-area:api-testing
+  used_for:
+    - skill-area:api-testing
+  alternative_to:
+    - target: tool:wiremock
+      comparison: "API testing — Pact is contract testing; WireMock is service virtualisation"
+    - target: tool:testcontainers
+      comparison: "Integration testing — Pact uses contracts; Testcontainers uses real services in Docker"
+---
+nodeKind: Tool
+id: tool:wiremock
+attributes:
+  displayName: "WireMock"
+  homepageUrl: "https://wiremock.org"
+  kind: test-runner
+  description: |
+    Flexible HTTP service virtualisation and API mocking tool for development
+    and testing. Stubs can be defined via JSON mappings, a Java/Kotlin DSL,
+    or the REST Admin API. Supports request matching, response templating,
+    fault injection, stateful scenarios, and record/playback of real traffic.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:integration-testing
+    - target: skill-area:api-testing
+  used_for:
+    - skill-area:api-testing
+  alternative_to:
+    - target: tool:pact
+      comparison: "API testing — WireMock is service virtualisation; Pact is contract testing"
+    - target: tool:testcontainers
+      comparison: "Integration testing — WireMock mocks HTTP services; Testcontainers runs real services"
+---
+nodeKind: Tool
+id: tool:testcontainers
+attributes:
+  displayName: "Testcontainers"
+  homepageUrl: "https://testcontainers.com"
+  kind: test-runner
+  description: |
+    Library for spinning up real, throwaway Docker containers inside automated
+    tests. Provides pre-built modules for databases, message brokers, browsers,
+    and cloud service emulators. Available for Java, Go, Python, .NET, Node.js,
+    and Rust; integrates with JUnit, pytest, and other test frameworks.
+edges:
+  belongs_to_language:
+    - language:java
+  tool_used_by:
+    - target: skill-area:integration-testing
+  used_for:
+    - skill-area:api-testing
+  alternative_to:
+    - target: tool:pact
+      comparison: "Integration testing — Testcontainers uses real services in Docker; Pact uses contracts"
+    - target: tool:wiremock
+      comparison: "Integration testing — Testcontainers runs real services; WireMock mocks HTTP services"
+---
+# Frontend visual-testing tools
+nodeKind: Tool
+id: tool:chromatic
+attributes:
+  languageApplicability: neutral
+  displayName: "Chromatic"
+  homepageUrl: "https://www.chromatic.com"
+  kind: other
+  description: |
+    Cloud-based visual testing and review platform purpose-built for Storybook.
+    Captures pixel-perfect snapshots of UI components on each commit, diffs
+    them against baselines, and routes change reviews to the right teammates.
+    Also publishes Storybook as a shared design-system documentation site.
+edges:
+  tool_used_by:
+    - target: skill-area:frontend-testing
+    - target: skill-area:visual-regression-testing
+  used_for:
+    - skill-area:frontend-testing
+  alternative_to:
+    - target: tool:percy
+      comparison: "Visual testing — Chromatic is Storybook-native; Percy integrates with multiple E2E frameworks"
+    - target: tool:storybook
+      comparison: "Frontend UI tools — Chromatic is visual testing for Storybook; Storybook is the component sandbox"
+---
+nodeKind: Tool
+id: tool:percy
+attributes:
+  languageApplicability: neutral
+  displayName: "Percy"
+  homepageUrl: "https://percy.io"
+  kind: other
+  description: |
+    Visual testing and review platform by BrowserStack that captures full-page
+    and component screenshots across browsers and viewports, then highlights
+    pixel-level diffs for team review. Integrates with Selenium, Cypress,
+    Playwright, and many CI systems; supports snapshot stabilisation and
+    AI-assisted false-positive filtering.
+edges:
+  tool_used_by:
+    - target: skill-area:frontend-testing
+    - target: skill-area:visual-regression-testing
+  used_for:
+    - skill-area:frontend-testing
+  alternative_to:
+    - target: tool:chromatic
+      comparison: "Visual testing — Percy integrates with multiple E2E frameworks; Chromatic is Storybook-native"
+---
+# AI / ML inference and evaluation tools
+nodeKind: Tool
+id: tool:vllm
+attributes:
+  displayName: "vLLM"
+  homepageUrl: "https://github.com/vllm-project/vllm"
+  kind: other
+  description: |
+    High-throughput and memory-efficient LLM inference engine implementing the
+    PagedAttention algorithm to maximise GPU KV-cache utilisation. Exposes an
+    OpenAI-compatible REST API and supports continuous batching, streaming, and
+    tensor parallelism across multiple GPUs. A common production serving
+    backend for self-hosted open-source language models.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:model-serving
+    - target: skill-area:llm-infrastructure
+  used_for:
+    - skill-area:model-serving
+    - skill-area:ai-evaluation
+  alternative_to:
+    - target: tool:tensorrt
+      comparison: "ML inference — vLLM is LLM-focused with PagedAttention; TensorRT is GPU model optimization"
+    - target: tool:triton-inference
+      comparison: "ML inference — vLLM is LLM-specific; Triton serves multiple model frameworks"
+    - target: tool:onnx-runtime
+      comparison: "ML inference — vLLM is LLM-specific GPU; ONNX Runtime is cross-platform multi-model"
+---
+nodeKind: Tool
+id: tool:tensorrt
+attributes:
+  displayName: "TensorRT"
+  homepageUrl: "https://developer.nvidia.com/tensorrt"
+  kind: other
+  description: |
+    NVIDIA's SDK for high-performance deep-learning inference on GPU. Optimises
+    trained models through layer fusion, precision calibration (FP16/INT8),
+    and kernel auto-tuning to minimise latency and maximise throughput.
+    Integrates with PyTorch via torch-tensorrt, ONNX import, and the Triton
+    Inference Server backend ecosystem.
+edges:
+  belongs_to_language:
+    - language:cpp
+  tool_used_by:
+    - target: skill-area:model-serving
+    - target: skill-area:model-optimisation
+  used_for:
+    - skill-area:model-serving
+    - skill-area:ai-evaluation
+  alternative_to:
+    - target: tool:vllm
+      comparison: "ML inference — TensorRT is GPU model optimization; vLLM is LLM-focused with PagedAttention"
+    - target: tool:triton-inference
+      comparison: "NVIDIA inference — TensorRT optimizes models; Triton serves them"
+    - target: tool:onnx-runtime
+      comparison: "ML inference — TensorRT is NVIDIA GPU-only; ONNX Runtime is cross-platform"
+---
+nodeKind: Tool
+id: tool:triton-inference
+attributes:
+  displayName: "Triton Inference Server"
+  homepageUrl: "https://github.com/triton-inference-server/server"
+  kind: other
+  description: |
+    NVIDIA's open-source inference serving platform that hosts models from
+    TensorRT, ONNX Runtime, PyTorch, TensorFlow, and vLLM backends behind a
+    unified gRPC/HTTP API. Supports dynamic batching, model ensembles,
+    concurrent model execution, and Kubernetes-native deployment with Prometheus
+    metrics out of the box.
+edges:
+  belongs_to_language:
+    - language:cpp
+  tool_used_by:
+    - target: skill-area:model-serving
+    - target: skill-area:llm-infrastructure
+  used_for:
+    - skill-area:model-serving
+    - skill-area:ai-evaluation
+  alternative_to:
+    - target: tool:vllm
+      comparison: "ML inference — Triton serves multiple model frameworks; vLLM is LLM-specific"
+    - target: tool:tensorrt
+      comparison: "NVIDIA inference — Triton serves models; TensorRT optimizes them"
+    - target: tool:onnx-runtime
+      comparison: "ML inference — Triton is a serving platform; ONNX Runtime is an inference engine"
+---
+nodeKind: Tool
+id: tool:onnx-runtime
+attributes:
+  displayName: "ONNX Runtime"
+  homepageUrl: "https://onnxruntime.ai"
+  kind: other
+  description: |
+    Cross-platform, high-performance ML inference engine for ONNX models.
+    Runs on CPU, CUDA, DirectML, CoreML, ROCm, and other execution providers;
+    supports quantization and graph optimisations. Used for deploying models
+    trained in PyTorch, TensorFlow, or scikit-learn after export to the open
+    ONNX interchange format.
+edges:
+  belongs_to_language:
+    - language:cpp
+  tool_used_by:
+    - target: skill-area:model-serving
+    - target: skill-area:model-optimisation
+  used_for:
+    - skill-area:model-serving
+    - skill-area:ai-evaluation
+  alternative_to:
+    - target: tool:vllm
+      comparison: "ML inference — ONNX Runtime is cross-platform multi-model; vLLM is LLM-specific GPU"
+    - target: tool:tensorrt
+      comparison: "ML inference — ONNX Runtime is cross-platform; TensorRT is NVIDIA GPU-only"
+    - target: tool:triton-inference
+      comparison: "ML inference — ONNX Runtime is an inference engine; Triton is a serving platform"
+---
+nodeKind: Tool
+id: tool:langsmith
+attributes:
+  displayName: "LangSmith"
+  homepageUrl: "https://smith.langchain.com"
+  kind: other
+  description: |
+    Observability and evaluation platform for LLM applications from LangChain.
+    Traces every LLM call, chain step, and tool invocation; lets teams create
+    datasets, run automated evaluations, and compare prompts in an online
+    playground. Integrates seamlessly with LangChain and LangGraph but works
+    with any LLM framework via the langsmith SDK.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:llm-observability
+    - target: skill-area:ai-evaluation
+  used_for:
+    - skill-area:llm-observability
+  alternative_to:
+    - target: tool:langfuse
+      comparison: "LLM observability — LangSmith is commercial by LangChain; Langfuse is open-source"
+    - target: tool:ragas
+      comparison: "LLM evaluation — LangSmith is full observability; Ragas focuses on RAG metrics"
+    - target: tool:braintrust-proxy
+      comparison: "LLM observability and evaluation platforms"
+---
+nodeKind: Tool
+id: tool:langfuse
+attributes:
+  displayName: "Langfuse"
+  homepageUrl: "https://langfuse.com"
+  kind: other
+  description: |
+    Open-source LLM engineering platform providing tracing, prompt management,
+    and evaluation workflows. Captures detailed spans for every generation and
+    retrieval step; supports human annotation, LLM-as-judge scoring, and
+    dataset-driven regression testing. Can be self-hosted or used via Langfuse
+    Cloud; provides SDKs for Python, TypeScript, and OpenAI-compatible wrappers.
+edges:
+  belongs_to_language:
+    - language:typescript
+  tool_used_by:
+    - target: skill-area:llm-observability
+    - target: skill-area:ai-evaluation
+  used_for:
+    - skill-area:llm-observability
+  alternative_to:
+    - target: tool:langsmith
+      comparison: "LLM observability — Langfuse is open-source; LangSmith is commercial by LangChain"
+    - target: tool:ragas
+      comparison: "LLM evaluation — Langfuse is full observability; Ragas focuses on RAG metrics"
+    - target: tool:braintrust-proxy
+      comparison: "LLM observability and evaluation platforms"
+---
+nodeKind: Tool
+id: tool:ragas
+attributes:
+  displayName: "Ragas"
+  homepageUrl: "https://github.com/explodinggradients/ragas"
+  kind: other
+  description: |
+    Open-source framework for evaluating Retrieval-Augmented Generation (RAG)
+    pipelines with reference-free metrics such as faithfulness, answer
+    relevancy, context precision, and context recall. Generates synthetic
+    test datasets automatically and integrates with LangSmith, Langfuse, and
+    other observability backends for continuous quality monitoring.
+edges:
+  belongs_to_language:
+    - language:python
+  tool_used_by:
+    - target: skill-area:ai-evaluation
+    - target: skill-area:retrieval-augmented-generation
+  used_for:
+    - skill-area:ai-evaluation
+  alternative_to:
+    - target: tool:langsmith
+      comparison: "LLM evaluation — Ragas focuses on RAG metrics; LangSmith is full observability"
+    - target: tool:langfuse
+      comparison: "LLM evaluation — Ragas focuses on RAG metrics; Langfuse is full observability"
+    - target: tool:braintrust-proxy
+      comparison: "LLM evaluation platforms"

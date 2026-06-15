@@ -1,0 +1,21 @@
+nodeKind: Tool
+id: tool:insomnia
+attributes:
+  displayName: "Insomnia"
+  homepageUrl: "https://insomnia.rest"
+  kind: api-tool
+  languageApplicability: neutral
+  description: |
+    Open-source API client and design platform for REST, GraphQL, gRPC, and WebSockets.
+edges:
+  tool_used_by:
+    - target: skill-area:api-design
+  alternative_to:
+    - target: tool:postman
+      comparison: "API testing clients"
+    - target: tool:hoppscotch
+      comparison: "API testing clients"
+    - target: tool:bruno
+      comparison: "API testing clients"
+    - target: tool:httpie
+      comparison: "API testing clients"

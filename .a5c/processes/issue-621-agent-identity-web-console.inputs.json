@@ -1,0 +1,234 @@
+{
+  "issueNumber": 621,
+  "dependencyIssueNumber": 620,
+  "baseBranch": "staging",
+  "targetBranch": "issue/621-agent-identity-web-console",
+  "prompt": "Implement issue #621: Kradle agent identity web console pages, persona APIs, create wizard, and persona-aware existing UI. Depend on the #620 core identity contracts and preserve legacy AgentStack fallback.",
+  "issueTitle": "Agent identity: web console - directory, profile pages, create wizard",
+  "labels": [
+    "priority:high",
+    "ready-for-dev",
+    "feature",
+    "effort:large",
+    "kradle",
+    "kradle-web",
+    "risk:high"
+  ],
+  "specFiles": [
+    "packages/kradle/docs/agent-identity/03-web-experience.md",
+    "packages/kradle/docs/agent-identity/01-resource-model.md",
+    "packages/kradle/docs/agent-identity/02-migration.md",
+    "packages/kradle/docs/agent-identity/04-meeting-integration.md"
+  ],
+  "targetSurfaces": {
+    "webPages": [
+      "/orgs/[org]/agents/directory",
+      "/orgs/[org]/agents/directory/[name]",
+      "/orgs/[org]/agents/directory/new"
+    ],
+    "apiRoutes": [
+      "/api/orgs/[org]/agents/personas",
+      "/api/orgs/[org]/agents/personas/[name]",
+      "/api/orgs/[org]/agents/souls/[name]",
+      "/api/orgs/[org]/agents/appearances/[name]",
+      "/api/orgs/[org]/agents/appearances/[name]/avatar",
+      "/api/orgs/[org]/agents/voices/[name]",
+      "/api/orgs/[org]/agents/voices/[name]/preview",
+      "/api/orgs/[org]/agents/definitions",
+      "/api/orgs/[org]/agents/definitions/[name]"
+    ],
+    "components": [
+      "agent-directory.jsx",
+      "agent-profile-card.jsx",
+      "agent-profile-page.jsx",
+      "agent-persona-editor.jsx",
+      "agent-soul-editor.jsx",
+      "agent-appearance-editor.jsx",
+      "agent-voice-editor.jsx",
+      "agent-definition-form.jsx",
+      "agent-create-wizard.jsx",
+      "agent-personality-traits.jsx"
+    ],
+    "resourceKinds": [
+      "AgentPersona",
+      "AgentSoul",
+      "AgentAppearance",
+      "AgentVoiceProfile",
+      "AgentDefinition"
+    ],
+    "existingUiReferences": [
+      "DispatchButton shows persona names and avatars instead of only stack names",
+      "Run list shows persona display name, avatar, and role with stack fallback",
+      "Session detail header shows persona identity with stack fallback",
+      "NotificationBell uses persona display names in activity messages",
+      "CommandPalette offers persona-aware dispatch labels",
+      "Meeting participant list shows persona avatar, display name, role, and voice indicator when identity data is available"
+    ],
+    "wizardSteps": [
+      "identity",
+      "soul",
+      "skills",
+      "appearance",
+      "voice",
+      "infrastructure",
+      "review"
+    ],
+    "wizardCreates": [
+      "AgentPersona",
+      "AgentSoul",
+      "AgentAppearance",
+      "AgentVoiceProfile",
+      "AgentDefinition"
+    ]
+  },
+  "knownExistingInfrastructure": {
+    "navigation": "packages/kradle/web/app/lib/kradle-ui.jsx",
+    "uiShell": "packages/kradle/web/app/ui-shell.jsx",
+    "agentsPage": "packages/kradle/web/app/orgs/[org]/agents/page.jsx",
+    "agentComponents": "packages/kradle/web/app/components/agent",
+    "componentBarrel": "packages/kradle/web/app/components/index.js",
+    "agentHelpers": "packages/kradle/web/app/lib/agent-utils.js",
+    "orgApiRoutes": "packages/kradle/web/app/api/orgs/[org]",
+    "genericResourcesApi": "packages/kradle/web/app/api/orgs/[org]/resources/route.js",
+    "dispatchApi": "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "commandPalette": "packages/kradle/web/app/components/shell/command-palette.jsx",
+    "notificationBell": "packages/kradle/web/app/components/shell/notification-bell.jsx",
+    "sessionShell": "packages/kradle/web/app/components/agent/session-shell.jsx",
+    "dispatchButton": "packages/kradle/web/app/components/agent/dispatch-button.jsx",
+    "meetingParticipantList": "packages/kradle/web/app/components/jitsi/jitsi-participant-list.jsx",
+    "coreIdentityContracts": [
+      "packages/kradle/core/src/resource-model.js",
+      "packages/kradle/core/src/agent-persona-controller.js",
+      "packages/kradle/core/src/agent-prompt-composition.js",
+      "packages/kradle/core/src/agent-dispatch-controller.js",
+      "packages/kradle/sdk/src/index.js"
+    ],
+    "webTests": [
+      "packages/kradle/web/tests/page-structure.test.js",
+      "packages/kradle/web/tests/api-routes.test.js",
+      "packages/kradle/web/tests/component-structure.test.js",
+      "packages/kradle/web/tests/component-exports.test.js",
+      "packages/kradle/web/tests/barrel-exports.test.js",
+      "packages/kradle/web/tests/resource-contract.test.js",
+      "packages/kradle/web/e2e/navigation.spec.js",
+      "packages/kradle/web/e2e/smoke.spec.js"
+    ]
+  },
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "status": "not-present-in-checkout",
+    "localAlternativesUsed": [
+      "docs/agent-reference/process-authoring.md",
+      "library/methodologies/atdd-tdd/atdd-tdd.js",
+      "library/methodologies/feature-driven-development/feature-driven-development.js",
+      "library/specializations/web-development/nextjs-fullstack-app.js",
+      "library/specializations/web-development/api-integration-testing.js",
+      "library/specializations/web-development/e2e-testing-playwright.js",
+      "library/specializations/qa-testing-automation/quality-gates.js",
+      ".a5c/processes/issue-625-jitsi-web-console-plan.mjs",
+      ".a5c/processes/issue-625-jitsi-web-console-plan.inputs.json"
+    ],
+    "methodologyReferencesToPreserve": [
+      "mandatory Phase 0 reuse audit",
+      "ATDD/TDD before implementation",
+      "brownfield feature-driven development",
+      "Next.js full-stack implementation",
+      "API integration testing",
+      "Playwright smoke verification when available",
+      "quality-gated implementation loop"
+    ]
+  },
+  "dependencyContext": {
+    "issue620StateAtPlanning": "closed after PR #661 merge according to issue comments",
+    "issue621PriorPlanningContext": "issue comments mention closed planning PR #666, open planning PR #723 on plan/issue-621, and implementation work in progress; this process should re-read the current branch before implementation and treat current code as source of truth",
+    "coreContractsObservedOnBranch": [
+      "Kradle SDK exports createAgentPersonaController, validateAgentPersona, validateAgentDefinition, resolveAgentPersona, and resolveAgentDefinition",
+      "Kradle core tests reference AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition",
+      "Kradle CLI MCP tests reference kradle_create_agent and AgentDefinition/AgentPersona resources"
+    ]
+  },
+  "acceptanceFocus": [
+    "Directory page lists organization AgentPersona profiles with appearance/avatar data, role/tagline, definitions/deployments, run or meeting metrics when available, and a New Agent entry point.",
+    "Profile page resolves and displays persona, soul, personality, skills, definitions, appearance, voice, and recent activity without hiding missing optional resources.",
+    "Create wizard implements the documented seven steps and creates AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition with transaction or compensation behavior on partial failure.",
+    "Typed persona APIs use org-scoped authenticated route handlers, existing Kradle resource/controller helpers, validation, cache invalidation, and resource events rather than UI-only storage.",
+    "Dispatch, run list, session detail, notifications, command palette, and meeting participants prefer persona display identity and preserve legacy AgentStack fallback.",
+    "All new components are exported through the component barrel, follow existing component conventions, and include expected accessible controls and states.",
+    "Tests cover route/page/component structure, API contracts, identity resolution, wizard partial-failure handling, and legacy fallback behavior."
+  ],
+  "nonGoals": [
+    "Do not implement or modify the #620 core CRD/controller contracts beyond small compatibility fixes required to consume already-landed identity resources.",
+    "Do not remove or break legacy AgentStack dispatch, stack pages, inline prompts, or stack-based UI fallback.",
+    "Do not require external avatar generation or TTS providers for base workflow success; keep provider integrations behind explicit route contracts and mocks when needed.",
+    "Do not redesign unrelated Kradle navigation, settings, meetings, inference, MCP, or agent stack builder surfaces.",
+    "Do not generate shell-oriented process subtasks for this repository workflow."
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/kradle-web",
+    "npm run build:kradle-web",
+    "npm run test --workspace=@a5c-ai/kradle",
+    "npm run test --workspace=@a5c-ai/kradle-cli",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": {
+    "requiresIssue620ReadinessCheck": true,
+    "requiresReuseAudit": true,
+    "requiresTestsBeforeImplementation": true,
+    "requiresAuthenticatedOrgRoutes": true,
+    "requiresControllerBackedResourcePersistence": true,
+    "requiresWizardRollbackOrCompensation": true,
+    "requiresLegacyStackFallback": true,
+    "requiresPersonaReferenceConsistency": true,
+    "requiresComponentAndBarrelExports": true,
+    "requiresPlaywrightSmokeWhenAvailable": true,
+    "requiresFinalSpecToDiffReview": true
+  },
+  "plannedPhases": [
+    {
+      "name": "Authoritative context",
+      "purpose": "Read #621, all comments and labels, dependency #620, and the agent identity docs before implementation."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Scan current Kradle identity, web, API, route, component, navigation, MCP, and test infrastructure before proposing new surfaces."
+    },
+    {
+      "name": "Runtime trace",
+      "purpose": "Map loadKradleUi, org navigation, API auth/resource routes, identity contracts, existing stack-centric UI references, and test conventions."
+    },
+    {
+      "name": "Dependency readiness",
+      "purpose": "Gate implementation on landed #620 resource/controller/SDK contracts and raise a maintainer breakpoint only for real contract ambiguity."
+    },
+    {
+      "name": "Acceptance tests",
+      "purpose": "Write failing or pending tests for pages, components, APIs, wizard rollback, persona identity resolution, and legacy fallback before implementation."
+    },
+    {
+      "name": "Implementation slices",
+      "purpose": "Implement identity helpers, typed APIs, directory/profile/wizard pages and components, navigation exports, and persona-aware existing UI references."
+    },
+    {
+      "name": "Quality gates",
+      "purpose": "Run web, Kradle, CLI, build, metadata, and optional Playwright gates; iterate up to three attempts on failures."
+    },
+    {
+      "name": "Review",
+      "purpose": "Review UX, API/auth, resource contracts, wizard partial-state behavior, provider stubs, accessibility, and fallback consistency."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Compare the issue and specs to the final diff and verification results before accepting the implementation."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if #620 contracts are absent or materially conflict with the web spec in a way that would require inventing storage or changing resource semantics.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed using landed #620 contracts",
+        "Pause until core identity contracts are clarified"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+nodeKind: ToolServer
+id: tool-server:mcp-sidekiq
+attributes:
+  displayName: Sidekiq MCP Server
+  description: |
+    Ruby gem providing an MCP server for Sidekiq background job processing.
+    Enables AI agents to inspect queues, view job statistics, retry or delete
+    failed jobs, and monitor worker utilization through 20+ specialized tools.
+    Integrates as Rack middleware into Rails or any Rack-based application.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/andrew/sidekiq-mcp
+  rubyGem: sidekiq-mcp
+  maintainer: andrew (Community)
+  mcpTransports:
+  - mcp-transport:stdio
+  - mcp-transport:streamable-http
+edges:
+  integrates_with:
+  - target: library:sidekiq
+  lib_applies_to_domain:
+  - target: domain:backend
+  - target: domain:software-engineering
+---
+
+nodeKind: ToolServer
+id: tool-server:mcp-docusaurus
+attributes:
+  displayName: Docusaurus MCP Server Plugin
+  description: |
+    Docusaurus plugin that exposes documentation sites as an MCP server endpoint.
+    Allows AI agents (Claude, Cursor, and other MCP-compatible tools) to perform
+    full-text search across documentation and retrieve page content as markdown.
+    Indexing happens at build time via FlexSearch for fast, stateless query handling.
+  protocol: mcp
+  category: devtools
+  repoUrl: https://github.com/scalvert/docusaurus-plugin-mcp-server
+  npmPackage: docusaurus-plugin-mcp-server
+  maintainer: scalvert (Community)
+  mcpTransports:
+  - mcp-transport:streamable-http
+edges:
+  supports_work:
+    - target: role:technical-writer
+      confidence: high
+      evidence: "Docusaurus docs sites support developer-documentation authoring and review."
+    - target: workflow:developer-documentation-review
+      confidence: high
+      evidence: "Docs source and build surfaces can be reviewed as a documentation workflow."
+  integrates_with:
+  - target: framework:docusaurus
+  lib_applies_to_domain:
+  - target: domain:web-development
+  - target: domain:content-operations

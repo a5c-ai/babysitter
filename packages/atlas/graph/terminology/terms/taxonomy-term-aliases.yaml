@@ -1,0 +1,401 @@
+---
+nodeKind: Term
+id: term:rest-representational-state-transfer
+attributes:
+  displayName: "REST (Representational State Transfer)"
+  kind: concept
+  references:
+    - topic:rest
+  description: |
+    Taxonomy alias term for the broader REST concept already modeled in Atlas.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:event-driven-architecture-eda
+attributes:
+  displayName: "Event-Driven Architecture (EDA)"
+  kind: concept
+  references:
+    - topic:event-driven-architecture
+  description: |
+    Taxonomy alias term for Event-Driven Architecture using the EDA form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:domain-driven-design-ddd
+attributes:
+  displayName: "Domain-Driven Design (DDD)"
+  kind: concept
+  references:
+    - term:domain-driven-design
+    - skill-area:domain-driven-design
+  description: |
+    Taxonomy alias term for Domain-Driven Design using the long-form plus acronym.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:cqrs-command-query-responsibility-segregation
+attributes:
+  displayName: "CQRS (Command Query Responsibility Segregation)"
+  kind: concept
+  references:
+    - topic:cqrs
+    - skill-area:cqrs
+  description: |
+    Taxonomy alias term for CQRS using its expanded long form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:backend-for-frontend-bff
+attributes:
+  displayName: "Backend for Frontend (BFF)"
+  kind: concept
+  references:
+    - topic:backend-for-frontend
+  description: |
+    Taxonomy alias term for Backend for Frontend using the BFF form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:service-oriented-architecture-soa
+attributes:
+  displayName: "Service-Oriented Architecture (SOA)"
+  kind: concept
+  references:
+    - topic:service-oriented-architecture
+  description: |
+    Taxonomy alias term for Service-Oriented Architecture using the SOA form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:publish-subscribe-pubsub
+attributes:
+  displayName: "Publish-Subscribe (PubSub)"
+  kind: concept
+  references:
+    - topic:publish-subscribe
+  description: |
+    Taxonomy alias term for Publish-Subscribe using the PubSub form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:mvc-model-view-controller
+attributes:
+  displayName: "MVC (Model-View-Controller)"
+  kind: concept
+  references:
+    - topic:mvc
+  description: |
+    Taxonomy alias term for MVC using the expanded long form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:mvp-model-view-presenter
+attributes:
+  displayName: "MVP (Model-View-Presenter)"
+  kind: concept
+  references:
+    - topic:mvp
+  description: |
+    Taxonomy alias term for MVP using the expanded long form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:mvvm-model-view-viewmodel
+attributes:
+  displayName: "MVVM (Model-View-ViewModel)"
+  kind: concept
+  references:
+    - topic:mvvm
+  description: |
+    Taxonomy alias term for MVVM using the expanded long form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:single-page-application-spa
+attributes:
+  displayName: "Single Page Application (SPA)"
+  kind: concept
+  references:
+    - topic:single-page-application
+  description: |
+    Taxonomy alias term for Single Page Application using the SPA form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:progressive-web-application-pwa
+attributes:
+  displayName: "Progressive Web Application (PWA)"
+  kind: concept
+  references:
+    - topic:progressive-web-application
+  description: |
+    Taxonomy alias term for Progressive Web Application using the PWA form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:client-side-rendering-csr
+attributes:
+  displayName: "Client-Side Rendering (CSR)"
+  kind: concept
+  references:
+    - topic:client-side-rendering
+  description: |
+    Taxonomy alias term for Client-Side Rendering using the CSR form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:server-side-rendering-ssr
+attributes:
+  displayName: "Server-Side Rendering (SSR)"
+  kind: concept
+  references:
+    - skill-area:server-side-rendering
+  description: |
+    Taxonomy alias term for Server-Side Rendering using the SSR form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:static-site-generation-ssg
+attributes:
+  displayName: "Static Site Generation (SSG)"
+  kind: concept
+  references:
+    - topic:static-site-generation
+  description: |
+    Taxonomy alias term for Static Site Generation using the SSG form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:incremental-static-regeneration-isr
+attributes:
+  displayName: "Incremental Static Regeneration (ISR)"
+  kind: concept
+  references:
+    - topic:incremental-static-regeneration
+  description: |
+    Taxonomy alias term for Incremental Static Regeneration using the ISR form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:finite-state-machine-fsm
+attributes:
+  displayName: "Finite State Machine (FSM)"
+  kind: concept
+  references:
+    - topic:finite-state-machine
+  description: |
+    Taxonomy alias term for Finite State Machine using the FSM form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:grpc-google-remote-procedure-call
+attributes:
+  displayName: "gRPC (Google Remote Procedure Call)"
+  kind: concept
+  references:
+    - agent-host-transport:grpc
+    - term:remote-procedure-call
+  description: |
+    Taxonomy alias term for gRPC using its expanded long form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:server-sent-events-sse
+attributes:
+  displayName: "Server-Sent Events (SSE)"
+  kind: concept
+  references:
+    - agent-host-transport:http
+    - acronym:sse
+  description: |
+    Taxonomy alias term for Server-Sent Events using the SSE form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:jwt-json-web-tokens
+attributes:
+  displayName: "JWT (JSON Web Tokens)"
+  kind: concept
+  references:
+    - term:json-web-token
+    - acronym:jwt
+  description: |
+    Taxonomy alias term for JSON Web Token using the JWT form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:circuit-breaker
+attributes:
+  displayName: "Circuit Breaker"
+  kind: concept
+  references:
+    - topic:circuit-breakers
+  description: |
+    Taxonomy singular alias term for Atlas Circuit Breakers topic.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:canary-testing
+attributes:
+  displayName: "Canary Testing"
+  kind: concept
+  references:
+    - skill-area:canary-rollouts
+  description: |
+    Taxonomy alias term mapping canary-style testing/release validation to Atlas
+    canary rollout practice.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:rpc-remote-procedure-call
+attributes:
+  displayName: "RPC (Remote Procedure Call)"
+  kind: concept
+  references:
+    - term:remote-procedure-call
+    - acronym:rpc
+  description: |
+    Taxonomy alias term for RPC using its expanded long form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:authentication
+attributes:
+  displayName: "Authentication"
+  kind: concept
+  references:
+    - skill-area:authentication-authorization
+  description: |
+    Taxonomy alias term for the authentication aspect of Atlas auth practice.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:authorization
+attributes:
+  displayName: "Authorization"
+  kind: concept
+  references:
+    - skill-area:authentication-authorization
+  description: |
+    Taxonomy alias term for the authorization aspect of Atlas auth practice.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:test-driven-development-tdd
+attributes:
+  displayName: "Test-Driven Development (TDD)"
+  kind: concept
+  references:
+    - term:test-driven-development
+    - acronym:tdd
+  description: |
+    Taxonomy alias term for Test-Driven Development using the TDD form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:behavior-driven-development-bdd
+attributes:
+  displayName: "Behavior-Driven Development (BDD)"
+  kind: concept
+  references:
+    - term:behavior-driven-development
+    - acronym:bdd
+  description: |
+    Taxonomy alias term for Behavior-Driven Development using the BDD form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science
+---
+nodeKind: Term
+id: term:multi-page-application-mpa
+attributes:
+  displayName: "Multi-Page Application (MPA)"
+  kind: concept
+  references:
+    - topic:multi-page-application
+  description: |
+    Taxonomy alias term for Multi-Page Application using the MPA form.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:computer-science

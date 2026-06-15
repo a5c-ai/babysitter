@@ -1,0 +1,81 @@
+nodeKind: Claim
+id: claim:codex-rust-v0-135-0-issue-802
+attributes:
+  claimId: codex-rust-v0-135-0-issue-802
+  subjectId: "agent-version:codex@0.135.0"
+  attribute: assimilationNotes
+  value:
+    - richer-doctor-diagnostics
+    - remote-status-details
+    - vim-text-objects
+    - named-permission-profiles
+    - bundled-zsh-helper
+    - python-sdk-sandbox-presets
+    - non-interactive-installers
+  subjectKind: AgentVersion
+  statement: "Codex CLI 0.135.0 adds richer codex doctor diagnostics, remote transport /status connection and server-version details, Vim text-object and interrupt-binding updates, named permission profile display, bundled patched zsh helper discovery, Python SDK Sandbox presets, and CODEX_NON_INTERACTIVE=1 installer support."
+  confidence: high
+  status: accepted
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  evidenceSourceIds:
+    - evidence:codex-rust-v0-135-0-issue-802
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  unresolvedGaps: []
+edges:
+  backed_by_evidence:
+    - evidence:codex-rust-v0-135-0-issue-802
+  about_subject:
+    - agent-version:codex@0.135.0
+---
+nodeKind: Claim
+id: claim:codex-rust-v0-135-0-issue-802-version-range
+attributes:
+  claimId: codex-rust-v0-135-0-issue-802-version-range
+  subjectId: "agent-version:codex@0.135.0"
+  attribute: versionRange
+  value: "0.135.0"
+  subjectKind: AgentVersion
+  statement: "The rust-v0.135.0 release identifies Codex CLI version 0.135.0."
+  confidence: high
+  status: accepted
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  evidenceSourceIds:
+    - evidence:codex-rust-v0-135-0-issue-802
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  unresolvedGaps: []
+edges:
+  backed_by_evidence:
+    - evidence:codex-rust-v0-135-0-issue-802
+  about_subject:
+    - agent-version:codex@0.135.0
+---
+nodeKind: Claim
+id: claim:codex-rust-v0-135-0-issue-802-cli-command
+attributes:
+  claimId: codex-rust-v0-135-0-issue-802-cli-command
+  subjectId: "agent-version:codex@0.135.0"
+  attribute: cliCommand
+  value: "codex"
+  subjectKind: AgentVersion
+  statement: "Codex CLI 0.135.0 continues to use the codex CLI command and the @openai/codex npm package."
+  confidence: high
+  status: accepted
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  evidenceSourceIds:
+    - evidence:codex-rust-v0-135-0-issue-802
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  unresolvedGaps: []
+edges:
+  backed_by_evidence:
+    - evidence:codex-rust-v0-135-0-issue-802
+  about_subject:
+    - agent-version:codex@0.135.0

@@ -1,0 +1,13 @@
+nodeKind: Term
+id: term:plugin-target
+attributes:
+  canonicalDefinitionId: definition:plugin-target.canonical
+  displayName: "PluginTarget"
+  kind: tool
+  references:
+    - "NodeKind:PluginTarget"
+  description: |
+    Per-agent target spec used by the extensions-adapter / extensions-adapter to know
+edges:
+  applies_to:
+    - target: domain:software-engineering

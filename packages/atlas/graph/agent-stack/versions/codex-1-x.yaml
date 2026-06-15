@@ -1,0 +1,416 @@
+nodeKind: AgentVersion
+id: agentVersion:codex:ge-0-0-0-lt-0-119-0
+attributes:
+  agentId: "codex"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "Codex CLI (pre-0.119)"
+  summary: "OpenAI's open-source CLI coding agent — pre-hook version"
+  sourcePackage: "@openai/codex"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:codex
+  versionRange: ">=0.0.0 <0.119.0"
+  releasedAt: "2025-04-16"
+  cliCommand: "codex"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  interactiveSignals:
+    turnCompletePattern: "codex>"
+    exitOnNonInteractive: true
+    nonInteractiveMode: "exec"
+    interactiveMode: ""
+  adapterMetadata:
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [OPENAI_API_KEY]
+    authFiles:
+      - "~/.codex/config.json"
+    hostEnvSignals:
+      - CODEX_SESSION_ID
+      - CODEX_RUN_ID
+      - CODEX_CLI
+    sessionDir: "~/.codex/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+      - deny
+    capabilityFlags:
+      canResume: true
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: false
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: true
+      supportsStructuredOutput: true
+      structuredSessionTransport: restart-per-turn
+      sessionControlPlane: self-managed
+      supportsSkills: false
+      supportsAgentsMd: false
+      skillsFormat: none
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: false
+      supportsStdinInjection: false
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: false
+      supportedPlatforms: [darwin, linux, win32]
+      thinkingEffortLevels: []
+      requiresGitRepo: false
+      requiresPty: false
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.codex/config.json"
+    displayName: "OpenAI Codex"
+    defaultModelId: "o4-mini"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: true
+edges:
+  version_of:
+    - agent:codex
+  composed_of:
+    - target: agent-core-impl:codex.core@1.x
+      role: core
+    - target: agent-runtime-impl:codex.runtime@1.x
+      role: runtime
+    - target: agent-platform-impl:codex.platform@1.x
+      role: platform
+    - target: agent-ui-impl:codex.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:codex.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:codex-agents-md
+  has_launch_contract:
+    - target: launch-contract:codex-default
+  supports:
+    - target: capability:supports-agents-md
+      versionRange: '>=0.0.0 <0.119.0'
+      level: full
+      notes: Codex CLI reads AGENTS.md as long-term memory at session bootstrap. Source — github.com/openai/codex docs/.
+    - target: capability:requires-pty
+      versionRange: '>=0.0.0 <0.119.0'
+      level: partial
+      notes: Interactive TUI mode requires PTY; --quiet / scripted mode does not.
+    - target: capability:supports-file-attachments
+      versionRange: '>=0.0.0 <0.119.0'
+      level: partial
+      notes: TUI accepts pasted content; image attachments via --add-image.
+---
+nodeKind: AgentVersion
+id: agentVersion:codex:ge-0-119-0
+attributes:
+  agentId: "codex"
+  aliases: []
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  displayName: "Codex CLI"
+  summary: "OpenAI's open-source CLI coding agent, assimilated through 0.135.0"
+  sourcePackage: "@openai/codex"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:codex
+  versionRange: ">=0.119.0"
+  currentVersion: "0.135.0"
+  releasedAt: "2026-05-28"
+  upstreamReleaseTag: "rust-v0.135.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.135.0"
+  assimilationNotes:
+    - "codex doctor now reports richer environment, Git, terminal, app-server, and thread inventory diagnostics."
+    - "/status now shows remote connection details and server version when connected over a remote transport."
+    - "Vim mode adds text-object editing, improved word/line-end behavior, and a configurable interrupt-turn binding."
+    - "/permissions understands named permission profiles and displays configured custom profiles."
+    - "Packaged builds can discover and use the bundled patched zsh helper on supported macOS and Linux targets."
+    - "Resume flows include non-interactive exec sessions when requested and honor cwd overrides for idle cached threads."
+    - "Runtime state for memories moved into a dedicated SQLite database."
+    - "Local conversation history search now includes case-insensitive content matches with previews."
+    - "--profile is now the primary selector across CLI, TUI permissions, and sandbox flows; legacy profile configs are rejected with migration guidance."
+    - "MCP setup adds per-server environment targeting and OAuth options for streamable HTTP servers."
+    - "Connector tool schemas preserve local $ref/$defs structures and compact oversized schemas before exposure."
+    - "Read-only MCP tools can run concurrently when readOnlyHint is advertised."
+    - "Extensions and hooks receive richer context, including conversation history for extension tools and subagent identity in hook inputs."
+    - "Remote control reliability improved by reconnecting stale exec-server websocket clients, retrying after auth recovery, and retrying remote compaction v2 streams."
+    - "Node-based tools honor Codex's managed network proxy environment."
+    - "Goals are default-on in 0.133.0 and backed by dedicated storage."
+    - "codex remote-control is modeled as foreground readiness plus explicit start/stop lifecycle commands."
+    - "Permission profiles expose list APIs, inheritance, requirements.toml support, runtime refresh, and stronger Windows sandbox integration."
+    - "Plugin discovery reports marketplace-aware list output, installed versions, marketplace roots, and remote collections."
+    - "Extensions can observe subagent lifecycle, tool execution, turn metadata, async approval, and turn processing."
+    - "App-server fixes include startup/shutdown race fixes and realtime v1 websocket compatibility."
+  goals:
+    defaultEnabled: true
+    storage: dedicated-goal-store
+    progressScope: active-turns
+  remoteControl:
+    launchBehavior: foreground-readiness
+    reportsMachineStatus: true
+    explicitLifecycleCommands: [start, stop]
+  permissionProfiles:
+    listApi: true
+    inheritance: true
+    requirementsToml: managed
+    runtimeRefresh: true
+    windowsSandboxIntegration: resolved-profiles
+  pluginDiscovery:
+    marketplaceAwareListOutput: true
+    installedVersions: true
+    visibleMarketplaceRoots: true
+    remoteCollections: true
+    marketplaceCli: "codex plugin marketplace"
+    marketplaceCliCommands: [add, list, upgrade, remove]
+    pluginManifestPath: ".codex-plugin/plugin.json"
+    marketplacePaths:
+      primary: ".agents/plugins/marketplace.json"
+      legacy: ".claude-plugin/marketplace.json"
+    pluginCacheDir: "~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/"
+    hookDiscovery:
+      autoDetect: "./hooks/hooks.json"
+      manifestField: hooks
+      manifestFieldFormats:
+        - path
+        - array-of-paths
+        - inline-object
+        - array-of-objects
+    hookEnvVars:
+      native: [PLUGIN_ROOT, PLUGIN_DATA]
+      compatAliases: [CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
+  extensionEvents:
+    observesSubagentLifecycle: true
+    observesToolExecution: true
+    observesTurnMetadata: true
+    asyncApproval: true
+    asyncTurnProcessing: true
+  appServer:
+    startupRaceFix: true
+    shutdownRaceFix: true
+    realtimeV1WebsocketCompatible: true
+  cliCommand: "codex"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+  interactiveSignals:
+    turnCompletePattern: "codex>"
+    exitOnNonInteractive: true
+    nonInteractiveMode: "exec"
+    interactiveMode: ""
+  adapterMetadata:
+    installCommands:
+      - type: npm
+        command: "npm install -g @openai/codex"
+      - type: marketplace
+        command: "codex plugin marketplace add <plugin-name>"
+    authMethods:
+      - type: api_key
+        name: "API Key"
+        envVars: [OPENAI_API_KEY]
+    authFiles:
+      - "~/.codex/config.json"
+    hostEnvSignals:
+      - CODEX_SESSION_ID
+      - CODEX_RUN_ID
+      - CODEX_CLI
+    sessionDir: "~/.codex/sessions"
+    sessionPersistence: file
+    approvalModes:
+      - yolo
+      - prompt
+      - deny
+    capabilityFlags:
+      canResume: true
+      canFork: false
+      supportsMultiTurn: true
+      sessionPersistence: file
+      supportsTextStreaming: true
+      supportsToolCallStreaming: true
+      supportsThinkingStreaming: false
+      supportsNativeTools: true
+      supportsMCP: false
+      supportsParallelToolCalls: true
+      requiresToolApproval: true
+      supportsThinking: false
+      supportsJsonMode: true
+      supportsStructuredOutput: true
+      structuredSessionTransport: restart-per-turn
+      sessionControlPlane: self-managed
+      supportsSkills: true
+      supportsAgentsMd: true
+      skillsFormat: codex-skills
+      supportsSubagentDispatch: false
+      supportsParallelExecution: false
+      maxParallelTasks: 1
+      supportsInteractiveMode: false
+      supportsStdinInjection: false
+      supportsImageInput: false
+      supportsImageOutput: false
+      supportsFileAttachments: false
+      supportsPlugins: true
+      supportsPluginMarketplace: true
+      supportedPlatforms: [darwin, linux, win32]
+      thinkingEffortLevels: []
+      requiresGitRepo: false
+      requiresPty: false
+    goals:
+      defaultEnabled: true
+      storage: dedicated-goal-store
+      progressScope: active-turns
+    remoteControl:
+      launchBehavior: foreground-readiness
+      reportsMachineStatus: true
+      explicitLifecycleCommands: [start, stop]
+    permissionProfiles:
+      listApi: true
+      inheritance: true
+      requirementsToml: managed
+      runtimeRefresh: true
+      windowsSandboxIntegration: resolved-profiles
+    pluginDiscovery:
+      marketplaceAwareListOutput: true
+      installedVersions: true
+      visibleMarketplaceRoots: true
+      remoteCollections: true
+      marketplaceCli: "codex plugin marketplace"
+      marketplaceCliCommands: [add, list, upgrade, remove]
+      pluginManifestPath: ".codex-plugin/plugin.json"
+      marketplacePaths:
+        primary: ".agents/plugins/marketplace.json"
+        legacy: ".claude-plugin/marketplace.json"
+      pluginCacheDir: "~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/"
+      hookDiscovery:
+        autoDetect: "./hooks/hooks.json"
+        manifestField: hooks
+        manifestFieldFormats:
+          - path
+          - array-of-paths
+          - inline-object
+          - array-of-objects
+      hookEnvVars:
+        native: [PLUGIN_ROOT, PLUGIN_DATA]
+        compatAliases: [CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
+    extensionEvents:
+      observesSubagentLifecycle: true
+      observesToolExecution: true
+      observesTurnMetadata: true
+      asyncApproval: true
+      asyncTurnProcessing: true
+    appServer:
+      startupRaceFix: true
+      shutdownRaceFix: true
+      realtimeV1WebsocketCompatible: true
+    runtimeHooks:
+      preToolUse: nonblocking
+      postToolUse: nonblocking
+      sessionStart: nonblocking
+      sessionEnd: nonblocking
+      stop: nonblocking
+      userPromptSubmit: nonblocking
+    configSchema:
+      configFormat: json
+      configFilePaths:
+        - "~/.codex/config.json"
+    displayName: "OpenAI Codex"
+    defaultModelId: "o4-mini"
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+      preToolUse: unsupported
+      sessionEnd: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    hookBridge: true
+    sessionResume: false
+    positionalPrompt: true
+    nonInteractiveUsesExecMode: true
+edges:
+  version_of:
+    - agent:codex
+  composed_of:
+    - target: agent-core-impl:codex.core@1.x
+      role: core
+    - target: agent-runtime-impl:codex.runtime@1.x
+      role: runtime
+    - target: agent-platform-impl:codex.platform@1.x
+      role: platform
+    - target: agent-ui-impl:codex.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:codex.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:codex-agents-md
+  has_launch_contract:
+    - target: launch-contract:codex-default
+  uses_transport:
+    - transport-runtime:terminal-cli
+    - transport-runtime:shell-hook-runtime
+    - transportProtocol:terminal-cli
+    - transportProtocol:shell-hook-runtime
+  supports_modality:
+    - modality:image
+    - modality:text
+  defaults_to_model:
+    - modelVersion:codex-default:ge-0-0-0
+  targets_plugin_surface:
+    - plugin-target:codex
+  discovered_by:
+    - discovery-signal:codex-host-env
+  supports:
+    - target: capability:supports-agents-md
+      versionRange: '>=0.119.0'
+      level: full
+      notes: Codex CLI reads AGENTS.md as long-term memory at session bootstrap, with 0.133.0 fixes for global reads and invalid UTF-8 warnings.
+    - target: capability:requires-pty
+      versionRange: '>=0.119.0'
+      level: partial
+      notes: Interactive TUI mode requires PTY; --quiet / scripted mode does not.
+    - target: capability:supports-file-attachments
+      versionRange: '>=0.119.0'
+      level: partial
+      notes: TUI accepts pasted content; image attachments via --add-image.

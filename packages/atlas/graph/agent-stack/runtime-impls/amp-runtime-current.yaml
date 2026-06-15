@@ -1,0 +1,38 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:amp.runtime@current
+attributes:
+  displayName: Sourcegraph Amp Runtime (current)
+  agentVersionId: agent-version:amp@current
+  subagentDispatchMechanism: handoff
+  packageRef: source-ref:amp-github
+  builtInTools: []
+  toolRegistryDiscovery: static-bundled
+  hookSockets: []
+  internalSessionStateLocation: ~/.config/amp/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.config/amp/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: platform-deferred
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:amp
+    role: runtime
+  exposes: []
+  bundles: []
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '*'
+    level: full
+  speaks:
+    - target: mcp-transport:stdio

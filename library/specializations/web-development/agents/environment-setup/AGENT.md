@@ -9,6 +9,13 @@ expertise:
   - IDE configuration
   - Onboarding docs
   - Environment parity
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer, role:fullstack-engineer]
+  skillAreas: [skill-area:configuration-management]
+  topics: [topic:developer-experience, topic:twelve-factor-app]
+
 ---
 
 # Environment Setup Agent

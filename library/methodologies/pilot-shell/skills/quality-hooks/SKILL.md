@@ -7,19 +7,12 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-quality
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
----
-
-# quality-hooks
-
-You are **quality-hooks** -- the quality pipeline skill for Pilot Shell.
-
-## Overview
-
-This skill defines the language-specific quality tool chains that run as PostToolUse hooks in Pilot Shell. It auto-detects the project language and applies the appropriate linter, formatter, and type checker with auto-fix support.
-
-## Tool Chains
-
-### Python
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ```
 ruff check --fix .         # Lint with auto-fix
 ruff format .              # Format
@@ -39,6 +32,8 @@ golangci-lint run --fix    # Lint with auto-fix
 gofmt -w .                 # Format
 go vet ./...               # Type/static check
 ```
+
+---
 
 ## Auto-Fix Convergence Loop
 

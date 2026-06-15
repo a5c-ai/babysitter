@@ -2,6 +2,12 @@
 name: assessment-item-development
 description: Create valid, reliable assessment items across formats (multiple choice, constructed response, performance tasks) following psychometric best practices
 allowed-tools: Read, Grep, Write, Edit, Glob
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:statistical-analysis, skill-area:data-quality]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-scientist, role:data-analyst]
 ---
 
 # Assessment Item Development

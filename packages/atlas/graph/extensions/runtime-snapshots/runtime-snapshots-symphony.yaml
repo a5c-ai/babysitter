@@ -1,0 +1,26 @@
+nodeKind: RuntimeSnapshot
+id: runtime-snapshot:example-clean
+attributes:
+  displayName: "Clean runtime snapshot (2 running, 1 retrying)"
+  generatedAt: "2026-05-01T10:31:15Z"
+  snapshotStatus: clean
+  runningLiveSessionIds:
+    - live-session:running-example
+  retryingRunAttemptIds:
+    - run-attempt:retrying-example
+  codexTotals:
+    inputTokens: 1245000
+    outputTokens: 321000
+    totalTokens: 1566000
+    secondsRunning: 7320
+  lastRateLimitObservation:
+    capturedAt: "2026-05-01T10:30:55Z"
+    vendor: anthropic
+    primaryLimit:
+      used: 4200
+      max: 5000
+      resetAt: "2026-05-01T11:00:00Z"
+  tokenAccountingSemantics: absolute
+edges:
+  snapshots_state:
+    - target: orchestrator-state:default

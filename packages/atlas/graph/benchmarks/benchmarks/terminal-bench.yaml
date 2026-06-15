@@ -1,0 +1,15 @@
+nodeKind: Benchmark
+id: benchmark:terminal-bench
+attributes:
+  displayName: "Terminal-Bench"
+  homepageUrl: https://www.tbench.ai/
+  kind: terminal-agent
+  targetsKind: AgentVersion
+  description: |
+    Benchmark for AI agents performing real software-engineering and devops tasks in a terminal environment.
+edges:
+  covers:
+    - target: skill-area:cli-design
+      attributes:
+        coverage: partial
+        weight: 0.4

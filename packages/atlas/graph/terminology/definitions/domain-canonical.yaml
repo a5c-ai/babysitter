@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:domain.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:domain
+  text: |
+    broad area (web-development, devops, ...)
+  status: canonical
+edges:
+  defines:
+    - term:domain

@@ -1,0 +1,15 @@
+nodeKind: Library
+id: library:pydantic
+attributes:
+  displayName: "Pydantic"
+  belongsToLanguageId: language:python
+  category: validation
+  description: |
+    Data validation and settings management for Python using type hints.
+edges:
+  belongs_to_language:
+    - language:python
+  library_used_by:
+    - target: skill-area:data-validation-sanitization
+  alternative_to:
+    - library:fluentvalidation

@@ -1,0 +1,160 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.ps
+attributes:
+  schema: '{}'
+  displayName: "Docker: ps"
+  description: List running containers (docker ps).
+  inputSchema:
+    type: object
+    properties:
+      all: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      containers: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.run
+attributes:
+  schema: '{}'
+  displayName: "Docker: run"
+  description: Run a container from an image.
+  inputSchema:
+    type: object
+    required: [image]
+    properties:
+      image: { type: string }
+      name: { type: string }
+      command: { type: array, items: { type: string } }
+      env: { type: object }
+      ports: { type: array }
+      detach: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      container_id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.logs
+attributes:
+  schema: '{}'
+  displayName: "Docker: logs"
+  description: Fetch logs of a container.
+  inputSchema:
+    type: object
+    required: [container]
+    properties:
+      container: { type: string }
+      tail: { type: integer }
+  outputSchema:
+    type: object
+    properties:
+      logs: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.images
+attributes:
+  schema: '{}'
+  displayName: "Docker: images"
+  description: List local Docker images.
+  inputSchema:
+    type: object
+    properties: {}
+  outputSchema:
+    type: object
+    properties:
+      images: { type: array }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.build
+attributes:
+  schema: '{}'
+  displayName: "Docker: build"
+  description: Build an image from a Dockerfile context path.
+  inputSchema:
+    type: object
+    required: [path]
+    properties:
+      path: { type: string }
+      tag: { type: string }
+      dockerfile: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      image_id: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.stop
+attributes:
+  schema: '{}'
+  displayName: "Docker: stop"
+  description: Stop a running container.
+  inputSchema:
+    type: object
+    required: [container]
+    properties:
+      container: { type: string }
+  outputSchema:
+    type: object
+    properties:
+      stopped: { type: boolean }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker
+---
+nodeKind: ToolDescriptor
+id: tool-descriptor:docker.exec
+attributes:
+  schema: '{}'
+  displayName: "Docker: exec"
+  description: Run a command in a running container.
+  inputSchema:
+    type: object
+    required: [container, command]
+    properties:
+      container: { type: string }
+      command: { type: array, items: { type: string } }
+  outputSchema:
+    type: object
+    properties:
+      stdout: { type: string }
+      stderr: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-docker

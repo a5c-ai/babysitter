@@ -1,0 +1,27 @@
+nodeKind: Layer
+id: layer:8-execution
+attributes:
+  displayName: Execution
+  position: 8
+  path: surfacing
+  scope: Invocation environment for agent-driven tools, commands, and side effects.
+  summary: |
+    The execution layer hosts agent-driven tool calls and shell commands:
+    local process, Docker container, SSH remote, Kubernetes pod, cloud
+    function, direct host, or service-side executor. Execution posture includes
+    process lifecycle, signal propagation, resource limits, isolation, network
+    policy, filesystem access, GPU access, and concrete runtime substrate.
+    Realized by `Execution` nodes.
+  responsibilities:
+    - Start, stream, interrupt, and stop tool/shell/process execution.
+    - Own process lifecycle, resource limits, environment variables, and mounts.
+    - Route side effects to local, remote, container, or hosted executors.
+  examples:
+    - Local shell, Docker, SSH remote, Kubernetes pod, GitHub Actions runner.
+    - Browser automation worker, notebook/kernel executor, cloud function.
+    - LangGraph tool node executing inside a host application runtime.
+  fitNotes: |
+    Frameworks often delegate execution to user-defined tools. Hosted agent
+    products may make this layer invisible but still need it for auditing and
+    policy mapping.
+edges: {}

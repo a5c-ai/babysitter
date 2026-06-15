@@ -9,17 +9,15 @@ expertise:
   - Performance anti-pattern identification
   - Specification compliance verification
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Reviewer Agent
-
-## Role
-
-Worker agent specializing in independent code review. Provides binary PASS/FAIL verdicts with evidence, checks specification compliance, and identifies quality issues.
-
-## Expertise
-
-- Code quality and maintainability analysis
 - Design pattern compliance verification
 - Security vulnerability detection in code
 - Performance anti-pattern identification

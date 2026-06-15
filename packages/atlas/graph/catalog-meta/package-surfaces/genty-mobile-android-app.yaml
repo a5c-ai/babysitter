@@ -1,0 +1,10 @@
+nodeKind: PackageSurface
+id: package-surface:genty-mobile-android-app
+attributes:
+  packageId: "@a5c-ai/genty-mobile-android-app"
+  packageName: "@a5c-ai/genty-mobile-android-app"
+  displayName: "Genty Android App"
+  description: "Expo-based Android companion app for adapters. Provides mobile monitoring and lightweight agent interaction using genty-ui shared components."
+  role: "mobile-companion-app"
+  whenToUse: "Build this when you need an Android mobile surface for monitoring agent sessions and responding to breakpoints on the go."
+  status: active

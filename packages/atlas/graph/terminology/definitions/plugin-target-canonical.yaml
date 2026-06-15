@@ -1,0 +1,17 @@
+nodeKind: Definition
+id: definition:plugin-target.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:plugin-target
+  text: |
+    Per-agent target spec used by the extensions-adapter / extensions-adapter to know
+    how to compile a Plugin or PortableExtension into a NativeExtension for a
+    particular agent host. Distinct from AgentPlatformImpl (the platform itself);
+    PluginTarget is the *target descriptor* — manifest format, command format,
+    script variants, install layout, package metadata, distribution model, etc.
+    Sourced from the legacy agent-catalog ontology
+    (packages/agent-catalog/graph/schema/ontology-schema.yaml :: PluginTarget).
+  status: canonical
+edges:
+  defines:
+    - term:plugin-target

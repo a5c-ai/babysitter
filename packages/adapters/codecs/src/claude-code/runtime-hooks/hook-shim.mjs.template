@@ -1,0 +1,63 @@
+import fs from 'node:fs/promises';
+import net from 'node:net';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const eventName = process.argv[2] ?? 'UnknownHook';
+const configDir = path.dirname(fileURLToPath(import.meta.url));
+const socketPath = process.env.AMUX_CLAUDE_HOOK_SOCKET;
+const secretPath = path.join(configDir, 'secret');
+
+function readStdin() {
+  return new Promise((resolve, reject) => {
+    let input = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk) => {
+      input += chunk;
+    });
+    process.stdin.on('end', () => resolve(input));
+    process.stdin.on('error', reject);
+  });
+}
+
+try {
+  if (!socketPath) {
+    throw new Error('AMUX_CLAUDE_HOOK_SOCKET is not set');
+  }
+
+  const [secret, rawInput] = await Promise.all([
+    fs.readFile(secretPath, 'utf8'),
+    readStdin(),
+  ]);
+
+  const payload = rawInput.trim().length > 0 ? JSON.parse(rawInput) : {};
+  const response = await new Promise((resolve, reject) => {
+    const socket = net.createConnection(socketPath);
+    let body = '';
+    socket.setEncoding('utf8');
+    socket.on('connect', () => {
+      socket.write(
+        JSON.stringify({
+          secret: secret.trim(),
+          event: eventName,
+          payload,
+        }) + '\n',
+      );
+    });
+    socket.on('data', (chunk) => {
+      body += chunk;
+    });
+    socket.on('end', () => resolve(body));
+    socket.on('error', reject);
+  });
+
+  const parsed = response ? JSON.parse(String(response)) : {};
+  if (typeof parsed.stdout === 'string' && parsed.stdout.length > 0) {
+    process.stdout.write(parsed.stdout);
+  }
+  process.exit(Number.isInteger(parsed.exitCode) ? parsed.exitCode : 0);
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  process.stderr.write(`${message}\n`);
+  process.exit(1);
+}

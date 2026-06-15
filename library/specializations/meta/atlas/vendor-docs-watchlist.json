@@ -1,0 +1,23 @@
+{
+  "$comment": "Watchlist of vendor docs to periodically re-mine for catalog drift. Edit freely. Each entry: vendor (string), kind (concept|env-vars|hooks|tools|skills|plugins|deep-links|agent-loop|sub-agents|agent-teams|primary-entrypoint), url (canonical doc URL), notes (free text). Used by vendor-doc-drift-detection.cjs and env-var-inventory-sync.cjs.",
+  "version": 1,
+  "lastReviewed": "2026-05-04",
+  "watched": [
+    { "vendor": "claude-code", "kind": "agent-loop",       "url": "https://docs.claude.com/en/api/agent-sdk/agent-loop", "notes": "Wave-82 source. ResultMessage subtypes, message types, budget knobs." },
+    { "vendor": "claude-code", "kind": "sub-agents",       "url": "https://docs.claude.com/en/docs/claude-code/sub-agents", "notes": "Wave-82/83. Subagent attrs." },
+    { "vendor": "claude-code", "kind": "skills",           "url": "https://docs.claude.com/en/docs/claude-code/skills", "notes": "Wave-82/83. Skill frontmatter, dynamic context injection." },
+    { "vendor": "claude-code", "kind": "plugins",          "url": "https://docs.claude.com/en/docs/claude-code/discover-plugins", "notes": "Wave-82/83. PluginMarketplace, install scopes." },
+    { "vendor": "claude-code", "kind": "agent-teams",      "url": "https://docs.claude.com/en/docs/claude-code/agent-teams", "notes": "Wave-82/83. AgentTeam NodeKind." },
+    { "vendor": "claude-code", "kind": "deep-links",       "url": "https://docs.claude.com/en/docs/claude-code/deep-links", "notes": "Wave-82/83. InteractionPrimitive(kind=deep-link)." },
+    { "vendor": "claude-code", "kind": "tools",            "url": "https://code.claude.com/docs/en/tools-reference", "notes": "Wave-81. Extended tool descriptors." },
+    { "vendor": "claude-code", "kind": "env-vars",         "url": "https://code.claude.com/docs/en/env-vars", "notes": "Wave-81/W84. ~110 documented vars across 25 categories." },
+    { "vendor": "claude-code", "kind": "hooks",            "url": "https://code.claude.com/docs/en/hooks", "notes": "Wave-81. 29 hook events." },
+
+    { "vendor": "codex",            "kind": "primary-entrypoint", "url": "https://platform.openai.com/docs/codex", "notes": "Wave-87 cross-vendor parity. PermissionMode tiers, EffortLevel(minimal)." },
+    { "vendor": "codex",            "kind": "env-vars",           "url": "https://github.com/openai/codex/blob/main/README.md", "notes": "OPENAI_API_KEY, OPENAI_BASE_URL etc." },
+    { "vendor": "cursor",           "kind": "primary-entrypoint", "url": "https://docs.cursor.com/", "notes": "Wave-80/W87. Cursor agent docs, rules.md frontmatter." },
+    { "vendor": "gemini-cli",       "kind": "primary-entrypoint", "url": "https://github.com/google-gemini/gemini-cli", "notes": "Wave-87. Gemini CLI hooks, effort tiers, env vars." },
+    { "vendor": "copilot-cli",      "kind": "primary-entrypoint", "url": "https://docs.github.com/en/copilot/github-copilot-in-the-cli", "notes": "Wave-87. GH_TOKEN, GH_DEBUG." },
+    { "vendor": "openai-agents-sdk","kind": "primary-entrypoint", "url": "https://openai.github.io/openai-agents-python/", "notes": "Wave-82. OpenAI Agents SDK handoff/graph primitives." }
+  ]
+}

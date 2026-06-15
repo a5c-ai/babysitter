@@ -1,0 +1,23 @@
+nodeKind: OperationalTrigger
+id: operational-trigger:refresh-poll
+attributes:
+  displayName: "Symphony refresh-poll"
+  triggerKind: refresh-poll
+  effect: "Re-poll issue tracker for active issues"
+  idempotent: true
+---
+nodeKind: OperationalTrigger
+id: operational-trigger:refresh-reconcile
+attributes:
+  displayName: "Trigger reconciliation pass"
+  triggerKind: refresh-reconcile
+  effect: "Run a reconciliation cycle (refresh + cleanup terminal)"
+  idempotent: true
+---
+nodeKind: OperationalTrigger
+id: operational-trigger:drain
+attributes:
+  displayName: "Drain (stop accepting new dispatches)"
+  triggerKind: drain
+  effect: "Set orchestrator state to draining; existing runs continue."
+  idempotent: true

@@ -8,6 +8,12 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:technical-writing, skill-area:deep-web-research, skill-area:natural-language-processing]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer, role:research-analyst]
 ---
 
 # Philosophical Writing and Argumentation Skill

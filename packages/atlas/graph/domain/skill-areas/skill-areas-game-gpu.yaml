@@ -1,0 +1,181 @@
+---
+nodeKind: SkillArea
+id: skill-area:game-loop
+attributes:
+  displayName: "Game Loop & Frame Pacing"
+  description: |
+    Fixed vs variable timestep loops, decoupled update/render,
+    interpolation, and frame budget management.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:scene-graphs
+attributes:
+  displayName: "Scene Graphs & ECS"
+  description: |
+    Scene-graph hierarchies, transform propagation, ECS architectures
+    (Bevy, Unity DOTS), and data-oriented design.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:physics-simulation
+attributes:
+  displayName: "Physics Simulation"
+  description: |
+    Rigid-body and soft-body simulation — broadphase, contact solving,
+    and integrating engines like Box2D, Bullet, Rapier.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:shader-programming
+attributes:
+  displayName: "Shader Programming"
+  description: |
+    GLSL/HLSL/WGSL/MSL shaders — vertex/fragment/compute pipelines,
+    PBR, post-processing, and shader debugging.
+  domains:
+    - specialization:game-development
+    - specialization:gpu-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:cuda-kernels
+      strength: recommended
+    - target: skill-area:opencl-programming
+      strength: recommended
+    - target: skill-area:compute-shaders
+      strength: recommended
+    - target: skill-area:gpu-memory-hierarchy
+      strength: recommended
+    - target: skill-area:profiling-cuda
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:asset-pipeline
+attributes:
+  displayName: "Asset Pipeline"
+  description: |
+    Importing, processing, and packing game assets — texture atlases,
+    LODs, meshes, animations, and incremental builds.
+  domains:
+    - specialization:game-development
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:multiplayer-networking
+attributes:
+  displayName: "Multiplayer Game Networking"
+  description: |
+    Authoritative servers, client prediction, lag compensation,
+    rollback netcode, and snapshot/delta replication.
+  domains:
+    - specialization:game-development
+    - specialization:network-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:game-development
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:cuda-kernels
+attributes:
+  displayName: "CUDA Kernel Programming"
+  description: |
+    Writing CUDA kernels — grid/block layout, shared memory,
+    coalesced access, warp-level primitives, and occupancy.
+  domains:
+    - specialization:gpu-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:gpu-programming
+      confidence: primary
+  uses_language:
+    - language:cpp
+---
+nodeKind: SkillArea
+id: skill-area:opencl-programming
+attributes:
+  displayName: "OpenCL Programming"
+  description: |
+    Cross-vendor GPU/accelerator compute with OpenCL — buffers,
+    queues, kernels, and SPIR-V tooling.
+  domains:
+    - specialization:gpu-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:gpu-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:compute-shaders
+attributes:
+  displayName: "Compute Shaders"
+  description: |
+    GPGPU via graphics APIs — Vulkan/D3D12/WebGPU compute shaders,
+    workgroup sizing, and barriers.
+  domains:
+    - specialization:gpu-programming
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:gpu-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:gpu-memory-hierarchy
+attributes:
+  displayName: "GPU Memory Hierarchy"
+  description: |
+    Reasoning about global, shared, constant, and texture memory;
+    bank conflicts, caches, and memory-bandwidth bound work.
+  domains:
+    - specialization:gpu-programming
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:gpu-programming
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:profiling-cuda
+attributes:
+  displayName: "CUDA Profiling"
+  description: |
+    Profiling CUDA workloads with Nsight Systems / Compute — kernel
+    timing, occupancy, memory throughput, and roofline analysis.
+  domains:
+    - specialization:gpu-programming
+    - specialization:performance-optimization
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: specialization:gpu-programming
+      confidence: primary

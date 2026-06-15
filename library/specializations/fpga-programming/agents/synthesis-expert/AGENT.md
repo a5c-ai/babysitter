@@ -11,6 +11,11 @@ expertise:
   - Tool-specific optimizations
   - Multi-vendor synthesis flows
   - Synthesis scripting
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # Synthesis Expert Agent

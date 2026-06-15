@@ -15,6 +15,12 @@
  * - A Brief History of Just-In-Time: https://dl.acm.org/doi/10.1145/857076.857077
  * - V8 TurboFan: https://v8.dev/docs/turbofan
  * - HotSpot JIT: https://openjdk.org/groups/hotspot/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

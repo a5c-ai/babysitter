@@ -3,6 +3,13 @@
  * @description QC-ERR-002: Implement quantum error correction codes for fault-tolerant computation
  * @inputs { codeType: string, logicalQubits: number, errorModel: object }
  * @outputs { success: boolean, qecImplementation: object, threshold: number, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:quantum-computing]
+ *   specializations: [specialization:quantum-computing]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:compiler-implementation, skill-area:language-design]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

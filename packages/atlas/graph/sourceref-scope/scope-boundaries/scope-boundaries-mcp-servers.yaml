@@ -1,0 +1,193 @@
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-tavily.scope
+attributes:
+  subjectId: tool-server:mcp-tavily
+  inScope: |
+    AI-optimized web search via Tavily's API — search + extract +
+    crawl with LLM-friendly summarization. Best for grounded research
+    queries inside agents that need fresh public web answers.
+  outOfScope: |
+    Internal / authenticated content, deep-crawl SEO audits, and
+    rate-limit-sensitive workflows that exceed Tavily quotas.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-tavily
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-exa.scope
+attributes:
+  subjectId: tool-server:mcp-exa
+  inScope: |
+    Neural / embedding-based web search via Exa — supports semantic
+    similarity search, find-similar, and structured-result modes.
+    Strong for research agents that need beyond-keyword retrieval.
+  outOfScope: |
+    Realtime news firehose, transactional / authenticated data, and
+    workloads that demand a Google-class crawl frontier.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-exa
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-firecrawl.scope
+attributes:
+  subjectId: tool-server:mcp-firecrawl
+  inScope: |
+    Crawl + scrape + structured-extract over the public web with
+    JS rendering, returning markdown / JSON. Strong fit for ingestion
+    pipelines feeding RAG indexes.
+  outOfScope: |
+    Authenticated SaaS scraping (ToS-sensitive), real-time low-latency
+    queries, and internal-only data sources behind VPNs.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-firecrawl
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-context7.scope
+attributes:
+  subjectId: tool-server:mcp-context7
+  inScope: |
+    Up-to-date library / framework documentation lookup for code
+    agents — fetch docs for a named library at a specific version
+    so models cite real APIs instead of hallucinating.
+  outOfScope: |
+    Private repositories, proprietary internal docs, and arbitrary
+    web fetch beyond the indexed library set.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-context7
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-kubernetes.scope
+attributes:
+  subjectId: tool-server:mcp-kubernetes
+  inScope: |
+    Read / write Kubernetes resources via kubectl-equivalent tool
+    calls — describe pods, list namespaces, apply manifests. Strong
+    fit for SRE copilots in dev/staging clusters.
+  outOfScope: |
+    Production clusters without explicit RBAC scoping, multi-cluster
+    federation workflows, and any operation that should require
+    a four-eyes change-management process.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-kubernetes
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-docker.scope
+attributes:
+  subjectId: tool-server:mcp-docker
+  inScope: |
+    Local Docker daemon control — list / run / stop / logs / exec
+    on containers. Strong fit for dev-loop agents that need to
+    spin up sandboxes or inspect a running stack.
+  outOfScope: |
+    Production orchestration (use Kubernetes / ECS / Nomad clients
+    instead), remote daemons over the public internet, and
+    rootless-only environments without docker-socket access.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-docker
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-sequential-thinking.scope
+attributes:
+  subjectId: tool-server:mcp-sequential-thinking
+  inScope: |
+    Reflective scratchpad tool that lets a model record / revise
+    explicit reasoning steps. Useful for hard multi-step problems
+    on models without native extended-thinking budgets.
+  outOfScope: |
+    Models with native extended thinking (use that instead),
+    latency-critical chat surfaces, and tasks where the
+    additional turns inflate cost without quality gain.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - tool-server:mcp-sequential-thinking
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-perplexity.scope
+attributes:
+  subjectId: tool-server:mcp-perplexity
+  inScope: |
+    Perplexity Sonar API as a citation-grounded web search tool —
+    returns answers with source links suitable for follow-up fetch.
+    Strong fit for research agents that want pre-summarized hits.
+  outOfScope: |
+    Cost-sensitive high-volume search (each call hits Perplexity
+    billing), authenticated content, and offline / air-gapped
+    deployments.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-perplexity
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-figma.scope
+attributes:
+  subjectId: tool-server:mcp-figma
+  inScope: |
+    Read Figma files / frames / nodes via the Figma REST API and
+    surface them as design context for code agents (export images,
+    extract design tokens, lookup variables).
+  outOfScope: |
+    Bulk write / collaborative editing of Figma files, real-time
+    cursor presence, and operations requiring an interactive
+    plugin surface.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-figma
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-supabase.scope
+attributes:
+  subjectId: tool-server:mcp-supabase
+  inScope: |
+    Manage Supabase projects from agents — query Postgres, run
+    migrations, manage auth users, edit RLS policies. Strong fit
+    for full-stack SaaS dev loops where the agent owns DB shape.
+  outOfScope: |
+    Production database mutations without an approval gate,
+    self-hosted non-Supabase Postgres deployments, and any
+    operation needing service-role keys in untrusted contexts.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-supabase
+---
+nodeKind: ScopeBoundary
+id: scope-boundary:mcp-clickhouse.scope
+attributes:
+  subjectId: tool-server:mcp-clickhouse
+  inScope: |
+    Run analytical SQL against a ClickHouse cluster from an agent —
+    list databases / tables, run SELECT queries, inspect schemas.
+    Strong fit for data-analysis copilots on column-store warehouses.
+  outOfScope: |
+    OLTP write paths, multi-warehouse federation, and queries
+    that should stream gigabytes back into the agent context.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+edges:
+  bounds_subject:
+    - tool-server:mcp-clickhouse

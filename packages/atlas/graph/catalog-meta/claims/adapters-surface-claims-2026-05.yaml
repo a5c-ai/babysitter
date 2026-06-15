@@ -1,0 +1,229 @@
+nodeKind: Claim
+id: claim:adapters-tui-package-surface
+attributes:
+  subjectId: package:a5c-ai-adapters-tui
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/genty-tui is modeled as a TUI and bin-entrypoint package surface.'
+  statement: The adapters TUI package surface is grounded in its package metadata and adapters-tui binary entrypoint.
+  evidenceSourceIds:
+    - evidence:adapters-tui-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-adapters-tui
+  backed_by_evidence:
+    - evidence:adapters-tui-package-source
+---
+nodeKind: Claim
+id: claim:adapters-tui-exposes-interactive-primitives
+attributes:
+  subjectId: package:a5c-ai-adapters-tui
+  subjectKind: PackageSurface
+  attribute: exposes_subcommand
+  value: adapters TUI exposes command palette, prompt input, and model picker as tui-command InteractionPrimitive records.
+  statement: The adapters TUI exposes interactive command primitives backed by command-palette, prompt-input, and model-picker source files.
+  evidenceSourceIds:
+    - evidence:adapters-tui-primitives-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-adapters-tui
+  backed_by_evidence:
+    - evidence:adapters-tui-primitives-source
+---
+nodeKind: Claim
+id: claim:adapters-cli-package-surface
+attributes:
+  subjectId: package:a5c-ai-adapters-cli
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/adapters-cli is modeled as a CLI and bin-entrypoint package surface.'
+  statement: The adapters CLI package surface is grounded in its package metadata and adapters binary entrypoint.
+  evidenceSourceIds:
+    - evidence:adapters-cli-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-adapters-cli
+  backed_by_evidence:
+    - evidence:adapters-cli-package-source
+---
+nodeKind: Claim
+id: claim:adapters-cli-exposes-subcommands
+attributes:
+  subjectId: package:a5c-ai-adapters-cli
+  subjectKind: PackageSurface
+  attribute: exposes_subcommand
+  value: adapters CLI exposes adapters leaf subcommands as cli-subcommand InteractionPrimitive records with exit-code metadata.
+  statement: The adapters CLI subcommand surface is grounded in command handler source files and the shared exit-code mapping.
+  evidenceSourceIds:
+    - evidence:adapters-cli-command-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-adapters-cli
+  backed_by_evidence:
+    - evidence:adapters-cli-command-source
+---
+nodeKind: Claim
+id: claim:hooks-adapter-core-package-surface
+attributes:
+  subjectId: package:a5c-ai-hooks-adapter-core
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/hooks-adapter-core is modeled as the package surface exposing normalized hook payload schemas.'
+  statement: The hooks-adapter core package surface is grounded in package metadata and core package source files.
+  evidenceSourceIds:
+    - evidence:hooks-adapter-core-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-hooks-adapter-core
+  backed_by_evidence:
+    - evidence:hooks-adapter-core-package-source
+---
+nodeKind: Claim
+id: claim:hooks-adapter-core-shared-context-specs
+attributes:
+  subjectId: package:a5c-ai-hooks-adapter-core
+  subjectKind: PackageSurface
+  attribute: has_payload_schema
+  value: hooks-adapter core exposes shared context specs for unified hook events, execution context, hook results, merge results, phase mapping, session state, harness detection, and propagation options.
+  statement: The hooks-adapter shared payload schema records are grounded in the public core type, merge, discovery, and propagation source files.
+  evidenceSourceIds:
+    - evidence:hooks-adapter-core-shared-types-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-hooks-adapter-core
+  backed_by_evidence:
+    - evidence:hooks-adapter-core-shared-types-source
+---
+nodeKind: Claim
+id: claim:adapters-gateway-package-surface
+attributes:
+  subjectId: package:a5c-ai-adapters-gateway
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/adapters-gateway is modeled as the package surface exposing gateway HTTP, WebSocket, and Kanban APIs.'
+  statement: The adapters gateway package surface is grounded in package metadata and gateway source files.
+  evidenceSourceIds:
+    - evidence:adapters-gateway-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-adapters-gateway
+  backed_by_evidence:
+    - evidence:adapters-gateway-package-source
+---
+nodeKind: Claim
+id: claim:adapters-gateway-exposes-endpoints
+attributes:
+  subjectId: package:a5c-ai-adapters-gateway
+  subjectKind: PackageSurface
+  attribute: exposes_endpoint
+  value: adapters gateway exposes health, token, run, session, workspace, dispatch, WebSocket, and Kanban HTTP endpoints as APIEndpoint records.
+  statement: The adapters gateway endpoint records are grounded in server route source files and bearer-auth middleware.
+  evidenceSourceIds:
+    - evidence:adapters-gateway-endpoint-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-adapters-gateway
+  backed_by_evidence:
+    - evidence:adapters-gateway-endpoint-source
+---
+nodeKind: Claim
+id: claim:tasks-adapter-package-surface
+attributes:
+  subjectId: package:a5c-ai-tasks-adapter
+  subjectKind: PackageSurface
+  attribute: surfaceKinds
+  value: '@a5c-ai/tasks-adapter is modeled as a breakpoint-runtime package surface.'
+  statement: The tasks-adapter package surface is grounded in package metadata and runtime source files.
+  evidenceSourceIds:
+    - evidence:tasks-adapter-package-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-tasks-adapter
+  backed_by_evidence:
+    - evidence:tasks-adapter-package-source
+---
+nodeKind: Claim
+id: claim:tasks-adapter-server-client-endpoints
+attributes:
+  subjectId: package:a5c-ai-tasks-adapter
+  subjectKind: PackageSurface
+  attribute: exposes_endpoint
+  value: tasks-adapter server backend client methods are modeled as authenticated outbound-client APIEndpoint records for question create/get/cancel/list/answer/claim and expert listing.
+  statement: The tasks-adapter server-client endpoint records are grounded in ServerBreakpointBackend source methods.
+  evidenceSourceIds:
+    - evidence:tasks-adapter-server-client-source
+  confidence: high
+  provenanceKind: repo-inspection
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: '2026-05-05T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: provenance
+edges:
+  about_subject:
+    - package:a5c-ai-tasks-adapter
+  backed_by_evidence:
+    - evidence:tasks-adapter-server-client-source

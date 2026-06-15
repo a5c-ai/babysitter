@@ -1,0 +1,136 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:openai-responses
+attributes:
+  displayName: "OpenAI Responses"
+  vendor: "OpenAI"
+  specUrl: "https://platform.openai.com/docs/api-reference/responses"
+  streamingFraming: sse-or-websocket
+  toolUseSchema: |
+    Tool calls appear as `function_call` items in the response output
+    array with `call_id`, `name`, and `arguments` (JSON string). Tool
+    results are returned as `function_call_output` items referencing the
+    same `call_id`.
+  thinkingChannel: item
+  cacheControl: implicit
+  firstSpecVersion: "2025-03-11"
+  currentSpecVersion: "2025-03-11"
+  status: standard
+  requestBodyShape: |
+    POST /v1/responses
+    JSON body (top-level fields):
+      - `model` (required, string)
+      - `input` (required, string or array of input items — messages,
+        function_call_output, file/image refs, ...)
+      - `instructions` (optional, string — system-style preamble)
+      - `tools` (optional, array; built-in tools like `web_search`, `file_search`,
+        `code_interpreter`, plus `{type: "function", name, description, parameters}`)
+      - `tool_choice` (optional)
+      - `reasoning` (optional, `{effort: "low"|"medium"|"high", summary?: "auto"|"concise"|"detailed"}`)
+      - `max_output_tokens`, `temperature`, `top_p` (optional)
+      - `stream` (optional, bool)
+      - `previous_response_id` (optional, string — server-side state chaining)
+      - `store` (optional, bool — whether the server should retain this response)
+      - `metadata` (optional, map<string,string>)
+      - `prompt_cache_key` (optional, string — opt-in caching scope key)
+    WebSocket mode uses the same logical body inside a `response.create`
+    event sent to `/v1/responses`; streaming and background fields are
+    transport-owned and should not be forwarded as HTTP-only assumptions.
+  responseBodyShape: |
+    Non-streaming response (HTTP 200 application/json):
+      {
+        "id": "resp_...",
+        "object": "response",
+        "created_at": int,
+        "model": "...",
+        "status": "completed"|"in_progress"|"failed"|"incomplete",
+        "output": [
+        ],
+        "output_text": string,
+        "usage": {
+          "input_tokens": int,
+          "output_tokens": int,
+          "total_tokens": int,
+          "input_tokens_details": { "cached_tokens": int },
+          "output_tokens_details": { "reasoning_tokens": int }
+        },
+        "error": null|{...}
+      }
+  streamingEventTypes:
+    - response.created
+    - response.in_progress
+    - response.output_item.added
+    - response.output_item.done
+    - response.content_part.added
+    - response.content_part.done
+    - response.output_text.delta
+    - response.output_text.done
+    - response.function_call_arguments.delta
+    - response.function_call_arguments.done
+    - response.reasoning_summary_text.delta
+    - response.reasoning_summary_text.done
+    - response.completed
+    - response.failed
+    - response.incomplete
+    - error
+  toolCallWireFormat: |
+    A `function_call` item in `response.output[]`:
+      { "type": "function_call",
+        "id": "fc_...",
+        "call_id": "call_...",
+        "name": "<tool_name>",
+        "arguments": "<JSON-encoded string>" }
+  toolResultWireFormat: |
+    A `function_call_output` item provided as input on the next request:
+      { "type": "function_call_output",
+        "call_id": "call_...",
+        "output": "<string>" }
+  errorEnvelope: |
+    Non-2xx response, `application/json`:
+      { "error": { "type": string, "code": string|null, "message": string,
+                   "param": string|null } }
+    Common types: `invalid_request_error`, `authentication_error`,
+    `permission_error`, `rate_limit_exceeded`, `server_error`.
+    HTTP status: 400/401/403/404/429/500/503.
+  cacheControlWireFormat: |
+    Implicit automatic prompt caching for prompts >= 1024 tokens; cache
+    state is reported in `usage.input_tokens_details.cached_tokens`.
+    Optional explicit scoping via top-level `prompt_cache_key` (free-form
+    string used by the server to bucket cache entries per project/tenant).
+  rateLimitSignaling: |
+    Response headers on every request:
+      - `x-ratelimit-limit-requests`, `x-ratelimit-remaining-requests`,
+        `x-ratelimit-reset-requests`
+      - `x-ratelimit-limit-tokens`, `x-ratelimit-remaining-tokens`,
+        `x-ratelimit-reset-tokens`
+    On HTTP 429: `retry-after` header (seconds).
+  reasoningWireFormat: |
+    A `reasoning` item in `response.output[]`:
+      { "type": "reasoning",
+        "id": "rs_...",
+        "summary": [ { "type": "summary_text", "text": "..." }, ... ],
+        "encrypted_content"?: "<opaque>",
+        "status": "completed" }
+    Raw chain-of-thought tokens are not exposed; the `summary` items
+    carry user-visible reasoning. `encrypted_content` (when present) is
+    echoed back via `previous_response_id` or input to preserve state.
+  authHeaderFormat: |
+    `Authorization: Bearer <OPENAI_API_KEY>`
+    Optional: `OpenAI-Organization: <org-id>`, `OpenAI-Project: <proj-id>`.
+  clientRouting: |
+    Codex clients should receive proxy endpoints through top-level
+    `openai_base_url` config (preferably `-c openai_base_url=...` for
+    launched sessions). OPENAI_BASE_URL remains a compatibility fallback but
+    is not sufficient for all recent Codex builds and config layers.
+  versioningHeader: |
+    No general API version header; the `/v1/...` path is the surface version.
+    Per-feature betas are opted into with `OpenAI-Beta: <feature>=v<n>`
+    headers (e.g. assistants/threads betas).
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:openai
+  spoken_by:
+    - model:gpt-5@current
+  bridged_by:
+    - transport-proxy:adapters-proxy

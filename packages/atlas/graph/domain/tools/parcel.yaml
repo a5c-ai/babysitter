@@ -1,0 +1,20 @@
+nodeKind: Tool
+id: tool:parcel
+attributes:
+  displayName: "Parcel"
+  homepageUrl: "https://parceljs.org"
+  kind: bundler
+  description: |
+    Zero-config web application bundler.
+edges:
+  belongs_to_language:
+    - target: language:javascript
+  used_for:
+    - target: skill-area:ci-pipeline-optimization
+  alternative_to:
+    - target: tool:webpack
+      comparison: "JavaScript bundlers"
+    - target: tool:vite
+      comparison: "JavaScript bundlers"
+    - target: tool:turbopack
+      comparison: "JavaScript bundlers"

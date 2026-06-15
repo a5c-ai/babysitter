@@ -8,6 +8,12 @@
  * @references
  * - CCL Leadership Development: https://www.ccl.org/articles/leading-effectively-articles/leadership-development-program/
  * - Harvard Leadership Programs: https://www.exed.hbs.edu/leadership-programs
+  * @graph
+ *   domains: [domain:human-resources]
+ *   specializations: [specialization:talent-management]
+ *   skillAreas: [skill-area:talent-acquisition-strategy, skill-area:performance-management, skill-area:organizational-design, skill-area:learning-development]
+ *   workflows: [workflow:talent-acquisition-pipeline]
+ *   roles: [role:hr-manager, role:talent-recruiter]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

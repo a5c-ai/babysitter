@@ -1,0 +1,12 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:gemini-config-yaml
+attributes:
+  artifactId: plugin-artifact:gemini-config-yaml
+  displayName: "Gemini CLI user config.yaml"
+  targetId: plugin-target:gemini-cli
+  artifactKind: settings-fragment
+  pathPattern: "~/.gemini/config.yaml"
+  installerSurface: "settings-merge"
+edges:
+  emits_artifact:
+    - target: plugin-target:gemini-cli

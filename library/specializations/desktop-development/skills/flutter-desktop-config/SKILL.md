@@ -3,6 +3,12 @@ name: flutter-desktop-config
 description: Configure Flutter for desktop platforms with platform channels and native integrations
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [flutter, dart, cross-platform, desktop, ui]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:flutter-development]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # flutter-desktop-config

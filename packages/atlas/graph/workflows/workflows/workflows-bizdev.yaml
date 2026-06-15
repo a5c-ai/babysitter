@@ -1,0 +1,148 @@
+---
+nodeKind: Workflow
+id: workflow:partnership-pipeline-review
+attributes:
+  displayName: "Partnership Pipeline Review"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "weekly"
+  complexity: single-team
+  description: |
+    Reviews the business development partnership pipeline end-to-end --
+    triaging inbound partnership inquiries and outbound prospecting targets,
+    scoring partner prospects on strategic fit, market reach, and technical
+    compatibility, advancing qualified opportunities through deal stages
+    (identification, qualification, proposal, negotiation, close), monitoring
+    stage-velocity metrics and conversion rates, identifying stalled deals
+    requiring executive intervention, and maintaining the partner pipeline CRM
+    with accurate stage progression and next-action dates. Produces weekly
+    pipeline health report and partner deal forecast. Excludes contract
+    execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:engineering-manager
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:business-development
+    - target: domain:revenue-operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:bizdev-team
+    - target: org-unit:partnerships-team
+---
+nodeKind: Workflow
+id: workflow:channel-partner-enablement
+attributes:
+  displayName: "Channel Partner Enablement"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages ongoing enablement of channel and reseller partners --
+    coordinating partner training sessions on product updates and new feature
+    launches, maintaining co-marketing asset libraries with current messaging
+    and brand guidelines, providing technical enablement resources such as
+    integration guides and sandbox environments, tracking partner certification
+    completion rates, reviewing co-selling opportunity registrations, and
+    measuring partner-sourced pipeline contribution against quarterly targets.
+    Produces partner enablement scorecard and co-marketing calendar. Excludes
+    partner contract negotiations.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:technical-writer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:tutorial-design
+    - target: skill-area:docs-as-code
+  applies_to_domain:
+    - target: domain:business-development
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:write-user-docs
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:partnerships-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:strategic-alliance-performance-review
+attributes:
+  displayName: "Strategic Alliance Performance Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews performance of strategic alliance partnerships against agreed
+    KPIs -- analyzing joint revenue attribution and revenue-share accuracy,
+    evaluating joint roadmap delivery milestones, assessing co-marketing
+    campaign ROI and lead quality, benchmarking alliance-sourced pipeline
+    against direct channels, reviewing escalated support issues affecting the
+    partner relationship, and identifying opportunities for deepening or
+    restructuring the alliance. Produces quarterly alliance performance report
+    and joint steering committee agenda. Excludes alliance contract
+    renegotiation.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:business-development
+    - target: domain:revenue-operations
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:bizdev-team
+    - target: org-unit:partnerships-team
+    - target: org-unit:revenue-operations-team
+---
+nodeKind: Workflow
+id: workflow:market-expansion-assessment
+attributes:
+  displayName: "Market Expansion Assessment"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Evaluates new market entry opportunities for geographic or vertical
+    expansion -- analyzing total addressable market sizing and growth
+    trajectories, mapping regulatory and compliance landscapes for target
+    markets, assessing localization requirements including language, payments,
+    and data residency, evaluating competitive intensity and incumbent
+    positioning, modeling go-to-market cost structures and break-even
+    timelines, identifying required local partnerships and distribution
+    channels, and stress-testing expansion assumptions against scenario-based
+    financial projections. Produces market expansion feasibility report and
+    go/no-go recommendation. Excludes market entry execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:explorer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+  applies_to_domain:
+    - target: domain:business-development
+    - target: domain:strategy
+    - target: domain:finance
+  triggers_responsibility:
+    - target: responsibility:capacity-planning
+    - target: responsibility:vendor-evaluation
+  performed_by_org_unit:
+    - target: org-unit:bizdev-team
+    - target: org-unit:strategy-team
+    - target: org-unit:finance-team

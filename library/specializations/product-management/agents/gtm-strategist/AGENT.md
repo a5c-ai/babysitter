@@ -9,6 +9,12 @@ expertise:
   - Sales enablement
   - Customer marketing
   - Analyst relations
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:growth-strategy, skill-area:competitive-intelligence]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Go-to-Market Strategist Agent

@@ -17,6 +17,12 @@
  * - Secure Boot Design: https://interrupt.memfault.com/blog/secure-boot-guide
  * - Chain of Trust: https://www.embedded.com/building-a-chain-of-trust-for-embedded-systems/
  * - Key Management: https://www.arm.com/technologies/trustzone-for-cortex-m
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

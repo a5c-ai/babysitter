@@ -3,6 +3,12 @@
  * @description Create high-level process definitions identifying Suppliers, Inputs, Process steps, Outputs, and Customers. Serves as foundation for detailed process analysis and improvement initiatives.
  * @inputs { projectName: string, processName: string, processContext: object, stakeholders: array }
  * @outputs { success: boolean, sipocDiagram: object, processScope: object, stakeholderMap: object, artifacts: array }
+  * @graph
+ *   domains: [domain:business-intelligence]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

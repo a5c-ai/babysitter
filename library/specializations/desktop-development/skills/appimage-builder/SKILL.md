@@ -3,6 +3,12 @@ name: appimage-builder
 description: Build AppImage bundles with AppDir structure for portable Linux applications
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [linux, appimage, portable, packaging, distribution]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # appimage-builder

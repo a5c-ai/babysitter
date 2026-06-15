@@ -2,6 +2,11 @@
 name: quantitative-research-methodologist
 description: Lead design and execution of quantitative research studies with rigorous statistical analysis
 required-skills: quantitative-methods, causal-inference-methods, psychometric-assessment
+graph:
+  domains: [domain:social-sciences]
+  skillAreas: [skill-area:statistical-analysis, skill-area:data-analysis, skill-area:machine-learning-frameworks]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:data-scientist, role:research-scientist]
 ---
 
 # Quantitative Research Methodologist Agent

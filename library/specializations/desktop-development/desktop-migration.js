@@ -16,6 +16,12 @@
  * @references
  * - Migration patterns: https://docs.microsoft.com/en-us/dotnet/architecture/modernize-desktop/
  * - Electron migration: https://www.electronjs.org/docs/latest/tutorial/context-isolation
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:desktop-development]
+ *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:parallel-run-migration]
+ *   roles: [role:desktop-developer, role:fullstack-engineer]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

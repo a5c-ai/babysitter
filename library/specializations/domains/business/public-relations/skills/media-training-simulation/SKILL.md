@@ -13,6 +13,10 @@ metadata:
   domain: business
   category: Crisis Communications
   skill-id: SK-013
+graph:
+  domains: [domain:public-relations]
+  skillAreas: [skill-area:brand-positioning, skill-area:content-strategy, skill-area:brand-strategy]
+  roles: [role:marketing-strategist, role:content-strategist, role:marketing-manager]
 ---
 
 # Media Training Simulation Skill

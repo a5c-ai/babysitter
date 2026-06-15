@@ -17,6 +17,13 @@
  * - Kong Gateway: https://docs.konghq.com/
  * - AWS API Gateway: https://docs.aws.amazon.com/apigateway/
  * - Envoy Proxy: https://www.envoyproxy.io/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+ *   roles: [role:platform-engineer]
+ *   topics: [topic:api-design, topic:developer-experience]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

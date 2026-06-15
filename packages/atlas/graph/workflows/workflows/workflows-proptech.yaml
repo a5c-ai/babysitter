@@ -1,0 +1,72 @@
+---
+nodeKind: Workflow
+id: workflow:smart-building-systems-review
+attributes:
+  displayName: "Smart Building Systems Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews smart building technology systems and integrations -- auditing
+    BMS (Building Management System) sensor health and calibration status,
+    evaluating HVAC optimization algorithm performance against energy
+    benchmarks, reviewing access control and security system integration
+    with tenant management platforms, validating IoT device firmware
+    versions and cybersecurity posture, and assessing occupancy analytics
+    accuracy against ground-truth surveys. Produces systems health reports,
+    energy performance certificates, and technology upgrade roadmaps.
+    Excludes building construction and renovation.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:staff-engineer
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:sli-slo-management
+  applies_to_domain:
+    - target: domain:proptech
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:tenant-experience-optimization
+attributes:
+  displayName: "Tenant Experience Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Optimizes the tenant experience in managed properties -- analyzing
+    tenant satisfaction survey results and NPS trends, tracking maintenance
+    request resolution times against SLA commitments, evaluating amenity
+    utilization patterns to inform investment priorities, monitoring
+    common-area environmental quality (air quality, lighting, noise levels)
+    from IoT sensors, and benchmarking tenant retention and renewal rates
+    against market comparables. Produces tenant experience scorecards,
+    amenity ROI analyses, and retention risk reports. Excludes lease
+    negotiation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:proptech
+    - target: domain:customer-experience
+  triggers_responsibility:
+    - target: responsibility:slo-definition
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:facilities-team
+    - target: org-unit:customer-success

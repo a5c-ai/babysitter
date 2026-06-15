@@ -1,0 +1,104 @@
+nodeKind: PluginTarget
+id: plugin-target:pi
+attributes:
+  displayName: "Pi"
+  hostAgent: agent:pi
+  adapterFamily: programmatic
+  adapterName: pi
+  manifestFormat: "state-only"
+  commandFormat: markdown-commands
+  skillHandling: derived-from-commands
+  hookRegistrationFormat: null
+  hookRegistrationOutputPath: null
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  marketplacePath: null
+  pluginRootEnvVar: null
+  pluginRootEnvVarForExtension: PI_PLUGIN_ROOT
+  scriptVariants:
+    - javascript
+  distribution:
+    - npm-cli
+  distributionModel: workspace-generated
+  npmPublishable: true
+  installLayout: null
+  packageMetadata:
+    moduleType: module
+    binScriptExt: ".cjs"
+    installLifecycle: none
+    activationMessage: restart
+    peerDependencyPackage: "@earendil-works/pi-coding-agent"
+    emitCjsWrappers: false
+  componentSupport:
+    agents: native
+    context: native
+  cliCommand: "pi"
+  callerEnvVars:
+    - "PI_SESSION_ID"
+  configPaths:
+    - ".pi"
+  processNames:
+    - "pi"
+  capabilities:
+    - Programmatic
+    - SessionBinding
+    - StopHook
+    - HeadlessPrompt
+  adapterModule: "@a5c-ai/adapters-codecs/pi-adapter"
+  externalRepo: "a5c-ai/babysitter-pi"
+  externalPackageName: "@a5c-ai/babysitter-pi"
+  generatedSourceDir: "pi"
+  marketplaceSpecs: []
+  requiredSurfaceFile: "AGENTS.md"
+  promptCapabilities:
+    - skills
+    - slash-commands
+    - task-tool
+    - harness-routing
+    - programmatic-session
+    - stop-hook
+  loopControlTerm: stop-hook
+  hookDriven: true
+  interactiveToolName: "AskUserQuestion"
+  sessionEnvVarsDescription: "PID-scoped session marker (authoritative); PI_SESSION_ID and AGENT_SESSION_ID are fallbacks"
+  hasIntentFidelityChecks: false
+  hasNonNegotiables: false
+  cliSetupMode: default
+  defaultStepCount: 8
+  skillSystemLabel: "Installed skill"
+  defaultTransportId: openai-chat
+  hooksMuxFamily: in-process
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: runtime_hook
+  toolInterceptionScope: all
+  launchBehavior:
+    promptDelivery: cli-flag
+    promptFlag: "-p"
+    promptExtraFlags: ["--mode", "json"]
+    execSubcommand: null
+    resumeDelivery: null
+    resumeFlag: null
+    sessionIdFlag: null
+    maxTurnsFlag: null
+    stdinBehavior: close-after-prompt
+    selfExits: false
+    needsIdleKill: true
+  description: |
+    Pi as a programmatic plugin host. Pi drives the babysitter loop via the
+    `pi.on("agent_end")` lifecycle event, which invokes the proxied stop hook
+    (`babysitter-proxied-stop.js` -> `hook:run --hook-type stop`) after each
+    assistant turn — the StopHook-capability equivalent. Unlike Claude Code,
+    Pi does NOT register Claude-style hook files; the stop hook is driven by a
+    Pi extension event rather than `hooks/hooks.json`.
+
+edges:
+  hosted_by:
+    - target: agent:pi
+    - target: agent-platform-impl:pi.platform@current

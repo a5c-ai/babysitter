@@ -9,6 +9,11 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:compiler-implementation, skill-area:graph-algorithms]
+  roles: [role:backend-engineer]
 ---
 
 # AST Manipulation Skill

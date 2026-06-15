@@ -1,0 +1,24 @@
+nodeKind: AutomationRule
+id: automation-rule:github-issue-opened
+attributes:
+  displayName: "Mirror GitHub issues onto kanban"
+  triggerType: webhook
+  webhookPort: 4187
+  webhookPath: "/automations/webhooks/github-issue-opened"
+  webhookMethod: POST
+  webhookAuthType: bearer
+  sourceEvent: "github:issues.opened"
+  lifecycleState: active
+  targetProjectId: "project:babysitter-core"
+  targetBoardProjectId: "board:babysitter-default"
+  taskTemplateTitle: "{{issue.title}}"
+  taskTemplatePriority: high
+  taskTemplateStatus: ready
+  routingAction: canonical-issue-create
+  sourceKind: external-system
+  createdAt: "2026-04-20"
+  description: |
+    Receives `issues.opened` webhook deliveries from a GitHub App and
+    creates a canonical kanban issue per delivery. The bearer-token
+    auth secret is supplied by the kanban gateway; deliveryId is recorded
+    on the AutomationExecutionRecord for replay protection.

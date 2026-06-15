@@ -1,0 +1,83 @@
+nodeKind: EnvVar
+id: env-var:anthropic-auth-token
+attributes:
+  displayName: ANTHROPIC_AUTH_TOKEN
+  description: Custom value for the Authorization header (prefixed with `Bearer `).
+  name: ANTHROPIC_AUTH_TOKEN
+  category: auth
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-base-url
+attributes:
+  displayName: ANTHROPIC_BASE_URL
+  description: Override the API endpoint to route requests through a proxy or gateway.
+  name: ANTHROPIC_BASE_URL
+  category: auth
+  valueType: url
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-oauth-token
+attributes:
+  displayName: ANTHROPIC_OAUTH_TOKEN
+  description: OAuth access token for Claude.ai authentication; takes precedence over keychain-stored credentials.
+  name: ANTHROPIC_OAUTH_TOKEN
+  category: auth
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-oauth-token
+attributes:
+  displayName: CLAUDE_CODE_OAUTH_TOKEN
+  description: OAuth access token for Claude.ai authentication (alternative to /login for SDK and automated environments).
+  name: CLAUDE_CODE_OAUTH_TOKEN
+  category: auth
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-oauth-refresh-token
+attributes:
+  displayName: CLAUDE_CODE_OAUTH_REFRESH_TOKEN
+  description: OAuth refresh token for Claude.ai authentication for automated environments.
+  name: CLAUDE_CODE_OAUTH_REFRESH_TOKEN
+  category: auth
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-oauth-scopes
+attributes:
+  displayName: CLAUDE_CODE_OAUTH_SCOPES
+  description: Space-separated OAuth scopes the refresh token was issued with.
+  name: CLAUDE_CODE_OAUTH_SCOPES
+  category: auth
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-api-key-helper-ttl-ms
+attributes:
+  displayName: CLAUDE_CODE_API_KEY_HELPER_TTL_MS
+  description: Interval in milliseconds at which credentials should be refreshed when using apiKeyHelper.
+  name: CLAUDE_CODE_API_KEY_HELPER_TTL_MS
+  category: auth
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

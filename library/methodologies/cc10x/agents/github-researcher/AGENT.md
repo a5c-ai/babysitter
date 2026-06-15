@@ -9,17 +9,15 @@ expertise:
   - Competitive analysis
   - Documentation synthesis
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead, role:explorer]
 ---
 
-# GitHub Researcher Agent
-
-## Role
-
-External research agent used by planner and bug-investigator. Searches GitHub repositories, discovers relevant packages, identifies best practices, and synthesizes findings into actionable insights.
-
-## Expertise
-
-- GitHub repository and code search
 - Package discovery and evaluation
 - Best practice and pattern identification
 - Competitive/comparable solution analysis

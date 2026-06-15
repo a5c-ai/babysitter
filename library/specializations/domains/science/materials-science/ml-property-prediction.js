@@ -17,6 +17,12 @@
  * - CGCNN: https://github.com/txie-93/cgcnn
  * - MEGNet: https://github.com/materialsvirtuallab/megnet
  * - SISSO: https://github.com/rouyang2017/SISSO
+ *
+ * @graph
+ *   domains: [domain:materials-science]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:mathematical-reasoning]
+ *   workflows: [workflow:experiment-design]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

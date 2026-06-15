@@ -1,0 +1,18 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:opencode.scope
+attributes:
+  subjectId: agent:opencode
+  inScope: |
+    Open-source developer terminal coding harness — pluggable model
+    routing across multiple providers, local file edits, shell tool use,
+    and MCP servers on a single developer's workstation.
+  outOfScope: |
+    Production runtime / always-on services, multi-tenant hosting,
+    browser-only environments, CI without explicit non-interactive
+    setup, and IDE-embedded UX.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:runtime-only
+    - out-of-scope-reason:future-phase
+edges:
+  bounds_subject:
+    - agent:opencode

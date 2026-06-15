@@ -1,0 +1,74 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:antigravity-cli.runtime@current
+attributes:
+  displayName: Antigravity CLI Runtime (current)
+  agentVersionId: agentVersion:antigravity:2-0-11
+  subagentDispatchMechanism: workflow-dispatch
+  subagentChildSessionPolicy: child-session
+  subagentToolScopePolicy: inherit-parent
+  packageRef: source-ref:antigravity-cli-github
+  builtInTools:
+  - tool-descriptor:read
+  - tool-descriptor:write
+  - tool-descriptor:edit
+  - tool-descriptor:bash
+  - tool-descriptor:grep
+  - tool-descriptor:web-search
+  toolRegistryDiscovery: static-bundled
+  hookSockets:
+  - hook-surface:antigravity.pre-prompt
+  - hook-surface:antigravity.post-response
+  - hook-surface:antigravity.tool-call-pre
+  - hook-surface:antigravity.tool-call-post
+  internalSessionStateLocation: ~/.antigravity/sessions/
+  sessionFileFormat: jsonl
+  sessionFilePathConvention: ~/.antigravity/sessions/<session-id>.jsonl
+  approvalGatingPrimitive: per-call
+  subprocessSandboxStrategy: native-sandbox
+  runtimeIdentity: api-key
+  supportedMCPTransports:
+  - mcp-transport:stdio
+  supportsStreaming: true
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+  - target: agent:antigravity-cli
+    role: runtime
+  succeeds:
+  - target: agent-runtime-impl:gemini-cli.runtime@current
+    notes: 'Antigravity CLI runtime succeeds Gemini CLI runtime; adds workflow-driven hook dispatch and multi-model routing (Gemini 3.5 Flash, Claude, GPT).
+      '
+  exposes:
+  - target: hook-surface:antigravity.pre-prompt
+  - target: hook-surface:antigravity.post-response
+  - target: hook-surface:antigravity.tool-call-pre
+  - target: hook-surface:antigravity.tool-call-post
+  - target: hook-surface:before-tool-selection
+  - target: hook-surface:before-model
+  - target: hook-surface:after-model
+  - target: hook-surface:before-agent
+  bundles:
+  - target: tool-descriptor:read
+  - target: tool-descriptor:write
+  - target: tool-descriptor:edit
+  - target: tool-descriptor:bash
+  - target: tool-descriptor:grep
+  - target: tool-descriptor:web-search
+  connects:
+  - target: mcp-transport:stdio
+  supports:
+  - target: capability:mcp-stdio
+    versionRange: '*'
+    level: full
+  - target: capability:supports-mcp
+    versionRange: '>=2.0.0'
+    level: full
+    notes: 'MCP via stdio.
+      '
+  has_env_var:
+  - target: env-var:gemini-api-key
+  - target: env-var:google-api-key
+  - target: env-var:antigravity-debug
+  speaks:
+    - target: mcp-transport:stdio

@@ -1,0 +1,100 @@
+# Catalog schema — primitive attribute types.
+# See ../schema/meta-schema.md §AttributeType for rationale.
+
+catalogSchemaVersion: 1.0.0
+
+primitiveTypes:
+  - name: string
+    description: UTF-8 string
+    validator: any string
+
+  - name: slug
+    description: lowercase, hyphenated, no spaces
+    validator: "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+
+  - name: id
+    description: "<kind-prefix>:<slug>"
+    validator: "^[a-z][a-z0-9-]*:([a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9])$"
+
+  - name: semver
+    description: semantic version
+    validator: "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$"
+
+  - name: versionRange
+    description: semver range
+    validator: any valid semver range string (npm semver compatible)
+
+  - name: iso-date
+    description: ISO 8601 date (YYYY-MM-DD)
+    validator: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+
+  - name: iso-timestamp
+    description: ISO 8601 timestamp with timezone
+    validator: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+
+  - name: url
+    description: HTTP(S) URL
+    validator: "^https?://[^\\s]+$"
+
+  - name: bool
+    description: true or false
+    validator: boolean
+
+  - name: int
+    description: integer (positive, negative, or zero)
+    validator: integer
+
+  - name: float
+    description: floating-point number
+    validator: number
+
+  - name: tokens
+    description: non-negative integer (token count)
+    validator: integer >= 0
+
+  - name: cost-per-million-tokens
+    description: float, USD per million tokens by default
+    validator: number >= 0
+
+  - name: markdown
+    description: string containing markdown
+    validator: any string
+
+  - name: code
+    description: string containing source code
+    annotations:
+      - language
+    validator: any string
+
+  - name: list<T>
+    description: ordered list of T
+    parameterized: true
+
+  - name: set<T>
+    description: unordered unique set of T
+    parameterized: true
+
+  - name: map<K,V>
+    description: key-value map
+    parameterized: true
+
+  - name: ref<NodeKind>
+    description: typed reference to another node by id
+    parameterized: true
+    validator: id form, target NodeKind must match the parameter
+
+  - name: enum<...>
+    description: one of declared values
+    parameterized: true
+
+  - name: evidence-bound<T>
+    description: a value of type T that requires an EvidenceSource
+    parameterized: true
+    notes: |
+      Authoring an evidence-bound attribute requires creating a Claim node whose
+      subjectId/attribute reference this value, with at least one EvidenceSource
+      meeting the policy's minimumTrustLevel within the freshness window.
+
+  - name: any
+    description: any value (used sparingly; e.g. Claim.value)
+    validator: any

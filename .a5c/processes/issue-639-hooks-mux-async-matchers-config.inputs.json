@@ -1,0 +1,99 @@
+{
+  "issueNumber": 639,
+  "title": "hooks-mux: async execution, regex matchers, and per-hook config",
+  "baseBranch": "staging",
+  "implementationBranchName": "fix/issue-639-hooks-mux-async-matchers-config",
+  "dependencyNote": "Depends on #637 for async-capable/typed handler support; #637 itself coordinates with #636 missing hook event infrastructure. Implement dependency-ready slices and gate or defer unresolved asyncRewake/runtime integration explicitly.",
+  "issueBody": "Summary: Async: async:true, asyncRewake:true, once:true. Matchers: regex, OR, if conditional. Config: per-hook timeout, shell selection, statusMessage, disableAllHooks. Env: CLAUDE_ENV_FILE, CLAUDE_EFFORT, CLAUDE_PLUGIN_DATA. Ref: docs/agent-stack/hooks/missing-capabilities.md sections 3-5, 7",
+  "labels": [
+    "enhancement",
+    "hooks-mux",
+    "priority:high",
+    "ready-for-dev",
+    "effort:large",
+    "agent-platform",
+    "P2",
+    "risk:high"
+  ],
+  "comments": [
+    {
+      "author": "tmuskal",
+      "body": "Depends on: #637 (handler types need async support). Related: #636 (missing events need matcher patterns)."
+    },
+    {
+      "author": "a5c-ai",
+      "body": "Triage confirms hooks-mux lacks matcher evaluation, async execution, per-hook runtime config, and Claude compatibility env propagation. Recommended approach: add failing matcher tests first; extend plan/config types while preserving literal semantics; add runner shell selection/config gates; add async/once/asyncRewake with durable per-session tracking; add Claude env propagation allowlist/precedence tests; wire asyncRewake into agent-platform only after callback/reminder path is defined."
+    }
+  ],
+  "dependencyIssues": {
+    "637": {
+      "title": "hooks-mux: add HTTP, MCP tool, prompt, and agent handler types",
+      "relationship": "Issue #639 depends on #637 for async-capable/typed handler support.",
+      "summary": "Extend HandlerRef with a backward-compatible type model, dispatch handlers by type in runner.ts, add HTTP/MCP/prompt/agent handlers, preserve legacy command refs, and coordinate MCP tool support with tool-mux."
+    },
+    "636": {
+      "title": "hooks-mux: implement 13 missing hook events (tool, turn, task, session lifecycle)",
+      "relationship": "Issue #636 is related and partly foundational for missing events/matcher patterns; it blocks or informs #637.",
+      "summary": "Reconcile canonical hook event contract across hooks-mux, atlas/catalog data, adapters, SDK runtime hooks, and agent-platform dispatch. Runtime emission support must be separated from mapping-only support."
+    }
+  },
+  "reuseAuditScanRoots": [
+    "docs/agent-stack/hooks",
+    "docs/agent-reference",
+    "packages/hooks-mux/core/src",
+    "packages/hooks-mux/cli/src",
+    "packages/hooks-mux/adapter-claude/src",
+    "packages/genty/platform/src",
+    "packages/adapters/launch/src",
+    "packages/adapters/adapters/src",
+    "packages/agent-catalog/src",
+    "packages/atlas/graph"
+  ],
+  "targetFiles": [
+    "docs/agent-stack/hooks/missing-capabilities.md",
+    "packages/hooks-mux/core/src/types/plan.ts",
+    "packages/hooks-mux/core/src/normalizer/plan-resolver.ts",
+    "packages/hooks-mux/core/src/normalizer/runner.ts",
+    "packages/hooks-mux/core/src/propagation/materialize.ts",
+    "packages/hooks-mux/core/src/propagation/env-file.ts",
+    "packages/hooks-mux/core/src/session-store",
+    "packages/hooks-mux/core/src/__tests__/when-conditional.test.ts",
+    "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
+    "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
+    "packages/hooks-mux/core/src/propagation/__tests__/propagation.test.ts",
+    "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+    "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts",
+    "packages/genty/platform/src/harness/backgroundTracker.ts",
+    "packages/genty/platform/src/harness/backgroundProcessRegistry.ts",
+    "packages/genty/platform/src/harness/agenticTools/background/state.ts"
+  ],
+  "qualityCommands": [
+    "npm run build:hooks-mux",
+    "npm run test:hooks-mux",
+    "npm run lint:hooks-mux",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "maxVerificationAttempts": 2,
+  "processLibraryReferences": [
+    "methodologies/superpowers/test-driven-development",
+    "methodologies/superpowers/systematic-debugging",
+    "methodologies/superpowers/verification-before-completion",
+    "methodologies/shared/root-cause-diagnosis",
+    "processes/shared/tdd-triplet",
+    "specializations/collaboration/github/issue-linking"
+  ],
+  "acceptanceChecklist": [
+    "Reuse-audit findings are rendered before implementation work.",
+    "Dependency readiness for #637 and #636 is explicit before implementation.",
+    "Runtime call paths are traced from invoke/programmatic engine through plan resolution, runner, merge, propagation, and session persistence.",
+    "Literal matcher behavior remains compatible while OR, regex, negation, and if conditions are covered by tests.",
+    "Per-hook timeout, shell selection, statusMessage, and disableAllHooks semantics are deterministic and tested.",
+    "Async handlers do not block synchronous hook flow, once is tracked per session, and async exits are recorded without orphaned processes.",
+    "asyncRewake is wired only if its callback/reminder path is defined; otherwise it is dependency-gated with explicit tests or documentation.",
+    "Claude compatibility env propagation uses an allowlist and tested precedence.",
+    "Quality commands pass and final review approves before delivery."
+  ]
+}

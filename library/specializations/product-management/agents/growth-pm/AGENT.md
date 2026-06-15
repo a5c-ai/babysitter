@@ -9,6 +9,12 @@ expertise:
   - Retention and engagement
   - Referral and viral mechanics
   - Monetization optimization
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:growth-strategy, skill-area:a-b-testing]
+  roles: [role:product-manager, role:product-analyst, role:growth-pm]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Growth PM Agent

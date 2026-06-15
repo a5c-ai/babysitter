@@ -2,6 +2,12 @@
 name: desktop-ci-architect
 description: Expert agent in designing CI/CD pipelines for multi-platform desktop application builds with caching, parallelization, code signing, and release automation
 expertise: [ci-cd, github-actions, azure-devops, desktop-builds, code-signing, release-management]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:cross-platform-desktop, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # desktop-ci-architect

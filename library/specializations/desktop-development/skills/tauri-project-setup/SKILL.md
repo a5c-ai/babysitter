@@ -3,6 +3,12 @@ name: tauri-project-setup
 description: Initialize Tauri project with Rust backend and frontend framework integration
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [tauri, rust, cross-platform, webview, desktop]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # tauri-project-setup

@@ -2,17 +2,14 @@
 name: spec-creation
 description: Feature specification creation from codebase research. Produces requirements, acceptance criteria, architecture decisions, implementation plans, and risk analysis.
 allowed-tools: Read, Bash, Grep, Glob
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Spec Creation
-
-## Overview
-
-Creates comprehensive feature specifications by first deeply researching the codebase, then generating structured specifications with requirements, acceptance criteria, architecture decisions, and phased implementation plans.
-
-## Research Phase
-
-- Analyze project structure and module organization
 - Identify existing patterns and conventions
 - Map dependencies and integration points
 - Review existing tests for testing patterns

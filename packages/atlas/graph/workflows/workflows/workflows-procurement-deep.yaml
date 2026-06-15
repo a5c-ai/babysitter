@@ -1,0 +1,124 @@
+---
+nodeKind: Workflow
+id: workflow:contract-renewal-negotiation
+attributes:
+  displayName: "Contract Renewal Negotiation"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-event"
+  complexity: cross-team
+  description: |
+    Manages the vendor contract renewal process from preparation through
+    execution -- triggering renewal preparation workflows at appropriate lead
+    times based on contract value and complexity, compiling usage analytics and
+    satisfaction data for the incumbent vendor's performance assessment,
+    benchmarking current pricing against market alternatives and
+    peer-negotiated rates, identifying renegotiation leverage points including
+    unused entitlements, service level shortfalls, and competitive alternatives,
+    drafting renewal term proposals covering pricing, SLA improvements, scope
+    adjustments, and exit clause refinements, coordinating cross-functional
+    input from technical stakeholders on feature requirements and integration
+    dependencies, managing negotiation rounds with documentation of concession
+    tracking and approval checkpoints, and conducting post-renewal
+    retrospective on negotiation effectiveness. Produces renewal preparation
+    brief, competitive benchmarking analysis, negotiation tracker, and executed
+    contract summary. Excludes legal contract review.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:planner
+    - target: role:staff-engineer
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:api-design
+  applies_to_domain:
+    - target: domain:procurement
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:cost-optimization
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:supplier-diversity-review
+attributes:
+  displayName: "Supplier Diversity Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Reviews supplier diversity metrics and program effectiveness against
+    organizational goals -- auditing diverse supplier certification status and
+    validity across the vendor portfolio (MBE, WBE, SDVOB, HUBZone, LGBTBE
+    classifications), measuring diverse spend as a percentage of total
+    addressable procurement spend by category, evaluating the pipeline of
+    diverse supplier candidates under consideration for upcoming procurement
+    opportunities, assessing barriers to diverse supplier participation in
+    procurement processes, reviewing second-tier diversity reporting from prime
+    suppliers, tracking progress against annual diversity spend targets with
+    variance analysis, benchmarking diversity metrics against industry peers and
+    public commitment levels, and identifying procurement categories with
+    untapped diverse supplier markets. Produces quarterly diversity dashboard,
+    certification status report, gap analysis, and action plan for
+    underperforming categories. Excludes supplier sourcing execution.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:data-scientist
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:procurement
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:vendor-evaluation
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:operations-team
+---
+nodeKind: Workflow
+id: workflow:procurement-spend-analysis
+attributes:
+  displayName: "Procurement Spend Analysis"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Analyzes organizational procurement spend to identify optimization
+    opportunities and policy compliance -- categorizing spend data by vendor,
+    commodity code, business unit, and contract status to build a comprehensive
+    spend cube, identifying maverick buying where purchases bypass preferred
+    vendors or contract terms, detecting spend fragmentation across multiple
+    vendors for the same commodity category, evaluating volume consolidation
+    opportunities and projected savings from strategic sourcing, tracking
+    contract coverage ratio to identify categories with significant off-contract
+    spend, analyzing price variance within categories to surface negotiation
+    opportunities, reviewing purchase order compliance against approval
+    thresholds and delegation of authority policies, and assessing total cost of
+    ownership for high-spend categories including hidden costs. Produces
+    quarterly spend analysis report, consolidation opportunity matrix, maverick
+    buying report, and savings pipeline forecast. Excludes sourcing execution.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:engineering-manager
+  requires_skill_area:
+    - target: skill-area:data-quality
+    - target: skill-area:data-governance
+  applies_to_domain:
+    - target: domain:procurement
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:procurement-team
+    - target: org-unit:operations-team

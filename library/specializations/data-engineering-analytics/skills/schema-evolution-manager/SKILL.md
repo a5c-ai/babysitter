@@ -11,6 +11,13 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+graph:
+  domains: [domain:data-engineering]
+  specializations: [specialization:data-engineering-analytics]
+  skillAreas: [skill-area:schema-evolution, skill-area:data-governance]
+  roles: [role:data-engineer, role:analytics-engineer]
+  workflows: [workflow:data-pipeline-deployment]
+  topics: [topic:data-mesh]
 ---
 
 # Schema Evolution Manager

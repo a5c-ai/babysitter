@@ -10,6 +10,14 @@ expertise:
   - Module design
   - Provider configuration
   - Drift detection
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:platform-engineer, role:architect]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:configuration-management]
+  workflows: [workflow:change-management]
+  topics: [topic:infrastructure-as-code]
+
 ---
 
 # IaC Specialist Agent

@@ -16,6 +16,12 @@
  * - The Garbage Collection Handbook by Jones, Hosking, Moss
  * - V8 Garbage Collection: https://v8.dev/blog/trash-talk
  * - Boehm GC: https://www.hboehm.info/gc/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:profiling-memory]
+ *   roles: [role:backend-engineer]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

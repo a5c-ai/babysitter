@@ -3,6 +3,12 @@
  * @description Comprehensive analysis of industry competitive dynamics through threat of new entrants, supplier power, buyer power, substitutes, and competitive rivalry
  * @inputs { industry: string, organizationContext: object, marketScope: string, outputDir: string }
  * @outputs { success: boolean, fiveForces: object, industryAttractiveness: number, strategicImplications: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

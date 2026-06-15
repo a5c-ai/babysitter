@@ -1,0 +1,68 @@
+---
+nodeKind: Workflow
+id: workflow:civic-data-publication
+attributes:
+  displayName: "Civic Data Publication"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Manages the publication of government datasets to open-data portals --
+    validating data quality against DCAT and Schema.org metadata standards,
+    executing PII detection and redaction pipelines, converting proprietary
+    formats to open standards (CSV, GeoJSON, Parquet), generating
+    machine-readable data dictionaries, and coordinating agency sign-off
+    before public release. Produces publication-ready datasets, data quality
+    scorecards, and PII redaction audit logs. Excludes policy decisions
+    about which datasets to release.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:security-reviewer
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:python-data-pipelines
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:government
+    - target: domain:data-engineering
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:run-security-scans
+  performed_by_org_unit:
+    - target: org-unit:data-governance-team
+    - target: org-unit:compliance-team
+---
+nodeKind: Workflow
+id: workflow:e-government-accessibility-audit
+attributes:
+  displayName: "E-Government Accessibility Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Audits government digital services for accessibility compliance --
+    running automated WCAG 2.2 AA scanners against citizen-facing portals,
+    conducting manual screen-reader and keyboard-navigation testing,
+    reviewing PDF document accessibility tagging, validating multilingual
+    content availability against statutory language requirements, and
+    tracking remediation progress against Section 508 and EN 301 549
+    standards. Produces accessibility conformance reports, remediation
+    priority backlogs, and statutory compliance attestations. Excludes UI
+    redesign implementation.
+edges:
+  involves_role:
+    - target: role:test-writer
+    - target: role:product-designer
+    - target: role:security-reviewer
+  applies_to_domain:
+    - target: domain:government
+    - target: domain:web-development
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:write-user-docs
+  performed_by_org_unit:
+    - target: org-unit:quality-engineering
+    - target: org-unit:compliance-team

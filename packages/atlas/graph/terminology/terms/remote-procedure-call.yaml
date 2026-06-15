@@ -1,0 +1,12 @@
+nodeKind: Term
+id: term:remote-procedure-call
+attributes:
+  canonicalDefinitionId: definition:remote-procedure-call.canonical
+  displayName: "Remote Procedure Call"
+  kind: protocol
+  description: |
+    A protocol pattern where a function call crosses a process boundary.
+edges:
+  applies_to:
+    - target: domain:software-engineering
+    - target: domain:backend

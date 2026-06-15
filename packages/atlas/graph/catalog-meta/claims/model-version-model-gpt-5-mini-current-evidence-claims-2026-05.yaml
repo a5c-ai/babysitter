@@ -1,0 +1,361 @@
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-contextwindowtokens
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: contextWindowTokens
+  value: '400000'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current contextWindowTokens is 400000.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-costpermtokinput
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: costPerMTokInput
+  value: '0.25'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current costPerMTokInput is 0.25.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-costpermtokoutput
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: costPerMTokOutput
+  value: '2.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current costPerMTokOutput is 2.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-kind
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: kind
+  value: reasoning
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current kind is reasoning.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-knowledgecutoffdate
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: knowledgeCutoffDate
+  value: '2024-10-01'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current knowledgeCutoffDate is 2024-10-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-lifecyclestatus
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: lifecycleStatus
+  value: ga
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current lifecycleStatus is ga.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-modalities
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: modalities
+  value: text, image
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current modalities is text, image.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-modalitydirections
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: modalityDirections
+  value: kind=text;direction=input, kind=image;direction=input, kind=text;direction=output
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current modalityDirections is kind=text;direction=input,
+    kind=image;direction=input, kind=text;direction=output.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-modelcardurl
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: modelCardUrl
+  value: https://openai.com/index/gpt-5-system-card/
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current modelCardUrl is https://openai.com/index/gpt-5-system-card/.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-safetytier
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: safetyTier
+  value: openai-preparedness-medium
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current safetyTier is openai-preparedness-medium.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-supportsextendedthinking
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: supportsExtendedThinking
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current supportsExtendedThinking is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-supportsfinetuning
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: supportsFineTuning
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current supportsFineTuning is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-supportsthinkingbudgettokens
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: supportsThinkingBudgetTokens
+  value: 'False'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current supportsThinkingBudgetTokens is False.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-thinkingeffortlevels
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: thinkingEffortLevels
+  value: minimal, low, medium, high
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current thinkingEffortLevels is minimal, low, medium,
+    high.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current
+---
+nodeKind: Claim
+id: claim:model-version-model-gpt-5-mini-current-versionrange
+attributes:
+  subjectId: model:gpt-5-mini@current
+  attribute: versionRange
+  value: '>=5.0.0 <6.0.0'
+  subjectKind: ModelVersion
+  statement: model:gpt-5-mini@current versionRange is >=5.0.0 <6.0.0.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+  - evidence:openai-models-page
+  claimedAt: '2026-05-04T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for provider:openai model-version attributes.
+edges:
+  backed_by_evidence:
+  - evidence:openai-models-page
+  about_subject:
+  - model:gpt-5-mini@current

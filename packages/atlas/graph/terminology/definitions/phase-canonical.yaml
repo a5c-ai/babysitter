@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:phase.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:phase
+  text: |
+    a named state in a phase machine
+  status: canonical
+edges:
+  defines:
+    - term:phase

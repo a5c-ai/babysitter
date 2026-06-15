@@ -1,6 +1,11 @@
 ---
 name: embedded-tech-writer
 description: Technical writer specialized in embedded systems documentation. Expert in API documentation standards, hardware interface documentation, memory maps, register descriptions, and firmware documentation best practices.
+graph:
+  domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Technical Documentation Agent (Embedded)

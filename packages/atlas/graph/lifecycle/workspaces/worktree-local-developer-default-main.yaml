@@ -1,0 +1,7 @@
+nodeKind: Worktree
+id: worktree:local-developer-default.main
+attributes:
+  workspaceId: workspace:local-developer-default
+  path: "/home/<user>/projects/<repo>"
+  branch: main
+edges: {}

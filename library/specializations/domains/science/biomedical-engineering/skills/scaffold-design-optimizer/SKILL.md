@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Tissue Engineering
   skill-id: BME-SK-029
+graph:
+  domains: [domain:biomedical-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Scaffold Design Optimizer Skill

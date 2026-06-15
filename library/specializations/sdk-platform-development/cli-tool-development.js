@@ -28,6 +28,13 @@
  *   - https://oclif.io/docs/
  *   - https://cobra.dev/
  *   - https://click.palletsprojects.com/
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+ *   roles: [role:platform-engineer]
+ *   topics: [topic:api-design, topic:developer-experience]
+ *   workflows: [workflow:sdk-release-lifecycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -35,14 +42,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, cliName, languages, commandCategories, features } = inputs;
 
-  ctx.log.info('Starting CLI tool development', {
+  ctx.log('info','Starting CLI tool development', {
     sdkName,
     cliName,
     commandCategories
   });
 
   // Phase 1: CLI Architecture Design
-  ctx.log.info('Phase 1: Designing CLI architecture');
+  ctx.log('info','Phase 1: Designing CLI architecture');
   const cliArchitecture = await ctx.task(cliArchitectureDesignTask, {
     sdkName,
     cliName,
@@ -51,7 +58,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Command Structure Definition
-  ctx.log.info('Phase 2: Defining command structure');
+  ctx.log('info','Phase 2: Defining command structure');
   const commandStructure = await ctx.task(commandStructureDefinitionTask, {
     cliName,
     commandCategories,
@@ -59,7 +66,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Scaffolding and Code Generation
-  ctx.log.info('Phase 3: Implementing scaffolding');
+  ctx.log('info','Phase 3: Implementing scaffolding');
   const scaffolding = await ctx.task(scaffoldingImplementationTask, {
     sdkName,
     cliName,
@@ -68,7 +75,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Interactive Features
-  ctx.log.info('Phase 4: Adding interactive features');
+  ctx.log('info','Phase 4: Adding interactive features');
   const interactiveFeatures = await ctx.task(interactiveFeaturesTask, {
     cliName,
     features,
@@ -76,7 +83,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Distribution and Installation
-  ctx.log.info('Phase 5: Setting up distribution');
+  ctx.log('info','Phase 5: Setting up distribution');
   let distribution = await ctx.task(cliDistributionSetupTask, {
     cliName,
     languages,
@@ -107,7 +114,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('CLI tool development completed');
+  }  ctx.log('info','CLI tool development completed');
 
   return {
     cliArchitecture: cliArchitecture.result,

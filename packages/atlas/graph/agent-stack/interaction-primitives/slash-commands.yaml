@@ -1,0 +1,143 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-help
+attributes:
+  displayName: "/help"
+  description: "Show available commands and usage."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-init
+attributes:
+  displayName: "/init"
+  description: "Initialize a project (e.g. write CLAUDE.md, scan repo)."
+  surface: slash-command
+  availableInModes: [chat, plan]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-clear
+attributes:
+  displayName: "/clear"
+  description: "Clear current conversation context."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-fork
+attributes:
+  displayName: "/fork"
+  description: "Fork the current session into a new branch."
+  surface: slash-command
+  availableInModes: [chat, plan, composer]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-resume
+attributes:
+  displayName: "/resume"
+  description: "Resume a previously-paused session."
+  surface: slash-command
+  availableInModes: [chat]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-model
+attributes:
+  displayName: "/model"
+  description: "Switch the active model."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-config
+attributes:
+  displayName: "/config"
+  description: "View or edit runtime configuration."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-permissions
+attributes:
+  displayName: "/permissions"
+  description: "View or edit permission rules."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-cost
+attributes:
+  displayName: "/cost"
+  description: "Show token and cost usage for the session."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-compact
+attributes:
+  displayName: "/compact"
+  description: "Compact conversation history to free context."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-mcp
+attributes:
+  displayName: "/mcp"
+  description: "Manage MCP server connections."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: true
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:slash-status
+attributes:
+  displayName: "/status"
+  description: "Show runtime/session status."
+  surface: slash-command
+  availableInModes: [chat, plan, composer, edit]
+  requiresPermission: false
+edges:
+  realizes:
+    - target: layer:10-interaction

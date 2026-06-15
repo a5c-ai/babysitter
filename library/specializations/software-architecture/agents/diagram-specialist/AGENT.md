@@ -10,6 +10,13 @@ expertise:
   - Visual communication
   - Diagram layout
   - Audience-appropriate abstraction
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect]
+  skillAreas: [skill-area:c4-modeling]
+  topics: [topic:architecture-decisions]
+
 ---
 
 # Diagram Specialist Agent

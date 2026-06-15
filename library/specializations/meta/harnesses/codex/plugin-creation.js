@@ -7,6 +7,12 @@
  *   distribution, and generating documentation.
  * @inputs { pluginName: string, pluginDescription: string, outputDir?: string, components?: { skills?: string[], hooks?: string[], commands?: string[], mcp?: boolean }, language?: string, author?: string }
  * @outputs { success: boolean, pluginDir: string, manifest: object, components: object, distributionReady: boolean }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:ai-agent-development]
+ *   topics: [topic:developer-experience, topic:package-management]
+ *   roles: [role:platform-engineer]
+ *   workflows: [workflow:feature-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

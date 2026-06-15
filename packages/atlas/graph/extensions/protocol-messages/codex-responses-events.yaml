@@ -1,0 +1,81 @@
+nodeKind: ProtocolMessage
+id: protocol-message:openai-response-created
+attributes:
+  displayName: "OpenAI Responses / response.created"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    event: response.created
+    fields: ["response.id","response.created_at","response.model"]
+  description: |
+    First SSE event of an OpenAI Responses API stream — opens the response
+    envelope. Codex CLI consumes this to record the response id for trace
+    persistence.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:openai-response-output-item-added
+attributes:
+  displayName: "OpenAI Responses / response.output_item.added"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    event: response.output_item.added
+    fields: ["output_index","item.type","item.id"]
+  description: |
+    Streaming SSE event announcing a new output item (message, function_call,
+    or reasoning block) in the response. Codex CLI dispatches tool calls
+    when item.type=function_call.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:openai-response-output-text-delta
+attributes:
+  displayName: "OpenAI Responses / response.output_text.delta"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: false
+  errorCategory: none
+  payloadSchema:
+    event: response.output_text.delta
+    fields: ["output_index","delta"]
+  description: |
+    Per-token text delta for a streaming assistant message — Codex CLI
+    renders these to stdout incrementally.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:openai-response-completed
+attributes:
+  displayName: "OpenAI Responses / response.completed"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: true
+  errorCategory: none
+  payloadSchema:
+    event: response.completed
+    fields: ["response.id","response.usage","response.output"]
+  description: |
+    Terminal SSE event closing a successful Responses API stream — Codex
+    treats it as the loop-iteration boundary. terminal=true.
+---
+nodeKind: ProtocolMessage
+id: protocol-message:openai-response-failed
+attributes:
+  displayName: "OpenAI Responses / response.failed"
+  messageType: StreamEvent
+  subtype: none
+  direction: core-to-user
+  terminal: true
+  errorCategory: execution
+  payloadSchema:
+    event: response.failed
+    fields: ["response.id","response.error"]
+  description: |
+    Terminal SSE event signaling a Responses API stream that errored
+    server-side. terminal=true.

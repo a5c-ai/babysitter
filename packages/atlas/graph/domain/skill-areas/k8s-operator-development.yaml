@@ -1,0 +1,30 @@
+nodeKind: SkillArea
+id: skill-area:k8s-operator-development
+attributes:
+  displayName: "Kubernetes Operator Development"
+  description: |
+    Building Kubernetes operators that encode operational knowledge as
+    custom controllers: CRD design, reconciliation loops, kubebuilder /
+    operator-sdk, owner references, finalizers, status subresources, and
+    leader election.
+  domains:
+    - specialization:k8s-ops
+    - domain:devops
+  requiresLanguages:
+    - language:go
+  requiresTools:
+    - tool:kubernetes
+    - tool:helm
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:k8s-ops
+      confidence: primary
+    - target: specialization:k8s-operator
+      confidence: primary
+  uses_language:
+    - language:go
+    - target: language:go
+  uses_tool:
+    - tool:kubernetes
+    - tool:helm

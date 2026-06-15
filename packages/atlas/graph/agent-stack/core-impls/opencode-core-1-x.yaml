@@ -1,0 +1,87 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:opencode.core@1.x
+attributes:
+  displayName: OpenCode Core (1.x)
+  agentVersionId: agentVersion:opencode:ge-0-0-0
+  packageRef: source-ref:opencode-github
+  loopIteratorPolicy: tool-use-loop
+  loopIteratorNotes: 'Tool-use loop driven by whichever provider OpenCode is configured
+    against
+
+    (Anthropic Messages, OpenAI Responses, or Gemini generateContent). OpenCode
+
+    normalizes provider stop signals into a single internal end-of-turn event and
+
+    advances the loop until that event fires or the user interrupts.
+
+    '
+  contextManagementStrategy: platform-managed
+  compactionTriggerNotes: 'OpenCode delegates compaction to whichever provider is
+    in use; no in-CLI
+
+    threshold is exposed.
+
+    '
+  subagentInvokerPolicy: tool-call-handoff
+  subagentInvokerNotes: 'OpenCode supports the ACP-style sub-agent handoff: a structured
+    tool call with
+
+    a target agent identifier triggers a child loop in the same process.
+
+    '
+  resultSynthesisPolicy: model-direct
+  resultSynthesisNotes: 'Final assistant text is streamed via SSE (HTTP variant) or
+    stdout (subprocess
+
+    variant); a `session-idle` event is emitted when the last chunk arrives and
+
+    no tool calls remain.
+
+    '
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: opencode-internal
+  supportedTransportProtocols:
+  - model-transport:anthropic-messages
+  - model-transport:openai-responses
+  - model-transport:gemini-generate-content
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: not-supported
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+  - target: agent:opencode
+    role: core
+  speaks:
+    - target: model-transport:gemini-generate-content
+    - target: model-transport:anthropic-messages
+    - target: model-transport:openai-responses
+  supports:
+  - target: capability:can-fork
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'OpenCode supports session forking — a session can be branched
+
+      from a prior turn and explored independently.
+
+      '
+  - target: capability:parallel-tool-calls
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'OpenCode loop dispatches tool calls in parallel.
+
+      '
+  - target: capability:streaming
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+    notes: 'OpenCode streams model output through the TUI presentation layer.
+
+      '
+  - target: capability:supports-tool-use
+    versionRange: '>=1.0.0 <2.0.0'
+    level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:workspace-snapshot
+    - target: orch-primitive:agent-dispatch
+    - target: orch-primitive:progress-stream

@@ -3,6 +3,12 @@ name: swift-package-manager-config
 description: Configure Swift Package Manager with platform-specific dependencies and build settings
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [swift, spm, package, dependencies, apple]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:deployment-infrastructure-management]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # swift-package-manager-config

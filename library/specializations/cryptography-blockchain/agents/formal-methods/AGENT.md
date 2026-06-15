@@ -4,6 +4,11 @@ description: Formal verification specialist for smart contract correctness using
 role: Formal Verification Engineer
 experience: 6+ years formal methods
 background: Academic formal methods, Certora/Runtime Verification experience
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:smart-contract-security, skill-area:smart-contract-development-testing, skill-area:application-security-testing]
+  roles: [role:security-engineer, role:research-engineer]
 ---
 
 # Formal Methods Engineer Agent

@@ -1,0 +1,2599 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  NPM_TAG: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
+  PUBLISH_BRANCH: ${{ github.ref_name }}
+  NPM_CONFIG_AUDIT: "true"
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_LEGACY_PEER_DEPS: "true"
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --prefer-offline --force
+
+      - name: Build lint dependencies
+        run: |
+          npm run build --workspace=@a5c-ai/atlas
+
+      - name: Lint SDK
+        run: npm run lint --workspace=@a5c-ai/babysitter-sdk
+
+      - name: Verify metadata
+        run: npm run verify:metadata
+
+  build_all:
+    name: Build All
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Restore framework cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            packages/adapters/webui/node_modules/.vite
+            packages/atlas/webui/.next/cache
+            packages/kradle/web/.next/cache
+          key: framework-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            framework-${{ runner.os }}-${{ github.ref_name }}-
+            build-${{ runner.os }}-
+
+      - name: "Build phase 1: shared catalog foundation"
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+
+
+      - name: "Build phase 2: parallel independents and adapters critical path"
+        run: |
+          set -euo pipefail
+          PIDS=()
+          run_bg() {
+            "$@" &
+            PIDS+=("$!")
+          }
+          wait_all() {
+            local fail=0
+            for pid in "${PIDS[@]}"; do
+              wait "$pid" || fail=1
+            done
+            PIDS=()
+            [ "$fail" -eq 0 ] || exit 1
+          }
+
+          run_bg bash -lc '
+            set -euo pipefail
+            npm run build --workspace=@a5c-ai/hooks-adapter-core
+            # Adapters are independent (only depend on core) — build in parallel
+            for adapter in claude codex gemini copilot cursor pi oh-my-pi opencode openclaw hermes; do
+              npm run build --workspace=@a5c-ai/hooks-adapter-$adapter &
+            done
+            wait
+            npm run build --workspace=@a5c-ai/hooks-adapter-cli
+          '
+          run_bg npm run build --workspace=@a5c-ai/extensions-adapter
+          run_bg npm run build --workspace=@a5c-ai/triggers-adapter
+          run_bg npm run build:observer
+          run_bg npm run build:cloud
+          run_bg bash -lc '
+            set -euo pipefail
+            npm run build --workspace=@a5c-ai/kradle
+            npm run build --workspace=@a5c-ai/comm-adapter
+            npm run build --workspace=@a5c-ai/genty-ui
+            npm run build --workspace=@a5c-ai/kradle-web
+          '
+
+          # adapters critical path (sequential — each depends on previous)
+          npm run build --workspace=@a5c-ai/adapters-observability
+          npm run build --workspace=@a5c-ai/comm-adapter
+
+          leaf_pids=()
+          npm run build --workspace=@a5c-ai/adapters-codecs & leaf_pids+=("$!")
+          npm run build --workspace=@a5c-ai/adapters-harness-mock & leaf_pids+=("$!")
+          npm run build --workspace=@a5c-ai/transport-adapter & leaf_pids+=("$!")
+          leaf_fail=0
+          for pid in "${leaf_pids[@]}"; do
+            wait "$pid" || leaf_fail=1
+          done
+          [ "$leaf_fail" -eq 0 ] || exit 1
+
+          npm run build --workspace=@a5c-ai/adapters-gateway
+          npm run build --workspace=@a5c-ai/adapters-cli
+          npm run build --workspace=@a5c-ai/adapters
+          npm run build:local --workspace=@a5c-ai/genty-tui
+          # genty-ui must be built before kradle-web (kradle imports genty-ui subpaths)
+          npm run build --workspace=@a5c-ai/genty-ui
+          # webui depends on core + ui — must be after adapters chain
+          npm run build --workspace=@a5c-ai/genty-web-app
+
+          # SDK, agent-core, agent-platform: prerequisites (atlas,
+          # adapters chain) are already built above — call tsc directly to avoid
+          # redundant rebuilds through chained npm scripts.
+          npm run build --workspace=@a5c-ai/babysitter-sdk
+          (cd packages/genty/core && npx tsc --build --force tsconfig.json)
+          (cd packages/genty/platform && npx tsc --build tsconfig.json)
+
+          wait_all
+
+      - name: Package dist directories
+        run: find packages -path '*/dist' -type d | tar czf /tmp/build-all-dist.tar.gz -T -
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp/build-all-dist.tar.gz
+          if-no-files-found: error
+
+  validate_core:
+    needs: [build_all, lint]
+    name: Validate Core Runtime
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: tar xzf /tmp/build-all-dist.tar.gz
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/core-logs
+
+      - name: Architecture boundary gate
+        run: |
+          set -euo pipefail
+          npm run test:architecture 2>&1 | tee artifacts/core-logs/architecture.log
+
+      - name: SDK tests
+        run: |
+          set -euo pipefail
+          npm run test:sdk 2>&1 | tee artifacts/core-logs/sdk-tests.log
+
+      - name: genty-core tests
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/genty-core 2>&1 | tee artifacts/core-logs/core-tests.log
+
+      - name: babysitter-harness tests
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/genty-platform 2>&1 | tee artifacts/core-logs/babysitter-harness-tests.log
+
+      - name: Upload core validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-core-logs
+          path: artifacts/core-logs
+          if-no-files-found: warn
+
+  validate_mux:
+    needs: build_all
+    name: Validate Adapter Surfaces
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: tar xzf /tmp/build-all-dist.tar.gz
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/adapter-logs
+
+      - name: Hooks-proxy unit tests
+        run: |
+          set -euo pipefail
+          npm run test:hooks-adapter 2>&1 | tee artifacts/adapter-logs/hooks-adapter-tests.log
+
+      - name: Verify atlas graph data
+        run: |
+          set -euo pipefail
+          echo "Atlas dist/index.json: $(wc -c < packages/atlas/dist/index.json) bytes"
+          node -e "const i=require('./packages/atlas/dist/index.json'); console.log('Atlas records:', Object.keys(i.records).length, 'edges:', i.edges.length)"
+
+      - name: adapters package tests
+        run: |
+          set -euo pipefail
+          node scripts/adapters-build.cjs test packages/adapters/observability 2>&1 | tee artifacts/adapter-logs/adapters-observability-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/core 2>&1 | tee artifacts/adapter-logs/agent-comm-adapter-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/codecs 2>&1 | tee artifacts/adapter-logs/adapters-adapters-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/harness-mock 2>&1 | tee artifacts/adapter-logs/adapters-harness-mock-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/gateway 2>&1 | tee artifacts/adapter-logs/adapters-gateway-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/cli 2>&1 | tee artifacts/adapter-logs/adapters-cli-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/sdk 2>&1 | tee artifacts/adapter-logs/adapters-sdk-tests.log
+          npm run test:unit --workspace=@a5c-ai/triggers-adapter 2>&1 | tee artifacts/adapter-logs/triggers-tests.log
+
+      - name: Verify non-realtime adapters release artifacts
+        run: |
+          set -euo pipefail
+          npm run verify:release --workspace=@a5c-ai/comm-adapter 2>&1 | tee artifacts/adapter-logs/agent-comm-adapter-release.log
+          npm run verify:release --workspace=@a5c-ai/genty-tui 2>&1 | tee artifacts/adapter-logs/adapters-tui-release.log
+
+      - name: Validate transport-adapter runtime owner
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/transport-adapter 2>&1 | tee artifacts/adapter-logs/transport-adapter-tests.log
+          npm run scorecard:migration --workspace=@a5c-ai/transport-adapter 2>&1 | tee artifacts/adapter-logs/transport-adapter-scorecard.log
+
+      - name: Upload adapter validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-adapter-logs
+          path: artifacts/adapter-logs
+          if-no-files-found: warn
+
+  e2e_integration:
+    needs:
+      - validate_core
+      - validate_mux
+      - validate_kradle
+      - validate_cloud
+      - validate_observer_and_compiler
+    name: E2E Integration Tests
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: tar xzf /tmp/build-all-dist.tar.gz
+
+      - name: Prepare artifacts directory
+        run: mkdir -p artifacts/e2e-logs
+
+      - name: Triggers e2e + coverage
+        run: |
+          set -euo pipefail
+          npm run test:e2e --workspace=@a5c-ai/triggers-adapter 2>&1 | tee artifacts/e2e-logs/triggers-e2e.log
+          npm run test:coverage --workspace=@a5c-ai/triggers-adapter 2>&1 | tee artifacts/e2e-logs/triggers-coverage.log
+
+      - name: Kradle e2e + smoke
+        run: |
+          set -euo pipefail
+          cd packages/kradle/core
+          npm run e2e 2>&1 | tee ../../../artifacts/e2e-logs/kradle-e2e.log
+          npm run smoke 2>&1 | tee ../../../artifacts/e2e-logs/kradle-smoke.log
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: adapters webui browser e2e
+        run: npm run test:e2e --workspace=@a5c-ai/genty-web-app
+
+      - name: Upload e2e logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-e2e-logs
+          path: artifacts/e2e-logs
+          if-no-files-found: warn
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-adapter-playwright-artifacts
+          path: |
+            packages/adapters/webui/.tmp/playwright-report
+            packages/adapters/webui/.tmp/playwright-test-results
+          if-no-files-found: warn
+
+  validate_cloud:
+    needs: build_all
+    name: Validate Cloud Workspace
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: tar xzf /tmp/build-all-dist.tar.gz
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/cloud-logs
+
+      - name: Validate cloud deployment workspace
+        run: |
+          set -euo pipefail
+          npm run test:cloud 2>&1 | tee artifacts/cloud-logs/cloud-tests.log
+          npm run coverage:cloud 2>&1 | tee artifacts/cloud-logs/cloud-coverage.log
+          npm run verify:cloud-release 2>&1 | tee artifacts/cloud-logs/cloud-release.log
+
+      - name: Upload cloud validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-cloud-logs
+          path: artifacts/cloud-logs
+          if-no-files-found: warn
+
+  validate_kradle:
+    needs: build_all
+    name: Validate Kradle
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: tar xzf /tmp/build-all-dist.tar.gz
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/kradle-logs
+
+      - name: Build Helm dependencies
+        run: helm dependency build packages/kradle/charts 2>&1 | tee artifacts/kradle-logs/helm-dep-build.log || true
+
+      - name: Test kradle core
+        run: |
+          set -euo pipefail
+          cd packages/kradle/core && npm test 2>&1 | tee ../../../artifacts/kradle-logs/core-tests.log
+
+      - name: Upload kradle validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-kradle-logs
+          path: artifacts/kradle-logs
+          if-no-files-found: warn
+
+  validate_observer_and_compiler:
+    needs: build_all
+    name: Validate Observer And Compiler
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: tar xzf /tmp/build-all-dist.tar.gz
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/observer-compiler-logs
+
+      - name: Test adapters-extensions
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/extensions-adapter 2>&1 | tee artifacts/observer-compiler-logs/adapters-extensions-tests.log
+
+      - name: Generate unified plugin bundles
+        run: |
+          set -euo pipefail
+          npm run generate:plugins 2>&1 | tee artifacts/observer-compiler-logs/generated-plugin-bundles.log
+
+      - name: Test observer-dashboard
+        run: |
+          set -euo pipefail
+          npm run test:observer 2>&1 | tee artifacts/observer-compiler-logs/observer-dashboard-tests.log
+
+      - name: Upload observer and compiler logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-observer-compiler-logs
+          path: artifacts/observer-compiler-logs
+          if-no-files-found: warn
+
+  prepare_staging_publish:
+    if: >-
+      !cancelled()
+      && needs.lint.result == 'success'
+      && needs.build_all.result == 'success'
+      && needs.validate_core.result == 'success'
+      && needs.validate_mux.result == 'success'
+      && needs.e2e_integration.result == 'success'
+      && needs.validate_cloud.result == 'success'
+      && needs.validate_kradle.result == 'success'
+      && needs.validate_observer_and_compiler.result == 'success'
+    name: Prepare Publish
+    needs:
+      - lint
+      - build_all
+      - validate_core
+      - validate_mux
+      - e2e_integration
+      - validate_cloud
+      - validate_kradle
+      - validate_observer_and_compiler
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: write
+    outputs:
+      staging_version_sdk: ${{ steps.version.outputs.staging_version_sdk }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Set publish version
+        id: version
+        run: |
+          set -euo pipefail
+          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
+          SHORT_SHA=$(git rev-parse --short=12 HEAD)
+          case "${GITHUB_REF_NAME}" in
+            main)
+              PUBLISH_VERSION="$BASE_VERSION"
+              ;;
+            staging|develop)
+              IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+              NEXT_PATCH=$((PATCH + 1))
+              PUBLISH_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-${GITHUB_REF_NAME}.${SHORT_SHA}"
+              ;;
+            *)
+              echo "Unsupported publish branch: ${GITHUB_REF_NAME}" >&2
+              exit 1
+              ;;
+          esac
+          echo "publish_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_unified=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_sdk=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_agent_mux=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_codex=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_github=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_cursor=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_gemini=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_pi=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_omp=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_opencode=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_version_openclaw=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Setting ${GITHUB_REF_NAME} publish version: $PUBLISH_VERSION"
+          node scripts/sync-workspace-versions.mjs --version "$PUBLISH_VERSION"
+
+      - name: Prepare workspace manifests for publish
+        run: |
+          set -euo pipefail
+          node scripts/sync-workspace-versions.mjs --version "$STAGING_VERSION"
+        env:
+          STAGING_VERSION: ${{ steps.version.outputs.staging_version_sdk }}
+
+      - name: Refresh publish lockfile
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --workspaces --include-workspace-root
+
+      - name: Bundle publish workspace
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/publish-source
+          tar --exclude=.git --exclude=node_modules --exclude=artifacts -czf artifacts/publish-source/publish-source.tgz .
+
+      - name: Upload publish workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source/publish-source.tgz
+          if-no-files-found: error
+
+  publish_staging_atlas:
+    name: Publish Foundation - atlas
+    needs: prepare_staging_publish
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build atlas
+        run: npm run build --workspace=@a5c-ai/atlas
+
+      - name: Publish atlas
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/atlas --access public --tag "$NPM_TAG"
+
+  publish_staging_foundation:
+    name: Publish Foundation - ${{ matrix.name }}
+    needs: [prepare_staging_publish, publish_staging_atlas]
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: adapters-tasks
+            build: npm run build --workspace=@a5c-ai/tasks-adapter
+            publish: npm publish --workspace=@a5c-ai/tasks-adapter --access public --tag "$NPM_TAG"
+          - name: adapters-observability
+            build: npm run build --workspace=@a5c-ai/adapters-observability
+            publish: npm publish --workspace=@a5c-ai/adapters-observability --access public --tag "$NPM_TAG"
+          - name: triggers
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/triggers-adapter
+              npm run test:unit --workspace=@a5c-ai/triggers-adapter
+              npm run test:e2e --workspace=@a5c-ai/triggers-adapter
+              npm run test:coverage --workspace=@a5c-ai/triggers-adapter
+            publish: npm publish --workspace=@a5c-ai/triggers-adapter --access public --tag "$NPM_TAG"
+          - name: observer-dashboard
+            build: npm run build:observer
+            publish: npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public --tag "$NPM_TAG"
+          - name: cloud
+            build: npm run build:cloud
+            publish: npm publish --workspace=@a5c-ai/kradle-installer --access public --tag "$NPM_TAG"
+          - name: kradle
+            build: cd packages/kradle/core && npm run build
+            publish: npm publish --workspace=@a5c-ai/kradle --access public --tag "$NPM_TAG"
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build package workspace
+        run: ${{ matrix.build }}
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.publish }}
+
+  publish_staging_hooks_and_core:
+    name: Publish Hooks/Core Base - ${{ matrix.name }}
+    needs: publish_staging_foundation
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: hooks-adapter-core
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/hooks-adapter-core
+            publish: npm publish --workspace=@a5c-ai/hooks-adapter-core --access public --tag "$NPM_TAG"
+          - name: agent-comm-adapter
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-observability && npm run build --workspace=@a5c-ai/comm-adapter
+            publish: npm publish --workspace=@a5c-ai/comm-adapter --access public --tag "$NPM_TAG"
+          - name: adapters-extensions
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/extensions-adapter
+            publish: npm publish --workspace=@a5c-ai/extensions-adapter --access public --tag "$NPM_TAG"
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build package workspace
+        run: ${{ matrix.build }}
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.publish }}
+
+  publish_staging_hooks_adapters:
+    name: Publish Hooks Adapter - ${{ matrix.name }}
+    needs: publish_staging_hooks_and_core
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: hooks-adapter-adapter-claude
+            workspace: '@a5c-ai/hooks-adapter-claude'
+          - name: hooks-adapter-adapter-codex
+            workspace: '@a5c-ai/hooks-adapter-codex'
+          - name: hooks-adapter-adapter-gemini
+            workspace: '@a5c-ai/hooks-adapter-gemini'
+          - name: hooks-adapter-adapter-copilot
+            workspace: '@a5c-ai/hooks-adapter-copilot'
+          - name: hooks-adapter-adapter-cursor
+            workspace: '@a5c-ai/hooks-adapter-cursor'
+          - name: hooks-adapter-adapter-pi
+            workspace: '@a5c-ai/hooks-adapter-pi'
+          - name: hooks-adapter-adapter-oh-my-pi
+            workspace: '@a5c-ai/hooks-adapter-oh-my-pi'
+          - name: hooks-adapter-adapter-opencode
+            workspace: '@a5c-ai/hooks-adapter-opencode'
+          - name: hooks-adapter-adapter-openclaw
+            workspace: '@a5c-ai/hooks-adapter-openclaw'
+          - name: hooks-adapter-adapter-hermes
+            workspace: '@a5c-ai/hooks-adapter-hermes'
+          - name: hooks-adapter-adapter-antigravity
+            workspace: '@a5c-ai/hooks-adapter-antigravity'
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build hooks adapter workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/hooks-adapter-core
+          npm run build --workspace=${{ matrix.workspace }}
+
+      - name: Publish hooks adapter
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=${{ matrix.workspace }} --access public --tag "$NPM_TAG"
+
+  publish_staging_hooks_cli:
+    name: Publish Hooks Adapter CLI
+    needs: publish_staging_hooks_adapters
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build hooks-adapter CLI dependency chain
+        run: npm run build:hooks-adapter
+
+      - name: Publish hooks-adapter CLI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/hooks-adapter-cli --access public --tag "$NPM_TAG"
+
+  publish_staging_agent_mux_leaf:
+    name: Publish Agent Adapter Leaf - ${{ matrix.name }}
+    needs: publish_staging_hooks_and_core
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: adapters-adapters
+            workspace: '@a5c-ai/adapters-codecs'
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/atlas
+              npm run build --workspace=@a5c-ai/adapters-observability
+              npm run build --workspace=@a5c-ai/comm-adapter
+              npm run build --workspace=@a5c-ai/adapters-codecs
+          - name: adapters-harness-mock
+            workspace: '@a5c-ai/adapters-harness-mock'
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/atlas
+              npm run build --workspace=@a5c-ai/adapters-observability
+              npm run build --workspace=@a5c-ai/comm-adapter
+              npm run build --workspace=@a5c-ai/adapters-harness-mock
+          - name: transport-adapter
+            workspace: '@a5c-ai/transport-adapter'
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/atlas
+              npm run build --workspace=@a5c-ai/adapters-observability
+              npm run build --workspace=@a5c-ai/comm-adapter
+              npm run build --workspace=@a5c-ai/transport-adapter
+          - name: agent-config-adapter
+            workspace: '@a5c-ai/config-adapter'
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/atlas
+              npm run build --workspace=@a5c-ai/adapters-observability
+              npm run build --workspace=@a5c-ai/comm-adapter
+              npx tsc --build packages/adapters/config/tsconfig.json
+          - name: agent-launch-adapter
+            workspace: '@a5c-ai/launch-adapter'
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/atlas
+              npm run build --workspace=@a5c-ai/adapters-observability
+              npm run build --workspace=@a5c-ai/comm-adapter
+              npm run build --workspace=@a5c-ai/adapters-codecs
+              npm run build --workspace=@a5c-ai/transport-adapter
+              npx tsc --build packages/adapters/launch/tsconfig.json
+          - name: tools-adapter
+            workspace: '@a5c-ai/tools-adapter'
+            build: |
+              set -euo pipefail
+              npm run build --workspace=@a5c-ai/atlas
+              npm run build --workspace=@a5c-ai/adapters-observability
+              npm run build --workspace=@a5c-ai/comm-adapter
+              npm run build --workspace=@a5c-ai/transport-adapter
+              npx tsc --build packages/adapters/tools/tsconfig.json
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build package workspace
+        run: ${{ matrix.build }}
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=${{ matrix.workspace }} --access public --tag "$NPM_TAG"
+
+  publish_staging_agent_mux_gateway:
+    name: Publish Agent Adapter Gateway
+    needs: publish_staging_agent_mux_leaf
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build adapters gateway workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/adapters-observability
+          npm run build --workspace=@a5c-ai/comm-adapter
+          npm run build --workspace=@a5c-ai/adapters-codecs
+          npm run build --workspace=@a5c-ai/adapters-gateway
+
+      - name: Publish adapters gateway
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/adapters-gateway --access public --tag "$NPM_TAG"
+
+  publish_staging_agent_mux_cli:
+    name: Publish Agent Adapter CLI
+    needs: publish_staging_agent_mux_gateway
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Build adapters CLI workspace
+        run: |
+          set -euo pipefail
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/adapters-observability
+          npm run build --workspace=@a5c-ai/comm-adapter
+          npm run build --workspace=@a5c-ai/adapters-codecs
+          npm run build --workspace=@a5c-ai/adapters-gateway
+          npm run build --workspace=@a5c-ai/transport-adapter
+          npm run build --workspace=@a5c-ai/adapters-cli
+
+      - name: Publish adapters CLI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/adapters-cli --access public --tag "$NPM_TAG"
+
+  publish_staging_agent_mux_root:
+    name: Publish Agent Adapter Root
+    needs: publish_staging_agent_mux_cli
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build adapters root workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/adapters-observability
+          npm run build --workspace=@a5c-ai/comm-adapter
+          npm run build --workspace=@a5c-ai/adapters-codecs
+          npm run build --workspace=@a5c-ai/adapters-gateway
+          npm run build --workspace=@a5c-ai/transport-adapter
+          npm run build --workspace=@a5c-ai/adapters-cli
+          npm run build --workspace=@a5c-ai/adapters
+
+      - name: Publish adapters root
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/adapters --access public --tag "$NPM_TAG"
+
+  publish_staging_agent_mux_tui:
+    name: Publish Agent Adapter TUI
+    needs: publish_staging_agent_mux_root
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build adapters TUI workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+          npm run build --workspace=@a5c-ai/adapters-observability
+          npm run build --workspace=@a5c-ai/comm-adapter
+          npm run build --workspace=@a5c-ai/adapters-codecs
+          npm run build --workspace=@a5c-ai/adapters-gateway
+          npm run build --workspace=@a5c-ai/transport-adapter
+          npm run build --workspace=@a5c-ai/adapters-cli
+          npm run build --workspace=@a5c-ai/adapters
+          npm run build:sdk
+          npm run build:local --workspace=@a5c-ai/genty-tui
+
+      - name: Publish adapters TUI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/genty-tui --access public --tag "$NPM_TAG"
+
+  publish_staging_sdk:
+    name: Publish Babysitter SDK
+    needs: publish_staging_agent_mux_root
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build SDK workspace
+        run: |
+          set -euo pipefail
+          # atlas must be built first because the adapters chain imports atlas/catalog
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+          node scripts/adapters-build.cjs build packages/adapters/sdk
+          npm run build:sdk
+
+      - name: Verify SDK package health
+        run: npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
+
+      - name: Publish babysitter SDK
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/babysitter-sdk --access public --tag "$NPM_TAG"
+
+  publish_staging_agent_core:
+    name: Publish Agent Core
+    needs: publish_staging_sdk
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build genty-core workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+          node scripts/adapters-build.cjs build packages/adapters/sdk
+          npm run build:sdk
+          npm run build --workspace=@a5c-ai/genty-core
+
+      - name: Publish genty-core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/genty-core --access public --tag "$NPM_TAG"
+
+  publish_staging_babysitter_agent:
+    name: Publish genty Platform
+    needs: publish_staging_agent_core
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build agent-platform workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+          node scripts/adapters-build.cjs build packages/adapters/sdk
+          npm run build:sdk
+          npm run build --workspace=@a5c-ai/genty-core
+          npm run build --workspace=@a5c-ai/genty-platform
+
+      - name: Publish agent-platform
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/genty-platform --access public --tag "$NPM_TAG"
+
+  publish_staging_genty_runtime:
+    name: Publish genty Runtime
+    needs: publish_staging_agent_core
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build genty-runtime
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+          node scripts/adapters-build.cjs build packages/adapters/sdk
+          npm run build:sdk
+          npm run build --workspace=@a5c-ai/genty-core
+          npm run build --workspace=@a5c-ai/genty-runtime
+
+      - name: Publish genty-runtime
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/genty-runtime --access public --tag "$NPM_TAG"
+
+  publish_staging_omni:
+    name: Publish genty
+    needs: [publish_staging_babysitter_agent, publish_staging_genty_runtime]
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build genty
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/tasks-adapter
+          node scripts/adapters-build.cjs build packages/adapters/sdk
+          npm run build:sdk
+          npm run build --workspace=@a5c-ai/genty-core
+          npm run build --workspace=@a5c-ai/genty-runtime
+          npm run build --workspace=@a5c-ai/genty-platform
+          npm run build --workspace=@a5c-ai/genty
+
+      - name: Publish genty
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty --skip-build
+
+  deploy_docs_site:
+    if: ${{ github.ref_name != 'develop' }}
+    name: Deploy Docs Site
+    needs:
+      - build_all
+    runs-on: ubuntu-latest-l
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Run docs QA
+        run: npm run docs:qa
+
+      - name: Build docs
+        run: npm run docs:build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs-site/build
+
+      - name: Deploy docs
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  deploy_atlas_webui:
+    name: Deploy Atlas WebUI To AKS
+    needs:
+      - build_all
+    runs-on: ubuntu-latest-l
+    environment:
+      name: atlas-${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+      url: ${{ github.ref_name == 'main' && 'https://atlas.a5c.ai' || github.ref_name == 'staging' && 'https://atlas-staging.a5c.ai' || 'https://atlas-develop.a5c.ai' }}
+    env:
+      ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+      APP_NAME: atlas-webui
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Check deployment configuration
+        id: config
+        env:
+          KUBE_CONFIG_SECRET: ${{ secrets.KUBE_CONFIG }}
+          AZURE_CLIENT_ID_VAR: ${{ vars.AZURE_APPLICATION_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}
+        run: |
+          missing=()
+          [[ -n "${KUBE_CONFIG_SECRET}" ]] || missing+=("KUBE_CONFIG")
+          [[ -n "${AZURE_CLIENT_ID_VAR}" ]] || missing+=("AZURE_APPLICATION_CLIENT_ID")
+          [[ -n "${AZURE_CLIENT_SECRET}" ]] || missing+=("AZURE_APPLICATION_CLIENT_SECRET")
+          [[ -n "${ACR_NAME}" ]] || missing+=("AZURE_ACR_NAME")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Atlas WebUI deploy missing required configuration: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Resolve deployment target
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            main)    NS=atlas;         HOST=atlas.a5c.ai;         RG="${{ vars.A5C_CLOUD_PROD_RESOURCE_GROUP }}" ;;
+            staging) NS=atlas-staging; HOST=atlas-staging.a5c.ai; RG="${{ vars.A5C_CLOUD_STAGING_RESOURCE_GROUP }}" ;;
+            develop) NS=atlas-develop; HOST=atlas-develop.a5c.ai; RG="${{ vars.A5C_CLOUD_STAGING_RESOURCE_GROUP }}" ;;
+            *)       echo "Unsupported branch" >&2; exit 1 ;;
+          esac
+          echo "KUBE_NAMESPACE=$NS" >> "$GITHUB_ENV"
+          echo "APP_HOST=$HOST" >> "$GITHUB_ENV"
+          echo "AZURE_RESOURCE_GROUP=$RG" >> "$GITHUB_ENV"
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Azure login for ACR push
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ vars.AZURE_APPLICATION_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          az acr login --name "$ACR_NAME"
+          IMAGE="${ACR_NAME}.azurecr.io/${APP_NAME}:${IMAGE_TAG}"
+          docker buildx build \
+            --file packages/atlas/webui/Dockerfile \
+            --tag "$IMAGE" \
+            --cache-from type=gha,scope=atlas-webui \
+            --cache-to type=gha,mode=max,scope=atlas-webui \
+            --push .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Create ACR pull secret
+        run: |
+          kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          ACR_TOKEN=$(az acr login --name "$ACR_NAME" --expose-token --output tsv --query accessToken)
+          kubectl -n "$KUBE_NAMESPACE" create secret docker-registry acr-pull \
+            --docker-server="${ACR_NAME}.azurecr.io" \
+            --docker-username=00000000-0000-0000-0000-000000000000 \
+            --docker-password="$ACR_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create Atlas auth secret
+        env:
+          ATLAS_GITHUB_CLIENT_ID: ${{ vars.ATLAS_GITHUB_CLIENT_ID }}
+          ATLAS_GITHUB_CLIENT_SECRET: ${{ secrets.ATLAS_GITHUB_CLIENT_SECRET }}
+        run: |
+          if [[ -n "${ATLAS_GITHUB_CLIENT_ID}" && -n "${ATLAS_GITHUB_CLIENT_SECRET}" ]]; then
+            kubectl -n "$KUBE_NAMESPACE" create secret generic atlas-auth \
+              --from-literal=GITHUB_CLIENT_ID="$ATLAS_GITHUB_CLIENT_ID" \
+              --from-literal=GITHUB_CLIENT_SECRET="$ATLAS_GITHUB_CLIENT_SECRET" \
+              --from-literal=AUTH_SECRET="$(openssl rand -hex 32)" \
+              --dry-run=client -o yaml | kubectl apply -f -
+          else
+            echo "::notice::Atlas GitHub OAuth not configured"
+          fi
+
+      - name: Provision Atlas Postgres
+        env:
+          ATLAS_POSTGRES_STORAGE_ACCOUNT: ${{ vars.ATLAS_POSTGRES_STORAGE_ACCOUNT }}
+          ATLAS_POSTGRES_STORAGE_KEY: ${{ secrets.ATLAS_POSTGRES_STORAGE_KEY }}
+        run: |
+          POSTGRES_APP=atlas-postgres
+          POSTGRES_DB=atlas_webui
+          POSTGRES_USER=atlas
+
+          if kubectl -n "$KUBE_NAMESPACE" get secret "$POSTGRES_APP" >/dev/null 2>&1; then
+            POSTGRES_PASSWORD=$(kubectl -n "$KUBE_NAMESPACE" get secret "$POSTGRES_APP" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)
+          else
+            POSTGRES_PASSWORD=$(openssl rand -hex 32)
+          fi
+
+          if [[ -z "$POSTGRES_PASSWORD" ]]; then
+            POSTGRES_PASSWORD=$(openssl rand -hex 32)
+          fi
+
+          DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_APP}:5432/${POSTGRES_DB}"
+          kubectl -n "$KUBE_NAMESPACE" create secret generic "$POSTGRES_APP" \
+            --from-literal=POSTGRES_DB="$POSTGRES_DB" \
+            --from-literal=POSTGRES_USER="$POSTGRES_USER" \
+            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --from-literal=DATABASE_URL="$DATABASE_URL" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          POSTGRES_PVC="data-${POSTGRES_APP}-0"
+          POSTGRES_PV="${KUBE_NAMESPACE}-${POSTGRES_APP}"
+          POSTGRES_STORAGE_CLASS="atlas-postgres-static"
+          POSTGRES_SHARE="${KUBE_NAMESPACE}-${POSTGRES_APP}"
+          if [[ -n "${ATLAS_POSTGRES_STORAGE_ACCOUNT:-}" && -n "${ATLAS_POSTGRES_STORAGE_KEY:-}" ]]; then
+            STORAGE_ACCOUNT="$ATLAS_POSTGRES_STORAGE_ACCOUNT"
+            STORAGE_KEY="$ATLAS_POSTGRES_STORAGE_KEY"
+            echo "Using configured Atlas Postgres storage account ${STORAGE_ACCOUNT}"
+          else
+            if [[ -z "${AZURE_RESOURCE_GROUP:-}" ]]; then
+              NODE_PROVIDER_ID=$(kubectl get nodes -o jsonpath='{.items[0].spec.providerID}')
+              NODE_RESOURCE_GROUP=$(echo "$NODE_PROVIDER_ID" | sed -E 's#.*resourceGroups/([^/]+)/.*#\1#')
+              NODE_RESOURCE_GROUP_LOWER=$(echo "$NODE_RESOURCE_GROUP" | tr '[:upper:]' '[:lower:]')
+              if [[ "$NODE_RESOURCE_GROUP_LOWER" == mc_* ]]; then
+                AZURE_RESOURCE_GROUP=$(echo "$NODE_RESOURCE_GROUP" | cut -d_ -f2)
+                AZURE_LOCATION=$(echo "$NODE_RESOURCE_GROUP" | awk -F_ '{print $NF}')
+                echo "Using AKS cluster resource group ${AZURE_RESOURCE_GROUP} for Atlas Postgres storage"
+              else
+                AZURE_RESOURCE_GROUP="$NODE_RESOURCE_GROUP"
+                echo "Using AKS provider resource group ${AZURE_RESOURCE_GROUP} for Atlas Postgres storage"
+              fi
+            fi
+            AZURE_LOCATION="${AZURE_LOCATION:-$(az group show --name "$AZURE_RESOURCE_GROUP" --query location -o tsv)}"
+            SUBSCRIPTION_HASH=$(az account show --query id -o tsv | tr -d '-' | cut -c1-8)
+            STORAGE_ACCOUNT="a5catlaspg${SUBSCRIPTION_HASH}"
+
+            if ! az storage account show --name "$STORAGE_ACCOUNT" --resource-group "$AZURE_RESOURCE_GROUP" >/dev/null 2>&1; then
+              az storage account create \
+                --name "$STORAGE_ACCOUNT" \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --location "$AZURE_LOCATION" \
+                --sku Standard_LRS \
+                --kind StorageV2 \
+                --https-only true \
+                --allow-blob-public-access false \
+                --min-tls-version TLS1_2 >/dev/null
+            fi
+            STORAGE_KEY=$(az storage account keys list --resource-group "$AZURE_RESOURCE_GROUP" --account-name "$STORAGE_ACCOUNT" --query '[0].value' -o tsv)
+          fi
+          az storage share create --account-name "$STORAGE_ACCOUNT" --account-key "$STORAGE_KEY" --name "$POSTGRES_SHARE" --quota 8 >/dev/null
+
+          kubectl -n "$KUBE_NAMESPACE" create secret generic atlas-postgres-azure-file \
+            --from-literal=azurestorageaccountname="$STORAGE_ACCOUNT" \
+            --from-literal=azurestorageaccountkey="$STORAGE_KEY" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl -n "$KUBE_NAMESPACE" delete statefulset "$POSTGRES_APP" --ignore-not-found --wait=true
+
+          if kubectl -n "$KUBE_NAMESPACE" get pvc "$POSTGRES_PVC" >/dev/null 2>&1; then
+            POSTGRES_PVC_PHASE=$(kubectl -n "$KUBE_NAMESPACE" get pvc "$POSTGRES_PVC" -o jsonpath='{.status.phase}')
+            if [[ "$POSTGRES_PVC_PHASE" != "Bound" ]]; then
+              echo "Deleting non-bound Atlas Postgres PVC ${POSTGRES_PVC} in phase ${POSTGRES_PVC_PHASE:-unknown}"
+              kubectl -n "$KUBE_NAMESPACE" delete pod "${POSTGRES_APP}-0" --ignore-not-found --wait=false
+              kubectl -n "$KUBE_NAMESPACE" delete pvc "$POSTGRES_PVC" --ignore-not-found
+              kubectl delete pv "$POSTGRES_PV" --ignore-not-found
+            fi
+          fi
+
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: PersistentVolume
+          metadata:
+            name: ${POSTGRES_PV}
+            labels:
+              app: ${POSTGRES_APP}
+          spec:
+            capacity:
+              storage: 8Gi
+            accessModes:
+              - ReadWriteMany
+            persistentVolumeReclaimPolicy: Retain
+            storageClassName: ${POSTGRES_STORAGE_CLASS}
+            mountOptions:
+              - dir_mode=0700
+              - file_mode=0600
+              - uid=70
+              - gid=70
+              - mfsymlinks
+              - cache=strict
+              - nosharesock
+            claimRef:
+              namespace: ${KUBE_NAMESPACE}
+              name: ${POSTGRES_PVC}
+            csi:
+              driver: file.csi.azure.com
+              readOnly: false
+              volumeHandle: ${POSTGRES_PV}-${STORAGE_ACCOUNT}
+              volumeAttributes:
+                shareName: ${POSTGRES_SHARE}
+              nodeStageSecretRef:
+                name: atlas-postgres-azure-file
+                namespace: ${KUBE_NAMESPACE}
+          EOF
+
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${POSTGRES_APP}
+            namespace: ${KUBE_NAMESPACE}
+          spec:
+            selector:
+              app: ${POSTGRES_APP}
+            ports:
+              - name: postgres
+                port: 5432
+                targetPort: 5432
+          ---
+          apiVersion: apps/v1
+          kind: StatefulSet
+          metadata:
+            name: ${POSTGRES_APP}
+            namespace: ${KUBE_NAMESPACE}
+          spec:
+            serviceName: ${POSTGRES_APP}
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ${POSTGRES_APP}
+            template:
+              metadata:
+                labels:
+                  app: ${POSTGRES_APP}
+              spec:
+                containers:
+                  - name: postgres
+                    image: postgres:16-alpine
+                    imagePullPolicy: IfNotPresent
+                    ports:
+                      - containerPort: 5432
+                    envFrom:
+                      - secretRef:
+                          name: ${POSTGRES_APP}
+                    env:
+                      - name: PGDATA
+                        value: /var/lib/postgresql/data/pgdata
+                    readinessProbe:
+                      exec:
+                        command:
+                          - sh
+                          - -c
+                          - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                      failureThreshold: 30
+                    volumeMounts:
+                      - name: data
+                        mountPath: /var/lib/postgresql/data
+            volumeClaimTemplates:
+              - metadata:
+                  name: data
+                spec:
+                  storageClassName: ${POSTGRES_STORAGE_CLASS}
+                  accessModes:
+                    - ReadWriteMany
+                  resources:
+                    requests:
+                      storage: 8Gi
+          EOF
+          if ! kubectl -n "$KUBE_NAMESPACE" rollout status statefulset/"$POSTGRES_APP" --timeout=300s; then
+            kubectl -n "$KUBE_NAMESPACE" get pods -l app="$POSTGRES_APP" -o wide || true
+            kubectl -n "$KUBE_NAMESPACE" get pvc "$POSTGRES_PVC" -o wide || true
+            kubectl get pv "$POSTGRES_PV" -o wide || true
+            kubectl get storageclass -o wide || true
+            kubectl -n "$KUBE_NAMESPACE" describe pods -l app="$POSTGRES_APP" || true
+            kubectl -n "$KUBE_NAMESPACE" describe pvc "$POSTGRES_PVC" || true
+            kubectl describe pv "$POSTGRES_PV" || true
+            kubectl -n "$KUBE_NAMESPACE" logs statefulset/"$POSTGRES_APP" --tail=100 || true
+            exit 1
+          fi
+
+      - name: Initialize Atlas database
+        run: |
+          kubectl -n "$KUBE_NAMESPACE" delete job atlas-webui-db-init --ignore-not-found
+          cat <<EOF | kubectl apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: atlas-webui-db-init
+            namespace: ${KUBE_NAMESPACE}
+          spec:
+            backoffLimit: 2
+            template:
+              metadata:
+                labels:
+                  app: atlas-webui-db-init
+              spec:
+                restartPolicy: Never
+                imagePullSecrets:
+                  - name: acr-pull
+                containers:
+                  - name: db-init
+                    image: ${IMAGE}
+                    imagePullPolicy: Always
+                    command:
+                      - npm
+                      - run
+                      - db:init
+                      - "-w"
+                      - "@a5c-ai/atlas-webui"
+                    envFrom:
+                      - secretRef:
+                          name: atlas-postgres
+          EOF
+          if ! kubectl -n "$KUBE_NAMESPACE" wait --for=condition=complete job/atlas-webui-db-init --timeout=300s; then
+            kubectl -n "$KUBE_NAMESPACE" get job atlas-webui-db-init -o wide || true
+            kubectl -n "$KUBE_NAMESPACE" get pods -l app=atlas-webui-db-init -o wide || true
+            kubectl -n "$KUBE_NAMESPACE" describe job atlas-webui-db-init || true
+            kubectl -n "$KUBE_NAMESPACE" describe pods -l app=atlas-webui-db-init || true
+            kubectl -n "$KUBE_NAMESPACE" logs job/atlas-webui-db-init --all-containers --tail=200 --prefix || true
+            exit 1
+          fi
+
+      - name: Deploy Atlas WebUI
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${APP_NAME}
+            namespace: ${KUBE_NAMESPACE}
+          spec:
+            replicas: 1
+            strategy:
+              type: Recreate
+            selector:
+              matchLabels:
+                app: ${APP_NAME}
+            template:
+              metadata:
+                labels:
+                  app: ${APP_NAME}
+              spec:
+                terminationGracePeriodSeconds: 10
+                imagePullSecrets:
+                  - name: acr-pull
+                containers:
+                  - name: ${APP_NAME}
+                    image: ${IMAGE}
+                    imagePullPolicy: Always
+                    ports:
+                      - containerPort: 3000
+                    env:
+                      - name: NODE_ENV
+                        value: production
+                      - name: PORT
+                        value: "3000"
+                      - name: HOSTNAME
+                        value: 0.0.0.0
+                    envFrom:
+                      - secretRef:
+                          name: atlas-auth
+                          optional: true
+                      - secretRef:
+                          name: atlas-postgres
+                    readinessProbe:
+                      httpGet:
+                        path: /api/health
+                        port: 3000
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                      failureThreshold: 30
+                    livenessProbe:
+                      httpGet:
+                        path: /api/health
+                        port: 3000
+                      initialDelaySeconds: 15
+                      periodSeconds: 10
+                      failureThreshold: 5
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${APP_NAME}
+            namespace: ${KUBE_NAMESPACE}
+          spec:
+            selector:
+              app: ${APP_NAME}
+            ports:
+              - port: 80
+                targetPort: 3000
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: ${APP_NAME}
+            namespace: ${KUBE_NAMESPACE}
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-production
+              external-dns.alpha.kubernetes.io/hostname: ${APP_HOST}
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          spec:
+            ingressClassName: nginx
+            tls:
+              - hosts:
+                  - ${APP_HOST}
+                secretName: ${APP_NAME}-tls
+            rules:
+              - host: ${APP_HOST}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: ${APP_NAME}
+                          port:
+                            number: 80
+          EOF
+          # Delete pods stuck in Terminating so the rollout can proceed
+          # Force-delete pods stuck in Terminating (shown as "Terminating" in STATUS column)
+          kubectl -n "$KUBE_NAMESPACE" get pods -l app="$APP_NAME" --no-headers 2>/dev/null \
+            | awk '/Terminating/{print $1}' \
+            | xargs -r kubectl -n "$KUBE_NAMESPACE" delete --force --grace-period=0 2>/dev/null || true
+          kubectl -n "$KUBE_NAMESPACE" rollout restart deployment/"$APP_NAME"
+          kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$APP_NAME" --timeout=600s
+
+  deploy_kradle:
+    name: Deploy Kradle To AKS
+    needs:
+      - lint
+    runs-on: ubuntu-latest-l
+    environment:
+      name: kradle-${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+      url: ${{ github.ref_name == 'main' && 'https://kradle.a5c.ai' || github.ref_name == 'staging' && 'https://kradle-staging.a5c.ai' || 'https://kradle-develop.a5c.ai' }}
+    env:
+      ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+      APP_NAME: kradle
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: build-all-dist
+          path: /tmp
+
+      - name: Extract build artifacts
+        run: test -f /tmp/build-all-dist.tar.gz && tar xzf /tmp/build-all-dist.tar.gz || echo "No build artifacts — kradle Dockerfiles build from source"
+
+      - name: Check deployment configuration
+        id: config
+        env:
+          KUBE_CONFIG_SECRET: ${{ secrets.KUBE_CONFIG }}
+          AZURE_CLIENT_ID_VAR: ${{ vars.AZURE_APPLICATION_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}
+          KRADLE_GITHUB_CLIENT_ID: ${{ vars.KRATE_GITHUB_CLIENT_ID }}
+          KRADLE_GITHUB_CLIENT_SECRET: ${{ secrets.KRATE_GITHUB_CLIENT_SECRET }}
+        run: |
+          missing=()
+          [[ -n "${KUBE_CONFIG_SECRET}" ]] || missing+=("KUBE_CONFIG")
+          [[ -n "${AZURE_CLIENT_ID_VAR}" ]] || missing+=("AZURE_APPLICATION_CLIENT_ID")
+          [[ -n "${AZURE_CLIENT_SECRET}" ]] || missing+=("AZURE_APPLICATION_CLIENT_SECRET")
+          [[ -n "${ACR_NAME}" ]] || missing+=("AZURE_ACR_NAME")
+          [[ -n "${KRADLE_GITHUB_CLIENT_ID}" ]] || echo "::notice::KRADLE_GITHUB_CLIENT_ID not set — GitHub OAuth will be disabled"
+          [[ -n "${KRADLE_GITHUB_CLIENT_SECRET}" ]] || echo "::notice::KRADLE_GITHUB_CLIENT_SECRET not set — GitHub OAuth will be disabled"
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Kradle deploy missing required configuration: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Resolve deployment target
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            main)    NS=kradle;         HOST=kradle.a5c.ai ;;
+            staging) NS=kradle-staging; HOST=kradle-staging.a5c.ai ;;
+            develop) NS=kradle-develop; HOST=kradle-develop.a5c.ai ;;
+            *)       echo "Unsupported branch" >&2; exit 1 ;;
+          esac
+          echo "KUBE_NAMESPACE=$NS" >> "$GITHUB_ENV"
+          echo "APP_HOST=$HOST" >> "$GITHUB_ENV"
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Azure login for ACR push
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ vars.AZURE_APPLICATION_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build kradle packages for Docker context
+        run: |
+          set -euo pipefail
+          npm ci --force --ignore-scripts 2>/dev/null || npm install --ignore-scripts
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu 2>/dev/null || true
+          cd packages/kradle/core && npm run build
+
+      - name: Build and push kradle-controller image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          az acr login --name "$ACR_NAME"
+          IMAGE="${ACR_NAME}.azurecr.io/kradle-controller:${IMAGE_TAG}"
+          docker buildx build \
+            --file packages/kradle/core/Dockerfile \
+            --tag "$IMAGE" \
+            --cache-from type=gha,scope=kradle-controller \
+            --cache-to type=gha,mode=max,scope=kradle-controller \
+            --push .
+          echo "KRADLE_CONTROLLER_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Build and push adapters-agent image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="${ACR_NAME}.azurecr.io/adapters-agent:${IMAGE_TAG}"
+          docker buildx build \
+            --file packages/adapters/cli/Dockerfile \
+            --tag "$IMAGE" \
+            --tag "${ACR_NAME}.azurecr.io/adapters-agent:latest" \
+            --cache-from type=gha,scope=adapters-agent \
+            --cache-to type=gha,mode=max,scope=adapters-agent \
+            --push .
+          echo "ADAPTERS_AGENT_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Build and push kradle-web image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="${ACR_NAME}.azurecr.io/kradle-web:${IMAGE_TAG}"
+          docker buildx build \
+            --file packages/kradle/web/Dockerfile \
+            --tag "$IMAGE" \
+            --cache-from type=gha,scope=kradle-web \
+            --cache-to type=gha,mode=max,scope=kradle-web \
+            --push .
+          echo "KRADLE_WEB_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Create ACR pull secret
+        run: |
+          kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          ACR_TOKEN=$(az acr login --name "$ACR_NAME" --expose-token --output tsv --query accessToken)
+          kubectl -n "$KUBE_NAMESPACE" create secret docker-registry acr-pull \
+            --docker-server="${ACR_NAME}.azurecr.io" \
+            --docker-username=00000000-0000-0000-0000-000000000000 \
+            --docker-password="$ACR_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Clean up legacy kradle release and pre-Helm resources
+        run: |
+          # Remove old kradle Helm release from the legacy namespace
+          OLD_NS="${KUBE_NAMESPACE/kradle/kradle}"
+          if [ "$OLD_NS" != "$KUBE_NAMESPACE" ]; then
+            helm uninstall kradle -n "$OLD_NS" 2>/dev/null || true
+            kubectl delete namespace "$OLD_NS" --ignore-not-found 2>/dev/null || true
+          fi
+          # Also remove any leftover kradle release in the current namespace
+          helm uninstall kradle -n "$KUBE_NAMESPACE" 2>/dev/null || true
+          # Adopt orphaned resources still annotated with release-name=kradle
+          for kind in ingress service deployment secret statefulset configmap serviceaccount; do
+            for name in $(kubectl -n "$KUBE_NAMESPACE" get "$kind" -o jsonpath='{range .items[?(@.metadata.annotations.meta\.helm\.sh/release-name=="kradle")]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do
+              echo "Adopting $kind/$name from kradle → kradle"
+              kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-name=kradle --overwrite
+              kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-namespace="$KUBE_NAMESPACE" --overwrite
+            done
+          done
+          # Clean up pre-Helm standalone resources
+          kubectl -n "$KUBE_NAMESPACE" delete ingress kradle --ignore-not-found
+          kubectl -n "$KUBE_NAMESPACE" delete service kradle --ignore-not-found
+          kubectl -n "$KUBE_NAMESPACE" delete deployment kradle --ignore-not-found
+
+      - name: Remove standalone KubeVela release (now managed as kradle subchart)
+        run: helm uninstall kubevela -n vela-system 2>/dev/null || true
+
+      - name: Build Helm chart dependencies
+        run: |
+          helm dependency update packages/kradle/charts 2>&1 || echo "::notice::Helm dependency update completed (some repos may be unavailable)"
+
+      - name: Update Kradle CRDs
+        run: kubectl apply -f packages/kradle/charts/crds/ --server-side --force-conflicts
+
+      - name: Deploy Kradle via Helm
+        env:
+          KRADLE_GITHUB_CLIENT_ID: ${{ vars.KRATE_GITHUB_CLIENT_ID }}
+          KRADLE_GITHUB_CLIENT_SECRET: ${{ secrets.KRATE_GITHUB_CLIENT_SECRET }}
+          KRADLE_TEST_AUTH_SECRET: ${{ secrets.KRADLE_TEST_AUTH_SECRET }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          kubectl -n "$KUBE_NAMESPACE" create secret generic kradle-assistant-keys \
+            --from-literal=AZURE_API_KEY="${AZURE_OPENAI_API_KEY}" \
+            --from-literal=AGENT_MUX_API_BASE="https://${AZURE_OPENAI_PROJECT_NAME}.services.ai.azure.com" \
+            --from-literal=KRADLE_ASSISTANT_PROVIDER=openai \
+            --from-literal=KRADLE_ASSISTANT_MODEL=gpt-5.5 \
+            --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY}" \
+            --from-literal=GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
+            --from-literal=KRADLE_AGENT_IMAGE="${ADAPTERS_AGENT_IMAGE:-${ACR_NAME}.azurecr.io/adapters-agent:latest}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          helm upgrade --install kradle packages/kradle/charts \
+            --namespace "$KUBE_NAMESPACE" \
+            --create-namespace \
+            --set image.controller.repository="${ACR_NAME}.azurecr.io/kradle-controller" \
+            --set image.controller.tag="${GITHUB_SHA}" \
+            --set image.web.repository="${ACR_NAME}.azurecr.io/kradle-web" \
+            --set image.web.tag="${GITHUB_SHA}" \
+            --set image.pullPolicy=Always \
+            --set "global.imagePullSecrets[0].name=acr-pull" \
+            --set auth.github.clientId="${KRADLE_GITHUB_CLIENT_ID}" \
+            --set auth.github.clientSecret="${KRADLE_GITHUB_CLIENT_SECRET}" \
+            --set auth.testSession.secret="${KRADLE_TEST_AUTH_SECRET}" \
+            --set admin.org=a5c-ai \
+            --set admin.username=tmuskal \
+            --set ingress.enabled=true \
+            --set ingress.className=nginx \
+            --set "ingress.hosts[0].host=${APP_HOST}" \
+            --set "ingress.hosts[0].paths[0].path=/" \
+            --set "ingress.hosts[0].paths[0].pathType=Prefix" \
+            --set "ingress.tls[0].secretName=kradle-tls" \
+            --set "ingress.tls[0].hosts[0]=${APP_HOST}" \
+            --set "ingress.annotations.cert-manager\\.io/cluster-issuer=letsencrypt-production" \
+            --set "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname=${APP_HOST}" \
+            --set-string "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/ssl-redirect=true" \
+            --set demo.enabled=false \
+            --set gitea.enabled=true \
+            --set gitea.persistence.type=emptyDir \
+            --set argocd.enabled=false \
+            --set kubevela.enabled=false \
+            --set "externalDependencies.kyverno.enabled=true" \
+            --set "externalDependencies.kyverno.discoverExisting=true" \
+            --set networkPolicy.enabled=false \
+            --set apiService.enabled=false \
+            --set "assistant.existingSecret=kradle-assistant-keys" \
+            --timeout 600s
+          # Force-delete pods stuck in Terminating
+          kubectl -n "$KUBE_NAMESPACE" get pods --no-headers 2>/dev/null \
+            | awk '/Terminating/{print $1}' \
+            | xargs -r kubectl -n "$KUBE_NAMESPACE" delete --force --grace-period=0 2>/dev/null || true
+
+      - name: Post-deploy health verification
+        run: |
+          set -euo pipefail
+          echo "Waiting for pods to be ready..."
+          kubectl -n "$KUBE_NAMESPACE" rollout status deployment/kradle-kradle-api --timeout=120s
+          kubectl -n "$KUBE_NAMESPACE" rollout status deployment/kradle-kradle-web --timeout=120s
+
+          echo "Running health check..."
+          HEALTH=$(kubectl -n "$KUBE_NAMESPACE" exec deploy/kradle-kradle-web -- wget -qO- "http://kradle-kradle-api:80/healthz?quick=1")
+          echo "$HEALTH" | jq .
+          echo "$HEALTH" | jq -e '.ok == true or .health.kubernetes == "ok"'
+
+      - name: Post-deploy E2E smoke (non-blocking)
+        continue-on-error: true
+        run: |
+          KRADLE_E2E_URL="https://${APP_HOST}" node packages/kradle/web/tests/api-e2e.test.js 2>&1 | tail -10
+
+  e2e_smoke_kradle:
+    name: Kradle E2E Smoke Test
+    needs:
+      - deploy_kradle
+    runs-on: ubuntu-latest-l
+    if: ${{ github.ref_name != 'develop' }}
+    steps:
+      - name: Resolve target host
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            main)    HOST=kradle.a5c.ai ;;
+            staging) HOST=kradle-staging.a5c.ai ;;
+            *)       echo "Unsupported branch" >&2; exit 1 ;;
+          esac
+          echo "APP_HOST=$HOST" >> "$GITHUB_ENV"
+
+      - name: Wait for deployment to become reachable
+        run: |
+          for i in $(seq 1 12); do
+            if curl -sf --max-time 10 "https://${APP_HOST}/login" >/dev/null 2>&1; then
+              echo "Kradle is reachable at https://${APP_HOST}"
+              exit 0
+            fi
+            echo "Attempt $i: waiting for https://${APP_HOST} ..."
+            sleep 10
+          done
+          echo "::warning::Kradle not reachable after 2 minutes -- smoke test may fail"
+
+      - name: 'E2E smoke - login page returns HTML'
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' "https://${APP_HOST}/login")
+          echo "Login page status: $STATUS"
+          [ "$STATUS" -lt 500 ] || { echo "::error::Login page returned $STATUS"; exit 1; }
+
+      - name: 'E2E smoke - snapshot health endpoint'
+        run: |
+          RESPONSE=$(curl -sf --max-time 15 "https://${APP_HOST}/api/orgs/default/snapshot" 2>/dev/null || true)
+          if [ -z "$RESPONSE" ]; then
+            echo "::warning::Snapshot endpoint did not return data (may require auth or controller not ready)"
+          elif echo "$RESPONSE" | jq -e '.health' >/dev/null 2>&1; then
+            echo "Health probe returned structured data"
+          else
+            echo "::warning::Snapshot endpoint returned non-JSON or missing .health field (controller may still be initializing)"
+          fi
+
+      - name: 'E2E smoke - resource list endpoint'
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/resources?kind=AgentStack" || echo "000")
+          echo "Resource list status: $STATUS"
+          [ "$STATUS" -lt 500 ] || { echo "::error::Resource list returned $STATUS"; exit 1; }
+
+      - name: 'E2E smoke - search endpoint'
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/search?q=test" || echo "000")
+          echo "Search endpoint status: $STATUS"
+          [ "$STATUS" -lt 500 ] || { echo "::error::Search endpoint returned $STATUS"; exit 1; }
+
+      - name: 'E2E smoke - tools catalog'
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/agents/tools/catalog" || echo "000")
+          echo "Tools catalog status: $STATUS"
+          [ "$STATUS" -lt 500 ] || { echo "::error::Tools catalog returned $STATUS"; exit 1; }
+
+      - name: 'E2E smoke - authenticated session via test endpoint'
+        env:
+          KRADLE_TEST_AUTH_SECRET: ${{ secrets.KRADLE_TEST_AUTH_SECRET }}
+        run: |
+          if [ -z "${KRADLE_TEST_AUTH_SECRET}" ]; then
+            echo "::notice::KRADLE_TEST_AUTH_SECRET not set — skipping authenticated smoke tests"
+            exit 0
+          fi
+          RESPONSE=$(curl -sf --max-time 15 -X POST "https://${APP_HOST}/api/auth/test-session" \
+            -H "Content-Type: application/json" \
+            -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"ci-smoke-test\"}" \
+            -c /tmp/kradle-cookies.txt 2>&1) || { echo "::warning::Test session endpoint not available (deploy may not include it yet)"; exit 0; }
+          echo "Test session: $RESPONSE"
+          echo "$RESPONSE" | jq -e '.ok == true' || { echo "::error::Test session creation failed"; exit 1; }
+
+          COOKIE=$(grep kradle_session /tmp/kradle-cookies.txt | awk '{print $NF}' || true)
+          if [ -z "$COOKIE" ]; then
+            echo "::warning::No session cookie returned"
+            exit 0
+          fi
+
+          DASH_STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 -b /tmp/kradle-cookies.txt "https://${APP_HOST}/orgs/a5c-ai" || echo "000")
+          echo "Authenticated dashboard status: $DASH_STATUS"
+          [ "$DASH_STATUS" -eq 200 ] || echo "::warning::Dashboard returned $DASH_STATUS (expected 200)"
+
+          SNAP_STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 -b /tmp/kradle-cookies.txt "https://${APP_HOST}/orgs/a5c-ai/agents" || echo "000")
+          echo "Agents page status: $SNAP_STATUS"
+          [ "$SNAP_STATUS" -eq 200 ] || echo "::warning::Agents page returned $SNAP_STATUS"
+
+  deploy_staging_cloud:
+    name: Deploy Cloud
+    needs:
+      - prepare_staging_publish
+    runs-on: ubuntu-latest-l
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build cloud workspace
+        if: >-
+          (github.ref_name == 'staging' && vars.A5C_CLOUD_STAGING_DEPLOY_ENABLED == 'true') ||
+          (github.ref_name == 'main' && vars.A5C_CLOUD_PROD_DEPLOY_ENABLED == 'true')
+        run: npm run build:cloud
+
+      - name: Run cloud staging deploy hook
+        if: ${{ github.ref_name == 'staging' && vars.A5C_CLOUD_STAGING_DEPLOY_ENABLED == 'true' }}
+        env:
+          A5C_CLOUD_ENVIRONMENT: staging
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.staging_version_sdk }}
+          A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_STAGING_TARGET_TYPE }}
+          A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_STAGING_KUBE_CONTEXT }}
+          A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_STAGING_NAMESPACE }}
+          A5C_CLOUD_INGRESS_HOSTS: ${{ vars.A5C_CLOUD_STAGING_INGRESS_HOSTS }}
+          A5C_CLOUD_IMAGE_REGISTRY: ${{ vars.A5C_CLOUD_IMAGE_REGISTRY }}
+          A5C_CLOUD_REGION: ${{ vars.A5C_CLOUD_STAGING_REGION }}
+          A5C_CLOUD_CLUSTER_NAME: ${{ vars.A5C_CLOUD_STAGING_CLUSTER_NAME }}
+          A5C_CLOUD_PROJECT_ID: ${{ vars.A5C_CLOUD_STAGING_PROJECT_ID }}
+          A5C_CLOUD_RESOURCE_GROUP: ${{ vars.A5C_CLOUD_STAGING_RESOURCE_GROUP }}
+          A5C_CLOUD_SUBSCRIPTION_ID: ${{ vars.A5C_CLOUD_STAGING_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          npm run deploy:cloud:staging
+
+      - name: Run cloud production deploy hook
+        if: ${{ github.ref_name == 'main' && vars.A5C_CLOUD_PROD_DEPLOY_ENABLED == 'true' }}
+        env:
+          A5C_CLOUD_ENVIRONMENT: prod
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.staging_version_sdk }}
+          A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_PROD_TARGET_TYPE }}
+          A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_PROD_KUBE_CONTEXT }}
+          A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_PROD_NAMESPACE }}
+          A5C_CLOUD_INGRESS_HOSTS: ${{ vars.A5C_CLOUD_PROD_INGRESS_HOSTS }}
+          A5C_CLOUD_IMAGE_REGISTRY: ${{ vars.A5C_CLOUD_IMAGE_REGISTRY }}
+          A5C_CLOUD_REGION: ${{ vars.A5C_CLOUD_PROD_REGION }}
+          A5C_CLOUD_CLUSTER_NAME: ${{ vars.A5C_CLOUD_PROD_CLUSTER_NAME }}
+          A5C_CLOUD_PROJECT_ID: ${{ vars.A5C_CLOUD_PROD_PROJECT_ID }}
+          A5C_CLOUD_RESOURCE_GROUP: ${{ vars.A5C_CLOUD_PROD_RESOURCE_GROUP }}
+          A5C_CLOUD_SUBSCRIPTION_ID: ${{ vars.A5C_CLOUD_PROD_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          npm run deploy:cloud:prod
+
+  publish_staging_metapackage:
+    name: Publish Metapackage
+    needs:
+      - publish_staging_agent_mux_tui
+      - publish_staging_hooks_cli
+      - publish_staging_babysitter_agent
+      - deploy_staging_cloud
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish babysitter metapackage to npm ($NPM_TAG tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --access public --tag "$NPM_TAG"
+        working-directory: packages/babysitter
+
+  create_release_tag:
+    name: Create Release Tag
+    needs:
+      - publish_staging_metapackage
+    uses: ./.github/workflows/release-tags.yml
+    secrets: inherit
+
+  sync_external_plugins:
+    name: Sync External Plugins
+    needs:
+      - create_release_tag
+    uses: ./.github/workflows/sync-external-plugins.yml
+    with:
+      branch: ${{ github.ref_name }}
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  sync_atlas_plugins:
+    name: Sync Atlas Plugins
+    needs:
+      - create_release_tag
+    uses: ./.github/workflows/sync-atlas-plugins.yml
+    with:
+      branch: ${{ github.ref_name }}
+      ref: ${{ github.sha }}
+    secrets: inherit

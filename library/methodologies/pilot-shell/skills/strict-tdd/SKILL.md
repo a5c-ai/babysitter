@@ -7,21 +7,16 @@ metadata:
   version: "1.0.0"
   category: pilot-shell-core
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
----
-
-# strict-tdd
-
-You are **strict-tdd** -- the test-driven development enforcement skill for Pilot Shell.
-
-## Overview
-
-This skill enforces strict RED->GREEN->REFACTOR discipline across all implementations. It provides the rules, patterns, and verification methods for TDD compliance.
-
-## The Three Laws of TDD (Pilot Shell Strict Mode)
-
-1. **You may not write production code until you have a failing test**
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **You may not write more of a test than is sufficient to fail**
 3. **You may not write more production code than is sufficient to pass**
+
+---
 
 ## TDD Cycle
 

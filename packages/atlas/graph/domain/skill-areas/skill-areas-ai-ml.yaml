@@ -1,0 +1,174 @@
+---
+nodeKind: SkillArea
+id: skill-area:prompt-engineering
+attributes:
+  displayName: "Prompt Engineering"
+  description: |
+    Prompt design for LLMs — system/user roles, few-shot patterns,
+    structured output, and prompt evaluation.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [novice, intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  prerequisite_for_learning:
+    - target: skill-area:autonomous-research-engineering
+      strength: recommended
+    - target: skill-area:autonomous-coding-engagement
+      strength: recommended
+    - target: skill-area:deep-web-research
+      strength: recommended
+    - target: skill-area:multi-app-orchestration
+      strength: recommended
+    - target: skill-area:closed-book-frontier-reasoning
+      strength: recommended
+    - target: skill-area:visual-pattern-induction
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:retrieval-augmented-generation
+attributes:
+  displayName: "Retrieval-Augmented Generation"
+  description: |
+    RAG architectures — chunking, embeddings, vector stores, reranking,
+    citation/provenance, and evaluation.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  uses_library:
+    - library:langchain
+    - library:llama-index
+    - library:chromadb
+    - library:qdrant-client
+  uses_stack_part:
+    - stack-part:vector-database
+  prerequisite_for_learning:
+    - target: skill-area:ai-agent-development
+      strength: recommended
+---
+nodeKind: SkillArea
+id: skill-area:agentic-loops
+attributes:
+  displayName: "Agentic Loops"
+  description: |
+    Designing tool-use loops for LLM agents — planner/executor split,
+    reflection, retries, and termination criteria.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:tool-use
+attributes:
+  displayName: "LLM Tool Use"
+  description: |
+    Tool/function-calling design — schemas, argument validation,
+    parallel calls, error handling, and safety boundaries.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:context-management
+attributes:
+  displayName: "LLM Context Management"
+  description: |
+    Managing the context window — summarization, hierarchical memory,
+    retrieval, and pruning strategies.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:eval-driven-development
+attributes:
+  displayName: "Eval-Driven LLM Development"
+  description: |
+    Defining evals before features — golden sets, rubric scoring,
+    LLM-as-judge with calibration, and regression gates.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+---
+nodeKind: SkillArea
+id: skill-area:model-monitoring-drift-detection
+attributes:
+  displayName: "Model Monitoring and Drift Detection"
+  description: |
+    Monitoring deployed models for data drift, concept drift, output quality
+    regressions, alert thresholds, and retraining triggers.
+  domains:
+    - specialization:ml-inference-serving
+    - domain:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ml-inference-serving
+      confidence: primary
+    - target: domain:observability
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:observability-pipeline
+    - skill-area:sli-slo-management
+  uses_tool:
+    - tool:prometheus
+    - tool:grafana
+    - tool:mlflow
+---
+nodeKind: SkillArea
+id: skill-area:agent-planning-reasoning
+attributes:
+  displayName: "Agent Planning and Reasoning"
+  description: |
+    Designing planner/executor behavior for agents - decomposition quality,
+    intermediate reasoning structure, goal tracking, and termination control.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:agentic-loops
+    - skill-area:context-management
+---
+nodeKind: SkillArea
+id: skill-area:multi-agent-coordination
+attributes:
+  displayName: "Multi-Agent Coordination"
+  description: |
+    Coordinating multiple agents with explicit roles, message passing, shared
+    state boundaries, escalation rules, and convergence checks.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:agent-planning-reasoning
+    - skill-area:tool-use

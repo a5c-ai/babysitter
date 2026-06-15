@@ -1,0 +1,59 @@
+---
+nodeKind: Workflow
+id: workflow:network-change-management
+attributes:
+  displayName: "Network Change Management"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-change"
+  complexity: cross-team
+  description: |
+    Governs planned network infrastructure changes — firewall rule updates,
+    load balancer reconfigurations, VPN changes, and subnet modifications
+    with pre-change impact analysis and post-change validation. Excludes emergency network incident response.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+    - target: role:security-reviewer
+  requires_skill_area:
+    - target: skill-area:service-mesh-config
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:networking
+    - target: domain:infrastructure
+  triggers_responsibility:
+    - target: responsibility:approve-deploys
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:dns-migration
+attributes:
+  displayName: "DNS Migration"
+  workflowKind: operational
+  triggerType: event-driven
+  typicalCadence: "per-migration"
+  complexity: cross-team
+  description: |
+    Plans and executes DNS zone migrations — record inventory, TTL
+    pre-lowering, staged cutover, rollback readiness, and propagation
+    verification across resolvers. Excludes routine DNS record additions.
+edges:
+  involves_role:
+    - target: role:platform-engineer
+    - target: role:cloud-architect
+  requires_skill_area:
+    - target: skill-area:service-mesh-config
+    - target: skill-area:chaos-engineering
+  applies_to_domain:
+    - target: domain:networking
+    - target: domain:cloud-infra
+  triggers_responsibility:
+    - target: responsibility:runbook-authoring
+    - target: responsibility:terraform-state-mgmt
+  performed_by_org_unit:
+    - target: org-unit:infra-engineering
+    - target: org-unit:platform-team

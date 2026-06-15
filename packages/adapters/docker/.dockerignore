@@ -1,0 +1,10 @@
+node_modules
+.git
+.github
+.a5c
+*.md
+docs/
+.harness-profiles/
+coverage/
+*.test.ts
+tests/

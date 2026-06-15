@@ -1,0 +1,14 @@
+nodeKind: EvalResult
+id: eval-result:swe-bench.claude-code.001
+attributes:
+  unit: "pct"
+  evalRunId: eval-run:swe-bench.claude-code@1.x.2025-04-29
+  metricName: pass_rate
+  score: 0.65
+  passFail: pass
+  reportedAt: "2025-04-29T14:30:00Z"
+edges:
+  belongs_to_eval_run:
+    - eval-run:swe-bench.claude-code@1.x.2025-04-29
+  scored_against:
+    - target: benchmark:swe-bench-verified

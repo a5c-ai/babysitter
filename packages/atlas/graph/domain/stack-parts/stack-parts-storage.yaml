@@ -1,0 +1,26 @@
+---
+nodeKind: StackPart
+id: stack-part:block-storage
+attributes:
+  displayName: "Block Storage"
+  category: data-store
+  description: |
+    Network-attached block volumes (EBS, Persistent Disk, Azure Managed
+    Disks, Fly Volumes).
+edges:
+  implemented_by:
+    - target: platform-service:fly-volumes
+---
+nodeKind: StackPart
+id: stack-part:file-storage
+attributes:
+  displayName: "File Storage / NFS"
+  category: data-store
+  description: |
+    Managed shared file system (EFS, Filestore, Azure Files).
+edges:
+  implemented_by:
+    - target: platform-service:aws-s3
+    - target: platform-service:gcp-gcs
+    - target: platform-service:azure-blob-storage
+    - target: platform-service:vercel-blob

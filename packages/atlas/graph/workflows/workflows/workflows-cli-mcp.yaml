@@ -1,0 +1,94 @@
+---
+nodeKind: Workflow
+id: workflow:cli-release-cycle
+attributes:
+  displayName: "CLI Release Cycle"
+  workflowKind: release
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: single-team
+  description: |
+    Manages the full release lifecycle for command-line tools — versioning,
+    changelog generation, binary compilation for multiple targets,
+    publishing to package registries (npm, brew, cargo, apt), and
+    verifying install-path integrity. Excludes feature development.
+edges:
+  involves_role:
+    - target: role:implementer
+    - target: role:tech-lead
+    - target: role:devrel
+  requires_skill_area:
+    - target: skill-area:editor-fluency
+  applies_to_domain:
+    - target: domain:software-engineering
+    - target: domain:platform-engineering
+  triggers_responsibility:
+    - target: responsibility:release-coordination
+    - target: responsibility:changelog-maintenance
+    - target: responsibility:generate-changelogs
+  performed_by_org_unit:
+    - target: org-unit:engineering
+    - target: org-unit:devrel-team
+---
+nodeKind: Workflow
+id: workflow:mcp-server-certification
+attributes:
+  displayName: "MCP Server Certification"
+  workflowKind: governance
+  triggerType: on-demand
+  typicalCadence: "per-submission"
+  complexity: single-team
+  description: |
+    Evaluates MCP server implementations against protocol conformance,
+    security, and performance criteria — running automated compliance
+    test suites, reviewing authentication flows, assessing rate-limiting,
+    and issuing certification status. Excludes server development.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:staff-engineer
+    - target: role:tech-lead
+  requires_skill_area:
+    - target: skill-area:tool-use
+    - target: skill-area:oauth-flows
+    - target: skill-area:rate-limiting
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:security-team
+---
+nodeKind: Workflow
+id: workflow:plugin-marketplace-review
+attributes:
+  displayName: "Plugin Marketplace Review"
+  workflowKind: governance
+  triggerType: event-driven
+  typicalCadence: "per-submission"
+  complexity: single-team
+  description: |
+    Reviews third-party plugin submissions for marketplace listing —
+    scanning for malicious code, verifying API compatibility, checking
+    licensing terms, testing sandboxed execution, and publishing approved
+    plugins. Excludes plugin development.
+edges:
+  involves_role:
+    - target: role:security-reviewer
+    - target: role:code-reviewer
+    - target: role:license-auditor
+  requires_skill_area:
+    - target: skill-area:tool-use
+    - target: skill-area:webhook-verification
+  applies_to_domain:
+    - target: domain:platform-engineering
+    - target: domain:security
+  triggers_responsibility:
+    - target: responsibility:run-security-scans
+    - target: responsibility:dependency-audit
+  performed_by_org_unit:
+    - target: org-unit:platform-team
+    - target: org-unit:application-security-team

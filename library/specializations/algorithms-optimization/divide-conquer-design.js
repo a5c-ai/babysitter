@@ -8,6 +8,12 @@
  * @references
  * - Divide and Conquer: CLRS Chapter 4
  * - Master Theorem Analysis
+ * @graph
+ *   domains: [domain:computer-science]
+ *   specializations: [specialization:algorithms-optimization]
+ *   skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms]
+ *   roles: [role:backend-engineer, role:computational-scientist]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

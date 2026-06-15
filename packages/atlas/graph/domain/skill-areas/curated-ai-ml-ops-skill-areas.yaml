@@ -1,0 +1,213 @@
+---
+nodeKind: SkillArea
+id: skill-area:feature-engineering-pipelines
+attributes:
+  displayName: "Data and Feature Engineering Pipelines"
+  description: |
+    Building pipelines that derive training and serving features - feature
+    extraction, transformation reuse, consistency, and lifecycle management.
+  domains:
+    - domain:ml-ops
+    - specialization:data-engineering-analytics
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:data-engineering-analytics
+      confidence: secondary
+  uses_stack_part:
+    - stack-part:feature-store
+  requires_skill_area:
+    - skill-area:data-preprocessing
+---
+nodeKind: SkillArea
+id: skill-area:model-registry-management
+attributes:
+  displayName: "Automated Training and Model Registry"
+  description: |
+    Managing trained-model versions and promotion flow - lineage, artifact
+    registration, stage transitions, and reproducible training outputs.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+  requires_skill_area:
+    - skill-area:model-validation-testing
+---
+nodeKind: SkillArea
+id: skill-area:hyperparameter-tuning-experiment-management
+attributes:
+  displayName: "Hyperparameter Tuning and Experiment Management"
+  description: |
+    Running structured model experiments - search strategies, trial tracking,
+    result comparison, reproducibility, and promotion decisions.
+  domains:
+    - domain:ml-ops
+    - domain:data-science
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: domain:data-science
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-validation-testing
+---
+nodeKind: SkillArea
+id: skill-area:automated-retraining
+attributes:
+  displayName: "Automated Retraining"
+  description: |
+    Triggering and governing retraining loops - drift- or schedule-driven
+    rebuilds, dataset refresh, validation gates, and rollout safeguards.
+  domains:
+    - domain:ml-ops
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+  requires_skill_area:
+    - skill-area:model-monitoring-drift-detection
+    - skill-area:model-registry-management
+---
+nodeKind: SkillArea
+id: skill-area:ml-governance-compliance
+attributes:
+  displayName: "ML Governance and Compliance"
+  description: |
+    Governing model lifecycle and accountability - approval controls,
+    documentation, auditability, policy checks, and risk ownership.
+  domains:
+    - domain:ml-ops
+    - domain:security
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: domain:security
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:model-validation-testing
+---
+nodeKind: SkillArea
+id: skill-area:ci-cd-ml-pipelines
+attributes:
+  displayName: "CI/CD for ML Pipelines"
+  description: |
+    Applying delivery automation to ML workflows - train/validate/register
+    stages, deployment gates, artifact promotion, and rollback control.
+  domains:
+    - domain:ml-ops
+    - specialization:devops-sre-platform
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:devops-sre-platform
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:deployment-infrastructure-management
+    - skill-area:ml-pipeline-testing
+---
+nodeKind: SkillArea
+id: skill-area:llm-summarization-qa
+attributes:
+  displayName: "LLM-based Summarization and QA"
+  description: |
+    Designing LLM flows for summarization and question answering - context
+    framing, grounding, answer quality, and evaluation against source material.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:prompt-engineering
+    - skill-area:context-management
+---
+nodeKind: SkillArea
+id: skill-area:hallucination-mitigation-fact-checking
+attributes:
+  displayName: "Hallucination Mitigation and Fact Checking"
+  description: |
+    Reducing unsupported model claims - grounding strategies, verification
+    loops, source citation discipline, and factuality evaluation.
+  domains:
+    - specialization:ai-agents-conversational
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+  requires_skill_area:
+    - skill-area:retrieval-augmented-generation
+    - skill-area:eval-driven-development
+---
+nodeKind: SkillArea
+id: skill-area:agent-simulation-testing
+attributes:
+  displayName: "Agent Simulation and Testing"
+  description: |
+    Exercising agent behavior in controlled scenarios - mock tools, scripted
+    environments, replay harnesses, and multi-turn regression cases.
+  domains:
+    - specialization:ai-agents-conversational
+    - specialization:qa-testing-automation
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: specialization:qa-testing-automation
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:agentic-loops
+    - skill-area:eval-driven-development
+---
+nodeKind: SkillArea
+id: skill-area:agent-debugging-logging
+attributes:
+  displayName: "Agent Debugging and Logging"
+  description: |
+    Diagnosing agent failures across prompts, tool calls, and context flow -
+    trace inspection, event logging, and error-source isolation.
+  domains:
+    - specialization:ai-agents-conversational
+    - domain:observability
+  expertiseLevels: [intermediate, expert]
+edges:
+  applies_to:
+    - target: specialization:ai-agents-conversational
+      confidence: primary
+    - target: domain:observability
+      confidence: secondary
+  requires_skill_area:
+    - skill-area:observability-pipeline
+---
+nodeKind: SkillArea
+id: skill-area:rlhf-systems
+attributes:
+  displayName: "RLHF"
+  description: |
+    Human-feedback-driven model optimization - preference data collection,
+    reward modeling, policy updates, and evaluation against alignment goals.
+  domains:
+    - domain:ml-ops
+    - specialization:ai-agents-conversational
+  expertiseLevels: [expert]
+edges:
+  applies_to:
+    - target: domain:ml-ops
+      confidence: primary
+    - target: specialization:ai-agents-conversational
+      confidence: secondary

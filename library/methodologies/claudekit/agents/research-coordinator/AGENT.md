@@ -10,17 +10,15 @@ expertise:
   - Research gap analysis
   - Confidence-weighted aggregation
 model: inherit
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 ---
 
-# Research Coordinator Agent
-
-## Role
-
-Plans and coordinates parallel research operations. Decomposes complex queries into independent sub-queries, dispatches 5-10 research agents concurrently, and synthesizes results into a coherent, validated report.
-
-## Expertise
-
-- Query decomposition: break complex questions into parallel-executable sub-queries
 - Agent assignment: match sub-queries to appropriate research strategies
 - Synthesis: merge findings, identify consensus, flag conflicts
 - Gap analysis: detect under-researched areas requiring further investigation

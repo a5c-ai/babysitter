@@ -2,6 +2,13 @@
 name: schema-comparator
 description: Compare database schemas between source and target environments for migration planning
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:schema-evolution, skill-area:database-migrations-zero-downtime]
+  roles: [role:data-engineer, role:backend-engineer]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Schema Comparator Skill

@@ -4,6 +4,11 @@ description: Smart contract incident response and exploit mitigation specialist.
 role: Blockchain Incident Commander
 experience: 5+ years security operations
 background: Protocol security teams, white-hat rescue operations, hack response
+graph:
+  domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:incident-response-forensics, skill-area:smart-contract-security, skill-area:blockchain-analytics-explorer]
+  roles: [role:incident-commander, role:security-engineer]
 ---
 
 # Incident Response Specialist Agent

@@ -1,0 +1,13 @@
+nodeKind: ModelFamily
+id: model-family:qwen-2-5
+attributes:
+  displayName: "Qwen 2.5"
+  vendor: "Alibaba (Qwen team)"
+  homepageUrl: "https://qwenlm.github.io/"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:qwen-2-5-72b-instruct@current
+    - model:qwen-2-5-coder-32b@current
+    - model:qwq-32b-preview@current

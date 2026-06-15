@@ -1,6 +1,0 @@
-{
-  "mockImagePath": "packages/catalog/searchpanel-mock.jpg",
-  "targetComponent": "src/app/search/page.tsx",
-  "maxIterations": 5,
-  "targetQuality": 95
-}

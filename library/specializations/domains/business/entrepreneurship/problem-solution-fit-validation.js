@@ -16,6 +16,11 @@
  * - Lean Startup Methodology: https://theleanstartup.com/
  * - Testing Business Ideas: https://www.strategyzer.com/books/testing-business-ideas
  * - Design Thinking: https://designthinking.ideo.com/
+  * @graph
+ *   domains: [domain:entrepreneurship]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

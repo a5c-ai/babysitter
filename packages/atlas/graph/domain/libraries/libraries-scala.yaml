@@ -1,0 +1,214 @@
+---
+nodeKind: Library
+id: library:akka
+attributes:
+  displayName: "Akka"
+  belongsToLanguageId: language:scala
+  category: other
+  description: |
+    Toolkit for building concurrent, distributed, and resilient message-driven
+    applications on the JVM using the Actor model and Streams.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:cats-effect
+---
+nodeKind: Library
+id: library:play-framework-lib
+attributes:
+  displayName: "Play Framework"
+  belongsToLanguageId: language:scala
+  category: http-server
+  description: |
+    Full-stack web framework for Scala and Java with reactive, non-blocking
+    I/O, built-in testing support, and a type-safe routing DSL.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:cats
+attributes:
+  displayName: "Cats"
+  belongsToLanguageId: language:scala
+  category: other
+  description: |
+    Lightweight, modular functional programming library for Scala providing
+    type class abstractions such as Functor, Monad, and Applicative.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:arrow-kt
+---
+nodeKind: Library
+id: library:cats-effect
+attributes:
+  displayName: "Cats Effect"
+  belongsToLanguageId: language:scala
+  category: other
+  description: |
+    Purely functional runtime for asynchronous and concurrent Scala programs
+    built on the IO monad with a high-performance fiber scheduler.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:zio
+---
+nodeKind: Library
+id: library:zio
+attributes:
+  displayName: "ZIO"
+  belongsToLanguageId: language:scala
+  category: other
+  description: |
+    Type-safe, composable asynchronous and concurrent programming library for
+    Scala with structured concurrency, resource management, and dependency injection.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-async-processing
+---
+nodeKind: Library
+id: library:http4s
+attributes:
+  displayName: "http4s"
+  belongsToLanguageId: language:scala
+  category: http-server
+  description: |
+    Minimal, purely functional HTTP library for Scala built on Cats Effect
+    and FS2, supporting server and client implementations.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:play-framework-lib
+    - library:tapir
+---
+nodeKind: Library
+id: library:doobie
+attributes:
+  displayName: "Doobie"
+  belongsToLanguageId: language:scala
+  category: orm
+  description: |
+    Pure functional JDBC layer for Scala and Cats providing type-safe SQL
+    queries, streaming results, and connection pool integration.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:slick
+---
+nodeKind: Library
+id: library:circe
+attributes:
+  displayName: "Circe"
+  belongsToLanguageId: language:scala
+  category: other
+  description: |
+    JSON library for Scala based on Cats with automatic codec derivation,
+    cursor-based decoding, and optics for JSON manipulation.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:jackson
+    - library:aeson
+---
+nodeKind: Library
+id: library:scalatest
+attributes:
+  displayName: "ScalaTest"
+  belongsToLanguageId: language:scala
+  category: testing
+  description: |
+    Flexible testing framework for Scala and Scala.js with multiple spec
+    styles (FunSpec, WordSpec, FlatSpec) and rich matchers.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:specs2
+    - library:kotest
+---
+nodeKind: Library
+id: library:specs2
+attributes:
+  displayName: "Specs2"
+  belongsToLanguageId: language:scala
+  category: testing
+  description: |
+    Specification-style testing library for Scala with mutable and immutable
+    spec variants, matchers, and first-class concurrency support.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:slick
+attributes:
+  displayName: "Slick"
+  belongsToLanguageId: language:scala
+  category: orm
+  description: |
+    Functional-relational mapping library for Scala with a lifted embedding
+    DSL that compiles Scala queries to SQL at compile time.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:fs2
+attributes:
+  displayName: "FS2"
+  belongsToLanguageId: language:scala
+  category: other
+  description: |
+    Purely functional, effectful streaming library for Scala built on Cats
+    Effect with support for concurrent, resource-safe stream processing.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:conduit
+---
+nodeKind: Library
+id: library:tapir
+attributes:
+  displayName: "Tapir"
+  belongsToLanguageId: language:scala
+  category: http-server
+  description: |
+    Declarative Scala library for defining typed HTTP API endpoints that can
+    be interpreted as servers, clients, or OpenAPI documentation.
+edges:
+  belongs_to_language:
+    - language:scala
+  library_used_by:
+    - target: skill-area:backend-api-design

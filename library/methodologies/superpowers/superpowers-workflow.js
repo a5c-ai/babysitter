@@ -3,6 +3,13 @@
  * @description Superpowers Extended - Full development lifecycle: brainstorm -> plan -> execute -> review -> finish
  * @inputs { task: string, mode?: string, skipBrainstorm?: boolean, planPath?: string, executionMode?: string, qualityThreshold?: number }
  * @outputs { success: boolean, designDoc: object, plan: object, implementation: object, review: object, completionStatus: string }
+   * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:ai-agents-conversational]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

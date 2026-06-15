@@ -1,0 +1,25 @@
+nodeKind: Layer
+id: layer:7-workspace
+attributes:
+  displayName: Workspace
+  position: 7
+  path: surfacing
+  scope: Materialized working context the agent reads, writes, indexes, and reasons over.
+  summary: |
+    The workspace is the materialized working directory or project context the
+    agent operates against — a git worktree, clone, symlinked overlay,
+    IDE-managed project, mounted remote, or virtual ephemeral workspace.
+    Workspace posture includes materialization, storage backend, indexing,
+    git hooks, artifact scope, and multi-tenant policy. Realized by `Workspace` nodes.
+  responsibilities:
+    - Materialize project files, indexes, artifacts, and session-visible state.
+    - Define git/worktree, mounting, overlay, and persistence behavior.
+    - Bound what files, generated outputs, and caches belong to the agent task.
+  examples:
+    - Local repository, remote clone, IDE project, container-mounted workspace.
+    - Git worktree, generated artifact directory, vector/code index, cache scope.
+    - LangGraph app state when backed by project files or persisted stores.
+  fitNotes: |
+    Some products are read-only and omit this layer. Others delegate workspace
+    ownership to an IDE, CI runner, hosted environment, or user shell.
+edges: {}

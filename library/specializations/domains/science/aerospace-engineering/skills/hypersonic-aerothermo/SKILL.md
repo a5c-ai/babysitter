@@ -18,6 +18,11 @@ metadata:
     - hypersonic
     - aerothermodynamics
     - thermal-protection
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:computational-geometry]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Hypersonic Aerothermodynamics Skill

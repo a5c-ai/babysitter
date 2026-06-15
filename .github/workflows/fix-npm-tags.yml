@@ -1,0 +1,45 @@
+# Fix Broken npm Latest Tags
+#
+# Finds packages where the `latest` tag points to an empty/broken publish
+# and retags to the last working version.
+
+name: Fix npm Latest Tags
+
+on:
+  push:
+    branches: [main, staging]
+    paths: ['.github/workflows/fix-npm-tags.yml']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (show what would change without retagging)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  fix-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Fix broken latest tags
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node scripts/fix-broken-latest-tags.mjs
+          else
+            node scripts/fix-broken-latest-tags.mjs --fix
+          fi

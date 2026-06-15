@@ -1,0 +1,47 @@
+nodeKind: EnvVar
+id: env-var:claude-code-disable-background-tasks
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_BACKGROUND_TASKS
+  description: Set to 1 to disable all background task functionality.
+  name: CLAUDE_CODE_DISABLE_BACKGROUND_TASKS
+  category: background-tasks
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-auto-background-tasks
+attributes:
+  displayName: CLAUDE_AUTO_BACKGROUND_TASKS
+  description: Set to 1 to force-enable automatic backgrounding of long-running agent tasks.
+  name: CLAUDE_AUTO_BACKGROUND_TASKS
+  category: background-tasks
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-cron
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_CRON
+  description: Set to 1 to disable scheduled tasks; the /loop skill and cron tools become unavailable.
+  name: CLAUDE_CODE_DISABLE_CRON
+  category: background-tasks
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-exit-after-stop-delay
+attributes:
+  displayName: CLAUDE_CODE_EXIT_AFTER_STOP_DELAY
+  description: Time in milliseconds to wait after the query loop becomes idle before automatically exiting.
+  name: CLAUDE_CODE_EXIT_AFTER_STOP_DELAY
+  category: background-tasks
+  valueType: int
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

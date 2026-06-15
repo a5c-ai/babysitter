@@ -1,0 +1,19 @@
+nodeKind: BinaryProvider
+id: binary-provider:example-helpers
+attributes:
+  displayName: "Plugin bin/ helpers (example)"
+  binDir: "bin/"
+  executables:
+    - name: pgrep
+      platform: all
+      target: bin/pgrep
+    - name: dump-context
+      platform: all
+      target: bin/dump-context.sh
+  pathPolicy: prepend
+  description: "Plugin-shipped bin/ executables added to PATH on install (Claude Code pattern)."
+edges:
+  contained_in_plugin:
+    - target: plugin:example-portable-extension
+  provides_executable:
+    - target: tool-descriptor:dump-context

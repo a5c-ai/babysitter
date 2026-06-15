@@ -1,0 +1,143 @@
+{
+  "issueNumber": 588,
+  "title": "agent-core: tool system gaps - no AbortSignal, no streaming, missing metadata",
+  "labels": [
+    "enhancement",
+    "priority:high",
+    "ready-for-dev",
+    "effort:large",
+    "agent-core",
+    "agent-platform",
+    "tool-mux",
+    "P1",
+    "integration",
+    "risk:high"
+  ],
+  "issueBody": "## Summary\nTool execution system missing several capabilities:\n\n- No shared AbortSignal for long-running tools (each must own timeout)\n- No tool output streaming (onUpdate callback exists but unused)\n- Missing tool metadata: category/tags, cost hints, rateLimit, requiresApproval\n- No error types (all errors become text strings)\n- SSH tool incomplete\n- No caching of tool results, web fetches, or schema fetches\n- Hardcoded limits (50MB output, 120s bash, 30s search) not configurable\n\nRef: `docs/agent-layer-gaps.md`",
+  "issueComments": [
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T06:54:52Z",
+      "body": "**Related:** #576 (tool registry - metadata, AbortSignal belong in unified registry)\n**Related:** #587 (abort fix enables tool cancellation via AbortSignal)"
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T10:11:00Z",
+      "body": "Triage says this is a valid umbrella issue for unifying and hardening the agent tool execution system across agent-core, tool-mux, and agent-platform. Recommended approach: define the unified tool contract first; add contract tests before implementation for built-in tools, custom/plugin tools, tool_search/tool_fetch, tool-mux dispatch, and MCP-backed tools; wire agent-core execution through shared tool-mux dispatcher/registry; implement slices for cancellation, typed results/errors, streaming/onUpdate, metadata/policy enforcement, SSH behavior, caching, and configurable limits. Keep cache behavior opt-in for read-only tools until side-effect metadata, cache keys, TTLs, and invalidation are explicit."
+    }
+  ],
+  "relatedIssues": [
+    {
+      "number": 576,
+      "summary": "tool registry - metadata and AbortSignal belong in unified registry"
+    },
+    {
+      "number": 587,
+      "summary": "abort fix enables tool cancellation via AbortSignal"
+    }
+  ],
+  "planningNotes": [
+    "Use flat phase list because the gap categories and affected packages are known.",
+    "Perform Phase 0 reuse audit before proposing new infrastructure.",
+    "Treat DeferredToolRegistry as a migration surface, not the long-term target architecture.",
+    "Keep cache behavior opt-in and limited to read-only tools until side-effect metadata and invalidation semantics are explicit.",
+    "Use sparse breakpoints: one after low-confidence runtime trace if needed, one mandatory unified contract review before implementation, one only if final gates fail."
+  ],
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/agent-core/README.md",
+    "packages/agent-core/src/types.ts",
+    "packages/agent-core/src/deferredToolRegistry.ts",
+    "packages/agent-core/src/deferredToolRegistry.test.ts",
+    "packages/agent-core/src/agenticTools/index.ts",
+    "packages/agent-core/src/agenticTools/types.ts",
+    "packages/agent-core/src/agenticTools/shared/process.ts",
+    "packages/agent-core/src/agenticTools/shared/results.ts",
+    "packages/agent-core/src/agenticTools/discovery/tools.ts",
+    "packages/agent-core/src/agenticTools/tools/execution.ts",
+    "packages/agent-core/src/agenticTools/tools/programmaticToolCalling.ts",
+    "packages/tool-mux/src/types.ts",
+    "packages/tool-mux/src/registry.ts",
+    "packages/tool-mux/src/dispatch.ts",
+    "packages/tool-mux/src/hooks.ts",
+    "packages/tool-mux/src/schema-translation.ts",
+    "packages/tool-mux/src/__tests__/registry.test.ts",
+    "packages/tool-mux/src/__tests__/dispatch.test.ts",
+    "packages/tool-mux/src/__tests__/hooks.test.ts",
+    "packages/tool-mux/src/__tests__/schema-translation.test.ts",
+    "packages/genty/platform/src/governance/builtins.ts",
+    "packages/genty/platform/src/governance/categories.ts",
+    "packages/genty/platform/src/governance/postureBridge.ts",
+    "packages/genty/platform/src/harness/types.ts",
+    "packages/genty/platform/src/harness/agenticTools/types.ts",
+    "packages/genty/platform/src/harness/agenticTools/discovery/tools.ts",
+    "packages/genty/platform/src/harness/agenticTools/tools/execution.ts",
+    "packages/genty/platform/src/mcp/client/toolRegistry.ts",
+    "packages/genty/platform/src/mcp/client/executor.ts"
+  ],
+  "testTargets": [
+    "packages/agent-core/src/deferredToolRegistry.test.ts",
+    "packages/agent-core/src/agenticTools/**/*.test.ts",
+    "packages/tool-mux/src/__tests__/registry.test.ts",
+    "packages/tool-mux/src/__tests__/dispatch.test.ts",
+    "packages/tool-mux/src/__tests__/hooks.test.ts",
+    "packages/tool-mux/src/__tests__/schema-translation.test.ts",
+    "packages/genty/platform/src/governance/__tests__/policy.test.ts",
+    "packages/genty/platform/src/governance/__tests__/postureBridge.test.ts",
+    "packages/genty/platform/src/harness/**/__tests__/*.test.ts",
+    "packages/genty/platform/src/mcp/client/**/*.test.ts"
+  ],
+  "implementationSlices": [
+    {
+      "id": "contract-types",
+      "title": "shared execution context, AbortSignal, streaming event, ToolResult, ToolError, and metadata types",
+      "focus": [
+        "packages/agent-core/src/types.ts",
+        "packages/tool-mux/src/types.ts",
+        "schema translation and exports",
+        "README/API documentation updates"
+      ]
+    },
+    {
+      "id": "dispatcher-registry-integration",
+      "title": "agent-core execution through tool-mux registry/dispatcher and discovery metadata flow",
+      "focus": [
+        "tool_search/tool_fetch metadata output",
+        "DeferredToolRegistry migration adapter",
+        "programmatic code_executor nested tool calls",
+        "MCP/plugin/custom descriptor flow"
+      ]
+    },
+    {
+      "id": "builtin-tools-runtime",
+      "title": "built-in tool cancellation, streaming updates, typed errors, and configurable timeout/output limits",
+      "focus": [
+        "bash/python/ssh/fetch helpers",
+        "shared AbortSignal propagation",
+        "onUpdate delivery",
+        "structured ToolError result mapping",
+        "configured timeout and output limit plumbing"
+      ]
+    },
+    {
+      "id": "policy-ssh-cache",
+      "title": "metadata-driven policy, approval/rate/cost hints, SSH hardening, and opt-in read-only caching",
+      "focus": [
+        "agent-platform governance bridge",
+        "tool-mux hooks",
+        "requiresApproval/rateLimit/cost hints",
+        "SSH host-key policy and keepalive/retry controls",
+        "fetch/schema cache behavior"
+      ]
+    }
+  ],
+  "qualityCommands": [
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm --workspace packages/agent-core test",
+    "npm --workspace packages/tool-mux test",
+    "npm --workspace packages/genty/platform test"
+  ],
+  "maxVerificationAttempts": 2
+}

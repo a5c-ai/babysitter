@@ -1,0 +1,471 @@
+nameOverride: ""
+
+fullnameOverride: ""
+
+namespaceOverride: ""
+
+
+
+global:
+
+  imageRegistry: ""
+
+  imagePullSecrets: []
+
+
+
+image:
+
+  repository: kradle/mvp-model
+
+  tag: "0.1.0"
+
+  pullPolicy: IfNotPresent
+
+  controller:
+    repository: ""
+    tag: ""
+
+  web:
+    repository: ""
+    tag: ""
+
+
+
+demo:
+  enabled: true
+  storageClassName: standard
+  objectStore:
+    mode: local-dev-minio
+  postgres:
+    mode: local-dev-postgres
+  nats:
+    mode: local-dev-nats
+    image: nats:2.10-alpine
+
+
+api:
+
+  replicas: 1
+
+  service:
+
+    port: 80
+  resources: {}
+
+
+apiService:
+  enabled: false
+
+
+
+
+controllers:
+
+  replicas: 1
+
+  resources: {}
+
+
+
+
+
+
+
+
+web:
+
+  replicas: 1
+
+  service:
+
+    port: 80
+
+  resources: {}
+
+
+assistant:
+  existingSecret: ""
+  anthropic:
+    existingSecret: ""
+    key: anthropic-api-key
+  kradleAssistant:
+    existingSecret: ""
+    key: kradle-assistant-api-key
+
+
+
+webhookWorker:
+
+  replicas: 1
+
+  resources: {}
+
+
+
+serviceAccount:
+
+  create: true
+
+  annotations: {}
+
+
+
+rbac:
+
+  create: true
+
+
+
+networkPolicy:
+
+  enabled: true
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+oidc:
+  issuerUrl: ""
+  clientId: ""
+  existingSecret: ""
+
+
+
+admin:
+  org: ""
+  username: ""
+
+auth:
+  session:
+    cookieName: kradle_session
+  testSession:
+    secret: ""
+    existingSecret: ""
+    key: test-auth-secret
+  delegatedIdentity:
+    enabled: false
+    userHeader: x-forwarded-user
+    groupsHeader: x-forwarded-groups
+    emailHeader: x-forwarded-email
+    localDevelopment:
+      enabled: false
+      user: local-developer
+      email: local-developer@example.test
+      groups: kradle:repo-admins
+  github:
+    enabled: true
+    clientId: ""
+    clientSecret: ""
+    existingSecret: ""
+    scopes: "read:user user:email"
+    authorizationUrl: https://github.com/login/oauth/authorize
+    tokenUrl: https://github.com/login/oauth/access_token
+    userInfoUrl: https://api.github.com/user
+  sso:
+    enabled: false
+    providerName: Workspace SSO
+    issuerUrl: ""
+    authorizationUrl: ""
+    tokenUrl: ""
+    userInfoUrl: ""
+    clientId: ""
+    clientSecret: ""
+    existingSecret: ""
+    scopes: "openid profile email groups"
+
+externalDependencies:
+  postgres:
+    enabled: false
+    host: ""
+    port: 5432
+    database: kradle
+    existingSecret: ""
+  objectStorage:
+    enabled: false
+    endpoint: ""
+    bucket: kradle-artifacts
+    existingSecret: ""
+  nats:
+    enabled: false
+    url: ""
+    existingSecret: ""
+    key: url
+    eventTransport:
+      enabled: false
+      subject: kradle.events
+      stream: KRADLE_EVENTS
+      requireBroker: false
+  arc:
+    enabled: false
+    runnerScaleSet: ""
+  kyverno:
+    enabled: false
+    mode: auto
+    namespace: kyverno
+    policyNamespace: kradle-system
+    requireForEnforceMode: true
+    discoverExisting: true
+    managed:
+      enabled: false
+      installMethod: argocd
+      chartRepoURL: https://kyverno.github.io/kyverno/
+      chart: kyverno
+      targetRevision: "3.x"
+      releaseName: kyverno
+      values: {}
+    policyReporter:
+      enabled: false
+      mode: external
+      namespace: policy-reporter
+    defaultPolicyPack:
+      enabled: true
+      mode: audit
+      installExamples: true
+  gatekeeper:
+    enabled: false
+    constraintNamespace: gatekeeper-system
+
+jitsi:
+  install: false
+  enableAuth: true
+  enableGuests: false
+  publicURL: https://meet.kradle.local
+  external:
+    enabled: false
+    url: ""
+    jwtAppId: ""
+    jwtAppSecret: ""
+    existingSecret: ""
+    jwtAppIdKey: appId
+    jwtAppSecretKey: appSecret
+  web: &jitsiWeb
+    replicaCount: 1
+    image:
+      repository: jitsi/web
+    ingress:
+      enabled: true
+      hosts:
+        - host: meet.kradle.local
+          paths:
+            - /
+      tls: []
+    health:
+      configPath: /config.js
+  prosody: &jitsiProsody
+    replicaCount: 1
+    image:
+      repository: jitsi/prosody
+    auth:
+      type: jwt
+      jwt:
+        appId: kradle
+        appSecret: ""
+        existingSecret: ""
+        appIdKey: appId
+        appSecretKey: appSecret
+        issuer: kradle
+        audience: jitsi
+    jwt:
+      secret: ""
+      existingSecretName: ""
+    http:
+      enabled: true
+      port: 5280
+  jicofo: &jitsiJicofo
+    replicaCount: 1
+    image:
+      repository: jitsi/jicofo
+  jvb: &jitsiJvb
+    replicaCount: 1
+    image:
+      repository: jitsi/jvb
+    publicIPs: []
+    useNodeIP: true
+    UDPPort: 10000
+    service:
+      type: NodePort
+      udpPort: 10000
+      nodePort: 30000
+    publicIP: ""
+  jibri: &jitsiJibri
+    enabled: false
+    replicaCount: 0
+    image:
+      repository: jitsi/jibri
+    persistence:
+      enabled: true
+      size: 20Gi
+  kradle:
+    autoCreateRooms: true
+    webhookSecret: ""
+    webhookExistingSecret: ""
+    webhookSecretKey: webhookSecret
+    defaultRoomTTL: 120m
+    agentSidecarImage: "kradle/jitsi-agent-sidecar:latest"
+    maxAgentsPerRoom: 5
+    recordingStorageClass: ""
+    healthProbe:
+      enabled: true
+      configUrl: ""
+      path: /healthz
+    sidecarResources:
+      chatOnly:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+      listen:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+      listenSpeak:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 2000m
+          memory: 2Gi
+      full:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
+jitsi-subchart:
+  enableAuth: true
+  enableGuests: false
+  publicURL: https://meet.kradle.local
+  extraCommonEnvs:
+    AUTH_TYPE: jwt
+    JWT_APP_ID: kradle
+    JWT_ACCEPTED_ISSUERS: kradle
+    JWT_ACCEPTED_AUDIENCES: jitsi
+  web: *jitsiWeb
+  prosody:
+    <<: *jitsiProsody
+    secretEnvs:
+      JWT_APP_SECRET: ""
+    jwt:
+      secret: ""
+      existingSecretName: ""
+  jicofo: *jitsiJicofo
+  jvb: *jitsiJvb
+  jibri: *jitsiJibri
+
+autoscaling:
+  api:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  controllers:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  web:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  webhookWorker:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+gitea:
+  enabled: true
+  image:
+    repository: gitea/gitea
+    tag: "1.22-rootless"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  rootUrl: ""
+  sshDomain: ""
+  httpUrl: ""
+  token:
+    existingSecret: ""
+    key: token
+  service:
+    httpPort: 3000
+    sshPort: 22
+  admin:
+    username: kradle-admin
+    password: change-me
+  persistence:
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ""
+
+agentMux:
+  url: ""
+  gatewayUrl: ""
+
+argocd:
+  enabled: true
+  namespace: argocd
+  applicationName: kradle
+  project: default
+  repoURL: ""
+  targetRevision: main
+  path: charts/kradle
+  syncPolicy:
+    automated: true
+    prune: true
+    selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kradle-system
+
+
+
+kyverno:
+  install: false
+
+envoyAiGateway:
+  enabled: true
+  defaultBackend: "kserve"
+  externalProviders: {}
+  # Install via: kubectl apply -k "github.com/envoyproxy/ai-gateway/manifests?ref=main"
+
+kserve:
+  enabled: false
+  discoverExisting: true
+
+agents:
+  enabled: true
+  agentMux:
+    enabled: false
+    gateway: ""
+
+kubevela:
+  install: false
+  enabled: true
+  applicationName: kradle-kubevela
+  namespace: vela-system
+  releaseName: kubevela
+  chart:
+    repoURL: https://kubevela.github.io/charts
+    chart: vela-core
+    targetRevision: "1.10.8"
+    values: {}
+  syncPolicy:
+    prune: true
+    selfHeal: true
+  addons:
+    fluxcd:
+      enabled: true
+      onlyHelmComponents: true

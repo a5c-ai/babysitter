@@ -16,6 +16,13 @@
  * @references
  * - Circom Documentation: https://docs.circom.io/
  * - Noir Language: https://noir-lang.org/docs/
+ * @graph
+ *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
+ *   workflows: [workflow:crypto-protocol-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

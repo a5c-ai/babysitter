@@ -13,6 +13,12 @@ metadata:
   domain: business
   category: Corporate Governance
   skill-id: SK-020
+graph:
+  domains: [domain:legal]
+  specializations: [specialization:legal-compliance]
+  skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+  workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+  roles: [role:legal-counsel, role:compliance-officer]
 ---
 
 # Board Governance Skill

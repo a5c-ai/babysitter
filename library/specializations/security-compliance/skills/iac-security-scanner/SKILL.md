@@ -8,6 +8,13 @@ allowed-tools:
   - Glob
   - Grep
   - WebFetch
+graph:
+  domains: [domain:security]
+  specializations: [specialization:security-compliance]
+  skillAreas: [skill-area:sast, skill-area:vulnerability-scanning-remediation]
+  roles: [role:security-engineer, role:devops-engineer]
+  workflows: [workflow:security-audit, workflow:vulnerability-management]
+
 ---
 
 # IaC Security Scanner Skill

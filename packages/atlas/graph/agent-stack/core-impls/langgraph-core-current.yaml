@@ -1,0 +1,67 @@
+nodeKind: AgentCoreImpl
+id: agent-core-impl:langgraph.core@current
+attributes:
+  displayName: "LangGraph Graph Core (current)"
+  agentVersionId: agent-version:langgraph@current
+  packageRef: source-ref:langgraph-github
+  loopIteratorPolicy: custom
+  loopIteratorNotes: |
+    The core loop is an explicit graph/state-machine authored by the application:
+    nodes transform state, edges route control, and terminal conditions are part
+    of the graph definition rather than a fixed CLI loop.
+  contextManagementStrategy: user-managed
+  compactionTriggerNotes: |
+    Context and memory are represented in graph state, stores, checkpointers, or
+    model-call middleware chosen by the graph author.
+  subagentInvokerPolicy: nested-loop
+  subagentInvokerNotes: |
+    Custom multi-agent patterns can be encoded as subgraphs, supervisor graphs,
+    handoff nodes, or Deep Agents-style subagent harnesses.
+  resultSynthesisPolicy: post-processed
+  resultSynthesisNotes: |
+    Final outputs are graph-defined: the terminal state can be converted to chat
+    messages, structured outputs, events, or application-specific payloads.
+  stopDetectionStrategy: structured-end-event
+  transportClientLibrary: langchain-chat-model-abstraction
+  supportedTransportProtocols:
+    - model-transport:openai-chat-completions
+    - model-transport:openai-responses
+    - model-transport:anthropic-messages
+    - model-transport:gemini-generate-content
+    - model-transport:openai-compat
+  parallelToolCallHandling: native
+  streamingFidelity: full
+  thinkingChannelHandling: model-dependent
+  notes: |
+    Represents LangGraph's framework-level core, not a single product loop. The
+    graph author chooses which model provider integrations and node semantics are
+    active for a concrete application.
+edges:
+  realizes:
+    - target: layer:4-agent-core
+  composes:
+    - target: agent:langgraph
+      role: core
+  speaks:
+    - target: model-transport:openai-chat-completions
+    - target: model-transport:openai-responses
+    - target: model-transport:anthropic-messages
+    - target: model-transport:gemini-generate-content
+    - target: model-transport:openai-compat
+  sourced_from:
+    - source-ref:langgraph-docs
+    - source-ref:langchain-agents-docs
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: ">=0.0.0"
+      level: full
+    - target: capability:streaming
+      versionRange: ">=0.0.0"
+      level: full
+    - target: capability:can-resume
+      versionRange: ">=0.0.0"
+      level: full
+  supports_orchestration_primitive:
+    - target: orch-primitive:multi-agent-dispatch
+    - target: orch-primitive:dependency-resolution
+    - target: orch-primitive:result-validation

@@ -1,0 +1,10 @@
+nodeKind: Domain
+id: domain:gaming
+attributes:
+  displayName: "Gaming"
+  description: |
+    Gaming domain — game engines, real-time rendering, gameplay
+    programming, multiplayer netcode, and game tooling.
+edges:
+  contains:
+    - specialization:game-development

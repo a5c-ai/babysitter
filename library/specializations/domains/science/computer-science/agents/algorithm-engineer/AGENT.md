@@ -13,6 +13,12 @@ metadata:
   domain: science
   category: research-methodology
   phase: 6
+graph:
+  domains: [domain:computer-science]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:graph-algorithms, skill-area:dynamic-programming]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Algorithm Engineer

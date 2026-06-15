@@ -1,0 +1,203 @@
+nodeKind: Claim
+id: claim:provider-deepseek-api-compatible-base-urls
+attributes:
+  subjectId: provider:deepseek
+  attribute: endpoints
+  value: OpenAI-compatible base URL https://api.deepseek.com; Anthropic-format base URL https://api.deepseek.com/anthropic.
+  subjectKind: Provider
+  statement: provider:deepseek exposes both OpenAI-compatible and Anthropic-format API base URLs.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #431 DeepSeek provider API-family endpoint coverage.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-api-key-auth
+attributes:
+  subjectId: provider:deepseek
+  attribute: authMethods
+  value: api-key
+  subjectKind: Provider
+  statement: provider:deepseek uses API-key authentication for the OpenAI-compatible and Anthropic-format API surfaces.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: OpenAI-compatible examples use bearer API keys; Anthropic-format examples use ANTHROPIC_API_KEY / x-api-key compatibility.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+    - evidence:deepseek-anthropic-api
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-rate-limit-signaling
+attributes:
+  subjectId: provider:deepseek
+  attribute: rateLimitSignalingProtocol
+  value: HTTP 429 with retry and OpenAI-shaped error semantics.
+  subjectKind: Provider
+  statement: provider:deepseek rate-limit signaling is documented through DeepSeek's rate-limit and error-code API guidance.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Existing provider metadata retains the OpenAI-compatible error-envelope convention.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-data-residency-options
+attributes:
+  subjectId: provider:deepseek
+  attribute: dataResidencyOptions
+  value: cn
+  subjectKind: Provider
+  statement: provider:deepseek dataResidencyOptions is cn.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for existing DeepSeek provider residency metadata.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-sla-tier
+attributes:
+  subjectId: provider:deepseek
+  attribute: slaTier
+  value: deepseek-standard
+  subjectKind: Provider
+  statement: provider:deepseek slaTier is deepseek-standard.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: adequate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-api-quickstart
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the existing DeepSeek provider SLA-tier label.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-api-quickstart
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-v4-provider-features
+attributes:
+  subjectId: provider:deepseek
+  attribute: vendorFeatures
+  value: capability:supports-prompt-caching, capability:supports-json-mode, capability:supports-tool-use
+  subjectKind: Provider
+  statement: provider:deepseek documents context caching prices, JSON output, and tool calls for the V4 API surface.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+    - evidence:deepseek-json-output
+    - evidence:deepseek-tool-calls
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek provider feature metadata introduced for issue #431.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+    - evidence:deepseek-json-output
+    - evidence:deepseek-tool-calls
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-legacy-model-alias-compatibility
+attributes:
+  subjectId: provider:deepseek
+  attribute: modelAliasCompatibility
+  value: deepseek-chat maps to deepseek-v4-flash non-thinking mode; deepseek-reasoner maps to deepseek-v4-flash thinking mode.
+  subjectKind: Provider
+  statement: provider:deepseek keeps deepseek-chat and deepseek-reasoner as compatibility aliases for DeepSeek V4 Flash modes.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Mode compatibility is modeled as Claim metadata on provider:deepseek, avoiding unresolved alias ModelVersion nodes.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+    - evidence:deepseek-v4-release
+  about_subject:
+    - provider:deepseek
+---
+nodeKind: Claim
+id: claim:provider-deepseek-legacy-model-deprecation-notice
+attributes:
+  subjectId: provider:deepseek
+  attribute: legacyModelLifecycle
+  value: deepseek-chat and deepseek-reasoner will be deprecated in the future; they currently remain compatibility mappings to deepseek-v4-flash modes.
+  subjectKind: Provider
+  statement: provider:deepseek documents future deprecation for deepseek-chat and deepseek-reasoner while retaining current compatibility mappings.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-pricing
+    - evidence:deepseek-v4-release
+  claimedAt: '2026-05-26T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Lifecycle/deprecation compatibility is captured as provider Claim metadata only, per issue #431.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-pricing
+    - evidence:deepseek-v4-release
+  about_subject:
+    - provider:deepseek

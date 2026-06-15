@@ -8,6 +8,12 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+graph:
+  domains: [domain:philosophy]
+  specializations: [specialization:applied-ethics]
+  skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:strategic-analysis]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-analyst, role:compliance-officer]
 ---
 
 # Ethical Framework Application Skill

@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:hellaswag.scope
+attributes:
+  subjectId: benchmark:hellaswag
+  inScope: |
+    Sentence-completion commonsense-reasoning benchmark with 10k multiple-choice items over everyday-activity narratives. Scored by accuracy.
+  outOfScope: |
+    Code-generation, mathematical reasoning, agentic tool-use, and free-form generation quality.
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:hellaswag

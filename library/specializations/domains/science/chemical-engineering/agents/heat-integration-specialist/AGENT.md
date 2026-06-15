@@ -13,6 +13,11 @@ metadata:
   domain: science
   category: Process Simulation
   agent-id: CE-AG-002
+graph:
+  domains: [domain:chemical-engineering]
+  skillAreas: [skill-area:np-hard-heuristics, skill-area:mathematical-reasoning, skill-area:physics-simulation]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Heat Integration Specialist Agent

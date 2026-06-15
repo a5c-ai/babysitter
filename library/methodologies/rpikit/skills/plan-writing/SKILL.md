@@ -2,17 +2,14 @@
 name: plan-writing
 description: Transform research findings into actionable implementation plans with stakes-based rigor, test-first strategy, and granular task decomposition.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 
-# Plan Writing
-
-## Overview
-
-Convert research findings into actionable implementation plans. Scales planning rigor to stakes level. Every code-changing task specifies tests before implementation.
-
-## When to Use
-
-- After research phase identifies what needs to change
 - Before implementing any medium or high stakes changes
 - When requirements are clear and codebase is understood
 

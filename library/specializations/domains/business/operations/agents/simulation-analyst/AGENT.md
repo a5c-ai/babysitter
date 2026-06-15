@@ -9,6 +9,11 @@ expertise:
   - Optimization recommendations
   - Investment justification
   - Change impact assessment
+graph:
+  domains: [domain:operations]
+  skillAreas: [skill-area:quantitative-modeling, skill-area:statistical-analysis, skill-area:data-analytics]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:data-scientist, role:business-analyst]
 ---
 
 # Simulation Analyst

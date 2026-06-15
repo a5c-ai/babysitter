@@ -2,6 +2,13 @@
 name: guardrails-ai-setup
 description: Guardrails AI validation framework setup for LLM applications. Implement input/output validation, safety checks, and structured output enforcement.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob, WebFetch
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:hallucination-mitigation-fact-checking, skill-area:prompt-engineering]
+  roles: [role:ml-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development, workflow:ml-model-lifecycle]
+
 ---
 
 # guardrails-ai-setup

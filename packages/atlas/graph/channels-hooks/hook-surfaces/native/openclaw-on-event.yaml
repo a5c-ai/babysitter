@@ -1,0 +1,22 @@
+nodeKind: HookSurface
+id: hook-surface:openclaw.on-event
+attributes:
+  eventName: "onEvent (OpenClaw)"
+  displayName: "onEvent (OpenClaw)"
+  kind: native
+  originVendor: a5c
+  direction: post
+  blocking: false
+  family: shell-hook
+  payloadSchema:
+    type: object
+    required: [event]
+    properties:
+      event: { type: string }
+      payload: { type: object }
+  description: |
+    OpenClaw's generic onEvent hook. Canonicalizes to post-tool-use for
+    cross-product policies.
+edges:
+  canonicalized_to:
+    - target: hook-surface:post-tool-use

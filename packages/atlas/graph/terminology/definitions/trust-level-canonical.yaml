@@ -1,0 +1,11 @@
+nodeKind: Definition
+id: definition:trust-level.canonical
+attributes:
+  authoredAt: "2026-04-28T00:00:00Z"
+  termId: term:trust-level
+  text: |
+    enum — official-web, vendor-doc, community, synthetic, repo
+  status: canonical
+edges:
+  defines:
+    - term:trust-level

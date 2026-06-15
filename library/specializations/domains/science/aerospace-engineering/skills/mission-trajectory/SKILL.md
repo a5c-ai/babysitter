@@ -18,6 +18,11 @@ metadata:
     - trajectory
     - orbital-mechanics
     - mission-design
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:computational-geometry]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Mission Design and Trajectory Skill

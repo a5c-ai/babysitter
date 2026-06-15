@@ -1,0 +1,299 @@
+import { builtinModules } from "node:module";
+import { resolveRunsDir } from "../config";
+import { STATIC_FALLBACK_METADATA } from "./adapterFallbackMetadata";
+
+/**
+ * Resolves adapter metadata from @a5c-ai/adapters when available.
+ *
+ * Some environments used by validation and CI can load the babysitter SDK but
+ * cannot load the full adapters runtime graph. In those cases we fall back to
+ * a static metadata table so harness adapters can still resolve activation
+ * signals, prompt capabilities, and session binding behavior.
+ */
+
+/**
+ * Subset of adapters AgentCapabilities relevant to babysitter orchestration.
+ */
+export interface AdapterCapabilitiesSubset {
+  supportsSkills: boolean;
+  supportsThinking: boolean;
+  supportsMCP: boolean;
+  requiresToolApproval: boolean;
+  supportsInteractiveMode: boolean;
+  supportsStdinInjection: boolean;
+  supportsSubagentDispatch: boolean;
+  supportsParallelExecution: boolean;
+  supportsImageInput: boolean;
+  /** Whether the harness supports runtime hooks (stop-hook, pre-tool-use, etc.) */
+  hasRuntimeHooks: boolean;
+  /** Whether the harness has a blocking stop hook. */
+  hasStopHook: boolean;
+}
+
+/**
+ * Metadata resolved from an adapters adapter instance.
+ */
+export interface AdapterAdapterMetadata {
+  /** The agent name in adapters (e.g. 'claude', 'codex', 'gemini'). */
+  name: string;
+  /** Env vars that indicate this harness is active. */
+  hostEnvSignals: readonly string[];
+  /** Subset of capabilities relevant to babysitter. */
+  capabilities: AdapterCapabilitiesSubset;
+  /** Session directory (resolved). */
+  sessionDir: string;
+}
+
+// ---------------------------------------------------------------------------
+// Name mapping (babysitter harness name -> adapters adapter name)
+// ---------------------------------------------------------------------------
+
+const HARNESS_TO_AGENT_MUX_NAME: Record<string, string> = {
+  "claude-code": "claude",
+  "gemini-cli": "gemini",
+  "github-copilot": "copilot",
+  "oh-my-pi": "omp",
+};
+
+function mapHarnessName(name: string): string {
+  return HARNESS_TO_AGENT_MUX_NAME[name] || name;
+}
+
+// ---------------------------------------------------------------------------
+// Internal types for the dynamic require from @a5c-ai/adapters
+// ---------------------------------------------------------------------------
+
+/** Minimal type for the adapter registry returned by createClient(). */
+interface AdapterAdapterRegistry {
+  get(agent: string): AdapterRawAdapter | undefined;
+}
+
+/** Minimal adapter shape we read from adapters. */
+interface AdapterRawAdapter {
+  agent?: string;
+  hostEnvSignals?: readonly string[];
+  capabilities?: AdapterRawCapabilities;
+  sessionDir?: (cwd?: string) => string;
+}
+
+/** Minimal capabilities shape. */
+interface AdapterRawCapabilities {
+  supportsSkills?: boolean;
+  supportsThinking?: boolean;
+  supportsMCP?: boolean;
+  requiresToolApproval?: boolean;
+  supportsInteractiveMode?: boolean;
+  supportsStdinInjection?: boolean;
+  supportsSubagentDispatch?: boolean;
+  supportsParallelExecution?: boolean;
+  supportsImageInput?: boolean;
+  runtimeHooks?: Record<string, string>;
+}
+
+/** Minimal client shape. */
+interface AgentMuxClient {
+  adapters: AdapterAdapterRegistry;
+}
+
+// ---------------------------------------------------------------------------
+// Cached metadata lookup
+// ---------------------------------------------------------------------------
+
+let _metadataCache: Map<string, AdapterAdapterMetadata> | undefined;
+
+function getCache(): Map<string, AdapterAdapterMetadata> {
+  if (!_metadataCache) {
+    _metadataCache = new Map();
+  }
+  return _metadataCache;
+}
+
+/**
+ * Get metadata for a harness from adapters's adapter registry.
+ *
+ * @a5c-ai/adapters is a hard dependency — this function throws if it is
+ * missing, broken, or does not contain the requested adapter.
+ *
+ * Results are cached for the lifetime of the process.
+ */
+
+let _agentMuxOverride: Record<string, unknown> | undefined;
+
+function hasNodeSqliteBuiltin(): boolean {
+  return builtinModules.includes("node:sqlite") || builtinModules.includes("sqlite");
+}
+
+function requireAmux(): Record<string, unknown> {
+  if (_agentMuxOverride) return _agentMuxOverride;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+  const mod: Record<string, unknown> = require("@a5c-ai/adapters");
+  return mod;
+}
+
+/**
+ * Override the adapters module for testing.
+ * Pass `undefined` to restore require-based resolution.
+ * @internal — test-only API, not part of the public surface.
+ */
+export function _setAmuxModuleForTesting(mod: Record<string, unknown> | undefined): void {
+  _agentMuxOverride = mod;
+}
+
+function cloneMetadata(metadata: AdapterAdapterMetadata): AdapterAdapterMetadata {
+  return {
+    ...metadata,
+    hostEnvSignals: [...metadata.hostEnvSignals],
+    capabilities: { ...metadata.capabilities },
+  };
+}
+
+function getFallbackAdapterMetadata(harnessName: string, agentMuxName: string): AdapterAdapterMetadata {
+  const fallback = STATIC_FALLBACK_METADATA[agentMuxName];
+  if (!fallback) {
+    throw new Error(
+      `No fallback adapter metadata is defined for harness "${harnessName}" ` +
+      `(adapters adapter "${agentMuxName}").`,
+    );
+  }
+  return cloneMetadata(fallback);
+}
+
+function shouldUseFallbackMetadata(error: unknown): boolean {
+  const code = typeof error === "object" && error !== null && "code" in error
+    ? String((error as { code?: unknown }).code)
+    : "";
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    code === "ERR_UNKNOWN_BUILTIN_MODULE" ||
+    code === "ERR_MODULE_NOT_FOUND" ||
+    code === "MODULE_NOT_FOUND" ||
+    message.includes("node:sqlite")
+  );
+}
+
+export function getAmuxAdapterMetadata(harnessName: string): AdapterAdapterMetadata {
+  const cache = getCache();
+  const agentMuxName = mapHarnessName(harnessName);
+
+  const cached = cache.get(agentMuxName);
+  if (cached) {
+    return cached;
+  }
+
+  if (!hasNodeSqliteBuiltin()) {
+    const fallback = getFallbackAdapterMetadata(harnessName, agentMuxName);
+    cache.set(agentMuxName, fallback);
+    return fallback;
+  }
+
+  let adapters: Record<string, unknown>;
+  let createClient: (() => AgentMuxClient) | undefined;
+  let registerBuiltInAdapters: ((client: AgentMuxClient) => void) | undefined;
+
+  try {
+    adapters = requireAmux();
+    createClient = adapters.createClient as (() => AgentMuxClient) | undefined;
+    registerBuiltInAdapters = adapters.registerBuiltInAdapters as ((client: AgentMuxClient) => void) | undefined;
+  } catch (error) {
+    if (shouldUseFallbackMetadata(error)) {
+      const fallback = getFallbackAdapterMetadata(harnessName, agentMuxName);
+      cache.set(agentMuxName, fallback);
+      return fallback;
+    }
+    throw error;
+  }
+
+  if (!createClient || !registerBuiltInAdapters) {
+    const fallback = getFallbackAdapterMetadata(harnessName, agentMuxName);
+    cache.set(agentMuxName, fallback);
+    return fallback;
+  }
+
+  let client: AgentMuxClient;
+  try {
+    client = createClient();
+    registerBuiltInAdapters(client);
+  } catch (error) {
+    if (shouldUseFallbackMetadata(error)) {
+      const fallback = getFallbackAdapterMetadata(harnessName, agentMuxName);
+      cache.set(agentMuxName, fallback);
+      return fallback;
+    }
+    throw error;
+  }
+
+  const adapter = client.adapters.get(agentMuxName);
+  if (!adapter) {
+    // #949: the live @a5c-ai/adapters module loads fine but the build it ships
+    // simply does not carry the requested adapter (e.g. "genty"). Rather than
+    // hard-throw — which aborts the entire adapter registry construction — fall
+    // back to the static metadata when we have it. This is an intentional,
+    // narrow graceful-degradation (logged to stderr), not a silent fallback.
+    if (STATIC_FALLBACK_METADATA[agentMuxName]) {
+      process.stderr.write(
+        `[adapterMetadata] @a5c-ai/adapters has no adapter named "${agentMuxName}" ` +
+        `(requested harness: "${harnessName}"); using static fallback metadata.\n`,
+      );
+      const fallback = getFallbackAdapterMetadata(harnessName, agentMuxName);
+      cache.set(agentMuxName, fallback);
+      return fallback;
+    }
+    throw new Error(
+      `@a5c-ai/adapters does not have an adapter named "${agentMuxName}" ` +
+      `(requested harness: "${harnessName}"). Available adapters may need updating.`,
+    );
+  }
+
+  const caps = adapter.capabilities;
+  if (!caps) {
+    throw new Error(
+      `@a5c-ai/adapters adapter "${agentMuxName}" has no capabilities defined. ` +
+      `Ensure @a5c-ai/adapters is up to date.`,
+    );
+  }
+
+  // Determine if the adapter has a stop hook
+  const runtimeHooks = caps.runtimeHooks;
+  const hasStopHook = !!(
+    runtimeHooks &&
+    typeof runtimeHooks === "object" &&
+    "stop" in runtimeHooks &&
+    runtimeHooks.stop !== "none"
+  );
+  const hasRuntimeHooks = !!(
+    runtimeHooks &&
+    typeof runtimeHooks === "object" &&
+    Object.values(runtimeHooks).some((v: unknown) => v !== "none")
+  );
+
+  const metadata: AdapterAdapterMetadata = {
+    name: adapter.agent ?? agentMuxName,
+    hostEnvSignals: adapter.hostEnvSignals ?? [],
+    capabilities: {
+      supportsSkills: caps.supportsSkills ?? false,
+      supportsThinking: caps.supportsThinking ?? false,
+      supportsMCP: caps.supportsMCP ?? false,
+      requiresToolApproval: caps.requiresToolApproval ?? false,
+      supportsInteractiveMode: caps.supportsInteractiveMode ?? false,
+      supportsStdinInjection: caps.supportsStdinInjection ?? false,
+      supportsSubagentDispatch: caps.supportsSubagentDispatch ?? false,
+      supportsParallelExecution: caps.supportsParallelExecution ?? false,
+      supportsImageInput: caps.supportsImageInput ?? false,
+      hasRuntimeHooks,
+      hasStopHook,
+    },
+    sessionDir: typeof adapter.sessionDir === "function"
+      ? adapter.sessionDir()
+      : resolveRunsDir(),
+  };
+
+  cache.set(agentMuxName, metadata);
+  return metadata;
+}
+
+/**
+ * Clear the metadata cache. Useful for testing.
+ */
+export function clearAmuxMetadataCache(): void {
+  _metadataCache = undefined;
+}

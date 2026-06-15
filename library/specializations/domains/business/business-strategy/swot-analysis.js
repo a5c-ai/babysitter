@@ -3,6 +3,12 @@
  * @description Systematic evaluation of organizational Strengths, Weaknesses, Opportunities, and Threats to inform strategic decision-making
  * @inputs { organizationContext: object, industry: string, stakeholders: array, outputDir: string }
  * @outputs { success: boolean, swotMatrix: object, strategicImplications: array, artifacts: array }
+  * @graph
+ *   domains: [domain:strategy]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

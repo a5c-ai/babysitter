@@ -5,6 +5,13 @@
  * @outputs { success: boolean, tpackPlan: object, integrationStrategies: array, professionalDevelopment: object, artifacts: array }
  * @recommendedSkills SK-EDU-012 (facilitation-workshop-delivery), SK-EDU-007 (lms-configuration-administration)
  * @recommendedAgents AG-EDU-006 (faculty-development-facilitator), AG-EDU-005 (learning-technology-administrator)
+ *
+ * @graph
+ *   domains: [domain:education]
+ *   specializations: [specialization:instructional-design]
+ *   skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

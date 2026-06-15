@@ -1,0 +1,827 @@
+name: Live Stack
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+    paths:
+      - '.github/workflows/live-stack.yml'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or ref to check out and test. Defaults to the dispatched ref (usually staging).'
+        required: false
+        type: string
+        default: ''
+      os:
+        description: 'Runner OS (ubuntu-latest-l, macos-latest, windows-latest).'
+        required: false
+        type: string
+        default: 'ubuntu-latest-l'
+      matrix:
+        description: 'JSON array of test combinations. Each entry: {agent, model, mode, install, live}. Empty = use push defaults.'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  NPM_CONFIG_AUDIT: "true"
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_LEGACY_PEER_DEPS: "true"
+  NPM_CONFIG_PREFER_OFFLINE: "true"
+
+concurrency:
+  group: live-stack-${{ github.event_name == 'workflow_dispatch' && format('dispatch-{0}', github.run_id) || format('push-{0}', github.ref_name) }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  build_all:
+    name: Build All
+    runs-on: ${{ inputs.os || 'ubuntu-latest-l' }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Python (for pip-based agent installs like hermes)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          npm install --legacy-peer-deps --prefer-offline
+          # Ensure pip user-bin is on PATH for hermes and other pip-installed agents
+          export PATH="$HOME/.local/bin:$PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          NATIVE_PKGS=""
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            NATIVE_PKGS="@rollup/rollup-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @rolldown/binding-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu"
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            NATIVE_PKGS="@rollup/rollup-darwin-arm64 @tailwindcss/oxide-darwin-arm64 lightningcss-darwin-arm64 @next/swc-darwin-arm64 @rolldown/binding-darwin-arm64 @unrs/resolver-binding-darwin-arm64"
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            NATIVE_PKGS="@rollup/rollup-win32-x64-msvc @tailwindcss/oxide-win32-x64-msvc lightningcss-win32-x64-msvc @rolldown/binding-win32-x64-msvc @unrs/resolver-binding-win32-x64-msvc"
+          fi
+          if [[ -n "$NATIVE_PKGS" ]]; then
+            npm install --no-save $NATIVE_PKGS || echo "some native deps failed to install"
+          fi
+
+      - name: Restore framework cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            packages/adapters/webui/node_modules/.vite
+            packages/atlas/webui/.next/cache
+            packages/kradle/web/.next/cache
+          key: framework-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            framework-${{ runner.os }}-${{ github.ref_name }}-
+            framework-${{ runner.os }}-
+
+      - name: "Build all packages"
+        run: |
+          set -euo pipefail
+          # Use root build scripts that know the current package layout
+          npm run build:sdk || true
+          npm run build:hooks-adapter || true
+          npm run build:adapters-extensions || true
+          npm run build:adapters || true
+          npm run build:runtime || true
+          npm run build --workspace=@a5c-ai/genty || true
+          if [[ "$RUNNER_OS" != "Windows" ]]; then
+            npm run build:observer || true
+            npm run build:cloud || true
+            npm run build:kradle || true
+            npm run build:kradle-web || true
+          fi
+
+      - name: Package dist directories
+        run: |
+          TEMP_DIR=$(echo "${RUNNER_TEMP}" | sed 's|\\|/|g')
+          TAR_LOCAL_FLAG=""
+          if [[ "$RUNNER_OS" == "Windows" ]]; then TAR_LOCAL_FLAG="--force-local"; fi
+          find packages -path '*/dist' -type d | tar czf "${TEMP_DIR}/build-all-dist.tar.gz" $TAR_LOCAL_FLAG -T -
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-all-dist
+          path: ${{ runner.temp }}/build-all-dist.tar.gz
+          if-no-files-found: error
+
+  setup:
+    name: Compute Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      vanilla_ni: ${{ steps.matrix.outputs.vanilla_ni }}
+      vanilla_interactive: ${{ steps.matrix.outputs.vanilla_interactive }}
+      bp_interactive: ${{ steps.matrix.outputs.bp_interactive }}
+      bp_bridged: ${{ steps.matrix.outputs.bp_bridged }}
+    steps:
+      - name: Generate matrix combinations
+        id: matrix
+        env:
+          DISPATCH_MATRIX: ${{ inputs.matrix }}
+          LIVE_STACK_OS: ${{ inputs.os || 'ubuntu-latest-l' }}
+        run: |
+          set -euo pipefail
+
+          # --- Axis definitions ---
+          # Agents: id → adapters_agent mapping
+          # Models: id → {provider, adapters_provider, model, required_env}
+          # Modes: id → {interactive, bridge_interactive, bridge_hooks}
+
+          if [ -n "${DISPATCH_MATRIX:-}" ] && [ "${DISPATCH_MATRIX:-}" != "null" ] && [ "${DISPATCH_MATRIX:-}" != "" ]; then
+            # --- Manual dispatch: parse custom JSON ---
+            echo "Using workflow_dispatch matrix input"
+            # Input format: [{"agent":"claude","model":"foundry-gpt55","mode":"ni","install":"vanilla","live":true}, ...]
+            # Transform into per-job matrices
+            node -e "
+              const input = JSON.parse(process.env.DISPATCH_MATRIX || '[]');
+              const agents = {
+                'claude': {agent:'claude-code', adapters_agent:'claude'},
+                'codex': {agent:'codex', adapters_agent:'codex'},
+                'pi': {agent:'pi', adapters_agent:'pi'},
+                'gemini': {agent:'gemini-cli', adapters_agent:'gemini'},
+                'copilot': {agent:'copilot-cli', adapters_agent:'copilot'},
+                'cursor': {agent:'cursor-cli', adapters_agent:'cursor'},
+                'hermes': {agent:'hermes', adapters_agent:'hermes'},
+                'opencode': {agent:'opencode', adapters_agent:'opencode'},
+                'openclaw': {agent:'openclaw', adapters_agent:'openclaw'},
+                'omp': {agent:'omp', adapters_agent:'omp'},
+                'droid': {agent:'droid', adapters_agent:'droid'},
+                'amp': {agent:'amp', adapters_agent:'amp'},
+                'genty': {agent:'genty', adapters_agent:'genty', agent_path:'genty'},
+                'antigravity': {agent:'antigravity', adapters_agent:'antigravity'},
+              };
+              const models = {
+                'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'google-gemini35flash': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'google-gemini31': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'google-gemini31pro': {provider:'google', adapters_provider:'google', model:'gemini-3.1-pro-preview', required_env:'GOOGLE_API_KEY'},
+                'anthropic-sonnet46': {provider:'anthropic', adapters_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
+                'foundry-deepseek': {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'foundry-gpt54mini': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+              };
+              const modes = {
+                'ni': {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'},
+                'bridged-interactive': {id:'bridged-interactive', interactive:'false', bridge_interactive:'true', bridge_hooks:'false'},
+                'interactive': {id:'interactive', interactive:'true', bridge_interactive:'false', bridge_hooks:'false'},
+                'bridged-hooks': {id:'bridged-hooks', interactive:'false', bridge_interactive:'true', bridge_hooks:'true'},
+              };
+              const installModes = {
+                'vanilla': {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,transport-adapter-trace,provider-trace-redacted'},
+                'bp': {id:'babysitter-plugin', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted'},
+              };
+              function modelFor(entry) {
+                const selected = models[entry.model];
+                if (!selected) throw new Error(`Unknown model '${entry.model}' in matrix. Available: ${Object.keys(models).join(', ')}`);
+                return selected;
+              }
+
+              function toScenario(entry) {
+                const a = agents[entry.agent];
+                if (!a) throw new Error(`Unknown agent '${entry.agent}' in matrix. Available: ${Object.keys(agents).join(', ')}`);
+                const m = modelFor(entry);
+                return {
+                  id: 'live.adapters.' + a.agent + '.' + m.provider + '.' + m.model,
+                  agent_path: a.agent_path || 'adapters', agent: a.agent, adapters_agent: a.adapters_agent,
+                  integration_type: a.agent_path === 'genty' ? 'runtime-cli' : 'third-party-plugin',
+                  provider: m.provider, adapters_provider: m.adapters_provider, model: m.model,
+                  required_env: m.required_env, live: entry.live !== false,
+                  process_mode: entry.process_mode || 'predefined',
+                };
+              }
+
+              const vanillaNi = [], vanillaInt = [], bpInt = [], bpBridged = [];
+              for (const e of input) {
+                const scenario = toScenario(e);
+                const mode = modes[e.mode];
+                if (!mode) throw new Error(`Unknown mode '${e.mode}' in matrix. Available: ${Object.keys(modes).join(', ')}`);
+                const install = installModes[e.install];
+                if (!install) throw new Error(`Unknown install mode '${e.install}' in matrix. Available: ${Object.keys(installModes).join(', ')}`);
+                const combo = {scenario, interaction_mode: mode, install_mode: install};
+                if (e.install === 'bp' && mode.id === 'interactive') bpInt.push(combo);
+                else if (e.install === 'bp' && mode.id === 'bridged-hooks') bpBridged.push(combo);
+                else if (mode.id === 'interactive') vanillaInt.push(combo);
+                else vanillaNi.push(combo);
+              }
+
+              const wrap = (arr) => JSON.stringify({include: arr});
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_ni=' + wrap(vanillaNi) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_interactive=' + wrap(vanillaInt) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_interactive=' + wrap(bpInt) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_bridged=' + wrap(bpBridged) + '\n');
+            "
+          else
+            # --- Push trigger: compact default ---
+            # Claude Code (foundry-gpt55), Codex (google-gemini31pro), Pi (foundry-deepseek), Antigravity (google-gemini31pro)
+            # vanilla + BP, live — push defaults use gemini-3.1-pro-preview (Primary Full Tests use gemini-3.5-flash)
+            node -e "
+              const foundry = {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
+              const google = {provider:'google', adapters_provider:'google', model:'gemini-3.1-pro-preview', required_env:'GOOGLE_API_KEY'};
+              const deepseek = {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
+              const vanillaInstall = {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,transport-adapter-trace,provider-trace-redacted'};
+              const bpInstall = {id:'babysitter-plugin', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'adapters-events,plugin-command-transcript,transport-adapter-trace,provider-trace-redacted'};
+
+              const ni = {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'};
+              const bridgedInt = {id:'bridged-interactive', interactive:'false', bridge_interactive:'true', bridge_hooks:'false'};
+              const interactive = {id:'interactive', interactive:'true', bridge_interactive:'false', bridge_hooks:'false'};
+              const bridgedHooks = {id:'bridged-hooks', interactive:'false', bridge_interactive:'true', bridge_hooks:'true'};
+
+              function scenario(agent, adapters_agent, m, process_mode) {
+                return {id:'live.adapters.'+agent+'.'+m.provider+'.'+m.model, agent_path:'adapters', agent, adapters_agent, integration_type:'third-party-plugin', provider:m.provider, adapters_provider:m.adapters_provider, model:m.model, required_env:m.required_env, live:true, process_mode: process_mode || 'predefined'};
+              }
+
+              const claude = scenario('claude-code','claude',foundry);
+              const codex = scenario('codex','codex',google);
+              const pi = scenario('pi','pi',deepseek);
+              const antigravity = scenario('antigravity','antigravity',google);
+              // Genty is a runtime-cli agent with native babysitter support
+              const gentyScenario = {id:'live.adapters.genty.foundry-openai.gpt-5.5', agent_path:'genty', agent:'genty', adapters_agent:'genty', integration_type:'runtime-cli', provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE', live:true, process_mode:'predefined'};
+
+              // Vanilla NI: claude+codex+pi+antigravity+genty NI
+              const vanillaNi = [
+                {scenario: claude, interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: codex, interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: pi, interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: antigravity, interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: gentyScenario, interaction_mode: ni, install_mode: vanillaInstall},
+              ];
+
+              // Vanilla Interactive: bridged-interactive
+              const vanillaInt = [
+                  {scenario: claude, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: codex, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: antigravity, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: gentyScenario, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+              ];
+
+              const claudeCreate = scenario('claude-code','claude',foundry,'create');
+              const codexCreate = scenario('codex','codex',google,'create');
+              const piCreate = scenario('pi','pi',deepseek,'create');
+              const hermesCreate = scenario('hermes','hermes',foundry,'create');
+              const antigravityCreate = scenario('antigravity','antigravity',google,'create');
+              const gentyBp = {...gentyScenario};
+
+              // BP Interactive: claude+codex+pi+hermes+antigravity (create) + genty (predefined, native babysitter)
+              const bpInt = [
+                {scenario: claudeCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: codexCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: piCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: hermesCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: antigravityCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: gentyBp, interaction_mode: interactive, install_mode: bpInstall},
+              ];
+
+              // BP Bridged-hooks: claude+codex+pi+hermes+antigravity (create) + genty (predefined, native babysitter)
+              const bpBridged = [
+                {scenario: claudeCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: codexCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: piCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: hermesCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: antigravityCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: gentyBp, interaction_mode: bridgedHooks, install_mode: bpInstall},
+              ];
+
+              const wrap = (arr) => JSON.stringify({include: arr});
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_ni=' + wrap(vanillaNi) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'vanilla_interactive=' + wrap(vanillaInt) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_interactive=' + wrap(bpInt) + '\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'bp_bridged=' + wrap(bpBridged) + '\n');
+            "
+          fi
+
+  live_stack_vanilla_ni:
+    needs: [build_all, setup]
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.vanilla_ni) }}
+    steps: &live_stack_steps
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Python (for pip-based agents like hermes)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Ensure pip user-bin on PATH
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install dependencies
+        run: |
+          npm install --legacy-peer-deps --prefer-offline
+          NATIVE_PKGS="node-pty"
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            NATIVE_PKGS="$NATIVE_PKGS @rollup/rollup-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @rolldown/binding-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu"
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            NATIVE_PKGS="$NATIVE_PKGS @rollup/rollup-darwin-arm64 @tailwindcss/oxide-darwin-arm64 lightningcss-darwin-arm64 @next/swc-darwin-arm64 @rolldown/binding-darwin-arm64 @unrs/resolver-binding-darwin-arm64"
+          fi
+          npm install --no-save $NATIVE_PKGS || echo "some native deps failed to install"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: build-all-dist
+          path: ${{ runner.temp }}
+
+      - name: Extract build artifacts
+        run: |
+          TEMP_DIR=$(echo "${RUNNER_TEMP}" | sed 's|\\|/|g')
+          TAR_LOCAL_FLAG=""
+          if [[ "$RUNNER_OS" == "Windows" ]]; then TAR_LOCAL_FLAG="--force-local"; fi
+          tar xzf "${TEMP_DIR}/build-all-dist.tar.gz" $TAR_LOCAL_FLAG
+
+      - name: Install Windows native deps
+        if: runner.os == 'Windows'
+        run: npm install --no-save @rolldown/binding-win32-x64-msvc @rollup/rollup-win32-x64-msvc @unrs/resolver-binding-win32-x64-msvc || echo "some native deps failed"
+
+      - name: Verify native deps
+        run: ls node_modules/@rolldown/ 2>/dev/null && echo "rolldown OK" || echo "rolldown missing"
+
+      - name: Link workspace CLIs to PATH
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          for pair in \
+            "adapters:packages/adapters/sdk/dist/bin/adapters.js" \
+            "agent-platform:packages/genty/cli/dist/cli/main.js" \
+            "genty:packages/genty/cli/dist/cli/main.js" \
+            "babysitter:packages/babysitter-sdk/dist/cli/main.js" \
+            "adapters-hooks:packages/adapters/hooks/cli/dist/cli/main.js"
+          do
+            name="${pair%%:*}"
+            script="${pair#*:}"
+            printf '#!/bin/sh\nexec node "%s/%s" "$@"\n' "${{ github.workspace }}" "$script" > "$HOME/.local/bin/$name"
+            chmod +x "$HOME/.local/bin/$name"
+          done
+
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install Antigravity CLI (if needed)
+        if: contains(toJSON(matrix), 'antigravity')
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          if command -v agy &>/dev/null; then
+            echo "antigravity already installed: $(agy --version 2>&1 || true)"
+          else
+            echo "Installing antigravity-cli via official installer"
+            curl -fsSL https://antigravity.google/cli/install.sh | bash 2>&1 || echo "curl installer failed"
+            for dir in "$HOME/.local/bin" "$HOME/bin" "$HOME/.antigravity/bin"; do
+              if [ -f "$dir/agy" ]; then
+                echo "$dir" >> "$GITHUB_PATH"
+                export PATH="$dir:$PATH"
+                break
+              fi
+            done
+          fi
+          # NOTE: Antigravity requires browser-based Google OAuth and ignores all
+          # env vars and credential files. CI auth requires a GOOGLE_SERVICE_ACCOUNT_KEY
+          # secret (not yet configured). See issue for tracking.
+          which agy && agy --version 2>&1 || echo "WARNING: agy (antigravity) not available"
+
+      - name: Remove agent skill directories from workspace (vanilla only)
+        if: matrix.install_mode.id == 'vanilla'
+        run: |
+          rm -rf .codex .claude/commands .gemini CLAUDE.md GEMINI.md AGENTS.md 2>/dev/null || true
+          echo "Cleaned agent skill directories to prevent test interference"
+
+      - name: Generate a5c GitHub App token
+        id: a5c-token
+        continue-on-error: true
+        uses: a5c-ai/generate-token-action@main
+
+      - name: Run selected live stack E2E
+        timeout-minutes: 90
+        env:
+          LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
+          LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
+          LIVE_STACK_AGENT: ${{ matrix.scenario.agent }}
+          LIVE_STACK_AGENT_MUX_AGENT: ${{ matrix.scenario.adapters_agent }}
+          LIVE_STACK_INTEGRATION_TYPE: ${{ matrix.scenario.integration_type }}
+          LIVE_STACK_BABYSITTER_HARNESS: ${{ matrix.scenario.babysitter_harness }}
+          LIVE_STACK_INSTALL_MODE: ${{ matrix.install_mode.id }}
+          LIVE_STACK_PROCESS_MODE: ${{ matrix.scenario.process_mode || 'predefined' }}
+          LIVE_STACK_INTERACTION_MODE: ${{ matrix.interaction_mode.id }}
+          LIVE_STACK_INTERACTIVE: ${{ matrix.interaction_mode.interactive }}
+          LIVE_STACK_BRIDGE_INTERACTIVE: ${{ matrix.interaction_mode.bridge_interactive }}
+          LIVE_STACK_BRIDGE_HOOKS: ${{ matrix.interaction_mode.bridge_hooks }}
+          LIVE_STACK_USE_AGENT_MUX_RUN: 'false'
+          LIVE_STACK_PROVIDER: ${{ matrix.scenario.provider }}
+          LIVE_STACK_AGENT_MUX_PROVIDER: ${{ matrix.scenario.adapters_provider }}
+          LIVE_STACK_MODEL: ${{ matrix.scenario.model }}
+          LIVE_STACK_CREDENTIAL_MODE: github-org-secrets-and-vars
+          LIVE_STACK_REQUIRED_ENV: ${{ matrix.scenario.required_env }}
+          LIVE_STACK_LAYERS: ${{ matrix.install_mode.id }}
+          LIVE_STACK_COVERAGE_LAYERS: ${{ matrix.scenario.provider }},${{ matrix.scenario.agent }}
+          LIVE_STACK_REQUIRED_TRACE_IDS: ${{ matrix.install_mode.required_trace_ids }}
+          LIVE_STACK_EXPECTED_ARTIFACTS: ${{ matrix.install_mode.expected_artifacts }}
+          LIVE_STACK_RUN_MODEL_TESTS: ${{ matrix.scenario.live && '1' || '0' }}
+          LIVE_STACK_REQUIRE_EVIDENCE: '1'
+          LIVE_STACK_TEST_TIMEOUT_MS: '4860000'
+          LIVE_STACK_COMMAND_TIMEOUT_MS: '4800000'
+          LIVE_STACK_BABYSITTER_BIN: ${{ github.workspace }}/packages/babysitter-sdk/dist/cli/main.js
+          LIVE_STACK_AGENT_MUX_BIN: ${{ github.workspace }}/packages/adapters/cli/dist/index.js
+          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/genty/cli/dist/cli/main.js
+          LIVE_STACK_GENTY_BIN: ${{ github.workspace }}/packages/genty/cli/dist/cli/main.js
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
+          AGENT_MUX_PROVIDER: foundry
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_CLOUD_LOCATION: global
+          GOOGLE_GENAI_USE_VERTEXAI: True
+          GH_TOKEN: ${{ secrets.TAL_GH_TOKEN || github.token }}
+          GITHUB_TOKEN: ${{ secrets.TAL_GH_TOKEN || github.token }}
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          COPILOT_GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || secrets.TAL_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AZURE_FOUNDRY_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        run: |
+          # Verify Node 22 is active (setup-node should have set PATH)
+          echo "Node: $(node --version) at $(which node)"
+          if ! node --version | grep -q "^v22"; then
+            echo "::warning::Node version is not 22, fixing PATH"
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              NODE22=""
+              for d in /c/hostedtoolcache/windows/node/22.*/x64; do
+                [ -d "$d" ] && NODE22="$d" && break
+              done
+              if [[ -z "$NODE22" ]] && [[ -n "${RUNNER_TOOL_CACHE:-}" ]]; then
+                TC=$(echo "$RUNNER_TOOL_CACHE" | sed 's|\\|/|g')
+                for d in "$TC"/node/22.*/x64; do
+                  [ -d "$d" ] && NODE22="$d" && break
+                done
+              fi
+              if [[ -n "$NODE22" ]]; then export PATH="$NODE22:$PATH"; fi
+            elif [[ "$RUNNER_OS" == "macOS" ]]; then
+              NODE22=$(find /Users/runner/hostedtoolcache/node/22.*/arm64/bin -maxdepth 0 2>/dev/null | head -1 || true)
+              if [[ -z "$NODE22" ]]; then
+                NODE22=$(find /Users/runner/hostedtoolcache/node/22.*/x64/bin -maxdepth 0 2>/dev/null | head -1 || true)
+              fi
+              if [[ -n "$NODE22" ]]; then export PATH="$NODE22:$PATH"; fi
+            else
+              NODE22=$(find /opt/hostedtoolcache/node/22.*/x64/bin -maxdepth 0 2>/dev/null | head -1 || true)
+              if [[ -n "$NODE22" ]]; then export PATH="$NODE22:$PATH"; fi
+            fi
+            echo "Node after fix: $(node --version)"
+          fi
+          # Ensure pip user-bin is on PATH for hermes and other pip agents (Linux + macOS paths)
+          export PATH="$HOME/.local/bin:$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$PATH"
+          # Pre-create .a5c directory — genty atomic write needs it on Windows
+          mkdir -p "$HOME/.a5c" .a5c 2>/dev/null || true
+          # Verify genty can start — capture and echo output for debugging
+          echo "::group::Genty startup check"
+          GENTY_CHECK=$(node packages/genty/cli/dist/cli/main.js version 2>&1) && echo "genty ok: $GENTY_CHECK" || echo "GENTY STARTUP FAILED: $GENTY_CHECK"
+          echo "::endgroup::"
+          START_TS=$(date +%s)
+          npm run test:e2e:live-stack:pipeline
+          npm run coverage:e2e:live-stack
+          ELAPSED=$(( $(date +%s) - START_TS ))
+          echo "${ELAPSED}" > artifacts/live-stack/duration-seconds.txt
+
+      - name: Upload live stack artifacts
+        if: ${{ always() }}
+        timeout-minutes: 1
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-stack-${{ github.run_id }}-${{ matrix.install_mode.id }}-${{ matrix.interaction_mode.id }}-${{ matrix.scenario.process_mode || 'predefined' }}-${{ matrix.scenario.id }}
+          path: artifacts/live-stack
+          if-no-files-found: error
+
+  live_stack_vanilla_interactive:
+    needs: [build_all, setup]
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.vanilla_interactive) }}
+    steps: *live_stack_steps
+
+  live_stack_bp_interactive:
+    needs: [build_all, setup]
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.bp_interactive) }}
+    steps: *live_stack_steps
+
+  live_stack_bp_bridged:
+    needs: [build_all, setup]
+    name: "Live Stack (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.bp_bridged) }}
+    steps: *live_stack_steps
+
+  live_stack_report:
+    if: ${{ always() }}
+    needs: [live_stack_bp_interactive, live_stack_bp_bridged, live_stack_vanilla_ni, live_stack_vanilla_interactive]
+    name: Live Stack Report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Download all live-stack artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: live-stack-${{ github.run_id }}-*
+          path: all-artifacts
+          merge-multiple: false
+
+      - name: Generate combined report
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          echo "::group::Artifact directory structure"
+          find all-artifacts -maxdepth 3 -type f 2>/dev/null | head -50 || echo "all-artifacts not found or empty"
+          ls -la all-artifacts/ 2>/dev/null || echo "no all-artifacts dir"
+          echo "::endgroup::"
+
+          # --- Robust agent/provider/model derivation (issue #946) -------------
+          # The "live.adapters.<agent>.<provider>.<model>" token in the JSON
+          # artifact filename (or the directory name) is the most reliable source
+          # for the matrix cells. It is always present even when
+          # verification-report.md is missing/malformed or the JSON lacks
+          # evidence fields. The model name itself may contain dots (e.g.
+          # "gpt-5.5"), so we parse with bash parameter expansion (segment-safe)
+          # instead of splitting on ".".
+          DERIVED_AGENT=""; DERIVED_PROVIDER=""; DERIVED_MODEL=""
+          derive_apm() {
+            DERIVED_AGENT=""; DERIVED_PROVIDER=""; DERIVED_MODEL=""
+            local dir="$1" token jf rest
+            jf=$(find "$dir" -name "live.adapters.*.json" 2>/dev/null | head -1 || true)
+            if [ -n "$jf" ]; then
+              token=$(basename "$jf" .json)
+            else
+              token=$(echo "$dir" | grep -oE 'live\.adapters\.[^/]+' | head -1 || true)
+            fi
+            [ -n "$token" ] || return 0
+            token=${token#live.adapters.}            # <agent>.<provider>.<model>
+            DERIVED_AGENT=${token%%.*}               # <agent>
+            rest=${token#*.}
+            [ "$rest" != "$token" ] || return 0      # no provider/model segments
+            DERIVED_PROVIDER=${rest%%.*}             # <provider>
+            local model=${rest#*.}
+            [ "$model" != "$rest" ] && DERIVED_MODEL=$model   # <model> (keeps dots)
+          }
+
+          # Echo the first argument that is non-empty and not "?", trimming
+          # surrounding whitespace; otherwise echo "?".
+          coalesce() {
+            local v
+            for v in "$@"; do
+              v=$(printf '%s' "$v" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              if [ -n "$v" ] && [ "$v" != "?" ]; then printf '%s' "$v"; return 0; fi
+            done
+            printf '%s' "?"
+          }
+
+          echo "# Live Stack Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit:** \`${{ github.sha }}\` on \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**OS:** \`${{ inputs.os || 'ubuntu-latest-l' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Run:** [#${RUN_ID}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${RUN_ID})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          bp_pass=0; bp_fail=0
+          van_pass=0; van_fail=0
+
+          echo "## Babysitter-Plugin Matrix" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          OS_LABEL="${{ inputs.os || 'ubuntu' }}"
+          echo "| OS | Agent | Provider | Model | Mode | Process | Runtime | Status | Detail |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----|-------|----------|-------|------|---------|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          for dir in all-artifacts/live-stack-*-babysitter-plugin-*/ ; do
+            [ -d "$dir" ] || continue
+            mode=$(echo "$dir" | grep -oP '(bridged-hooks|bridged-interactive|interactive|non-interactive)' | head -1 || echo "?")
+            proc_mode=$(echo "$dir" | grep -oP '(?<=interactive-|hooks-)(predefined|create|resume)' | head -1)
+            [ -z "$proc_mode" ] && proc_mode="predefined"
+            dur_file=$(find "$dir" -name "duration-seconds.txt" | head -1)
+            if [ -n "$dur_file" ] && [ -f "$dur_file" ]; then
+              dur_s=$(cat "$dur_file"); runtime="$((dur_s / 60))m$((dur_s % 60))s"
+            else
+              runtime="—"
+            fi
+
+            report=$(find "$dir" -name "verification-report.md" | head -1)
+            json_artifact=$(find "$dir" -name "live.adapters.*.json" | head -1)
+
+            # Filename-derived fallback values (never empty when the artifact
+            # token is present) — fills cells when report/JSON parsing falls short.
+            derive_apm "$dir"
+
+            result_status=""
+            if [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
+              result_status=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.status || '')" 2>/dev/null || echo "")
+            fi
+
+            if [ -n "$report" ] && [ -f "$report" ]; then
+              r_agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              agent=$(coalesce "$r_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$r_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$r_model" "$DERIVED_MODEL")
+              failures=$(grep -c '✗' "$report" 2>/dev/null || true)
+              passes=$(grep -c '✓' "$report" 2>/dev/null || true)
+              if [ "${failures:-0}" -gt 0 ]; then
+                status="❌"; bp_fail=$((bp_fail + 1))
+                detail=$(grep '✗' "$report" | head -1 | sed 's/.*| //;s/ |.*//' || echo "")
+              else
+                status="✅"; bp_pass=$((bp_pass + 1))
+                detail="${passes:-0} checks"
+              fi
+            elif [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
+              j_agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '')" 2>/dev/null || echo "")
+              j_provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '')" 2>/dev/null || echo "")
+              j_model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '')" 2>/dev/null || echo "")
+              agent=$(coalesce "$j_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$j_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$j_model" "$DERIVED_MODEL")
+              if [ "$result_status" = "passed" ]; then
+                status="✅"; bp_pass=$((bp_pass + 1)); detail="passed (json)"
+              else
+                status="❌"; bp_fail=$((bp_fail + 1)); detail="${result_status:-unknown} (json)"
+              fi
+            else
+              agent=$(coalesce "$DERIVED_AGENT")
+              provider=$(coalesce "$DERIVED_PROVIDER" "—")
+              model=$(coalesce "$DERIVED_MODEL" "—")
+              status="❌"; bp_fail=$((bp_fail + 1)); detail="no report"
+            fi
+            echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${proc_mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Agent-Adapter Matrix" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| OS | Agent | Provider | Model | Mode | Runtime | Status | Detail |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----|-------|----------|-------|------|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          for dir in all-artifacts/live-stack-*-vanilla-*/ ; do
+            [ -d "$dir" ] || continue
+            report=$(find "$dir" -name "verification-report.md" | head -1)
+            json_artifact=$(find "$dir" -name "live.adapters.*.json" | head -1)
+            derive_apm "$dir"
+            result_status=""
+            if [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
+              result_status=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.status || '')" 2>/dev/null || echo "")
+            fi
+            mode=$(echo "$dir" | grep -oP '(bridged-hooks|bridged-interactive|interactive|non-interactive)' | head -1 || echo "?")
+            dur_file=$(find "$dir" -name "duration-seconds.txt" | head -1)
+            if [ -n "$dur_file" ] && [ -f "$dur_file" ]; then
+              dur_s=$(cat "$dur_file"); runtime="$((dur_s / 60))m$((dur_s % 60))s"
+            else
+              runtime="—"
+            fi
+            if [ -n "$report" ] && [ -f "$report" ]; then
+              r_agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              agent=$(coalesce "$r_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$r_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$r_model" "$DERIVED_MODEL")
+              failures=$(grep -c '✗' "$report" 2>/dev/null || true)
+              passes=$(grep -c '✓' "$report" 2>/dev/null || true)
+              if [ "${failures:-0}" -gt 0 ]; then
+                status="❌"; van_fail=$((van_fail + 1))
+                detail=$(grep '✗' "$report" | head -1 | sed 's/.*| //;s/ |.*//' || echo "")
+              else
+                status="✅"; van_pass=$((van_pass + 1))
+                detail="${passes:-0} checks"
+              fi
+            elif [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
+              j_agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '')" 2>/dev/null || echo "")
+              j_provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '')" 2>/dev/null || echo "")
+              j_model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '')" 2>/dev/null || echo "")
+              agent=$(coalesce "$j_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$j_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$j_model" "$DERIVED_MODEL")
+              if [ "$result_status" = "passed" ]; then
+                status="✅"; van_pass=$((van_pass + 1)); detail="passed (json)"
+              else
+                status="❌"; van_fail=$((van_fail + 1)); detail="${result_status:-unknown} (json)"
+              fi
+            else
+              agent=$(coalesce "$DERIVED_AGENT")
+              provider=$(coalesce "$DERIVED_PROVIDER" "—")
+              model=$(coalesce "$DERIVED_MODEL" "—")
+              status="❌"; van_fail=$((van_fail + 1)); detail="no report"
+            fi
+            echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Totals" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          total_pass=$((bp_pass + van_pass))
+          total_fail=$((bp_fail + van_fail))
+          total=$((total_pass + total_fail))
+          echo "| Matrix | Passed | Failed | Total |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|--------|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Babysitter-Plugin | ${bp_pass} | ${bp_fail} | $((bp_pass + bp_fail)) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Agent-Adapter | ${van_pass} | ${van_fail} | $((van_pass + van_fail)) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Total** | **${total_pass}** | **${total_fail}** | **${total}** |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$total_fail" -gt 0 ]; then
+            echo "## Failed Scenarios" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            for dir in all-artifacts/live-stack-*/ ; do
+              [ -d "$dir" ] || continue
+              report=$(find "$dir" -name "verification-report.md" | head -1)
+              [ -n "$report" ] && [ -f "$report" ] || continue
+              if grep -q '✗' "$report" 2>/dev/null; then
+                label=$(basename "$dir" | sed "s/live-stack-${RUN_ID}-//")
+                echo "<details><summary>${label}</summary>" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                cat "$report" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                echo "</details>" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            done
+          fi
+
+          echo "---" >> "$GITHUB_STEP_SUMMARY"
+          echo "*Generated at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$total" -eq 0 ]; then
+            echo "::warning::no live stack scenario reports were found"
+          fi
+
+          if [ "$total_fail" -gt 0 ]; then
+            echo "::warning::${total_fail} scenario(s) failed — see summary above for details"
+          fi
+
+          exit 0  # Report always succeeds — individual test results are in the summary

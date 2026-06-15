@@ -1,0 +1,17 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-synthetic-inference
+attributes:
+  displayName: "Catalog synthetic inference evidence"
+  kindLabel: observation
+  trustLevel: trust-level:synthetic
+  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/atlas/graph"
+  observedAt: "2026-05-15T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  locator: catalog-synthetic-inference
+  excerpt: |
+    Synthetic evidence marks values generated or schema-inferred by the Atlas
+    catalog itself. It is intentionally the lowest trust level and should be
+    superseded by vendor, community, or official web evidence when available.
+edges:
+  has_trust_level:
+    - trust-level:synthetic

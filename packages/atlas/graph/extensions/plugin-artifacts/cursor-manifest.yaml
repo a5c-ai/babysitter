@@ -1,0 +1,16 @@
+nodeKind: PluginArtifact
+id: plugin-artifact:cursor-manifest
+attributes:
+  artifactId: plugin-artifact:cursor-manifest
+  displayName: "Cursor plugin manifest"
+  targetId: plugin-target:cursor
+  artifactKind: manifest
+  pathPattern: "plugin.json"
+  installerSurface: "plugin.json"
+  scriptVariants:
+    - markdown-commands
+  contextFiles:
+    - packages/extensions-adapter/src/targets/cursor.ts
+edges:
+  emits_artifact:
+    - target: plugin-target:cursor

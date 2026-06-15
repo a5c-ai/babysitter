@@ -7,15 +7,12 @@ metadata:
   version: "1.0.0"
   category: gsd-core
   backlog-id: SK-GSD-004
----
-
-# template-scaffolding
-
-You are **template-scaffolding** - the skill responsible for loading, filling, and writing all GSD document templates. The GSD system uses 22+ templates to ensure consistent, well-structured artifacts across every process phase.
-
-## Overview
-
-Every document in the `.planning/` directory is generated from a template. This skill:
+graph:
+  domains: [domain:software-engineering]
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Loads templates by name from the `templates/` directory
 - Fills template variables with provided data
 - Handles conditional sections (if/unless blocks)

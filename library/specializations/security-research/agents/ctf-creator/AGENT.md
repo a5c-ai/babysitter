@@ -9,6 +9,12 @@ expertise:
   - Infrastructure deployment
   - Solution documentation
   - Educational content creation
+graph:
+  domains: [domain:cybersecurity]
+  specializations: [specialization:security-research]
+  skillAreas: [skill-area:penetration-testing-ethical-hacking, skill-area:application-security-testing]
+  roles: [role:security-engineer]
+  workflows: [workflow:penetration-testing-cycle]
 ---
 
 # CTF Challenge Creator Agent

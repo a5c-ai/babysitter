@@ -16,6 +16,12 @@
  * - Toth & Vigo, Vehicle Routing: Problems, Methods, and Applications
  * - Golden et al., The Vehicle Routing Problem
  * - Google OR-Tools Routing: https://developers.google.com/optimization/routing
+ *
+ * @graph
+ *   domains: [domain:industrial-engineering]
+ *   skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+ *   roles: [role:operations-analyst, role:research-engineer]
+ *   workflows: [workflow:experiment-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

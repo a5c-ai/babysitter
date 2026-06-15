@@ -1,0 +1,167 @@
+---
+nodeKind: Workflow
+id: workflow:cloud-cost-allocation-review
+attributes:
+  displayName: "Cloud Cost Allocation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews cloud cost allocation accuracy and tagging compliance to ensure cost
+    transparency across teams -- auditing resource tagging compliance rates
+    against the mandatory tagging policy (team, environment, service,
+    cost-center), identifying untagged and mistagged resources with remediation
+    assignments, generating showback reports that attribute cloud spend to
+    business units with shared-cost allocation rules for platform services,
+    comparing team-level budgets against actual spend with variance analysis,
+    reviewing cost allocation methodology for fairness and accuracy especially
+    for shared infrastructure, evaluating the impact of tagging gaps on budget
+    accuracy and forecasting, tracking tag compliance improvement trends over
+    time by team, and escalating persistent tagging violations to engineering
+    leadership. Produces cost allocation report, tagging compliance scorecard,
+    showback dashboards, and budget variance analysis. Excludes resource
+    provisioning.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:engineering-manager
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:finops
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:finops-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:ai-inference-cost-review
+attributes:
+  displayName: "AI Inference Cost Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Reviews AI and LLM inference costs across the organization to optimize
+    spend while maintaining quality -- analyzing API cost breakdowns by model,
+    feature, and team with token-level granularity, evaluating prompt
+    engineering efficiency by measuring token counts against output quality
+    metrics, reviewing caching layer effectiveness including semantic cache hit
+    rates and cost avoidance, assessing model selection appropriateness by
+    comparing quality-to-cost ratios across model tiers for each use case,
+    identifying opportunities to shift workloads from expensive frontier models
+    to fine-tuned smaller models, tracking cost trends against usage growth to
+    detect non-linear cost scaling, reviewing batch vs real-time inference
+    allocation for latency-tolerant workloads, and benchmarking per-request
+    costs against industry norms. Produces AI cost dashboard, optimization
+    recommendation report, and model-tier allocation review. Excludes model
+    training and fine-tuning.
+edges:
+  involves_role:
+    - target: role:ai-champion
+    - target: role:cloud-architect
+    - target: role:data-scientist
+  requires_skill_area:
+    - target: skill-area:prompt-engineering
+    - target: skill-area:context-management
+  applies_to_domain:
+    - target: domain:finops
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:ai-agent-usage-review
+  performed_by_org_unit:
+    - target: org-unit:finops-team
+    - target: org-unit:engineering
+---
+nodeKind: Workflow
+id: workflow:reserved-instance-optimization
+attributes:
+  displayName: "Reserved Instance Optimization"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Optimizes reserved instance and savings plan coverage to minimize cloud
+    compute costs -- analyzing current RI and savings plan portfolio utilization
+    rates against commitment terms, identifying underutilized reservations
+    eligible for marketplace resale or modification, modeling optimal commitment
+    levels using historical usage patterns and growth projections, evaluating
+    coverage gaps where on-demand spend exceeds reserved capacity thresholds,
+    comparing pricing across commitment types (standard RI, convertible RI,
+    compute savings plans, instance savings plans) for each workload profile,
+    assessing the impact of architectural changes (containerization, serverless
+    migration) on reservation strategy, reviewing expiring commitments and
+    recommending renewal or replacement strategies, and tracking realized
+    savings against projected savings from prior optimization cycles. Produces
+    RI utilization report, savings plan coverage analysis, purchase
+    recommendations, and realized-savings tracking. Excludes commitment
+    purchases.
+edges:
+  involves_role:
+    - target: role:cloud-architect
+    - target: role:platform-engineer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:terraform-infrastructure
+    - target: skill-area:observability-pipeline
+  applies_to_domain:
+    - target: domain:finops
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:capacity-planning
+  performed_by_org_unit:
+    - target: org-unit:finops-team
+    - target: org-unit:platform-team
+---
+nodeKind: Workflow
+id: workflow:finops-monthly-business-review
+attributes:
+  displayName: "FinOps Monthly Business Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Conducts the monthly FinOps business review bringing together cost data,
+    anomalies, forecasts, and action tracking -- compiling total cloud spend
+    with month-over-month and year-over-year comparisons across all cloud
+    providers and SaaS platforms, reviewing cost anomaly detections from the
+    prior period with root-cause attributions and resolution status, comparing
+    actual spend against budget forecasts with variance explanations by business
+    unit, presenting cost-per-unit economics (cost per customer, cost per
+    transaction, cost per API call) with trend analysis, reviewing progress on
+    active cost optimization initiatives with realized savings tracking,
+    assessing forecast accuracy and updating projections based on planned
+    product launches and infrastructure changes, escalating teams with
+    persistent budget overruns for remediation planning, and setting
+    optimization targets for the coming period. Produces monthly FinOps report,
+    forecast update, optimization initiative tracker, and executive cost
+    summary. Excludes budget setting.
+edges:
+  involves_role:
+    - target: role:engineering-manager
+    - target: role:cloud-architect
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:observability-pipeline
+    - target: skill-area:data-quality
+  applies_to_domain:
+    - target: domain:finops
+    - target: domain:operations
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:finops-team
+    - target: org-unit:engineering
+    - target: org-unit:operations-team

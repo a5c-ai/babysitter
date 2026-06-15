@@ -1,0 +1,20 @@
+nodeKind: DiscoverySignal
+id: discovery-signal:pi-hooks-adapter
+attributes:
+  signalId: discovery-signal:pi-hooks-adapter
+  signalKind: env-any
+  key: pi
+  matchMode: all
+  confidence: high
+  scope: hooks-adapter
+  signals:
+    - PI_PLUGIN_ROOT
+    - PI_SESSION_ID
+  absentSignals: []
+  argvMatches: []
+  metadataFields: []
+  consumer: hooks-adapter-core
+  notes: 'Ordered adapter auto-detection rule used by hooks-adapter. Verbatim from legacy discovery:pi:hooks-adapter:7.'
+edges:
+  applies_to:
+    - target: agent:pi

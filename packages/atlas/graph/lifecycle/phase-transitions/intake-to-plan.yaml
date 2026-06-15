@@ -1,0 +1,14 @@
+nodeKind: PhaseTransition
+id: phase-transition:intake-to-plan
+attributes:
+  fromPhaseId: phase:intake
+  toPhaseId: phase:plan
+  gate: "requirements_clarified == true"
+  stopMessage: |
+    Cannot enter plan: requirements still ambiguous. Continue interviewing
+    the user until requirements are clear, then re-attempt the transition.
+edges:
+  from_phase:
+    - phase:intake
+  to_phase:
+    - phase:plan

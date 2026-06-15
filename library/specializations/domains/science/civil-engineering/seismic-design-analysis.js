@@ -3,6 +3,12 @@
  * @description Earthquake-resistant design process including seismic hazard analysis, structural system selection, and compliance with ASCE 7 seismic provisions
  * @inputs { projectId: string, siteLocation: object, buildingType: string, structuralSystem: string, geotechnicalData: object }
  * @outputs { success: boolean, seismicDesignReport: object, detailingRequirements: object, artifacts: array }
+ *
+ * @graph
+ *   domains: [domain:civil-engineering]
+ *   skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+ *   roles: [role:systems-integration-engineer, role:research-engineer]
+ *   workflows: [workflow:architecture-decision-record]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

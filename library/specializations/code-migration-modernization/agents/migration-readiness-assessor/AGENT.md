@@ -9,6 +9,13 @@ skills:
   - dependency-scanner
   - vulnerability-scanner
   - architecture-analyzer
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:code-analysis-linting, skill-area:dependency-vulnerability-mgmt]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Migration Readiness Assessor Agent

@@ -5,6 +5,12 @@
  * @outputs { success: boolean, strategicPlan: object, implementation: object, metrics: array, artifacts: array }
  * @recommendedSkills SK-AC-002 (grant-proposal-writing), SK-AC-009 (donor-relationship-management), SK-AC-013 (stakeholder-facilitation), SK-AC-010 (cultural-policy-analysis)
  * @recommendedAgents AG-AC-002 (arts-administrator-agent), AG-AC-009 (cultural-policy-agent)
+ *
+ * @graph
+ *   domains: [domain:arts-culture]
+ *   skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+ *   roles: [role:creative-director, role:design-lead]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

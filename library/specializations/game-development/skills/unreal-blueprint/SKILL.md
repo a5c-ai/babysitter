@@ -2,6 +2,11 @@
 name: unreal-blueprint
 description: Unreal Engine Blueprint visual scripting skill for macros, functions, event graphs, and rapid prototyping.
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
+graph:
+  domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engines, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Unreal Blueprint Skill

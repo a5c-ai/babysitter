@@ -3,6 +3,11 @@
  * @description Define content pillars, themes, and editorial mission aligned with business objectives and audience needs. Create content matrix mapping content types to funnel stages.
  * @inputs { brandName: string, businessObjectives: object, targetAudience: object, competitors: array, existingContent: object }
  * @outputs { success: boolean, contentStrategy: object, contentPillars: array, contentMatrix: object, editorialMission: string, artifacts: array }
+  * @graph
+ *   domains: [domain:marketing]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

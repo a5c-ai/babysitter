@@ -2,6 +2,13 @@
 name: knowledge-extractor
 description: Extract tribal knowledge from code, documentation, and commit history to preserve institutional memory
 allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
+graph:
+  domains: [domain:software-engineering]
+  specializations: [specialization:code-migration-modernization]
+  skillAreas: [skill-area:docs-as-code, skill-area:technical-writing]
+  roles: [role:technical-writer, role:architect]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring]
 ---
 
 # Knowledge Extractor Skill

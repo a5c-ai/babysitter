@@ -27,6 +27,9 @@
  * - Netflix Experimentation: https://netflixtechblog.com/its-all-a-bout-testing-the-netflix-experimentation-platform-4e1ca458c15
  * - Airbnb Experiments at Scale: https://medium.com/airbnb-engineering/experiments-at-airbnb-e2db3abf39e7
  * - Uber's Experimentation Platform: https://eng.uber.com/experimentation-platform/
+ * @graph
+ *   domains: [domain:data-engineering]
+ *   workflows: [workflow:schema-migration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -1,0 +1,181 @@
+---
+nodeKind: Workflow
+id: workflow:personalization-engine-optimization
+attributes:
+  displayName: "Personalization Engine Optimization"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Optimizes dynamic personalization across marketing touchpoints — configuring
+    recommendation algorithms for content and product suggestions, testing
+    personalization rules by segment and behavioral trigger, measuring lift from
+    personalized vs generic experiences, tuning real-time decisioning engines
+    based on conversion data, managing fallback strategies for insufficient
+    signal scenarios, and auditing personalization coverage across channels.
+    Produces personalization coverage reports, A/B test result summaries, and
+    algorithm tuning recommendations. Excludes personalization platform
+    implementation and data pipeline engineering.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:planner
+    - target: role:product-designer
+  requires_skill_area:
+    - target: skill-area:marketing-automation
+    - target: skill-area:data-analytics
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:marketing-data-warehouse-governance
+attributes:
+  displayName: "Marketing Data Warehouse Governance"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Governs marketing data infrastructure and customer data platforms — auditing
+    identity resolution accuracy across devices and channels, enforcing consent
+    management compliance with privacy regulations, maintaining segment hygiene
+    by pruning stale or overlapping audiences, validating data flows from source
+    systems through CDPs to activation platforms, managing schema evolution for
+    marketing events, and resolving data quality issues that impact campaign
+    targeting accuracy. Produces data quality scorecards, consent compliance
+    reports, and segment health audits. Excludes CDP platform selection and
+    initial implementation.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:data-analyst
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:marketing-automation
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:review-architecture-changes
+  performed_by_org_unit:
+    - target: org-unit:analytics-team
+    - target: org-unit:marketing-team
+---
+nodeKind: Workflow
+id: workflow:seo-technical-audit
+attributes:
+  displayName: "SEO Technical Audit"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "quarterly"
+  complexity: cross-team
+  description: |
+    Conducts deep technical SEO audits beyond content optimization — diagnosing
+    crawlability issues through log file analysis, validating structured data
+    markup against schema.org specifications, measuring Core Web Vitals
+    performance and identifying render-blocking resources, auditing hreflang
+    implementations for international SEO, evaluating JavaScript rendering
+    impacts on indexation, reviewing canonical tag correctness and redirect chain
+    efficiency, and benchmarking site architecture depth against crawl budget
+    constraints. Produces technical SEO audit reports, prioritized fix backlogs,
+    and Core Web Vitals improvement plans. Excludes content writing and link
+    building outreach.
+edges:
+  involves_role:
+    - target: role:data-analyst
+    - target: role:planner
+    - target: role:technical-writer
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:content-marketing
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:performance-budget-tracking
+    - target: responsibility:data-quality-monitoring
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:growth-team
+---
+nodeKind: Workflow
+id: workflow:conversion-rate-experimentation
+attributes:
+  displayName: "Conversion Rate Experimentation"
+  workflowKind: operational
+  triggerType: scheduled
+  typicalCadence: "bi-weekly"
+  complexity: cross-team
+  description: |
+    Manages systematic conversion rate optimization through structured
+    experimentation — designing multivariate tests for landing pages, forms, and
+    checkout flows, calculating required sample sizes for statistical
+    significance, implementing experiment tracking and goal configuration,
+    analyzing test results with proper segmentation and regression controls,
+    documenting winning patterns into a CRO playbook, and prioritizing the
+    experiment queue using ICE or PIE scoring frameworks. Produces experiment
+    design documents, statistical analysis reports, and CRO playbook updates.
+    Excludes traffic acquisition and UX redesign projects.
+edges:
+  involves_role:
+    - target: role:data-scientist
+    - target: role:product-designer
+    - target: role:planner
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:digital-marketing
+    - target: domain:marketing
+  triggers_responsibility:
+    - target: responsibility:data-quality-monitoring
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:growth-team
+    - target: org-unit:analytics-team
+---
+nodeKind: Workflow
+id: workflow:marketing-budget-allocation-review
+attributes:
+  displayName: "Marketing Budget Allocation Review"
+  workflowKind: governance
+  triggerType: scheduled
+  typicalCadence: "monthly"
+  complexity: cross-team
+  description: |
+    Reviews and optimizes marketing budget allocation across channels and
+    programs — comparing channel ROI and incrementality test results, evaluating
+    diminishing returns curves by spend level, running scenario analyses for
+    budget reallocation, assessing new channel investment opportunities against
+    portfolio risk, reconciling planned vs actual spend with variance
+    explanations, and aligning budget shifts with pipeline generation targets and
+    seasonal demand patterns. Produces budget reallocation recommendations,
+    channel efficiency reports, and spend-to-pipeline forecasts. Excludes annual
+    budget planning and finance approvals.
+edges:
+  involves_role:
+    - target: role:planner
+    - target: role:business-analyst
+    - target: role:data-analyst
+  requires_skill_area:
+    - target: skill-area:data-analytics
+    - target: skill-area:market-research
+  applies_to_domain:
+    - target: domain:marketing
+    - target: domain:digital-marketing
+  triggers_responsibility:
+    - target: responsibility:cost-optimization
+    - target: responsibility:performance-budget-tracking
+  performed_by_org_unit:
+    - target: org-unit:marketing-team
+    - target: org-unit:analytics-team

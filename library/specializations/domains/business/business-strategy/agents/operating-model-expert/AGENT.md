@@ -16,6 +16,12 @@ metadata:
   domain: business
   category: Organization Design
   agent-id: AG-016
+graph:
+  domains: [domain:strategy]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:organizational-design, skill-area:operational-excellence, skill-area:strategic-planning]
+  workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+  roles: [role:organizational-development-specialist, role:strategic-planner]
 ---
 
 # Operating Model Expert Agent

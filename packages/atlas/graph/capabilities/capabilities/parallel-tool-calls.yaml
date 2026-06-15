@@ -1,0 +1,10 @@
+nodeKind: Capability
+id: capability:parallel-tool-calls
+attributes:
+  displayName: "Parallel tool calls"
+  description: |
+    The entity can request multiple tool calls in a single turn and
+    receive their results out of order or in parallel.
+  appliesToNodeKinds: ["AgentVersion", "ModelVersion"]
+  category: tool
+edges: {}

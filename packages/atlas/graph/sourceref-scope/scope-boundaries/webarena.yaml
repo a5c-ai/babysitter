@@ -1,0 +1,14 @@
+nodeKind: ScopeBoundary
+id: scope-boundary:webarena.scope
+attributes:
+  subjectId: benchmark:webarena
+  inScope: |
+    Reproducible web-agent benchmark — agent navigates self-hosted clones of e-commerce, forum, GitLab, and CMS sites via a browser to complete user tasks.
+  outOfScope: |
+    Terminal/CLI agents (use Terminal-Bench), code-generation tasks, and live public web targets (uses sandboxed self-hosted instances only).
+  outOfScopeReasonIds:
+    - out-of-scope-reason:future-phase
+    - out-of-scope-reason:implementation-detail
+edges:
+  bounds_subject:
+    - benchmark:webarena

@@ -2,6 +2,12 @@
 name: quality-assurance-review
 description: Conduct systematic quality reviews of instructional materials using established rubrics (Quality Matters) and design standards
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
+graph:
+  domains: [domain:education]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:learning-development, skill-area:acceptance-testing, skill-area:compliance-automation]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:qa-lead, role:technical-writer]
 ---
 
 # Quality Assurance Review

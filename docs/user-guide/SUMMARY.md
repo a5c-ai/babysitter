@@ -21,7 +21,7 @@ This is the GitBook-style table of contents for the Babysitter User Guide.
 
 ## Features
 
-* [**Process Library** (2,000+ processes)](./features/process-library.md)
+* [**Process Library** (current library snapshot)](./features/process-library.md)
 * [**Best Practices Guide**](./features/best-practices.md)
 * [Breakpoints](./features/breakpoints.md)
 * [Hooks](./features/hooks.md)
@@ -76,7 +76,7 @@ docs/user-guide/
 |   +-- first-run.md                      # First workflow execution
 |
 +-- features/                             # Core Features
-|   +-- process-library.md                # 2,000+ pre-built processes
+|   +-- process-library.md                # SDK-managed built-in library and current counts
 |   +-- best-practices.md                 # Comprehensive best practices guide
 |   +-- breakpoints.md                    # Human-in-the-loop approval
 |   +-- hooks.md                          # Extensible lifecycle events

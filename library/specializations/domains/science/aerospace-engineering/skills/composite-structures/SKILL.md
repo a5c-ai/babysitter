@@ -18,6 +18,11 @@ metadata:
     - composites
     - laminate-design
     - materials
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:statistical-analysis]
+  roles: [role:research-engineer, role:systems-integration-engineer]
 ---
 
 # Composite Structures Skill

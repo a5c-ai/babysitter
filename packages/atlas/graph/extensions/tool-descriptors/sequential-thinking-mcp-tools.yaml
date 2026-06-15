@@ -1,0 +1,32 @@
+nodeKind: ToolDescriptor
+id: tool-descriptor:sequentialthinking.sequentialthinking
+attributes:
+  schema: '{}'
+  displayName: "Sequential Thinking"
+  description: |
+    Structured stepwise reasoning tool. Records a chain of thoughts where each
+    thought may revise an earlier one or branch into an alternative line of
+    reasoning, ending when the model concludes the chain is complete.
+  inputSchema:
+    type: object
+    required: [thought, nextThoughtNeeded, thoughtNumber, totalThoughts]
+    properties:
+      thought: { type: string }
+      nextThoughtNeeded: { type: boolean }
+      thoughtNumber: { type: integer }
+      totalThoughts: { type: integer }
+      isRevision: { type: boolean }
+      revisesThought: { type: integer }
+      branchFromThought: { type: integer }
+      branchId: { type: string }
+      needsMoreThoughts: { type: boolean }
+  outputSchema:
+    type: object
+    properties:
+      status: { type: string }
+  mode: normal
+  streamable: false
+  timeoutMs: 30000
+edges:
+  contained_in_plugin:
+    - target: tool-server:mcp-sequential-thinking

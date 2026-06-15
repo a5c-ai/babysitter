@@ -2,6 +2,10 @@
 name: curator-agent
 description: Curatorial specialist agent for art historical research, exhibition development, collection interpretation, scholarly writing, provenance research, and loan coordination
 required-skills: curatorial-research, collection-documentation, exhibition-design, interpretive-writing
+graph:
+  domains: [domain:arts-culture]
+  skillAreas: [skill-area:deep-web-research, skill-area:visual-design, skill-area:content-strategy]
+  roles: [role:research-analyst, role:creative-director]
 ---
 
 # Curator Agent

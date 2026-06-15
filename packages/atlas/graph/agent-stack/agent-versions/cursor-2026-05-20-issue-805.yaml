@@ -1,0 +1,54 @@
+# Issue #805 additive records.  The AgentVersion node is NOT redeclared
+# here to avoid overwriting the canonical cursor-current.yaml attributes.
+nodeKind: AgentPlatformImpl
+id: agent-platform-impl:cursor.platform@current
+attributes:
+  issue805AutomationMetadata:
+    releaseMarker: "2026-05-20"
+    surface: "Agents Window"
+    supportsMultipleAttachedRepositories: true
+    supportsNoRepositoryAutomations: true
+    babysitterAdapterImpact: "Workspace selection should support Cursor automation contexts with multiple repositories or no repository."
+edges:
+  composes:
+    - target: agent:cursor
+      role: platform
+  sourced_from:
+    - evidence:cursor-2026-05-20-changelog-issue-805
+---
+nodeKind: AgentUIImpl
+id: agent-ui-impl:cursor.ui@current
+attributes:
+  issue805InteractionMetadata:
+    releaseMarker: "2026-05-20"
+    sharedCanvases:
+      description: "Shared canvases expose live read-only browser snapshots of agent-created artifacts."
+      mapsTo: interaction-primitive:cursor-shared-canvas
+    loopSkill:
+      invocationToken: "/loop"
+      description: "Runs a prompt repeatedly on a local schedule or agent-decided cadence."
+      mapsTo: interaction-primitive:slash-loop
+edges:
+  supports_interaction_primitive:
+    - target: interaction-primitive:cursor-shared-canvas
+      attributes:
+        issue805Evidence: "Cursor 2026-05-20 changelog: shared canvases are live read-only browser snapshots of agent-created artifacts."
+    - target: interaction-primitive:slash-loop
+      attributes:
+        issue805Evidence: "Cursor 2026-05-20 changelog: /loop can repeat prompts on a local schedule or agent-decided cadence."
+  sourced_from:
+    - evidence:cursor-2026-05-20-changelog-issue-805
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-2026-05-20-changelog-issue-805
+attributes:
+  displayName: "Cursor 2026-05-20 changelog (issue #805)"
+  sourceUrl: "https://cursor.com/changelog"
+  sourcePathOrUrl: "https://cursor.com/changelog"
+  sourceKind: official-changelog
+  observedAt: "2026-05-31"
+  notes:
+    - "Issue #805 records the 2026-05-20 Cursor changelog entry for Automations in the Agents Window."
+    - "The changelog notes Automations can attach multiple repositories or no repositories."
+    - "The changelog notes shared canvases for live read-only browser snapshots of agent-created artifacts."
+    - "The changelog notes /loop repeated prompt runs on a local schedule or agent-decided cadence."

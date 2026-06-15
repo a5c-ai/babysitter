@@ -18,6 +18,12 @@ metadata:
     - visualization
     - igv
     - genome-browser
+graph:
+  domains: [domain:bioinformatics]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:data-visualization, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:lab-technician]
 ---
 
 # IGV Genome Browser Skill

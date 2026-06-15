@@ -1,0 +1,25 @@
+nodeKind: Claim
+id: claim:claude-opus-4-7-context-window
+attributes:
+  subjectKind: "ModelVersion"
+  statement: "Claude Opus 4.7 supports a 1,000,000-token context window."
+  confidence: "medium"
+  provenanceKind: "vendor-doc"
+  evidenceStrength: "adequate"
+  status: "open"
+  subjectId: model:claude-opus-4-7@current
+  attribute: contextWindowTokens
+  value: 1000000
+  evidenceSourceIds:
+    - evidence:anthropic-models-doc
+  claimedAt: "2026-04-28T10:00:00Z"
+  claimedBy: a5c-ai-team
+edges:
+  about_subject:
+    - model:claude-opus-4-7@current
+  backed_by_evidence:
+    - evidence:anthropic-models-doc
+  conforms_to:
+    - target: compliance:iso-42001
+    - target: compliance:owasp-llm-top-10
+    - target: compliance:soc-2

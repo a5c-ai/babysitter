@@ -14,6 +14,11 @@
  * @references
  * - MIT Center for Transportation: https://ctl.mit.edu/research
  * - Last Mile Delivery: https://www.supplychaindive.com/
+  * @graph
+ *   domains: [domain:logistics]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
+ *   workflows: [workflow:strategic-planning]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

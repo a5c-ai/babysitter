@@ -1,0 +1,29 @@
+nodeKind: Framework
+id: framework:nextjs
+attributes:
+  displayName: "Next.js"
+  homepageUrl: "https://nextjs.org"
+  belongsToLanguageId: language:typescript
+  category: web-fullstack
+  releasedAt: "2016"
+  description: |
+    The Next.js framework.
+edges:
+  belongs_to_language:
+    - language:typescript
+  used_by_skill_area:
+    - target: skill-area:server-side-rendering
+    - target: skill-area:hydration
+    - target: skill-area:frontend-development
+    - target: skill-area:frontend-performance
+  alternative_to:
+    - target: framework:nuxt
+      comparison: "meta-frameworks — Next.js for React; Nuxt for Vue"
+    - target: framework:sveltekit
+      comparison: "meta-frameworks — Next.js for React; SvelteKit for Svelte"
+    - target: framework:remix
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:astro
+      comparison: "JavaScript meta-frameworks"
+    - target: framework:gatsby
+      comparison: "JavaScript meta-frameworks"

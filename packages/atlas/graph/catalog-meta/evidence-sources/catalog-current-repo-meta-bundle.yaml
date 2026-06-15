@@ -1,0 +1,14 @@
+nodeKind: EvidenceSource
+id: evidence:catalog-current-repo-meta-bundle
+attributes:
+  displayName: "Current repository metadata bundle for source references"
+  kindLabel: repo
+  sourceUrl: "https://github.com/a5c-ai/babysitter"
+  trustLevel: trust-level:repo
+  observedAt: "2026-05-05T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  locator: catalog-current-repo-meta-bundle
+edges:
+  has_trust_level:
+    - trust-level:repo
+

@@ -18,6 +18,11 @@ metadata:
     - requirements
     - verification
     - traceability
+graph:
+  domains: [domain:aerospace-engineering]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:sensor-fusion, skill-area:statistical-analysis, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Requirements Verification Skill

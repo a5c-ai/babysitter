@@ -1,0 +1,318 @@
+---
+nodeKind: Library
+id: library:entity-framework
+attributes:
+  displayName: "Entity Framework Core"
+  belongsToLanguageId: language:csharp
+  category: orm
+  description: |
+    Microsoft's official ORM for .NET, supporting code-first and database-first
+    workflows, LINQ-based queries, migrations, change tracking, and multiple
+    database providers (SQL Server, PostgreSQL, SQLite, MySQL, Cosmos DB).
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:dapper
+---
+nodeKind: Library
+id: library:aspnet-core
+attributes:
+  displayName: "ASP.NET Core"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    Cross-platform, high-performance web framework from Microsoft for building
+    modern APIs, MVC web apps, Razor Pages, and gRPC services on .NET with
+    middleware pipeline, DI container, Kestrel server, and minimal API support.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:express
+---
+nodeKind: Library
+id: library:dapper
+attributes:
+  displayName: "Dapper"
+  belongsToLanguageId: language:csharp
+  category: orm
+  description: |
+    Lightweight micro-ORM for .NET that extends IDbConnection with convenient
+    extension methods for parameterized SQL queries, multi-mapping, multi-result,
+    and stored procedure execution with near-raw-ADO.NET performance.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+---
+nodeKind: Library
+id: library:mediatr
+attributes:
+  displayName: "MediatR"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    In-process messaging library for .NET implementing the Mediator pattern;
+    decouples request/response, commands, queries, notifications, and events
+    through handlers with a pipeline behavior system for cross-cutting concerns.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:bull
+---
+nodeKind: Library
+id: library:automapper
+attributes:
+  displayName: "AutoMapper"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    Convention-based object-to-object mapping library for .NET that eliminates
+    boilerplate DTO projection code; supports flattening, value converters,
+    custom resolvers, and query projections via IQueryable extensions.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:jackson
+---
+nodeKind: Library
+id: library:fluentvalidation
+attributes:
+  displayName: "FluentValidation"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    Popular .NET validation library that uses a fluent, chainable API to define
+    strongly-typed validation rules for .NET objects; integrates with ASP.NET
+    Core model binding, MediatR pipelines, and localization providers.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:pydantic
+---
+nodeKind: Library
+id: library:serilog
+attributes:
+  displayName: "Serilog"
+  belongsToLanguageId: language:csharp
+  category: logging
+  description: |
+    Structured logging library for .NET with a rich sink ecosystem (Console,
+    File, Seq, Elasticsearch, Application Insights); supports message templates,
+    enrichers, log-level filtering, and async buffered sink wrappers.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+  alternative_to:
+    - library:nlog
+---
+nodeKind: Library
+id: library:nlog
+attributes:
+  displayName: "NLog"
+  belongsToLanguageId: language:csharp
+  category: logging
+  description: |
+    Flexible and configurable logging framework for .NET with XML/JSON
+    configuration, dozens of built-in targets (File, Database, SMTP, Syslog),
+    layout renderers, and seamless integration with Microsoft.Extensions.Logging.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:observability-instrumentation
+---
+nodeKind: Library
+id: library:polly
+attributes:
+  displayName: "Polly"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    .NET resilience and transient-fault-handling library providing fluent
+    policies for Retry, Circuit Breaker, Timeout, Bulkhead Isolation, Rate
+    Limiting, Fallback, and Hedging with async/await and HttpClient integration.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-async-processing
+  alternative_to:
+    - library:tower
+---
+nodeKind: Library
+id: library:hangfire
+attributes:
+  displayName: "Hangfire"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    Background job processing library for .NET that persists fire-and-forget,
+    delayed, recurring, and continuation jobs in SQL Server, Redis, or other
+    storages; ships with a built-in web dashboard for monitoring and management.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:oban
+    - library:sidekiq
+---
+nodeKind: Library
+id: library:signalr
+attributes:
+  displayName: "SignalR"
+  belongsToLanguageId: language:csharp
+  category: other
+  description: |
+    ASP.NET Core real-time communications library that abstracts WebSockets,
+    Server-Sent Events, and Long Polling behind a Hub API; enables bi-directional
+    server-client messaging with group management and scale-out via Redis/Azure.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:streaming-realtime-processing
+  alternative_to:
+    - library:socket-io
+---
+nodeKind: Library
+id: library:identity-server
+attributes:
+  displayName: "Duende IdentityServer"
+  belongsToLanguageId: language:csharp
+  category: auth
+  description: |
+    OpenID Connect and OAuth 2.x framework for ASP.NET Core that provides
+    token issuance, federation, consent, and API protection; supports PKCE,
+    device flow, pushed authorization requests, and dynamic client registration.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:authentication-authorization
+  alternative_to:
+    - library:devise
+    - library:next-auth
+---
+nodeKind: Library
+id: library:xunit
+attributes:
+  displayName: "xUnit.net"
+  belongsToLanguageId: language:csharp
+  category: testing
+  description: |
+    Modern, extensible unit testing framework for .NET with constructor-based
+    test isolation, [Fact]/[Theory] attributes, inline and member data sources,
+    parallel test execution, and a rich ecosystem of assertion and fixture packages.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:nunit
+---
+nodeKind: Library
+id: library:nunit
+attributes:
+  displayName: "NUnit"
+  belongsToLanguageId: language:csharp
+  category: testing
+  description: |
+    Mature and feature-rich unit testing framework for .NET with parameterized
+    tests, test fixtures, setup/teardown lifecycle, constraint-based assertions
+    via Assert.That, and a flexible test runner adapter model.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:component-testing
+---
+nodeKind: Library
+id: library:moq
+attributes:
+  displayName: "Moq"
+  belongsToLanguageId: language:csharp
+  category: testing
+  description: |
+    Most widely used .NET mocking library, leveraging Castle DynamicProxy to
+    create strongly-typed mock objects with a LINQ-based fluent setup API for
+    method expectations, return values, callbacks, and verification.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:component-testing
+  alternative_to:
+    - library:mockito
+---
+nodeKind: Library
+id: library:newtonsoft-json
+attributes:
+  displayName: "Newtonsoft.Json"
+  belongsToLanguageId: language:csharp
+  category: serialization
+  description: |
+    Highly popular JSON serialization library for .NET (Json.NET) with flexible
+    contract resolvers, custom converters, LINQ-to-JSON (JObject/JArray),
+    schema validation, and broad compatibility across .NET Framework and .NET Core.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+  alternative_to:
+    - library:system-text-json
+---
+nodeKind: Library
+id: library:system-text-json
+attributes:
+  displayName: "System.Text.Json"
+  belongsToLanguageId: language:csharp
+  category: serialization
+  description: |
+    Built-in high-performance JSON library shipped with .NET 6+ supporting
+    UTF-8 source generation, read-ahead parsing, Utf8JsonReader/Writer, custom
+    converters, and immutable type deserialization with minimal allocations.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-api-design
+---
+nodeKind: Library
+id: library:efcore-migrations
+attributes:
+  displayName: "EF Core Migrations"
+  belongsToLanguageId: language:csharp
+  category: orm
+  description: |
+    Database schema migration subsystem built into Entity Framework Core that
+    generates incremental migration files from model changes, applies them via
+    the dotnet-ef CLI or MigrationBuilder API, and tracks history in a migrations table.
+edges:
+  belongs_to_language:
+    - language:csharp
+  library_used_by:
+    - target: skill-area:backend-data-persistence
+  alternative_to:
+    - library:alembic

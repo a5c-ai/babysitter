@@ -1,0 +1,47 @@
+nodeKind: EnvVar
+id: env-var:anthropic-betas
+attributes:
+  displayName: ANTHROPIC_BETAS
+  description: Comma-separated list of `anthropic-beta` header values to include in API requests.
+  name: ANTHROPIC_BETAS
+  category: headers
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:anthropic-custom-headers
+attributes:
+  displayName: ANTHROPIC_CUSTOM_HEADERS
+  description: Custom headers to add to requests (Name; Value format, newline-separated for multiple).
+  name: ANTHROPIC_CUSTOM_HEADERS
+  category: headers
+  valueType: string
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-extra-body
+attributes:
+  displayName: CLAUDE_CODE_EXTRA_BODY
+  description: JSON object to merge into the top level of every API request body.
+  name: CLAUDE_CODE_EXTRA_BODY
+  category: headers
+  valueType: json
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x
+---
+nodeKind: EnvVar
+id: env-var:claude-code-disable-experimental-betas
+attributes:
+  displayName: CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS
+  description: Set to 1 to strip Anthropic-specific anthropic-beta request headers and beta fields.
+  name: CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS
+  category: headers
+  valueType: bool
+edges:
+  affects:
+  - target: agent-runtime-impl:claude-code.runtime@1.x

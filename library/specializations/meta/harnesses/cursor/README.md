@@ -553,7 +553,7 @@ This enables the same hook-driven orchestration model as Claude Code, with the s
 ### Harness Adapter
 
 The Cursor harness adapter is registered in the Babysitter SDK at:
-- Adapter: `createCursorAdapter` in `packages/sdk/src/harness/adapters/`
+- Adapter: `createCursorAdapter` in `packages/babysitter-sdk/src/harness/adapters/`
 - Discovery: Detected via `cursor` CLI availability
 - Plugin: `plugins/babysitter-cursor/`
 

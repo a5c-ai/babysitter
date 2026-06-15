@@ -1,0 +1,41 @@
+{
+  "issueNumber": 619,
+  "baseBranch": "staging",
+  "implementationBranch": "issue/619-host-agent-identity-prompts",
+  "targetFiles": [
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/phase.ts",
+    "packages/genty/platform/src/harness/internal/createRun/prompts.ts",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/prompts.ts",
+    "packages/genty/platform/src/harness/internal/createRun/output.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/prompts.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "packages/sdk/src/harness/unified/promptContext.ts",
+    "packages/sdk/src/harness/unified/capabilities.ts",
+    "packages/sdk/src/harness/unified/__tests__/adapter.test.ts",
+    "packages/sdk/src/harness/unified/__tests__/e2e-integration.test.ts",
+    "packages/sdk/src/prompts/types.ts",
+    "packages/sdk/src/prompts/contextShared.ts",
+    "docs/adapters-babysitter-integrations/plugin-mode.md"
+  ],
+  "relatedIssues": [605, 616, 602],
+  "verificationCommands": [
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "processLibraryReferences": [
+    "/home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/shared/root-cause-diagnosis.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/backward-compatibility-management.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/ai-agents-conversational/system-prompt-guardrails.js"
+  ],
+  "acceptanceSummary": [
+    "Process creation prompts explicitly state the host agent identity for plugin-mode hosts such as codex and claude-code.",
+    "Prompt context includes host capabilities and clear delegation guidance.",
+    "Prompt wording distinguishes host agent, selected binding harness, internal worker/default execution, discovered external harnesses, and task routing.",
+    "Fallback behavior remains backward-compatible when host identity data is absent.",
+    "Tests cover representative host contexts and prompt rendering behavior."
+  ]
+}

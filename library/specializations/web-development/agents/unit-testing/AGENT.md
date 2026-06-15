@@ -9,6 +9,14 @@ expertise:
   - Test-driven development
   - React component testing
   - Test utilities
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  roles: [role:frontend-engineer, role:qa-engineer]
+  skillAreas: [skill-area:react-testing, skill-area:unit-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
+
 ---
 
 # Unit Testing Agent

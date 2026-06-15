@@ -1,0 +1,52 @@
+nodeKind: AgentVersion
+id: agent-version:amp@current
+attributes:
+  agentProductId: agent:amp
+  sourcePackage: "@ampcode/cli"
+  versionRange: ">=0.0.1780032159-g3925ab"
+  currentVersion: "0.0.1780032159-g3925ab"
+  releasedAt: "2026-05-29"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780032159-g3925ab"
+  assimilationNotes:
+    - "npm latest moved from 0.0.1779959155-g362e01 to 0.0.1780032159-g3925ab; no public Amp changelog or GitHub release note was found for this commit-stamped npm build."
+    - "Install method and package name remain npm install -g @ampcode/cli."
+    - "No release-note evidence of CLI flag, transport, auth, MCP, or package-name changes was found."
+  cliCommand: "amp"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:amp
+  composed_of:
+    - target: agent-core-impl:amp.core@current
+      role: core
+    - target: agent-runtime-impl:amp.runtime@current
+      role: runtime
+    - target: agent-platform-impl:amp.platform@current
+      role: platform
+    - target: agent-ui-impl:amp.ui@current
+      role: ui
+    - target: knowledge-fabric-impl:amp.knowledge@current
+      role: knowledge-fabric
+  uses_memory_system:
+    - target: memory-system:amp-memory
+  sourced_from:
+    - evidence:amp-0-0-1780032159-g3925ab-release
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=0.0.1780032159-g3925ab'
+      level: full
+      notes: Amp runs multi-turn agentic coding sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=0.0.1780032159-g3925ab'
+      level: full
+      notes: Amp streams model output in real time.
+    - target: capability:supports-tool-use
+      versionRange: '>=0.0.1780032159-g3925ab'
+      level: full
+      notes: Amp drives file edits and terminal commands via tool-use.
+    - target: capability:supports-mcp
+      versionRange: '>=0.0.1780032159-g3925ab'
+      level: full
+      notes: Amp supports MCP servers for extensibility.

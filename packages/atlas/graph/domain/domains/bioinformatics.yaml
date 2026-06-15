@@ -1,0 +1,11 @@
+nodeKind: Domain
+id: domain:bioinformatics
+attributes:
+  displayName: "Bioinformatics"
+  description: |
+    Bioinformatics domain — sequence analysis, genomics pipelines,
+    structural biology tooling, and computational analysis of biological
+    data.
+edges:
+  contains:
+    - specialization:biomedical-informatics

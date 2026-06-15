@@ -17,6 +17,10 @@ metadata:
     - sqlite
     - markdown
     - jinja2
+graph:
+  domains: [domain:business-intelligence]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:strategic-analysis]
+  roles: [role:data-analyst, role:research-scientist, role:business-analyst]
 ---
 
 # Hypothesis Tracker

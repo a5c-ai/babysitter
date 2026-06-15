@@ -1,0 +1,31 @@
+---
+nodeKind: SourceRef
+id: source-ref:openai-agents-sdk-github
+attributes:
+  description: "OpenAI Agents SDK (openai-agents-python) repository"
+  displayName: "OpenAI Agents SDK GitHub"
+  repoUrl: https://github.com/openai/openai-agents-python
+  ref: main
+  path: "."
+  packageManager: pip
+  packageName: openai-agents
+  kind: github-repo
+  notes: |
+    Canonical open-source repository for OpenAI Agents SDK — Runner,
+    Agent, Handoff, RunItemStreamEvent, and Responses API integration.
+edges: {}
+---
+nodeKind: SourceRef
+id: source-ref:openai-agents-sdk-docs
+attributes:
+  description: "OpenAI Agents SDK official documentation"
+  displayName: "OpenAI Agents SDK Docs"
+  repoUrl: https://openai.github.io/openai-agents-python/
+  ref: current
+  path: "."
+  kind: documentation-page
+  notes: |
+    Official documentation for the OpenAI Agents SDK including the
+    Runner streaming taxonomy (RawResponsesStreamEvent,
+    RunItemStreamEvent, AgentUpdatedStreamEvent).
+edges: {}

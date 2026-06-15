@@ -1,0 +1,42 @@
+nodeKind: Domain
+id: domain:security
+attributes:
+  displayName: "Security"
+  description: |
+    Security encompasses the practices, tools, and mindset required to
+    protect software systems, infrastructure, and data from unauthorized
+    access, compromise, and abuse.
+
+    The domain spans application security (secure coding, SAST/DAST,
+    dependency scanning), identity and access management (OAuth 2.0,
+    OIDC, RBAC), network security, cryptography, secrets management, and
+    compliance frameworks (SOC 2, ISO 27001). It is the broader parent of
+    Cybersecurity (offensive/defensive practitioner work) and intersects
+    every other domain — every system has a threat model.
+edges:
+  contains:
+    - specialization:security-research
+    - specialization:cryptography-blockchain
+    - topic:api-key
+    - topic:csrf-protection
+    - topic:data-at-rest-encryption
+    - topic:data-in-transit-encryption
+    - topic:input-sanitization
+    - topic:oauth-integration
+    - topic:protected-routes
+    - topic:route-guards
+    - topic:secure-storage-pattern
+    - topic:secure-token-pattern
+    - topic:security-headers-implementation
+    - topic:oauth-openid-connect
+    - topic:defense-in-depth
+    - topic:zero-trust-architecture
+    - topic:content-security-policy
+    - topic:xss-prevention
+    - topic:secure-authentication-patterns
+    - topic:permission-based-access
+    - topic:hmac-signing
+    - topic:jwt-handling
+    - topic:oauth-flows
+    - topic:ssl-certs
+    - topic:webhook-verification

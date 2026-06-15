@@ -17,6 +17,12 @@
  * - Profiling Embedded Systems: https://interrupt.memfault.com/blog/profiling-firmware-on-cortex-m
  * - Cycle Counters: https://www.embedded.com/using-the-cortex-m-cycle-counter/
  * - Performance Optimization: https://www.embedded.com/performance-optimization-for-embedded-systems/
+ * @graph
+ *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:timing-closure]
+ *   roles: [role:embedded-engineer]
+ *   workflows: [workflow:firmware-release-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

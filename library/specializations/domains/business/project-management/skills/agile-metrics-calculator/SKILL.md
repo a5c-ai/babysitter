@@ -12,6 +12,11 @@ metadata:
   domain: business
   category: Agile Management
   id: SK-005
+graph:
+  domains: [domain:project-management]
+  skillAreas: [skill-area:roadmap-planning, skill-area:data-analytics, skill-area:ab-testing-experimentation]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:scrum-master, role:data-analyst]
 ---
 
 # Agile Metrics Calculator

@@ -2,6 +2,13 @@
 name: graphql
 description: GraphQL schema design, resolvers, directives, subscriptions, and best practices for API development.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+graph:
+  domains: [domain:web-development]
+  specializations: [specialization:web-development]
+  skillAreas: [skill-area:graphql-schema-design, skill-area:api-design]
+  roles: [role:backend-engineer, role:fullstack-engineer]
+  topics: [topic:graphql-schema-design, topic:api-design]
+
 ---
 
 # GraphQL Skill

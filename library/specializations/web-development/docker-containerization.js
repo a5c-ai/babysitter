@@ -4,6 +4,13 @@
  * @inputs { projectName: string, runtime?: string }
  * @outputs { success: boolean, dockerConfig: object, images: array, artifacts: array }
  * @references - Docker: https://docs.docker.com/
+ * @graph
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:release-management]
+ *   roles: [role:devops-engineer, role:fullstack-engineer]
+ *   skillAreas: [skill-area:containerization]
+ *   topics: [topic:twelve-factor-app]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
