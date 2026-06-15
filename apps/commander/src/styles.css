@@ -1,0 +1,5628 @@
+@import 'tailwindcss';
+
+/*
+ * A5C Commander — "The Aegis Cogitator" theme tokens (SPEC-V2 §V2-1).
+ * Warm parchment field (aged paper #e9dcbe family) framing slate-umber
+ * panels (#22231e family) edged with brass/gold ornament (#b9913f family),
+ * warm amber lamp-light glows, jewel stained-glass faction accents, serif
+ * display headers with the mono accent kept for numbers.
+ * Geometry is untouched — this is a re-skin of the v1 command deck.
+ */
+@theme {
+  /* parchment field (aged paper) */
+  --color-parchment-50: #f7eed7;
+  --color-parchment-100: #f0e6c9;
+  --color-parchment-200: #e9dcbe;
+  --color-parchment-300: #dcca9e;
+  --color-parchment-400: #c9b384;
+  --color-parchment-500: #ab9264;
+
+  /* slate-umber panel surfaces */
+  --color-deck-950: #16170f;
+  --color-deck-900: #191a14;
+  --color-deck-800: #22231e;
+  --color-deck-700: #2c2d25;
+  --color-deck-600: #3a3b30;
+
+  /* brass / gold ornament */
+  --color-brass-300: #e3c87f;
+  --color-brass-400: #d2ab57;
+  --color-brass-500: #b9913f;
+  --color-brass-600: #94702c;
+  --color-brass-700: #6d5120;
+
+  /* warm amber lamp-light */
+  --color-amber-glow: #e8b54a;
+  --color-amber-deep: #c98f2b;
+
+  /* ink on parchment (map labels, plate captions) */
+  --color-ink: #3b3122;
+  --color-ink-soft: #6f5f44;
+
+  /* map floor drafting grid (sepia) */
+  --color-grid-line: rgb(122 99 60 / 0.16);
+
+  /* HUD text on slate */
+  --color-hud-text: #e2d3ac;
+  --color-hud-dim: #a59373;
+  --color-hud-bright: #f6ecd2;
+
+  /* brass panel chrome (var names kept from v1 — many call sites) */
+  --color-glass-border: rgb(185 145 63 / 0.55);
+  --color-glass-fill: rgb(30 31 25 / 0.92);
+
+  /* adapter faction accents — jewel stained-glass over brass (§V2-1):
+     claude-code=verdigris teal glass · codex=garnet glass ·
+     gemini-cli=amber glass · pi=peridot glass */
+  --color-faction-claude: #58b3a4;
+  --color-faction-codex: #d0707c;
+  --color-faction-gemini: #ddab4a;
+  --color-faction-pi: #a9bf57;
+
+  /* status accents (warm jewel, text-grade on slate) */
+  --color-status-alert: #d4604a;
+  --color-status-warn: #dba344;
+  --color-status-ok: #84b274;
+  --color-status-info: #5fae9c;
+
+  /* selection / lamp glow */
+  --color-selection-ring: #e0a83c;
+
+  /* mono accent for numbers (SPEC §10: single mono accent — kept in v2) */
+  --font-mono-hud:
+    ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* serif display stack (§V2-1 small-caps letter-spaced headers) */
+  --font-serif-display:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    /* §V2-1 / AC15: the field resolves to the parchment family */
+    background-color: var(--color-parchment-200);
+    color: var(--color-hud-text);
+    font-family: var(--font-serif-display);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* keyboard-only operation must stay visible (SPEC §14) — warm lamp focus */
+  :focus-visible {
+    outline: 2px solid var(--color-selection-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ======================================================================
+   * Root / map viewport — the parchment plate
+   * ==================================================================== */
+  .wr-root {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
+    /* aged-paper mottling over the parchment base */
+    background:
+      radial-gradient(ellipse at 22% 16%, rgb(255 248 224 / 0.55), transparent 55%),
+      radial-gradient(ellipse at 80% 85%, rgb(150 120 66 / 0.16), transparent 60%),
+      radial-gradient(ellipse at 65% 30%, rgb(214 190 140 / 0.35), transparent 65%),
+      var(--color-parchment-200);
+    user-select: none;
+  }
+  /* §V2-1: ≤4%-effective paper grain + faint repeating gear watermarks over
+     the parchment field (inline path-only SVG data-URIs; layer opacity 0.07
+     × baked 0.5 stroke-opacity ≈ 3.5% effective). */
+  .wr-root::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.33 0 0 0 0 0.18 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%236f5430' stroke-opacity='.5' stroke-width='7' stroke-dasharray='6.5 5'/%3E%3Ccircle cx='32' cy='32' r='12' fill='none' stroke='%236f5430' stroke-opacity='.5' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%236f5430' fill-opacity='.5'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%236f5430' stroke-opacity='.4' stroke-width='7' stroke-dasharray='6.5 5'/%3E%3Ccircle cx='32' cy='32' r='12' fill='none' stroke='%236f5430' stroke-opacity='.4' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%236f5430' fill-opacity='.4'/%3E%3C/svg%3E");
+    background-repeat: repeat, repeat, repeat;
+    background-size: 160px 160px, 340px 340px, 230px 230px;
+    background-position: 0 0, 40px 60px, 190px 230px;
+  }
+  /* plate-border flourish: a hairline engraved frame just inside the field */
+  .wr-root::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    z-index: 0;
+    pointer-events: none;
+    border: 1px solid rgb(122 99 60 / 0.28);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 3px rgb(122 99 60 / 0.08);
+  }
+
+  /* ======================================================================
+   * Slate panels with brass frames (HUD chrome, §V2-1)
+   * ==================================================================== */
+  .wr-panel {
+    /* AC15 hook: every panel carries the brass-border custom property */
+    --wr-brass-border: 1px solid var(--color-brass-500);
+    position: relative;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.09), transparent 38%),
+      radial-gradient(ellipse at 50% 120%, rgb(140 110 60 / 0.18), transparent 60%),
+      var(--color-glass-fill);
+    border: var(--wr-brass-border);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* etched double border (inner umber groove + brass thread) + a faint
+       parchment inset frame warming the slate + warm drop */
+    box-shadow:
+      inset 0 0 0 1px rgb(18 16 9 / 0.9),
+      inset 0 0 0 2px rgb(216 181 97 / 0.26),
+      inset 0 0 0 4px rgb(233 220 190 / 0.06),
+      inset 0 0 22px rgb(232 181 74 / 0.05),
+      0 10px 26px rgb(58 42 18 / 0.45);
+    padding: 8px 10px;
+    overflow: hidden;
+  }
+  /* corner rivets, struck into the frame */
+  .wr-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle 3px at 7px 7px, #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at calc(100% - 7px) 7px, #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at 7px calc(100% - 7px), #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at calc(100% - 7px) calc(100% - 7px), #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%);
+  }
+
+  .wr-panel-title {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 11px;
+    letter-spacing: 0.26em;
+    color: var(--color-brass-400);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* oval amber "eye" indicator — lamp-lit while the panel is live (§V2-1) */
+  .wr-panel-title::before {
+    content: '';
+    width: 10px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 38%, #ffe9b0, var(--color-amber-glow) 55%, var(--color-amber-deep) 85%);
+    border: 1px solid var(--color-brass-700);
+    box-shadow: 0 0 6px rgb(232 181 74 / 0.75);
+    animation: wr-soft-pulse 3.4s ease-in-out infinite;
+  }
+  .wr-panel-count {
+    color: var(--color-hud-bright);
+    font-family: var(--font-mono-hud);
+  }
+
+  /* --- top bar ---------------------------------------------------------- */
+  .wr-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 14px;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.05), transparent 45%),
+      linear-gradient(to bottom, rgb(25 26 20 / 0.97), rgb(25 26 20 / 0.88));
+    border-bottom: 1px solid var(--color-brass-500);
+    /* brass-plate edge treatment matching the bottom HUD plates: umber
+       groove + brass thread + parchment warmth above the brass rule */
+    box-shadow:
+      inset 0 1px 0 rgb(216 181 97 / 0.2),
+      inset 0 -2px 0 rgb(216 181 97 / 0.26),
+      inset 0 -4px 0 rgb(18 16 9 / 0.55),
+      0 6px 18px rgb(58 42 18 / 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 40;
+  }
+  /* corner rivets struck into the top plate (mirrors .wr-panel::after) */
+  .wr-topbar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle 3px at 7px 50%, #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at calc(100% - 7px) 50%, #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 2px at 33% calc(100% - 5px), #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2px at 67% calc(100% - 5px), #b9913f 0%, #94702c 55%, transparent 100%);
+  }
+
+  .wr-topbar-logo {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    font-size: 14px;
+    color: var(--color-hud-bright);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  /* engraved brass flourishes bracketing the wordmark */
+  .wr-topbar-logo::before,
+  .wr-topbar-logo::after {
+    content: '';
+    width: 22px;
+    height: 8px;
+    flex-shrink: 0;
+    opacity: 0.8;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 8'%3E%3Cpath d='M0 4 C6 4 8 1.2 12 1.2 C15 1.2 16 2.6 16 4 C16 5.4 15 6.8 12 6.8 C8 6.8 6 4 0 4 Z' fill='none' stroke='%23b9913f' stroke-opacity='.85' stroke-width='1.1'/%3E%3Ccircle cx='19.5' cy='4' r='1.4' fill='%23b9913f' fill-opacity='.8'/%3E%3C/svg%3E")
+        center / contain no-repeat;
+  }
+  .wr-topbar-logo::after {
+    transform: scaleX(-1);
+  }
+  .wr-topbar-logo span {
+    color: var(--color-brass-300);
+  }
+  .wr-topbar-cogitator {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--color-hud-dim);
+  }
+  .wr-topbar-cogitator::before {
+    content: '\2014\00a0';
+    color: var(--color-brass-600);
+  }
+
+  .wr-topbar-stats {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .wr-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  .wr-stat-label {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--color-brass-500);
+  }
+  .wr-stat-value {
+    font-family: var(--font-mono-hud);
+    font-size: 14px;
+    color: var(--color-hud-bright);
+  }
+  .wr-stat-value em {
+    font-style: normal;
+    font-size: 10px;
+    color: var(--color-hud-dim);
+  }
+  .wr-stat--alert .wr-stat-value {
+    color: var(--color-status-alert);
+    animation: wr-urgent 1s ease-in-out infinite;
+  }
+
+  /* counter values remount on change → subtle count-tick (SPEC §10 motion) */
+  .wr-stat-num {
+    display: inline-block;
+    animation: wr-count-tick 0.35s ease-out;
+  }
+
+  .wr-sim-toggle {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-brass-600);
+    background: linear-gradient(to bottom, rgb(227 200 127 / 0.14), rgb(109 81 32 / 0.14));
+    color: var(--color-hud-text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+  .wr-sim-toggle:hover {
+    border-color: var(--color-selection-ring);
+    color: var(--color-hud-bright);
+    background: rgb(224 168 60 / 0.16);
+  }
+  .wr-sim-toggle--paused {
+    border-color: var(--color-amber-glow);
+    color: var(--color-amber-glow);
+  }
+
+  .wr-topbar-clock {
+    font-family: var(--font-mono-hud);
+    font-size: 14px;
+    color: var(--color-hud-bright);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .wr-clock-paused {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--color-amber-glow);
+    border: 1px solid var(--color-amber-glow);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  .wr-bottom-row {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    height: 178px;
+    display: flex;
+    gap: 10px;
+    pointer-events: none;
+    z-index: 40;
+  }
+  .wr-bottom-row > * {
+    pointer-events: auto;
+  }
+
+  .wr-ticker {
+    width: 26%;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+  }
+  .wr-ticker-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    flex: 1;
+    /* DOM stays append-order (frozen ticker-slice contract); the view shows
+       newest first and stays anchored on the latest entry. */
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .wr-ticker-list > li {
+    flex: none;
+  }
+  .wr-ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: var(--color-hud-text);
+    font-size: 11px;
+    cursor: default;
+    animation: wr-slide-in 0.25s ease-out;
+  }
+  .wr-ticker-item--linked {
+    cursor: pointer;
+  }
+  .wr-ticker-item:hover {
+    background: rgb(227 200 127 / 0.08);
+  }
+  .wr-ticker-glyph {
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
+    color: var(--color-hud-dim);
+  }
+  .wr-ticker-item--success .wr-ticker-glyph {
+    color: var(--color-status-ok);
+  }
+  .wr-ticker-item--warn .wr-ticker-glyph {
+    color: var(--color-status-warn);
+  }
+  .wr-ticker-item--alert .wr-ticker-glyph {
+    color: var(--color-status-alert);
+  }
+  .wr-ticker-hold {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--color-status-info);
+    border: 1px solid rgb(95 174 156 / 0.5);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  .wr-ticker-ts {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-dim);
+    flex-shrink: 0;
+  }
+  .wr-ticker-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wr-ticker-item--success .wr-ticker-text {
+    color: var(--color-status-ok);
+  }
+  .wr-ticker-item--warn .wr-ticker-text {
+    color: var(--color-status-warn);
+  }
+  .wr-ticker-item--alert .wr-ticker-text {
+    color: var(--color-status-alert);
+  }
+  .wr-ticker-empty {
+    font-size: 11px;
+    color: var(--color-hud-dim);
+    padding: 4px;
+  }
+
+  /* --- selection panel ---------------------------------------------------------- */
+  .wr-selection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .wr-sel-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    color: var(--color-hud-dim);
+    font-size: 11px;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.14em;
+  }
+  /* engraved commander's-monocle crest fills the empty plate (§V2-1) */
+  .wr-sel-empty::before {
+    content: '';
+    width: 46px;
+    height: 46px;
+    opacity: 0.55;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='19' cy='19' r='13' fill='none' stroke='%23b9913f' stroke-width='3'/%3E%3Ccircle cx='19' cy='19' r='8.5' fill='none' stroke='%23b9913f' stroke-opacity='.45' stroke-width='1.4'/%3E%3Cpath d='M29 29 C33 33 37.5 39 40 44' fill='none' stroke='%23b9913f' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='19' cy='19' r='2' fill='%23b9913f' fill-opacity='.4'/%3E%3C/svg%3E")
+        center / contain no-repeat;
+    filter: drop-shadow(0 1px 0 rgb(18 16 9 / 0.7));
+  }
+  .wr-sel-single {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    flex: 1;
+    min-height: 0;
+  }
+  /* sepia illustration plate: portrait on parchment, brass-framed (§V2-1) */
+  .wr-sel-portrait {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background:
+      radial-gradient(circle at 30% 25%, rgb(255 248 224 / 0.85), transparent 70%),
+      linear-gradient(to bottom, #f0e6c9, #d6c294);
+    border: 1px solid var(--color-brass-600);
+    box-shadow:
+      inset 0 0 0 2px rgb(34 35 30 / 0.18),
+      inset 0 0 10px rgb(140 110 60 / 0.3);
+    padding: 4px;
+  }
+  .wr-sel-info {
+    min-width: 140px;
+  }
+  .wr-sel-name {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-hud-bright);
+    letter-spacing: 0.06em;
+  }
+  .wr-sel-sub {
+    display: flex;
+    gap: 10px;
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    color: var(--color-hud-dim);
+    margin-top: 2px;
+    flex-wrap: wrap;
+  }
+  /* oval amber-eye state badge (live status indicator, §V2-1) */
+  .wr-sel-state {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-hud-dim);
+    color: var(--color-hud-text);
+  }
+  .wr-sel-staterow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wr-sel-paused,
+  .wr-sel-priority {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 5px;
+    text-transform: uppercase;
+  }
+  .wr-sel-paused {
+    border: 1px solid var(--color-hud-bright);
+    color: var(--color-hud-bright);
+  }
+  .wr-sel-priority {
+    border: 1px solid var(--color-brass-400);
+    color: var(--color-brass-300);
+  }
+  .wr-sel-card-state .wr-sel-paused {
+    margin-top: 0;
+    margin-left: 4px;
+    padding: 0 3px;
+    font-size: 8px;
+  }
+  .wr-sel-state--thinking,
+  .wr-sel-state--dispatching {
+    border-color: var(--color-amber-glow);
+    color: var(--color-amber-glow);
+    box-shadow: 0 0 7px rgb(232 181 74 / 0.4);
+  }
+  .wr-sel-state--tool_running {
+    border-color: var(--color-status-warn);
+    color: var(--color-status-warn);
+    box-shadow: 0 0 7px rgb(219 163 68 / 0.4);
+  }
+  .wr-sel-state--awaiting_approval,
+  .wr-sel-state--failed {
+    border-color: var(--color-status-alert);
+    color: var(--color-status-alert);
+  }
+  .wr-sel-state--completed,
+  .wr-sel-state--task-done {
+    border-color: var(--color-status-ok);
+    color: var(--color-status-ok);
+  }
+
+  /* faction-accent text — jewel stained-glass tints (§V2-1) */
+  .wr-faction-text--claude-code {
+    color: var(--color-faction-claude);
+  }
+  .wr-faction-text--codex {
+    color: var(--color-faction-codex);
+  }
+  .wr-faction-text--gemini-cli {
+    color: var(--color-faction-gemini);
+  }
+  .wr-faction-text--pi {
+    color: var(--color-faction-pi);
+  }
+
+  .wr-sel-tasklink {
+    display: block;
+    margin-top: 6px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+    font-size: 11px;
+    color: var(--color-brass-300);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .wr-sel-tasklink:hover {
+    text-decoration: underline;
+    color: var(--color-hud-bright);
+  }
+
+  .wr-sel-phase {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .wr-sel-assignees {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
+  }
+  .wr-sel-assignee {
+    font-size: 10px;
+    color: var(--color-hud-bright);
+    background: rgb(227 200 127 / 0.1);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 9px;
+    padding: 1px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .wr-sel-assignee:hover {
+    border-color: var(--color-selection-ring);
+    background: rgb(224 168 60 / 0.2);
+  }
+
+  /* rank chevrons (turn count → XP, SPEC §3) — earned in brass */
+  .wr-rank {
+    display: inline-flex;
+    gap: 2px;
+    align-items: center;
+  }
+  .wr-rank-chevron {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 6px solid rgb(227 200 127 / 0.18);
+  }
+  .wr-rank-chevron.is-earned {
+    border-bottom-color: var(--color-brass-400);
+  }
+
+  .wr-sel-vitals {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .wr-vital {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wr-vital .wr-bar {
+    flex: 1;
+    height: 6px;
+    background: rgb(227 200 127 / 0.12);
+  }
+  .wr-vital-label {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--color-brass-500);
+    width: 64px;
+    flex-shrink: 0;
+  }
+  .wr-vital-value {
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    color: var(--color-hud-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wr-sel-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow-y: auto;
+    flex: 1;
+    align-content: flex-start;
+  }
+  .wr-sel-card {
+    width: 76px;
+    border: 1px solid var(--color-glass-border);
+    border-radius: 8px;
+    padding: 4px;
+    text-align: center;
+    background: rgb(227 200 127 / 0.05);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+  .wr-sel-card:hover {
+    border-color: var(--color-selection-ring);
+    background: rgb(224 168 60 / 0.1);
+    box-shadow: 0 0 8px rgb(224 168 60 / 0.3);
+  }
+  /* per-state card border + label accent — the multi-select grid reads fleet
+     state at a glance (single-unit view keeps the verbatim state badge) */
+  .wr-sel-card--awaiting_approval {
+    border-color: rgb(212 96 74 / 0.65);
+  }
+  .wr-sel-card--awaiting_approval .wr-sel-card-state {
+    color: var(--color-status-alert);
+  }
+  .wr-sel-card--failed {
+    border-color: var(--color-status-alert);
+  }
+  .wr-sel-card--failed .wr-sel-card-state {
+    color: var(--color-status-alert);
+  }
+  .wr-sel-card--dispatching,
+  .wr-sel-card--thinking {
+    border-color: rgb(232 181 74 / 0.55);
+  }
+  .wr-sel-card--dispatching .wr-sel-card-state,
+  .wr-sel-card--thinking .wr-sel-card-state {
+    color: var(--color-amber-glow);
+  }
+  .wr-sel-card--tool_running {
+    border-color: rgb(219 163 68 / 0.55);
+  }
+  .wr-sel-card--tool_running .wr-sel-card-state {
+    color: var(--color-status-warn);
+  }
+  .wr-sel-card--blocked {
+    border-color: rgb(219 163 68 / 0.55);
+  }
+  .wr-sel-card--completed {
+    border-color: rgb(132 178 116 / 0.55);
+  }
+  .wr-sel-card--completed .wr-sel-card-state {
+    color: var(--color-status-ok);
+  }
+  /* card portraits sit on miniature sepia plates */
+  .wr-sel-card-portrait {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+    border-radius: 6px;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.9), rgb(214 194 148 / 0.9));
+    border: 1px solid rgb(148 112 44 / 0.6);
+  }
+  .wr-sel-card-name {
+    font-size: 10px;
+    color: var(--color-hud-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-sel-card-state {
+    font-family: var(--font-mono-hud);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    color: var(--color-hud-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-sel-mixed {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* --- command card ----------------------------------------------------------------- */
+  .wr-commands {
+    width: 348px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 3x4 grid, row-major QWER / ASDF / ZXCV — cells mirror the keyboard (SPEC §5) */
+  .wr-cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 5px;
+    flex: 1;
+    min-height: 0;
+  }
+  .wr-cmd {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: 1px solid var(--color-glass-border);
+    border-radius: 7px;
+    background:
+      linear-gradient(to bottom, rgb(227 200 127 / 0.07), transparent 55%),
+      rgb(44 45 37 / 0.6);
+    color: var(--color-hud-text);
+    font-size: 10px;
+    cursor: pointer;
+    padding: 2px;
+    min-height: 30px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .wr-cmd:hover:not(:disabled) {
+    background: rgb(224 168 60 / 0.14);
+    border-color: var(--color-selection-ring);
+  }
+  .wr-cmd:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .wr-cmd--danger {
+    border-color: rgb(212 96 74 / 0.55);
+  }
+  .wr-cmd--danger:hover:not(:disabled) {
+    background: rgb(179 56 46 / 0.16);
+    border-color: var(--color-status-alert);
+  }
+  .wr-cmd--urgent {
+    border-color: var(--color-amber-glow);
+    animation: wr-cmd-urgent 1.4s ease-in-out infinite;
+  }
+  /* v4-r1: empty command cell = CLOSED-SOCKET COVER — a deliberately dormant
+     blanking plate: corner screw heads, engraved cover seam, center boss */
+  .wr-cmd--empty {
+    border-style: solid;
+    border-color: rgb(148 112 44 / 0.32);
+    opacity: 1;
+    cursor: default;
+    background:
+      radial-gradient(circle 1.6px at 6px 6px, rgb(185 145 63 / 0.55) 0 58%, transparent 72%),
+      radial-gradient(circle 1.6px at calc(100% - 6px) 6px, rgb(185 145 63 / 0.55) 0 58%, transparent 72%),
+      radial-gradient(circle 1.6px at 6px calc(100% - 6px), rgb(185 145 63 / 0.55) 0 58%, transparent 72%),
+      radial-gradient(circle 1.6px at calc(100% - 6px) calc(100% - 6px), rgb(185 145 63 / 0.55) 0 58%, transparent 72%),
+      radial-gradient(circle 10px at 50% 46%, transparent 0 6.6px, rgb(18 16 9 / 0.45) 7.2px 7.8px, rgb(216 181 97 / 0.2) 8.4px 9px, transparent 9.8px),
+      radial-gradient(circle 3.2px at 50% 46%, rgb(62 63 51 / 0.9) 0 52%, rgb(18 16 9 / 0.55) 68%, transparent 80%),
+      linear-gradient(to bottom, rgb(54 55 45 / 0.5), rgb(30 31 26 / 0.45));
+    box-shadow:
+      inset 0 1px 2px rgb(18 16 9 / 0.5),
+      inset 0 -1px 0 rgb(216 181 97 / 0.1);
+  }
+  .wr-cmd-icon {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+  .wr-cmd-label {
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  /* engraved brass keycap in the cell corner (SPEC §5 hint; §V2-1 styling) */
+  .wr-cmd-sep {
+    position: absolute;
+    white-space: pre;
+  }
+  .wr-cmd-hotkey {
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    min-width: 11px;
+    text-align: center;
+    font-family: var(--font-mono-hud);
+    font-size: 8px;
+    line-height: 1.5;
+    color: #3b2f17;
+    border: 1px solid var(--color-brass-700);
+    border-radius: 3px;
+    background: linear-gradient(to bottom, #e3c87f, #b9913f 60%, #94702c);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 200 / 0.55),
+      0 1px 1px rgb(20 15 5 / 0.5);
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.4);
+    padding: 0 2px;
+    pointer-events: none;
+  }
+  .wr-cmd:hover:not(:disabled) .wr-cmd-hotkey {
+    color: #241b0a;
+    border-color: var(--color-selection-ring);
+  }
+  .wr-cmd--empty .wr-cmd-hotkey {
+    background: rgb(58 59 48 / 0.7);
+    color: var(--color-hud-dim);
+    border-color: rgb(148 112 44 / 0.4);
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  /* --- inspector ----------------------------------------------------------------------- */
+  .wr-inspector {
+    position: absolute;
+    top: 52px;
+    right: 0;
+    bottom: 196px;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.04), transparent 30%),
+      rgb(25 26 20 / 0.96);
+    border-left: 1px solid var(--color-brass-500);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    box-shadow:
+      inset 1px 0 0 rgb(216 181 97 / 0.25),
+      -12px 0 30px rgb(58 42 18 / 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 50;
+    animation: wr-slide-left 0.22s ease-out;
+  }
+  .wr-inspector-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-glass-border);
+  }
+  /* sepia plate behind the header portrait */
+  .wr-inspector-portrait {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
+    border: 1px solid var(--color-brass-600);
+    box-shadow: inset 0 0 6px rgb(140 110 60 / 0.3);
+  }
+  .wr-inspector-id {
+    flex: 1;
+    min-width: 0;
+  }
+  .wr-inspector-name {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-hud-bright);
+    letter-spacing: 0.05em;
+  }
+  .wr-inspector-sub {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-dim);
+  }
+  /* §V4-3: the attended card's serif title under the agent identity, so a
+     retargeted Inspector visibly re-renders for the new entity. */
+  .wr-inspector-attended {
+    font-family: var(--font-serif-display);
+    font-size: 11px;
+    font-style: italic;
+    color: var(--color-hud-text);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 280px;
+  }
+  .wr-inspector-close {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--color-hud-dim);
+    background: none;
+    border: 1px solid var(--color-glass-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .wr-inspector-close:hover {
+    color: var(--color-hud-bright);
+    border-color: var(--color-selection-ring);
+  }
+  .wr-inspector-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .wr-inspector-stream {
+    list-style: none;
+    margin: 0;
+    padding: 10px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-inspector-jump {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-selection-ring);
+    background: rgb(25 26 20 / 0.95);
+    color: var(--color-selection-ring);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgb(224 168 60 / 0.35);
+  }
+  .wr-inspector-jump:hover {
+    color: var(--color-hud-bright);
+  }
+  .wr-tr {
+    font-size: 11px;
+    line-height: 1.45;
+    border-radius: 6px;
+    padding: 5px 8px;
+    word-break: break-word;
+  }
+  .wr-tr-role {
+    display: block;
+    font-family: var(--font-mono-hud);
+    font-style: normal;
+    font-size: 8px;
+    letter-spacing: 0.22em;
+    color: var(--color-brass-500);
+    margin-bottom: 2px;
+  }
+  .wr-tr--turn {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--color-hud-dim);
+    text-align: center;
+    padding: 1px;
+  }
+  .wr-tr--text {
+    background: rgb(233 220 190 / 0.07);
+    border: 1px solid rgb(185 145 63 / 0.18);
+    color: var(--color-hud-text);
+    margin-right: 18px;
+  }
+  .wr-tr--thinking {
+    background: rgb(232 181 74 / 0.06);
+    border: 1px solid rgb(232 181 74 / 0.14);
+    color: var(--color-hud-dim);
+    font-style: italic;
+    margin-right: 18px;
+  }
+  /* live thinking entry glows lamp-warm while the unit is in `thinking` */
+  .wr-tr--thinking.is-live {
+    background: linear-gradient(
+      100deg,
+      rgb(232 181 74 / 0.05) 30%,
+      rgb(232 181 74 / 0.17) 50%,
+      rgb(232 181 74 / 0.05) 70%
+    );
+    background-size: 220% 100%;
+    animation: wr-text-shimmer 1.6s linear infinite;
+  }
+  .wr-tr--tool {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-status-warn);
+    background: rgb(219 163 68 / 0.08);
+    border: 1px solid rgb(219 163 68 / 0.16);
+  }
+  .wr-tr-tool-glyph {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+  .wr-tr--tool-running .wr-tr-tool-glyph {
+    animation: wr-spin 1.4s linear infinite;
+  }
+  .wr-tr-tool-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wr-tr-tool-meta {
+    color: var(--color-hud-dim);
+    flex-shrink: 0;
+  }
+  .wr-tr--tool-failed {
+    color: var(--color-status-alert);
+    background: rgb(179 56 46 / 0.1);
+    border-color: rgb(212 96 74 / 0.3);
+  }
+  .wr-tr--tool-failed .wr-tr-tool-meta {
+    color: var(--color-status-alert);
+  }
+  .wr-tr--note {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-dim);
+  }
+
+  /* token usage footer (mono accent for numbers, kept from v1) */
+  .wr-inspector-foot {
+    display: flex;
+    gap: 12px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--color-glass-border);
+    background: rgb(22 23 15 / 0.7);
+  }
+  .wr-foot-cell {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-bright);
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .wr-foot-cell em {
+    font-style: normal;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    color: var(--color-brass-500);
+  }
+  .wr-foot-cell--cost {
+    margin-left: auto;
+    color: var(--color-amber-glow);
+  }
+
+  /* --- steer modal -------------------------------------------------------------------------- */
+  .wr-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(58 42 18 / 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+  }
+  .wr-modal {
+    width: 460px;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.05), transparent 35%),
+      rgb(30 31 25 / 0.96);
+    border: 1px solid var(--color-brass-500);
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow:
+      inset 0 0 0 1px rgb(18 16 9 / 0.9),
+      inset 0 0 0 2px rgb(216 181 97 / 0.26),
+      0 20px 60px rgb(40 28 10 / 0.6),
+      0 0 24px rgb(232 181 74 / 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: wr-modal-in 0.18s ease-out;
+  }
+  .wr-modal-targets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .wr-modal-target {
+    font-size: 10px;
+    color: var(--color-hud-bright);
+    background: rgb(227 200 127 / 0.1);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 9px;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+  .wr-modal-target--none {
+    color: var(--color-status-warn);
+    border-color: rgb(219 163 68 / 0.45);
+    background: rgb(219 163 68 / 0.08);
+  }
+  /* parchment writing inset — orders are penned in ink (§V2-1 inset) */
+  .wr-modal-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(to bottom, #f0e6c9, #e2d1a8);
+    border: 1px solid var(--color-brass-600);
+    border-radius: 6px;
+    color: var(--color-ink);
+    font-size: 13px;
+    font-family: inherit;
+    padding: 8px 10px;
+    resize: vertical;
+    min-height: 60px;
+    box-shadow: inset 0 1px 4px rgb(109 81 32 / 0.35);
+  }
+  .wr-modal-input::placeholder {
+    color: var(--color-ink-soft);
+  }
+  .wr-modal-input:focus {
+    outline: none;
+    border-color: var(--color-selection-ring);
+    box-shadow:
+      inset 0 1px 4px rgb(109 81 32 / 0.35),
+      0 0 8px rgb(224 168 60 / 0.4);
+  }
+  .wr-modal-hint {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--color-hud-dim);
+    margin-top: 6px;
+  }
+  .wr-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  /* --- narrow viewport gate (SPEC §15) -------------------------------------------------------- */
+  .wr-narrow-gate {
+    display: none;
+  }
+  @media (max-width: 1099px) {
+    .wr-narrow-gate {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at 25% 20%, rgb(255 248 224 / 0.55), transparent 55%),
+        var(--color-parchment-200);
+    }
+    .wr-narrow-gate-card {
+      text-align: center;
+      border: 1px solid var(--color-brass-500);
+      border-radius: 12px;
+      padding: 32px 40px;
+      background: var(--color-glass-fill);
+      box-shadow:
+        inset 0 0 0 1px rgb(18 16 9 / 0.9),
+        inset 0 0 0 2px rgb(216 181 97 / 0.26),
+        0 12px 30px rgb(58 42 18 / 0.45);
+    }
+    .wr-narrow-gate-card h1 {
+      font-family: var(--font-serif-display);
+      font-variant-caps: small-caps;
+      letter-spacing: 0.3em;
+      font-size: 18px;
+      color: var(--color-hud-bright);
+    }
+    .wr-narrow-gate-card p {
+      color: var(--color-hud-dim);
+      font-size: 13px;
+      max-width: 320px;
+    }
+  }
+
+  /* ======================================================================
+   * Keyframes (SPEC §3/§10 motion vocabulary — warm lamp-light edition)
+   * ==================================================================== */
+  @keyframes wr-soft-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes wr-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes wr-shimmer {
+    0%,
+    100% {
+      box-shadow: 0 0 4px rgb(232 181 74 / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 16px rgb(232 181 74 / 0.7);
+    }
+  }
+  @keyframes wr-urgent {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.12);
+      opacity: 0.75;
+    }
+  }
+  @keyframes wr-flicker {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.45;
+    }
+  }
+  @keyframes wr-flare {
+    0% {
+      box-shadow: 0 0 0 rgb(79 143 99 / 0);
+    }
+    40% {
+      box-shadow: 0 0 26px rgb(79 143 99 / 0.9);
+    }
+    100% {
+      box-shadow: 0 0 14px rgb(79 143 99 / 0.55);
+    }
+  }
+  @keyframes wr-ping-expand {
+    0% {
+      transform: scale(0.4);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(3.2);
+      opacity: 0;
+    }
+  }
+  @keyframes wr-dash {
+    to {
+      stroke-dashoffset: -24;
+    }
+  }
+  @keyframes wr-slide-in {
+    from {
+      transform: translateX(-8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes wr-slide-left {
+    from {
+      transform: translateX(24px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes wr-banner-in {
+    from {
+      transform: translate(-50%, -8px);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+  @keyframes wr-modal-in {
+    from {
+      transform: translateY(-6px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  /* "base under attack" — restrained garnet wax-seal pulse */
+  @keyframes wr-banner-pulse {
+    0%,
+    100% {
+      box-shadow:
+        inset 0 0 0 1px rgb(18 10 7 / 0.9),
+        inset 0 0 0 2px rgb(216 181 97 / 0.2),
+        0 0 12px rgb(179 56 46 / 0.3);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 0 1px rgb(18 10 7 / 0.9),
+        inset 0 0 0 2px rgb(216 181 97 / 0.2),
+        0 0 26px rgb(179 56 46 / 0.6);
+    }
+  }
+  /* urgent command cell (Approve) — amber lamp pulse */
+  @keyframes wr-cmd-urgent {
+    0%,
+    100% {
+      box-shadow: 0 0 2px rgb(232 181 74 / 0.25);
+      border-color: rgb(232 181 74 / 0.65);
+    }
+    50% {
+      box-shadow: 0 0 12px rgb(232 181 74 / 0.6);
+      border-color: var(--color-amber-glow);
+    }
+  }
+  /* counter remount tick (TopBar) */
+  @keyframes wr-count-tick {
+    from {
+      transform: translateY(0.3em);
+      opacity: 0.2;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  /* live thinking shimmer (Inspector) */
+  @keyframes wr-text-shimmer {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -120% 0;
+    }
+  }
+}
+
+/* ==========================================================================
+ * The Cogitator Board (SPEC-V3 §V3-1) — brass-framed parchment lanes
+ * ======================================================================== */
+@layer components {
+  .wr-board {
+    position: absolute;
+    /* left is 356px to permanently cede the 336px inquiry-dock gutter */
+    inset: 48px 10px 218px 356px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    z-index: 1;
+  }
+
+  .wr-lane {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* AC15: the lane chrome reads small-caps; card content resets below */
+    font-variant-caps: small-caps;
+    border: 1px solid var(--color-brass-500);
+    border-radius: 10px;
+    /* ghosted lane watermark: one large faint gear fills the empty plate
+       (§V2-1 boot composition) over the parchment gradient */
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%236f5430' stroke-opacity='.085' stroke-width='8' stroke-dasharray='7 5.6'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%236f5430' stroke-opacity='.085' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='4.5' fill='%236f5430' fill-opacity='.085'/%3E%3C/svg%3E")
+        center 42% / 150px 150px no-repeat,
+      linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(228 211 168 / 0.92));
+    /* etched double border: paired inset grooves (umber thread · parchment
+       highlight · brass thread) under the warm drop */
+    box-shadow:
+      inset 0 0 0 1px rgb(34 35 30 / 0.35),
+      inset 0 0 0 2.5px rgb(255 248 224 / 0.55),
+      inset 0 0 0 3.5px rgb(148 112 44 / 0.45),
+      inset 0 0 18px rgb(140 110 60 / 0.18),
+      0 6px 16px rgb(58 42 18 / 0.25);
+    transition: box-shadow 160ms ease, border-color 160ms ease;
+  }
+  /* corner-gear ornaments + brass rivet dots struck into the lane frame */
+  .wr-lane::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 10px;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23947030' stroke-opacity='.72' stroke-width='8' stroke-dasharray='7 5.6'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%23947030' stroke-opacity='.72' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23947030' fill-opacity='.72'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23947030' stroke-opacity='.72' stroke-width='8' stroke-dasharray='7 5.6'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%23947030' stroke-opacity='.72' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23947030' fill-opacity='.72'/%3E%3C/svg%3E"),
+      radial-gradient(circle 2.5px at 6px 6px, #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 6px) 6px, #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at 6px calc(100% - 6px), #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 6px) calc(100% - 6px), #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 1.5px at 50% 4.5px, #94702c 0%, #94702c 60%, transparent 100%),
+      radial-gradient(circle 1.5px at 50% calc(100% - 4.5px), #94702c 0%, #94702c 60%, transparent 100%);
+    background-repeat: no-repeat;
+    background-size: 16px 16px, 16px 16px, auto, auto, auto, auto, auto, auto;
+    background-position: -5px -5px, calc(100% + 5px) calc(100% + 5px), 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  /* §V3-1: legal drop lanes glow warm amber while a card is lifted */
+  .wr-lane.is-drop-legal {
+    border-color: var(--color-amber-glow);
+  }
+  .wr-lane.is-drop-target {
+    border-color: var(--color-amber-glow);
+    box-shadow:
+      inset 0 0 0 1px rgb(232 181 74 / 0.6),
+      inset 0 0 26px rgb(232 181 74 / 0.35),
+      0 0 18px rgb(232 181 74 / 0.55);
+  }
+  .wr-lane.is-drop-illegal {
+    border-color: var(--color-status-alert);
+  }
+
+  .wr-lane-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px 9px;
+    border-bottom: 1px solid rgb(148 112 44 / 0.45);
+  }
+  /* engraved ornament under each lane header: tapering hairline with a
+     central brass lens, letterpressed into the parchment (§V2-1) */
+  .wr-lane-head::after {
+    content: '';
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    bottom: 1px;
+    height: 5px;
+    pointer-events: none;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 C9 4 13 1 20 1 C27 1 31 4 40 4 C31 4 27 7 20 7 C13 7 9 4 0 4 Z' fill='%23947030' fill-opacity='.6'/%3E%3C/svg%3E"),
+      linear-gradient(to right, transparent, rgb(148 112 44 / 0.55) 30%, rgb(148 112 44 / 0.55) 70%, transparent),
+      linear-gradient(to right, transparent, rgb(255 248 224 / 0.6) 30%, rgb(255 248 224 / 0.6) 70%, transparent);
+    background-repeat: no-repeat;
+    background-size: 26px 5px, 100% 1px, 100% 1px;
+    background-position: center 0, center 2px, center 3px;
+  }
+  /* etched small-caps headers (§V2-1/§V3-1; AC15 serif + small-caps) */
+  .wr-lane-title {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 12px;
+    color: var(--color-ink);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+  }
+  .wr-lane-count {
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    min-width: 20px;
+    text-align: center;
+    padding: 1px 5px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-brass-600);
+    background: rgb(34 35 30 / 0.85);
+    color: var(--color-brass-300);
+  }
+  .wr-lane-cards {
+    font-variant-caps: normal;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-lane-empty {
+    margin: auto;
+    font-size: 11px;
+    font-style: italic;
+    color: var(--color-ink-soft);
+    opacity: 0.7;
+  }
+  /* §V4-1 release-rail empty state (v4-r0): etched small-caps caption */
+  .wr-lane-empty--rail {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.18em;
+    font-style: italic;
+    font-size: 10px;
+    text-align: center;
+    opacity: 1;
+    color: var(--color-ink-soft);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+    border-top: 1px solid rgb(148 112 44 / 0.35);
+    border-bottom: 1px solid rgb(148 112 44 / 0.35);
+    padding: 4px 8px;
+  }
+
+  /* --- cards (tasks, §V3-1) ----------------------------------------------- */
+  .wr-card {
+    position: relative;
+    border: 1px solid var(--color-brass-600);
+    border-radius: 8px;
+    background:
+      linear-gradient(to bottom, rgb(252 245 226 / 0.97), rgb(236 221 184 / 0.97));
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.5),
+      0 2px 6px rgb(58 42 18 / 0.28);
+    padding: 7px 8px;
+    cursor: pointer;
+    color: var(--color-ink);
+    transition: box-shadow 140ms ease, border-color 140ms ease;
+  }
+  .wr-card.is-draggable {
+    cursor: grab;
+  }
+  .wr-card.is-selected {
+    border-color: var(--color-selection-ring);
+    box-shadow:
+      0 0 0 1px var(--color-selection-ring),
+      0 0 12px rgb(224 168 60 / 0.6),
+      0 2px 6px rgb(58 42 18 / 0.28);
+  }
+  /* §V4-2: while the ghost rides the top-level layer, the in-lane original
+     dims to an etched placeholder slot (the lift moved onto the ghost). */
+  .wr-card.is-dragging {
+    cursor: grabbing;
+    opacity: 0.35;
+    filter: saturate(0.5);
+    border-style: dashed;
+    box-shadow: inset 0 0 0 1px rgb(148 112 44 / 0.35);
+  }
+  /* §V4-2 top-level drag ghost layer: sibling of every panel, above all HUD
+     chrome and overlays. The layer ignores the pointer; the ghost itself
+     stays hit-testable so elementFromPoint resolves it topmost (AC36) — lane
+     drop resolution skips it via elementsFromPoint. */
+  .wr-drag-ghost-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    pointer-events: none;
+  }
+  .wr-drag-ghost {
+    position: fixed;
+    pointer-events: auto;
+    cursor: grabbing;
+    transform: rotate(2.2deg);
+    filter: drop-shadow(0 14px 24px rgb(58 42 18 / 0.5));
+  }
+  /* the injected snapshot root keeps its wr-card skin; re-light it */
+  .wr-drag-ghost > .wr-card {
+    opacity: 1;
+    border-style: solid;
+    box-shadow:
+      0 6px 18px rgb(58 42 18 / 0.45),
+      0 0 0 1px var(--color-amber-glow);
+  }
+  .wr-card.is-snapback {
+    transition: transform 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    transform: translate(0, 0) rotate(0deg);
+  }
+  /* v4-r1: a gliding card must stay visible BETWEEN lanes — while a FLIP
+     move runs, the destination lane unclips its card well and rides above
+     its neighbours so the arc never disappears behind a lane frame. */
+  .wr-lane:has(.wr-card.is-moving) {
+    z-index: 30;
+  }
+  .wr-lane-cards:has(.wr-card.is-moving) {
+    overflow: visible;
+  }
+  /* §V3-3 e2e hook + brass trail while gliding between lanes */
+  .wr-card.is-moving {
+    z-index: 50;
+    box-shadow:
+      0 10px 24px rgb(58 42 18 / 0.45),
+      0 0 14px rgb(232 181 74 / 0.6);
+  }
+  .wr-card.is-moving::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 10px;
+    pointer-events: none;
+    background: linear-gradient(120deg, transparent 30%, rgb(227 200 127 / 0.5), transparent 70%);
+    background-size: 240% 100%;
+    filter: blur(3px);
+    /* §V3-3: the brass trail streams along the FLIP glide */
+    animation: wr-trail-slide 600ms linear infinite;
+  }
+  @keyframes wr-trail-slide {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -120% 0;
+    }
+  }
+  .wr-card--arrive-glow {
+    box-shadow: 0 0 16px rgb(232 181 74 / 0.8);
+  }
+
+  .wr-card-body {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .wr-card-seal {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+  .wr-card-body--mini .wr-card-seal {
+    width: 24px;
+    height: 24px;
+  }
+  .wr-card-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wr-card-title {
+    font-family: var(--font-serif-display);
+    font-size: 12.5px;
+    line-height: 1.15;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .wr-card-body--mini .wr-card-title {
+    font-size: 11px;
+    -webkit-line-clamp: 1;
+  }
+  .wr-card-chips {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  /* etched chips: parchment fill · hairline brass border · letterpress
+     text-shadow (the type reads as pressed into the paper) */
+  .wr-card-kind {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 0 5px;
+    border-radius: 4px;
+    border: 1px solid rgb(185 145 63 / 0.6);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(233 220 190 / 0.92));
+    color: var(--color-ink-soft);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+  }
+  .wr-card-dirty {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: linear-gradient(to bottom, rgb(248 238 218 / 0.92), rgb(238 220 196 / 0.92));
+    border: 1px solid rgb(185 145 63 / 0.6);
+    color: #8a3526;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow: inset 0 1px 1px rgb(138 53 38 / 0.18);
+  }
+  .wr-card-feedback {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: linear-gradient(to bottom, rgb(248 240 214 / 0.92), rgb(238 224 188 / 0.92));
+    border: 1px solid rgb(185 145 63 / 0.6);
+    color: #6d4d12;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+  }
+  .wr-card-inquiry {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    width: 14px;
+    text-align: center;
+    border-radius: 9999px;
+    background: linear-gradient(to bottom, rgb(250 242 220 / 0.96), rgb(238 222 190 / 0.96));
+    border: 1px solid rgb(185 145 63 / 0.7);
+    color: var(--color-amber-deep);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow:
+      inset 0 1px 1px rgb(109 81 32 / 0.2),
+      0 0 6px rgb(232 181 74 / 0.6);
+    animation: wr-soft-pulse 1.2s ease-in-out infinite;
+  }
+  .wr-card-ring {
+    width: 25px;
+    height: 25px;
+    flex: none;
+    color: var(--color-brass-600);
+  }
+  /* verdigris-to-amber progress arc over the etched brass track (§V2-1) */
+  .wr-ring-track {
+    stroke: var(--color-brass-600);
+  }
+  .wr-ring-arc {
+    stroke: #3f8d7d;
+  }
+  /* amber oval "eye" lamp — lit while a working agent attends the card */
+  .wr-card-eye {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 11px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 38%, #ffe9b0, var(--color-amber-glow) 55%, var(--color-amber-deep) 88%);
+    border: 1px solid var(--color-brass-700);
+    box-shadow: 0 0 7px rgb(232 181 74 / 0.85);
+    animation: wr-eye-glow 2.2s ease-in-out infinite;
+    z-index: 2;
+    pointer-events: none;
+  }
+  @keyframes wr-eye-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 4px rgb(232 181 74 / 0.5);
+      opacity: 0.8;
+    }
+    50% {
+      box-shadow: 0 0 11px rgb(232 181 74 / 0.95);
+      opacity: 1;
+    }
+  }
+  .wr-card-yolo {
+    flex: none;
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-brass-600);
+    background: transparent;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+  }
+  .wr-card-yolo.is-on {
+    background: var(--color-amber-glow);
+    border-color: var(--color-amber-deep);
+    color: var(--color-deck-900);
+    box-shadow: 0 0 8px rgb(232 181 74 / 0.7);
+  }
+  .wr-card-yolo:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* --- agent slot (§V3-1/§V3-2) ------------------------------------------- */
+  .wr-card-agents {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 0;
+  }
+  .wr-card-agents:not(:empty) {
+    margin-top: 5px;
+  }
+  /* creature portraits sit on a light parchment plate inside a brass ring —
+     no dark coin backing, so the stained-glass wing tints read (§V2-1) */
+  .wr-card-agent {
+    width: 46px;
+    height: 46px;
+    padding: 2px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--color-brass-500);
+    background:
+      radial-gradient(circle at 32% 26%, rgb(255 248 224 / 0.95), transparent 70%),
+      linear-gradient(to bottom, #f3e9cc, #ddc99c);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.6),
+      inset 0 -3px 6px rgb(140 110 60 / 0.25);
+    cursor: pointer;
+  }
+  .wr-card-agent--claude-code { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(88 179 164 / 0.65); }
+  .wr-card-agent--codex { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(208 112 124 / 0.65); }
+  .wr-card-agent--gemini-cli { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(221 171 74 / 0.65); }
+  .wr-card-agent--pi { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(169 191 87 / 0.65); }
+  .wr-card-agent-portrait {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  /* spawn = gear-assemble (~500ms, §V3-3) */
+  .wr-card-agent.is-spawning {
+    animation: wr-gear-assemble 500ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+  /* despawn = dissolve to sparks (ghost residue, no testid) */
+  .wr-card-agent--ghost {
+    pointer-events: none;
+    animation: wr-dissolve-sparks 450ms ease-out both;
+  }
+  .wr-card-agent-overflow {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-ink-soft);
+  }
+
+  /* --- stacks (§V3-1: children fanned beneath the parent) ------------------ */
+  .wr-card--stack > .wr-card-body {
+    padding-bottom: 1px;
+  }
+  .wr-card-children {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wr-card--mini {
+    padding: 4px 6px;
+    border-radius: 6px;
+    background:
+      linear-gradient(to bottom, rgb(246 236 210 / 0.95), rgb(230 213 173 / 0.95));
+    box-shadow: 0 1px 3px rgb(58 42 18 / 0.25);
+    cursor: pointer;
+  }
+
+  /* --- merged seal rows (§V3-2 terminal state) ------------------------------
+     v4-r1: full ink at rest — dimming is reserved for in-production
+     compacted crown rows (.wr-card--compact). */
+  .wr-card--merged {
+    padding: 4px 8px;
+    background:
+      linear-gradient(to bottom, rgb(236 224 192 / 0.9), rgb(220 202 158 / 0.9));
+  }
+  .wr-card--merged .wr-card-body {
+    gap: 5px;
+  }
+  .wr-card--merged .wr-card-seal {
+    width: 20px;
+    height: 20px;
+  }
+  .wr-card--merged .wr-card-title {
+    font-size: 11px;
+    -webkit-line-clamp: 1;
+  }
+  .wr-card--merged .wr-card-ring,
+  .wr-card--merged .wr-card-children {
+    display: none;
+  }
+  .wr-card-sealstamp {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background:
+      radial-gradient(circle at 35% 30%, var(--color-brass-300), var(--color-brass-600) 70%);
+    border: 1px solid var(--color-brass-700);
+    box-shadow: 0 1px 4px rgb(58 42 18 / 0.5), inset 0 0 4px rgb(255 248 224 / 0.6);
+    z-index: 2;
+  }
+
+  /* --- the release rail (§V4-1: MERGED = staging, IN PRODUCTION) ------------- */
+  /* etched lane sub-caption (MERGED: "staging" · IN PRODUCTION: "live") */
+  .wr-lane-caption {
+    text-align: center;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    opacity: 0.8;
+    padding: 3px 0 0;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.6);
+  }
+  /* the brass release lever in the MERGED lane header (col-release) */
+  .wr-release-lever {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--color-brass-700);
+    background:
+      linear-gradient(to bottom, var(--color-brass-300), var(--color-brass-500) 60%, var(--color-brass-600));
+    color: var(--color-deck-900);
+    cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.65),
+      0 1px 3px rgb(58 42 18 / 0.45);
+    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .wr-release-lever:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.7),
+      0 0 10px rgb(232 181 74 / 0.55);
+  }
+  .wr-release-lever:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  /* v4-r0: the disarmed lever stays clearly visible brass at boot — dimmed
+     and de-glossed, never ghosted out */
+  .wr-release-lever:disabled {
+    opacity: 0.8;
+    cursor: default;
+    filter: saturate(0.55) brightness(0.92);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.4),
+      0 1px 2px rgb(58 42 18 / 0.35);
+  }
+  .wr-release-lever-glyph {
+    width: 12px;
+    height: 12px;
+    display: inline-flex;
+  }
+  /* crown seal on IN PRODUCTION rows (§V4-1) */
+  .wr-card-crown {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    color: var(--color-brass-400);
+    filter: drop-shadow(0 1px 2px rgb(58 42 18 / 0.55));
+    z-index: 2;
+    display: inline-flex;
+  }
+  /* §V4-1: in-production rows compact to slim rows after 30 ticks */
+  .wr-card--compact {
+    padding: 2px 8px;
+    opacity: 0.78;
+  }
+  .wr-card--compact .wr-card-chips,
+  .wr-card--compact .wr-card-ring,
+  .wr-card--compact .wr-card-yolo,
+  .wr-card--compact .wr-card-agents {
+    display: none;
+  }
+  .wr-card--compact .wr-card-seal {
+    width: 16px;
+    height: 16px;
+  }
+  .wr-card--compact .wr-card-title {
+    font-size: 10.5px;
+    -webkit-line-clamp: 1;
+  }
+  .wr-card--compact .wr-card-crown {
+    top: -6px;
+    width: 16px;
+    height: 16px;
+  }
+
+  /* §V4-4 TopBar speed control — mono multiplier label */
+  .wr-speed-control {
+    min-width: 46px;
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+
+  /* --- the Foundry (§V2-6, Commission Task only) ---------------------------- */
+  .wr-foundry {
+    width: 380px;
+  }
+  .wr-foundry-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 8px 0;
+  }
+  .wr-foundry-label {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    color: var(--color-hud-dim);
+  }
+  .wr-foundry-input {
+    font-family: var(--font-mono-hud);
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-glass-border);
+    background: rgb(22 23 15 / 0.85);
+    color: var(--color-hud-bright);
+  }
+  .wr-foundry-input:focus {
+    outline: none;
+    border-color: var(--color-brass-500);
+    box-shadow: 0 0 8px rgb(224 168 60 / 0.35);
+  }
+
+  /* --- foundry tabs (§V4-5: Commission Task | Stacks) ------------------------ */
+  .wr-foundry--wide {
+    width: 600px;
+    max-height: calc(100% - 60px);
+    overflow-y: auto;
+  }
+  .wr-foundry-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 8px 0 4px;
+    border-bottom: 1px solid rgb(216 181 97 / 0.3);
+    padding-bottom: 6px;
+  }
+  .wr-foundry-tab {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 12px;
+    color: var(--color-hud-dim);
+    background: rgb(227 200 127 / 0.06);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+  .wr-foundry-tab.is-active {
+    color: var(--color-amber-glow);
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.12);
+    box-shadow: inset 0 0 8px rgb(232 181 74 / 0.12);
+  }
+
+  /* --- agent-stack roster + editor (§V4-5) ------------------------------------ */
+  .wr-stack-roster {
+    list-style: none;
+    margin: 6px 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .wr-stack-row {
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 8px;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.04), transparent 60%),
+      rgb(26 27 21 / 0.9);
+    padding: 6px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .wr-stack-row-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .wr-stack-name {
+    font-family: var(--font-serif-display);
+    font-size: 13px;
+    color: var(--color-hud-bright);
+    letter-spacing: 0.04em;
+  }
+  .wr-stack-adapter {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--color-glass-border);
+    border-radius: 8px;
+    padding: 0 7px;
+  }
+  .wr-stack-model {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-dim);
+  }
+  .wr-stack-phase {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-status-ok, #9fbf78);
+    border: 1px solid rgb(159 191 120 / 0.4);
+    border-radius: 8px;
+    padding: 0 6px;
+  }
+  .wr-stack-custom {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--color-amber-glow);
+    border: 1px solid rgb(232 181 74 / 0.5);
+    border-radius: 3px;
+    padding: 0 4px;
+  }
+  .wr-stack-id {
+    margin-left: auto;
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--color-hud-dim);
+  }
+  .wr-stack-row-excerpt {
+    font-style: italic;
+    font-size: 11px;
+    color: var(--color-hud-dim);
+  }
+  .wr-stack-row-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .wr-stack-btn {
+    font-size: 10px;
+    padding: 2px 10px;
+  }
+  /* v4-r1: Forge From is an etched BRASS chip with a small anvil glyph */
+  .wr-stack-btn--forge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #3b2f17;
+    border: 1px solid var(--color-brass-700);
+    background: linear-gradient(to bottom, #e3c87f, #c4a050 55%, #a8853a);
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.5);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 200 / 0.55),
+      0 1px 2px rgb(20 15 5 / 0.5);
+  }
+  .wr-stack-btn--forge:hover {
+    color: #241b0a;
+    filter: brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 200 / 0.6),
+      0 0 8px rgb(232 181 74 / 0.55);
+  }
+  .wr-forge-glyph {
+    width: 11px;
+    height: 11px;
+    display: inline-flex;
+    color: #4a3812;
+    filter: drop-shadow(0 1px 0 rgb(255 240 200 / 0.4));
+  }
+  .wr-stack-editor {
+    margin-top: 8px;
+    border-top: 1px solid rgb(216 181 97 / 0.3);
+    padding-top: 6px;
+  }
+  .wr-stack-editor-title {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--color-amber-glow);
+  }
+  .wr-stack-editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .wr-stack-prompt {
+    resize: vertical;
+    font-family: var(--font-mono-hud);
+  }
+
+  /* --- card editor (§V4-5 parchment form — v4-r0 re-skin to the parchment
+     form family: parchment dialog body, ink labels, dark inputs) ------------- */
+  .wr-card-editor {
+    width: 440px;
+    max-height: calc(100% - 60px);
+    overflow-y: auto;
+    background:
+      radial-gradient(ellipse at 30% 12%, rgb(255 248 224 / 0.55), transparent 60%),
+      linear-gradient(to bottom, #f4ebd0, #e6d7b2);
+    border: 2px solid var(--color-brass-500);
+    box-shadow:
+      inset 0 0 0 1px rgb(34 35 30 / 0.35),
+      inset 0 0 24px rgb(140 110 60 / 0.18),
+      0 20px 60px rgb(40 28 10 / 0.6);
+    color: var(--color-ink);
+  }
+  .wr-card-editor .wr-panel-title {
+    color: var(--color-ink);
+    border-bottom: 1px solid rgb(148 112 44 / 0.4);
+    padding-bottom: 6px;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+  }
+  .wr-card-editor .wr-foundry-label {
+    color: var(--color-ink-soft);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+  }
+  /* v4-r1: engraved parchment INK-WELLS — dark ink script on a recessed
+     cream well (no near-black plates inside the parchment dialog) */
+  .wr-card-editor .wr-foundry-input {
+    color: var(--color-ink);
+    background: linear-gradient(to bottom, #ece0bd, #f5ecd2 35%, #efe4c4);
+    border-color: rgb(148 112 44 / 0.7);
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.38),
+      inset 0 0 0 1px rgb(255 248 224 / 0.35),
+      0 1px 0 rgb(255 248 224 / 0.6);
+  }
+  .wr-card-editor .wr-foundry-input::placeholder {
+    color: rgb(109 81 32 / 0.55);
+  }
+  /* brass focus ring on the engraved well */
+  .wr-card-editor .wr-foundry-input:focus {
+    border-color: var(--color-brass-500);
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.32),
+      0 0 0 2px rgb(185 145 63 / 0.45),
+      0 0 8px rgb(232 181 74 / 0.35);
+  }
+  .wr-card-editor .wr-foundry-input:disabled {
+    opacity: 0.55;
+    background: rgb(220 204 164 / 0.7);
+  }
+  .wr-card-editor .wr-modal-hint {
+    color: var(--color-ink-soft);
+  }
+  /* etched-chip action buttons on the parchment plate */
+  .wr-card-editor .wr-modal-actions button {
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-soft);
+    border: 1px solid rgb(185 145 63 / 0.6);
+    border-radius: 6px;
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(233 220 190 / 0.92));
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+  .wr-card-editor .wr-modal-actions button:hover {
+    color: #6d4d12;
+    border-color: var(--color-brass-500);
+    box-shadow:
+      inset 0 1px 1px rgb(109 81 32 / 0.18),
+      0 0 6px rgb(232 181 74 / 0.45);
+  }
+  .wr-card-editor .wr-modal-actions .wr-alert-btn--approve {
+    color: #5c4516;
+    font-weight: 700;
+    border-color: var(--color-brass-500);
+  }
+  .wr-card-editor-desc {
+    resize: vertical;
+  }
+  /* v4-r0: the YOLO row is a brass LEVER — etched track, sliding brass knob */
+  .wr-card-editor-yolo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-align: left;
+    color: var(--color-ink-soft);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.9), rgb(233 220 190 / 0.9));
+    border: 1px solid rgb(148 112 44 / 0.6);
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .wr-card-editor-yolo.is-on {
+    color: #6d4d12;
+    border-color: var(--color-brass-500);
+    box-shadow:
+      inset 0 1px 1px rgb(109 81 32 / 0.18),
+      0 0 10px rgb(232 181 74 / 0.35);
+  }
+  .wr-yolo-lever {
+    flex: none;
+    position: relative;
+    width: 42px;
+    height: 16px;
+    border-radius: 9999px;
+    border: 1px solid rgb(74 56 18 / 0.8);
+    background: linear-gradient(to bottom, rgb(22 23 15 / 0.92), rgb(44 45 37 / 0.92));
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / 0.7),
+      0 1px 0 rgb(255 248 224 / 0.55);
+  }
+  .wr-yolo-lever-knob {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 16px;
+    height: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--color-brass-700);
+    background: linear-gradient(to bottom, var(--color-brass-300), var(--color-brass-500) 60%, var(--color-brass-600));
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.65),
+      0 1px 2px rgb(0 0 0 / 0.55);
+    transition: left 0.18s ease;
+  }
+  .wr-card-editor-yolo.is-on .wr-yolo-lever-knob {
+    left: 23px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.7),
+      0 0 8px rgb(232 181 74 / 0.7);
+  }
+  .wr-yolo-caption {
+    flex: 1;
+    min-width: 0;
+  }
+  .wr-foundry-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* --- selection panel edit affordance (§V4-5) ---------------------------------- */
+  .wr-sel-edit {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--color-hud-dim);
+    background: rgb(227 200 127 / 0.07);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 8px;
+    padding: 1px 8px;
+    cursor: pointer;
+  }
+  .wr-sel-edit:hover {
+    color: var(--color-amber-glow);
+    border-color: var(--color-brass-500);
+  }
+
+  /* --- inspector stack chip (§V4-5 / AC40) -------------------------------------- */
+  .wr-inspector-stack {
+    margin-left: 8px;
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--color-amber-glow);
+    border: 1px solid rgb(232 181 74 / 0.45);
+    border-radius: 8px;
+    padding: 0 7px;
+    white-space: nowrap;
+  }
+
+  /* --- the Archive overlay (§V2-3) ------------------------------------------ */
+  .wr-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 80;
+    background: rgb(22 23 15 / 0.45);
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 24px;
+  }
+  .wr-memory {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 2px solid var(--color-brass-500);
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgb(255 248 224 / 0.6), transparent 60%),
+      var(--color-parchment-100);
+    box-shadow:
+      inset 0 0 0 1px rgb(34 35 30 / 0.4),
+      0 18px 50px rgb(22 23 15 / 0.55);
+    color: var(--color-ink);
+  }
+  .wr-memory-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgb(148 112 44 / 0.45);
+  }
+  .wr-memory-head .wr-panel-title {
+    color: var(--color-ink);
+  }
+  .wr-memory-filters {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .wr-mem-chip {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-brass-600);
+    background: transparent;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+  }
+  .wr-mem-chip.is-active {
+    background: hsl(var(--mem-hue, 40) 55% 38%);
+    color: var(--color-parchment-50);
+  }
+  .wr-memory-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+  }
+  .wr-memory-silos {
+    width: 220px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+  .wr-mem-silo {
+    position: relative;
+    border: 1px solid var(--color-brass-600);
+    border-radius: 8px;
+    background: rgb(252 245 226 / 0.9);
+    padding: 8px 10px;
+  }
+  .wr-mem-silo.is-pulsing {
+    box-shadow: 0 0 14px rgb(232 181 74 / 0.8);
+  }
+  .wr-mem-silo-name {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+  }
+  .wr-mem-silo-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-ink-soft);
+  }
+  .wr-mem-pulse {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    border: 2px solid var(--color-amber-glow);
+    animation: wr-ping-expand 1.2s ease-out infinite;
+  }
+  /* parchment vignette + engraved plate-border frame (§V2-3 retheme) */
+  .wr-memory-plate {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--color-brass-600);
+    border-radius: 8px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% 42%, rgb(255 248 224 / 0.5), transparent 62%),
+      radial-gradient(ellipse at 50% 50%, transparent 58%, rgb(140 110 60 / 0.22) 100%),
+      linear-gradient(to bottom, #f2e8ca, #e4d3a8);
+    box-shadow:
+      inset 0 0 0 1px rgb(34 35 30 / 0.3),
+      inset 0 0 0 3.5px rgb(255 248 224 / 0.5),
+      inset 0 0 0 4.5px rgb(148 112 44 / 0.4),
+      inset 0 0 26px rgb(140 110 60 / 0.2);
+  }
+  /* corner rivets struck into the plate frame */
+  .wr-memory-plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle 2.5px at 8px 8px, #e3c87f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 8px) 8px, #e3c87f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at 8px calc(100% - 8px), #e3c87f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 8px) calc(100% - 8px), #e3c87f 0%, #94702c 55%, transparent 100%);
+  }
+  .wr-memory-graph {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* faint sepia ink strokes (gentle curvature comes from the quadratic
+     path geometry); incident edges of the hovered/selected node brighten
+     to inked brass while the rest recede */
+  .wr-mem-edge {
+    stroke: rgb(122 99 60 / 0.28);
+    stroke-width: 1;
+    transition: stroke 150ms ease, stroke-width 150ms ease, opacity 150ms ease;
+  }
+  /* v4-r1: incident edges are tapered inked threads — the stroke is a
+     per-edge userSpaceOnUse gradient (MemoryOverlay) falling off from the
+     focused node; the fallback stroke sits at ~0.4 */
+  .wr-mem-edge.is-incident {
+    stroke: rgb(148 112 44 / 0.4);
+    stroke-width: 1.6;
+  }
+  .wr-mem-edge.is-faded {
+    opacity: 0.3;
+  }
+  .wr-mem-node {
+    cursor: pointer;
+  }
+  /* wax-seal node: brass ring · jewel-glass wax disc with engraved sepia
+     edge · porcelain gloss bead (§V2-1 four-faction glass tints) */
+  .wr-mem-node-ring {
+    fill: none;
+    stroke: var(--color-brass-500);
+    stroke-width: 2.4;
+  }
+  .wr-mem-node-dot {
+    fill: hsl(var(--mem-hue, 40) 52% 38%);
+    stroke: #4a3812;
+    stroke-width: 1.3;
+  }
+  .wr-mem-node-gloss {
+    fill: rgb(255 248 224 / 0.45);
+    pointer-events: none;
+  }
+  .wr-mem-node.is-dimmed {
+    opacity: 0.3;
+  }
+  .wr-mem-node.is-held .wr-mem-node-dot {
+    stroke: var(--color-amber-glow);
+    stroke-width: 3;
+  }
+  .wr-mem-node.is-focused .wr-mem-node-dot {
+    stroke: var(--color-selection-ring);
+    stroke-width: 3;
+  }
+  .wr-mem-node-pulse {
+    fill: none;
+    stroke: var(--color-amber-glow);
+    stroke-width: 2;
+    animation: wr-node-pulse 1.2s ease-out infinite;
+  }
+  .wr-mem-node-label {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    fill: var(--color-ink);
+    pointer-events: none;
+    /* crisp vector legibility halo (paint-order stroke — never a blurry
+       rasterized glow, §V4-10 as polished in v4-r0) */
+    stroke: rgb(247 238 215 / 0.9);
+    stroke-width: 2.4;
+    paint-order: stroke;
+    stroke-linejoin: round;
+  }
+  .wr-mem-card {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 260px;
+    border: 1px solid var(--color-brass-500);
+    border-radius: 8px;
+    background: rgb(252 245 226 / 0.97);
+    box-shadow: 0 8px 20px rgb(58 42 18 / 0.4);
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  .wr-mem-card-title {
+    font-family: var(--font-serif-display);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .wr-mem-card-row {
+    display: flex;
+    gap: 8px;
+    color: var(--color-ink-soft);
+    margin: 2px 0;
+  }
+  .wr-mem-card-status--approved { color: #4f8f63; }
+  .wr-mem-card-status--draft { color: #6d4d12; }
+  .wr-mem-card-status--deprecated,
+  .wr-mem-card-status--archived { color: #8a3526; }
+  .wr-mem-card-summary {
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  @keyframes wr-gear-assemble {
+    0% {
+      transform: scale(0.2) rotate(-160deg);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.12) rotate(12deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+  }
+  @keyframes wr-dissolve-sparks {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+      filter: blur(0);
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+      filter: blur(4px);
+    }
+  }
+  @keyframes wr-node-pulse {
+    0% {
+      r: 9;
+      opacity: 0.9;
+    }
+    100% {
+      r: 22;
+      opacity: 0;
+    }
+  }
+
+  /* §V3-3: reduced motion collapses transitions to instant + glow */
+  @media (prefers-reduced-motion: reduce) {
+    .wr-card,
+    .wr-lane,
+    .wr-card.is-snapback {
+      transition: none;
+    }
+    .wr-card-agent.is-spawning,
+    .wr-card-agent--ghost,
+    .wr-card-inquiry,
+    .wr-card-eye,
+    .wr-card.is-moving::after,
+    .wr-mem-pulse,
+    .wr-mem-node-pulse {
+      animation: none;
+    }
+  }
+}
+
+/* ==========================================================================
+ * UI-PANELS phase (SPEC-V2 §V2-5/§V2-7 + SPEC-V3 §V3-4/§V3-5):
+ * Inspector tabs · Process pipeline · Workspace plates · Human Review panel
+ * · Inquiry Dock. Cogitator tokens only — parchment/brass/slate/amber.
+ * ======================================================================== */
+@layer components {
+  /* --- inspector tabs ----------------------------------------------------- */
+  .wr-inspector-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 6px 10px 0;
+    border-bottom: 1px solid var(--color-glass-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+  }
+  .wr-inspector-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .wr-inspector-tab {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--color-hud-dim);
+    background: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 7px 7px 0 0;
+    padding: 4px 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .wr-inspector-tab:hover {
+    color: var(--color-hud-bright);
+  }
+  .wr-inspector-tab.is-active {
+    color: var(--color-brass-300);
+    border-color: var(--color-brass-600);
+    background: linear-gradient(to bottom, rgb(227 200 127 / 0.12), transparent);
+    box-shadow: inset 0 1px 0 rgb(216 181 97 / 0.3);
+  }
+  .wr-tab-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-hud-dim);
+    font-size: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  /* --- process tab (§V2-5, AC20) ------------------------------------------ */
+  .wr-process {
+    padding: 8px 10px;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .wr-process-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wr-runstate {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--color-brass-600);
+    color: var(--color-hud-text);
+    background: rgb(227 200 127 / 0.08);
+  }
+  .wr-runstate--waiting {
+    color: var(--color-amber-glow);
+    border-color: var(--color-amber-glow);
+    box-shadow: 0 0 6px rgb(232 181 74 / 0.4);
+  }
+  .wr-runstate--completed {
+    color: var(--color-status-ok);
+    border-color: var(--color-status-ok);
+  }
+  .wr-runstate--failed,
+  .wr-runstate--halted {
+    color: var(--color-status-alert);
+    border-color: var(--color-status-alert);
+  }
+  .wr-process-runid {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* brass stage pipeline: done = filled · live = glowing amber + gear ·
+     pending = etched outline */
+  .wr-stage-pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .wr-stage {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 9px;
+    border: 1px solid var(--color-brass-600);
+    color: var(--color-hud-dim);
+  }
+  .wr-stage--done {
+    background: linear-gradient(to bottom, #e3c87f, #b9913f 70%);
+    color: #241b0a;
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.4);
+  }
+  .wr-stage--now {
+    color: var(--color-amber-glow);
+    border-color: var(--color-amber-glow);
+    box-shadow: 0 0 8px rgb(232 181 74 / 0.5), inset 0 0 4px rgb(232 181 74 / 0.2);
+    animation: wr-soft-pulse 2.2s ease-in-out infinite;
+  }
+  .wr-stage--pending {
+    border-style: dashed;
+    opacity: 0.75;
+  }
+  .wr-stage-gear {
+    width: 11px;
+    height: 11px;
+    color: var(--color-amber-glow);
+    animation: wr-gear-spin 2.6s linear infinite;
+  }
+  @keyframes wr-gear-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .wr-effect-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .wr-effect-chip {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 5px;
+    border: 1px solid var(--color-glass-border);
+    color: var(--color-hud-text);
+  }
+  .wr-effect-chip--pulse {
+    color: var(--color-status-warn);
+    border-color: var(--color-status-warn);
+    animation: wr-urgent 1.1s ease-in-out infinite;
+  }
+  .wr-journal {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0 0;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    border-top: 1px solid rgb(185 145 63 / 0.25);
+  }
+  .wr-journal-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-text);
+    padding: 1px 2px;
+    white-space: nowrap;
+  }
+  .wr-journal-seq {
+    color: var(--color-brass-500);
+  }
+  .wr-journal-type {
+    color: var(--color-hud-dim);
+  }
+  .wr-journal-type--effect_resolved {
+    color: var(--color-status-ok);
+  }
+  .wr-journal-type--run_failed,
+  .wr-journal-type--process_runtime_error {
+    color: var(--color-status-alert);
+  }
+  .wr-journal-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-hud-bright);
+  }
+  .wr-journal-ts {
+    color: var(--color-hud-dim);
+  }
+
+  /* --- workspace surfaces (§V2-7, shared with the review panel) ----------- */
+  .wr-workspace {
+    padding: 8px 10px;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .wr-workspace-scroll {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+  .wr-ws-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgb(185 145 63 / 0.25);
+  }
+  .wr-ws-branch {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-brass-300);
+  }
+  .wr-ws-branch::before {
+    content: '\2387\00a0';
+    color: var(--color-brass-600);
+  }
+  .wr-ws-sha,
+  .wr-ws-aheadbehind,
+  .wr-ws-phase {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-hud-dim);
+  }
+  .wr-ws-evidence {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--color-glass-border);
+    color: var(--color-hud-text);
+  }
+  .wr-ws-evidence--passed {
+    color: var(--color-status-ok);
+    border-color: var(--color-status-ok);
+  }
+  .wr-ws-evidence--failed {
+    color: var(--color-status-alert);
+    border-color: var(--color-status-alert);
+  }
+  .wr-ws-dirty {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--color-status-warn);
+    color: var(--color-status-warn);
+  }
+  .wr-ws-clean {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    color: var(--color-status-ok);
+  }
+  .wr-ws-files {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 4px;
+  }
+  .wr-ws-empty {
+    color: var(--color-hud-dim);
+    font-size: 11px;
+    padding: 8px 2px;
+  }
+  /* file rows read as parchment dossier slips (§V3-4 sepia dossier) */
+  .wr-ws-file {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    text-align: left;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.85), rgb(222 204 160 / 0.85));
+    border: 1px solid rgb(148 112 44 / 0.45);
+    border-radius: 6px;
+    padding: 3px 6px;
+    cursor: pointer;
+    color: var(--color-ink);
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.4);
+  }
+  .wr-ws-file:hover {
+    border-color: var(--color-selection-ring);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.95), rgb(228 211 168 / 0.95));
+  }
+  .wr-ws-file.is-open {
+    border-color: var(--color-brass-500);
+    background: linear-gradient(to bottom, rgb(250 242 222 / 0.97), rgb(233 217 178 / 0.97));
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.5),
+      0 0 6px rgb(232 181 74 / 0.3);
+  }
+  .wr-ws-status {
+    flex-shrink: 0;
+    width: 14px;
+    text-align: center;
+    font-weight: 700;
+    border-radius: 4px;
+  }
+  /* ink-grade status letters — sepia-legible on the parchment slips */
+  .wr-ws-status--A {
+    color: #3f7a4e;
+  }
+  .wr-ws-status--M {
+    color: #8a5a14;
+  }
+  .wr-ws-status--D {
+    color: #8a3526;
+  }
+  .wr-ws-path {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wr-ws-counts {
+    flex-shrink: 0;
+    display: flex;
+    gap: 5px;
+  }
+  .wr-ws-adds,
+  .wr-ws-dels {
+    font-style: normal;
+    font-size: 10px;
+  }
+  .wr-ws-adds {
+    color: var(--color-status-ok);
+  }
+  .wr-ws-dels {
+    color: var(--color-status-alert);
+  }
+
+  /* sepia parchment diff plate: verdigris additions · garnet deletions ·
+     engraved line numbers (§V2-7/§V3-4) */
+  .wr-diff-plate {
+    margin: 2px 0 6px 20px;
+    border: 1px solid var(--color-brass-600);
+    border-radius: 7px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #f0e6c9, #e9dcbe);
+    box-shadow: inset 0 0 10px rgb(140 110 60 / 0.25);
+  }
+  /* v4-r0: inner scroll region — long rows scroll horizontally instead of
+     wrapping, and a mask-image gradient fades overflowing row text into the
+     plate's right edge (the brass border itself stays un-masked) */
+  .wr-diff-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    mask-image: linear-gradient(to right, #000 calc(100% - 22px), rgb(0 0 0 / 0.1));
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 22px), rgb(0 0 0 / 0.1));
+  }
+  .wr-diff-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: var(--font-mono-hud);
+    font-size: 9.5px;
+    color: var(--color-ink);
+    padding: 0 6px;
+    white-space: pre;
+    width: max-content;
+    min-width: 100%;
+  }
+  .wr-diff-num {
+    flex-shrink: 0;
+    width: 18px;
+    text-align: right;
+    color: rgb(111 95 68 / 0.65);
+    border-right: 1px solid rgb(122 99 60 / 0.3);
+    padding-right: 4px;
+  }
+  /* the engraved number is CSS content (kept out of textContent, AC42) */
+  .wr-diff-num::before {
+    content: attr(data-n);
+  }
+  .wr-diff-marker {
+    flex-shrink: 0;
+    width: 8px;
+    font-weight: 700;
+  }
+  .wr-diff-text {
+    flex: 1;
+    overflow-wrap: normal;
+  }
+  .wr-diff-add {
+    background: rgb(88 179 164 / 0.22);
+  }
+  .wr-diff-add .wr-diff-marker,
+  .wr-diff-add .wr-diff-text {
+    color: #1f5a4e;
+  }
+  .wr-diff-del {
+    background: rgb(208 112 124 / 0.2);
+  }
+  .wr-diff-del .wr-diff-marker,
+  .wr-diff-del .wr-diff-text {
+    color: #7c2f33;
+  }
+  .wr-diff-meta {
+    background: rgb(122 99 60 / 0.14);
+    color: var(--color-ink-soft);
+    font-style: italic;
+  }
+
+  /* --- human review side panel (§V3-4, AC30) ------------------------------- */
+  .wr-review {
+    position: absolute;
+    top: 52px;
+    right: 0;
+    bottom: 196px;
+    width: 420px;
+    display: flex;
+    flex-direction: column;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.04), transparent 30%),
+      rgb(25 26 20 / 0.97);
+    border-left: 1px solid var(--color-brass-500);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    box-shadow:
+      inset 1px 0 0 rgb(216 181 97 / 0.25),
+      -12px 0 30px rgb(58 42 18 / 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 55;
+    animation: wr-slide-left 0.22s ease-out;
+  }
+  .wr-review-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-glass-border);
+  }
+  .wr-review-seal {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
+    border: 1px solid var(--color-brass-600);
+    box-shadow: inset 0 0 6px rgb(140 110 60 / 0.3);
+    padding: 4px;
+  }
+  .wr-review-id {
+    flex: 1;
+    min-width: 0;
+  }
+  /* v5-r1 (2): the title WRAPS to at most two lines instead of truncating. */
+  .wr-review-title {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-hud-bright);
+    letter-spacing: 0.05em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .wr-review-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 10px;
+  }
+  .wr-review-section {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--color-brass-400);
+    margin: 10px 0 4px;
+  }
+  .wr-review-notes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  /* reviewer notes are inked on parchment slips — one sepia dossier (§V3-4) */
+  .wr-review-note {
+    font-family: var(--font-serif-display);
+    font-size: 11px;
+    color: var(--color-ink);
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.92), rgb(222 204 160 / 0.92));
+    border: 1px solid rgb(148 112 44 / 0.5);
+    border-radius: 7px;
+    padding: 5px 8px;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.45),
+      inset 0 1px 3px rgb(109 81 32 / 0.2);
+  }
+  .wr-review-note::before {
+    content: '\201C';
+    color: var(--color-brass-600);
+    margin-right: 3px;
+  }
+  .wr-review-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--color-glass-border);
+  }
+  .wr-review-btn {
+    flex: 1;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 7px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--color-brass-600);
+    background: linear-gradient(to bottom, rgb(227 200 127 / 0.14), rgb(109 81 32 / 0.14));
+    color: var(--color-hud-text);
+    cursor: pointer;
+  }
+  .wr-review-btn:hover {
+    border-color: var(--color-selection-ring);
+    color: var(--color-hud-bright);
+  }
+  .wr-review-btn--approve {
+    border-color: var(--color-status-ok);
+    color: var(--color-status-ok);
+  }
+  .wr-review-btn--approve:hover {
+    background: rgb(132 178 116 / 0.16);
+    color: #b8e0a8;
+  }
+  .wr-review-btn--reject {
+    border-color: var(--color-status-alert);
+    color: var(--color-status-alert);
+  }
+  .wr-review-btn--reject:hover {
+    background: rgb(212 96 74 / 0.14);
+  }
+  .wr-review-feedback {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-review-feedback-input {
+    width: 100%;
+    resize: vertical;
+    font-size: 11px;
+    color: var(--color-hud-bright);
+    background: rgb(34 35 30 / 0.9);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 7px;
+    padding: 6px 8px;
+  }
+  .wr-review-feedback-input:focus {
+    outline: none;
+    border-color: var(--color-selection-ring);
+  }
+  .wr-review-feedback-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* --- inquiry dock (§V3-5, AC32 — replaced the AlertBanner) ---------------
+   * The dock is a PERSISTENT left-hand gutter column (always visible).
+   * It shows an engraved empty-state when no inquiries are pending.
+   * The board always cedes the gutter — no conditional :has() needed. */
+  .wr-dock {
+    position: absolute;
+    left: 10px;
+    top: 48px;
+    bottom: 218px;
+    width: 336px;
+    display: flex;
+    flex-direction: column;
+    z-index: 45;
+    pointer-events: none;
+    /* etched brass-framed parchment column — same family as .wr-lane */
+    background:
+      linear-gradient(to bottom, rgb(255 248 224 / 0.035), transparent 30%),
+      linear-gradient(160deg, rgb(185 145 63 / 0.06) 0%, transparent 60%),
+      var(--color-glass-fill);
+    border: 1px solid var(--color-brass-600);
+    border-radius: 10px;
+    box-shadow:
+      inset 0 0 0 1px rgb(18 16 9 / 0.7),
+      inset 0 0 0 2px rgb(216 181 97 / 0.1),
+      0 4px 18px rgb(20 15 5 / 0.35);
+    padding: 8px 8px 10px;
+  }
+  .wr-dock > * {
+    pointer-events: auto;
+  }
+  /* empty-state: centred engraved plate */
+  .wr-dock--empty .wr-dock-stack {
+    display: none;
+  }
+  .wr-dock-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 12px;
+    pointer-events: none;
+    user-select: none;
+  }
+  .wr-dock-empty-gear {
+    width: 52px;
+    height: 52px;
+    color: var(--color-brass-500);
+    opacity: 0.55;
+    fill: var(--color-brass-500);
+    filter: drop-shadow(0 2px 4px rgb(20 15 5 / 0.5));
+    animation: wr-dock-gear-spin 18s linear infinite;
+  }
+  @keyframes wr-dock-gear-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .wr-dock-empty-quill {
+    width: 28px;
+    height: 28px;
+    color: var(--color-brass-400);
+    fill: var(--color-brass-400);
+    opacity: 0.4;
+    margin-top: -4px;
+  }
+  .wr-dock-empty-label {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--color-brass-400);
+    text-align: center;
+    opacity: 0.7;
+    margin: 0;
+    text-shadow: 0 1px 3px rgb(20 15 5 / 0.6);
+  }
+  .wr-dock-empty-sub {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--color-brass-600);
+    text-align: center;
+    opacity: 0.55;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .wr-dock.is-pulsing .wr-inq {
+    box-shadow: 0 0 0 2px var(--color-selection-ring), 0 10px 24px rgb(58 42 18 / 0.5);
+  }
+  .wr-dock-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    color: var(--color-brass-400);
+    margin-bottom: 4px;
+    text-shadow: 0 1px 2px rgb(20 15 5 / 0.7);
+  }
+  .wr-dock-more {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--color-status-warn);
+    border: 1px solid var(--color-status-warn);
+    border-radius: 5px;
+    padding: 0 5px;
+  }
+  .wr-dock-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .wr-inq {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.06), transparent 40%),
+      var(--color-glass-fill);
+    border: 1px solid var(--color-brass-500);
+    border-radius: 10px;
+    box-shadow:
+      inset 0 0 0 1px rgb(18 16 9 / 0.9),
+      inset 0 0 0 2px rgb(216 181 97 / 0.22),
+      inset 0 0 0 4px rgb(233 220 190 / 0.06),
+      0 10px 24px rgb(58 42 18 / 0.45);
+    padding: 8px;
+    animation: wr-slide-in 0.25s ease-out;
+    position: relative;
+  }
+  .wr-inq-portrait {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background:
+      radial-gradient(circle at 32% 26%, rgb(255 248 224 / 0.95), transparent 70%),
+      linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
+    border: 1px solid var(--color-brass-600);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.5),
+      inset 0 0 5px rgb(140 110 60 / 0.3);
+    padding: 2px;
+  }
+  .wr-inq-main {
+    flex: 1;
+    min-width: 0;
+  }
+  /* the question is penned on a brass-edged parchment inset plate (§V2-1) */
+  .wr-inq-question {
+    font-family: var(--font-serif-display);
+    font-size: 12px;
+    color: var(--color-ink);
+    margin-bottom: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-brass-600);
+    background: linear-gradient(to bottom, #f0e6c9, #e2d1a8);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.55),
+      inset 0 1px 4px rgb(109 81 32 / 0.3);
+  }
+  .wr-inq-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  /* AskUserQuestion-style option: engraved icon ABOVE a short caption */
+  .wr-inq-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 58px;
+    max-width: 96px;
+    padding: 5px 6px;
+    border: 1px solid var(--color-brass-600);
+    border-radius: 8px;
+    background: linear-gradient(to bottom, rgb(227 200 127 / 0.1), rgb(58 59 48 / 0.5));
+    color: var(--color-hud-text);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .wr-inq-opt:hover {
+    border-color: var(--color-selection-ring);
+    box-shadow: 0 0 8px rgb(232 181 74 / 0.4);
+  }
+  .wr-inq-opt--danger {
+    border-color: #c25a5a;
+    background: linear-gradient(to bottom, rgb(194 90 90 / 0.14), rgb(58 59 48 / 0.5));
+  }
+  .wr-inq-opt--danger:hover {
+    border-color: var(--color-status-alert);
+    box-shadow: 0 0 8px rgb(212 96 74 / 0.45);
+  }
+  .wr-inq-opt--primary {
+    border-color: var(--color-brass-300);
+    box-shadow: 0 0 7px rgb(232 181 74 / 0.4);
+  }
+  .wr-inq-opt-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .wr-inq-opt-caption {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .wr-inq-resolved {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 11px;
+    color: var(--color-status-ok);
+  }
+  /* wax-stamp resolution: the bubble seals and fades out (§V3-5) */
+  .wr-inq--stamped {
+    animation: wr-inq-stamp-out 0.65s ease-in forwards;
+  }
+  .wr-inq-stamp {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--color-status-ok);
+    box-shadow: inset 0 0 5px rgb(132 178 116 / 0.6);
+    animation: wr-inq-stamp-hit 0.3s ease-out;
+  }
+  @keyframes wr-inq-stamp-hit {
+    0% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(0.92);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes wr-inq-stamp-out {
+    0%,
+    55% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+      filter: blur(2px);
+    }
+  }
+
+  /* transcript inline inquiry bubbles (§V3-5) */
+  .wr-tr--inquiry {
+    border: 1px solid var(--color-brass-600);
+    border-radius: 8px;
+    background: rgb(227 200 127 / 0.07);
+    padding: 6px 8px;
+    margin: 4px 0;
+  }
+  .wr-tr--inquiry.is-resolved {
+    border-color: rgb(132 178 116 / 0.5);
+  }
+
+  /* inquiry focus-button (portrait + question as a clickable header) */
+  .wr-inq-focus-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+  }
+  .wr-inq-focus-btn:hover {
+    background: rgb(216 181 97 / 0.1);
+  }
+  .wr-inq-focus-btn:hover .wr-inq-question {
+    box-shadow:
+      inset 0 0 0 1px rgb(216 181 97 / 0.35),
+      inset 0 1px 4px rgb(109 81 32 / 0.3);
+  }
+  /* when we use a focus-btn the .wr-inq layout adjusts */
+  .wr-inq:has(.wr-inq-focus-btn) {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-inq-focus-btn .wr-inq-question {
+    margin-bottom: 0;
+    text-align: left;
+  }
+
+  /* --- roster agent tab (Foundry Agents tab) -------------------------------- */
+  .wr-roster-row {
+    /* inherits from .wr-stack-row */
+  }
+  .wr-roster-role {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 8px;
+    padding: 0 6px;
+  }
+  .wr-roster-role--worker {
+    color: #9fbf78;
+    border: 1px solid rgb(159 191 120 / 0.4);
+  }
+  .wr-roster-role--reviewer {
+    color: #78a9bf;
+    border: 1px solid rgb(120 169 191 / 0.4);
+  }
+  .wr-roster-assigned {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-amber-glow);
+    border: 1px solid rgb(232 181 74 / 0.45);
+    border-radius: 8px;
+    padding: 0 6px;
+  }
+  .wr-roster-empty {
+    list-style: none;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--color-hud-dim);
+    padding: 6px 0;
+    text-align: center;
+  }
+
+  /* --- assignment chips on backlog cards ------------------------------------ */
+  .wr-assign-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 0 2px;
+    border-top: 1px solid rgb(216 181 97 / 0.14);
+    margin-top: 2px;
+  }
+  .wr-assign-slot {
+    position: relative;
+    display: inline-flex;
+  }
+  .wr-assign-chip {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 1px 5px;
+    border-radius: 6px;
+    border: 1px solid rgb(216 181 97 / 0.22);
+    background: rgb(26 27 21 / 0.6);
+    color: var(--color-hud-dim);
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .wr-assign-chip:hover {
+    border-color: rgb(216 181 97 / 0.5);
+    color: var(--color-hud-text);
+  }
+  .wr-assign-chip.is-set {
+    color: var(--color-hud-bright);
+    border-color: rgb(216 181 97 / 0.5);
+    background: rgb(216 181 97 / 0.1);
+  }
+  .wr-assign-chip--worker.is-set {
+    color: #9fbf78;
+    border-color: rgb(159 191 120 / 0.5);
+    background: rgb(159 191 120 / 0.08);
+  }
+  .wr-assign-chip--reviewer.is-set {
+    color: #78a9bf;
+    border-color: rgb(120 169 191 / 0.5);
+    background: rgb(120 169 191 / 0.08);
+  }
+  .wr-assign-chip--human.is-set {
+    color: var(--color-amber-glow);
+    border-color: rgb(232 181 74 / 0.5);
+    background: rgb(232 181 74 / 0.08);
+  }
+  .wr-assign-chip-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  .wr-assign-popover {
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 0;
+    z-index: 60;
+    min-width: 140px;
+    background: var(--color-deck-800);
+    border: 1px solid var(--color-brass-500);
+    border-radius: 8px;
+    box-shadow:
+      0 8px 24px rgb(10 8 3 / 0.65),
+      inset 0 0 0 1px rgb(216 181 97 / 0.15);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wr-assign-pop-opt {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: none;
+    background: none;
+    color: var(--color-hud-text);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wr-assign-pop-opt:hover {
+    background: rgb(216 181 97 / 0.1);
+  }
+  .wr-assign-pop-opt.is-selected {
+    color: var(--color-amber-glow);
+    background: rgb(232 181 74 / 0.1);
+  }
+  .wr-assign-pop-opt.is-busy {
+    opacity: 0.45;
+  }
+  .wr-assign-pop-opt--clear {
+    color: var(--color-hud-dim);
+    font-style: italic;
+    border-bottom: 1px solid rgb(216 181 97 / 0.15);
+    border-radius: 0;
+    margin-bottom: 2px;
+    padding-bottom: 5px;
+  }
+  .wr-assign-pop-adapter {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .wr-assign-pop-empty {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    color: var(--color-hud-dim);
+    font-style: italic;
+    padding: 4px 8px;
+  }
+
+  /* sel-stage chip (§V2-5) */
+  .wr-sel-stage {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--color-amber-glow);
+    color: var(--color-amber-glow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wr-stage-gear,
+    .wr-effect-chip--pulse,
+    .wr-inq,
+    .wr-inq--stamped,
+    .wr-inq-stamp,
+    .wr-review,
+    .wr-stage--now {
+      animation: none;
+    }
+  }
+}
+
+/* ===========================================================================
+ * OPS-VIEWS-V4 (SPEC-V4 §V4-6 runs ledger + process library, §V4-9 memory
+ * I/O tab, §V4-10 archive navigation) — cogitator parchment + brass grammar.
+ * ======================================================================== */
+@layer components {
+  /* --- runs ledger overlay (§V4-6) ---------------------------------------- */
+  .wr-runs {
+    display: flex;
+    flex-direction: column;
+  }
+  .wr-runs-tabs {
+    margin: 0 12px;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  /* v4-r0 ruled-ledger ground: faint horizontal rules + the red margin line
+     (an accountant's parchment ledger) behind both the Runs and Processes
+     tabs */
+  .wr-runs-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px 14px 10px 40px;
+    background:
+      linear-gradient(to right, transparent 27px, rgb(168 62 50 / 0.3) 27px, rgb(168 62 50 / 0.3) 28.5px, transparent 28.5px),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 23px,
+        rgb(122 99 60 / 0.14) 23px,
+        rgb(122 99 60 / 0.14) 24px
+      );
+  }
+  .wr-runs-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-runs-row {
+    display: grid;
+    grid-template-columns: 110px minmax(160px, 1.4fr) 70px minmax(140px, 1fr) 86px 90px minmax(90px, 1fr) 130px 130px;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+  }
+  .wr-runs-row:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.09);
+  }
+  /* §V4-6 column-header row (v4-r0): etched small-caps, not clickable */
+  .wr-runs-colhead {
+    cursor: default;
+    border-color: rgb(148 112 44 / 0.5);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.6), rgb(233 220 190 / 0.5));
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+  .wr-runs-colhead > span {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    color: var(--color-ink-soft);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-runs-id,
+  .wr-runs-process,
+  .wr-runs-tokens,
+  .wr-runs-times {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-ink-soft);
+  }
+  /* v4-r0 readability: the card-title column carries full ink weight */
+  .wr-runs-title {
+    font-family: var(--font-serif-display);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* v4-r0 readability: pending-effects chips inked for parchment — etched
+     chip treatment instead of the HUD's dim glass (they read as data, not
+     as disabled controls) */
+  .wr-runs .wr-effect-chip {
+    border: 1px solid rgb(148 112 44 / 0.65);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(233 220 190 / 0.92));
+    color: #5c4516;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+  }
+  .wr-runs .wr-effect-chip--pulse {
+    color: #8a3526;
+    border-color: rgb(138 53 38 / 0.7);
+  }
+  /* the promoted ProcessTab + journal sit on parchment inside the ledger —
+     re-ink the HUD-dim text */
+  .wr-runs .wr-journal-row {
+    color: var(--color-ink-soft);
+  }
+  .wr-runs .wr-journal-label {
+    color: var(--color-ink);
+  }
+  .wr-runs .wr-journal-type,
+  .wr-runs .wr-journal-ts {
+    color: var(--color-ink-soft);
+  }
+  .wr-runs .wr-journal-seq {
+    color: #8a6a1e;
+  }
+  .wr-runs .wr-journal-type--effect_resolved {
+    color: #2f6e4f;
+  }
+  .wr-runs .wr-journal-type--run_failed,
+  .wr-runs .wr-journal-type--process_runtime_error {
+    color: #8a3526;
+  }
+  .wr-runs .wr-runstate {
+    color: var(--color-ink-soft);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+  }
+  .wr-runs .wr-tab-empty {
+    color: var(--color-ink-soft);
+    font-style: italic;
+  }
+  /* §V4-6 ornamental footer colophon (v4-r0) */
+  .wr-runs-colophon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 5px 14px 7px;
+    border-top: 1px solid rgb(148 112 44 / 0.35);
+    color: rgb(148 112 44 / 0.75);
+  }
+  .wr-runs-colophon-orn {
+    width: 60px;
+    height: 10px;
+    flex: none;
+  }
+  .wr-runs-colophon-text {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-style: italic;
+    letter-spacing: 0.22em;
+    font-size: 9.5px;
+    color: var(--color-ink-soft);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+    white-space: nowrap;
+  }
+  .wr-runs-pipeline {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .wr-runs-stage {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    border: 1px solid var(--color-brass-600);
+    background: transparent;
+    display: inline-block;
+  }
+  .wr-runs-stage.is-done {
+    background: var(--color-brass-500);
+  }
+  .wr-runs-stage.is-now {
+    background: var(--color-amber-glow);
+    border-color: var(--color-amber-glow);
+    box-shadow: 0 0 5px rgb(232 181 74 / 0.7);
+  }
+  .wr-runs-effects {
+    display: inline-flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .wr-run-detail {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+  }
+  .wr-run-detail-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 2px 10px;
+    border-bottom: 1px solid rgb(216 181 97 / 0.3);
+    margin-bottom: 8px;
+  }
+  /* v4-r0: the run-detail journal FILLS the ledger height (auto-follow
+     scroll region) instead of stopping at a 40vh plate */
+  .wr-run-detail .wr-inspector-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .wr-run-detail .wr-journal {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
+  .wr-runs-back {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--color-amber-glow);
+    border: 1px solid var(--color-brass-600);
+    border-radius: 6px;
+    background: rgb(227 200 127 / 0.07);
+    padding: 3px 10px;
+    cursor: pointer;
+  }
+  .wr-runs-back:hover {
+    border-color: var(--color-amber-glow);
+  }
+  .wr-runs-note {
+    font-size: 10px;
+    font-style: italic;
+    color: var(--color-hud-dim);
+    padding: 6px 2px;
+  }
+
+  /* --- process library + editor (§V4-6) ----------------------------------- */
+  .wr-process-lib {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .wr-process-cards {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .wr-process-card {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.8fr) 70px minmax(200px, 1.6fr);
+    gap: 10px;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+  }
+  .wr-process-card:hover,
+  .wr-process-card.is-open {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.09);
+  }
+  .wr-process-card-id {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    font-weight: 600;
+    color: #8a6a1e;
+  }
+  .wr-process-card-phases {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-ink);
+  }
+  /* §V4-6 process editor (v4-r0 re-skin): etched brass-bordered parchment
+     plate; phase rows are engraved parchment fields */
+  .wr-process-editor {
+    width: 340px;
+    flex-shrink: 0;
+    border: 1px solid var(--color-brass-600);
+    border-radius: 8px;
+    background: linear-gradient(to bottom, rgb(252 245 226 / 0.85), rgb(236 221 184 / 0.85));
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.5),
+      inset 0 0 14px rgb(140 110 60 / 0.18),
+      0 4px 12px rgb(58 42 18 / 0.25);
+    padding: 10px 12px;
+  }
+  .wr-process-editor-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgb(148 112 44 / 0.35);
+    padding-bottom: 5px;
+  }
+  .wr-process-editor-id {
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    font-weight: 600;
+    color: #8a6a1e;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+  }
+  .wr-process-editor-kind {
+    font-size: 10px;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.1em;
+    color: var(--color-ink-soft);
+  }
+  .wr-process-editor-phases {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .wr-process-editor-phase {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  /* etched brass-bordered parchment field (v4-r0): engraved inset writing
+     line, ink script */
+  .wr-process-editor-phase input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    color: var(--color-ink);
+    background: linear-gradient(to bottom, #f4ebd0, #e9dcbe);
+    border: 1px solid rgb(148 112 44 / 0.65);
+    border-radius: 5px;
+    padding: 3px 7px;
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.3),
+      0 1px 0 rgb(255 248 224 / 0.6);
+  }
+  .wr-process-editor-phase input:focus {
+    outline: none;
+    border-color: var(--color-amber-deep, #a8761c);
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.3),
+      0 0 6px rgb(224 168 60 / 0.45);
+  }
+  /* v4-r1: ADD PHASE/SAVE/CANCEL/REMOVE/↑↓ are BRASS-ETCHED CHIPS — struck
+     brass keycap fill, engraved umber type, crisp bevel */
+  .wr-process-editor-phase button,
+  .wr-process-editor-actions button {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    color: #3b2f17;
+    border: 1px solid var(--color-brass-700);
+    border-radius: 5px;
+    background: linear-gradient(to bottom, #e3c87f, #c4a050 55%, #a8853a);
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.5);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 200 / 0.55),
+      0 1px 2px rgb(58 42 18 / 0.4);
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: filter 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+  }
+  .wr-process-editor-phase button:hover:not(:disabled),
+  .wr-process-editor-actions button:hover:not(:disabled) {
+    color: #241b0a;
+    filter: brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 200 / 0.6),
+      0 0 7px rgb(232 181 74 / 0.5);
+  }
+  .wr-process-editor-phase button:active:not(:disabled),
+  .wr-process-editor-actions button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  /* clear RECESSED disabled state: the chip sinks into the parchment —
+     de-brassed, inset shadow, engraving dimmed (no floating ghost) */
+  .wr-process-editor-phase button:disabled,
+  .wr-process-editor-actions button:disabled {
+    cursor: default;
+    color: rgb(74 56 18 / 0.45);
+    background: linear-gradient(to bottom, #ddcda2, #e7d9b4);
+    border-color: rgb(148 112 44 / 0.45);
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.5);
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.32),
+      0 1px 0 rgb(255 248 224 / 0.55);
+  }
+  .wr-process-editor-actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .wr-process-editor-save {
+    color: #5c4516 !important;
+    border-color: var(--color-brass-500) !important;
+    font-weight: 700;
+  }
+  .wr-process-editor-error {
+    font-size: 10px;
+    font-style: italic;
+    color: #8a3526;
+    margin-bottom: 6px;
+  }
+  .wr-process-editor-note {
+    font-size: 9.5px;
+    font-style: italic;
+    color: var(--color-ink-soft);
+    border-top: 1px solid rgb(148 112 44 / 0.3);
+    padding-top: 6px;
+  }
+
+  /* --- memory I/O tab (§V4-9) --------------------------------------------- */
+  .wr-memio {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  .wr-memio-sec {
+    border: 1px solid rgb(216 181 97 / 0.25);
+    border-radius: 8px;
+    background: rgb(227 200 127 / 0.04);
+    padding: 8px 10px;
+  }
+  .wr-memio-cap {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    color: var(--color-amber-glow);
+    margin: 0 0 6px;
+  }
+  .wr-memio-strip {
+    display: block;
+    height: 34px;
+    max-width: 100%;
+    margin-bottom: 6px;
+  }
+  .wr-memio-strip-edge {
+    stroke: var(--color-brass-600);
+    stroke-width: 1.1;
+    opacity: 0.7;
+  }
+  .wr-memio-meta {
+    font-family: var(--font-mono-hud);
+    font-size: 9.5px;
+    color: var(--color-hud-dim);
+    margin-bottom: 4px;
+  }
+  .wr-memio-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wr-memio-piece {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    flex-wrap: wrap;
+    font-size: 10.5px;
+    color: var(--color-hud-dim);
+    border: 1px solid transparent;
+    border-radius: 5px;
+    padding: 3px 6px;
+    cursor: pointer;
+  }
+  .wr-memio-piece:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.08);
+  }
+  .wr-memio-id {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-parchment-100);
+  }
+  .wr-memio-kind {
+    font-size: 9px;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.08em;
+    padding: 0 6px;
+    border-radius: 4px;
+    border: 1px solid hsl(var(--mem-hue, 42) 45% 55% / 0.7);
+    color: hsl(var(--mem-hue, 42) 60% 70%);
+  }
+  .wr-memio-silo,
+  .wr-memio-phase,
+  .wr-memio-changes,
+  .wr-memio-tick {
+    font-family: var(--font-mono-hud);
+    font-size: 9.5px;
+  }
+
+  /* --- archive navigation (§V4-10) ----------------------------------------- */
+  .wr-memory-graph.is-panning {
+    cursor: grabbing;
+  }
+  .wr-memory-graph {
+    cursor: grab;
+    touch-action: none;
+  }
+  .wr-mem-search-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* v4-r1: etched parchment-inset search well — brass border, ink script,
+     small engraved monocle glyph on the left */
+  .wr-mem-search {
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    color: var(--color-ink);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='6.8' cy='6.8' r='4.2' fill='none' stroke='%23947030' stroke-width='1.7'/%3E%3Cpath d='M10.1 10.1 L13.6 13.6' fill='none' stroke='%23947030' stroke-width='1.9' stroke-linecap='round'/%3E%3C/svg%3E")
+        7px 50% / 12px 12px no-repeat,
+      linear-gradient(to bottom, #ece0bd, #f5ecd2 35%, #efe4c4);
+    border: 1px solid var(--color-brass-600);
+    border-radius: 6px;
+    padding: 3px 9px 3px 24px;
+    width: 190px;
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.4),
+      inset 0 0 0 1px rgb(255 248 224 / 0.3),
+      0 1px 0 rgb(255 248 224 / 0.12);
+  }
+  .wr-mem-search::placeholder {
+    color: rgb(109 81 32 / 0.6);
+  }
+  /* the native blue search-cancel cross clashes with the parchment well */
+  .wr-mem-search::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 2 L8 8 M8 2 L2 8' fill='none' stroke='%23947030' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")
+        center / 10px 10px no-repeat;
+  }
+  .wr-mem-search:focus {
+    outline: none;
+    border-color: var(--color-amber-glow);
+    box-shadow:
+      inset 0 1px 3px rgb(109 81 32 / 0.35),
+      0 0 0 2px rgb(185 145 63 / 0.4),
+      0 0 8px rgb(232 181 74 / 0.35);
+  }
+  .wr-mem-matches {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    color: var(--color-amber-glow);
+    white-space: nowrap;
+  }
+  .wr-mem-reset {
+    white-space: nowrap;
+  }
+  .wr-mem-sector-plate {
+    stroke: rgb(216 181 97 / 0.22);
+    stroke-width: 1;
+    stroke-dasharray: 7 5;
+  }
+  /* v4-r1: faint per-silo gear sigil watermark behind each cluster sector —
+     umber ink (the lane-watermark tone reads on parchment; light brass
+     vanished) */
+  .wr-mem-sigil-teeth {
+    fill: none;
+    stroke: rgb(111 84 48 / 0.13);
+    stroke-width: 13;
+    stroke-dasharray: 8 6.5;
+  }
+  .wr-mem-sigil-rim {
+    fill: none;
+    stroke: rgb(111 84 48 / 0.14);
+    stroke-width: 4;
+  }
+  .wr-mem-sigil-hub {
+    fill: rgb(111 84 48 / 0.12);
+  }
+  .wr-mem-sector-caption {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.18em;
+    font-size: 15px;
+    fill: rgb(216 181 97 / 0.5);
+  }
+  /* tight match halo (v4-r0): a snug amber ring, no wide blur bloom */
+  .wr-mem-node.is-match .wr-mem-node-ring {
+    stroke: var(--color-amber-glow);
+    stroke-width: 2.6;
+    filter: drop-shadow(0 0 1.5px rgb(232 181 74 / 0.9));
+  }
+  .wr-mem-node.is-filtered {
+    opacity: 0.18;
+  }
+}
+
+/* ===========================================================================
+ * TERMINAL-IDE-V4 (SPEC-V4 §V4-7 cogitator terminal, §V4-11 web IDE) —
+ * dark-slate cogitator plates with amber mono script and brass framing.
+ * ======================================================================== */
+@layer components {
+  /* --- §V4-7 the cogitator terminal plate ---------------------------------- */
+  .wr-terminal {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgb(232 181 74 / 0.05), transparent 55%),
+      #14160f;
+    border-top: 1px solid var(--color-glass-border);
+    cursor: text;
+  }
+  .wr-terminal-output {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px 12px 6px;
+    font-family: var(--font-mono-hud);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--color-amber-glow);
+    text-shadow: 0 0 6px rgb(232 181 74 / 0.22);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .wr-terminal-line--echo {
+    color: var(--color-hud-bright);
+  }
+  .wr-terminal-line--out {
+    color: var(--color-amber-glow);
+  }
+  .wr-terminal-inputrow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px 9px;
+    border-top: 1px solid rgb(185 145 63 / 0.3);
+    background: rgb(22 23 15 / 0.6);
+  }
+  .wr-terminal-prompt {
+    font-family: var(--font-mono-hud);
+    font-size: 11.5px;
+    color: var(--color-brass-300);
+    white-space: nowrap;
+  }
+  .wr-terminal-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-mono-hud);
+    font-size: 11.5px;
+    color: var(--color-amber-glow);
+    caret-color: var(--color-amber-glow);
+  }
+  .wr-terminal-cursor {
+    width: 7px;
+    height: 14px;
+    background: var(--color-amber-glow);
+    opacity: 0.85;
+    animation: wr-term-blink 1.1s steps(2, start) infinite;
+  }
+  .wr-terminal-inputrow:focus-within .wr-terminal-cursor {
+    opacity: 0.25;
+  }
+  @keyframes wr-term-blink {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  /* --- §V4-11 the web IDE overlay (full-screen cogitator plate) ------------- */
+  .wr-ide {
+    position: absolute;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    background:
+      radial-gradient(ellipse at 30% 0%, rgb(232 181 74 / 0.06), transparent 50%),
+      #181a13;
+    border: 2px solid var(--color-brass-500);
+    box-shadow: inset 0 0 0 1px rgb(34 35 30 / 0.5);
+    color: var(--color-hud-text);
+  }
+  .wr-ide-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--color-glass-border);
+    background: linear-gradient(180deg, rgb(58 59 48 / 0.7), rgb(25 26 20 / 0.9));
+  }
+  .wr-ide-title {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.16em;
+    font-size: 13px;
+    color: var(--color-brass-300);
+  }
+  .wr-ide-sub {
+    flex: 1;
+    font-family: var(--font-mono-hud);
+    font-size: 10.5px;
+    color: var(--color-hud-dim);
+  }
+  .wr-ide-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+  }
+  .wr-ide-explorer {
+    width: 240px;
+    flex: none;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 4px;
+    border-right: 1px solid rgb(185 145 63 / 0.35);
+    background: rgb(22 23 15 / 0.55);
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+  }
+  .wr-ide-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--color-hud-text);
+    user-select: none;
+  }
+  .wr-ide-entry:hover {
+    background: rgb(232 181 74 / 0.08);
+  }
+  .wr-ide-entry--file.is-open {
+    color: var(--color-amber-glow);
+    background: rgb(232 181 74 / 0.1);
+  }
+  .wr-ide-disclosure {
+    color: var(--color-brass-400);
+    font-size: 9px;
+  }
+  .wr-ide-entry-dirname {
+    color: var(--color-brass-300);
+  }
+  .wr-ide-badge {
+    margin-left: auto;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 0 4px;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+  }
+  .wr-ide-badge--a {
+    color: #8fbf6a;
+  }
+  .wr-ide-badge--m {
+    color: var(--color-amber-glow);
+  }
+  .wr-ide-badge--d {
+    color: #d0707c;
+  }
+  .wr-ide-center {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .wr-ide-tabbar {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    padding: 4px 6px 0;
+    border-bottom: 1px solid rgb(185 145 63 / 0.35);
+    background: rgb(22 23 15 / 0.4);
+    overflow-x: auto;
+  }
+  .wr-ide-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-family: var(--font-mono-hud);
+    font-size: 10.5px;
+    color: var(--color-hud-dim);
+    border: 1px solid rgb(185 145 63 / 0.3);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: rgb(34 35 30 / 0.5);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .wr-ide-tab.is-active {
+    color: var(--color-amber-glow);
+    background: #181a13;
+    border-color: var(--color-brass-500);
+  }
+  .wr-ide-dirty-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--color-amber-glow);
+    box-shadow: 0 0 5px rgb(232 181 74 / 0.7);
+  }
+  .wr-ide-tab-close {
+    background: transparent;
+    border: none;
+    color: var(--color-hud-dim);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+  }
+  .wr-ide-tab-close:hover {
+    color: var(--color-amber-glow);
+  }
+  .wr-ide-tabbar-empty {
+    font-family: var(--font-mono-hud);
+    font-size: 10.5px;
+    color: var(--color-hud-dim);
+    padding: 5px 8px;
+  }
+  .wr-ide-editor {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #14160f;
+  }
+  .wr-ide-editor--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wr-ide-empty {
+    font-family: var(--font-mono-hud);
+    font-size: 11px;
+    color: var(--color-hud-dim);
+    padding: 12px;
+  }
+  /* shared metrics: the backdrop and the textarea MUST align glyph-perfect */
+  .wr-ide-backdrop,
+  .wr-ide-buffer {
+    font-family: var(--font-mono-hud);
+    font-size: 12.5px;
+    line-height: 19px;
+    tab-size: 2;
+  }
+  .wr-ide-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    min-width: 100%;
+    will-change: transform;
+    pointer-events: none;
+  }
+  .wr-ide-gutter {
+    flex: none;
+    width: 52px;
+    padding: 8px 8px 8px 0;
+    text-align: right;
+    color: rgb(165 147 115 / 0.55);
+    background: rgb(22 23 15 / 0.65);
+    border-right: 1px solid rgb(185 145 63 / 0.28);
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.6);
+    user-select: none;
+  }
+  .wr-ide-lineno.is-lit {
+    color: var(--color-amber-glow);
+  }
+  .wr-ide-highlight {
+    margin: 0;
+    padding: 8px 12px;
+    white-space: pre;
+    color: var(--color-hud-text);
+  }
+  .wr-ide-line {
+    min-height: 19px;
+  }
+  .wr-ide-line.is-lit {
+    background: rgb(232 181 74 / 0.07);
+    box-shadow: inset 2px 0 0 rgb(232 181 74 / 0.5);
+  }
+  .tok-keyword {
+    color: #d2ab57;
+  }
+  .tok-string {
+    color: #8fbf6a;
+  }
+  .tok-comment {
+    color: rgb(165 147 115 / 0.75);
+    font-style: italic;
+  }
+  .tok-number {
+    color: #d0707c;
+  }
+  .tok-type {
+    color: #58b3a4;
+  }
+  .wr-ide-ghost {
+    color: rgb(226 211 172 / 0.45);
+    font-style: italic;
+  }
+  .wr-ide-cap-notice {
+    padding: 6px 0;
+    font-style: italic;
+    color: var(--color-brass-400);
+  }
+  .wr-ide-buffer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 8px 12px 8px 64px;
+    margin: 0;
+    border: none;
+    outline: none;
+    resize: none;
+    overflow: auto;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--color-amber-glow);
+    white-space: pre;
+  }
+  .wr-ide-buffer::selection {
+    background: rgb(232 181 74 / 0.25);
+    color: transparent;
+  }
+  /* review panel affordance (§V4-11 Open in IDE) — v4-r1: the header chip
+     must NOT inherit the action-row flex-grow; the TITLE owns the spare
+     width (wr-review-id flex-grow + min-width:0) and ellipsizes only when
+     the header is truly out of room */
+  .wr-review-btn--ide {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 4px 9px;
+    font-size: 11px;
+    white-space: nowrap;
+    border-color: var(--color-brass-500);
+    color: var(--color-amber-glow);
+  }
+}
+
+/* ===========================================================================
+   SPEC-V5 §V5-2/§V5-4 — Sessions tab (forensics ledger) + board separation
+   =========================================================================== */
+@layer components {
+  /* --- session list (grouped ledger) ------------------------------------- */
+  .wr-sessions {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .wr-sess-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 2px 2px 10px;
+  }
+  /* etched attempt divider (engraved rule + small-caps serif label) */
+  .wr-sess-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 2px 5px;
+    font-family: var(--font-serif-display);
+    font-size: 10px;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.22em;
+    color: var(--color-hud-dim);
+    text-shadow: 0 1px 0 rgb(22 23 15 / 0.8);
+  }
+  .wr-sess-divider::before,
+  .wr-sess-divider::after {
+    content: '';
+    flex: 1;
+    height: 0;
+    border-top: 1px solid rgb(22 23 15 / 0.75);
+    border-bottom: 1px solid rgb(227 200 127 / 0.14);
+  }
+  .wr-sess-divider::before {
+    flex: 0 0 14px;
+  }
+  /* ledger row */
+  .wr-sess-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 6px;
+    margin: 2px 0;
+    border: 1px solid rgb(185 145 63 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.04);
+    cursor: pointer;
+  }
+  .wr-sess-row:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(227 200 127 / 0.09);
+  }
+  .wr-sess-portrait {
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--color-glass-border);
+    background: var(--color-deck-800);
+  }
+  .wr-sess-portrait--lg {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+  }
+  .wr-sess-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wr-sess-title {
+    font-family: var(--font-serif-display);
+    font-size: 12px;
+    color: var(--color-hud-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-sess-chiprow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+  .wr-sess-role,
+  .wr-sess-stack,
+  .wr-sess-status,
+  .wr-sess-reviewed,
+  .wr-sess-linkchip {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid var(--color-glass-border);
+    color: var(--color-hud-text);
+    white-space: nowrap;
+  }
+  .wr-sess-role--reviewer {
+    color: var(--color-status-info);
+    border-color: rgb(95 174 156 / 0.55);
+  }
+  .wr-sess-role--integration {
+    color: var(--color-status-ok);
+    border-color: rgb(132 178 116 / 0.55);
+  }
+  .wr-sess-role--coordination {
+    color: var(--color-brass-300);
+    border-color: var(--color-brass-500);
+    border-style: double;
+    border-width: 3px;
+    padding: 0 5px;
+  }
+  .wr-sess-stack {
+    color: var(--color-amber-glow);
+    border-color: rgb(232 181 74 / 0.45);
+  }
+  /* status chips: active = amber glow / completed = ink / aborted = garnet */
+  .wr-sess-status--active {
+    color: var(--color-amber-glow);
+    border-color: var(--color-amber-glow);
+    box-shadow: 0 0 7px rgb(232 181 74 / 0.55);
+  }
+  .wr-sess-status--completed {
+    color: var(--color-hud-dim);
+    border-color: rgb(59 49 34 / 0.9);
+    background: rgb(59 49 34 / 0.35);
+  }
+  .wr-sess-status--aborted {
+    color: var(--color-faction-codex);
+    border-color: rgb(208 112 124 / 0.6);
+  }
+  .wr-sess-reviewed,
+  .wr-sess-linkchip {
+    cursor: pointer;
+    color: var(--color-status-info);
+    border-color: rgb(95 174 156 / 0.5);
+    background: transparent;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-sess-reviewed:hover,
+  .wr-sess-linkchip:hover {
+    color: var(--color-hud-bright);
+    border-color: var(--color-status-info);
+  }
+  .wr-sess-meta {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    color: var(--color-hud-dim);
+    white-space: nowrap;
+  }
+  .wr-sess-ticks {
+    color: var(--color-brass-500);
+  }
+  /* nested subsessions: engraved CSS connector bracket (no svg lines) */
+  .wr-sess-children {
+    margin-left: 14px;
+    padding-left: 10px;
+    border-left: 2px solid rgb(185 145 63 / 0.4);
+    box-shadow: inset 1px 0 0 rgb(22 23 15 / 0.8);
+  }
+  .wr-sess-children > .wr-sess-row {
+    position: relative;
+  }
+  .wr-sess-children > .wr-sess-row::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 8px;
+    height: 0;
+    border-top: 2px solid rgb(185 145 63 / 0.4);
+  }
+
+  /* --- read-only transcript view ----------------------------------------- */
+  .wr-sess-transcript {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 6px;
+  }
+  .wr-sess-tr-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 4px 2px 6px;
+    border-bottom: 1px solid rgb(185 145 63 / 0.3);
+  }
+  .wr-sess-tr-id {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .wr-sess-tr-title {
+    font-family: var(--font-serif-display);
+    font-size: 13px;
+    color: var(--color-hud-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-sess-linkrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+  }
+  .wr-sess-back {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 1px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-brass-500);
+    background: rgb(227 200 127 / 0.07);
+    color: var(--color-amber-glow);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .wr-sess-back:hover {
+    color: var(--color-hud-bright);
+    box-shadow: 0 0 6px rgb(232 181 74 / 0.4);
+  }
+  .wr-sess-stream {
+    flex: 1;
+  }
+  /* event entries: small centered etched line */
+  .wr-sess-event {
+    list-style: none;
+    text-align: center;
+    margin: 5px 12px;
+    padding: 1px 0;
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--color-hud-dim);
+    text-shadow: 0 1px 0 rgb(22 23 15 / 0.8);
+    border-top: 1px solid rgb(22 23 15 / 0.7);
+    border-bottom: 1px solid rgb(227 200 127 / 0.12);
+  }
+  .wr-tr--user .wr-tr-role {
+    color: var(--color-amber-glow);
+  }
+
+  /* --- §V5-4 board separation: SelectionPanel entity links ---------------- */
+  .wr-sel-agentline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .wr-sel-entitylink {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 1px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--color-glass-border);
+    background: rgb(227 200 127 / 0.06);
+    color: var(--color-hud-text);
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-sel-entitylink:hover {
+    color: var(--color-amber-glow);
+    border-color: var(--color-brass-500);
+  }
+  .wr-sel-entitylink--stack {
+    color: var(--color-amber-glow);
+    border-color: rgb(232 181 74 / 0.45);
+  }
+
+  /* review-panel Sessions chip (§V5-2 deep-link) */
+  .wr-review-btn--sessions {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 4px 9px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .wr-review-btn--sessions + .wr-review-btn--ide {
+    margin-left: 0;
+  }
+  /* v5-r1 (2): compressed header chip cluster — action chips wear tighter
+     padding in the header (the footer bar keeps its full-width buttons). */
+  .wr-review-head .wr-review-btn {
+    flex: 0 0 auto;
+    padding: 3px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  /* v5-r1 (2): icon-only Close (caption rides the title tooltip). */
+  .wr-review-close {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wr-review-close svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* v5-r1 (8): session-row chips flow on two fixed single lines (role+stack /
+     status+reviewed-link) — rows keep an even height; overflow ellipsizes. */
+  .wr-sess-chiprow--line {
+    flex-wrap: nowrap;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .wr-sess-chiprow--line > * {
+    flex-shrink: 0;
+  }
+  .wr-sess-chiprow--line > .wr-sess-stack,
+  .wr-sess-chiprow--line > .wr-sess-reviewed {
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ==========================================================================
+ * SPEC-V5 §V5-3 — THE REGISTRY (parchment ledger family, AC48–AC51)
+ * ======================================================================== */
+@layer components {
+  .wr-reg-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-reg-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-reg-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+  }
+  .wr-reg-row:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.09);
+  }
+  /* agents tab status inks (§V5-3: active amber, completed ink, aborted garnet) */
+  .wr-reg-row--active {
+    border-color: rgb(232 181 74 / 0.6);
+    background: rgb(232 181 74 / 0.12);
+    box-shadow: inset 0 0 0 1px rgb(232 181 74 / 0.25);
+  }
+  .wr-reg-row--aborted {
+    border-color: rgb(146 46 46 / 0.55);
+    background: rgb(146 46 46 / 0.07);
+  }
+  .wr-reg-row--ws {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wr-reg-ws-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .wr-reg-ws-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 0 18px;
+    border-left: 2px solid rgb(148 112 44 / 0.35);
+    margin-left: 4px;
+  }
+  .wr-reg-ws-cardline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+  }
+  .wr-reg-name {
+    font-family: var(--font-serif-display);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .wr-reg-dim {
+    font-size: 10px;
+    color: var(--color-ink-soft);
+    opacity: 0.85;
+  }
+  .wr-reg-mono {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    color: var(--color-ink-soft);
+  }
+  .wr-reg-chiprow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .wr-reg-model,
+  .wr-reg-approval,
+  .wr-reg-phase,
+  .wr-reg-column {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid rgb(148 112 44 / 0.5);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.85), rgb(233 220 190 / 0.85));
+    color: #5c4516;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    white-space: nowrap;
+  }
+  .wr-reg-custom,
+  .wr-reg-yolo {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid rgb(146 46 46 / 0.6);
+    background: rgb(146 46 46 / 0.08);
+    color: #7c2d2d;
+    white-space: nowrap;
+  }
+  .wr-reg-excerpt {
+    flex: 1 1 100%;
+    font-style: italic;
+    font-size: 10px;
+    color: var(--color-ink-soft);
+    opacity: 0.9;
+  }
+  .wr-reg-dirty {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid rgb(82 112 58 / 0.55);
+    background: rgb(110 140 76 / 0.1);
+    color: #44602e;
+    white-space: nowrap;
+  }
+  .wr-reg-dirty.is-dirty {
+    border-color: rgb(168 62 50 / 0.6);
+    background: rgb(168 62 50 / 0.08);
+    color: #8a3326;
+  }
+  .wr-reg-link {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 1px 8px;
+    border-radius: 8px;
+    border: 1px solid rgb(148 112 44 / 0.55);
+    background: rgb(227 200 127 / 0.12);
+    color: #5c4516;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-reg-link:hover {
+    border-color: var(--color-brass-500);
+    color: #2f2305;
+    background: rgb(232 181 74 / 0.2);
+  }
+  .wr-reg-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-reg-detail-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgb(148 112 44 / 0.5);
+    border-radius: 7px;
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.6), rgb(233 220 190 / 0.5));
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+  }
+  .wr-reg-detail-title {
+    font-family: var(--font-serif-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .wr-reg-foundry {
+    margin-left: auto;
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 7px;
+    border: 1px solid rgb(148 112 44 / 0.65);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(233 220 190 / 0.92));
+    color: #5c4516;
+    cursor: pointer;
+  }
+  .wr-reg-foundry:hover {
+    border-color: var(--color-brass-500);
+    color: #2f2305;
+  }
+  .wr-reg-section {
+    margin-top: 6px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+    border-bottom: 1px solid rgb(148 112 44 / 0.4);
+    padding-bottom: 2px;
+  }
+  /* §V5-3 sepia spec plates: prompt.system / prompt.developer verbatim */
+  .wr-reg-plates {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-reg-plate-label {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--color-ink-soft);
+    margin-bottom: 2px;
+  }
+  .wr-reg-plate {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid rgb(148 112 44 / 0.45);
+    border-radius: 6px;
+    background: linear-gradient(to bottom, rgb(243 230 200 / 0.9), rgb(231 214 178 / 0.9));
+    box-shadow: inset 0 1px 2px rgb(109 81 32 / 0.2);
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    line-height: 1.6;
+    color: #3d2e10;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .wr-reg-sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wr-reg-subrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 10px;
+    border: 1px solid rgb(216 181 97 / 0.22);
+    border-radius: 6px;
+    background: rgb(227 200 127 / 0.04);
+    cursor: pointer;
+    font-size: 10px;
+    color: var(--color-ink-soft);
+  }
+  .wr-reg-subrow:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.08);
+  }
+  .wr-reg-subrow--file {
+    cursor: default;
+  }
+  .wr-reg-subrow--active {
+    border-color: rgb(232 181 74 / 0.55);
+    background: rgb(232 181 74 / 0.1);
+  }
+  .wr-reg-subrow--aborted {
+    border-color: rgb(146 46 46 / 0.5);
+  }
+  .wr-reg-filestatus {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    width: 14px;
+    text-align: center;
+    border: 1px solid rgb(148 112 44 / 0.5);
+    border-radius: 4px;
+    background: rgb(247 238 215 / 0.85);
+    color: #5c4516;
+  }
+  .wr-reg-ws-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+    font-size: 11px;
+  }
+  .wr-reg-linkrow {
+    padding: 6px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+  }
+  /* parchment ink for the reused session components inside the registry */
+  .wr-registry .wr-sess-row,
+  .wr-registry .wr-sess-transcript {
+    color: var(--color-ink-soft);
+  }
+
+  /* --- v5-r0 design polish ------------------------------------------------ */
+  /* (3) agent detail: transcript column capped to a readable measure,
+     left-anchored — matches the inspector transcript plate. */
+  .wr-reg-detail--agent {
+    max-width: 760px;
+    width: 100%;
+    align-self: flex-start;
+  }
+  /* (4) parchment-legible session status chips inside the registry —
+     completed reads as pressed ink, aborted as garnet on parchment. */
+  .wr-registry .wr-sess-status--completed {
+    color: #4a3a1c;
+    border-color: rgb(148 112 44 / 0.5);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.8), rgb(233 220 190 / 0.8));
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.7);
+  }
+  .wr-registry .wr-sess-status--aborted {
+    color: #8a3326;
+    border-color: rgb(168 62 50 / 0.55);
+    background: rgb(168 62 50 / 0.08);
+  }
+  /* v5-r1 (4): role/stack chips on parchment take the SAME etched-ink
+     treatment as the agents-tab status chips — no more pale HUD-cream chips
+     leading the task-detail attempt groups. Role hues survive as dark inks. */
+  .wr-registry .wr-sess-role,
+  .wr-registry .wr-sess-stack {
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    color: #5c4516;
+    border-color: rgb(148 112 44 / 0.5);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.85), rgb(233 220 190 / 0.85));
+  }
+  .wr-registry .wr-sess-role--reviewer {
+    color: #1d5a4d;
+    border-color: rgb(45 110 96 / 0.55);
+  }
+  .wr-registry .wr-sess-role--integration {
+    color: #3f6026;
+    border-color: rgb(82 112 58 / 0.6);
+  }
+  .wr-registry .wr-sess-role--coordination {
+    color: #6b4d12;
+    border-color: rgb(148 112 44 / 0.75);
+  }
+  .wr-registry .wr-sess-stack {
+    color: #7a5410;
+    border-color: rgb(148 96 16 / 0.55);
+  }
+  .wr-registry .wr-sess-status--active {
+    color: #7a5410;
+    border-color: rgb(148 96 16 / 0.75);
+    background: rgb(232 181 74 / 0.25);
+    box-shadow: 0 0 6px rgb(232 181 74 / 0.5);
+    text-shadow: none;
+  }
+  .wr-registry .wr-sess-reviewed,
+  .wr-registry .wr-sess-linkchip {
+    color: #1d5a4d;
+    border-color: rgb(45 110 96 / 0.5);
+  }
+  .wr-registry .wr-sess-reviewed:hover,
+  .wr-registry .wr-sess-linkchip:hover {
+    color: #0e3d33;
+    border-color: rgb(29 90 77 / 0.9);
+  }
+  /* v5-r1 (1): parchment ink floor for the REUSED transcript bubbles — the
+     HUD-cream bubble palette is near-invisible on the parchment plate; every
+     entry kind re-inks dark enough to clear WCAG AA on the plate ground. */
+  .wr-registry .wr-sess-title,
+  .wr-registry .wr-sess-tr-title {
+    color: var(--color-ink);
+  }
+  .wr-registry .wr-sess-meta {
+    color: #5d4c2e;
+  }
+  .wr-registry .wr-sess-ticks {
+    color: #7a5410;
+  }
+  .wr-registry .wr-tr--text {
+    color: #33290f;
+    background: rgb(59 49 34 / 0.06);
+    border-color: rgb(148 112 44 / 0.45);
+  }
+  .wr-registry .wr-tr--thinking {
+    color: #5d4c2e;
+    background: rgb(148 112 44 / 0.08);
+    border-color: rgb(148 112 44 / 0.35);
+  }
+  .wr-registry .wr-tr-role {
+    color: #8a6722;
+  }
+  .wr-registry .wr-tr--user .wr-tr-role {
+    color: #7a5410;
+  }
+  .wr-registry .wr-tr--tool {
+    color: #6b4d12;
+    background: rgb(148 112 44 / 0.1);
+    border-color: rgb(148 112 44 / 0.4);
+  }
+  .wr-registry .wr-tr-tool-meta {
+    color: #5d4c2e;
+  }
+  .wr-registry .wr-tr--note {
+    color: #5d4c2e;
+  }
+  .wr-registry .wr-sess-event {
+    color: #5d4c2e;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.6);
+    border-top: 1px solid rgb(148 112 44 / 0.35);
+    border-bottom: 1px solid rgb(255 248 224 / 0.6);
+  }
+  /* (5) stacks tab: ledger column captions row.
+     v5-r1 (3): the captions row and every stack row share ONE fixed grid
+     template, so STACK / ADAPTER / MODEL / APPROVAL / PHASE captions align
+     exactly with the chips beneath them. */
+  .wr-reg-grid-stacks {
+    display: grid;
+    grid-template-columns:
+      minmax(150px, 1.1fr) 92px minmax(130px, 0.9fr) 84px 96px minmax(200px, 1.6fr);
+    column-gap: 10px;
+    align-items: center;
+  }
+  .wr-reg-captions {
+    padding: 0 10px 2px;
+    list-style: none;
+    border-bottom: 1px solid rgb(148 112 44 / 0.4);
+  }
+  .wr-reg-cap {
+    font-family: var(--font-mono-hud);
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    opacity: 0.85;
+    white-space: nowrap;
+  }
+  .wr-reg-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .wr-reg-cell > .wr-reg-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-reg-cell > .wr-reg-model,
+  .wr-reg-cell > .wr-reg-approval,
+  .wr-reg-cell > .wr-reg-phase {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-reg-grid-stacks .wr-reg-excerpt {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  /* (8) workspaces tab: boxed parchment group plates */
+  .wr-reg-row--ws {
+    border: 1px solid rgb(148 112 44 / 0.5);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.55), rgb(233 220 190 / 0.45));
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.15), 0 1px 2px rgb(46 33 12 / 0.12);
+  }
+  /* (8) status chips fall into an aligned right-hand column */
+  .wr-reg-ws-cardline .wr-reg-dirty {
+    margin-left: auto;
+    min-width: 52px;
+    text-align: center;
+  }
+  .wr-reg-ws-head .wr-reg-dirty {
+    min-width: 52px;
+    text-align: center;
+  }
+}

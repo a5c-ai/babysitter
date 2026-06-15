@@ -16,7 +16,6 @@ const packages = [
   'packages/adapters/cli',
   'packages/adapters/sdk',
   'packages/genty/tui',
-  'packages/adapters/webui',
 ];
 
 function parseCliArgs(argv = process.argv.slice(2)) {

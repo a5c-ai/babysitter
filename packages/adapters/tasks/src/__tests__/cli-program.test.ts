@@ -46,7 +46,7 @@ describe("CLI Program", () => {
       const program = createProgram();
 
       expect(program).toBeDefined();
-      expect(program.name()).toBe("tasks-adapter");
+      expect(program.name()).toBe("adapters-tasks");
     });
 
     it("sets version to 5.0.0", async () => {
