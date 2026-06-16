@@ -41,7 +41,7 @@ export function resolveAppearanceAvatar(appearance, persona) {
     url: avatar.url || appearance?.status?.avatarUrl || null,
     emoji: appearance?.spec?.emoji || persona?.spec?.emoji || null,
     initials: avatar.fallbackInitials || fallbackInitials(displayName),
-    color: avatar.fallbackColor || appearance?.spec?.theme?.primaryColor || '#2563eb',
+    color: avatar.fallbackColor || appearance?.spec?.theme?.primaryColor || '#b9913f',
   };
 }
 

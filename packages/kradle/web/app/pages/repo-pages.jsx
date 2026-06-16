@@ -174,7 +174,7 @@ function RepoSettingsPanel({ repository, model, org = 'default', repo }) {
           <dt>Visibility</dt>
           <dd>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>
-              <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', background: visibility === 'public' ? '#22c55e' : visibility === 'internal' ? '#3b82f6' : '#6b7280', flexShrink: 0 }} />
+              <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', background: visibility === 'public' ? 'var(--success)' : visibility === 'internal' ? 'var(--info)' : 'var(--text-muted)', flexShrink: 0 }} />
               {visibility}
             </span>
           </dd>
@@ -234,7 +234,7 @@ function RepoSettingsPanel({ repository, model, org = 'default', repo }) {
           <h3>Collaborators</h3>
           <StatusPill tone="neutral">access control</StatusPill>
         </div>
-        <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 0.75rem' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0 0 0.75rem' }}>
           Collaborators are managed through Kradle user and team grants. Use the People page to add or remove repository access.
         </p>
         <div className="heroActions">
@@ -243,26 +243,26 @@ function RepoSettingsPanel({ repository, model, org = 'default', repo }) {
         </div>
       </div>
 
-      <div className="card" style={{ borderLeft: '3px solid #ef4444' }}>
+      <div className="card" style={{ borderLeft: '3px solid var(--danger)' }}>
         <div className="cardTitle">
           <h3>Danger zone</h3>
           <StatusPill tone="danger">destructive</StatusPill>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: '#fef2f2', borderRadius: '0.375rem', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgb(212 96 74 / 0.12)', borderRadius: '0.375rem', gap: '1rem', flexWrap: 'wrap' }}>
             <div>
               <strong style={{ fontSize: '0.875rem' }}>Transfer repository</strong>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: '#6b7280' }}>Transfer ownership to another organization or user.</p>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Transfer ownership to another organization or user.</p>
             </div>
-            <button disabled title="Coming soon — transfer requires org admin approval" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem', background: '#f3f4f6', color: '#9ca3af', border: '1px solid #e5e7eb', borderRadius: '0.375rem', cursor: 'not-allowed', flexShrink: 0 }}>
+            <button disabled title="Coming soon — transfer requires org admin approval" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem', background: 'var(--surface-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '0.375rem', cursor: 'not-allowed', flexShrink: 0 }}>
               Transfer (coming soon)
             </button>
           </div>
           {repository && repoName ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: '#fef2f2', borderRadius: '0.375rem', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgb(212 96 74 / 0.12)', borderRadius: '0.375rem', gap: '1rem', flexWrap: 'wrap' }}>
               <div>
                 <strong style={{ fontSize: '0.875rem' }}>Delete this repository</strong>
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: '#6b7280' }}>Permanently delete <code>{repoName}</code> and all its data. This action cannot be undone.</p>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Permanently delete <code>{repoName}</code> and all its data. This action cannot be undone.</p>
               </div>
               <ResourceActions org={org} apiPath={`resources/Repository/${repoName}`} actions={['delete']} />
             </div>
@@ -287,10 +287,10 @@ function KubeVelaRequiredBanner({ model }) {
   const kubeVelaResources = (model.resources || []).filter((r) => String(r.kind || '').startsWith('KubeVela'));
   const hasKubeVela = kubeVelaResources.length > 0 || model.delivery?.installed || model.delivery?.available;
   if (hasKubeVela) return null;
-  return <section className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)', marginBottom: '0.75rem' }}>
+  return <section className="card" style={{ borderLeft: '3px solid var(--info)', marginBottom: '0.75rem' }}>
     <div className="cardTitle"><h3>KubeVela not detected</h3><StatusPill tone="neutral">optional dependency</StatusPill></div>
-    <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0.5rem 0' }}>Deployments require KubeVela. Install KubeVela to enable application deployment management, release tracking, and environment promotion.</p>
-    <p style={{ color: '#9ca3af', fontSize: '0.8125rem' }}>Kradle will automatically discover KubeVela CRDs once installed. Webhook and repository features remain available without KubeVela.</p>
+    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0.5rem 0' }}>Deployments require KubeVela. Install KubeVela to enable application deployment management, release tracking, and environment promotion.</p>
+    <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Kradle will automatically discover KubeVela CRDs once installed. Webhook and repository features remain available without KubeVela.</p>
   </section>;
 }
 
@@ -298,10 +298,10 @@ function KyvernoRequiredBanner({ model }) {
   const engine = model.policyEngine || {};
   const hasKyverno = engine.detected || engine.health === 'ready' || (engine.controllers || []).length > 0;
   if (hasKyverno) return null;
-  return <section className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)', marginBottom: '0.75rem' }}>
+  return <section className="card" style={{ borderLeft: '3px solid var(--info)', marginBottom: '0.75rem' }}>
     <div className="cardTitle"><h3>Kyverno not detected</h3><StatusPill tone="neutral">optional dependency</StatusPill></div>
-    <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0.5rem 0' }}>Policy management requires Kyverno. Install Kyverno to enable policy enforcement, admission control, and policy reporting.</p>
-    <p style={{ color: '#9ca3af', fontSize: '0.8125rem' }}>Kradle will automatically discover Kyverno CRDs once installed. Webhook subscriptions and hook management remain available without Kyverno.</p>
+    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0.5rem 0' }}>Policy management requires Kyverno. Install Kyverno to enable policy enforcement, admission control, and policy reporting.</p>
+    <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Kradle will automatically discover Kyverno CRDs once installed. Webhook subscriptions and hook management remain available without Kyverno.</p>
   </section>;
 }
 

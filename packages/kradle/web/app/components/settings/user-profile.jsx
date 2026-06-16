@@ -6,9 +6,9 @@ const labelStyle = { display: 'block', fontWeight: 600, fontSize: '0.8125rem', m
 const descStyle = { fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' };
 const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', fontSize: '0.875rem', boxSizing: 'border-box' };
 const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
-const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
-const dangerStyle = { ...buttonStyle, backgroundColor: '#dc2626', color: '#fff' };
-const secondaryStyle = { ...buttonStyle, backgroundColor: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' };
+const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: '#fff' };
+const dangerStyle = { ...buttonStyle, backgroundColor: 'var(--danger)', color: '#fff' };
+const secondaryStyle = { ...buttonStyle, backgroundColor: 'var(--surface-raised)', color: 'var(--text)', border: '1px solid var(--border)' };
 const disabledStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
 const sectionStyle = { display: 'flex', flexDirection: 'column', gap: '1.25rem' };
 const cardStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
@@ -18,7 +18,7 @@ const kvValueStyle = { color: 'var(--text)', overflowWrap: 'anywhere' };
 
 function StatusMsg({ status, message }) {
   if (!message) return null;
-  const color = status === 'success' ? '#16a34a' : '#dc2626';
+  const color = status === 'success' ? 'var(--success)' : 'var(--danger)';
   return <span style={{ fontSize: 13, color, fontWeight: 600 }}>{message}</span>;
 }
 
@@ -195,13 +195,13 @@ export function UserProfileForm({ org, user }) {
             {apiKeys.map(key => (
               <div key={key.name} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <strong style={{ flex: '1 1 auto' }}>{key.name}</strong>
-                <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>{key.purpose || 'API key'}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{key.purpose || 'API key'}</span>
                 {confirmRevokeKey === key.name ? (
                   <>
                     <button
                       type="button"
                       onClick={() => handleRevokeKey(key.name)}
-                      style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#fff', backgroundColor: '#dc2626', borderColor: '#dc2626' }}
+                      style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#fff', backgroundColor: 'var(--danger)', borderColor: 'var(--danger)' }}
                       aria-label={`Confirm revoke API key ${key.name}`}
                     >
                       Confirm
@@ -219,7 +219,7 @@ export function UserProfileForm({ org, user }) {
                   <button
                     type="button"
                     onClick={() => handleRevokeKey(key.name)}
-                    style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: '#dc2626', borderColor: '#fca5a5' }}
+                    style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: 'var(--danger)' }}
                     aria-label={`Revoke API key ${key.name}`}
                   >
                     Revoke

@@ -59,7 +59,7 @@ export async function AgentMemoryPage({ org = null } = {}) {
             return <div key={repoName} className="resourceRow" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <strong>{repoName}</strong>
-                <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>{repo.spec?.repoUrl || repo.spec?.description || ''}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{repo.spec?.repoUrl || repo.spec?.description || ''}</span>
                 <StatusPill tone={repo.status?.phase === 'Active' ? 'good' : 'neutral'}>{repo.status?.phase || 'Unknown'}</StatusPill>
                 <MemoryRepoEditForm org={activeOrg} repo={repo} />
                 <ResourceActions org={activeOrg} apiPath={`resources/AgentMemoryRepository/${repoName}`} actions={['delete']} />
@@ -79,15 +79,15 @@ export async function AgentMemoryPage({ org = null } = {}) {
       <section className="routeGrid three">
         <a href={orgHref(activeOrg, '/agents/memory/search')} className="card quickAction" style={{ textDecoration: 'none' }}>
           <div className="cardTitle"><h3>Search memory</h3></div>
-          <p style={{ color: '#6b7280', fontSize: '0.8125rem' }}>Query structured records or full-text search across markdown documents.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Query structured records or full-text search across markdown documents.</p>
         </a>
         <a href={orgHref(activeOrg, '/agents/memory/imports')} className="card quickAction" style={{ textDecoration: 'none' }}>
           <div className="cardTitle"><h3>Review imports</h3></div>
-          <p style={{ color: '#6b7280', fontSize: '0.8125rem' }}>Inspect pending memory imports from agent runs and sessions.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Inspect pending memory imports from agent runs and sessions.</p>
         </a>
         <a href={orgHref(activeOrg, '/agents/memory/ontology')} className="card quickAction" style={{ textDecoration: 'none' }}>
           <div className="cardTitle"><h3>Configure ontology</h3></div>
-          <p style={{ color: '#6b7280', fontSize: '0.8125rem' }}>Define node kinds, edge kinds, and graph schema for memory repositories.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Define node kinds, edge kinds, and graph schema for memory repositories.</p>
         </a>
       </section>
     </> : <section className="routeGrid two" style={{ alignItems: 'start' }}>
@@ -133,20 +133,20 @@ spec:
     <section className="routeGrid three">
       <div className="card">
         <div className="cardTitle"><h3>Graph</h3><StatusPill tone="neutral">mode</StatusPill></div>
-        <p style={{ color: '#6b7280', fontSize: '0.8125rem' }}>Query structured records by node kind, traverse edges. Best for exploring relationships between services, teams, decisions, and runbooks.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Query structured records by node kind, traverse edges. Best for exploring relationships between services, teams, decisions, and runbooks.</p>
       </div>
       <div className="card">
         <div className="cardTitle"><h3>Grep</h3><StatusPill tone="neutral">mode</StatusPill></div>
-        <p style={{ color: '#6b7280', fontSize: '0.8125rem' }}>Full-text search across markdown documents. Best for finding specific content, code references, or text patterns in stored knowledge.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Full-text search across markdown documents. Best for finding specific content, code references, or text patterns in stored knowledge.</p>
       </div>
       <div className="card">
         <div className="cardTitle"><h3>Graph + Grep</h3><StatusPill tone="neutral">mode</StatusPill></div>
-        <p style={{ color: '#6b7280', fontSize: '0.8125rem' }}>Graph narrows candidates by node kind and edge traversal, then grep searches within matched documents. Best for targeted, precise queries.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Graph narrows candidates by node kind and edge traversal, then grep searches within matched documents. Best for targeted, precise queries.</p>
       </div>
     </section>
     <div className="card">
       <div className="cardTitle"><h3>Example AgentMemoryQuery resource</h3><StatusPill tone="neutral">reference</StatusPill></div>
-      <pre style={{ background: '#1e1e2e', color: '#cdd6f4', padding: '1rem', borderRadius: '0.5rem', fontSize: '0.8125rem', lineHeight: '1.6', overflow: 'auto' }}><code>{exampleYaml}</code></pre>
+      <pre style={{ background: 'var(--bg)', color: 'var(--text)', padding: '1rem', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', lineHeight: '1.6', overflow: 'auto' }}><code>{exampleYaml}</code></pre>
     </div>
   </PageFrame>;
 }
@@ -168,7 +168,7 @@ export async function AgentMemoryImportsPage({ org = null } = {}) {
     <div className="card">
       <div className="cardTitle"><h2>All imports</h2><StatusPill tone={imports.length ? 'good' : 'neutral'}>{imports.length} imports</StatusPill></div>
       {imports.length ? <div className="resourceTable">
-        <div className="resourceRow" style={{ fontWeight: 600, fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div className="resourceRow" style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           <span>Name</span><span>Source</span><span>Phase</span><span>Repository</span><span>Created</span>
         </div>
         {imports.map((imp) => <a key={imp.metadata?.name} href={orgHref(activeOrg, `/agents/memory/imports/${imp.metadata?.name}`)} className="resourceRow" style={{ textDecoration: 'none' }}>
@@ -234,8 +234,8 @@ export async function AgentMemoryImportDetailPage({ org = null, importId } = {})
             const isComplete = currentPhaseIndex > index;
             const isCurrent = currentPhaseIndex === index;
             return <div key={phase} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isComplete ? '#22c55e' : isCurrent ? '#eab308' : '#d1d5db', flexShrink: 0 }} />
-              <span style={{ color: isComplete || isCurrent ? '#111827' : '#9ca3af', fontWeight: isCurrent ? 600 : 400 }}>{phase}</span>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isComplete ? 'var(--success)' : isCurrent ? 'var(--warning)' : 'var(--border-subtle)', flexShrink: 0 }} />
+              <span style={{ color: isComplete || isCurrent ? 'var(--text)' : 'var(--text-muted)', fontWeight: isCurrent ? 600 : 400 }}>{phase}</span>
             </div>;
           })}</div>}
         </div>
@@ -257,9 +257,9 @@ export async function AgentMemoryOntologyPage({ org = null } = {}) {
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory ontology" title="Memory ontology" text="Define graph schema for memory repositories, including supported node kinds and edge relationship types." actions={[['/agents/memory', 'Overview'], ['/agents/memory/search', 'Search']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/ontology', 'Ontology']]}>
     <DegradedBanner model={ui.model} />
     {!primaryOntology && (
-      <div className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)', marginBottom: '0.5rem' }}>
+      <div className="card" style={{ borderLeft: '3px solid var(--info)', marginBottom: '0.5rem' }}>
         <div className="cardTitle"><h3>No ontology configured</h3><StatusPill tone="neutral">new</StatusPill></div>
-        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>No AgentMemoryOntology resource exists yet. Use the editor below to define node kinds and edge kinds, then save to create one.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No AgentMemoryOntology resource exists yet. Use the editor below to define node kinds and edge kinds, then save to create one.</p>
       </div>
     )}
     {primaryOntology && (

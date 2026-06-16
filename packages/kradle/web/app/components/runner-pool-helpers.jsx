@@ -10,9 +10,9 @@ import { useState } from 'react';
 // ── Constants ──────────────────────────────────────────────────────────────
 
 export const STATUS_COLORS = {
-  Idle: { color: '#15803d', bg: '#dcfce7', border: '#22c55e' },
-  Running: { color: 'var(--accent)', bg: '#dbeafe', border: '#3b82f6' },
-  Terminating: { color: '#9a3412', bg: '#ffedd5', border: '#f97316' }
+  Idle: { color: 'var(--success)', bg: 'var(--surface-raised)', border: 'var(--success)' },
+  Running: { color: 'var(--accent)', bg: 'var(--surface-raised)', border: 'var(--accent)' },
+  Terminating: { color: 'var(--warning)', bg: 'var(--surface-raised)', border: 'var(--warning)' }
 };
 
 // ── Normalization utilities ────────────────────────────────────────────────
@@ -28,7 +28,7 @@ export function normalizeRunners(runners) {
 // ── RunnerStatusBadge ──────────────────────────────────────────────────────
 
 export function RunnerStatusBadge({ status = 'Idle' }) {
-  const s = STATUS_COLORS[status] || { color: 'var(--text-muted)', bg: '#f3f4f6', border: '#e5e7eb' };
+  const s = STATUS_COLORS[status] || { color: 'var(--text-muted)', bg: 'var(--surface-raised)', border: 'var(--border)' };
   return (
     <span
       aria-label={`Runner status: ${status}`}
@@ -46,7 +46,7 @@ export function RunnerStatusBadge({ status = 'Idle' }) {
 
 export function CapacityBar({ used, total, label }) {
   const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
-  const barColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#22c55e';
+  const barColor = pct >= 90 ? 'var(--danger)' : pct >= 70 ? 'var(--warning)' : 'var(--success)';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -59,7 +59,7 @@ export function CapacityBar({ used, total, label }) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={`${label || 'Capacity'}: ${pct}%`}
-        style={{ height: '0.5rem', borderRadius: '9999px', background: '#e5e7eb', overflow: 'hidden' }}
+        style={{ height: '0.5rem', borderRadius: '9999px', background: 'var(--surface-raised)', overflow: 'hidden' }}
       >
         <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: '9999px', transition: 'width 0.3s' }} />
       </div>
@@ -77,7 +77,7 @@ export function RunnerRow({ runner }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0',
-      borderBottom: '1px solid #f3f4f6', flexWrap: 'wrap'
+      borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap'
     }}>
       <code style={{ fontFamily: 'monospace', fontSize: '0.8125rem', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {runnerId}
@@ -175,7 +175,7 @@ export function PoolCard({ pool, org, onScale, onToggleAutoScale }) {
           onClick={() => onToggleAutoScale?.(name, !autoScale)}
           style={{
             width: '2.25rem', height: '1.25rem', borderRadius: '9999px',
-            background: autoScale ? '#2563eb' : '#d1d5db', transition: 'background 0.2s',
+            background: autoScale ? 'var(--accent)' : 'var(--surface-overlay)', transition: 'background 0.2s',
             position: 'relative', cursor: 'pointer', flexShrink: 0
           }}>
           <div style={{

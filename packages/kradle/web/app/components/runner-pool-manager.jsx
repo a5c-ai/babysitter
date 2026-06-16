@@ -134,8 +134,8 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
             <h3 style={{ margin: 0, fontSize: '1.125rem' }}>Runner pools</h3>
             <span style={{
               display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px',
-              fontSize: '0.75rem', fontWeight: 600, color: localPools.length ? '#15803d' : '#6b7280',
-              background: localPools.length ? '#dcfce7' : '#f3f4f6'
+              fontSize: '0.75rem', fontWeight: 600, color: localPools.length ? 'var(--success)' : 'var(--text-muted)',
+              background: localPools.length ? 'var(--surface-raised)' : 'var(--surface-raised)'
             }}>
               {localPools.length} pool{localPools.length !== 1 ? 's' : ''}
             </span>
@@ -219,12 +219,12 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
             <span style={{ fontSize: '0.875rem', color: 'var(--text)' }}>Enable auto-scale (queue depth)</span>
           </label>
 
-          {message && <p style={{ margin: 0, fontSize: '0.875rem', color: saving ? '#6b7280' : '#15803d' }}>{message}</p>}
+          {message && <p style={{ margin: 0, fontSize: '0.875rem', color: saving ? 'var(--text-muted)' : 'var(--success)' }}>{message}</p>}
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button type="submit" disabled={saving} aria-label={saving ? 'Creating pool' : 'Submit new pool'} style={{
               padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 600,
-              background: saving ? '#9ca3af' : '#2563eb', color: '#fff', border: 'none',
+              background: saving ? 'var(--text-muted)' : 'var(--accent)', color: '#fff', border: 'none',
               borderRadius: '0.375rem', cursor: saving ? 'not-allowed' : 'pointer'
             }}>
               {saving ? 'Creating…' : 'Create pool'}
@@ -261,7 +261,7 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
       )}
 
       {message && !showForm && (
-        <p role={message.startsWith('Failed') ? 'alert' : undefined} style={{ margin: 0, fontSize: '0.875rem', color: message.startsWith('Failed') ? 'var(--danger, #dc2626)' : '#15803d' }}>{message}</p>
+        <p role={message.startsWith('Failed') ? 'alert' : undefined} style={{ margin: 0, fontSize: '0.875rem', color: message.startsWith('Failed') ? 'var(--danger)' : 'var(--success)' }}>{message}</p>
       )}
     </div>
   );

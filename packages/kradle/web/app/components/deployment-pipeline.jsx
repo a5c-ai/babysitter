@@ -12,10 +12,10 @@ const STAGE_DESCRIPTIONS = {
 };
 
 const tonePalette = {
-  pending: { bg: '#f9fafb', border: '#e5e7eb', badge: '#6b7280', badgeBg: '#f3f4f6' },
-  running: { bg: '#eff6ff', border: '#3b82f6', badge: '#1d4ed8', badgeBg: '#dbeafe' },
-  success: { bg: '#f0fdf4', border: '#22c55e', badge: '#15803d', badgeBg: '#dcfce7' },
-  failed: { bg: '#fef2f2', border: '#ef4444', badge: '#b91c1c', badgeBg: '#fee2e2' }
+  pending: { bg: 'var(--surface)', border: 'var(--border)', badge: 'var(--text-muted)', badgeBg: 'var(--surface-raised)' },
+  running: { bg: 'var(--surface-raised)', border: 'var(--info)', badge: 'var(--accent)', badgeBg: 'var(--surface-raised)' },
+  success: { bg: 'var(--surface-raised)', border: 'var(--success)', badge: 'var(--success)', badgeBg: 'var(--surface-raised)' },
+  failed: { bg: 'var(--surface-raised)', border: 'var(--danger)', badge: 'var(--danger)', badgeBg: 'var(--surface-raised)' }
 };
 
 const stageIcon = { pending: '○', running: '◎', success: '✓', failed: '✕' };
@@ -89,7 +89,7 @@ function PipelineConnector({ done }) {
     }}>
       <div style={{
         width: '2rem', height: '2px',
-        background: done ? '#22c55e' : '#e5e7eb'
+        background: done ? 'var(--success)' : 'var(--border)'
       }} />
     </div>
   );
@@ -284,7 +284,7 @@ export function DeploymentPipeline({ org = 'default', repository = null, kubeVel
           aria-label={`Create deployment pipeline for ${env} environment`}
           style={{
             padding: '0.375rem 0.875rem', fontSize: '0.875rem', fontWeight: 600,
-            background: deploying || isRunning ? '#9ca3af' : '#2563eb',
+            background: deploying || isRunning ? 'var(--text-muted)' : 'var(--accent)',
             color: '#fff', border: 'none', borderRadius: '0.375rem',
             cursor: deploying || isRunning ? 'not-allowed' : 'pointer'
           }}>
@@ -298,7 +298,7 @@ export function DeploymentPipeline({ org = 'default', repository = null, kubeVel
             aria-label={`Rollback deployment in ${env} environment`}
             style={{
               padding: '0.375rem 0.875rem', fontSize: '0.875rem', fontWeight: 600,
-              background: rollingBack ? '#9ca3af' : '#ef4444',
+              background: rollingBack ? 'var(--text-muted)' : 'var(--danger)',
               color: '#fff', border: 'none', borderRadius: '0.375rem',
               cursor: rollingBack ? 'not-allowed' : 'pointer'
             }}>
@@ -338,7 +338,7 @@ export function DeploymentPipeline({ org = 'default', repository = null, kubeVel
         </p>
       )}
       {message && (
-        <p aria-live="polite" style={{ margin: 0, fontSize: '0.875rem', color: anyFailed ? '#b91c1c' : '#15803d' }}>
+        <p aria-live="polite" style={{ margin: 0, fontSize: '0.875rem', color: anyFailed ? 'var(--danger)' : 'var(--success)' }}>
           {message}
         </p>
       )}

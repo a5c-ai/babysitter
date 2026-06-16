@@ -111,7 +111,7 @@ spec:
       <TriggerRuleForm org={activeOrg} stacks={stacks} />
       <div className="card">
         <div className="cardTitle"><h3>Resource definition</h3><StatusPill tone="neutral">example</StatusPill></div>
-        <pre style={{ background: '#1e1e2e', color: '#cdd6f4', padding: '1rem', borderRadius: '0.5rem', fontSize: '0.8125rem', lineHeight: '1.6', overflow: 'auto' }}><code>{exampleYaml}</code></pre>
+        <pre style={{ background: 'var(--bg)', color: 'var(--text)', padding: '1rem', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', lineHeight: '1.6', overflow: 'auto' }}><code>{exampleYaml}</code></pre>
       </div>
     </section>
   </PageFrame>;

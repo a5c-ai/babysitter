@@ -110,7 +110,7 @@ export async function SSHKeysPage({ org = null } = {}) {
             <strong>{name}</strong>
             <span className="pill neutral" style={{ fontSize: '0.75rem' }}>{scope}</span>
             <StatusPill tone={phaseTone}>{phase}</StatusPill>
-            {fingerprint ? <small style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '0.75rem' }}>{fingerprint.substring(0, 20)}</small> : null}
+            {fingerprint ? <small style={{ color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.75rem' }}>{fingerprint.substring(0, 20)}</small> : null}
             <ResourceActions org={activeOrg} apiPath={`resources/SSHKey/${name}`} actions={phase === 'Revoked' ? ['delete'] : ['revoke', 'delete']} />
           </div>;
         })}</div> : <EmptyState title="No SSH keys" text="Add deploy keys for CI/CD pipelines, user SSH keys for developer access, or automation keys for agent workspaces. Use the form on the right to add one." cta={orgHref(activeOrg, '/people')} ctaLabel="Manage people" />}
@@ -144,7 +144,7 @@ export async function RepositoryPermissionsPage({ org = null } = {}) {
       <div className="card">
         <div className="cardTitle"><h2>Repository permissions</h2><StatusPill tone={items.length ? 'good' : 'neutral'}>{items.length} grants</StatusPill></div>
         {items.length ? <div className="resourceTable">
-          <div className="resourceRow" style={{ fontWeight: 600, fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div className="resourceRow" style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             <span>Name</span><span>Repository</span><span>Subject</span><span>Permission</span><span>Status</span>
           </div>
           {items.map((perm) => {

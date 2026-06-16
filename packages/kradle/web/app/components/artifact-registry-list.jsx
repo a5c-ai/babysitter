@@ -32,7 +32,7 @@ export function RegistryCard({ registry, feeds, onSelect }) {
     <div style={cardStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <div style={{
-          width: 40, height: 40, borderRadius: '0.375rem', background: '#1e293b', color: '#f8fafc',
+          width: 40, height: 40, borderRadius: '0.375rem', background: 'var(--surface-overlay)', color: 'var(--text)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.75rem', flexShrink: 0,
         }}>
           {icon}
@@ -111,9 +111,9 @@ export function CreateRegistryForm({ org, onCreated, externalProviders }) {
               aria-pressed={form.registryType === t}
               style={{
                 ...btnSecondary,
-                background: form.registryType === t ? '#2563eb' : undefined,
-                color: form.registryType === t ? '#fff' : '#374151',
-                borderColor: form.registryType === t ? '#2563eb' : '#e5e7eb',
+                background: form.registryType === t ? 'var(--accent)' : undefined,
+                color: form.registryType === t ? '#fff' : 'var(--text)',
+                borderColor: form.registryType === t ? 'var(--accent)' : 'var(--border)',
                 fontWeight: form.registryType === t ? 600 : 400,
               }}
             >

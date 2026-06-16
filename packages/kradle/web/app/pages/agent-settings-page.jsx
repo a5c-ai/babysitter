@@ -26,9 +26,9 @@ export async function AgentSettingsPage({ org = null } = {}) {
         <a href={orgHref(activeOrg, '/agents/approvals')}><strong>{agentView.approvals?.count || 0}</strong><span>Approvals</span></a>
         <a href={orgHref(activeOrg, '/agents/runs')}><strong>{agentView.runs?.count || 0}</strong><span>Runs</span></a>
       </div>
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-        <span>Agents: <strong style={{ color: agentsEnabled ? '#22c55e' : '#9ca3af' }}>{agentsEnabled ? 'enabled' : 'disabled'}</strong></span>
-        <span>Agent Mux: <strong style={{ color: agentMuxConnected ? '#22c55e' : '#9ca3af' }}>{agentMuxConnected ? 'connected' : 'not configured'}</strong></span>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <span>Agents: <strong style={{ color: agentsEnabled ? 'var(--success)' : 'var(--text-muted)' }}>{agentsEnabled ? 'enabled' : 'disabled'}</strong></span>
+        <span>Agent Mux: <strong style={{ color: agentMuxConnected ? 'var(--success)' : 'var(--text-muted)' }}>{agentMuxConnected ? 'connected' : 'not configured'}</strong></span>
       </div>
     </div>
   </PageFrame>;

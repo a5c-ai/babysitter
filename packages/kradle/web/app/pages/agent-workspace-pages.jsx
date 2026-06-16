@@ -29,7 +29,7 @@ export async function AgentWorkspacesPage({ org = null } = {}) {
             <StatusPill tone={ws.status?.volumeStatus === 'Bound' ? 'good' : ws.status?.volumeStatus === 'Pending' ? 'warn' : 'neutral'}>{ws.status?.volumeStatus ? `PVC: ${ws.status.volumeStatus}` : 'PVC: Unknown'}</StatusPill>
             <span>{ws.spec?.volumeSpec?.capacity || '10Gi'}</span>
             <small>{ws.spec?.branch || 'main'}</small>
-            {ws.status?.runRef ? <small style={{ color: '#2563eb' }}>mounted: {ws.status.runRef}</small> : null}
+            {ws.status?.runRef ? <small style={{ color: 'var(--accent)' }}>mounted: {ws.status.runRef}</small> : null}
           </a>
           <ResourceActions org={activeOrg} apiPath={`resources/KradleWorkspace/${ws.metadata?.name}`} actions={ws.status?.phase === 'Archived' ? ['delete'] : ws.status?.phase === 'InUse' ? ['archive', 'delete'] : ['archive', 'delete']} />
         </div>)}</div> : <EmptyState title="No agent workspaces" text="Workspaces are provisioned when runs start, or create one manually using the form." info />}

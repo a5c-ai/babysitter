@@ -292,7 +292,7 @@ export function AppSettingsForm() {
       </div>
 
       {saved && (
-        <div role="status" aria-live="polite" style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', padding: '0.625rem 1.25rem', borderRadius: '0.5rem', background: 'var(--accent, #2563eb)', color: '#fff', fontWeight: 700, fontSize: '0.875rem', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 50 }}>
+        <div role="status" aria-live="polite" style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', padding: '0.625rem 1.25rem', borderRadius: '0.5rem', background: 'var(--accent)', color: '#fff', fontWeight: 700, fontSize: '0.875rem', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 50 }}>
           Settings saved
         </div>
       )}

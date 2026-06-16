@@ -12,9 +12,9 @@ export function ApiExplorer({ org = 'default' }) {
       {/* Summary bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, padding: '10px 16px', background: 'var(--bg-subtle)', borderRadius: 8, fontSize: 13 }}>
         <span style={{ color: 'var(--text)' }}><strong>{totalEndpoints}</strong> endpoints</span>
-        <span style={{ color: '#d1d5db' }}>|</span>
+        <span style={{ color: 'var(--border)' }}>|</span>
         <span style={{ color: 'var(--text)' }}><strong>{ENDPOINT_GROUPS.length}</strong> groups</span>
-        <span style={{ color: '#d1d5db' }}>|</span>
+        <span style={{ color: 'var(--border)' }}>|</span>
         <span style={{ color: 'var(--text-muted)' }}>Organization: <code style={{ fontFamily: 'monospace', color: 'var(--accent)' }}>{org}</code></span>
         <a
           href={`/api/orgs/${org}/resources`}
@@ -36,8 +36,8 @@ export function ApiExplorer({ org = 'default' }) {
           onClick={() => setActiveGroup(null)}
           style={{
             padding: '4px 14px', borderRadius: 20, border: '1px solid var(--border)',
-            background: activeGroup === null ? '#2563eb' : '#fff',
-            color: activeGroup === null ? '#fff' : '#374151',
+            background: activeGroup === null ? 'var(--accent)' : 'var(--surface)',
+            color: activeGroup === null ? '#fff' : 'var(--text)',
             cursor: 'pointer', fontSize: 12, fontWeight: 600,
           }}
         >
@@ -52,8 +52,8 @@ export function ApiExplorer({ org = 'default' }) {
             onClick={() => setActiveGroup(g.title === activeGroup ? null : g.title)}
             style={{
               padding: '4px 14px', borderRadius: 20, border: '1px solid var(--border)',
-              background: activeGroup === g.title ? '#2563eb' : '#fff',
-              color: activeGroup === g.title ? '#fff' : '#374151',
+              background: activeGroup === g.title ? 'var(--accent)' : 'var(--surface)',
+              color: activeGroup === g.title ? '#fff' : 'var(--text)',
               cursor: 'pointer', fontSize: 12, fontWeight: 600,
             }}
           >

@@ -1,9 +1,9 @@
 export const METHOD_COLORS = {
-  GET: { bg: '#2563eb', text: '#fff' },
-  POST: { bg: '#16a34a', text: '#fff' },
-  DELETE: { bg: '#dc2626', text: '#fff' },
-  PUT: { bg: '#d97706', text: '#fff' },
-  PATCH: { bg: '#7c3aed', text: '#fff' },
+  GET: { bg: 'var(--accent)', text: '#fff' },
+  POST: { bg: 'var(--success)', text: '#fff' },
+  DELETE: { bg: 'var(--danger)', text: '#fff' },
+  PUT: { bg: 'var(--warning)', text: '#fff' },
+  PATCH: { bg: 'var(--info)', text: '#fff' },
 };
 
 export const ENDPOINT_GROUPS = [

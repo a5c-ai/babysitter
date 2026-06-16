@@ -19,8 +19,8 @@ export default function Error({ error, reset }) {
     return (
       <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
         <h2>Update available</h2>
-        <p style={{ color: 'var(--text-muted, #6b7280)' }}>A new version was deployed. Reloading to get the latest.</p>
-        <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: 'var(--accent, #2563eb)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+        <p style={{ color: 'var(--text-muted)' }}>A new version was deployed. Reloading to get the latest.</p>
+        <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
           Reload now
         </button>
       </div>
@@ -30,8 +30,8 @@ export default function Error({ error, reset }) {
   return (
     <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto' }}>
       <h2>Something went wrong</h2>
-      <p style={{ color: 'var(--text-muted, #6b7280)' }}>{error?.message || 'An unexpected error occurred.'}</p>
-      <button onClick={reset} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: 'var(--accent, #2563eb)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+      <p style={{ color: 'var(--text-muted)' }}>{error?.message || 'An unexpected error occurred.'}</p>
+      <button onClick={reset} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
         Try again
       </button>
     </div>

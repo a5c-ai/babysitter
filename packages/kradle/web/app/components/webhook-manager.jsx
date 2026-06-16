@@ -11,18 +11,18 @@ const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem',
 const selectStyle = { ...inputStyle, background: 'var(--surface)' };
 const fieldGroupStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 const buttonStyle = { padding: '7px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600 };
-const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
-const ghostStyle = { ...buttonStyle, backgroundColor: 'transparent', color: 'var(--accent)', border: '1px solid #2563eb' };
+const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: '#fff' };
+const ghostStyle = { ...buttonStyle, backgroundColor: 'transparent', color: 'var(--accent)', border: '1px solid var(--accent)' };
 const smallGhostStyle = { ...buttonStyle, padding: '4px 10px', fontSize: 12, backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border)' };
 
 function Badge({ children, tone = 'neutral' }) {
   const colors = {
-    good: { background: '#dcfce7', color: '#16a34a' },
-    warn: { background: '#fef9c3', color: '#a16207' },
-    bad: { background: '#fee2e2', color: 'var(--danger)' },
-    danger: { background: '#fee2e2', color: 'var(--danger)' },
+    good: { background: 'var(--surface-raised)', color: 'var(--success)' },
+    warn: { background: 'var(--surface-raised)', color: 'var(--warning)' },
+    bad: { background: 'var(--surface-raised)', color: 'var(--danger)' },
+    danger: { background: 'var(--surface-raised)', color: 'var(--danger)' },
     neutral: { background: 'var(--bg-subtle)', color: 'var(--text-muted)' },
-    info: { background: '#dbeafe', color: 'var(--accent)' },
+    info: { background: 'var(--surface-raised)', color: 'var(--accent)' },
   };
   const { background, color } = colors[tone] || colors.neutral;
   return (
@@ -131,12 +131,12 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
             </button>
           </>
         ) : (
-          <button onClick={() => setConfirmDelete(true)} disabled={deleting} style={{ ...smallGhostStyle, color: 'var(--danger)', borderColor: '#fca5a5', opacity: deleting ? 0.6 : 1 }} aria-label={`Delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
+          <button onClick={() => setConfirmDelete(true)} disabled={deleting} style={{ ...smallGhostStyle, color: 'var(--danger)', borderColor: 'var(--danger)', opacity: deleting ? 0.6 : 1 }} aria-label={`Delete webhook ${webhook.metadata?.name || 'unnamed'}`}>
             {deleting ? 'Deleting...' : 'Delete'}
           </button>
         )}
         {pingMsg && (
-          <span style={{ fontSize: 12, color: pingMsg.startsWith('Ping sent') ? '#16a34a' : '#dc2626', fontWeight: 500 }}>
+          <span style={{ fontSize: 12, color: pingMsg.startsWith('Ping sent') ? 'var(--success)' : 'var(--danger)', fontWeight: 500 }}>
             {pingMsg}
           </span>
         )}
@@ -205,8 +205,8 @@ function AddWebhookForm({ org, onCreated }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div style={{ border: '1px solid #dbeafe', borderRadius: 8, padding: '1rem', background: '#f0f7ff', marginTop: '0.75rem' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: '0.75rem', color: '#1d4ed8' }}>Add Webhook</div>
+      <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '1rem', background: 'var(--surface-raised)', marginTop: '0.75rem' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: '0.75rem', color: 'var(--accent)' }}>Add Webhook</div>
         <div style={fieldGroupStyle}>
           <div>
             <label style={labelStyle}>Name <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -265,7 +265,7 @@ function AddWebhookForm({ org, onCreated }) {
             <button type="submit" disabled={!canSubmit} style={{ ...primaryStyle, opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? 'pointer' : 'not-allowed' }} aria-label="Create webhook">
               {status === 'saving' ? 'Creating...' : 'Create Webhook'}
             </button>
-            {status === 'success' && <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 600 }}>{message}</span>}
+            {status === 'success' && <span style={{ fontSize: 12, color: 'var(--success)', fontWeight: 600 }}>{message}</span>}
             {status === 'error' && <span style={{ fontSize: 12, color: 'var(--danger)' }}>{message}</span>}
           </div>
         </div>
@@ -297,7 +297,7 @@ function DeliveryHistoryList({ deliveries = [] }) {
             const ts = d.timestamp || d.metadata?.creationTimestamp || '';
             const st = d.status || d.status?.phase || 'received';
             return (
-              <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: 12, padding: '5px 0', borderBottom: '1px solid #f3f4f6' }}>
+              <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: 12, padding: '5px 0', borderBottom: '1px solid var(--border-subtle)' }}>
                 <code style={{ flex: '0 0 auto', color: 'var(--text-muted)' }}>{truncateId(id)}</code>
                 <Badge tone="neutral">{evType}</Badge>
                 <span style={{ color: 'var(--text-muted)', flex: 1, fontSize: 11 }}>{ts ? new Date(ts).toLocaleString() : ''}</span>

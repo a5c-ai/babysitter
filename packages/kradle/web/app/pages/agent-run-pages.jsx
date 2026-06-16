@@ -165,9 +165,9 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
               const isUser = msg.role === 'user';
               const isSystem = msg.role === 'system';
               const isTool = msg.role === 'tool' || msg.role === 'tool_result';
-              return <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: isUser ? 'var(--surface-raised, rgba(37,99,235,0.05))' : isSystem ? 'var(--surface-overlay, rgba(0,0,0,0.02))' : isTool ? 'var(--surface-overlay, rgba(0,0,0,0.02))' : 'var(--surface)', border: '1px solid var(--border)' }}>
+              return <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: isUser ? 'var(--surface-raised)' : isSystem ? 'var(--surface-overlay)' : isTool ? 'var(--surface-overlay)' : 'var(--surface)', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: isUser ? 'var(--accent)' : isTool ? '#d97706' : 'var(--text-muted)' }}>{msg.role || 'unknown'}</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: isUser ? 'var(--accent)' : isTool ? 'var(--warning)' : 'var(--text-muted)' }}>{msg.role || 'unknown'}</span>
                   {msg.timestamp && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{msg.timestamp}</span>}
                 </div>
                 <div style={{ fontSize: '0.85rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: 'var(--text)' }}>{typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content, null, 2)}</div>

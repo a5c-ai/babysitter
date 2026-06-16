@@ -20,20 +20,20 @@ export {
 
 export function ToolCallCard({ toolName, input, output, status }) {
   const renderer = resolveToolRenderer(toolName);
-  const statusColor = status === 'error' ? '#ef4444' : status === 'completed' ? '#22c55e' : '#f59e0b';
+  const statusColor = status === 'error' ? 'var(--danger)' : status === 'completed' ? 'var(--success)' : 'var(--warning)';
   const inputPreview = renderer.renderInput(typeof input === 'string' ? tryParseJson(input) : input);
   const outputPreview = output != null ? renderer.renderOutput(typeof output === 'string' ? tryParseJson(output) : output) : null;
 
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderLeft: `3px solid ${statusColor}`, borderRadius: 4, padding: '8px 12px', marginBottom: 8, fontSize: 13, backgroundColor: '#fafafa' }}>
+    <div style={{ border: '1px solid var(--border)', borderLeft: `3px solid ${statusColor}`, borderRadius: 4, padding: '8px 12px', marginBottom: 8, fontSize: 13, backgroundColor: 'var(--surface-raised)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: outputPreview ? 4 : 0 }}>
-        <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280' }}>{renderer.prefix}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>{renderer.prefix}</span>
         <strong style={{ fontSize: 12 }}>{renderer.label}</strong>
-        <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#374151', flex: 1 }}>{inputPreview}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-secondary)', flex: 1 }}>{inputPreview}</span>
         <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: statusColor, flexShrink: 0 }} />
       </div>
       {outputPreview && (
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{outputPreview}</div>
+        <div style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{outputPreview}</div>
       )}
     </div>
   );
@@ -65,7 +65,7 @@ export function FlowLane({ run, transcript }) {
   const messages = transcript?.spec?.messages || [];
   const segments = deriveSegments(messages);
   const tone = phaseTone(phase);
-  const phaseColor = tone === 'good' ? '#22c55e' : tone === 'warn' ? '#f59e0b' : tone === 'danger' ? '#ef4444' : '#94a3b8';
+  const phaseColor = tone === 'good' ? 'var(--success)' : tone === 'warn' ? 'var(--warning)' : tone === 'danger' ? 'var(--danger)' : 'var(--text-muted)';
 
   return <div style={{ marginBottom: 12 }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 13 }}>
@@ -73,7 +73,7 @@ export function FlowLane({ run, transcript }) {
       {stackName ? <span style={{ color: 'var(--text-muted)' }}>{stackName}</span> : null}
       <StatusPill tone={tone}>{phase}</StatusPill>
     </div>
-    <div style={{ display: 'flex', height: 28, borderRadius: 4, overflow: 'hidden', backgroundColor: '#f1f5f9' }}>
+    <div style={{ display: 'flex', height: 28, borderRadius: 4, overflow: 'hidden', backgroundColor: 'var(--surface-raised)' }}>
       {segments.length ? segments.map((seg, index) => {
         const info = SEGMENT_KINDS[seg.kind] || SEGMENT_KINDS.lifecycle;
         return <div key={index} className="flowSegment" title={`${info.label}: ${seg.count} messages`} style={{
@@ -180,10 +180,10 @@ export function IssueDetailView({ model, issue, repo = null, project = null }) {
 // ── Kanban helpers ────────────────────────────────────────────────────────────
 
 export const WORKFLOW_COLUMNS = [
-  { id: 'todo', label: 'Todo', color: '#6b7280' },
-  { id: 'in-progress', label: 'In Progress', color: '#eab308' },
-  { id: 'review', label: 'Review', color: '#3b82f6' },
-  { id: 'done', label: 'Done', color: '#22c55e' },
+  { id: 'todo', label: 'Todo', color: 'var(--text-muted)' },
+  { id: 'in-progress', label: 'In Progress', color: 'var(--warning)' },
+  { id: 'review', label: 'Review', color: 'var(--info)' },
+  { id: 'done', label: 'Done', color: 'var(--success)' },
 ];
 
 export function KanbanBoard({ project, items = [], org = 'default' }) {
@@ -193,22 +193,22 @@ export function KanbanBoard({ project, items = [], org = 'default' }) {
   }));
   const hasItems = items.length > 0;
   return <div className="kanbanBoard" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', minHeight: '20rem' }}>
-    {columns.map((col) => <section key={col.id} className="kanbanColumn" style={{ background: 'var(--surface-muted, #f9fafb)', borderRadius: '0.5rem', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    {columns.map((col) => <section key={col.id} className="kanbanColumn" style={{ background: 'var(--surface)', borderRadius: '0.5rem', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
         <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600 }}>{col.label}</h3>
         <span style={{ background: col.color, color: '#fff', borderRadius: '9999px', padding: '0.125rem 0.5rem', fontSize: '0.75rem', fontWeight: 600 }}>{col.items.length}</span>
       </div>
-      {col.items.length ? col.items.map((item) => <div key={item.metadata?.name || item.spec?.title} className="kanbanCard" style={{ background: '#fff', borderRadius: '0.375rem', padding: '0.625rem 0.75rem', borderLeft: `4px solid ${col.color}`, boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }}>
+      {col.items.length ? col.items.map((item) => <div key={item.metadata?.name || item.spec?.title} className="kanbanCard" style={{ background: 'var(--surface-raised)', borderRadius: '0.375rem', padding: '0.625rem 0.75rem', borderLeft: `4px solid ${col.color}`, boxShadow: 'var(--shadow-sm)' }}>
         <strong style={{ fontSize: '0.8125rem', display: 'block', marginBottom: '0.25rem' }}>{item.spec?.title || item.metadata?.name}</strong>
         {item.spec?.priority ? <span className="pill neutral" style={{ fontSize: '0.6875rem', marginRight: '0.25rem' }}>{item.spec.priority}</span> : null}
-        {item.spec?.assignee ? <small style={{ color: '#6b7280', fontSize: '0.75rem' }}>{item.spec.assignee}</small> : null}
+        {item.spec?.assignee ? <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.spec.assignee}</small> : null}
         <div style={{ display: 'flex', gap: '0.375rem', marginTop: '0.25rem' }}>
-          {item.status?.linkedSessions ? <small style={{ color: '#9ca3af', fontSize: '0.6875rem' }}>{item.status.linkedSessions} sessions</small> : null}
-          {item.status?.linkedWorkspaces ? <small style={{ color: '#9ca3af', fontSize: '0.6875rem' }}>{item.status.linkedWorkspaces} workspaces</small> : null}
+          {item.status?.linkedSessions ? <small style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{item.status.linkedSessions} sessions</small> : null}
+          {item.status?.linkedWorkspaces ? <small style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{item.status.linkedWorkspaces} workspaces</small> : null}
         </div>
-      </div>) : <p style={{ color: '#9ca3af', fontSize: '0.8125rem', textAlign: 'center', margin: 'auto 0', padding: '1rem 0' }}>No items</p>}
+      </div>) : <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', textAlign: 'center', margin: 'auto 0', padding: '1rem 0' }}>No items</p>}
     </section>)}
-    {!hasItems ? <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem 0', color: '#9ca3af' }}>
+    {!hasItems ? <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)' }}>
       <p style={{ fontSize: '0.875rem' }}>Link issues to this project to populate the board</p>
     </div> : null}
   </div>;

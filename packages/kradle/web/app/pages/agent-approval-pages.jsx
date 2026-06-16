@@ -22,7 +22,7 @@ export async function AgentApprovalsPage({ org = null } = {}) {
       <div className="card"><div className="cardTitle"><h3>Approved</h3><StatusPill tone={approvedCount ? 'good' : 'neutral'}>{approvedCount}</StatusPill></div><p className="emptyText">Actions authorized</p></div>
       <div className="card"><div className="cardTitle"><h3>Denied</h3><StatusPill tone={deniedCount ? 'danger' : 'neutral'}>{deniedCount}</StatusPill></div><p className="emptyText">Actions rejected</p></div>
     </section>
-    <div className="card" style={{ borderLeft: pending.length ? '3px solid var(--color-warn, #e8a735)' : undefined }}>
+    <div className="card" style={{ borderLeft: pending.length ? '3px solid var(--warning)' : undefined }}>
       <div className="cardTitle"><h2>Pending approvals</h2><StatusPill tone={pending.length ? 'warn' : 'neutral'}>{pending.length} pending</StatusPill></div>
       {pending.length ? <div className="stack">{pending.map((approval) => {
         const name = approval.metadata?.name || 'unknown';
@@ -31,7 +31,7 @@ export async function AgentApprovalsPage({ org = null } = {}) {
         const dispatchRun = approval.spec?.dispatchRun || null;
         const requestedAt = approval.metadata?.creationTimestamp || approval.spec?.requestedAt || null;
         const description = approval.spec?.description || approval.spec?.reason || `Agent requests permission to perform: ${action}`;
-        return <div key={name} className="card" style={{ background: 'var(--surface-warn, #fffbeb)', border: '1px solid var(--border-warn, #f5d060)' }}>
+        return <div key={name} className="card" style={{ background: 'rgb(219 163 68 / 0.12)', border: '1px solid rgb(219 163 68 / 0.45)' }}>
           <div className="cardTitle"><h3>{action}</h3><StatusPill tone="warn">pending</StatusPill></div>
           <dl className="kv">
             <dt>Requesting agent</dt><dd>{requestedBy}</dd>

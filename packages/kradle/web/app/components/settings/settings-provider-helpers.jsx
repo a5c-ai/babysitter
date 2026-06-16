@@ -48,13 +48,13 @@ export const selectStyle = { ...inputStyle, background: 'var(--surface)' };
 export const fieldGroupStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 export const rowStyle = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' };
 export const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
-export const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
-export const secondaryStyle = { ...buttonStyle, backgroundColor: '#f3f4f6', color: 'var(--text)', border: '1px solid var(--border)' };
+export const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: '#fff' };
+export const secondaryStyle = { ...buttonStyle, backgroundColor: 'var(--surface-raised)', color: 'var(--text)', border: '1px solid var(--border)' };
 export const disabledStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
 
 export function StatusMsg({ status, message }) {
   if (!message) return null;
-  const color = status === 'success' ? '#16a34a' : '#dc2626';
+  const color = status === 'success' ? 'var(--success)' : 'var(--danger)';
   return <span style={{ fontSize: 13, color, fontWeight: 600 }}>{message}</span>;
 }
 
@@ -139,10 +139,10 @@ export function ProviderRow({ org, provider, onDeleted }) {
   }
 
   const phaseTone = (phase) => {
-    if (!phase || phase === 'Pending') return '#9ca3af';
-    if (phase === 'Active' || phase === 'Ready' || phase === 'Configured') return '#22c55e';
-    if (phase === 'Failed') return '#ef4444';
-    return '#9ca3af';
+    if (!phase || phase === 'Pending') return 'var(--text-muted)';
+    if (phase === 'Active' || phase === 'Ready' || phase === 'Configured') return 'var(--success)';
+    if (phase === 'Failed') return 'var(--danger)';
+    return 'var(--text-muted)';
   };
 
   return (
@@ -180,7 +180,7 @@ export function ProviderRow({ org, provider, onDeleted }) {
           type="button"
           onClick={handleDelete}
           disabled={delStatus === 'deleting'}
-          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: 'var(--danger)' }}
           aria-label={`Delete provider ${name}`}
         >
           {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}

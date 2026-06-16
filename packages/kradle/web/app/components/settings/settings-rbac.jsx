@@ -10,13 +10,13 @@ const selectStyle = { ...inputStyle, background: 'var(--surface)' };
 const fieldGroupStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 const rowStyle = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' };
 const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
-const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
-const secondaryStyle = { ...buttonStyle, backgroundColor: '#f3f4f6', color: 'var(--text)', border: '1px solid var(--border)' };
+const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: '#fff' };
+const secondaryStyle = { ...buttonStyle, backgroundColor: 'var(--surface-raised)', color: 'var(--text)', border: '1px solid var(--border)' };
 const disabledStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
 
 function StatusMsg({ status, message }) {
   if (!message) return null;
-  const color = status === 'success' ? '#16a34a' : '#dc2626';
+  const color = status === 'success' ? 'var(--success)' : 'var(--danger)';
   return <span style={{ fontSize: 13, color, fontWeight: 600 }}>{message}</span>;
 }
 
@@ -62,7 +62,7 @@ function ServiceAccountRow({ org, sa, onDeleted }) {
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8125rem' }}>
         <span style={{
           display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
-          backgroundColor: sa.status?.phase === 'Active' ? '#22c55e' : '#9ca3af',
+          backgroundColor: sa.status?.phase === 'Active' ? 'var(--success)' : 'var(--text-muted)',
         }} />
         {sa.status?.phase || 'Pending'}
       </span>
@@ -90,7 +90,7 @@ function ServiceAccountRow({ org, sa, onDeleted }) {
           type="button"
           onClick={handleDelete}
           disabled={delStatus === 'deleting'}
-          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: '#fca5a5' }}
+          style={{ ...secondaryStyle, padding: '4px 12px', fontSize: 12, color: 'var(--danger)', borderColor: 'var(--danger)' }}
           aria-label={`Delete service account ${name}`}
         >
           {delStatus === 'deleting' ? 'Deleting...' : 'Delete'}

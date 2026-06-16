@@ -30,12 +30,12 @@ export function tryParseJson(text) {
 }
 
 export const SEGMENT_KINDS = {
-  user: { label: 'User', color: '#3b82f6' },
-  assistant: { label: 'Assistant', color: '#6b7280' },
-  thinking: { label: 'Thinking', color: '#a855f7' },
-  tool: { label: 'Tool', color: '#f59e0b' },
-  error: { label: 'Error', color: '#ef4444' },
-  lifecycle: { label: 'Lifecycle', color: '#94a3b8' },
+  user: { label: 'User', color: '#58b3a4' },
+  assistant: { label: 'Assistant', color: '#a59373' },
+  thinking: { label: 'Thinking', color: '#a9bf57' },
+  tool: { label: 'Tool', color: '#dba344' },
+  error: { label: 'Error', color: '#d4604a' },
+  lifecycle: { label: 'Lifecycle', color: '#6f5f44' },
 };
 
 export function classifyMessageKind(message) {

@@ -31,9 +31,9 @@ export async function AgentSessionsPage({ org = null } = {}) {
           <StatusPill tone={phaseTone(session.status?.phase)}>{session.status?.phase || 'Pending'}</StatusPill>
         </a>
         {session.spec?.dispatchRun ? (
-          <a href={orgHref(activeOrg, `/agents/runs/${session.spec.dispatchRun}`)} style={{ color: '#2563eb', fontSize: '0.875rem' }}>{session.spec.dispatchRun}</a>
+          <a href={orgHref(activeOrg, `/agents/runs/${session.spec.dispatchRun}`)} style={{ color: 'var(--accent)', fontSize: '0.875rem' }}>{session.spec.dispatchRun}</a>
         ) : (
-          <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>no run</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>no run</span>
         )}
         <a href={orgHref(activeOrg, `/agents/sessions/${session.metadata?.name}`)} style={{ textDecoration: 'none', display: 'contents' }}>
           <small>{session.status?.updatedAt || session.metadata?.creationTimestamp || ''}</small>

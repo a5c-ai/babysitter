@@ -7,8 +7,8 @@ import { CURATED_MODELS, MODEL_CATEGORIES } from '../../../lib/model-catalog-dat
 export const metadata = { title: 'Model Catalog | Kradle' };
 
 const CATEGORY_COLORS = {
-  LLM: '#8b5cf6', Code: '#3b82f6', Embedding: '#06b6d4',
-  Vision: '#ec4899', Speech: '#f59e0b', 'Classical ML': '#16a34a',
+  LLM: '#a9bf57', Code: '#58b3a4', Embedding: '#5fae9c',
+  Vision: '#d0707c', Speech: '#dba344', 'Classical ML': '#84b274',
 };
 
 export default async function ModelsPage({ params }) {
@@ -76,7 +76,7 @@ export default async function ModelsPage({ params }) {
                 <a href={`/orgs/${activeOrg}/inference`} style={{
                   display: 'block', textAlign: 'center', marginTop: '0.25rem',
                   padding: '0.375rem', borderRadius: 'var(--radius-sm)',
-                  background: 'var(--accent, #2563eb)', color: '#fff',
+                  background: 'var(--accent)', color: '#fff',
                   textDecoration: 'none', fontSize: '0.8rem', fontWeight: 600,
                 }}>
                   Deploy
