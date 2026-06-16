@@ -69,7 +69,7 @@ function StepIndicator({ current, total }) {
             height: 4,
             flex: 1,
             borderRadius: 2,
-            background: i < current ? '#2563eb' : i === current ? '#93c5fd' : '#e5e7eb',
+            background: i < current ? 'var(--accent)' : i === current ? 'var(--border-focus)' : 'var(--border)',
           }}
         />
       ))}
@@ -88,10 +88,10 @@ function Step1Platform({ value, onChange }) {
           alignItems: 'center',
           gap: '0.75rem',
           padding: '0.75rem',
-          border: `1px solid ${value === pt.value ? '#2563eb' : '#e5e7eb'}`,
+          border: `1px solid ${value === pt.value ? 'var(--accent)' : 'var(--border)'}`,
           borderRadius: '0.5rem',
           cursor: 'pointer',
-          background: value === pt.value ? '#eff6ff' : '#fff',
+          background: value === pt.value ? 'var(--card)' : 'var(--surface)',
         }}>
           <input
             type="radio"
@@ -99,7 +99,7 @@ function Step1Platform({ value, onChange }) {
             value={pt.value}
             checked={value === pt.value}
             onChange={() => onChange(pt.value)}
-            style={{ accentColor: '#2563eb' }}
+            style={{ accentColor: 'var(--accent)' }}
           />
           <div>
             <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{pt.label}</div>
@@ -125,10 +125,10 @@ function Step2Hosting({ hosting, setHosting, baseUrl, setBaseUrl, platform }) {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.75rem',
-            border: `1px solid ${hosting === h ? '#2563eb' : '#e5e7eb'}`,
+            border: `1px solid ${hosting === h ? 'var(--accent)' : 'var(--border)'}`,
             borderRadius: '0.5rem',
             cursor: 'pointer',
-            background: hosting === h ? '#eff6ff' : '#fff',
+            background: hosting === h ? 'var(--card)' : 'var(--surface)',
           }}>
             <input
               type="radio"
@@ -136,7 +136,7 @@ function Step2Hosting({ hosting, setHosting, baseUrl, setBaseUrl, platform }) {
               value={h}
               checked={hosting === h}
               onChange={() => { setHosting(h); if (h === 'saas') setBaseUrl(''); }}
-              style={{ accentColor: '#2563eb' }}
+              style={{ accentColor: 'var(--accent)' }}
             />
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{h === 'saas' ? 'SaaS / Cloud' : 'Self-hosted'}</div>
@@ -184,10 +184,10 @@ function Step3Scopes({ platform, selected, onChange }) {
             alignItems: 'center',
             gap: '0.75rem',
             padding: '0.75rem',
-            border: `1px solid ${checked ? '#2563eb' : '#e5e7eb'}`,
+            border: `1px solid ${checked ? 'var(--accent)' : 'var(--border)'}`,
             borderRadius: '0.5rem',
             cursor: fixed ? 'default' : 'pointer',
-            background: checked ? '#eff6ff' : '#fff',
+            background: checked ? 'var(--card)' : 'var(--surface)',
             opacity: fixed ? 0.85 : 1,
           }}>
             <input
@@ -195,7 +195,7 @@ function Step3Scopes({ platform, selected, onChange }) {
               checked={checked}
               onChange={() => toggle(scope)}
               disabled={fixed}
-              style={{ accentColor: '#2563eb', width: 16, height: 16, flexShrink: 0 }}
+              style={{ accentColor: 'var(--accent)', width: 16, height: 16, flexShrink: 0 }}
             />
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>
@@ -263,12 +263,12 @@ function Step5Review({ platform, hosting, baseUrl, scopes, secretRef, org }) {
         {resources.length} resource{resources.length !== 1 ? 's' : ''} will be created: {resources.map((r) => r.kind).join(', ')}
       </p>
       <pre style={{
-        background: '#1e1e2e',
-        color: '#cdd6f4',
+        background: 'var(--surface)',
+        color: 'var(--text)',
         padding: '1rem',
         borderRadius: '0.5rem',
         fontSize: '0.8125rem',
-        fontFamily: 'monospace',
+        fontFamily: 'var(--font-mono, monospace)',
         overflow: 'auto',
         whiteSpace: 'pre',
         margin: 0,
@@ -347,7 +347,7 @@ export function ExternalProviderWizard({ org, onCancel, onSuccess }) {
   }
 
   const wrapStyle = { display: 'flex', flexDirection: 'column', gap: '1.5rem' };
-  const actionsStyle = { display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', paddingTop: '0.75rem', borderTop: '1px solid #e5e7eb' };
+  const actionsStyle = { display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' };
 
   return (
     <div style={wrapStyle}>
@@ -360,7 +360,7 @@ export function ExternalProviderWizard({ org, onCancel, onSuccess }) {
       {step === 4 && <Step5Review platform={platform} hosting={hosting} baseUrl={baseUrl} scopes={scopes} secretRef={secretRef} org={org} />}
 
       {status === 'error' && (
-        <div role="alert" style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
+        <div role="alert" style={{ background: 'var(--card)', border: '1px solid var(--danger)', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
           {errorMsg}
         </div>
       )}

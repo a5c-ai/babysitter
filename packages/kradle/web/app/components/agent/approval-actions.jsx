@@ -30,23 +30,23 @@ export function ApprovalDecisionButtons({ org, approvalName }) {
 
   if (status === 'approved') {
     return <div className="heroActions" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginTop: '0.75rem' }}>
-      <span style={{ color: 'var(--color-good, #22863a)', fontWeight: 600 }}>Approved</span>
+      <span style={{ color: 'var(--color-good)', fontWeight: 600 }}>Approved</span>
     </div>;
   }
 
   if (status === 'denied') {
     return <div className="heroActions" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginTop: '0.75rem' }}>
-      <span style={{ color: 'var(--color-danger, #cb2431)', fontWeight: 600 }}>Denied</span>
+      <span style={{ color: 'var(--color-danger)', fontWeight: 600 }}>Denied</span>
     </div>;
   }
 
   return <div className="heroActions" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginTop: '0.75rem' }}>
-    <button type="button" onClick={() => handleDecision('approve')} disabled={status === 'loading'} aria-label={`Approve approval request ${approvalName}`} style={{ background: 'var(--color-good, #22863a)', color: '#fff', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', cursor: status === 'loading' ? 'wait' : 'pointer', opacity: status === 'loading' ? 0.7 : 1, fontWeight: 600 }}>
+    <button type="button" onClick={() => handleDecision('approve')} disabled={status === 'loading'} aria-label={`Approve approval request ${approvalName}`} style={{ background: 'var(--color-good)', color: 'var(--surface)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', cursor: status === 'loading' ? 'wait' : 'pointer', opacity: status === 'loading' ? 0.7 : 1, fontWeight: 600 }}>
       {status === 'loading' ? 'Deciding...' : 'Approve'}
     </button>
-    <button type="button" onClick={() => handleDecision('deny')} disabled={status === 'loading'} aria-label={`Deny approval request ${approvalName}`} style={{ background: 'var(--color-danger, #cb2431)', color: '#fff', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', cursor: status === 'loading' ? 'wait' : 'pointer', opacity: status === 'loading' ? 0.7 : 1, fontWeight: 600 }}>
+    <button type="button" onClick={() => handleDecision('deny')} disabled={status === 'loading'} aria-label={`Deny approval request ${approvalName}`} style={{ background: 'var(--color-danger)', color: 'var(--surface)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', cursor: status === 'loading' ? 'wait' : 'pointer', opacity: status === 'loading' ? 0.7 : 1, fontWeight: 600 }}>
       {status === 'loading' ? 'Deciding...' : 'Deny'}
     </button>
-    {status === 'error' && message ? <span role="alert" style={{ color: 'var(--color-danger, #cb2431)', fontSize: '0.85rem' }}>{message}</span> : null}
+    {status === 'error' && message ? <span role="alert" style={{ color: 'var(--color-danger)', fontSize: '0.85rem' }}>{message}</span> : null}
   </div>;
 }

@@ -25,8 +25,8 @@ function PanelHeader({ title, badge, collapsed, onToggle }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '8px 12px',
-        backgroundColor: '#1e293b',
-        color: '#fff',
+        backgroundColor: 'var(--surface-raised)',
+        color: 'var(--text)',
         cursor: 'pointer',
         userSelect: 'none',
         borderRadius: collapsed ? 6 : '6px 6px 0 0',
@@ -49,10 +49,10 @@ function PanelHeader({ title, badge, collapsed, onToggle }) {
 function Panel({ title, badge, children, defaultCollapsed = false, style = {} }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0', borderRadius: 6, overflow: 'hidden', ...style }}>
+    <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden', ...style }}>
       <PanelHeader title={title} badge={badge} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       {!collapsed && (
-        <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#fff', minHeight: 0 }}>
+        <div style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--surface)', minHeight: 0 }}>
           {children}
         </div>
       )}
@@ -72,7 +72,7 @@ function WorkspacePanel({ session }) {
         {workspace ? (
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>WORKSPACE</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#1e293b', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '6px 10px' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--text)', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 4, padding: '6px 10px' }}>
               {workspace}
             </div>
           </div>
@@ -82,15 +82,15 @@ function WorkspacePanel({ session }) {
 
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>FILE TREE</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '8px 10px', minHeight: 80 }}>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 4, padding: '8px 10px', minHeight: 80 }}>
             <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>File tree not available</div>
-            <div style={{ marginTop: 4, color: '#94a3b8', fontSize: 11 }}>Connect workspace to browse files</div>
+            <div style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: 11 }}>Connect workspace to browse files</div>
           </div>
         </div>
 
         <div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>GIT STATUS</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 4, padding: '8px 10px' }}>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text)', backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 4, padding: '8px 10px' }}>
             <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>git status not available</div>
           </div>
         </div>
@@ -105,11 +105,11 @@ function WorkspacePanel({ session }) {
 
 function ToolCallCard({ toolName, input, output, status }) {
   const renderer = resolveToolRenderer(toolName);
-  const statusColor = status === 'error' ? '#ef4444' : status === 'completed' ? '#22c55e' : '#f59e0b';
+  const statusColor = status === 'error' ? 'var(--danger)' : status === 'completed' ? 'var(--success)' : 'var(--warning)';
   const inputPreview = renderer.renderInput(typeof input === 'string' ? tryParseJson(input) : input);
   const outputPreview = output != null ? renderer.renderOutput(typeof output === 'string' ? tryParseJson(output) : output) : null;
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderLeft: `3px solid ${statusColor}`, borderRadius: 4, padding: '8px 12px', marginBottom: 8, fontSize: 13, backgroundColor: '#fafafa' }}>
+    <div style={{ border: '1px solid var(--border)', borderLeft: `3px solid ${statusColor}`, borderRadius: 4, padding: '8px 12px', marginBottom: 8, fontSize: 13, backgroundColor: 'var(--surface-raised)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: outputPreview ? 4 : 0 }}>
         <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>{renderer.prefix}</span>
         <strong style={{ fontSize: 12 }}>{renderer.label}</strong>
@@ -130,7 +130,7 @@ function TranscriptMessageItem({ message }) {
   }
   if (role === 'system' || role === 'thinking') {
     return (
-      <div style={{ padding: '8px 12px', marginBottom: 8, backgroundColor: '#f1f5f9', borderRadius: 4, borderLeft: '3px solid #94a3b8' }}>
+      <div style={{ padding: '8px 12px', marginBottom: 8, backgroundColor: 'var(--surface-raised)', borderRadius: 4, borderLeft: '3px solid var(--text-muted)' }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>{role}</div>
         <div style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {typeof message.content === 'string' ? message.content : JSON.stringify(message.content)}
@@ -144,11 +144,11 @@ function TranscriptMessageItem({ message }) {
       padding: '10px 12px',
       marginBottom: 8,
       borderRadius: 4,
-      backgroundColor: isUser ? '#eff6ff' : '#f8fafc',
-      borderLeft: `3px solid ${isUser ? '#3b82f6' : '#6b7280'}`,
+      backgroundColor: isUser ? 'var(--surface-raised)' : 'var(--surface-raised)',
+      borderLeft: `3px solid ${isUser ? 'var(--accent)' : 'var(--text-secondary)'}`,
     }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: isUser ? '#3b82f6' : '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>{role}</div>
-      <div style={{ fontSize: 13, color: '#1e293b', whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.5 }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: isUser ? 'var(--accent)' : 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 4 }}>{role}</div>
+      <div style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.5 }}>
         {typeof message.content === 'string'
           ? message.content
           : Array.isArray(message.content)
@@ -200,9 +200,9 @@ function FlowLaneItem({ run, transcript }) {
   const tone = computePhaseTone(phase);
   const msgs = transcript?.spec?.messages || [];
   const segments = deriveSegments(msgs);
-  const phaseColor = tone === 'good' ? '#22c55e' : tone === 'warn' ? '#f59e0b' : tone === 'danger' ? '#ef4444' : '#94a3b8';
-  const pillColor = tone === 'good' ? '#dcfce7' : tone === 'warn' ? '#fef9c3' : tone === 'danger' ? '#fee2e2' : '#f1f5f9';
-  const pillText = tone === 'good' ? '#166534' : tone === 'warn' ? '#854d0e' : tone === 'danger' ? '#991b1b' : '#475569';
+  const phaseColor = tone === 'good' ? 'var(--success)' : tone === 'warn' ? 'var(--warning)' : tone === 'danger' ? 'var(--danger)' : 'var(--text-muted)';
+  const pillColor = tone === 'good' ? 'var(--surface-raised)' : tone === 'warn' ? 'var(--surface-raised)' : tone === 'danger' ? 'var(--surface-raised)' : 'var(--surface-raised)';
+  const pillText = tone === 'good' ? 'var(--success)' : tone === 'warn' ? 'var(--warning)' : tone === 'danger' ? 'var(--danger)' : 'var(--text-secondary)';
 
   return (
     <div style={{ marginBottom: 16 }}>
@@ -211,7 +211,7 @@ function FlowLaneItem({ run, transcript }) {
         {stackName ? <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{stackName}</span> : null}
         <span style={{ fontSize: 11, borderRadius: 10, padding: '1px 8px', backgroundColor: pillColor, color: pillText, fontWeight: 600 }}>{phase}</span>
       </div>
-      <div style={{ display: 'flex', height: 24, borderRadius: 4, overflow: 'hidden', backgroundColor: '#f1f5f9' }}>
+      <div style={{ display: 'flex', height: 24, borderRadius: 4, overflow: 'hidden', backgroundColor: 'var(--surface-raised)' }}>
         {segments.length ? segments.map((seg, index) => {
           const info = SEGMENT_KINDS[seg.kind] || SEGMENT_KINDS.lifecycle;
           return (
@@ -274,14 +274,14 @@ function StatCard({ label, value, accent = false }) {
   return (
     <div style={{
       padding: '10px 16px',
-      backgroundColor: accent ? '#eff6ff' : '#f8fafc',
-      border: `1px solid ${accent ? '#bfdbfe' : '#e2e8f0'}`,
+      backgroundColor: accent ? 'var(--surface-raised)' : 'var(--surface-raised)',
+      border: `1px solid ${accent ? 'var(--accent)' : 'var(--border)'}`,
       borderRadius: 6,
       minWidth: 120,
       flex: '1 1 auto',
     }}>
       <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: accent ? '#1d4ed8' : '#1e293b' }}>{value || '—'}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: accent ? 'var(--accent)' : 'var(--text)' }}>{value || '—'}</div>
     </div>
   );
 }

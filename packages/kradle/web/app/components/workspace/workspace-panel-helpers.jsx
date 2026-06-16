@@ -34,7 +34,7 @@ export const MOCK_FILE_TREE = [
 // ---- Phase color mapping ----
 
 export function phaseColor(phase) {
-  return phase === 'Ready' ? '#22c55e' : phase === 'InUse' ? '#3b82f6' : phase === 'Pending' ? '#f59e0b' : phase === 'Terminating' ? '#ef4444' : phase === 'Archived' ? '#6b7280' : '#9ca3af';
+  return phase === 'Ready' ? 'var(--success)' : phase === 'InUse' ? 'var(--accent)' : phase === 'Pending' ? 'var(--warning)' : phase === 'Terminating' ? 'var(--danger)' : phase === 'Archived' ? 'var(--text-secondary)' : 'var(--text-muted)';
 }
 
 // ---- Shared presentational components ----
@@ -60,9 +60,9 @@ export function FileIcon({ type, expanded }) {
   );
 }
 
-export function ResourceUsageBar({ label, value, max, unit = '%', color = '#3b82f6' }) {
+export function ResourceUsageBar({ label, value, max, unit = '%', color = 'var(--accent)' }) {
   const pct = max ? Math.min(100, Math.round((value / max) * 100)) : value;
-  const barColor = pct > 85 ? '#ef4444' : pct > 60 ? '#f97316' : color;
+  const barColor = pct > 85 ? 'var(--danger)' : pct > 60 ? 'var(--warning)' : color;
 
   return (
     <div>
@@ -83,7 +83,7 @@ export function ResourceUsageBar({ label, value, max, unit = '%', color = '#3b82
       <div
         style={{
           height: '0.375rem',
-          background: '#e5e7eb',
+          background: 'var(--border)',
           borderRadius: '9999px',
           overflow: 'hidden',
         }}
@@ -116,17 +116,17 @@ export function ResourceStats({ cpu, memory, disk }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <ResourceUsageBar label="CPU" value={cpuVal} unit="%" color="#3b82f6" />
-      <ResourceUsageBar label="Memory" value={memUsed} max={memTotal} unit=" GB" color="#8b5cf6" />
-      <ResourceUsageBar label="Disk" value={diskUsed} max={diskTotal} unit=" GB" color="#06b6d4" />
+      <ResourceUsageBar label="CPU" value={cpuVal} unit="%" color="var(--accent)" />
+      <ResourceUsageBar label="Memory" value={memUsed} max={memTotal} unit=" GB" color="var(--accent)" />
+      <ResourceUsageBar label="Disk" value={diskUsed} max={diskTotal} unit=" GB" color="var(--info)" />
     </div>
   );
 }
 
 export function PvcStatusBadge({ status }) {
   const display = status || 'Unknown';
-  const bg = display === 'Bound' ? '#d1fae5' : display === 'Pending' ? '#fef3c7' : display === 'Released' ? '#e5e7eb' : '#f3f4f6';
-  const fg = display === 'Bound' ? '#065f46' : display === 'Pending' ? '#92400e' : display === 'Released' ? '#374151' : '#6b7280';
+  const bg = display === 'Bound' ? 'var(--surface-raised)' : display === 'Pending' ? 'var(--surface-raised)' : display === 'Released' ? 'var(--border)' : 'var(--surface-raised)';
+  const fg = display === 'Bound' ? 'var(--success)' : display === 'Pending' ? 'var(--warning)' : display === 'Released' ? 'var(--text)' : 'var(--text-secondary)';
 
   return (
     <span

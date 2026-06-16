@@ -2,12 +2,12 @@
 import { useState } from 'react';
 
 function phaseTone(phase) {
-  if (!phase || phase === 'Pending') return { bg: '#f1f5f9', color: '#334155' };
-  if (['Collecting', 'Redacting', 'Normalizing', 'Validating'].includes(phase)) return { bg: '#fef3c7', color: '#b45309' };
-  if (phase === 'AwaitingReview') return { bg: '#dbeafe', color: '#1d4ed8' };
-  if (phase === 'Merged') return { bg: '#dcfce7', color: '#15803d' };
-  if (phase === 'Rejected' || phase === 'Failed') return { bg: '#fee2e2', color: 'var(--danger)' };
-  return { bg: '#f1f5f9', color: '#334151' };
+  if (!phase || phase === 'Pending') return { bg: 'var(--surface-raised)', color: 'var(--text)' };
+  if (['Collecting', 'Redacting', 'Normalizing', 'Validating'].includes(phase)) return { bg: 'var(--surface-raised)', color: 'var(--warning)' };
+  if (phase === 'AwaitingReview') return { bg: 'var(--surface-raised)', color: 'var(--accent)' };
+  if (phase === 'Merged') return { bg: 'var(--surface-raised)', color: 'var(--success)' };
+  if (phase === 'Rejected' || phase === 'Failed') return { bg: 'var(--surface-raised)', color: 'var(--danger)' };
+  return { bg: 'var(--surface-raised)', color: 'var(--text)' };
 }
 
 function PhaseBadge({ phase }) {
@@ -63,7 +63,7 @@ function ImportCard({ imp, org, onDecision }) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: '0.5rem', overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--bg-subtle)', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border)' }}>
         <strong style={{ fontSize: '0.875rem', flex: 1 }}>{name}</strong>
         <PhaseBadge phase={decision ? (decision === 'approve' ? 'Merged' : 'Rejected') : phase} />
         {created && <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{new Date(created).toLocaleString()}</small>}
@@ -82,12 +82,12 @@ function ImportCard({ imp, org, onDecision }) {
         {(eventCount !== null || nodeCount !== null) && (
           <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8125rem' }}>
             {eventCount !== null && (
-              <span style={{ background: '#f3e8ff', color: '#7e22ce', padding: '0.125rem 0.5rem', borderRadius: '0.25rem', fontWeight: 600 }}>
+              <span style={{ background: 'var(--surface-raised)', color: 'var(--accent)', padding: '0.125rem 0.5rem', borderRadius: '0.25rem', fontWeight: 600 }}>
                 {eventCount} events
               </span>
             )}
             {nodeCount !== null && (
-              <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '0.125rem 0.5rem', borderRadius: '0.25rem', fontWeight: 600 }}>
+              <span style={{ background: 'var(--surface-raised)', color: 'var(--accent)', padding: '0.125rem 0.5rem', borderRadius: '0.25rem', fontWeight: 600 }}>
                 {nodeCount} nodes
               </span>
             )}
@@ -113,19 +113,19 @@ function ImportCard({ imp, org, onDecision }) {
 
       {/* Actions */}
       {localStatus === 'done' ? (
-        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid #e5e7eb', fontSize: '0.8125rem', color: decision === 'approve' ? '#15803d' : '#dc2626', fontWeight: 500 }}>
+        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', fontSize: '0.8125rem', color: decision === 'approve' ? 'var(--success)' : 'var(--danger)', fontWeight: 500 }}>
           {decision === 'approve' ? 'Approved — merging into memory repository' : 'Rejected — import will not be merged'}
         </div>
       ) : canReview ? (
-        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
             onClick={() => handleDecision('approve')}
             disabled={localStatus === 'approving' || localStatus === 'rejecting'}
             aria-label={`Approve memory import ${name}`}
             style={{
               padding: '0.375rem 0.875rem',
-              background: '#16a34a',
-              color: '#fff',
+              background: 'var(--success)',
+              color: 'var(--surface)',
               border: 'none',
               borderRadius: '0.375rem',
               fontSize: '0.8125rem',
@@ -144,7 +144,7 @@ function ImportCard({ imp, org, onDecision }) {
               padding: '0.375rem 0.875rem',
               background: 'var(--surface)',
               color: 'var(--danger)',
-              border: '1px solid #fca5a5',
+              border: '1px solid var(--danger)',
               borderRadius: '0.375rem',
               fontSize: '0.8125rem',
               fontWeight: 600,
@@ -159,7 +159,7 @@ function ImportCard({ imp, org, onDecision }) {
           )}
         </div>
       ) : (
-        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid #e5e7eb', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           {phase === 'Merged' ? 'Already merged' : phase === 'Rejected' ? 'Already rejected' : `Review available when phase is AwaitingReview (currently: ${phase})`}
         </div>
       )}
@@ -203,7 +203,7 @@ export function MemoryImportReview({ org, imports = [] }) {
         <div>
           <h4 style={{ fontWeight: 600, fontSize: '0.8125rem', color: 'var(--text)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             Awaiting review
-            <span style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '0.75rem', fontWeight: 600, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{pending.length}</span>
+            <span style={{ background: 'var(--surface-raised)', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{pending.length}</span>
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {pending.map((imp) => (

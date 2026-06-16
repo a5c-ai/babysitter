@@ -1,7 +1,7 @@
 'use client';
 
 function Avatar({ avatar, label, size = 48 }) {
-  const style = { width: size, height: size, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: avatar?.color || '#2563eb', color: '#fff', fontWeight: 800, flexShrink: 0 };
+  const style = { width: size, height: size, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: avatar?.color || 'var(--accent)', color: 'var(--surface)', fontWeight: 800, flexShrink: 0 };
   if (avatar?.url) return <img src={avatar.url} alt={`${label} avatar`} style={{ ...style, objectFit: 'cover' }} />;
   return <span role="img" aria-label={`${label} avatar`} style={style}>{avatar?.emoji || avatar?.initials || 'AI'}</span>;
 }

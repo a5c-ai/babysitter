@@ -6,17 +6,17 @@ import { Pagination } from '../shell/pagination.jsx';
 export const tabStyle = (active) => ({
   padding: '0.5rem 1rem',
   border: 'none',
-  borderBottom: active ? '2px solid #2563eb' : '2px solid transparent',
+  borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
   background: 'none',
   cursor: 'pointer',
   fontWeight: active ? 700 : 500,
-  color: active ? '#2563eb' : '#6b7280',
+  color: active ? 'var(--accent)' : 'var(--text-muted)',
   fontSize: '0.875rem',
 });
 
 const errorBanner = {
-  background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.375rem',
-  padding: '0.5rem', fontSize: '0.8125rem', color: '#dc2626', marginBottom: '0.5rem',
+  background: 'color-mix(in srgb, var(--danger) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)', borderRadius: 'var(--radius-md)',
+  padding: '0.5rem', fontSize: '0.8125rem', color: 'var(--danger)', marginBottom: '0.5rem',
 };
 
 export async function createResource(org, endpoint, body) {
@@ -41,7 +41,7 @@ export function ResourceTabContent({
   return (
     <>
       {showForm && (
-        <div style={{ ...cardStyle, marginBottom: '1rem', background: '#f8fafc' }}>
+        <div style={{ ...cardStyle, marginBottom: '1rem', background: 'var(--surface-raised)' }}>
           <div style={{ fontWeight: 700, fontSize: '0.9375rem', marginBottom: '0.5rem' }}>{formTitle}</div>
           {createError && <div style={errorBanner}>{createError}</div>}
           <FormComponent
@@ -52,7 +52,7 @@ export function ResourceTabContent({
         </div>
       )}
       {items.length === 0 && !showForm ? (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#9ca3af' }}>
+        <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
           <div style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>{emptyTitle}</div>
           <div style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>{emptyText}</div>
           <button style={btnStyle()} onClick={onShowForm} aria-label={`Create new ${emptyTitle.replace('No ', '').toLowerCase()}`}>

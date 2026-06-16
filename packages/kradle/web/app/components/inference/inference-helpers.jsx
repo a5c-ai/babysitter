@@ -18,13 +18,13 @@ export function relativeTime(timestamp) {
 }
 
 export const FORMAT_COLORS = {
-  sklearn: '#2563eb',
-  pytorch: '#ea580c',
-  tensorflow: '#16a34a',
-  onnx: '#7c3aed',
-  huggingface: '#d97706',
-  triton: '#6b7280',
-  custom: '#6b7280',
+  sklearn: 'var(--accent)',
+  pytorch: 'var(--warning)',
+  tensorflow: 'var(--success)',
+  onnx: '#a9bf57',
+  huggingface: 'var(--warning)',
+  triton: 'var(--text-muted)',
+  custom: 'var(--text-muted)',
 };
 
 export const DEFAULT_PAYLOADS = {
@@ -48,16 +48,16 @@ export function getServiceStatus(service) {
 }
 
 export function statusColor(status) {
-  if (status === 'Ready') return '#16a34a';
-  if (status === 'Failed') return '#dc2626';
-  return '#d97706';
+  if (status === 'Ready') return 'var(--success)';
+  if (status === 'Failed') return 'var(--danger)';
+  return 'var(--warning)';
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 export const cardStyle = {
-  border: '1px solid #e2e8f0',
-  borderRadius: '0.5rem',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-lg)',
   padding: '1rem',
   background: 'var(--surface)',
   display: 'flex',
@@ -65,9 +65,9 @@ export const cardStyle = {
   gap: '0.5rem',
 };
 
-export const btnStyle = (color = '#2563eb') => ({
+export const btnStyle = (color = 'var(--accent)') => ({
   padding: '0.375rem 0.75rem',
-  borderRadius: '0.375rem',
+  borderRadius: 'var(--radius-md)',
   border: 'none',
   background: color,
   color: '#fff',
@@ -78,7 +78,7 @@ export const btnStyle = (color = '#2563eb') => ({
 
 export const btnOutlineStyle = {
   padding: '0.375rem 0.75rem',
-  borderRadius: '0.375rem',
+  borderRadius: 'var(--radius-md)',
   border: '1px solid var(--border)',
   background: 'var(--surface)',
   color: 'var(--text)',
@@ -90,7 +90,7 @@ export const btnOutlineStyle = {
 export const inputStyle = {
   width: '100%',
   padding: '0.5rem',
-  borderRadius: '0.375rem',
+  borderRadius: 'var(--radius-md)',
   border: '1px solid var(--border)',
   fontSize: '0.875rem',
   boxSizing: 'border-box',
@@ -104,15 +104,15 @@ export const labelStyle = {
   color: 'var(--text)',
 };
 
-export const badgeStyle = (color = '#2563eb') => ({
+export const badgeStyle = (color = 'var(--accent)') => ({
   display: 'inline-block',
   fontSize: '0.6875rem',
   padding: '2px 8px',
   borderRadius: '9999px',
-  background: color + '20',
+  background: `color-mix(in srgb, ${color} 13%, transparent)`,
   color: color,
   fontWeight: 600,
-  border: `1px solid ${color}40`,
+  border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`,
 });
 
 export const overlayStyle = {
@@ -143,7 +143,7 @@ export const panelStyle = {
 import { useState, memo } from 'react';
 
 export const FrameworkBadge = memo(function FrameworkBadge({ format }) {
-  const color = FORMAT_COLORS[format] || '#6b7280';
+  const color = FORMAT_COLORS[format] || 'var(--text-muted)';
   return <span style={badgeStyle(color)}>{format || 'custom'}</span>;
 });
 
@@ -177,16 +177,16 @@ export function CopyButton({ text, label }) {
 
 // ─── Color constants ────────────────────────────────────────────────────────
 
-export const ROUTE_TYPE_COLORS = { internal: '#2563eb', external: '#7c3aed' };
-export const PROVIDER_COLORS = { kserve: '#2563eb', anthropic: '#d97706', openai: '#16a34a', 'azure-openai': '#0284c7', 'google-vertex': '#dc2626', custom: '#6b7280' };
+export const ROUTE_TYPE_COLORS = { internal: 'var(--accent)', external: '#a9bf57' };
+export const PROVIDER_COLORS = { kserve: 'var(--accent)', anthropic: '#d0707c', openai: '#58b3a4', 'azure-openai': 'var(--info)', 'google-vertex': '#dba344', custom: 'var(--text-muted)' };
 
 export const CATEGORY_COLORS = {
-  LLM: '#2563eb',
-  Code: '#7c3aed',
-  Embedding: '#0891b2',
-  Vision: '#d946ef',
-  Speech: '#ea580c',
-  'Classical ML': '#16a34a',
+  LLM: 'var(--accent)',
+  Code: '#a9bf57',
+  Embedding: 'var(--info)',
+  Vision: '#d0707c',
+  Speech: 'var(--warning)',
+  'Classical ML': 'var(--success)',
 };
 
 export const FALLBACK_PROVIDERS = ['anthropic', 'openai', 'azure-openai', 'google-vertex', 'custom'];

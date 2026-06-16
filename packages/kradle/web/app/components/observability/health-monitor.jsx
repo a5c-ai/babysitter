@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const STATUS_COLORS = {
-  ok: '#22c55e',
-  error: '#ef4444',
-  warning: '#f59e0b',
-  unknown: '#9ca3af',
-  notConfigured: '#9ca3af',
+  ok: 'var(--success)',
+  error: 'var(--danger)',
+  warning: 'var(--warning)',
+  unknown: 'var(--text-muted)',
+  notConfigured: 'var(--text-muted)',
 };
 
 function StatusDot({ status }) {
@@ -27,7 +27,7 @@ function StatusDot({ status }) {
 function StatusRow({ label, status, text }) {
   const statusText = text || (status === 'ok' ? 'Connected' : status === 'notConfigured' ? 'Not configured' : status === 'error' ? 'Error' : 'Unknown');
   return (
-    <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.5rem 0', borderBottom: '1px solid var(--line, #d0d7de)' }}>
+    <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.5rem 0', borderBottom: '1px solid var(--line)' }}>
       <StatusDot status={status} />
       <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', fontWeight: 500 }}>{label}</span>
       <span aria-label={`${label} status: ${statusText}`} style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{statusText}</span>
@@ -166,8 +166,8 @@ export function HealthMonitor({ org }) {
 
   return (
     <div style={{
-      background: 'var(--surface, #fff)',
-      border: '1px solid var(--line, #d0d7de)',
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
       borderRadius: '8px',
       overflow: 'hidden',
       maxWidth: '480px',
@@ -178,7 +178,7 @@ export function HealthMonitor({ org }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '1rem',
-        borderBottom: '1px solid var(--line, #d0d7de)',
+        borderBottom: '1px solid var(--line)',
       }}>
         <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>
           System Health
@@ -191,8 +191,8 @@ export function HealthMonitor({ org }) {
           style={{
             padding: '0.25rem 0.625rem',
             borderRadius: '0.375rem',
-            border: '1px solid var(--line, #d0d7de)',
-            background: 'var(--surface, #fff)',
+            border: '1px solid var(--line)',
+            background: 'var(--surface)',
             cursor: loading ? 'not-allowed' : 'pointer',
             fontSize: '0.75rem',
             color: 'var(--text)',
@@ -205,13 +205,13 @@ export function HealthMonitor({ org }) {
       {/* Status rows */}
       <div style={{ padding: '0 1rem' }}>
         {error ? (
-          <div style={{ padding: '1rem 0', color: '#ef4444', fontSize: '0.875rem' }}>
+          <div style={{ padding: '1rem 0', color: 'var(--danger)', fontSize: '0.875rem' }}>
             Unable to fetch health data: {error}
             <button
               type="button"
               onClick={fetchHealth}
               aria-label="Retry fetching health data"
-              style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', border: '1px solid #ef4444', background: 'transparent', cursor: 'pointer', fontSize: '0.75rem', color: '#ef4444' }}
+              style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', border: '1px solid var(--danger)', background: 'transparent', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--danger)' }}
             >
               Retry
             </button>
@@ -240,8 +240,8 @@ export function HealthMonitor({ org }) {
         flexWrap: 'wrap',
         gap: '0.5rem',
         padding: '0.625rem 1rem',
-        borderTop: '1px solid var(--line, #d0d7de)',
-        background: 'var(--surface-raised, #f6f8fa)',
+        borderTop: '1px solid var(--line)',
+        background: 'var(--surface-raised)',
         fontSize: '0.75rem',
         color: 'var(--text-muted)',
       }}>
@@ -252,7 +252,7 @@ export function HealthMonitor({ org }) {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: sseConnected ? '#22c55e' : '#ef4444',
+            background: sseConnected ? 'var(--success)' : 'var(--danger)',
             display: 'inline-block',
           }} />
           {sseConnected ? 'Live' : 'Disconnected'}

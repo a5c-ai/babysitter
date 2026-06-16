@@ -8,20 +8,20 @@ const MODES = [
 ];
 
 const NODE_KIND_COLORS = {
-  Service: { bg: '#dbeafe', text: '#1d4ed8' },
-  Team: { bg: '#dcfce7', text: '#15803d' },
-  Repository: { bg: '#f3e8ff', text: '#7e22ce' },
-  Decision: { bg: '#ffedd5', text: '#c2410c' },
-  Incident: { bg: '#fee2e2', text: '#dc2626' },
-  Runbook: { bg: '#fef3c7', text: '#b45309' },
-  AgentPractice: { bg: '#ccfbf1', text: '#0f766e' },
-  Workflow: { bg: '#e0e7ff', text: '#3730a3' },
-  API: { bg: '#fce7f3', text: '#9d174d' },
-  Documentation: { bg: '#f1f5f9', text: '#334155' },
+  Service: { bg: 'var(--surface-raised)', text: 'var(--accent)' },
+  Team: { bg: 'var(--surface-raised)', text: 'var(--success)' },
+  Repository: { bg: 'var(--surface-raised)', text: 'var(--accent)' },
+  Decision: { bg: 'var(--surface-raised)', text: 'var(--warning)' },
+  Incident: { bg: 'var(--surface-raised)', text: 'var(--danger)' },
+  Runbook: { bg: 'var(--surface-raised)', text: 'var(--warning)' },
+  AgentPractice: { bg: 'var(--surface-raised)', text: 'var(--success)' },
+  Workflow: { bg: 'var(--surface-overlay)', text: 'var(--accent)' },
+  API: { bg: 'var(--surface-raised)', text: 'var(--danger)' },
+  Documentation: { bg: 'var(--surface-raised)', text: 'var(--text)' },
 };
 
 function kindPalette(kind) {
-  return NODE_KIND_COLORS[kind] || { bg: '#f1f5f9', text: '#374151' };
+  return NODE_KIND_COLORS[kind] || { bg: 'var(--surface-raised)', text: 'var(--text)' };
 }
 
 function NodeCard({ match, edgesFrom = [], org }) {
@@ -31,7 +31,7 @@ function NodeCard({ match, edgesFrom = [], org }) {
   const viewInGraphHref = org ? `/orgs/${org}/agents/memory/search?query=${encodeURIComponent(id)}&mode=graph-only` : null;
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.5rem', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 0.875rem', background: 'var(--bg-subtle)', borderBottom: edgesFrom.length ? '1px solid #e5e7eb' : 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 0.875rem', background: 'var(--bg-subtle)', borderBottom: edgesFrom.length ? '1px solid var(--border)' : 'none' }}>
         <span style={{ background: bg, color: text, fontSize: '0.75rem', fontWeight: 700, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{kind}</span>
         <span style={{ fontWeight: 600, fontSize: '0.875rem', flex: 1 }}>{id}</span>
         {match.score !== undefined && (
@@ -49,7 +49,7 @@ function NodeCard({ match, edgesFrom = [], org }) {
         </div>
       )}
       {edgesFrom.length > 0 && (
-        <div style={{ padding: '0.375rem 0.875rem', borderTop: '1px solid #f3f4f6', display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+        <div style={{ padding: '0.375rem 0.875rem', borderTop: '1px solid var(--surface-raised)', display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
           {edgesFrom.map((edge, i) => (
             <span key={i} style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span style={{ color: 'var(--text-muted)' }}>──</span>
@@ -75,19 +75,19 @@ function GrepExcerpt({ excerpt, org }) {
   function renderHighlighted(raw, hl) {
     if (!hl || !raw.includes(hl)) return raw;
     const idx = raw.indexOf(hl);
-    return <>{raw.slice(0, idx)}<mark style={{ background: '#fef08a', color: '#713f12' }}>{hl}</mark>{raw.slice(idx + hl.length)}</>;
+    return <>{raw.slice(0, idx)}<mark style={{ background: 'var(--warning)', color: 'var(--warning)' }}>{hl}</mark>{raw.slice(idx + hl.length)}</>;
   }
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.5rem', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.875rem', background: 'var(--bg-subtle)', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.875rem', background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border)' }}>
         <span style={{ fontFamily: 'monospace', fontSize: '0.8125rem', color: 'var(--text)', flex: 1 }}>{path}</span>
         {lineNumber !== undefined && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>line {lineNumber}</span>}
         {viewInGraphHref && (
           <a href={viewInGraphHref} style={{ fontSize: '0.75rem', color: 'var(--accent)', textDecoration: 'none', whiteSpace: 'nowrap' }}>View in graph →</a>
         )}
       </div>
-      <pre style={{ margin: 0, fontSize: '0.8125rem', fontFamily: 'monospace', background: '#1e1e2e', color: '#cdd6f4', padding: '0.625rem 0.875rem', overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all', lineHeight: 1.6 }}>
+      <pre style={{ margin: 0, fontSize: '0.8125rem', fontFamily: 'monospace', background: 'var(--surface)', color: 'var(--border)', padding: '0.625rem 0.875rem', overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all', lineHeight: 1.6 }}>
         {renderHighlighted(text, highlight)}
       </pre>
     </div>
@@ -167,14 +167,14 @@ export function MemorySearchForm({ org, showGraphLinks = true }) {
           type="submit"
           disabled={status === 'searching' || !query.trim()}
           aria-label="Search agent memory"
-          style={{ alignSelf: 'flex-start', padding: '0.5rem 1.25rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '0.375rem', fontSize: '0.875rem', fontWeight: 600, cursor: status === 'searching' ? 'not-allowed' : 'pointer', opacity: status === 'searching' ? 0.7 : 1 }}
+          style={{ alignSelf: 'flex-start', padding: '0.5rem 1.25rem', background: 'var(--accent)', color: 'var(--surface)', border: 'none', borderRadius: '0.375rem', fontSize: '0.875rem', fontWeight: 600, cursor: status === 'searching' ? 'not-allowed' : 'pointer', opacity: status === 'searching' ? 0.7 : 1 }}
         >
           {status === 'searching' ? 'Searching...' : 'Search'}
         </button>
       </form>
 
       {status === 'error' && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
+        <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--danger)', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
           {error}
         </div>
       )}

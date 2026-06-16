@@ -100,7 +100,7 @@ export function KeyboardShortcuts({ org }) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.5)',
+        background: 'var(--shadow)',
         zIndex: 9998,
         display: 'flex',
         alignItems: 'center',
@@ -113,29 +113,30 @@ export function KeyboardShortcuts({ org }) {
         aria-label="Keyboard shortcuts reference"
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: 'var(--surface, #fff)',
-          borderRadius: 8,
-          boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+          background: 'var(--panel-strong)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--accent)',
+          boxShadow: 'var(--shadow-lg)',
           padding: '2rem',
           minWidth: 360,
           maxWidth: '90vw',
         }}
       >
-        <h2 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 600 }}>Keyboard Shortcuts</h2>
+        <h2 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 600, fontFamily: 'var(--font-display)' }}>Keyboard Shortcuts</h2>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <tbody>
             {SHORTCUTS_DATA.map(({ keys, label }) => (
-              <tr key={keys} style={{ borderBottom: '1px solid var(--border, #e5e7eb)' }}>
-                <td style={{ padding: '0.5rem 0', color: 'var(--ink-muted, #6b7280)', whiteSpace: 'nowrap' }}>
+              <tr key={keys} style={{ borderBottom: '1px solid var(--border)' }}>
+                <td style={{ padding: '0.5rem 0', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                   {keys.split(' ').map((k) => (
                     <kbd
                       key={k}
                       style={{
-                        background: 'var(--bg, #f3f4f6)',
-                        border: '1px solid var(--border, #d1d5db)',
+                        background: 'var(--surface-raised)',
+                        border: '1px solid var(--border)',
                         borderRadius: 3,
                         padding: '1px 6px',
-                        fontFamily: 'monospace',
+                        fontFamily: 'var(--font-mono, monospace)',
                         fontSize: '0.8rem',
                         marginRight: 4,
                       }}
@@ -149,8 +150,8 @@ export function KeyboardShortcuts({ org }) {
             ))}
           </tbody>
         </table>
-        <p style={{ margin: '1rem 0 0', fontSize: '0.8rem', color: 'var(--ink-muted, #6b7280)', textAlign: 'right' }}>
-          Press <kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 3, padding: '1px 5px', fontFamily: 'monospace', fontSize: '0.75rem' }}>?</kbd> or Escape to close
+        <p style={{ margin: '1rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right' }}>
+          Press <kbd style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 5px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.75rem' }}>?</kbd> or Escape to close
         </p>
       </div>
     </div>

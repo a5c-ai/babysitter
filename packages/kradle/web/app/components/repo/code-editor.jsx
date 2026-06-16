@@ -8,9 +8,9 @@ import { EditorView } from '@codemirror/view';
 
 const kradleEditorTheme = EditorView.theme({
   '&': {
-    backgroundColor: 'rgba(1, 6, 13, .72)',
-    color: '#d9f8ff',
-    borderRadius: '18px',
+    backgroundColor: 'var(--bg, #16170f)',
+    color: 'var(--text, #e8e2d0)',
+    borderRadius: 'var(--radius-lg)',
     overflow: 'hidden'
   },
   '.cm-scroller': {
@@ -20,15 +20,21 @@ const kradleEditorTheme = EditorView.theme({
     maxHeight: '420px'
   },
   '.cm-gutters': {
-    backgroundColor: 'rgba(4, 13, 24, .86)',
-    color: 'rgba(232, 242, 255, .44)',
-    borderRight: '1px solid rgba(139, 233, 253, .13)'
+    backgroundColor: 'var(--bg-subtle, #1c1d12)',
+    color: 'var(--text-muted, rgba(232, 226, 208, .44))',
+    borderRight: '1px solid var(--border)'
   },
   '.cm-activeLine, .cm-activeLineGutter': {
-    backgroundColor: 'rgba(139, 233, 253, .08)'
+    backgroundColor: 'rgba(224, 168, 60, .08)'
+  },
+  '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
+    backgroundColor: 'rgba(224, 168, 60, 0.25)'
   },
   '.cm-content': {
-    caretColor: '#8be9fd'
+    caretColor: 'var(--accent)'
+  },
+  '.cm-cursor, .cm-dropCursor': {
+    borderLeftColor: 'var(--accent)'
   }
 });
 

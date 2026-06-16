@@ -2,11 +2,11 @@
 
 function priorityColor(priority) {
   switch ((priority || '').toLowerCase()) {
-    case 'critical': return '#ef4444';
-    case 'high': return '#f97316';
-    case 'medium': return '#eab308';
-    case 'low': return '#22c55e';
-    default: return '#9ca3af';
+    case 'critical': return 'var(--danger)';
+    case 'high': return 'var(--warning)';
+    case 'medium': return 'var(--warning)';
+    case 'low': return 'var(--success)';
+    default: return 'var(--text-muted)';
   }
 }
 
@@ -39,18 +39,19 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
       aria-label={`Card: ${title}`}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(item); } }}
       style={{
-        background: 'var(--surface)',
-        borderRadius: '0.375rem',
+        background: 'var(--card)',
+        borderRadius: 'var(--radius-sm)',
         padding: '0.625rem 0.75rem',
+        border: '1px solid var(--border)',
         borderLeft: `4px solid ${columnColor}`,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+        boxShadow: 'var(--shadow-sm)',
         cursor: 'pointer',
         userSelect: 'none',
         opacity: isDragging ? 0.4 : 1,
         transition: 'opacity 0.15s ease, box-shadow 0.15s ease',
       }}
-      onMouseEnter={(e) => { if (!isDragging) e.currentTarget.style.boxShadow = '0 3px 8px rgba(0,0,0,0.12)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.06)'; }}
+      onMouseEnter={(e) => { if (!isDragging) e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
     >
       <strong style={{ fontSize: '0.8125rem', display: 'block', marginBottom: '0.25rem', lineHeight: 1.4 }}>{title}</strong>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: labels.length ? '0.25rem' : 0 }}>
@@ -67,7 +68,7 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
       {/* Workspace badge */}
       {workspaceRef ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.6875rem' }}>
-          <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontWeight: 600, flexShrink: 0 }}>
+          <span style={{ background: 'var(--surface-raised)', color: 'var(--info)', padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontWeight: 600, flexShrink: 0 }}>
             WS
           </span>
           <span style={{ color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
@@ -77,8 +78,8 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
             fontSize: '0.5625rem',
             padding: '0.0625rem 0.25rem',
             borderRadius: '9999px',
-            background: workspacePvcStatus === 'Bound' ? '#dcfce7' : '#fef3c7',
-            color: workspacePvcStatus === 'Bound' ? '#16a34a' : '#92400e',
+            background: workspacePvcStatus === 'Bound' ? 'var(--surface-raised)' : 'var(--surface-raised)',
+            color: workspacePvcStatus === 'Bound' ? 'var(--success)' : 'var(--warning)',
             fontWeight: 600,
             flexShrink: 0,
           }}>
@@ -94,7 +95,7 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
           onClick={(e) => e.stopPropagation()}
           style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.6875rem', color: 'var(--accent)', textDecoration: 'none' }}
         >
-          <span style={{ background: '#dbeafe', color: 'var(--accent)', padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontWeight: 600, flexShrink: 0 }}>Session</span>
+          <span style={{ background: 'var(--surface-raised)', color: 'var(--accent)', padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontWeight: 600, flexShrink: 0 }}>Session</span>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
             {sessionRef.slice(0, 12)}…
           </span>
@@ -109,9 +110,9 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
         <a
           href={`/orgs/${encodeURIComponent(org)}/agents/runs/${dispatchRunRef}`}
           onClick={(e) => e.stopPropagation()}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.125rem', fontSize: '0.6875rem', color: '#7c3aed', textDecoration: 'none' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.125rem', fontSize: '0.6875rem', color: 'var(--info)', textDecoration: 'none' }}
         >
-          <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontWeight: 600, flexShrink: 0 }}>Run</span>
+          <span style={{ background: 'var(--surface-raised)', color: 'var(--info)', padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontWeight: 600, flexShrink: 0 }}>Run</span>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {dispatchRunRef.slice(0, 14)}
           </span>
@@ -120,12 +121,12 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
 
       {/* Agent indicator */}
       {agentName ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.6875rem', color: '#059669' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.6875rem', color: 'var(--success)' }}>
           <span style={{
             width: '0.5rem',
             height: '0.5rem',
             borderRadius: '9999px',
-            background: '#10b981',
+            background: 'var(--success)',
             flexShrink: 0,
             animation: 'kanbanPulse 2s ease-in-out infinite',
           }} />
@@ -161,10 +162,10 @@ export function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDraggi
             marginTop: '0.375rem',
             padding: '0.1875rem 0.5rem',
             fontSize: '0.6875rem',
-            background: '#eff6ff',
+            background: 'var(--surface-raised)',
             color: 'var(--accent)',
-            border: '1px solid #bfdbfe',
-            borderRadius: '0.25rem',
+            border: '1px solid var(--accent)',
+            borderRadius: 'var(--radius-sm)',
             cursor: 'pointer',
             width: '100%',
             textAlign: 'center',

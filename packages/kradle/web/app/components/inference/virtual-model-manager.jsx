@@ -47,11 +47,11 @@ export const VirtualModelCard = memo(function VirtualModelCard({ vm, onDelete })
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
         <span style={{ fontWeight: 700, fontSize: '0.9375rem' }}>{name}</span>
         <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
-          <span style={badgeStyle('#7c3aed')}>{routeCount} route{routeCount !== 1 ? 's' : ''}</span>
-          {rulesCount > 0 && <span style={badgeStyle('#2563eb')}>{rulesCount} rule{rulesCount !== 1 ? 's' : ''}</span>}
-          {hasHooks && <span style={badgeStyle('#d97706')}>hooks</span>}
-          {sessionEnabled && <span style={badgeStyle('#0891b2')}>session</span>}
-          {!enabled && <span style={badgeStyle('#9ca3af')}>disabled</span>}
+          <span style={badgeStyle('#a9bf57')}>{routeCount} route{routeCount !== 1 ? 's' : ''}</span>
+          {rulesCount > 0 && <span style={badgeStyle('var(--accent)')}>{rulesCount} rule{rulesCount !== 1 ? 's' : ''}</span>}
+          {hasHooks && <span style={badgeStyle('var(--warning)')}>hooks</span>}
+          {sessionEnabled && <span style={badgeStyle('var(--info)')}>session</span>}
+          {!enabled && <span style={badgeStyle('var(--text-muted)')}>disabled</span>}
         </div>
       </div>
       <div style={{ fontSize: '0.8125rem', color: 'var(--text)' }}>
@@ -62,7 +62,7 @@ export const VirtualModelCard = memo(function VirtualModelCard({ vm, onDelete })
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{createdAt ? relativeTime(createdAt) : ''}</span>
-        <button style={btnStyle('#dc2626')} onClick={() => onDelete(vm)} aria-label={`Delete virtual model ${name}`}>Delete</button>
+        <button style={btnStyle('var(--danger)')} onClick={() => onDelete(vm)} aria-label={`Delete virtual model ${name}`}>Delete</button>
       </div>
     </div>
   );
@@ -73,13 +73,13 @@ export const VirtualModelCard = memo(function VirtualModelCard({ vm, onDelete })
 export function CollapsibleSection({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: '0.375rem', overflow: 'hidden' }}>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-label={`${open ? 'Collapse' : 'Expand'} ${title} section`}
-        style={{ width: '100%', padding: '0.5rem 0.75rem', background: '#f8fafc', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text)' }}
+        style={{ width: '100%', padding: '0.5rem 0.75rem', background: 'var(--surface-raised)', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text)' }}
       >
         {title}
         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{open ? 'collapse' : 'expand'}</span>
@@ -222,7 +222,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
             <input style={{ ...inputStyle, flex: 1 }} type="number" min="0" value={route.weight} onChange={(e) => updateRoute(idx, 'weight', e.target.value)} placeholder="Weight" title="Weight" aria-label={`Weight for route ${route.modelRouteRef || idx + 1}`} />
             <input style={{ ...inputStyle, flex: 1 }} type="number" min="0" value={route.priority} onChange={(e) => updateRoute(idx, 'priority', e.target.value)} placeholder="Priority" title="Priority" aria-label={`Priority for route ${route.modelRouteRef || idx + 1}`} />
             {form.routes.length > 1 && (
-              <button type="button" style={{ ...btnStyle('#dc2626'), padding: '0.375rem 0.5rem', fontSize: '0.75rem' }} onClick={() => removeRoute(idx)} aria-label={`Remove route ${route.modelRouteRef || idx + 1}`}>X</button>
+              <button type="button" style={{ ...btnStyle('var(--danger)'), padding: '0.375rem 0.5rem', fontSize: '0.75rem' }} onClick={() => removeRoute(idx)} aria-label={`Remove route ${route.modelRouteRef || idx + 1}`}>X</button>
             )}
           </div>
         ))}
@@ -238,7 +238,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
               <option value="">Select fallback...</option>
               {routeOptions.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
-            <button type="button" style={{ ...btnStyle('#dc2626'), padding: '0.375rem 0.5rem', fontSize: '0.75rem' }} onClick={() => removeFallback(idx)}>X</button>
+            <button type="button" style={{ ...btnStyle('var(--danger)'), padding: '0.375rem 0.5rem', fontSize: '0.75rem' }} onClick={() => removeFallback(idx)}>X</button>
           </div>
         ))}
         <button type="button" style={{ ...btnOutlineStyle, fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} onClick={addFallback}>+ Add Fallback</button>
@@ -247,14 +247,14 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
       {/* Rules */}
       <CollapsibleSection title={`Rules (${form.rules.length})`}>
         {form.rules.map((rule, rIdx) => (
-          <div key={rule.__rowId} style={{ ...cardStyle, padding: '0.75rem', background: '#f8fafc' }}>
+          <div key={rule.__rowId} style={{ ...cardStyle, padding: '0.75rem', background: 'var(--surface-raised)' }}>
             <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.5rem' }}>
               <input style={{ ...inputStyle, flex: 2 }} value={rule.name} onChange={(e) => updateRule(rIdx, 'name', e.target.value)} placeholder="Rule name" aria-label={`Rule ${rIdx + 1} name`} />
               <select style={{ ...inputStyle, flex: 2 }} value={rule.action.route} onChange={(e) => updateRule(rIdx, 'action.route', e.target.value)}>
                 <option value="">Action route...</option>
                 {routeOptions.map(n => <option key={n} value={n}>{n}</option>)}
               </select>
-              <button type="button" style={{ ...btnStyle('#dc2626'), padding: '0.375rem 0.5rem', fontSize: '0.75rem' }} onClick={() => removeRule(rIdx)}>X</button>
+              <button type="button" style={{ ...btnStyle('var(--danger)'), padding: '0.375rem 0.5rem', fontSize: '0.75rem' }} onClick={() => removeRule(rIdx)}>X</button>
             </div>
             <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Conditions:</div>
             {rule.conditions.map((cond, cIdx) => (
@@ -265,7 +265,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
                 </select>
                 <input style={{ ...inputStyle, flex: 1 }} value={cond.value} onChange={(e) => updateCondition(rIdx, cIdx, 'value', e.target.value)} placeholder="value" aria-label={`Rule ${rIdx + 1} condition ${cIdx + 1} value`} />
                 {rule.conditions.length > 1 && (
-                  <button type="button" style={{ ...btnStyle('#dc2626'), padding: '0.25rem 0.375rem', fontSize: '0.6875rem' }} onClick={() => removeCondition(rIdx, cIdx)}>X</button>
+                  <button type="button" style={{ ...btnStyle('var(--danger)'), padding: '0.25rem 0.375rem', fontSize: '0.6875rem' }} onClick={() => removeCondition(rIdx, cIdx)}>X</button>
                 )}
               </div>
             ))}

@@ -29,10 +29,10 @@ function FileTreeNode({ node, depth = 0 }) {
           fontSize: '0.8125rem',
           cursor: isDir ? 'pointer' : 'default',
           borderRadius: '0.25rem',
-          color: isDir ? '#111827' : '#374151',
+          color: isDir ? 'var(--text)' : 'var(--text)',
           fontWeight: isDir ? 600 : 400,
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6'; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-raised)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
       >
         <FileIcon type={node.type} expanded={expanded} />
@@ -56,7 +56,7 @@ export function FileSidebar({ fileTree, sidebarOpen, onToggle }) {
         width: sidebarOpen ? '14rem' : '2.25rem',
         minWidth: sidebarOpen ? '14rem' : '2.25rem',
         flexShrink: 0,
-        borderRight: '1px solid #e5e7eb',
+        borderRight: '1px solid var(--border)',
         background: 'var(--bg-subtle)',
         borderRadius: '0.5rem 0 0 0.5rem',
         display: 'flex',
@@ -138,8 +138,8 @@ export function GitStatusBar({ branch, dirty, ahead, behind }) {
         <span
           title="Uncommitted changes"
           style={{
-            background: '#fef3c7',
-            color: '#92400e',
+            background: 'var(--surface-raised)',
+            color: 'var(--warning)',
             borderRadius: '0.25rem',
             padding: '0.0625rem 0.375rem',
             fontWeight: 700,
@@ -151,8 +151,8 @@ export function GitStatusBar({ branch, dirty, ahead, behind }) {
       ) : (
         <span
           style={{
-            background: '#d1fae5',
-            color: '#065f46',
+            background: 'var(--surface-raised)',
+            color: 'var(--success)',
             borderRadius: '0.25rem',
             padding: '0.0625rem 0.375rem',
             fontWeight: 700,
@@ -200,12 +200,12 @@ export function TerminalPlaceholder({ sessionHref }) {
   return (
     <div
       style={{
-        background: '#111827',
+        background: 'var(--text)',
         borderRadius: '0.5rem',
         padding: '1rem',
         fontFamily: 'var(--font-mono, monospace)',
         fontSize: '0.8125rem',
-        color: '#d1d5db',
+        color: 'var(--border)',
         minHeight: '7rem',
         display: 'flex',
         flexDirection: 'column',
@@ -219,14 +219,14 @@ export function TerminalPlaceholder({ sessionHref }) {
         </div>
         {connected ? (
           <div>
-            <span style={{ color: '#22c55e' }}>$</span>
-            <span style={{ marginLeft: '0.5rem', color: '#d1d5db' }}>agent@workspace:~$</span>
+            <span style={{ color: 'var(--success)' }}>$</span>
+            <span style={{ marginLeft: '0.5rem', color: 'var(--border)' }}>agent@workspace:~$</span>
             <span
               style={{
                 display: 'inline-block',
                 width: '0.5rem',
                 height: '1em',
-                background: '#22c55e',
+                background: 'var(--success)',
                 marginLeft: '0.25rem',
                 verticalAlign: 'text-bottom',
                 animation: 'none',
@@ -248,8 +248,8 @@ export function TerminalPlaceholder({ sessionHref }) {
             alignSelf: 'flex-start',
             padding: '0.375rem 0.75rem',
             fontSize: '0.75rem',
-            background: connecting ? '#374151' : '#2563eb',
-            color: '#fff',
+            background: connecting ? 'var(--text)' : 'var(--accent)',
+            color: 'var(--surface)',
             border: 'none',
             borderRadius: '0.375rem',
             cursor: connecting ? 'not-allowed' : 'pointer',
@@ -266,8 +266,8 @@ export function TerminalPlaceholder({ sessionHref }) {
             alignSelf: 'flex-start',
             padding: '0.375rem 0.75rem',
             fontSize: '0.75rem',
-            background: '#374151',
-            color: '#d1d5db',
+            background: 'var(--text)',
+            color: 'var(--border)',
             border: 'none',
             borderRadius: '0.375rem',
             cursor: 'pointer',
@@ -295,17 +295,17 @@ export function WorkspaceActions({ phase, onSync, onRelease, onDelete }) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
       {(phase === 'Ready' || phase === 'InUse') ? (
-        <button onClick={onSync} aria-label="Sync workspace" style={{ ...btnBase, background: 'var(--accent)', color: '#fff' }}>
+        <button onClick={onSync} aria-label="Sync workspace" style={{ ...btnBase, background: 'var(--accent)', color: 'var(--surface)' }}>
           Sync
         </button>
       ) : null}
       {phase === 'InUse' ? (
-        <button onClick={onRelease} aria-label="Release workspace" style={{ ...btnBase, background: '#f59e0b', color: '#fff' }}>
+        <button onClick={onRelease} aria-label="Release workspace" style={{ ...btnBase, background: 'var(--warning)', color: 'var(--surface)' }}>
           Release
         </button>
       ) : null}
       {(phase !== 'Terminating') ? (
-        <button onClick={onDelete} aria-label="Delete workspace" style={{ ...btnBase, background: '#ef4444', color: '#fff' }}>
+        <button onClick={onDelete} aria-label="Delete workspace" style={{ ...btnBase, background: 'var(--danger)', color: 'var(--surface)' }}>
           Delete
         </button>
       ) : null}
@@ -324,7 +324,7 @@ export function SessionBinding({ sessionName, sessionHref }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0.5rem 0.75rem',
-          background: '#eff6ff',
+          background: 'var(--surface-raised)',
           borderRadius: '0.375rem',
           fontSize: '0.8125rem',
         }}

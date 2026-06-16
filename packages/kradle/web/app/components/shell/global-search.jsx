@@ -4,12 +4,12 @@ import { useRouter } from 'next/navigation';
 import { useDebounce } from '../../hooks/use-debounce.js';
 
 const KIND_COLORS = {
-  AgentStack: '#3b82f6',
+  AgentStack: 'var(--accent)',
   KradleProject: '#7c3aed',
-  Repository: '#059669',
-  AgentDispatchRun: '#d97706',
-  AgentChatSession: '#0891b2',
-  TriggerRule: '#dc2626',
+  Repository: 'var(--success)',
+  AgentDispatchRun: 'var(--warning)',
+  AgentChatSession: 'var(--info)',
+  TriggerRule: 'var(--danger)',
   AgentApproval: '#ca8a04',
 };
 
@@ -179,7 +179,7 @@ export function GlobalSearch({ org }) {
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           autoComplete="off"
-          style={searchError ? { borderColor: '#f59e0b' } : undefined}
+          style={searchError ? { borderColor: 'var(--warning)' } : undefined}
         />
       </label>
 
@@ -192,10 +192,10 @@ export function GlobalSearch({ org }) {
             top: '100%',
             left: 0,
             right: 0,
-            background: 'var(--surface, #fff)',
-            border: '1px solid var(--border, #e5e7eb)',
-            borderRadius: 6,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+            background: 'var(--panel)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
             zIndex: 1000,
             maxHeight: 400,
             overflowY: 'auto',
@@ -203,7 +203,7 @@ export function GlobalSearch({ org }) {
           }}
         >
           {showRecent && (
-            <div style={{ padding: '8px 12px 4px', fontSize: '0.75rem', color: 'var(--ink-muted, #6b7280)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ padding: '8px 12px 4px', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Recent searches
             </div>
           )}
@@ -226,36 +226,36 @@ export function GlobalSearch({ org }) {
                 color: 'var(--text)',
               }}
             >
-              <span style={{ color: 'var(--ink-muted, #9ca3af)', fontSize: '0.75rem' }}>↩</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>↩</span>
               {q}
             </button>
           ))}
 
           {loading && (
-            <div style={{ padding: '12px', fontSize: '0.875rem', color: 'var(--ink-muted, #6b7280)', textAlign: 'center' }}>
+            <div style={{ padding: '12px', fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>
               Searching...
             </div>
           )}
 
           {!loading && searchError && query.length >= 2 && (
-            <div style={{ padding: '12px', fontSize: '0.875rem', color: '#f59e0b', textAlign: 'center' }}>
+            <div style={{ padding: '12px', fontSize: '0.875rem', color: 'var(--warning)', textAlign: 'center' }}>
               <div>Search unavailable &mdash; check connection</div>
               <button
                 onClick={() => { setSearchError(false); setQuery((q) => q + ' '); setTimeout(() => setQuery((q) => q.trimEnd()), 10); }}
-                style={{ marginTop: 6, padding: '4px 12px', fontSize: '0.8rem', background: 'none', border: '1px solid #f59e0b', borderRadius: 4, color: '#f59e0b', cursor: 'pointer' }}
+                style={{ marginTop: 6, padding: '4px 12px', fontSize: '0.8rem', background: 'none', border: '1px solid var(--warning)', borderRadius: 4, color: 'var(--warning)', cursor: 'pointer' }}
               >Retry</button>
             </div>
           )}
 
           {!loading && !searchError && noResults && query.length >= 2 && (
-            <div style={{ padding: '12px', fontSize: '0.875rem', color: 'var(--ink-muted, #6b7280)', textAlign: 'center' }}>
+            <div style={{ padding: '12px', fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>
               No results for &ldquo;{query}&rdquo;
             </div>
           )}
 
           {!loading && results.length > 0 && (
             <>
-              <div style={{ padding: '8px 12px 4px', fontSize: '0.75rem', color: 'var(--ink-muted, #6b7280)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ padding: '8px 12px 4px', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Results
               </div>
               {results.map((result, idx) => (
@@ -270,7 +270,7 @@ export function GlobalSearch({ org }) {
                     gap: 10,
                     width: '100%',
                     padding: '8px 12px',
-                    background: idx === selectedIndex ? 'var(--bg-hover, #f3f4f6)' : 'none',
+                    background: idx === selectedIndex ? 'var(--surface-raised)' : 'none',
                     border: 'none',
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -280,7 +280,7 @@ export function GlobalSearch({ org }) {
                 >
                   <span
                     style={{
-                      background: KIND_COLORS[result.kind] || '#6b7280',
+                      background: KIND_COLORS[result.kind] || 'var(--text-muted)',
                       color: '#fff',
                       borderRadius: 3,
                       padding: '1px 6px',
@@ -293,7 +293,7 @@ export function GlobalSearch({ org }) {
                   </span>
                   <span style={{ fontWeight: 500 }}>{result.displayName || result.name}</span>
                   {result.displayName && result.displayName !== result.name && (
-                    <span style={{ color: 'var(--ink-muted, #9ca3af)', fontSize: '0.8rem' }}>{result.name}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{result.name}</span>
                   )}
                 </button>
               ))}

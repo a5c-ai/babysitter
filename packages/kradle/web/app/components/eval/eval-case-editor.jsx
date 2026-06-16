@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const inputStyle = { width: '100%', padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '0.875rem', background: 'var(--bg-input, transparent)', color: 'var(--text)' };
-const btnPrimary = { border: 'none', padding: '0.375rem 0.875rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, background: 'var(--color-accent, #3b82f6)', color: '#fff' };
+const btnPrimary = { border: 'none', padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, background: 'var(--accent)', color: '#fff' };
 const btnSecondary = { border: '1px solid var(--border)', background: 'transparent', padding: '0.375rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text)' };
 const cardStyle = { padding: '1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', background: 'var(--bg-card, var(--bg-subtle))' };
 
@@ -69,7 +69,7 @@ export function EvalCaseEditor({ org, suiteRef, cases: initialCases = [], onCase
       {showForm && (
         <form onSubmit={handleCreate} style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 500 }}>Input prompt <span style={{ color: 'var(--color-danger, #cb2431)' }}>*</span></span>
+            <span style={{ fontSize: '0.8125rem', fontWeight: 500 }}>Input prompt <span style={{ color: 'var(--danger)' }}>*</span></span>
             <textarea name="input" rows={3} required placeholder="Enter the test prompt..." style={{ ...inputStyle, resize: 'vertical' }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -88,7 +88,7 @@ export function EvalCaseEditor({ org, suiteRef, cases: initialCases = [], onCase
             <button type="submit" disabled={busy} style={btnPrimary}>{busy ? 'Creating...' : 'Create case'}</button>
             <button type="button" onClick={() => setShowForm(false)} style={btnSecondary}>Cancel</button>
           </div>
-          {message && <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-danger, #cb2431)' }}>{message}</p>}
+          {message && <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--danger)' }}>{message}</p>}
         </form>
       )}
 

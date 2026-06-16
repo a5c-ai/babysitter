@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { agentIdentityOptions } from '../../lib/agent-identity.js';
 
 const btnBase = { padding: '4px 12px', borderRadius: 5, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 };
-const primaryBtn = { ...btnBase, backgroundColor: '#2563eb', color: '#fff' };
-const dangerBtn = { ...btnBase, backgroundColor: '#dc2626', color: '#fff' };
-const secondaryBtn = { ...btnBase, backgroundColor: 'transparent', color: '#374151', border: '1px solid #d1d5db' };
+const primaryBtn = { ...btnBase, backgroundColor: 'var(--accent)', color: 'var(--surface)' };
+const dangerBtn = { ...btnBase, backgroundColor: 'var(--danger)', color: 'var(--surface)' };
+const secondaryBtn = { ...btnBase, backgroundColor: 'transparent', color: 'var(--text)', border: '1px solid var(--border)' };
 const disabledStyle = { opacity: 0.55, cursor: 'not-allowed' };
 
 /**
@@ -60,7 +60,7 @@ export function ManualDispatchButton({ org, stacks = [], agents = [] }) {
   if (status === 'success') {
     return (
       <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>{message}</span>
+        <span style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600 }}>{message}</span>
         <button onClick={reset} style={secondaryBtn} aria-label="Dispatch another run">Dispatch another</button>
       </span>
     );
@@ -69,7 +69,7 @@ export function ManualDispatchButton({ org, stacks = [], agents = [] }) {
   if (status === 'error') {
     return (
       <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontSize: 13, color: '#dc2626' }}>{message}</span>
+        <span style={{ fontSize: 13, color: 'var(--danger)' }}>{message}</span>
         <button onClick={reset} style={secondaryBtn} aria-label="Try dispatch again">Try again</button>
       </span>
     );
@@ -88,7 +88,7 @@ export function ManualDispatchButton({ org, stacks = [], agents = [] }) {
       <select
         value={selectedStack}
         onChange={e => setSelectedStack(e.target.value)}
-        style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }}
+        style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border)', fontSize: 13 }}
         aria-label="Select agent persona or stack"
       >
         <option value="">Select agent…</option>
@@ -98,7 +98,7 @@ export function ManualDispatchButton({ org, stacks = [], agents = [] }) {
         placeholder="Repository (optional)"
         value={repository}
         onChange={e => setRepository(e.target.value)}
-        style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, width: 170 }}
+        style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border)', fontSize: 13, width: 170 }}
         aria-label="Repository"
       />
       <button
@@ -210,18 +210,18 @@ export function RunActions({ org, runName, stackRef, phase }) {
           Cancel
         </button>
       )}
-      {cancelStatus === 'loading' && <span style={{ fontSize: 12, color: '#6b7280' }}>Cancelling…</span>}
-      {cancelStatus === 'done' && <span style={{ fontSize: 12, color: '#dc2626', fontWeight: 600 }}>Cancelled</span>}
-      {cancelStatus === 'error' && <span style={{ fontSize: 12, color: '#dc2626' }}>{cancelMsg}</span>}
+      {cancelStatus === 'loading' && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Cancelling…</span>}
+      {cancelStatus === 'done' && <span style={{ fontSize: 12, color: 'var(--danger)', fontWeight: 600 }}>Cancelled</span>}
+      {cancelStatus === 'error' && <span style={{ fontSize: 12, color: 'var(--danger)' }}>{cancelMsg}</span>}
 
       {canRetry && stackRef && (
         <button onClick={handleRetry} style={secondaryBtn} title="Retry this run with the same stack" aria-label={`Retry run ${runName}`}>
           Retry
         </button>
       )}
-      {retryStatus === 'loading' && <span style={{ fontSize: 12, color: '#6b7280' }}>Retrying…</span>}
-      {retryStatus === 'done' && <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 600 }}>{retryMsg}</span>}
-      {retryStatus === 'error' && <span style={{ fontSize: 12, color: '#dc2626' }}>{retryMsg}</span>}
+      {retryStatus === 'loading' && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Retrying…</span>}
+      {retryStatus === 'done' && <span style={{ fontSize: 12, color: 'var(--success)', fontWeight: 600 }}>{retryMsg}</span>}
+      {retryStatus === 'error' && <span style={{ fontSize: 12, color: 'var(--danger)' }}>{retryMsg}</span>}
 
       {canDelete && deleteStatus === 'idle' && (
         <button onClick={handleDelete} style={dangerBtn} title="Delete this run" aria-label={`Delete run ${runName}`}>
@@ -238,9 +238,9 @@ export function RunActions({ org, runName, stackRef, phase }) {
           </button>
         </>
       )}
-      {deleteStatus === 'loading' && <span style={{ fontSize: 12, color: '#6b7280' }}>Deleting…</span>}
-      {deleteStatus === 'done' && <span style={{ fontSize: 12, color: '#dc2626', fontWeight: 600 }}>{deleteMsg}</span>}
-      {deleteStatus === 'error' && <span style={{ fontSize: 12, color: '#dc2626' }}>{deleteMsg}</span>}
+      {deleteStatus === 'loading' && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Deleting…</span>}
+      {deleteStatus === 'done' && <span style={{ fontSize: 12, color: 'var(--danger)', fontWeight: 600 }}>{deleteMsg}</span>}
+      {deleteStatus === 'error' && <span style={{ fontSize: 12, color: 'var(--danger)' }}>{deleteMsg}</span>}
     </span>
   );
 }

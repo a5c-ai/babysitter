@@ -7,7 +7,7 @@ import { AgentVoiceEditor } from './agent-voice-editor.jsx';
 
 function Avatar({ profile }) {
   const avatar = profile?.avatar || {};
-  const style = { width: 88, height: 88, borderRadius: 8, background: avatar.color || '#2563eb', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', fontWeight: 800 };
+  const style = { width: 88, height: 88, borderRadius: 8, background: avatar.color || 'var(--accent)', color: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', fontWeight: 800 };
   if (avatar.url) return <img src={avatar.url} alt={`${profile.displayName} avatar`} style={{ ...style, objectFit: 'cover' }} />;
   return <span role="img" aria-label={`${profile?.displayName || 'Agent'} avatar`} style={style}>{avatar.emoji || avatar.initials || 'AI'}</span>;
 }

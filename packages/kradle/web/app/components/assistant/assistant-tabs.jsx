@@ -15,7 +15,7 @@ const tabStyles = {
   },
   tab: (active) => ({
     padding: '10px 20px', fontSize: '0.85rem', fontWeight: active ? 700 : 500, cursor: 'pointer',
-    background: 'transparent', border: 'none', borderBottom: active ? '2px solid var(--accent, #2563eb)' : '2px solid transparent',
+    background: 'transparent', border: 'none', borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
     marginBottom: -1, color: active ? 'var(--text)' : 'var(--text-muted)',
   }),
   content: {

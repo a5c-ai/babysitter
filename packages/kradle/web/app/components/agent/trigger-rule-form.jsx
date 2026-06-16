@@ -76,13 +76,13 @@ export function TriggerRuleForm({ org, stacks = [], agents = [] }) {
   }
 
   const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
-  const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
+  const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: 'var(--surface)' };
   const disabledPrimaryStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
   const canSubmit = name && targetRef && status !== 'saving';
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)' }}>
+      <div className="card" style={{ borderLeft: '3px solid var(--color-info)' }}>
         <div className="cardTitle">
           <h3>New trigger rule</h3>
           <span className="pill neutral">create</span>
@@ -185,7 +185,7 @@ export function TriggerRuleForm({ org, stacks = [], agents = [] }) {
               {status === 'saving' ? 'Creating...' : 'Create Rule'}
             </button>
             {status === 'success' && (
-              <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>{message}</span>
+              <span style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600 }}>{message}</span>
             )}
             {status === 'error' && (
               <span role="alert" style={{ fontSize: 13, color: 'var(--danger)' }}>{message}</span>

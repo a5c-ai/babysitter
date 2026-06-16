@@ -28,13 +28,13 @@ const PLATFORM_ICONS = {
 
 function scopeBadgeColor(kind) {
   const colors = {
-    GitProvider: { bg: '#dbeafe', color: '#1e40af' },
-    CiProvider: { bg: '#fef3c7', color: '#92400e' },
-    IssueTrackerProvider: { bg: '#d1fae5', color: '#065f46' },
-    AppHostingProvider: { bg: '#ede9fe', color: '#5b21b6' },
-    ArtifactRegistryProvider: { bg: '#fce7f3', color: '#9d174d' },
+    GitProvider: { bg: 'var(--card)', color: 'var(--accent)' },
+    CiProvider: { bg: 'var(--card)', color: 'var(--warning)' },
+    IssueTrackerProvider: { bg: 'var(--card)', color: 'var(--success)' },
+    AppHostingProvider: { bg: 'var(--card)', color: '#7c3aed' },
+    ArtifactRegistryProvider: { bg: 'var(--card)', color: 'var(--info)' },
   };
-  return colors[kind] || { bg: '#f3f4f6', color: 'var(--text)' };
+  return colors[kind] || { bg: 'var(--surface-raised)', color: 'var(--text)' };
 }
 
 function PlatformGroupCard({ platform, providers, onDelete, removing, confirmTarget, onCancelConfirm }) {
@@ -62,8 +62,8 @@ function PlatformGroupCard({ platform, providers, onDelete, removing, confirmTar
     width: 36,
     height: 36,
     borderRadius: '0.375rem',
-    background: '#1e293b',
-    color: '#f8fafc',
+    background: 'var(--surface-raised)',
+    color: 'var(--text)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -107,7 +107,7 @@ function PlatformGroupCard({ platform, providers, onDelete, removing, confirmTar
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: tone === 'good' ? '#16a34a' : tone === 'warn' ? '#d97706' : tone === 'danger' ? '#dc2626' : '#9ca3af',
+                background: tone === 'good' ? 'var(--success)' : tone === 'warn' ? 'var(--warning)' : tone === 'danger' ? 'var(--danger)' : 'var(--text-muted)',
               }} />
             </span>
           );
@@ -257,7 +257,7 @@ export function ExternalProviderList({ org, providers = [], onAdd, addHref }) {
       </div>
 
       {error && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
+        <div style={{ background: 'var(--card)', border: '1px solid var(--danger)', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
           {error}
         </div>
       )}

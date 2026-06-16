@@ -31,7 +31,7 @@ export function AgentCreateWizard({ org, stacks = [], skills = [] }) {
   const [createdResources, setCreatedResources] = useState([]);
   const [persona, setPersona] = useState({ displayName: '', tagline: '', role: { title: '', domain: '' }, personality: { traits: [], communicationStyle: 'direct', tone: 'professional' }, skillRefs: [] });
   const [soul, setSoul] = useState('');
-  const [appearance, setAppearance] = useState({ avatar: { type: 'initials' }, theme: { primaryColor: '#2563eb' } });
+  const [appearance, setAppearance] = useState({ avatar: { type: 'initials' }, theme: { primaryColor: 'var(--accent)' } });
   const [voice, setVoice] = useState({ ttsProvider: 'openai', ttsConfig: { voice: 'nova', speed: 1 } });
   const [definition, setDefinition] = useState({ stackRef: '', roleContext: '' });
   const name = useMemo(() => slugify(persona.displayName), [persona.displayName]);

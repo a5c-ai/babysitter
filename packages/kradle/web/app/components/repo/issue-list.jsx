@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
 
-const LABEL_BG_COLORS = ['#dbeafe', '#dcfce7', '#fef3c7', '#fce7f3', '#ede9fe', '#fee2e2', '#f0fdf4', '#fef9c3'];
-const LABEL_TEXT_COLORS = ['#1d4ed8', '#166534', '#92400e', '#9d174d', '#5b21b6', '#991b1b', '#14532d', '#713f12'];
+const LABEL_BG_COLORS = ['var(--surface-raised)', 'var(--surface-raised)', 'var(--surface-raised)', 'var(--surface-raised)', 'var(--surface-raised)', 'var(--surface-raised)', 'var(--surface-raised)', 'var(--surface-raised)'];
+const LABEL_TEXT_COLORS = ['var(--accent)', 'var(--success)', 'var(--warning)', 'var(--info)', 'var(--accent)', 'var(--danger)', 'var(--success)', 'var(--warning)'];
 
 function labelBadgeStyle(label) {
   const idx = label.charCodeAt(0) % LABEL_BG_COLORS.length;
@@ -99,17 +99,17 @@ export function IssueList({ org, repo, issues = [] }) {
     }
   }
 
-  const inputStyle = { padding: '0.375rem 0.5rem', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.875rem', width: '100%', boxSizing: 'border-box' };
+  const inputStyle = { padding: '0.375rem 0.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', width: '100%', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' };
   const btnStyle = (variant) => {
-    const base = { border: 'none', padding: '0.375rem 0.75rem', borderRadius: '4px', cursor: busy ? 'wait' : 'pointer', fontSize: '0.8125rem', fontWeight: 600, opacity: busy ? 0.6 : 1 };
-    if (variant === 'primary') return { ...base, background: 'var(--color-accent, #2563eb)', color: '#fff' };
+    const base = { border: 'none', padding: '0.375rem 0.75rem', borderRadius: 'var(--radius-sm)', cursor: busy ? 'wait' : 'pointer', fontSize: '0.8125rem', fontWeight: 600, opacity: busy ? 0.6 : 1 };
+    if (variant === 'primary') return { ...base, background: 'var(--accent)', color: 'var(--bg)' };
     if (variant === 'close') return { ...base, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' };
-    if (variant === 'danger') return { ...base, background: 'var(--color-danger, #cb2431)', color: '#fff' };
-    if (variant === 'reopen') return { ...base, background: 'var(--color-good, #16a34a)', color: '#fff' };
+    if (variant === 'danger') return { ...base, background: 'var(--danger)', color: 'var(--bg)' };
+    if (variant === 'reopen') return { ...base, background: 'var(--success)', color: 'var(--bg)' };
     return { ...base, background: 'var(--bg-subtle)', color: 'var(--text)' };
   };
   const pillStyle = (tone) => {
-    const colors = { good: { bg: '#dcfce7', color: '#166534' }, neutral: { bg: '#f3f4f6', color: 'var(--text)' }, warn: { bg: '#fef3c7', color: '#92400e' }, danger: { bg: '#fee2e2', color: '#991b1b' } };
+    const colors = { good: { bg: 'var(--surface-raised)', color: 'var(--success)' }, neutral: { bg: 'var(--bg-subtle)', color: 'var(--text)' }, warn: { bg: 'var(--surface-raised)', color: 'var(--warning)' }, danger: { bg: 'var(--surface-raised)', color: 'var(--danger)' } };
     const c = colors[tone] || colors.neutral;
     return { display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.6875rem', fontWeight: 600, background: c.bg, color: c.color };
   };
@@ -178,7 +178,7 @@ export function IssueList({ org, repo, issues = [] }) {
             const isOpen = status === 'Open';
             const isConfirmingClose = confirmClose === name;
             return (
-              <li key={name} style={{ padding: '0.75rem 0', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              <li key={name} style={{ padding: '0.75rem 0', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <strong style={{ fontSize: '0.9375rem' }}>{title}</strong>

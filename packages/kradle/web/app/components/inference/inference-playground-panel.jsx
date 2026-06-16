@@ -105,13 +105,13 @@ export const panelStyles = {
     fontSize: 14, fontWeight: 600, transition: 'background 0.15s',
   }),
   codeBlock: {
-    background: 'var(--bg-code, #1e1e2e)', color: 'var(--text)',
-    padding: '12px 14px', borderRadius: 6, fontFamily: 'var(--mono, monospace)',
+    background: 'var(--surface-raised)', color: 'var(--text)',
+    padding: '12px 14px', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-mono)',
     fontSize: 12.5, overflow: 'auto', whiteSpace: 'pre', lineHeight: 1.6,
   },
   codeHeader: {
-    padding: '4px 12px', background: 'var(--bg-code, #1e1e2e)', borderRadius: '6px 6px 0 0',
-    fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--mono, monospace)',
+    padding: '4px 12px', background: 'var(--surface-raised)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+    fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)',
     borderBottom: '1px solid var(--border)',
   },
   inlineCode: {
@@ -157,7 +157,7 @@ export function PlaygroundPanel({ side, model, onModelChange, models, state, rat
         {state.loading ? (
           <div style={panelStyles.emptyResponse}><div style={panelStyles.spinner} /></div>
         ) : state.error ? (
-          <div style={{ color: 'var(--danger, #ef4444)', fontSize: 13 }}>{state.error}</div>
+          <div style={{ color: 'var(--danger)', fontSize: 13 }}>{state.error}</div>
         ) : state.response ? (
           renderMarkdown(state.response)
         ) : (

@@ -32,10 +32,12 @@ function AddCardRow({ onAdd }) {
             width: '100%',
             padding: '0.375rem 0.5rem',
             fontSize: '0.8125rem',
-            border: '1px solid #d1d5db',
-            borderRadius: '0.375rem',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
             outline: 'none',
             boxSizing: 'border-box',
+            background: 'var(--surface)',
+            color: 'var(--text)',
           }}
         />
         <div style={{ display: 'flex', gap: '0.375rem' }}>
@@ -45,10 +47,10 @@ function AddCardRow({ onAdd }) {
               flex: 1,
               padding: '0.25rem',
               fontSize: '0.75rem',
-              background: '#2563eb',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--bg)',
               border: 'none',
-              borderRadius: '0.25rem',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
             }}
           >
@@ -60,10 +62,10 @@ function AddCardRow({ onAdd }) {
               flex: 1,
               padding: '0.25rem',
               fontSize: '0.75rem',
-              background: '#f3f4f6',
-              color: '#374151',
+              background: 'var(--bg-subtle)',
+              color: 'var(--text)',
               border: 'none',
-              borderRadius: '0.25rem',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
             }}
           >
@@ -83,15 +85,15 @@ function AddCardRow({ onAdd }) {
         padding: '0.375rem',
         fontSize: '0.75rem',
         background: 'transparent',
-        color: '#9ca3af',
-        border: '1px dashed #d1d5db',
-        borderRadius: '0.375rem',
+        color: 'var(--text-muted)',
+        border: '1px dashed var(--border)',
+        borderRadius: 'var(--radius-sm)',
         cursor: 'pointer',
         textAlign: 'center',
         transition: 'color 0.15s, border-color 0.15s',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderColor = '#9ca3af'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.borderColor = '#d1d5db'; }}
+      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >
       + Add card
     </button>
@@ -105,12 +107,13 @@ function Swimlane({ label, items, columnColor, draggingId, onDragStart, onDragEn
         style={{
           fontSize: '0.6875rem',
           fontWeight: 700,
-          color: '#6b7280',
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-display)',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
           padding: '0.125rem 0',
           marginBottom: '0.25rem',
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         {label} ({items.length})
@@ -183,37 +186,39 @@ export function KanbanColumn({
       onDragLeave={onDragLeave}
       onDrop={(e) => onDrop(e, col.id)}
       style={{
-        background: isOver ? 'var(--surface-hover, #f0f4ff)' : 'var(--surface-muted, #f9fafb)',
-        borderRadius: '0.5rem',
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg)',
         padding: '0.75rem',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.375rem',
         border: wipExceeded
-          ? '2px solid #f97316'
+          ? '2px solid var(--warning)'
           : isOver
-          ? `2px solid ${col.color}`
-          : '2px solid transparent',
-        transition: 'border-color 0.15s ease, background 0.15s ease',
+          ? '2px solid var(--border-focus)'
+          : '2px solid var(--border)',
+        boxShadow: isOver ? 'var(--shadow-glow-amber)' : 'none',
+        transition: 'border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease',
         minHeight: '12rem',
       }}
     >
       {/* Column header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-        <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600 }}>{col.label}</h3>
+        <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>{col.label}</h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
           {wipExceeded ? (
             <span
               title={`WIP limit exceeded (limit: ${col.wipLimit})`}
-              style={{ fontSize: '0.75rem', color: '#f97316', fontWeight: 700 }}
+              style={{ fontSize: '0.75rem', color: 'var(--warning)', fontWeight: 700 }}
             >
               WIP!
             </span>
           ) : null}
           <span
             style={{
-              background: wipExceeded ? '#f97316' : col.color,
-              color: '#fff',
+              background: wipExceeded ? 'var(--warning)' : col.color,
+              color: 'var(--bg)',
+              fontFamily: 'var(--font-mono)',
               borderRadius: '9999px',
               padding: '0.125rem 0.5rem',
               fontSize: '0.75rem',
@@ -227,11 +232,11 @@ export function KanbanColumn({
       </div>
 
       {/* Column stats */}
-      <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.6875rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.6875rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
         <span>{items.length} card{items.length !== 1 ? 's' : ''}</span>
         {totalPoints > 0 ? <span>{totalPoints} pts</span> : null}
         {col.wipLimit != null ? (
-          <span style={{ color: wipExceeded ? '#f97316' : '#9ca3af' }}>
+          <span style={{ color: wipExceeded ? 'var(--warning)' : 'var(--text-muted)' }}>
             limit {col.wipLimit}
           </span>
         ) : null}
@@ -241,7 +246,7 @@ export function KanbanColumn({
       {items.length === 0 ? (
         <p
           style={{
-            color: '#9ca3af',
+            color: 'var(--text-muted)',
             fontSize: '0.8125rem',
             textAlign: 'center',
             margin: 'auto 0',

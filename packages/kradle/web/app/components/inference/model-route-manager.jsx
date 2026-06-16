@@ -10,21 +10,21 @@ import {
 // ─── Route Type Badge ───────────────────────────────────────────────────────
 
 export const RouteTypeBadge = memo(function RouteTypeBadge({ type }) {
-  const color = ROUTE_TYPE_COLORS[type] || '#6b7280';
+  const color = ROUTE_TYPE_COLORS[type] || 'var(--text-muted)';
   return <span style={badgeStyle(color)}>{type || 'unknown'}</span>;
 });
 
 // ─── Provider Badge ─────────────────────────────────────────────────────────
 
 export const ProviderBadge = memo(function ProviderBadge({ provider }) {
-  const color = PROVIDER_COLORS[provider] || '#6b7280';
+  const color = PROVIDER_COLORS[provider] || 'var(--text-muted)';
   return <span style={badgeStyle(color)}>{provider || 'unknown'}</span>;
 });
 
 // ─── Catalog Status Pill ────────────────────────────────────────────────────
 
 export const CatalogStatusPill = memo(function CatalogStatusPill({ status }) {
-  const color = status === 'available' ? '#16a34a' : '#d97706';
+  const color = status === 'available' ? 'var(--success)' : 'var(--warning)';
   return (
     <span style={{ ...badgeStyle(color), fontSize: '0.6875rem' }}>
       <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: color, marginRight: 4, verticalAlign: 'middle' }} />
@@ -51,7 +51,7 @@ export const ModelRouteCard = memo(function ModelRouteCard({ route, onDelete }) 
         <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
           <RouteTypeBadge type={routeType} />
           <ProviderBadge provider={provider} />
-          {!enabled && <span style={badgeStyle('#9ca3af')}>disabled</span>}
+          {!enabled && <span style={badgeStyle('var(--text-muted)')}>disabled</span>}
         </div>
       </div>
       <div style={{ fontSize: '0.8125rem', color: 'var(--text)' }}>
@@ -67,7 +67,7 @@ export const ModelRouteCard = memo(function ModelRouteCard({ route, onDelete }) 
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{createdAt ? relativeTime(createdAt) : ''}</span>
-        <button style={btnStyle('#dc2626')} onClick={() => onDelete(route)} aria-label={`Delete model route ${name}`}>Delete</button>
+        <button style={btnStyle('var(--danger)')} onClick={() => onDelete(route)} aria-label={`Delete model route ${name}`}>Delete</button>
       </div>
     </div>
   );
@@ -166,9 +166,9 @@ export function CreateModelRouteForm({ org, services, onSubmit, onCancel, loadin
               type="button"
               style={{
                 ...btnOutlineStyle,
-                background: form.routeType === t ? (t === 'internal' ? '#2563eb' : '#7c3aed') : '#fff',
-                color: form.routeType === t ? '#fff' : '#374151',
-                borderColor: form.routeType === t ? 'transparent' : '#d1d5db',
+                background: form.routeType === t ? (t === 'internal' ? 'var(--accent)' : '#a9bf57') : 'var(--surface)',
+                color: form.routeType === t ? '#fff' : 'var(--text-secondary)',
+                borderColor: form.routeType === t ? 'transparent' : 'var(--border)',
               }}
               onClick={() => setForm(f => ({ ...f, routeType: t }))}
               aria-label={`Set route type to ${t}`}

@@ -42,7 +42,7 @@ export const ServiceCard = memo(function ServiceCard({ service, onView, onDelete
       </div>
 
       {endpoint && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', borderRadius: '0.375rem', padding: '0.375rem 0.625rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: '0.375rem 0.625rem' }}>
           <code style={{ fontSize: '0.75rem', color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{endpoint}</code>
           <CopyButton text={endpoint} />
         </div>
@@ -60,7 +60,7 @@ export const ServiceCard = memo(function ServiceCard({ service, onView, onDelete
         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{createdAt ? relativeTime(createdAt) : ''}</span>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button style={btnStyle()} onClick={() => onView(service)} aria-label={`View details for service ${name}`}>Details</button>
-          <button style={btnStyle('#dc2626')} onClick={() => onDelete(service)} aria-label={`Delete service ${name}`}>Delete</button>
+          <button style={btnStyle('var(--danger)')} onClick={() => onDelete(service)} aria-label={`Delete service ${name}`}>Delete</button>
         </div>
       </div>
     </div>
@@ -234,7 +234,7 @@ export function ServiceDetailPanel({ service, org, onClose }) {
         </div>
 
         {/* Endpoint */}
-        <div style={{ background: '#f8fafc', borderRadius: '0.375rem', padding: '0.75rem' }}>
+        <div style={{ background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: '0.75rem' }}>
           <div style={{ fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.5rem' }}>Endpoint</div>
           {endpoint ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -257,7 +257,7 @@ export function ServiceDetailPanel({ service, org, onClose }) {
                 <div key={serviceConditionKey(c)} style={{ ...cardStyle, padding: '0.5rem 0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{c.type}</span>
-                    <span style={{ fontSize: '0.8125rem', color: c.status === 'True' ? '#16a34a' : '#dc2626' }}>{c.status}</span>
+                    <span style={{ fontSize: '0.8125rem', color: c.status === 'True' ? 'var(--success)' : 'var(--danger)' }}>{c.status}</span>
                   </div>
                   {c.message && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.message}</div>}
                   {c.lastTransitionTime && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{relativeTime(c.lastTransitionTime)}</div>}
@@ -291,7 +291,7 @@ export function ServiceDetailPanel({ service, org, onClose }) {
             placeholder="JSON inference payload"
           />
           <button
-            style={{ ...btnStyle('#7c3aed'), marginTop: '0.5rem', width: '100%' }}
+            style={{ ...btnStyle('#a9bf57'), marginTop: '0.5rem', width: '100%' }}
             onClick={handleTest}
             disabled={testLoading || !endpoint}
             aria-label={`Send test inference request to service ${name}`}
@@ -299,7 +299,7 @@ export function ServiceDetailPanel({ service, org, onClose }) {
             {testLoading ? 'Sending...' : endpoint ? 'Send Test Request' : 'Service not ready'}
           </button>
           {testError && (
-            <div style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--danger)', background: '#fef2f2', padding: '0.5rem', borderRadius: '0.375rem' }}>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--danger)', background: 'color-mix(in srgb, var(--danger) 12%, transparent)', padding: '0.5rem', borderRadius: 'var(--radius-md)' }}>
               {testError}
             </div>
           )}
@@ -308,7 +308,7 @@ export function ServiceDetailPanel({ service, org, onClose }) {
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
                 Status: {testOutput.status} | Endpoint: {testOutput.endpoint}
               </div>
-              <pre style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.75rem', overflow: 'auto', maxHeight: '12rem', margin: 0 }}>
+              <pre style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.75rem', fontSize: '0.75rem', overflow: 'auto', maxHeight: '12rem', margin: 0 }}>
                 {JSON.stringify(testOutput.response, null, 2)}
               </pre>
             </div>
@@ -316,10 +316,10 @@ export function ServiceDetailPanel({ service, org, onClose }) {
         </div>
 
         {/* Use in Agent Stack */}
-        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
           <a
             href={agentStackHref}
-            style={{ ...btnStyle('#16a34a'), display: 'inline-block', textDecoration: 'none' }}
+            style={{ ...btnStyle('var(--success)'), display: 'inline-block', textDecoration: 'none' }}
           >
             Use in Agent Stack
           </a>

@@ -18,13 +18,13 @@ export const styles = {
   sidebarTitle: { fontWeight: 700, fontSize: 13, color: 'var(--text)', margin: 0 },
   newBtn: {
     padding: '4px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
-    background: 'var(--accent, #2563eb)', color: '#fff', border: 'none', borderRadius: 4,
+    background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 4,
   },
   sessionList: { flex: 1, overflow: 'auto', padding: '4px 0' },
   sessionItem: (active) => ({
     display: 'block', padding: '8px 14px', cursor: 'pointer', fontSize: 12,
     background: active ? 'var(--surface-raised)' : 'transparent',
-    borderLeft: active ? '3px solid var(--accent, #2563eb)' : '3px solid transparent',
+    borderLeft: active ? '3px solid var(--accent)' : '3px solid transparent',
     borderBottom: 'none', borderTop: 'none', borderRight: 'none',
     textAlign: 'left', width: '100%', color: 'var(--text)',
   }),
@@ -56,7 +56,7 @@ export const styles = {
   }),
   bubble: (isUser) => ({
     maxWidth: '78%', position: 'relative',
-    background: isUser ? 'var(--accent, #2563eb)' : 'var(--surface-raised)',
+    background: isUser ? 'var(--accent)' : 'var(--surface-raised)',
     color: isUser ? '#fff' : 'var(--text)',
     borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
     padding: '10px 14px', fontSize: 14, lineHeight: 1.55,
@@ -64,7 +64,7 @@ export const styles = {
   }),
   bubbleError: {
     maxWidth: '78%', position: 'relative',
-    background: '#fef2f2', border: '1px solid var(--danger)',
+    background: 'var(--card)', border: '1px solid var(--danger)',
     color: 'var(--danger)',
     borderRadius: '16px 16px 16px 4px',
     padding: '10px 14px', fontSize: 14, lineHeight: 1.55,
@@ -82,23 +82,23 @@ export const styles = {
   copyBtnHover: { background: 'var(--surface-overlay)' },
   /* ── code blocks ── */
   codeBlock: {
-    background: '#181624', color: '#f0e6d1',
-    padding: '14px 16px', borderRadius: 6, fontFamily: 'var(--mono, "JetBrains Mono", monospace)',
+    background: 'var(--surface)', color: 'var(--text)',
+    padding: '14px 16px', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
     fontSize: 12.5, overflow: 'auto', whiteSpace: 'pre', marginTop: 8, marginBottom: 4,
     lineHeight: 1.6, position: 'relative', counterReset: 'line',
   },
   codeBlockHeader: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '4px 12px', background: '#12101e', borderRadius: '6px 6px 0 0',
-    fontSize: 11, color: '#8c7e65', fontFamily: 'var(--mono, monospace)',
+    padding: '4px 12px', background: 'var(--surface-raised)', borderRadius: '6px 6px 0 0',
+    fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono, monospace)',
   },
   codeCopyBtn: {
     background: 'none', border: 'none', cursor: 'pointer', padding: '2px 8px',
-    fontSize: 11, color: '#8c7e65', borderRadius: 3,
+    fontSize: 11, color: 'var(--text-muted)', borderRadius: 'var(--radius-sm)',
   },
   lineNumber: {
     display: 'inline-block', width: '2.5em', textAlign: 'right',
-    marginRight: '1em', color: '#5a4e5a', userSelect: 'none', fontSize: 11,
+    marginRight: '1em', color: 'var(--text-faint)', userSelect: 'none', fontSize: 11,
   },
   usage: { fontSize: 10, color: 'var(--text-muted)', marginTop: 2 },
   /* ── input area ── */
@@ -115,7 +115,7 @@ export const styles = {
   },
   sendBtn: (disabled) => ({
     padding: '10px 18px', fontSize: 14, fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer',
-    background: disabled ? 'var(--text-faint)' : 'var(--accent, #2563eb)', color: '#fff',
+    background: disabled ? 'var(--text-faint)' : 'var(--accent)', color: '#fff',
     border: 'none', borderRadius: 8, opacity: disabled ? 0.6 : 1, flexShrink: 0,
   }),
   /* ── empty state ── */
@@ -139,22 +139,22 @@ export const styles = {
   },
   thinkingDot: (delay) => ({
     width: 7, height: 7, borderRadius: '50%',
-    background: 'var(--accent, #2563eb)',
+    background: 'var(--accent)',
     animation: `kradle-dot-pulse 1.4s ease-in-out ${delay}s infinite`,
   }),
   /* ── scroll-to-bottom ── */
   scrollBtn: {
     position: 'absolute', bottom: 80, right: 24,
     width: 36, height: 36, borderRadius: '50%',
-    background: 'var(--accent, #2563eb)', color: '#fff',
+    background: 'var(--accent)', color: '#fff',
     border: 'none', cursor: 'pointer', fontSize: 16,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: '0 2px 8px rgba(0,0,0,.18)',
+    boxShadow: 'var(--shadow-md)',
     transition: 'opacity .2s',
   },
   /* ── error banner ── */
   errorBanner: {
-    background: '#fef2f2', border: '1px solid var(--danger)', borderRadius: 8,
+    background: 'var(--card)', border: '1px solid var(--danger)', borderRadius: 8,
     padding: '8px 14px', color: 'var(--danger)', fontSize: 13, margin: '0 16px 8px',
     display: 'flex', alignItems: 'center', gap: 8,
   },

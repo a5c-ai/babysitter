@@ -58,15 +58,15 @@ export function RepoRuns({ org, repo, runs = [] }) {
     }
   }
 
-  const inputStyle = { padding: '0.375rem 0.5rem', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem', width: '100%', boxSizing: 'border-box' };
+  const inputStyle = { padding: '0.375rem 0.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', width: '100%', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' };
   const btnStyle = (variant) => {
-    const base = { border: 'none', padding: '0.375rem 0.75rem', borderRadius: '4px', cursor: busy ? 'wait' : 'pointer', fontSize: '0.8125rem', fontWeight: 600, opacity: busy ? 0.6 : 1 };
-    if (variant === 'primary') return { ...base, background: 'var(--color-accent, #2563eb)', color: '#fff' };
-    if (variant === 'close') return { ...base, background: 'transparent', border: '1px solid #d1d5db', color: '#374151' };
-    return { ...base, background: '#f3f4f6', color: '#374151' };
+    const base = { border: 'none', padding: '0.375rem 0.75rem', borderRadius: 'var(--radius-sm)', cursor: busy ? 'wait' : 'pointer', fontSize: '0.8125rem', fontWeight: 600, opacity: busy ? 0.6 : 1 };
+    if (variant === 'primary') return { ...base, background: 'var(--accent)', color: 'var(--bg)' };
+    if (variant === 'close') return { ...base, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' };
+    return { ...base, background: 'var(--bg-subtle)', color: 'var(--text)' };
   };
   const pillStyle = (tone) => {
-    const colors = { good: { bg: '#dcfce7', color: '#166534' }, neutral: { bg: '#f3f4f6', color: '#374151' }, warn: { bg: '#fef3c7', color: '#92400e' }, danger: { bg: '#fee2e2', color: '#991b1b' } };
+    const colors = { good: { bg: 'var(--surface-raised)', color: 'var(--success)' }, neutral: { bg: 'var(--bg-subtle)', color: 'var(--text)' }, warn: { bg: 'var(--surface-raised)', color: 'var(--warning)' }, danger: { bg: 'var(--surface-raised)', color: 'var(--danger)' } };
     const c = colors[tone] || colors.neutral;
     return { display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.6875rem', fontWeight: 600, background: c.bg, color: c.color };
   };
@@ -93,7 +93,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
       </div>
 
       {showForm && (
-        <form onSubmit={handleTrigger} style={{ margin: '1rem 0', padding: '1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', display: 'grid', gap: '0.75rem' }}>
+        <form onSubmit={handleTrigger} style={{ margin: '1rem 0', padding: '1rem', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', display: 'grid', gap: '0.75rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.8125rem' }}>
               <span style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>Branch *</span>
@@ -104,7 +104,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
               <input style={inputStyle} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="manual trigger" />
             </label>
           </div>
-          {message && <p style={{ color: '#dc2626', fontSize: '0.8125rem', margin: 0 }}>{message}</p>}
+          {message && <p style={{ color: 'var(--danger)', fontSize: '0.8125rem', margin: 0 }}>{message}</p>}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button type="submit" style={btnStyle('primary')} disabled={busy} aria-label="Submit pipeline run">{busy ? 'Triggering...' : 'Trigger run'}</button>
             <button type="button" style={btnStyle('close')} onClick={() => setShowForm(false)}>Cancel</button>
@@ -126,7 +126,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
       </div>
 
       {filteredItems.length === 0 ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
           <p>{branchFilter ? 'No runs match the branch filter.' : 'No runs yet.'}</p>
           <p style={{ fontSize: '0.875rem' }}>Trigger a run to kick off a pipeline for this repository.</p>
         </div>
@@ -143,13 +143,13 @@ export function RepoRuns({ org, repo, runs = [] }) {
             const tone = statusTone(phase);
             const logsHref = `/api/orgs/${encodeURIComponent(org)}/pipelines/${encodeURIComponent(name)}/logs`;
             return (
-              <li key={name} style={{ padding: '0.75rem 0', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              <li key={name} style={{ padding: '0.75rem 0', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <strong style={{ fontSize: '0.9375rem' }}>{name}</strong>
                     <span style={pillStyle(tone)}>{phase}</span>
                   </div>
-                  <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
                     <span>branch: {branch}</span>
                     <span>·</span>
                     <span>{isActive ? `running... (${duration})` : `duration: ${duration}`}</span>
@@ -159,7 +159,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
                 <div style={{ flexShrink: 0 }}>
                   <a
                     href={logsHref}
-                    style={{ fontSize: '0.8125rem', color: 'var(--color-accent, #2563eb)', textDecoration: 'none', padding: '0.25rem 0.5rem', border: '1px solid currentColor', borderRadius: '4px' }}
+                    style={{ fontSize: '0.8125rem', color: 'var(--accent)', textDecoration: 'none', padding: '0.25rem 0.5rem', border: '1px solid currentColor', borderRadius: 'var(--radius-sm)' }}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -171,7 +171,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
           })}
         </ul>
       )}
-      {message && !showForm && <p style={{ color: '#dc2626', fontSize: '0.8125rem', marginTop: '0.5rem' }}>{message}</p>}
+      {message && !showForm && <p style={{ color: 'var(--danger)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>{message}</p>}
     </div>
   );
 }

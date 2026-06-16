@@ -11,20 +11,20 @@ import { useState } from 'react';
 
 export const WORKFLOW_COLUMNS = [
   { id: 'todo', label: 'Todo', color: 'var(--text-muted)', wipLimit: null },
-  { id: 'in-progress', label: 'In Progress', color: '#eab308', wipLimit: 5 },
-  { id: 'review', label: 'Review', color: '#3b82f6', wipLimit: 3 },
-  { id: 'done', label: 'Done', color: '#22c55e', wipLimit: null },
+  { id: 'in-progress', label: 'In Progress', color: 'var(--accent)', wipLimit: 5 },
+  { id: 'review', label: 'Review', color: 'var(--warning)', wipLimit: 3 },
+  { id: 'done', label: 'Done', color: 'var(--success)', wipLimit: null },
 ];
 
 // ── Priority helpers ───────────────────────────────────────────────────────
 
 export function priorityColor(priority) {
   switch ((priority || '').toLowerCase()) {
-    case 'critical': return '#ef4444';
-    case 'high': return '#f97316';
-    case 'medium': return '#eab308';
-    case 'low': return '#22c55e';
-    default: return '#9ca3af';
+    case 'critical': return 'var(--danger)';
+    case 'high': return 'var(--warning)';
+    case 'medium': return 'var(--warning)';
+    case 'low': return 'var(--success)';
+    default: return 'var(--text-muted)';
   }
 }
 
@@ -107,11 +107,12 @@ export function CardDetailModal({ item, onClose, columnColor, org = 'default' })
     >
       <div
         style={{
-          background: 'var(--surface)',
-          borderRadius: '0.75rem',
+          background: 'var(--surface-raised)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           width: '100%',
           maxWidth: '36rem',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+          boxShadow: 'var(--shadow-lg)',
           overflow: 'hidden',
         }}
       >
@@ -125,7 +126,7 @@ export function CardDetailModal({ item, onClose, columnColor, org = 'default' })
             gap: '0.75rem',
           }}
         >
-          <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, lineHeight: 1.4 }}>{title}</h2>
+          <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, lineHeight: 1.4, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close card detail"
@@ -180,8 +181,8 @@ export function CardDetailModal({ item, onClose, columnColor, org = 'default' })
                       fontSize: '0.625rem',
                       padding: '0.0625rem 0.375rem',
                       borderRadius: '9999px',
-                      background: workspacePvcStatus === 'Bound' ? '#dcfce7' : '#fef3c7',
-                      color: workspacePvcStatus === 'Bound' ? '#16a34a' : '#92400e',
+                      background: 'var(--surface)',
+                      color: workspacePvcStatus === 'Bound' ? 'var(--success)' : 'var(--warning)',
                       fontWeight: 600,
                     }}>
                       {workspacePvcStatus}
@@ -205,7 +206,7 @@ export function CardDetailModal({ item, onClose, columnColor, org = 'default' })
               <>
                 <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Run</dt>
                 <dd style={{ margin: 0 }}>
-                  <a href={`/orgs/${encodeURIComponent(org)}/agents/runs/${dispatchRunRef}`} aria-label={`View run ${dispatchRunRef.slice(0, 16)}`} style={{ color: '#7c3aed', fontSize: '0.75rem' }}>
+                  <a href={`/orgs/${encodeURIComponent(org)}/agents/runs/${dispatchRunRef}`} aria-label={`View run ${dispatchRunRef.slice(0, 16)}`} style={{ color: 'var(--info)', fontSize: '0.75rem' }}>
                     {dispatchRunRef.slice(0, 16)}…
                   </a>
                 </dd>
@@ -214,8 +215,8 @@ export function CardDetailModal({ item, onClose, columnColor, org = 'default' })
             {agentName ? (
               <>
                 <dt style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Agent</dt>
-                <dd style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#059669' }}>
-                  <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '9999px', background: '#10b981', flexShrink: 0, animation: 'kanbanPulse 2s infinite' }} />
+                <dd style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--success)' }}>
+                  <span style={{ width: '0.5rem', height: '0.5rem', borderRadius: '9999px', background: 'var(--success)', flexShrink: 0, animation: 'kanbanPulse 2s infinite' }} />
                   {agentName}
                 </dd>
               </>
@@ -247,7 +248,7 @@ export function CardDetailModal({ item, onClose, columnColor, org = 'default' })
             </div>
           ) : null}
           {(item.status?.linkedSessions || item.status?.linkedWorkspaces) ? (
-            <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '0.75rem', display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem', display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               {item.status?.linkedSessions ? <span>{item.status.linkedSessions} sessions</span> : null}
               {item.status?.linkedWorkspaces ? <span>{item.status.linkedWorkspaces} workspaces</span> : null}
             </div>
@@ -293,15 +294,16 @@ export function StartWorkDialog({ item, onConfirm, onCancel, org }) {
     >
       <div
         style={{
-          background: 'var(--surface)',
-          borderRadius: '0.75rem',
+          background: 'var(--surface-raised)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: '1.5rem',
           maxWidth: '28rem',
           width: '100%',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+          boxShadow: 'var(--shadow-lg)',
         }}
       >
-        <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 700 }}>
+        <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>
           Start work on &quot;{name}&quot;?
         </h3>
         <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
@@ -309,7 +311,7 @@ export function StartWorkDialog({ item, onConfirm, onCancel, org }) {
           {repoRef ? `repository ${repoRef}` : 'this item'} and link it to the board card.
         </p>
         {repoRef ? (
-          <div style={{ margin: '0 0 1rem', padding: '0.5rem 0.75rem', background: '#f0fdf4', borderRadius: '0.375rem', fontSize: '0.8125rem' }}>
+          <div style={{ margin: '0 0 1rem', padding: '0.5rem 0.75rem', background: 'var(--surface)', border: '1px solid var(--success)', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}>
             <strong>Repository:</strong> <code>{repoRef}</code>
           </div>
         ) : null}
@@ -321,10 +323,11 @@ export function StartWorkDialog({ item, onConfirm, onCancel, org }) {
             style={{
               flex: 1,
               padding: '0.5rem',
-              background: loading ? '#93c5fd' : '#2563eb',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--bg)',
+              opacity: loading ? 0.6 : 1,
               border: 'none',
-              borderRadius: '0.375rem',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '0.875rem',
               cursor: loading ? 'not-allowed' : 'pointer',
               fontWeight: 600,
@@ -341,8 +344,8 @@ export function StartWorkDialog({ item, onConfirm, onCancel, org }) {
               padding: '0.5rem',
               background: 'var(--bg-subtle)',
               color: 'var(--text)',
-              border: 'none',
-              borderRadius: '0.375rem',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '0.875rem',
               cursor: 'pointer',
             }}

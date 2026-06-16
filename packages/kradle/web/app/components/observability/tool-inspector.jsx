@@ -19,13 +19,13 @@ function truncate(text, maxLen) {
 }
 
 const STATUS_COLOR = {
-  completed: '#22c55e',
-  error: '#ef4444',
-  running: '#f59e0b',
+  completed: 'var(--success)',
+  error: 'var(--danger)',
+  running: 'var(--warning)',
 };
 
 function statusColor(status) {
-  return STATUS_COLOR[status] || '#94a3b8';
+  return STATUS_COLOR[status] || 'var(--text-muted)';
 }
 
 const TOOL_META = {
@@ -72,12 +72,12 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
       onToggle={(e) => setOpen(e.target.open)}
       aria-label={`Tool call: ${meta.label} - ${summary || 'no input'}`}
       style={{
-        border: '1px solid #e2e8f0',
+        border: '1px solid var(--border)',
         borderLeft: `3px solid ${color}`,
         borderRadius: 4,
         marginBottom: 6,
         fontSize: 12,
-        backgroundColor: '#fafafa',
+        backgroundColor: 'var(--surface-raised)',
       }}
     >
       <summary
@@ -95,7 +95,7 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
           style={{
             fontFamily: 'monospace',
             fontSize: 10,
-            color: '#fff',
+            color: 'var(--surface)',
             backgroundColor: color,
             borderRadius: 3,
             padding: '1px 5px',
@@ -105,7 +105,7 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
         >
           {meta.prefix}
         </span>
-        <strong style={{ fontSize: 11, color: '#1e293b', flexShrink: 0 }}>{meta.label}</strong>
+        <strong style={{ fontSize: 11, color: 'var(--text)', flexShrink: 0 }}>{meta.label}</strong>
         <span
           style={{
             fontFamily: 'monospace',
@@ -136,7 +136,7 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
         </span>
       </summary>
 
-      <div style={{ padding: '8px 10px', borderTop: '1px solid #e2e8f0' }}>
+      <div style={{ padding: '8px 10px', borderTop: '1px solid var(--border)' }}>
         <div style={{ marginBottom: parsedOutput != null ? 8 : 0 }}>
           <span
             style={{
@@ -156,9 +156,9 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
               margin: 0,
               fontFamily: 'monospace',
               fontSize: 11,
-              color: '#1e293b',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #e2e8f0',
+              color: 'var(--text)',
+              backgroundColor: 'var(--surface-raised)',
+              border: '1px solid var(--border)',
               borderRadius: 3,
               padding: '6px 8px',
               whiteSpace: 'pre-wrap',
@@ -191,9 +191,9 @@ export function ToolCallInspector({ toolName, input, output, status = 'completed
                 margin: 0,
                 fontFamily: 'monospace',
                 fontSize: 11,
-                color: status === 'error' ? '#dc2626' : '#374151',
-                backgroundColor: status === 'error' ? '#fef2f2' : '#f8fafc',
-                border: `1px solid ${status === 'error' ? '#fca5a5' : '#e2e8f0'}`,
+                color: status === 'error' ? 'var(--danger)' : 'var(--text)',
+                backgroundColor: status === 'error' ? 'var(--surface-raised)' : 'var(--surface-raised)',
+                border: `1px solid ${status === 'error' ? 'var(--danger)' : 'var(--border)'}`,
                 borderRadius: 3,
                 padding: '6px 8px',
                 whiteSpace: 'pre-wrap',

@@ -137,7 +137,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
           width: '220px',
           minWidth: '180px',
           maxWidth: '280px',
-          borderRight: '1px solid #e5e7eb',
+          borderRight: '1px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
           background: 'var(--bg-subtle)',
@@ -145,7 +145,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
         }}
       >
         {/* Branch selector */}
-        <div style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border)' }}>
           <label style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 600 }}>
             Branch
           </label>
@@ -192,15 +192,15 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
               style={{
                 margin: '0.75rem 0.5rem',
                 padding: '0.75rem',
-                border: '1px solid #fbbf24',
-                borderRadius: '0.375rem',
-                background: '#fef3c7',
+                border: '1px solid var(--warning)',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--surface-raised)',
                 fontSize: '0.75rem',
-                color: '#92400e',
+                color: 'var(--warning)',
               }}
             >
               <strong style={{ display: 'block', marginBottom: '0.25rem' }}>Repository browser requires Gitea</strong>
-              <span>Set <code style={{ background: '#fde68a', padding: '0.0625rem 0.25rem', borderRadius: '0.125rem', fontSize: '0.6875rem' }}>KRADLE_GITEA_HTTP_URL</code> to enable.</span>
+              <span>Set <code style={{ background: 'var(--surface)', padding: '0.0625rem 0.25rem', borderRadius: '0.125rem', fontSize: '0.6875rem' }}>KRADLE_GITEA_HTTP_URL</code> to enable.</span>
             </div>
           ) : !tree || tree.length === 0 ? (
             <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -238,17 +238,17 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
               style={{
                 maxWidth: '24rem',
                 padding: '1.25rem 1.5rem',
-                border: '1px solid #fbbf24',
-                borderRadius: '0.5rem',
-                background: '#fef3c7',
-                color: '#92400e',
+                border: '1px solid var(--warning)',
+                borderRadius: 'var(--radius-lg)',
+                background: 'var(--surface-raised)',
+                color: 'var(--warning)',
                 textAlign: 'center',
               }}
             >
               <p style={{ margin: '0 0 0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>Repository browser not available</p>
               <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.5 }}>
                 Repository browser requires Gitea. Set{' '}
-                <code style={{ background: '#fde68a', padding: '0.125rem 0.375rem', borderRadius: '0.25rem', fontSize: '0.75rem' }}>
+                <code style={{ background: 'var(--surface)', padding: '0.125rem 0.375rem', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem' }}>
                   KRADLE_GITEA_HTTP_URL
                 </code>{' '}
                 to enable.
@@ -276,7 +276,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
             <div
               style={{
                 padding: '0.5rem 0.875rem',
-                borderBottom: '1px solid #e5e7eb',
+                borderBottom: '1px solid var(--border)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem',
@@ -286,7 +286,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                 flexWrap: 'wrap',
               }}
             >
-              <strong style={{ color: 'var(--text)', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+              <strong style={{ color: 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem' }}>
                 {selectedFile}
               </strong>
               {fileContent ? (
@@ -294,7 +294,9 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                   <span>{formatSize(fileContent.size)}</span>
                   <span
                     style={{
-                      background: '#e5e7eb',
+                      background: 'var(--surface-raised)',
+                      color: 'var(--text-secondary)',
+                      fontFamily: 'var(--font-mono)',
                       padding: '0.0625rem 0.375rem',
                       borderRadius: '9999px',
                       fontSize: '0.6875rem',
@@ -317,10 +319,10 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                       color: 'var(--accent)',
                       textDecoration: 'none',
                       fontSize: '0.6875rem',
-                      border: '1px solid #bfdbfe',
+                      border: '1px solid var(--accent)',
                       padding: '0.125rem 0.5rem',
-                      borderRadius: '0.25rem',
-                      background: '#eff6ff',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--surface-raised)',
                       flexShrink: 0,
                     }}
                   >

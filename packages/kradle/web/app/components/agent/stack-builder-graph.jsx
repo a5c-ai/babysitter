@@ -116,12 +116,12 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
   const totalSelections = Object.values(selections).reduce((sum, arr) => sum + arr.length, 0);
 
   const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
-  const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
+  const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: 'var(--surface)' };
   const disabledPrimaryStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
 
   return (
     <form onSubmit={handleSubmit} aria-label="Agent stack builder form">
-      <div className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)' }}>
+      <div className="card" style={{ borderLeft: '3px solid var(--color-info)' }}>
         <div className="cardTitle">
           <h3>{isEditing ? 'Edit stack' : 'New agent stack'}</h3>
           <span className="pill neutral">{isEditing ? 'editing' : 'graph builder'}</span>
@@ -158,10 +158,10 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
 
           {/* Stack Layers */}
           <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
               Stack Layers ({STACK_LAYERS.length})
               {totalSelections > 0 && (
-                <span style={{ fontWeight: 400, fontSize: '0.75rem', color: '#64748b', marginLeft: 8 }}>
+                <span style={{ fontWeight: 400, fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: 8 }}>
                   {totalSelections} total selections
                 </span>
               )}
@@ -189,7 +189,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
 
           {/* Composition Facets */}
           <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
               Composition Facets ({COMPOSITION_FACETS.length})
             </h4>
             {COMPOSITION_FACETS.map((facet) => (
@@ -205,7 +205,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
 
           {/* Model Inference (KServe) */}
           <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
               Model Inference
             </h4>
             <ModelInferenceSection
@@ -217,10 +217,10 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
 
           {/* Memory Repositories */}
           <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
               Memory
               {selectedMemoryRepos.length > 0 && (
-                <span style={{ fontWeight: 400, fontSize: '0.75rem', color: '#64748b', marginLeft: 8 }}>
+                <span style={{ fontWeight: 400, fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: 8 }}>
                   {selectedMemoryRepos.length} repo{selectedMemoryRepos.length !== 1 ? 's' : ''} attached
                 </span>
               )}
@@ -234,7 +234,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
 
           {/* RBAC / Runtime Identity */}
           <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
               Runtime Identity (RBAC)
             </h4>
             <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
@@ -328,12 +328,12 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
               {status === 'saving' ? 'Saving...' : isEditing ? 'Update Stack' : 'Create Stack'}
             </button>
             {totalSelections > 0 && (
-              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                 {totalSelections} Atlas record{totalSelections !== 1 ? 's' : ''} bound across {Object.values(selections).filter((a) => a.length > 0).length} layers
               </span>
             )}
             {status === 'success' && (
-              <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>{message}</span>
+              <span style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600 }}>{message}</span>
             )}
             {status === 'error' && (
               <span role="alert" style={{ fontSize: 13, color: 'var(--danger)' }}>{message}</span>

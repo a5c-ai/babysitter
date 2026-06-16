@@ -3,14 +3,14 @@
 import { useState, useRef, useCallback } from 'react';
 
 const WORKFLOW_COLUMNS = [
-  { id: 'todo', label: 'Todo', color: '#6b7280' },
-  { id: 'in-progress', label: 'In Progress', color: '#eab308' },
-  { id: 'review', label: 'Review', color: '#3b82f6' },
-  { id: 'done', label: 'Done', color: '#22c55e' },
+  { id: 'todo', label: 'Todo', color: 'var(--text-muted)' },
+  { id: 'in-progress', label: 'In Progress', color: 'var(--accent)' },
+  { id: 'review', label: 'Review', color: 'var(--warning)' },
+  { id: 'done', label: 'Done', color: 'var(--success)' },
 ];
 
 function getColumnColor(columnId) {
-  return WORKFLOW_COLUMNS.find((c) => c.id === columnId)?.color || '#6b7280';
+  return WORKFLOW_COLUMNS.find((c) => c.id === columnId)?.color || 'var(--text-muted)';
 }
 
 function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDragging }) {
@@ -28,32 +28,33 @@ function KanbanCard({ item, columnColor, onDragStart, onDragEnd, isDragging }) {
       aria-grabbed={isDragging}
       tabIndex={0}
       style={{
-        background: '#fff',
-        borderRadius: '0.375rem',
+        background: 'var(--card)',
+        borderRadius: 'var(--radius-sm)',
         padding: '0.625rem 0.75rem',
+        border: '1px solid var(--border)',
         borderLeft: `4px solid ${columnColor}`,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+        boxShadow: 'var(--shadow-sm)',
         cursor: 'grab',
         userSelect: 'none',
         opacity: isDragging ? 0.4 : 1,
         transition: 'opacity 0.15s ease',
       }}
     >
-      <strong style={{ fontSize: '0.8125rem', display: 'block', marginBottom: '0.25rem' }}>{title}</strong>
+      <strong style={{ fontSize: '0.8125rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text)' }}>{title}</strong>
       {item.spec?.priority ? (
         <span className="pill neutral" style={{ fontSize: '0.6875rem', marginRight: '0.25rem' }}>
           {item.spec?.priority}
         </span>
       ) : null}
       {item.spec?.assignee ? (
-        <small style={{ color: '#6b7280', fontSize: '0.75rem' }}>{item.spec?.assignee}</small>
+        <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.spec?.assignee}</small>
       ) : null}
       <div style={{ display: 'flex', gap: '0.375rem', marginTop: '0.25rem' }}>
         {item.status?.linkedSessions ? (
-          <small style={{ color: '#9ca3af', fontSize: '0.6875rem' }}>{item.status.linkedSessions} sessions</small>
+          <small style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{item.status.linkedSessions} sessions</small>
         ) : null}
         {item.status?.linkedWorkspaces ? (
-          <small style={{ color: '#9ca3af', fontSize: '0.6875rem' }}>{item.status.linkedWorkspaces} workspaces</small>
+          <small style={{ color: 'var(--text-muted)', fontSize: '0.6875rem' }}>{item.status.linkedWorkspaces} workspaces</small>
         ) : null}
       </div>
     </div>
@@ -71,23 +72,25 @@ function KanbanColumn({ col, items, draggingId, dragOverCol, onDragStart, onDrag
       onDragLeave={onDragLeave}
       onDrop={(e) => onDrop(e, col.id)}
       style={{
-        background: isOver ? 'var(--surface-hover, #f0f4ff)' : 'var(--surface-muted, #f9fafb)',
-        borderRadius: '0.5rem',
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg)',
         padding: '0.75rem',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.5rem',
-        border: isOver ? `2px solid ${col.color}` : '2px solid transparent',
-        transition: 'border-color 0.15s ease, background 0.15s ease',
+        border: isOver ? '2px solid var(--border-focus)' : '2px solid var(--border)',
+        boxShadow: isOver ? 'var(--shadow-glow-amber)' : 'none',
+        transition: 'border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease',
         minHeight: '12rem',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-        <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600 }}>{col.label}</h3>
+        <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>{col.label}</h3>
         <span
           style={{
             background: col.color,
-            color: '#fff',
+            color: 'var(--bg)',
+            fontFamily: 'var(--font-mono)',
             borderRadius: '9999px',
             padding: '0.125rem 0.5rem',
             fontSize: '0.75rem',
@@ -111,7 +114,7 @@ function KanbanColumn({ col, items, draggingId, dragOverCol, onDragStart, onDrag
       ) : (
         <p
           style={{
-            color: '#9ca3af',
+            color: 'var(--text-muted)',
             fontSize: '0.8125rem',
             textAlign: 'center',
             margin: 'auto 0',
@@ -251,7 +254,7 @@ export function InteractiveKanbanBoard({ initialIssues = [], org = 'default', pr
         />
       ))}
       {!hasItems ? (
-        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem 0', color: '#9ca3af' }}>
+        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)' }}>
           <p style={{ fontSize: '0.875rem' }}>Link issues to this project to populate the board</p>
         </div>
       ) : null}

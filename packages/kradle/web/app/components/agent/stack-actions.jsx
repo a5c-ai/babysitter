@@ -58,7 +58,7 @@ export function StackActions({ org, stackName }) {
   return (
     <span style={{ display: 'flex', gap: 8, flexDirection: 'column', alignItems: 'flex-start' }}>
       <span style={{ display: 'flex', gap: 8 }}>
-        <a href={editHref} aria-label={`Edit stack ${stackName}`} style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: 4, textDecoration: 'none', fontSize: 'inherit' }}>
+        <a href={editHref} aria-label={`Edit stack ${stackName}`} style={{ padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 4, textDecoration: 'none', fontSize: 'inherit' }}>
           Edit
         </a>
         <button
@@ -73,7 +73,7 @@ export function StackActions({ org, stackName }) {
           <>
             <button
               onClick={handleDelete}
-              style={{ color: '#fff', backgroundColor: 'var(--danger)', border: 'none', borderRadius: 4, padding: '4px 8px', fontWeight: 600 }}
+              style={{ color: 'var(--surface)', backgroundColor: 'var(--danger)', border: 'none', borderRadius: 4, padding: '4px 8px', fontWeight: 600 }}
               aria-label={`Confirm delete stack ${stackName}`}
             >
               Confirm

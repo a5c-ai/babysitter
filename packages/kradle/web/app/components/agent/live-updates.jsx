@@ -76,7 +76,7 @@ export function LiveUpdates({ org }) {
     width: 8,
     height: 8,
     borderRadius: '50%',
-    backgroundColor: connected ? '#16a34a' : '#dc2626',
+    backgroundColor: connected ? 'var(--success)' : 'var(--danger)',
     marginLeft: 8,
     verticalAlign: 'middle',
     flexShrink: 0,
@@ -86,7 +86,7 @@ export function LiveUpdates({ org }) {
     marginLeft: 6,
     fontSize: '0.7rem',
     fontWeight: 600,
-    color: '#16a34a',
+    color: 'var(--success)',
     opacity: flash ? 1 : 0,
     transition: 'opacity 0.3s',
   };

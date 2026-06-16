@@ -118,8 +118,8 @@ export function ActivityFeed({ org }) {
 
   return (
     <div style={{
-      background: 'var(--surface-raised, #f8f9fa)',
-      border: '1px solid var(--line, #d0d7de)',
+      background: 'var(--surface-raised)',
+      border: '1px solid var(--line)',
       borderRadius: '8px',
       overflow: 'hidden',
     }}>
@@ -129,8 +129,8 @@ export function ActivityFeed({ org }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0.75rem 1rem',
-        borderBottom: '1px solid var(--line, #d0d7de)',
-        background: 'var(--surface, #fff)',
+        borderBottom: '1px solid var(--line)',
+        background: 'var(--surface)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)' }}>Activity</span>
@@ -138,10 +138,10 @@ export function ActivityFeed({ org }) {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: connected ? '#22c55e' : '#ef4444',
+            background: connected ? 'var(--success)' : 'var(--danger)',
             display: 'inline-block',
           }} title={connected ? 'Live' : 'Disconnected'} />
-          <span style={{ fontSize: '0.6875rem', color: connected ? '#22c55e' : '#ef4444' }}>
+          <span style={{ fontSize: '0.6875rem', color: connected ? 'var(--success)' : 'var(--danger)' }}>
             {connected ? 'Live' : 'Disconnected'}
           </span>
         </div>
@@ -152,8 +152,8 @@ export function ActivityFeed({ org }) {
         display: 'flex',
         gap: '0.25rem',
         padding: '0.5rem 1rem',
-        borderBottom: '1px solid var(--line, #d0d7de)',
-        background: 'var(--surface, #fff)',
+        borderBottom: '1px solid var(--line)',
+        background: 'var(--surface)',
         overflowX: 'auto',
       }}>
         {FILTER_LABELS.map(({ key, label }) => (
@@ -166,9 +166,9 @@ export function ActivityFeed({ org }) {
             style={{
               padding: '0.25rem 0.625rem',
               borderRadius: '1rem',
-              border: '1px solid var(--line, #d0d7de)',
-              background: filter === key ? 'var(--accent, #0969da)' : 'transparent',
-              color: filter === key ? '#fff' : 'var(--text)',
+              border: '1px solid var(--line)',
+              background: filter === key ? 'var(--accent)' : 'transparent',
+              color: filter === key ? 'var(--surface)' : 'var(--text)',
               cursor: 'pointer',
               fontSize: '0.75rem',
               fontWeight: filter === key ? 600 : 400,
@@ -196,7 +196,7 @@ export function ActivityFeed({ org }) {
                 display: 'flex',
                 gap: '0.75rem',
                 padding: '0.625rem 1rem',
-                borderBottom: '1px solid var(--line, #d0d7de)',
+                borderBottom: '1px solid var(--line)',
                 fontSize: '0.8125rem',
               }}
             >

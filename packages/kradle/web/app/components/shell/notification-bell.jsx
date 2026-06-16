@@ -174,7 +174,7 @@ export function NotificationBell({ org }) {
             position: 'absolute',
             top: '0px',
             right: '0px',
-            background: '#ef4444',
+            background: 'var(--danger)',
             color: '#fff',
             borderRadius: '50%',
             width: '16px',
@@ -198,10 +198,10 @@ export function NotificationBell({ org }) {
           top: 'calc(100% + 8px)',
           minWidth: '320px',
           maxWidth: '380px',
-          background: 'var(--surface, #fff)',
-          border: '1px solid var(--line, #d0d7de)',
-          borderRadius: '8px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+          background: 'var(--panel)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-lg)',
           zIndex: 1000,
           overflow: 'hidden',
         }}>
@@ -210,19 +210,19 @@ export function NotificationBell({ org }) {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0.75rem 1rem',
-            borderBottom: '1px solid var(--line, #d0d7de)',
+            borderBottom: '1px solid var(--border)',
           }}>
             <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)' }}>
               Notifications
               {connected && (
-                <span style={{ marginLeft: '0.5rem', display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', verticalAlign: 'middle' }} title="Live" />
+                <span style={{ marginLeft: '0.5rem', display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', verticalAlign: 'middle' }} title="Live" />
               )}
             </span>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllRead}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--accent, #0969da)', padding: 0 }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--accent)', padding: 0 }}
               >
                 Mark all read
               </button>
@@ -244,9 +244,9 @@ export function NotificationBell({ org }) {
                     display: 'flex',
                     gap: '0.75rem',
                     padding: '0.75rem 1rem',
-                    borderBottom: '1px solid var(--line, #d0d7de)',
+                    borderBottom: '1px solid var(--border)',
                     textDecoration: 'none',
-                    background: notif.read ? 'transparent' : 'var(--surface-raised, #f6f8fa)',
+                    background: notif.read ? 'transparent' : 'var(--surface-raised)',
                     transition: 'background 0.1s',
                   }}
                 >
@@ -269,7 +269,7 @@ export function NotificationBell({ org }) {
                     </div>
                   </div>
                   {!notif.read && (
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0969da', flexShrink: 0, marginTop: '6px' }} />
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', flexShrink: 0, marginTop: '6px' }} />
                   )}
                 </a>
               ))
@@ -277,7 +277,7 @@ export function NotificationBell({ org }) {
           </div>
 
           {notifications.length > 10 && (
-            <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--line, #d0d7de)', textAlign: 'center' }}>
+            <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Showing 10 of {notifications.length} notifications
               </span>

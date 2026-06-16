@@ -99,7 +99,7 @@ export function WorkspacePanel({
           <span
             style={{
               background: pColor,
-              color: '#fff',
+              color: 'var(--surface)',
               borderRadius: '9999px',
               padding: '0.125rem 0.5rem',
               fontSize: '0.6875rem',

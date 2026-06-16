@@ -134,7 +134,7 @@ export function InferenceServiceManager({ org, initialServiceName }) {
       <UnifiedModelCatalogSection org={org} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0' }} role="tablist" aria-label="Inference resource tabs">
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }} role="tablist" aria-label="Inference resource tabs">
           {tabButtons.map(({ key, label }) => (
             <button key={key} style={tabStyle(activeTab === key)} onClick={() => setActiveTab(key)} role="tab" aria-selected={activeTab === key} aria-label={`${label} tab`}>{label}</button>
           ))}
@@ -143,13 +143,13 @@ export function InferenceServiceManager({ org, initialServiceName }) {
       </div>
 
       {error && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.875rem', color: '#dc2626', marginBottom: '1rem' }}>
+        <div style={{ background: 'color-mix(in srgb, var(--danger) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)', borderRadius: 'var(--radius-md)', padding: '0.75rem', fontSize: '0.875rem', color: 'var(--danger)', marginBottom: '1rem' }}>
           {error}
         </div>
       )}
 
       {loading && (
-        <div style={{ fontSize: '0.875rem', color: '#9ca3af', padding: '2rem', textAlign: 'center' }}>Loading...</div>
+        <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', padding: '2rem', textAlign: 'center' }}>Loading...</div>
       )}
 
       {!loading && activeTab === 'services' && (

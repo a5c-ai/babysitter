@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const inputStyle = { width: '100%', padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '0.875rem', background: 'var(--bg-input, transparent)', color: 'var(--text)' };
-const btnPrimary = { border: 'none', padding: '0.375rem 0.875rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, background: 'var(--color-accent, #3b82f6)', color: '#fff' };
+const btnPrimary = { border: 'none', padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, background: 'var(--accent)', color: '#fff' };
 const btnSecondary = { border: '1px solid var(--border)', background: 'transparent', padding: '0.375rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text)' };
 const cardStyle = { padding: '1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', background: 'var(--bg-card, var(--bg-subtle))' };
 
@@ -155,7 +155,7 @@ export function DatasetUpload({ org, datasetRef, onUploaded }) {
         </button>
       </div>
 
-      {message && <p style={{ margin: 0, fontSize: '0.75rem', color: message.startsWith('Uploaded') || message.startsWith('Parsed') ? 'var(--color-good, #22c55e)' : 'var(--color-danger, #cb2431)' }}>{message}</p>}
+      {message && <p style={{ margin: 0, fontSize: '0.75rem', color: message.startsWith('Uploaded') || message.startsWith('Parsed') ? 'var(--success)' : 'var(--danger)' }}>{message}</p>}
     </div>
   );
 }

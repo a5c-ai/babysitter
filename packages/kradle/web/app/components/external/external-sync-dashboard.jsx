@@ -23,8 +23,8 @@ const pillStyle = (t) => ({
   borderRadius: '9999px',
   fontSize: '0.75rem',
   fontWeight: 600,
-  background: t === 'good' ? '#dcfce7' : t === 'warn' ? '#fef9c3' : t === 'danger' ? '#fee2e2' : '#f3f4f6',
-  color: t === 'good' ? '#166534' : t === 'warn' ? '#713f12' : t === 'danger' ? '#991b1b' : '#374151',
+  background: 'var(--card)',
+  color: t === 'good' ? 'var(--success)' : t === 'warn' ? 'var(--warning)' : t === 'danger' ? 'var(--danger)' : 'var(--text-secondary)',
 });
 
 function BindingRow({ binding, org, onSync }) {
@@ -59,10 +59,10 @@ function BindingRow({ binding, org, onSync }) {
         {lastSync && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>Last sync: {lastSync}</div>}
       </div>
       <span style={pillStyle(t)} aria-label={`Sync status for ${name}: ${syncStatus}`}>{syncStatus}</span>
-      <span style={{ fontSize: '0.8125rem', color: pendingWrites > 0 ? '#d97706' : '#9ca3af' }}>
+      <span style={{ fontSize: '0.8125rem', color: pendingWrites > 0 ? 'var(--warning)' : 'var(--text-muted)' }}>
         {pendingWrites} pending write{pendingWrites !== 1 ? 's' : ''}
       </span>
-      <span style={{ fontSize: '0.8125rem', color: conflicts > 0 ? '#dc2626' : '#9ca3af' }}>
+      <span style={{ fontSize: '0.8125rem', color: conflicts > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
         {conflicts} conflict{conflicts !== 1 ? 's' : ''}
       </span>
       <button
@@ -133,27 +133,27 @@ export function ExternalSyncDashboard({ org, bindings = [] }) {
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Bindings</div>
         </div>
         <div style={statCardStyle}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#166534' }}>{readyCount}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>{readyCount}</div>
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Ready</div>
         </div>
-        <div style={{ ...statCardStyle, borderColor: totalPendingWrites > 0 ? '#fde68a' : '#e5e7eb' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: totalPendingWrites > 0 ? '#d97706' : '#9ca3af' }}>{totalPendingWrites}</div>
+        <div style={{ ...statCardStyle, borderColor: totalPendingWrites > 0 ? 'var(--warning)' : 'var(--border)' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: totalPendingWrites > 0 ? 'var(--warning)' : 'var(--text-muted)' }}>{totalPendingWrites}</div>
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Pending writes</div>
         </div>
-        <div style={{ ...statCardStyle, borderColor: totalConflicts > 0 ? '#fca5a5' : '#e5e7eb' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: totalConflicts > 0 ? '#dc2626' : '#9ca3af' }}>{totalConflicts}</div>
+        <div style={{ ...statCardStyle, borderColor: totalConflicts > 0 ? 'var(--danger)' : 'var(--border)' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: totalConflicts > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>{totalConflicts}</div>
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Conflicts</div>
         </div>
       </div>
 
       {error && (
-        <div role="alert" style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
+        <div role="alert" style={{ background: 'var(--card)', border: '1px solid var(--danger)', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
           {error}
         </div>
       )}
 
       {successMsg && (
-        <div role="status" aria-live="polite" style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.375rem', padding: '0.75rem', color: '#166534', fontSize: '0.875rem' }}>
+        <div role="status" aria-live="polite" style={{ background: 'var(--card)', border: '1px solid var(--success)', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--success)', fontSize: '0.875rem' }}>
           {successMsg}
         </div>
       )}

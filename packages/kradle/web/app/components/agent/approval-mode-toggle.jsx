@@ -119,7 +119,7 @@ export function ApprovalModeToggle({ initialMode = 'prompt', onChange }) {
                 border: 'none',
                 borderRight: m.id !== 'deny' ? '1px solid var(--border)' : 'none',
                 backgroundColor: active ? m.color : 'transparent',
-                color: active ? '#fff' : 'var(--text-muted)',
+                color: active ? 'var(--surface)' : 'var(--text-muted)',
                 cursor: 'pointer',
                 fontSize: 12,
                 fontWeight: active ? 700 : 400,

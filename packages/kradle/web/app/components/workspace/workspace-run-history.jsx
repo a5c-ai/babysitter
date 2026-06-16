@@ -5,15 +5,15 @@ import { useState } from 'react';
 function RunPhaseBadge({ phase }) {
   const display = phase || 'Unknown';
   const colorMap = {
-    Running: { bg: '#dbeafe', fg: '#1e40af' },
-    Queued: { bg: '#fef3c7', fg: '#92400e' },
-    Pending: { bg: '#fef3c7', fg: '#92400e' },
-    Dispatched: { bg: '#e0e7ff', fg: '#3730a3' },
-    Succeeded: { bg: '#d1fae5', fg: '#065f46' },
-    Failed: { bg: '#fee2e2', fg: '#991b1b' },
-    Cancelled: { bg: '#e5e7eb', fg: '#374151' },
+    Running: { bg: 'var(--surface-raised)', fg: 'var(--accent)' },
+    Queued: { bg: 'var(--surface-raised)', fg: 'var(--warning)' },
+    Pending: { bg: 'var(--surface-raised)', fg: 'var(--warning)' },
+    Dispatched: { bg: 'var(--surface-overlay)', fg: 'var(--accent)' },
+    Succeeded: { bg: 'var(--surface-raised)', fg: 'var(--success)' },
+    Failed: { bg: 'var(--surface-raised)', fg: 'var(--danger)' },
+    Cancelled: { bg: 'var(--border)', fg: 'var(--text)' },
   };
-  const colors = colorMap[display] || { bg: '#f3f4f6', fg: '#6b7280' };
+  const colors = colorMap[display] || { bg: 'var(--surface-raised)', fg: 'var(--text-secondary)' };
 
   return (
     <span
@@ -50,9 +50,9 @@ export function RunHistorySection({ active = [], history = [], org }) {
     fontSize: '0.75rem',
     fontWeight: 600,
     border: 'none',
-    borderBottom: selected ? '2px solid #2563eb' : '2px solid transparent',
+    borderBottom: selected ? '2px solid var(--accent)' : '2px solid transparent',
     background: 'none',
-    color: selected ? '#2563eb' : '#6b7280',
+    color: selected ? 'var(--accent)' : 'var(--text-secondary)',
     cursor: 'pointer',
   });
 

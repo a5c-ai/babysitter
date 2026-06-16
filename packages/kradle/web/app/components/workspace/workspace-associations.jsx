@@ -23,15 +23,15 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
   };
 
   const kindColors = {
-    User: { bg: '#dbeafe', fg: '#1e40af' },
-    AgentDispatchRun: { bg: '#fce7f3', fg: '#9d174d' },
-    AgentSession: { bg: '#e0e7ff', fg: '#3730a3' },
+    User: { bg: 'var(--surface-raised)', fg: 'var(--accent)' },
+    AgentDispatchRun: { bg: 'var(--surface-raised)', fg: 'var(--danger)' },
+    AgentSession: { bg: 'var(--surface-overlay)', fg: 'var(--accent)' },
   };
 
   return (
     <div
       style={{
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--border)',
         borderRadius: '0.5rem',
         padding: '0.75rem',
       }}
@@ -40,7 +40,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
         style={{
           fontSize: '0.75rem',
           fontWeight: 700,
-          color: '#374151',
+          color: 'var(--text)',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
           marginBottom: '0.5rem',
@@ -52,7 +52,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
       {associations.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '0.5rem' }}>
           {associations.map((a, i) => {
-            const colors = kindColors[a.kind] || { bg: '#f3f4f6', fg: '#6b7280' };
+            const colors = kindColors[a.kind] || { bg: 'var(--surface-raised)', fg: 'var(--text-secondary)' };
             return (
               <div
                 key={`${a.kind}-${a.name}-${i}`}
@@ -61,7 +61,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '0.25rem 0.5rem',
-                  background: '#f9fafb',
+                  background: 'var(--surface-raised)',
                   borderRadius: '0.25rem',
                   fontSize: '0.75rem',
                 }}
@@ -79,11 +79,11 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
                   >
                     {a.kind}
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono, monospace)', color: '#111827' }}>{a.name}</span>
+                  <span style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--text)' }}>{a.name}</span>
                 </div>
                 <button
                   onClick={() => onRemove?.(a)}
-                  style={{ ...btnBase, background: '#fee2e2', color: '#991b1b' }}
+                  style={{ ...btnBase, background: 'var(--surface-raised)', color: 'var(--danger)' }}
                   aria-label={`Remove association ${a.kind} ${a.name}`}
                 >
                   Remove
@@ -93,7 +93,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
           })}
         </div>
       ) : (
-        <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.5rem' }}>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
           No associations
         </div>
       )}
@@ -108,8 +108,8 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
             padding: '0.25rem 0.375rem',
             fontSize: '0.75rem',
             borderRadius: '0.25rem',
-            border: '1px solid #d1d5db',
-            background: '#fff',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
           }}
         >
           {kinds.map((k) => (
@@ -127,7 +127,7 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
             padding: '0.25rem 0.375rem',
             fontSize: '0.75rem',
             borderRadius: '0.25rem',
-            border: '1px solid #d1d5db',
+            border: '1px solid var(--border)',
             flex: 1,
             minWidth: '8rem',
           }}
@@ -137,8 +137,8 @@ export function AssociationsSection({ associations = [], onAdd, onRemove }) {
           disabled={!newName.trim()}
           style={{
             ...btnBase,
-            background: newName.trim() ? '#2563eb' : '#d1d5db',
-            color: '#fff',
+            background: newName.trim() ? 'var(--accent)' : 'var(--border)',
+            color: 'var(--surface)',
           }}
           aria-label="Add association"
         >

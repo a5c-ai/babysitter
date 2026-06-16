@@ -2,14 +2,14 @@
 import { useState } from 'react';
 
 const NODE_KIND_COLORS = [
-  { label: 'Blue', value: '#3b82f6', bg: '#dbeafe', text: '#1d4ed8' },
-  { label: 'Green', value: '#22c55e', bg: '#dcfce7', text: '#15803d' },
-  { label: 'Purple', value: '#a855f7', bg: '#f3e8ff', text: '#7e22ce' },
-  { label: 'Orange', value: '#f97316', bg: '#ffedd5', text: '#c2410c' },
-  { label: 'Rose', value: '#f43f5e', bg: '#ffe4e6', text: '#be123c' },
-  { label: 'Teal', value: '#14b8a6', bg: '#ccfbf1', text: '#0f766e' },
-  { label: 'Amber', value: '#f59e0b', bg: '#fef3c7', text: '#b45309' },
-  { label: 'Slate', value: '#64748b', bg: '#f1f5f9', text: '#334155' },
+  { label: 'Blue', value: 'var(--accent)', bg: 'var(--surface-raised)', text: 'var(--accent)' },
+  { label: 'Green', value: 'var(--success)', bg: 'var(--surface-raised)', text: 'var(--success)' },
+  { label: 'Purple', value: 'var(--accent)', bg: 'var(--surface-raised)', text: 'var(--accent)' },
+  { label: 'Orange', value: 'var(--warning)', bg: 'var(--surface-raised)', text: 'var(--warning)' },
+  { label: 'Rose', value: 'var(--danger)', bg: 'var(--surface-raised)', text: 'var(--danger)' },
+  { label: 'Teal', value: 'var(--info)', bg: 'var(--surface-raised)', text: 'var(--success)' },
+  { label: 'Amber', value: 'var(--warning)', bg: 'var(--surface-raised)', text: 'var(--warning)' },
+  { label: 'Slate', value: 'var(--text-secondary)', bg: 'var(--surface-raised)', text: 'var(--text)' },
 ];
 
 function ColorPicker({ value, onChange }) {
@@ -27,7 +27,7 @@ function ColorPicker({ value, onChange }) {
             height: 24,
             borderRadius: '50%',
             backgroundColor: c.value,
-            border: value === c.value ? '3px solid #111' : '2px solid transparent',
+            border: value === c.value ? '3px solid var(--text)' : '2px solid transparent',
             cursor: 'pointer',
             padding: 0,
           }}
@@ -67,7 +67,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
   const [ontologyPath, setOntologyPath] = useState(existing?.spec?.ontologyPath || '.kradle/ontology.yaml');
   const [nodeKinds, setNodeKinds] = useState(
     (existing?.spec?.nodeKinds || []).map((k) =>
-      typeof k === 'string' ? { name: k, description: '', color: '#3b82f6' } : k
+      typeof k === 'string' ? { name: k, description: '', color: 'var(--accent)' } : k
     )
   );
   const [edgeKinds, setEdgeKinds] = useState(
@@ -79,7 +79,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
   // New node kind form state
   const [newNodeName, setNewNodeName] = useState('');
   const [newNodeDesc, setNewNodeDesc] = useState('');
-  const [newNodeColor, setNewNodeColor] = useState('#3b82f6');
+  const [newNodeColor, setNewNodeColor] = useState('var(--accent)');
   const [showNodeForm, setShowNodeForm] = useState(false);
 
   // New edge kind form state
@@ -99,7 +99,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
     setNodeKinds([...nodeKinds, { name, description: newNodeDesc.trim(), color: newNodeColor }]);
     setNewNodeName('');
     setNewNodeDesc('');
-    setNewNodeColor('#3b82f6');
+    setNewNodeColor('var(--accent)');
     setShowNodeForm(false);
   }
 
@@ -169,7 +169,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
   const btnPrimary = {
     padding: '0.375rem 0.875rem',
     background: 'var(--accent)',
-    color: '#fff',
+    color: 'var(--surface)',
     border: 'none',
     borderRadius: '0.375rem',
     fontSize: '0.8125rem',
@@ -190,7 +190,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
     padding: '0.25rem 0.5rem',
     background: 'transparent',
     color: 'var(--danger)',
-    border: '1px solid #fca5a5',
+    border: '1px solid var(--danger)',
     borderRadius: '0.375rem',
     fontSize: '0.75rem',
     cursor: 'pointer',
@@ -221,7 +221,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
       <div className="card">
         <div className="cardTitle">
           <h3>Node kinds</h3>
-          <span style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '0.75rem', fontWeight: 600, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{nodeKinds.length}</span>
+          <span style={{ background: 'var(--surface-raised)', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{nodeKinds.length}</span>
         </div>
         {nodeKinds.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }} role="list" aria-label="Node kinds">
@@ -262,7 +262,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
       <div className="card">
         <div className="cardTitle">
           <h3>Edge kinds</h3>
-          <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '0.75rem', fontWeight: 600, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{edgeKinds.length}</span>
+          <span style={{ background: 'var(--surface-raised)', color: 'var(--success)', fontSize: '0.75rem', fontWeight: 600, padding: '0.125rem 0.5rem', borderRadius: '9999px' }}>{edgeKinds.length}</span>
         </div>
         {edgeKinds.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }} role="list" aria-label="Edge kinds">
@@ -314,7 +314,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
           {saveStatus === 'saving' ? 'Saving...' : 'Save ontology'}
         </button>
         {saveStatus === 'saved' && (
-          <span style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: 500 }}>Saved successfully</span>
+          <span style={{ color: 'var(--success)', fontSize: '0.875rem', fontWeight: 500 }}>Saved successfully</span>
         )}
         {saveStatus === 'error' && (
           <span style={{ color: 'var(--danger)', fontSize: '0.875rem' }}>{saveError}</span>

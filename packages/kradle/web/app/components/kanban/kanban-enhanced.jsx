@@ -226,7 +226,7 @@ export function EnhancedKanbanBoard({
     setPendingWorkspaceItem(item);
   }, []);
 
-  const getColumnColor = (colId) => WORKFLOW_COLUMNS.find((c) => c.id === colId)?.color || '#6b7280';
+  const getColumnColor = (colId) => WORKFLOW_COLUMNS.find((c) => c.id === colId)?.color || 'var(--text-muted)';
 
   return (
     <div>
@@ -251,9 +251,9 @@ export function EnhancedKanbanBoard({
 
       {/* Board error */}
       {boardError && (
-        <div role="alert" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--danger, #dc2626)' }}>
+        <div role="alert" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-raised)', border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--danger)' }}>
           <span>{boardError}</span>
-          <button onClick={() => setBoardError(null)} aria-label="Dismiss error" style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1rem', color: 'var(--danger, #dc2626)', padding: '0 0.25rem' }}>&times;</button>
+          <button onClick={() => setBoardError(null)} aria-label="Dismiss error" style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '1rem', color: 'var(--danger)', padding: '0 0.25rem' }}>&times;</button>
         </div>
       )}
 

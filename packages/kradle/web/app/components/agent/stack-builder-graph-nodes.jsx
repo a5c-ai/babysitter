@@ -77,13 +77,13 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
         <span>
           <strong>{layer.label}</strong>
           {layer.position != null && (
-            <span style={{ color: '#64748b', fontSize: '0.75rem', marginLeft: 6 }}>Layer {layer.position}</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginLeft: 6 }}>Layer {layer.position}</span>
           )}
           {selectionCount > 0 && (
-            <span style={{ ...badgeStyle, background: '#dbeafe', color: '#1e40af' }}>{selectionCount} selected</span>
+            <span style={{ ...badgeStyle, background: 'var(--surface-raised)', color: 'var(--accent)' }}>{selectionCount} selected</span>
           )}
         </span>
-        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           {layer.atlasKinds.join(', ')} {open ? '▲' : '▼'}
         </span>
       </div>
@@ -99,7 +99,7 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
             aria-label={`Search ${layer.label} records`}
           />
 
-          {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading...</span>}
+          {loading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Loading...</span>}
 
           {results.length > 0 && (
             <div style={resultGridStyle}>
@@ -120,7 +120,7 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
                       <span style={badgeStyle}>{hit.nodeKind}</span>
                     </div>
                     {hit.snippet && (
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.3, marginTop: 2 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3, marginTop: 2 }}>
                         {hit.snippet.slice(0, 120)}
                       </div>
                     )}
@@ -131,13 +131,13 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
           )}
 
           {!loading && results.length === 0 && initialLoaded && (
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No records found for this layer.</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No records found for this layer.</span>
           )}
 
           {/* Selected items summary */}
           {selectionCount > 0 && (
             <div style={{ marginTop: '0.25rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>Selected:</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Selected:</span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.25rem' }}>
                 {selected.map((s) => (
                   <span
@@ -150,7 +150,7 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                       fontSize: '0.75rem', padding: '2px 8px', borderRadius: '9999px',
-                      background: '#dbeafe', color: '#1e40af', cursor: 'pointer',
+                      background: 'var(--surface-raised)', color: 'var(--accent)', cursor: 'pointer',
                     }}
                   >
                     {s.displayName || s.id} &times;
@@ -187,13 +187,13 @@ export function ToolsLayerSection({ layer, atlasProxyUrl, selected, onToggle }) 
         <span>
           <strong>{layer.label}</strong>
           {layer.position != null && (
-            <span style={{ color: '#64748b', fontSize: '0.75rem', marginLeft: 6 }}>Layer {layer.position}</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginLeft: 6 }}>Layer {layer.position}</span>
           )}
           {selectionCount > 0 && (
-            <span style={{ ...badgeStyle, background: '#dbeafe', color: '#1e40af' }}>{selectionCount} selected</span>
+            <span style={{ ...badgeStyle, background: 'var(--surface-raised)', color: 'var(--accent)' }}>{selectionCount} selected</span>
           )}
         </span>
-        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           {layer.atlasKinds.join(', ')} {open ? '▲' : '▼'}
         </span>
       </div>
@@ -282,10 +282,10 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
         <span>
           {label}
           {selectionCount > 0 && (
-            <span style={{ ...badgeStyle, background: '#dbeafe', color: '#1e40af', fontSize: '0.625rem' }}>{selectionCount}</span>
+            <span style={{ ...badgeStyle, background: 'var(--surface-raised)', color: 'var(--accent)', fontSize: '0.625rem' }}>{selectionCount}</span>
           )}
         </span>
-        <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>
+        <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
           {kinds.join(', ')} {subOpen ? '▲' : '▼'}
         </span>
       </div>
@@ -301,7 +301,7 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
             aria-label={`Search ${label.toLowerCase()}`}
           />
 
-          {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading...</span>}
+          {loading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Loading...</span>}
 
           {results.length > 0 && (
             <div style={resultGridStyle}>
@@ -322,7 +322,7 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
                       <span style={badgeStyle}>{hit.nodeKind}</span>
                     </div>
                     {hit.snippet && (
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.3, marginTop: 2 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3, marginTop: 2 }}>
                         {hit.snippet.slice(0, 120)}
                       </div>
                     )}
@@ -333,12 +333,12 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
           )}
 
           {!loading && results.length === 0 && initialLoaded && (
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No records found.</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No records found.</span>
           )}
 
           {selectionCount > 0 && (
             <div style={{ marginTop: '0.25rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>Selected:</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Selected:</span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.25rem' }}>
                 {selected.map((s) => (
                   <span
@@ -351,7 +351,7 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                       fontSize: '0.75rem', padding: '2px 8px', borderRadius: '9999px',
-                      background: '#dbeafe', color: '#1e40af', cursor: 'pointer',
+                      background: 'var(--surface-raised)', color: 'var(--accent)', cursor: 'pointer',
                     }}
                   >
                     {s.displayName || s.id} &times;

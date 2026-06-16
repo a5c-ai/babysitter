@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const btnSecondary = { border: '1px solid var(--border)', background: 'transparent', padding: '0.375rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text)' };
 const inputStyle = { padding: '0.375rem 0.5rem', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '0.8125rem', background: 'var(--bg-input, transparent)', color: 'var(--text)' };
-const pillStyle = (tone) => ({ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.6875rem', fontWeight: 600, background: tone === 'good' ? 'rgba(34,197,94,0.12)' : 'rgba(107,114,128,0.12)', color: tone === 'good' ? '#16a34a' : '#6b7280' });
+const pillStyle = (tone) => ({ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.6875rem', fontWeight: 600, background: tone === 'good' ? 'color-mix(in srgb, var(--success) 12%, transparent)' : 'color-mix(in srgb, var(--text-muted) 12%, transparent)', color: tone === 'good' ? 'var(--success)' : 'var(--text-muted)' });
 
 export function DatasetViewer({ org, dataset = null, versions = [], records = [] }) {
   const [selectedVersion, setSelectedVersion] = useState(null);

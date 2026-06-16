@@ -180,9 +180,9 @@ export function CommandPalette({ org, isOpen, onClose }) {
           justifyContent: 'space-between',
           width: '100%',
           padding: '10px 16px',
-          background: isSelected ? 'var(--bg-hover, #f3f4f6)' : 'none',
+          background: isSelected ? 'var(--surface-raised)' : 'none',
           border: 'none',
-          borderLeft: isSelected ? '2px solid var(--accent, #3b82f6)' : '2px solid transparent',
+          borderLeft: isSelected ? '2px solid var(--accent)' : '2px solid transparent',
           cursor: 'pointer',
           textAlign: 'left',
           fontSize: '0.875rem',
@@ -191,7 +191,7 @@ export function CommandPalette({ org, isOpen, onClose }) {
       >
         <span style={{ fontWeight: 500 }}>{cmd.label}</span>
         {cmd.hint && (
-          <span style={{ color: 'var(--ink-muted, #9ca3af)', fontSize: '0.8rem' }}>{cmd.hint}</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{cmd.hint}</span>
         )}
       </button>
     );
@@ -203,7 +203,7 @@ export function CommandPalette({ org, isOpen, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.5)',
+        background: 'var(--shadow)',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'flex-start',
@@ -214,9 +214,10 @@ export function CommandPalette({ org, isOpen, onClose }) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: 'var(--surface, #fff)',
-          borderRadius: 8,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          background: 'var(--panel-strong)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--accent)',
+          boxShadow: 'var(--shadow-lg)',
           width: 'min(600px, 90vw)',
           maxHeight: '60vh',
           overflow: 'hidden',
@@ -224,8 +225,8 @@ export function CommandPalette({ org, isOpen, onClose }) {
           flexDirection: 'column',
         }}
       >
-        <div style={{ borderBottom: '1px solid var(--border, #e5e7eb)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: 'var(--ink-muted, #9ca3af)', fontSize: '1rem' }}>⌘</span>
+        <div style={{ borderBottom: '1px solid var(--border)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>⌘</span>
           <input
             ref={inputRef}
             value={query}
@@ -242,20 +243,20 @@ export function CommandPalette({ org, isOpen, onClose }) {
             }}
             aria-label="Command palette search"
           />
-          <kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 3, padding: '2px 6px', fontSize: '0.75rem', color: 'var(--ink-muted, #6b7280)' }}>Esc</kbd>
+          <kbd style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 3, padding: '2px 6px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Esc</kbd>
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {showRecent && (
             <>
-              <div style={{ padding: '8px 16px 4px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--ink-muted, #9ca3af)' }}>
+              <div style={{ padding: '8px 16px 4px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>
                 Recent
               </div>
               {recentCommands.map((cmd, idx) => renderCommandItem(cmd, idx))}
-              <div style={{ borderTop: '1px solid var(--border, #e5e7eb)', margin: '4px 0' }} />
+              <div style={{ borderTop: '1px solid var(--border)', margin: '4px 0' }} />
             </>
           )}
           {!showRecent && grouped.length === 0 && (
-            <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--ink-muted, #9ca3af)', fontSize: '0.875rem' }}>
+            <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               No commands match &ldquo;{query}&rdquo;
             </div>
           )}
@@ -263,7 +264,7 @@ export function CommandPalette({ org, isOpen, onClose }) {
             const groupStart = flatList.indexOf(g.commands[0]);
             return (
               <div key={g.group}>
-                <div style={{ padding: '8px 16px 4px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--ink-muted, #9ca3af)' }}>
+                <div style={{ padding: '8px 16px 4px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>
                   {g.group}
                 </div>
                 {g.commands.map((cmd, idx) => renderCommandItem(cmd, groupStart + idx))}
@@ -272,14 +273,14 @@ export function CommandPalette({ org, isOpen, onClose }) {
           })}
         </div>
         {actionError && (
-          <div style={{ padding: '8px 16px', fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', borderTop: '1px solid rgba(239, 68, 68, 0.3)' }}>
+          <div style={{ padding: '8px 16px', fontSize: '0.8rem', color: 'var(--danger)', background: 'var(--card)', borderTop: '1px solid var(--danger)' }}>
             {actionError}
           </div>
         )}
-        <div style={{ borderTop: '1px solid var(--border, #e5e7eb)', padding: '8px 16px', display: 'flex', gap: 16, fontSize: '0.75rem', color: 'var(--ink-muted, #9ca3af)' }}>
-          <span><kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 2, padding: '1px 4px' }}>↑↓</kbd> navigate</span>
-          <span><kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 2, padding: '1px 4px' }}>↵</kbd> select</span>
-          <span><kbd style={{ background: 'var(--bg, #f3f4f6)', border: '1px solid var(--border, #d1d5db)', borderRadius: 2, padding: '1px 4px' }}>Esc</kbd> close</span>
+        <div style={{ borderTop: '1px solid var(--border)', padding: '8px 16px', display: 'flex', gap: 16, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <span><kbd style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 2, padding: '1px 4px' }}>↑↓</kbd> navigate</span>
+          <span><kbd style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 2, padding: '1px 4px' }}>↵</kbd> select</span>
+          <span><kbd style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 2, padding: '1px 4px' }}>Esc</kbd> close</span>
         </div>
       </div>
     </div>

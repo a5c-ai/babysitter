@@ -36,10 +36,12 @@ export function KanbanFilters({
         style={{
           padding: '0.375rem 0.625rem',
           fontSize: '0.8125rem',
-          border: '1px solid #d1d5db',
-          borderRadius: '0.375rem',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
           outline: 'none',
           minWidth: '10rem',
+          background: 'var(--surface)',
+          color: 'var(--text)',
         }}
       />
       {allAssignees.length > 0 ? (
@@ -50,9 +52,10 @@ export function KanbanFilters({
           style={{
             padding: '0.375rem 0.625rem',
             fontSize: '0.8125rem',
-            border: '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            background: '#fff',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
           }}
         >
           <option value="">All assignees</option>
@@ -67,9 +70,10 @@ export function KanbanFilters({
           style={{
             padding: '0.375rem 0.625rem',
             fontSize: '0.8125rem',
-            border: '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            background: '#fff',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
           }}
         >
           <option value="">All labels</option>
@@ -83,9 +87,10 @@ export function KanbanFilters({
         style={{
           padding: '0.375rem 0.625rem',
           fontSize: '0.8125rem',
-          border: '1px solid #d1d5db',
-          borderRadius: '0.375rem',
-          background: '#fff',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
+          background: 'var(--surface)',
+          color: 'var(--text)',
         }}
       >
         <option value="none">No grouping</option>
@@ -99,10 +104,10 @@ export function KanbanFilters({
           style={{
             padding: '0.375rem 0.75rem',
             fontSize: '0.75rem',
-            background: '#fee2e2',
-            color: '#991b1b',
-            border: 'none',
-            borderRadius: '0.375rem',
+            background: 'var(--surface-raised)',
+            color: 'var(--danger)',
+            border: '1px solid var(--danger)',
+            borderRadius: 'var(--radius-sm)',
             cursor: 'pointer',
           }}
         >
@@ -110,7 +115,7 @@ export function KanbanFilters({
         </button>
       ) : null}
       {hasActiveFilter ? (
-        <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           Showing {filteredCount} of {totalCount} cards
         </span>
       ) : null}

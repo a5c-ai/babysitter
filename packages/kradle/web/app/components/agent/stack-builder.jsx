@@ -6,9 +6,9 @@ const BASE_AGENTS = ['claude-code', 'codex', 'gemini', 'opencode', 'babysitter',
 const APPROVAL_MODES = ['prompt', 'deny', 'yolo', 'policy-derived'];
 
 const labelStyle = { display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' };
-const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem', boxSizing: 'border-box' };
+const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', fontSize: '0.875rem', boxSizing: 'border-box' };
 const textareaStyle = { ...inputStyle, resize: 'vertical', fontFamily: 'inherit' };
-const selectStyle = { ...inputStyle, background: '#fff' };
+const selectStyle = { ...inputStyle, background: 'var(--surface)' };
 const fieldGroupStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 const rowStyle = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' };
 
@@ -94,12 +94,12 @@ export function StackBuilder({ org, existingStack = null }) {
   }
 
   const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
-  const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
+  const primaryStyle = { ...buttonStyle, backgroundColor: 'var(--accent)', color: 'var(--surface)' };
   const disabledPrimaryStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)' }}>
+      <div className="card" style={{ borderLeft: '3px solid var(--color-info)' }}>
         <div className="cardTitle">
           <h3>{isEditing ? 'Edit stack' : 'New stack'}</h3>
           <span className="pill neutral">{isEditing ? 'editing' : 'create'}</span>
@@ -116,7 +116,7 @@ export function StackBuilder({ org, existingStack = null }) {
                 disabled={isEditing}
                 placeholder="my-agent-stack"
                 required
-                style={{ ...inputStyle, ...(isEditing ? { background: '#f9fafb', color: '#9ca3af' } : {}) }}
+                style={{ ...inputStyle, ...(isEditing ? { background: 'var(--surface-raised)', color: 'var(--text-muted)' } : {}) }}
               />
             </div>
             <div>
@@ -220,7 +220,7 @@ export function StackBuilder({ org, existingStack = null }) {
           {/* Refs */}
           <div style={rowStyle}>
             <div>
-              <label style={labelStyle}>MCP Server Refs <small style={{ fontWeight: 400, color: '#6b7280' }}>(comma-separated)</small></label>
+              <label style={labelStyle}>MCP Server Refs <small style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>(comma-separated)</small></label>
               <input
                 type="text"
                 value={mcpServerRefs}
@@ -230,7 +230,7 @@ export function StackBuilder({ org, existingStack = null }) {
               />
             </div>
             <div>
-              <label style={labelStyle}>Skill Refs <small style={{ fontWeight: 400, color: '#6b7280' }}>(comma-separated)</small></label>
+              <label style={labelStyle}>Skill Refs <small style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>(comma-separated)</small></label>
               <input
                 type="text"
                 value={skillRefs}
@@ -241,7 +241,7 @@ export function StackBuilder({ org, existingStack = null }) {
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Subagent Refs <small style={{ fontWeight: 400, color: '#6b7280' }}>(comma-separated)</small></label>
+            <label style={labelStyle}>Subagent Refs <small style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>(comma-separated)</small></label>
             <input
               type="text"
               value={subagentRefs}
@@ -262,10 +262,10 @@ export function StackBuilder({ org, existingStack = null }) {
               {status === 'saving' ? 'Saving...' : isEditing ? 'Update Stack' : 'Create Stack'}
             </button>
             {status === 'success' && (
-              <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>{message}</span>
+              <span style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600 }}>{message}</span>
             )}
             {status === 'error' && (
-              <span style={{ fontSize: 13, color: '#dc2626' }}>{message}</span>
+              <span style={{ fontSize: 13, color: 'var(--danger)' }}>{message}</span>
             )}
           </div>
         </div>

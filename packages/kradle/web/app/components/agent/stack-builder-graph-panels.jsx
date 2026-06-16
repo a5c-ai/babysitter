@@ -37,22 +37,22 @@ export function MemoryRepositorySection({ org, selectedRepos, onToggleRepo }) {
         <span>
           <strong>Memory</strong>
           {selectionCount > 0 && (
-            <span style={{ ...badgeStyle, background: '#ede9fe', color: '#5b21b6' }}>{selectionCount} selected</span>
+            <span style={{ ...badgeStyle, background: 'var(--surface-overlay)', color: 'var(--accent)' }}>{selectionCount} selected</span>
           )}
         </span>
-        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           AgentMemoryRepository {open ? '▲' : '▼'}
         </span>
       </div>
 
       {open && (
         <div style={sectionBodyStyle}>
-          {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading memory repositories...</span>}
+          {loading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Loading memory repositories...</span>}
 
           {!loading && repos.length === 0 && loaded && (
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
               No memory repositories available.{' '}
-              <a href={`/orgs/${org}/agents/memory`} style={{ color: '#7c3aed', textDecoration: 'underline' }}>
+              <a href={`/orgs/${org}/agents/memory`} style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
                 Create one
               </a>
             </div>
@@ -77,13 +77,13 @@ export function MemoryRepositorySection({ org, selectedRepos, onToggleRepo }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       <strong>{repoName}</strong>
                       {repoUrl && (
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{repoUrl}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{repoUrl}</span>
                       )}
                     </div>
                     <div
                       style={{
                         width: 36, height: 20, borderRadius: 10,
-                        background: isSelected ? '#7c3aed' : '#d1d5db',
+                        background: isSelected ? 'var(--accent)' : 'var(--border)',
                         position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0,
                       }}
                       aria-hidden="true"
@@ -153,17 +153,17 @@ export function ModelInferenceSection({ org, selectedInference, onSelectInferenc
         <span>
           <strong>Model Inference</strong>
           {selectedInference && (
-            <span style={{ ...badgeStyle, background: '#d1fae5', color: '#065f46', marginLeft: 8 }}>{selectedInference.name}</span>
+            <span style={{ ...badgeStyle, background: 'var(--surface-raised)', color: 'var(--success)', marginLeft: 8 }}>{selectedInference.name}</span>
           )}
         </span>
-        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           KServe inference services {open ? '▲' : '▼'}
         </span>
       </div>
 
       {open && (
         <div style={sectionBodyStyle}>
-          {loading && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading inference services...</span>}
+          {loading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Loading inference services...</span>}
 
           {!loading && services.length === 0 && (
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
@@ -206,7 +206,7 @@ export function ModelInferenceSection({ org, selectedInference, onSelectInferenc
                   </div>
                   <div>
                     <strong>Status:</strong>{' '}
-                    <span style={{ color: selectedInference.status === 'Ready' ? '#16a34a' : '#d97706' }}>
+                    <span style={{ color: selectedInference.status === 'Ready' ? 'var(--success)' : 'var(--warning)' }}>
                       {selectedInference.status}
                     </span>
                   </div>

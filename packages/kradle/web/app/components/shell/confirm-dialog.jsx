@@ -56,31 +56,32 @@ export function ConfirmDialog({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'var(--overlay-bg, rgba(0, 0, 0, 0.45))',
+    background: 'var(--shadow)',
   };
 
   const panelStyle = {
-    background: 'var(--surface, #fff)',
-    color: 'var(--text, #1f2937)',
-    borderRadius: '8px',
+    background: 'var(--panel-strong)',
+    color: 'var(--text)',
+    borderRadius: 'var(--radius-lg)',
     padding: '1.5rem',
     minWidth: '320px',
     maxWidth: '440px',
-    boxShadow: '0 8px 30px var(--shadow, rgba(0,0,0,0.18))',
-    border: '1px solid var(--border, #e5e7eb)',
+    boxShadow: 'var(--shadow-lg)',
+    border: '1px solid var(--accent)',
   };
 
   const titleStyle = {
     margin: 0,
     fontSize: '1rem',
     fontWeight: 700,
-    color: 'var(--text, #1f2937)',
+    fontFamily: 'var(--font-display)',
+    color: 'var(--text)',
   };
 
   const messageStyle = {
     margin: '0.75rem 0 1.25rem',
     fontSize: '0.875rem',
-    color: 'var(--text-muted, #6b7280)',
+    color: 'var(--text-muted)',
     lineHeight: 1.5,
   };
 
@@ -95,15 +96,15 @@ export function ConfirmDialog({
 
   const confirmBtnStyle = {
     ...btnBase,
-    background: danger ? 'var(--color-danger, #dc2626)' : 'var(--accent, #2563eb)',
+    background: danger ? 'var(--danger)' : 'var(--accent)',
     color: '#fff',
   };
 
   const cancelBtnStyle = {
     ...btnBase,
     background: 'transparent',
-    border: '1px solid var(--border, #d1d5db)',
-    color: 'var(--text, #374151)',
+    border: '1px solid var(--border)',
+    color: 'var(--text)',
   };
 
   return (

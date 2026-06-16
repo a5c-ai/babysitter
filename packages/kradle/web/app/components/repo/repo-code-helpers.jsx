@@ -44,24 +44,27 @@ export function languageExtension(language) {
 export const repoCodeTheme = EditorView.theme({
   '&': {
     minHeight: '100%',
-    backgroundColor: '#1e1e2e',
-    color: '#cdd6f4',
+    backgroundColor: 'var(--bg, #16170f)',
+    color: 'var(--text, #e8e2d0)',
   },
   '.cm-scroller': {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    fontFamily: 'var(--font-mono)',
     fontSize: '0.8125rem',
     lineHeight: '1.65',
   },
   '.cm-gutters': {
-    backgroundColor: '#181825',
-    color: '#6c7086',
-    borderRight: '1px solid rgba(205, 214, 244, 0.12)',
+    backgroundColor: 'var(--bg-subtle, #1c1d12)',
+    color: 'var(--text-muted, #8a8470)',
+    borderRight: '1px solid var(--border)',
   },
   '.cm-activeLine, .cm-activeLineGutter': {
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(224, 168, 60, 0.06)',
   },
   '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
-    backgroundColor: 'rgba(137, 180, 250, 0.36)',
+    backgroundColor: 'rgba(224, 168, 60, 0.25)',
+  },
+  '.cm-cursor, .cm-dropCursor': {
+    borderLeftColor: 'var(--accent)',
   },
 });
 
@@ -73,7 +76,7 @@ export function BreadcrumbNav({ repo, pathSegments, onNavigate }) {
       aria-label="Directory path"
       style={{
         padding: '0.375rem 0.5rem',
-        borderBottom: '1px solid #e5e7eb',
+        borderBottom: '1px solid var(--border)',
         fontSize: '0.6875rem',
         display: 'flex',
         flexWrap: 'wrap',
@@ -90,7 +93,7 @@ export function BreadcrumbNav({ repo, pathSegments, onNavigate }) {
           border: 'none',
           cursor: 'pointer',
           fontSize: '0.6875rem',
-          color: pathSegments.length === 0 ? '#374151' : '#2563eb',
+          color: pathSegments.length === 0 ? 'var(--text)' : 'var(--accent)',
           padding: 0,
           fontWeight: pathSegments.length === 0 ? 700 : 400,
         }}
@@ -108,7 +111,7 @@ export function BreadcrumbNav({ repo, pathSegments, onNavigate }) {
               border: 'none',
               cursor: 'pointer',
               fontSize: '0.6875rem',
-              color: idx === pathSegments.length - 1 ? '#374151' : '#2563eb',
+              color: idx === pathSegments.length - 1 ? 'var(--text)' : 'var(--accent)',
               padding: 0,
               fontWeight: idx === pathSegments.length - 1 ? 700 : 400,
             }}
@@ -143,13 +146,13 @@ export function FileTreeItem({ item, isSelected, onClick }) {
         fontSize: '0.75rem',
         border: 'none',
         cursor: 'pointer',
-        background: isSelected ? '#dbeafe' : 'transparent',
-        color: isSelected ? '#1d4ed8' : '#374151',
+        background: isSelected ? 'var(--surface-raised)' : 'transparent',
+        color: isSelected ? 'var(--accent)' : 'var(--text)',
         fontWeight: isDir ? 600 : 400,
         transition: 'background 0.1s',
       }}
       onMouseEnter={(e) => {
-        if (!isSelected) e.currentTarget.style.background = '#f3f4f6';
+        if (!isSelected) e.currentTarget.style.background = 'var(--bg-subtle)';
       }}
       onMouseLeave={(e) => {
         if (!isSelected) e.currentTarget.style.background = 'transparent';

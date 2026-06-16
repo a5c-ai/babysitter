@@ -4,8 +4,8 @@ import { useState } from 'react';
 
 function CodespaceStatusBadge({ status }) {
   const display = status || 'Stopped';
-  const bg = display === 'Running' ? '#d1fae5' : display === 'Starting' ? '#fef3c7' : display === 'Stopping' ? '#fef3c7' : '#f3f4f6';
-  const fg = display === 'Running' ? '#065f46' : display === 'Starting' ? '#92400e' : display === 'Stopping' ? '#92400e' : '#6b7280';
+  const bg = display === 'Running' ? 'var(--surface-raised)' : display === 'Starting' ? 'var(--surface-raised)' : display === 'Stopping' ? 'var(--surface-raised)' : 'var(--surface-raised)';
+  const fg = display === 'Running' ? 'var(--success)' : display === 'Starting' ? 'var(--warning)' : display === 'Stopping' ? 'var(--warning)' : 'var(--text-secondary)';
 
   return (
     <span
@@ -60,7 +60,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
   return (
     <div
       style={{
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--border)',
         borderRadius: '0.5rem',
         padding: '0.75rem',
       }}
@@ -69,7 +69,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
         style={{
           fontSize: '0.75rem',
           fontWeight: 700,
-          color: '#374151',
+          color: 'var(--text)',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
           marginBottom: '0.5rem',
@@ -92,8 +92,8 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
               padding: '0.375rem 0.5rem',
               fontSize: '0.75rem',
               borderRadius: '0.375rem',
-              border: '1px solid #d1d5db',
-              background: '#fff',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
             }}
           >
             {images.map((img) => (
@@ -102,7 +102,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
           </select>
           <button
             onClick={() => onLaunch?.({ image: selectedImage })}
-            style={{ ...btnBase, background: '#22c55e', color: '#fff' }}
+            style={{ ...btnBase, background: 'var(--success)', color: 'var(--surface)' }}
             aria-label={`Launch codespace for workspace ${workspaceName || 'unknown'}`}
           >
             Launch Codespace
@@ -119,7 +119,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
               gap: '1rem',
               fontSize: '0.75rem',
               fontFamily: 'var(--font-mono, monospace)',
-              color: '#374151',
+              color: 'var(--text)',
               flexWrap: 'wrap',
             }}
           >
@@ -136,8 +136,8 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
                 aria-label={`Open codespace for workspace ${workspaceName || 'unknown'} in browser`}
                 style={{
                   ...btnBase,
-                  background: '#2563eb',
-                  color: '#fff',
+                  background: 'var(--accent)',
+                  color: 'var(--surface)',
                   textDecoration: 'none',
                   display: 'inline-block',
                 }}
@@ -148,24 +148,24 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
             {!confirmStop ? (
               <button
                 onClick={() => setConfirmStop(true)}
-                style={{ ...btnBase, background: '#ef4444', color: '#fff' }}
+                style={{ ...btnBase, background: 'var(--danger)', color: 'var(--surface)' }}
                 aria-label={`Stop codespace for workspace ${workspaceName || 'unknown'}`}
               >
                 Stop Codespace
               </button>
             ) : (
               <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Confirm?</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Confirm?</span>
                 <button
                   onClick={() => { setConfirmStop(false); onStop?.(); }}
-                  style={{ ...btnBase, background: '#ef4444', color: '#fff' }}
+                  style={{ ...btnBase, background: 'var(--danger)', color: 'var(--surface)' }}
                   aria-label="Confirm stop codespace"
                 >
                   Yes, Stop
                 </button>
                 <button
                   onClick={() => setConfirmStop(false)}
-                  style={{ ...btnBase, background: '#e5e7eb', color: '#374151' }}
+                  style={{ ...btnBase, background: 'var(--border)', color: 'var(--text)' }}
                   aria-label="Cancel stopping codespace"
                 >
                   Cancel
@@ -177,7 +177,7 @@ export function CodespaceSection({ codespace, workspaceName, org, onLaunch, onSt
       ) : null}
 
       {(isStarting || isStopping) ? (
-        <div style={{ fontSize: '0.75rem', color: '#92400e' }}>
+        <div style={{ fontSize: '0.75rem', color: 'var(--warning)' }}>
           {isStarting ? 'Starting codespace...' : 'Stopping codespace...'}
         </div>
       ) : null}

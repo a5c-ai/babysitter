@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const inputStyle = { width: '100%', padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '0.875rem', background: 'var(--bg-input, transparent)', color: 'var(--text)' };
-const btnPrimary = { border: 'none', padding: '0.375rem 0.875rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, background: 'var(--color-accent, #3b82f6)', color: '#fff' };
+const btnPrimary = { border: 'none', padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, background: 'var(--accent)', color: '#fff' };
 const btnSecondary = { border: '1px solid var(--border)', background: 'transparent', padding: '0.375rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text)' };
 const cardStyle = { padding: '1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', background: 'var(--bg-card, var(--bg-subtle))' };
-const pillStyle = (tone) => ({ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.6875rem', fontWeight: 600, background: tone === 'good' ? 'rgba(34,197,94,0.12)' : tone === 'warn' ? 'rgba(234,179,8,0.12)' : tone === 'danger' ? 'rgba(239,68,68,0.12)' : 'rgba(107,114,128,0.12)', color: tone === 'good' ? '#16a34a' : tone === 'warn' ? '#ca8a04' : tone === 'danger' ? '#dc2626' : '#6b7280' });
+const pillStyle = (tone) => ({ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.6875rem', fontWeight: 600, background: tone === 'good' ? 'color-mix(in srgb, var(--success) 12%, transparent)' : tone === 'warn' ? 'color-mix(in srgb, var(--warning) 12%, transparent)' : tone === 'danger' ? 'color-mix(in srgb, var(--danger) 12%, transparent)' : 'color-mix(in srgb, var(--text-muted) 12%, transparent)', color: tone === 'good' ? 'var(--success)' : tone === 'warn' ? 'var(--warning)' : tone === 'danger' ? 'var(--danger)' : 'var(--text-muted)' });
 
 const RULE_TYPE_FIELDS = {
   'content-filter': [
@@ -154,7 +154,7 @@ export function GuardrailRuleEditor({ org, guardrail = null, onSaved }) {
         <button type="submit" disabled={busy} style={btnPrimary}>{busy ? 'Saving...' : 'Save changes'}</button>
       </div>
 
-      {message && <p style={{ margin: 0, fontSize: '0.75rem', color: message === 'Guardrail saved' ? 'var(--color-good, #22c55e)' : 'var(--color-danger, #cb2431)' }}>{message}</p>}
+      {message && <p style={{ margin: 0, fontSize: '0.75rem', color: message === 'Guardrail saved' ? 'var(--success)' : 'var(--danger)' }}>{message}</p>}
     </form>
   );
 }

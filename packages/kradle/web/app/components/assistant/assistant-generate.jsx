@@ -18,7 +18,7 @@ const styles = {
   contextEditor: {
     width: '100%', minHeight: 100, resize: 'vertical', border: '1px solid var(--border)',
     borderRadius: 6, padding: '10px 12px', fontSize: 12, fontFamily: 'var(--mono, monospace)',
-    lineHeight: 1.5, background: 'var(--bg-code, #1e1e2e)', color: 'var(--text-code, #cdd6f4)',
+    lineHeight: 1.5, background: 'var(--surface)', color: 'var(--text)',
   },
   select: {
     padding: '6px 12px', borderRadius: 4, border: '1px solid var(--border)',
@@ -27,7 +27,7 @@ const styles = {
   row: { display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' },
   generateBtn: (disabled) => ({
     padding: '10px 22px', fontSize: 14, fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer',
-    background: disabled ? 'var(--text-faint)' : 'var(--accent, #2563eb)',
+    background: disabled ? 'var(--text-faint)' : 'var(--accent)',
     color: '#fff', border: 'none', borderRadius: 6, opacity: disabled ? 0.6 : 1,
   }),
   resultBox: {
@@ -46,7 +46,7 @@ const styles = {
   iframe: { width: '100%', height: 400, border: 'none', background: '#fff' },
   jsonView: {
     padding: '14px', fontFamily: 'var(--mono, monospace)', fontSize: 12,
-    background: 'var(--bg-code, #1e1e2e)', color: 'var(--text-code, #cdd6f4)',
+    background: 'var(--surface)', color: 'var(--text)',
     overflow: 'auto', maxHeight: 500, whiteSpace: 'pre-wrap', lineHeight: 1.5,
   },
   markdownView: {
@@ -54,8 +54,8 @@ const styles = {
     background: 'var(--bg)', maxHeight: 500, overflow: 'auto',
   },
   error: {
-    background: '#fef2f2', border: '1px solid var(--red, #c03a2b)', borderRadius: 8,
-    padding: '8px 14px', color: 'var(--red, #c03a2b)', fontSize: 13,
+    background: 'var(--card)', border: '1px solid var(--danger)', borderRadius: 8,
+    padding: '8px 14px', color: 'var(--danger)', fontSize: 13,
   },
   usage: { fontSize: 11, color: 'var(--text-muted)', marginTop: 6 },
 };

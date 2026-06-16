@@ -137,13 +137,13 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
   };
 
   const categoryPillStyle = (cat, active) => {
-    const color = cat === 'All' ? '#374151' : (CATEGORY_COLORS[cat] || '#6b7280');
+    const color = cat === 'All' ? 'var(--text-secondary)' : (CATEGORY_COLORS[cat] || 'var(--text-muted)');
     return {
       padding: '0.375rem 0.875rem',
       borderRadius: '9999px',
-      border: `1px solid ${active ? color : '#d1d5db'}`,
-      background: active ? color + '15' : '#fff',
-      color: active ? color : '#6b7280',
+      border: `1px solid ${active ? color : 'var(--border)'}`,
+      background: active ? `color-mix(in srgb, ${color} 12%, transparent)` : 'var(--surface)',
+      color: active ? color : 'var(--text-muted)',
       fontSize: '0.8125rem',
       fontWeight: active ? 700 : 500,
       cursor: 'pointer',
@@ -158,10 +158,10 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
     fontSize: '0.6875rem',
     padding: '2px 8px',
     borderRadius: '9999px',
-    background: '#ea580c20',
-    color: '#ea580c',
+    background: 'color-mix(in srgb, var(--warning) 13%, transparent)',
+    color: 'var(--warning)',
     fontWeight: 600,
-    border: '1px solid #ea580c40',
+    border: '1px solid color-mix(in srgb, var(--warning) 25%, transparent)',
   };
 
   const cpuBadge = {
@@ -171,10 +171,10 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
     fontSize: '0.6875rem',
     padding: '2px 8px',
     borderRadius: '9999px',
-    background: '#16a34a20',
-    color: '#16a34a',
+    background: 'color-mix(in srgb, var(--success) 13%, transparent)',
+    color: 'var(--success)',
     fontWeight: 600,
-    border: '1px solid #16a34a40',
+    border: '1px solid color-mix(in srgb, var(--success) 25%, transparent)',
   };
 
   return (
@@ -192,7 +192,7 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
             type="checkbox"
             checked={hideDeployed}
             onChange={e => setHideDeployed(e.target.checked)}
-            style={{ accentColor: '#2563eb' }}
+            style={{ accentColor: 'var(--accent)' }}
           />
           Hide deployed
         </label>
@@ -225,7 +225,7 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
         {filtered.map(model => {
           const deployed = isDeployed(model);
-          const catColor = CATEGORY_COLORS[model.category] || '#6b7280';
+          const catColor = CATEGORY_COLORS[model.category] || 'var(--text-muted)';
           return (
             <div
               key={model.id}
@@ -233,12 +233,12 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
                 ...cardStyle,
                 padding: '1rem',
                 position: 'relative',
-                borderColor: deployed ? '#16a34a40' : '#e2e8f0',
-                background: deployed ? '#f0fdf4' : '#fff',
+                borderColor: deployed ? 'color-mix(in srgb, var(--success) 25%, transparent)' : 'var(--border)',
+                background: deployed ? 'color-mix(in srgb, var(--success) 8%, var(--surface))' : 'var(--surface)',
                 transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
               }}
-              onMouseEnter={e => { if (!deployed) e.currentTarget.style.borderColor = '#93c5fd'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = deployed ? '#16a34a40' : '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
+              onMouseEnter={e => { if (!deployed) e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = deployed ? 'color-mix(in srgb, var(--success) 25%, transparent)' : 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
             >
               {/* Top row: name + provider */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.375rem' }}>
@@ -265,19 +265,19 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
                     CPU only
                   </span>
                 )}
-                <span style={{ ...badgeStyle('#6b7280'), fontSize: '0.6875rem' }}>{model.minMemory}</span>
+                <span style={{ ...badgeStyle('var(--text-muted)'), fontSize: '0.6875rem' }}>{model.minMemory}</span>
                 <FrameworkBadge format={model.modelFormat} />
               </div>
 
               {/* Action button */}
               {deployed ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#16a34a' }} />
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#16a34a' }}>Deployed</span>
+                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--success)' }}>Deployed</span>
                 </div>
               ) : (
                 <button
-                  style={{ ...btnStyle('#2563eb'), width: '100%', padding: '0.5rem' }}
+                  style={{ ...btnStyle('var(--accent)'), width: '100%', padding: '0.5rem' }}
                   onClick={() => { setDeployTarget(model); setDeployResult(null); }}
                   aria-label={`Deploy model ${model.name}`}
                 >
@@ -306,27 +306,27 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
 
             {deployResult?.success ? (
               <div style={{ marginTop: '0.5rem' }}>
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.375rem', padding: '1rem', marginBottom: '1rem' }}>
-                  <div style={{ fontWeight: 700, color: '#16a34a', marginBottom: '0.375rem' }}>Service created successfully</div>
+                <div style={{ background: 'color-mix(in srgb, var(--success) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--success) 30%, transparent)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--success)', marginBottom: '0.375rem' }}>Service created successfully</div>
                   <div style={{ fontSize: '0.8125rem', color: 'var(--text)' }}>
                     <strong>{deployResult.model.name}</strong> is being deployed. It may take a few minutes to become ready.
                   </div>
                 </div>
                 {deployResult.routeWarning && (
-                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.8125rem', color: '#92400e', marginBottom: '1rem' }}>
+                  <div style={{ background: 'color-mix(in srgb, var(--warning) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--warning) 35%, transparent)', borderRadius: 'var(--radius-md)', padding: '0.75rem', fontSize: '0.8125rem', color: 'var(--warning)', marginBottom: '1rem' }}>
                     Service deployment started, but the model route was not created: {deployResult.routeWarning}
                   </div>
                 )}
                 <a
                   href={`/orgs/${org}/inference?service=${encodeURIComponent(deployResult.model.id)}`}
-                  style={{ ...btnStyle('#2563eb'), display: 'inline-block', textDecoration: 'none' }}
+                  style={{ ...btnStyle('var(--accent)'), display: 'inline-block', textDecoration: 'none' }}
                 >
                   View Service
                 </a>
               </div>
             ) : (
               <>
-                <div style={{ background: '#f8fafc', borderRadius: '0.5rem', padding: '1rem', marginTop: '0.5rem' }}>
+                <div style={{ background: 'var(--surface-raised)', borderRadius: 'var(--radius-lg)', padding: '1rem', marginTop: '0.5rem' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem 1rem', fontSize: '0.8125rem' }}>
                     <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Model</span>
                     <span style={{ color: 'var(--text)' }}>{deployTarget.name}</span>
@@ -335,7 +335,7 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
                     <span style={{ color: 'var(--text)' }}>{deployTarget.provider}</span>
 
                     <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Category</span>
-                    <span style={badgeStyle(CATEGORY_COLORS[deployTarget.category] || '#6b7280')}>{deployTarget.category}</span>
+                    <span style={badgeStyle(CATEGORY_COLORS[deployTarget.category] || 'var(--text-muted)')}>{deployTarget.category}</span>
 
                     <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Format</span>
                     <span><FrameworkBadge format={deployTarget.modelFormat} /></span>
@@ -355,13 +355,13 @@ export function CuratedModelCatalog({ org, services, onDeploy }) {
                 </div>
 
                 {deployResult?.error && (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.375rem', padding: '0.75rem', fontSize: '0.8125rem', color: 'var(--danger)', marginTop: '0.75rem' }}>
+                  <div style={{ background: 'color-mix(in srgb, var(--danger) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)', borderRadius: 'var(--radius-md)', padding: '0.75rem', fontSize: '0.8125rem', color: 'var(--danger)', marginTop: '0.75rem' }}>
                     {deployResult.error}
                   </div>
                 )}
 
                 <button
-                  style={{ ...btnStyle('#2563eb'), width: '100%', padding: '0.625rem', marginTop: '1rem', fontSize: '0.875rem' }}
+                  style={{ ...btnStyle('var(--accent)'), width: '100%', padding: '0.625rem', marginTop: '1rem', fontSize: '0.875rem' }}
                   onClick={() => handleDeploy(deployTarget)}
                   disabled={deploying}
                   aria-label={`Confirm deploy ${deployTarget.name} to cluster`}

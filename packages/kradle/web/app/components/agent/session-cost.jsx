@@ -105,8 +105,8 @@ function TurnCostRow({ turn, index }) {
           alignItems: 'center',
           gap: 8,
           padding: '5px 8px',
-          backgroundColor: '#f8fafc',
-          border: '1px solid #e2e8f0',
+          backgroundColor: 'var(--surface-raised)',
+          border: '1px solid var(--border)',
           borderRadius: 4,
           fontSize: 12,
           listStyle: 'none',
@@ -131,7 +131,7 @@ function TurnCostRow({ turn, index }) {
             fontFamily: 'monospace',
             fontSize: 11,
             fontWeight: 600,
-            color: cost != null ? '#1e293b' : '#9ca3af',
+            color: cost != null ? 'var(--text)' : 'var(--text-muted)',
             flexShrink: 0,
           }}
         >
@@ -145,10 +145,10 @@ function TurnCostRow({ turn, index }) {
       <div
         style={{
           padding: '8px 10px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--border)',
           borderTop: 'none',
           borderRadius: '0 0 4px 4px',
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--surface)',
         }}
       >
         <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
@@ -173,7 +173,7 @@ function TurnCostRow({ turn, index }) {
                 <td style={{ fontFamily: 'monospace', textAlign: 'right' }}>{formatTokens(cacheWrite)}</td>
               </tr>
             )}
-            <tr style={{ borderTop: '1px solid #e2e8f0' }}>
+            <tr style={{ borderTop: '1px solid var(--border)' }}>
               <td style={{ padding: '4px 8px 2px 0', color: 'var(--text)', fontWeight: 600 }}>
                 Estimated cost
               </td>
@@ -182,7 +182,7 @@ function TurnCostRow({ turn, index }) {
                   fontFamily: 'monospace',
                   textAlign: 'right',
                   fontWeight: 600,
-                  color: cost != null ? '#1e293b' : '#9ca3af',
+                  color: cost != null ? 'var(--text)' : 'var(--text-muted)',
                 }}
               >
                 {cost != null ? formatCost(cost) : known === null ? 'unknown model' : '—'}
@@ -237,16 +237,16 @@ export function SessionCost({ turns = [], totalCost, compact = false }) {
           gap: 12,
           fontSize: 12,
           padding: '6px 10px',
-          backgroundColor: '#f8fafc',
-          border: '1px solid #e2e8f0',
+          backgroundColor: 'var(--surface-raised)',
+          border: '1px solid var(--border)',
           borderRadius: 4,
         }}
       >
         <span style={{ color: 'var(--text-muted)' }}>Session cost</span>
-        <strong style={{ fontFamily: 'monospace', color: '#1e293b' }}>{displayTotal}</strong>
+        <strong style={{ fontFamily: 'monospace', color: 'var(--text)' }}>{displayTotal}</strong>
         {totalInputTokens > 0 && (
           <>
-            <span style={{ color: '#d1d5db' }}>|</span>
+            <span style={{ color: 'var(--border)' }}>|</span>
             <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
               {formatTokens(totalInputTokens)} in / {formatTokens(totalOutputTokens)} out
             </span>
@@ -268,23 +268,23 @@ export function SessionCost({ turns = [], totalCost, compact = false }) {
           gap: 8,
           marginBottom: 10,
           padding: '8px 10px',
-          backgroundColor: '#f0fdf4',
-          border: '1px solid #bbf7d0',
+          backgroundColor: 'var(--surface-raised)',
+          border: '1px solid var(--surface-raised)',
           borderRadius: 4,
         }}
       >
-        <span style={{ fontSize: 12, color: '#166534' }}>Total session cost</span>
+        <span style={{ fontSize: 12, color: 'var(--success)' }}>Total session cost</span>
         <strong
           style={{
             fontFamily: 'monospace',
             fontSize: 14,
-            color: '#14532d',
+            color: 'var(--success)',
             flex: 1,
           }}
         >
           {displayTotal}
         </strong>
-        <span style={{ fontSize: 11, color: '#16a34a' }}>
+        <span style={{ fontSize: 11, color: 'var(--success)' }}>
           {formatTokens(totalInputTokens)} in / {formatTokens(totalOutputTokens)} out
         </span>
       </div>

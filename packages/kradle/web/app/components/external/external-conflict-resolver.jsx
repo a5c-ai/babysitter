@@ -22,16 +22,16 @@ function ConflictCard({ conflict, onResolve, resolving }) {
   const detectedAt = spec.detectedAt || conflict.metadata?.creationTimestamp || null;
 
   const cardStyle = {
-    border: '1px solid #fde68a',
-    borderRadius: '0.5rem',
+    border: '1px solid var(--warning)',
+    borderRadius: 'var(--radius-lg)',
     overflow: 'hidden',
     background: 'var(--surface)',
   };
 
   const headerStyle = {
     padding: '0.75rem 1rem',
-    background: '#fffbeb',
-    borderBottom: '1px solid #fde68a',
+    background: 'var(--card)',
+    borderBottom: '1px solid var(--warning)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -46,11 +46,11 @@ function ConflictCard({ conflict, onResolve, resolving }) {
 
   const valueColStyle = (side) => ({
     padding: '0.75rem 1rem',
-    borderRight: side === 'local' ? '1px solid #e5e7eb' : 'none',
+    borderRight: side === 'local' ? '1px solid var(--border)' : 'none',
   });
 
   const valueStyle = {
-    fontFamily: 'monospace',
+    fontFamily: 'var(--font-mono, monospace)',
     fontSize: '0.8125rem',
     background: 'var(--bg-subtle)',
     padding: '0.5rem',
@@ -77,9 +77,9 @@ function ConflictCard({ conflict, onResolve, resolving }) {
     fontWeight: 600,
     cursor: resolving ? 'not-allowed' : 'pointer',
     opacity: resolving ? 0.6 : 1,
-    background: variant === 'external' ? '#dbeafe' : variant === 'local' ? '#dcfce7' : '#fff',
-    borderColor: variant === 'external' ? '#93c5fd' : variant === 'local' ? '#86efac' : '#d1d5db',
-    color: variant === 'external' ? '#1d4ed8' : variant === 'local' ? '#166534' : '#6b7280',
+    background: variant === 'external' ? 'var(--card)' : variant === 'local' ? 'var(--card)' : 'var(--surface)',
+    borderColor: variant === 'external' ? 'var(--accent)' : variant === 'local' ? 'var(--success)' : 'var(--border)',
+    color: variant === 'external' ? 'var(--accent)' : variant === 'local' ? 'var(--success)' : 'var(--text-muted)',
   });
 
   return (
@@ -91,13 +91,13 @@ function ConflictCard({ conflict, onResolve, resolving }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {detectedAt && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Detected {detectedAt}</span>}
-          <span style={{ padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, background: '#fef9c3', color: '#713f12' }}>Conflict</span>
+          <span style={{ padding: '0.125rem 0.5rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, background: 'var(--card)', color: 'var(--warning)' }}>Conflict</span>
         </div>
       </div>
 
       <div style={bodyStyle}>
         <div style={valueColStyle('local')}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Local</div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Local</div>
           <div style={valueStyle}>{localValue === null ? <em style={{ color: 'var(--text-muted)' }}>null</em> : String(localValue)}</div>
         </div>
         <div style={valueColStyle('external')}>
@@ -124,7 +124,7 @@ function ConflictHistory({ resolved }) {
         {resolved.map((entry) => (
           <div key={resolvedConflictKey(entry)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem', color: 'var(--text-muted)', padding: '0.375rem 0.625rem', background: 'var(--bg-subtle)', borderRadius: '0.375rem' }}>
             <span style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.id}</span>
-            <span style={{ padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontSize: '0.75rem', background: '#e0e7ff', color: '#3730a3', fontWeight: 600 }}>{RESOLUTION_LABELS[entry.resolution] || entry.resolution}</span>
+            <span style={{ padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontSize: '0.75rem', background: 'var(--card)', color: 'var(--accent)', fontWeight: 600 }}>{RESOLUTION_LABELS[entry.resolution] || entry.resolution}</span>
             <span style={{ marginLeft: 'auto' }}>{entry.resolvedAt}</span>
           </div>
         ))}
@@ -176,13 +176,13 @@ export function ExternalConflictResolver({ org, conflicts = [] }) {
       </div>
 
       {error && (
-        <div role="alert" style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
+        <div role="alert" style={{ background: 'var(--card)', border: '1px solid var(--danger)', borderRadius: '0.375rem', padding: '0.75rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
           {error}
         </div>
       )}
 
       {localConflicts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem', background: '#f0fdf4', borderRadius: '0.5rem', color: '#166534', fontSize: '0.875rem', border: '1px solid #86efac' }}>
+        <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--card)', borderRadius: 'var(--radius-lg)', color: 'var(--success)', fontSize: '0.875rem', border: '1px solid var(--success)' }}>
           No open conflicts. All fields are in sync.
         </div>
       ) : (
