@@ -69,6 +69,7 @@ export async function createRunDir(options: CreateRunDirOptions) {
     processRevision: options.processRevision,
     layoutVersion,
     createdAt,
+    cwd: options.cwd ?? process.cwd(),
     ...(options.prompt !== undefined ? { prompt: options.prompt } : {}),
     ...(options.inputSchema !== undefined ? { inputSchema: options.inputSchema } : {}),
     ...(options.outputSchema !== undefined ? { outputSchema: options.outputSchema } : {}),

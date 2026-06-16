@@ -26,6 +26,12 @@ export interface RunMetadata extends JsonRecord {
   processCodeHash?: string;
   layoutVersion: string;
   createdAt: string;
+  /**
+   * Working directory the run was created in. Recorded so run-overlap
+   * detection can scope to the current project and never surface runs that
+   * belong to a different project/worktree sharing the global runs dir.
+   */
+  cwd?: string;
   completionProof?: string;
   prompt?: string;
   inputSchema?: Record<string, unknown>;
@@ -52,6 +58,8 @@ export interface CreateRunDirOptions {
   processPath?: string;
   processRevision?: string;
   layoutVersion?: string;
+  /** Working directory the run is created in. Defaults to `process.cwd()`. */
+  cwd?: string;
   inputs?: unknown;
   extraMetadata?: Record<string, unknown>;
   prompt?: string;
