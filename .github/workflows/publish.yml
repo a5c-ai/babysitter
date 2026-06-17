@@ -323,6 +323,7 @@ jobs:
           node scripts/adapters-build.cjs test packages/adapters/gateway 2>&1 | tee artifacts/adapter-logs/adapters-gateway-tests.log
           node scripts/adapters-build.cjs test packages/adapters/cli 2>&1 | tee artifacts/adapter-logs/adapters-cli-tests.log
           node scripts/adapters-build.cjs test packages/adapters/sdk 2>&1 | tee artifacts/adapter-logs/adapters-sdk-tests.log
+          node scripts/adapters-build.cjs test packages/adapters/channels 2>&1 | tee artifacts/adapter-logs/channels-tests.log
           npm run test:unit --workspace=@a5c-ai/triggers-adapter 2>&1 | tee artifacts/adapter-logs/triggers-tests.log
 
       - name: Verify non-realtime adapters release artifacts
@@ -1299,6 +1300,65 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace=@a5c-ai/adapters --access public --tag "$NPM_TAG"
+
+  publish_staging_channels:
+    name: Publish Channels Adapter
+    needs: publish_staging_agent_mux_root
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    steps:
+      - name: Download publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-source
+          path: artifacts/publish-source
+
+      - name: Extract publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          registry-url: https://registry.npmjs.org/
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          npm ci --force
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build channels adapter workspace
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/atlas
+          npm run build --workspace=@a5c-ai/adapters-observability
+          npm run build --workspace=@a5c-ai/comm-adapter
+          npm run build --workspace=@a5c-ai/adapters-codecs
+          npm run build --workspace=@a5c-ai/adapters-gateway
+          npm run build --workspace=@a5c-ai/transport-adapter
+          npm run build --workspace=@a5c-ai/adapters-cli
+          npm run build --workspace=@a5c-ai/adapters
+          npm run build --workspace=@a5c-ai/triggers-adapter
+          npm run build --workspace=@a5c-ai/channels-adapter
+          npm run test --workspace=@a5c-ai/channels-adapter
+
+      - name: Publish channels adapter
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/channels-adapter --access public --tag "$NPM_TAG"
 
   publish_staging_agent_mux_tui:
     name: Publish Agent Adapter TUI
