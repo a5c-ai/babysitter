@@ -1,0 +1,114 @@
+nodeKind: ModelVersion
+id: model:claude-mythos-5@current
+attributes:
+  displayName: "Claude Mythos 5"
+  modelFamilyId: model-family:claude-mythos
+  versionRange: '>=5.0.0 <5.1.0'
+  kind: reasoning
+  contextWindowTokens: 1000000
+  maxOutputTokens: 128000
+  costPerMTokInput: 10.0
+  costPerMTokCachedInput: 1.0
+  costPerMTokCacheWrite5m: 12.5
+  costPerMTokCacheWrite1h: 20.0
+  costPerMTokOutput: 50.0
+  supportsExtendedThinking: false
+  supportsAdaptiveThinking: true
+  supportsThinking: true
+  supportsThinkingBudgetTokens: true
+  supportsRefusals: false
+  pricingNotes: "Batch API pricing is $5/MTok input and $25/MTok output. Anthropic lists Claude Mythos 5 as limited availability through Project Glasswing."
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  capabilityTags:
+    - long-context
+    - long-horizon-agents
+    - adaptive-thinking
+    - code-execution
+    - memory-tool
+    - programmatic-tool-calling
+    - vision
+    - project-glasswing
+  releaseDate: '2026-06-09'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-06-09'
+  accessStatus: limited-availability
+  accessNotes: "Limited availability to approved Project Glasswing customers; contact Anthropic, AWS, or Google Cloud account teams."
+  modelCardUrl: https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md
+  supportsFineTuning: false
+  regions:
+    - global
+  providerModelIds:
+    - claude-mythos-5
+  providerAvailability:
+    - provider: provider:anthropic
+      status: limited-availability
+      announcedAt: '2026-06-09'
+      modelId: claude-mythos-5
+      transport: model-transport:anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+    - provider: provider:aws-bedrock
+      status: limited-availability
+      announcedAt: '2026-06-09'
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+      notes: "Anthropic overview marks the AWS Bedrock ID as limited availability rather than publishing a public Bedrock model ID."
+    - provider: provider:gcp-vertex
+      status: limited-availability
+      announcedAt: '2026-06-09'
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+      notes: "Anthropic overview marks the Vertex AI ID as limited availability rather than publishing a public Vertex model ID."
+  releaseDateNotes: |
+    Anthropic documents Claude Mythos 5 as available in limited availability
+    through Project Glasswing beginning 2026-06-09 and as the successor to
+    Claude Mythos Preview.
+edges:
+  belongs_to_family:
+    - target: model-family:claude-mythos
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:claude-mythos
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+    - provider:gcp-vertex
+  speaks:
+    - model-transport:anthropic-messages
+    - model-transport:vertex-anthropic-messages
+  supports:
+    - target: capability:adaptive-thinking
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+    - target: capability:supports-tool-use
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+    - target: capability:vision-input
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+    - target: capability:supports-prompt-caching
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+    - target: capability:supports-batch-api
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-pricing-issue-991-992

@@ -14,3 +14,4 @@ edges:
     - target: layer:1-model
   has_version:
     - model:claude-mythos-preview@current
+    - model:claude-mythos-5@current

@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:anthropic-fable-mythos-5-launch-issue-991-992
+attributes:
+  displayName: "Anthropic Claude Fable 5 and Claude Mythos 5 launch documentation"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md
+  locator: "Model IDs, release date, Messages API changes, availability, and supported feature list"
+  capturedAt: '2026-06-17T17:10:00Z'
+  observedAt: '2026-06-17T17:10:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-06-17T17:10:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+attributes:
+  displayName: "Anthropic models overview for Claude Fable 5 and Claude Mythos 5"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/models/overview.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/models/overview.md
+  locator: "Current model comparison tables for Fable, Mythos, Opus, Sonnet, and Haiku"
+  capturedAt: '2026-06-17T17:10:00Z'
+  observedAt: '2026-06-17T17:10:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-06-17T17:10:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+attributes:
+  displayName: "Anthropic pricing for Claude Fable 5 and Claude Mythos 5"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/pricing.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/pricing.md
+  locator: "Model pricing, prompt caching, Batch API, and long context pricing sections"
+  capturedAt: '2026-06-17T17:10:00Z'
+  observedAt: '2026-06-17T17:10:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-06-17T17:10:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-mythos-preview-retirement-issue-992
+attributes:
+  displayName: "Anthropic model deprecations for Claude Mythos Preview retirement"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+  locator: "Claude Mythos Preview retirement and Mythos 5 migration guidance"
+  capturedAt: '2026-06-17T17:10:00Z'
+  observedAt: '2026-06-17T17:10:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-06-17T17:10:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web

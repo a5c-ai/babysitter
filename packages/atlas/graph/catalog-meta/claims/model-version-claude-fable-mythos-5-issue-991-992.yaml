@@ -1,0 +1,206 @@
+nodeKind: Claim
+id: claim:model-version-model-claude-fable-5-current-modelid
+attributes:
+  subjectId: model:claude-fable-5@current
+  attribute: providerModelIds
+  value: claude-fable-5
+  subjectKind: ModelVersion
+  statement: model:claude-fable-5@current has Anthropic API model ID claude-fable-5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  about_subject:
+    - model:claude-fable-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-fable-5-current-contextwindowtokens
+attributes:
+  subjectId: model:claude-fable-5@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:claude-fable-5@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+  about_subject:
+    - model:claude-fable-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-fable-5-current-pricing
+attributes:
+  subjectId: model:claude-fable-5@current
+  attribute: pricing
+  value: '$10 input / $50 output per MTok'
+  subjectKind: ModelVersion
+  statement: model:claude-fable-5@current is priced at $10/MTok input and $50/MTok output.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+  about_subject:
+    - model:claude-fable-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-fable-5-current-availability
+attributes:
+  subjectId: model:claude-fable-5@current
+  attribute: providerAvailability
+  value: 'Claude API, Claude Platform on AWS, Amazon Bedrock, Vertex AI, Microsoft Foundry'
+  subjectKind: ModelVersion
+  statement: model:claude-fable-5@current is generally available on Anthropic and documented cloud channels beginning 2026-06-09.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  about_subject:
+    - model:claude-fable-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-5-current-modelid
+attributes:
+  subjectId: model:claude-mythos-5@current
+  attribute: providerModelIds
+  value: claude-mythos-5
+  subjectKind: ModelVersion
+  statement: model:claude-mythos-5@current has Anthropic API model ID claude-mythos-5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  about_subject:
+    - model:claude-mythos-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-5-current-contextwindowtokens
+attributes:
+  subjectId: model:claude-mythos-5@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:claude-mythos-5@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+  about_subject:
+    - model:claude-mythos-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-5-current-pricing
+attributes:
+  subjectId: model:claude-mythos-5@current
+  attribute: pricing
+  value: '$10 input / $50 output per MTok'
+  subjectKind: ModelVersion
+  statement: model:claude-mythos-5@current is priced at $10/MTok input and $50/MTok output.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+  about_subject:
+    - model:claude-mythos-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-5-current-availability
+attributes:
+  subjectId: model:claude-mythos-5@current
+  attribute: providerAvailability
+  value: 'limited availability through Project Glasswing'
+  subjectKind: ModelVersion
+  statement: model:claude-mythos-5@current is limited availability through Project Glasswing beginning 2026-06-09.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+  about_subject:
+    - model:claude-mythos-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-claude-mythos-preview-current-retirement
+attributes:
+  subjectId: model:claude-mythos-preview@current
+  attribute: retirementDate
+  value: '2026-06-30'
+  subjectKind: ModelVersion
+  statement: model:claude-mythos-preview@current is scheduled for retirement on 2026-06-30 with migration to claude-mythos-5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:anthropic-mythos-preview-retirement-issue-992
+  claimedAt: '2026-06-17T17:10:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:anthropic-mythos-preview-retirement-issue-992
+  about_subject:
+    - model:claude-mythos-preview@current

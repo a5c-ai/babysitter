@@ -1,0 +1,125 @@
+nodeKind: ModelVersion
+id: model:claude-fable-5@current
+attributes:
+  displayName: "Claude Fable 5"
+  modelFamilyId: model-family:claude-fable
+  versionRange: '>=5.0.0 <5.1.0'
+  kind: reasoning
+  contextWindowTokens: 1000000
+  maxOutputTokens: 128000
+  costPerMTokInput: 10.0
+  costPerMTokCachedInput: 1.0
+  costPerMTokCacheWrite5m: 12.5
+  costPerMTokCacheWrite1h: 20.0
+  costPerMTokOutput: 50.0
+  supportsExtendedThinking: false
+  supportsAdaptiveThinking: true
+  supportsThinking: true
+  supportsThinkingBudgetTokens: true
+  supportsRefusals: true
+  pricingNotes: "Batch API pricing is $5/MTok input and $25/MTok output; Claude Fable 5 refusals that produce no output are not billed."
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  capabilityTags:
+    - long-context
+    - long-horizon-agents
+    - adaptive-thinking
+    - code-execution
+    - memory-tool
+    - programmatic-tool-calling
+    - vision
+    - refusals
+  releaseDate: '2026-06-09'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-06-09'
+  modelCardUrl: https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md
+  supportsFineTuning: false
+  regions:
+    - global
+  providerModelIds:
+    - claude-fable-5
+    - anthropic.claude-fable-5
+  providerAvailability:
+    - provider: provider:anthropic
+      status: ga
+      announcedAt: '2026-06-09'
+      modelId: claude-fable-5
+      transport: model-transport:anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+    - provider: provider:aws-bedrock
+      status: ga
+      announcedAt: '2026-06-09'
+      modelId: anthropic.claude-fable-5
+      transport: model-transport:anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+    - provider: provider:gcp-vertex
+      status: ga
+      announcedAt: '2026-06-09'
+      modelId: claude-fable-5
+      transport: model-transport:vertex-anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+    - provider: provider:azure-foundry
+      status: ga
+      announcedAt: '2026-06-09'
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+      notes: "Anthropic lists Microsoft Foundry availability for Claude Fable 5 beginning June 9, 2026."
+  releaseDateNotes: |
+    Anthropic documents Claude Fable 5 as generally available on the Claude API,
+    Claude Platform on AWS, Amazon Bedrock, Vertex AI, and Microsoft Foundry
+    beginning 2026-06-09.
+  accessNotes: |
+    Claude Fable 5 includes safety classifiers that can return
+    stop_reason: "refusal" as a successful Messages API response.
+edges:
+  belongs_to_family:
+    - target: model-family:claude-fable
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:claude-fable
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+    - provider:gcp-vertex
+    - provider:azure-foundry
+  speaks:
+    - model-transport:anthropic-messages
+    - model-transport:vertex-anthropic-messages
+  supports:
+    - target: capability:adaptive-thinking
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+    - target: capability:supports-tool-use
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-launch-issue-991-992
+    - target: capability:vision-input
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-models-overview-issue-991-992
+    - target: capability:supports-prompt-caching
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-pricing-issue-991-992
+    - target: capability:supports-batch-api
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-fable-mythos-5-pricing-issue-991-992

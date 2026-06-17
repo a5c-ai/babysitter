@@ -1,0 +1,417 @@
+{
+  "providers": [
+    "anthropic",
+    "openai",
+    "google-gemini",
+    "xai",
+    "meta-llama",
+    "deepseek",
+    "mistral",
+    "alibaba-qwen",
+    "amazon-nova-bedrock",
+    "cohere",
+    "together-ai",
+    "fireworks-ai",
+    "groq"
+  ],
+  "findings": [
+    {
+      "provider": "Anthropic",
+      "latestModels": [
+        "claude-fable-5",
+        "claude-mythos-5",
+        "claude-opus-4-8",
+        "claude-sonnet-4-6",
+        "claude-haiku-4-5",
+        "claude-mythos-preview"
+      ],
+      "graphStatus": "partial",
+      "status": "Open graph gaps for Claude Fable 5 and Claude Mythos 5; existing graph already tracks Opus 4.8, Sonnet 4.6, Haiku 4.5, and Mythos Preview.",
+      "evidenceUrls": [
+        "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md",
+        "https://platform.claude.com/docs/en/about-claude/models/overview.md",
+        "https://platform.claude.com/docs/en/about-claude/pricing.md",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations.md"
+      ],
+      "issues": [
+        991,
+        992
+      ]
+    },
+    {
+      "provider": "OpenAI",
+      "latestModels": [
+        "gpt-5.5",
+        "gpt-5.5-pro",
+        "gpt-5.4",
+        "gpt-5.4-mini",
+        "gpt-5.4-nano",
+        "gpt-5.3-codex",
+        "gpt-oss-120b",
+        "gpt-oss-20b"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover the checked GPT-5.x, Codex, and gpt-oss updates.",
+      "evidenceUrls": [
+        "https://developers.openai.com/api/docs/models",
+        "https://platform.openai.com/docs/models"
+      ],
+      "issues": [
+        356,
+        429,
+        430,
+        533
+      ]
+    },
+    {
+      "provider": "Google Gemini",
+      "latestModels": [
+        "gemini-3.5-flash",
+        "gemini-3.1-pro",
+        "gemini-3.1-flash-live",
+        "gemini-3.1-flash-tts"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover Gemini 3.5 Flash, Gemini 3.1 model cards, live/TTS variants, image records, and Gemini 2.x lifecycle work.",
+      "evidenceUrls": [
+        "https://ai.google.dev/gemini-api/docs/models",
+        "https://ai.google.dev/gemini-api/docs/changelog",
+        "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models"
+      ],
+      "issues": [
+        357,
+        534,
+        884,
+        900
+      ]
+    },
+    {
+      "provider": "xAI",
+      "latestModels": [
+        "grok-4.3",
+        "grok-build-0.1"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover the checked Grok 4.3 and Grok Build 0.1 updates; API remains OpenAI-compatible.",
+      "evidenceUrls": [
+        "https://docs.x.ai/docs/models"
+      ],
+      "issues": [
+        358,
+        906
+      ]
+    },
+    {
+      "provider": "Meta Llama",
+      "latestModels": [
+        "llama-4-maverick",
+        "llama-4-scout"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issue 364 cover the official Llama 4 release audit; no newer official Llama release was confirmed during this check.",
+      "evidenceUrls": [
+        "https://ai.meta.com/blog/llama-4-multimodal-intelligence/",
+        "https://www.llama.com/docs/model-cards-and-prompt-formats/"
+      ],
+      "issues": [
+        364
+      ]
+    },
+    {
+      "provider": "DeepSeek",
+      "latestModels": [
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "deepseek-r1",
+        "deepseek-coder"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover DeepSeek V4 Pro/Flash and provider availability through DeepSeek-compatible and OpenAI-compatible APIs.",
+      "evidenceUrls": [
+        "https://api-docs.deepseek.com/",
+        "https://www.deepseek.com/"
+      ],
+      "issues": [
+        359,
+        431
+      ]
+    },
+    {
+      "provider": "Mistral",
+      "latestModels": [
+        "mistral-large-3",
+        "mistral-medium-3.5",
+        "mistral-small-4",
+        "codestral-25.08",
+        "pixtral"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover Mistral Large/Medium/Small, Codestral, and Pixtral lifecycle updates.",
+      "evidenceUrls": [
+        "https://docs.mistral.ai/getting-started/models/models_overview/",
+        "https://docs.mistral.ai/platform/pricing/"
+      ],
+      "issues": [
+        360,
+        432,
+        903
+      ]
+    },
+    {
+      "provider": "Alibaba Qwen",
+      "latestModels": [
+        "qwen3-coder-next",
+        "qwen3.7-plus",
+        "qwen3.6-flash",
+        "qwen3.5-omni"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover Qwen3-Coder Next, Qwen 3.7/3.6, and Qwen3.5 Omni updates.",
+      "evidenceUrls": [
+        "https://qwenlm.github.io/",
+        "https://www.alibabacloud.com/help/en/model-studio/"
+      ],
+      "issues": [
+        361,
+        433,
+        882
+      ]
+    },
+    {
+      "provider": "Amazon Nova / Bedrock",
+      "latestModels": [
+        "amazon.nova-2-pro",
+        "amazon.nova-2-lite-v1:0",
+        "amazon.nova-2-sonic-v1:0",
+        "amazon.nova-2-omni"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover Nova 2 Pro/Lite/Sonic/Omni and Bedrock model-card availability.",
+      "evidenceUrls": [
+        "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+        "https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html",
+        "https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-sonic.html"
+      ],
+      "issues": [
+        362,
+        535,
+        904
+      ]
+    },
+    {
+      "provider": "Cohere",
+      "latestModels": [
+        "command-a-plus-05-2026",
+        "embed-v4.0",
+        "command-a-reasoning",
+        "command-a-vision"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover Command A+, Embed v4.0, and Command A reasoning/vision variants.",
+      "evidenceUrls": [
+        "https://docs.cohere.com/docs/command-a-plus",
+        "https://docs.cohere.com/docs/embed-v4"
+      ],
+      "issues": [
+        363,
+        905
+      ]
+    },
+    {
+      "provider": "Together AI",
+      "latestModels": [
+        "serverless-model-catalog-2026-05",
+        "deepseek-v4-pro",
+        "deepseek-v4-flash"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing provider catalog records and closed issues cover the Together AI serverless catalog delta.",
+      "evidenceUrls": [
+        "https://docs.together.ai/docs/serverless-models",
+        "https://docs.together.ai/reference/models"
+      ],
+      "issues": [
+        365,
+        435
+      ]
+    },
+    {
+      "provider": "Fireworks AI",
+      "latestModels": [
+        "serverless-model-catalog-2026-05",
+        "deepseek-v4-pro",
+        "deepseek-v4-flash"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing provider catalog records and closed issues cover the Fireworks AI serverless catalog delta.",
+      "evidenceUrls": [
+        "https://docs.fireworks.ai/models",
+        "https://fireworks.ai/models"
+      ],
+      "issues": [
+        365,
+        435
+      ]
+    },
+    {
+      "provider": "Groq",
+      "latestModels": [
+        "openai-compatible-catalog-2026-05"
+      ],
+      "graphStatus": "covered",
+      "status": "Existing provider catalog records and closed issues cover Groq OpenAI-compatible model availability; no new untracked official Groq-only model was confirmed.",
+      "evidenceUrls": [
+        "https://console.groq.com/docs/models"
+      ],
+      "issues": [
+        365,
+        435
+      ]
+    }
+  ],
+  "issuesCreated": [
+    {
+      "number": 991,
+      "title": "Track Claude Fable 5",
+      "url": "https://github.com/a5c-ai/babysitter/issues/991"
+    },
+    {
+      "number": 992,
+      "title": "Track Claude Mythos 5",
+      "url": "https://github.com/a5c-ai/babysitter/issues/992"
+    }
+  ],
+  "issuesExisting": [
+    355,
+    356,
+    357,
+    358,
+    359,
+    360,
+    361,
+    362,
+    363,
+    364,
+    365,
+    429,
+    430,
+    431,
+    432,
+    433,
+    435,
+    532,
+    533,
+    534,
+    535,
+    882,
+    884,
+    900,
+    903,
+    904,
+    905,
+    906
+  ],
+  "changedFiles": [
+    "artifacts/model-provider-tracker/summary.json"
+  ],
+  "summaryTable": [
+    {
+      "provider": "Anthropic",
+      "model": "Claude Fable / Mythos / Opus / Sonnet / Haiku",
+      "latestVersion": "Fable 5, Mythos 5; Opus 4.8/Sonnet 4.6/Haiku 4.5 already tracked",
+      "inGraph": "Partial",
+      "status": "Issues #991 and #992 open for new Claude 5 graph records"
+    },
+    {
+      "provider": "OpenAI",
+      "model": "GPT-5.x / GPT-OSS / Codex",
+      "latestVersion": "GPT-5.5 family and gpt-oss records",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #356, #429, #430, #533"
+    },
+    {
+      "provider": "Google",
+      "model": "Gemini",
+      "latestVersion": "Gemini 3.5 Flash and Gemini 3.1 variants",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #357, #534, #884, #900"
+    },
+    {
+      "provider": "xAI",
+      "model": "Grok",
+      "latestVersion": "Grok 4.3 / Grok Build 0.1",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #358 and #906"
+    },
+    {
+      "provider": "Meta",
+      "model": "Llama",
+      "latestVersion": "Llama 4 Scout/Maverick",
+      "inGraph": "Yes",
+      "status": "Covered by closed issue #364"
+    },
+    {
+      "provider": "DeepSeek",
+      "model": "DeepSeek",
+      "latestVersion": "DeepSeek V4 Pro/Flash",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #359 and #431"
+    },
+    {
+      "provider": "Mistral",
+      "model": "Mistral / Codestral / Pixtral",
+      "latestVersion": "Mistral Large 3, Medium 3.5, Small 4, Codestral 25.08",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #360, #432, #903"
+    },
+    {
+      "provider": "Alibaba",
+      "model": "Qwen",
+      "latestVersion": "Qwen3-Coder Next, Qwen3.7/3.6, Qwen3.5 Omni",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #361, #433, #882"
+    },
+    {
+      "provider": "Amazon",
+      "model": "Nova / Bedrock",
+      "latestVersion": "Nova 2 Pro/Lite/Sonic/Omni",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #362, #535, #904"
+    },
+    {
+      "provider": "Cohere",
+      "model": "Command / Embed",
+      "latestVersion": "Command A+, Command A reasoning/vision, Embed v4",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #363 and #905"
+    },
+    {
+      "provider": "Together AI",
+      "model": "Serverless inference catalog",
+      "latestVersion": "2026-05 catalog snapshot",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #365 and #435"
+    },
+    {
+      "provider": "Fireworks AI",
+      "model": "Serverless inference catalog",
+      "latestVersion": "2026-05 catalog snapshot",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #365 and #435"
+    },
+    {
+      "provider": "Groq",
+      "model": "OpenAI-compatible inference catalog",
+      "latestVersion": "2026-05 catalog snapshot",
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #365 and #435"
+    }
+  ],
+  "summary": "Checked every requested major provider. The current Atlas graph already covers the major GPT, Gemini, Grok, Llama, DeepSeek, Mistral, Qwen, Nova, Cohere, Together, Fireworks, and Groq updates found in provider docs and existing evidence. New Anthropic Claude 5 gaps were identified for claude-fable-5 and claude-mythos-5; issues #991 and #992 are open with exact model IDs, API family, release date, links, context, capabilities, pricing, cross-provider availability, graph changes, and transport-adapter notes. No graph YAML was changed in this run.",
+  "verificationNotes": [
+    "Atlas build passed after dependency repairs and packages/atlas/tsconfig.json node type scoping.",
+    "gh issue list --label model-version-update --state open shows #991 and #992 as the only open model-version-update issues.",
+    "No duplicate issues were created for already-covered provider updates.",
+    "Only the summary artifact was added by the research step; graph YAML updates should proceed through #991 and #992."
+  ]
+}

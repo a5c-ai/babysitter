@@ -1,0 +1,22 @@
+extendsNode:
+  nodeKind: Provider
+  id: provider:aws-bedrock
+edges:
+  serves:
+    - model:claude-fable-5@current
+    - model:claude-mythos-5@current
+---
+extendsNode:
+  nodeKind: Provider
+  id: provider:gcp-vertex
+edges:
+  serves:
+    - model:claude-fable-5@current
+    - model:claude-mythos-5@current
+---
+extendsNode:
+  nodeKind: Provider
+  id: provider:azure-foundry
+edges:
+  serves:
+    - model:claude-fable-5@current

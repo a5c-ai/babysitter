@@ -77,6 +77,8 @@ edges:
       idiom).
   serves:
   - model:claude-mythos-preview@current
+  - model:claude-mythos-5@current
+  - model:claude-fable-5@current
   - model:claude-opus-4-7@current
   - model:claude-opus-4-6@current
   - model:claude-opus-4-5@current

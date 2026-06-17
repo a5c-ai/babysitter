@@ -1,0 +1,16 @@
+nodeKind: ModelFamily
+id: model-family:claude-fable
+attributes:
+  displayName: "Claude Fable"
+  providerId: anthropic
+  family: claude-fable
+  generation: 5
+  modalities:
+    - text
+    - image
+  status: ga
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-fable-5@current
