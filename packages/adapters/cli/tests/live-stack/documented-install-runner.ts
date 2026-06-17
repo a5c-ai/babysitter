@@ -158,7 +158,9 @@ export async function resolveExpectedPublishedVersion(
 }
 
 interface InstalledPluginEntry {
+  /** claude uses `id` ("babysitter@a5c.ai"); codex uses `pluginId` ("babysitter@babysitter"). */
   readonly id?: string;
+  readonly pluginId?: string;
   readonly name?: string;
   readonly version?: string;
   readonly enabled?: boolean;
@@ -167,16 +169,28 @@ interface InstalledPluginEntry {
 
 /**
  * Find the babysitter plugin entry in `claude/codex plugin list --json` output.
- * Tolerant of either `id` ("babysitter@a5c.ai") or `name` ("babysitter") keys.
+ *
+ * Tolerant of the three list shapes in the wild:
+ *   - claude: a top-level array, or `{ plugins: [...] }`, entries keyed by `id`.
+ *   - codex 0.140.0: `{ installed: [...], available: [...] }`, entries keyed by
+ *     `pluginId` (e.g. "babysitter@babysitter"). Only `installed` counts as a
+ *     successful documented install.
  */
 export function findInstalledBabysitterPlugin(listJson: string): InstalledPluginEntry | undefined {
-  const parsed = JSON.parse(listJson) as InstalledPluginEntry[] | { plugins?: InstalledPluginEntry[] };
-  const entries = Array.isArray(parsed) ? parsed : parsed.plugins ?? [];
-  return entries.find((entry) =>
-    entry.id === DOCUMENTED_PLUGIN_ID ||
-    entry.id?.startsWith('babysitter@') === true ||
-    entry.name === 'babysitter',
-  );
+  const parsed = JSON.parse(listJson) as
+    | InstalledPluginEntry[]
+    | { plugins?: InstalledPluginEntry[]; installed?: InstalledPluginEntry[]; available?: InstalledPluginEntry[] };
+  const entries = Array.isArray(parsed)
+    ? parsed
+    : parsed.installed ?? parsed.plugins ?? [];
+  return entries.find((entry) => {
+    const id = entry.id ?? entry.pluginId;
+    return (
+      id === DOCUMENTED_PLUGIN_ID ||
+      id?.startsWith('babysitter@') === true ||
+      entry.name === 'babysitter'
+    );
+  });
 }
 
 export interface VersionAssertionResult {

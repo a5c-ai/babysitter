@@ -122,6 +122,24 @@ describe('documented published install — version assertion', () => {
     expect(findInstalledBabysitterPlugin(byName)?.version).toBe('5.1.1-staging.4839ab47c625');
   });
 
+  it('finds the babysitter plugin in codex `{ installed: [...] }` list shape (pluginId key)', () => {
+    // codex 0.140.0 `plugin list --json` returns installed/available arrays with
+    // `pluginId` (e.g. "babysitter@babysitter"), not a top-level array of `id`s.
+    const codexList = JSON.stringify({
+      installed: [
+        {
+          pluginId: 'babysitter@babysitter',
+          name: 'babysitter',
+          version: '5.1.1-staging.4839ab47c625',
+          installed: true,
+          enabled: true,
+        },
+      ],
+      available: [],
+    });
+    expect(findInstalledBabysitterPlugin(codexList)?.version).toBe('5.1.1-staging.4839ab47c625');
+  });
+
   it('passes when the installed version matches the channel published version', () => {
     const result = assertInstalledVersion(listJson('5.1.1-staging.4839ab47c625'), '5.1.1-staging.4839ab47c625');
     expect(result.ok).toBe(true);
