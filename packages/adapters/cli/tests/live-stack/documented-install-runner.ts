@@ -100,8 +100,13 @@ export function buildDocumentedInstallCommands(
   const base = { env, cwd: options.cwd, timeoutMs };
 
   if (harness === 'claude-code') {
+    // The channel ref is the `@<ref>` suffix on the GitHub source (claude has no
+    // `--ref` flag); without it `marketplace add` clones the repo's DEFAULT branch
+    // (stale for prerelease channels). With `@<channel>` it clones that branch, so
+    // the install resolves the channel-current plugin. Verified: `…babysitter-claude@staging`
+    // → install → 5.1.1-staging.* (vs the no-ref default branch's stale 5.0.0).
     return [
-      { command: 'claude', args: ['plugin', 'marketplace', 'add', spec.marketplaceRepo], ...base },
+      { command: 'claude', args: ['plugin', 'marketplace', 'add', `${spec.marketplaceRepo}@${channel}`], ...base },
       { command: 'claude', args: ['plugin', 'install', '--scope', 'user', DOCUMENTED_PLUGIN_ID], ...base },
       { command: 'claude', args: ['plugin', 'list', '--json'], ...base },
     ];

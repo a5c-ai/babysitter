@@ -44,7 +44,7 @@ describe('documented published install — command building (no execution)', () 
     expect(commands).toHaveLength(3);
     expect(commands[0]).toMatchObject({
       command: 'claude',
-      args: ['plugin', 'marketplace', 'add', 'a5c-ai/babysitter-claude'],
+      args: ['plugin', 'marketplace', 'add', 'a5c-ai/babysitter-claude@staging'],
     });
     expect(commands[1]).toMatchObject({
       command: 'claude',
