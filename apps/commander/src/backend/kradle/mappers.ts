@@ -252,8 +252,44 @@ function buildStackResource(item: KradleResourceItem): KradleAgentStack {
   const model = asString(sp.model) ?? adapterModels[0] ?? '';
 
   const promptRaw = asRecord(sp.prompt) ?? asRecord(sp.promptTemplates);
-  const promptSystem = asString(promptRaw?.system) ?? '';
-  const promptDeveloper = asString(promptRaw?.developer);
+  // Tolerate the flat `systemPrompt`/`developerPrompt` the live builder writes
+  // (`stack-builder.jsx:34-35`) alongside the nested `prompt.{system,developer}`.
+  const promptSystem = asString(promptRaw?.system) ?? asString(sp.systemPrompt) ?? '';
+  const promptDeveloper = asString(promptRaw?.developer) ?? asString(sp.developerPrompt);
+
+  const stringArray = (value: unknown): string[] | undefined => {
+    const arr = asArray(value);
+    return arr !== undefined
+      ? arr.filter((x): x is string => typeof x === 'string')
+      : undefined;
+  };
+
+  const runtimeIdentityRaw = asRecord(sp.runtimeIdentity);
+  const serviceAccountRef = asString(runtimeIdentityRaw?.serviceAccountRef);
+
+  const externalToolsRaw = asRecord(sp.externalTools);
+  const externalMcp = stringArray(externalToolsRaw?.mcpServerRefs) ?? stringArray(sp.mcpServerRefs);
+  const externalCli = stringArray(externalToolsRaw?.cliToolRefs);
+  const externalTools =
+    externalMcp !== undefined || externalCli !== undefined
+      ? {
+          ...(externalMcp !== undefined ? { mcpServerRefs: externalMcp } : {}),
+          ...(externalCli !== undefined ? { cliToolRefs: externalCli } : {}),
+        }
+      : undefined;
+
+  const permissionRaw = asRecord(sp.permissionRefs);
+  const roleBindings = stringArray(permissionRaw?.roleBindings);
+  const secretGrants = stringArray(permissionRaw?.secretGrants);
+  const configGrants = stringArray(permissionRaw?.configGrants);
+  const permissionRefs =
+    roleBindings !== undefined || secretGrants !== undefined || configGrants !== undefined
+      ? {
+          ...(roleBindings !== undefined ? { roleBindings } : {}),
+          ...(secretGrants !== undefined ? { secretGrants } : {}),
+          ...(configGrants !== undefined ? { configGrants } : {}),
+        }
+      : undefined;
 
   const stack: KradleAgentStack = {
     apiVersion: asString(item.apiVersion) ?? 'kradle.a5c.ai/v1alpha1',
@@ -266,6 +302,9 @@ function buildStackResource(item: KradleResourceItem): KradleAgentStack {
       labels: labels(item),
     },
     spec: {
+      ...(asString(sp.organizationRef) !== undefined
+        ? { organizationRef: asString(sp.organizationRef) }
+        : {}),
       baseAgent,
       adapter,
       ...(asString(sp.provider) !== undefined ? { provider: asString(sp.provider) } : {}),
@@ -274,16 +313,30 @@ function buildStackResource(item: KradleResourceItem): KradleAgentStack {
         ? { system: promptSystem, developer: promptDeveloper }
         : { system: promptSystem },
       approvalMode: asString(sp.approvalMode) ?? 'prompt',
+      ...(serviceAccountRef !== undefined
+        ? { runtimeIdentity: { serviceAccountRef } }
+        : {}),
       ...(asString(sp.toolProfileRef) !== undefined
         ? { toolProfileRef: asString(sp.toolProfileRef) }
         : {}),
-      ...(asArray(sp.skillRefs) !== undefined
-        ? { skillRefs: (asArray(sp.skillRefs) as unknown[]).filter((x): x is string => typeof x === 'string') }
+      ...(externalTools !== undefined ? { externalTools } : {}),
+      ...(stringArray(sp.skillRefs) !== undefined
+        ? { skillRefs: stringArray(sp.skillRefs) }
         : {}),
-      ...(asArray(sp.subagentRefs) !== undefined
-        ? { subagentRefs: (asArray(sp.subagentRefs) as unknown[]).filter((x): x is string => typeof x === 'string') }
+      ...(stringArray(sp.subagentRefs) !== undefined
+        ? { subagentRefs: stringArray(sp.subagentRefs) }
+        : {}),
+      ...(stringArray(sp.contextLabelRefs) !== undefined
+        ? { contextLabelRefs: stringArray(sp.contextLabelRefs) }
+        : {}),
+      ...(asString(sp.workspacePolicyRef) !== undefined
+        ? { workspacePolicyRef: asString(sp.workspacePolicyRef) }
         : {}),
       ...(asString(sp.runnerPool) !== undefined ? { runnerPool: asString(sp.runnerPool) } : {}),
+      ...(permissionRefs !== undefined ? { permissionRefs } : {}),
+      ...(stringArray(sp.memoryRepositoryRefs) !== undefined
+        ? { memoryRepositoryRefs: stringArray(sp.memoryRepositoryRefs) }
+        : {}),
     },
     status: { phase: statusPhase(item) ?? 'Ready' },
   };

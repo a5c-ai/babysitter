@@ -248,6 +248,16 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
             />
           </label>
           <label className="wr-foundry-field">
+            <span className="wr-foundry-label">provider</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.provider}
+              placeholder="anthropic"
+              onChange={(e) => setDraft({ ...draft, provider: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
             <span className="wr-foundry-label">approval mode</span>
             <select
               className="wr-foundry-input"
@@ -260,6 +270,138 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
                 </option>
               ))}
             </select>
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">service account</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.serviceAccountRef}
+              placeholder="runtimeIdentity.serviceAccountRef"
+              onChange={(e) => setDraft({ ...draft, serviceAccountRef: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">tool profile</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.toolProfileRef}
+              placeholder="toolProfileRef"
+              onChange={(e) => setDraft({ ...draft, toolProfileRef: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">runner pool</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.runnerPool}
+              placeholder="runnerPool"
+              onChange={(e) => setDraft({ ...draft, runnerPool: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">workspace policy</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.workspacePolicyRef}
+              placeholder="workspacePolicyRef"
+              onChange={(e) => setDraft({ ...draft, workspacePolicyRef: e.target.value })}
+            />
+          </label>
+        </div>
+        <div className="wr-stack-editor-grid">
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">mcp servers (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.mcpServerRefs}
+              placeholder="kradle-mcp, atlas-mcp"
+              onChange={(e) => setDraft({ ...draft, mcpServerRefs: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">cli tools (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.cliToolRefs}
+              placeholder="gh, kubectl"
+              onChange={(e) => setDraft({ ...draft, cliToolRefs: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">skills (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.skillRefs}
+              placeholder="skill-x, skill-y"
+              onChange={(e) => setDraft({ ...draft, skillRefs: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">subagents (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.subagentRefs}
+              placeholder="subagent-1, subagent-2"
+              onChange={(e) => setDraft({ ...draft, subagentRefs: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">context labels (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.contextLabelRefs}
+              placeholder="label-a, label-b"
+              onChange={(e) => setDraft({ ...draft, contextLabelRefs: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">memory repositories (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.memoryRepositoryRefs}
+              placeholder="repo-brain"
+              onChange={(e) => setDraft({ ...draft, memoryRepositoryRefs: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">role bindings (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.roleBindings}
+              placeholder="permissionRefs.roleBindings"
+              onChange={(e) => setDraft({ ...draft, roleBindings: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">secret grants (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.secretGrants}
+              placeholder="permissionRefs.secretGrants"
+              onChange={(e) => setDraft({ ...draft, secretGrants: e.target.value })}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">config grants (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.configGrants}
+              placeholder="permissionRefs.configGrants"
+              onChange={(e) => setDraft({ ...draft, configGrants: e.target.value })}
+            />
           </label>
         </div>
         <label className="wr-foundry-field">

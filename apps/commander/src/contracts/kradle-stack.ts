@@ -3,9 +3,13 @@
  *
  * This is the EDITABLE subset the Foundry stack-builder writes
  * (`stack-builder.jsx`): base agent + adapter + model + the three prompts +
- * approval posture + the ref lists. The full composite mirror (with
- * `organizationRef`, `runtimeIdentity`, `permissionRefs`, `secretPolicy`,
- * `writeBackPolicy`, …) lives in `kradle-resources.ts` (`AgentStackSpec`).
+ * approval posture + the ref lists, PLUS the CRD-required `organizationRef`
+ * (from the active org context) and `runtimeIdentity` (service-account ref), and
+ * the real composite refs the live builder exposes (`externalTools`,
+ * `contextLabelRefs`, `workspacePolicyRef`, `permissionRefs`,
+ * `memoryRepositoryRefs`). The full composite mirror (with `secretPolicy`,
+ * `writeBackPolicy`, `jitsiConfig`, …) lives in `kradle-resources.ts`
+ * (`AgentStackSpec`).
  *
  * To keep the two from DRIFTING, every field name here is asserted (at compile
  * time, below) to be a key of the canonical `AgentStackSpec`. The value-type
@@ -14,7 +18,12 @@
  * not drift.
  */
 
-import type { AgentStackSpec } from './kradle-resources';
+import type {
+  AgentStackSpec,
+  AgentStackRuntimeIdentity,
+  AgentStackExternalTools,
+  AgentStackPermissionRefs,
+} from './kradle-resources';
 
 /** Personality prompts (prompt.system carries the written personality). */
 export interface KradleStackPrompt {
@@ -23,6 +32,14 @@ export interface KradleStackPrompt {
 }
 
 export interface KradleStackSpec {
+  /**
+   * Org slug (`agent-resources.yaml:35` — CRD-required). Optional in this
+   * editable draft because the active-org context is resolved at emit time:
+   * `stackInputToResourceBody` stamps it from `client.org` (and the generic CRD
+   * gateway also injects it server-side). Carried on the cluster body so a
+   * kubectl-applied stack validates.
+   */
+  organizationRef?: string;
   /** Base agent family (e.g. 'claude-code'). */
   baseAgent: string;
   /** Adapter binding (e.g. 'claude-code' / 'adapters.claude-code'). */
@@ -32,10 +49,26 @@ export interface KradleStackSpec {
   prompt: KradleStackPrompt;
   /** Approval posture; kradle uses yolo|prompt|deny, the sim accepts free-form. */
   approvalMode: string;
+  /**
+   * Runtime identity → `AgentServiceAccount` (`agent-resources.yaml:38`,
+   * CRD-required). The server does NOT inject this, so the stack carries it; the
+   * Foundry captures `serviceAccountRef` and the mapper defaults it when blank.
+   */
+  runtimeIdentity?: AgentStackRuntimeIdentity;
   toolProfileRef?: string;
+  /** External tool bindings: MCP servers / CLI tools / OpenAPI specs. */
+  externalTools?: AgentStackExternalTools;
   skillRefs?: string[];
   subagentRefs?: string[];
+  /** → `AgentContextLabel`. */
+  contextLabelRefs?: string[];
+  /** → `KradleWorkspacePolicy`. */
+  workspacePolicyRef?: string;
   runnerPool?: string;
+  /** Role-binding / secret-grant / config-grant references. */
+  permissionRefs?: AgentStackPermissionRefs;
+  /** Company-brain bindings (`agent-resources.yaml:90`). */
+  memoryRepositoryRefs?: string[];
 }
 
 /**

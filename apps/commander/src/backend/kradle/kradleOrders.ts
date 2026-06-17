@@ -141,22 +141,45 @@ export function resolveDispatchStack(
 // client omits those server-forced fields.
 // ---------------------------------------------------------------------------
 
-function stackInputToResourceBody(stack: KradleAgentStackInput): ResourceApplyBody {
+/** The CRD-required default runtime identity when the draft left it blank. */
+const DEFAULT_SERVICE_ACCOUNT_REF = 'default';
+
+/**
+ * Inverse stack mapping: a `KradleAgentStackInput` → the `AgentStack` resource
+ * body applied via the generic CRD gateway. The CRD requires
+ * `organizationRef, baseAgent, adapter, runtimeIdentity`
+ * (`agent-resources.yaml:34-38`); the gateway POST injects `organizationRef` +
+ * namespace + org label server-side, but a kubectl-applied body must carry them,
+ * so we stamp `organizationRef` from the active org (`org`) here and emit a
+ * `runtimeIdentity.serviceAccountRef` (the server does NOT inject identity).
+ */
+function stackInputToResourceBody(stack: KradleAgentStackInput, org: string): ResourceApplyBody {
   const sp = stack.spec;
   const name = stack.metadata.name;
   const labels: Record<string, string> = { ...(stack.metadata.labels ?? {}) };
+  const serviceAccountRef =
+    sp.runtimeIdentity?.serviceAccountRef ?? DEFAULT_SERVICE_ACCOUNT_REF;
   const spec: Record<string, unknown> = {
+    // CRD-required: org slug stamped from the active org context.
+    organizationRef: sp.organizationRef ?? org,
     baseAgent: sp.baseAgent,
     adapter: sp.adapter,
     model: sp.model,
     prompt: sp.prompt,
     approvalMode: sp.approvalMode,
+    // CRD-required: runtime identity (→ AgentServiceAccount). Never server-injected.
+    runtimeIdentity: { ...(sp.runtimeIdentity ?? {}), serviceAccountRef },
   };
   if (sp.provider !== undefined) spec.provider = sp.provider;
   if (sp.toolProfileRef !== undefined) spec.toolProfileRef = sp.toolProfileRef;
+  if (sp.externalTools !== undefined) spec.externalTools = sp.externalTools;
   if (sp.skillRefs !== undefined) spec.skillRefs = sp.skillRefs;
   if (sp.subagentRefs !== undefined) spec.subagentRefs = sp.subagentRefs;
+  if (sp.contextLabelRefs !== undefined) spec.contextLabelRefs = sp.contextLabelRefs;
+  if (sp.workspacePolicyRef !== undefined) spec.workspacePolicyRef = sp.workspacePolicyRef;
   if (sp.runnerPool !== undefined) spec.runnerPool = sp.runnerPool;
+  if (sp.permissionRefs !== undefined) spec.permissionRefs = sp.permissionRefs;
+  if (sp.memoryRepositoryRefs !== undefined) spec.memoryRepositoryRefs = sp.memoryRepositoryRefs;
   return {
     apiVersion: stack.apiVersion ?? 'kradle.a5c.ai/v1alpha1',
     kind: 'AgentStack',
@@ -301,7 +324,7 @@ export function makeKradleOrders(
       // is an upsert, so the create/patch distinction collapses; when a stackRef
       // is supplied it names the resource being updated, else the stack's own
       // metadata.name is the new resource name.
-      const body = stackInputToResourceBody(stack);
+      const body = stackInputToResourceBody(stack, client.org);
       if (stack.stackRef !== undefined && stack.stackRef !== '') {
         body.metadata.name = stack.stackRef;
         run('upsertStack/applyResource', () => client.applyResource(body));
