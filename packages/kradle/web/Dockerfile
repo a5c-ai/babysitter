@@ -13,6 +13,11 @@ COPY packages/kradle/web ./packages/kradle/web
 COPY packages/kradle/sdk ./packages/kradle/sdk
 COPY packages/kradle/core/src ./packages/kradle/core/src
 COPY packages/kradle/core/package.json ./packages/kradle/core/
+# The org-home WarRoom imports the prebuilt commander library artifact via a
+# repo-root-relative path (apps/commander/dist-lib). It lives outside
+# packages/kradle so it must be copied into the build context explicitly, or
+# `next build` fails with "Module not found: .../apps/commander/dist-lib/commander.mjs".
+COPY apps/commander/dist-lib ./apps/commander/dist-lib
 WORKDIR /app/packages/kradle/web
 RUN npx next build --webpack
 
