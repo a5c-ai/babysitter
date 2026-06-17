@@ -137,6 +137,36 @@ export function createKradleApiController(options = {}) {
       );
       return { ...result, resource: appliedResource };
     },
+    async patchResourceStatusForOrg(orgSlug, kindOrPlural, name, statusPatch) {
+      const slug = normalizeOrgSlug(orgSlug);
+      const orgNs = orgNamespaceName(slug);
+      if (typeof resourceGateway.patchStatus !== 'function') {
+        throw new Error('resource gateway does not support status subresource patching');
+      }
+      // Verify the resource belongs to the org's namespace before mutating status.
+      const existing = await resourceGateway.get(kindOrPlural, name);
+      const resource = existing?.resource || existing;
+      if (resource) {
+        const resourceNs = resource.metadata?.namespace;
+        if (resourceNs && resourceNs !== orgNs) {
+          throw new Error(
+            `Cross-org denial: resource "${name}" is in namespace "${resourceNs}" which does not match org "${slug}" namespace "${orgNs}"`
+          );
+        }
+      }
+      const result = await resourceGateway.patchStatus(kindOrPlural, name, statusPatch, { namespace: orgNs });
+      clearSnapshotCache();
+      const patched = result.resource || resource;
+      if (patched) {
+        emitAuditEvent(patched, 'patch-status');
+        globalEventBus.emitResourceChange(
+          patched.kind || kindOrPlural,
+          patched.metadata?.name || name,
+          'patch-status'
+        );
+      }
+      return result;
+    },
     async deleteResource(kindOrPlural, name) {
       const result = await resourceGateway.delete(kindOrPlural, name);
       clearSnapshotCache();
@@ -220,7 +250,14 @@ export function createKradleApiController(options = {}) {
       });
     },
     async dispatchAgent(input) {
-      const snapshot = await this.snapshot();
+      // Resource resolution: a caller may pre-supply the resources needed to
+      // resolve the dispatch target (the org-scoped AgentStack / identity
+      // resources). When provided we skip the full cluster snapshot — that
+      // snapshot scans ~96 kinds sequentially over the (often remote) kubeconfig
+      // and blocks the event loop for tens of seconds; the dispatch path only
+      // needs the AgentStack (+ identity kinds), so a scoped read is both correct
+      // and orders of magnitude faster.
+      const resources = input.resources || (await this.snapshot()).resources;
       const controllerOptions = input.controllerOptions || {};
       const controller = createAgentDispatchController({
         ...controllerOptions,
@@ -228,8 +265,26 @@ export function createKradleApiController(options = {}) {
       });
       const result = await controller.createManualDispatch({
         ...input,
-        resources: snapshot.resources
+        resources
       });
+      // Persist the AgentDispatchRun CR. `createManualDispatch` builds the run in
+      // memory and only ever submits a K8s Job (runtime path) — it never writes
+      // the run resource itself. The control-plane contract (a dispatch creates a
+      // queryable AgentDispatchRun) requires us to apply it. The Job submission
+      // remains best-effort: the run CR is the durable record regardless of
+      // whether the agent runtime is available to pick it up.
+      if (result && !result.error && result.run) {
+        try {
+          const applied = await this.applyResourceForOrg(
+            input.organizationRef || result.run.spec?.organizationRef || 'default',
+            result.run
+          );
+          result.run = applied.resource || result.run;
+          result.runApplyResult = applied;
+        } catch (err) {
+          result.runApplyError = err.message || String(err);
+        }
+      }
       if (result?.memorySnapshot) {
         result.memorySnapshotApplyResult = await this.applyResourceForOrg(
           input.organizationRef || result.memorySnapshot.spec?.organizationRef || 'default',

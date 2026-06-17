@@ -28,6 +28,12 @@ export function createKubernetesResourceGateway(options = {}) {
     async apply(resource) {
       return resourceClient.applyResource(resource);
     },
+    async patchStatus(kindOrPlural, name, statusPatch, patchOptions = {}) {
+      if (typeof resourceClient.patchResourceStatus !== 'function') {
+        throw new Error('resource client does not support status subresource patching');
+      }
+      return resourceClient.patchResourceStatus(kindOrPlural, name, statusPatch, patchOptions);
+    },
     async delete(kindOrPlural, name) {
       return resourceClient.deleteResource(kindOrPlural, name);
     },

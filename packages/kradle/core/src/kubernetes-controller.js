@@ -180,6 +180,9 @@ export function createKubernetesResourceClient(options = {}) {
     async applyResource(resource) {
       return applyResource(resource, { kubectl, namespace, timeoutMs, env });
     },
+    async patchResourceStatus(kindOrPlural, name, statusPatch, patchOptions = {}) {
+      return patchResourceStatus(kindOrPlural, name, statusPatch, { kubectl, namespace, timeoutMs, env, ...patchOptions });
+    },
     async deleteResource(kindOrPlural, name) {
       return deleteResource(kindOrPlural, name, { kubectl, namespace, timeoutMs, env });
     },
@@ -582,6 +585,35 @@ function ensureNamespace(name, options) {
   const check = runKubectl(['get', 'namespace', name], { ...options, allowFailure: true });
   if (check.ok) return;
   runKubectl(['create', 'namespace', name], { ...options, allowFailure: true });
+}
+
+/**
+ * Patch a resource's STATUS subresource. `kubectl apply` (used by applyResource)
+ * never writes the status subresource — the API server silently strips it — so
+ * status mutations (e.g. cancelling a run, deciding an approval) MUST go through
+ * the status subresource explicitly. This mirrors the manual patch the seed
+ * harness performs (`kubectl patch ... --subresource=status --type=merge`).
+ */
+export async function patchResourceStatus(kindOrPlural, name, statusPatch, options = {}) {
+  if (!name) throw new Error('resource name is required');
+  if (!statusPatch || typeof statusPatch !== 'object') throw new Error('statusPatch object is required');
+  const namespace = options.namespace || process.env.KRADLE_NAMESPACE || 'kradle-system';
+  const definition = findResourceDefinition(kindOrPlural);
+  const resourceNamespace = definition.namespace || namespace;
+  const args = [
+    'patch', apiResourceName(definition), name,
+    ...namespaceArgs(definition, resourceNamespace),
+    '--subresource=status', '--type=merge',
+    '-p', JSON.stringify({ status: statusPatch }),
+    '-o', 'json'
+  ];
+  const result = runKubectl(args, {
+    kubectl: options.kubectl || process.env.KRADLE_KUBECTL || 'kubectl',
+    timeoutMs: Number(options.timeoutMs || process.env.KRADLE_KUBECTL_TIMEOUT_MS || 3_000),
+    env: { ...process.env, ...(options.env || {}) },
+    allowFailure: false
+  });
+  return { operation: 'patch-status', command: `kubectl ${args.join(' ')}`, resource: safeJson(result.stdout), stderr: result.stderr.trim() };
 }
 
 export async function deleteResource(kindOrPlural, name, options = {}) {

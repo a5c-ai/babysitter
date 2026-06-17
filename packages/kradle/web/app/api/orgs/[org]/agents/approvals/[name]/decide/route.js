@@ -16,19 +16,17 @@ export const POST = withAuth(async (request, { params }) => {
     const newPhase = decision === 'approve' ? 'Approved' : 'Denied';
     const existingResult = await controller.getResourceForOrg(org, 'AgentApproval', name);
     const existing = existingResult?.resource || existingResult;
-    const updated = {
-      ...existing,
-      apiVersion: existing?.apiVersion || 'kradle.a5c.ai/v1alpha1',
-      kind: existing?.kind || 'AgentApproval',
-      metadata: { ...(existing?.metadata || {}), name },
-      status: {
-        ...(existing?.status || {}),
-        phase: newPhase,
-        decidedBy: body.decidedBy || 'owner',
-        decidedAt: new Date().toISOString(),
-      },
-    };
-    const result = await controller.applyResourceForOrg(org, updated);
+    if (!existing || !existing.metadata) {
+      return errorResponse(`Approval '${name}' not found`, 404);
+    }
+    // The decision lives on the STATUS subresource. `kubectl apply` strips status,
+    // so the decision must be written through the status subresource explicitly.
+    const result = await controller.patchResourceStatusForOrg(org, 'AgentApproval', name, {
+      phase: newPhase,
+      decision,
+      decidedBy: body.decidedBy || 'owner',
+      decidedAt: new Date().toISOString(),
+    });
     clearSnapshotCache();
     invalidateApiCache();
     return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
