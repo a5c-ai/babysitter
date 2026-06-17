@@ -75,6 +75,9 @@ describe('resolveProvider', () => {
   });
 
   it('keeps GEMINI_API_KEY as a fallback for direct Google provider auth', () => {
+    // GOOGLE_API_KEY takes precedence over GEMINI_API_KEY; clear it so this test
+    // exercises the GEMINI fallback hermetically regardless of the ambient env.
+    delete process.env['GOOGLE_API_KEY'];
     process.env['GEMINI_API_KEY'] = 'legacy-gemini-key';
 
     const config = resolveProvider({ provider: 'google' });
