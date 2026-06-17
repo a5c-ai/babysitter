@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { RunHandleImpl } from '@a5c-ai/comm-adapter';
+import { RunHandleImpl, DEFAULT_HOST_SIGNALS } from '@a5c-ai/comm-adapter';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createGateway, MemoryTokenStore } from '../src/index.js';
@@ -584,7 +584,22 @@ describe('gateway end-to-end', () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gateway-native-active-session-'));
     tempDirs.push(tempDir);
 
-    const previousThreadId = process.env['CODEX_THREAD_ID'];
+    // Make ambient-harness detection hermetic. `detectHostHarness()` reads the
+    // real `process.env` and picks the agent with the MOST matched signal vars.
+    // On a developer/CI machine that is itself running under a harness (e.g.
+    // Claude Code sets CLAUDECODE + friends), that harness would win over our
+    // single CODEX_THREAD_ID signal, the ambient binding would not match the
+    // discovered codex session, and the status would be 'inactive'. Clear every
+    // known host-detection signal var so ONLY codex's CODEX_THREAD_ID is present,
+    // making detection deterministic regardless of where the test runs.
+    const signalVars = Array.from(
+      new Set(Object.values(DEFAULT_HOST_SIGNALS).flatMap((vars) => [...vars])),
+    );
+    const previousSignalEnv = new Map<string, string | undefined>();
+    for (const name of signalVars) {
+      previousSignalEnv.set(name, process.env[name]);
+      delete process.env[name];
+    }
     process.env['CODEX_THREAD_ID'] = 'native-codex-session';
 
     const tokenStore = new MemoryTokenStore();
@@ -636,10 +651,12 @@ describe('gateway end-to-end', () => {
       );
     } finally {
       await gateway.stop();
-      if (previousThreadId === undefined) {
-        delete process.env['CODEX_THREAD_ID'];
-      } else {
-        process.env['CODEX_THREAD_ID'] = previousThreadId;
+      for (const [name, value] of previousSignalEnv) {
+        if (value === undefined) {
+          delete process.env[name];
+        } else {
+          process.env[name] = value;
+        }
       }
     }
   });
