@@ -124,6 +124,7 @@
     "test:e2e:live-stack": "npm run test:e2e:live-stack:framework && npm run test:e2e:live-stack:primary",
     "coverage:e2e:live-stack": "node scripts/live-stack-coverage-report.cjs",
     "test:e2e:live-stack:pipeline": "vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/live-stack/pipeline-scenario.test.ts",
+    "test:e2e:live-stack:documented-install": "vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/live-stack/documented-install.test.ts",
     "test:e2e:adapters-hooks-adapter": "vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/e2e/adapters-hooks-adapter.pipeline.test.ts",
     "test:e2e:adapters-no-model-stack": "vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/e2e/adapters-no-model-stack.pipeline.test.ts"
   },

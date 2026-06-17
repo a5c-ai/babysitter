@@ -167,6 +167,59 @@ jobs:
             "
           fi
 
+  documented_install:
+    needs: [setup]
+    name: "Documented Install (${{ inputs.os || 'ubuntu' }}, ${{ matrix.harness }}, ${{ needs.setup.outputs.npm_tag }})"
+    # Validates the PUBLISHED, user-facing documented install path (README marketplace
+    # commands against the external marketplaces) — NOT the BP local-source lane.
+    # Catches a broken/stale published marketplace that the local-source lanes mask
+    # with false confidence (issue #960).
+    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        harness: [claude-code, codex]
+    steps:
+      - name: Checkout repository (test code only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install harness CLI (claude-code)
+        if: matrix.harness == 'claude-code'
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install harness CLI (codex)
+        if: matrix.harness == 'codex'
+        run: npm install -g @openai/codex
+
+      - name: Install test runner deps
+        run: |
+          cd packages/adapters/cli
+          npm install --legacy-peer-deps 2>/dev/null || true
+
+      - name: Verify documented published install
+        timeout-minutes: 15
+        env:
+          NPM_TAG: ${{ needs.setup.outputs.npm_tag }}
+          LIVE_STACK_DOCUMENTED_INSTALL_HARNESS: ${{ matrix.harness }}
+          LIVE_STACK_RUN_MODEL_TESTS: '1'
+          LIVE_STACK_REQUIRE_EVIDENCE: '1'
+          LIVE_STACK_TEST_TIMEOUT_MS: '720000'
+          LIVE_STACK_COMMAND_TIMEOUT_MS: '300000'
+        run: npm run test:e2e:live-stack:documented-install
+
   live_stack_vanilla_ni:
     needs: [setup]
     name: "Published (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
