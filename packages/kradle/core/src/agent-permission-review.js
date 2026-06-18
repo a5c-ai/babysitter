@@ -11,6 +11,27 @@ export const AGENT_PERMISSION_REVIEW_BOUNDARY = {
 
 const VALID_APPROVAL_MODES = new Set(['yolo', 'prompt', 'deny']);
 
+/**
+ * Match a grant/binding `spec.subject` against the dispatch's service-account
+ * ref or agent-stack name. The CRD declares `subject` as an OBJECT
+ * (`{ kind?, name }`, preserve-unknown), but older data may carry a bare string.
+ * A direct `subject === ref` comparison silently fails for the object shape, so
+ * every grant/binding is unmatched and dispatch is always denied. Handle both:
+ * legacy string subjects compare directly; structured subjects match on `name`.
+ */
+export function subjectMatches(subject, serviceAccountRef, agentStack) {
+  if (subject == null) return false;
+  if (typeof subject === 'string') {
+    return subject === serviceAccountRef || subject === agentStack;
+  }
+  if (typeof subject === 'object') {
+    const name = typeof subject.name === 'string' ? subject.name : undefined;
+    if (!name) return false;
+    return name === serviceAccountRef || name === agentStack;
+  }
+  return false;
+}
+
 export function createPermissionReviewer(options = {}) {
   return {
     role: 'agent-permission-review',
@@ -89,7 +110,7 @@ export function createPermissionReviewer(options = {}) {
 
       // Step 6 — Check role bindings
       const roleBindings = resources.AgentRoleBinding || [];
-      const matchedBindings = roleBindings.filter((rb) => rb.spec?.subject === serviceAccountRef || rb.spec?.subject === agentStack);
+      const matchedBindings = roleBindings.filter((rb) => subjectMatches(rb.spec?.subject, serviceAccountRef, agentStack));
       for (const binding of matchedBindings) {
         grants.push({ kind: 'AgentRoleBinding', name: binding.metadata.name, roleRef: binding.spec?.roleRef, scope: binding.spec?.scope, status: 'bound' });
       }
@@ -102,7 +123,7 @@ export function createPermissionReviewer(options = {}) {
       const neededSecrets = collectSecretNeeds(stack, capabilities, resources);
       for (const need of neededSecrets) {
         const match = secretGrants.find((sg) => {
-          if (sg.spec?.subject !== serviceAccountRef && sg.spec?.subject !== agentStack) return false;
+          if (!subjectMatches(sg.spec?.subject, serviceAccountRef, agentStack)) return false;
           if (need.purpose && sg.spec?.purpose !== need.purpose) return false;
           if (sg.spec?.allowedRepositories && sg.spec.allowedRepositories.length > 0 && !sg.spec.allowedRepositories.includes(repository)) return false;
           if (sg.spec?.allowedRefs && sg.spec.allowedRefs.length > 0 && !sg.spec.allowedRefs.includes(ref)) return false;
@@ -128,7 +149,7 @@ export function createPermissionReviewer(options = {}) {
       const neededConfigs = collectConfigNeeds(stack, capabilities, resources);
       for (const need of neededConfigs) {
         const match = configGrants.find((cg) => {
-          if (cg.spec?.subject !== serviceAccountRef && cg.spec?.subject !== agentStack) return false;
+          if (!subjectMatches(cg.spec?.subject, serviceAccountRef, agentStack)) return false;
           if (need.purpose && cg.spec?.purpose !== need.purpose) return false;
           return true;
         });
