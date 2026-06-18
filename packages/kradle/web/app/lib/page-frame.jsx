@@ -15,7 +15,7 @@ export function AppShell({ children, org = 'default', orgs = [], currentPath = '
     <a className="skipLink" href="#main-content">Skip to content</a>
     <header className="appTopbar" aria-label="Kradle global navigation">
       <MobileNavToggle />
-      <a className="brandMark" href={orgHref(org, '/')} aria-label="a5c.ai Kradle home"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>ate</span></strong><em>a5c.ai</em></span></a>
+      <a className="brandMark" href={orgHref(org, '/')} aria-label="a5c.ai Kradle home"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>adle</span></strong><em>a5c.ai</em></span></a>
       <GlobalSearch org={org} />
       <nav className="topbarNav" aria-label="Global actions"><a href="/orgs">Orgs</a><a href={orgHref(org, '/repositories')}>Repos</a><a href={orgHref(org, '/inbox')}>Reviews</a></nav>
       <div className="topbarAccount" aria-label={signedInName ? 'Signed-in user' : 'Account'}><NotificationBell org={org} />{signedInName ? <><a className="userChip" href={orgHref(org, '/people')}><span className="userAvatar" aria-hidden="true">{userInitial}</span><span className="userName">{signedInName}</span></a><a className="signOutLink" href="/api/auth/logout">Sign out</a></> : <a className="signInLink" href="/login">Sign in</a>}</div>
