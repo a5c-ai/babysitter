@@ -231,11 +231,20 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
   }
 
   const processMode = options.env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
+  // In the published-packages workflow the babysitter-sdk + hooks-adapter CLIs
+  // are installed globally from npm; re-installing them from local (unbuilt)
+  // source clobbers the global `babysitter` bin with a dangling dist/ symlink
+  // → `spawn babysitter ENOENT` at harness:install-plugin. Skip the local
+  // source installs in that mode and rely on the published globals.
+  const usePublishedPackages = options.env['LIVE_STACK_PUBLISHED_PACKAGES'] === '1';
+  const localSdkInstallCommands = usePublishedPackages ? [] : [
+    commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/babysitter-sdk'], options.cwd, SETUP_TIMEOUT_MS),
+    commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/adapters/hooks/cli'], options.cwd, SETUP_TIMEOUT_MS),
+  ];
   const setupCommands = [
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['run', 'generate:plugins'], options.cwd, SETUP_TIMEOUT_MS),
     { ...commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS), nonFatal: true },
-    commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/babysitter-sdk'], options.cwd, SETUP_TIMEOUT_MS),
-    commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/adapters/hooks/cli'], options.cwd, SETUP_TIMEOUT_MS),
+    ...localSdkInstallCommands,
     generatedPluginInstallCommand(commandEnv, scenario, options.cwd, SETUP_TIMEOUT_MS),
     ensureLiveArtifactDirCommand(commandEnv, options.cwd),
   ];

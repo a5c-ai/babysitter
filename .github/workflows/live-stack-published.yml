@@ -280,6 +280,17 @@ jobs:
           cd packages/adapters/cli
           npm install --legacy-peer-deps 2>/dev/null || true
 
+          # vitest 4 (rolldown) ships its native binding as platform-specific
+          # OPTIONAL deps; npm intermittently skips them (npm/cli#4828), which
+          # breaks vitest startup on macOS arm64 with
+          # "Cannot find module '@rolldown/binding-darwin-arm64'". Install the
+          # binding for THIS runner explicitly when the base module can't load.
+          node -e "require('@rolldown/binding')" 2>/dev/null || {
+            RB="@rolldown/binding-$(node -p "({win32:'win32-'+process.arch+'-msvc',darwin:'darwin-'+process.arch,linux:'linux-'+process.arch+'-gnu'})[process.platform]")"
+            echo "rolldown binding missing — installing $RB"
+            npm install --no-save --legacy-peer-deps "$RB" 2>/dev/null || true
+          }
+
           # Verify installations
           echo "--- Installed versions ---"
           adapters --version 2>/dev/null || echo "adapters: not found"
@@ -309,6 +320,11 @@ jobs:
           LIVE_STACK_INTEGRATION_TYPE: ${{ matrix.scenario.integration_type }}
           LIVE_STACK_BABYSITTER_HARNESS: ${{ matrix.scenario.babysitter_harness }}
           LIVE_STACK_INSTALL_MODE: ${{ matrix.install_mode.id }}
+          # This workflow tests PUBLISHED npm packages — the babysitter-sdk and
+          # hooks-adapter CLIs are installed globally from npm above. Tell the
+          # runner NOT to re-install them from local (unbuilt) source, which
+          # would clobber the `babysitter` bin with a dangling dist/ symlink.
+          LIVE_STACK_PUBLISHED_PACKAGES: '1'
           LIVE_STACK_PROCESS_MODE: ${{ matrix.scenario.process_mode || 'predefined' }}
           LIVE_STACK_INTERACTION_MODE: ${{ matrix.interaction_mode.id }}
           LIVE_STACK_INTERACTIVE: ${{ matrix.interaction_mode.interactive }}
