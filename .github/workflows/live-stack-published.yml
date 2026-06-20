@@ -222,6 +222,7 @@ jobs:
 
   live_stack_vanilla_ni:
     needs: [setup]
+    if: ${{ fromJSON(needs.setup.outputs.vanilla_ni).include[0] != null }}
     name: "Published (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
@@ -352,6 +353,9 @@ jobs:
 
   live_stack_vanilla_interactive:
     needs: [setup]
+    # Skip (don't fail the run) when this lane's matrix is empty — a matrix that
+    # expands to zero entries otherwise fails the job and reds the whole run.
+    if: ${{ fromJSON(needs.setup.outputs.vanilla_interactive).include[0] != null }}
     name: "Published (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
@@ -367,6 +371,7 @@ jobs:
 
   live_stack_bp_interactive:
     needs: [setup]
+    if: ${{ fromJSON(needs.setup.outputs.bp_interactive).include[0] != null }}
     name: "Published (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
@@ -382,6 +387,7 @@ jobs:
 
   live_stack_bp_bridged:
     needs: [setup]
+    if: ${{ fromJSON(needs.setup.outputs.bp_bridged).include[0] != null }}
     name: "Published (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
     runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
     permissions:
