@@ -19,7 +19,22 @@ export type SpawnRunner = (
 export function makeSpawnRunner(echo: boolean): SpawnRunner {
   return (command, args) =>
     new Promise((resolve, reject) => {
-      const child = spawn(command, args, {
+      // On posix, run non-shell install commands (e.g. `npm install -g <pkg>`)
+      // through `sh -c` so the install tool's parent process is a shell. Some
+      // agent package postinstalls spawn `sh` and only resolve it reliably under
+      // a shell parent (matching a plain `npm install -g` step); a direct node
+      // spawn (shell:false) intermittently fails the postinstall with
+      // `spawn sh ENOENT`, leaving the CLI half-installed. Commands already
+      // wrapped in a shell (`sh`/`bash`, e.g. "curl ... | bash") are passed
+      // through unchanged to avoid double-wrapping.
+      let spawnCmd = command;
+      let spawnArgs = args;
+      const alreadyShell = command === 'sh' || command === 'bash' || command === 'cmd';
+      if (process.platform !== 'win32' && !alreadyShell) {
+        spawnCmd = 'sh';
+        spawnArgs = ['-c', [command, ...args].join(' ')];
+      }
+      const child = spawn(spawnCmd, spawnArgs, {
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: process.platform === 'win32',
         windowsHide: true,
