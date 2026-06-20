@@ -133,6 +133,52 @@ describe('BaseAgentAdapter.install (default)', () => {
     expect(res.stderr).toContain('npm ERR!');
   });
 
+  it('treats non-zero npm exit as ok=true when the binary installed and runs (non-fatal postinstall)', async () => {
+    const adapter = new CodexAdapter();
+    let installed = false;
+    const { spawner } = spawnerFrom((cmd, args) => {
+      if (cmd === 'which' || cmd === 'where') {
+        return installed
+          ? { code: 0, stdout: '/usr/bin/codex\n', stderr: '' }
+          : { code: 1, stdout: '', stderr: '' };
+      }
+      if (cmd === 'npm' && args[0] === 'install') {
+        // npm exits non-zero (e.g. postinstall `spawn sh ENOENT`) but the
+        // package files + bin symlink were written.
+        installed = true;
+        return { code: 1, stdout: '', stderr: 'npm error enoent spawn sh ENOENT' };
+      }
+      if (args.includes('--version')) return { code: 0, stdout: '2.0.0', stderr: '' };
+      return { code: 0, stdout: '', stderr: '' };
+    });
+    adapter.setSpawner(spawner);
+    const res = await adapter.install();
+    expect(res.ok).toBe(true);
+    expect(res.installedVersion).toBe('2.0.0');
+  });
+
+  it('keeps ok=false when non-zero exit leaves the binary present but not runnable', async () => {
+    const adapter = new CodexAdapter();
+    let linked = false;
+    const { spawner } = spawnerFrom((cmd, args) => {
+      if (cmd === 'which' || cmd === 'where') {
+        return linked
+          ? { code: 0, stdout: '/usr/bin/codex\n', stderr: '' }
+          : { code: 1, stdout: '', stderr: '' };
+      }
+      if (cmd === 'npm' && args[0] === 'install') {
+        linked = true;
+        return { code: 1, stdout: '', stderr: 'npm error' };
+      }
+      // version probe fails -> binary is present but does not actually run
+      if (args.includes('--version')) return { code: 1, stdout: '', stderr: 'cannot execute' };
+      return { code: 0, stdout: '', stderr: '' };
+    });
+    adapter.setSpawner(spawner);
+    const res = await adapter.install();
+    expect(res.ok).toBe(false);
+  });
+
   it('applies --version flag to npm package tail', async () => {
     const adapter = new CodexAdapter();
     const { spawner } = spawnerFrom(() => ({ code: 0, stdout: '', stderr: '' }));

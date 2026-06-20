@@ -68,11 +68,17 @@ async function executeCommand(
     };
   }
 
-  const ok = runResult.code === 0;
-  let installedVersion: string | undefined;
-  if (ok) {
-    const det = await ctx.detectInstallation().catch(() => null);
-    if (det?.version) installedVersion = det.version;
+  let ok = runResult.code === 0;
+  // Re-detect after the install command regardless of exit code. Some agent
+  // packages (e.g. @anthropic-ai/claude-code) ship a non-fatal postinstall that
+  // can exit non-zero (`spawn sh ENOENT`, optional native-asset setup) even
+  // though the CLI binary is installed and runnable. Treat the install as
+  // successful when the binary is present AND its version probe succeeds —
+  // proving it actually runs — instead of failing solely on npm's exit code.
+  const det = await ctx.detectInstallation().catch(() => null);
+  const installedVersion: string | undefined = det?.version;
+  if (!ok && det?.installed && det.version) {
+    ok = true;
   }
 
   const result: InstallResult = {
