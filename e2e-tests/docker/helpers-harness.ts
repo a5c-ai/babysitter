@@ -11,6 +11,9 @@ export function createMockHarness(
   output: string,
   exitCode: number = 0,
 ): void {
+  if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+    throw new Error(`Invalid harness name: ${name}`);
+  }
   const scriptDir = `/tmp/mock-harnesses`;
   const scriptPath = `${scriptDir}/${name}`;
   // Write to /tmp (always writable), then ensure dir is on PATH
