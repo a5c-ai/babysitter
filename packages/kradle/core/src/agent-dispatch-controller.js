@@ -1,4 +1,4 @@
-import { createPermissionReviewer } from './agent-permission-review.js';
+import { createPermissionReviewer, subjectMatches } from './agent-permission-review.js';
 import { createAgentStackController } from './agent-stack-controller.js';
 import { createAgentPersonaController } from './agent-persona-controller.js';
 import { composeAgentPrompt } from './agent-prompt-composition.js';
@@ -30,6 +30,29 @@ function estimateCost(event) {
   const inputCost = ((event.usage.inputTokens || 0) / 1000) * rate.inputPer1k;
   const outputCost = ((event.usage.outputTokens || 0) / 1000) * rate.outputPer1k;
   return inputCost + outputCost;
+}
+
+/**
+ * Resolve the K8s Secret name from the model-provider AgentSecretGrant bound to
+ * this dispatch's runtime identity. The grant's `secretRef` may be an object
+ * ({ name }) or a bare string (legacy data). Returns null when no model-provider
+ * grant matches — the permission review denies that case before dispatch, so a
+ * null here only happens on a path that never reaches Job creation.
+ *
+ * @param {{ serviceAccountRef?: string, agentStack?: string, secretGrants: object[] }} input
+ * @returns {string|null}
+ */
+function resolveModelProviderSecretName({ serviceAccountRef, agentStack, secretGrants }) {
+  const grant = (secretGrants || []).find(
+    (sg) =>
+      sg.spec?.purpose === 'model-provider' &&
+      subjectMatches(sg.spec?.subject, serviceAccountRef, agentStack),
+  );
+  if (!grant) return null;
+  const ref = grant.spec?.secretRef;
+  if (typeof ref === 'string') return ref;
+  if (ref && typeof ref === 'object' && typeof ref.name === 'string') return ref.name;
+  return null;
 }
 
 export const AGENT_DISPATCH_CONTROLLER_BOUNDARY = {
@@ -488,6 +511,16 @@ export function createAgentDispatchController(options = {}) {
       const pvcName = workspaceResult?.workspace?.spec?.volumeClaimName || workspaceResult?.pvcManifest?.metadata?.name || null;
       const resolvedCallbackUrl = callbackUrl || process.env.KRADLE_CALLBACK_URL || null;
 
+      // Resolve the model-provider secret granted to this stack so its API key
+      // and endpoint reach the agent pod. The permission review above already
+      // verified this grant exists (it denies otherwise), so this re-resolution
+      // is for the secret NAME only — never a fallback path.
+      const modelSecretName = resolveModelProviderSecretName({
+        serviceAccountRef: stack.spec?.runtimeIdentity?.serviceAccountRef,
+        agentStack: stack.metadata?.name,
+        secretGrants: resources.AgentSecretGrant || [],
+      });
+
       try {
         // Inject memory config env vars into the Job when memory repos are scoped
         const jobEnv = { ...executionConfig.env };
@@ -513,6 +546,7 @@ export function createAgentDispatchController(options = {}) {
           callbackUrl: resolvedCallbackUrl,
           prompt: executionConfig.prompt,
           env: jobEnv,
+          modelSecretName,
           workspace: pvcName ? { pvcName } : undefined,
           resources: stack.spec?.resources,
           meetingContext: runtimeMeetingContext || run.spec.meetingContext,

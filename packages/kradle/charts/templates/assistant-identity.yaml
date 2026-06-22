@@ -1,0 +1,64 @@
+{{- if .Values.agents.enabled }}
+{{- $org := .Values.admin.org | default "default" }}
+{{- $orgNamespace := printf "kradle-org-%s" $org }}
+{{- $sa := include "kradle.fullname" . }}
+{{- $modelSecret := .Values.assistant.existingSecret }}
+# Real K8s ServiceAccount the agent pod runs as. Agent dispatch Jobs run in the
+# org namespace and pull the adapters image from a private registry, so the SA
+# carries the same imagePullSecrets as the platform deployments.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $sa }}
+  namespace: {{ $orgNamespace }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    kradle.a5c.ai/builtin: "true"
+    kradle.a5c.ai/org: {{ $org | quote }}
+{{- with .Values.global.imagePullSecrets }}
+imagePullSecrets:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+---
+# Kradle runtime identity for the builtin "assistant" AgentStack. The dispatch
+# permission review (agent-permission-review.js, Step 5) requires an
+# AgentServiceAccount whose name matches the stack's
+# runtimeIdentity.serviceAccountRef — which is include "kradle.fullname".
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: AgentServiceAccount
+metadata:
+  name: {{ $sa }}
+  namespace: {{ $orgNamespace }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    kradle.a5c.ai/builtin: "true"
+    kradle.a5c.ai/org: {{ $org | quote }}
+spec:
+  organizationRef: {{ $org | quote }}
+  namespace: {{ $orgNamespace }}
+  serviceAccountName: {{ $sa }}
+{{- if $modelSecret }}
+---
+# Model-provider grant binding the assistant identity to the projected
+# org-namespace copy of the assistant keys secret. Step 7 of the permission
+# review denies dispatch without a purpose=model-provider grant, and the job
+# builder reads this grant's secretRef to inject the key into the agent pod.
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: AgentSecretGrant
+metadata:
+  name: assistant-model-provider
+  namespace: {{ $orgNamespace }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    kradle.a5c.ai/builtin: "true"
+    kradle.a5c.ai/org: {{ $org | quote }}
+spec:
+  organizationRef: {{ $org | quote }}
+  subject:
+    kind: AgentServiceAccount
+    name: {{ $sa }}
+  secretRef:
+    name: {{ $modelSecret | quote }}
+  purpose: model-provider
+{{- end }}
+{{- end }}

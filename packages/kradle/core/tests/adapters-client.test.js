@@ -345,6 +345,40 @@ describe('createAgentMuxClient — createAgentJob transport env vars', () => {
   });
 });
 
+describe('createAgentMuxClient — createAgentJob model-provider secret injection', () => {
+  it('adds an envFrom secretRef when modelSecretName is provided', () => {
+    const client = createAgentMuxClient();
+    const { jobManifest } = client.createAgentJob({
+      adapter: 'claude-code',
+      provider: 'openai',
+      model: 'gpt-5.5',
+      org: 'test-org',
+      modelSecretName: 'kradle-assistant-keys',
+    });
+    const container = jobManifest.spec.template.spec.containers[0];
+    assert.ok(Array.isArray(container.envFrom), 'envFrom must be an array');
+    const ref = container.envFrom.find(e => e.secretRef?.name === 'kradle-assistant-keys');
+    assert.ok(ref, 'envFrom must reference the model-provider secret');
+    // The model key must be REQUIRED — a missing provider secret is a hard
+    // failure, never a silent fallback to an unauthenticated run.
+    assert.equal(ref.secretRef.optional, false);
+  });
+
+  it('omits envFrom entirely when no modelSecretName is provided', () => {
+    const client = createAgentMuxClient();
+    const { jobManifest } = client.createAgentJob({
+      adapter: 'claude-code',
+      provider: 'anthropic',
+      org: 'test-org',
+    });
+    const container = jobManifest.spec.template.spec.containers[0];
+    assert.ok(
+      container.envFrom === undefined || container.envFrom.length === 0,
+      'envFrom must not be present without a model secret',
+    );
+  });
+});
+
 describe('createAgentMuxClient — Jitsi sidecar job contract from docs/jitsi/06-agent-meeting-participation.md', () => {
   it('adds the documented sidecar container, socket env vars, shared volume, lifecycle, and resources', () => {
     const client = createAgentMuxClient();

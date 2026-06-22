@@ -355,7 +355,7 @@ export function createAgentMuxClient(options = {}) {
      * Generate a Kubernetes Job manifest to run an agent as an isolated Job
      * instead of a subprocess of the API server.
      *
-     * @param {{ adapter: string, provider?: string, model?: string, workspace?: { pvcName?: string }, prompt?: { system?: string, task?: string }, env?: Record<string,string>, org: string, runId?: string, stackName?: string, budget?: { maxDurationSeconds?: number }, resources?: object, image?: string, serviceAccount?: string, callbackUrl?: string, jitsi?: object, meetingContext?: object }} config
+     * @param {{ adapter: string, provider?: string, model?: string, workspace?: { pvcName?: string }, prompt?: { system?: string, task?: string }, env?: Record<string,string>, org: string, runId?: string, stackName?: string, budget?: { maxDurationSeconds?: number }, resources?: object, image?: string, serviceAccount?: string, callbackUrl?: string, jitsi?: object, meetingContext?: object, modelSecretName?: string }} config
      * @returns {{ jobManifest: object, jobName: string }}
      */
     createAgentJob(config = {}) {
@@ -377,6 +377,7 @@ export function createAgentMuxClient(options = {}) {
         transportBindings = [],
         jitsi,
         meetingContext = null,
+        modelSecretName = null,
       } = config;
 
       // Validate adapter
@@ -421,12 +422,23 @@ export function createAgentMuxClient(options = {}) {
         agentVolumeMounts.push({ name: 'agent-socket', mountPath: '/tmp' });
         volumes.push({ name: 'agent-socket', emptyDir: {} });
       }
+      // The model-provider secret (API key + endpoint) is granted via an
+      // AgentSecretGrant and must reach the agent pod. K8s secret refs are
+      // namespace-scoped, so the secret is expected to live in the Job's own
+      // org namespace (projected there by the chart). It is REQUIRED, never
+      // optional: a missing provider secret must hard-fail the pod rather than
+      // silently launch an unauthenticated run.
+      const envFrom = modelSecretName
+        ? [{ secretRef: { name: modelSecretName, optional: false } }]
+        : undefined;
+
       const containers = [{
         name: 'agent',
         image: image || process.env.KRADLE_AGENT_IMAGE || 'ghcr.io/a5c-ai/adapters:latest',
         command: ['node', 'dist/cli/index.js', 'launch', adapter, provider],
         args: model ? ['--model', model] : [],
         env: containerEnv,
+        ...(envFrom ? { envFrom } : {}),
         resources: resourceLimits || {
           requests: { cpu: '500m', memory: '1Gi' },
           limits: { cpu: '2', memory: '4Gi' },
