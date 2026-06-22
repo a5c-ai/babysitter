@@ -1,6 +1,22 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { createAgentMuxClient, parseSseLines, AGENT_MUX_CLIENT_BOUNDARY } from '../src/adapters-client.js';
+import { createAgentMuxClient, parseSseLines, AGENT_MUX_CLIENT_BOUNDARY, resolveAdapterName } from '../src/adapters-client.js';
+
+describe('resolveAdapterName', () => {
+  it("resolves the 'default' sentinel to the base agent (builtin stacks use adapter: default)", () => {
+    assert.equal(resolveAdapterName({ adapter: 'default', baseAgent: 'claude-code' }), 'claude-code');
+  });
+  it('falls back to the base agent when adapter is empty', () => {
+    assert.equal(resolveAdapterName({ baseAgent: 'codex' }), 'codex');
+  });
+  it('keeps an explicit non-default adapter', () => {
+    assert.equal(resolveAdapterName({ adapter: 'gemini-cli', baseAgent: 'claude-code' }), 'gemini-cli');
+  });
+  it('defaults to claude-code when nothing usable is set', () => {
+    assert.equal(resolveAdapterName({ adapter: 'default' }), 'claude-code');
+    assert.equal(resolveAdapterName({}), 'claude-code');
+  });
+});
 
 describe('AGENT_MUX_CLIENT_BOUNDARY', () => {
   it('declares the expected role and scope', () => {

@@ -4,6 +4,7 @@ import { createAgentPersonaController } from './agent-persona-controller.js';
 import { composeAgentPrompt } from './agent-prompt-composition.js';
 import { legacyAgentStackIdentityWarning } from './agent-identity-migration.js';
 import { assembleContextBundle } from './agent-context-bundles.js';
+import { resolveAdapterName } from './adapters-client.js';
 import { createResource, clone } from './resource-model.js';
 import { createAgentMuxClient } from './adapters-client.js';
 import { createAgentMemoryController } from './agent-memory-controller.js';
@@ -95,7 +96,7 @@ export function createAgentDispatchController(options = {}) {
           };
 
       return {
-        adapter: spec.adapter || spec.baseAgent || 'claude-code',
+        adapter: resolveAdapterName(spec),
         provider: spec.provider || 'anthropic',
         model: spec.model || 'claude-sonnet-4-20250514',
         prompt,

@@ -18,6 +18,19 @@ const KNOWN_ADAPTERS = new Set([
   'amp', 'roo-code', 'kilo-code', 'cline', 'cursor',
 ]);
 
+/**
+ * Resolve the effective adapter name for a stack spec. `adapter: 'default'` is a
+ * sentinel — the Helm-installed builtin stacks (e.g. the assistant) set it to
+ * mean "use the base agent's adapter". An empty adapter falls back the same way.
+ * Without this, 'default' reaches the job builder and is rejected as
+ * "Unknown adapter: default", so every dispatch of a builtin stack fails.
+ */
+export function resolveAdapterName(spec) {
+  const adapter = spec?.adapter;
+  if (adapter && adapter !== 'default') return adapter;
+  return spec?.baseAgent || 'claude-code';
+}
+
 const JITSI_SOCKET_PATH = '/tmp/jitsi-agent.sock';
 
 function jitsiResourceProfile(audioMode = 'listen') {
@@ -181,7 +194,7 @@ export function createAgentMuxClient(options = {}) {
      * @returns {{ protocol: string, endpoint: string, codec: string }}
      */
     resolveTransport(stack, transportBindings = []) {
-      const adapterName = stack?.spec?.adapter || stack?.spec?.baseAgent || 'claude-code';
+      const adapterName = resolveAdapterName(stack?.spec);
       const provider = stack?.spec?.provider || 'anthropic';
       const binding = (transportBindings || []).find(b => b.spec?.adapterRef === adapterName);
 
