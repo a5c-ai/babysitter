@@ -489,6 +489,33 @@ describe('callModel', () => {
     assert.equal(result.stopReason, 'tool_use');
     assert.ok(result.content.includes('Sure'));
   });
+
+  it('uses max_completion_tokens (not max_tokens) for the OpenAI-compatible/Azure path', async () => {
+    // gpt-5.x on the Azure 2024-12-01-preview API rejects `max_tokens` with
+    // "Use 'max_completion_tokens' instead", which broke every assistant chat.
+    let captured = null;
+    const result = await callModel({
+      provider: 'openai',
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      maxTokens: 123,
+      apiKey: 'test-key',
+      baseUrl: 'https://example.azure.com',
+      fetchImpl: async (_url, opts) => {
+        captured = JSON.parse(opts.body);
+        return {
+          ok: true,
+          json: async () => ({
+            choices: [{ message: { content: 'KRADLE_MODEL_CALL_OK' }, finish_reason: 'stop' }],
+            usage: { prompt_tokens: 4, completion_tokens: 2 },
+          }),
+        };
+      },
+    });
+    assert.equal(captured.max_completion_tokens, 123, 'must send max_completion_tokens');
+    assert.equal('max_tokens' in captured, false, 'must NOT send max_tokens');
+    assert.equal(result.content, 'KRADLE_MODEL_CALL_OK');
+  });
 });
 
 // ---------------------------------------------------------------------------

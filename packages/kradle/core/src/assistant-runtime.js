@@ -117,7 +117,11 @@ async function callOpenAICompatibleModel({ provider, model, messages, tools, max
 
   const body = {
     messages,
-    max_tokens: maxTokens || 4096,
+    // gpt-5.x on the Azure 2024-12-01-preview chat-completions API rejects the
+    // legacy `max_tokens` field ("Use 'max_completion_tokens' instead"), which
+    // made every assistant chat fail. `max_completion_tokens` is the current
+    // field and is accepted across the models this endpoint serves.
+    max_completion_tokens: maxTokens || 4096,
     ...(tools?.length ? { tools: tools.map(t => ({ type: 'function', function: t })) } : {}),
   };
 
