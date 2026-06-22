@@ -97,37 +97,48 @@ describe('createAgentJob', () => {
     const container = jobManifest.spec.template.spec.containers[0];
     assert.equal(container.name, 'agent');
     assert.equal(container.image, 'ghcr.io/custom/agent:v2');
-    assert.deepEqual(container.command, ['node', 'dist/cli/index.js', 'launch', 'claude-code', 'anthropic']);
+    // The runtime image's entrypoint wrapper drives `adapters launch`; harness/
+    // provider/model/task are passed via env, not inline command args.
+    assert.deepEqual(container.command, ['node', 'packages/adapters/cli/kradle-agent-entrypoint.mjs']);
 
-    // Env vars should include KRADLE_ORG and KRADLE_RUN_ID
+    // Env vars should include KRADLE_ORG, KRADLE_RUN_ID, and the harness/provider.
     const envMap = Object.fromEntries(container.env.map(e => [e.name, e.value]));
     assert.equal(envMap.KRADLE_ORG, 'acme');
     assert.equal(envMap.KRADLE_RUN_ID, 'run-456');
     assert.equal(envMap.KRADLE_WORKSPACE_PATH, '/workspace');
+    // kradle 'claude-code' maps to the launcher harness 'claude'.
+    assert.equal(envMap.KRADLE_HARNESS, 'claude');
+    assert.equal(envMap.KRADLE_PROVIDER, 'anthropic');
   });
 
-  it('includes model arg when provided', () => {
+  it('passes the model to the entrypoint via KRADLE_MODEL env', () => {
     const client = createAgentMuxClient({});
     const { jobManifest } = client.createAgentJob({
       adapter: 'claude-code',
-      provider: 'anthropic',
-      model: 'claude-sonnet-4-20250514',
+      provider: 'openai',
+      model: 'gpt-5.5',
       org: 'acme',
     });
 
     const container = jobManifest.spec.template.spec.containers[0];
-    assert.deepEqual(container.args, ['--model', 'claude-sonnet-4-20250514']);
+    const envMap = Object.fromEntries(container.env.map(e => [e.name, e.value]));
+    assert.equal(envMap.KRADLE_MODEL, 'gpt-5.5');
+    assert.equal(envMap.KRADLE_HARNESS, 'claude');
+    assert.equal(envMap.KRADLE_PROVIDER, 'openai');
   });
 
-  it('generates empty args when no model provided', () => {
+  it('omits KRADLE_MODEL when no model provided', () => {
     const client = createAgentMuxClient({});
     const { jobManifest } = client.createAgentJob({
-      adapter: 'claude-code',
+      adapter: 'gemini-cli',
       org: 'acme',
     });
 
     const container = jobManifest.spec.template.spec.containers[0];
-    assert.deepEqual(container.args, []);
+    const envMap = Object.fromEntries(container.env.map(e => [e.name, e.value]));
+    assert.equal('KRADLE_MODEL' in envMap, false);
+    // 'gemini-cli' maps to the launcher harness 'gemini'.
+    assert.equal(envMap.KRADLE_HARNESS, 'gemini');
   });
 
   it('mounts workspace PVC when provided', () => {

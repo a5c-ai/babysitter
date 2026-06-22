@@ -18,6 +18,24 @@ const KNOWN_ADAPTERS = new Set([
   'amp', 'roo-code', 'kilo-code', 'cline', 'cursor',
 ]);
 
+// Kradle adapter/baseAgent names → the harness identifier the `adapters launch`
+// CLI expects (packages/adapters/cli). They differ: kradle uses 'claude-code'
+// and 'gemini-cli', the launcher uses 'claude' and 'gemini'. An unmapped adapter
+// passes through unchanged.
+const HARNESS_MAP = {
+  'claude-code': 'claude',
+  'gemini-cli': 'gemini',
+};
+
+/**
+ * Map a kradle adapter/baseAgent name to the `adapters launch` harness name.
+ * @param {string} adapter
+ * @returns {string}
+ */
+export function resolveHarness(adapter) {
+  return HARNESS_MAP[adapter] || adapter;
+}
+
 /**
  * Resolve the effective adapter name for a stack spec. `adapter: 'default'` is a
  * sentinel — the Helm-installed builtin stacks (e.g. the assistant) set it to
@@ -404,6 +422,12 @@ export function createAgentMuxClient(options = {}) {
         { name: 'KRADLE_ORG', value: org },
         { name: 'KRADLE_RUN_ID', value: runId },
         { name: 'KRADLE_WORKSPACE_PATH', value: '/workspace' },
+        // Harness/provider/model the entrypoint wrapper passes to `adapters launch`.
+        // adapter is a kradle name (e.g. 'claude-code'); resolveHarness maps it to
+        // the launcher's harness id (e.g. 'claude').
+        { name: 'KRADLE_HARNESS', value: resolveHarness(adapter) },
+        { name: 'KRADLE_PROVIDER', value: provider },
+        ...(model ? [{ name: 'KRADLE_MODEL', value: model }] : []),
         { name: 'AGENT_MUX_TRANSPORT', value: transportConfig.protocol },
         { name: 'TRANSPORT_MUX_CODEC', value: transportConfig.codec },
         ...(transportConfig.endpoint ? [{ name: 'AGENT_MUX_TRANSPORT_ENDPOINT', value: transportConfig.endpoint }] : []),
@@ -435,8 +459,11 @@ export function createAgentMuxClient(options = {}) {
       const containers = [{
         name: 'agent',
         image: image || process.env.KRADLE_AGENT_IMAGE || 'ghcr.io/a5c-ai/adapters:latest',
-        command: ['node', 'dist/cli/index.js', 'launch', adapter, provider],
-        args: model ? ['--model', model] : [],
+        // The runtime image's entrypoint wrapper (kradle-agent-entrypoint.mjs)
+        // runs `adapters launch <harness> <provider>` through the JS transport-mux
+        // proxy and POSTs the result to KRADLE_CALLBACK_URL. It reads the harness/
+        // provider/model and task from env (below), so no inline command args.
+        command: ['node', 'packages/adapters/cli/kradle-agent-entrypoint.mjs'],
         env: containerEnv,
         ...(envFrom ? { envFrom } : {}),
         resources: resourceLimits || {
