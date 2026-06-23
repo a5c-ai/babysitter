@@ -39,44 +39,79 @@ function log(...args) {
   console.error('[kradle-agent]', ...args);
 }
 
+/**
+ * Extract the agent's final text + token usage from harness stdout. The launcher
+ * may emit plain text, a single claude-code JSON envelope, or stream-json NDJSON
+ * (one JSON event per line). Handle all three.
+ */
+function parseHarnessOutput(stdout) {
+  const trimmed = stdout.trim();
+  let text = trimmed;
+  let usage = {};
+
+  const pickUsage = (u) => (u ? {
+    inputTokens: u.input_tokens ?? u.prompt_tokens ?? 0,
+    outputTokens: u.output_tokens ?? u.completion_tokens ?? 0,
+  } : null);
+
+  // Single JSON envelope.
+  try {
+    const o = JSON.parse(trimmed);
+    if (o && typeof o === 'object') {
+      text = o.result ?? o.text ?? o.content ?? text;
+      usage = pickUsage(o.usage) ?? usage;
+      return { text: String(text), usage };
+    }
+  } catch { /* not a single JSON object */ }
+
+  // NDJSON / stream-json: scan events for the final result + usage.
+  const events = [];
+  for (const line of trimmed.split('\n')) {
+    const s = line.trim();
+    if (!s.startsWith('{')) continue;
+    try { events.push(JSON.parse(s)); } catch { /* skip non-JSON line */ }
+  }
+  if (events.length > 0) {
+    for (let i = events.length - 1; i >= 0; i--) {
+      const e = events[i];
+      const t = e.result ?? (e.type === 'result' ? e.result : undefined)
+        ?? (e.message?.content && typeof e.message.content === 'string' ? e.message.content : undefined)
+        ?? (e.role === 'assistant' ? e.content : undefined);
+      if (t != null) { text = typeof t === 'string' ? t : JSON.stringify(t); break; }
+    }
+    for (let i = events.length - 1; i >= 0; i--) {
+      const u = pickUsage(events[i].usage);
+      if (u) { usage = u; break; }
+    }
+  }
+  return { text: String(text), usage };
+}
+
 /** Run the harness one-shot and resolve with { text, usage, raw, exitCode }. */
 function runHarness() {
   return new Promise((resolvePromise) => {
-    // claude-code one-shot: -p prints and exits; --output-format json yields a
-    // structured result envelope. Pass harness args after the `--` separator.
-    const harnessArgs = ['-p', task, '--output-format', 'json'];
-    if (systemPrompt) harnessArgs.push('--append-system-prompt', systemPrompt);
-
+    // Prepend the system prompt into the task (the launcher has no generic
+    // system-prompt flag across harnesses).
+    const fullTask = systemPrompt ? `${systemPrompt}\n\n${task}` : task;
+    // `--no-interactive -p` is the launcher's one-shot contract: it sets the
+    // harness's own prompt flag (cli-flag delivery) and plain-spawns it to
+    // completion. `--with-proxy-if-needed` stands up the JS transport-mux so the
+    // claude harness can speak to the openai/Azure provider.
     const args = [
       CLI, 'launch', harness, provider,
       ...(model ? ['--model', model] : []),
       '--with-proxy-if-needed',
-      '--', ...harnessArgs,
+      '--no-interactive',
+      '-p', fullTask,
     ];
-    log('exec: node', args.map((a) => (a === task ? '<task>' : a)).join(' '));
+    log('exec: node', args.map((a) => (a === fullTask ? '<task>' : a)).join(' '));
 
     const child = spawn('node', args, { stdio: ['ignore', 'pipe', 'inherit'] });
     let stdout = '';
     child.stdout.on('data', (d) => { stdout += d.toString(); });
     child.on('error', (err) => resolvePromise({ text: '', usage: {}, raw: '', exitCode: 1, error: err.message }));
     child.on('close', (code) => {
-      let text = stdout.trim();
-      let usage = {};
-      // Try to parse claude-code --output-format json envelope.
-      try {
-        const parsed = JSON.parse(stdout);
-        if (parsed && typeof parsed === 'object') {
-          text = parsed.result ?? parsed.text ?? parsed.content ?? text;
-          if (parsed.usage) {
-            usage = {
-              inputTokens: parsed.usage.input_tokens ?? parsed.usage.prompt_tokens ?? 0,
-              outputTokens: parsed.usage.output_tokens ?? parsed.usage.completion_tokens ?? 0,
-            };
-          }
-        }
-      } catch {
-        // Not JSON — keep raw text.
-      }
+      const { text, usage } = parseHarnessOutput(stdout);
       resolvePromise({ text, usage, raw: stdout, exitCode: code ?? 0 });
     });
   });
