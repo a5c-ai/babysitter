@@ -1,0 +1,28 @@
+nodeKind: PackageSurface
+id: package:a5c-ai-voice-adapter
+attributes:
+  packageId: "@a5c-ai/voice-adapter"
+  packageName: "@a5c-ai/voice-adapter"
+  displayName: "Voice Governance Bridge"
+  description: |
+    PROPOSED (not yet built). Thin TypeScript bridge letting an external realtime
+    voice framework (LiveKit Agents) call babysitter-governed tools over MCP, with
+    a kradle VoiceCall session CRD and an inbound-call->session spawn path. Keeps
+    all governance/audit logic in-repo and OUT of the audio hot path: governed
+    tools are async MCP tools backed by in-process babysitter runs (createRun ->
+    orchestrateIteration -> commitEffectResult), with policy gates, breakpoint
+    approval gates (auth./destroy. postures force owner approval) and a replayable
+    journal. See docs/research/voice-governance-bridge-spec.md.
+  role: "voice-governance-bridge"
+  whenToUse: "Use when a realtime voice agent must run governed/audited tool workflows mid-conversation without blocking the sub-second audio turn."
+  status: proposed
+  workspacePath: packages/adapters/voice
+  moduleType: typescript
+  surfaceKinds: [mcp-server, crd-controller, channel-bridge]
+  sourceOfTruthRole: external
+  publishedTo: npm
+  versionPolicy: semver
+  supportedBackends: [webrtc, sip]
+  layer: cross-cutting
+  mux: voice-adapter
+edges: {}

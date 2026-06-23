@@ -1,0 +1,31 @@
+nodeKind: Channel
+id: channel:webrtc-voice
+attributes:
+  displayName: "WebRTC Voice"
+  kind: voice
+  endpoint: webrtc
+  persistent: true
+  description: |
+    Realtime bidirectional audio transport for browser/app voice agents over
+    WebRTC, terminated by the external media server (LiveKit). Carries the audio
+    hot path (VAD->STT->LLM->TTS); governed tool workflows run out-of-band via
+    @a5c-ai/voice-adapter. See docs/research/realtime-voice-agent-stack.md.
+edges:
+  realizes:
+    - target: layer:3-transport
+---
+nodeKind: Channel
+id: channel:sip-telephony
+attributes:
+  displayName: "SIP / PSTN Telephony"
+  kind: voice
+  endpoint: sip
+  persistent: true
+  description: |
+    Realtime phone transport (SIP/PSTN, inbound + outbound, DTMF, REFER, warm/cold
+    transfer) bridged to WebRTC by the external SIP gateway (livekit/sip). Inbound
+    calls map onto the channels-adapter event->bounded-session-spawn pattern. See
+    docs/research/realtime-voice-agent-stack.md.
+edges:
+  realizes:
+    - target: layer:3-transport

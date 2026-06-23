@@ -1,0 +1,52 @@
+nodeKind: Framework
+id: framework:livekit-agents
+attributes:
+  displayName: "LiveKit Agents"
+  homepageUrl: "https://github.com/livekit/agents"
+  belongsToLanguageId: language:python
+  category: realtime-voice
+  license: Apache-2.0
+  selfHostable: true
+  transports: [webrtc, sip]
+  description: |
+    Apache-2.0, fully self-hostable realtime voice-agent framework (incl. the
+    LiveKit WebRTC media server and a dedicated SIP/PSTN bridge). Runs the
+    cascaded VAD->STT->LLM->TTS pipeline with pluggable managed STT/TTS/LLM,
+    Turn Detector v1.0, async/background tools (ToolFlag.CANCELLABLE) and native
+    one-line MCP tool integration. Recommended orchestration core for the
+    WebRTC+telephony task/tool voice-agent use case. See
+    docs/research/realtime-voice-agent-stack.md.
+edges:
+  belongs_to_language:
+    - target: language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+  alternative_to:
+    - target: framework:pipecat
+      comparison: "LiveKit bundles WebRTC media server + SIP + native MCP in one Apache-2.0 self-hostable stack; Pipecat is a more granular Python pipeline with FunctionCallParams interception."
+---
+nodeKind: Framework
+id: framework:pipecat
+attributes:
+  displayName: "Pipecat"
+  homepageUrl: "https://github.com/pipecat-ai/pipecat"
+  belongsToLanguageId: language:python
+  category: realtime-voice
+  license: BSD-2-Clause
+  selfHostable: true
+  transports: [webrtc, websocket, sip]
+  description: |
+    BSD-licensed, self-hostable Python realtime voice pipeline framework. Pluggable
+    STT/TTS/LLM; tool calls default synchronous, cancel_on_interruption=False makes
+    them async/non-blocking with streaming is_final=False updates; the
+    FunctionCallParams.result_callback is a per-call interception seam; tool calls
+    instrumented as discrete OpenTelemetry spans (observation-only). Strong
+    alternative to LiveKit Agents. See docs/research/realtime-voice-agent-stack.md.
+edges:
+  belongs_to_language:
+    - target: language:python
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development
+  alternative_to:
+    - target: framework:livekit-agents
+      comparison: "Pipecat's result_callback gives finer per-call interception; LiveKit gives an integrated WebRTC+SIP+MCP stack."

@@ -1,0 +1,43 @@
+nodeKind: AgentGovernanceImpl
+id: agent-governance-impl:voice-governance@proposed
+attributes:
+  displayName: "Voice Tool-Loop Governance (proposed)"
+  status: proposed
+  agentVersionId: agent-version:babysitter@current
+  componentKind: voice-tool-governance
+  description: |
+    PROPOSED out-of-band governance for a realtime voice agent's mid-conversation
+    tool/decision loop. babysitter is a deterministic, fsync-per-step,
+    replay-by-re-execution orchestrator and CANNOT sit in the sub-second audio
+    turn; instead each governed tool is an async MCP tool whose handler drives an
+    in-process babysitter run off the hot path. The run decomposes the workflow
+    (ctx.task/ctx.parallel), enforces policy (PolicyEngine deny-on-dispatch), gates
+    sensitive actions with ctx.breakpoint (auth./destroy. postures force
+    owner-level human approval), and emits an append-only, checksummed, replayable
+    journal as the audit trail. Governance latency is hidden behind filler speech +
+    async/background tools so the audio path never blocks. See
+    docs/research/voice-governance-bridge-spec.md.
+  governedSurfaces:
+    - voice-agent-tool-call-loop
+    - mid-conversation-workflow-decomposition
+    - sensitive-action-execution
+  riskControls:
+    - policy-engine-deny-on-dispatch
+    - breakpoint-approval-gates (auth./destroy. -> owner)
+    - human-in-the-loop-mid-call
+    - irreversible-action-guarding (disallow_interruptions/wait_for_playout pairing)
+  evidenceProduced:
+    - append-only-checksummed-journal
+    - per-decision-replayable-audit-trail
+    - voicecall-crd-governanceRuns-status
+edges:
+  realizes:
+    - target: layer:14-governance
+  composes:
+    - target: agent:babysitter
+      role: governance
+  implements:
+    - target: extension-interface:governance
+  depends_on:
+    - target: source-ref:babysitter-sdk
+    - target: agent-runtime-impl:voice-agent@proposed

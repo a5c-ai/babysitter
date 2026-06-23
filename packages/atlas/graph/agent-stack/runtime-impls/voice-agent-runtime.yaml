@@ -1,0 +1,27 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:voice-agent@proposed
+attributes:
+  displayName: "Voice Agent Runtime (proposed)"
+  status: proposed
+  agentVersionId: agent-version:genty@current
+  componentKind: voice-runtime
+  description: |
+    PROPOSED realization of the realtime voice-agent runtime for the task/tool use
+    case. The conversational hot path is the cascaded VAD->STT->LLM->TTS pipeline
+    on an external framework (LiveKit Agents); the LLM node points at
+    @a5c-ai/transport-adapter (OpenAI-compatible, multi-provider + cost/usage
+    observability), and genty-core supplies the reusable streaming tool-calling
+    loop for governed sub-tasks. Governed tools are exposed to the framework over
+    MCP by @a5c-ai/voice-adapter. See docs/research/realtime-voice-agent-stack.md.
+  externalFrameworks: [livekit-agents, pipecat]
+  pipeline: cascaded-stt-llm-tts
+  reusedPackages: ["@a5c-ai/genty-core", "@a5c-ai/transport-adapter", "@a5c-ai/voice-adapter", "@a5c-ai/channels-adapter"]
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  composes:
+    - target: agent:genty
+      role: runtime
+  depends_on:
+    - target: source-ref:packages-genty
+    - target: source-ref:babysitter-sdk

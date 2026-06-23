@@ -1,0 +1,17 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:barge-in
+attributes:
+  displayName: "Barge-in / interruption"
+  kind: voice
+  surface: voice
+  requiresPermission: false
+  description: |
+    The user interrupts the agent mid-utterance and the agent yields the turn
+    (endpointing + interruption handling, e.g. LiveKit Turn Detector v1.0). A
+    realtime-voice interaction primitive distinct from dictation/narration. Note:
+    irreversible governed actions are protected from barge-in cancellation via
+    disallow_interruptions()/wait_for_playout() on the execute step. See
+    docs/research/realtime-voice-agent-stack.md.
+edges:
+  realizes:
+    - target: layer:10-interaction
