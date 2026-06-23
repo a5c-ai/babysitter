@@ -1,0 +1,61 @@
+nodeKind: InteractionPrimitive
+id: interaction-primitive:avatar-lipsync
+attributes:
+  displayName: "Avatar lipsync (voice-synced mouth)"
+  kind: video
+  surface: video
+  requiresPermission: false
+  description: |
+    The animated character's mouth/jaw morphs are driven from TTS viseme timing
+    (Azure VisemeReceived / ElevenLabs timestamps) scheduled against the same-page
+    audio clock, so the published video track lip-syncs the published audio track.
+    Fast path; never a tool call. See docs/research/realtime-voice-agent-stack.md §II.2.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-expression-gesture
+attributes:
+  displayName: "Agent expression / posture / gesture"
+  kind: video
+  surface: video
+  requiresPermission: false
+  description: |
+    Tool-driven cosmetic animation (set_expression/mood, set_posture, play_gesture,
+    look_at, set_view) on the realtime fast path straight to the renderer. Reversible,
+    sub-100ms; not babysitter-governed. See docs/research/voice-governance-bridge-spec.md §8A.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-canvas-draw
+attributes:
+  displayName: "Agent canvas annotation"
+  kind: video
+  surface: video
+  requiresPermission: true
+  description: |
+    The agent draws on an HTML canvas composited into the published video track.
+    When it renders externally-visible CONTENT it is routed through the babysitter
+    media-governance bridge (governed path); ephemeral cursors stay fast-path.
+    See docs/research/voice-governance-bridge-spec.md §8A.
+edges:
+  realizes:
+    - target: layer:10-interaction
+---
+nodeKind: InteractionPrimitive
+id: interaction-primitive:agent-screenshare
+attributes:
+  displayName: "Agent screen-share / VNC"
+  kind: video
+  surface: video
+  requiresPermission: true
+  description: |
+    The agent shares/operates a desktop via noVNC composited into the video track.
+    Governed (auth. breakpoint -> owner approval) before start. See
+    docs/research/voice-governance-bridge-spec.md §8A and realtime-agent-gaps.md G7.
+edges:
+  realizes:
+    - target: layer:10-interaction

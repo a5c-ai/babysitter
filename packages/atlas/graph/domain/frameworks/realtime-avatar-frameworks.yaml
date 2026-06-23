@@ -1,0 +1,27 @@
+nodeKind: Framework
+id: framework:talkinghead-js
+attributes:
+  displayName: "TalkingHead.js"
+  homepageUrl: "https://github.com/met4citizen/TalkingHead"
+  belongsToLanguageId: language:typescript
+  category: realtime-avatar-rendering
+  license: MIT
+  selfHostable: true
+  rendering: webgl-threejs
+  avatarFormat: ready-player-me-glb
+  visemeSets: [oculus, arkit]
+  description: |
+    Browser avatar renderer: renders a Ready Player Me GLB on Three.js with a
+    ready-made control API for posture, expression, gaze, gesture and visemes
+    (52 ARKit + 15 Oculus). Recommended renderer for the realtime animated-avatar
+    agent harness, run inside the kradle headless-Chromium Jitsi sidecar; its
+    canvas is captureStream()'d and published as the agent video track. Ship your
+    own licensed RPM avatar (the sample is CC BY-NC). 2D alternative: Live2D via
+    pixi-live2d-display (proprietary Cubism Core). Server-side fidelity upgrade:
+    NVIDIA Audio2Face-3D (MIT SDK, audio->blendshapes). See
+    docs/research/realtime-voice-agent-stack.md Part II + Appendix D.
+edges:
+  belongs_to_language:
+    - target: language:typescript
+  used_by_skill_area:
+    - target: skill-area:ai-agent-development

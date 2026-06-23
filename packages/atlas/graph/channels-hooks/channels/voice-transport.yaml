@@ -29,3 +29,35 @@ attributes:
 edges:
   realizes:
     - target: layer:3-transport
+---
+nodeKind: Channel
+id: channel:avatar-video-track
+attributes:
+  displayName: "Avatar Video Track"
+  kind: video
+  endpoint: webrtc
+  persistent: true
+  description: |
+    The agent's published VIDEO track: a composited HTML <canvas> (avatar WebGL +
+    annotation overlay + screen-share layer) captured via canvas.captureStream() and
+    published into the Jitsi meeting through lib-jitsi-meet setEffect (the
+    JitsiStreamPresenterEffect pattern), from the kradle headless-Chromium sidecar.
+    See docs/research/realtime-voice-agent-stack.md §II.2.
+edges:
+  realizes:
+    - target: layer:3-transport
+---
+nodeKind: Channel
+id: channel:screenshare-vnc
+attributes:
+  displayName: "Screen-share / VNC surface"
+  kind: video
+  endpoint: vnc-websocket
+  persistent: true
+  description: |
+    A remote desktop surfaced via noVNC (RFB over WebSocket / websockify), rendered
+    to a canvas and composited into the agent's video track; the agent can both show
+    and operate it. Governed start/stop. See docs/research/realtime-agent-gaps.md G7.
+edges:
+  realizes:
+    - target: layer:3-transport

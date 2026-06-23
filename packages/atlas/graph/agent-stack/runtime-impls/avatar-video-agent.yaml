@@ -1,0 +1,31 @@
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:avatar-video-agent@proposed
+attributes:
+  displayName: "Avatar Video Agent Runtime (proposed)"
+  status: proposed
+  agentVersionId: agent-version:genty@current
+  componentKind: avatar-video-runtime
+  description: |
+    PROPOSED realtime animated-avatar VIDEO runtime, rendered inside the existing
+    kradle headless-Chromium Jitsi sidecar (package-surface:kradle-jitsi-agent-sidecar).
+    TalkingHead.js (RPM GLB + Three.js) renders the character to a canvas that is
+    captureStream()'d and published as the agent's Jitsi VIDEO track; TTS is
+    published as the AUDIO track through a same-page Web Audio graph, with mouth
+    visemes driven off AudioContext.currentTime (lipsync). Cosmetic animation
+    (expression/posture/gaze) is a realtime FAST PATH to the renderer; consequential
+    visual tool calls (canvas content, screen-share/VNC, external video metadata)
+    are GOVERNED by agent-governance-impl:voice-governance@proposed. Extends the
+    voice runtime. See docs/research/realtime-voice-agent-stack.md Part II.
+  externalFrameworks: [talkinghead-js, livekit-agents]
+  reusedPackages: ["@a5c-ai/genty-core", "@a5c-ai/transport-adapter", "@a5c-ai/voice-adapter", "kradle-jitsi-agent-sidecar", "kradle"]
+  mediaPlane: [avatar-render, video-track-publish, audio-track-publish, lipsync, screenshare-vnc, canvas-overlay]
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+    - target: layer:11-presentation
+  composes:
+    - target: agent:genty
+      role: runtime
+  depends_on:
+    - target: source-ref:packages-genty
+    - target: agent-runtime-impl:voice-agent@proposed

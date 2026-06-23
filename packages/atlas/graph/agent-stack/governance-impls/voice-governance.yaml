@@ -21,6 +21,7 @@ attributes:
     - voice-agent-tool-call-loop
     - mid-conversation-workflow-decomposition
     - sensitive-action-execution
+    - consequential-visual-tools (canvas-content, screen-share-vnc, external-video-metadata)
   riskControls:
     - policy-engine-deny-on-dispatch
     - breakpoint-approval-gates (auth./destroy. -> owner)

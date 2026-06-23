@@ -1,8 +1,9 @@
-# `@a5c-ai/voice-adapter` — voice-governance bridge (draft spec)
+# `@a5c-ai/voice-adapter` — media-governance bridge (draft spec, **audio + video/avatar**)
 
-> **Status:** Draft design spec for a **proposed, not-yet-built** package. Companion to [`realtime-voice-agent-stack.md`](./realtime-voice-agent-stack.md).
+> **Status:** Draft design spec for a **proposed, not-yet-built** package. Companion to [`realtime-voice-agent-stack.md`](./realtime-voice-agent-stack.md) (architecture, incl. Part II video) and [`realtime-agent-gaps.md`](./realtime-agent-gaps.md) (gap register).
 > **Date:** 2026-06-23.
-> **One-liner:** the thin TypeScript bridge that lets an external realtime voice framework (LiveKit Agents) call **babysitter-governed tools** over MCP, with a kradle `VoiceCall` session CRD and an inbound-call→session spawn path — keeping all governance/audit logic inside this monorepo and out of the audio hot path.
+> **One-liner:** the thin TypeScript bridge that lets a realtime media agent call **babysitter-governed tools** over MCP — now covering both the voice path **and** the animated-avatar **video** path on kradle/Jitsi: cosmetic animation runs on a realtime fast path, while consequential visual actions (canvas content, screen-share/VNC, external video metadata) are gated exactly like any sensitive tool, with a replayable audit journal — all out of the audio/animation hot path.
+> **Reconciled with kradle reality (Appendix E of the architecture doc):** kradle ALREADY has the session/identity CRDs (`AgentStack.jitsiConfig`, `JitsiMeeting`, `AgentAppearance`/`AgentVoiceProfile`) and the dispatch→sidecar wiring. **§4 below now EXTENDS those existing CRDs rather than minting a parallel `VoiceCall`** (an earlier draft of this spec proposed a new CRD before the code map; superseded).
 
 ## 1. Why this package exists
 
@@ -104,33 +105,54 @@ async function driveRun(runDir: string, resolvers: EffectResolvers): Promise<Run
 
 `resolvers.execute` runs the actual sub-tool (a DB write, an API call, or a `genty-core` agent task with `customTools`); `resolvers.approve` routes a breakpoint to the human channel.
 
-## 4. Component 2 — kradle `VoiceCall` CRD
+## 4. Component 2 — kradle CRD extensions (EXTEND existing, don't invent)
 
-Clone the existing `JitsiMeeting` CRD + controller (`packages/kradle/core/src/jitsi-meeting-controller.js`). It owns per-call session lifecycle, correlation, and (optionally) join credentials for the LiveKit room.
+The code map (Appendix E of the architecture doc) shows kradle already has the session/identity CRDs. We **extend** them — no parallel `VoiceCall` kind.
 
+**(a) `AgentStack.spec.jitsiConfig` — add the video capability** (validated in `agent-stack-controller.js:223-257`):
 ```yaml
-apiVersion: kradle.a5c.ai/v1
-kind: VoiceCall
 spec:
-  channel: webrtc | sip            # transport
-  direction: inbound | outbound
-  peer: { e164?: "+1...", roomId?: "..." }   # phone or WebRTC room
-  agent: { model, systemPrompt, governedTools: [issue_refund, ...] }
-  ttlSeconds: 3600
-status:
-  phase: Pending | Ringing | Active | Completed | Failed
-  livekitRoom: "..."               # bound LiveKit room
-  governanceRuns:                  # correlation: every governed run spawned this call
-    - { tool: issue_refund, runId: 01..., phase: waiting-approval }
-  transcriptRef: "..."
-  startedAt / endedAt
+  jitsiCapability: true
+  jitsiMeetingProviderRef: { name: ... }
+  jitsiConfig:
+    role: agent
+    participantName: "Aria"
+    capabilities:
+      audio: publish          # existing
+      video: publish          # NEW — gates the avatar/video media plane
+    avatarRef: { name: aria-appearance }      # NEW — points at an AgentAppearance
+    tools: [send_chat, speak, set_expression, set_posture, play_gesture,    # NEW video tools
+            look_at, set_view, draw_canvas, share_surface, send_video_metadata]
+    governedTools: [draw_canvas, share_surface, send_video_metadata]        # NEW — which visual tools are babysitter-gated
 ```
+`JitsiCapabilityReady` validation extends to: video role may publish, `avatarRef` resolves, `governedTools ⊆ tools`.
 
-Controller responsibilities: admit the call, (for SIP) coordinate with the LiveKit SIP trunk/dispatch, mint any room JWT (reuse `signJwt`), track `governanceRuns` status by watching babysitter run journals, enforce TTL, and reconcile terminal cleanup. This makes every governed decision in a call queryable as control-plane state + a replayable journal.
+**(b) `AgentAppearance` — add the avatar model** (`resource-model.js:36`; today “avatar generation settings” only):
+```yaml
+spec:
+  organizationRef: ...
+  renderer: talkinghead          # talkinghead | live2d
+  avatarModelUrl: "https://…/aria.glb"     # Ready Player Me GLB (own-licensed)
+  visemeSet: oculus              # oculus | arkit
+  defaultMood: neutral
+  defaultView: upper
+```
+Pair with the existing `AgentVoiceProfile` (TTS provider/voice). **Critical wiring gap (G10):** both are resolved into dispatch identity (`agent-dispatch-controller.js:303-309`) but never reach the sidecar — thread them through `prepareMeetingContext` (`jitsi-agent-bridge.js:62-99`) → `meetingContext` → `createJitsiSidecarContainer` env (`adapters-client.js:94-118`).
 
-## 5. Component 3 — telephony channels backend (inbound spawn)
+**(c) `JitsiMeeting.status` — add media/session tracking** (`jitsi-meeting-controller.js:156-174` tracks only `recording.*`):
+```yaml
+status:
+  media:        { agentTracks: [{ participant, audio: true, video: true, screenshare: false }] }
+  transcript:   { live: true, ref: "..." }
+  session:      { agents: [{ stackRef, jobRef, phase }] }
+  governanceRuns: [{ tool: draw_canvas, runId: 01…, phase: waiting-approval }]   # correlation to babysitter runs
+```
+The meeting controller watches babysitter run journals (via this bridge) to populate `governanceRuns`, making every gated visual/tool decision queryable as control-plane state + a replayable journal.
 
-A new backend in `channels-adapter`'s poller/relay/spawner pipeline (the pattern in `spawner.ts:148,383`). An inbound call event (from the LiveKit SIP dispatch webhook / trunk) becomes a surviving channel event → `SessionSpawner.spawn` launches **one bounded per-call agent session**, self-associating the voice-bridge MCP server (so the spawned agent has the governed tools) and a `reply_to`-style back-channel keyed to the `voiceCallId`. Bounded concurrency + error isolation come for free from the existing spawner. (Outbound calls are initiated via the `VoiceCall` CRD + LiveKit SIP outbound API.)
+## 5. Component 3 — inbound spawn (two paths)
+
+- **kradle-native (today's path):** an inbound meeting/call → `JitsiMeeting` + `dispatchAutoJoinAgents` / manual dispatch (`jitsi-meeting-controller.js:190-219`, `agent-dispatch-controller.js`) → `createAgentJob` attaches the sidecar (`adapters-client.js:496-498`). Primary flow, already exists; we ride it.
+- **channels-adapter (telephony/SIP):** for PSTN inbound, a new "telephony" backend in `channels-adapter`'s poller/relay/spawner (`spawner.ts:148,383`) maps an inbound-call event → `SessionSpawner.spawn` (bounded concurrency + reply back-channel), which requests a kradle dispatch into the room. Outbound calls are initiated via the meeting controller + SIP gateway.
 
 ## 6. Governed-tool process skeleton (babysitter)
 
@@ -195,11 +217,41 @@ If approval is slow, the agent fills naturally ("still waiting on a supervisor�
 - No babysitter `orchestrateIteration`/`commitEffectResult` ever runs inside a turn — always in `runDriver` off the hot path.
 - Filler speech + `ToolFlag.CANCELLABLE` cover the governance round-trip; `disallow_interruptions()`/`wait_for_playout()` wrap only the irreversible execute step (heed issue #4560 — re-assert per step).
 
+## 8A. Avatar control protocol + the two lanes (video)
+
+The agent controls the character with tool calls mapped onto the renderer (TalkingHead.js) vocabulary. They split by latency/consequence:
+
+| Lane | Tools | Path | Governed? |
+|---|---|---|---|
+| **Realtime fast path** (must sync to speech, sub-100ms) | `speak` (visemes internal), `set_expression(mood)`, `set_posture`/`play_gesture`, `look_at`, `set_view` | MCP → **G0 socket → sidecar renderer** directly | no (cosmetic, reversible) — light audit only |
+| **Governed async path** (shows content / shares desktop / emits data) | `draw_canvas` (content), `share_surface`/`share_vnc`, `send_video_metadata` to external sinks | MCP **async tool → babysitter run** (filler) → on approval → socket → sidecar | yes — policy + `auth.`/`destroy.` breakpoints + journal |
+
+MCP tool surface to add (consumed by the G0 socket-writer; see gaps G16): `kradle_speak`, `kradle_set_expression`, `kradle_set_posture`, `kradle_play_gesture`, `kradle_look_at`, `kradle_set_view` (fast); `kradle_draw_canvas`, `kradle_share_surface`, `kradle_send_video_metadata` (governed). Visemes are **never** a tool — they're driven internally from the TTS clock (architecture doc §II.2).
+
+A governed *visual* process mirrors §6, e.g. `share_surface` → `ctx.task(resolveTarget)` → `ctx.breakpoint('auth.screen-share')` (owner) → `ctx.task(startVnc)`; or `draw_canvas` with externally-visible content → `ctx.task(contentPolicyCheck)` → optional breakpoint → emit draw commands.
+
+## 8B. Sidecar media plane the bridge drives (kradle `jitsi-agent-sidecar`)
+
+The bridge's fast-path and approved governed commands land as IPC actions on the sidecar. Required sidecar work (gaps G0–G8):
+- **G0 (load-bearing):** build the **agent↔sidecar socket client** — today MCP tools only return a `{socketPath,command}` descriptor and nothing writes it to `/tmp/jitsi-agent.sock` (`mcp-server.js:709-733`); without this *no* command (even chat) reaches the sidecar.
+- **Render + publish:** inject a TalkingHead canvas in the headless page; `canvas.captureStream()` → publish via lib-jitsi-meet `setEffect` (video); TTS → Web-Audio graph → `captureStream()` (audio) on the same clock (lipsync). Replace the `--use-fake-device` placeholder and the `audio.js` stubs.
+- **New IPC actions:** extend `SUPPORTED_ACTIONS` (`ipc-server.js:4-14`) + `handleCommand` (`runtime.js:73-102`) with `set_expression`, `set_posture`, `play_gesture`, `look_at`, `set_view`, `draw_canvas`, `start_screenshare`, `send_video_metadata`; emit inbound `chat` events (`runtime.js:58-71`).
+- **Screen-share:** replace `window.open` (`puppeteer-jitsi-client.js:63-65`) with noVNC-canvas compositing or `getDisplayMedia` → screen track.
+
+## 8C. Full user flow (create stack → agent → call → interact by text AND video)
+
+1. **Create an AgentStack** in the kradle web **stack-builder** (gap G14 adds the "Meeting / Video" section): toggle modalities (text / voice / video), pick the avatar (`AgentAppearance`) + voice (`AgentVoiceProfile`) + the governed tool set; writes `jitsiCapability` + `jitsiConfig.capabilities.video` + `avatarRef`. Reconciled by `agent-stack-controller.js` → `JitsiCapabilityReady`.
+2. **Create an Agent** (persona) bound to the stack (MCP `kradle_create_agent` or the identity pages → `AgentPersona`+`AgentDefinition` (+`AgentAppearance`/`AgentVoiceProfile`)).
+3. **Call it** — create a `JitsiMeeting`; dispatch attaches the sidecar Job (`createAgentJob`), the headless browser joins as the avatar and (with the media plane built) publishes A/V tracks. The kradle web meeting page already renders the agent's track as a participant tile (`jitsi-embedded-meeting.jsx`) — no new video component needed.
+4. **Interact** — the user joins via the web meeting UI and talks/types. The agent responds with **voice + lipsynced mouth + expressions/posture** on the **fast path**, and can **draw on the canvas / screen-share / send video metadata** via the **governed path** (filler speech while babysitter gates the action). Text chat works both ways (human via the iframe chat; agent via `send_chat` once G0 lands). Video is active **only if the stack declares `capabilities.video`** — otherwise the same agent is a text/voice participant.
+
 ## 9. Open implementation questions
 
-1. **Callback transport:** MCP notification/SSE vs an agent-polled `check_status` tool vs a LiveKit data-channel message — which gives the lowest-friction "result is ready" injection? (Prototype both.)
+1. **Callback transport:** MCP notification/SSE vs an agent-polled `check_status` tool vs a LiveKit/Jitsi data-channel message — which gives the lowest-friction "result is ready" injection? (Prototype both.)
 2. **Breakpoint→human routing in-call:** DTMF capture, a supervisor console, or warm-transfer to a human agent who approves — needs a concrete `resolvers.approve` implementation per channel.
 3. **Babysitter latency envelope:** micro-benchmark `create→iterate→commit→iterate` on target disk to set the `sync`-eligible threshold and typical governed-tool wall-clock.
-4. **Run/session GC:** TTL + terminal-cleanup reconciliation in the `VoiceCall` controller; orphaned-run sweeping.
+4. **Run/session GC:** TTL + terminal-cleanup reconciliation in the `JitsiMeeting` controller; orphaned-run sweeping; tearing down the sidecar Job + babysitter runs when the meeting ends.
 5. **genty-as-sub-executor vs direct effect resolvers:** when a governed sub-task is itself agentic, run it via `genty-core` (`customTools`) vs a plain function — pick per tool.
-6. **Multi-tool calls in one turn:** ordering/locking when the LLM emits several governed tool calls at once (babysitter runs are per-tool; the `VoiceCall` correlates them).
+6. **Multi-tool calls in one turn:** ordering/locking when the LLM emits several governed tool calls at once (babysitter runs are per-tool; `JitsiMeeting.status.governanceRuns` correlates them).
+7. **Fast-path vs governed boundary:** is `draw_canvas` cosmetic (fast) or content (governed)? Likely per-call classification (e.g. ephemeral cursor vs persistent rendered text) — needs a crisp rule so animation never accidentally blocks on governance.
+8. **A/V sync under load:** measure viseme-vs-audio drift on the real sidecar GPU host (architecture doc §II risk X1) before committing to the same-page-audio-clock approach at scale.

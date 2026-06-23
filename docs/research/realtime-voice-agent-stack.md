@@ -1,9 +1,10 @@
-# Realtime Voice Agent Stack — with babysitter as the inner governance layer
+# Realtime Voice **+ Video / Animated-Avatar** Agent Stack — with babysitter as the inner governance layer
 
-> **Status:** Research + architecture report (no code yet).
+> **Status:** Research + architecture report (no code yet). Originally a voice-only design (Parts 0–6); **extended to a realtime animated-avatar VIDEO harness on kradle/Jitsi in Part II** (lipsync, tool-driven expression/posture/canvas/screen-share, video published into meetings).
 > **Date:** 2026-06-23.
-> **Scope (locked with requester):** open-core (managed STT/TTS/LLM acceptable) · WebRTC **+** telephony (SIP/PSTN) · deliverable = research + architecture report · primary use case = **task/tool agent** (customer-support / ops copilot that calls tools and runs multi-step workflows mid-conversation).
-> **Method:** three parallel research streams — (A) in-repo babysitter-SDK governance-fit, (B) in-repo reusable infra survey, (C) online landscape via the deep-research harness (28 sources fetched → 133 claims → 25 adversarially verified, 23 confirmed). Raw streams are reproduced verbatim in the appendices.
+> **Scope (locked with requester):** open-core (managed STT/TTS/LLM acceptable) · WebRTC **+** telephony (SIP/PSTN) · **+ realtime video: an animated character with voice-synced mouth/expression/posture, an HTML canvas it can draw on, screen-share (VNC), and arbitrary video metadata — fully usable through kradle meetings (CRD + UX + full create-stack→agent→call flow)** · deliverable = research + architecture report · primary use case = **task/tool agent**.
+> **Method:** five research streams — (A) babysitter-SDK governance-fit, (B) reusable in-repo infra, (C) online voice landscape (deep-research, 28 sources→25 verified), plus for Part II: (D) the online avatar/video-subsystem landscape and (E) the kradle media/CRD/UX code map. Raw streams are reproduced in the appendices.
+> **Gaps:** the consolidated, dependency-ordered gap register lives in [`realtime-agent-gaps.md`](./realtime-agent-gaps.md); the bridge/CRD/UX spec in [`voice-governance-bridge-spec.md`](./voice-governance-bridge-spec.md).
 
 ---
 
@@ -12,6 +13,8 @@
 Build the realtime audio path on **LiveKit Agents** (Apache-2.0, fully self-hostable including its WebRTC media server *and* a dedicated SIP bridge) running the **cascaded VAD→STT→LLM→TTS pipeline** — **not** speech-to-speech, because a tool/compliance agent needs the text audit trail at every stage. Reuse the babysitter monorepo for the **non-audio half** (genty as the streaming tool-brain, `transport-adapter` as the multi-provider + observability LLM gateway, kradle as the session control plane, the channels-adapter spawn pattern for inbound calls). Plug babysitter in as **governance behind an async MCP tool boundary — never inside the audio turn** — using LiveKit's native MCP support + async/background tools so the agent speaks filler while the deterministic, replayable governance run executes out-of-band.
 
 The design hinges on one hard, code-verified fact: **babysitter is a fsync-per-step, lock-serialized, replay-by-re-execution orchestrator. It physically cannot sit in a sub-second turn.** So it governs the *workflow behind a tool call*, not the conversation.
+
+**For video (Part II):** keep the realtime media in the existing **kradle headless-Chromium Jitsi sidecar** — render the avatar (TalkingHead.js / Ready Player Me + Three.js) into an HTML `<canvas>`, `captureStream()` it as the agent's **video track**, publish TTS through a same-page Web Audio graph as the **audio track**, and drive mouth visemes off the same audio clock. Cosmetic animation (mouth, expression, posture, gaze) is a **realtime fast path** straight to the renderer; **consequential** visual tool calls (writing content to the canvas, starting screen-share/VNC, emitting external video metadata) route through the same async babysitter governance boundary as any other sensitive tool. The whole capability is declared on the **AgentStack CRD**, bound to an **AgentAppearance/AgentVoiceProfile** identity, and exercised through the **create-stack → create-agent → call → interact (text + video)** flow in kradle/web.
 
 ---
 
@@ -124,6 +127,72 @@ Pipecat: [function-calling docs](https://docs.pipecat.ai/pipecat/learn/function-
 External governance pattern: [webrtc.ventures — Twilio+Pipecat+LangGraph policy guardrails](https://webrtc.ventures/2026/01/building-a-voice-ai-agent-with-policy-guardrails-using-twilio-pipecat-and-langgraph).
 Latency corroboration: [Hamming AI voice latency](https://hamming.ai/resources/voice-ai-latency).
 In-repo (see appendices for line cites): genty `packages/genty/core/src/session.ts`; transport `packages/adapters/transport/src/server.ts`; kradle `packages/kradle/core/src/control-plane.js`; channels `packages/adapters/channels/src/spawner.ts`; babysitter `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts`, `.../breakpoints/evaluator.ts`.
+
+---
+---
+
+# Part II — Realtime video / animated-avatar harness (kradle)
+
+> Extends Parts 0–6 from voice to a **talking animated character** published into a kradle/Jitsi meeting, with tool-driven expression/posture, an HTML canvas it draws on, screen-share (VNC), and arbitrary video metadata. Grounded in Appendix D (avatar/video tech) + Appendix E (kradle code map).
+
+## II.1 The keystone — render inside the existing headless-Chromium Jitsi sidecar
+
+kradle already dispatches a meeting agent as a K8s Job with a **headless-Chromium Jitsi participant sidecar** (`packages/kradle/jitsi-agent-sidecar`) that joins via `window.APP.conference`. Today it publishes only Chrome's **fake spinning-ball video + beep** (`--use-fake-device-for-media-stream`) and its audio is a stub. That headless browser is exactly the right place to render an avatar: a real DOM/WebGL page is available, so the natural pattern is **render → `canvas.captureStream()` → publish as the agent's camera track** — no new media server, no extra hop. **We extend the sidecar; we do not replace the media path.**
+
+> **Load-bearing precondition (gap G0):** the agent's MCP meeting tools currently only *return a descriptor* `{socketPath, command}` and **nothing writes it to the sidecar's Unix socket at runtime** — so even text chat and `speak_tts` never reach the sidecar. The agent↔sidecar socket-client must be built first; every video capability rides on it. See [`realtime-agent-gaps.md`](./realtime-agent-gaps.md) §1.
+
+## II.2 Media pipeline (and the A/V-sync fix)
+
+```
+headless Chromium page (sidecar)
+  ├─ Renderer: TalkingHead.js (Ready Player Me GLB on Three.js) → WebGL canvas
+  ├─ Compositor: one output <canvas>, per-frame drawImage() of
+  │     [avatar WebGL canvas] + [annotation 2D overlay] + [noVNC/screen layer]
+  │        → canvas.captureStream(fps)  ──► VIDEO track  (lib-jitsi-meet setEffect, the JitsiStreamPresenterEffect pattern)
+  └─ Audio: TTS → AudioBuffer → Web Audio graph → MediaStreamAudioDestinationNode.captureStream()
+           → AUDIO track (published in the SAME conference)
+                 ▲
+   Lipsync: Azure VisemeReceived (viseme ids + tick offsets) OR ElevenLabs char-timestamps
+            → schedule mouth/jaw morphs against AudioContext.currentTime  (RMS-envelope fallback)
+```
+
+**The single hardest problem is cross-track A/V drift.** Audio and the canvas video are *separate* WebRTC tracks; receivers don't lip-sync-align them beyond RTCP. The fix (Appendix D): **play TTS through a Web Audio graph in the same page, publish *that* as the audio track, and drive visemes off `AudioContext.currentTime`** — one page, one audio clock → bounded drift. Publishing audio from a different process is what visibly desyncs.
+
+## II.3 Avatar control protocol — the fast-path vs governed split
+
+The agent controls the character with tool calls that map onto the renderer's command vocabulary (TalkingHead.js API): `speak`, `setExpression(mood)`, `setPosture`/`playGesture`, `lookAt`, `setView`, `drawCanvas`, `showScreen/shareVNC`, `sendVideoMetadata`. These split into two lanes by latency and consequence:
+
+| Lane | Tool calls | Path | Governance |
+|---|---|---|---|
+| **Realtime fast path** (sub-100ms, must sync to speech) | mouth/visemes, `setExpression`, `setPosture`/`playGesture`, `lookAt`, `setView` | agent → MCP → **G0 socket → sidecar renderer** directly | none / lightweight audit only — cosmetic, reversible, must not block on fsync |
+| **Governed (async) path** (consequential/irreversible) | `drawCanvas` *content*, `showScreen`/`shareVNC` start, `sendVideoMetadata` to external sinks | agent → **async MCP tool → babysitter run** (filler speech) → on approval, socket → sidecar | babysitter policy + `auth.`/`destroy.` breakpoint gates + replayable journal |
+
+This is the same hot-path-vs-governance rule from Part I, now applied to the *visual* channel: animation is reflexive and stays on the fast path; anything that **shows content, shares a desktop, or emits data outward** is gated exactly like a sensitive tool. (Detail + the control protocol live in [`voice-governance-bridge-spec.md`](./voice-governance-bridge-spec.md).)
+
+## II.4 Canvas, screen-share/VNC, video metadata
+
+- **HTML canvas the agent draws on:** an annotation 2D-canvas layer composited into the output canvas (so it's part of the published video). Draw commands arrive via `drawCanvas` (governed when they render content).
+- **Screen-share / view-VNC:** **noVNC** (RFB over WebSocket via websockify) renders a desktop onto a canvas → composited as a layer; the agent can both *show* and *operate* the desktop. Governed start/stop.
+- **Arbitrary video metadata:** a control channel (Jitsi endpoint messages / data channel) carries whatever extra the character supports (name tags, lower-thirds, emotion telemetry); governed when it leaves the meeting.
+
+## II.5 kradle integration (CRD → identity → call → UX)
+
+The control plane is **already real** (Appendix E): `AgentStack` CRD with `jitsiCapability`/`jitsiConfig`, `AgentAppearance`("avatar generation settings") + `AgentVoiceProfile` identity, full `JitsiMeeting` lifecycle, dispatch→sidecar-Job wiring, and an External-API iframe that **already renders the agent's published track as a participant tile** (so no new web video component is needed). The deltas to make it video-capable — `jitsiConfig.capabilities.video:'publish'` + `avatarRef`, threading appearance/voice into the sidecar env, `JitsiMeeting.status.media`, the stack-builder “Meeting/Video” section, and the video MCP tools — are specified in [`voice-governance-bridge-spec.md`](./voice-governance-bridge-spec.md) and tracked in [`realtime-agent-gaps.md`](./realtime-agent-gaps.md) §3–4. **User flow:** create an AgentStack (toggle text/voice/video, pick avatar+voice+governed tools) → create an Agent (persona bound to the stack) → call it (a `JitsiMeeting` is created, the sidecar joins as the avatar, publishes A/V) → interact by **text** (chat) **and video** (the character speaks with lipsync, emotes, draws on canvas, shares a screen) — video only if the stack declares the capability.
+
+## II.6 Recommended video stack (open-core, browser-canvas-in-sidecar)
+
+| Subsystem | Choice | Notes |
+|---|---|---|
+| Renderer | **TalkingHead.js** (RPM GLB + Three.js) in headless Chromium (`--headless=new`, real GPU) | richest ready-made control API; ship own-licensed avatar (sample is CC BY-NC) |
+| Lipsync | **Azure `VisemeReceived`** (or ElevenLabs char-timestamps) → morphs on `AudioContext.currentTime` | same-page audio clock; RMS-envelope fallback |
+| Video publish | `canvas.captureStream()` → lib-jitsi-meet **`setEffect`** | the `JitsiStreamPresenterEffect` pattern; pin a known-good LJM version |
+| Screen/desktop | **noVNC** + websockify, composited layer | also lets the agent operate the desktop |
+| Media server | existing **Jitsi** (sidecar+CRDs already target it) | LiveKit is the Part-I alternative |
+| (optional) hi-fi face | **NVIDIA Audio2Face-3D** (MIT SDK, audio→blendshapes) | GPU + gRPC hop; still needs the Three.js renderer |
+
+## II.7 Video risks
+
+All in [`realtime-agent-gaps.md`](./realtime-agent-gaps.md) §6: A/V sync drift (X1), headless WebGL+WebRTC GPU quirks (X2), GPU cost-per-bot (X3), lipsync retarget accuracy (X4), governance latency budget (X5), lib-jitsi-meet `setEffect`/`replaceTrack` reliability (X6), noVNC throughput (X7), and licensing landmines — Cubism Core proprietary, RPM sample CC-BY-NC, Mixamo no-redistribute, Audio2Face NIM non-OSS, HeyGen/D-ID closed SaaS (X8).
 
 ---
 ---
@@ -261,3 +330,45 @@ All latency figures originate from a framework vendor (LiveKit), illustrative no
 
 ## C.5 Source set (28 fetched; primary = official docs/repos)
 livekit/agents · livekit/livekit LICENSE · livekit/sip · docs.livekit.io/{telephony,agents/logic/tools,agents/integrations/overview} · livekit.com/blog/{sequential-pipeline-architecture-voice-agents, voice-agent-architecture-stt-llm-tts-pipelines-explained, human-in-the-loop-voice-agents, observer-pattern-voice-agent-guardrails} · github.com/livekit/agents/releases · docs.pipecat.ai/{pipecat/learn/function-calling, pipecat/learn/llm, server/utilities/opentelemetry} · reference-server.pipecat.ai (llm_service) · github.com/pipecat-ai/pipecat (+issue #1842, async-stream example) · webrtc.ventures (Twilio+Pipecat+LangGraph guardrails) · hamming.ai/resources/voice-ai-latency · assemblyai.com/blog/vapi-vs-pipecat-vs-livekit · softcery.com (several 2025/2026 guides) · blog.dograh.com (OSS Vapi alternatives) · openai.github.io/openai-agents-js (HITL).
+
+---
+---
+
+# Appendix D — Avatar / video subsystems landscape (raw stream D)
+
+*Web research; context assumes a headless-Chromium Jitsi sidecar, so a browser-canvas rendering path is favored. Primary sources linked.*
+
+**D.1 Browser avatar rendering.** **TalkingHead.js** (met4citizen) — renders a Ready Player Me **GLB** on **Three.js**, with a ready-made control API for posture/expression/gaze/gesture/visemes; supports a scene-owned mode suitable for a sidecar; Mixamo-compatible rig with **52 ARKit shapes + 15 Oculus visemes**. MIT class; **the sample `brunette.glb` avatar is CC BY-NC and the Mixamo raw animations can't be redistributed — ship your own**. RPM GLB + Three.js + viseme-morph-targets is the mainstream 2024-25 pattern (Wawa Sensei, Agora ConvoAI+RPM). 3D alternatives: Babylon.js (first-class morph-target API), `<model-viewer>` (weaker per-blendshape control). 2D: **pixi-live2d-display** (guansss) for Live2D Cubism — expressive but requires the **proprietary, revenue-gated Cubism Core** runtime; `pixi-live2d-display-lipsyncpatch` adds amplitude mouth driving. All are local WebGL → sub-frame render latency; the deciding factor is *control surface*, where TalkingHead leads. [TalkingHead](https://github.com/met4citizen/TalkingHead) · [Wawa Sensei lip-sync](https://wawasensei.dev/tuto/react-three-fiber-tutorial-lip-sync) · [Agora ConvoAI+RPM](https://www.agora.io/en/blog/build-real-time-ai-avatars-with-lip-sync-using-agora-convoai-rpm/) · [pixi-live2d-display](https://github.com/guansss/pixi-live2d-display)
+
+**D.2 Lipsync.** Prefer engine-emitted timing over post-hoc analysis. **Azure Speech `VisemeReceived`** = per-phoneme Viseme ID (22-set) + `AudioOffset` in 100ns ticks; or `mstts:viseme` → **55 ARKit blendshape coefficients @60 FPS** (“render each group immediately before the corresponding audio chunk”). Caveat: those are ARKit-tuned, not Oculus — retarget to the rig. **ElevenLabs** convert/stream-**with-timestamps** = character-level start/end times (convert chars→words→phonemes→visemes yourself; TalkingHead has language modules for this). **Rhubarb** = offline only (pre-rendered lines). **RMS-envelope** (Web Audio `AnalyserNode`) = universal fallback. TalkingHead `speakAudio({audio, visemes, vtimes, vdurations, words, wtimes…})` / `streamAudio()` ingest this directly. [Azure viseme how-to](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-speech-synthesis-viseme) · [ElevenLabs timestamps](https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps)
+
+**D.3 Inject generated video into WebRTC.** `HTMLCanvasElement.captureStream(fps)` → `CanvasCaptureMediaStreamTrack` (use `fps:0` + `requestFrame()` for manual cadence). **lib-jitsi-meet idiomatic path = `track.setEffect(effect)`** where the effect's `startEffect(stream)` returns `canvas.captureStream()` — exactly Jitsi's own **`JitsiStreamPresenterEffect`** (canvas + interval `drawImage` + captureStream). `createLocalTracks`+`conference.replaceTrack(old,new)` also works but has reported multi-second/20s delays + null-old-track failures — pin a good LJM version. LiveKit alt: `localParticipant.publishTrack(canvas.captureStream(30).getVideoTracks()[0], {source:Camera})`. Headless: `--headless=new` + real GPU (old headless broke `mediaDevices`/`captureStream`). [MDN captureStream](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream) · [LJM API](https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-ljm-api/) · [Jitsi canvas thread](https://community.jitsi.org/t/how-to-stream-a-html-canvas-content-using-video-stream/120624) · [LiveKit canvas](https://livekit.com/blog/streaming-video-from-a-canvas-with-webrtc-and-react)
+
+**D.4 Screen-share / desktop into video.** **noVNC** (RFB over WebSocket via **websockify**) renders a desktop to an HTML5 canvas → composite as a `drawImage` layer; it also sends input events back, so the agent can *show and operate* the desktop. MPL-2.0, self-hostable. [noVNC](https://github.com/novnc/noVNC)
+
+**D.5 Server-side alternatives.** **NVIDIA Audio2Face-3D** (open-sourced Sept 2025; SDK **MIT**, models on HF) = audio→facial-animation only (blendshapes/joints), **does not render** — needs UE5/Omniverse/Three.js; real-time via gRPC, GPU. The **NIM microservice** is under NVIDIA's AI-product license (not OSS). **HeyGen LiveAvatar / D-ID** = managed photoreal avatar over WebRTC (~sub-300ms), closed SaaS, per-minute cost, returns a *remote* track to re-pipe; HeyGen Interactive Avatar sunsets 2026-03-31. Net: server-side buys photorealism at GPU/SaaS cost + an extra hop + weaker custom control; browser-canvas wins on cost/locality/controllability for a self-hosted tool-driven agent. [NVIDIA A2F open-source](https://developer.nvidia.com/blog/nvidia-open-sources-audio2face-animation-model/) · [Audio2Face-3D repo](https://github.com/NVIDIA/Audio2Face-3D) · [HeyGen LiveAvatar](https://help.heygen.com/en/articles/12758516-introducing-liveavatar)
+
+**D.6 Control vocabulary (TalkingHead API → agent tools).** speech `speakText/speakAudio/streamAudio`; mood `setMood(neutral|happy|angry|sad|fear|disgust|love|sleep)` + `setFixedValue(shape,v)`; gaze `lookAt/lookAtCamera/makeEyeContact`; pose/gesture `playGesture(handup|index|ok|thumbup|thumbdown|side|shrug)`/`playPose`/`playAnimation`; staging `setView(full|mid|upper|head)`/`setLighting`. Agent tools mirror these; **visemes stay internal (driven by D.2), not exposed as tools**.
+
+**D.7 Hard problems.** Cross-track A/V drift (originate both tracks from one page/audio clock); headless WebGL+WebRTC GPU quirks; GPU cost/bot; ARKit→Oculus retarget accuracy; lib-jitsi-meet setEffect/replaceTrack reliability; noVNC bandwidth; licensing (Cubism proprietary, RPM sample CC-BY-NC, Mixamo no-redist, A2F NIM non-OSS, HeyGen/D-ID SaaS).
+
+---
+---
+
+# Appendix E — kradle media / CRD / UX code map (raw stream E)
+
+*Read-only; `file:line` in `packages/kradle/…`. The kradle source is present on this branch.*
+
+**E.1 How it works today.** The sidecar joins via headless Chromium + Jitsi External API, **not a real media client**: `puppeteer-jitsi-client.js:25-37` launches `puppeteer-core` with `--use-fake-ui/--use-fake-device-for-media-stream`, navigates to the room, and drives it through `window.APP.conference.*`. The fake-device flag means Chromium publishes a **synthetic spinning-ball video + beep** — no real camera/mic/canvas/TTS reaches the meeting. `shareScreen(url)` (`:63-65`) is just `window.open`. `audio.js` is 100% stub: `speak()` returns text (`:21-31`), `transcribe()` returns `[]` (`:33-38`), `detectVoice()` returns false (`:40-45`).
+
+**E.2 IPC channel (real but small).** `ipc-server.js` = Unix-domain NDJSON server; `runtime.js:73-102` `handleCommand` accepts exactly `send_chat, raise_hand, lower_hand, react, share_screen, speak_tts, get_transcript, get_participants, disconnect`. Inbound sidecar→agent events: `connected, transcript, participant_joined, participant_left` (`:58-71`) — **note `chat` is not emitted**.
+
+**E.3 THE load-bearing gap.** MCP meeting tools (`cli/src/mcp-server.js:612-631`) call `meetingToolCommand` which **only returns a descriptor** `{meetingRef,roomId,socketPath,command}` (`:709-733`) — **it never opens `/tmp/jitsi-agent.sock`**. The only socket *client* is `bin/graceful-leave.mjs:6` (a `disconnect` on preStop). So **the agent-reasons→command→sidecar loop is broken at runtime even for text chat**.
+
+**E.4 Sidecar Job injection (real).** `adapters-client.js:94-135` `createJitsiSidecarContainer` + `createAgentJob` (`:434,457-498`) attach the sidecar as a second container with a shared `agent-socket` emptyDir at `/tmp` when meeting context is present; env: room URL/JWT/roomId, role, `JITSI_AUDIO/CHAT/SCREENSHARE_MODE`, optional `JITSI_TTS_*/STT_*/VAD_*`.
+
+**E.5 CRDs.** `AgentStack` validates `spec.jitsiCapability`, `spec.jitsiConfig.{role,tools,capabilities.audio,participantName}`, `jitsiMeetingProviderRef` (`agent-stack-controller.js:223-257`) — **no video field**. Identity: `AgentAppearance`(“avatar generation settings”) + `AgentVoiceProfile`(TTS) exist (`resource-model.js:36-37`), resolved (`agent-persona-controller.js:71-85`), surfaced to dispatch identity (`agent-dispatch-controller.js:303-309`) — **but never passed to the sidecar** (`adapters-client.js:94-118` reads `jitsi.tts`, ignores appearance). `JitsiMeeting` = full lifecycle (`jitsi-meeting-controller.js:72-289`), status tracks only `recording.*` — **no live media/transcript/session status**.
+
+**E.6 Web.** Official `JitsiMeetExternalAPI` iframe (`web/.../jitsi-embedded-meeting.jsx:104-122`) — **agent video tracks render automatically as participant tiles; no custom video component needed**. Join: `jitsi-meeting-experience.jsx:31-57` → mints user JWT (`jitsi-service.js:145-173`). `stack-builder.jsx` captures baseAgent/adapter/model/prompts/mcp/skills only — **zero jitsi/avatar/video fields**.
+
+**E.7 Bottom line.** Control plane (CRDs, controllers, dispatch→sidecar Job, web meeting UI, MCP tools, identity-with-appearance/voice) is **real and fairly complete**. Media plane is **almost entirely stub** — no avatar render, no published video/audio track, no lipsync, no real screen-share, and the load-bearing **missing agent↔sidecar socket client**. Smallest change set + dependency order are consolidated in [`realtime-agent-gaps.md`](./realtime-agent-gaps.md).
