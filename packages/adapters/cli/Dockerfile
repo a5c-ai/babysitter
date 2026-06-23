@@ -17,10 +17,22 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 # Full source context (deps/build artifacts excluded by Dockerfile.dockerignore).
 COPY . .
-# Clean install of the whole monorepo (matches CI's `npm ci --force`), then build
-# the adapters CLI (ESM). Fail loud — a build failure must fail the image.
+# Clean install of the whole monorepo (matches CI's `npm ci --force`).
 RUN npm ci --force
-RUN npm run build --workspace=@a5c-ai/adapters-cli
+# Build the adapters critical path in dependency order — the same sequence CI's
+# "Build phase" uses. adapters-cli's tsc project references compile codecs/launch/
+# transport/etc from source, but they import @a5c-ai/atlas/catalog, so atlas (and
+# tasks-adapter) must be built first to provide its types. Fail loud.
+RUN set -e; \
+    npm run build --workspace=@a5c-ai/atlas; \
+    npm run build --workspace=@a5c-ai/tasks-adapter; \
+    npm run build --workspace=@a5c-ai/adapters-observability; \
+    npm run build --workspace=@a5c-ai/comm-adapter; \
+    npm run build --workspace=@a5c-ai/adapters-codecs; \
+    npm run build --workspace=@a5c-ai/adapters-harness-mock; \
+    npm run build --workspace=@a5c-ai/transport-adapter; \
+    npm run build --workspace=@a5c-ai/adapters-gateway; \
+    npm run build --workspace=@a5c-ai/adapters-cli
 RUN node --check packages/adapters/cli/dist/index.js \
  && node --check packages/adapters/cli/kradle-agent-entrypoint.mjs
 
