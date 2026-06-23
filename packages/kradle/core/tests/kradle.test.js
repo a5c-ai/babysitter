@@ -161,6 +161,13 @@ test('login usernames are normalized to a valid RFC 1123 resource name (regressi
   const messy = mapLoginProfileToKradleIdentity({ provider: 'sso', subject: 's', username: 'Beni Hakak!', namespace: 'kradle-test' });
   assert.match(messy.user.metadata.name, RFC1123);
   assert.equal(messy.user.spec.displayName, 'Beni Hakak!');
+
+  // The session cookie's `user` must equal the normalized resource name so
+  // downstream lookups by session.user resolve the User resource (not the raw login).
+  const cfg = createAuthProviderConfig({ KRADLE_AUTH_COOKIE_NAME: 'kradle_session' });
+  const cookie = createSessionCookie(cfg, { provider: 'github', subject: 'gh-42', username: 'Benihakak' });
+  const cookieValue = cookie.match(/kradle_session=([^;]+)/)?.[1];
+  assert.equal(parseSessionCookie(cfg, cookieValue).user, mapped.user.metadata.name);
 });
 
 test('session cookies parse into the signed-in Kradle user', () => {

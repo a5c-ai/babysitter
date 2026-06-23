@@ -152,7 +152,11 @@ export function createSessionCookie(config, profile, options = {}) {
   const secret = options.secret || process.env.KRADLE_SESSION_SECRET || '';
   const maxAgeSeconds = options.maxAge || Number(process.env.KRADLE_SESSION_MAX_AGE) || 86400;
   const now = Math.floor(Date.now() / 1000);
-  const payload = Buffer.from(JSON.stringify({ provider: profile.provider, subject: profile.subject, user: profile.username || profile.email, iat: now, exp: now + maxAgeSeconds })).toString('base64url');
+  // The session `user` must equal the canonical User resource name (RFC 1123
+  // normalized) so downstream lookups by session.user resolve the right resource —
+  // a raw OAuth login like "Benihakak" would not match the normalized "benihakak".
+  const sessionUser = normalizeName(profile.username || profile.email || profile.subject || profile.displayName || 'user');
+  const payload = Buffer.from(JSON.stringify({ provider: profile.provider, subject: profile.subject, user: sessionUser, iat: now, exp: now + maxAgeSeconds })).toString('base64url');
   let value;
   if (secret) {
     const signature = createHmac('sha256', secret).update(payload).digest('base64url');
