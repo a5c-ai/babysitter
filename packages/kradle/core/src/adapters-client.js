@@ -459,7 +459,7 @@ export function createAgentMuxClient(options = {}) {
           { name: 'JITSI_MEETING_ACTIVE', value: 'true' },
         ] : []),
         ...Object.entries(env).map(([name, value]) => ({ name, value: String(value) })),
-      ];
+      ].filter((e, i, arr) => arr.findIndex((x) => x.name === e.name) === i); // dedupe by name (explicit entries win over the env map, e.g. KRADLE_ORG)
       const volumes = pvcName ? [{ name: 'workspace', persistentVolumeClaim: { claimName: pvcName } }] : [];
       const agentVolumeMounts = pvcName ? [{ name: 'workspace', mountPath: '/workspace' }] : [];
       if (jitsiContext) {

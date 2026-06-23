@@ -567,11 +567,15 @@ export function createAgentDispatchController(options = {}) {
             lifecycleEmitter.emitSessionStarted({ sessionId: jobName, runId: runName });
             lifecycleEmitter.emitStepStarted(run, 'launch');
           }
-        } catch {
-          // Job manifest was generated but submission failed — queue for retry
+        } catch (submitErr) {
+          // Job manifest was generated but submission failed — surface the reason
+          // (it was previously swallowed, making "run created but no Job" opaque).
+          const reason = submitErr?.message || String(submitErr);
+          if (typeof logger?.warn === 'function') logger.warn(`[dispatch] Job submit failed: ${reason}`);
+          else console.warn(`[dispatch] Job submit failed: ${reason}`);
           run.status.phase = 'Queued';
-          run.status.conditions = [{ type: 'JobSubmitted', status: 'False', reason: 'SubmitFailed', message: 'K8s Job submission failed' }];
-          jobResult = { jobName, namespace: jobManifest.metadata.namespace, submitted: false };
+          run.status.conditions = [{ type: 'JobSubmitted', status: 'False', reason: 'SubmitFailed', message: `K8s Job submission failed: ${reason}` }];
+          jobResult = { jobName, namespace: jobManifest.metadata.namespace, submitted: false, error: reason };
         }
       } catch (err) {
         run.status.phase = 'Queued';
