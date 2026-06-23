@@ -237,18 +237,34 @@ describe('createAgentJob', () => {
     assert.equal(envMap.AGENT_TASK, 'Fix the CI.');
   });
 
-  it('includes callbackUrl in env when provided', () => {
+  it('builds the per-run callback URL from a base callbackUrl', () => {
     const client = createAgentMuxClient({});
     const { jobManifest } = client.createAgentJob({
       adapter: 'claude-code',
       org: 'acme',
-      callbackUrl: 'https://kradle.example.com/api/callback',
+      runId: 'run-77',
+      callbackUrl: 'https://kradle.example.com',
     });
 
     const envMap = Object.fromEntries(
       jobManifest.spec.template.spec.containers[0].env.map(e => [e.name, e.value])
     );
-    assert.equal(envMap.KRADLE_CALLBACK_URL, 'https://kradle.example.com/api/callback');
+    assert.equal(
+      envMap.KRADLE_CALLBACK_URL,
+      'https://kradle.example.com/api/orgs/acme/agents/runs/run-77/callback',
+    );
+  });
+
+  it('passes through a callbackUrl that already targets a run', () => {
+    const client = createAgentMuxClient({});
+    const full = 'https://kradle.example.com/api/orgs/acme/agents/runs/run-9/callback';
+    const { jobManifest } = client.createAgentJob({
+      adapter: 'claude-code', org: 'acme', runId: 'run-9', callbackUrl: full,
+    });
+    const envMap = Object.fromEntries(
+      jobManifest.spec.template.spec.containers[0].env.map(e => [e.name, e.value])
+    );
+    assert.equal(envMap.KRADLE_CALLBACK_URL, full);
   });
 
   it('includes custom env vars from config', () => {

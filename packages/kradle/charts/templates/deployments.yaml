@@ -388,6 +388,12 @@ spec:
               value: "3000"
             - name: HOSTNAME
               value: "0.0.0.0"
+            # Base origin for agent run callbacks. dispatchAgent (this web pod)
+            # bakes the per-run callback URL into the Job from this base; the
+            # dispatched agent pod POSTs its result here (the callback route lives
+            # in this web service). Defaults to the in-cluster web service DNS.
+            - name: KRADLE_CALLBACK_URL
+              value: {{ .Values.callbackBaseUrl | default (printf "http://%s-web.%s.svc.cluster.local" (include "kradle.fullname" .) .Release.Namespace) | quote }}
             - name: KRADLE_ORG
               value: {{ .Values.admin.org | quote }}
             - name: KRADLE_ADMIN_ORG

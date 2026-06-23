@@ -37,6 +37,21 @@ export function resolveHarness(adapter) {
 }
 
 /**
+ * Build the per-run result callback URL the agent wrapper POSTs to. `base` is the
+ * kradle API origin (e.g. http://kradle-kradle-api.kradle-staging.svc.cluster.local).
+ * If `base` already points at a run callback, it is returned unchanged.
+ * @param {string} base
+ * @param {string} org
+ * @param {string} runId
+ * @returns {string}
+ */
+export function buildRunCallbackUrl(base, org, runId) {
+  if (!base) return base;
+  if (base.includes('/agents/runs/')) return base;
+  return `${base.replace(/\/$/, '')}/api/orgs/${org}/agents/runs/${runId}/callback`;
+}
+
+/**
  * Resolve the effective adapter name for a stack spec. `adapter: 'default'` is a
  * sentinel — the Helm-installed builtin stacks (e.g. the assistant) set it to
  * mean "use the base agent's adapter". An empty adapter falls back the same way.
@@ -431,7 +446,12 @@ export function createAgentMuxClient(options = {}) {
         { name: 'AGENT_MUX_TRANSPORT', value: transportConfig.protocol },
         { name: 'TRANSPORT_MUX_CODEC', value: transportConfig.codec },
         ...(transportConfig.endpoint ? [{ name: 'AGENT_MUX_TRANSPORT_ENDPOINT', value: transportConfig.endpoint }] : []),
-        ...(callbackUrl ? [{ name: 'KRADLE_CALLBACK_URL', value: callbackUrl }] : []),
+        // The agent wrapper POSTs its result to KRADLE_CALLBACK_URL, but the
+        // callback route is per-run (/api/orgs/<org>/agents/runs/<run>/callback).
+        // `callbackUrl` is a BASE (the kradle API origin) — build the full per-run
+        // URL here, where the runId is known. A value that already targets a run
+        // is passed through unchanged.
+        ...(callbackUrl ? [{ name: 'KRADLE_CALLBACK_URL', value: buildRunCallbackUrl(callbackUrl, org, runId) }] : []),
         ...(prompt?.system ? [{ name: 'AGENT_SYSTEM_PROMPT', value: prompt.system }] : []),
         ...(prompt?.task ? [{ name: 'AGENT_TASK', value: prompt.task }] : []),
         ...(jitsiContext ? [

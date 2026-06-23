@@ -3,6 +3,15 @@ import { NextResponse } from 'next/server.js';
 const PUBLIC_PAGE_PATHS = new Set(['/login']);
 const PUBLIC_PATH_PREFIXES = ['/api/auth', '/_next'];
 const PUBLIC_FILE_PATTERN = /\.(?:css|js|map|png|jpg|jpeg|gif|svg|ico|webp|avif|txt|xml|json|woff2?)$/;
+// Routes that are intentionally unauthenticated (no kradle_session) because they
+// are called by non-user clients and authenticate by other means:
+//  - agent run callbacks: posted by dispatched K8s Job pods (identity = run
+//    name + namespace binding); the route deliberately has no withAuth.
+// Without these here, proxy.js redirects them to /login (307) and they never
+// reach their route handler.
+const PUBLIC_PATH_PATTERNS = [
+  /^\/api\/orgs\/[^/]+\/agents\/runs\/[^/]+\/callback\/?$/,
+];
 
 function applySecurityHeaders(response) {
   response.headers.set('X-Frame-Options', 'DENY');
@@ -53,5 +62,6 @@ export const config = {
 function isPublicPath(pathname) {
   if (PUBLIC_PAGE_PATHS.has(pathname)) return true;
   if (PUBLIC_PATH_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return true;
+  if (PUBLIC_PATH_PATTERNS.some((re) => re.test(pathname))) return true;
   return PUBLIC_FILE_PATTERN.test(pathname);
 }
