@@ -151,7 +151,7 @@ The harness-agnostic orchestration framework (v6) that enables deterministic, ev
 - Main CLI (`@a5c-ai/babysitter`) - End-user command-line tool (the primary install) for `babysitter`
 - SDK (`@a5c-ai/babysitter-sdk`) - Programmatic runtime imported by process code; public SDK/library and core CLI implementation
 - Runtime CLI (`@a5c-ai/genty-platform`) - Optional runtime/orchestration commands
-- Blueprint (`babysitter@a5c.ai`) - Harness integration content
+- Plugin (`babysitter@a5c.ai`) - Per-harness extension package (skills, hooks, commands)
 
 **Related:** [SDK](#sdk), [Blueprint](#blueprint), [Plugin](#plugin), [Harness](#harness)
 
@@ -470,7 +470,7 @@ A workflow pattern that includes human approval checkpoints. Implemented through
 
 ### In-Session Loop
 
-A mechanism for continuous iteration within a single Claude Code session. The stop hook intercepts exit attempts and continues the loop until completion or max iterations reached.
+A mechanism for continuous iteration within a single harness session: each turn the loop re-injects the next iteration until the run reaches completion (or max iterations). **How continuation is driven is harness-specific** - it is one part of the per-harness hook/continuation model that the [Hooks Adapter](#hooks-adapter) normalizes. Claude Code's [Stop Hook](#stop-hook) is one such mechanism; other harnesses use different signals (e.g. Codex also intercepts `Stop`; Gemini and Antigravity re-inject via an `AfterAgent` hook with no `Stop`; openclaw drives it from a daemon; opencode runs the loop within a single turn on `session.idle`; Hermes drives orchestration over ACP). Do not assume Claude Code's `Stop`-hook model on other harnesses.
 
 **Components:**
 - State file: `$BABYSITTER_PLUGIN_ROOT/state/${AGENT_SESSION_ID}.md`
@@ -480,7 +480,7 @@ A mechanism for continuous iteration within a single Claude Code session. The st
 /babysitter:call Build feature --max-iterations 20
 ```
 
-**Related:** [Stop Hook](#stop-hook), [Completion Promise](#completion-promise)
+**Related:** [Hooks Adapter](#hooks-adapter), [Stop Hook](#stop-hook), [Completion Promise](#completion-promise)
 
 ---
 

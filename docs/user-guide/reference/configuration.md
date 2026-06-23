@@ -133,7 +133,7 @@ These variables are set by the harness and used by the plugin. v6 uses **harness
 |----------|-------------|--------|
 | `AGENT_SESSION_ID` | Current harness session identifier | The active harness |
 | `BABYSITTER_PLUGIN_ROOT` | Plugin installation directory (injected into hooks by the runtime) | The runtime |
-| `BABYSITTER_ENV_FILE` | Path to environment persistence file | The active harness |
+| `BABYSITTER_ENV_FILE` | Path to environment persistence file | The runtime |
 | `BABYSITTER_TRUST_ENV_SESSION` | Opt back into legacy env-first session resolution (`1` to enable) | You (escape hatch) |
 
 These are automatically available in hooks and skills. Use them for session isolation and state management.

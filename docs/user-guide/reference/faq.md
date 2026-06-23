@@ -2,7 +2,6 @@
 
 **Version:** 1.2
 **Last Updated:** 2026-06-22
-Last refreshed: 2026-06-22
 **Category:** Reference
 
 ---
@@ -140,8 +139,8 @@ For simple, one-off tasks, using Claude Code directly may be faster.
 
 **Required:**
 - Node.js 20.0.0+ (recommend 22.x LTS)
-- Claude Code (latest version)
 - npm 8.0.0+
+- One of: a supported AI coding harness (Claude Code, Codex, Cursor, Gemini, GitHub Copilot, and others - see the [Install Matrix](../harnesses/install-matrix.md)), **or** the internal/Adapters runtime for headless automation. Claude Code is one supported option, not a hard requirement.
 
 **Optional:**
 - Git (for version control)
@@ -697,10 +696,10 @@ How many iterations have completed?
 
 ### Is my code sent to external services?
 
-Agent tasks use Claude's API, which means:
-- Code context is sent to the API for analysis
-- No data is stored by the API beyond the session
-- Review Anthropic's privacy policy for details
+Agent tasks call whichever harness/provider you have configured (Claude Code, Codex, Gemini, and others), which means:
+- Code context is sent to that provider's API for analysis
+- Data handling and retention depend on the provider you use
+- Review your configured provider's privacy policy for details
 
 For sensitive code, consider:
 - Using shell/node tasks instead of agent tasks

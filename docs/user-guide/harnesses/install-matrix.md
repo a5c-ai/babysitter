@@ -98,7 +98,7 @@ Each row below ships now. The **harness key** is the argument to `babysitter har
 - **Install:**
   ```bash
   babysitter harness:install-plugin github-copilot [--workspace <path>]
-  copilot plugin marketplace add a5c-ai/babysitter-claude && copilot plugin install babysitter
+  copilot plugin marketplace add a5c-ai/babysitter-github-copilot && copilot plugin install babysitter
   copilot plugin install a5c-ai/babysitter-github-copilot
   babysitter-github install --cloud-agent --workspace <path>
   ```

@@ -186,7 +186,7 @@ adapters sessions list claude
 adapters sessions cost
 ```
 
-**Subcommands:** `list` (default), `show`, `search`, `export`, `cost`.
+**Subcommands:** `list` (default), `show`, `export`, `cost`.
 **Arguments:** `subcommand`, `agent`, `session-id` (for `show`/`export`).
 
 **Options:**
@@ -541,7 +541,7 @@ adapters tui --agent claude-code
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--agent <name>`, `-a` | string | claude-code | Default agent for new prompts |
-| `--user-plugins-dir <dir>` | string | `$AGENT_MUX_TUI_PLUGINS_DIR` or `~/.adapters/tui-plugins` | Override user-plugin discovery dir |
+| `--user-plugins-dir <dir>` | string | `$ADAPTERS_TUI_PLUGINS_DIR` or `~/.adapters/tui-plugins` | Override user-plugin discovery dir |
 | `--no-user-plugins` | boolean | false | Skip discovering user plugins |
 
 ---
