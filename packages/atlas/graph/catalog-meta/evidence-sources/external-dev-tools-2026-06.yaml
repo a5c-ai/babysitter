@@ -1,0 +1,55 @@
+nodeKind: EvidenceSource
+id: evidence:agent-browser-homepage-2026-06
+attributes:
+  displayName: agent-browser vendor homepage
+  kindLabel: web
+  sourceUrl: https://agent-browser.dev
+  trustLevel: trust-level:official-web
+  observedAt: '2026-06-23T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: agent-browser-dev-homepage
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:portless-homepage-2026-06
+attributes:
+  displayName: Portless vendor homepage
+  kindLabel: web
+  sourceUrl: https://portless.sh
+  trustLevel: trust-level:official-web
+  observedAt: '2026-06-23T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: portless-sh-homepage
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:emulate-dev-homepage-2026-06
+attributes:
+  displayName: Emulate vendor homepage
+  kindLabel: web
+  sourceUrl: https://emulate.dev
+  trustLevel: trust-level:official-web
+  observedAt: '2026-06-23T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: emulate-dev-homepage
+edges:
+  has_trust_level:
+  - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:ai-cli-homepage-2026-06
+attributes:
+  displayName: ai-cli vendor homepage
+  kindLabel: web
+  sourceUrl: https://ai-cli.dev
+  trustLevel: trust-level:official-web
+  observedAt: '2026-06-23T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  locator: ai-cli-dev-homepage
+edges:
+  has_trust_level:
+  - trust-level:official-web

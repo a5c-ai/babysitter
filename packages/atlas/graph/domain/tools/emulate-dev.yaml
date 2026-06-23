@@ -1,0 +1,29 @@
+nodeKind: Tool
+id: tool:emulate-dev
+attributes:
+  displayName: "Emulate"
+  homepageUrl: "https://emulate.dev"
+  kind: api-tool
+  description: |
+    CLI that provides offline, stateful local emulation of ~11 popular third-party
+    APIs (Stripe, GitHub, Google, AWS, Slack, and others) — no network, API keys, or
+    real accounts needed. Emulates authentic protocols (OAuth with RS256 tokens, AWS
+    XML responses) and persists state across requests (create repos, push commits,
+    charge cards). Deterministic and CI-ready. Services run on HTTPS localhost
+    endpoints (e.g. `https://stripe.emulate.localhost`) and integrate with Portless
+    (`npx emulate --portless`); SDKs are pointed at the local host/port (e.g.
+    `localhost:4010`). Usage: `npx emulate --service github,stripe`; programmatic
+    `import { createEmulator } from "emulate"`; Next.js adapter via
+    `npm install @emulators/adapter-next @emulators/github`.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:tool-service-integration-agents
+  alternative_to:
+    - target: tool:wiremock
+      comparison: "WireMock is a generic HTTP stub/mock server; Emulate ships stateful, protocol-accurate emulations of named services (Stripe/GitHub/AWS/…) out of the box"
+    - target: tool:pact
+      comparison: "Pact does consumer-driven contract testing; Emulate runs runnable, stateful local service replicas for integration/E2E"
+  sourced_from:
+    - target: evidence:emulate-dev-homepage-2026-06

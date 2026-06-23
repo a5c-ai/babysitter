@@ -1,0 +1,26 @@
+nodeKind: Tool
+id: tool:portless
+attributes:
+  displayName: "Portless"
+  homepageUrl: "https://portless.sh"
+  kind: other
+  description: |
+    Replaces local-dev port numbers with stable, named `.localhost` URLs so there
+    are no port conflicts. Runs an HTTPS reverse proxy on port 443; each app
+    registers a hostname→port route and is proxied to a randomly assigned port
+    (4000–4999), so `http://localhost:3000` becomes `https://myapp.localhost`.
+    HTTPS/HTTP-2 by default with auto-generated trusted local CA; auto-detects
+    frameworks (Vite, Astro, React Router, …) and honors/injects `PORT`; auto-syncs
+    `/etc/hosts`. Worktree-friendly: a git branch name is auto-prepended as a
+    subdomain (`fix-ui.myapp.localhost`) with zero config, so parallel worktrees
+    never collide on ports. Install `npm install -g portless` (Node 24+); run
+    `portless` to wrap the package.json dev script, `portless myapp next dev`, or
+    `portless api.myapp pnpm start` for sub-services. Custom TLD via `--tld test`.
+edges:
+  belongs_to_language:
+    - language:javascript
+  alternative_to:
+    - target: tool:ngrok
+      comparison: "ngrok exposes local servers via public tunnels; Portless gives stable named HTTPS .localhost routes purely locally, with worktree-aware subdomains"
+  sourced_from:
+    - target: evidence:portless-homepage-2026-06

@@ -1,0 +1,23 @@
+nodeKind: Tool
+id: tool:ai-cli
+attributes:
+  displayName: "ai-cli"
+  homepageUrl: "https://ai-cli.dev"
+  kind: ai-dev-tool
+  description: |
+    Terminal CLI for generating text, images, and video from prompts, with
+    multi-model comparison and pipeable I/O. Routes to models from OpenAI,
+    Anthropic, Google, Black Forest Labs, and ByteDance through the Vercel AI
+    Gateway; short names auto-resolve (e.g. `flux-2-pro`, `gpt-image-2`) and model
+    discovery is live (no hardcoded list). Supports stdin/stdout piping for chaining
+    (`ai image | ai video`), inline terminal image preview via graphics protocols,
+    and JSON metadata output for automation. Install `npm install -g ai-cli`; usage
+    `ai image "prompt"`, `ai video "prompt"`, `ai text "prompt"`, `ai models`.
+    Designed for scripts, CI pipelines, agent toolchains, and terminal workflows.
+edges:
+  belongs_to_language:
+    - language:javascript
+  used_for:
+    - target: skill-area:video-processing
+  sourced_from:
+    - target: evidence:ai-cli-homepage-2026-06

@@ -1,0 +1,35 @@
+nodeKind: Tool
+id: tool:agent-browser
+attributes:
+  displayName: "agent-browser"
+  homepageUrl: "https://agent-browser.dev"
+  kind: ai-dev-tool
+  description: |
+    Browser-automation CLI built for AI coding agents to verify changes in a real
+    browser. A native Rust CLI talks to a Rust daemon that drives Chrome over the
+    Chrome DevTools Protocol (CDP). Output is optimized for token efficiency:
+    accessibility-tree snapshots with stable element references (`@e1`, `@e2`) for
+    deterministic selection instead of brittle CSS/XPath. Ships 50+ commands
+    (navigation, forms, screenshots, network monitoring, storage, video recording,
+    streaming, profiling, diffing) plus session/auth-state preservation and proxy
+    support. Install: `npm install -g agent-browser` (or `brew install agent-browser`),
+    then `agent-browser install` to fetch Chrome and e.g. `npx agent-browser open example.com`.
+    Marketed for Claude Code, Cursor, Copilot, Codex, and Gemini; also supports
+    AgentCore / Browserbase / Browserless providers.
+edges:
+  belongs_to_language:
+    - language:rust
+  used_for:
+    - target: skill-area:cross-browser-testing
+    - target: skill-area:agent-debugging-logging
+  tool_used_by:
+    - target: skill-area:cross-browser-testing
+  alternative_to:
+    - target: tool:playwright
+      comparison: "browser automation — Playwright is a general test/automation framework; agent-browser is an agent-first CLI with token-efficient accessibility-tree output over CDP"
+    - target: tool:dev-browser
+      comparison: "both target agent-driven browser verification; agent-browser is native Rust with a 50+ command surface"
+    - target: tool:browserbase
+      comparison: "Browserbase is hosted/remote browser infra; agent-browser runs a local Rust daemon driving local Chrome"
+  sourced_from:
+    - target: evidence:agent-browser-homepage-2026-06
