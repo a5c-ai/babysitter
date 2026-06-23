@@ -39,6 +39,12 @@ export default {
     ],
     setupFiles: ['vitest.setup.ts'],
     environment: 'node',
+    // Several contract tests do subprocess/I-O-heavy work (recursive packages/**
+    // scans, `npm pack` + `npm install` of packed tarballs). The 5s default flakes
+    // for these under machine load; give tests + hooks headroom. Raising a timeout
+    // only permits slower tests — it cannot make a passing assertion fail.
+    testTimeout: 30000,
+    hookTimeout: 30000,
     coverage: {
       provider: 'v8',
       include: ['packages/*/src/**/*.ts', 'packages/adapters/*/src/**/*.ts', 'packages/genty/*/src/**/*.ts'],
