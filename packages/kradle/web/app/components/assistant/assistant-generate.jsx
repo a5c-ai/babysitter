@@ -68,6 +68,9 @@ export function AssistantGenerate({ org, stacks = [] }) {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [viewName, setViewName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(null);
   const iframeRef = useRef(null);
 
   async function handleGenerate() {
@@ -115,6 +118,35 @@ export function AssistantGenerate({ org, stacks = [] }) {
     if (!result) return;
     const text = typeof result.content === 'string' ? result.content : JSON.stringify(result.content, null, 2);
     navigator.clipboard.writeText(text).catch(() => {});
+  }
+
+  // Persist the already-generated HTML as a durable, named KradleGeneratedView
+  // (no model re-run) so it can be reused and viewed later.
+  async function handleSave() {
+    if (!result || typeof result.content !== 'string' || saving) return;
+    setSaving(true);
+    setSaved(null);
+    setError('');
+    try {
+      const res = await fetch(`/api/orgs/${org}/views`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: viewName.trim() || task.trim().slice(0, 40),
+          title: task.trim().slice(0, 80),
+          viewType: 'widget',
+          html: result.content,
+          sourceTask: task.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) setSaved(data);
+      else setError(data.message || 'Save failed');
+    } catch (err) {
+      setError(err.message || 'Network error');
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleDownload() {
@@ -185,11 +217,31 @@ export function AssistantGenerate({ org, stacks = [] }) {
         <div style={styles.resultBox}>
           <div style={styles.resultHeader}>
             <span style={styles.resultLabel}>Result ({outputType.toUpperCase()})</span>
-            <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {outputType === 'html' && (
+                <>
+                  <input
+                    value={viewName}
+                    onChange={(e) => setViewName(e.target.value)}
+                    placeholder="view name"
+                    style={{ ...styles.actionBtn, minWidth: 110 }}
+                    aria-label="View name"
+                  />
+                  <button onClick={handleSave} disabled={saving} style={styles.actionBtn}>
+                    {saving ? 'Saving…' : 'Save as view'}
+                  </button>
+                </>
+              )}
               <button onClick={handleCopy} style={styles.actionBtn}>Copy</button>
               <button onClick={handleDownload} style={styles.actionBtn}>Download</button>
             </div>
           </div>
+          {saved && (
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+              Saved as <strong>{saved.name}</strong> —{' '}
+              <a href={saved.viewUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>open view</a>
+            </div>
+          )}
 
           {/* Render based on output type */}
           {outputType === 'html' && result.artifactUrl ? (
