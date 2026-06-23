@@ -1654,6 +1654,27 @@ export interface Orders {
     roleContext?: string;
   }): string | null;
   /**
+   * SPEC-KRADLE-MODEL — create a full agent identity (the `AgentPersona` plus its
+   * linked `AgentSoul` / `AgentAppearance` / `AgentVoiceProfile`), mirroring
+   * kradle's agent-create wizard. Returns the persona name, or null in mock mode
+   * (no identity store). The persona reconciles onto the gallery and becomes
+   * selectable in `upsertDefinition`.
+   */
+  createAgentIdentity(input: {
+    name: string;
+    displayName: string;
+    tagline?: string;
+    roleTitle?: string;
+    roleDomain?: string;
+    communicationStyle?: string;
+    tone?: string;
+    emoji?: string;
+    soul?: string;
+    ttsProvider?: string;
+    ttsVoice?: string;
+    skillRefs?: string[];
+  }): string | null;
+  /**
    * SPEC-V4 §V4-6: process-editor save — amend a kind's phase pipeline
    * TEMPLATE (revision bump, `process_updated` event, future runs only).
    */
@@ -1869,6 +1890,11 @@ export function bindBackendToStore(store: CommanderStore, backend: MockBackend):
     upsertDefinition() {
       // SPEC-KRADLE-MODEL — the mock sim has no AgentDefinition store (the real
       // identity model is live-kradle only); no write path, documented null.
+      return null;
+    },
+    createAgentIdentity() {
+      // SPEC-KRADLE-MODEL — the mock sim has no AgentPersona/Soul/Appearance/Voice
+      // store (the real identity model is live-kradle only); documented null.
       return null;
     },
     updateProcessTemplate(kind, phases) {

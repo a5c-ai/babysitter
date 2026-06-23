@@ -210,6 +210,8 @@ function stackInputToResourceBody(stack: KradleAgentStackInput, org: string): Re
   if (sp.runnerPool !== undefined) spec.runnerPool = sp.runnerPool;
   if (sp.permissionRefs !== undefined) spec.permissionRefs = sp.permissionRefs;
   if (sp.memoryRepositoryRefs !== undefined) spec.memoryRepositoryRefs = sp.memoryRepositoryRefs;
+  if (sp.displayName !== undefined) spec.displayName = sp.displayName;
+  if (sp.agentRole !== undefined) spec.agentRole = sp.agentRole;
   return {
     apiVersion: stack.apiVersion ?? 'kradle.a5c.ai/v1alpha1',
     kind: 'AgentStack',
@@ -277,6 +279,119 @@ export async function listDefinitions(
 ): Promise<KradleResourceItem[]> {
   const result = await client.listResources('AgentDefinition');
   return result.items ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// AgentPersona identity apply — the full identity model kradle's agent-create
+// wizard builds: an `AgentPersona` plus its linked `AgentSoul` (behavioral
+// document), `AgentAppearance` (emoji/avatar/theme) and `AgentVoiceProfile`
+// (TTS). Mirrors agent-create-wizard.jsx exactly (the persona references its
+// soul/appearance/voice by `${name}-{soul,appearance,voice}`). Each resource is
+// applied via the generic CRD gateway (upsert), stamping organizationRef.
+// ---------------------------------------------------------------------------
+
+export interface AgentIdentityInput {
+  /** Persona resource name (slug). */
+  name: string;
+  displayName: string;
+  tagline?: string;
+  roleTitle?: string;
+  roleDomain?: string;
+  /** AgentPersona.spec.personality.communicationStyle (direct|gentle|formal|casual). */
+  communicationStyle?: string;
+  /** AgentPersona.spec.personality.tone (professional|friendly|academic|playful). */
+  tone?: string;
+  /** AgentAppearance.spec.emoji. */
+  emoji?: string;
+  /** AgentSoul.spec.content (markdown). */
+  soul?: string;
+  /** AgentVoiceProfile.spec.ttsProvider / ttsConfig.voice. */
+  ttsProvider?: string;
+  ttsVoice?: string;
+  skillRefs?: string[];
+}
+
+function agentIdentityResourceBodies(
+  input: AgentIdentityInput,
+  org: string,
+): ResourceApplyBody[] {
+  const name = input.name;
+  const soulRef = `${name}-soul`;
+  const appearanceRef = `${name}-appearance`;
+  const voiceRef = `${name}-voice`;
+  const persona: ResourceApplyBody = {
+    apiVersion: 'kradle.a5c.ai/v1alpha1',
+    kind: 'AgentPersona',
+    metadata: { name },
+    spec: {
+      organizationRef: org,
+      displayName: input.displayName,
+      ...(input.tagline ? { tagline: input.tagline } : {}),
+      role: { title: input.roleTitle ?? '', domain: input.roleDomain ?? '' },
+      personality: {
+        communicationStyle: input.communicationStyle ?? 'direct',
+        tone: input.tone ?? 'professional',
+        traits: [],
+      },
+      ...(input.skillRefs && input.skillRefs.length > 0 ? { skillRefs: input.skillRefs } : {}),
+      soul: { ref: soulRef },
+      appearance: { ref: appearanceRef },
+      voiceProfile: { ref: voiceRef },
+    },
+  };
+  const soul: ResourceApplyBody = {
+    apiVersion: 'kradle.a5c.ai/v1alpha1',
+    kind: 'AgentSoul',
+    metadata: { name: soulRef },
+    spec: {
+      organizationRef: org,
+      personaRef: name,
+      format: 'markdown',
+      content: input.soul && input.soul.trim() !== '' ? input.soul : `# ${input.displayName}`,
+    },
+  };
+  const appearance: ResourceApplyBody = {
+    apiVersion: 'kradle.a5c.ai/v1alpha1',
+    kind: 'AgentAppearance',
+    metadata: { name: appearanceRef },
+    spec: {
+      organizationRef: org,
+      personaRef: name,
+      avatar: { type: 'initials' },
+      theme: { primaryColor: 'var(--accent)' },
+      ...(input.emoji ? { emoji: input.emoji } : {}),
+    },
+  };
+  const voice: ResourceApplyBody = {
+    apiVersion: 'kradle.a5c.ai/v1alpha1',
+    kind: 'AgentVoiceProfile',
+    metadata: { name: voiceRef },
+    spec: {
+      organizationRef: org,
+      personaRef: name,
+      ttsProvider: input.ttsProvider ?? 'openai',
+      ttsConfig: { voice: input.ttsVoice ?? 'nova', speed: 1 },
+    },
+  };
+  return [persona, soul, appearance, voice];
+}
+
+/**
+ * Apply a full agent identity (persona + soul + appearance + voice) via the
+ * generic CRD gateway. Returns the persona name. Mirrors kradle's wizard so a
+ * Commander-created persona is identical to a kradle-web-created one.
+ */
+export async function applyAgentIdentity(
+  client: KradleControllerClient,
+  input: AgentIdentityInput,
+): Promise<string> {
+  const bodies = agentIdentityResourceBodies(input, client.org);
+  // Persona first (the soul/appearance/voice reference it back by personaRef),
+  // then the linked resources. applyResource is an upsert.
+  for (const body of bodies) {
+    await client.applyResource(body);
+  }
+  return input.name;
 }
 
 /** List `AgentPersona` resources via the generic CRD gateway. */
@@ -525,6 +640,15 @@ export function makeKradleOrders(
           },
         }),
       );
+      return input.name;
+    },
+    createAgentIdentity(input) {
+      // SPEC-KRADLE-MODEL — create the full agent identity (AgentPersona +
+      // AgentSoul + AgentAppearance + AgentVoiceProfile) via the generic CRD
+      // gateway, mirroring kradle's agent-create wizard. The persona reconciles
+      // onto the gallery on the next snapshot refresh and is then selectable in
+      // the definition (persona↔stack) binding form.
+      run('createAgentIdentity/applyAgentIdentity', () => applyAgentIdentity(client, input));
       return input.name;
     },
     // --- roster verbs: REMOVED from the model (SPEC §2.4/§5.2) ----------------

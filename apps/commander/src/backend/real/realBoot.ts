@@ -198,6 +198,9 @@ function makeRealOrders(backend: CommanderBackend, flush: () => void): Orders {
     upsertDefinition() {
       return null;
     },
+    createAgentIdentity() {
+      return null;
+    },
     updateProcessTemplate() {
       return null;
     },

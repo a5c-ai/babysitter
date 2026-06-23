@@ -244,6 +244,16 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           />
         </label>
+        <label className="wr-foundry-field">
+          <span className="wr-foundry-label">display name</span>
+          <input
+            className="wr-foundry-input"
+            type="text"
+            value={draft.displayName}
+            placeholder="human label (spec.displayName)"
+            onChange={(e) => setDraft({ ...draft, displayName: e.target.value })}
+          />
+        </label>
         <div className="wr-stack-editor-grid">
           <label className="wr-foundry-field">
             <span className="wr-foundry-label">adapter</span>
@@ -258,6 +268,12 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
                 </option>
               ))}
             </select>
+            <GraphLayerPicker
+              label="Platform"
+              kinds={['AgentProduct', 'AgentPlatformImpl', 'AgentRuntimeImpl', 'Platform']}
+              selectedId={draft.adapter}
+              onSelect={(h) => setDraft(withAdapter(draft, h.displayName || h.id))}
+            />
           </label>
           <label className="wr-foundry-field">
             <span className="wr-foundry-label">model</span>
@@ -422,6 +438,21 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
             />
           </label>
           <label className="wr-foundry-field">
+            <span className="wr-foundry-label">agent role (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={draft.agentRole}
+              placeholder="reviewer, backend-team"
+              onChange={(e) => setDraft({ ...draft, agentRole: e.target.value })}
+            />
+            <GraphLayerPicker
+              label="Agent Role"
+              kinds={['Role', 'Responsibility', 'AgentTeam', 'OrgUnit']}
+              onSelect={(h) => setDraft({ ...draft, agentRole: appendCsv(draft.agentRole, h.displayName || h.id) })}
+            />
+          </label>
+          <label className="wr-foundry-field">
             <span className="wr-foundry-label">role bindings (csv)</span>
             <input
               className="wr-foundry-input"
@@ -565,6 +596,20 @@ function AgentsTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
   const [stackRef, setStackRef] = useState(stacks[0]?.stackRef ?? '');
   const [roleContext, setRoleContext] = useState('');
 
+  // NEW PERSONA form — the full identity model (persona + soul + appearance +
+  // voice), mirroring kradle's agent-create wizard.
+  const [pName, setPName] = useState('');
+  const [pTagline, setPTagline] = useState('');
+  const [pRoleTitle, setPRoleTitle] = useState('');
+  const [pRoleDomain, setPRoleDomain] = useState('');
+  const [pCommStyle, setPCommStyle] = useState('direct');
+  const [pTone, setPTone] = useState('professional');
+  const [pEmoji, setPEmoji] = useState('');
+  const [pSoul, setPSoul] = useState('');
+  const pTtsProvider = 'openai';
+  const [pTtsVoice, setPTtsVoice] = useState('nova');
+  const [pSkillRefs, setPSkillRefs] = useState('');
+
   const canApply = name.trim() !== '' && personaRef !== '' && stackRef !== '';
 
   const apply = (): void => {
@@ -578,6 +623,42 @@ function AgentsTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
     if (applied !== null) {
       setName('');
       setRoleContext('');
+      setApplySeq((n) => n + 1);
+    }
+  };
+
+  const canCreatePersona = pName.trim() !== '';
+
+  const createPersona = (): void => {
+    if (!canCreatePersona) return;
+    const slug =
+      pName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'new-agent';
+    const skillRefs = pSkillRefs
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const applied = orders.createAgentIdentity({
+      name: slug,
+      displayName: pName.trim(),
+      ...(pTagline.trim() !== '' ? { tagline: pTagline.trim() } : {}),
+      ...(pRoleTitle.trim() !== '' ? { roleTitle: pRoleTitle.trim() } : {}),
+      ...(pRoleDomain.trim() !== '' ? { roleDomain: pRoleDomain.trim() } : {}),
+      communicationStyle: pCommStyle,
+      tone: pTone,
+      ...(pEmoji.trim() !== '' ? { emoji: pEmoji.trim() } : {}),
+      ...(pSoul.trim() !== '' ? { soul: pSoul } : {}),
+      ttsProvider: pTtsProvider,
+      ttsVoice: pTtsVoice,
+      ...(skillRefs.length > 0 ? { skillRefs } : {}),
+    });
+    if (applied !== null) {
+      setPName('');
+      setPTagline('');
+      setPRoleTitle('');
+      setPRoleDomain('');
+      setPEmoji('');
+      setPSoul('');
+      setPSkillRefs('');
       setApplySeq((n) => n + 1);
     }
   };
@@ -601,6 +682,139 @@ function AgentsTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
             <PersonaCard key={p.name} persona={p} />
           ))}
         </ul>
+      </div>
+
+      <div className="wr-stack-editor" aria-label="New persona">
+        <div className="wr-stack-editor-title">NEW PERSONA</div>
+        <div className="wr-stack-editor-grid">
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">display name</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pName}
+              placeholder="Ada the Reviewer"
+              onChange={(e) => setPName(e.target.value)}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">tagline</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pTagline}
+              placeholder="meticulous code auditor"
+              onChange={(e) => setPTagline(e.target.value)}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">role title</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pRoleTitle}
+              placeholder="Senior Reviewer"
+              onChange={(e) => setPRoleTitle(e.target.value)}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">role domain</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pRoleDomain}
+              placeholder="backend"
+              onChange={(e) => setPRoleDomain(e.target.value)}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">communication style</span>
+            <select
+              className="wr-foundry-input"
+              value={pCommStyle}
+              onChange={(e) => setPCommStyle(e.target.value)}
+            >
+              {['direct', 'gentle', 'formal', 'casual'].map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">tone</span>
+            <select
+              className="wr-foundry-input"
+              value={pTone}
+              onChange={(e) => setPTone(e.target.value)}
+            >
+              {['professional', 'friendly', 'academic', 'playful'].map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">emoji</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pEmoji}
+              placeholder="🔍"
+              onChange={(e) => setPEmoji(e.target.value)}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">tts voice</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pTtsVoice}
+              placeholder="nova"
+              onChange={(e) => setPTtsVoice(e.target.value)}
+            />
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">skills (csv)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={pSkillRefs}
+              placeholder="code-review, security"
+              onChange={(e) => setPSkillRefs(e.target.value)}
+            />
+            <GraphLayerPicker
+              label="Skills"
+              kinds={['Skill', 'LibrarySkill', 'SkillArea', 'Capability']}
+              onSelect={(h) => setPSkillRefs(appendCsv(pSkillRefs, h.displayName || h.id))}
+            />
+          </label>
+        </div>
+        <label className="wr-foundry-field">
+          <span className="wr-foundry-label">soul (behavioral document, markdown)</span>
+          <textarea
+            className="wr-foundry-input wr-stack-prompt"
+            rows={3}
+            value={pSoul}
+            placeholder="# Identity&#10;Values, boundaries, and communication principles."
+            onChange={(e) => setPSoul(e.target.value)}
+          />
+        </label>
+        <div className="wr-modal-hint">
+          creates AgentPersona + AgentSoul + AgentAppearance + AgentVoiceProfile · reconciles on the next refresh
+        </div>
+        <div className="wr-modal-actions">
+          <button
+            type="button"
+            data-testid="foundry-new-persona"
+            className="wr-alert-btn wr-alert-btn--approve"
+            disabled={!canCreatePersona}
+            onClick={createPersona}
+          >
+            Create Persona
+          </button>
+        </div>
       </div>
 
       <div className="wr-stack-editor" aria-label="New definition">

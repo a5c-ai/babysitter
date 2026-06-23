@@ -69,6 +69,10 @@ export interface KradleStackSpec {
   permissionRefs?: AgentStackPermissionRefs;
   /** Company-brain bindings (`agent-resources.yaml:90`). */
   memoryRepositoryRefs?: string[];
+  /** Human display label (kradle stack-builder parity). */
+  displayName?: string;
+  /** Agent-role composition facet (kradle `facet:agent-role` — Role/Responsibility/AgentTeam/OrgUnit refs). */
+  agentRole?: { refs: string[] };
 }
 
 /**

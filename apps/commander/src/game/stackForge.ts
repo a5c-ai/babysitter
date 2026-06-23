@@ -52,6 +52,10 @@ export interface StackDraft {
   configGrants: string;
   /** CSV → `memoryRepositoryRefs`. */
   memoryRepositoryRefs: string;
+  /** Human display label → `spec.displayName` (kradle parity). */
+  displayName: string;
+  /** CSV → `spec.agentRole.refs` (kradle agent-role facet). */
+  agentRole: string;
 }
 
 /** CSV ↔ string[] helpers (mirror `stack-builder.jsx:15-21`). */
@@ -87,6 +91,8 @@ export function blankStackDraft(): StackDraft {
     secretGrants: '',
     configGrants: '',
     memoryRepositoryRefs: '',
+    displayName: '',
+    agentRole: '',
   };
 }
 
@@ -114,6 +120,8 @@ function draftBody(view: SimStackView): Omit<StackDraft, 'stackRef' | 'name'> {
     secretGrants: joinCsv(spec.permissionRefs?.secretGrants),
     configGrants: joinCsv(spec.permissionRefs?.configGrants),
     memoryRepositoryRefs: joinCsv(spec.memoryRepositoryRefs),
+    displayName: spec.displayName ?? '',
+    agentRole: joinCsv(spec.agentRole?.refs),
   };
 }
 
@@ -169,6 +177,7 @@ export function draftToStackInput(draft: StackDraft): KradleAgentStackInput | nu
   const roleBindings = splitCsv(draft.roleBindings);
   const secretGrants = splitCsv(draft.secretGrants);
   const configGrants = splitCsv(draft.configGrants);
+  const agentRoleRefs = splitCsv(draft.agentRole);
 
   const externalTools = {
     ...(mcpServerRefs.length > 0 ? { mcpServerRefs } : {}),
@@ -207,6 +216,8 @@ export function draftToStackInput(draft: StackDraft): KradleAgentStackInput | nu
       ...(draft.runnerPool.trim() !== '' ? { runnerPool: draft.runnerPool.trim() } : {}),
       ...(Object.keys(permissionRefs).length > 0 ? { permissionRefs } : {}),
       ...(memoryRepositoryRefs.length > 0 ? { memoryRepositoryRefs } : {}),
+      ...(draft.displayName.trim() !== '' ? { displayName: draft.displayName.trim() } : {}),
+      ...(agentRoleRefs.length > 0 ? { agentRole: { refs: agentRoleRefs } } : {}),
     },
     status: { phase: 'ready' },
   };

@@ -144,6 +144,7 @@ function makeFakeGateway(): { orders: Orders; calls: RecordedCall[] } {
     updateTask: () => false,
     upsertStack: () => null,
     upsertDefinition: () => null,
+    createAgentIdentity: () => null,
     updateProcessTemplate: () => null,
     writeFile: () => false,
     createRosterAgent: () => null,
@@ -552,6 +553,46 @@ describe('AC4 §3 — upsertStack → applyResource; roster verbs are no-ops (AC
     const orders = makeKradleOrders(client, noopOptions(null));
     expect(() => orders.deleteRosterAgent('ra-1')).not.toThrow();
     expect(calls).toHaveLength(0);
+  });
+});
+
+// ===========================================================================
+// createAgentIdentity → the full identity model (persona + soul + appearance +
+// voice), mirroring kradle's agent-create wizard.
+// ===========================================================================
+
+describe('createAgentIdentity → applyResource(persona+soul+appearance+voice)', () => {
+  it('applies the four linked identity CRDs with org-stamped specs and back-references', async () => {
+    const { client, calls } = makeFakeClient();
+    const orders = makeKradleOrders(client, noopOptions(null));
+    const result = orders.createAgentIdentity({
+      name: 'ada',
+      displayName: 'Ada the Reviewer',
+      roleTitle: 'Senior Reviewer',
+      emoji: '🔍',
+      soul: '# Ada\nMeticulous.',
+      skillRefs: ['code-review'],
+    });
+    // applyAgentIdentity awaits four sequential applyResource calls — flush
+    // enough microtasks for the whole chain to settle.
+    for (let i = 0; i < 8; i += 1) await Promise.resolve();
+    expect(result).toBe('ada');
+    const applies = calls.filter((c) => c.method === 'applyResource').map((c) => c.arg as ResourceApplyBody);
+    expect(applies.map((b) => b.kind)).toEqual([
+      'AgentPersona',
+      'AgentSoul',
+      'AgentAppearance',
+      'AgentVoiceProfile',
+    ]);
+    const persona = applies[0];
+    expect(persona.metadata.name).toBe('ada');
+    expect((persona.spec as Record<string, unknown>).organizationRef).toBe('acme');
+    expect((persona.spec as Record<string, unknown>).displayName).toBe('Ada the Reviewer');
+    expect((persona.spec as { soul: { ref: string } }).soul.ref).toBe('ada-soul');
+    // soul/appearance/voice carry personaRef back to the persona name.
+    expect((applies[1].spec as { personaRef: string }).personaRef).toBe('ada');
+    expect((applies[2].spec as Record<string, unknown>).emoji).toBe('🔍');
+    expect((applies[3].spec as { ttsProvider: string }).ttsProvider).toBe('openai');
   });
 });
 
