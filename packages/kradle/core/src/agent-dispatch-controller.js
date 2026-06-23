@@ -293,7 +293,7 @@ export function createAgentDispatchController(options = {}) {
       return { run, attempt, transcript, notification };
     },
 
-    async createManualDispatch({ repository, ref, sourceRefs = [], agentDefinition, agentStack, meetingRef, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
+    async createManualDispatch({ repository, ref, sourceRefs = [], agentDefinition, agentStack, task, meetingRef, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
       let identity = null;
       if (agentDefinition) {
         const resolved = personaController.resolveAgentDefinition(agentDefinition, { resources, organizationRef });
@@ -434,9 +434,15 @@ export function createAgentDispatchController(options = {}) {
       }
 
       if (!workspaceResult) {
+        // Fresh per-run workspaces are ephemeral: they live exactly as long as the
+        // agent pod and are never reused (reuse is the findReusableWorkspace path
+        // above, which claims a pre-existing Ready PVC-backed workspace). Mounting
+        // an emptyDir avoids provisioning a managed disk per dispatch — instant
+        // bind, no CSI dependency.
         const createResult = workspaceController.createWorkspace({
           organizationRef, repository, branch, namespace,
           volumeSpec: {},
+          ephemeral: true,
         });
         if (!createResult.error) {
           workspaceResult = { workspace: createResult.workspace, pvcManifest: createResult.pvcManifest, reused: false };
@@ -508,7 +514,17 @@ export function createAgentDispatchController(options = {}) {
       let jobResult = null;
 
       const executionConfig = this.resolveStack(stack, { organizationRef, identity });
+      // The per-dispatch task (the board card's objective) is the actual work to
+      // run. resolveStack only sources prompt.task from the stack's static
+      // taskPrompt; a caller-supplied task is what the user asked for, so it wins.
+      // Without it the agent pod gets no AGENT_TASK and exits immediately.
+      if (task) {
+        executionConfig.prompt = { ...executionConfig.prompt, task };
+      }
       const pvcName = workspaceResult?.workspace?.spec?.volumeClaimName || workspaceResult?.pvcManifest?.metadata?.name || null;
+      // PVC-backed workspace → mount that claim; otherwise mount an ephemeral
+      // emptyDir at /workspace (instant, no managed-disk provisioning).
+      const jobWorkspace = pvcName ? { pvcName } : { ephemeral: true };
       const resolvedCallbackUrl = callbackUrl || process.env.KRADLE_CALLBACK_URL || null;
 
       // Resolve the model-provider secret granted to this stack so its API key
@@ -547,7 +563,7 @@ export function createAgentDispatchController(options = {}) {
           prompt: executionConfig.prompt,
           env: jobEnv,
           modelSecretName,
-          workspace: pvcName ? { pvcName } : undefined,
+          workspace: jobWorkspace,
           resources: stack.spec?.resources,
           meetingContext: runtimeMeetingContext || run.spec.meetingContext,
         });

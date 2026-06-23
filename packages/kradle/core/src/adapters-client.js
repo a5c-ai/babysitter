@@ -460,8 +460,18 @@ export function createAgentMuxClient(options = {}) {
         ] : []),
         ...Object.entries(env).map(([name, value]) => ({ name, value: String(value) })),
       ].filter((e, i, arr) => arr.findIndex((x) => x.name === e.name) === i); // dedupe by name (explicit entries win over the env map, e.g. KRADLE_ORG)
-      const volumes = pvcName ? [{ name: 'workspace', persistentVolumeClaim: { claimName: pvcName } }] : [];
-      const agentVolumeMounts = pvcName ? [{ name: 'workspace', mountPath: '/workspace' }] : [];
+      // The agent always gets a writable /workspace. A persistent, reusable
+      // workspace is PVC-backed (pvcName); an ephemeral per-run workspace mounts
+      // an emptyDir — it binds instantly with no CSI provisioning and is reclaimed
+      // with the pod. Only omit the mount entirely when no workspace is requested.
+      const wantsWorkspace = Boolean(pvcName) || workspace?.ephemeral === true;
+      const workspaceVolume = pvcName
+        ? { name: 'workspace', persistentVolumeClaim: { claimName: pvcName } }
+        : workspace?.ephemeral === true
+          ? { name: 'workspace', emptyDir: {} }
+          : null;
+      const volumes = workspaceVolume ? [workspaceVolume] : [];
+      const agentVolumeMounts = wantsWorkspace ? [{ name: 'workspace', mountPath: '/workspace' }] : [];
       if (jitsiContext) {
         agentVolumeMounts.push({ name: 'agent-socket', mountPath: '/tmp' });
         volumes.push({ name: 'agent-socket', emptyDir: {} });

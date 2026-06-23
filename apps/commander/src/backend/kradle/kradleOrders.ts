@@ -460,6 +460,7 @@ export function makeKradleOrders(
           agentDefinition: definitionRef,
           repository: repo,
           ref: 'main',
+          ...(input.title ? { task: input.title } : {}),
           taskKind: input.taskKind,
           actor: 'owner',
         };
@@ -483,6 +484,7 @@ export function makeKradleOrders(
         stackRef,
         repository: repo,
         ref: 'main',
+        ...(input.title ? { task: input.title } : {}),
         taskKind: input.taskKind,
         actor: 'owner',
       };

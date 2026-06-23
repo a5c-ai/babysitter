@@ -14,7 +14,7 @@ export function createAgentWorkspaceController() {
 
     // --- Volume lifecycle ---
 
-    createWorkspace({ name, organizationRef, repository, volumeSpec = {}, branch, namespace = 'default' }) {
+    createWorkspace({ name, organizationRef, repository, volumeSpec = {}, branch, namespace = 'default', ephemeral = false }) {
       if (!organizationRef) {
         return { error: true, reason: 'missing-org', message: 'organizationRef is required' };
       }
@@ -23,6 +23,29 @@ export function createAgentWorkspaceController() {
       }
 
       const workspaceName = name || `ws-${repository.replace(/[^a-z0-9-]/gi, '-').toLowerCase()}-${Date.now()}`;
+
+      // Ephemeral workspaces are per-run scratch space that lives exactly as long
+      // as the agent pod — no persistence is needed across runs (reuse goes through
+      // findReusableWorkspace, which requires a pre-existing Ready PVC-backed
+      // workspace). For these we mount an emptyDir instead of provisioning a
+      // managed disk: it binds instantly, needs no CSI provisioning (AKS disk
+      // provisioning can time out under load), and is reclaimed with the pod.
+      if (ephemeral) {
+        const workspace = createResource('KradleWorkspace', { name: workspaceName, namespace }, {
+          organizationRef,
+          repository,
+          ephemeral: true,
+          branch: branch || 'main',
+        });
+        workspace.status = {
+          phase: 'Pending',
+          volumeStatus: 'Ephemeral',
+          createdAt: new Date().toISOString(),
+        };
+        // No pvcManifest — the Job mounts an emptyDir for /workspace (see createAgentJob).
+        return { error: false, workspace };
+      }
+
       const pvcName = `kradle-ws-${workspaceName}`;
       // Omit storageClassName unless explicitly set (or overridden via env) so the
       // PVC binds against the cluster's DEFAULT StorageClass. Hardcoding 'standard'
@@ -200,6 +223,15 @@ export function createAgentWorkspaceController() {
     getMountSpec({ workspace }) {
       if (!workspace) {
         return { error: true, reason: 'missing-workspace', message: 'workspace resource is required' };
+      }
+
+      // Ephemeral workspaces mount an emptyDir — no PVC is provisioned for them.
+      if (workspace.spec?.ephemeral) {
+        return {
+          error: false,
+          volume: { name: 'workspace', emptyDir: {} },
+          volumeMount: { name: 'workspace', mountPath: '/workspace' },
+        };
       }
 
       const pvcName = workspace.spec?.pvcName || `kradle-ws-${workspace.metadata?.name}`;

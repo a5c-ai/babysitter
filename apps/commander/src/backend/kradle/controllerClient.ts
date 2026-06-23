@@ -290,6 +290,9 @@ export interface DispatchInput {
   agentDefinition?: string;
   repository?: string;
   ref?: string;
+  /** The actual work for the agent — the board card's objective/title. Becomes
+   *  AGENT_TASK in the dispatched pod; without it the agent has nothing to do. */
+  task?: string;
   taskKind?: string;
   actor?: string;
   meetingRef?: string;

@@ -13712,6 +13712,7 @@ function Kc(e, t) {
 					agentDefinition: i,
 					repository: a,
 					ref: "main",
+					...t.title ? { task: t.title } : {},
 					taskKind: t.taskKind,
 					actor: "owner"
 				};
@@ -13724,6 +13725,7 @@ function Kc(e, t) {
 				stackRef: o,
 				repository: a,
 				ref: "main",
+				...t.title ? { task: t.title } : {},
 				taskKind: t.taskKind,
 				actor: "owner"
 			};

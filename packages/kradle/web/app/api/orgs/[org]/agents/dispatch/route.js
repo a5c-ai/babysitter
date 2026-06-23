@@ -25,10 +25,15 @@ export const POST = withAuth(async (request, { params }) => {
     const resources = agentDefinition
       ? await loadIdentityResources(controller, org)
       : await loadStackResources(controller, org);
+    // The per-dispatch task is the actual work the agent should do (a board card's
+    // objective/title/description). Without it the agent pod gets no AGENT_TASK and
+    // exits immediately. Accept the common field aliases the board/commander send.
+    const task = body.task || body.objective || body.prompt || body.description || undefined;
     const result = await controller.dispatchAgent({
       ...(agentDefinition ? { agentDefinition } : { agentStack }),
       repository: body.repository || 'default',
       ref: body.ref || 'main',
+      task,
       meetingRef: body.meetingRef || undefined,
       taskKind: body.taskKind || 'diagnostic',
       actor: body.actor || 'owner',

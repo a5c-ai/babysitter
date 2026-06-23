@@ -490,7 +490,7 @@ spec:
             {{- end }}
             {{- with .Values.assistant }}
             {{- if .existingSecret }}
-            {{- range $key := list "AZURE_API_KEY" "AGENT_MUX_API_BASE" "KRADLE_ASSISTANT_PROVIDER" "KRADLE_ASSISTANT_MODEL" "OPENAI_API_KEY" "GOOGLE_API_KEY" }}
+            {{- range $key := list "AZURE_API_KEY" "AGENT_MUX_API_BASE" "KRADLE_ASSISTANT_PROVIDER" "KRADLE_ASSISTANT_MODEL" "OPENAI_API_KEY" "GOOGLE_API_KEY" "KRADLE_AGENT_IMAGE" }}
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:

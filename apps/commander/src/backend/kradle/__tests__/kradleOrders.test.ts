@@ -219,17 +219,30 @@ describe('AC4 §3.4 — createTask → dispatch body (by stack)', () => {
   });
 
   it('AC14: createTask returns null and does NOT dispatch when no stack can be resolved', () => {
-    // Snapshot has an empty stacks list AND the kind has no seeded default? Use a
-    // snapshot with an explicitly empty agents.stacks and rely on the seeded
-    // fallback being present — so to force "no stack", pass a kind whose seeded
-    // default exists. Instead assert the seeded fallback path returns a value:
-    const { client } = makeFakeClient();
+    // DEFAULT_STACK_BY_KIND maps every real TaskKind, so the seeded fallback
+    // always resolves a stack for a valid kind. The genuine "no stack" path needs
+    // a kind absent from both the live snapshot AND the seeded map — an unknown
+    // kind. Then resolveDispatchStack/Definition both return null and createTask
+    // returns null without dispatching.
+    const { client, calls } = makeFakeClient();
     const orders = makeKradleOrders(client, noopOptions(snapshotWith({ stacks: { items: [] } })));
-    // With an empty live stack list, resolveDispatchStack falls back to the
-    // seeded default-by-kind, so dispatch DOES fire. The "null" path requires
-    // resolveDispatchStack to return null (no seeded default) — covered below.
-    const result = orders.createTask({ taskKind: 'implement' });
+    // Deliberately out-of-domain kind (not a real TaskKind) to exercise the
+    // genuine no-stack path; cast through the binding's param type.
+    const result = orders.createTask(
+      { taskKind: 'unknown-kind-with-no-seed' } as unknown as Parameters<typeof orders.createTask>[0],
+    );
     expect(result).toBeNull(); // synchronous contract returns null (card on refresh)
+    expect(calls.find((c) => c.method === 'dispatch')).toBeUndefined();
+  });
+
+  it('AC4b: createTask forwards the card title as the dispatch task (AGENT_TASK source)', async () => {
+    const snapshot = snapshotWith({ stacks: { items: [stackItem('stk-cc', 'claude-code')] } });
+    const { client, calls } = makeFakeClient();
+    const orders = makeKradleOrders(client, noopOptions(snapshot));
+    orders.createTask({ taskKind: 'implement', title: 'Forge the new mechanism' });
+    await Promise.resolve();
+    const body = calls.find((c) => c.method === 'dispatch')!.arg as DispatchInput;
+    expect(body.task).toBe('Forge the new mechanism');
   });
 
   it('AC14 §3.1: resolveDispatchStack prefers default-for label, then adapter family, then first', () => {
