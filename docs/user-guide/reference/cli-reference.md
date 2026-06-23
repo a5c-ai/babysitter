@@ -124,7 +124,7 @@ These options are available on all commands:
 
 > The default `--help` (and the usage text printed on a wrong-syntax invocation or a bare command name) lists **agent-facing** commands only — the surface a babysitter skill or hook would call. Run `babysitter --help-human` to see the commands intended for direct human use.
 
-> Runtime/orchestration commands such as `agent-platform call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/genty-platform` package and are not covered by this reference unless explicitly noted.
+> Runtime/orchestration commands such as `genty call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/genty-platform` package and are not covered by this reference unless explicitly noted.
 
 ### Path Handling
 

@@ -647,7 +647,7 @@ CHECK STATUS:
 
 BREAKPOINTS:
   Interactive (Claude Code): Handled in chat - no setup!
-  Non-Interactive: agent-platform call --harness internal --process <path>#<export> --workspace . --no-interactive
+  Non-Interactive: genty call --harness internal --process <path>#<export> --workspace . --no-interactive
   Web UI (non-interactive): http://localhost:3184
 
 LIST ALL RUNS:

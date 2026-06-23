@@ -142,7 +142,7 @@ adapters doctor
 adapters run claude "explain this repository in two sentences"
 ```
 
-If you also want headless runtime commands such as `agent-platform call`, install the optional runtime CLI too:
+If you also want headless runtime commands such as `genty call`, install the optional runtime CLI too:
 
 ```bash
 npm install -g @a5c-ai/genty-platform@latest
@@ -204,7 +204,7 @@ adapters run claude "explain this repository in two sentences"
 
 #### Step 3: Install the Optional Runtime CLI
 
-Install this only if you need `agent-platform` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
+Install this only if you need `genty` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
 
 ```bash
 npm install -g @a5c-ai/genty-platform@latest
@@ -212,7 +212,7 @@ npm install -g @a5c-ai/genty-platform@latest
 
 **Verify installation:**
 ```bash
-agent-platform --version
+genty --version
 ```
 
 #### Step 4: Install the Claude Code Plugin
@@ -518,7 +518,7 @@ adapters run claude "say hi"
 If you installed `@a5c-ai/genty-platform`:
 
 ```bash
-agent-platform --version
+genty --version
 ```
 
 **Expected:** The v6 release version (`5.1.0`)
@@ -546,7 +546,7 @@ In Claude Code:
 | Adapters CLI | `adapters version` | `5.1.0` |
 | Adapter health | `adapters doctor` | All checks pass |
 | Try an Adapter | `adapters run claude "say hi"` | The harness responds |
-| Runtime CLI | `agent-platform --version` | `5.1.0` if installed |
+| Runtime CLI | `genty --version` | `5.1.0` if installed |
 | Plugin (Claude Code) | `/skills` in Claude Code | "babysit" listed |
 
 **All checks passed?** You're ready for the [Quickstart](./quickstart.md)!
@@ -587,7 +587,7 @@ babysitter --version
 adapters version
 
 # Runtime CLI version (if installed)
-agent-platform --version
+genty --version
 
 # Plugin version
 claude plugin list | grep babysitter
