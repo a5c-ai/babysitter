@@ -45,19 +45,20 @@ export async function POST(request, { params }) {
     const now = new Date().toISOString();
 
     // 2. Update run status
-    const patched = {
-      ...run,
-      status: {
-        ...(run.status || {}),
-        phase: status === 'completed' ? 'Completed' : 'Failed',
-        ...(status === 'completed' ? { completedAt: now } : { failedAt: now }),
-        ...(errorMsg ? { failureReason: errorMsg } : {}),
-        ...(result ? { result } : {}),
-        ...(tokenUsage ? { tokenUsage } : {}),
-      },
+    // The run phase lives on the STATUS subresource. `applyResource` (kubectl
+    // apply) silently drops status — the API server strips it — so the board
+    // never saw the run complete. Patch the status subresource explicitly,
+    // mirroring the cancel route.
+    const statusPatch = {
+      ...(run.status || {}),
+      phase: status === 'completed' ? 'Completed' : 'Failed',
+      ...(status === 'completed' ? { completedAt: now } : { failedAt: now }),
+      ...(errorMsg ? { failureReason: errorMsg } : {}),
+      ...(result ? { result } : {}),
+      ...(tokenUsage ? { tokenUsage } : {}),
     };
 
-    await controller.applyResource(patched);
+    await controller.patchResourceStatusForOrg(org, 'AgentDispatchRun', name, statusPatch);
     clearSnapshotCache();
     invalidateApiCache();
 

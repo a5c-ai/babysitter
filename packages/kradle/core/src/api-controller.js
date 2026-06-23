@@ -274,13 +274,23 @@ export function createKradleApiController(options = {}) {
       // remains best-effort: the run CR is the durable record regardless of
       // whether the agent runtime is available to pick it up.
       if (result && !result.error && result.run) {
+        const runOrg = input.organizationRef || result.run.spec?.organizationRef || 'default';
         try {
-          const applied = await this.applyResourceForOrg(
-            input.organizationRef || result.run.spec?.organizationRef || 'default',
-            result.run
-          );
+          const applied = await this.applyResourceForOrg(runOrg, result.run);
           result.run = applied.resource || result.run;
           result.runApplyResult = applied;
+          // `applyResourceForOrg` (kubectl apply) strips the status subresource,
+          // so the just-created run would have an empty status and the board would
+          // never see it as Running. Persist the initial phase via the status
+          // subresource explicitly (same reason the callback patches status).
+          const initialStatus = result.run.status;
+          if (initialStatus && typeof this.patchResourceStatusForOrg === 'function') {
+            try {
+              await this.patchResourceStatusForOrg(runOrg, 'AgentDispatchRun', result.run.metadata?.name, initialStatus);
+            } catch (statusErr) {
+              result.runStatusApplyError = statusErr.message || String(statusErr);
+            }
+          }
         } catch (err) {
           result.runApplyError = err.message || String(err);
         }

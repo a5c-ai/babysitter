@@ -1,4 +1,5 @@
 import { createKradleApiController, orgNamespaceName } from '@a5c-ai/kradle-sdk';
+import { withAuth } from '../../../../../lib/api-auth.js';
 import { errorResponse } from '../../../../../lib/api-errors.js';
 
 export const dynamic = 'force-dynamic';
@@ -6,8 +7,9 @@ export const dynamic = 'force-dynamic';
 // Serves a saved KradleGeneratedView's HTML so it can be embedded (same-origin
 // iframe) and reused. Read-only render of stored content; intentionally renders
 // the stored HTML, so it is served with a restrictive CSP + sandbox-friendly
-// headers and only ever returns content this org saved.
-export async function GET(_request, { params }) {
+// headers and only ever returns content this org saved. Auth-gated like every
+// other org-data GET — the same-origin preview iframe carries the session cookie.
+export const GET = withAuth(async (_request, { params }) => {
   const { org, name } = await params;
   const controller = createKradleApiController({ namespace: orgNamespaceName(org) });
   try {
@@ -29,4 +31,4 @@ export async function GET(_request, { params }) {
   } catch (err) {
     return errorResponse(err.message || 'Failed to load view', 500);
   }
-}
+});
