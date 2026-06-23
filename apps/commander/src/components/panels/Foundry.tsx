@@ -17,6 +17,8 @@ import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import clsx from 'clsx';
 
+import { GraphLayerPicker } from './GraphLayerPicker';
+
 import { TASK_KINDS, TASK_TITLES, ADAPTERS, type TaskKind } from '../../backend/mock/scenario';
 import type {
   SimAgentDefinitionView,
@@ -250,6 +252,12 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
               value={draft.model}
               onChange={(e) => setDraft({ ...draft, model: e.target.value })}
             />
+            <GraphLayerPicker
+              label="Model"
+              kinds={['ModelFamily', 'ModelVersion']}
+              selectedId={draft.model}
+              onSelect={(h) => setDraft({ ...draft, model: h.displayName || h.id })}
+            />
           </label>
           <label className="wr-foundry-field">
             <span className="wr-foundry-label">provider</span>
@@ -259,6 +267,12 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
               value={draft.provider}
               placeholder="anthropic"
               onChange={(e) => setDraft({ ...draft, provider: e.target.value })}
+            />
+            <GraphLayerPicker
+              label="Provider"
+              kinds={['Provider']}
+              selectedId={draft.provider}
+              onSelect={(h) => setDraft({ ...draft, provider: h.displayName || h.id })}
             />
           </label>
           <label className="wr-foundry-field">
