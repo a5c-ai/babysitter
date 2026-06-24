@@ -1,3 +1,5 @@
+[Docs](../index.md) › [Features](./index.md) › Process Library
+
 # Process Library
 
 <!-- process-library:lead:start -->
@@ -26,6 +28,18 @@ The Babysitter Process Library is the SDK-managed library under [`library/`](../
 
 ---
 
+## On this page
+
+- [Quick Start: Using the Library](#quick-start-using-the-library)
+- [What is the Process Library?](#what-is-the-process-library)
+- [How Babysitter Uses the Process Library](#how-babysitter-uses-the-process-library)
+- [Library Structure](#library-structure)
+- [Browsing and Discovering Processes](#browsing-and-discovering-processes)
+- [Customizing Processes](#customizing-processes)
+- [Best Practices](#best-practices)
+
+---
+
 ## Quick Start: Using the Library
 
 **Most users never need to browse the library directly.** Just describe what you want:
@@ -48,7 +62,7 @@ That's it! See the sections below for details on what's available.
 
 The Process Library provides ready-to-use orchestration workflows for virtually any task you might encounter. Each process is:
 
-- **Battle-tested**: Designed with best practices and quality gates built-in
+- **Battle-tested**: Designed with best practices and [quality gates](../reference/glossary.md) built-in
 - **Composable**: Can be combined with other processes to create complex workflows
 - **Customizable**: Extend or modify any process to match your requirements
 - **Self-documenting**: Includes clear inputs, outputs, and execution flow
@@ -112,6 +126,8 @@ The agent will take the base process and adapt it to your specific requirements.
 
 ## Library Structure
 
+> **Renamed in v6:** Installable process bundles are now **blueprints** and are managed with `blueprints:*` commands — for example `/babysitter:blueprints` to browse and install. The old `plugin:*` commands (such as `/babysitter:plugins`) are **retained as deprecated aliases for one release** and will be removed; switch to `blueprints:*`. See [Process Definitions](./process-definitions.md) for how blueprints map onto process files.
+
 The built-in library lives under [`library/`](../../../library/README.md). Harness plugins do **not** ship the whole process tree under `skills/babysit/`; instead, they expose the `babysit` skill and rely on the SDK-managed active process-library binding. Project-local copies under `.a5c/` are an override layer that can be created by plugins or by you.
 
 ### How The Layers Relate
@@ -135,7 +151,7 @@ Click any link to view the current source location:
 | Area | Description | Link |
 |------|-------------|------|
 | **library/methodologies/** | Methodology families such as Agile, Devin, GSD, Kanban, Spec-Kit, and more | [Browse →](../../../library/methodologies/) |
-| **library/methodologies/gsd/** | Get Shit Done workflows | [Browse →](../../../library/methodologies/gsd/README.md) |
+| **library/methodologies/gsd/** | Get Stuff Done workflows | [Browse →](../../../library/methodologies/gsd/README.md) |
 | **library/specializations/** | Domain-specific processes across the specialization tree | [Browse →](../../../library/specializations/) |
 | **library/processes/shared/** | Shared reusable process components | [Browse →](../../../library/processes/shared/README.md) |
 | **library/tdd-quality-convergence.js** | Featured TDD workflow at the library root | [View](../../../library/tdd-quality-convergence.js) |
@@ -570,3 +586,8 @@ Most processes accept configuration through inputs:
 - [Quality Convergence](./quality-convergence.md) - Quality gates and scoring
 - [Breakpoints](./breakpoints.md) - Human-in-the-loop approval
 - [Parallel Execution](./parallel-execution.md) - Running tasks concurrently
+
+## Next steps
+
+- **Next:** [Process Definitions](./process-definitions.md)
+- **Related:** [Best Practices](./best-practices.md), [Quality Convergence](./quality-convergence.md)

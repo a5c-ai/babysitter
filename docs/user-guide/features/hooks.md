@@ -1,7 +1,9 @@
+[Docs](../index.md) › [Features](./index.md) › Hooks
+
 # Hooks: Extensible Lifecycle Events
 
-**Version:** 1.1
-**Last Updated:** 2026-01-26
+**Version:** 5.1.0 (v6)
+**Last Updated:** 2026-06-22
 **Category:** Feature Guide
 
 ---
@@ -10,7 +12,7 @@
 
 **Hooks are automatic triggers that run your custom code at specific moments.**
 
-Like setting up an automatic notification: "When the workflow finishes, send me a Slack message." That's a hook.
+Like setting up an automatic notification: "When the workflow finishes, send me a Slack message." That's a [hook](../reference/glossary.md).
 
 **Common examples:**
 - 📧 Send an email when a run completes
@@ -19,11 +21,30 @@ Like setting up an automatic notification: "When the workflow finishes, send me 
 
 **Do you need hooks as a beginner?** No - they're an advanced feature for customizing behavior. You can use Babysitter perfectly well without ever writing a hook.
 
+**One thing to know for v6:** how Babysitter *keeps a run going turn-to-turn* differs by harness. Claude Code uses a `Stop` hook; Gemini and antigravity use `AfterAgent`; openclaw uses a daemon `agent_end`; opencode uses `session.idle`; Hermes uses ACP. The **Hooks Adapter** normalizes all of these into one consistent contract so your processes don't care which harness they run on.
+
+---
+
+## On this page
+
+- [Overview](#overview)
+- [Hook Lifecycle Overview](#hook-lifecycle-overview)
+- [Available Hook Types](#available-hook-types)
+- [Creating Custom Hooks](#creating-custom-hooks)
+- [Hook Payloads and Environment Variables](#hook-payloads-and-environment-variables)
+- [Configuration in hooks.json](#configuration-in-hooksjson)
+- [Troubleshooting](#troubleshooting)
+- [Best Practices](#best-practices)
+
 ---
 
 ## Overview
 
-Hooks are shell scripts that execute at specific lifecycle points during Babysitter orchestration. They enable custom behavior for task execution, notifications, logging, metrics collection, and third-party integrations without modifying core SDK code.
+Hooks are scripts and handlers that execute at specific lifecycle points during Babysitter orchestration. They enable custom behavior for task execution, notifications, logging, metrics collection, and third-party integrations without modifying core SDK code.
+
+In v6 the hook system is unified by the **Hooks Adapter**: a canonical session store plus a merge engine that takes each harness's distinct hook/continuation model and presents one consistent contract to the runtime and to your custom hooks. The SDK lifecycle hooks (`on-run-start`, `on-iteration-start`, ...) are harness-agnostic and behave the same everywhere; what varies is the **per-harness continuation model** that drives the loop forward each turn (see the table below). The Hooks Adapter is part of the [Adapters](adapters.md) runtime.
+
+> **Do not assume the Claude `Stop`-hook model on other harnesses.** Claude's "one orchestration phase per turn, decided by a synchronous `Stop` hook" is specific to Claude Code. The per-harness table below is authoritative.
 
 ### Why Use Hooks
 
@@ -38,7 +59,7 @@ Hooks are shell scripts that execute at specific lifecycle points during Babysit
 
 ## Hook Lifecycle Overview
 
-The following diagram shows when each hook type fires during a Babysitter run:
+The following diagram shows when each hook type fires during a Babysitter run. The SESSION LIFECYCLE block below illustrates the **Claude Code** continuation model (SessionStart + Stop); other harnesses substitute their own continuation mechanism (see the [Per-Harness Continuation Models](#per-harness-continuation-models) table). The RUN and GIT lifecycle hooks are harness-agnostic.
 
 ```
                             SESSION LIFECYCLE
@@ -123,16 +144,30 @@ These hooks fire during the orchestration lifecycle managed by the Babysitter SD
 | `pre-branch` | Before git branch operation | Branch naming, validation |
 | `pre-commit` | Before git commit | Linting, formatting, validation |
 
-### Claude Code Hooks
+### Per-Harness Continuation Models
 
-These hooks integrate with Claude Code's session management.
+The orchestration loop is *kept alive turn-to-turn* by a harness-specific mechanism. The Hooks Adapter normalizes these into one contract; you only need this table when integrating or debugging a specific harness. **These models are distinct - do not generalize one onto another.**
 
-| Hook | Trigger | Purpose |
-|------|---------|---------|
-| `SessionStart` | Session begins | Persist session ID, set environment variables |
-| `Stop` | Exit attempt | Implement in-session orchestration loops |
-| `PreToolUse` | Before tool call | Validation, logging |
-| `PostToolUse` | After tool call | Result logging, metrics |
+| Harness | Continuation model | How the loop advances |
+|---------|--------------------|------------------------|
+| Claude Code | SessionStart + **Stop** | One orchestration phase per turn; the synchronous `Stop` hook decides block-vs-approve-exit, finishing only when the completion proof returns as `<promise>...</promise>` |
+| Codex | SessionStart + **UserPromptSubmit + Stop** | Plugin-level lifecycle hooks; the proxied-stop hook advances the loop each turn (hooks auto-detected via `./hooks/hooks.json`) |
+| Antigravity | SessionStart + **AfterAgent** (no Stop) | `AfterAgent` fires after every turn and returns `{decision: block, ..., systemMessage}` to inject the next iteration until `<promise>COMPLETION_PROOF</promise>` |
+| Gemini | SessionStart + **AfterAgent** (no Stop) | `session-start.sh` inits state; `after-agent.sh` returns `{decision: block, ...}` to inject the next iteration |
+| Cursor | SessionStart + **Stop** | The `Stop` hook emits `{followup_message: ...}` (Cursor-specific, **not** `{decision: block}`) to auto-continue while the run is in progress |
+| GitHub Copilot | plugin-bundle **SessionStart + SessionEnd + UserPromptSubmitted** | `sessionEnd` is the loop driver (checks completion / re-injects next step); cloud-agent path is driven by repo instructions/skills |
+| openclaw | daemon **session_start + before_prompt_build + agent_end + session_end** (no sync Stop) | `before_prompt_build` injects run state into each turn's prompt; `agent_end` fires async (fire-and-forget) and does not block the next turn |
+| opencode | **session.created + session.idle** (non-blocking) + shell.env + tool.execute.before/after | No blocking Stop hook; the agent runs the full loop within a single turn by calling `babysitter run:iterate` until completion |
+| Hermes | **ACP** (JSON-RPC over stdio) | The babysitter adapter speaks ACP; the SDK owns orchestration; no filesystem Stop hook |
+| omp (oh-my-pi) | thin-skill-alias: **session_start** proxied hook + `/skill:*` forwarding | SDK-owned loop; commands forward via `/skill:<name>` |
+| Pi | thin-skill-alias: **session_start + proxied stop** hook + `/skill:*` forwarding | Active-run detection lives in the SDK stop hook |
+| genty | genty extension API: **session_start** proxied hook | SDK-owned continuation via the `babysit` skill; no marketplace CLI |
+
+For each harness's full command surface and install steps, see the [Install Matrix](../harnesses/install-matrix.md), [Claude Code](../harnesses/claude-code.md), and [Codex](../harnesses/codex.md) pages.
+
+### Host-Side Hook Management
+
+The host-side [`adapters` CLI](../reference/adapters-cli.md) manages unified agent hooks via `adapters hooks` (`discover`, `list`, `add`, `remove`, `set`, `handle`) - for example registering a cross-harness trace hook. This is distinct from the per-repo/per-user SDK lifecycle hooks below.
 
 ---
 
@@ -319,9 +354,9 @@ These environment variables are available to hooks:
 | `HOOK_PAYLOAD` | The JSON payload (also available via stdin) |
 | `HOOK_TYPE` | The hook type being executed |
 | `REPO_ROOT` | Repository root directory |
-| `AGENT_SESSION_ID` | Cross-harness session identifier |
-| `CLAUDE_PLUGIN_ROOT` | Plugin installation directory |
-| `CLAUDE_ENV_FILE` | Path to session environment file |
+| `AGENT_SESSION_ID` | Harness-agnostic session identifier (supersedes the deprecated `CLAUDE_SESSION_ID` / `BABYSITTER_SESSION_ID`) |
+| `BABYSITTER_PLUGIN_ROOT` | Plugin installation directory (injected by the runtime; the legacy `CLAUDE_PLUGIN_ROOT` / `--plugin-root` are gone) |
+| `BABYSITTER_ENV_FILE` | Path to session environment file |
 
 ---
 
@@ -490,7 +525,7 @@ per-user:notify.sh:success
 
 ## Configuration in hooks.json
 
-The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUse, PostToolUse).
+The `hooks.json` file registers **Claude Code** hooks (SessionStart, Stop, PreToolUse, PostToolUse). Other harnesses register continuation hooks through their own manifests — see [Per-Harness Continuation Models](#per-harness-continuation-models) above.
 
 **Location:** generated from `plugins/babysitter-unified/plugin.json`
 
@@ -503,7 +538,7 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
+            "command": "bash ${BABYSITTER_PLUGIN_ROOT}/hooks/session-start.sh"
           }
         ]
       }
@@ -513,7 +548,7 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/stop.sh"
+            "command": "bash ${BABYSITTER_PLUGIN_ROOT}/hooks/stop.sh"
           }
         ]
       }
@@ -648,6 +683,9 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
 
 ## Related Documentation
 
+- [Adapters](./adapters.md) - The Hooks Adapter and the harness-agnostic runtime
+- [Install Matrix](../harnesses/install-matrix.md) - Per-harness install and continuation models
+- [Adapters CLI Reference](../reference/adapters-cli.md) - Host-side `adapters hooks` management
 - [Configuration Reference](../reference/configuration.md) - Hook configuration options
 - [Glossary](../reference/glossary.md) - Hook terminology definitions
 - [Process Definitions](./process-definitions.md) - Using hooks in processes
@@ -660,3 +698,10 @@ The `hooks.json` file registers Claude Code hooks (SessionStart, Stop, PreToolUs
 ## Summary
 
 Hooks provide a powerful extension mechanism for customizing Babysitter behavior at every lifecycle stage. Use SDK lifecycle hooks for run orchestration, notifications, and metrics. Use Claude Code hooks for session management and continuous orchestration loops. Follow the input/output protocol (stdin JSON, stdout JSON, stderr logging) and ensure scripts are executable. Place hooks in per-repo, per-user, or plugin directories based on your needs.
+
+---
+
+## Next steps
+
+- **Next:** [Install Matrix](../harnesses/install-matrix.md)
+- **Related:** [Adapters](./adapters.md), [Breakpoints](./breakpoints.md), [Architecture Overview](./architecture-overview.md)

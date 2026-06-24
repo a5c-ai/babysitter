@@ -1,81 +1,124 @@
+[Docs](../index.md) › [Features](./index.md) › Architecture Overview
+
 # Architecture Overview
 
-**Version:** 1.0
-**Last Updated:** 2026-01-31
+**Version:** 5.1.0 (v6)
+**Last Updated:** 2026-06-22
 **Category:** Feature Guide
 
 ---
 
 ## In Plain English
 
-**Babysitter is built in layers, like a well-organized office.**
+**Babysitter v6 is built around one headline subsystem: Adapters - the harness-agnostic runtime that lets the same orchestration run on any supported AI coding harness.**
 
 Think of it like this:
-- **The Plugin** is the receptionist - it takes your requests and routes them to the right department
-- **The SDK** is the operations team - it actually does the work
-- **The Journal** is the filing cabinet - it keeps a record of everything
-- **The AskUserQuestion Tool** is the approval desk - it pauses for human review when needed
+- **Adapters** is the universal adapter plug - it lets Babysitter speak to Claude Code, Codex, Cursor, Gemini, and the rest through one common interface
+- **The SDK** is the operations team - it actually runs the process
+- **The Journal** is the filing cabinet - it keeps a replayable record of everything
+- **Breakpoints** are the approval desk - they pause for human review when needed
+- **Atlas** is the directory - the catalog the runtime reads to discover each harness's capabilities
 
 **Tip for beginners:** You don't need to understand the architecture to use Babysitter. This document is for those who want to understand how it works under the hood, or who are building custom processes.
 
-**Related:** For the conceptual model of how orchestration and AI work together, see [Two-Loops Architecture](./two-loops-architecture.md).
+**Related:** [Adapters](./adapters.md) for the headline subsystem, and [Two-Loops Architecture](./two-loops-architecture.md) for the conceptual model of orchestration and AI working together.
+
+---
+
+## On this page
+
+- [Overview](#overview)
+- [High-Level Architecture](#high-level-architecture)
+- [Core Components](#core-components)
+- [Data Flow](#data-flow)
+- [State Management](#state-management)
+- [Extensibility](#extensibility)
+- [Design Patterns](#design-patterns)
 
 ---
 
 ## Overview
 
-Babysitter uses a modular architecture designed for reliability, debuggability, and extensibility. The system combines a deterministic orchestration engine with adaptive AI capabilities, all backed by an event-sourced persistence layer.
+Babysitter v6 uses a modular, **harness-agnostic** architecture designed for reliability, debuggability, and extensibility. The system combines a deterministic orchestration engine with adaptive AI capabilities, runs on top of the **Adapters** runtime so it is not tied to any single harness, and is backed by an event-sourced persistence layer.
+
+The central change from the prior (Claude-only) design: orchestration no longer assumes one harness and one continuation hook. The Adapters runtime - together with the [Hooks Adapter](./hooks.md), [Breakpoints Adapter](./breakpoints.md), Transport Adapter, and the Atlas catalog - makes [harness](../reference/glossary.md)-agnosticism the core story.
 
 ---
 
 ## High-Level Architecture
 
-```
-+-----------------------------------------------------------------+
-|  Claude Code Session                                             |
-|  +-----------------------------------------------------------+  |
-|  |  Babysitter Skill (orchestrates via CLI)                  |  |
-|  +-----------------------------------------------------------+  |
-|                           |                                      |
-|                           v                                      |
-|  +-----------------------------------------------------------+  |
-|  |  .a5c/runs/<runId>/                                       |  |
-|  |  +-- run.json        (run metadata)                       |  |
-|  |  +-- inputs.json     (run inputs)                         |  |
-|  |  +-- code/           (process code)                       |  |
-|  |  +-- artifacts/      (output artifacts)                   |  |
-|  |  +-- journal/        (event log, individual JSON files)   |  |
-|  |  +-- state/state.json (current state)                     |  |
-|  |  +-- tasks/<effectId>/ (task artifacts)                   |  |
-|  +-----------------------------------------------------------+  |
-|                           |                                      |
-|                           v                                      |
-|  +-----------------------------------------------------------+  |
-|  |  AskUserQuestion Tool (human approval)                     |  |
-|  +-----------------------------------------------------------+  |
-+-----------------------------------------------------------------+
+```mermaid
+graph TD
+    subgraph Entry["Entry Points"]
+        ADP["adapters CLI (host-side)"]
+        SES["/babysitter:* (in-session, varies by harness)"]
+    end
+
+    subgraph Runtime["Adapters Runtime (harness-agnostic core)"]
+        ENGINE["Process Engine + SDK"]
+        HOOKS["Hooks Adapter (canonical session store + merge engine)"]
+        BP["Breakpoints Adapter"]
+        TRANS["Transport Adapter + Triggers"]
+        OBS["Observability"]
+    end
+
+    ATLAS["Atlas (capability + adapter catalog)"]
+
+    subgraph Store["Run Store: .a5c/runs/&lt;runId&gt;/"]
+        J["journal/ (event log)"]
+        ST["state/state.json"]
+        ART["artifacts/ · tasks/&lt;effectId&gt;/"]
+    end
+
+    subgraph Harnesses
+        H["Claude Code · Codex · Cursor · Gemini · Copilot · ..."]
+    end
+
+    ADP --> ENGINE
+    SES --> ENGINE
+    ENGINE --> HOOKS
+    ENGINE --> BP
+    ENGINE --> TRANS
+    ENGINE --> OBS
+    ENGINE --> Store
+    ENGINE --> ATLAS
+    ATLAS --> Harnesses
+    HOOKS --> Harnesses
 ```
 
 ---
 
 ## Core Components
 
-### 1. Babysitter Skill Plugin
+### 1. Adapters Runtime
 
-**Location:** `plugins/babysitter-unified/skills/babysit/`
+**Package family:** `@a5c-ai/*-adapter` (formerly the `-mux` / Agent Mux packages) under `packages/adapters/*`
 
 **Responsibilities:**
-- Parses natural language commands into process inputs
-- Orchestrates the run loop via SDK CLI
-- Manages iteration lifecycle
-- Handles resumption from saved state
-- Reports progress to Claude Code
+- Presents a harness-agnostic run/session/options model to the orchestration engine
+- Normalizes each harness's distinct hook/continuation model via the [Hooks Adapter](./hooks.md)
+- Routes runs to providers via the Transport Adapter and the proxy used by `adapters launch`
+- Reads the Atlas catalog to discover harness capabilities
 
-**Technology:** Claude Code Plugin System (JavaScript)
+**Technology:** Node.js, TypeScript. See [Adapters](./adapters.md) and the [Adapters CLI Reference](../reference/adapters-cli.md).
 
 ---
 
-### 2. Babysitter SDK
+### 2. Babysitter Skill / Plugin (per harness)
+
+**Location:** `plugins/babysitter-unified/skills/babysit/` (and the per-harness plugin packages)
+
+**Responsibilities:**
+- Parses natural language commands into process inputs
+- Orchestrates the run loop via the SDK/CLI on top of the Adapters runtime
+- Manages iteration lifecycle and resumption
+- Reports progress back to the harness
+
+**Technology:** The harness's plugin/skill system (JavaScript/TypeScript). The in-session command surface and continuation model **vary by harness** - see [Hooks](./hooks.md) and the [Install Matrix](../harnesses/install-matrix.md).
+
+---
+
+### 3. Babysitter SDK
 
 **Package:** `@a5c-ai/babysitter-sdk`
 
@@ -93,7 +136,7 @@ Babysitter uses a modular architecture designed for reliability, debuggability, 
 
 ---
 
-### 3. Event-Sourced Journal
+### 4. Event-Sourced Journal
 
 **Format:** Individual JSON files in `journal/` directory, one per event, named `{SEQ}.{ULID}.json` (e.g. `000001.01ARZ3NDEKTSV4RRFFQ69G5FAV.json`)
 
@@ -143,7 +186,7 @@ For more details on the journal system, see [Journal System](./journal-system.md
 
 ---
 
-### 4. Process Definitions
+### 5. Process Definitions
 
 **Format:** JavaScript/TypeScript functions
 
@@ -188,14 +231,14 @@ For more details on creating processes, see [Process Definitions](./process-defi
 
 ---
 
-### 5. Task Execution System
+### 6. Task Execution System
 
 **Task Types:**
 
 | Type | Executor | Use Case | Example |
 |------|----------|----------|---------|
-| **Agent** | LLM API | Planning, analysis, scoring | GPT-4, Claude |
-| **Skill** | Claude Code | Code operations | Refactoring, search |
+| **Agent** | LLM API | Planning, analysis, scoring | Any supported harness |
+| **Skill** | Harness skill | Code operations | Refactoring, search |
 | **Node** | Node.js | Scripts and tools | Build, test, deploy |
 | **Shell** | System shell | Commands | git, npm, docker |
 
@@ -224,7 +267,7 @@ For more details on creating processes, see [Process Definitions](./process-defi
 +---------------------------------------------------------+
 | Execute Task                                            |
 | - Agent: Call LLM API                                   |
-| - Skill: Invoke Claude Code skill                       |
+| - Skill: Invoke the harness skill                       |
 | - Node: Run JavaScript function                         |
 | - Shell: Execute command                                |
 | - Breakpoint: Wait for approval (kind: breakpoint)      |
@@ -268,13 +311,13 @@ For more details on parallel execution, see [Parallel Execution](./parallel-exec
 ```
 1. User Command
    |
-   +--> Claude Code
+   +--> Harness (Claude Code, Codex, Cursor, ...)
         |
         +--> Babysitter Skill
              |
              +-- Parse intent
              +-- Load/create run
-             +--> CLI: npx -y @a5c-ai/babysitter@latest run:iterate
+             +--> CLI: babysitter run:iterate (on the Adapters runtime)
                   |
                   +--> SDK Process Engine
                        |
@@ -298,7 +341,7 @@ For more details on parallel execution, see [Parallel Execution](./parallel-exec
                        +-- Save state cache
                        +--> Return results to skill
                             |
-                            +--> Report to Claude Code
+                            +--> Report to the harness
                                  |
                                  +--> Display to user
 ```
@@ -389,7 +432,8 @@ For more details on hooks, see [Hooks](./hooks.md).
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
-| **Plugin** | JavaScript | Claude Code integration |
+| **Adapters Runtime** | TypeScript + Node.js | Harness-agnostic run/session model |
+| **Plugin** | JavaScript/TypeScript | Per-harness integration (12 harnesses) |
 | **SDK** | TypeScript + Node.js | Core orchestration engine |
 | **Process Definitions** | JavaScript/TypeScript | User workflow logic |
 | **Journal** | Individual JSON files | Event persistence |
@@ -422,23 +466,32 @@ For more details on hooks, see [Hooks](./hooks.md).
 
 ## Related Documentation
 
+- [Adapters](./adapters.md) - The headline v6 runtime and harness-agnosticism
+- [Hooks](./hooks.md) - The Hooks Adapter and per-harness continuation models
 - [Two-Loops Architecture](./two-loops-architecture.md) - Conceptual model of orchestration and AI loops
 - [Process Definitions](./process-definitions.md) - Creating custom processes
 - [Journal System](./journal-system.md) - Event sourcing and replay
 - [Breakpoints](./breakpoints.md) - Human-in-the-loop approval
 - [Parallel Execution](./parallel-execution.md) - Running tasks concurrently
-- [Hooks](./hooks.md) - Extensibility and custom integrations
 
 ---
 
 ## Summary
 
-Babysitter's architecture is built on these key principles:
+Babysitter's v6 architecture is built on these key principles:
 
+- **Harness-agnostic by default**: The Adapters runtime lets the same process run on any supported harness
 - **Modular Design**: Each component has a clear, single responsibility
 - **Event Sourcing**: The journal provides a complete, replayable audit trail
 - **Two-Layer State**: Journal for truth, cache for performance
 - **Extensibility**: Hooks and custom tasks enable integration with any system
-- **Human-in-the-Loop**: Breakpoints enables approval workflows
+- **Human-in-the-Loop**: Breakpoints enable approval workflows
 
-This architecture enables reliable, debuggable, and auditable AI-powered workflows that can be paused, resumed, and replayed at any point.
+This architecture enables reliable, debuggable, and auditable AI-powered workflows that can run on any harness and be paused, resumed, and replayed at any point.
+
+---
+
+## Next steps
+
+- **Next:** [Two-Loops Architecture](./two-loops-architecture.md)
+- **Related:** [Adapters](./adapters.md), [Journal System](./journal-system.md), [Hooks](./hooks.md)

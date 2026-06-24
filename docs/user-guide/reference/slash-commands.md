@@ -1,8 +1,19 @@
+[Docs](../index.md) › [Reference](./index.md) › Slash Commands
+
 # Babysitter Slash Commands Reference
 
 **Version:** 1.0 | **Last Updated:** 2026-03-05
 
 Complete reference for Babysitter slash commands in Claude Code.
+
+## On this page
+
+- [Quick Overview](#quick-overview)
+- [Core Modes](#core-modes)
+- [Utility Commands](#utility-commands)
+- [Mode Selection Guide](#mode-selection-guide)
+- [Common Patterns](#common-patterns)
+- [See Also](#see-also)
 
 ---
 
@@ -50,7 +61,7 @@ These are the primary ways to invoke Babysitter. Same engine, different behavior
 1. Interviews you to understand requirements
 2. Creates a custom process tailored to your request
 3. Asks for confirmation before executing
-4. Pauses at breakpoints for your approval
+4. Pauses at [breakpoints](./glossary.md) for your approval
 5. Iterates until quality targets are met
 
 **When to use:**
@@ -252,7 +263,7 @@ Opens a web-based dashboard showing:
 - Journal events as they happen
 - Orchestration state visualization
 
-**Package:** This command launches the first-party `@a5c-ai/babysitter-observer-dashboard` package. The core `babysitter` CLI does not provide a `babysitter observe` fallback; optional harness runtimes may expose their own `agent-platform observe` surface.
+**Package:** This command launches the first-party `@a5c-ai/babysitter-observer-dashboard` package. The core `babysitter` CLI does not provide a `babysitter observe` fallback; optional harness runtimes may expose their own `genty observe` surface.
 
 **Technical:** Runs a local server and opens your browser. Blocking process — runs until stopped.
 
@@ -384,3 +395,10 @@ Start here
 - [Process Library](../features/process-library.md) — 2,239 generated pre-built process files
 <!-- slash-commands:process-library-link:end -->
 - [Troubleshooting](./troubleshooting.md) — Common issues and solutions
+
+---
+
+## Next steps
+
+- **Next:** [CLI Reference](./cli-reference.md)
+- **Related:** [Install Matrix](../harnesses/install-matrix.md), [Adapters CLI](./adapters-cli.md)

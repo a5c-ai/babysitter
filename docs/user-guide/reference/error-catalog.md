@@ -1,17 +1,22 @@
+[Docs](../index.md) › [Reference](./index.md) › Error Catalog
+
 # Error Catalog
 
 **Version:** 1.0
-**Last Updated:** 2026-01-25
+**Last Updated:** 2026-06-22
 **Category:** Reference
 
 This catalog provides comprehensive documentation of Babysitter error messages, their meanings, causes, and solutions.
 
 ---
 
-## Table of Contents
+## On this page
 
 - [Installation Errors](#installation-errors)
 - [Plugin Errors](#plugin-errors)
+- [Adapter Errors](#adapter-errors)
+- [Harness Install Errors](#harness-install-errors)
+- [Session Binding Errors](#session-binding-errors)
 - [Run Execution Errors](#run-execution-errors)
 - [Task Execution Errors](#task-execution-errors)
 - [Quality and Scoring Errors](#quality-and-scoring-errors)
@@ -46,7 +51,7 @@ Error: Cannot find module '@a5c-ai/babysitter-sdk'
    ```bash
    npx -y @a5c-ai/babysitter@latest --version
    ```
-3. If your process code imports the SDK, install it in the project:
+3. If your [process](./glossary.md) code imports the SDK, install it in the project:
    ```bash
    npm install @a5c-ai/babysitter-sdk
    ```
@@ -199,6 +204,216 @@ Error loading plugin babysitter@a5c.ai: [details]
    ```bash
    claude plugin update babysitter@a5c.ai
    ```
+
+---
+
+## Adapter Errors
+
+The host-side `adapters` CLI (package `@a5c-ai/adapters-cli`) is the harness runtime companion. When it cannot start, find a harness, or reach a provider, you will see one of the following. See the [Adapters CLI Reference](./adapters-cli.md) for the full command surface.
+
+### adapters: command not found
+
+```
+adapters: command not found
+```
+
+**Meaning:** The `adapters` CLI is not installed or not on your PATH.
+
+**Causes:**
+- `@a5c-ai/adapters-cli` not installed globally
+- npm global bin not on PATH
+
+**Solutions:**
+1. Install globally:
+   ```bash
+   npm install -g @a5c-ai/adapters-cli
+   ```
+2. Confirm the install and environment:
+   ```bash
+   adapters version
+   adapters doctor
+   ```
+3. Ensure the npm global bin is on PATH:
+   ```bash
+   npm bin -g
+   ```
+
+---
+
+### Unsupported Node.js version (adapters)
+
+```
+Error: @a5c-ai/adapters-cli requires Node.js >=20.9.0
+```
+
+**Meaning:** The `adapters` CLI pins a higher Node floor (>=20.9.0) than the rest of the Babysitter toolchain (>=20.0.0).
+
+**Causes:**
+- An older Node.js is active in the current shell
+- A version manager (nvm/asdf) selected an out-of-range version
+
+**Solutions:**
+1. Check the active version:
+   ```bash
+   node --version
+   ```
+2. Switch to a supported version (22.x LTS recommended):
+   ```bash
+   nvm install 22 && nvm use 22
+   ```
+
+---
+
+### Adapter not found / harness binary missing
+
+```
+Error: adapter not found for agent 'codex'
+```
+```
+Error: harness binary for 'gemini' not detected
+```
+
+**Meaning:** The requested adapter is not registered, or its underlying harness binary cannot be located.
+
+**Causes:**
+- The harness CLI is not installed
+- Wrong agent/adapter name
+- Credentials or PATH issues hiding the binary
+
+**Solutions:**
+1. Run the environment health check first:
+   ```bash
+   adapters doctor
+   ```
+2. List and inspect registered adapters:
+   ```bash
+   adapters adapters list
+   adapters adapters detect codex
+   ```
+3. Install the missing harness binary:
+   ```bash
+   adapters install codex
+   ```
+
+---
+
+### Provider transport error
+
+```
+Error: harness cannot speak provider transport natively
+```
+
+**Meaning:** The harness cannot reach the requested provider (Bedrock, Vertex, Azure Foundry, Ollama, and others) without a transport proxy.
+
+**Causes:**
+- Harness does not natively support the provider's transport
+- Proxy disabled with `--no-proxy`
+
+**Solutions:**
+1. Let the launcher start a proxy when needed:
+   ```bash
+   adapters launch claude bedrock --with-proxy-if-needed
+   ```
+2. Verify credentials with `adapters auth check`.
+
+---
+
+## Harness Install Errors
+
+These surface when installing the in-session `/babysitter:*` plugin into a harness with `babysitter harness:install-plugin <harness-key>`. See the [Install Matrix](../harnesses/install-matrix.md) for the authoritative list of harness keys.
+
+### Unknown harness key
+
+```
+Error: unknown harness key 'gemini'
+```
+
+**Meaning:** The argument passed to `harness:install-plugin` is not a recognized harness key.
+
+**Causes:**
+- Using the harness display name instead of its key (e.g. `gemini` instead of `gemini-cli`)
+- Typo in the key
+
+**Solutions:**
+1. Use the correct harness key — it is **not** always the harness name:
+   ```bash
+   babysitter harness:install-plugin gemini-cli
+   ```
+2. Check the [Install Matrix](../harnesses/install-matrix.md) for every supported key.
+
+---
+
+### Plugin installed but not appearing in the harness
+
+```
+Plugin installed, but /babysitter:* commands are not available
+```
+
+**Meaning:** The install completed but the harness has not picked up the plugin.
+
+**Causes:**
+- Harness not restarted after install
+- Installed into the wrong workspace
+- The harness uses a different continuation/registration model than expected
+
+**Solutions:**
+1. Restart the harness completely.
+2. Re-run the install targeting the right workspace:
+   ```bash
+   babysitter harness:install-plugin <harness-key> --workspace ./my-project
+   ```
+3. Confirm which continuation model the harness uses in the [Hooks](../features/hooks.md) per-harness table — do not assume the Claude `Stop`-hook model elsewhere.
+
+See: [Troubleshooting - Harness Install Issues](./troubleshooting.md#harness-install-issues).
+
+---
+
+## Session Binding Errors
+
+In v6, session resolution is **PID-scoped** and harness-agnostic. The session ID is carried in `AGENT_SESSION_ID` (which supersedes the deprecated `BABYSITTER_SESSION_ID` and `CLAUDE_SESSION_ID`). See [Configuration](./configuration.md) for the full variable list.
+
+### Session not bound / cannot resolve session
+
+```
+Error: could not resolve agent session for this process
+```
+
+**Meaning:** Babysitter could not bind the current process to a harness session.
+
+**Causes:**
+- The harness did not export `AGENT_SESSION_ID`
+- The continuation hook is not registered for this harness
+- A wrapper process broke the PID-scoped lookup
+
+**Solutions:**
+1. Confirm the session variable is present:
+   ```bash
+   echo "$AGENT_SESSION_ID"
+   ```
+2. If your harness sets the session only via the environment (not via the PID-scoped store), opt into the legacy behavior with the escape hatch:
+   ```bash
+   export BABYSITTER_TRUST_ENV_SESSION=1
+   ```
+3. Verify the harness's continuation hooks are installed (see [Hooks](../features/hooks.md)).
+
+See: [Troubleshooting - Session Binding Issues](./troubleshooting.md#session-binding-issues).
+
+---
+
+### Deprecated session variable in use
+
+```
+Warning: BABYSITTER_SESSION_ID is deprecated; use AGENT_SESSION_ID
+```
+
+**Meaning:** A removed/deprecated session variable was detected.
+
+**Causes:**
+- Scripts or configs still set `BABYSITTER_SESSION_ID` or `CLAUDE_SESSION_ID`
+
+**Solutions:**
+1. Replace the deprecated variables with `AGENT_SESSION_ID`.
+2. Remove any `--plugin-root` flag from scripts — it has been removed and plugin-root resolution is now automatic (the runtime injects `BABYSITTER_PLUGIN_ROOT` into hooks; you do not set it yourself).
 
 ---
 
@@ -710,6 +925,8 @@ Error: EMFILE: too many open files
 ## Related Documentation
 
 - [Troubleshooting Guide](./troubleshooting.md) - Step-by-step problem resolution
+- [Configuration Reference](./configuration.md) - Environment variables (including `AGENT_SESSION_ID` and `BABYSITTER_TRUST_ENV_SESSION`)
+- [Adapters CLI Reference](./adapters-cli.md) - The host-side `adapters` CLI
 - [FAQ](./faq.md) - Common questions answered
 - [Installation Guide](../getting-started/installation.md) - Setup help
 
@@ -735,5 +952,12 @@ If you encounter an error not listed here:
 
 ---
 
+## Next steps
+
+- **Next:** [Troubleshooting](./troubleshooting.md)
+- **Related:** [FAQ](./faq.md), [CLI Reference](./cli-reference.md)
+
+---
+
 **Document Status:** Complete
-**Last Updated:** 2026-01-25
+**Last Updated:** 2026-06-22

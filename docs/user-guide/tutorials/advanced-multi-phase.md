@@ -1,8 +1,10 @@
+[Docs](../index.md) › [Tutorials](./index.md) › Multi-Phase Workflows
+
 # Advanced Tutorial: Multi-Phase Feature Development
 
 **Version:** 1.0
 **Date:** 2026-01-25
-Last refreshed: 2026-06-10
+Last refreshed: 2026-06-23
 **Category:** Tutorial
 **Level:** Advanced
 **Estimated Time:** 90-120 minutes
@@ -10,12 +12,31 @@ Last refreshed: 2026-06-10
 
 ---
 
+> **Runs on the Adapters runtime:** These multi-phase workflows are harness-agnostic. They execute on Babysitter's [Adapters](../features/adapters.md) runtime, so the same [process definitions](../features/process-definitions.md) run unchanged across every supported harness. The `/babysitter:call` token shown below is Claude Code's; substitute your harness's token as needed.
+
+---
+
+## On this page
+
+- [Prerequisites](#prerequisites)
+- [Step 1: Understanding Quality Convergence](#step-1-understanding-quality-convergence)
+- [Step 3: Define the Task Definitions](#step-3-define-the-task-definitions)
+- [Step 4: Create the Multi-Phase Process Definition](#step-4-create-the-multi-phase-process-definition)
+- [Step 6: Run the Multi-Phase Process](#step-6-run-the-multi-phase-process)
+- [Step 8: Monitor Quality Convergence](#step-8-monitor-quality-convergence)
+- [Step 9: Review the Audit Trail](#step-9-review-the-audit-trail)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+> **What this tutorial demonstrates:** Babysitter orchestrates complex, multi-phase agentic workflows deterministically — your process is code the orchestrator can only obey, with a mandatory stop and process check between phases (enforcement, not assistance). The quality convergence loops below are one of the gates your multi-phase process enforces, not the headline capability.
+
 ## Learning Objectives
 
 By the end of this tutorial, you will be able to:
 
-1. **Design multi-phase workflows** that follow Research-Plan-Implement-Test-Deploy patterns
-2. **Implement quality convergence loops** with agent-based scoring
+1. **Design multi-phase workflows** that follow Research-Plan-Implement-Test-Deploy patterns, enforced deterministically by your process code
+2. **Implement quality convergence loops** with agent-based scoring (one of the gates your process can enforce)
 3. **Configure team collaboration patterns** with strategic breakpoints
 4. **Use parallel quality checks** to accelerate feedback cycles
 5. **Create governance-ready processes** with comprehensive audit trails
@@ -47,7 +68,7 @@ This tutorial involves team collaboration breakpoints. How they work depends on 
 
 **Interactive Mode (Claude Code)**: Breakpoints are handled directly in the chat. Great for single-developer workflows.
 
-**Non-Interactive Mode (Team Collaboration)**: For team approval workflows, breakpoints are disabled.
+**Non-Interactive Mode (Team Collaboration)**: For team approval workflows, breakpoints are routed to the durable Breakpoints Adapter backend / UI so approvals can happen out of session.
 
 Choose the mode that fits your workflow. For learning, interactive mode (no setup) is easiest.
 
@@ -127,7 +148,7 @@ In this tutorial, we will create a **comprehensive feature development workflow*
 
 ## Step 1: Understanding Quality Convergence
 
-Before we dive into code, let's understand the core concept of **quality convergence**.
+Before we dive into code, let's understand the core concept of **[quality convergence](../reference/glossary.md)**.
 
 ### What is Quality Convergence?
 
@@ -1312,31 +1333,27 @@ QUALITY TARGET MET! Score: 89/85
 After the process completes, examine the comprehensive audit trail:
 
 ```bash
-# View the journal
-cat .a5c/runs/<runId>/journal/journal.jsonl | jq -s '.'
+# View the journal (each event is its own file)
+cat .a5c/runs/<runId>/journal/*.json | jq -s '.'
 ```
 
-**Key events to look for:**
+**Key events to look for** (breakpoints surface as `EFFECT_REQUESTED` with `kind: "breakpoint"`, resolved via `EFFECT_RESOLVED`; quality scoring is application-level and has no dedicated event type):
 
 ```json
 [
-  {"type": "RUN_STARTED", "inputs": {...}},
-  {"type": "TASK_COMPLETED", "taskId": "codebase-analysis-001"},
-  {"type": "TASK_COMPLETED", "taskId": "requirements-analysis-001"},
-  {"type": "BREAKPOINT_REQUESTED", "title": "Research Review"},
-  {"type": "BREAKPOINT_APPROVED", "approver": "tech-lead"},
-  {"type": "TASK_COMPLETED", "taskId": "technical-spec-001"},
-  {"type": "TASK_COMPLETED", "taskId": "implementation-plan-001"},
-  {"type": "BREAKPOINT_APPROVED", "title": "Plan Approval"},
-  {"type": "ITERATION_STARTED", "iteration": 1},
-  {"type": "QUALITY_SCORE", "iteration": 1, "score": 62},
-  {"type": "ITERATION_STARTED", "iteration": 2},
-  {"type": "QUALITY_SCORE", "iteration": 2, "score": 78},
-  {"type": "ITERATION_STARTED", "iteration": 3},
-  {"type": "QUALITY_SCORE", "iteration": 3, "score": 89},
-  {"type": "BREAKPOINT_APPROVED", "title": "Final Approval"},
-  {"type": "TASK_COMPLETED", "taskId": "deploy-001"},
-  {"type": "RUN_COMPLETED", "status": "success"}
+  {"type": "RUN_CREATED", "data": {"inputs": {}}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "codebase-analysis-001", "status": "success"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "requirements-analysis-001", "status": "success"}},
+  {"type": "EFFECT_REQUESTED", "data": {"effectId": "bp-research", "kind": "breakpoint", "title": "Research Review"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "bp-research", "status": "approved", "approver": "tech-lead"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "technical-spec-001", "status": "success"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "implementation-plan-001", "status": "success"}},
+  {"type": "EFFECT_REQUESTED", "data": {"effectId": "bp-plan", "kind": "breakpoint", "title": "Plan Approval"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "bp-plan", "status": "approved"}},
+  {"type": "EFFECT_REQUESTED", "data": {"effectId": "bp-final", "kind": "breakpoint", "title": "Final Approval"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "bp-final", "status": "approved"}},
+  {"type": "EFFECT_RESOLVED", "data": {"effectId": "deploy-001", "status": "success"}},
+  {"type": "RUN_COMPLETED", "data": {"status": "success"}}
 ]
 ```
 
@@ -1435,27 +1452,6 @@ Congratulations! You have completed the advanced tutorial on multi-phase feature
 
 ---
 
-## Next Steps
-
-You have completed the advanced tutorials. Here are paths to continue your expertise:
-
-### Apply Your Knowledge
-- **Implement in your team** - Customize for your team's workflow
-- **Create team templates** - Share processes across projects
-- **Build governance policies** - Define approval requirements
-
-### Go Deeper
-- **[Process Engine Architecture](../features/process-definitions.md)** - Understand internals
-- **[Configuration Reference](../reference/configuration.md)** - Meet regulatory requirements
-- **[FAQ](../reference/faq.md)** - Common questions and answers
-
-### Contribute
-- **Share your processes** - Contribute to the community
-- **Report issues** - Help improve Babysitter
-- **Write tutorials** - Help others learn
-
----
-
 ## Troubleshooting
 
 ### Issue: "Quality score not improving between iterations"
@@ -1504,6 +1500,13 @@ You have completed the advanced tutorials. Here are paths to continue your exper
 - [Event Sourcing Explained](../features/journal-system.md) - Architecture concepts
 - [Quality Convergence Explained](../features/quality-convergence.md) - Deep dive
 - [FAQ](../reference/faq.md) - Common questions and rollout strategies
+
+---
+
+## Next steps
+
+- **Previous:** [Custom Process](./intermediate-custom-process.md)
+- **Related:** [Parallel Execution](../features/parallel-execution.md), [Two-Loops Architecture](../features/two-loops-architecture.md), [Journal System](../features/journal-system.md)
 
 ---
 

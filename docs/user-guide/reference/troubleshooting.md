@@ -1,17 +1,22 @@
+[Docs](../index.md) › [Reference](./index.md) › Troubleshooting
+
 # Troubleshooting Guide
 
 **Version:** 1.0
-**Last Updated:** 2026-01-25
+**Last Updated:** 2026-06-22
 **Category:** Reference
 
 This guide provides systematic troubleshooting procedures for common Babysitter issues. Each section includes symptoms, diagnosis steps, solutions, and prevention tips.
 
 ---
 
-## Table of Contents
+## On this page
 
 - [Installation Issues](#installation-issues)
 - [Plugin Issues](#plugin-issues)
+- [Adapter Issues](#adapter-issues)
+- [Harness Install Issues](#harness-install-issues)
+- [Session Binding Issues](#session-binding-issues)
 - [Run Execution Issues](#run-execution-issues)
 - [Quality Convergence Issues](#quality-convergence-issues)
 - [Resumption Issues](#resumption-issues)
@@ -174,7 +179,7 @@ command not found: jq
 jq: command not found
 ```
 
-Many Babysitter diagnostic commands use `jq` for JSON processing. Without it, commands like journal analysis and status inspection will fail.
+Many Babysitter diagnostic commands use `jq` for JSON processing. Without it, commands like [journal](./glossary.md) analysis and status inspection will fail.
 
 **Diagnosis:**
 ```bash
@@ -317,6 +322,203 @@ claude plugin list --all
    - Temporarily disable other plugins
    - Test Babysitter alone
    - Re-enable plugins one by one
+
+---
+
+## Adapter Issues
+
+These cover the host-side `adapters` CLI (package `@a5c-ai/adapters-cli`), which runs and manages harnesses from your shell. See the [Adapters CLI Reference](./adapters-cli.md) for the full command surface. When in doubt, run `adapters doctor` first.
+
+### adapters: command not found
+
+**Symptoms:**
+```
+adapters: command not found
+```
+
+**Diagnosis:**
+```bash
+which adapters
+npm list -g @a5c-ai/adapters-cli
+echo $PATH
+```
+
+**Solutions:**
+
+1. **Install the CLI globally:**
+   ```bash
+   npm install -g @a5c-ai/adapters-cli
+   ```
+
+2. **Verify the install and environment:**
+   ```bash
+   adapters version
+   adapters doctor
+   ```
+
+3. **Ensure npm global bin is on PATH:**
+   ```bash
+   npm bin -g
+   # Add this directory to PATH if missing
+   ```
+
+**Prevention:** Install `@a5c-ai/adapters-cli` as part of initial setup and confirm with `adapters version`.
+
+---
+
+### Node.js Version Too Old for Adapters
+
+**Symptoms:**
+```
+Error: @a5c-ai/adapters-cli requires Node.js >=20.9.0
+```
+
+The `adapters` CLI pins a higher Node floor (>=20.9.0) than the rest of the toolchain (>=20.0.0), so a Node that works for `babysitter` may still be too old for `adapters`.
+
+**Diagnosis:**
+```bash
+node --version
+```
+
+**Solutions:**
+
+1. **Switch to a supported version (22.x LTS recommended):**
+   ```bash
+   nvm install 22
+   nvm use 22
+   ```
+
+2. **Re-check:**
+   ```bash
+   node --version
+   adapters doctor
+   ```
+
+**Prevention:** Use nvm to keep Node at 22.x LTS.
+
+---
+
+### Harness Not Detected / Adapter Errors
+
+**Symptoms:**
+```
+Error: adapter not found for agent 'codex'
+Error: harness binary for 'gemini' not detected
+```
+
+**Diagnosis:**
+```bash
+adapters doctor
+adapters adapters list
+adapters adapters detect codex
+```
+
+**Solutions:**
+
+1. **Install the missing harness binary:**
+   ```bash
+   adapters install codex
+   ```
+
+2. **Confirm credentials:**
+   ```bash
+   adapters auth check
+   ```
+
+3. **If the harness cannot reach a provider natively, let the launcher proxy:**
+   ```bash
+   adapters launch claude bedrock --with-proxy-if-needed
+   ```
+
+**Prevention:** Run `adapters doctor` after installing or upgrading harnesses.
+
+---
+
+## Harness Install Issues
+
+These cover installing the in-session `/babysitter:*` plugin into a harness with `babysitter harness:install-plugin <harness-key>`. The harness key is **not** always the harness's display name; the authoritative list is the [Install Matrix](../harnesses/install-matrix.md).
+
+### Plugin Not Appearing After Install
+
+**Symptoms:**
+- `harness:install-plugin` reports success, but `/babysitter:*` commands are unavailable inside the harness
+
+**Diagnosis:**
+```bash
+# Re-run targeting the workspace you actually use
+babysitter harness:install-plugin <harness-key> --workspace ./my-project
+```
+
+**Solutions:**
+
+1. **Restart the harness completely** so it re-discovers installed plugins.
+
+2. **Confirm you installed into the right workspace** with `--workspace`.
+
+3. **Check the harness's continuation model** in the [Hooks](../features/hooks.md) per-harness table. Each harness registers continuation hooks differently — do not assume Claude Code's `Stop`-hook model on another harness.
+
+**Prevention:** Install into the project directory you will run from, and restart the harness after install.
+
+---
+
+### Wrong Harness Key
+
+**Symptoms:**
+```
+Error: unknown harness key 'gemini'
+```
+
+**Diagnosis:**
+```bash
+# Compare against the documented keys
+# e.g. gemini's key is gemini-cli, not gemini
+```
+
+**Solutions:**
+
+1. **Use the documented harness key:**
+   ```bash
+   babysitter harness:install-plugin gemini-cli
+   ```
+
+2. **Look up the correct key** in the [Install Matrix](../harnesses/install-matrix.md) — the key can differ from the harness name.
+
+**Prevention:** Copy the harness key from the Install Matrix rather than guessing from the display name.
+
+---
+
+## Session Binding Issues
+
+In v6, session resolution is **PID-scoped** and harness-agnostic. The session ID is carried in `AGENT_SESSION_ID` (which supersedes the removed/deprecated `BABYSITTER_SESSION_ID` and `CLAUDE_SESSION_ID`). The `--plugin-root` flag has been removed; plugin-root resolution is now handled automatically by the runtime (it injects `BABYSITTER_PLUGIN_ROOT` into hooks for you — it is not a variable you set). See [Configuration](./configuration.md).
+
+### Session Not Bound / In-Session Loop Won't Continue
+
+**Symptoms:**
+```
+Error: could not resolve agent session for this process
+```
+- The in-session loop stops advancing, or each turn behaves like a fresh session
+
+**Diagnosis:**
+```bash
+# Is the harness exporting the session variable?
+echo "$AGENT_SESSION_ID"
+```
+
+**Solutions:**
+
+1. **Confirm the harness sets `AGENT_SESSION_ID`.** If empty, the harness's continuation hooks may not be installed — see [Hooks](../features/hooks.md) and re-run `babysitter harness:install-plugin <harness-key>`.
+
+2. **If your harness only provides the session via the environment** (not via the PID-scoped store), opt into the legacy env-first behavior:
+   ```bash
+   export BABYSITTER_TRUST_ENV_SESSION=1
+   ```
+
+3. **Remove stale references** to deprecated variables (`BABYSITTER_SESSION_ID`, `CLAUDE_SESSION_ID`) and the removed `--plugin-root` flag from your scripts and configs.
+
+**Prevention:** Let Babysitter resolve sessions per-PID by default; reserve `BABYSITTER_TRUST_ENV_SESSION=1` for harnesses that genuinely need env-first resolution.
+
+See also: [Error Catalog - Session Binding Errors](./error-catalog.md#session-binding-errors).
 
 ---
 
@@ -841,10 +1043,14 @@ cat .a5c/runs/<runId>/tasks/<effectId>/result.json | jq .
 # Check core CLI version
 babysitter --version
 
-# Check installed packages
-npm list -g @a5c-ai/babysitter @a5c-ai/genty-platform
+# Check the host-side Adapters CLI and run a health check
+adapters version
+adapters doctor
 
-# Check plugin status
+# Check installed packages
+npm list -g @a5c-ai/babysitter @a5c-ai/adapters-cli @a5c-ai/genty-platform
+
+# Check plugin status (Claude Code)
 claude plugin list | grep babysitter
 ```
 
@@ -903,10 +1109,20 @@ Contact support if you experience:
 
 - [FAQ](./faq.md) - Common questions answered
 - [Error Catalog](./error-catalog.md) - Error messages explained
+- [Configuration Reference](./configuration.md) - Environment variables (including `AGENT_SESSION_ID` and `BABYSITTER_TRUST_ENV_SESSION`)
+- [Adapters CLI Reference](./adapters-cli.md) - The host-side `adapters` CLI
+- [Install Matrix](../harnesses/install-matrix.md) - Supported harnesses and their harness keys
 - [Installation Guide](../getting-started/installation.md) - Setup instructions
 - [Run Resumption](../features/run-resumption.md) - Recovery procedures
 
 ---
 
+## Next steps
+
+- **Next:** [Error Catalog](./error-catalog.md)
+- **Related:** [FAQ](./faq.md), [Configuration](./configuration.md)
+
+---
+
 **Document Status:** Complete
-**Last Updated:** 2026-01-25
+**Last Updated:** 2026-06-22

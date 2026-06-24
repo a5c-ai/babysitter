@@ -1,3 +1,5 @@
+[Docs](../index.md) › [Features](./index.md) › Journal System
+
 # Journal System: Event Sourcing and Audit Trail
 
 **Version:** 1.1
@@ -8,7 +10,7 @@
 
 ## In Plain English
 
-**The journal is a diary of everything that happens during a run.**
+**The [journal](../reference/glossary.md) is a diary of everything that happens during a run.**
 
 Every time the AI does something - writes code, runs tests, asks for approval - it gets recorded in the journal. This means:
 
@@ -19,6 +21,20 @@ Every time the AI does something - writes code, runs tests, asks for approval - 
 **Where is it?** Look in `.a5c/runs/<your-run-id>/journal/` - each file is one event.
 
 **Tip for beginners:** You don't need to understand the journal to use Babysitter. It works automatically. But when something goes wrong, the journal helps you figure out why.
+
+> The journal is harness-agnostic — it's part of the [Adapters](./adapters.md) runtime, so the same events are recorded no matter which harness drives the run. The `babysitter run:events` CLI commands below work everywhere; the in-session command surface (slash commands, skills) **varies by harness** — see the [Slash Commands reference](../reference/slash-commands.md).
+
+---
+
+## On this page
+
+- [Overview](#overview)
+- [Use Cases and Scenarios](#use-cases-and-scenarios)
+- [Step-by-Step Instructions](#step-by-step-instructions)
+- [Configuration Options](#configuration-options)
+- [Code Examples and Best Practices](#code-examples-and-best-practices)
+- [Common Pitfalls and Troubleshooting](#common-pitfalls-and-troubleshooting)
+- [How the Journal Works](#how-the-journal-works)
 
 ---
 
@@ -531,9 +547,18 @@ On each iteration:
 - [Run Resumption](./run-resumption.md) - Understand how journal enables resumption
 - [Process Definitions](./process-definitions.md) - How events are generated
 - [Breakpoints](./breakpoints.md) - Breakpoint events in the journal
+- [Adapters](./adapters.md) - The harness-agnostic runtime the journal is part of
+- [Slash Commands](../reference/slash-commands.md) - Per-harness in-session command surface
 
 ---
 
 ## Summary
 
 The journal system is the foundation of Babysitter's reliability and auditability. Every action is recorded as an immutable event, enabling deterministic replay, debugging, compliance reporting, and seamless resumption. Use the CLI to query events, never edit journal files directly, and leverage the complete audit trail for debugging and analysis.
+
+---
+
+## Next steps
+
+- **Next:** [Run Resumption](./run-resumption.md)
+- **Related:** [Architecture Overview](./architecture-overview.md), [Process Definitions](./process-definitions.md)

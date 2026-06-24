@@ -5,6 +5,8 @@ last_updated: 2026-04-27
 category: landing
 ---
 
+[Docs](../index.md) › Reference
+
 # User Guide Reference
 
 Use this section as the fast lookup surface while you are actively running Babysitter.
@@ -32,8 +34,7 @@ For repo-level and implementation-specific reference material, use the top-level
 3. [Configuration](./configuration.md)
 4. [Troubleshooting](./troubleshooting.md)
 
-## Next Steps
+## Next steps
 
-- Need conceptual explanations? Go back to [Features](../features/index.md).
-- Need a guided workflow? Go to [Tutorials](../tutorials/index.md).
-- Need the public docs entrypoint? Go to the [User Guide home](../index.md).
+- **Start with:** [Slash Commands](./slash-commands.md)
+- **Related:** [CLI Reference](./cli-reference.md), [Configuration](./configuration.md), [Troubleshooting](./troubleshooting.md)

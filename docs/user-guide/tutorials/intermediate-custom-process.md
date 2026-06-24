@@ -1,7 +1,9 @@
+[Docs](../index.md) › [Tutorials](./index.md) › Custom Process
+
 # Intermediate Tutorial: Custom Process Definition
 
 **Version:** 1.0
-**Date:** 2026-01-25
+**Date:** 2026-06-23
 **Category:** Tutorial
 **Level:** Intermediate
 **Estimated Time:** 60-90 minutes
@@ -9,14 +11,32 @@
 
 ---
 
+> **Works on any harness:** This tutorial uses Claude Code's `/babysitter:call` command token, but Babysitter is harness-agnostic and the same custom-process flow runs on every supported harness with its own in-session token. See the [Install Matrix](../harnesses/install-matrix.md) for per-harness setup.
+
+---
+
+## On this page
+
+- [Prerequisites](#prerequisites)
+- [Step 1: Understand Process Definition Structure](#step-1-understand-process-definition-structure)
+- [Step 3: Define Your Task Definitions](#step-3-define-your-task-definitions)
+- [Step 4: Write the Main Process Definition](#step-4-write-the-main-process-definition)
+- [Step 7: Run Your Custom Process](#step-7-run-your-custom-process)
+- [Step 10: Understanding Parallel Execution Benefits](#step-10-understanding-parallel-execution-benefits)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+> **What this tutorial demonstrates:** Authoring a custom process *is* the heart of Babysitter — your workflow is real JavaScript code, and the orchestrator can only do what that code permits. You'll define complex agentic work (tasks, parallel dispatch, breakpoints) that the engine then enforces deterministically, with a mandatory stop after each step. The quality checks you configure are one of the gates your code can enforce.
+
 ## Learning Objectives
 
 By the end of this tutorial, you will be able to:
 
-1. **Create a custom process definition** that orchestrates multiple tasks
+1. **Create a custom process definition** that orchestrates multiple tasks — the code the orchestrator is bound to obey
 2. **Implement parallel execution** for independent tasks to improve performance
-3. **Add strategic breakpoints** for human approval at critical decision points
-4. **Configure quality checks** that run as part of your workflow
+3. **Add strategic breakpoints** for human approval at critical decision points (enforced, not optional)
+4. **Configure quality checks** as one of the gates that run as part of your workflow
 5. **Parameterize your process** to make it reusable across different scenarios
 
 ---
@@ -42,7 +62,7 @@ babysitter --version
 
 **Interactive Mode (Claude Code)**: When running in Claude Code, breakpoints are handled directly in the chat - no service needed!
 
-**Non-Interactive Mode**: For CI/CD or headless automation, breakpoints are disabled:
+**Non-Interactive Mode**: For CI/CD or headless automation, breakpoints are routed to the durable Breakpoints Adapter backend / UI rather than the chat (they are not disabled):
 
 ---
 
@@ -124,7 +144,7 @@ This process demonstrates several powerful Babysitter features:
 
 Before we write code, let's understand how Babysitter process definitions work.
 
-A **process definition** is a JavaScript function that orchestrates tasks using a context object (`ctx`). The context provides methods for:
+A **[process definition](../reference/glossary.md)** is a JavaScript function that orchestrates tasks using a context object (`ctx`). The context provides methods for:
 
 | Method | Purpose | Example |
 |--------|---------|---------|
@@ -854,16 +874,16 @@ The `ctx.parallel.all()` method runs independent tasks concurrently, significant
 Let's look at how parallel execution appears in the journal:
 
 ```bash
-cat .a5c/runs/01KGHTYK2MP9Q8BN5YM4XRZ3WD/journal/journal.jsonl | grep -E "TASK_STARTED|TASK_COMPLETED"
+cat .a5c/runs/01KGHTYK2MP9Q8BN5YM4XRZ3WD/journal/*.json | jq 'select(.type | test("EFFECT_"))'
 ```
 
-**What you should see:**
+**What you should see** (each event is its own file):
 
 ```json
-{"type":"TASK_STARTED","timestamp":"2026-01-25T16:00:01.123Z","taskId":"lint-001"}
-{"type":"TASK_STARTED","timestamp":"2026-01-25T16:00:01.125Z","taskId":"unit-tests-001"}
-{"type":"TASK_COMPLETED","timestamp":"2026-01-25T16:00:01.923Z","taskId":"lint-001","exitCode":0}
-{"type":"TASK_COMPLETED","timestamp":"2026-01-25T16:00:02.325Z","taskId":"unit-tests-001","exitCode":0}
+{"type":"EFFECT_REQUESTED","recordedAt":"2026-01-25T16:00:01.123Z","data":{"effectId":"lint-001"}}
+{"type":"EFFECT_REQUESTED","recordedAt":"2026-01-25T16:00:01.125Z","data":{"effectId":"unit-tests-001"}}
+{"type":"EFFECT_RESOLVED","recordedAt":"2026-01-25T16:00:01.923Z","data":{"effectId":"lint-001","status":"success"}}
+{"type":"EFFECT_RESOLVED","recordedAt":"2026-01-25T16:00:02.325Z","data":{"effectId":"unit-tests-001","status":"success"}}
 ```
 
 Notice how both tasks started almost simultaneously (2ms apart), demonstrating parallel execution.
@@ -960,23 +980,6 @@ Congratulations! You have successfully created a custom Babysitter process defin
 
 ---
 
-## Next Steps
-
-Now that you've mastered custom process definitions, here are paths to continue:
-
-### Continue Learning
-- **[Advanced Tutorial: Multi-Phase Feature Development](./advanced-multi-phase.md)** - Team workflows with agent scoring and quality convergence
-
-### Go Deeper
-- **[Process Engine Architecture](../features/process-definitions.md)** - Understand how processes execute
-- **[Task Types Reference](../reference/cli-reference.md)** - Complete reference for all task types
-
-### Apply Your Knowledge
-- **[How to Create Team Templates](../features/process-definitions.md)** - Share processes across your team
-- **[Quality Convergence](../features/quality-convergence.md)** - Custom quality evaluators
-
----
-
 ## Troubleshooting
 
 ### Issue: "Process file not found"
@@ -1024,6 +1027,14 @@ Now that you've mastered custom process definitions, here are paths to continue:
 - [CLI Reference](../reference/cli-reference.md) - Running processes via CLI
 - [Configuration Reference](../reference/configuration.md) - All configuration options
 - [Breakpoints](../features/breakpoints.md) - How breakpoints work
+
+---
+
+## Next steps
+
+- **Previous:** [Build a REST API](./beginner-rest-api.md)
+- **Next:** [Multi-Phase Workflows](./advanced-multi-phase.md)
+- **Related:** [Process Definitions](../features/process-definitions.md), [Best Practices](../features/best-practices.md)
 
 ---
 

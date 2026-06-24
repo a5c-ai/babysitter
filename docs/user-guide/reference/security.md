@@ -1,22 +1,26 @@
+[Docs](../index.md) › [Reference](./index.md) › Security
+
 # Security Guide
 
-**Version:** 1.0
-**Last Updated:** 2026-01-31
+**Version:** 1.1
+**Last Updated:** 2026-06-22
 
 Comprehensive security guidelines for using Babysitter in development and production environments. This guide covers best practices for handling code, credentials, and network security.
 
 ---
 
-## Table of Contents
+## On this page
 
 - [Overview](#overview)
 - [General Security](#general-security)
-  - [Production Setup](#production-setup)
-  - [Authentication Configuration](#authentication-configuration)
+  - [Best Practices](#best-practices)
+  - [.gitignore Configuration](#gitignore-configuration)
 - [Credential Management](#credential-management)
   - [Environment Variables](#environment-variables)
   - [Breakpoints for Sensitive Operations](#breakpoints-for-sensitive-operations)
   - [Journal File Review](#journal-file-review)
+  - [Secrets in the Adapters CLI and CI Triggers](#secrets-in-the-adapters-cli-and-ci-triggers)
+- [Tamper-Evident Approvals](#tamper-evident-approvals)
 - [Code Review Security](#code-review-security)
   - [Reviewing Generated Code](#reviewing-generated-code)
   - [Security Test Coverage](#security-test-coverage)
@@ -44,7 +48,7 @@ Babysitter handles code generation, execution, and may interact with credentials
 
 **DO:**
 - Review all code changes before final approval
-- Use breakpoints before deploying to production
+- Use [breakpoints](./glossary.md) before deploying to production
 - Keep `.a5c/` directories out of version control (add to `.gitignore`)
 - Regularly update to latest versions
 - Run with least privilege necessary
@@ -115,10 +119,36 @@ Review journal files before sharing to ensure no secrets were leaked:
 
 ```bash
 # Check for leaked secrets
-grep -i "password\|secret\|key\|token" .a5c/runs/*/journal/journal.jsonl
+grep -i "password\|secret\|key\|token" .a5c/runs/*/journal/*.json
 ```
 
 **Security tip:** Always set `BABYSITTER_ALLOW_SECRET_LOGS=false` in production to prevent sensitive data from appearing in logs.
+
+### Secrets in the Adapters CLI and CI Triggers
+
+The host-side `adapters` CLI (package `@a5c-ai/adapters-cli`) launches and authenticates harnesses on your machine, so it can touch provider credentials. Keep secrets out of arguments and shell history:
+
+- **Prefer ambient credentials.** Use `adapters auth check` and `adapters auth setup <agent>` to verify and configure provider auth rather than passing keys inline. See the [Adapters CLI Reference](./adapters-cli.md).
+- **Avoid keys on the command line.** When launching a provider, prefer the provider's own credential chain over `--api-key`; for token-based providers use `--auth-command` to emit a short-lived bearer token instead of a static key. Anything passed as an argument may be captured in shell history and process listings.
+- **Scope environment injection.** When passing variables into a run with `adapters run --env KEY=VALUE`, pass secret *names* sourced from your environment, never literal secret values.
+
+For CI, Babysitter v6 **Triggers** normalize inbound webhooks from GitHub, GitLab, and Bitbucket (via the `adapters-triggers` action). Treat trigger pipelines like any other secret-bearing CI job:
+
+- Store provider keys and tokens as CI secrets and reference them by name (e.g. repository/organization secrets), never inline in workflow files.
+- Grant the workflow only the token scopes it needs.
+- Be cautious with triggers that run on untrusted input (such as PRs from forks), which can expose secrets to attacker-controlled code.
+
+See [GitHub Actions Setup](../../github-actions-setup-babysitter.md) for end-to-end CI configuration.
+
+---
+
+## Tamper-Evident Approvals
+
+The **Breakpoints Adapter** (v6) records human-in-the-loop approvals to a durable backend and **cryptographically signs** each approval - the "proven" approval model. This makes the approval trail *verifiable* rather than merely *trusted*: you can confirm who approved what, and detect after-the-fact tampering, instead of relying on an unsigned log that could be edited.
+
+This complements the [journal audit trail](#audit-trail): the journal records that an approval happened, while signed approvals let you cryptographically verify the record is authentic and unaltered.
+
+The Breakpoints Adapter replaces the legacy `breakpoints-pro` package (now deprecated). For the approval workflow and how to route breakpoints to a durable backend, see [Breakpoints](../features/breakpoints.md).
 
 ---
 
@@ -202,10 +232,10 @@ Every action in Babysitter is logged in the journal:
 
 ```bash
 # View complete event history for a run
-cat .a5c/runs/<runId>/journal/journal.jsonl | jq .
+cat .a5c/runs/<runId>/journal/*.json | jq .
 
-# Filter for approval events
-jq 'select(.type=="BREAKPOINT_RELEASED")' .a5c/runs/*/journal/journal.jsonl
+# Filter for approval events (breakpoints resolve via EFFECT_RESOLVED)
+jq 'select(.type=="EFFECT_RESOLVED")' .a5c/runs/*/journal/*.json
 ```
 
 ### Data Retention Policy
@@ -226,14 +256,24 @@ For sensitive environments, encrypt the `.a5c/` directory:
 # Mount encrypted volume at .a5c/
 
 # Or use encryption tools
-gpg --symmetric --cipher-algo AES256 .a5c/runs/sensitive-run/journal/journal.jsonl
+gpg --symmetric --cipher-algo AES256 .a5c/runs/sensitive-run/journal/000001.*.json
 ```
 
 ---
 
 ## Related Documentation
 
+- [Breakpoints](../features/breakpoints.md) - Approval workflow and the Breakpoints Adapter ("proven" signed approvals)
+- [GitHub Actions Setup](../../github-actions-setup-babysitter.md) - CI configuration, Triggers, and secret handling
+- [Adapters CLI Reference](./adapters-cli.md) - The host-side `adapters` CLI and its auth commands
 - [Configuration Reference](./configuration.md) - Environment variables and settings
 - [CLI Reference](./cli-reference.md) - Command-line options
 - [Troubleshooting](./troubleshooting.md) - Common issues and solutions
 - [Glossary](./glossary.md) - Term definitions
+
+---
+
+## Next steps
+
+- **Next:** [Configuration](./configuration.md)
+- **Related:** [Breakpoints](../features/breakpoints.md), [Troubleshooting](./troubleshooting.md)

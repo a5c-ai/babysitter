@@ -1,12 +1,25 @@
+[Docs](../index.md) › [Getting Started](./README.md) › Installation
+
 # Installation Guide
 
-This guide walks you through installing Babysitter on your system. By the end, you will have a fully working Babysitter installation ready for your first run.
+This guide walks you through installing Babysitter v6 on your system. By the end, you will have a fully working installation and will have run an Adapter to confirm it works.
 
 **Estimated time:** 5-10 minutes
 
 ---
 
-## Table of Contents
+## In Plain English
+
+**v6 has two install tracks. Don't conflate them:**
+
+1. **The host-side `adapters` CLI** — run any supported AI coding harness directly from your shell. Install `@a5c-ai/adapters-cli`, then `adapters run claude "..."`.
+2. **The in-session per-harness plugin** — drive a full Babysitter orchestration [run](../reference/glossary.md) from *inside* your harness (Claude Code, Codex, Cursor, and 9 more). Install the core CLI plus your harness's plugin.
+
+Most people want both. Install the core CLI and the Adapters CLI first (this page), then pick your harness and follow its page. Babysitter supports **12 harnesses**; the two fully-worked ones are [Claude Code](../harnesses/claude-code.md) and [Codex](../harnesses/codex.md), and every harness is listed in the [Install Matrix](../harnesses/install-matrix.md).
+
+---
+
+## On this page
 
 - [Prerequisites Check](#prerequisites-check)
 - [Installation Methods](#installation-methods)
@@ -17,8 +30,10 @@ This guide walks you through installing Babysitter on your system. By the end, y
   - [Linux](#linux)
   - [Windows](#windows)
 - [Plugin Installation](#plugin-installation)
+- [Other Harnesses](#other-harnesses)
 - [Verification](#verification)
 - [Keeping Updated](#keeping-updated)
+- [Upgrading from a Prior Version](#upgrading-from-a-prior-version)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -29,11 +44,13 @@ Before installing Babysitter, let's verify your system is ready.
 
 ### Required: Node.js 20.0.0+
 
+The core toolchain runs on **Node.js 20.0.0+** (22.x LTS recommended). The **Adapters CLI requires Node.js >=20.9.0**.
+
 ```bash
 node --version
 ```
 
-**Expected output:** `v20.x.x` or `v22.x.x`
+**Expected output:** `v20.9.x` or higher (or `v22.x.x`)
 
 If you see a lower version or "command not found," install Node.js:
 
@@ -49,7 +66,9 @@ nvm use 22
 
 **Direct download:** Visit [nodejs.org](https://nodejs.org/) and download the LTS version.
 
-### Required: Claude Code
+### Required: A supported harness (for in-session use)
+
+To drive Babysitter runs from inside a harness, install at least one supported harness CLI — for example Claude Code:
 
 ```bash
 claude --version
@@ -57,7 +76,9 @@ claude --version
 
 **Expected output:** Claude Code version information
 
-If Claude Code is not installed, follow the [Claude Code installation guide](https://docs.anthropic.com/en/docs/claude-code) first.
+If Claude Code is not installed, follow the [Claude Code installation guide](https://docs.anthropic.com/en/docs/claude-code). For any other harness, see the [Install Matrix](../harnesses/install-matrix.md).
+
+> If you only want to run harnesses from your shell via the `adapters` CLI, you can skip the in-session plugin entirely.
 
 ### Required: jq (JSON processor)
 
@@ -93,10 +114,10 @@ scoop install jq
 Run this command to verify all prerequisites:
 
 ```bash
-echo "Node: $(node --version)" && echo "npm: $(npm --version)" && echo "Claude: $(claude --version 2>&1 | head -1)" && echo "jq: $(jq --version)"
+echo "Node: $(node --version)" && echo "npm: $(npm --version)" && echo "jq: $(jq --version)"
 ```
 
-You should see version numbers for all four tools. If not, address the missing requirement before continuing.
+You should see version numbers for all three tools. If you plan to use a harness in-session, also confirm it is installed (e.g. `claude --version` for Claude Code). Address any missing requirement before continuing.
 
 ---
 
@@ -104,22 +125,32 @@ You should see version numbers for all four tools. If not, address the missing r
 
 ### Method 1: Quick Install (Recommended)
 
-Copy and paste this to install the main CLI and the Claude Code plugin:
+Copy and paste this to install the main CLI, the host-side **Adapters CLI**, and the Claude Code plugin:
 
 ```bash
-npm install -g @a5c-ai/babysitter@latest && \
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli && \
 claude plugin marketplace add a5c-ai/babysitter-claude && \
 claude plugin install --scope user babysitter@a5c.ai && \
 claude plugin enable --scope user babysitter@a5c.ai
 ```
 
-If you also want headless runtime commands such as `agent-platform call`, install the optional runtime CLI too:
+Try an Adapter immediately to confirm the host-side track works:
+
+```bash
+adapters version
+adapters doctor
+adapters run claude "explain this repository in two sentences"
+```
+
+If you also want headless runtime commands such as `genty call`, install the optional runtime CLI too:
 
 ```bash
 npm install -g @a5c-ai/genty-platform@latest
 ```
 
 Then restart Claude Code and skip to [Verification](#verification).
+
+> Using a harness other than Claude Code? Replace the three `claude plugin ...` lines with `babysitter harness:install-plugin <harness-key>` for your harness — see [Other Harnesses](#other-harnesses).
 
 ### Method 2: Step-by-Step Install
 
@@ -153,9 +184,27 @@ npm install -g @a5c-ai/babysitter-sdk@latest
 babysitter --version
 ```
 
-#### Step 2: Install the Optional Runtime CLI
+#### Step 2: Install the Adapters CLI (host-side track)
 
-Install this only if you need `agent-platform` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
+The **Adapters CLI** (`adapters`) is a host-side binary for running and managing harnesses directly from your shell. It is published separately as `@a5c-ai/adapters-cli` (version **5.1.0**) and needs **Node >=20.9.0**:
+
+```bash
+npm install -g @a5c-ai/adapters-cli
+```
+
+**Verify and try an Adapter immediately:**
+
+```bash
+adapters version
+adapters doctor
+adapters run claude "explain this repository in two sentences"
+```
+
+`adapters doctor` runs an environment health check; `adapters run claude "..."` runs the Claude harness with a single prompt. See the [Adapters CLI Reference](../reference/adapters-cli.md) for every command.
+
+#### Step 3: Install the Optional Runtime CLI
+
+Install this only if you need `genty` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
 
 ```bash
 npm install -g @a5c-ai/genty-platform@latest
@@ -163,12 +212,12 @@ npm install -g @a5c-ai/genty-platform@latest
 
 **Verify installation:**
 ```bash
-agent-platform --version
+genty --version
 ```
 
-#### Step 3: Install the Claude Code Plugin
+#### Step 4: Install the Claude Code Plugin
 
-The plugin integrates Babysitter with Claude Code and enables the `/babysitter:*` slash-command surface.
+The plugin integrates Babysitter with Claude Code and enables the `/babysitter:*` slash-command surface. For any other harness, see [Other Harnesses](#other-harnesses) and the [Install Matrix](../harnesses/install-matrix.md).
 
 ```bash
 # Add the plugin repository
@@ -187,7 +236,7 @@ Plugin 'babysitter@a5c.ai' installed successfully
 Plugin 'babysitter@a5c.ai' enabled
 ```
 
-#### Step 4: Restart Claude Code
+#### Step 5: Restart Claude Code
 
 **Important:** You must restart Claude Code for the plugin to load.
 
@@ -218,7 +267,7 @@ nvm use 22
 
 **Installation:**
 ```bash
-npm install -g @a5c-ai/babysitter@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
 ```
 
 **Permission Issues?**
@@ -232,7 +281,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Then retry installation
-npm install -g @a5c-ai/babysitter@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
 ```
 
 ### Linux
@@ -246,8 +295,8 @@ sudo apt-get install -y nodejs
 # Verify
 node --version  # Should show v22.x.x
 
-# Install Babysitter
-npm install -g @a5c-ai/babysitter@latest
+# Install Babysitter + Adapters CLI
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
 ```
 
 **Fedora/RHEL/CentOS:**
@@ -256,14 +305,14 @@ npm install -g @a5c-ai/babysitter@latest
 curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
 sudo yum install -y nodejs
 
-# Install Babysitter
-npm install -g @a5c-ai/babysitter@latest
+# Install Babysitter + Adapters CLI
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
 ```
 
 **Arch Linux:**
 ```bash
 sudo pacman -S nodejs npm
-npm install -g @a5c-ai/babysitter@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
 ```
 
 ### Windows
@@ -287,7 +336,7 @@ wsl --install
 3. Open Git Bash and run:
 
 ```bash
-npm install -g @a5c-ai/babysitter@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
 ```
 
 **Note:** Some shell commands in Babysitter may require Git Bash or WSL. PowerShell/CMD support is limited.
@@ -335,6 +384,32 @@ If you don't see it:
 1. Make sure you restarted Claude Code
 2. Try running `claude plugin list` to see installed plugins
 3. Check the [Troubleshooting](#troubleshooting) section
+
+---
+
+## Other Harnesses
+
+Claude Code is the worked example above, but Babysitter v6 supports **12 harnesses**. The two fully-worked harnesses have dedicated pages:
+
+- **[Claude Code](../harnesses/claude-code.md)** — `/babysitter:*` slash-commands and the `babysit` skill
+- **[Codex](../harnesses/codex.md)** — `$babysitter:*` via the mention picker
+
+For **every** harness (antigravity, cursor, gemini, genty, github-copilot, hermes, omp, openclaw, opencode, pi, plus the two above), the [**Install Matrix**](../harnesses/install-matrix.md) lists the exact install command, the in-session invocation token, and the per-harness hook/continuation model.
+
+The universal installer works for any harness — the argument is the **harness key**, which may differ from the harness name (e.g. `gemini-cli`, `github-copilot`, `oh-my-pi`, `antigravity-cli`):
+
+```bash
+babysitter harness:install-plugin <harness-key> [--workspace <path>]
+```
+
+For example:
+
+```bash
+babysitter harness:install-plugin codex
+babysitter harness:install-plugin cursor --workspace /path/to/repo
+```
+
+> Each harness ships its own published plugin and its own version — do not pin a pre-release build. Per-harness continuation models differ: only Claude Code, Codex, and Cursor use a `Stop` hook; antigravity and gemini use `AfterAgent`, openclaw uses a session daemon, opencode uses session-idle, hermes uses ACP, and genty/omp/pi are thin skill-alias surfaces. See each harness's row in the [Install Matrix](../harnesses/install-matrix.md).
 
 ---
 
@@ -423,40 +498,56 @@ Run each command and verify the expected result:
 ```bash
 babysitter --version
 ```
-**Expected:** Current release version (for this repository, `5.0.0`)
+**Expected:** The v6 release version (`5.1.0` for this edition)
 
-#### 2. Optional Runtime CLI Installed
+#### 2. Adapters CLI Installed (host-side track)
+```bash
+adapters version
+adapters doctor
+```
+**Expected:** `adapters version` reports `5.1.0`; `adapters doctor` reports all checks passing.
+
+#### 3. Try an Adapter
+```bash
+adapters run claude "say hi"
+```
+**Expected:** The harness responds. (Swap `claude` for any other installed harness.)
+
+#### 4. Optional Runtime CLI Installed
 
 If you installed `@a5c-ai/genty-platform`:
 
 ```bash
-agent-platform --version
+genty --version
 ```
 
-**Expected:** Current release version (for this repository, `5.0.0`)
+**Expected:** The v6 release version (`5.1.0`)
 
-#### 3. Plugin Active
+#### 5. Plugin Active
 In Claude Code, type:
 ```
 /skills
 ```
 **Expected:** "babysit" appears in the list
 
-#### 4. Full Integration Test
+#### 6. Full Integration Test
 In Claude Code:
 ```
-claude "/babysitter:call echo hello world"
+/babysitter:call echo hello world
 ```
-**Expected:** Babysitter creates a run and executes successfully
+**Expected:** Babysitter creates a run and executes successfully. (Other harnesses use their own invocation token — see the [Install Matrix](../harnesses/install-matrix.md).)
 
 ### Verification Summary
 
 | Check | Command | Expected |
 |-------|---------|----------|
 | jq | `jq --version` | jq-1.6 or higher |
-| Core CLI | `babysitter --version` | `5.0.0` |
-| Runtime CLI | `agent-platform --version` | `5.0.0` if installed |
-| Plugin | `/skills` in Claude Code | "babysit" listed |
+| Core CLI | `babysitter --version` | `5.1.0` |
+| Adapters CLI | `adapters version` | `5.1.0` |
+| Adapter health | `adapters doctor` | All checks pass |
+| Try an Adapter | `adapters run claude "say hi"` | The harness responds |
+| Runtime CLI | `genty --version` | `5.1.0` if installed |
+| Plugin (Claude Code) | `/skills` in Claude Code | "babysit" listed |
 
 **All checks passed?** You're ready for the [Quickstart](./quickstart.md)!
 
@@ -469,7 +560,7 @@ Babysitter is actively developed. Keep your installation current for the latest 
 ### Update CLI Packages
 
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/genty-platform
+npm update -g @a5c-ai/babysitter @a5c-ai/adapters-cli @a5c-ai/genty-platform
 ```
 
 ### Update Claude Code Plugin
@@ -482,6 +573,8 @@ claude plugin marketplace update a5c.ai
 claude plugin update babysitter@a5c.ai
 ```
 
+For other harnesses, re-run `babysitter harness:install-plugin <harness-key>` or follow the update note on that harness's row in the [Install Matrix](../harnesses/install-matrix.md).
+
 **Tip:** Run updates regularly, ideally daily or weekly.
 
 ### Check Current Versions
@@ -490,12 +583,21 @@ claude plugin update babysitter@a5c.ai
 # Core CLI version
 babysitter --version
 
+# Adapters CLI version
+adapters version
+
 # Runtime CLI version (if installed)
-agent-platform --version
+genty --version
 
 # Plugin version
 claude plugin list | grep babysitter
 ```
+
+---
+
+## Upgrading from a Prior Version
+
+Coming from the prod `0.0.x` series? v6 is a semver-major jump with breaking changes (package renames, removed flags such as `--plugin-root`, `BABYSITTER_SESSION_ID` → `AGENT_SESSION_ID`, and `plugins/` → `blueprints/`). Follow the **[Migration Guide](./migration.md)** before upgrading.
 
 ---
 
@@ -527,7 +629,18 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Retry installation
-npm install -g @a5c-ai/babysitter@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/adapters-cli
+```
+
+#### "adapters: command not found"
+
+**Problem:** The Adapters CLI is not installed, or your Node version is below 20.9.0.
+
+**Solution:**
+```bash
+node --version   # must be >=20.9.0
+npm install -g @a5c-ai/adapters-cli
+adapters version
 ```
 
 #### "Cannot find module '@a5c-ai/babysitter-sdk'"
@@ -575,6 +688,8 @@ claude plugin marketplace add a5c-ai/babysitter-claude
 claude plugin install --scope user babysitter@a5c.ai
 ```
 
+For harness-specific install problems on any other harness, see that harness's row in the [Install Matrix](../harnesses/install-matrix.md) and the session-binding section of [Troubleshooting](../reference/troubleshooting.md).
+
 ### Runtime Issues
 
 #### "Run encountered an error"
@@ -583,8 +698,11 @@ claude plugin install --scope user babysitter@a5c.ai
 
 **Solution:**
 ```bash
-# Check journal integrity
-cat .a5c/runs/<runId>/journal/journal.jsonl | head
+# Inspect the journal — it is one JSON file per event (not a single .jsonl)
+ls .a5c/runs/<runId>/journal/
+
+# Read the first event
+cat .a5c/runs/<runId>/journal/000001.*.json | jq .
 
 # Ask Claude to analyze
 claude "Analyze the babysitter run error for <runId> and try to recover"
@@ -606,26 +724,32 @@ If you're still stuck:
 
 ---
 
-## Next Steps
-
-Congratulations! You have Babysitter installed and ready to go.
-
-**Your next step:** [Quickstart Tutorial](./quickstart.md) - Build your first feature in 10 minutes!
-
----
-
 ## Quick Reference
 
 Commands you'll use most often:
 
 ```bash
-# Start a new babysitter run
-claude "/babysitter:call <your request>"
+# Run a harness directly from your shell (host-side Adapters track)
+adapters run claude "<your request>"
 
-# Resume a run
-claude "/babysitter:call resume the babysitter run"
+# Start a new in-session run (Claude Code)
+/babysitter:call <your request>
+
+# Resume a run (Claude Code)
+/babysitter:resume
+
+# Install a plugin for another harness
+babysitter harness:install-plugin <harness-key>
 
 # Update everything
-npm update -g @a5c-ai/babysitter @a5c-ai/genty-platform
+npm update -g @a5c-ai/babysitter @a5c-ai/adapters-cli @a5c-ai/genty-platform
 claude plugin update babysitter@a5c.ai
 ```
+
+---
+
+## Next steps
+
+- **Next:** [Quickstart](./quickstart.md) — build your first feature in 10 minutes
+- **Previous:** [Getting Started overview](./README.md)
+- **Related:** [Install Matrix](../harnesses/install-matrix.md) — setup and command token for every supported harness

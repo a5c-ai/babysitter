@@ -30,10 +30,10 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 - [Installation](#installation)
 - [First Steps](#first-steps)
 - [Quick Start](#quick-start)
-- [Harness CLI Wrappers](#harness-cli-wrappers)
+- [Agent Runtime CLI](#agent-runtime-cli)
 - [How It Works](#how-it-works)
 - [Why Babysitter?](#why-babysitter)
-- [Plugins](#plugins)
+- [Blueprints](#blueprints)
 - [Compression](#compression)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
@@ -46,21 +46,24 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 
 Babysitter enforces obedience to agentic workforces, enabling them to manage extremely complex tasks and workflows through deterministic, hallucination-free self-orchestration. Define your workflow in code - Babysitter enforces every step, ensures quality gates pass before progression, requires human approval at breakpoints, and records every decision in an immutable journal. Your agents do exactly what the process permits, nothing more.
 
+As of v6, Babysitter is harness-agnostic via its **Adapters** runtime: the same processes run across the 12 supported AI coding harnesses, so you are not locked to a single tool. See [Adapters](docs/user-guide/features/adapters.md) and the [harness install matrix](docs/user-guide/harnesses/install-matrix.md).
+
 ---
 
 ## Prerequisites
 
-- **Node.js**: Version 20.0.0+ (22.x LTS recommended)
-- **Claude Code**: Latest version ([docs](https://code.claude.com/docs/en/quickstart))
+- **Node.js**: Version 20.0.0+ (22.x LTS recommended). The host-side `adapters` CLI pins a slightly higher floor of 20.9.0+.
+- **A supported AI coding harness**: any of the 12 harnesses covered in the [install matrix](docs/user-guide/harnesses/install-matrix.md) (e.g. Claude Code — [docs](https://code.claude.com/docs/en/quickstart)).
 - **Git**: For cloning (optional)
 
 ---
 
 ## Installation
 
-Babysitter has a small package split:
+Babysitter v6 has two install tracks that should not be conflated: the **host-side `adapters` CLI** for running any harness directly from your shell, and the **in-session per-harness plugin** for driving full orchestration runs from inside your harness. Most people want both. The package split is:
 
 - `@a5c-ai/babysitter` is the recommended end-user install for the main `babysitter` CLI.
+- `@a5c-ai/adapters-cli` provides the host-side `adapters` CLI (Node >=20.9.0) for running and managing any supported harness from your shell. See the [Adapters CLI reference](docs/user-guide/reference/adapters-cli.md).
 - `@a5c-ai/babysitter-sdk` is the public SDK/library package and the underlying implementation behind the core CLI.
 - `@a5c-ai/genty-platform` is the optional runtime CLI for `genty call`, `resume`, `start-server`, `tui`, and other orchestration/runtime commands.
 - Harness plugins such as `@a5c-ai/babysitter-codex` or `@a5c-ai/babysitter-cursor` integrate Babysitter into a specific host tool. They do not replace the core CLI packages.
@@ -83,7 +86,15 @@ If you are authoring processes or embedding Babysitter in your own code, add the
 npm install @a5c-ai/babysitter-sdk
 ```
 
-Babysitter supports multiple AI coding harnesses. Install the plugin for your harness of choice.
+Prefer to drive a harness directly from your shell instead of from inside a session? Install the host-side `adapters` CLI and run any supported harness with one command — see the [Adapters CLI reference](docs/user-guide/reference/adapters-cli.md):
+
+```bash
+npm install -g @a5c-ai/adapters-cli
+adapters doctor
+adapters run claude "explain this codebase"
+```
+
+Babysitter supports the 12 AI coding harnesses listed in the [install matrix](docs/user-guide/harnesses/install-matrix.md). Install the plugin for your harness of choice; the two fully-worked harnesses have dedicated pages — [Claude Code](docs/user-guide/harnesses/claude-code.md) and [Codex](docs/user-guide/harnesses/codex.md).
 In this repository, [`plugins/babysitter-unified`](plugins/babysitter-unified/plugin.json) is the only maintained plugin source; harness-specific bundles are generated during build/release and are not committed:
 
 ### Claude Code (recommended)
@@ -517,14 +528,15 @@ library/                  # Process library (methodologies + specializations)
 
 | Traditional Approach | Babysitter |
 |---------------------|------------|
-| Run script once, hope it works | Process enforces quality gates before completion |
+| Agent decides what to do and when it's "done" | Orchestrator can only do what your process code permits |
+| Ad-hoc workflow | Deterministic, code-defined processes — mandatory stop after every step (enforcement, not assistance) |
+| Single task execution | Complex agentic workflows: parallel execution, dependencies, sub-agent delegation across harnesses |
+| State lost on session end | Event-sourced, deterministic replay, fully resumable |
 | Manual approval via chat | Structured breakpoints with context |
-| State lost on session end | Event-sourced, fully resumable |
-| Single task execution | Parallel execution, dependencies |
 | No audit trail | Complete journal of all events |
-| Ad-hoc workflow | Deterministic, code-defined processes |
+| Run script once, hope it works | Gates (including quality gates) block progression until satisfied |
 
-**Key differentiators:** Process enforcement, deterministic replay, quality convergence, human-in-the-loop breakpoints, and parallel execution.
+**Key differentiators:** Process enforcement, deterministic replay, human-in-the-loop breakpoints, parallel execution, and quality convergence (one gate type among several).
 
 ---
 
@@ -601,9 +613,12 @@ Toggle any layer with `babysitter compression:toggle <layer> <on|off>` or set in
 ### Getting Started
 - [Quickstart Guide](docs/user-guide/getting-started/quickstart.md)
 - [Beginner Tutorial: REST API](docs/user-guide/tutorials/beginner-rest-api.md)
-- [Best Practices](docs/user-guide/BEST-PRACTICES.md)
+- [Best Practices](docs/user-guide/features/best-practices.md)
+- [Migration Guide (0.0.x → v6)](docs/user-guide/getting-started/migration.md)
 
 ### Features
+- [Adapters](docs/user-guide/features/adapters.md) - Harness-agnostic runtime across the 12 supported harnesses
+- [Harness Install Matrix](docs/user-guide/harnesses/install-matrix.md) - Per-harness install instructions and invocation tokens
 - [Process Library](docs/user-guide/features/process-library.md) - 2,000+ pre-built processes
 - [Process Definitions](docs/user-guide/features/process-definitions.md)
 - [Quality Convergence](docs/user-guide/features/quality-convergence.md)
@@ -616,7 +631,8 @@ Toggle any layer with `babysitter compression:toggle <layer> <on|off>` or set in
 - [FAQ](docs/user-guide/reference/faq.md)
 - [Troubleshooting](docs/user-guide/reference/troubleshooting.md)
 - [Security](docs/user-guide/reference/security.md)
-- [CLI Reference](docs/user-guide/reference/cli-reference.md)
+- [CLI Reference](docs/user-guide/reference/cli-reference.md) - The core `babysitter` CLI
+- [Adapters CLI Reference](docs/user-guide/reference/adapters-cli.md) - The host-side `adapters` CLI
 - [Atlas Knowledge Graph](packages/atlas/README.md)
 
 ---
@@ -646,7 +662,7 @@ See [CONTRIBUTING.md](https://github.com/a5c-ai/babysitter/blob/main/CONTRIBUTIN
 
 | Tool | Description |
 |------|-------------|
-| [Observer Dashboard](https://github.com/yoavmayer/babysitter-observer-dashboard) | Real-time monitoring UI for parallel runs |
+| [Observer Dashboard](https://github.com/a5c-ai/babysitter) | Real-time monitoring UI for parallel runs — install and launch with the built-in `/babysitter:observe` command |
 | [Telegram Bot](https://github.com/a5c-ai/claude-code-telegram-bot) | Control sessions remotely |
 | [vibe-kanban](https://github.com/BloopAI/vibe-kanban) | Parallel process management |
 

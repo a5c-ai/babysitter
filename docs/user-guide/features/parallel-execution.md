@@ -1,3 +1,5 @@
+[Docs](../index.md) › [Features](./index.md) › Parallel Execution
+
 # Parallel Execution: Running Tasks Concurrently
 
 **Version:** 1.1
@@ -16,7 +18,18 @@ Think of it like cooking: instead of waiting for the water to boil, THEN choppin
 - Without parallel: Run tests (30s) → Run linter (20s) → Check security (15s) = **65 seconds total**
 - With parallel: Run all three at once = **30 seconds total** (just the slowest one)
 
-**Do you need this as a beginner?** Not really - Babysitter handles this automatically in most pre-built processes. This doc is for when you're building custom processes and want to optimize speed.
+**Do you need this as a beginner?** Not really - Babysitter handles this automatically in most pre-built [processes](../reference/glossary.md). This doc is for when you're building custom processes and want to optimize speed.
+
+---
+
+## On this page
+
+- [Overview](#overview)
+- [Use Cases and Scenarios](#use-cases-and-scenarios)
+- [Step-by-Step Instructions](#step-by-step-instructions)
+- [Configuration Options](#configuration-options)
+- [Code Examples and Best Practices](#code-examples-and-best-practices)
+- [Common Pitfalls and Troubleshooting](#common-pitfalls-and-troubleshooting)
 
 ---
 
@@ -487,3 +500,10 @@ for (let i = 0; i < items.length; i += chunkSize) {
 ## Summary
 
 Parallel execution dramatically reduces workflow duration by running independent tasks concurrently. Use `ctx.parallel.all` for fixed sets of tasks and `ctx.parallel.map` for processing collections. Remember to wrap task calls in thunks, only parallelize independent operations, and handle errors gracefully. For large batches, process in chunks to manage resource utilization.
+
+---
+
+## Next steps
+
+- **Next:** [Process Definitions](./process-definitions.md)
+- **Related:** [Quality Convergence](./quality-convergence.md), [Best Practices](./best-practices.md)

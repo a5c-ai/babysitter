@@ -1,8 +1,10 @@
+[Docs](../index.md) › [Reference](./index.md) › FAQ
+
 # Frequently Asked Questions (FAQ)
 
-**Version:** 1.1
-**Last Updated:** 2026-01-26
-Last refreshed: 2026-06-10
+**Version:** 1.2
+**Last Updated:** 2026-06-22
+Last refreshed: 2026-06-23
 **Category:** Reference
 
 ---
@@ -17,18 +19,17 @@ Last refreshed: 2026-06-10
 | **How do I start?** | Just type `/babysitter:call build a login page` in Claude Code |
 | **Do I need to write code?** | No - you use natural language. Babysitter handles the rest |
 | **What if something goes wrong?** | Everything is saved automatically. You can always resume or debug |
-| **Is it free?** | Babysitter is included with Claude Code - no additional cost |
+| **Is it free?** | Babysitter is open source and free to use with any supported harness; enterprise support and features are paid |
 
 Still have questions? Browse the full FAQ below, or check the [Troubleshooting guide](./troubleshooting.md).
 
 ---
 
-## Table of Contents
+## On this page
 
 - [Getting Started](#getting-started)
 - [Installation and Setup](#installation-and-setup)
 - [Using Babysitter](#using-babysitter)
-- [Breakpoints and Approval](#breakpoints-and-approval)
 - [Quality Convergence](#quality-convergence)
 - [Sessions and Resumption](#sessions-and-resumption)
 - [Process Definitions](#process-definitions)
@@ -42,7 +43,7 @@ Still have questions? Browse the full FAQ below, or check the [Troubleshooting g
 
 ### What is Babysitter?
 
-Babysitter is an event-sourced orchestration framework for Claude Code that enables deterministic, resumable, and human-in-the-loop workflow management. It allows you to build complex, multi-step development processes with built-in quality gates, human approval checkpoints, and automatic iteration until quality targets are met.
+Babysitter is an event-sourced, harness-agnostic orchestration framework (v6) that enables deterministic, resumable, and human-in-the-loop workflow management across any supported AI coding harness via the Adapters runtime. It allows you to build complex, multi-step development processes with built-in [quality gates](./glossary.md), human approval checkpoints, and automatic iteration until quality targets are met.
 
 **Key features:**
 - Structured multi-step workflows
@@ -89,9 +90,34 @@ See: [Getting Started](../getting-started/quickstart.md)
 
 ---
 
-### Can I use Babysitter with other AI tools?
+### Does it only work with Claude?
 
-Babysitter is specifically designed for Claude Code. The orchestration framework integrates with Claude Code's plugin system and skill infrastructure. While the underlying concepts could be adapted, Babysitter is not currently directly compatible with other AI coding assistants.
+**No.** Babysitter v6 is harness-agnostic through its **Adapters** runtime. It runs on a dozen (12) supported AI coding harnesses, including Claude Code and Codex (which have their own fully-worked pages), plus Cursor, Gemini, GitHub Copilot, genty, and others.
+
+The orchestration runtime is the same everywhere; what differs per harness is how the continuation loop is driven and how the in-session commands are exposed. For the full list of harnesses, their harness keys, and how each one drives the loop, see the [Install Matrix](../harnesses/install-matrix.md).
+
+To run any supported harness directly from your shell, use the host-side `adapters` CLI:
+
+```bash
+npm install -g @a5c-ai/adapters-cli
+adapters run claude "explain this codebase"
+```
+
+See: [Adapters CLI Reference](./adapters-cli.md)
+
+---
+
+### What are the three Babysitter command surfaces?
+
+Babysitter exposes three distinct surfaces. They are easy to conflate, so here is the breakdown:
+
+| Surface | Where it runs | What it does |
+|---------|---------------|--------------|
+| **`adapters` CLI** | Your shell (host-side) | Run, install, and manage AI coding harnesses directly. Package `@a5c-ai/adapters-cli`. See [Adapters CLI Reference](./adapters-cli.md). |
+| **`babysitter` CLI** | Your shell (host-side) | The core orchestration runtime (`run:*`, `task:*`, `harness:install-plugin`). See [CLI Reference](./cli-reference.md). |
+| **`/babysitter:*` commands** | Inside a harness (in-session) | Drive an orchestration run from the chat surface. The exact commands and how they are triggered **vary by harness** — see the [Install Matrix](../harnesses/install-matrix.md). |
+
+Rule of thumb: `adapters` manages harnesses from outside, `babysitter` runs orchestration from your shell, and `/babysitter:*` drives a run from inside a harness.
 
 ---
 
@@ -115,8 +141,8 @@ For simple, one-off tasks, using Claude Code directly may be faster.
 
 **Required:**
 - Node.js 20.0.0+ (recommend 22.x LTS)
-- Claude Code (latest version)
 - npm 8.0.0+
+- One of: a supported AI coding harness (Claude Code, Codex, Cursor, Gemini, GitHub Copilot, and others - see the [Install Matrix](../harnesses/install-matrix.md)), **or** the internal/Adapters runtime for headless automation. Claude Code is one supported option, not a hard requirement.
 
 **Optional:**
 - Git (for version control)
@@ -318,7 +344,7 @@ babysitter run:events <runId> --filter-type RUN_FAILED --json
 
 1. **Check the journal:**
    ```bash
-   cat .a5c/runs/<runId>/journal/journal.jsonl | jq .
+   cat .a5c/runs/<runId>/journal/*.json | jq .
    ```
 
 2. **View recent events:**
@@ -672,10 +698,10 @@ How many iterations have completed?
 
 ### Is my code sent to external services?
 
-Agent tasks use Claude's API, which means:
-- Code context is sent to the API for analysis
-- No data is stored by the API beyond the session
-- Review Anthropic's privacy policy for details
+Agent tasks call whichever harness/provider you have configured (Claude Code, Codex, Gemini, and others), which means:
+- Code context is sent to that provider's API for analysis
+- Data handling and retention depend on the provider you use
+- Review your configured provider's privacy policy for details
 
 For sensitive code, consider:
 - Using shell/node tasks instead of agent tasks
@@ -702,7 +728,7 @@ For sensitive code, consider:
    grep -i "password\|secret\|key" .a5c/runs/*/journal/*.json
    ```
 
-See: [Security Best Practices](../../../README.md#security-best-practices)
+See: [Security Guide](./security.md)
 
 ---
 
@@ -829,5 +855,12 @@ Kill the conflicting process or configure a different port in your SDK settings.
 
 ---
 
+## Next steps
+
+- **Next:** [Troubleshooting](./troubleshooting.md)
+- **Related:** [Glossary](./glossary.md), [Error Catalog](./error-catalog.md)
+
+---
+
 **Document Status:** Complete
-**Last Updated:** 2026-01-25
+**Last Updated:** 2026-06-22

@@ -1,21 +1,26 @@
+[Docs](../index.md) › [Getting Started](./README.md) › First Run
+
 # First Run Deep Dive: Understanding What Happened
 
 **Time:** 10 minutes | **Level:** Beginner | **Prerequisites:** [Completed the Quickstart](./quickstart.md)
 
-In the quickstart, you built a calculator with a single command and watched Babysitter iterate to quality. Now let's understand exactly what happened under the hood. This knowledge will help you use Babysitter more effectively and debug issues when they arise.
+In the quickstart, you built a calculator with a single command and watched Babysitter run a deterministic process where the orchestrator only did what the code permitted — stopping after every step, checking what the process allowed next, and (among other gates) iterating a quality gate until its target was met. Now let's understand exactly what happened under the hood. This knowledge will help you use Babysitter more effectively and debug issues when they arise.
+
+> **Note on commands:** This page uses Claude Code's `/babysitter:call` command. Babysitter is harness-agnostic, and the in-session command surface varies by harness (for example, `$babysitter:call` on Codex, `$call` on Cursor/Copilot, `/status` on opencode). The run directory, journal, and convergence concepts described here are identical across all harnesses. See the [Slash Commands reference](../reference/slash-commands.md) and the [Install Matrix](../harnesses/install-matrix.md) for your harness's token.
 
 ---
 
-## Table of Contents
+## On this page
 
 - [The Anatomy of a Babysitter Run](#the-anatomy-of-a-babysitter-run)
 - [Understanding the Run Directory](#understanding-the-run-directory)
 - [The Event Journal Explained](#the-event-journal-explained)
 - [How Quality Convergence Works](#how-quality-convergence-works)
-- [The TDD Methodology in Action](#the-tdd-methodology-in-action)
+- [TDD Quality Convergence in Action](#tdd-quality-convergence-in-action)
 - [Configuration and Customization](#configuration-and-customization)
 - [Verifying Success](#verifying-success)
-- [Next Steps](#next-steps)
+- [Keep Practicing](#keep-practicing)
+- [Next steps](#next-steps)
 
 ---
 
@@ -161,7 +166,7 @@ Contains **artifacts from each task**:
 
 ## The Event Journal Explained
 
-The journal is the heart of Babysitter's persistence. Let's examine it:
+The [journal](../reference/glossary.md) is the heart of Babysitter's persistence. Let's examine it:
 
 ```bash
 # List all journal events (each is an individual JSON file)
@@ -249,7 +254,7 @@ The journal enables:
 
 ## How Quality Convergence Works
 
-Quality convergence is Babysitter's core value proposition. Here's how it works:
+Quality convergence is one of Babysitter's gate types — a consequence of the fact that gates are code-defined. It is not the product thesis (that's deterministic, obedient orchestration of complex workflows), but it's a useful gate to understand because the calculator run used one. Here's how it works:
 
 ### The Quality Loop
 
@@ -414,7 +419,7 @@ Different methodologies for different needs:
 | Methodology | Best For | Quality Focus |
 |-------------|----------|---------------|
 | TDD Quality Convergence | Feature development | High |
-| GSD (Get Shit Done) | Quick prototypes | Medium |
+| GSD (Get Stuff Done) | Quick prototypes | Medium |
 | Spec-Kit | Complex specifications | High |
 
 ```bash
@@ -583,7 +588,7 @@ ls -la .a5c/runs/
 
 ---
 
-## Next Steps
+## Keep Practicing
 
 Now that you understand what happened in your first run, you're ready to explore more:
 
@@ -642,7 +647,7 @@ CHECK STATUS:
 
 BREAKPOINTS:
   Interactive (Claude Code): Handled in chat - no setup!
-  Non-Interactive: agent-platform call --harness internal --process <path>#<export> --workspace . --no-interactive
+  Non-Interactive: genty call --harness internal --process <path>#<export> --workspace . --no-interactive
   Web UI (non-interactive): http://localhost:3184
 
 LIST ALL RUNS:
@@ -662,3 +667,11 @@ JOURNAL FORMAT:
 Congratulations! You now understand how Babysitter works under the hood. This knowledge will help you use it more effectively, debug issues when they arise, and eventually create your own custom processes.
 
 **Happy orchestrating!**
+
+---
+
+## Next steps
+
+- **Next:** [Build a REST API tutorial](../tutorials/beginner-rest-api.md) — apply what you learned on a real project
+- **Previous:** [Quickstart](./quickstart.md)
+- **Related:** [Two-Loops Architecture](../features/two-loops-architecture.md), [Journal System](../features/journal-system.md)

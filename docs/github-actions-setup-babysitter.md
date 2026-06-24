@@ -158,6 +158,16 @@ model: claude-sonnet-4-20250514
 | `status` | Final status: completed, failed, or unknown |
 | `iterations` | Number of orchestration iterations |
 
+## v6 Triggers: Normalizing Inbound Webhooks
+
+Babysitter v6 introduces **Triggers**, a Transport Adapter layer that normalizes inbound webhooks from different forges into a single, common trigger event you can use to launch runs from CI. This is exposed as the `adapters-triggers` GitHub Action (`action.yml`).
+
+Different forges deliver webhooks with different payload shapes and event semantics — a GitHub `issue_comment`, a GitLab note event, and a Bitbucket pull-request comment all carry the same intent ("someone commented on this change") in incompatible formats. The `adapters-triggers` action receives an inbound webhook from **GitHub, GitLab, or Bitbucket** and normalizes it into a common trigger event, so the rest of your pipeline can launch a Babysitter run without forge-specific branching.
+
+In practice this means you can keep a single launch path for orchestration runs regardless of which forge raised the event. The Transport Adapter that performs this normalization is part of the broader [Adapters](pathname:///docs/user-guide/features/adapters) runtime; review the [Security reference](pathname:///docs/user-guide/reference/security) before wiring inbound webhooks into CI, since trigger sources are an untrusted input boundary.
+
+> The released end-user CLI is published as `@a5c-ai/babysitter`. When a workflow installs the CLI directly (rather than via the harness plugin marketplace), install `@a5c-ai/babysitter`.
+
 ## Workflow Examples
 
 ### Issue Comment Handler

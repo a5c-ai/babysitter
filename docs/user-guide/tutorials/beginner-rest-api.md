@@ -1,7 +1,9 @@
+[Docs](../index.md) › [Tutorials](./index.md) › Build a REST API
+
 # Beginner Tutorial: Build a Simple REST API with TDD
 
 **Version:** 1.0
-**Date:** 2026-01-25
+**Date:** 2026-06-23
 **Category:** Tutorial
 **Level:** Beginner
 **Estimated Time:** 45-60 minutes
@@ -9,15 +11,34 @@
 
 ---
 
+> **Works on any harness:** This tutorial uses Claude Code's `/babysitter:call` command token. Babysitter is harness-agnostic, so the exact same flow works on every supported harness using its own in-session token (for example, `$babysitter:call` on Codex, `$call` on Cursor/Copilot). See the [Install Matrix](../harnesses/install-matrix.md) for setup per harness and the [Slash Commands reference](../reference/slash-commands.md) for the right token.
+
+---
+
+## On this page
+
+- [Prerequisites](#prerequisites)
+- [Step 3: Start Your First Babysitter Run](#step-3-start-your-first-babysitter-run)
+- [Step 6: Approve the Specifications (Breakpoint)](#step-6-approve-the-specifications-breakpoint)
+- [Step 7: Watch the TDD Implementation Loop](#step-7-watch-the-tdd-implementation-loop)
+- [Step 10: Explore the Journal](#step-10-explore-the-journal)
+- [Step 12: Simulate Session Interruption and Resume](#step-12-simulate-session-interruption-and-resume)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+> **What this tutorial demonstrates:** Babysitter's core value is deterministic, obedient execution — the orchestrator only does what your process permits, stopping after every step to decide what's next (enforcement, not assistance). The quality convergence you'll observe here is *one* gate the process enforces, not the whole point.
+
 ## Learning Objectives
 
 By the end of this tutorial, you will be able to:
 
 1. **Start a Babysitter workflow** using natural language commands
-2. **Understand the TDD (Test-Driven Development) process** as orchestrated by Babysitter
-3. **Observe quality convergence** as Babysitter iterates toward your quality target
-4. **Interpret run output** including the journal, artifacts, and quality scores
-5. **Resume an interrupted workflow** if your session ends unexpectedly
+2. **See deterministic, obedient execution** — the orchestrator running only what the process permits, step by step
+3. **Understand the TDD (Test-Driven Development) process** as orchestrated by Babysitter
+4. **Observe a quality gate converge** toward your target (one of the gates the process enforces)
+5. **Interpret run output** including the journal, artifacts, and quality scores
+6. **Resume an interrupted workflow** via journal replay if your session ends unexpectedly
 
 ---
 
@@ -56,7 +77,7 @@ Babysitter has two modes for handling breakpoints (approval prompts):
 
 1. **Interactive Mode (Claude Code)**: When running in Claude Code, breakpoints are handled directly in the chat - Claude asks you questions and you respond. **No setup required!**
 
-2. **Non-Interactive Mode**: For CI/CD or headless automation, breakpoints are disabled.
+2. **Non-Interactive Mode**: For CI/CD or headless automation, breakpoints are routed to the durable Breakpoints Adapter backend / UI rather than the chat (they are not disabled).
 
 **For this tutorial, we'll use interactive mode** - just respond to Claude's questions in the chat. No additional service needed!
 
@@ -396,8 +417,10 @@ task-api-tutorial/
     runs/
       01KFFTSF8TK8C9GT3YM9QYQ6WG/
         journal/
-          journal.jsonl
-        state.json
+          000001.<ulid>.json   # one file per event
+          000002.<ulid>.json
+        state/
+          state.json
         tasks/
   src/
     app.js           # Express application setup
@@ -529,30 +552,24 @@ Tests:       21 passed, 21 total
 
 ## Step 10: Explore the Journal
 
-One of Babysitter's most powerful features is its **event-sourced journal**. This provides a complete audit trail of everything that happened during the run.
+One of Babysitter's most powerful features is its **event-sourced [journal](../reference/glossary.md)**. This provides a complete audit trail of everything that happened during the run.
 
 Let's examine it:
 
 ```bash
-# View the journal (replace with your actual run ID)
-cat .a5c/runs/01KFFTSF8TK8C9GT3YM9QYQ6WG/journal/journal.jsonl | head -20
+# View the journal (replace with your actual run ID); each event is its own file
+cat .a5c/runs/01KFFTSF8TK8C9GT3YM9QYQ6WG/journal/*.json | jq .
 ```
 
-**What you should see:**
+**What you should see** (each file holds one event; breakpoints surface as effects):
 
 ```json
-{"type":"RUN_STARTED","timestamp":"2026-01-25T14:30:12.445Z","runId":"01KFFTSF8TK8C9GT3YM9QYQ6WG","inputs":{...}}
-{"type":"ITERATION_STARTED","timestamp":"2026-01-25T14:30:12.567Z","iteration":1}
-{"type":"TASK_STARTED","timestamp":"2026-01-25T14:30:13.123Z","taskId":"research-001","taskType":"agent"}
-{"type":"TASK_COMPLETED","timestamp":"2026-01-25T14:30:45.789Z","taskId":"research-001","result":{"status":"success"}}
-{"type":"TASK_STARTED","timestamp":"2026-01-25T14:30:46.001Z","taskId":"specs-001","taskType":"agent"}
-...
-{"type":"BREAKPOINT_REQUESTED","timestamp":"2026-01-25T14:31:12.234Z","breakpointId":"bp-001","question":"Review and approve specifications?"}
-{"type":"BREAKPOINT_APPROVED","timestamp":"2026-01-25T14:31:45.123Z","breakpointId":"bp-001"}
-...
-{"type":"QUALITY_SCORE","timestamp":"2026-01-25T14:33:23.456Z","iteration":1,"score":62}
-{"type":"QUALITY_SCORE","timestamp":"2026-01-25T14:34:44.789Z","iteration":2,"score":88}
-{"type":"RUN_COMPLETED","timestamp":"2026-01-25T14:34:44.890Z","status":"success"}
+{"type":"RUN_CREATED","recordedAt":"2026-01-25T14:30:12.445Z","data":{"runId":"01KFFTSF8TK8C9GT3YM9QYQ6WG","inputs":{}}}
+{"type":"EFFECT_REQUESTED","recordedAt":"2026-01-25T14:30:13.123Z","data":{"effectId":"research-001","kind":"agent"}}
+{"type":"EFFECT_RESOLVED","recordedAt":"2026-01-25T14:30:45.789Z","data":{"effectId":"research-001","status":"success"}}
+{"type":"EFFECT_REQUESTED","recordedAt":"2026-01-25T14:31:12.234Z","data":{"effectId":"bp-001","kind":"breakpoint","question":"Review and approve specifications?"}}
+{"type":"EFFECT_RESOLVED","recordedAt":"2026-01-25T14:31:45.123Z","data":{"effectId":"bp-001","status":"approved"}}
+{"type":"RUN_COMPLETED","recordedAt":"2026-01-25T14:34:44.890Z","data":{"status":"success"}}
 ```
 
 > **Why the Journal Matters:**
@@ -622,7 +639,7 @@ If you were to close Claude Code mid-run (please don't do this for a completed r
 To resume a previously interrupted run, you would use:
 
 ```
-/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
+/babysitter:resume 01KFFTSF8TK8C9GT3YM9QYQ6WG
 ```
 
 Or in natural language:
@@ -660,7 +677,7 @@ Congratulations! You have successfully completed your first Babysitter tutorial.
 
 ### What You Learned
 
-1. **Starting a Babysitter workflow** with the `/babysit` command
+1. **Starting a Babysitter workflow** with the `/babysitter:call` command
 2. **Understanding the phases**: Research, Specifications, TDD Implementation
 3. **Using breakpoints** for human-in-the-loop approval
 4. **Observing quality convergence** as Babysitter iterates to meet targets
@@ -676,24 +693,6 @@ Congratulations! You have successfully completed your first Babysitter tutorial.
 | **Journal** | Event-sourced audit trail of all actions |
 | **Quality Score** | Automated assessment of code quality (tests, coverage, linting) |
 | **Iteration** | One pass through the implementation and quality check cycle |
-
----
-
-## Next Steps
-
-Now that you've completed the beginner tutorial, here are some paths to continue your learning:
-
-### Continue Learning
-- **[Intermediate Tutorial: Custom Process Definition](./intermediate-custom-process.md)** - Learn to create custom workflows with parallel execution and approval gates
-- **[Advanced Tutorial: Multi-Phase Feature Development](./advanced-multi-phase.md)** - Master complex team workflows with quality convergence
-
-### Go Deeper
-- **[Event Sourcing Explained](../features/journal-system.md)** - Understand the architecture behind Babysitter
-- **[Quality Convergence Explained](../features/quality-convergence.md)** - Learn how quality scoring works
-
-### Apply Your Knowledge
-- **[Quality Convergence](../features/quality-convergence.md)** - Fine-tune quality settings for your projects
-- **[Breakpoints](../features/breakpoints.md)** - Customize approval workflows
 
 ---
 
@@ -720,10 +719,10 @@ claude plugin enable --scope user babysitter@a5c.ai
 **Solution (Interactive Mode - Claude Code):**
 1. Look for Claude's question in the chat - scroll up if needed
 2. Respond to the question to continue
-3. If the session timed out, resume with `/babysitter:call resume`
+3. If the session timed out, resume with `/babysitter:resume`
 
 **Solution (Non-Interactive Mode):**
-1. Breakpoints are disabled in non-interactive mode
+1. In non-interactive mode, breakpoints are routed to the durable Breakpoints Adapter backend / UI (not disabled)
 
 ### Issue: "Quality target never reached"
 
@@ -754,6 +753,13 @@ claude plugin enable --scope user babysitter@a5c.ai
 
 ---
 
+## Next steps
+
+- **Next:** [Custom Process tutorial](./intermediate-custom-process.md)
+- **Related:** [Quality Convergence](../features/quality-convergence.md), [Process Definitions](../features/process-definitions.md)
+
+---
+
 **Document Status:** Complete
-**Last Updated:** 2026-01-25
+**Last Updated:** 2026-06-23
 **Feedback:** Found an issue? [Report it on GitHub](https://github.com/a5c-ai/babysitter/issues)

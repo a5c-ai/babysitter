@@ -1,16 +1,20 @@
+[Docs](../index.md) › [Reference](./index.md) › CLI Reference
+
 # Babysitter CLI Reference
 
 **Version:** 1.1
-**CLI/SDK Version:** 5.0.0
-**Last Updated:** 2026-01-25
+**CLI/SDK Version:** 5.1.0 (v6)
+**Last Updated:** 2026-06-22
 
-Complete reference documentation for the core Babysitter command-line interface.
+Complete reference documentation for the core `babysitter` orchestration command-line interface.
 
 > **Looking for slash commands?** See [Slash Commands Reference](./slash-commands.md) for `/babysitter:call`, `/babysitter:yolo`, and other Claude Code commands.
 
+> **Looking for the host-side `adapters` CLI?** Running, installing, and managing AI coding harnesses from your shell is a separate surface. See the [Adapters CLI Reference](./adapters-cli.md). This page documents only the core `babysitter` orchestration commands (`run:*`, `task:*`, `breakpoint:*`, `harness:*`).
+
 ---
 
-## Table of Contents
+## On this page
 
 - [Overview](#overview)
 - [Installation](#installation)
@@ -33,6 +37,9 @@ Complete reference documentation for the core Babysitter command-line interface.
   - [breakpoint:list-rules](#breakpointlist-rules)
   - [breakpoint:should-auto-approve](#breakpointshould-auto-approve)
   - [breakpoint:history](#breakpointhistory)
+- [Harness Commands](#harness-commands)
+  - [harness:install-plugin](#harnessinstall-plugin)
+- [Companion Binaries](#companion-binaries)
 - [Exit Codes](#exit-codes)
 - [Output Formats](#output-formats)
 - [Examples](#examples)
@@ -41,11 +48,13 @@ Complete reference documentation for the core Babysitter command-line interface.
 
 ## Overview
 
-The Babysitter CLI provides deterministic orchestration for event-sourced workflows. It enables run lifecycle management, task introspection, plugin/profile management, and result posting.
+The Babysitter CLI provides deterministic orchestration for event-sourced workflows. It enables [run](./glossary.md) lifecycle management, task introspection, plugin/profile management, and result posting.
 
 **Binary Names:**
 - `babysitter` (primary)
 - `babysitter-sdk` (alias)
+
+The core package also ships several companion binaries (`babysitter-mcp-server`, `adapters-proxy`, `atlas` / `a5c-atlas`, `babysitter-observer-dashboard`) — see [Companion Binaries](#companion-binaries). The host-side `adapters` binary ships separately as `@a5c-ai/adapters-cli` — see the [Adapters CLI Reference](./adapters-cli.md).
 
 **Package split:**
 - Install `@a5c-ai/babysitter` for the recommended end-user `babysitter` command.
@@ -84,7 +93,7 @@ npx -y @a5c-ai/babysitter@latest <command>
 
 ```bash
 babysitter --version
-# Output: 5.0.0
+# Output: 5.1.0
 ```
 
 ### Alias Setup
@@ -115,7 +124,7 @@ These options are available on all commands:
 
 > The default `--help` (and the usage text printed on a wrong-syntax invocation or a bare command name) lists **agent-facing** commands only — the surface a babysitter skill or hook would call. Run `babysitter --help-human` to see the commands intended for direct human use.
 
-> Runtime/orchestration commands such as `agent-platform call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/genty-platform` package and are not covered by this reference unless explicitly noted.
+> Runtime/orchestration commands such as `genty call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/genty-platform` package and are not covered by this reference unless explicitly noted.
 
 ### Path Handling
 
@@ -824,6 +833,61 @@ babysitter task:post run-20260125-143012 ef-build-001 \
 
 ---
 
+## Harness Commands
+
+### harness:install-plugin
+
+Installs the Babysitter plugin into a supported AI coding harness so that the in-session command surface (e.g. `/babysitter:*` on Claude Code) becomes available inside that harness.
+
+#### Synopsis
+
+```bash
+babysitter harness:install-plugin <harness-key> [--workspace <path>]
+```
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<harness-key>` | Yes | The harness key (e.g. `claude-code`, `codex`, `gemini-cli`, `cursor`, `github-copilot`, `oh-my-pi`, `antigravity-cli`). The key is **not** always the harness's display name. |
+
+#### Options
+
+| Option | Description |
+|--------|-------------|
+| `--workspace <path>` | Install into the given workspace/project directory instead of the current one |
+
+> The harness key is the argument expected here, and it can differ from the harness name (for example, Gemini's key is `gemini-cli`). The full list of harnesses and their keys lives in the [Install Matrix](../harnesses/install-matrix.md).
+
+#### Examples
+
+```bash
+# Install the plugin for Claude Code
+babysitter harness:install-plugin claude-code
+
+# Install for Codex into a specific workspace
+babysitter harness:install-plugin codex --workspace ./my-project
+```
+
+> To run a harness directly from your shell (rather than installing its in-session plugin), use the host-side `adapters` CLI instead — see the [Adapters CLI Reference](./adapters-cli.md).
+
+---
+
+## Companion Binaries
+
+The core package ships several supporting binaries alongside the `babysitter` CLI. These are launched directly (not as `babysitter` subcommands):
+
+| Binary | Purpose |
+|--------|---------|
+| `babysitter-mcp-server` | Exposes Babysitter orchestration over the Model Context Protocol so MCP-capable harnesses can drive runs |
+| `adapters-proxy` | Local transport proxy that lets a harness speak to a provider it cannot reach natively (used by the Adapters runtime) |
+| `atlas` (alias `a5c-atlas`) | Reads and inspects the Atlas catalog of harness capabilities and adapters that the runtime uses for discovery |
+| `babysitter-observer-dashboard` | Launches the real-time observer dashboard that watches active runs, journal events, and orchestration state |
+
+These complement, and do not replace, the `run:*` / `task:*` / `breakpoint:*` / `harness:*` commands documented above. For the host-side harness-management surface, see the [Adapters CLI Reference](./adapters-cli.md).
+
+---
+
 ## Exit Codes
 
 | Code | Meaning |
@@ -1090,7 +1154,16 @@ babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit
 
 ## Related Documentation
 
+- [Adapters CLI Reference](./adapters-cli.md) - The host-side `adapters` CLI for running and managing harnesses
+- [Install Matrix](../harnesses/install-matrix.md) - Supported harnesses and their harness keys
 - [Breakpoints Feature Guide](../features/breakpoints.md) - Breakpoint usage, auto-approval rules, and patterns
 - [Glossary](./glossary.md) - Term definitions
 - [Configuration Reference](./configuration.md) - Environment variables and settings
 - [Troubleshooting](./troubleshooting.md) - Common issues and solutions
+
+---
+
+## Next steps
+
+- **Next:** [Adapters CLI](./adapters-cli.md)
+- **Related:** [Configuration](./configuration.md), [Slash Commands](./slash-commands.md), [Error Catalog](./error-catalog.md)

@@ -5,6 +5,8 @@ last_updated: 2026-04-27
 category: landing
 ---
 
+[Docs](../index.md) › Features
+
 # Features
 
 This section explains how Babysitter works once you are past installation and want to understand the system on purpose, not by trial and error.
@@ -35,3 +37,8 @@ These pages describe the core operating model:
 - Need exact commands or flags? Go to [User Guide Reference](../reference/index.md).
 - Need a guided project? Go to [Tutorials](../tutorials/index.md).
 - Need install or first-run setup? Go to [Getting Started](../getting-started/README.md).
+
+## Next steps
+
+- **Start with:** [Two-Loops Architecture](./two-loops-architecture.md)
+- **Related:** [Architecture Overview](./architecture-overview.md), [Quality Convergence](./quality-convergence.md), [Reference overview](../reference/index.md)

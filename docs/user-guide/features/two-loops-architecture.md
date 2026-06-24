@@ -1,7 +1,9 @@
+[Docs](../index.md) › [Features](./index.md) › Two-Loops Architecture
+
 # Two-Loops Architecture: Understanding Hybrid Agentic Systems
 
 **Version:** 1.1
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-06-23
 **Category:** Feature Guide
 
 ---
@@ -10,7 +12,11 @@
 
 **Skip this section if you just want to USE babysitter.** This document explains the architecture for those who want to understand WHY babysitter works the way it does, or who are building custom processes.
 
-**The key insight:** Babysitter separates "what must happen" (deterministic rules) from "how to do it" (AI reasoning). This makes AI workflows reliable and debuggable.
+**The key insight:** Babysitter separates "what must happen" (deterministic rules) from "how to do it" (AI reasoning). This is what makes the product triad possible:
+
+1. **Deterministic process execution** — the boss loop is real code; the orchestrator can only do what it permits, and state is event-sourced for deterministic replay.
+2. **Complex agentic workflows** — the worker loop handles tasks, breakpoints, sleeps, parallel dispatch, dependencies, and sub-agent delegation across harnesses.
+3. **Policy / process adherence (obedience)** — a mandatory stop after every step, a process check, and a permit/halt decision. **Enforcement, not assistance — gates block progression until satisfied; they're not suggestions.**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -35,7 +41,20 @@
 **When to skip this document:**
 - You just want to run existing processes
 - You're following a tutorial
-- You're a beginner (start with [Quality Convergence](./quality-convergence.md) instead)
+- You're a beginner (start with the [Getting Started overview](../getting-started/README.md) instead; [Quality Convergence](./quality-convergence.md) covers one gate type once you're ready)
+
+---
+
+## On this page
+
+- [Overview](#overview)
+- [The Core Building Blocks](#the-core-building-blocks)
+- [The Two Loops in Detail](#the-two-loops-in-detail)
+- [What Goes Where?](#what-goes-where)
+- [The Four Guardrail Layers](#the-four-guardrail-layers)
+- [Quality Gates: Turning Agentic Work into Reliable Outcomes](#quality-gates-turning-agentic-work-into-reliable-outcomes)
+- [The Journal: Making Execution Testable](#the-journal-making-execution-testable)
+- [The Doctrine](#the-doctrine)
 
 ---
 
@@ -47,6 +66,8 @@ Babysitter implements a **Two-Loops Control Plane** architecture that combines:
 2. **Agentic Harness** (LLM Runtime): Adaptive, AI-powered work execution
 
 This hybrid approach delivers the best of both worlds: the reliability of deterministic systems with the flexibility of AI reasoning.
+
+> **Where the loops run (v6):** The symbolic orchestration loop runs on the harness-agnostic **[Adapters](./adapters.md) runtime**, not on any single harness's lifecycle. The orchestration loop is kept alive turn-to-turn by a continuation mechanism that **varies by harness** — Claude Code uses a `Stop` hook, others use their own equivalents — which the Hooks Adapter normalizes into one contract. See [Hooks](./hooks.md) for the per-harness continuation models. The two-loops concept is unchanged; it simply now sits on top of Adapters.
 
 ### Why Two Loops?
 
@@ -131,7 +152,7 @@ const gateResult = await ctx.task(securityGateTask, {
 
 ### Loop 1: Orchestration Loop (Symbolic)
 
-A process stepper that progresses a run through explicit stages.
+A process stepper that progresses a run through explicit stages. It runs on the harness-agnostic [Adapters](./adapters.md) runtime; the mechanism that advances it each turn depends on the harness (see [Hooks](./hooks.md)).
 
 **Typical Cycle:**
 
@@ -292,7 +313,7 @@ const behavioralConfig = {
 
 ## Quality Gates: Turning Agentic Work into Reliable Outcomes
 
-Quality gates convert "it seems done" into "it is done."
+Quality gates are one consequence of code-defined gates: because the orchestrator only advances when the process permits, you can encode a gate that demands evidence before progression — converting "it seems done" into "it is done." Quality convergence is one such gate type, not the product thesis.
 
 ### The Evidence-Driven Pattern
 
@@ -371,7 +392,7 @@ await ctx.breakpoint({
 
 ## The Journal: Making Execution Testable
 
-A journaled control plane turns agentic behavior into something you can:
+A [journaled](../reference/glossary.md) control plane turns agentic behavior into something you can:
 
 | Capability | Value |
 |------------|-------|
@@ -551,6 +572,8 @@ Feedback-driven quality loop:
 - [Process Definitions](./process-definitions.md) - Creating your own processes
 - [Journal System](./journal-system.md) - Event sourcing and replay
 - [Breakpoints](./breakpoints.md) - Human-in-the-loop approval
+- [Adapters](./adapters.md) - The harness-agnostic runtime the orchestration loop runs on
+- [Hooks](./hooks.md) - Per-harness continuation models that advance the loop
 
 ---
 
@@ -607,3 +630,10 @@ Based on your role, here's your next step:
 | **Debugging a run** | Check [Journal System](./journal-system.md) to understand event sourcing |
 | **Adding approvals** | See [Breakpoints](./breakpoints.md) for human-in-the-loop patterns |
 | **Evaluating for team** | Review the Four Guardrail Layers section above |
+
+---
+
+## Next steps
+
+- **Next:** [Quality Convergence](./quality-convergence.md)
+- **Related:** [Best Practices](./best-practices.md), [Architecture Overview](./architecture-overview.md)

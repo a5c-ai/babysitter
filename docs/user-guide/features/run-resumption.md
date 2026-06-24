@@ -1,3 +1,5 @@
+[Docs](../index.md) › [Features](./index.md) › Run Resumption
+
 # Run Resumption: Pause and Continue Workflows
 
 **Version:** 1.1
@@ -19,11 +21,25 @@ Close your laptop, end your session, or even have your computer crash - when you
 
 **How to resume:** Just tell Babysitter to continue your previous work, or use the CLI command shown below.
 
+> **Note (v6):** The in-session command shown in the examples below (`/babysitter:call resume ...`) is the **Claude Code** form. The exact in-session token that triggers a resume **varies by harness** — see the [Slash Commands reference](../reference/slash-commands.md) for the per-harness surface. The CLI commands (`babysitter run:iterate`, `run:status`) are harness-agnostic and work everywhere.
+
+---
+
+## On this page
+
+- [Overview](#overview)
+- [Use Cases and Scenarios](#use-cases-and-scenarios)
+- [Step-by-Step Instructions](#step-by-step-instructions)
+- [Configuration Options](#configuration-options)
+- [Code Examples and Best Practices](#code-examples-and-best-practices)
+- [Common Pitfalls and Troubleshooting](#common-pitfalls-and-troubleshooting)
+- [How Resumption Works](#how-resumption-works)
+
 ---
 
 ## Overview
 
-Run resumption enables pausing and continuing Babysitter workflows at any point. Whether a session times out, a breakpoint awaits approval, or you simply need to continue later, Babysitter's event-sourced architecture ensures no work is lost. Workflows automatically resume from exactly where they left off.
+Run resumption enables pausing and continuing Babysitter workflows at any point. Whether a session times out, a [breakpoint](../reference/glossary.md) awaits approval, or you simply need to continue later, Babysitter's event-sourced architecture ensures no work is lost. Workflows automatically resume from exactly where they left off.
 
 ### Why Use Run Resumption
 
@@ -199,6 +215,22 @@ babysitter task:list 01KFFTSF8TK8C9GT3YM9QYQ6WG --pending --json
 | `waiting` | Paused at breakpoint/sleep | Yes |
 | `completed` | Finished successfully | No (already done) |
 | `failed` | Terminated with error | Depends on error type |
+
+### Session Resolution (v6)
+
+To resume the right run, Babysitter must work out which harness session you are in. This changed in v6:
+
+- **The session ID env var is now `AGENT_SESSION_ID`** (harness-agnostic). The old `BABYSITTER_SESSION_ID` is **DEPRECATED** and superseded by `AGENT_SESSION_ID`.
+- **Resolution is now PID-scoped, not env-first.** Earlier versions trusted the session env var first; v6 resolves the active session from **PID-scoped markers** so concurrent sessions don't collide. The previous env-first behavior is **deprecated**.
+- **Escape hatch:** If you need the legacy env-first behavior (for example, an automation that injects the session ID), set `BABYSITTER_TRUST_ENV_SESSION=1` to make the runtime trust the session env var again.
+
+| Key | Status | Notes |
+|-----|--------|-------|
+| `AGENT_SESSION_ID` | Current | Harness-agnostic session ID |
+| `BABYSITTER_SESSION_ID` | **Deprecated** | Superseded by `AGENT_SESSION_ID` |
+| `BABYSITTER_TRUST_ENV_SESSION=1` | Escape hatch | Restores legacy env-first session resolution |
+
+See [Configuration](../reference/configuration.md) for the full key reference and [Troubleshooting](../reference/troubleshooting.md) if a resume targets the wrong run.
 
 ### Resume Command Options
 
@@ -490,9 +522,19 @@ export async function process(inputs, ctx) {
 - [Breakpoints](./breakpoints.md) - Understand approval gates that cause pauses
 - [Journal System](./journal-system.md) - Learn how state is persisted
 - [Process Definitions](./process-definitions.md) - Design resumable workflows
+- [Configuration](../reference/configuration.md) - Session env vars (`AGENT_SESSION_ID`) and `BABYSITTER_TRUST_ENV_SESSION`
+- [Troubleshooting](../reference/troubleshooting.md) - Diagnosing session-resolution and resume issues
+- [Slash Commands](../reference/slash-commands.md) - Per-harness in-session resume tokens
 
 ---
 
 ## Summary
 
 Run resumption is a fundamental Babysitter capability that ensures workflow progress is never lost. The event-sourced journal captures every state change, enabling workflows to resume from exactly where they paused. Use breakpoints for natural pause points, check run status before resuming, and design processes with resumption in mind.
+
+---
+
+## Next steps
+
+- **Next:** [Journal System](./journal-system.md)
+- **Related:** [Breakpoints](./breakpoints.md), [CLI Reference](../reference/cli-reference.md)

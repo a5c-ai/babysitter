@@ -1,14 +1,33 @@
+[Docs](../index.md) › [Getting Started](./README.md) › Quickstart
+
 # Quickstart: Your First Babysitter Run
 
-**Time:** 10 minutes | **Level:** Beginner | **Prerequisites:** [Installation complete](./installation.md)
+**Time:** ~10 minutes | **Level:** Beginner | **Prerequisites:** [Installation complete](./installation.md)
+
+**End state:** in about 10 minutes you will have run a deterministic Babysitter process once — where the orchestrator only did what the code permitted, stopping after every step before deciding what's next — and seen the result land on disk, all from a single command in your harness.
 
 Welcome! In this quickstart, you will build a calculator module using Test-Driven Development (TDD) with Babysitter. By the end, you will have experienced:
 
-- Automatic quality convergence (iterate until quality target met)
+- **Deterministic, obedient execution** - the orchestrator only ran what the process permitted, with a mandatory stop after each step (enforcement, not assistance)
+- **Journal-based persistence** - everything recorded in an immutable, replayable journal
+- **A quality gate in action** - quality [convergence](../reference/glossary.md) (iterate until the target is met) as one of the gates the process enforced
 - The TDD workflow (tests first, then implementation)
-- Journal-based persistence (everything is recorded)
 
 **Note:** TDD Quality Convergence is the full name; we use "TDD" as shorthand throughout this guide.
+
+## On this page
+
+- [What You Will Build](#what-you-will-build)
+- [Before You Begin](#before-you-begin)
+- [Step 1: Launch Your First Run](#step-1-launch-your-first-run)
+- [Step 2: Watch the Magic Happen](#step-2-watch-the-magic-happen)
+- [Step 4: Explore the Journal](#step-4-explore-the-journal)
+- [Bonus: Experience Session Resumption](#bonus-experience-session-resumption)
+- [Common First-Run Issues](#common-first-run-issues)
+
+### Pick your harness first
+
+This quickstart uses Claude Code's `/babysitter:call` token. **The command is the same on every harness — only the entry token differs** (`$babysitter:call` on Codex, `$call` on Cursor/Copilot, `/call` on the thin-alias harnesses, `/status` on opencode). If you are not on Claude Code, substitute your harness's token — see [Slash Commands and Modes](../reference/slash-commands.md) and the [Install Matrix](../harnesses/install-matrix.md).
 
 Let's get started!
 
@@ -57,13 +76,14 @@ Quick check that everything is working:
 
 ```bash
 # In your terminal
-babysitter --version
+npm list -g @a5c-ai/babysitter
+adapters version
 
 # Or run diagnostics
 /babysitter:doctor
 ```
 
-You should see a version number. If not, revisit the [installation guide](./installation.md).
+You should see version numbers (e.g. `@a5c-ai/babysitter@5.1.0` and `5.1.0`). If not, revisit the [installation guide](./installation.md).
 
 ### Open Your Project
 
@@ -347,10 +367,11 @@ Let's recap what Babysitter did for you:
 
 ### Key Takeaways
 
-1. **Quality Convergence:** You set 80% target, Babysitter iterated until it achieved 88%
-2. **TDD Methodology:** Tests were written before implementation
-3. **Complete Audit Trail:** Every action logged in the journal
-4. **No Context Loss:** If interrupted, you can resume exactly where you left off
+1. **Deterministic, Obedient Execution:** The orchestrator only did what your process permitted, stopping after each step to decide what's next — enforcement, not assistance
+2. **Complete Audit Trail:** Every action logged in the immutable journal
+3. **No Context Loss:** If interrupted, you can replay the journal and resume exactly where you left off
+4. **TDD Methodology:** Tests were written before implementation
+5. **Quality Convergence (one gate type):** You set an 80% target and the quality gate iterated until it achieved 88%
 
 ---
 
@@ -452,32 +473,29 @@ No work lost!
 
 ---
 
-## Next Steps
+## Explore Further
 
 Congratulations! You've completed your first Babysitter run. Here's what to explore next:
 
-### Immediate Next Steps
+### Try different prompts
 
-1. **[First Run Deep Dive](./first-run.md)** - Understand exactly what happened in detail
-2. **Try different prompts:**
-   - `/babysitter:call refactor the calculator for better error handling`
-   - `/babysitter:call add comprehensive documentation to the calculator`
-   - `/babysitter:call increase test coverage to 95%`
+- `/babysitter:call refactor the calculator for better error handling`
+- `/babysitter:call add comprehensive documentation to the calculator`
+- `/babysitter:call increase test coverage to 95%`
 
 ### This Week
 
-3. **Explore methodologies:**
-   - TDD (Test-Driven Development) - what you just used
-   - GSD (Get Shit Done) - faster, less formal
-   - Spec-Kit - specification-driven development
-
-4. **Configure breakpoints** for approval workflows
+- **Explore methodologies:**
+  - TDD (Test-Driven Development) - what you just used
+  - GSD (Get Stuff Done) - faster, less formal
+  - Spec-Kit - specification-driven development
+- **Configure breakpoints** for approval workflows
 
 ### Advanced Topics
 
-5. **Custom quality targets** and scoring criteria
-6. **Parallel execution** for faster runs
-7. **Custom process definitions** (for power users)
+- **Custom quality targets** and scoring criteria
+- **Parallel execution** for faster runs
+- **Custom process definitions** (for power users)
 
 ---
 
@@ -505,11 +523,20 @@ ls .a5c/runs/
 
 In just 10 minutes, you:
 
+- Ran a deterministic process where the orchestrator only did what your code permitted
 - Built a calculator module with TDD methodology
-- Achieved automatic quality convergence (set target, iterate until met)
-- Explored the event journal (complete audit trail)
+- Explored the event journal (complete, replayable audit trail)
 - Learned how to resume interrupted sessions
+- Saw a quality gate converge to its target (one gate type among several)
 
-**Babysitter turns complex AI workflows into single commands with deterministic, resumable execution.**
+**Babysitter enforces obedience on agentic work: it turns complex AI workflows into single commands with deterministic, resumable execution.**
 
 Ready to go deeper? Continue to [First Run Deep Dive](./first-run.md) to understand exactly what happened under the hood.
+
+---
+
+## Next steps
+
+- **Next:** [First Run Deep Dive](./first-run.md) — understand exactly what happened under the hood
+- **Previous:** [Installation](./installation.md)
+- **Related:** [Slash Commands](../reference/slash-commands.md) — every mode and command token

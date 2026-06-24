@@ -5,6 +5,8 @@ last_updated: 2026-04-27
 category: landing
 ---
 
+[Docs](../index.md) › Tutorials
+
 # Tutorials
 
 Use this section when you want to learn Babysitter by building something real instead of reading reference material first.
@@ -27,8 +29,7 @@ Use this section when you want to learn Babysitter by building something real in
 2. [Intermediate Custom Process](./intermediate-custom-process.md)
 3. [Advanced Multi-Phase Workflow](./advanced-multi-phase.md)
 
-## Next Steps
+## Next steps
 
-- Need installation and first-run help? Go to [Getting Started](../getting-started/README.md).
-- Need conceptual background before a tutorial? Read [Features](../features/index.md).
-- Need command lookups while following a tutorial? Keep [User Guide Reference](../reference/index.md) open.
+- **Next:** [Build a REST API](./beginner-rest-api.md)
+- **Related:** [Getting Started](../getting-started/README.md), [Features overview](../features/index.md), [Reference overview](../reference/index.md)

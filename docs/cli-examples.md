@@ -6,9 +6,21 @@ last_updated: 2026-04-26
 
 # Babysitter CLI & SDK Examples
 
-This guide walks through a realistic flow that exercises the `babysitter` CLI and the new deterministic test harness exposed from `@a5c-ai/babysitter-sdk/testing`. The examples assume you are standing in the repo root (or a project that already vendored the CLI + SDK) and that `~/.a5c/runs` is the default runs directory. Set `BABYSITTER_RUNS_SCOPE=repo` if you want repo-local `<repo>/.a5c/runs` instead.
+This guide walks through a realistic flow that exercises the `babysitter` CLI and the deterministic test harness exposed from `@a5c-ai/babysitter-sdk/testing`. The examples target Babysitter **5.1.0** (edition v6). The end-user CLI is installed from `@a5c-ai/babysitter`; the programmatic runtime used by the testing harness ships in `@a5c-ai/babysitter-sdk`:
+
+```bash
+# Core CLI (end users)
+npm install -g @a5c-ai/babysitter
+
+# Programmatic runtime / testing harness (process authors)
+npm install @a5c-ai/babysitter-sdk
+```
+
+The examples assume you are standing in the repo root (or a project that already installed the CLI + SDK) and that `~/.a5c/runs` is the default runs directory. Set `BABYSITTER_RUNS_SCOPE=repo` if you want repo-local `<repo>/.a5c/runs` instead.
 
 > **Tip:** All CLI paths in this document are rendered with POSIX separators (matching the CLI output convention) even when running on Windows.
+
+> **Related references:** For the full `babysitter` command surface see the [CLI Reference](pathname:///docs/user-guide/reference/cli-reference). For driving a harness directly from your shell (host-side), see the [Adapters CLI Reference](pathname:///docs/user-guide/reference/adapters-cli).
 
 ---
 
@@ -176,7 +188,20 @@ Instead of `run:continue` (removed), loop `run:iterate`, execute pending effects
 
 ---
 
-## 7. Unit-test a process with the deterministic harness
+## 7. Run a harness directly with the host-side `adapters` CLI
+
+The `babysitter` examples above drive an orchestration run. When you just want to invoke a supported harness directly from your shell, use the host-side `adapters` CLI (`@a5c-ai/adapters-cli`). It is documented in full in the [Adapters CLI Reference](pathname:///docs/user-guide/reference/adapters-cli):
+
+```bash
+adapters doctor
+adapters run claude "explain this codebase"
+```
+
+`adapters doctor` runs an environment health check (it confirms the CLI can see your harness binaries and credentials), and `adapters run <agent> "<prompt>"` runs the named harness with a single prompt.
+
+---
+
+## 8. Unit-test a process with the deterministic harness
 
 The SDK now exports `runToCompletionWithFakeRunner` from `@a5c-ai/babysitter-sdk/testing`. Use it to exercise process logic without invoking real node runners:
 
@@ -220,7 +245,7 @@ test("build pipeline converges", async () => {
 
 ---
 
-## 8. Cleaning up run artifacts
+## 9. Cleaning up run artifacts
 
 All examples above write into `~/.a5c/runs/<runId>` by default. After a tutorial or test completes, remove the directory (or move it under an archive location) to keep your environment tidy:
 

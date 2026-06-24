@@ -1,8 +1,10 @@
+[Docs](../index.md) › [Reference](./index.md) › Glossary
+
 # Babysitter Glossary
 
-**Version:** 1.1
-**Last Updated:** 2026-01-26
-Last refreshed: 2026-06-10
+**Version:** 1.2
+**Last Updated:** 2026-06-22
+Last refreshed: 2026-06-23
 **Audience:** All users
 
 This glossary provides definitions for technical terms and concepts used in Babysitter documentation. Terms are organized alphabetically with cross-references to related concepts and links to detailed documentation.
@@ -30,9 +32,9 @@ This glossary provides definitions for technical terms and concepts used in Baby
 
 ---
 
-## Table of Contents
+## On this page
 
-- [A](#a) | [B](#b) | [C](#c) | [D](#d) | [E](#e) | [F](#f) | [G](#g) | [H](#h) | [I](#i) | [J](#j) | [K](#k) | [L](#l) | [M](#m) | [N](#n) | [O](#o) | [P](#p) | [Q](#q) | [R](#r) | [S](#s) | [T](#t) | [U](#u) | [V](#v) | [W](#w)
+- [A](#a) | [B](#b) | [C](#c) | [D](#d) | [E](#e) | [G](#g) | [H](#h) | [I](#i) | [J](#j) | [K](#k) | [L](#l) | [M](#m) | [N](#n) | [O](#o) | [P](#p) | [Q](#q) | [R](#r) | [S](#s) | [T](#t) | [U](#u) | [V](#v) | [W](#w)
 
 ---
 
@@ -84,9 +86,45 @@ const agentTask = defineTask('scorer', (args, ctx) => ({
 
 ---
 
+### Adapter
+
+A unit in Babysitter's **Adapters** runtime that lets the same orchestration core drive many different harnesses, providers, and integrations without bespoke per-target code. Instead of writing integration code for each new harness, you add an adapter/data entry that the [Atlas](#atlas) catalog discovers at runtime. Specialized adapters include the [Hooks Adapter](#hooks-adapter), the [Breakpoints Adapter](#breakpoints-adapter), and the [Transport Adapter](#transport-adapter).
+
+**Related:** [Harness](#harness), [Atlas](#atlas), [Adapters CLI](#adapters-cli)
+
+**See Also:** [Adapters](../features/adapters.md)
+
+---
+
+### Adapters CLI
+
+The host-side companion CLI (`adapters`, package `@a5c-ai/adapters-cli`) for running and managing AI coding harnesses directly from your shell - install, run, models, sessions, config, and auth. It runs a harness from *outside*, whereas the in-session `/babysitter:*` commands drive an orchestration run from *inside* a harness.
+
+**Binary:** `adapters` · **Requires:** Node.js >=20.9.0
+
+**See Also:** [Adapters CLI Reference](./adapters-cli.md)
+
+---
+
+### Agent-Mux
+
+> **Deprecated.** Renamed to [Adapters](#adapter). The harness-agnostic runtime formerly called "Agent Mux" is now the **Adapters** runtime; use that term.
+
+---
+
 ### Approval Gate
 
 See [Breakpoint](#breakpoint).
+
+---
+
+### Atlas
+
+The catalog that the [Adapters](#adapter) runtime reads to discover harness capabilities and adapters. New harness support is largely a matter of adding an entry to Atlas rather than writing bespoke integration code. Inspect it with the `atlas` (alias `a5c-atlas`) binary.
+
+**Related:** [Adapter](#adapter), [Harness](#harness)
+
+**See Also:** [Adapters](../features/adapters.md)
 
 ---
 
@@ -109,15 +147,15 @@ Any file produced during a run, stored in the `artifacts/` directory. Common art
 
 ### Babysitter
 
-The orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. Babysitter provides structured multi-step workflows with quality gates, human approval checkpoints, and session persistence.
+The harness-agnostic orchestration framework (v6) that enables deterministic, event-sourced workflow management across any supported AI coding harness via the Adapters runtime. Babysitter provides structured multi-step workflows with quality gates, human approval checkpoints, and session persistence.
 
 **Components:**
-- Main CLI (`@a5c-ai/babysitter`) - Recommended end-user install for `babysitter`
-- SDK (`@a5c-ai/babysitter-sdk`) - Public SDK/library and core CLI implementation
+- Main CLI (`@a5c-ai/babysitter`) - End-user command-line tool (the primary install) for `babysitter`
+- SDK (`@a5c-ai/babysitter-sdk`) - Programmatic runtime imported by process code; public SDK/library and core CLI implementation
 - Runtime CLI (`@a5c-ai/genty-platform`) - Optional runtime/orchestration commands
-- Plugin (`babysitter@a5c.ai`) - Claude Code integration
+- Plugin (`babysitter@a5c.ai`) - Per-harness extension package (skills, hooks, commands)
 
-**Related:** [SDK](#sdk), [Plugin](#plugin)
+**Related:** [SDK](#sdk-software-development-kit), [Blueprint](#blueprint), [Plugin](#plugin), [Harness](#harness)
 
 ---
 
@@ -169,20 +207,38 @@ if (!result.approved) {
 
 ---
 
+### Breakpoints Adapter
+
+The v6, harness-agnostic home for human-in-the-loop approvals, part of the [Adapters](#adapter) runtime. It routes a breakpoint question to a durable backend so an approval can outlive the session or happen somewhere other than the chat, and it cryptographically signs approvals for tamper-evidence ("proven" approvals). It **replaces** the legacy `breakpoints-pro` package (now deprecated).
+
+**Related:** [Breakpoint](#breakpoint), [Adapter](#adapter)
+
+**See Also:** [Breakpoints Feature](../features/breakpoints.md), [Security](./security.md)
+
+---
+
+### Blueprint
+
+A packaged, installable unit of orchestration content (processes, skills, hooks, commands) for a harness. In v6 the processes directory is `blueprints/` (formerly `plugins/`), and the in-session command namespace is `blueprints:*` (the older `plugin:*` aliases are **deprecated**). Manage blueprints with `/babysitter:blueprints`.
+
+**Related:** [Plugin](#plugin), [Process](#process)
+
+---
+
 ## C
 
 ### CLI (Command-Line Interface)
 
 The command-line tool for managing Babysitter runs. Provides commands for run lifecycle management, task operations, and state inspection.
 
-**Binary Names:** `babysitter`, `babysitter-sdk`
+**Binary Name:** `babysitter`
 
 **Installation:**
 ```bash
 npm install -g @a5c-ai/babysitter
 ```
 
-**Related:** [SDK](#sdk)
+**Related:** [SDK](#sdk-software-development-kit)
 
 **See Also:** [CLI Reference](./cli-reference.md)
 
@@ -291,7 +347,7 @@ The JavaScript/TypeScript file and export that defines a process. Specified when
 
 **Example:** `.a5c/processes/build/process.js#buildProcess`
 
-**Related:** [Process](#process), [run:create](#runcreate)
+**Related:** [Process](#process), [run:create](./cli-reference.md)
 
 ---
 
@@ -326,6 +382,14 @@ An architectural pattern where all state changes are recorded as immutable event
 
 ## G
 
+### genty
+
+A supported [harness](#harness) (harness key `genty`), distributed from npm as `@a5c-ai/babysitter-genty`. Formerly named **tula** (now deprecated).
+
+**See Also:** [Install Matrix](../harnesses/install-matrix.md)
+
+---
+
 ### GSD (Get Stuff Done)
 
 A methodology focused on rapid task completion. GSD emphasizes pragmatic execution over extensive planning.
@@ -337,6 +401,16 @@ A methodology focused on rapid task completion. GSD emphasizes pragmatic executi
 ---
 
 ## H
+
+### Harness
+
+An AI coding tool that Babysitter drives - Claude Code, Codex, Cursor, Gemini, GitHub Copilot, [genty](#genty), and others. Babysitter v6 is harness-agnostic via the [Adapters](#adapter) runtime and supports a dozen (12) harnesses. Each harness has a **harness key** (the argument to `babysitter harness:install-plugin <harness-key>`), which is not always the harness's display name.
+
+**Related:** [Adapter](#adapter), [Atlas](#atlas)
+
+**See Also:** [Install Matrix](../harnesses/install-matrix.md)
+
+---
 
 ### Hook
 
@@ -370,6 +444,16 @@ The component that discovers and executes hooks. The maintained hook source live
 
 ---
 
+### Hooks Adapter
+
+The v6 unification layer for hooks, part of the [Adapters](#adapter) runtime. It provides a canonical session store plus a merge engine that takes each harness's distinct hook/continuation model and presents one consistent contract to the runtime and to your custom hooks. SDK lifecycle hooks behave the same everywhere; what varies is the per-harness continuation model that advances the loop each turn. Do not assume Claude Code's `Stop`-hook model on other harnesses.
+
+**Related:** [Hook](#hook), [Adapter](#adapter)
+
+**See Also:** [Hooks](../features/hooks.md)
+
+---
+
 ### Human-in-the-Loop
 
 A workflow pattern that includes human approval checkpoints. Implemented through breakpoints that pause execution until a human reviews and approves.
@@ -388,17 +472,17 @@ A workflow pattern that includes human approval checkpoints. Implemented through
 
 ### In-Session Loop
 
-A mechanism for continuous iteration within a single Claude Code session. The stop hook intercepts exit attempts and continues the loop until completion or max iterations reached.
+A mechanism for continuous iteration within a single harness session: each turn the loop re-injects the next iteration until the run reaches completion (or max iterations). **How continuation is driven is harness-specific** - it is one part of the per-harness hook/continuation model that the [Hooks Adapter](#hooks-adapter) normalizes. Claude Code's [Stop Hook](#stop-hook) is one such mechanism; other harnesses use different signals (e.g. Codex also intercepts `Stop`; Gemini and Antigravity re-inject via an `AfterAgent` hook with no `Stop`; openclaw drives it from a daemon; opencode runs the loop within a single turn on `session.idle`; Hermes drives orchestration over ACP). Do not assume Claude Code's `Stop`-hook model on other harnesses.
 
 **Components:**
-- State file: `$CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md`
+- State file: `$BABYSITTER_PLUGIN_ROOT/state/${AGENT_SESSION_ID}.md`
 
 **Invocation:**
 ```bash
 /babysitter:call Build feature --max-iterations 20
 ```
 
-**Related:** [Stop Hook](#stop-hook), [Completion Promise](#completion-promise)
+**Related:** [Hooks Adapter](#hooks-adapter), [Stop Hook](#stop-hook), [Completion Promise](#completion-promise)
 
 ---
 
@@ -513,6 +597,18 @@ The type classification of an effect or task. Determines how the effect is execu
 
 ---
 
+### Kradle
+
+The artifact/content store component (formerly **Krate**). Use the name "Kradle"; "Krate" is **deprecated**.
+
+---
+
+### Krate
+
+> **Deprecated.** Renamed to [Kradle](#kradle). Use "Kradle".
+
+---
+
 ## L
 
 ### Label
@@ -604,7 +700,7 @@ The iterative cycle that drives run execution. Each loop iteration: runs `run:it
 iterate -> get effects -> perform effects -> post results -> repeat
 ```
 
-**Related:** [Iteration](#iteration), [run:iterate](#runiterate)
+**Related:** [Iteration](#iteration), [run:iterate](./cli-reference.md)
 
 ---
 
@@ -639,7 +735,7 @@ An effect that has been requested but not yet resolved. Listed via `task:list --
 
 ### Plugin
 
-A Claude Code extension package. The Babysitter plugin (`babysitter@a5c.ai`) provides skills, hooks, and commands for orchestration.
+A harness extension package that provides skills, hooks, and commands for orchestration (for example, installed into Claude Code via `babysitter harness:install-plugin claude-code`).
 
 **Installation:**
 ```bash
@@ -647,7 +743,9 @@ claude plugin marketplace add a5c-ai/babysitter-claude
 claude plugin install --scope user babysitter@a5c.ai
 ```
 
-**Related:** [Babysitter Skill](#babysitter-skill)
+> **Note on naming:** Where "plugin" referred to the orchestration *content* directory (`plugins/`) or the in-session command namespace (`plugin:*`), the v6 term is [Blueprint](#blueprint) - the directory is now `blueprints/` and the namespace is `blueprints:*` (the `plugin:*` aliases are deprecated). "Plugin" still refers to the per-harness extension package installed by `harness:install-plugin`.
+
+**Related:** [Blueprint](#blueprint), [Babysitter Skill](#babysitter-skill), [Harness](#harness)
 
 ---
 
@@ -658,11 +756,11 @@ A JavaScript/TypeScript function that is the *low-level code implementation* of 
 **Key distinction:** Process = low-level code implementation; [Methodology](#methodology) = high-level concept/pattern that a process implements.
 
 <!-- glossary:process-library:start -->
-**Babysitter currently exposes 2,239 JavaScript process files in the live repository tree** organized across methodologies, shared processes, and specializations.
+**Babysitter currently exposes 2,243 JavaScript process files in the live repository tree** organized across methodologies, shared processes, and specializations.
 
 | Domain | Processes | Browse |
 |--------|-----------|--------|
-| **Development and technical specializations** | 837 | [Browse →](../../../library/specializations/) |
+| **Development and technical specializations** | 840 | [Browse →](../../../library/specializations/) |
 | **Business domains** | 490 | [Browse →](../../../library/specializations/domains/business/) |
 | **Science & engineering domains** | 551 | [Browse →](../../../library/specializations/domains/science/) |
 | **Social sciences & humanities** | 160 | [Browse →](../../../library/specializations/domains/social-sciences-humanities/) |
@@ -701,7 +799,7 @@ A unique identifier for a process type. Used when creating runs to specify which
 
 **Example:** `dev/build`, `ci/test`, `tdd/feature`
 
-**Related:** [Process](#process), [run:create](#runcreate)
+**Related:** [Process](#process), [run:create](./cli-reference.md)
 
 ---
 
@@ -773,7 +871,7 @@ The output from a completed task. Stored at `tasks/<effectId>/result.json`.
 }
 ```
 
-**Related:** [Task](#task), [task:post](#taskpost)
+**Related:** [Task](#task), [task:post](./cli-reference.md)
 
 ---
 
@@ -843,7 +941,7 @@ A unique identifier for a run. Typically includes timestamp and description.
 
 ### SDK (Software Development Kit)
 
-The core Babysitter package providing the orchestration runtime, CLI, and APIs.
+The programmatic runtime package providing the orchestration engine and APIs. It is imported by custom process code, not installed as the end-user CLI (for that, see [CLI](#cli-command-line-interface) / `@a5c-ai/babysitter`).
 
 **Package:** `@a5c-ai/babysitter-sdk`
 
@@ -854,7 +952,6 @@ npm install @a5c-ai/babysitter-sdk
 
 **Components:**
 - Runtime - Process execution engine
-- CLI - Command-line interface
 - Storage - Journal and state management
 - Tasks - Task definition and execution
 
@@ -864,9 +961,9 @@ npm install @a5c-ai/babysitter-sdk
 
 ### Session ID
 
-A unique identifier for a Claude Code session. Used for state isolation in in-session loops.
+A unique identifier for a harness session. Used for state isolation in in-session loops.
 
-**Environment Variable:** `AGENT_SESSION_ID`
+**Environment Variable:** `AGENT_SESSION_ID` (harness-agnostic; supersedes the deprecated `BABYSITTER_SESSION_ID` and `CLAUDE_SESSION_ID`). Session resolution is PID-scoped in v6.
 
 **Related:** [In-Session Loop](#in-session-loop)
 
@@ -1062,6 +1159,32 @@ See [TDD Quality Convergence](#tdd-quality-convergence).
 
 ---
 
+### Transport Adapter
+
+The [Adapter](#adapter) that normalizes provider transports so a harness can speak to a provider it cannot reach natively (used together with the `adapters-proxy` binary). Paired with [Triggers](#triggers) to launch runs from CI.
+
+**Related:** [Adapter](#adapter), [Triggers](#triggers)
+
+**See Also:** [Adapters](../features/adapters.md)
+
+---
+
+### Triggers
+
+The v6 mechanism that normalizes inbound webhooks from GitHub, GitLab, and Bitbucket (via the `adapters-triggers` action) so a run can be launched from CI regardless of provider. Part of the [Adapters](#adapter) runtime alongside the [Transport Adapter](#transport-adapter).
+
+**Related:** [Transport Adapter](#transport-adapter), [Adapter](#adapter)
+
+**See Also:** [GitHub Actions Setup](../../github-actions-setup-babysitter.md)
+
+---
+
+### tula
+
+> **Deprecated.** Renamed to [genty](#genty). Use "genty".
+
+---
+
 ## U
 
 ### ULID (Universally Unique Lexicographically Sortable Identifier)
@@ -1085,7 +1208,7 @@ The main output data from a task result. Passed via `--value` flag when posting 
 $CLI task:post <runId> <effectId> --status ok --value output.json
 ```
 
-**Related:** [Result](#result), [task:post](#taskpost)
+**Related:** [Result](#result), [task:post](./cli-reference.md)
 
 ---
 
@@ -1113,7 +1236,7 @@ A run status indicating a blocking effect (breakpoint or sleep) is active. Orche
 [Orchestration Loop](#orchestration-loop), [Iteration](#iteration), [Quality Convergence](#quality-convergence), [Breakpoint](#breakpoint)
 
 **Architecture:**
-[SDK](#sdk-software-development-kit), [CLI](#cli-command-line-interface), [Plugin](#plugin), [Hook](#hook)
+[SDK](#sdk-software-development-kit), [CLI](#cli-command-line-interface), [Adapter](#adapter), [Adapters CLI](#adapters-cli), [Atlas](#atlas), [Harness](#harness), [Blueprint](#blueprint), [Plugin](#plugin), [Hook](#hook), [Hooks Adapter](#hooks-adapter), [Breakpoints Adapter](#breakpoints-adapter), [Transport Adapter](#transport-adapter), [Triggers](#triggers), [Kradle](#kradle)
 
 **Session Management:**
 [In-Session Loop](#in-session-loop), [Completion Promise](#completion-promise), [Stop Hook](#stop-hook)
@@ -1122,7 +1245,17 @@ A run status indicating a blocking effect (breakpoint or sleep) is active. Orche
 
 ## Related Documentation
 
-- [CLI Reference](./cli-reference.md) - Complete CLI command documentation
+- [CLI Reference](./cli-reference.md) - Complete `babysitter` CLI command documentation
+- [Adapters CLI Reference](./adapters-cli.md) - The host-side `adapters` CLI
+- [Install Matrix](../harnesses/install-matrix.md) - Supported harnesses and harness keys
+- [Adapters](../features/adapters.md) - The Adapters runtime, Atlas, and Triggers
 - [Configuration Reference](./configuration.md) - Environment variables and settings
 - [FAQ](./faq.md) - Frequently asked questions
 - [Troubleshooting](./troubleshooting.md) - Common issues and solutions
+
+---
+
+## Next steps
+
+- **Next:** [Getting Started overview](../getting-started/README.md)
+- **Related:** [Two-Loops Architecture](../features/two-loops-architecture.md), [FAQ](./faq.md)

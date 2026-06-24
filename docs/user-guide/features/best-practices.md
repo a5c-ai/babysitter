@@ -1,23 +1,38 @@
+[Docs](../index.md) › [Features](./index.md) › Best Practices
+
 # Best Practices Guide: Comprehensive Reference for Babysitter
 
 **Version:** 2.0
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-06-23
 **Category:** Feature Guide
 
 ---
 
 ## Overview
 
-This guide consolidates best practices from across the Babysitter ecosystem into a single reference. Whether you are designing workflows, developing processes, optimizing performance, or collaborating with your team, these patterns will help you get the most out of Babysitter.
+This guide consolidates best practices from across the Babysitter ecosystem into a single reference. Babysitter's job is **enforcement, not assistance**: your workflow is deterministic code, the orchestrator can only do what that code permits, and a mandatory stop after every step keeps complex agentic work obedient. The practices below are about designing that enforced process well. Quality gates are *one* of the guardrail mechanisms covered here, not the headline. Whether you are designing workflows, developing [processes](../reference/glossary.md), optimizing performance, or collaborating with your team, these patterns will help you get the most out of Babysitter.
+
+## On this page
+
+- [The Four Guardrail Layers](#the-four-guardrail-layers)
+- [The Five Quality Gate Categories](#the-five-quality-gate-categories)
+- [Workflow Design Patterns](#workflow-design-patterns)
+- [Process Development Best Practices](#process-development-best-practices)
+- [Quality Convergence Best Practices](#quality-convergence-best-practices)
+- [Performance Optimization](#performance-optimization)
+- [Common Pitfalls and How to Avoid Them](#common-pitfalls-and-how-to-avoid-them)
+- [Quick Reference Checklist](#quick-reference-checklist)
+
+> **Harness-agnostic:** These practices apply unchanged across all 12 supported harnesses. Since v6, Babysitter orchestration runs on the harness-agnostic [Adapters](./adapters.md) runtime, so workflow design, guardrails, quality gates, and resumption work the same whichever harness you use. See the [Install Matrix](../harnesses/install-matrix.md) for the supported harnesses and their setup.
 
 ### Core Philosophy: The Two-Loops Architecture
 
 Babysitter implements a **hybrid agentic system** where:
 
-- A **symbolic orchestrator** governs progression, journaling, and phase boundaries
-- An **agentic harness** performs adaptive work with tools
+- A **symbolic orchestrator** governs progression, journaling, and phase boundaries — and can only do what your process code permits
+- An **agentic harness** performs adaptive work with tools, but cannot advance until the orchestrator's mandatory stop and process check permit it
 
-The key insight: **quality is evidence-driven, not assertion-driven.**
+The key insight: **enforcement, not assistance.** Gates block progression until satisfied; they're not suggestions. One consequence of code-defined gates is that quality becomes evidence-driven, not assertion-driven.
 
 > If you don't have evidence, you don't have completion.
 
@@ -1395,6 +1410,8 @@ Generates SDK bindings for external AI agents. Contribute your integration back 
 - [Journal System](./journal-system.md) - Event sourcing
 - [Hooks](./hooks.md) - Extensible lifecycle events
 - [Process Library](./process-library.md) - SDK-managed library layout and current counts
+- [Adapters](./adapters.md) - The harness-agnostic runtime these practices run on
+- [Install Matrix](../harnesses/install-matrix.md) - The 12 supported harnesses and their setup
 
 ---
 
@@ -1453,3 +1470,10 @@ This guide provides a comprehensive reference for Babysitter best practices. Key
 6. **Avoid Pitfalls**: Keep code deterministic, use proper thunk wrappers, detect quality plateaus, and follow proper resumption procedures.
 
 Apply these patterns consistently to maximize the value of Babysitter in your development workflows.
+
+---
+
+## Next steps
+
+- **Next:** [Custom Process tutorial](../tutorials/intermediate-custom-process.md)
+- **Related:** [Quality Convergence](./quality-convergence.md), [Two-Loops Architecture](./two-loops-architecture.md), [Process Definitions](./process-definitions.md)

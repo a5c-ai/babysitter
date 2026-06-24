@@ -1,14 +1,20 @@
+[Docs](../index.md) › [Features](./index.md) › Quality Convergence
+
 # Quality Convergence: Iterative Improvement Until Targets Met
 
-**Version:** 2.1
-**Last Updated:** 2026-01-26
+**Version:** 3.0 (v6 edition)
+**Last Updated:** 2026-06-23
 **Category:** Feature Guide
 
 ---
 
-## Quick Summary (Read This First)
+## Where This Fits
 
-**Quality Convergence = "Keep trying until it's good enough"**
+> **Quality convergence is *one* of Babysitter's roughly five core capabilities — not the whole product.** Babysitter is an enforcement engine for agentic work: it delivers (1) deterministic, event-sourced process execution, (2) complex agentic workflows (parallelism, dependencies, sub-agent delegation), (3) policy/process adherence and obedience (the orchestrator does only what your code permits), (4) multi-harness portability via the [Adapters](./adapters.md) runtime, and (5) quality convergence. For the full picture, start with the [Two-Loops Architecture](./two-loops-architecture.md) and the [Architecture Overview](./architecture-overview.md). This page documents capability #5: iterating until a defined quality target is met.
+
+## What Quality Convergence Is
+
+**Quality convergence is the pattern of looping — implement, measure, refine — until quality metrics meet a defined target, instead of running a task once and hoping.**
 
 Instead of:
 ```
@@ -19,6 +25,8 @@ Babysitter does:
 ```
 AI writes code → Tests: 60% pass → AI fixes → Tests: 85% pass → AI fixes → Tests: 95% pass ✓ Done!
 ```
+
+It is enforced by the same process-as-code authority that governs every other capability: the convergence loop is a gate your process defines, not a magic "try harder" mode.
 
 ### What You'll Learn in This Document
 
@@ -92,9 +100,21 @@ This flexibility means quality convergence adapts to any domain - from ML model 
 
 ---
 
+## On this page
+
+- [Overview](#overview)
+- [The Five Quality Gate Categories](#the-five-quality-gate-categories)
+- [The 90-Score Quality Convergence Pattern](#the-90-score-quality-convergence-pattern)
+- [Real-World Process Examples](#real-world-process-examples)
+- [Step-by-Step Instructions](#step-by-step-instructions)
+- [Configuration Options](#configuration-options)
+- [Common Pitfalls and Troubleshooting](#common-pitfalls-and-troubleshooting)
+
+---
+
 ## Overview
 
-Quality convergence is an iterative improvement pattern where Babysitter repeatedly refines work until a defined quality target is achieved. Instead of executing a task once and hoping for the best, quality convergence loops through implementation, testing, and scoring cycles until the output meets your standards.
+Quality [convergence](../reference/glossary.md) is an iterative improvement pattern where Babysitter repeatedly refines work until a defined quality target is achieved. Instead of executing a task once and hoping for the best, quality convergence loops through implementation, testing, and scoring cycles until the output meets your standards.
 
 ### The Core Principle: Evidence-Driven Completion
 
@@ -1128,3 +1148,10 @@ Quality convergence enables automated iterative improvement until defined qualit
 3. **Pass feedback between iterations** - AI learns from each failure
 4. **Detect plateaus early** - Don't waste iterations on no improvement
 5. **Parallelize independent checks** - Faster iterations mean faster convergence
+
+---
+
+## Next steps
+
+- **Next:** [Best Practices](./best-practices.md)
+- **Related:** [Two-Loops Architecture](./two-loops-architecture.md), [Process Definitions](./process-definitions.md)
