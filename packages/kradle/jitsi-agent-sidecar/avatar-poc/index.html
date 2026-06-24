@@ -104,35 +104,53 @@
     </div>
 
     <!--
-      Bootstrap stub. Intentionally contains NO logic yet — it only documents the wiring
-      contract and exposes window.__avatarPoc so the (later) verify.mjs / live path can
-      reach in. The dynamic imports tolerate the current empty stub modules.
+      Bootstrap. Constructs the avatar (primitive placeholder by default — no GLB committed or
+      fetched), the compositor over #out, starts the rAF compositing loop, and exposes
+      window.__avatarPoc so verify.mjs (headless puppeteer-core) and the manual live-Jitsi path
+      can drive the PoC via page.evaluate(). On error we still expose the failure on
+      window.__avatarPoc so the harness can read the real reason instead of timing out.
+
+      The AVATAR_GLB_URL can be supplied via ?glb=<url> (a user-owned/RPM GLB); absent => the
+      license-clean primitive placeholder.
     -->
     <script type="module">
-      // TODO(poc): once modules are implemented, replace this stub with real wiring:
-      //   import { createAvatar }              from './avatar.js';
-      //   import { createCompositor }          from './compositor.js';
-      //   import { buildVisemeSchedule, LipsyncRunner } from './lipsync.js';
-      //   import { createCanvasPublishEffect, attachToConference } from './publish-effect.js';
-      //
-      //   const out      = document.getElementById('out');
-      //   const stage    = document.getElementById('avatar-stage');
-      //   const avatar   = await createAvatar({ stage, /* AVATAR_GLB_URL: undefined => primitive placeholder */ });
-      //   const compositor = createCompositor({ canvas: out, avatar });
-      //   const lipsync  = new LipsyncRunner({ avatar });
-      //   compositor.start();
-      //
-      //   window.__avatarPoc = { avatar, compositor, lipsync, buildVisemeSchedule,
-      //                          createCanvasPublishEffect, attachToConference, out };
+      const out = document.getElementById('out');
+      const stageEl = document.getElementById('avatar-stage');
+      const glbUrl = new URLSearchParams(location.search).get('glb') || undefined;
 
-      // Skeleton placeholder so the page loads and verify.mjs can detect readiness.
-      // The real bootstrap (above) supersedes this once the modules carry logic.
-      window.__avatarPoc = {
-        ready: false,
-        note: 'skeleton — modules are stubs; no rendering/publish/lipsync wired yet',
-        out: document.getElementById('out'),
-        stage: document.getElementById('avatar-stage'),
-      };
+      try {
+        const { createAvatar } = await import('./avatar.js');
+        const { createCompositor } = await import('./compositor.js');
+
+        const avatar = await createAvatar({ stageEl, glbUrl });
+        const compositor = createCompositor({ outCanvas: out, avatar });
+        compositor.start();
+
+        // publish-effect.js / lipsync.js are loaded lazily (used by V2/V3 and the live path).
+        let publish = null;
+        let lipsyncMod = null;
+        try { publish = await import('./publish-effect.js'); } catch (e) { /* optional for V4 */ }
+        try { lipsyncMod = await import('./lipsync.js'); } catch (e) { /* optional for V4 */ }
+
+        window.__avatarPoc = {
+          ready: true,
+          mode: avatar.mode,
+          avatar,
+          compositor,
+          out,
+          stageEl,
+          publish,
+          lipsync: lipsyncMod,
+        };
+      } catch (err) {
+        window.__avatarPoc = {
+          ready: false,
+          error: (err && (err.stack || err.message)) || String(err),
+          out,
+          stageEl,
+        };
+        console.error('avatar-poc bootstrap failed:', err);
+      }
     </script>
   </body>
 </html>
