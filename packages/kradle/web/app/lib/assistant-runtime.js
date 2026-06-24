@@ -160,7 +160,18 @@ function defaultSystemPrompt() {
 }
 
 async function resolveStackConfig(controller, stackRef) {
-  const defaults = { provider: 'anthropic', model: 'claude-sonnet-4-20250514', systemPrompt: defaultSystemPrompt() };
+  // Default to the deployment's CONFIGURED assistant provider/model (env, sourced
+  // from the assistant secret — KRADLE_ASSISTANT_PROVIDER=openai, MODEL=gpt-5.5),
+  // not a hardcoded Anthropic default. Otherwise, whenever the org's `assistant`
+  // AgentStack is absent (e.g. right after a deploy reaps the org namespace), the
+  // chat falls back to Anthropic and dead-ends on "ANTHROPIC_API_KEY not
+  // configured" even though Azure/OpenAI creds ARE configured. The stack spec,
+  // when present, still wins (it's spread over these defaults).
+  const defaults = {
+    provider: process.env.KRADLE_ASSISTANT_PROVIDER || 'anthropic',
+    model: process.env.KRADLE_ASSISTANT_MODEL || 'claude-sonnet-4-20250514',
+    systemPrompt: defaultSystemPrompt(),
+  };
   if (!controller) return defaults;
   try {
     const result = await controller.getResource('AgentStack', stackRef || 'assistant');
