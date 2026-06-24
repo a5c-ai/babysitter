@@ -5,6 +5,18 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ $orgNamespace }}
+  # Keep the org namespace across `helm uninstall` (the deploy's "clean up legacy"
+  # step uninstalls before reinstalling). Without this the namespace is reaped on
+  # every deploy, and the assistant-stack/identity templates — gated on a
+  # RENDER-TIME `kradle.orgNamespaceActive` lookup — find it Terminating and
+  # render empty, so the org is left with no assistant stack/identity (board
+  # dispatch can't resolve a stack; the Foundry shows "No stacks"). Keeping the
+  # namespace (it carries matching meta.helm.sh/release-* annotations, so the next
+  # `helm upgrade --install` cleanly re-adopts it) means the lookup sees it Active
+  # and provisioning runs — and user-created resources in the namespace persist
+  # across deploys instead of vanishing.
+  annotations:
+    helm.sh/resource-policy: keep
   labels:
     {{- include "kradle.labels" . | nindent 4 }}
     kradle.a5c.ai/org: {{ $org | quote }}
