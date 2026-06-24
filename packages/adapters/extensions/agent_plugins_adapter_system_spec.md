@@ -97,7 +97,7 @@ This is the canonical manifest. It extends Claude Code's `plugin.json` with cros
 {
   // ── Identity ──────────────────────────────────────────────────
   "name": "babysitter",                          // string, required. Plugin name.
-  "version": "5.0.0",                            // string, required. Semver.
+  "version": "6.0.0",                            // string, required. Semver.
   "description": "Orchestrate complex...",        // string, required. Human-readable.
   "author": "a5c.ai",                            // string | { name, email }, required.
   "license": "MIT",                              // string, required. SPDX identifier.
@@ -192,7 +192,7 @@ The following TypeScript interface defines the canonical type for the UPF manife
 interface A5cPluginManifest {
   // ── Identity (required) ──────────────────────────────────────
   name: string;                                     // Plugin name (kebab-case)
-  version: string;                                  // Semver string (e.g., "5.0.0")
+  version: string;                                  // Semver string (e.g., "6.0.0")
   description: string;                              // Human-readable description
   author: string | { name: string; email?: string }; // Author identity
   license: string;                                  // SPDX license identifier
@@ -367,8 +367,8 @@ For Gemini, an optional `extensionVersion` field can be added:
 
 ```json
 {
-  "sdkVersion": "5.0.0",
-  "extensionVersion": "5.0.0"
+  "sdkVersion": "6.0.0",
+  "extensionVersion": "6.0.0"
 }
 ```
 
@@ -874,7 +874,7 @@ Each target has a well-defined native format. The compiler must emit files confo
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "author": "a5c.ai",
   "license": "MIT",
@@ -939,7 +939,7 @@ dist/claude-code/
 ```json
 {
   "name": "@a5c-ai/babysitter-codex",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Babysitter Codex skill bundle...",
   "scripts": {
     "test": "node test/integration.test.js && node test/packaged-install.test.js",
@@ -957,7 +957,7 @@ dist/claude-code/
   "author": "a5c.ai",
   "license": "MIT",
   "publishConfig": { "access": "public" },
-  "dependencies": { "@a5c-ai/babysitter-sdk": "5.0.0" }
+  "dependencies": { "@a5c-ai/babysitter-sdk": "6.0.0" }
 }
 ```
 
@@ -1026,7 +1026,7 @@ dist/codex/
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "author": "a5c.ai",
   "license": "MIT",
@@ -1113,7 +1113,7 @@ dist/cursor/
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "author": "a5c.ai",
   "license": "MIT",
@@ -1140,7 +1140,7 @@ dist/cursor/
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "contextFileName": "GEMINI.md",
   "settings": []
@@ -1204,7 +1204,7 @@ dist/gemini/
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "author": { "name": "a5c.ai", "email": "support@a5c.ai" },
   "license": "MIT",
@@ -1294,7 +1294,7 @@ dist/github-copilot/
 ```json
 {
   "name": "@a5c-ai/babysitter-pi",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "type": "module",
   "description": "Babysitter package for Pi Coding Agent",
   "keywords": ["pi", "babysitter", "orchestration"],
@@ -1302,7 +1302,7 @@ dist/github-copilot/
     "extensions": ["./extensions"],
     "skills": ["./skills"]
   },
-  "dependencies": { "@a5c-ai/babysitter-sdk": "5.0.0" },
+  "dependencies": { "@a5c-ai/babysitter-sdk": "6.0.0" },
   "peerDependencies": { "@earendil-works/pi-coding-agent": "*" },
   "scripts": {
     "test": "node --test test/integration.test.js && node test/packaged-install.test.cjs",
@@ -1429,14 +1429,14 @@ The `extensions/index.js` generation follows the same rules as Pi (see section 4
 ```json
 {
   "name": "@a5c-ai/babysitter-omp",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "type": "module",
   "description": "Babysitter package for oh-my-pi",
   "omp": {
     "extensions": ["./extensions"],
     "skills": ["./skills"]
   },
-  "dependencies": { "@a5c-ai/babysitter-sdk": "5.0.0" },
+  "dependencies": { "@a5c-ai/babysitter-sdk": "6.0.0" },
   "peerDependencies": { "@oh-my-pi/pi-coding-agent": "*" },
   ...
 }
@@ -1457,7 +1457,7 @@ The `extensions/index.js` generation follows the same rules as Pi (see section 4
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "author": "a5c.ai",
   "license": "MIT",
@@ -1566,7 +1566,7 @@ dist/opencode/
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "...",
   "author": "a5c.ai",
   "license": "MIT",
@@ -1583,7 +1583,7 @@ dist/opencode/
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Babysitter orchestration plugin for OpenClaw...",
   "entrypoint": "extensions/index.ts",
   "hooks": {
@@ -1884,7 +1884,7 @@ interface Diagnostic {
 | Missing required field in manifest | error | validation | `"Required field 'name' is missing in a5c-plugin.json"` |
 | Hook unsupported by target | warning | compatibility | `"Hook 'PreToolUse' is not supported by target 'gemini' — skipping"` |
 | Override file not found | error | validation | `"Override file 'overrides/codex/config.json' referenced in targets.codex.extraFiles does not exist"` |
-| Version mismatch in versions.json | warning | validation | `"sdkVersion '5.0.0' does not match manifest version '5.0.1'"` |
+| Version mismatch in versions.json | warning | validation | `"sdkVersion '6.0.0' does not match manifest version '5.0.1'"` |
 | Generated hook script missing shebang | error | verification | `"Hook script 'hooks/session-start.sh' is missing shebang line"` |
 | Diff against existing directory | info | verification | `"File 'skills/call/SKILL.md' differs from existing — content changed at line 4"` |
 | Command has no description | warning | validation | `"Command 'commands/test.md' has no 'description' in frontmatter"` |
@@ -2274,7 +2274,7 @@ jobs:
 ```json
 {
   "name": "babysitter",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Orchestrate complex, multi-step workflows...",
   "author": "a5c.ai",
   "license": "MIT",
@@ -2767,7 +2767,7 @@ If a target override specifies a different plugin `version` than the UPF manifes
 If a target override specifies an explicit dependency version for `@a5c-ai/babysitter-sdk` that differs from `versions.json` `sdkVersion`:
 
 - **Resolution:** The `versions.json` `sdkVersion` is authoritative for hook script installation. For `package.json` dependency fields in targets like Codex/Pi, the compiler uses `sdkVersion` from `versions.json` unless the target override explicitly sets a dependency version. If both are present and differ, the compiler:
-  1. Emits a `warning` diagnostic: `"Target 'codex' specifies SDK dependency '4.9.0' but versions.json pins sdkVersion to '5.0.0'. Using versions.json value."`
+  1. Emits a `warning` diagnostic: `"Target 'codex' specifies SDK dependency '4.9.0' but versions.json pins sdkVersion to '6.0.0'. Using versions.json value."`
   2. Uses the `versions.json` value (it is authoritative)
 
 **Scenario 3: Hook script version drift**

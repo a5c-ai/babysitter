@@ -1,12 +1,12 @@
 # Babysitter v6: The Orchestration Platform Goes Universal
 
-**Released: April 18, 2026** | **Version: 5.0.0** | **License: MIT**
+**Released: April 18, 2026** | **Version: 6.0.0** | **License: MIT**
 
 ---
 
 ## TL;DR
 
-- Babysitter is now **open source under MIT**. The version jumps from 0.0.175 to 5.0.0 (internally "v6"), signaling a clean break with the experimental era.
+- Babysitter is now **open source under MIT**. The version jumps from 0.0.175 to 6.0.0 (internally "v6"), signaling a clean break with the experimental era.
 - **43 packages** ship in the monorepo, transforming babysitter from a single SDK into a full-stack orchestration platform spanning CLI, TUI, web, mobile, TV, and watch surfaces.
 - **9 harness adapters** (Claude, Codex, Copilot, Cursor, Gemini, Oh-My-Pi, OpenClaw, OpenCode, Pi) let babysitter processes run on any AI coding assistant, not just one.
 - A **process library** of 62 methodologies and 40 specialization domains provides executable, community-extensible workflows out of the box.
@@ -67,7 +67,7 @@ Breakpoints Adapter (108 files, 26K lines) replaces the former `breakpoints-pro`
 - MCP server, CLI, and browser-based auth flows.
 - 7 export entry points: root, `backends`, `proven`, `mcp`, `harness`, `auth`, `config`.
 
-### SDK 5.0.0
+### SDK 6.0.0
 
 The SDK (453 files, 58K lines) remains the foundation of every babysitter process. v6 expands the public API from 9 to 46+ exports while keeping `defineTask` backward-compatible with the existing object-form spec.
 
@@ -207,7 +207,7 @@ Five architectural decisions define v6:
 
 | Change | Migration Path |
 |--------|---------------|
-| **Version 0.0.175 to 5.0.0** | Update your `package.json` range. `^0.0.x` will not resolve to 5.x. |
+| **Version 0.0.175 to 6.0.0** | Update your `package.json` range. `^0.0.x` will not resolve to 5.x. |
 | **License: UNLICENSED to MIT** | No action required. Your usage rights are now broader. |
 | **CLI split: `babysitter` / `agent-platform`** | Orchestration commands (`call`, `yolo`, `resume`, `plan`, `forever`) now live in `agent-platform`. Update scripts and CI configs. |
 | **`BABYSITTER_SESSION_ID` to `AGENT_SESSION_ID`** | Rename the env var in your CI configs. The SDK no longer reads the old name; adapters still recognizes it as a detection signal. |
