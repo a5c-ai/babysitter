@@ -26,7 +26,8 @@
  *   KRADLE_REPO_OWNER   git org/owner (e.g. 'a5c-ai')
  *   KRADLE_REPO_NAME    repository name (e.g. 'agent-sandbox')
  *   KRADLE_GIT_BASE_URL Gitea HTTP origin (e.g. 'http://host:3000')
- *   KRADLE_GIT_TOKEN    Gitea access token (clone + push + PR auth)
+ *   KRADLE_GIT_USER     Gitea user for basic auth (clone + push + PR)
+ *   KRADLE_GIT_PASSWORD Gitea password for basic auth
  *   KRADLE_BASE_BRANCH  PR base branch                   [default 'main']
  * When these are present the agent gets a real checkout: the repo is cloned into
  * the workspace, the harness edits it, and any changes are committed, pushed on a
@@ -49,16 +50,18 @@ const workspacePath = process.env.KRADLE_WORKSPACE_PATH || '/workspace';
 // image runs as root), so the settings-allowlist path is the one that works.
 if (!process.env.HOME) process.env.HOME = '/root';
 
-// Repo-work env. All five must be present for repo mode; a partial set is a
-// misconfiguration and must fail loudly (never silently degrade to scratch).
+// Repo-work env. owner+name+baseUrl plus basic-auth creds must all be present
+// for repo mode; a partial set is a misconfiguration and must fail loudly
+// (never silently degrade to scratch).
 const repo = {
   owner: process.env.KRADLE_REPO_OWNER || '',
   name: process.env.KRADLE_REPO_NAME || '',
   baseUrl: (process.env.KRADLE_GIT_BASE_URL || '').replace(/\/$/, ''),
-  token: process.env.KRADLE_GIT_TOKEN || '',
+  user: process.env.KRADLE_GIT_USER || '',
+  password: process.env.KRADLE_GIT_PASSWORD || '',
   baseBranch: process.env.KRADLE_BASE_BRANCH || 'main',
 };
-const repoMode = Boolean(repo.owner && repo.name && repo.baseUrl && repo.token);
+const repoMode = Boolean(repo.owner && repo.name && repo.baseUrl && repo.user && repo.password);
 
 const harness = process.env.KRADLE_HARNESS || 'claude';
 const provider = process.env.KRADLE_PROVIDER || 'openai';
@@ -79,17 +82,18 @@ function log(...args) {
   console.error('[kradle-agent]', ...args);
 }
 
-/** Build the authenticated clone/push URL (token-as-username, Gitea HTTP auth). */
+/** Build the authenticated clone/push URL (Gitea HTTP basic auth: user:password). */
 function authedRepoUrl() {
   const u = new URL(`${repo.baseUrl}/${repo.owner}/${repo.name}.git`);
-  u.username = repo.token;
+  u.username = repo.user;
+  u.password = repo.password;
   return u.toString();
 }
 
 /** Run a git command in a cwd; resolves { exitCode, stdout, stderr }. */
 function runGit(args, cwd = workspacePath) {
   return new Promise((resolvePromise) => {
-    const safeArgs = args.map((a) => (repo.token && a.includes(repo.token) ? a.replace(repo.token, '***') : a));
+    const safeArgs = args.map((a) => (repo.password && a.includes(repo.password) ? a.replace(repo.password, '***') : a));
     log('git', safeArgs.join(' '));
     const child = spawn('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '';
@@ -118,11 +122,12 @@ async function prepareCheckout() {
   log(`checked out ${branchName} from ${repo.owner}/${repo.name}@${repo.baseBranch}`);
 }
 
-/** POST to the Gitea API with token auth; returns parsed JSON (throws on non-2xx). */
+/** POST to the Gitea API with basic auth; returns parsed JSON (throws on non-2xx). */
 async function giteaApi(path, body) {
+  const basic = Buffer.from(`${repo.user}:${repo.password}`).toString('base64');
   const res = await fetch(`${repo.baseUrl}/api/v1${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `token ${repo.token}` },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Basic ${basic}` },
     body: JSON.stringify(body),
   });
   const text = await res.text();

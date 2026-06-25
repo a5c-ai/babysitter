@@ -559,7 +559,8 @@ export function createAgentDispatchController(options = {}) {
         // a scratch job the user did not ask for.
         if (repository && repository !== 'default') {
           const gitBase = (process.env.KRADLE_GIT_BASE_URL || '').replace(/\/$/, '');
-          const gitToken = process.env.KRADLE_GITEA_TOKEN || '';
+          const gitUser = process.env.KRADLE_GIT_USER || '';
+          const gitPassword = process.env.KRADLE_GIT_PASSWORD || '';
           const [repoOwner, repoName] = repository.includes('/')
             ? repository.split('/')
             : [organizationRef, repository];
@@ -567,7 +568,10 @@ export function createAgentDispatchController(options = {}) {
           jobEnv.KRADLE_REPO_NAME = repoName;
           jobEnv.KRADLE_BASE_BRANCH = branch;
           if (gitBase) jobEnv.KRADLE_GIT_BASE_URL = gitBase;
-          if (gitToken) jobEnv.KRADLE_GIT_TOKEN = gitToken;
+          // Deterministic admin basic-auth (self-provisioned by the gitea
+          // postStart) — durable across deploys, unlike a minted token.
+          if (gitUser) jobEnv.KRADLE_GIT_USER = gitUser;
+          if (gitPassword) jobEnv.KRADLE_GIT_PASSWORD = gitPassword;
         }
 
         const { jobManifest, jobName } = agentMuxClient.createAgentJob({

@@ -75,6 +75,23 @@ spec:
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
+            {{- if .Values.gitea.enabled }}
+            # Deterministic git credentials for agent repo-work (clone/push/PR).
+            # The admin user is self-provisioned by the gitea postStart, so these
+            # survive every deploy — no token minting/secret-restart dance.
+            - name: KRADLE_GIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: username
+                  optional: true
+            - name: KRADLE_GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: password
+                  optional: true
+            {{- end }}
             {{- if $giteaToken.existingSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
@@ -247,6 +264,23 @@ spec:
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
+            {{- if .Values.gitea.enabled }}
+            # Deterministic git credentials for agent repo-work (clone/push/PR).
+            # The admin user is self-provisioned by the gitea postStart, so these
+            # survive every deploy — no token minting/secret-restart dance.
+            - name: KRADLE_GIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: username
+                  optional: true
+            - name: KRADLE_GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: password
+                  optional: true
+            {{- end }}
             {{- if $giteaToken.existingSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
@@ -454,6 +488,23 @@ spec:
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
+            {{- if .Values.gitea.enabled }}
+            # Deterministic git credentials for agent repo-work (clone/push/PR).
+            # The admin user is self-provisioned by the gitea postStart, so these
+            # survive every deploy — no token minting/secret-restart dance.
+            - name: KRADLE_GIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: username
+                  optional: true
+            - name: KRADLE_GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: password
+                  optional: true
+            {{- end }}
             {{- if $giteaToken.existingSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
@@ -633,6 +684,23 @@ spec:
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
+            {{- if .Values.gitea.enabled }}
+            # Deterministic git credentials for agent repo-work (clone/push/PR).
+            # The admin user is self-provisioned by the gitea postStart, so these
+            # survive every deploy — no token minting/secret-restart dance.
+            - name: KRADLE_GIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: username
+                  optional: true
+            - name: KRADLE_GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: password
+                  optional: true
+            {{- end }}
             {{- if $giteaToken.existingSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:

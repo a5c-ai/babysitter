@@ -67,6 +67,36 @@ spec:
                 secretKeyRef:
                   name: {{ include "kradle.fullname" . }}-gitea-admin
                   key: password
+            - name: KRADLE_BOOTSTRAP_ORG
+              value: {{ .Values.admin.org | default "" | quote }}
+            - name: KRADLE_BOOTSTRAP_SANDBOX_REPO
+              value: {{ (.Values.gitea.bootstrap | default dict).sandboxRepo | default "" | quote }}
+          # Gitea data lives on an emptyDir in this deployment, so a fresh pod
+          # (every `helm uninstall`/install deploy) starts with an empty DB. This
+          # postStart self-provisions the admin user used for agent git auth and,
+          # when configured, the demo sandbox org+repo — so the "agents do real
+          # repo work" slice survives every deploy without manual re-provisioning.
+          # All steps are idempotent (|| true; "already exists" is fine).
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    set -u
+                    A=http://localhost:3000
+                    for i in $(seq 1 60); do curl -sf "$A/api/healthz" >/dev/null 2>&1 && break; sleep 2; done
+                    gitea admin user create --admin --username "$GITEA_ADMIN_USER" --password "$GITEA_ADMIN_PASSWORD" --email "$GITEA_ADMIN_USER@kradle.local" --must-change-password=false 2>/dev/null || true
+                    AUTH="$GITEA_ADMIN_USER:$GITEA_ADMIN_PASSWORD"
+                    if [ -n "$KRADLE_BOOTSTRAP_ORG" ]; then
+                      curl -s -o /dev/null -u "$AUTH" -X POST -H 'Content-Type: application/json' -d "{\"username\":\"$KRADLE_BOOTSTRAP_ORG\",\"visibility\":\"private\"}" "$A/api/v1/orgs" || true
+                    fi
+                    if [ -n "$KRADLE_BOOTSTRAP_ORG" ] && [ -n "$KRADLE_BOOTSTRAP_SANDBOX_REPO" ]; then
+                      curl -s -o /dev/null -u "$AUTH" -X POST -H 'Content-Type: application/json' -d "{\"name\":\"$KRADLE_BOOTSTRAP_SANDBOX_REPO\",\"private\":true,\"auto_init\":true,\"default_branch\":\"main\",\"description\":\"agent vertical-slice sandbox\"}" "$A/api/v1/orgs/$KRADLE_BOOTSTRAP_ORG/repos" || true
+                      C=$(printf '// agent sandbox\nexport function add(a, b) {\n  return a + b;\n}\n' | base64 | tr -d '\n')
+                      curl -s -o /dev/null -u "$AUTH" -X POST -H 'Content-Type: application/json' -d "{\"content\":\"$C\",\"message\":\"seed math.js\",\"branch\":\"main\"}" "$A/api/v1/repos/$KRADLE_BOOTSTRAP_ORG/$KRADLE_BOOTSTRAP_SANDBOX_REPO/contents/math.js" || true
+                    fi
           ports:
             - name: http
               containerPort: 3000

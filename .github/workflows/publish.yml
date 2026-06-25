@@ -2410,6 +2410,7 @@ jobs:
             --set gitea.enabled=true \
             --set gitea.persistence.type=emptyDir \
             --set gitea.token.existingSecret=kradle-gitea-agent-token \
+            --set gitea.bootstrap.sandboxRepo=agent-sandbox \
             --set argocd.enabled=false \
             --set kubevela.enabled=false \
             --set "externalDependencies.kyverno.enabled=true" \

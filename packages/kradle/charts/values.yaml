@@ -396,6 +396,12 @@ gitea:
   token:
     existingSecret: ""
     key: token
+  # On-start self-provisioning (postStart). The admin user is always created
+  # (the image does not auto-create it from GITEA_ADMIN_*). sandboxRepo, when
+  # set, also ensures a demo repo + seed under .Values.admin.org — used by the
+  # agent repo-work vertical slice in staging.
+  bootstrap:
+    sandboxRepo: ""
   service:
     httpPort: 3000
     sshPort: 22
