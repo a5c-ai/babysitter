@@ -17,6 +17,7 @@ This is the GitBook-style table of contents for the Babysitter User Guide. It is
 * [Quickstart](./getting-started/quickstart.md)
 * [First Run](./getting-started/first-run.md)
 * [Migration: Prod to v6](./getting-started/migration.md)
+* [Upgrade to v6](./getting-started/upgrade-to-v6.md)
 
 ---
 
@@ -116,6 +117,7 @@ docs/user-guide/
 |   +-- quickstart.md                     # Quick configuration
 |   +-- first-run.md                      # First workflow execution
 |   +-- migration.md                      # Prod (0.0.x) to v6 migration guide
+|   +-- upgrade-to-v6.md                   # Uninstall prod + reinstall v6 runbook
 |
 +-- tutorials/                            # Step-by-Step Tutorials
 |   +-- index.md                          # Tutorials overview

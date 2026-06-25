@@ -41,6 +41,8 @@ This document defines the navigation structure for the Babysitter User Guide doc
       path: /getting-started/first-run.md
     - title: Migration (Prod to v6)
       path: /getting-started/migration.md
+    - title: Upgrade to v6
+      path: /getting-started/upgrade-to-v6.md
 ```
 
 ### Tutorials
@@ -309,7 +311,8 @@ For documentation platforms that use JSON configuration (e.g., Docusaurus, ViteP
           "getting-started/installation",
           "getting-started/quickstart",
           "getting-started/first-run",
-          "getting-started/migration"
+          "getting-started/migration",
+          "getting-started/upgrade-to-v6"
         ]
       },
       {
