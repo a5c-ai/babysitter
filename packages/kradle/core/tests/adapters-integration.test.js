@@ -195,8 +195,11 @@ describe('createAgentJob', () => {
     });
 
     const container = jobManifest.spec.template.spec.containers[0];
+    // Agents are I/O-bound: a small CPU request floor that bursts to the limit
+    // (was 500m, which left dispatches Pending on busy clusters). Env-overridable
+    // via KRADLE_AGENT_CPU_REQUEST etc.; these are the code fallbacks.
     assert.deepEqual(container.resources, {
-      requests: { cpu: '500m', memory: '1Gi' },
+      requests: { cpu: '100m', memory: '512Mi' },
       limits: { cpu: '2', memory: '4Gi' },
     });
   });

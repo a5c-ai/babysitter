@@ -394,6 +394,18 @@ spec:
             # in this web service). Defaults to the in-cluster web service DNS.
             - name: KRADLE_CALLBACK_URL
               value: {{ .Values.callbackBaseUrl | default (printf "http://%s-web.%s.svc.cluster.local" (include "kradle.fullname" .) .Release.Namespace) | quote }}
+            # Default resource floor for dispatched agent Jobs (createAgentJob reads
+            # these when a stack sets no spec.resources). Agents are I/O-bound, so a
+            # small CPU request that bursts to the limit avoids the old 500m default
+            # leaving dispatches Pending on busy clusters ("Insufficient cpu").
+            - name: KRADLE_AGENT_CPU_REQUEST
+              value: {{ .Values.agents.dispatchCpuRequest | default "25m" | quote }}
+            - name: KRADLE_AGENT_MEMORY_REQUEST
+              value: {{ .Values.agents.dispatchMemoryRequest | default "512Mi" | quote }}
+            - name: KRADLE_AGENT_CPU_LIMIT
+              value: {{ .Values.agents.dispatchCpuLimit | default "1500m" | quote }}
+            - name: KRADLE_AGENT_MEMORY_LIMIT
+              value: {{ .Values.agents.dispatchMemoryLimit | default "2Gi" | quote }}
             # Atlas catalog API base for the stack-builder graph-object selectors.
             # The public https://atlas.a5c.ai default has a mismatched TLS cert, so
             # every kinds/search fetch failed and the stack builder showed empty

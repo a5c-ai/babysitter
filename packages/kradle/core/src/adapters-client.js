@@ -519,9 +519,22 @@ export function createAgentMuxClient(options = {}) {
         command: ['node', 'packages/adapters/cli/kradle-agent-entrypoint.mjs'],
         env: containerEnv,
         ...(envFrom ? { envFrom } : {}),
+        // Dispatched agents are I/O-bound (they spend almost all their time
+        // awaiting the model API), so the CPU *request* should be a small
+        // scheduling floor that bursts to the limit — NOT a large reservation.
+        // The old 500m default left dispatches Pending on busy clusters
+        // ("Insufficient cpu"). A stack's own spec.resources (resourceLimits)
+        // wins; otherwise use an env-overridable small floor so capacity-
+        // constrained deployments (e.g. staging at ~98% CPU) can tune it down.
         resources: resourceLimits || {
-          requests: { cpu: '500m', memory: '1Gi' },
-          limits: { cpu: '2', memory: '4Gi' },
+          requests: {
+            cpu: process.env.KRADLE_AGENT_CPU_REQUEST || '100m',
+            memory: process.env.KRADLE_AGENT_MEMORY_REQUEST || '512Mi',
+          },
+          limits: {
+            cpu: process.env.KRADLE_AGENT_CPU_LIMIT || '2',
+            memory: process.env.KRADLE_AGENT_MEMORY_LIMIT || '4Gi',
+          },
         },
         volumeMounts: agentVolumeMounts,
       }];
