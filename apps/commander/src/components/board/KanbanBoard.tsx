@@ -426,6 +426,16 @@ function CardBody({
         <span className="wr-card-title">{card.title}</span>
         <span className="wr-card-chips">
           <span className="wr-card-kind">{card.taskKind}</span>
+          {!mini && (card.costUsd > 0 || card.durationMs !== null || card.tokensBurned > 0) && (
+            <span
+              className="wr-card-cost"
+              title={`${card.tokensBurned.toLocaleString()} tokens${card.costUsd > 0 ? ` · $${card.costUsd.toFixed(4)}` : ''}${card.durationMs !== null ? ` · ${Math.round(card.durationMs / 1000)}s` : ''}`}
+            >
+              {card.durationMs !== null && `${Math.round(card.durationMs / 1000)}s`}
+              {card.costUsd > 0 && `${card.durationMs !== null ? ' · ' : ''}$${card.costUsd.toFixed(2)}`}
+              {card.costUsd <= 0 && card.durationMs === null && card.tokensBurned > 0 && `${card.tokensBurned.toLocaleString()}tok`}
+            </span>
+          )}
           {card.dirtyFileCount > 0 && (
             <span className="wr-card-dirty" title={`${card.dirtyFileCount} uncommitted file(s)`}>
               {card.dirtyFileCount}Δ

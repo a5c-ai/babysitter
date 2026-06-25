@@ -4,6 +4,24 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUnsavedChanges } from '../../hooks/use-unsaved-changes.js';
 
+/**
+ * Size preset → K8s resources for the dispatched agent Job (parity with the
+ * Commander stack builder). Agents are I/O-bound, so requests are small
+ * scheduling floors that burst to the limit; '' emits no resources so the
+ * deployment's env-configured floor (KRADLE_AGENT_CPU_REQUEST) applies.
+ */
+const SIZE_PRESETS = {
+  small: { requests: { cpu: '25m', memory: '512Mi' }, limits: { cpu: '1500m', memory: '2Gi' } },
+  medium: { requests: { cpu: '250m', memory: '1Gi' }, limits: { cpu: '2', memory: '4Gi' } },
+  large: { requests: { cpu: '1000m', memory: '2Gi' }, limits: { cpu: '4', memory: '8Gi' } },
+};
+
+function sizeFromResources(resources) {
+  const cpu = resources?.requests?.cpu;
+  if (cpu === undefined) return '';
+  return Object.keys(SIZE_PRESETS).find((s) => SIZE_PRESETS[s].requests.cpu === cpu) || '';
+}
+
 export function StackEditForm({ org, stack }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -19,6 +37,7 @@ export function StackEditForm({ org, stack }) {
     maxTokens: stack?.spec?.maxTokens || '',
     budgetLimitUsd: stack?.spec?.budgetLimitUsd || '',
     memoryRepositoryRefs: (stack?.spec?.memoryRepositoryRefs || []).join(', '),
+    size: sizeFromResources(stack?.spec?.resources),
   }), [stack]);
 
   const [fields, setFields] = useState(initialFields);
@@ -45,6 +64,9 @@ export function StackEditForm({ org, stack }) {
     if (fields.budgetLimitUsd) spec.budgetLimitUsd = Number(fields.budgetLimitUsd) || undefined;
     const memRefs = fields.memoryRepositoryRefs ? fields.memoryRepositoryRefs.split(',').map((s) => s.trim()).filter(Boolean) : [];
     if (memRefs.length) spec.memoryRepositoryRefs = memRefs;
+    // Size preset → spec.resources for the dispatched agent Job (createAgentJob
+    // reads stack.spec.resources). '' leaves it to the deployment floor.
+    if (fields.size && SIZE_PRESETS[fields.size]) spec.resources = SIZE_PRESETS[fields.size];
     try {
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentStack/${encodeURIComponent(stack.metadata.name)}`, {
         method: 'POST',
@@ -91,6 +113,7 @@ export function StackEditForm({ org, stack }) {
         <label><span style={labelStyle}>Max tokens</span><input style={inputStyle} type="number" value={fields.maxTokens} onChange={(e) => handleChange('maxTokens', e.target.value)} placeholder="4096" /></label>
         <label style={{ gridColumn: '1 / -1' }}><span style={labelStyle}>Description</span><input style={inputStyle} value={fields.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="What this stack does" /></label>
         <label><span style={labelStyle}>Budget limit (USD)</span><input style={inputStyle} type="number" step="0.01" value={fields.budgetLimitUsd} onChange={(e) => handleChange('budgetLimitUsd', e.target.value)} placeholder="10.00" /></label>
+        <label><span style={labelStyle}>Size (agent Job resources)</span><select style={inputStyle} value={fields.size} onChange={(e) => handleChange('size', e.target.value)}><option value="">default (deployment floor)</option><option value="small">small — 25m / 512Mi</option><option value="medium">medium — 250m / 1Gi</option><option value="large">large — 1000m / 2Gi</option></select></label>
         <label style={{ gridColumn: '1 / -1' }}><span style={labelStyle}>Memory repository refs (comma-separated)</span><input style={inputStyle} value={fields.memoryRepositoryRefs} onChange={(e) => handleChange('memoryRepositoryRefs', e.target.value)} placeholder="org-memory, shared-knowledge" /></label>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

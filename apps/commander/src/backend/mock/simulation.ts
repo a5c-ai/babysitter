@@ -296,6 +296,12 @@ export interface SimCardView {
   reviewerAgentId: string | null;
   /** Human operator assigned for human-review/breakpoints ('user' or null). */
   humanAssigneeId: string | null;
+  /** Run cost (USD) from the dispatch run's status.cost — 0 until reported. */
+  costUsd: number;
+  /** Total tokens burned (input+output) from the run's status.tokenUsage. */
+  tokensBurned: number;
+  /** Wall-clock ms from queued→completed, null while running or unstarted. */
+  durationMs: number | null;
 }
 
 export interface SimAgentView {
@@ -2570,6 +2576,11 @@ export class Simulation {
       workerAgentId: card.workerAgentId,
       reviewerAgentId: card.reviewerAgentId,
       humanAssigneeId: card.humanAssigneeId,
+      // The deterministic sim doesn't model per-card cost/duration; the live
+      // kradle mapping (mapCards) populates these from the run's status.
+      costUsd: 0,
+      tokensBurned: 0,
+      durationMs: null,
     }));
   }
 

@@ -129,6 +129,9 @@ describe('lane composition selectors', () => {
       workerAgentId: null,
       reviewerAgentId: null,
       humanAssigneeId: null,
+      costUsd: 0,
+      tokensBurned: 0,
+      durationMs: null,
     });
     const lane = cardsForColumn([live('b', true), live('a', false), live('c', false)], 'approved');
     expect(lane.map((c) => c.taskId)).toEqual(['a', 'c', 'b']);

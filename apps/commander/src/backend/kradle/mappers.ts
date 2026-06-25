@@ -1008,6 +1008,16 @@ export function mapCards(snapshot: KradleControllerSnapshot): SimCardView[] {
     const taskKind = narrowTaskKind(asString(sp.taskKind));
     const phase = statusPhase(run);
 
+    // Observability: surface the run's cost / tokens / duration on the card.
+    const st = status(run);
+    const tokenUsage = asRecord(st.tokenUsage);
+    const tokensBurned =
+      (asNumber(tokenUsage?.totalTokens) ??
+        (asNumber(tokenUsage?.inputTokens) ?? 0) + (asNumber(tokenUsage?.outputTokens) ?? 0)) || 0;
+    const startedMs = isoToMs(st.startedAt) ?? isoToMs(st.queuedAt);
+    const endedMs = isoToMs(st.completedAt) ?? isoToMs(st.failedAt);
+    const durationMs = startedMs !== undefined && endedMs !== undefined ? endedMs - startedMs : null;
+
     const runApprovals = approvals.pendingByRun.get(taskId) ?? [];
     const hasPendingReviewApproval = runApprovals.some((a) =>
       REVIEW_ACTION_TYPES.has(approvalActionType(a) ?? ''),
@@ -1119,6 +1129,9 @@ export function mapCards(snapshot: KradleControllerSnapshot): SimCardView[] {
       workerAgentId: lab[LABEL_WORKER] ?? null,
       reviewerAgentId: lab[LABEL_REVIEWER] ?? null,
       humanAssigneeId: lab[LABEL_HUMAN] ?? null,
+      costUsd: asNumber(st.cost) ?? 0,
+      tokensBurned,
+      durationMs,
     };
     built.push({ view, sortKey: creationMs(run) ?? seq, seq });
     seq += 1;

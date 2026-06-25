@@ -184,6 +184,38 @@ describe('AC2 — empty/degraded snapshot never throws, yields empty views', () 
   });
 });
 
+describe('card observability — cost / tokens / duration from the run status', () => {
+  it('surfaces costUsd, tokensBurned (in+out), and durationMs (queued→completed)', () => {
+    const s = snap({
+      runs: {
+        items: [
+          run('dispatch-1', { taskKind: 'implement' }, 'Completed', {}, {
+            cost: 0.0123,
+            tokenUsage: { inputTokens: 100, outputTokens: 50 },
+            queuedAt: '2026-06-25T10:00:00Z',
+            completedAt: '2026-06-25T10:00:30Z',
+          }),
+        ],
+      },
+    });
+    const cards = mapCards(s);
+    expect(cards).toHaveLength(1);
+    expect(cards[0].costUsd).toBe(0.0123);
+    expect(cards[0].tokensBurned).toBe(150);
+    expect(cards[0].durationMs).toBe(30_000);
+  });
+
+  it('defaults to 0/0/null while a run is still running (no end time)', () => {
+    const s = snap({
+      runs: { items: [run('dispatch-2', { taskKind: 'fix' }, 'Running', {}, { queuedAt: '2026-06-25T10:00:00Z' })] },
+    });
+    const card = mapCards(s)[0];
+    expect(card.costUsd).toBe(0);
+    expect(card.tokensBurned).toBe(0);
+    expect(card.durationMs).toBeNull();
+  });
+});
+
 // ===========================================================================
 // AC4 — AgentStack / AgentDefinition → SimStackView (§4.5)
 // ===========================================================================
