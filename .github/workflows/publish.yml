@@ -2288,6 +2288,26 @@ jobs:
             --push .
           echo "KRADLE_WEB_IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
+      - name: Build and push jitsi-agent-sidecar image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # The meeting-dispatch sidecar (G0-RT): a headless-Chromium image the controller
+          # injects as the 2nd container of a jitsiCapability Job. The controller resolves it
+          # from KRADLE_JITSI_AGENT_SIDECAR_IMAGE (jitsi-agent-bridge.js); without this build the
+          # dispatched sidecar had no real image to pull.
+          IMAGE="${ACR_NAME}.azurecr.io/jitsi-agent-sidecar:${IMAGE_TAG}"
+          # Build context is the sidecar package dir (its Dockerfile COPYs package.json/bin/src
+          # relative to the context), NOT the repo root used by the other images.
+          docker buildx build \
+            --file packages/kradle/jitsi-agent-sidecar/Dockerfile \
+            --tag "$IMAGE" \
+            --tag "${ACR_NAME}.azurecr.io/jitsi-agent-sidecar:latest" \
+            --cache-from type=gha,scope=jitsi-agent-sidecar \
+            --cache-to type=gha,mode=max,scope=jitsi-agent-sidecar \
+            --push packages/kradle/jitsi-agent-sidecar
+          echo "JITSI_AGENT_SIDECAR_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
       - name: Create ACR pull secret
         run: |
           kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
@@ -2349,6 +2369,7 @@ jobs:
             --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY}" \
             --from-literal=GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
             --from-literal=KRADLE_AGENT_IMAGE="${ADAPTERS_AGENT_IMAGE:-${ACR_NAME}.azurecr.io/adapters-agent:latest}" \
+            --from-literal=KRADLE_JITSI_AGENT_SIDECAR_IMAGE="${JITSI_AGENT_SIDECAR_IMAGE:-${ACR_NAME}.azurecr.io/jitsi-agent-sidecar:latest}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
           helm upgrade --install kradle packages/kradle/charts \
