@@ -2,7 +2,7 @@
 
 > **Status:** Living gap map for the realtime audio+video avatar agent harness on kradle.
 > **Date:** 2026-06-23.
-> **Companions:** [`realtime-voice-agent-stack.md`](./realtime-voice-agent-stack.md) (architecture), [`voice-governance-bridge-spec.md`](./voice-governance-bridge-spec.md) (bridge + CRD + UX flow).
+> **Companions:** [`realtime-voice-agent-stack.md`](./realtime-voice-agent-stack.md) (architecture), [`voice-governance-bridge-spec.md`](./voice-governance-bridge-spec.md) (bridge + CRD + UX flow), [`g0-rt-live-validation-runbook.md`](./g0-rt-live-validation-runbook.md) (the operator runbook to boot the sidecar into a live room + verify A/V publish + the G13 governance round-trip).
 > **Legend:** **HAS** = real & usable · **PARTIAL** = real but incomplete/unwired · **LACKS** = absent/stub. Seams are `file:line` in `packages/…`.
 
 ## 0. The shape of the problem
@@ -88,7 +88,7 @@ kradle's **control plane is real and fairly complete**; the **media plane is alm
 
 ## 7. Recommended build order (dependency-aware)
 
-0. **G0-RT** — confirm the meeting-sidecar dispatch actually boots (the Job runtime already works for board dispatch; build/publish `kradle/jitsi-agent-sidecar:latest` and prove the 2nd container joins a room). Precondition for everything below.
+0. **G0-RT** — confirm the meeting-sidecar dispatch actually boots (the Job runtime already works for board dispatch; build/publish `kradle/jitsi-agent-sidecar:latest` and prove the 2nd container joins a room). Precondition for everything below. **Operator steps + manifests + the landmine checklist are in [`g0-rt-live-validation-runbook.md`](./g0-rt-live-validation-runbook.md).**
 1. **G0** — the agent↔sidecar socket client (unblocks everything; makes today's text chat actually work).
 2. **G3 + G5 + G-chat** — real audio out (TTS) + audio in (STT) + chat events → a working **voice** agent in a meeting (the [voice stack](./realtime-voice-agent-stack.md) MVP).
 3. **G1 + G2 + G4** — avatar render + video-track publish + lipsync → a working **talking-avatar** agent.
