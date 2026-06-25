@@ -41,6 +41,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CLI = resolve(__dirname, 'dist/index.js');
 const workspacePath = process.env.KRADLE_WORKSPACE_PATH || '/workspace';
 
+// The launcher's prepareClaudeAutomationState writes ~/.claude/settings.json
+// (pre-approving Write/Edit/Bash so the harness runs headless) ONLY when HOME is
+// set — K8s leaves HOME unset for the agent pod, so without this the claude
+// harness blocks every file edit on an unanswerable permission prompt. We can't
+// use --dangerously-skip-permissions instead: claude refuses it under root (the
+// image runs as root), so the settings-allowlist path is the one that works.
+if (!process.env.HOME) process.env.HOME = '/root';
+
 // Repo-work env. All five must be present for repo mode; a partial set is a
 // misconfiguration and must fail loudly (never silently degrade to scratch).
 const repo = {
@@ -217,13 +225,12 @@ function runHarness() {
       ...(apiKey ? ['--api-key', apiKey] : []),
       '--with-proxy-if-needed',
       '--no-interactive',
-      // Dispatched agents run headless in a Job pod with no human to approve
-      // tool calls. --yolo resolves to the harness's auto-approve launch args
-      // (claude → --dangerously-skip-permissions) so the agent can actually
-      // Write/Edit/Bash; without it claude blocks every file edit on an
-      // unanswerable permission prompt and produces no changes.
-      '--yolo',
       '-p', fullTask,
+      // Forward claude-code's headless edit-acceptance via the launcher's `--`
+      // passthrough. acceptEdits auto-applies Write/Edit without a prompt and —
+      // unlike --dangerously-skip-permissions — is not refused under root. Paired
+      // with the HOME/settings-allowlist above (which covers Bash etc.).
+      ...(harness === 'claude' ? ['--', '--permission-mode', 'acceptEdits'] : []),
     ];
     log('exec: node', args.map((a) => {
       if (a === fullTask) return '<task>';
