@@ -218,11 +218,11 @@ pi install -l npm:@a5c-ai/babysitter-pi
 
 ### genty
 
-Neutral helper only — there is no standalone npm plugin package or marketplace repo for genty (it runs on the genty runtime, `@a5c-ai/genty-platform`).
+Install via the SDK helper or the npm-only installer:
 
-```bash
-babysitter harness:install-plugin genty [--workspace <path>]
-```
+    babysitter harness:install-plugin genty [--workspace <path>]
+    npx --yes @a5c-ai/babysitter-genty install --global
+    npx --yes @a5c-ai/babysitter-genty install --workspace <path>
 
 For the full per-harness reference (invocation tokens and hook/continuation models), see the [Install Matrix](../harnesses/install-matrix.md).
 
