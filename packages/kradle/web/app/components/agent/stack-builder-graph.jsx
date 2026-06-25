@@ -8,6 +8,7 @@ import {
 } from './stack-builder-graph-styles.jsx';
 import { LayerSection, ToolsLayerSection } from './stack-builder-graph-nodes.jsx';
 import { MemoryRepositorySection, ModelInferenceSection } from './stack-builder-graph-panels.jsx';
+import { MeetingVideoSection } from './stack-builder-meeting.jsx';
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -51,6 +52,26 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
   // KServe inference service selection
   const [selectedInference, setSelectedInference] = useState(null);
 
+  // Meeting / Video capability (G14) — seed from spec.jitsiConfig when editing.
+  const [meeting, setMeeting] = useState(() => {
+    const jc = spec.jitsiConfig || {};
+    const enabled = spec.jitsiCapability === true;
+    const videoPublish = jc.capabilities?.video === 'publish';
+    const avatarRef = typeof jc.avatarRef === 'object' && jc.avatarRef ? jc.avatarRef.name : jc.avatarRef;
+    return {
+      enabled,
+      mode: !enabled ? 'text' : videoPublish ? 'video' : 'voice',
+      providerRef: spec.jitsiMeetingProviderRef || '',
+      role: jc.role || 'agent',
+      audioMode: jc.capabilities?.audio || 'speak',
+      videoPublish,
+      avatarRef: avatarRef || '',
+      voiceProfileRef: jc.voiceProfileRef || '',
+      tools: jc.tools || [],
+      governedTools: jc.governedTools || [],
+    };
+  });
+
   // Use the proxy route to avoid CORS
   const atlasProxyUrl = '/api/atlas/search';
 
@@ -88,7 +109,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
     const resource = buildStackResource({
       name, displayName, systemPrompt, developerPrompt, taskPrompt,
       serviceAccount, role, rbacNamespace, org,
-      selections, selectedMemoryRepos, selectedInference,
+      selections, selectedMemoryRepos, selectedInference, meeting,
     });
 
     try {
@@ -212,6 +233,18 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
               org={org}
               selectedInference={selectedInference}
               onSelectInference={setSelectedInference}
+            />
+          </div>
+
+          {/* Meeting / Video (G14) */}
+          <div>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>
+              Meeting / Video
+            </h4>
+            <MeetingVideoSection
+              org={org}
+              meeting={meeting}
+              onChange={setMeeting}
             />
           </div>
 

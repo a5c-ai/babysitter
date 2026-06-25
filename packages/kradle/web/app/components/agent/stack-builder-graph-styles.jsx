@@ -73,10 +73,51 @@ export const memoryToggleSelectedStyle = {
 };
 
 // ---------------------------------------------------------------------------
+// Jitsi meeting / video capability — curated tool + role allowlists.
+// Names MUST mirror the controller's JITSI_TOOLS / JITSI_ROLES allowlists in
+// packages/kradle/core/src/agent-stack-controller.js so an emitted spec passes
+// the G9 JitsiCapabilityReady validator.
+// ---------------------------------------------------------------------------
+
+// Audio/chat tools available to any speaking meeting agent (voice or video).
+export const JITSI_AUDIO_TOOLS = [
+  'kradle_send_chat_message',
+  'kradle_get_meeting_transcript',
+  'kradle_get_participant_list',
+  'kradle_raise_hand',
+  'kradle_react',
+];
+
+// Video capability tools (G9) — avatar drive, canvas/video publish, surface share.
+export const JITSI_VIDEO_TOOLS = [
+  ...JITSI_AUDIO_TOOLS,
+  'kradle_speak',
+  'kradle_set_expression',
+  'kradle_play_gesture',
+  'kradle_set_posture',
+  'kradle_look_at',
+  'kradle_set_view',
+  'kradle_draw_canvas',
+  'kradle_publish_video',
+  'kradle_share_surface',
+  'kradle_send_video_metadata',
+];
+
+// Consequential subset that the org governs — guaranteed ⊆ JITSI_VIDEO_TOOLS.
+export const JITSI_GOVERNED_DEFAULTS = [
+  'kradle_draw_canvas',
+  'kradle_share_surface',
+  'kradle_send_video_metadata',
+];
+
+export const JITSI_MEETING_ROLES = ['observer', 'participant', 'moderator', 'agent'];
+export const JITSI_AUDIO_MODES = ['none', 'receive', 'speak', 'both'];
+
+// ---------------------------------------------------------------------------
 // Resource builder — constructs the AgentStack resource from form state
 // ---------------------------------------------------------------------------
 
-export function buildStackResource({ name, displayName, systemPrompt, developerPrompt, taskPrompt, serviceAccount, role, rbacNamespace, org, selections, selectedMemoryRepos, selectedInference }) {
+export function buildStackResource({ name, displayName, systemPrompt, developerPrompt, taskPrompt, serviceAccount, role, rbacNamespace, org, selections, selectedMemoryRepos, selectedInference, meeting }) {
   // Build layer bindings from selections
   const layerBindings = [];
   for (const [layerKey, records] of Object.entries(selections)) {
@@ -171,6 +212,57 @@ export function buildStackResource({ name, displayName, systemPrompt, developerP
           modelFormat: selectedInference.modelFormat,
         },
       } : {}),
+      // Jitsi meeting / video capability (G14). Video off ⇒ no jitsi fields at
+      // all (spec unchanged). Per-modality emission keeps the spec
+      // self-consistent with the G9 JitsiCapabilityReady validator.
+      ...buildJitsiSpec(meeting),
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Jitsi meeting spec fragment — pure, modality-driven. Returns {} when the
+// meeting toggle is off so the AgentStack spec is byte-for-byte unchanged.
+//   mode 'voice' → capabilities.audio only, no video, no avatarRef.
+//   mode 'video' → capabilities.audio + capabilities.video:'publish' + avatarRef.
+//   governedTools is always emitted as a subset of tools (the G9 invariant).
+// ---------------------------------------------------------------------------
+
+export function buildJitsiSpec(meeting) {
+  if (!meeting?.enabled) return {};
+
+  const mode = meeting.mode || 'text';
+  const role = meeting.role || 'agent';
+  const audioMode = meeting.audioMode || 'speak';
+  const isVideo = mode === 'video' && meeting.videoPublish !== false;
+
+  // Tool baseline per modality; explicit override (meeting.tools) wins.
+  const defaultTools = isVideo
+    ? JITSI_VIDEO_TOOLS
+    : mode === 'voice'
+      ? JITSI_AUDIO_TOOLS
+      : [];
+  const tools = meeting.tools?.length ? meeting.tools : defaultTools;
+
+  // governedTools must be ⊆ tools — clamp defaults to whatever tools allow.
+  const governedSource = meeting.governedTools?.length ? meeting.governedTools : JITSI_GOVERNED_DEFAULTS;
+  const governedTools = governedSource.filter((t) => tools.includes(t));
+
+  const capabilities = {
+    ...(audioMode ? { audio: audioMode } : {}),
+    ...(isVideo ? { video: 'publish' } : {}),
+  };
+
+  return {
+    jitsiCapability: true,
+    ...(meeting.providerRef ? { jitsiMeetingProviderRef: meeting.providerRef } : {}),
+    jitsiConfig: {
+      role,
+      capabilities,
+      ...(isVideo && meeting.avatarRef ? { avatarRef: meeting.avatarRef } : {}),
+      ...(meeting.voiceProfileRef ? { voiceProfileRef: meeting.voiceProfileRef } : {}),
+      ...(tools.length ? { tools } : {}),
+      ...(governedTools.length ? { governedTools } : {}),
     },
   };
 }

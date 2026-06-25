@@ -15,7 +15,7 @@
     "test:e2e:api": "node --test tests/api-e2e.test.js",
     "test:e2e:api:staging": "KRADLE_E2E_URL=https://kradle-staging.a5c.ai node --test tests/api-e2e.test.js",
     "test:e2e:staging": "KRADLE_E2E_URL=https://kradle-staging.a5c.ai npx playwright test --config=playwright.config.js",
-    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js tests/issue-workflow.test.js tests/kradle-improvements.test.js tests/inference-routes.test.js tests/assistant-routes.test.js tests/artifact-routes.test.js tests/resource-contract.test.js tests/api-routes.test.js tests/component-exports.test.js tests/validator-edge-cases.test.js tests/component-structure.test.js tests/ui-polish-issue-613.test.js tests/api-integration.test.js tests/page-structure.test.js tests/barrel-exports.test.js tests/lib-modules.test.js tests/security-edge-cases.test.js tests/jitsi-structure.test.js tests/jitsi-webhook-ingest.test.js"
+    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js tests/issue-workflow.test.js tests/kradle-improvements.test.js tests/inference-routes.test.js tests/assistant-routes.test.js tests/artifact-routes.test.js tests/resource-contract.test.js tests/api-routes.test.js tests/component-exports.test.js tests/validator-edge-cases.test.js tests/component-structure.test.js tests/ui-polish-issue-613.test.js tests/api-integration.test.js tests/page-structure.test.js tests/barrel-exports.test.js tests/lib-modules.test.js tests/security-edge-cases.test.js tests/jitsi-structure.test.js tests/jitsi-webhook-ingest.test.js tests/stack-builder-video-spec.test.js"
   },
   "dependencies": {
     "@a5c-ai/kradle-sdk": "*",
