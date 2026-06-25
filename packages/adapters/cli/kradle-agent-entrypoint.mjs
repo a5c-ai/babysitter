@@ -217,9 +217,19 @@ function runHarness() {
       ...(apiKey ? ['--api-key', apiKey] : []),
       '--with-proxy-if-needed',
       '--no-interactive',
+      // Dispatched agents run headless in a Job pod with no human to approve
+      // tool calls. --yolo resolves to the harness's auto-approve launch args
+      // (claude → --dangerously-skip-permissions) so the agent can actually
+      // Write/Edit/Bash; without it claude blocks every file edit on an
+      // unanswerable permission prompt and produces no changes.
+      '--yolo',
       '-p', fullTask,
     ];
-    log('exec: node', args.map((a) => (a === fullTask ? '<task>' : a)).join(' '));
+    log('exec: node', args.map((a) => {
+      if (a === fullTask) return '<task>';
+      if (apiKey && a === apiKey) return '<api-key>';
+      return a;
+    }).join(' '));
 
     const child = spawn('node', args, { cwd: workspacePath, stdio: ['ignore', 'pipe', 'inherit'] });
     let stdout = '';
