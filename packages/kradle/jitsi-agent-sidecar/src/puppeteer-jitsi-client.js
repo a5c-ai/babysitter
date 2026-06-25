@@ -417,6 +417,10 @@ export function createPuppeteerJitsiClient(config = {}) {
       await evaluateBestEffort((value) => window.APP?.conference?.sendEndpointMessage?.('', { type: 'reaction', emoji: value }), emoji);
     },
 
+    // DEPRECATED (legacy `share_screen` IPC action): merely window.open()s a URL in the headless
+    // page — it does NOT composite anything into the published video. The real G7 screen-share
+    // path is `start_screenshare` -> startScreenshare() (noVNC RFB / getDisplayMedia / image ->
+    // compositor screen layer). Kept only for back-compat; prefer start_screenshare.
     async shareScreen(url) {
       await evaluateBestEffort((value) => window.open(value, '_blank'), url);
     },

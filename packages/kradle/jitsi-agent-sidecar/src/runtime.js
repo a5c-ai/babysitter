@@ -92,6 +92,8 @@ export function createJitsiSidecarRuntime({ config, jitsi, broadcast = () => {},
         case 'react':
           await jitsi.react(command.emoji || '');
           return { ok: true };
+        // DEPRECATED: legacy window.open of a URL (composites nothing into video). Prefer
+        // 'start_screenshare' (the real G7 noVNC/getDisplayMedia -> compositor screen layer).
         case 'share_screen':
           await jitsi.shareScreen(command.url || '');
           return { ok: true };
