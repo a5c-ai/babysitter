@@ -102,6 +102,10 @@ const futurePackageReferencePrefixes = [
   "docs/adapters/terminology-and-structure-gaps/",
   "docs/daily-updates/",
   "docs/genty-decoupling/",
+  // Forward-looking design/spec/research docs may reference packages that are
+  // proposed but not yet built (e.g. the @a5c-ai/voice-adapter realtime
+  // media-governance bridge in docs/research/voice-governance-bridge-spec.md).
+  "docs/research/",
 ];
 
 function normalizeSlashes(value) {
