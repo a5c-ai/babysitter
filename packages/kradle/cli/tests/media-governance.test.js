@@ -33,7 +33,7 @@ test('governed visual tools return a governance descriptor with NO direct comman
   const cases = [
     ['kradle_draw_canvas', { content: 'slide deck' }, 'draw_canvas', 'auth.draw-canvas'],
     ['kradle_share_surface', { surface: 'browser', url: 'https://slides.example/x' }, 'share_surface', 'auth.share-surface'],
-    ['kradle_send_video_metadata', { metadata: { sink: 'external-crm', external: true } }, 'send_video_metadata', 'auth.send-video-metadata'],
+    ['kradle_send_video_metadata', { metadata: { sink: 'external-crm', external: true } }, 'send_video_metadata', 'destroy.send-video-metadata'],
   ];
   for (const [name, args, action, breakpointId] of cases) {
     const result = parseToolResult(await governedCall(server, name, args));
@@ -127,7 +127,7 @@ test('PolicyEngine: allow / require-approval / deny for representative inputs', 
   // require-approval — external metadata sink
   const external = evaluateVisualPolicy('send_video_metadata', { metadata: { sink: 'external-crm', external: true } }, {});
   assert.equal(external.decision, 'require-approval');
-  assert.equal(external.breakpointId, 'auth.send-video-metadata');
+  assert.equal(external.breakpointId, 'destroy.send-video-metadata');
 
   // deny — disallowed surface
   const denySurface = evaluateVisualPolicy('share_surface', { surface: 'system' }, {});

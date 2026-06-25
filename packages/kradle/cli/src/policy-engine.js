@@ -28,9 +28,12 @@ export const DEFAULT_VISUAL_POLICY = {
   // Metadata sinks considered internal/in-meeting (allow without approval).
   internalMetadataSinks: ['in-meeting', 'meeting', 'sidecar', 'local'],
   breakpointIds: {
+    // The auth./destroy. prefix is load-bearing (spec §6): it must match the
+    // approvalPosture declared for the tool in governed-tools.js. Emitting
+    // external video metadata to an outside sink is irreversible -> destroy.*
     draw_canvas: 'auth.draw-canvas',
     share_surface: 'auth.share-surface',
-    send_video_metadata: 'auth.send-video-metadata',
+    send_video_metadata: 'destroy.send-video-metadata',
   },
 };
 
