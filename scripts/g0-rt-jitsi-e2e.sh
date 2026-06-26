@@ -136,9 +136,12 @@ EOF
 # --- 3. authenticated BFF session ---
 log "3. authenticate (test-session) at https://${APP_HOST}"
 [ -n "${KRADLE_TEST_AUTH_SECRET:-}" ] || fail "KRADLE_TEST_AUTH_SECRET not set — cannot dispatch"
+# Authenticate as the deploy's ADMIN user (admin.username), so the dispatch passes kradle's
+# permission review (a non-admin test user is "denied by permission review"). Override via
+# G0RT_ADMIN_USER if your deploy uses a different admin.
 AUTH=$(curl -sf --max-time 20 -X POST "https://${APP_HOST}/api/auth/test-session" \
   -H 'content-type: application/json' \
-  -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"g0rt-e2e\"}" \
+  -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"${G0RT_ADMIN_USER:-tmuskal}\"}" \
   -c "$COOKIE_JAR") || fail "test-session request failed"
 echo "$AUTH" | jq -e '.ok == true' >/dev/null || fail "test-session not ok: $AUTH"
 
