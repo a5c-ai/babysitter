@@ -142,24 +142,28 @@ AUTH=$(curl -sf --max-time 20 -X POST "https://${APP_HOST}/api/auth/test-session
   -c "$COOKIE_JAR") || fail "test-session request failed"
 echo "$AUTH" | jq -e '.ok == true' >/dev/null || fail "test-session not ok: $AUTH"
 
-# --- 4. create the meeting (API -> Active + roomUrl) ---
+# --- 4. create the meeting (API -> Active + roomUrl). Capture status + body for diagnostics. ---
 log "4. create JitsiMeeting/${MEETING} (room ${ROOM_ID}) via the BFF"
-MEET=$(curl -sf --max-time 20 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/jitsi/meetings" \
+MEET_BODY="$(mktemp)"
+MHTTP=$(curl -s -o "$MEET_BODY" -w '%{http_code}' --max-time 30 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/jitsi/meetings" \
   -H 'content-type: application/json' \
-  -d "{\"name\":\"${MEETING}\",\"displayName\":\"G0-RT E2E\",\"ttlMinutes\":30,\"providerRef\":\"${PROVIDER}\",\"roomId\":\"${ROOM_ID}\"}") \
-  || fail "meeting creation failed"
-log "meeting: $(echo "$MEET" | jq -c '{name:(.metadata.name//.name), phase:(.status.phase//"?")}' 2>/dev/null || echo "$MEET" | head -c 200)"
-MEETING_REF=$(echo "$MEET" | jq -r '.metadata.name // .name // empty' 2>/dev/null || true)
+  -d "{\"name\":\"${MEETING}\",\"displayName\":\"G0-RT E2E\",\"ttlMinutes\":30,\"providerRef\":\"${PROVIDER}\",\"roomId\":\"${ROOM_ID}\"}" || echo "000")
+log "meeting HTTP=${MHTTP} body=$(head -c 400 "$MEET_BODY")"
+{ [ "$MHTTP" -ge 200 ] && [ "$MHTTP" -lt 300 ]; } || fail "meeting creation HTTP ${MHTTP}: $(head -c 300 "$MEET_BODY")"
+# metadata.name is the canonical ref; createMeetingResource normalizes name == our MEETING slug.
+MEETING_REF=$(jq -r '.metadata.name // .name // .resource.metadata.name // empty' "$MEET_BODY" 2>/dev/null || true)
 MEETING_REF="${MEETING_REF:-$MEETING}"
+rm -f "$MEET_BODY"
 
-# --- 5. dispatch the agent INTO the meeting ---
+# --- 5. dispatch the agent INTO the meeting. Capture status + body. ---
 log "5. dispatch AgentStack/${STACK} into meeting ${MEETING_REF}"
-curl -sf --max-time 60 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/agents/dispatch" \
+DHTTP=$(curl -s -o "$DISPATCH_JSON" -w '%{http_code}' --max-time 90 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/agents/dispatch" \
   -H 'content-type: application/json' \
-  -d "{\"agentStack\":\"${STACK}\",\"meetingRef\":\"${MEETING_REF}\",\"task\":\"Join the meeting and greet the room.\",\"taskKind\":\"g0-rt-e2e\"}" \
-  -o "$DISPATCH_JSON" || { cat "$DISPATCH_JSON" >&2; fail "dispatch request failed"; }
+  -d "{\"agentStack\":\"${STACK}\",\"meetingRef\":\"${MEETING_REF}\",\"task\":\"Join the meeting and greet the room.\",\"taskKind\":\"g0-rt-e2e\"}" || echo "000")
+log "dispatch HTTP=${DHTTP} body=$(head -c 600 "$DISPATCH_JSON")"
+{ [ "$DHTTP" -ge 200 ] && [ "$DHTTP" -lt 300 ]; } || fail "dispatch HTTP ${DHTTP}: $(head -c 400 "$DISPATCH_JSON")"
 RUN_ID=$(jq -r '.run.metadata.name // .run.id // .runId // .metadata.name // empty' "$DISPATCH_JSON" 2>/dev/null || true)
-[ -n "$RUN_ID" ] || { cat "$DISPATCH_JSON" >&2; fail "could not extract runId from dispatch response"; }
+[ -n "$RUN_ID" ] || fail "could not extract runId from dispatch response: $(head -c 400 "$DISPATCH_JSON")"
 log "dispatched runId=${RUN_ID}"
 
 # --- 6. find the Job + pod ---
