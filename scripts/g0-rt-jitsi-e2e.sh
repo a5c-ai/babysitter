@@ -195,19 +195,33 @@ rm -f "$MEET_BODY"
 # subresource, so the cluster meeting has no phase -> dispatch rejects "Meeting is not active".
 # Set it explicitly (+ the in-cluster roomUrl the sidecar opens). Try the status subresource,
 # fall back to a plain status merge if the CRD has no status subresource.
-log "4b. mark JitsiMeeting/${MEETING_REF} Active (roomUrl -> in-cluster web)"
+# jitsimeetings has a status subresource — status MUST be set via --subresource=status (a
+# plain merge drops it). jitsi-agent-bridge.js:66 requires status.phase === 'Active'.
+log "4b. mark JitsiMeeting/${MEETING_REF} Active via the status subresource"
 MSTATUS="{\"status\":{\"phase\":\"Active\",\"roomUrl\":\"http://${JITSI_WEB_SVC}/${ROOM_ID}\"}}"
-kubectl -n "$ORG_NS" patch jitsimeeting "$MEETING_REF" --subresource=status --type=merge -p "$MSTATUS" 2>/dev/null \
-  || kubectl -n "$ORG_NS" patch jitsimeeting "$MEETING_REF" --type=merge -p "$MSTATUS" \
-  || log "::warning:: could not patch meeting status to Active"
+kubectl -n "$ORG_NS" patch jitsimeeting "$MEETING_REF" --subresource=status --type=merge -p "$MSTATUS" \
+  || fail "could not patch meeting status to Active"
+for i in $(seq 1 10); do
+  PH=$(kubectl -n "$ORG_NS" get jitsimeeting "$MEETING_REF" -o jsonpath='{.status.phase}' 2>/dev/null || true)
+  [ "$PH" = "Active" ] && { log "meeting phase=Active at the cluster"; break; }
+  sleep 2
+done
 
-# --- 5. dispatch the agent INTO the meeting. Capture status + body. ---
+# --- 5. dispatch the agent INTO the meeting. Capture status + body. Retry past the BFF's
+#        30s stale-while-revalidate snapshot cache (the meeting was just patched Active). ---
 log "5. dispatch AgentStack/${STACK} into meeting ${MEETING_REF}"
-DHTTP=$(curl -s -o "$DISPATCH_JSON" -w '%{http_code}' --max-time 90 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/agents/dispatch" \
-  -H 'content-type: application/json' \
-  -d "{\"agentStack\":\"${STACK}\",\"meetingRef\":\"${MEETING_REF}\",\"task\":\"Join the meeting and greet the room.\",\"taskKind\":\"g0-rt-e2e\"}" || echo "000")
+DHTTP=000
+for attempt in $(seq 1 8); do
+  DHTTP=$(curl -s -o "$DISPATCH_JSON" -w '%{http_code}' --max-time 90 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/agents/dispatch" \
+    -H 'content-type: application/json' \
+    -d "{\"agentStack\":\"${STACK}\",\"meetingRef\":\"${MEETING_REF}\",\"task\":\"Join the meeting and greet the room.\",\"taskKind\":\"g0-rt-e2e\"}" || echo "000")
+  { [ "$DHTTP" -ge 200 ] && [ "$DHTTP" -lt 300 ]; } && break
+  DBODY="$(head -c 400 "$DISPATCH_JSON")"
+  log "dispatch attempt ${attempt} HTTP=${DHTTP} body=${DBODY}"
+  case "$DBODY" in *"not active"*) sleep 8 ;; *) fail "dispatch HTTP ${DHTTP}: ${DBODY}" ;; esac
+done
 log "dispatch HTTP=${DHTTP} body=$(head -c 600 "$DISPATCH_JSON")"
-{ [ "$DHTTP" -ge 200 ] && [ "$DHTTP" -lt 300 ]; } || fail "dispatch HTTP ${DHTTP}: $(head -c 400 "$DISPATCH_JSON")"
+{ [ "$DHTTP" -ge 200 ] && [ "$DHTTP" -lt 300 ]; } || fail "dispatch still failing after retries: $(head -c 400 "$DISPATCH_JSON")"
 RUN_ID=$(jq -r '.run.metadata.name // .run.id // .runId // .metadata.name // empty' "$DISPATCH_JSON" 2>/dev/null || true)
 [ -n "$RUN_ID" ] || fail "could not extract runId from dispatch response: $(head -c 400 "$DISPATCH_JSON")"
 log "dispatched runId=${RUN_ID}"
