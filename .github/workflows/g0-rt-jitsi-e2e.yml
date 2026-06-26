@@ -1,0 +1,68 @@
+name: G0-RT Jitsi E2E
+
+# Live end-to-end of the realtime meeting-agent (G0-RT): against the DEPLOYED kradle
+# cluster, dispatch a video-capable agent into an in-cluster Jitsi meeting and assert the
+# jitsi-agent-sidecar container JOINS the room (and, for video:publish, boots the avatar).
+#
+# On-demand only (workflow_dispatch) — a live-meeting E2E is heavy + depends on the Jitsi
+# stack being healthy, so it does NOT gate every publish. Run it AFTER a publish/deploy:
+#   gh workflow run g0-rt-jitsi-e2e.yml --ref staging
+# workflow_dispatch works from any branch (use --ref <branch>).
+#
+# Needs the same cluster creds the deploy uses (secrets.KUBE_CONFIG) + the test-session
+# secret for the authenticated dispatch (dispatch is API-only).
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: Org slug to dispatch under
+        required: false
+        default: a5c-ai
+      join_timeout:
+        description: Seconds to wait for the sidecar to join
+        required: false
+        default: "240"
+
+permissions:
+  contents: read
+
+jobs:
+  g0_rt_jitsi_e2e:
+    name: G0-RT live dispatch -> sidecar join
+    runs-on: ubuntu-latest-l
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve target host + namespace
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            main)    HOST=kradle.a5c.ai;        NS=kradle ;;
+            staging) HOST=kradle-staging.a5c.ai; NS=kradle-staging ;;
+            develop) HOST=kradle-develop.a5c.ai; NS=kradle-develop ;;
+            *) echo "::error::Unsupported branch ${GITHUB_REF_NAME} (use main/staging/develop)"; exit 1 ;;
+          esac
+          echo "APP_HOST=$HOST" >> "$GITHUB_ENV"
+          echo "CONTROL_NS=$NS" >> "$GITHUB_ENV"
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure cluster access
+        run: |
+          if [ -z "${{ secrets.KUBE_CONFIG }}" ]; then
+            echo "::error::secrets.KUBE_CONFIG is not set — cannot reach the cluster"; exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl version --client=true >/dev/null
+
+      - name: Run G0-RT live E2E (dispatch -> sidecar join)
+        env:
+          ORG: ${{ github.event.inputs.org }}
+          JOIN_TIMEOUT: ${{ github.event.inputs.join_timeout }}
+          KRADLE_TEST_AUTH_SECRET: ${{ secrets.KRADLE_TEST_AUTH_SECRET }}
+        run: |
+          chmod +x scripts/g0-rt-jitsi-e2e.sh
+          ./scripts/g0-rt-jitsi-e2e.sh
