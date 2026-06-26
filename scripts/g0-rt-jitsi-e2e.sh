@@ -202,7 +202,9 @@ done
 #        and submits the agent Job in-process. No web auth needed (kubeconfig is the trust). ---
 log "4. dispatch AgentStack/${STACK} into meeting ${MEETING_REF} via the kradle CLI"
 CLI="${GITHUB_WORKSPACE:-.}/packages/kradle/cli/bin/kradle.mjs"
-node "$CLI" dispatch \
+# api-controller.js:28 scopes the controller (and its snapshot) to KRADLE_NAMESPACE (default
+# kradle-system) — point it at the org namespace so the snapshot finds the stack/meeting/grants.
+KRADLE_NAMESPACE="$ORG_NS" node "$CLI" dispatch \
   --stack "$STACK" --namespace "$ORG_NS" --organizationRef "$ORG" \
   --meetingRef "$MEETING_REF" --task "Join the meeting and greet the room." \
   --taskKind g0-rt-e2e --repository default --ref main --actor g0-rt-e2e \
