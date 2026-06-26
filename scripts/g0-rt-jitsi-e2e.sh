@@ -166,48 +166,27 @@ spec:
       - share_surface
 EOF
 
-# --- 3. authenticated BFF session ---
-log "3. authenticate (test-session) at https://${APP_HOST}"
-[ -n "${KRADLE_TEST_AUTH_SECRET:-}" ] || fail "KRADLE_TEST_AUTH_SECRET not set — cannot dispatch"
-# Authenticate as the deploy's ADMIN user (admin.username), so the dispatch passes kradle's
-# permission review (a non-admin test user is "denied by permission review"). Override via
-# G0RT_ADMIN_USER. Retry: the BFF/api pod is intermittently slow/5xx under heavy control-plane
-# reads, so auth can transiently fail/time out.
-AUTH=""
-for a in $(seq 1 6); do
-  AUTH=$(curl -sf --max-time 30 -X POST "https://${APP_HOST}/api/auth/test-session" \
-    -H 'content-type: application/json' \
-    -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"${G0RT_ADMIN_USER:-tmuskal}\"}" \
-    -c "$COOKIE_JAR" 2>/dev/null) && echo "$AUTH" | jq -e '.ok == true' >/dev/null 2>&1 && break
-  log "auth attempt ${a} failed (transient BFF) — retrying"
-  AUTH=""; sleep 10
-done
-[ -n "$AUTH" ] || fail "test-session failed after retries (BFF unstable?)"
+# --- 3. create the meeting via kubectl (no BFF — the api pod is intermittently unstable and
+#        its dispatch reads a stale snapshot; we bypass it entirely and dispatch via the CLI). ---
+log "3. apply JitsiMeeting/${MEETING} (room ${ROOM_ID}) via kubectl"
+kubectl apply -f - <<EOF
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: JitsiMeeting
+metadata:
+  name: ${MEETING}
+  namespace: ${ORG_NS}
+spec:
+  organizationRef: ${ORG}
+  providerRef: ${PROVIDER}
+  roomId: ${ROOM_ID}
+  displayName: G0-RT E2E
+  ttlMinutes: 30
+EOF
+MEETING_REF="${MEETING}"
 
-# --- 4. create the meeting (API -> Active + roomUrl). Capture status + body for diagnostics. ---
-log "4. create JitsiMeeting/${MEETING} (room ${ROOM_ID}) via the BFF"
-MEET_BODY="$(mktemp)"; MHTTP=000
-for a in $(seq 1 6); do
-  MHTTP=$(curl -s -o "$MEET_BODY" -w '%{http_code}' --max-time 60 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/jitsi/meetings" \
-    -H 'content-type: application/json' \
-    -d "{\"name\":\"${MEETING}\",\"displayName\":\"G0-RT E2E\",\"ttlMinutes\":30,\"providerRef\":\"${PROVIDER}\",\"roomId\":\"${ROOM_ID}\"}" || echo "000")
-  { [ "$MHTTP" -ge 200 ] && [ "$MHTTP" -lt 300 ]; } && break
-  log "meeting attempt ${a} HTTP=${MHTTP} (transient BFF) — retrying"; sleep 10
-done
-log "meeting HTTP=${MHTTP} body=$(head -c 300 "$MEET_BODY")"
-{ [ "$MHTTP" -ge 200 ] && [ "$MHTTP" -lt 300 ]; } || fail "meeting creation HTTP ${MHTTP}: $(head -c 300 "$MEET_BODY")"
-# metadata.name is the canonical ref; createMeetingResource normalizes name == our MEETING slug.
-MEETING_REF=$(jq -r '.metadata.name // .name // .resource.metadata.name // empty' "$MEET_BODY" 2>/dev/null || true)
-MEETING_REF="${MEETING_REF:-$MEETING}"
-rm -f "$MEET_BODY"
-
-# The BFF returns status.phase=Active in the body, but kubectl apply does NOT write the status
-# subresource, so the cluster meeting has no phase -> dispatch rejects "Meeting is not active".
-# Set it explicitly (+ the in-cluster roomUrl the sidecar opens). Try the status subresource,
-# fall back to a plain status merge if the CRD has no status subresource.
-# jitsimeetings has a status subresource — status MUST be set via --subresource=status (a
-# plain merge drops it). jitsi-agent-bridge.js:66 requires status.phase === 'Active'.
-log "4b. mark JitsiMeeting/${MEETING_REF} Active via the status subresource"
+# jitsimeetings has a status subresource — status.phase MUST be set via --subresource=status.
+# jitsi-agent-bridge.js:66 requires status.phase === 'Active'; roomUrl is what the sidecar opens.
+log "3b. mark JitsiMeeting/${MEETING_REF} Active via the status subresource"
 MSTATUS="{\"status\":{\"phase\":\"Active\",\"roomUrl\":\"http://${JITSI_WEB_SVC}/${ROOM_ID}\"}}"
 kubectl -n "$ORG_NS" patch jitsimeeting "$MEETING_REF" --subresource=status --type=merge -p "$MSTATUS" \
   || fail "could not patch meeting status to Active"
@@ -217,29 +196,28 @@ for i in $(seq 1 10); do
   sleep 2
 done
 
-# --- 5. dispatch the agent INTO the meeting. Capture status + body. Retry past the BFF's
-#        30s stale-while-revalidate snapshot cache (the meeting was just patched Active). ---
-log "5. dispatch AgentStack/${STACK} into meeting ${MEETING_REF}"
-DHTTP=000
-for attempt in $(seq 1 12); do
-  DHTTP=$(curl -s -o "$DISPATCH_JSON" -w '%{http_code}' --max-time 120 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/agents/dispatch" \
-    -H 'content-type: application/json' \
-    -d "{\"agentStack\":\"${STACK}\",\"meetingRef\":\"${MEETING_REF}\",\"task\":\"Join the meeting and greet the room.\",\"taskKind\":\"g0-rt-e2e\"}" || echo "000")
-  { [ "$DHTTP" -ge 200 ] && [ "$DHTTP" -lt 300 ]; } && break
-  DBODY="$(head -c 300 "$DISPATCH_JSON")"
-  log "dispatch attempt ${attempt} HTTP=${DHTTP} body=${DBODY}"
-  # Retry on the cache-stale 'not active' (cluster is Active; BFF SWR cache lags <=30s) AND on
-  # transient gateway/pod 5xx/000. Any other 4xx is a real error -> fail fast.
-  case "$DBODY" in
-    *"not active"*) sleep 10; continue ;;
-  esac
-  if [ "$DHTTP" -ge 500 ] || [ "$DHTTP" = "000" ]; then sleep 10; continue; fi
-  fail "dispatch HTTP ${DHTTP}: ${DBODY}"
+# --- 4. dispatch via the kradle CLI. The CLI's getController() builds a FRESH per-invocation
+#        controller whose kubectl-backed gateway reads live k8s (no stuck BFF SWR snapshot), so
+#        getMeeting sees the Active meeting. dispatchAgent runs the permission review (SA+grant)
+#        and submits the agent Job in-process. No web auth needed (kubeconfig is the trust). ---
+log "4. dispatch AgentStack/${STACK} into meeting ${MEETING_REF} via the kradle CLI"
+CLI="${GITHUB_WORKSPACE:-.}/packages/kradle/cli/bin/kradle.mjs"
+node "$CLI" dispatch \
+  --stack "$STACK" --namespace "$ORG_NS" --organizationRef "$ORG" \
+  --meetingRef "$MEETING_REF" --task "Join the meeting and greet the room." \
+  --taskKind g0-rt-e2e --repository default --ref main --actor g0-rt-e2e \
+  > "$DISPATCH_JSON" 2>&1 || { sed 's/^/[cli] /' "$DISPATCH_JSON" | tail -25; fail "CLI dispatch failed"; }
+sed 's/^/[cli] /' "$DISPATCH_JSON" | tail -15
+
+# --- 5. find the agent Job the dispatch submitted (by stack label -> its run label). ---
+log "5. locate the agent-run Job for stack ${STACK}"
+RUN_ID=""
+for i in $(seq 1 20); do
+  RUN_ID=$(kubectl -n "$ORG_NS" get jobs -l "kradle.a5c.ai/stack=${STACK}" --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1:].metadata.labels.kradle\.a5c\.ai/run}' 2>/dev/null || true)
+  [ -n "$RUN_ID" ] && break
+  sleep 3
 done
-log "dispatch HTTP=${DHTTP} body=$(head -c 600 "$DISPATCH_JSON")"
-{ [ "$DHTTP" -ge 200 ] && [ "$DHTTP" -lt 300 ]; } || fail "dispatch still failing after retries: $(head -c 400 "$DISPATCH_JSON")"
-RUN_ID=$(jq -r '.run.metadata.name // .run.id // .runId // .metadata.name // empty' "$DISPATCH_JSON" 2>/dev/null || true)
-[ -n "$RUN_ID" ] || fail "could not extract runId from dispatch response: $(head -c 400 "$DISPATCH_JSON")"
+[ -n "$RUN_ID" ] || fail "no agent-run Job appeared for stack ${STACK} after CLI dispatch (review/submit failed — see [cli] output above)"
 log "dispatched runId=${RUN_ID}"
 
 # --- 6. find the Job + pod ---
