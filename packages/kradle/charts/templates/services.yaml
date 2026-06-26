@@ -25,3 +25,7 @@ spec:
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: web
+    # Scope to kradle's own web pods. Subcharts (jitsi) can share
+    # instance+component=web, so without this the Service would also select their
+    # nginx pods and route ~half of web traffic there (intermittent 405s).
+    kradle.a5c.ai/service: web

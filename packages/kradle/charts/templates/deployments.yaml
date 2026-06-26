@@ -411,6 +411,11 @@ spec:
       labels:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: web
+        # Disambiguator: subcharts (e.g. jitsi) can carry the same
+        # instance+component=web labels, which would make the -web Service below
+        # select their pods too and route ~half of kradle web traffic to the
+        # wrong backend (intermittent 405s). This unique label scopes the Service.
+        kradle.a5c.ai/service: web
     spec:
       serviceAccountName: {{ include "kradle.fullname" . }}
       {{- with .Values.global.imagePullSecrets }}
