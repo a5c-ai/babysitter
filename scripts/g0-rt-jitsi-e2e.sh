@@ -191,6 +191,16 @@ MEETING_REF=$(jq -r '.metadata.name // .name // .resource.metadata.name // empty
 MEETING_REF="${MEETING_REF:-$MEETING}"
 rm -f "$MEET_BODY"
 
+# The BFF returns status.phase=Active in the body, but kubectl apply does NOT write the status
+# subresource, so the cluster meeting has no phase -> dispatch rejects "Meeting is not active".
+# Set it explicitly (+ the in-cluster roomUrl the sidecar opens). Try the status subresource,
+# fall back to a plain status merge if the CRD has no status subresource.
+log "4b. mark JitsiMeeting/${MEETING_REF} Active (roomUrl -> in-cluster web)"
+MSTATUS="{\"status\":{\"phase\":\"Active\",\"roomUrl\":\"http://${JITSI_WEB_SVC}/${ROOM_ID}\"}}"
+kubectl -n "$ORG_NS" patch jitsimeeting "$MEETING_REF" --subresource=status --type=merge -p "$MSTATUS" 2>/dev/null \
+  || kubectl -n "$ORG_NS" patch jitsimeeting "$MEETING_REF" --type=merge -p "$MSTATUS" \
+  || log "::warning:: could not patch meeting status to Active"
+
 # --- 5. dispatch the agent INTO the meeting. Capture status + body. ---
 log "5. dispatch AgentStack/${STACK} into meeting ${MEETING_REF}"
 DHTTP=$(curl -s -o "$DISPATCH_JSON" -w '%{http_code}' --max-time 90 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/agents/dispatch" \
