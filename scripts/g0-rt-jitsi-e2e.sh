@@ -222,21 +222,31 @@ done
 [ -n "$RUN_ID" ] || fail "no agent-run Job appeared for stack ${STACK} after CLI dispatch (review/submit failed — see [cli] output above)"
 log "dispatched runId=${RUN_ID}"
 
-# --- 6. find the Job + pod ---
-log "6. wait for Job kradle-agent-${RUN_ID} + its pod"
+# --- 6. find the Job + its pod. K8s sets job-name=<job> + controller-uid on Job pods; the
+#        kradle.a5c.ai/run label is on the Job, not necessarily the pod — match on job-name. ---
+JOB="kradle-agent-${RUN_ID}"
+log "6. wait for Job ${JOB} + its pod"
 for i in $(seq 1 30); do
-  kubectl -n "$ORG_NS" get job "kradle-agent-${RUN_ID}" >/dev/null 2>&1 && break
+  kubectl -n "$ORG_NS" get job "$JOB" >/dev/null 2>&1 && break
   sleep 2
-  [ "$i" = 30 ] && fail "Job kradle-agent-${RUN_ID} never appeared (dispatch made no Job — check withOrgScope / image pull / controller logs)"
+  [ "$i" = 30 ] && { kubectl -n "$ORG_NS" get jobs 2>/dev/null | sed 's/^/[jobs] /'; fail "Job ${JOB} never appeared"; }
 done
 POD=""
-for i in $(seq 1 30); do
-  POD=$(kubectl -n "$ORG_NS" get pods -l "kradle.a5c.ai/run=${RUN_ID}" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+for i in $(seq 1 45); do  # up to ~135s — agent + sidecar image pulls can be slow
+  POD=$(kubectl -n "$ORG_NS" get pods -l "job-name=${JOB}" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  [ -z "$POD" ] && POD=$(kubectl -n "$ORG_NS" get pods -l "kradle.a5c.ai/run=${RUN_ID}" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
   [ -n "$POD" ] && break
-  sleep 2
+  sleep 3
 done
-[ -n "$POD" ] || fail "no pod for run ${RUN_ID}"
+if [ -z "$POD" ]; then
+  log "=== no pod — Job describe + namespace state (diagnostics) ==="
+  kubectl -n "$ORG_NS" describe job "$JOB" 2>/dev/null | sed 's/^/[job] /' | tail -30 || true
+  kubectl -n "$ORG_NS" get pods 2>/dev/null | sed 's/^/[pods] /' || true
+  kubectl -n "$ORG_NS" get events --sort-by=.lastTimestamp 2>/dev/null | sed 's/^/[ev] /' | tail -20 || true
+  fail "no pod for Job ${JOB} (see Job describe/events above — likely image pull, scheduling, or a Job-spec reject)"
+fi
 log "pod=${POD}"
+kubectl -n "$ORG_NS" get pod "$POD" -o wide 2>/dev/null | sed 's/^/[pod] /' || true
 
 # --- 7. assert the sidecar JOINS (and, for video:publish, boots the avatar) ---
 log "7. poll the jitsi-agent-sidecar container logs for the join signal (timeout ${JOIN_TIMEOUT}s)"
