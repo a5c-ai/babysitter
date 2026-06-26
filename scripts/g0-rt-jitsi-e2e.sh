@@ -171,20 +171,30 @@ log "3. authenticate (test-session) at https://${APP_HOST}"
 [ -n "${KRADLE_TEST_AUTH_SECRET:-}" ] || fail "KRADLE_TEST_AUTH_SECRET not set — cannot dispatch"
 # Authenticate as the deploy's ADMIN user (admin.username), so the dispatch passes kradle's
 # permission review (a non-admin test user is "denied by permission review"). Override via
-# G0RT_ADMIN_USER if your deploy uses a different admin.
-AUTH=$(curl -sf --max-time 20 -X POST "https://${APP_HOST}/api/auth/test-session" \
-  -H 'content-type: application/json' \
-  -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"${G0RT_ADMIN_USER:-tmuskal}\"}" \
-  -c "$COOKIE_JAR") || fail "test-session request failed"
-echo "$AUTH" | jq -e '.ok == true' >/dev/null || fail "test-session not ok: $AUTH"
+# G0RT_ADMIN_USER. Retry: the BFF/api pod is intermittently slow/5xx under heavy control-plane
+# reads, so auth can transiently fail/time out.
+AUTH=""
+for a in $(seq 1 6); do
+  AUTH=$(curl -sf --max-time 30 -X POST "https://${APP_HOST}/api/auth/test-session" \
+    -H 'content-type: application/json' \
+    -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"${G0RT_ADMIN_USER:-tmuskal}\"}" \
+    -c "$COOKIE_JAR" 2>/dev/null) && echo "$AUTH" | jq -e '.ok == true' >/dev/null 2>&1 && break
+  log "auth attempt ${a} failed (transient BFF) — retrying"
+  AUTH=""; sleep 10
+done
+[ -n "$AUTH" ] || fail "test-session failed after retries (BFF unstable?)"
 
 # --- 4. create the meeting (API -> Active + roomUrl). Capture status + body for diagnostics. ---
 log "4. create JitsiMeeting/${MEETING} (room ${ROOM_ID}) via the BFF"
-MEET_BODY="$(mktemp)"
-MHTTP=$(curl -s -o "$MEET_BODY" -w '%{http_code}' --max-time 30 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/jitsi/meetings" \
-  -H 'content-type: application/json' \
-  -d "{\"name\":\"${MEETING}\",\"displayName\":\"G0-RT E2E\",\"ttlMinutes\":30,\"providerRef\":\"${PROVIDER}\",\"roomId\":\"${ROOM_ID}\"}" || echo "000")
-log "meeting HTTP=${MHTTP} body=$(head -c 400 "$MEET_BODY")"
+MEET_BODY="$(mktemp)"; MHTTP=000
+for a in $(seq 1 6); do
+  MHTTP=$(curl -s -o "$MEET_BODY" -w '%{http_code}' --max-time 60 -b "$COOKIE_JAR" -X POST "https://${APP_HOST}/api/orgs/${ORG}/jitsi/meetings" \
+    -H 'content-type: application/json' \
+    -d "{\"name\":\"${MEETING}\",\"displayName\":\"G0-RT E2E\",\"ttlMinutes\":30,\"providerRef\":\"${PROVIDER}\",\"roomId\":\"${ROOM_ID}\"}" || echo "000")
+  { [ "$MHTTP" -ge 200 ] && [ "$MHTTP" -lt 300 ]; } && break
+  log "meeting attempt ${a} HTTP=${MHTTP} (transient BFF) — retrying"; sleep 10
+done
+log "meeting HTTP=${MHTTP} body=$(head -c 300 "$MEET_BODY")"
 { [ "$MHTTP" -ge 200 ] && [ "$MHTTP" -lt 300 ]; } || fail "meeting creation HTTP ${MHTTP}: $(head -c 300 "$MEET_BODY")"
 # metadata.name is the canonical ref; createMeetingResource normalizes name == our MEETING slug.
 MEETING_REF=$(jq -r '.metadata.name // .name // .resource.metadata.name // empty' "$MEET_BODY" 2>/dev/null || true)
