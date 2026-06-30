@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for Claude Code:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin claude-code
+claude plugin marketplace add a5c-ai/atlas-claude
+claude plugin install --scope user atlas@a5c.ai
 ```
 
 ## License
