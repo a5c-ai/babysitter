@@ -20,9 +20,9 @@ const baseManifest = {
   },
   scripts: {
     'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/comm-adapter && npm run build',
-    test: 'vitest run --root ../../.. --config vitest.config.ts packages/adapters/ui',
+    test: 'vitest run --root ../../.. --config vitest.config.ts packages/genty/ui',
     'test:realtime':
-      'vitest run --root ../../.. --config vitest.config.ts "packages/adapters/ui/src/session-flow*.test.ts" "packages/adapters/ui/src/screens/SessionDetailScreen.test.tsx" "packages/adapters/ui/src/release-verification.test.ts"',
+      'vitest run --root ../../.. --config vitest.config.ts "packages/genty/ui/src/session-flow*.test.ts" "packages/genty/ui/src/screens/SessionDetailScreen.test.tsx" "packages/genty/ui/src/release-verification.test.ts"',
     'verify:release': 'node ./scripts/verify-release.mjs',
     prepublishOnly: 'npm run build:realtime && npm run test:realtime && npm run verify:release',
   },
@@ -93,7 +93,7 @@ describe('verifyAgentMuxUiRelease', () => {
             ...baseManifest,
             scripts: {
               ...baseManifest.scripts,
-              'test:realtime': 'vitest run --root ../../.. --config vitest.config.ts "packages/adapters/ui/src/session-flow*.test.ts"',
+              'test:realtime': 'vitest run --root ../../.. --config vitest.config.ts "packages/genty/ui/src/session-flow*.test.ts"',
             },
           },
           packEntries: basePackEntries,
@@ -111,7 +111,7 @@ describe('verifyAgentMuxUiRelease', () => {
             ...baseManifest,
             scripts: {
               ...baseManifest.scripts,
-              test: 'vitest run --root ../../.. --config vitest.config.ts "packages/adapters/ui/src/**/*.test.ts"',
+              test: 'vitest run --root ../../.. --config vitest.config.ts "packages/genty/ui/src/**/*.test.ts"',
             },
           },
           packEntries: basePackEntries,

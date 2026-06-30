@@ -123,7 +123,7 @@
     "build:realtime": "npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/comm-adapter && npm run build",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "codegen": "tsx src/codegen/swift-types.ts && tsx src/codegen/kotlin-types.ts",
-    "test": "vitest run --root ../../.. --config vitest.config.ts packages/adapters/ui",
+    "test": "vitest run --root ../../.. --config vitest.config.ts packages/genty/ui",
     "test:realtime": "vitest run --root ../../.. --config vitest.config.ts \"packages/genty/ui/src/session-flow*.test.ts\" \"packages/genty/ui/src/screens/SessionDetailScreen.test.tsx\" \"packages/genty/ui/src/release-verification.test.ts\"",
     "verify:release": "node ./scripts/verify-release.mjs",
     "prepublishOnly": "npm run build:realtime && npm run test:realtime && npm run verify:release"

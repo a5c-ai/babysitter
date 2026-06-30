@@ -40,42 +40,42 @@ export function verifyAgentMuxUiRelease({ packageRoot, manifest, packEntries }) 
   const packedPaths = new Set(packEntries.map((entry) => normalizePackPath(entry.path)));
   const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
 
-  expect(manifest.name === '@a5c-ai/genty-ui', 'packages/adapters/ui/package.json name must stay @a5c-ai/genty-ui');
+  expect(manifest.name === '@a5c-ai/genty-ui', 'packages/genty/ui/package.json name must stay @a5c-ai/genty-ui');
   expect(
     manifest.publishConfig?.access === 'public',
-    'packages/adapters/ui/package.json publishConfig.access must stay public'
+    'packages/genty/ui/package.json publishConfig.access must stay public'
   );
   expect(
     scripts['build:realtime'] === 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/comm-adapter && npm run build',
-    'packages/adapters/ui/package.json build:realtime must remain a package-local realtime build entrypoint'
+    'packages/genty/ui/package.json build:realtime must remain a package-local realtime build entrypoint'
   );
   expect(
-    scripts.test === 'vitest run --root ../../.. --config vitest.config.ts packages/adapters/ui',
-    'packages/adapters/ui/package.json test must keep the package-local Vitest filter stable'
+    scripts.test === 'vitest run --root ../../.. --config vitest.config.ts packages/genty/ui',
+    'packages/genty/ui/package.json test must keep the package-local Vitest filter stable'
   );
   expect(
     typeof scripts['test:realtime'] === 'string' &&
-      scripts['test:realtime'].includes('packages/adapters/ui/src/session-flow*.test.ts') &&
-      scripts['test:realtime'].includes('packages/adapters/ui/src/screens/SessionDetailScreen.test.tsx') &&
-      scripts['test:realtime'].includes('packages/adapters/ui/src/release-verification.test.ts'),
-    'packages/adapters/ui/package.json test:realtime must keep the projector, screen, and release assertions together'
+      scripts['test:realtime'].includes('packages/genty/ui/src/session-flow*.test.ts') &&
+      scripts['test:realtime'].includes('packages/genty/ui/src/screens/SessionDetailScreen.test.tsx') &&
+      scripts['test:realtime'].includes('packages/genty/ui/src/release-verification.test.ts'),
+    'packages/genty/ui/package.json test:realtime must keep the projector, screen, and release assertions together'
   );
   expect(
     scripts['verify:release'] === 'node ./scripts/verify-release.mjs',
-    'packages/adapters/ui/package.json verify:release must point at the package-local release verifier'
+    'packages/genty/ui/package.json verify:release must point at the package-local release verifier'
   );
   expect(
     scripts.prepublishOnly === 'npm run build:realtime && npm run test:realtime && npm run verify:release',
-    'packages/adapters/ui/package.json prepublishOnly must exercise the realtime package seam directly'
+    'packages/genty/ui/package.json prepublishOnly must exercise the realtime package seam directly'
   );
   expect(
     sessionFlowExport.types === './dist/session-flow.d.ts' &&
       sessionFlowExport.default === './dist/session-flow.js',
-    'packages/adapters/ui/package.json must keep exporting ./session-flow from dist/session-flow.*'
+    'packages/genty/ui/package.json must keep exporting ./session-flow from dist/session-flow.*'
   );
   expect(
     readme.includes('@a5c-ai/genty-ui/session-flow'),
-    'packages/adapters/ui/README.md must keep documenting the public session-flow export'
+    'packages/genty/ui/README.md must keep documenting the public session-flow export'
   );
 
   for (const relativePath of REQUIRED_BUILD_PATHS) {
