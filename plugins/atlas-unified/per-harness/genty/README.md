@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for Genty:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin genty
+npx --yes @a5c-ai/atlas-genty install --global
+npx --yes @a5c-ai/atlas-genty install --workspace <path>
 ```
 
 ## License

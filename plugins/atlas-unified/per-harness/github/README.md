@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for GitHub Copilot:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin github-copilot
+copilot plugin marketplace add a5c-ai/atlas-github-copilot
+copilot plugin install atlas
 ```
 
 ## License

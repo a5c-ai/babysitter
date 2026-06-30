@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for Codex:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin codex
+npx --yes @a5c-ai/atlas-codex install --global
+npx --yes @a5c-ai/atlas-codex install --workspace <path>
 ```
 
 ## License

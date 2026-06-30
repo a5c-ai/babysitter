@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for OpenClaw:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin openclaw
+npx --yes github:a5c-ai/atlas-openclaw install --global
+npx --yes github:a5c-ai/atlas-openclaw install --workspace <path>
 ```
 
 ## License

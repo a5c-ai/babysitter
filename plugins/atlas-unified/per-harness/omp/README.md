@@ -26,8 +26,7 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for oh-my-pi:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin oh-my-pi
+omp plugin install @a5c-ai/atlas-omp
 ```
 
 ## License
