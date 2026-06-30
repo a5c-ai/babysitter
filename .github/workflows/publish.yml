@@ -790,7 +790,7 @@ jobs:
       - name: Publish atlas
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/atlas --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/atlas --skip-build
 
   publish_staging_foundation:
     name: Publish Foundation - ${{ matrix.name }}
@@ -804,10 +804,10 @@ jobs:
         include:
           - name: adapters-tasks
             build: npm run build --workspace=@a5c-ai/tasks-adapter
-            publish: npm publish --workspace=@a5c-ai/tasks-adapter --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tasks-adapter --skip-build
           - name: adapters-observability
             build: npm run build --workspace=@a5c-ai/adapters-observability
-            publish: npm publish --workspace=@a5c-ai/adapters-observability --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-observability --skip-build
           - name: triggers
             build: |
               set -euo pipefail
@@ -815,16 +815,16 @@ jobs:
               npm run test:unit --workspace=@a5c-ai/triggers-adapter
               npm run test:e2e --workspace=@a5c-ai/triggers-adapter
               npm run test:coverage --workspace=@a5c-ai/triggers-adapter
-            publish: npm publish --workspace=@a5c-ai/triggers-adapter --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/triggers-adapter --skip-build
           - name: observer-dashboard
             build: npm run build:observer
-            publish: npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter-observer-dashboard --skip-build
           - name: cloud
             build: npm run build:cloud
-            publish: npm publish --workspace=@a5c-ai/kradle-installer --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/kradle-installer --skip-build
           - name: kradle
             build: cd packages/kradle/core && npm run build
-            publish: npm publish --workspace=@a5c-ai/kradle --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/kradle --skip-build
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v4
@@ -878,13 +878,13 @@ jobs:
         include:
           - name: hooks-adapter-core
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/hooks-adapter-core
-            publish: npm publish --workspace=@a5c-ai/hooks-adapter-core --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/hooks-adapter-core --skip-build
           - name: agent-comm-adapter
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-observability && npm run build --workspace=@a5c-ai/comm-adapter
-            publish: npm publish --workspace=@a5c-ai/comm-adapter --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/comm-adapter --skip-build
           - name: adapters-extensions
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/extensions-adapter
-            publish: npm publish --workspace=@a5c-ai/extensions-adapter --access public --tag "$NPM_TAG"
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/extensions-adapter --skip-build
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v4
@@ -1001,7 +1001,7 @@ jobs:
       - name: Publish hooks adapter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=${{ matrix.workspace }} --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=${{ matrix.workspace }} --skip-build
 
   publish_staging_hooks_cli:
     name: Publish Hooks Adapter CLI
@@ -1048,7 +1048,7 @@ jobs:
       - name: Publish hooks-adapter CLI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/hooks-adapter-cli --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/hooks-adapter-cli --skip-build
 
   publish_staging_agent_mux_leaf:
     name: Publish Agent Adapter Leaf - ${{ matrix.name }}
@@ -1150,7 +1150,7 @@ jobs:
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=${{ matrix.workspace }} --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=${{ matrix.workspace }} --skip-build
 
   publish_staging_agent_mux_gateway:
     name: Publish Agent Adapter Gateway
@@ -1203,7 +1203,7 @@ jobs:
       - name: Publish adapters gateway
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/adapters-gateway --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-gateway --skip-build
 
   publish_staging_agent_mux_cli:
     name: Publish Agent Adapter CLI
@@ -1248,7 +1248,7 @@ jobs:
       - name: Publish adapters CLI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/adapters-cli --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-cli --skip-build
 
   publish_staging_agent_mux_root:
     name: Publish Agent Adapter Root
@@ -1304,7 +1304,7 @@ jobs:
       - name: Publish adapters root
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/adapters --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters --skip-build
 
   publish_staging_channels:
     name: Publish Channels Adapter
@@ -1363,7 +1363,7 @@ jobs:
       - name: Publish channels adapter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/channels-adapter --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/channels-adapter --skip-build
 
   publish_staging_agent_mux_tui:
     name: Publish Agent Adapter TUI
@@ -1422,7 +1422,7 @@ jobs:
       - name: Publish adapters TUI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/genty-tui --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-tui --skip-build
 
   publish_staging_sdk:
     name: Publish Babysitter SDK
@@ -1478,7 +1478,7 @@ jobs:
       - name: Publish babysitter SDK
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/babysitter-sdk --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter-sdk --skip-build
 
   publish_staging_agent_core:
     name: Publish Agent Core
@@ -1531,7 +1531,7 @@ jobs:
       - name: Publish genty-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/genty-core --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-core --skip-build
 
   publish_staging_babysitter_agent:
     name: Publish genty Platform
@@ -1585,7 +1585,7 @@ jobs:
       - name: Publish agent-platform
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/genty-platform --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-platform --skip-build
 
   publish_staging_genty_runtime:
     name: Publish genty Runtime
@@ -1632,7 +1632,7 @@ jobs:
       - name: Publish genty-runtime
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/genty-runtime --access public --tag "$NPM_TAG"
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-runtime --skip-build
 
   publish_staging_omni:
     name: Publish genty
@@ -2341,6 +2341,20 @@ jobs:
               kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-namespace="$KUBE_NAMESPACE" --overwrite
             done
           done
+          # Adopt the cluster-scoped org namespace into THIS release. Both staging
+          # (kradle-staging) and main (kradle) render the same kradle-org-<org>
+          # namespace (templates/org-namespace.yaml, org pinned to admin.org=a5c-ai)
+          # with helm.sh/resource-policy:keep, so whichever env deployed first owns
+          # it and the other's `helm upgrade --install` errors with "invalid
+          # ownership metadata; release-namespace must equal ...". Re-stamp the Helm
+          # ownership metadata to the current release so it is cleanly re-adopted.
+          ORG_NS="kradle-org-a5c-ai"
+          if kubectl get namespace "$ORG_NS" >/dev/null 2>&1; then
+            echo "Adopting namespace/$ORG_NS into release kradle (release-namespace=$KUBE_NAMESPACE)"
+            kubectl annotate namespace "$ORG_NS" meta.helm.sh/release-name=kradle --overwrite
+            kubectl annotate namespace "$ORG_NS" meta.helm.sh/release-namespace="$KUBE_NAMESPACE" --overwrite
+            kubectl label namespace "$ORG_NS" app.kubernetes.io/managed-by=Helm --overwrite
+          fi
           # Clean up pre-Helm standalone resources
           kubectl -n "$KUBE_NAMESPACE" delete ingress kradle --ignore-not-found
           kubectl -n "$KUBE_NAMESPACE" delete service kradle --ignore-not-found
@@ -2721,10 +2735,7 @@ jobs:
       - name: Publish babysitter metapackage to npm ($NPM_TAG tag)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          set -euo pipefail
-          npm publish --access public --tag "$NPM_TAG"
-        working-directory: packages/babysitter
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
 
   create_release_tag:
     name: Create Release Tag

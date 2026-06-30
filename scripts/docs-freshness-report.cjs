@@ -203,11 +203,16 @@ function main() {
       externalPluginPackages.push(`@a5c-ai/babysitter-${target.adapterName === "omp" ? "omp" : target.targetId}`);
     }
   } catch {
-    // Fallback if catalog not built
+    // Fallback if catalog not built — keep in sync with the plugin targets in
+    // packages/atlas/src/catalog/data.ts (listPluginTargetDescriptors).
     externalPluginPackages.push(
-      "@a5c-ai/babysitter-codex", "@a5c-ai/babysitter-cursor", "@a5c-ai/babysitter-gemini",
-      "@a5c-ai/babysitter-github", "@a5c-ai/babysitter-omp", "@a5c-ai/babysitter-openclaw",
-      "@a5c-ai/babysitter-opencode", "@a5c-ai/babysitter-pi",
+      "@a5c-ai/babysitter-antigravity", "@a5c-ai/babysitter-claude",
+      "@a5c-ai/babysitter-codex", "@a5c-ai/babysitter-copilot",
+      "@a5c-ai/babysitter-cursor", "@a5c-ai/babysitter-gemini",
+      "@a5c-ai/babysitter-genty", "@a5c-ai/babysitter-github",
+      "@a5c-ai/babysitter-hermes", "@a5c-ai/babysitter-omp",
+      "@a5c-ai/babysitter-openclaw", "@a5c-ai/babysitter-opencode",
+      "@a5c-ai/babysitter-pi",
     );
   }
   for (const ext of externalPluginPackages) {
