@@ -125,14 +125,24 @@ function writeMarketplace(repoDir, spec) {
   writeFileSync(out, `${JSON.stringify(data, null, 2)}\n`);
 }
 
-// Every claude-plugin-format repo needs a `.claude-plugin/marketplace.json` so
+// Every plugin repo needs a self-contained `.claude-plugin/marketplace.json` so
 // `claude plugin marketplace add <repo>@<branch>` works on ALL branches (not just
 // whichever branch happened to retain a stale leftover). Derive it from the
-// repo's own `.claude-plugin/plugin.json` — a single-plugin marketplace pointing
-// at the repo root. See issue #955.
+// repo's own plugin manifest — a single-plugin marketplace pointing at the repo
+// root. See issue #955.
+//
+// Codex-format repos ship `.codex-plugin/plugin.json` (no `.claude-plugin/`), so
+// fall back to it. Codex recognizes `.claude-plugin/marketplace.json` as a legacy
+// marketplace root, so writing it here makes `codex plugin marketplace add
+// a5c-ai/babysitter-codex` resolve WITHOUT `--sparse` — symmetric with the claude
+// per-repo flow (previously it failed with "marketplace root does not contain a
+// supported manifest" because only the monorepo `.agents/plugins/` had a manifest).
 function writeRepoMarketplace(repoDir) {
-  const pluginJsonPath = join(repoDir, '.claude-plugin', 'plugin.json');
-  if (!existsSync(pluginJsonPath)) return;
+  const pluginJsonPath = [
+    join(repoDir, '.claude-plugin', 'plugin.json'),
+    join(repoDir, '.codex-plugin', 'plugin.json'),
+  ].find((candidate) => existsSync(candidate));
+  if (!pluginJsonPath) return;
   const plugin = JSON.parse(readFileSync(pluginJsonPath, 'utf8'));
   const author =
     plugin.author && typeof plugin.author === 'object'

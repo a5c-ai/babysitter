@@ -180,7 +180,7 @@ graph TB
 
 **Installation:**
 - Claude Code: `claude plugin marketplace add a5c-ai/babysitter-claude && claude plugin install --scope project babysitter@a5c.ai`
-- Codex: `codex plugin marketplace add a5c-ai/babysitter --ref staging --sparse .agents/plugins`
+- Codex: `codex plugin marketplace add a5c-ai/babysitter --ref main --sparse .agents/plugins` (add the monorepo, not `a5c-ai/babysitter-codex`; never `--ref staging`)
 - Others: `babysitter harness:install-plugin <harness> --workspace <cwd>`
 
 ---
