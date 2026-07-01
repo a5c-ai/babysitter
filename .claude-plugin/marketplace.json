@@ -1,5 +1,9 @@
 {
   "name": "babysitter",
+  "owner": {
+    "name": "a5c.ai",
+    "email": "support@a5c.ai"
+  },
   "interface": {
     "displayName": "Babysitter"
   },
