@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "babysitter",
-      "version": "6.0.0",
+      "version": "6.0.1",
       "source": {
         "source": "url",
         "url": "https://github.com/a5c-ai/babysitter-claude.git",
