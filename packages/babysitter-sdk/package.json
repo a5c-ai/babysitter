@@ -9,7 +9,9 @@
   "bin": {
     "babysitter-sdk": "dist/cli/main.js",
     "babysitter": "dist/cli/main.js",
-    "babysitter-mcp-server": "dist/cli/mcpServeEntry.js"
+    "babysitter-mcp-server": "dist/cli/mcpServeEntry.js",
+    "adapters-hooks": "dist/cli/adaptersHooksBin.js",
+    "adapters": "dist/cli/adaptersBin.js"
   },
   "files": [
     "dist",
@@ -42,6 +44,7 @@
   "dependencies": {
     "@a5c-ai/atlas": "6.0.0",
     "@a5c-ai/adapters": "^6.0.0",
+    "@a5c-ai/hooks-adapter-cli": "^6.0.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",
     "fs-extra": "^11.2.0",
