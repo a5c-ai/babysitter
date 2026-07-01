@@ -53,7 +53,11 @@ jobs:
 
   test:
     name: Lint, Tests, Package
-    runs-on: ubuntu-latest
+    # Larger runner: the "Build babysitter-harness" step rebuilds atlas (22MB /
+    # ~17k-record index) + genty-core + genty-platform in one process and was
+    # silently OOM-killed on the 7GB ubuntu-latest (exit 1, no TS error). The
+    # same harness build passes on ubuntu-latest-l in publish.yml.
+    runs-on: ubuntu-latest-l
     timeout-minutes: 30
 
     steps:
