@@ -46,26 +46,29 @@ npx --yes @a5c-ai/babysitter-codex install --global
 npx --yes @a5c-ai/babysitter-codex install --workspace /path/to/repo
 ```
 
-Alternatively, use the official Codex marketplace CLI. The Codex marketplace
-manifest lives in the **monorepo** at `.agents/plugins/marketplace.json`, so add
-`a5c-ai/babysitter` with `--sparse .agents/plugins` — **not** `a5c-ai/babysitter-codex`
-(the per-harness package repo ships a `.codex-plugin/` plugin bundle, not a
-marketplace root, so `codex plugin marketplace add a5c-ai/babysitter-codex` fails
-with "marketplace root does not contain a supported manifest"):
+Alternatively, use the official Codex marketplace CLI. This repo ships a
+self-contained codex marketplace manifest (`.agents/plugins/marketplace.json`),
+so add it directly and install the `babysitter` plugin from it:
+
+```bash
+codex plugin marketplace add a5c-ai/babysitter-codex
+codex plugin add babysitter --marketplace babysitter
+```
+
+> `--marketplace babysitter` is the marketplace **name** declared in
+> `.agents/plugins/marketplace.json` (not the repo name).
+
+You can also add the marketplace from the **monorepo** with a sparse checkout, or
+from a local clone:
 
 ```bash
 codex plugin marketplace add a5c-ai/babysitter --ref main --sparse .agents/plugins
+codex plugin marketplace add ./path/to/babysitter-codex
 ```
 
-> Use the released default branch (`main`) or a released tag for `--ref` —
-> **never** `--ref staging`. Codex resolves a released plugin version; a
-> `6.0.x-staging.*` build-metadata prerelease will not resolve.
-
-Or from a local clone:
-
-```bash
-codex plugin marketplace add ./path/to/babysitter
-```
+> For the monorepo form, use the released default branch (`main`) or a released
+> tag for `--ref` — **never** `--ref staging`. Codex resolves a released plugin
+> version; a `6.0.x-staging.*` build-metadata prerelease will not resolve.
 
 Then browse and install:
 
