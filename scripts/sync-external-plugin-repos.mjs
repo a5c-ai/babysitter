@@ -125,36 +125,70 @@ function writeMarketplace(repoDir, spec) {
   writeFileSync(out, `${JSON.stringify(data, null, 2)}\n`);
 }
 
-// Every claude-plugin-format repo needs a `.claude-plugin/marketplace.json` so
-// `claude plugin marketplace add <repo>@<branch>` works on ALL branches (not just
-// whichever branch happened to retain a stale leftover). Derive it from the
-// repo's own `.claude-plugin/plugin.json` — a single-plugin marketplace pointing
-// at the repo root. See issue #955.
+// Every plugin repo needs a self-contained marketplace manifest so
+// `<harness> plugin marketplace add <repo>@<branch>` works on ALL branches (not
+// just whichever branch happened to retain a stale leftover). Each is derived
+// from the repo's own plugin manifest — a single-plugin marketplace pointing at
+// the repo root — in the FORMAT/LOCATION its harness expects. See issue #955.
+//
+//  - Claude: `.claude-plugin/marketplace.json` (claude format, `source: "./"`).
+//  - Codex:  `.agents/plugins/marketplace.json` (codex format, `source: {source:
+//    "local", path: "./"}`). Codex reads `$REPO_ROOT/.agents/plugins/marketplace.json`
+//    by default for `codex plugin marketplace add owner/repo`, so this makes
+//    `codex plugin marketplace add a5c-ai/babysitter-codex` resolve without
+//    `--sparse` (previously it failed with "marketplace root does not contain a
+//    supported manifest" — only the monorepo had a codex marketplace manifest).
 function writeRepoMarketplace(repoDir) {
-  const pluginJsonPath = join(repoDir, '.claude-plugin', 'plugin.json');
-  if (!existsSync(pluginJsonPath)) return;
-  const plugin = JSON.parse(readFileSync(pluginJsonPath, 'utf8'));
-  const author =
-    plugin.author && typeof plugin.author === 'object'
-      ? plugin.author
-      : { name: typeof plugin.author === 'string' ? plugin.author : 'a5c.ai' };
-  const marketplace = {
-    name: 'a5c.ai',
-    owner: { name: 'a5c.ai', email: 'support@a5c.ai' },
-    plugins: [
-      {
-        name: plugin.name,
-        source: './',
-        description: plugin.description ?? '',
-        version: plugin.version,
-        author,
-      },
-    ],
-  };
-  writeFileSync(
-    join(repoDir, '.claude-plugin', 'marketplace.json'),
-    `${JSON.stringify(marketplace, null, 2)}\n`,
-  );
+  const claudePluginPath = join(repoDir, '.claude-plugin', 'plugin.json');
+  if (existsSync(claudePluginPath)) {
+    const plugin = JSON.parse(readFileSync(claudePluginPath, 'utf8'));
+    const author =
+      plugin.author && typeof plugin.author === 'object'
+        ? plugin.author
+        : { name: typeof plugin.author === 'string' ? plugin.author : 'a5c.ai' };
+    const marketplace = {
+      name: 'a5c.ai',
+      owner: { name: 'a5c.ai', email: 'support@a5c.ai' },
+      plugins: [
+        {
+          name: plugin.name,
+          source: './',
+          description: plugin.description ?? '',
+          version: plugin.version,
+          author,
+        },
+      ],
+    };
+    writeFileSync(
+      join(repoDir, '.claude-plugin', 'marketplace.json'),
+      `${JSON.stringify(marketplace, null, 2)}\n`,
+    );
+  }
+
+  const codexPluginPath = join(repoDir, '.codex-plugin', 'plugin.json');
+  if (existsSync(codexPluginPath)) {
+    const plugin = JSON.parse(readFileSync(codexPluginPath, 'utf8'));
+    const displayName =
+      plugin.interface?.displayName ??
+      String(plugin.name || 'plugin').replace(/(^|[-_/])([a-z])/g, (_, sep, ch) => sep.replace(/[-_/]/, ' ') + ch.toUpperCase()).trim();
+    const marketplace = {
+      name: plugin.name,
+      version: plugin.version,
+      interface: { displayName },
+      plugins: [
+        {
+          name: plugin.name,
+          version: plugin.version,
+          source: { source: 'local', path: './' },
+          policy: { installation: 'AVAILABLE', authentication: 'ON_INSTALL' },
+          category: plugin.interface?.category ?? 'Coding',
+        },
+      ],
+    };
+    const out = join(repoDir, '.agents', 'plugins', 'marketplace.json');
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, `${JSON.stringify(marketplace, null, 2)}\n`);
+  }
 }
 
 function writeExternalReleaseFiles(repoDir, target) {

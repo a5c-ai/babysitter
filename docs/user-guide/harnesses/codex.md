@@ -33,13 +33,18 @@ Install the [plugin](../reference/glossary.md) once, and Babysitter surfaces as 
 # 1. Core CLI (host-side)
 npm install -g @a5c-ai/babysitter
 
-# 2a. Marketplace path
-codex plugin marketplace add a5c-ai/babysitter --ref <released-tag> --sparse .agents/plugins
+# 2a. Marketplace path (per-repo — the package repo ships its own
+#     .agents/plugins/marketplace.json, so no --sparse needed)
+codex plugin marketplace add a5c-ai/babysitter-codex
 codex plugin list --marketplace babysitter
 codex plugin add babysitter --marketplace babysitter
+
+# 2a-alt. From the monorepo with a sparse checkout:
+codex plugin marketplace add a5c-ai/babysitter --ref <released-tag> --sparse .agents/plugins
 ```
 
-> Use the harness's released default branch / tag for `--ref` - **never** `--ref staging`. The Codex plugin publishes its own released tag; do not use a `5.1.1-staging.*` build-metadata version.
+> `--marketplace babysitter` is the marketplace **name** declared in the manifest, not the repo name.
+> For the monorepo form, use the released default branch / tag for `--ref` - **never** `--ref staging`. The Codex plugin publishes its own released tag; do not use a `6.0.x-staging.*` build-metadata version.
 
 **Alternative (npx installer):**
 

@@ -46,18 +46,29 @@ npx --yes @a5c-ai/babysitter-codex install --global
 npx --yes @a5c-ai/babysitter-codex install --workspace /path/to/repo
 ```
 
-Alternatively, use the official Codex marketplace CLI to add the babysitter
-marketplace directly from GitHub:
+Alternatively, use the official Codex marketplace CLI. This repo ships a
+self-contained codex marketplace manifest (`.agents/plugins/marketplace.json`),
+so add it directly and install the `babysitter` plugin from it:
 
 ```bash
-codex plugin marketplace add a5c-ai/babysitter --ref staging --sparse .agents/plugins
+codex plugin marketplace add a5c-ai/babysitter-codex
+codex plugin add babysitter --marketplace babysitter
 ```
 
-Or from a local clone:
+> `--marketplace babysitter` is the marketplace **name** declared in
+> `.agents/plugins/marketplace.json` (not the repo name).
+
+You can also add the marketplace from the **monorepo** with a sparse checkout, or
+from a local clone:
 
 ```bash
-codex plugin marketplace add ./path/to/babysitter
+codex plugin marketplace add a5c-ai/babysitter --ref main --sparse .agents/plugins
+codex plugin marketplace add ./path/to/babysitter-codex
 ```
+
+> For the monorepo form, use the released default branch (`main`) or a released
+> tag for `--ref` — **never** `--ref staging`. Codex resolves a released plugin
+> version; a `6.0.x-staging.*` build-metadata prerelease will not resolve.
 
 Then browse and install:
 
