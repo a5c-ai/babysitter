@@ -53,10 +53,8 @@ jobs:
 
   test:
     name: Lint, Tests, Package
-    # Larger runner: the "Build babysitter-harness" step rebuilds atlas (22MB /
-    # ~17k-record index) + genty-core + genty-platform in one process and was
-    # silently OOM-killed on the 7GB ubuntu-latest (exit 1, no TS error). The
-    # same harness build passes on ubuntu-latest-l in publish.yml.
+    # Larger runner to match publish.yml for the heavy "Build babysitter-harness"
+    # step (rebuilds atlas's ~17k-record index + genty-core + genty-platform).
     runs-on: ubuntu-latest-l
     timeout-minutes: 30
 
@@ -209,13 +207,13 @@ jobs:
       - name: Build babysitter-harness
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/genty-core 2>&1 | tee artifacts/test-lo../core-build.log
+          npm run build --workspace=@a5c-ai/genty-core 2>&1 | tee artifacts/test-logs/core-build.log
           npm run build --workspace=@a5c-ai/genty-platform 2>&1 | tee artifacts/test-logs/babysitter-harness-build.log
 
       - name: genty-core tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/genty-core 2>&1 | tee artifacts/test-lo../core-tests.log
+          npm run test --workspace=@a5c-ai/genty-core 2>&1 | tee artifacts/test-logs/core-tests.log
 
       - name: babysitter-harness tests
         run: |
