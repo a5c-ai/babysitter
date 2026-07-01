@@ -119,7 +119,8 @@ of this repo for that flow, or upload plugin ZIPs manually.
 Official marketplace install:
 
 ```bash
-codex plugin marketplace add a5c-ai/babysitter
+codex plugin marketplace add a5c-ai/babysitter-codex
+
 ```
 
 Or via the SDK helper:
