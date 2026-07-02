@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] - 2026-07-02
+
+### Bug Fixes
+- 040275fa2 fix(docs): update marketplace installation command to use babysitter-codex (Tal Muskal, 16 hours ago)
+- 3838cbc83 fix(codex): emit codex-format .agents/plugins marketplace + document per-repo flow (Tal Muskal, 16 hours ago)
+- bfb75e139 fix(codex): make babysitter-codex marketplace-addable + correct install docs (Tal Muskal, 16 hours ago)
+- bd11c5b1b fix(sdk): expose adapters-hooks + adapters bins so plugin hooks resolve (Tal Muskal, 18 hours ago)
+- 6e8c63e09 fix(marketplace): add required top-level owner object to marketplace.json (Tal Muskal, 19 hours ago)
+
+### CI/CD
+- f17b37f23 ci(fix): correct corrupted tee log path (test-lo.. -> test-logs) in harness build (Tal Muskal, 16 hours ago)
+- cd5326fa4 ci(fix): run Lint/Tests/Package on ubuntu-latest-l to stop OOM in harness build (Tal Muskal, 17 hours ago)
+
 ## [Unreleased]
 
 - No unreleased changes.
