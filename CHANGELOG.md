@@ -3,15 +3,18 @@
 ## [Unreleased] - 2026-07-02
 
 ### Bug Fixes
-- 040275fa2 fix(docs): update marketplace installation command to use babysitter-codex (Tal Muskal, 16 hours ago)
-- 3838cbc83 fix(codex): emit codex-format .agents/plugins marketplace + document per-repo flow (Tal Muskal, 16 hours ago)
-- bfb75e139 fix(codex): make babysitter-codex marketplace-addable + correct install docs (Tal Muskal, 16 hours ago)
-- bd11c5b1b fix(sdk): expose adapters-hooks + adapters bins so plugin hooks resolve (Tal Muskal, 18 hours ago)
-- 6e8c63e09 fix(marketplace): add required top-level owner object to marketplace.json (Tal Muskal, 19 hours ago)
+- fix(docs): update marketplace installation command to use babysitter-codex (040275fa2, Tal Muskal, 16 hours ago)
+- fix(codex): emit codex-format .agents/plugins marketplace + document per-repo flow (3838cbc83, Tal Muskal, 16 hours ago)
+- fix(codex): make babysitter-codex marketplace-addable + correct install docs (bfb75e139, Tal Muskal, 16 hours ago)
+- fix(sdk): expose adapters-hooks + adapters bins so plugin hooks resolve (bd11c5b1b, Tal Muskal, 18 hours ago)
+- fix(marketplace): add required top-level owner object to marketplace.json (6e8c63e09, Tal Muskal, 19 hours ago)
+
+### Documentation
+- docs: daily changelog update (642dec141, a5c automation, 70 seconds ago)
 
 ### CI/CD
-- f17b37f23 ci(fix): correct corrupted tee log path (test-lo.. -> test-logs) in harness build (Tal Muskal, 16 hours ago)
-- cd5326fa4 ci(fix): run Lint/Tests/Package on ubuntu-latest-l to stop OOM in harness build (Tal Muskal, 17 hours ago)
+- ci(fix): correct corrupted tee log path (test-lo.. -> test-logs) in harness build (f17b37f23, Tal Muskal, 16 hours ago)
+- ci(fix): run Lint/Tests/Package on ubuntu-latest-l to stop OOM in harness build (cd5326fa4, Tal Muskal, 17 hours ago)
 
 ## [Unreleased]
 
