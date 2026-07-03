@@ -84,6 +84,21 @@ export interface TrustRoot {
   /** ... OR a repo-relative path to it (exactly one of the two). */
   publicKeyPath?: string;
   label: string;
+  /**
+   * Stable identity this root belongs to (AC-41 distinct-holder). Two keys owned by
+   * ONE human/identity share one `identityId` so a quorum counts them as ONE holder.
+   * When absent, the evaluator falls back to `label`, then the fingerprint (a store
+   * that maps one identity to one root needs neither).
+   */
+  identityId?: string;
+  /**
+   * For `engine` roots (AC-6/AC-39): distinguishes the AUTHORITATIVE transport-proxy
+   * attestation key (`'proxy'`, held outside the agent process) from the
+   * correlation-grade in-process genty key (`'in-process'`, held INSIDE the agent and
+   * therefore forgeable by a compromised agent). A model-decision step that requires
+   * (or defaults to requiring) proxy attestation is satisfied only by a `'proxy'` root.
+   */
+  producer?: 'proxy' | 'in-process';
   expiresAt?: string;
   revoked?: boolean;
 }

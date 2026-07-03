@@ -217,6 +217,8 @@ function normalizeMatch(raw: unknown, ctx: string): ActionMatch {
       program: a.program,
       subcommandEquals: asStringArray(a.subcommandEquals, `${ctx}.match.argv.subcommandEquals`),
       subcommandMatches: asStringArray(a.subcommandMatches, `${ctx}.match.argv.subcommandMatches`),
+      wrapperAllowlist: asStringArray(a.wrapperAllowlist, `${ctx}.match.argv.wrapperAllowlist`),
+      recognizedPrograms: asStringArray(a.recognizedPrograms, `${ctx}.match.argv.recognizedPrograms`),
     };
   }
 

@@ -75,8 +75,13 @@ export type {
   EvaluateInput,
 } from './policy-evaluator.js';
 
-export { issueCommandAuthorization } from './authorization-issuer.js';
-export type { IssueRequest, IssueResult, IssueEvidence } from './authorization-issuer.js';
+export { issueCommandAuthorization, issueFromDecision } from './authorization-issuer.js';
+export type {
+  IssueRequest,
+  IssueResult,
+  IssueEvidence,
+  IssueFromDecisionRequest,
+} from './authorization-issuer.js';
 
 export {
   canonicalizeCredentialIdentity,

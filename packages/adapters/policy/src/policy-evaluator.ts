@@ -36,6 +36,7 @@ import type {
   QuorumRequirement,
   StepConditions,
 } from './policy-schema.js';
+import { matchArgv, type ArgvMatchScope } from './argv-matcher.js';
 
 export interface Evidence {
   kind: 'human-approval' | 'model-decision' | 'delegation';
@@ -52,6 +53,15 @@ export interface EvaluationContext {
   credentialScope: string;
   configEpoch: number;
   minEpochFloor: number;
+  /**
+   * The RAW, untokenized command line for command-bearing tools (AC-38). Anti-evasion
+   * matching MUST re-tokenize and recurse through shell `-c` payloads / wrappers on the
+   * raw text — a pre-tokenized `canonicalArgv` has already collapsed `sh -c "aws …"` into
+   * a shell invocation and lost the inner program. When absent, the matcher derives the
+   * raw command from `args.command` (Bash tool input) or, failing that, from
+   * `canonicalArgv.join(' ')`.
+   */
+  rawCommand?: string;
 }
 
 export interface PolicyDecision {
@@ -108,7 +118,9 @@ function conditionsHold(
     if (typeof modelId !== 'string') return false;
     let re: RegExp;
     try {
-      re = new RegExp(conditions.modelIdMatches);
+      // Anchor as a FULL-STRING match (AC allowlist-widening fix): an unanchored
+      // pattern `claude-opus-.*` would also match `gpt-cheap-claude-opus-x`.
+      re = new RegExp(`^(?:${conditions.modelIdMatches})$`);
     } catch {
       return false;
     }
@@ -136,14 +148,27 @@ function conditionsHold(
 
 /**
  * The distinct human identity behind an approval — used to count DISTINCT holders for
- * a quorum (AC-41): one human holding two keys must not satisfy a 2-of quorum. The
- * identity is the payload's `approvedBy` (the responder identity), falling back to the
- * signing fingerprint.
+ * a quorum (AC-41): one human holding two keys must not satisfy a 2-of quorum.
+ *
+ * SECURITY: the identity MUST be resolved from the trusted store (the trust-root record
+ * the signing fingerprint resolves to), NOT the payload's `approvedBy` — `approvedBy` is
+ * signed by the human's OWN key and is therefore attacker-chosen. One human holding two
+ * keys, each registered under the SAME trusted-store identity (e.g. a stable
+ * `identityId`/`label` on the TrustRoot), signing `approvedBy:'alice'` and
+ * `approvedBy:'bob'`, would otherwise count as TWO distinct holders and defeat a
+ * 2-quorum. We key distinctness on the resolved TrustRoot's `identityId` (falling back
+ * to its `label`, then to the fingerprint when the store maps one identity to one root),
+ * so two keys owned by one trusted identity count as ONE.
  */
-function humanIdentity(evidence: Evidence): string {
-  const approvedBy = evidence.envelope.payload.approvedBy;
-  if (typeof approvedBy === 'string' && approvedBy.length > 0) return approvedBy;
-  return evidence.envelope.publicKeyFingerprint;
+function humanIdentity(evidence: Evidence, store: TrustStore): string {
+  const fp = evidence.envelope.publicKeyFingerprint;
+  const root = store.trustRoots.find((r) => r && r.fingerprint === fp);
+  if (root) {
+    if (typeof root.identityId === 'string' && root.identityId.length > 0) return root.identityId;
+    if (typeof root.label === 'string' && root.label.length > 0) return `label:${root.label}`;
+  }
+  // Fail-closed default: the fingerprint itself (store maps one identity → one root).
+  return fp;
 }
 
 // ── evidence → verified for a step ──────────────────────────────────────────
@@ -154,10 +179,63 @@ const KIND_TO_EVIDENCE_KIND: Record<string, EvidenceKind> = {
   delegation: 'delegation',
 };
 
+/** A signed tool-call binding entry inside a model-decision attestation (AC-34). */
+interface SignedToolCallLike {
+  toolCallId?: unknown;
+  name?: unknown;
+  argsHash?: unknown;
+}
+
+/**
+ * AC-34a — a model-decision attestation satisfies a step for THIS executing tool call
+ * iff its signed `toolCalls[]` contains an entry whose `toolCallId` equals
+ * `context.toolCallId` AND whose `argsHash` equals `context.argsHash` (both computed by
+ * the shared `canonicalizeArgs` serializer, so the bytes match the attestation
+ * producer). An attestation with no matching entry — a different call's id, a mismatched
+ * argsHash, or an empty/absent `toolCalls[]` — is NOT a valid binding → deny.
+ *
+ * Without this, a valid "opus decided" attestation for one call in a turn is replayable
+ * onto a DIFFERENT, unapproved sibling call in the same turn (AC-30 replay-within-turn).
+ */
+function modelDecisionBindsToolCall(
+  envelope: SignedEnvelope<Record<string, unknown>>,
+  context: EvaluationContext,
+): boolean {
+  const toolCalls = envelope.payload.toolCalls;
+  if (!Array.isArray(toolCalls) || toolCalls.length === 0) return false;
+  return toolCalls.some((tc) => {
+    const entry = tc as SignedToolCallLike;
+    return (
+      typeof entry.toolCallId === 'string' &&
+      entry.toolCallId === context.toolCallId &&
+      typeof entry.argsHash === 'string' &&
+      entry.argsHash === context.argsHash
+    );
+  });
+}
+
+/**
+ * AC-39 — for a model-decision step that requires proxy attestation (explicitly, or by
+ * DESIGN DEFAULT for any credentialScope-touching action), the resolved trust root MUST
+ * be an `engine` root marked `producer:'proxy'` (the out-of-agent proxy key). An
+ * in-process (agent-held) attestation is correlation-grade only and is rejected → deny.
+ */
+function attestationIsProxy(
+  envelope: SignedEnvelope<Record<string, unknown>>,
+  store: TrustStore,
+): boolean {
+  const root = store.trustRoots.find((r) => r && r.fingerprint === envelope.publicKeyFingerprint);
+  return root?.producer === 'proxy';
+}
+
 /**
  * True iff this evidence verifies against the trusted store for the required kind
  * (allowedFingerprints from the step) AND its conditions hold. Verification routes
  * through the Milestone-A trusted-store wrapper — the only sanctioned entry.
+ *
+ * For a model-decision step this ALSO enforces (AC-34a) that the signed `toolCalls[]`
+ * binds the executing `context.toolCallId` + `context.argsHash`, and (AC-39) that the
+ * attestation comes from a proxy producer when the step requires proxy attestation.
  */
 function evidenceSatisfiesStep(
   evidence: Evidence,
@@ -165,6 +243,8 @@ function evidenceSatisfiesStep(
   allowedFingerprints: string[] | undefined,
   conditions: StepConditions | undefined,
   store: TrustStore,
+  context: EvaluationContext,
+  requireProxyAttestation: boolean,
 ): boolean {
   if (evidence.kind !== requiredKind) return false;
   const trusted = verifyEnvelopeTrusted(
@@ -174,6 +254,14 @@ function evidenceSatisfiesStep(
     allowedFingerprints && allowedFingerprints.length > 0 ? allowedFingerprints : undefined,
   );
   if (!trusted.valid) return false;
+
+  if (requiredKind === 'model-decision') {
+    // AC-34a: the attestation MUST bind this exact executing tool call.
+    if (!modelDecisionBindsToolCall(evidence.envelope, context)) return false;
+    // AC-39: proxy attestation required (explicit or credential-scope default).
+    if (requireProxyAttestation && !attestationIsProxy(evidence.envelope, store)) return false;
+  }
+
   return conditionsHold(conditions, evidence.envelope);
 }
 
@@ -190,6 +278,8 @@ function satisfyTypedStep(
   evidence: Evidence[],
   store: TrustStore,
   consumed: Set<Evidence>,
+  context: EvaluationContext,
+  requireProxyAttestation: boolean,
 ): ReqResult {
   // Delegation steps requiring an actual delegation relationship take the chain path.
   if (step.kind === 'delegation' && step.conditions?.requiresDelegation === true) {
@@ -198,7 +288,17 @@ function satisfyTypedStep(
 
   for (const ev of evidence) {
     if (consumed.has(ev)) continue;
-    if (evidenceSatisfiesStep(ev, step.kind, step.trustedIdentities, step.conditions, store)) {
+    if (
+      evidenceSatisfiesStep(
+        ev,
+        step.kind,
+        step.trustedIdentities,
+        step.conditions,
+        store,
+        context,
+        requireProxyAttestation,
+      )
+    ) {
       return { satisfied: true, consumed: [ev] };
     }
   }
@@ -210,6 +310,8 @@ function satisfyQuorum(
   evidence: Evidence[],
   store: TrustStore,
   consumed: Set<Evidence>,
+  context: EvaluationContext,
+  requireProxyAttestation: boolean,
 ): ReqResult {
   const contributors: Evidence[] = [];
   const identities = new Set<string>();
@@ -217,11 +319,22 @@ function satisfyQuorum(
   for (const ev of evidence) {
     if (consumed.has(ev)) continue;
     if (ev.kind !== quorum.of) continue;
-    if (!evidenceSatisfiesStep(ev, quorum.of, quorum.trustedIdentities, quorum.conditions, store)) {
+    if (
+      !evidenceSatisfiesStep(
+        ev,
+        quorum.of,
+        quorum.trustedIdentities,
+        quorum.conditions,
+        store,
+        context,
+        requireProxyAttestation,
+      )
+    ) {
       continue;
     }
-    // Distinct-holder rule: count DISTINCT identities, not distinct keys (AC-41).
-    const identity = quorum.of === 'human-approval' ? humanIdentity(ev) : ev.envelope.publicKeyFingerprint;
+    // Distinct-holder rule: count DISTINCT identities resolved from the TRUSTED STORE,
+    // not distinct keys and not the attacker-signed payload label (AC-41).
+    const identity = quorum.of === 'human-approval' ? humanIdentity(ev, store) : ev.envelope.publicKeyFingerprint;
     if (identities.has(identity)) continue; // same holder's second key does not add
     identities.add(identity);
     contributors.push(ev);
@@ -281,12 +394,14 @@ function satisfyRequirement(
   evidence: Evidence[],
   store: TrustStore,
   consumed: Set<Evidence>,
+  context: EvaluationContext,
+  requireProxyAttestation: boolean,
 ): ReqResult & { requiredKind: string } {
   if ('quorum' in req) {
-    const r = satisfyQuorum(req.quorum, evidence, store, consumed);
+    const r = satisfyQuorum(req.quorum, evidence, store, consumed, context, requireProxyAttestation);
     return { ...r, requiredKind: req.quorum.of };
   }
-  const r = satisfyTypedStep(req.step, evidence, store, consumed);
+  const r = satisfyTypedStep(req.step, evidence, store, consumed, context, requireProxyAttestation);
   return { ...r, requiredKind: req.step.kind };
 }
 
@@ -305,14 +420,27 @@ interface ChainOutcome {
  * via the `consumed` set. `requiredStepCount` = number of AND-ed requirements, expanded
  * so each quorum contributor is its own binding (AC-41a).
  */
-function evaluateChain(chain: ChainDoc, evidence: Evidence[], store: TrustStore): ChainOutcome {
+function evaluateChain(
+  chain: ChainDoc,
+  evidence: Evidence[],
+  store: TrustStore,
+  context: EvaluationContext,
+  requireProxyAttestation: boolean,
+): ChainOutcome {
+  // Defensive fail-closed guard: a chain with no requirements (or a malformed
+  // requirements array) can NEVER be "satisfied" — an empty AND is vacuously true, which
+  // would grant with ZERO evidence. Deny (unsatisfied) instead.
+  if (!Array.isArray(chain.requirements) || chain.requirements.length === 0) {
+    return { satisfied: false, evidenceUsed: [], requiredStepCount: 0, stepBindings: [] };
+  }
+
   const consumed = new Set<Evidence>();
   const evidenceUsed: Evidence[] = [];
   const stepBindings: { stepIndex: number; requiredKind: string; evidence: Evidence }[] = [];
   let stepIndex = 0;
 
   for (const req of chain.requirements) {
-    const result = satisfyRequirement(req, evidence, store, consumed);
+    const result = satisfyRequirement(req, evidence, store, consumed, context, requireProxyAttestation);
     if (!result.satisfied) {
       return { satisfied: false, evidenceUsed: [], requiredStepCount: 0, stepBindings: [] };
     }
@@ -322,6 +450,13 @@ function evaluateChain(chain: ChainDoc, evidence: Evidence[], store: TrustStore)
       stepBindings.push({ stepIndex, requiredKind: result.requiredKind, evidence: ev });
       stepIndex++;
     }
+  }
+
+  // A satisfied chain MUST have bound at least one evidence per the guard above; a
+  // requiredStepCount of 0 after a "satisfied" pass is a contradiction → treat as
+  // unsatisfied (fail closed), so the issuer never issues on an empty evidence set.
+  if (stepBindings.length === 0) {
+    return { satisfied: false, evidenceUsed: [], requiredStepCount: 0, stepBindings: [] };
   }
 
   return {
@@ -334,40 +469,90 @@ function evaluateChain(chain: ChainDoc, evidence: Evidence[], store: TrustStore)
 
 // ── action matching ─────────────────────────────────────────────────────────
 
-/** True iff the context matches this action's tool + argv + credentialScope matchers. */
-function actionMatches(action: PolicyActionDoc, context: EvaluationContext): boolean {
-  if (!globMatch(action.match.tool, context.toolName)) return false;
+/**
+ * The result of matching an action against a context (AC-38 anti-evasion):
+ *   - 'match'    — the action covers this invocation; evaluate its chains.
+ *   - 'deny'     — the invocation is a covered-but-unauthorized disguised command
+ *                  (unresolvable wrapper for a covered program, AC-38a). No chain can
+ *                  authorize it; deny unconditionally.
+ *   - 'no-match' — the action does not apply.
+ */
+type ActionMatchOutcome = 'match' | 'deny' | 'no-match';
+
+/**
+ * Derive the RAW command line for argv matching. Prefer the explicit `rawCommand`; else
+ * the Bash tool input `{command}`; else re-join the canonical argv (last resort — this
+ * cannot recover a lost shell wrapper, but the anti-evasion path is fed the raw command
+ * by real gates).
+ */
+function rawCommandFor(context: EvaluationContext): string | undefined {
+  if (typeof context.rawCommand === 'string' && context.rawCommand.length > 0) {
+    return context.rawCommand;
+  }
+  const args = context.args;
+  if (args && typeof args === 'object' && typeof (args as Record<string, unknown>).command === 'string') {
+    return (args as Record<string, unknown>).command as string;
+  }
+  if (Array.isArray(context.canonicalArgv) && context.canonicalArgv.length > 0) {
+    return context.canonicalArgv.join(' ');
+  }
+  return undefined;
+}
+
+/**
+ * Match the context against this action's tool + argv + credentialScope matchers,
+ * routing the argv matching through the canonicalized, anti-evasion `matchArgv`
+ * (shell `-c` recursion, per-scope wrapper allowlist, deny-on-unresolvable, subcommand
+ * normalization) — NEVER naive basename matching (AC-38/AC-38a/AC-38c).
+ */
+function matchAction(action: PolicyActionDoc, context: EvaluationContext): ActionMatchOutcome {
+  if (!globMatch(action.match.tool, context.toolName)) return 'no-match';
 
   if (action.match.argv) {
-    const argv = context.canonicalArgv;
-    if (!Array.isArray(argv) || argv.length === 0) return false;
-    const program = argv[0].split(/[\\/]/).pop() ?? argv[0];
-    if (program !== action.match.argv.program) return false;
-    const subcommand = subcommandOf(argv);
-    const eq = action.match.argv.subcommandEquals;
-    const rx = action.match.argv.subcommandMatches;
-    if (eq || rx) {
-      let ok = false;
-      if (eq && eq.some((s) => subcommand === s || subcommand.startsWith(`${s} `))) ok = true;
-      if (!ok && rx && rx.some((p) => new RegExp(p).test(subcommand))) ok = true;
-      if (!ok) return false;
+    const command = rawCommandFor(context);
+    if (typeof command !== 'string' || command.trim().length === 0) return 'no-match';
+
+    const scope: ArgvMatchScope = {
+      scopeId: action.id,
+      match: {
+        program: action.match.argv.program,
+        subcommandEquals: action.match.argv.subcommandEquals,
+        subcommandMatches: action.match.argv.subcommandMatches,
+      },
+      wrapperAllowlist: action.match.argv.wrapperAllowlist,
+      recognizedPrograms: action.match.argv.recognizedPrograms ?? [action.match.argv.program],
+      // Coverage/deny for THIS action is decided by matchArgv; the document-level
+      // commandDefaultAllow governs the fully-uncovered case handled by the caller.
+      commandDefaultAllow: false,
+    };
+
+    const res = matchArgv(command, scope);
+
+    // A covered-but-unauthorized disguised command (unresolvable wrapper for a covered
+    // program, or an opaque construct touching the scope) → deny (AC-38a). A deny even
+    // takes precedence over any grant chain: a disguised covered command is never
+    // authorized.
+    if (res.deny === true && (res.covered || touchesArgvScope(res, scope, command))) {
+      return 'deny';
     }
+    if (!res.covered) return 'no-match';
   }
 
   if (typeof action.match.credentialScope === 'string') {
-    if (!globMatch(action.match.credentialScope, context.credentialScope)) return false;
+    if (!globMatch(action.match.credentialScope, context.credentialScope)) return 'no-match';
   }
 
-  return true;
+  return 'match';
 }
 
-function subcommandOf(argv: string[]): string {
-  const words: string[] = [];
-  for (const tok of argv.slice(1)) {
-    if (tok.startsWith('-')) break;
-    words.push(tok);
-  }
-  return words.join(' ');
+/**
+ * True when a denied (unresolvable) match still relates to the covered scope — the
+ * matcher already denies-on-touch for covered scopes, so any `deny` from `matchArgv`
+ * under a covered-program scope is treated as a covered-but-unauthorized action.
+ */
+function touchesArgvScope(res: ReturnType<typeof matchArgv>, scope: ArgvMatchScope, command: string): boolean {
+  const recognized = [...(scope.recognizedPrograms ?? []), scope.match.program];
+  return recognized.some((prog) => command.includes(prog));
 }
 
 // ── top-level evaluate ──────────────────────────────────────────────────────
@@ -393,7 +578,19 @@ export function evaluatePolicy(input: EvaluateInput): PolicyDecision {
     }
     if (context.configEpoch < context.minEpochFloor) return DENY('configEpoch below floor');
 
-    const matching = document.actions.filter((a) => actionMatches(a, context));
+    // Classify each action against the context via the anti-evasion argv matcher.
+    const classified = document.actions.map((a) => ({ action: a, outcome: matchAction(a, context) }));
+
+    // AC-38a: a covered-but-unauthorized DISGUISED command (an unresolvable wrapper for a
+    // covered program — `sh -c 'aws s3 rm'`, `npx aws`, `$(...)`, backticks, `eval`,
+    // busybox, `python -c`, env-indirection) is denied unconditionally, whether the
+    // action is a grant or a deny. It falls through NEITHER to a chain NOR to
+    // default-allow.
+    if (classified.some((c) => c.outcome === 'deny')) {
+      return { granted: false, reason: 'covered command disguised via wrapper/indirection → deny', evidenceUsed: [] };
+    }
+
+    const matching = classified.filter((c) => c.outcome === 'match').map((c) => c.action);
 
     // Deny precedence: any matching `deny` action wins over grants (AC-20).
     if (matching.some((a) => a.effect === 'deny')) {
@@ -402,8 +599,16 @@ export function evaluatePolicy(input: EvaluateInput): PolicyDecision {
 
     for (const action of matching) {
       if (action.effect === 'deny') continue;
+      // AC-17/AC-39: proxy attestation is REQUIRED when the policy sets it explicitly,
+      // OR by DESIGN DEFAULT for any credentialScope-touching action (an action whose
+      // `match` names a credentialScope). It defaults to false only for non-credential
+      // actions. An explicit `false` opts out of the credential default.
+      const requireProxyAttestation =
+        action.requireProxyAttestation !== undefined
+          ? action.requireProxyAttestation
+          : typeof action.match.credentialScope === 'string' && action.match.credentialScope.length > 0;
       for (const chain of action.chains) {
-        const outcome = evaluateChain(chain, evidence, store);
+        const outcome = evaluateChain(chain, evidence, store, context, requireProxyAttestation);
         if (outcome.satisfied) {
           return {
             granted: true,

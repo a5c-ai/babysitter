@@ -26,13 +26,21 @@ import { createHash } from 'node:crypto';
 import { createKeyPair, signPayload } from '@a5c-ai/genty-core/trust';
 import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
 
-import { issueCommandAuthorization, type IssueRequest, type IssueResult } from '../authorization-issuer.js';
+import {
+  issueCommandAuthorization,
+  issueFromDecision,
+  type IssueRequest,
+  type IssueResult,
+} from '../authorization-issuer.js';
 import {
   verifyCommandAuthorization,
   type CommandAuthorizationPayload,
   type TrustRoot,
   type TrustStore,
 } from '../verify-envelope-trusted.js';
+import { evaluatePolicy, type EvaluationContext } from '../policy-evaluator.js';
+import { parsePolicyDocument } from '../policy-schema.js';
+import { commandHash as computeCommandHash } from '../canonicalize-args.js';
 
 const sha256 = (s: string): string => createHash('sha256').update(s).digest('hex');
 
@@ -67,7 +75,8 @@ function humanRoot(kp: ReturnType<typeof createKeyPair>, label: string, extra: P
   return { fingerprint: kp.fingerprint, kind: 'human', publicKey: kp.publicKey, label, ...extra };
 }
 function engineRoot(kp: ReturnType<typeof createKeyPair>, label: string, extra: Partial<TrustRoot> = {}): TrustRoot {
-  return { fingerprint: kp.fingerprint, kind: 'engine', publicKey: kp.publicKey, label, ...extra };
+  // The proxy attestation key: AC-39 defaults credentialScope actions to proxy-required.
+  return { fingerprint: kp.fingerprint, kind: 'engine', producer: 'proxy', publicKey: kp.publicKey, label, ...extra };
 }
 
 const argsHashV = sha256('{"command":"aws s3 cp a b"}');
@@ -296,5 +305,139 @@ actions:
     });
     // Terminal identity (b) != expected delegatee (wrongDelegatee) → deny.
     expect(decision.granted).toBe(false);
+  });
+});
+
+// ── Defect 6: the issuer grant gate — issue ONLY the action the evaluator granted ──
+describe('Milestone B — grant-gated issuance consumes the PolicyDecision (defect 6)', () => {
+  const AWS_DOC = `
+version: 1
+authorizationTtlSeconds: 120
+commandDefaultAllow: false
+actions:
+  - id: aws-prod-write
+    match:
+      tool: "Bash"
+      argv: { program: "aws", subcommandEquals: ["s3 cp", "s3 rm", "s3 sync"] }
+      credentialScope: "aws:prod:*"
+    chains:
+      - id: human-plus-opus
+        requirements:
+          - step: { kind: human-approval, trustedIdentities: ["__ALICE_FP__"], conditions: { scopeEquals: "aws:prod:s3", notExpired: true } }
+          - step: { kind: model-decision, conditions: { modelIdMatches: "claude-opus-.*" } }
+`;
+
+  function grantCtx(overrides: Partial<EvaluationContext> = {}): EvaluationContext {
+    return {
+      now: Date.now(),
+      toolName: 'Bash',
+      toolCallId: 'call_A',
+      canonicalArgv: ['aws', 's3', 'cp', 'a', 'b'],
+      args: { command: 'aws s3 cp a b' },
+      argsHash: sha256('{"command":"aws s3 cp a b"}'),
+      credentialScope: 'aws:prod:s3',
+      configEpoch: 5,
+      minEpochFloor: 5,
+      ...overrides,
+    } as EvaluationContext;
+  }
+
+  function setup() {
+    const alice = createKeyPair();
+    const proxy = createKeyPair();
+    const issuer = createKeyPair();
+    const store: TrustStore = {
+      trustRoots: [humanRoot(alice, 'alice'), engineRoot(proxy, 'proxy'), engineRoot(issuer, 'issuer')],
+    };
+    const doc = parsePolicyDocument(AWS_DOC.replaceAll('__ALICE_FP__', alice.fingerprint));
+    return { alice, proxy, issuer, store, doc };
+  }
+
+  it('issues NOTHING when the decision is not granted (fail-closed grant gate)', () => {
+    const { alice, issuer, store, doc } = setup();
+    // Missing the required model-decision → decision NOT granted.
+    const decision = evaluatePolicy({
+      document: doc,
+      store,
+      evidence: [{ kind: 'human-approval', envelope: humanApproval(alice) }],
+      context: grantCtx(),
+    });
+    expect(decision.granted).toBe(false);
+
+    const result = issueFromDecision({
+      decision,
+      context: grantCtx(),
+      issuerKeyPair: issuer,
+      store,
+      policyDocHash: sha256('policy-doc-bytes'),
+      authorizationTtlSeconds: 120,
+    });
+    expect(result.issued).toBe(false);
+    expect(result.authorization).toBeUndefined();
+  });
+
+  it('issues the EXACT granted action and re-verifies at a gate (binds toolCallId/argsHash/commandHash/credentialScope/configEpoch)', () => {
+    const { alice, proxy, issuer, store, doc } = setup();
+    const context = grantCtx();
+    const decision = evaluatePolicy({
+      document: doc,
+      store,
+      evidence: [
+        { kind: 'human-approval', envelope: humanApproval(alice) },
+        { kind: 'model-decision', envelope: modelDecision(proxy) },
+      ],
+      context,
+    });
+    expect(decision.granted).toBe(true);
+
+    const result = issueFromDecision({
+      decision,
+      context,
+      issuerKeyPair: issuer,
+      store,
+      policyDocHash: sha256('policy-doc-bytes'),
+      authorizationTtlSeconds: 120,
+    });
+    expect(result.issued).toBe(true);
+    const env = result.authorization!;
+    // Bound to the EXACT granted action + context.
+    expect(env.payload.policyId).toBe('aws-prod-write');
+    expect(env.payload.matchedChainId).toBe('human-plus-opus');
+    expect(env.payload.toolName).toBe('Bash');
+    expect(env.payload.toolCallId).toBe('call_A');
+    expect(env.payload.argsHash).toBe(sha256('{"command":"aws s3 cp a b"}'));
+    expect(env.payload.commandHash).toBe(computeCommandHash(['aws', 's3', 'cp', 'a', 'b']));
+    expect(env.payload.credentialScope).toBe('aws:prod:s3');
+    expect(env.payload.configEpoch).toBe(5);
+
+    // The issued authorization re-verifies at a gate against the same bound context.
+    const issuerRoot = store.trustRoots.find((r) => r.label === 'issuer')!;
+    const gate = verifyCommandAuthorization(env, {
+      now: Date.now(),
+      toolName: 'Bash',
+      toolCallId: 'call_A',
+      commandHash: computeCommandHash(['aws', 's3', 'cp', 'a', 'b']),
+      argsHash: sha256('{"command":"aws s3 cp a b"}'),
+      credentialScope: 'aws:prod:s3',
+      policyDocHash: sha256('policy-doc-bytes'),
+      currentConfigEpoch: 5,
+      minEpochFloor: 5,
+      issuerRoots: [issuerRoot],
+      requiredStepCount: 2,
+    });
+    expect(gate.valid).toBe(true);
+  });
+
+  it('a null/malformed decision issues nothing (fail closed)', () => {
+    const { issuer, store } = setup();
+    const result = issueFromDecision({
+      decision: null as never,
+      context: grantCtx(),
+      issuerKeyPair: issuer,
+      store,
+      policyDocHash: sha256('x'),
+      authorizationTtlSeconds: 120,
+    });
+    expect(result.issued).toBe(false);
   });
 });

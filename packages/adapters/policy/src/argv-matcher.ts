@@ -30,6 +30,14 @@ export interface ArgvMatch {
   subcommandEquals?: string[];
   /** Regex(es) over the normalized subcommand string. */
   subcommandMatches?: string[];
+  /**
+   * AC-38c closed, per-scope allowlist of transparent leading wrappers the matcher may
+   * recurse through to the real program (e.g. `time`, `sudo`). Any leading token NOT on
+   * this allowlist makes the program unresolvable → deny.
+   */
+  wrapperAllowlist?: string[];
+  /** Programs recognized as a legitimate resolved program for this scope. */
+  recognizedPrograms?: string[];
 }
 
 /**
@@ -261,7 +269,9 @@ export function matchArgv(command: string, scope: ArgvMatchScope): ArgvMatchResu
       if (eq && eq.some((s) => subcommand === s || subcommand.startsWith(`${s} `))) {
         subMatch = true;
       }
-      if (!subMatch && rx && rx.some((pat) => new RegExp(pat).test(subcommand))) {
+      // Anchor as a FULL-STRING match (allowlist-widening fix): an unanchored
+      // subcommand pattern would match on any substring.
+      if (!subMatch && rx && rx.some((pat) => new RegExp(`^(?:${pat})$`).test(subcommand))) {
         subMatch = true;
       }
     }

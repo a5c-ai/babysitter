@@ -24,6 +24,8 @@ import {
   type CommandAuthorizationPayload,
   type EvidenceStepBinding,
 } from './verify-envelope-trusted.js';
+import { commandHash as computeCommandHash } from './canonicalize-args.js';
+import type { PolicyDecision, EvaluationContext } from './policy-evaluator.js';
 
 export interface IssueEvidence {
   kind: 'human-approval' | 'model-decision' | 'delegation';
@@ -175,5 +177,104 @@ export function issueCommandAuthorization(req: IssueRequest): IssueResult {
     return { issued: true, authorization };
   } catch (err) {
     return DENY(`exception during issuance: ${(err as Error)?.message ?? String(err)}`);
+  }
+}
+
+// ── Grant-gated issuance (defect 6) ─────────────────────────────────────────
+
+export interface IssueFromDecisionRequest {
+  /** The evaluator's decision — issuance happens ONLY when `granted === true`. */
+  decision: PolicyDecision;
+  /** The exact evaluation context the decision resolved against (binds the action). */
+  context: EvaluationContext;
+  issuerKeyPair: IdentityKeyPair;
+  store: TrustStore;
+  /** sha256 of the integrity-verified policy doc that granted this (AC-8/AC-42). */
+  policyDocHash: string;
+  authorizationTtlSeconds: number;
+  runId?: string;
+  sessionId?: string;
+}
+
+/**
+ * ISSUE ONLY WHAT THE EVALUATOR GRANTED (defect 6 — issuer grant gate).
+ *
+ * The low-level `issueCommandAuthorization` will mint an authorization from any
+ * caller-supplied `evidenceUsed[]`+`requiredStepCount` — it does NOT re-check that a real
+ * PolicyDecision granted the action, so a caller could issue for an action the evaluator
+ * never authorized. This entry point closes that: it consumes the evaluator's
+ * `PolicyDecision` and:
+ *   - issues NOTHING unless `decision.granted === true` (a non-granted decision → no
+ *     authorization, fail closed);
+ *   - binds `toolName / commandHash / argsHash / credentialScope / toolCallId /
+ *     configEpoch / matchedChainId / policyId(actionId)` from the GRANTED decision +
+ *     the exact context it resolved against — never from free-form caller input — so the
+ *     issued authorization names precisely the action the evaluator granted; and
+ *   - binds one evidence per satisfied requirement from `decision.stepBindings`
+ *     (AC-42), and carries the decision's `requiredStepCount`.
+ *
+ * All bound fields land in `signedFields` (the low-level signer signs the full AC-8 set).
+ * Any missing decision metadata (no matchedChainId / actionId / requiredStepCount /
+ * stepBindings) is a fail-closed no-issue.
+ */
+export function issueFromDecision(req: IssueFromDecisionRequest): IssueResult {
+  try {
+    if (!req || typeof req !== 'object') return DENY('missing issue-from-decision request');
+    const { decision, context } = req;
+    if (!decision || typeof decision !== 'object') return DENY('missing decision');
+    if (!context || typeof context !== 'object') return DENY('missing context');
+
+    // GRANT GATE: no grant → no authorization.
+    if (decision.granted !== true) return DENY('policy decision not granted → no authorization');
+
+    // The granted decision MUST name the exact action/chain and its bound evidence.
+    if (typeof decision.matchedChainId !== 'string' || decision.matchedChainId.length === 0) {
+      return DENY('granted decision has no matchedChainId');
+    }
+    if (typeof decision.actionId !== 'string' || decision.actionId.length === 0) {
+      return DENY('granted decision has no actionId');
+    }
+    if (typeof decision.requiredStepCount !== 'number' || decision.requiredStepCount < 1) {
+      return DENY('granted decision has no requiredStepCount');
+    }
+    if (!Array.isArray(decision.stepBindings) || decision.stepBindings.length === 0) {
+      return DENY('granted decision has no step bindings');
+    }
+
+    // Bind the evidence per satisfied requirement from the decision's own bindings
+    // (never re-derived from a caller-supplied evidence list).
+    const evidenceUsed: IssueEvidence[] = decision.stepBindings.map((b) => ({
+      kind: b.evidence.kind,
+      envelope: b.evidence.envelope,
+      stepIndex: b.stepIndex,
+    }));
+
+    // commandHash from the exact canonical argv the decision resolved against (AC-8).
+    const commandHash =
+      Array.isArray(context.canonicalArgv) && context.canonicalArgv.length > 0
+        ? computeCommandHash(context.canonicalArgv)
+        : '';
+
+    return issueCommandAuthorization({
+      issuerKeyPair: req.issuerKeyPair,
+      store: req.store,
+      policyId: decision.actionId,
+      policyDocHash: req.policyDocHash,
+      matchedChainId: decision.matchedChainId,
+      configEpoch: context.configEpoch,
+      minEpochFloor: context.minEpochFloor,
+      toolName: context.toolName,
+      toolCallId: context.toolCallId,
+      commandHash,
+      argsHash: context.argsHash,
+      credentialScope: context.credentialScope,
+      authorizationTtlSeconds: req.authorizationTtlSeconds,
+      requiredStepCount: decision.requiredStepCount,
+      evidenceUsed,
+      runId: req.runId,
+      sessionId: req.sessionId,
+    });
+  } catch (err) {
+    return DENY(`exception during grant-gated issuance: ${(err as Error)?.message ?? String(err)}`);
   }
 }
