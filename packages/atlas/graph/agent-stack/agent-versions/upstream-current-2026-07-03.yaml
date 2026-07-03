@@ -1,0 +1,252 @@
+# Additive upstream release records from the 2026-07-03 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783069983-gce9c8b
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783069983-gce9c8b"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783069983-gce9c8b"
+  currentVersion: "0.0.1783069983-gce9c8b"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783069983-gce9c8b"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from 0.0.1782969322-gf53f17 to 0.0.1783069983-gce9c8b."
+    - "npm metadata exposes homepage https://ampcode.com/ but no repository or issue tracker for build-specific release notes."
+    - "The npm README still documents npm install -g @ampcode/cli and says the prior @sourcegraph/amp package name works for backwards compatibility."
+    - "No confirmed CLI flag, transport, MCP, model, package-name, or migration change was published for this timestamped build."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783069983-gce9c8b."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783069983-gce9c8b-2026-07-03
+---
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-0-16
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.0.16"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.16"
+  currentVersion: "1.0.16"
+  releasedAt: "2026-07-02"
+  upstreamReleaseTag: "1.0.16"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.0.16"
+  cliCommand: "antigravity"
+  summary: "Antigravity CLI release improving streamed background-task logs, transient-error retries, dynamic subagent definitions, empty-output command handling, shutdown cleanup, and pre-tool hook decision handling."
+  assimilationNotes:
+    - "Latest official google-antigravity/antigravity-cli release moved from 1.0.15 to 1.0.16."
+    - "The /tasks detail panel now follows streaming background task logs to the bottom unless the user has manually scrolled up, affecting TUI task-log rendering."
+    - "Model generation adds automatic client-side retries for transient errors, affecting retry/backoff expectations."
+    - "Dynamically defined subagents moved from JSON to Markdown definitions, affecting dynamic-subagent definition parsing."
+    - "Background tasks or terminal commands with empty output no longer crash, affecting process-output handling."
+    - "Permission manager pre-tool hooks now tolerate empty decision strings instead of reporting unknown decisions."
+    - "No package-name or install-method migration was identified."
+  releaseHighlights:
+    - "Streaming /tasks detail panel auto-scroll behavior."
+    - "Client-side retries for transient model generation errors."
+    - "Markdown dynamic subagent definitions."
+    - "Empty-output background task and terminal command crash fix."
+    - "Shutdown leak cleanup for background sync."
+    - "Empty pre-tool hook decision handling."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:antigravity-cli
+  sourced_from:
+    - evidence:antigravity-1-0-16-2026-07-03
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-199
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.199"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.199"
+  currentVersion: "2.1.199"
+  releasedAt: "2026-07-02"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.199"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.199"
+  cliCommand: "claude"
+  summary: "Claude Code release improving stacked slash-skill loading, certificate and transient-error retry handling, partial-output preservation, subagent error propagation, background-agent stability, and hook stderr visibility."
+  assimilationNotes:
+    - "Latest npm moved from 2.1.198 to 2.1.199."
+    - "Stacked slash-skill invocations now load up to five leading skills, affecting slash-skill parsing and prompt assembly."
+    - "TLS/certificate errors now fail immediately with fix guidance instead of burning retries, affecting retry classification."
+    - "Mid-stream overloaded/server errors now preserve partial output with an incomplete-response notice, affecting stream result handling."
+    - "Subagents interrupted by rate limits or server errors return partial work or explicit errors to the parent instead of silently succeeding."
+    - "Background-agent daemon, stop/respawn, SSH cold-start, progress indicator, and low-memory handling fixes affect lifecycle supervision."
+    - "SessionStart, Setup, and SubagentStart hooks now show stderr when exiting with code 2, affecting hook diagnostics."
+    - "Plan mode now prompts for state-changing browser tool calls while read-only browser_batch remains auto-allowed."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Stacked slash-skill loading up to five leading skills."
+    - "Immediate TLS/certificate failure guidance."
+    - "Partial streaming output retained after mid-stream server errors."
+    - "Subagent partial-work and API-error propagation."
+    - "Background-agent stability fixes."
+    - "Hook stderr visibility for exit code 2."
+    - "Browser tool permission fix in plan mode."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-199-2026-07-03
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-199
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.199"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.199"
+  currentVersion: "0.3.199"
+  releasedAt: "2026-07-02"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.199"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.199"
+  summary: "Claude Agent SDK release adding canUseTool request correlation and null control-response suppression, workflow-agent blocked progress metadata, and masked sandbox credential injection settings."
+  assimilationNotes:
+    - "Latest npm moved from 0.3.198 to 0.3.199."
+    - "canUseTool callback options now include requestId, affecting permission-response correlation."
+    - "canUseTool callbacks may return null to suppress the SDK automatic control response, affecting permission adapter return handling."
+    - "workflow_agent progress events now include blocked when an agent is blocked by the auto-mode safety classifier."
+    - "sandbox.credentials settings add mode: mask and per-credential injectHosts, affecting sandbox credential config schema."
+    - "Package remains @anthropic-ai/claude-agent-sdk; update commands remain npm/yarn/pnpm/bun add for 0.3.199."
+  releaseHighlights:
+    - "canUseTool requestId callback option."
+    - "canUseTool null return for suppressing automatic control responses."
+    - "workflow_agent blocked progress event field."
+    - "sandbox.credentials mode: mask and injectHosts settings."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-199-2026-07-03
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-164-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.164.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.164.0"
+  currentVersion: "0.164.0"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.164.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific GitHub release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from 0.162.1 to 0.164.0."
+    - "npm metadata identifies @factory/cli 0.164.0 as the latest release and points repository metadata at Factory-AI/factory under apps/cli."
+    - "Factory-AI/factory exposes no GitHub Releases through gh release list as of this check."
+    - "The npm README still documents npm install -g @factory/cli, droid startup from a project directory, and the ! bash-mode toggle."
+    - "No public version-specific CLI flag, transport, API, model, package-name, install, or migration change is confirmed for 0.164.0."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.164.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-164-0-2026-07-03
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-4
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.4"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.4"
+  currentVersion: "16.3.4"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.4"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.4"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release adding Baseten provider and model catalog support, adjusting Claude Fable/Mythos cap handling, adding new third-party model entries, and fixing sibling-only usage limit display."
+  assimilationNotes:
+    - "Latest upstream moved from 16.3.0 to 16.3.4."
+    - "Baseten is now a supported AI provider and model provider, affecting provider/model catalog mappings."
+    - "Catalog adds Baseten models including DeepSeek V4 Pro and Kimi series, Devin Claude 5 Fable variants, GitHub Copilot Kimi K2.7 Code and MAI-Code-1-Flash, Poolside Laguna XS 2.1 via Kilo/OpenRouter, and Claude Fable 5 Free via Zenmux."
+    - "Claude Fable and Mythos weekly caps are no longer proactively hard-blocked and instead act as priority hints, affecting account rotation and fallback heuristics."
+    - "omp usage now renders sibling-only limits as not reported instead of hiding columns, affecting usage parser/UI expectations."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Baseten provider support."
+    - "New Baseten, Devin, GitHub Copilot, Poolside, and Zenmux model catalog entries."
+    - "Claude Fable/Mythos cap handling changed from proactive hard-blocking to reactive fallback priority."
+    - "omp usage sibling-only limit display fix."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-4-2026-07-03
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-5
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.5"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.5"
+  currentVersion: "0.19.5"
+  releasedAt: "2026-07-02"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.5"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.5"
+  cliCommand: "qwen"
+  summary: "Qwen Code release hardening daemon/channel workers and web shell behavior, adding TLS flags for serve mode, adding /effort reasoning control, improving skills ACP output, and expanding channel lifecycle metadata."
+  assimilationNotes:
+    - "Latest npm moved from 0.19.4 to 0.19.5."
+    - "serve mode adds --tls-cert and --tls-key flags, affecting launchBehavior and promptExtraFlags for hosted/WebUI runs."
+    - "Unified reasoning effort with /effort affects command catalog and model reasoning configuration."
+    - "Skills ACP output now shows description and level, affecting ACP output parsers."
+    - "Daemon-managed channel workers, channel lifecycle metadata, DingTalk proactive send, and listSessions affect channel/session bridge capabilities."
+    - "MCP capability discovery now retries with backoff and MCP approval dialogs are skipped in YOLO mode, affecting MCP readiness and approval behavior."
+    - "Credential redaction for worker stderr forwarding affects diagnostics/log sanitization."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "serve --tls-cert and --tls-key."
+    - "/effort unified reasoning effort command."
+    - "Skills ACP description and level output."
+    - "Channel lifecycle metadata, DingTalk proactive send, and listSessions."
+    - "MCP discovery retry backoff and YOLO approval-dialog skip."
+    - "Credential redaction for worker stderr forwarding."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-5-2026-07-03
