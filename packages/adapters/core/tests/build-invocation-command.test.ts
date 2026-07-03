@@ -339,7 +339,10 @@ describe('buildInvocationCommand — GATE 3 credential wiring (AC-23a/AC-50, def
       evidenceFingerprints: ['fp'],
       evidenceEnvelopeHashes: [sha256('e')],
       evidenceStepBindings: [{ stepIndex: 0, requiredKind: 'human-approval', envelopeHash: sha256('e') }],
-      issuedAt: new Date(now).toISOString(),
+      // Back-date issuedAt a few seconds so the gate's `now >= issuedAt` bound holds even
+      // when the gate captures its `now` before this resolver re-signs (else a
+      // millisecond-boundary flake drops the credential); expiresAt stays well in the future.
+      issuedAt: new Date(now - 5_000).toISOString(),
       expiresAt: new Date(now + 120_000).toISOString(),
     };
     return signPayload(ISSUER.privateKey, ISSUER.fingerprint, payload, CA_FIELDS);
