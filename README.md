@@ -123,12 +123,6 @@ codex plugin marketplace add a5c-ai/babysitter-codex
 
 ```
 
-Or via the SDK helper:
-
-```bash
-babysitter harness:install-plugin codex
-```
-
 [Plugin README](plugins/babysitter-unified/per-harness/codex/README.md)
 
 ### Cursor IDE and CLI (Experimental)
