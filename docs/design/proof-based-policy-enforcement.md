@@ -1282,3 +1282,42 @@ which are extensions of, not forks of, existing genty/proven primitives. The Dra
 (AC-50) and load-bearing-gate assertion (AC-49) add no new runtime module (they extend
 `spawn-invocation.ts` credential handling and add a coverage test over existing gates). No third policy
 engine is created (AC-22); the two existing engines delegate trust-chain steps to the adapter.
+
+## 14. Owner approval addendum (Draft 3 accepted, 2026-07-03)
+
+The owner approved this design at the design-approval breakpoint (security-review score 91/100) with
+the explicit condition that the four remaining non-blocking review notes are **promoted to REQUIRED
+acceptance criteria** — they are must-do before their milestone closes, not optional polish. These are
+now in scope:
+
+- **AC-53 (Milestone C — argsHash boundary conformance).** AC-52a's conformance corpus MUST include a
+  fixture that round-trips a real provider `arguments` JSON string through `JSON.parse` at the proxy
+  seam (`transport/types.ts:57`) → optional benign hook mutation → each gate's `canonicalizeArgs`, and
+  asserts byte-identity of the resulting `argsHash` against the object the harness actually delivers to
+  `definition.execute` (`session.ts:1251`). The design MUST also state that input-mutating GATE-1 hooks
+  (`dispatch.ts:158-163`) are incompatible with covered actions unless they run before attestation; a
+  covered action whose input a hook mutates after attestation MUST fail closed (deny), and a test MUST
+  assert this. Availability-grade, but required so covered actions do not silently break.
+
+- **AC-54 (Milestone A — proven canonical-form hardening).** The proven legacy signing canonical form
+  (`proven/sign.ts:23-30`, unescaped `field=value\n`) MUST be hardened with delimiter/length-prefix
+  escaping (or the proven answer path MUST be migrated to the genty JSON canonical form) so the
+  AC-48 bridge does not stand on an ambiguous concatenation. Existing proven signatures MUST continue to
+  verify (dual-read during transition) and the AC-48 completeness assertion MUST be evaluated against the
+  hardened form. A test MUST demonstrate two distinct field assignments can no longer collide to the same
+  signing bytes.
+
+- **AC-55 (Milestone B — credential-identity alias canonicalization).** The trusted credential→scope
+  source (AC-40/AC-40a) MUST canonicalize aliases of one physical credential (e.g. a KMS key referenced
+  by ARN and by key-id) to a single collision-resistant identity BEFORE the GATE-3 deny-on-ambiguous rule
+  is applied, so legitimate multi-alias credentials are not falsely denied. A test MUST cover a
+  two-alias-one-credential case resolving to one scope.
+
+- **AC-56 (Milestone D — exhaustive exec-seam registry).** The AC-49a execution-path enumeration test
+  MUST be structured as an exhaustiveness assertion over a checked-in registry of tool-execution /
+  dispatch / spawn entry seams (the `execute`/`dispatch`/spawn points in genty + adapters). Any new exec
+  entry point not present in the registry MUST fail the build, so a future unregistered execution path
+  breaks CI rather than silently bypassing enforcement.
+
+Each of AC-53..AC-56 maps to exactly one milestone as noted above and inherits the fail-closed,
+no-fallback discipline of the rest of this spec.
