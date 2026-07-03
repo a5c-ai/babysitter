@@ -72,6 +72,74 @@ export interface ArgvMatchResult {
 const SHELLS = new Set(['sh', 'bash', 'zsh', 'dash', 'ash', 'ksh']);
 
 /**
+ * Interpreter programs that run an INLINE code payload via a code-eval flag
+ * (`python -c`, `perl -e`, `ruby -e`, `node -e`, ...). An inline payload can NAME a
+ * covered program textually (`python -c "import os; os.system('aws s3 rm ...')"`)
+ * while the argv's leading program is the interpreter — so static resolution to a
+ * program is DEFEATED. Under a covered scope this is unresolvable → deny (AC-38a),
+ * never default-allow. We recognize the interpreter by basename (with a trailing
+ * version suffix stripped, e.g. `python3`, `ruby2.7`) so alternate binary names do
+ * not slip through.
+ */
+const INTERPRETERS = new Set([
+  'python',
+  'python2',
+  'python3',
+  'pypy',
+  'perl',
+  'ruby',
+  'node',
+  'nodejs',
+  'deno',
+  'bun',
+  'php',
+  'lua',
+  'Rscript',
+  'osascript',
+]);
+
+/**
+ * Code-eval flags that make an interpreter run an inline payload. `-c` (python),
+ * `-e` (perl/ruby/node), `-E` (perl), and `-m <module>` (python module exec) all
+ * hand the interpreter a payload that can invoke a covered program indirectly.
+ */
+const INTERPRETER_EVAL_FLAGS = new Set(['-c', '-e', '-E', '-m']);
+
+/**
+ * Strip a trailing version suffix from an interpreter basename so `python3`,
+ * `python3.11`, `ruby2.7`, `nodejs` canonicalize toward a known interpreter name.
+ * Returns the raw basename when no interpreter root is recognized.
+ */
+function interpreterRoot(base: string): string {
+  if (INTERPRETERS.has(base)) return base;
+  // Strip a trailing version (digits/dots) e.g. python3.11 -> python.
+  const stripped = base.replace(/[0-9]+(?:\.[0-9]+)*$/, '');
+  if (INTERPRETERS.has(stripped)) return stripped;
+  return base;
+}
+
+/**
+ * True iff `base` is an interpreter and one of `rest` (the tokens AFTER the
+ * interpreter, allowing intervening interpreter flags like `-I`, `-W`, `-u`) is a
+ * code-eval flag (`-c`/`-e`/`-E`/`-m`). The interpreter payload defeats static
+ * program resolution → the caller treats this as unresolvable (AC-38a).
+ */
+function isInterpreterEval(base: string, rest: string[]): boolean {
+  const root = interpreterRoot(base);
+  if (!INTERPRETERS.has(root)) return false;
+  // Scan the interpreter's own leading flags; if we hit a code-eval flag before a
+  // non-flag token (the script path), it is an inline-code eval.
+  for (const tok of rest) {
+    if (INTERPRETER_EVAL_FLAGS.has(tok)) return true;
+    // A `-c`/`-e` may be glued (`-ce`, unusual) — treat any flag STARTING with an
+    // eval letter conservatively as an eval flag under a covered scope.
+    if (tok.startsWith('-') && /^-[a-zA-Z]*[ceEm]/.test(tok)) return true;
+    if (!tok.startsWith('-')) break; // reached the script path — not inline eval
+  }
+  return false;
+}
+
+/**
  * Constructs that defeat static program resolution. Any token containing one of
  * these makes the program UNRESOLVABLE → deny (AC-38a): command substitution
  * `$(...)` / backticks, variable-indirect program `$VAR`, etc.
@@ -156,8 +224,11 @@ function resolveProgram(command: string, scope: ArgvMatchScope, depth = 0): Reso
       return { unresolvable: true, reason: 'shell without -c payload' };
     }
 
-    // An interpreter running inline code (`python -c "..."`) defeats resolution.
-    if (argv[idx + 1] === '-c' && !SHELLS.has(base)) {
+    // An interpreter running inline code (`python -c`, `perl -e`, `ruby -e`,
+    // `node -e`, `python -m ...`) defeats static resolution — the payload can name a
+    // covered program indirectly. Recognize the interpreter + code-eval flag form
+    // (with intervening interpreter flags) → unresolvable (AC-38a / AC-38c).
+    if (!SHELLS.has(base) && isInterpreterEval(base, argv.slice(idx + 1))) {
       return { unresolvable: true, reason: `interpreter indirection: ${base}` };
     }
 
@@ -279,6 +350,22 @@ function subcommandMatchesWindow(pattern: string, tokens: string[]): boolean {
  * form, references a recognized program for this scope. Used to decide whether an
  * unresolvable command is "covered-but-unauthorized" (→ deny) vs merely uncovered.
  */
+/**
+ * True iff any recognized program appears in `command` as a standalone WORD (bounded
+ * by whitespace, quotes, or `(`/`,`/`;`), so `awscli` / `/opt/awesome/x` do not
+ * spuriously fire but `os.system('aws s3 rm ...')` does. Used only for the fallback
+ * whole-command check for unresolvable / interpreter-payload disguises.
+ */
+function commandNamesRecognized(command: string, recognized: Set<string>): boolean {
+  for (const prog of recognized) {
+    // Word-ish boundary: start-of-string / non-[\w-] before, non-[\w-] / end after.
+    const escaped = prog.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(^|[^\\w-])${escaped}([^\\w-]|$)`);
+    if (re.test(command)) return true;
+  }
+  return false;
+}
+
 function touchesScope(command: string, scope: ArgvMatchScope): boolean {
   const recognized = new Set([
     ...(scope.recognizedPrograms ?? []),
@@ -294,16 +381,27 @@ function touchesScope(command: string, scope: ArgvMatchScope): boolean {
   try {
     argv = canonicalizeArgv(command);
   } catch {
-    // Not statically tokenizable (e.g. unterminated quote) → fall back to the raw
-    // containment check, failing closed toward "touches" so a covered program is denied.
-    return [...recognized].some((prog) => command.includes(prog));
+    // Not statically tokenizable (e.g. unterminated quote) → fall back to the word
+    // check, failing closed toward "touches" so a covered program is denied.
+    return commandNamesRecognized(command, recognized);
   }
   // If ANY token defeats static resolution (`$(...)`, backticks, `$VAR`, `NAME=value`),
   // the command is an unresolvable disguise: we cannot cleanly isolate the program, so
   // fall back to the whole-command containment check (fail closed toward deny). This is
   // exactly the covered-but-unauthorized case AC-38a must deny, not default-allow.
   if (argv.some((tok) => tokenBreaksResolution(tok) || isEnvAssignment(tok))) {
-    return [...recognized].some((prog) => command.includes(prog));
+    return commandNamesRecognized(command, recognized);
+  }
+  // An INTERPRETER-EVAL disguise (`python -c "... aws s3 rm ..."`, `perl -e '...'`,
+  // `node -e "..."`) hides the covered program inside an INLINE code payload token that
+  // is not the argv's leading program. Static basename resolution cannot see it, so if
+  // the leading program is an interpreter running inline code, fall back to a
+  // whole-command word check for the covered program (fail closed toward deny, AC-38a).
+  {
+    const lead = basename(argv[0]);
+    if (!SHELLS.has(lead) && isInterpreterEval(lead, argv.slice(1))) {
+      return commandNamesRecognized(command, recognized);
+    }
   }
   // Otherwise, use a precise RESOLVED-BASENAME check: a recognized program only "touches"
   // the scope if a token's canonical basename actually equals it — so `awscli`,

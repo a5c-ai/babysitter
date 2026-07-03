@@ -5,12 +5,30 @@
  * into a concrete host command based on the invocation mode (local, docker,
  * ssh, k8s). Split out of spawn-runner.ts for file-size hygiene — no
  * behavior change.
+ *
+ * GATE 3 (§9.3 / AC-23a / AC-40 / AC-50) — this module hosts the credential-
+ * delivery channels the design gates: docker `-e` env (86-89) and `-v` mounts
+ * (79-81), ssh `K=V` (120-124), k8s `env`/`--env` (211-216, 249-251), and k8s
+ * secret / `--serviceaccount` references (239). Before those channels deliver a
+ * SCOPED credential, `gateCredentialInjection` (`./policy-credential-gate.ts`)
+ * MUST authorize it: with no valid CommandAuthorization the channel is OMITTED
+ * (env dropped, `-v` mount omitted, secret/serviceaccount ref stripped) and, if
+ * the policy marks the credential required, the spawn is denied. IMDS / IRSA /
+ * pre-existing mounts are a bounded, warned non-goal (AC-50) this seam cannot see.
  */
 
 import { spawn } from 'node:child_process';
 import type { SpawnArgs } from './adapter.js';
 import type { InvocationMode, K8sInvocation } from './invocation.js';
 import { lookupHarnessImage } from './invocation.js';
+// GATE 3 credential backstop (re-exported for callers that inject scoped creds here).
+export {
+  gateCredentialInjection,
+  type ScopedCredential,
+  type CredentialChannel,
+  type GateCredentialInjectionInput,
+  type GateCredentialInjectionResult,
+} from './policy-credential-gate.js';
 
 // ---------------------------------------------------------------------------
 // Invocation mode dispatch

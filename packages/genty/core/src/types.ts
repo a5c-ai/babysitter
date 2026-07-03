@@ -162,6 +162,21 @@ export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOption
   };
   /** sha256 over the turn's input messages, bound into the in-process attestation. */
   modelAttestationInputMessagesHash?: string;
+  /**
+   * Milestone D (§9.4 / AC-23b / AC-49) — the genty session tool-execution GATE.
+   * When present, it is consulted BEFORE `definition.execute` for each tool call: a
+   * COVERED action without a valid CommandAuthorization is denied before execution
+   * (this seam is a LOAD-BEARING, un-bypassable blocking gate). A denial short-
+   * circuits the call with an error tool-result. When absent, the tool-execution
+   * path is unchanged (no covered actions configured). Never a fallback: any thrown
+   * exception is treated as a denial by the gate implementation.
+   */
+  policyToolGate?: (context: {
+    toolName: string;
+    toolCallId: string;
+    input: unknown;
+    modelId?: string;
+  }) => { allowed: boolean; reason?: string };
 }
 
 export interface ToolResult {

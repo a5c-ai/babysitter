@@ -136,6 +136,19 @@ interface McpRoutingOptions {
   stateDir?: string;
   autoConnect?: boolean;
   cacheTtlMs?: number;
+  /**
+   * GATE (§9.4 / AC-23b / AC-49) — Milestone D policy gate for the MCP dispatcher
+   * seam. When present, a COVERED dispatch WITHOUT a valid CommandAuthorization is
+   * denied BEFORE execution (this seam is a LOAD-BEARING, un-bypassable blocking
+   * gate). When absent, dispatch proceeds unchanged (no covered actions configured).
+   * The gate returns `{ allowed, reason? }`; a `false` short-circuits the tool call.
+   */
+  policyGate?: (context: {
+    toolName: string;
+    input: unknown;
+    runId?: string;
+    sessionId?: string;
+  }) => { allowed: boolean; reason?: string };
 }
 
 interface EffectResolverOptions {
@@ -578,6 +591,25 @@ async function dispatchMcpTool(
   request: McpToolExecutionRequest,
   options: EffectResolverOptions,
 ): Promise<McpToolResult> {
+  // GATE (§9.4) — verify the policy authorization BEFORE dispatch. A covered action
+  // without a valid CommandAuthorization is denied before execution (AC-23b/AC-49).
+  const policyGate = options.mcp?.policyGate;
+  if (policyGate) {
+    const decision = policyGate({
+      toolName: request.toolName,
+      input: request.args,
+      ...(options.runId ? { runId: options.runId } : {}),
+      ...(options.sessionId ? { sessionId: options.sessionId } : {}),
+    });
+    if (!decision.allowed) {
+      return {
+        success: false,
+        content: [],
+        error: decision.reason ?? "policy authorization denied",
+        durationMs: 0,
+      };
+    }
+  }
   const dispatched = await dispatcher.dispatch(
     {
       toolName: request.toolName,

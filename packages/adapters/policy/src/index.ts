@@ -92,3 +92,8 @@ export type {
   CredentialAliasMap,
   CredentialScopeResolution,
 } from './credential-identity.js';
+
+// ── Milestone D — tool-layer enforcement (exec-seam registry, AC-56) ─────────
+
+export { EXEC_SEAM_REGISTRY } from './exec-seam-registry.js';
+export type { ExecSeamEntry, ExecSeamRole } from './exec-seam-registry.js';
