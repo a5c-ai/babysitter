@@ -414,10 +414,73 @@ export interface ChainVerification {
 }
 
 /**
- * Verify a delegation trust chain (AC-35g). Each link's key is resolved from the
- * trusted store by fingerprint (NEVER taken from the link), the per-step kind is
- * enforced, and revocation/expiry/completeness are checked before the raw
- * `verifyTrustChain` primitive runs. Any failure or exception → deny.
+ * The delegation-binding fields carried inside a `DelegationChainLink` payload
+ * (genty `trust/types.ts`). They are always members of
+ * `REQUIRED_SIGNED_FIELDS['delegation']`, so a verified delegation envelope has
+ * them inside the signature — an attacker cannot alter the declared delegator or
+ * its signature without invalidating the link's own signature.
+ */
+interface DelegationLinkPayload {
+  delegatorFingerprint?: unknown;
+  delegatorSignature?: unknown;
+}
+
+/**
+ * Read the signed delegation binding (`delegatorFingerprint`,
+ * `delegatorSignature`) off a link's payload. Returns `null` for either value
+ * when it is absent or not a non-empty string.
+ */
+function readDelegationBinding(envelope: SignedEnvelope): {
+  delegatorFingerprint: string | null;
+  delegatorSignature: string | null;
+} {
+  const payload = (envelope?.payload ?? {}) as DelegationLinkPayload;
+  const fp =
+    typeof payload.delegatorFingerprint === 'string' && payload.delegatorFingerprint.length > 0
+      ? payload.delegatorFingerprint
+      : null;
+  const sig =
+    typeof payload.delegatorSignature === 'string' && payload.delegatorSignature.length > 0
+      ? payload.delegatorSignature
+      : null;
+  return { delegatorFingerprint: fp, delegatorSignature: sig };
+}
+
+/**
+ * Verify a delegation trust chain (AC-35g + delegation-linkage). Each link's key
+ * is resolved from the trusted store by fingerprint (NEVER taken from the link),
+ * the per-step kind is enforced, and revocation/expiry/completeness are checked
+ * before the raw `verifyTrustChain` primitive runs.
+ *
+ * DELEGATION LINKAGE (the load-bearing A→B→C guarantee). The previous
+ * implementation built links for `verifyTrustChain` WITHOUT `parentSignature`,
+ * so genty's parent-linkage check (`chain.ts:35`, `if (i>0 && link.parentSignature)`)
+ * was dead code: a "chain" passed as an unordered SET of individually-trusted
+ * agent envelopes with no real delegation relationship. An attacker could
+ * reorder links, or splice in a foreign-but-individually-trusted envelope, and
+ * still pass.
+ *
+ * We now verify true delegation linkage. Each link's signed payload declares who
+ * delegated to it (`delegatorFingerprint`) and carries the delegator's signature
+ * over the parent link (`delegatorSignature`, which is the parent envelope's
+ * signature). For every link i>0 that participates in a linked chain we assert,
+ * failing closed on any mismatch:
+ *   - `delegatorFingerprint === chain[i-1].publicKeyFingerprint` — the declared
+ *     delegator is exactly the immediate predecessor's signer (rejects
+ *     reordering and non-adjacent parents); AND
+ *   - `delegatorSignature === chain[i-1].signature` — the delegator's signature
+ *     covers the parent link. We populate `TrustChainLink.parentSignature` with
+ *     this value so genty's own check runs and re-confirms it.
+ *
+ * A chain is treated as a LINKED delegation chain when ANY link (i>0) binds to
+ * its immediate predecessor. Once a chain is linked, EVERY link i>0 MUST bind to
+ * its immediate predecessor — a chain is either a fully-linked A→B→C or a set of
+ * independent roots; mixing (i.e. splicing a foreign, unlinked envelope into a
+ * linked chain) is denied. This closes the "spliced-in foreign envelope" and
+ * "reordering" attacks while leaving a chain of independent trusted roots (no
+ * link declaring an in-chain delegator) as a valid non-delegation set.
+ *
+ * Any failure or exception → deny.
  */
 export function verifyTrustChainTrusted(
   chain: TrustedChainStep[],
@@ -455,6 +518,45 @@ export function verifyTrustChainTrusted(
         envelope: link.envelope,
         publicKey: resolvedPublicKey,
       });
+    }
+
+    // ── Delegation linkage. A chain is a LINKED delegation chain if ANY link
+    // (i>0) declares a `delegatorFingerprint` that names ANOTHER link's signer in
+    // this chain — i.e. it asserts an in-chain delegation relationship. We detect
+    // linkage by "declares an in-chain delegator" (not merely "binds to the
+    // immediate predecessor") so that a REORDERED chain — where a link's declared
+    // delegator is present in the chain but is no longer its immediate
+    // predecessor — is still recognized as a linked chain and then rejected by the
+    // immediate-predecessor assertion below. A chain of independent roots (every
+    // link's declared delegator names nothing in the chain, e.g. the frozen
+    // sentinel fixtures) is NOT a delegation chain and is left as a valid set.
+    const chainSigners = new Set(
+      chain.map((link) => link.envelope.publicKeyFingerprint),
+    );
+    const isLinkedChain = chain.some((link, i) => {
+      if (i === 0) return false;
+      const { delegatorFingerprint } = readDelegationBinding(link.envelope);
+      return delegatorFingerprint !== null && chainSigners.has(delegatorFingerprint);
+    });
+
+    if (isLinkedChain) {
+      for (let i = 1; i < chain.length; i++) {
+        const parent = chain[i - 1].envelope;
+        const { delegatorFingerprint, delegatorSignature } = readDelegationBinding(chain[i].envelope);
+
+        // The declared delegator MUST be exactly the immediate predecessor's
+        // signer — rejects reordering, non-adjacent parents, and a spliced
+        // foreign envelope that fails to bind to its predecessor.
+        if (delegatorFingerprint !== parent.publicKeyFingerprint) {
+          return { valid: false, reason: `link ${i} delegator does not bind to immediate predecessor`, brokenAt: i };
+        }
+        // The delegator's signature MUST cover the parent link (its signature).
+        if (delegatorSignature !== parent.signature) {
+          return { valid: false, reason: `link ${i} delegatorSignature does not cover the parent link`, brokenAt: i };
+        }
+        // Populate parentSignature so genty's own linkage check re-confirms it.
+        rawLinks[i].parentSignature = parent.signature;
+      }
     }
 
     const result = verifyTrustChain(rawLinks);

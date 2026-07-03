@@ -116,3 +116,144 @@ describe('Milestone A — verifyTrustChainTrusted (AC-35g, per-step kind + ident
     expect(res.valid).toBe(false);
   });
 });
+
+// ── Delegation-linkage adversarial coverage (added, not modifying frozen tests).
+// The frozen tests above assert per-link trusted-store resolution but never a
+// REAL A→B→C delegation relationship: verifyTrustChainTrusted previously built
+// links WITHOUT parentSignature, so genty's parent-linkage check was dead and a
+// "chain" passed as an unordered set of individually-trusted envelopes. These
+// tests build genuinely LINKED delegation chains (each link declares its
+// immediate predecessor as delegator and carries the predecessor's signature)
+// and assert reordering / splicing / forged-parent all fail closed.
+
+/**
+ * Sign a delegation link that genuinely binds to `parent` — i.e. the link's
+ * signed payload declares the parent's SIGNER fingerprint as its delegator and
+ * carries the parent envelope's SIGNATURE as `delegatorSignature`. A chain of
+ * such links is a real A→B→C delegation chain.
+ */
+function signLinkedDelegation(
+  kp: ReturnType<typeof createKeyPair>,
+  parent: SignedEnvelope<DelegationPayload> | null,
+): SignedEnvelope<DelegationPayload> {
+  return signDelegation(kp, {
+    delegatorFingerprint: parent ? parent.publicKeyFingerprint : 'fp-root',
+    delegatorSignature: parent ? parent.signature : 'root-sig',
+  });
+}
+
+describe('Milestone A — verifyTrustChainTrusted delegation linkage (A→B→C binding)', () => {
+  it('accepts a genuinely linked A→B→C delegation chain', () => {
+    const a = createKeyPair();
+    const b = createKeyPair();
+    const c = createKeyPair();
+    const linkA = signLinkedDelegation(a, null);
+    const linkB = signLinkedDelegation(b, linkA);
+    const linkC = signLinkedDelegation(c, linkB);
+    const chain: TrustedChainStep[] = [
+      { step: 'delegate-a', envelope: linkA, requiredKind: 'agent' },
+      { step: 'delegate-b', envelope: linkB, requiredKind: 'agent' },
+      { step: 'delegate-c', envelope: linkC, requiredKind: 'agent' },
+    ];
+    const store = {
+      trustRoots: [agentRoot(a), agentRoot(b, { label: 'b' }), agentRoot(c, { label: 'c' })],
+    };
+    const res = verifyTrustChainTrusted(chain, store);
+    expect(res.valid).toBe(true);
+  });
+
+  it('reordered links (B before A) in a linked chain → deny (linkage broken)', () => {
+    const a = createKeyPair();
+    const b = createKeyPair();
+    const c = createKeyPair();
+    const linkA = signLinkedDelegation(a, null);
+    const linkB = signLinkedDelegation(b, linkA);
+    const linkC = signLinkedDelegation(c, linkB);
+    // Present B, A, C: B claims A as delegator but its predecessor is now nothing,
+    // and A's predecessor becomes B — the declared linkage no longer matches the
+    // immediate predecessor, so the chain is rejected.
+    const chain: TrustedChainStep[] = [
+      { step: 'delegate-b', envelope: linkB, requiredKind: 'agent' },
+      { step: 'delegate-a', envelope: linkA, requiredKind: 'agent' },
+      { step: 'delegate-c', envelope: linkC, requiredKind: 'agent' },
+    ];
+    const store = {
+      trustRoots: [agentRoot(a), agentRoot(b, { label: 'b' }), agentRoot(c, { label: 'c' })],
+    };
+    const res = verifyTrustChainTrusted(chain, store);
+    expect(res.valid).toBe(false);
+  });
+
+  it('a foreign, individually-trusted envelope spliced into a linked chain → deny', () => {
+    const a = createKeyPair();
+    const b = createKeyPair();
+    const foreign = createKeyPair();
+    const linkA = signLinkedDelegation(a, null);
+    const linkB = signLinkedDelegation(b, linkA);
+    // The foreign link is validly signed by a trusted agent root, but it does NOT
+    // bind to its predecessor (B) — it declares a sentinel delegator. Splicing it
+    // into a linked chain must be denied even though it is individually trusted.
+    const foreignLink = signDelegation(foreign, {
+      delegatorFingerprint: 'fp-unrelated',
+      delegatorSignature: 'unrelated-sig',
+    });
+    const chain: TrustedChainStep[] = [
+      { step: 'delegate-a', envelope: linkA, requiredKind: 'agent' },
+      { step: 'delegate-b', envelope: linkB, requiredKind: 'agent' },
+      { step: 'spliced-foreign', envelope: foreignLink, requiredKind: 'agent' },
+    ];
+    const store = {
+      trustRoots: [
+        agentRoot(a),
+        agentRoot(b, { label: 'b' }),
+        agentRoot(foreign, { label: 'foreign' }),
+      ],
+    };
+    const res = verifyTrustChainTrusted(chain, store);
+    expect(res.valid).toBe(false);
+  });
+
+  it('forged parent signature (delegatorSignature does not cover the parent) → deny', () => {
+    const a = createKeyPair();
+    const b = createKeyPair();
+    const linkA = signLinkedDelegation(a, null);
+    // B declares A as delegator (correct fingerprint) but forges the signature it
+    // claims A produced over the parent — linkage must fail closed.
+    const linkB = signDelegation(b, {
+      delegatorFingerprint: linkA.publicKeyFingerprint,
+      delegatorSignature: 'forged-parent-signature',
+    });
+    const chain: TrustedChainStep[] = [
+      { step: 'delegate-a', envelope: linkA, requiredKind: 'agent' },
+      { step: 'delegate-b', envelope: linkB, requiredKind: 'agent' },
+    ];
+    const store = { trustRoots: [agentRoot(a), agentRoot(b, { label: 'b' })] };
+    const res = verifyTrustChainTrusted(chain, store);
+    expect(res.valid).toBe(false);
+  });
+
+  it('missing parent binding on a middle link of an otherwise-linked chain → deny', () => {
+    const a = createKeyPair();
+    const b = createKeyPair();
+    const c = createKeyPair();
+    const linkA = signLinkedDelegation(a, null);
+    // B does NOT bind to A (sentinel delegator) ...
+    const linkB = signDelegation(b, {
+      delegatorFingerprint: 'fp-none',
+      delegatorSignature: 'no-sig',
+    });
+    // ... but C DOES bind to B, making this a linked chain overall. The unbound
+    // middle link must break it.
+    const linkC = signLinkedDelegation(c, linkB);
+    const chain: TrustedChainStep[] = [
+      { step: 'delegate-a', envelope: linkA, requiredKind: 'agent' },
+      { step: 'delegate-b', envelope: linkB, requiredKind: 'agent' },
+      { step: 'delegate-c', envelope: linkC, requiredKind: 'agent' },
+    ];
+    const store = {
+      trustRoots: [agentRoot(a), agentRoot(b, { label: 'b' }), agentRoot(c, { label: 'c' })],
+    };
+    const res = verifyTrustChainTrusted(chain, store);
+    expect(res.valid).toBe(false);
+  });
+});

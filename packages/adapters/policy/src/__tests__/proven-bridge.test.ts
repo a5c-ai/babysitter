@@ -223,4 +223,60 @@ describe('Milestone A — proven bridge (AC-3, AC-43, AC-48)', () => {
     const res = await bridgeProvenAnswer(proven, { baseDir: tmpDir, store: { trustRoots: [] } });
     expect(res.derived).toBe(false);
   });
+
+  // ── Expired-human-root coverage (added). The bridge checked kind:'human' and
+  // revoked!==true but never the human root's expiresAt, so an EXPIRED human root
+  // could still launder proven answers into human evidence. It now enforces the
+  // root is valid at the answer's answeredAt (mirrors keyValidAt).
+  it('a human trust root expired at answeredAt → deny, no evidence emitted', async () => {
+    const pair = generateKeyPair('alice', 'Alice W');
+    await saveTrustedPublicKey(pair.publicKeyRecord, tmpDir);
+    await savePrivateKey(pair.privateKeyRecord, tmpDir);
+    // Answer given in 2026; the human root expired in 2020.
+    const proven = await signAnswer(
+      makeAnswer({ answeredAt: '2026-07-03T00:00:00.000Z' }),
+      pair.privateKeyRecord.fingerprint,
+      tmpDir,
+    );
+    const store = {
+      trustRoots: [
+        {
+          ...humanRootFromProven(
+            pair.publicKeyRecord.metadata.fingerprint,
+            pair.publicKeyRecord.publicKey,
+          ),
+          expiresAt: '2020-01-01T00:00:00.000Z',
+        },
+      ],
+    };
+    const res = await bridgeProvenAnswer(proven, { baseDir: tmpDir, store });
+    expect(res.derived).toBe(false);
+    expect(res.evidence).toBeUndefined();
+  });
+
+  it('a human root that expires AFTER answeredAt still bridges (answer within validity)', async () => {
+    const pair = generateKeyPair('alice', 'Alice W');
+    await saveTrustedPublicKey(pair.publicKeyRecord, tmpDir);
+    await savePrivateKey(pair.privateKeyRecord, tmpDir);
+    const proven = await signAnswer(
+      makeAnswer({ answeredAt: '2026-07-03T00:00:00.000Z' }),
+      pair.privateKeyRecord.fingerprint,
+      tmpDir,
+    );
+    const store = {
+      trustRoots: [
+        {
+          ...humanRootFromProven(
+            pair.publicKeyRecord.metadata.fingerprint,
+            pair.publicKeyRecord.publicKey,
+          ),
+          // Root valid until well after the answer was given.
+          expiresAt: '2030-01-01T00:00:00.000Z',
+        },
+      ],
+    };
+    const res = await bridgeProvenAnswer(proven, { baseDir: tmpDir, store });
+    expect(res.derived).toBe(true);
+    expect(res.evidence!.kind).toBe('human-approval');
+  });
 });

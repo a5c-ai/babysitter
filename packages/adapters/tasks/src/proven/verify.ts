@@ -1,4 +1,4 @@
-import { createPublicKey, verify as cryptoVerify } from "node:crypto";
+import { createHash, createPublicKey, verify as cryptoVerify } from "node:crypto";
 import type { ProvenBreakpointAnswer, ProvenVerificationResult } from "../types.js";
 import { loadTrustedPublicKeys } from "./keys.js";
 import { buildHardenedSigningPayload, buildLegacySigningPayload } from "./sign.js";
@@ -24,6 +24,27 @@ export async function verifyAnswer(
     };
   }
 
+  // Bind the fingerprint to the key material BEFORE trusting the key. The stored
+  // key is resolved by `metadata.fingerprint === publicKeyFingerprint`, but that
+  // metadata field is attacker-influenceable — a malicious trusted-key record
+  // could claim a victim's fingerprint while carrying attacker key material, or a
+  // record's metadata could be desynced from its bytes. Recompute the fingerprint
+  // as sha256(public-key DER) — the exact rule the key generator uses
+  // (`keys.ts:18`) and that `verify-envelope-trusted.ts:252` enforces — and deny
+  // unless it equals the claimed fingerprint. This is the signature check behind
+  // bridgeProvenAnswer's human guarantee; fail closed on any mismatch.
+  const publicKeyDer = Buffer.from(matchingKey.publicKey, "base64");
+  const boundFingerprint = createHash("sha256").update(publicKeyDer).digest("hex");
+  if (boundFingerprint !== provenAnswer.publicKeyFingerprint) {
+    return {
+      valid: false,
+      publicKeyFingerprint: provenAnswer.publicKeyFingerprint,
+      responderName: matchingKey.metadata.responderName,
+      reason: "Public key fingerprint does not match key material (sha256(DER) mismatch)",
+      verifiedAt: new Date().toISOString(),
+    };
+  }
+
   // Check key expiration
   if (matchingKey.metadata.expiresAt) {
     const expiresAt = new Date(matchingKey.metadata.expiresAt);
@@ -41,7 +62,7 @@ export async function verifyAnswer(
 
   // Verify signature
   const publicKey = createPublicKey({
-    key: Buffer.from(matchingKey.publicKey, "base64"),
+    key: publicKeyDer,
     format: "der",
     type: "spki",
   });

@@ -96,6 +96,25 @@ export async function bridgeProvenAnswer(
     if (humanRoot.kind !== 'human') return DENY('fingerprint is not a human trust root');
     if (humanRoot.revoked === true) return DENY('human trust root revoked');
 
+    // ── The human root MUST be valid at the moment the answer was given
+    // (mirrors keyValidAt(root, answeredAt) used in verify-envelope-trusted
+    // verifyOne). An EXPIRED human root can otherwise launder proven answers into
+    // human evidence, since only kind/revoked were checked before. Deny if the
+    // root's expiresAt is at or before the answer's answeredAt. Fail closed on a
+    // malformed timestamp.
+    if (typeof humanRoot.expiresAt === 'string' && humanRoot.expiresAt.length > 0) {
+      const answeredAtRaw = answer.answeredAt;
+      if (typeof answeredAtRaw !== 'string' || answeredAtRaw.length === 0) {
+        return DENY('answer has no answeredAt to validate the human root against');
+      }
+      const expiry = new Date(humanRoot.expiresAt).getTime();
+      const answeredAt = new Date(answeredAtRaw).getTime();
+      if (Number.isNaN(expiry) || Number.isNaN(answeredAt)) {
+        return DENY('malformed human-root expiresAt or answer answeredAt');
+      }
+      if (answeredAt > expiry) return DENY('human trust root expired at answeredAt');
+    }
+
     // ── AC-3: verify the legacy answer via proven verifyAnswer against the human
     // root's proven trusted directory. Only a genuinely human-signed answer passes.
     const provenResult = await verifyAnswer(proven, opts.baseDir);
