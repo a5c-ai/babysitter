@@ -666,6 +666,139 @@ actions:
   });
 });
 
+// ── Global-option argv-evasion: a deny cannot hide behind global options (AC-38) ──
+describe('Milestone B — global-option argv-evasion is un-evadable end-to-end (AC-38)', () => {
+  // A DENY action covers `aws s3 rm|cp|sync`, and a SEPARATE broad grant covers all `aws`
+  // (any subcommand) with a satisfiable human+opus chain. The residual bypass is: placing
+  // a global option before the subcommand (`aws --region us-east-1 s3 rm`) makes the deny
+  // NON-MATCH so the broad grant authorizes the disguised destructive command. After the
+  // fix, the deny matches regardless of global-option position and wins (deny > grant).
+  function evasionDoc(aliceFp: string) {
+    return parsePolicyDocument(`
+version: 1
+commandDefaultAllow: false
+actions:
+  - id: aws-prod-deny-destructive
+    effect: deny
+    match:
+      tool: "Bash"
+      argv: { program: "aws", subcommandEquals: ["s3 rm", "s3 cp", "s3 sync"], wrapperAllowlist: ["time", "sudo"], recognizedPrograms: ["aws"] }
+      credentialScope: "aws:prod:*"
+  - id: aws-prod-broad-allow
+    requireProxyAttestation: false
+    match:
+      tool: "Bash"
+      argv: { program: "aws", wrapperAllowlist: ["time", "sudo"], recognizedPrograms: ["aws"] }
+      credentialScope: "aws:prod:*"
+    chains:
+      - id: human-plus-opus
+        requirements:
+          - step: { kind: human-approval, trustedIdentities: ["${aliceFp}"], conditions: { scopeEquals: "aws:prod:s3", notExpired: true } }
+          - step: { kind: model-decision, conditions: { modelIdMatches: "claude-opus-.*" } }
+`);
+  }
+
+  function evalDisguised(command: string) {
+    const alice = createKeyPair();
+    const proxy = createKeyPair();
+    const store: TrustStore = { trustRoots: [humanRoot(alice, 'alice'), engineRoot(proxy, 'proxy')] };
+    const argsCommand = `{"command":${JSON.stringify(command)}}`;
+    return evaluatePolicy({
+      document: evasionDoc(alice.fingerprint),
+      store,
+      // A fully-satisfiable chain is PRESENT — proving the deny wins over an available grant,
+      // not merely that the grant was unsatisfied.
+      evidence: [
+        { kind: 'human-approval', envelope: humanApproval(alice) },
+        { kind: 'model-decision', envelope: modelDecision(proxy, { toolCalls: [{ toolCallId: 'call_A', name: 'Bash', argsHash: sha256(argsCommand) }] }) },
+      ],
+      context: ctx({
+        canonicalArgv: ['aws', 's3', 'rm', 'x'],
+        args: { command },
+        rawCommand: command,
+        argsHash: sha256(argsCommand),
+        credentialScope: 'aws:prod:s3',
+      }),
+    });
+  }
+
+  it('AC-38: disguised `aws --region us-east-1 s3 rm ...` is DENIED (not authorized by the broad aws grant)', () => {
+    expect(evalDisguised('aws --region us-east-1 s3 rm s3://prod/x').granted).toBe(false);
+  });
+
+  it('AC-38: `aws --debug s3 rm x` is DENIED', () => {
+    expect(evalDisguised('aws --debug s3 rm x').granted).toBe(false);
+  });
+
+  it('AC-38: `--flag=value` form `aws --region=us-east-1 s3 cp a b` is DENIED', () => {
+    expect(evalDisguised('aws --region=us-east-1 s3 cp a b').granted).toBe(false);
+  });
+
+  it('AC-38: option interspersed in the subcommand `aws s3 --recursive rm x` is DENIED', () => {
+    expect(evalDisguised('aws s3 --recursive rm x').granted).toBe(false);
+  });
+
+  it('AC-38: a LEGITIMATE distinct subcommand `aws --region us-east-1 s3 ls` is GRANTED by the broad allow (not the deny)', () => {
+    // The deny only covers rm|cp|sync; `s3 ls` is genuinely distinct, so global options
+    // must NOT force it into the deny — it should be authorized by the broad grant.
+    const decision = evalDisguised('aws --region us-east-1 s3 ls');
+    expect(decision.granted).toBe(true);
+    expect(decision.actionId).toBe('aws-prod-broad-allow');
+  });
+
+  it('AC-38: `git --no-pager push` deny is un-evadable by the leading global flag', () => {
+    const alice = createKeyPair();
+    const store: TrustStore = { trustRoots: [humanRoot(alice, 'alice')] };
+    const doc = parsePolicyDocument(`
+version: 1
+commandDefaultAllow: true
+actions:
+  - id: git-push-deny
+    effect: deny
+    match:
+      tool: "Bash"
+      argv: { program: "git", subcommandEquals: ["push"], wrapperAllowlist: [], recognizedPrograms: ["git"] }
+`);
+    const evalGit = (command: string) =>
+      evaluatePolicy({
+        document: doc,
+        store,
+        evidence: [],
+        context: ctx({ toolName: 'Bash', canonicalArgv: [], args: { command }, rawCommand: command, credentialScope: '' }),
+      });
+    // Both the bare and the global-option-disguised forms hit the explicit deny.
+    expect(evalGit('git push origin main').reason).toBe('explicit deny action matched');
+    expect(evalGit('git --no-pager push origin main').reason).toBe('explicit deny action matched');
+    // A distinct git subcommand (`status`) is NOT swept into the push deny — it non-matches
+    // the deny action (no deny reason), it is merely uncovered by any grant here.
+    expect(evalGit('git --no-pager status').reason).not.toBe('explicit deny action matched');
+  });
+
+  it('AC-38: `kubectl -n prod delete ...` deny is un-evadable by the `-n prod` short-flag value', () => {
+    const store: TrustStore = { trustRoots: [] };
+    const doc = parsePolicyDocument(`
+version: 1
+commandDefaultAllow: true
+actions:
+  - id: kubectl-delete-deny
+    effect: deny
+    match:
+      tool: "Bash"
+      argv: { program: "kubectl", subcommandEquals: ["delete"], wrapperAllowlist: [], recognizedPrograms: ["kubectl"] }
+`);
+    const evalK = (command: string) =>
+      evaluatePolicy({
+        document: doc,
+        store,
+        evidence: [],
+        context: ctx({ toolName: 'Bash', canonicalArgv: [], args: { command }, rawCommand: command, credentialScope: '' }),
+      });
+    expect(evalK('kubectl delete pod/foo').granted).toBe(false);
+    expect(evalK('kubectl -n prod delete pod/foo').granted).toBe(false);
+    expect(evalK('kubectl --namespace=prod delete pod/foo').granted).toBe(false);
+  });
+});
+
 // ── Defect 3: quorum distinctness by RESOLVED trusted-store identity (AC-41) ──
 describe('Milestone B — quorum distinctness by trusted-store identity, not payload label (AC-41)', () => {
   it('AC-41: ONE human with TWO keys both mapping to the same identityId → 2-quorum DENIED', () => {

@@ -184,16 +184,93 @@ function resolveProgram(command: string, scope: ArgvMatchScope, depth = 0): Reso
   return { unresolvable: true, reason: 'no program after wrappers' };
 }
 
-/** Normalize argv[1..] into a subcommand string (flags separated out). */
+/**
+ * Extract the sequence of NON-OPTION tokens from argv[1..] for a covered program.
+ *
+ * GLOBAL-OPTION ARGV-EVASION (residual bypass on top of 43ab59142): a covered program
+ * accepts global options BEFORE its subcommand — `aws --region us-east-1 s3 rm`,
+ * `aws --debug s3 rm`, `git --no-pager push`, `kubectl -n prod delete`. The previous
+ * `normalizeSubcommand` broke at the FIRST `-`-prefixed token, yielding an EMPTY
+ * subcommand for these, so a deny action `subcommandEquals:['s3 rm']` NON-MATCHED and the
+ * disguised command fell through to a broader program-level `aws` grant — evading the deny.
+ *
+ * FIX: strip EVERY option token (anything starting with `-`: `--flag`, `--flag=value`,
+ * short `-f`, clustered `-oL`) and keep only the non-option tokens, in order. The covered
+ * subcommand pattern is then matched as a CONTIGUOUS WINDOW over this non-option sequence
+ * (see `subcommandWindowMatches`), so no ordering/interspersion of global options can hide
+ * a deny-listed subcommand.
+ *
+ * VALUE-TAKING FLAGS: flag arity is CLI-specific and unknowable in general, so a bare
+ * value like `us-east-1` after `--region` is INDISTINGUISHABLE from a subcommand token
+ * without arity knowledge. We deliberately do NOT try to skip flag values: leaving the
+ * value in the non-option sequence can only ADD spurious tokens, and the window match still
+ * finds the real covered subcommand path (`s3 rm`) wherever it sits contiguously. Erring
+ * toward INCLUDING a value token can only make a covered/deny subcommand match MORE readily
+ * (the fail-closed direction for a deny), never let one hide. A genuinely different
+ * subcommand (`aws --region x s3 ls`) still produces a non-option sequence without the
+ * `s3 rm`/`s3 cp` window, so it correctly NON-MATCHES.
+ */
+function nonOptionTokens(argv: string[]): string[] {
+  // argv[0] is the program; keep every argv[1..] token that is not an option.
+  return argv.slice(1).filter((tok) => !tok.startsWith('-'));
+}
+
+/**
+ * Legacy leading-non-option join (argv[1..] up to the first option) — retained only for
+ * the `subcommand` field reported on the result for observability. Matching itself uses the
+ * window match below, NOT this string, so global-option position cannot defeat coverage.
+ */
 function normalizeSubcommand(argv: string[]): string {
-  // argv[0] is the program; the subcommand is the leading non-flag tokens.
-  const rest = argv.slice(1);
   const words: string[] = [];
-  for (const tok of rest) {
-    if (tok.startsWith('-')) break; // stop at the first flag/option
+  for (const tok of argv.slice(1)) {
+    if (tok.startsWith('-')) break;
     words.push(tok);
   }
   return words.join(' ');
+}
+
+/**
+ * True iff the covered subcommand pattern `pattern` (a space-separated token sequence such
+ * as `s3 rm`) appears as a CONTIGUOUS WINDOW inside the non-option token sequence `tokens`.
+ * This is the security-critical match: because option tokens are already stripped, the
+ * deny-listed subcommand path matches regardless of where global options were interspersed.
+ */
+function subcommandEqualsWindow(pattern: string, tokens: string[]): boolean {
+  const pat = pattern.split(/\s+/).filter((s) => s.length > 0);
+  if (pat.length === 0) return false;
+  for (let start = 0; start + pat.length <= tokens.length; start++) {
+    let all = true;
+    for (let j = 0; j < pat.length; j++) {
+      if (tokens[start + j] !== pat[j]) {
+        all = false;
+        break;
+      }
+    }
+    if (all) return true;
+  }
+  return false;
+}
+
+/**
+ * True iff the `subcommandMatches` regex `pattern` matches SOME contiguous window (of any
+ * length ≥1) of the non-option token sequence, anchored full-string over that window's
+ * space-join. Anchoring keeps an unanchored pattern from matching on an arbitrary substring
+ * (allowlist-widening), while windowing keeps a leading global option from shifting the
+ * subcommand out of view.
+ */
+function subcommandMatchesWindow(pattern: string, tokens: string[]): boolean {
+  let re: RegExp;
+  try {
+    re = new RegExp(`^(?:${pattern})$`);
+  } catch {
+    return false;
+  }
+  for (let start = 0; start < tokens.length; start++) {
+    for (let end = start + 1; end <= tokens.length; end++) {
+      if (re.test(tokens.slice(start, end).join(' '))) return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -207,8 +284,31 @@ function touchesScope(command: string, scope: ArgvMatchScope): boolean {
     ...(scope.recognizedPrograms ?? []),
     scope.match.program,
   ]);
-  // Cheap textual containment check on the raw command for any recognized program.
-  return [...recognized].some((prog) => command.includes(prog));
+  // Prefer a RESOLVED-PROGRAM check over a raw `String.includes(program)` (which would
+  // spuriously fire on `awscli`, `/opt/awesome/x`, or a scope program appearing only in an
+  // argument). Tokenize the command and test whether any token's canonical BASENAME equals
+  // a recognized program (also matching the `$VAR`/`$(...)`-indirected forms of it, since
+  // those tokens still name the covered program textually and are the disguise we must
+  // deny). Fall back to the containment check only if tokenization fails outright.
+  let argv: string[];
+  try {
+    argv = canonicalizeArgv(command);
+  } catch {
+    // Not statically tokenizable (e.g. unterminated quote) → fall back to the raw
+    // containment check, failing closed toward "touches" so a covered program is denied.
+    return [...recognized].some((prog) => command.includes(prog));
+  }
+  // If ANY token defeats static resolution (`$(...)`, backticks, `$VAR`, `NAME=value`),
+  // the command is an unresolvable disguise: we cannot cleanly isolate the program, so
+  // fall back to the whole-command containment check (fail closed toward deny). This is
+  // exactly the covered-but-unauthorized case AC-38a must deny, not default-allow.
+  if (argv.some((tok) => tokenBreaksResolution(tok) || isEnvAssignment(tok))) {
+    return [...recognized].some((prog) => command.includes(prog));
+  }
+  // Otherwise, use a precise RESOLVED-BASENAME check: a recognized program only "touches"
+  // the scope if a token's canonical basename actually equals it — so `awscli`,
+  // `/opt/awesome/x`, or `aws` appearing only inside an argument do NOT spuriously fire.
+  return argv.some((tok) => recognized.has(basename(tok)));
 }
 
 /**
@@ -258,27 +358,35 @@ export function matchArgv(command: string, scope: ArgvMatchScope): ArgvMatchResu
       return { covered: false, deny: true, program, reason: 'uncovered command-bearing, default-deny' };
     }
 
-    // Program matches; check the normalized subcommand.
+    // Program matches; check the covered subcommand against the NON-OPTION token
+    // sequence as a contiguous window (global-option argv-evasion fix). The reported
+    // `subcommand` string is the legacy leading-non-option join (observability only);
+    // the actual match is window-based so global-option position cannot defeat it.
     const subcommand = normalizeSubcommand(argv);
+    const tokens = nonOptionTokens(argv);
     const eq = scope.match.subcommandEquals;
     const rx = scope.match.subcommandMatches;
 
     let subMatch = true;
     if (eq || rx) {
       subMatch = false;
-      if (eq && eq.some((s) => subcommand === s || subcommand.startsWith(`${s} `))) {
+      if (eq && eq.some((s) => subcommandEqualsWindow(s, tokens))) {
         subMatch = true;
       }
-      // Anchor as a FULL-STRING match (allowlist-widening fix): an unanchored
-      // subcommand pattern would match on any substring.
-      if (!subMatch && rx && rx.some((pat) => new RegExp(`^(?:${pat})$`).test(subcommand))) {
+      if (!subMatch && rx && rx.some((pat) => subcommandMatchesWindow(pat, tokens))) {
         subMatch = true;
       }
     }
 
     if (!subMatch) {
-      // Correct program but a subcommand NOT in the action's list — not a covered
-      // match for THIS action (e.g. `aws s3 ls` under an `s3 cp|rm|sync` action).
+      // Correct COVERED program but no covered/deny subcommand appears anywhere in the
+      // non-option token sequence — a genuinely different subcommand (e.g. `aws s3 ls`,
+      // or `aws --region x s3 ls`, under an `s3 cp|rm|sync` action). This is NOT a covered
+      // match for THIS action, and (crucially) it is NOT a deny: the security invariant is
+      // only that a deny-listed subcommand cannot be HIDDEN behind global options — a
+      // legitimately distinct subcommand must still non-match and be allowed by a broader
+      // grant. Because option stripping is total, any covered subcommand present in ANY
+      // ordering WOULD have matched the window above; its absence here is unambiguous.
       return { covered: false, deny: false, program, subcommand, reason: 'subcommand not covered by this action' };
     }
 

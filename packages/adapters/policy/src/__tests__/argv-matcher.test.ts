@@ -168,6 +168,70 @@ describe('Milestone B — commandDefaultAllow opt-in (AC-38b)', () => {
   });
 });
 
+describe('Milestone B — global-option argv-evasion conformance (AC-38 residual bypass)', () => {
+  // Residual bypass on top of 43ab59142: global options placed BEFORE (or interspersed
+  // with) the subcommand must NOT let a covered/deny subcommand hide behind them. The
+  // covered subcommand is matched as a contiguous window over the NON-OPTION tokens, so
+  // no ordering of `--flag`/`--flag=value`/`-f value` can defeat coverage.
+
+  it('AC-38 global-option: `aws --region us-east-1 s3 rm ...` is still COVERED (option before subcommand)', () => {
+    const res = matchArgv('aws --region us-east-1 s3 rm s3://prod/x', AWS_SCOPE);
+    expect(res.covered).toBe(true);
+    expect(res.deny).toBeFalsy();
+    expect(res.program).toBe('aws');
+  });
+
+  it('AC-38 global-option: `aws --debug s3 rm` (boolean global flag) is COVERED', () => {
+    expect(matchArgv('aws --debug s3 rm x', AWS_SCOPE).covered).toBe(true);
+  });
+
+  it('AC-38 global-option: `--flag=value` form `aws --region=us-east-1 s3 cp a b` is COVERED', () => {
+    expect(matchArgv('aws --region=us-east-1 s3 cp a b', AWS_SCOPE).covered).toBe(true);
+  });
+
+  it('AC-38 global-option: short flag with value `aws -r us-east-1 s3 sync a b` is COVERED', () => {
+    expect(matchArgv('aws -r us-east-1 s3 sync a b', AWS_SCOPE).covered).toBe(true);
+  });
+
+  it('AC-38 global-option: flag AFTER program AND value-flag before subcommand → COVERED', () => {
+    // `aws --profile prod --region us-east-1 s3 rm x` — two value-taking flags before the
+    // subcommand. The window `s3 rm` still matches over the non-option tokens.
+    expect(matchArgv('aws --profile prod --region us-east-1 s3 rm x', AWS_SCOPE).covered).toBe(true);
+  });
+
+  it('AC-38 value-consuming flag INSIDE the subcommand `aws s3 --recursive rm x` → COVERED', () => {
+    // Option interspersed between the two subcommand words must not break the window.
+    expect(matchArgv('aws s3 --recursive rm x', AWS_SCOPE).covered).toBe(true);
+  });
+
+  it('AC-38 legitimate distinct subcommand: `aws --region x s3 ls` must NOT match an s3 rm|cp|sync scope', () => {
+    // A genuinely different subcommand (ls) — global options must NOT force a false match.
+    const res = matchArgv('aws --region us-east-1 s3 ls', AWS_SCOPE);
+    expect(res.covered).toBe(false);
+    // Not a deny either: a legitimately distinct subcommand of a covered program is allowed
+    // to fall through to a broader grant; only a DENY-listed subcommand may not hide.
+    expect(res.deny).toBeFalsy();
+  });
+
+  it('AC-38 global-option via shell wrapper: `sh -c "aws --region us-east-1 s3 rm x"` recurses → COVERED', () => {
+    const res = matchArgv('sh -c "aws --region us-east-1 s3 rm x"', AWS_SCOPE);
+    expect(res.covered).toBe(true);
+    expect(res.program).toBe('aws');
+  });
+
+  it('AC-38 subcommandMatches windowing: a regex scope matches through leading global options', () => {
+    const rxScope: ArgvMatchScope = {
+      scopeId: 'aws:prod:*',
+      match: { program: 'aws', subcommandMatches: ['s3 (rm|cp|sync)'] },
+      wrapperAllowlist: ['time', 'sudo'],
+      recognizedPrograms: ['aws'],
+    };
+    expect(matchArgv('aws --region us-east-1 s3 rm x', rxScope).covered).toBe(true);
+    // A distinct subcommand still non-matches the regex window.
+    expect(matchArgv('aws --region us-east-1 s3 ls', rxScope).covered).toBe(false);
+  });
+});
+
 describe('Milestone B — argv matcher fails closed (no fallbacks)', () => {
   it('a malformed/empty command → deny, never throw through', () => {
     expect(matchArgv('', AWS_SCOPE).deny).toBe(true);

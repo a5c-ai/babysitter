@@ -37,6 +37,7 @@ import type {
   StepConditions,
 } from './policy-schema.js';
 import { matchArgv, type ArgvMatchScope } from './argv-matcher.js';
+import { canonicalizeArgv } from './canonicalize-args.js';
 
 export interface Evidence {
   kind: 'human-approval' | 'model-decision' | 'delegation';
@@ -551,8 +552,35 @@ function matchAction(action: PolicyActionDoc, context: EvaluationContext): Actio
  * under a covered-program scope is treated as a covered-but-unauthorized action.
  */
 function touchesArgvScope(res: ReturnType<typeof matchArgv>, scope: ArgvMatchScope, command: string): boolean {
-  const recognized = [...(scope.recognizedPrograms ?? []), scope.match.program];
-  return recognized.some((prog) => command.includes(prog));
+  const recognized = new Set([...(scope.recognizedPrograms ?? []), scope.match.program]);
+  let argv: string[];
+  try {
+    argv = canonicalizeArgv(command);
+  } catch {
+    // Not tokenizable → fall back to raw containment, failing closed toward "touches".
+    return [...recognized].some((prog) => command.includes(prog));
+  }
+  // An unresolvable disguise (`$(...)`, backticks, `$VAR`, `NAME=value`) cannot be cleanly
+  // isolated → raw containment (fail closed toward deny). Otherwise use a precise
+  // resolved-BASENAME check so `awscli` / `aws` inside an argument do not spuriously match.
+  if (argv.some((tok) => breaksResolution(tok) || envAssignment(tok))) {
+    return [...recognized].some((prog) => command.includes(prog));
+  }
+  return argv.some((tok) => recognized.has(basename(tok)));
+}
+
+/** Canonical basename of a path token (mirrors argv-matcher.basename). */
+function basename(token: string): string {
+  const parts = token.split(/[\\/]/);
+  return parts[parts.length - 1] || token;
+}
+/** Token that defeats static program resolution (mirrors argv-matcher.tokenBreaksResolution). */
+function breaksResolution(token: string): boolean {
+  return token.includes('$(') || token.includes('`') || token.includes('${') || token.startsWith('$');
+}
+/** Inline `NAME=value` env assignment (mirrors argv-matcher.isEnvAssignment). */
+function envAssignment(token: string): boolean {
+  return /^[A-Za-z_][A-Za-z0-9_]*=/.test(token);
 }
 
 // ── top-level evaluate ──────────────────────────────────────────────────────
