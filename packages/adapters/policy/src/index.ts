@@ -107,4 +107,5 @@ export type {
   AuthorizationResolver,
   GateCallContext,
   GateDecision,
+  Gate3Context,
 } from './policy-enforcement-wiring.js';

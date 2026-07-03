@@ -258,6 +258,8 @@ export interface UnifiedToolDispatcherLike {
       toolName: string;
       input: unknown;
       caller?: string;
+      /** Milestone D (AC-34a) — the executing tool-call id GATE 1 binds an authorization to. */
+      toolCallId?: string;
       signal?: AbortSignal;
       onUpdate?: (event: ToolUpdateEvent) => void | Promise<void>;
     },

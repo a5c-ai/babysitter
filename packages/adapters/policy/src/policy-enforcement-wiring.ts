@@ -105,6 +105,24 @@ export interface GateDecision {
  * (`AgentCoreSessionOptions.policyToolGate`), `mcpPolicyGate` matches the genty MCP
  * dispatcher seam (`McpRoutingOptions.policyGate`). Both share one implementation.
  */
+/**
+ * The raw, verified-config pieces GATE 3 (`spawn-invocation.ts` credential channels) needs
+ * to build a `Gate3Options` at spawn time (AC-23a / AC-40 / AC-50). Exposed off the built
+ * gate so the adapters-side spawn path can construct GATE 3 from the SAME verified config
+ * that drives GATE 1 / the session gate — no second manifest verification, no forked trust.
+ * `undefined` when trust could not be established (a config error) — GATE 3 then has no
+ * issuer roots and every scoped credential fails authorization (fail closed).
+ */
+export interface Gate3Context {
+  issuerRoots: TrustRoot[];
+  currentConfigEpoch: number;
+  minEpochFloor: number;
+  /** The trusted credential→scope source (AC-40), when a verified one is present. */
+  credentialSource?: CredentialScopeSource;
+  /** Resolve the policyDocHash bound into an authorization for a covered tool + command. */
+  policyDocHashFor: (toolName: string, command: string) => string;
+}
+
 export interface PolicyEnforcementGate {
   enforcementActive: true;
   /** Set when trust could not be established — every covered action denies. */
@@ -117,6 +135,11 @@ export interface PolicyEnforcementGate {
   mcpPolicyGate: (ctx: { toolName: string; input: unknown; runId?: string; sessionId?: string }) => GateDecision;
   /** The uniform evaluator, exposed for GATE 1 / GATE 2 composition + tests. */
   evaluate: (ctx: GateCallContext) => GateDecision;
+  /**
+   * GATE 3 raw context (AC-50), or undefined on a config error. The adapters spawn path
+   * builds a `Gate3Options` from this when it has scoped credentials to deliver.
+   */
+  gate3Context?: Gate3Context;
 }
 
 export type LoadPolicyEnforcementResult =
@@ -434,13 +457,23 @@ export async function loadPolicyEnforcementGate(
 
   const denied = (reason: string): PolicyEnforcementGate => {
     const evaluate = makeConfigErrorEvaluator(reason);
+    const epoch = Number.isFinite(minEpochFloor) ? minEpochFloor : 0;
     return {
       enforcementActive: true,
       configError: reason,
-      configEpoch: Number.isFinite(minEpochFloor) ? minEpochFloor : 0,
+      configEpoch: epoch,
       evaluate,
       policyToolGate: (c) => evaluate({ toolName: c.toolName, toolCallId: c.toolCallId, input: c.input, modelId: c.modelId }),
       mcpPolicyGate: (c) => evaluate({ toolName: c.toolName, input: c.input, runId: c.runId, sessionId: c.sessionId }),
+      // GATE 3 fail-closed context: NO issuer roots + NO trusted credential source, so every
+      // scoped credential fails authorization and is dropped (required → denied). A config
+      // error must never leave GATE 3 ungated when the anchor is pinned.
+      gate3Context: {
+        issuerRoots: [],
+        currentConfigEpoch: epoch,
+        minEpochFloor: epoch,
+        policyDocHashFor: () => '',
+      },
     };
   };
 
@@ -540,12 +573,32 @@ export async function loadPolicyEnforcementGate(
 
     const evaluate = makeEvaluator(built, resolveAuthorization);
 
+    // Build the GATE-3 policyDocHash resolver from the verified docs: the doc that COVERS a
+    // tool + command is the doc whose hash binds an authorization for that action.
+    const docHashByActionId = new Map<string, string>();
+    for (const { hash, doc } of built.policyDocs) {
+      for (const action of doc.actions) docHashByActionId.set(action.id, hash);
+    }
+    const policyDocHashFor = (toolName: string, command: string): string => {
+      const cov = coverageFor(built.policyDocs.map((p) => p.doc), toolName, command);
+      return cov.action ? docHashByActionId.get(cov.action.id) ?? '' : '';
+    };
+
+    const gate3Context: Gate3Context = {
+      issuerRoots,
+      currentConfigEpoch: configEpoch,
+      minEpochFloor,
+      ...(credentialSource ? { credentialSource } : {}),
+      policyDocHashFor,
+    };
+
     return {
       enforcementActive: true,
       configEpoch,
       evaluate,
       policyToolGate: (c) => evaluate({ toolName: c.toolName, toolCallId: c.toolCallId, input: c.input, modelId: c.modelId }),
       mcpPolicyGate: (c) => evaluate({ toolName: c.toolName, input: c.input, runId: c.runId, sessionId: c.sessionId }),
+      gate3Context,
     };
   } catch (err) {
     return denied(`enforcement config error: ${(err as Error)?.message ?? String(err)}`);

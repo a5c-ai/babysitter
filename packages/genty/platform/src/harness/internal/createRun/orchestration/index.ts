@@ -295,6 +295,7 @@ export async function resolveAndPostEffect(
 
   const { execFileSync, execSync } = await import("node:child_process");
   const { createAgentCoreSession } = await import("../utils");
+  const { withPolicyGate } = await import("./policy-enforcement-wiring");
   const babysitterParts = babysitterBin.split(" ");
   const bCmd = babysitterParts[0]!;
   const bPrefix = babysitterParts.slice(1);
@@ -320,11 +321,13 @@ export async function resolveAndPostEffect(
         ?? action.taskDef?.title
         ?? "Execute this task";
 
-    const session = createAgentCoreSession({
+    // §9.4 / AC-49 — the delegated agent/skill session executes tools via session.prompt,
+    // so it MUST carry the load-bearing policy tool gate.
+    const session = createAgentCoreSession(await withPolicyGate({
       workspace,
       model,
       ephemeral: true,
-    });
+    }, workspace));
     try {
       const result = await session.prompt(prompt);
       if (result.success === false) {

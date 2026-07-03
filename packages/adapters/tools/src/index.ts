@@ -80,6 +80,9 @@ export type {
   CoverageDecision,
 } from './policy-verifier-hook.js';
 
+/* GATE 1 — production wiring (Milestone D, AC-49): construct + install the bridge. */
+export { loadPolicyVerifierBridge, composePolicyBridge } from './policy-verifier-wiring.js';
+
 /* ------------------------------------------------------------------ */
 /*  MCP bridge                                                         */
 /* ------------------------------------------------------------------ */

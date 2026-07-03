@@ -187,6 +187,19 @@ export interface AgentCoreSessionOptions {
   outputSchemaName?: string;
   /** Provider strictness flag for APIs that support schema strictness. */
   outputSchemaStrict?: boolean;
+  /**
+   * Milestone D (§9.4 / AC-49) — the LOAD-BEARING genty session tool-execution gate. When
+   * present it is consulted BEFORE `definition.execute` for each tool call; a covered action
+   * without a valid CommandAuthorization is denied before execution. Populated by the
+   * centralized `withPolicyGate` / `applyPolicyGateSync` wiring; undefined when the config
+   * anchor is not pinned (path unchanged).
+   */
+  policyToolGate?: (context: {
+    toolName: string;
+    toolCallId: string;
+    input: unknown;
+    modelId?: string;
+  }) => { allowed: boolean; reason?: string };
 }
 
 /**

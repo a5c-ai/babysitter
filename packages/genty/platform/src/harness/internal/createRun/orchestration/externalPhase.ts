@@ -43,7 +43,7 @@ import {
 } from "./dispatch";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
 import { subscribeVerbosePiEvents } from "./verbose";
-import { resolveRunPolicyGates } from "./policy-enforcement-wiring";
+import { resolveRunPolicyGates, applyPolicyGateSync } from "./policy-enforcement-wiring";
 import type { RunOrchestrationPhaseArgs } from "./types";
 import { extractErrorMessage, extractErrorStack, recoverExternalProcessError } from "./externalPhaseHelpers";
 
@@ -426,6 +426,11 @@ async function resolveExternalAction(args: {
     args.args.verbose,
     args.args.outputMode,
   );
+  // §9.4 / AC-49 — worker sessions run `definition.execute` (tool-executing), so they MUST
+  // carry the load-bearing policy tool gate. Resolve the run's gate ONCE (memoized) and
+  // apply it synchronously to every worker session (incl. the retry factory below), so no
+  // tool-executing worker omits the gate. Unpinned anchor → gate is undefined (unchanged).
+  const { policyToolGate: workerPolicyGate } = await resolveRunPolicyGates(args.args.workspace);
   let workerSession: ReturnType<typeof createAgentCoreSession> | null = null;
   let workerUnsub: (() => void) | null = null;
   if (
@@ -440,7 +445,7 @@ async function resolveExternalAction(args: {
         model: args.args.model,
       });
       workerSession = args.registerPiSession(createAgentCoreSession(
-        enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+        applyPolicyGateSync(enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext), workerPolicyGate),
       ));
       workerUnsub = subscribeVerbosePiEvents(
         workerSession,
@@ -454,7 +459,7 @@ async function resolveExternalAction(args: {
         model: args.args.model,
       });
       workerSession = args.registerPiSession(createAgentCoreSession(
-        enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+        applyPolicyGateSync(enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext), workerPolicyGate),
       ));
       workerUnsub = subscribeVerbosePiEvents(
         workerSession,
@@ -471,7 +476,7 @@ async function resolveExternalAction(args: {
         model: args.args.model,
       });
       const nextSession = args.registerPiSession(createAgentCoreSession(
-        enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+        applyPolicyGateSync(enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext), workerPolicyGate),
       ));
       workerUnsub?.();
       workerUnsub = subscribeVerbosePiEvents(

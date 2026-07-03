@@ -237,6 +237,12 @@ export type {
   GateCredentialInjectionInput,
   GateCredentialInjectionResult,
 } from './policy-credential-gate.js';
+export type { Gate3Options } from './spawn-invocation.js';
+export { resolveSpawnGate3, __resetSpawnGateCache } from './policy-spawn-gate.js';
+export type {
+  SpawnScopedCredentials,
+  SpawnGateBinding,
+} from './policy-spawn-gate.js';
 
 // Tool classification
 export type { ToolClassification } from './tools/index.js';

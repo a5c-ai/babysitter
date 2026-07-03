@@ -76,7 +76,18 @@ export const EXEC_SEAM_REGISTRY: readonly ExecSeamEntry[] = [
     role: 'blocking',
     description:
       'GATE 1 — ToolDispatcher.beforeToolUse policy verifier (PolicyVerifierHookBridge). ' +
-      'The LOAD-BEARING, un-bypassable gate for ALL covered actions (AC-23 / AC-49).',
+      'The LOAD-BEARING, un-bypassable gate for ALL covered actions (AC-23 / AC-49). ' +
+      'Production wiring: ToolDispatcher.create installs the bridge from policy-verifier-wiring.',
+  },
+  {
+    id: 'adapters-gate1-production-wiring',
+    file: 'packages/adapters/tools/src/policy-verifier-wiring.ts',
+    onCoveredPath: true,
+    role: 'blocking',
+    description:
+      'GATE 1 PRODUCTION wiring — loadPolicyVerifierBridge constructs the GATE-1 bridge from ' +
+      'the shared loadPolicyEnforcementGate and composePolicyBridge installs it in front of ' +
+      'the existing hooks bridge (AC-49). The bridge delegates to the verified gate.evaluate.',
   },
   {
     id: 'adapters-gate2-spawn-runtime-hooks',
@@ -95,5 +106,24 @@ export const EXEC_SEAM_REGISTRY: readonly ExecSeamEntry[] = [
     description:
       'GATE 3 — credential-injection backstop. Only mediates scoped credential delivery ' +
       '(env / docker -v / k8s secret/serviceaccount), so it is defense-in-depth (AC-50 / AC-49).',
+  },
+  {
+    id: 'adapters-gate3-spawn-runner',
+    file: 'packages/adapters/core/src/spawn-runner.ts',
+    onCoveredPath: true,
+    role: 'defense-in-depth',
+    description:
+      'GATE 3 PRODUCTION wiring — spawn-runner builds a Gate3Options via resolveSpawnGate3 ' +
+      'and passes it as the 4th arg to buildInvocationCommand so the live spawn gates every ' +
+      'credential channel (env / docker -v / k8s serviceaccount) (AC-23a / AC-50).',
+  },
+  {
+    id: 'adapters-gate3-spawn-gate-resolver',
+    file: 'packages/adapters/core/src/policy-spawn-gate.ts',
+    onCoveredPath: true,
+    role: 'defense-in-depth',
+    description:
+      'GATE 3 PRODUCTION resolver — resolveSpawnGate3 loads the Gate3Context from the shared ' +
+      'loadPolicyEnforcementGate and builds a Gate3Options for the spawn (AC-40 / AC-50).',
   },
 ];

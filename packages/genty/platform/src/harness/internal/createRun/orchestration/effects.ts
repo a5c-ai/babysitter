@@ -12,6 +12,7 @@ import {
 } from "./hookDecisionEffects";
 export { readProcessFileFingerprint } from "./effectsHelpers";
 import { enhanceWorkerSessionOptions } from "./workerSessionEnhancer";
+import { resolveRunPolicyGates, applyPolicyGateSync } from "./policy-enforcement-wiring";
 import {
   evaluateApprovalChain,
   type ApprovalChainDefinition,
@@ -1079,7 +1080,12 @@ async function invokeSubprocessEffect(
             const enhancedOpts = options.gentyContext
               ? enhanceWorkerSessionOptions(baseOpts, options.gentyContext)
               : baseOpts;
-            const createWorkerSession = () => createAgentCoreSession(enhancedOpts);
+            // §9.4 / AC-49 — the subagent worker session runs `definition.execute`, so it
+            // MUST carry the load-bearing policy tool gate. Resolve once (memoized), apply
+            // synchronously to every session the factory builds.
+            const { policyToolGate: childWorkerGate } = await resolveRunPolicyGates(options.workspace);
+            const createWorkerSession = () =>
+              createAgentCoreSession(applyPolicyGateSync(enhancedOpts, childWorkerGate));
             workerSession = createWorkerSession();
             workerSessionFactory = createWorkerSession;
           }

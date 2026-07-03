@@ -26,7 +26,8 @@ import { DEFAULT_RETRY_POLICY } from './retry.js';
 import type { ErrorCode, RetryPolicy } from './types.js';
 import type { InvocationMode } from './invocation.js';
 import { ActiveSpawn, computeDelay, isWindows, resolveExitOutcome, resolveSpawnArgs } from './spawn-runner-utils.js';
-import { buildInvocationCommand, runCleanupDetached, type InvocationCommandWithCleanup } from './spawn-invocation.js';
+import { buildInvocationCommand, runCleanupDetached, type InvocationCommandWithCleanup, type Gate3Options } from './spawn-invocation.js';
+import { resolveSpawnGate3 } from './policy-spawn-gate.js';
 export { buildInvocationCommand, type InvocationCommand, type InvocationCommandWithCleanup, type K8sCleanup } from './spawn-invocation.js';
 
 /**
@@ -109,10 +110,34 @@ async function runOnce(
     : resolvedSpawnArgs;
   const now = Date.now();
 
+  // GATE 3 (§9.3 / AC-23a / AC-50) — build the credential-injection gate from the SAME
+  // manifest-verified config that drives GATE 1 / the session gate. When the config anchor
+  // is pinned AND this run declares scoped credentials, `buildInvocationCommand` gates every
+  // credential channel it constructs; unpinned / no scoped creds → undefined (unchanged).
+  let gate3: Gate3Options | undefined;
+  if (options.policyGate3) {
+    const p = options.policyGate3;
+    gate3 = await resolveSpawnGate3(
+      p.projectRoot ?? options.cwd ?? process.cwd(),
+      {
+        ...(p.scopedEnvKeys ? { scopedEnvKeys: p.scopedEnvKeys } : {}),
+        ...(p.scopedMounts ? { scopedMounts: p.scopedMounts } : {}),
+        ...(p.scopedServiceAccount ? { scopedServiceAccount: p.scopedServiceAccount } : {}),
+      },
+      {
+        toolName: p.toolName ?? adapter.agent,
+        toolCallId: p.toolCallId ?? handle.runId,
+        command: spawnArgs.command,
+        args: [...spawnArgs.args],
+        resolveAuthorization: p.resolveAuthorization ?? (() => undefined),
+      },
+    );
+  }
+
   // Transform the spawnArgs according to the configured invocation mode.
   let invocationCmd: InvocationCommandWithCleanup;
   try {
-    invocationCmd = buildInvocationCommand(options.invocation, spawnArgs, adapter.agent);
+    invocationCmd = buildInvocationCommand(options.invocation, spawnArgs, adapter.agent, gate3);
   } catch (err) {
     handle.emit({
       type: 'error',

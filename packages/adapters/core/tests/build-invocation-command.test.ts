@@ -437,4 +437,123 @@ describe('buildInvocationCommand — GATE 3 credential wiring (AC-23a/AC-50, def
       if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
     }
   });
+
+  // ── AC-50 — the NON-ENV credential channels (docker -v mount, k8s serviceaccount) ──
+
+  const SCOPED_MOUNT = '/host/creds:/creds:ro';
+  const ORDINARY_MOUNT = '/host/data:/data';
+
+  it('a scoped docker -v mount with a VALID authorization is emitted (AC-50)', () => {
+    const out = buildInvocationCommand(
+      { mode: 'docker', image: 'i:1', volumes: [SCOPED_MOUNT, ORDINARY_MOUNT] }, spawn, 'claude',
+      gate3({
+        resolveAuthorization: () => makeAuthorization(true),
+        scopedMounts: { [SCOPED_MOUNT]: { alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro' } },
+      }),
+    );
+    // Both the scoped (authorized) and ordinary mounts are present.
+    expect(out.args).toContain(SCOPED_MOUNT);
+    expect(out.args).toContain(ORDINARY_MOUNT);
+  });
+
+  it('a scoped docker -v mount with NO authorization is OMITTED; the ordinary mount stays (AC-50)', () => {
+    const out = buildInvocationCommand(
+      { mode: 'docker', image: 'i:1', volumes: [SCOPED_MOUNT, ORDINARY_MOUNT] }, spawn, 'claude',
+      gate3({
+        resolveAuthorization: () => undefined,
+        // No scoped ENV keys here — isolate the mount channel.
+        scopedEnvKeys: {},
+        scopedMounts: { [SCOPED_MOUNT]: { alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro' } },
+      }),
+    );
+    expect(out.args).not.toContain(SCOPED_MOUNT);
+    expect(out.args).toContain(ORDINARY_MOUNT);
+  });
+
+  it('a REQUIRED scoped docker -v mount with no authorization DENIES the spawn (AC-50)', () => {
+    expect(() =>
+      buildInvocationCommand(
+        { mode: 'docker', image: 'i:1', volumes: [SCOPED_MOUNT] }, spawn, 'claude',
+        gate3({
+          resolveAuthorization: () => undefined,
+          scopedEnvKeys: {},
+          scopedMounts: { [SCOPED_MOUNT]: { alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro', required: true } },
+        }),
+      ),
+    ).toThrow(CredentialGateDenied);
+  });
+
+  it('a scoped k8s --serviceaccount with a VALID authorization is emitted (AC-50)', () => {
+    const prev = process.env['AGENT_MUX_K8S_POD'];
+    delete process.env['AGENT_MUX_K8S_POD'];
+    try {
+      const out = buildInvocationCommand(
+        { mode: 'k8s', ephemeral: true, image: 'i:1', serviceAccount: 'prod-sa' }, spawn, 'claude',
+        gate3({
+          resolveAuthorization: () => makeAuthorization(true),
+          scopedEnvKeys: {},
+          scopedServiceAccount: { name: 'prod-sa', alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro' },
+        }),
+      );
+      expect(out.args).toContain('--serviceaccount=prod-sa');
+    } finally {
+      if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
+    }
+  });
+
+  it('a scoped k8s --serviceaccount with NO authorization is STRIPPED (AC-50)', () => {
+    const prev = process.env['AGENT_MUX_K8S_POD'];
+    delete process.env['AGENT_MUX_K8S_POD'];
+    try {
+      const out = buildInvocationCommand(
+        { mode: 'k8s', ephemeral: true, image: 'i:1', serviceAccount: 'prod-sa' }, spawn, 'claude',
+        gate3({
+          resolveAuthorization: () => undefined,
+          scopedEnvKeys: {},
+          scopedServiceAccount: { name: 'prod-sa', alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro' },
+        }),
+      );
+      expect(out.args.some((a) => a.startsWith('--serviceaccount='))).toBe(false);
+    } finally {
+      if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
+    }
+  });
+
+  it('a REQUIRED scoped k8s --serviceaccount with no authorization DENIES the spawn (AC-50)', () => {
+    const prev = process.env['AGENT_MUX_K8S_POD'];
+    delete process.env['AGENT_MUX_K8S_POD'];
+    try {
+      expect(() =>
+        buildInvocationCommand(
+          { mode: 'k8s', ephemeral: true, image: 'i:1', serviceAccount: 'prod-sa' }, spawn, 'claude',
+          gate3({
+            resolveAuthorization: () => undefined,
+            scopedEnvKeys: {},
+            scopedServiceAccount: { name: 'prod-sa', alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro', required: true },
+          }),
+        ),
+      ).toThrow(CredentialGateDenied);
+    } finally {
+      if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
+    }
+  });
+
+  it('a non-scoped serviceaccount passes through unchanged (only the SCOPED name is gated)', () => {
+    const prev = process.env['AGENT_MUX_K8S_POD'];
+    delete process.env['AGENT_MUX_K8S_POD'];
+    try {
+      const out = buildInvocationCommand(
+        { mode: 'k8s', ephemeral: true, image: 'i:1', serviceAccount: 'unrelated-sa' }, spawn, 'claude',
+        gate3({
+          resolveAuthorization: () => undefined,
+          scopedEnvKeys: {},
+          scopedServiceAccount: { name: 'prod-sa', alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro' },
+        }),
+      );
+      // The invocation's SA is not the scoped one, so it is untouched.
+      expect(out.args).toContain('--serviceaccount=unrelated-sa');
+    } finally {
+      if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
+    }
+  });
 });

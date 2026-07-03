@@ -57,6 +57,20 @@ export interface Gate3Options extends Omit<GateCredentialInjectionInput, 'creden
    * (AC-40a). Env keys absent from this map are not credentials and pass through.
    */
   scopedEnvKeys: Record<string, { alias: string; required?: boolean }>;
+  /**
+   * AC-50 — SCOPED docker `-v` file mounts to gate. Keyed by the mount spec string
+   * (`host:container[:mode]`) → its trusted alias. A mount NOT listed passes through as an
+   * ordinary (non-credential) mount. With no valid authorization a listed mount is OMITTED
+   * (channel `docker-mount`); if `required`, the spawn is denied.
+   */
+  scopedMounts?: Record<string, { alias: string; required?: boolean }>;
+  /**
+   * AC-50 — a SCOPED k8s `--serviceaccount` / mounted-secret reference to gate. When set and
+   * the value matches the invocation's service account, GATE 3 authorizes it; with no valid
+   * authorization the `--serviceaccount` flag is STRIPPED (channel `k8s-serviceaccount`); if
+   * `required`, the spawn is denied.
+   */
+  scopedServiceAccount?: { name: string; alias: string; required?: boolean };
 }
 
 export interface Gate3Denied {
@@ -161,6 +175,95 @@ function applyGate3ToEnv(
 }
 
 /**
+ * Apply GATE 3 to a set of candidate docker `-v` mount specs (AC-50, channel
+ * `docker-mount`). Returns the mounts that passed the gate (unlisted mounts pass through
+ * as ordinary mounts). Throws `CredentialGateDenied` when a REQUIRED scoped mount is
+ * undeliverable. When `gate3` is undefined every mount passes through (back-compat).
+ */
+function applyGate3ToMounts(
+  mounts: string[],
+  gate3: Gate3Options | undefined,
+): string[] {
+  if (!gate3 || !gate3.scopedMounts || Object.keys(gate3.scopedMounts).length === 0) {
+    return mounts;
+  }
+  const scoped: ScopedCredential[] = [];
+  for (const spec of mounts) {
+    const s = gate3.scopedMounts[spec];
+    if (s) {
+      scoped.push({ name: spec, value: spec, alias: s.alias, channel: 'docker-mount', ...(s.required ? { required: true } : {}) });
+    }
+  }
+  if (scoped.length === 0) return mounts;
+
+  const result = gateCredentialInjection({
+    issuerRoots: gate3.issuerRoots,
+    policyDocHash: gate3.policyDocHash,
+    currentConfigEpoch: gate3.currentConfigEpoch,
+    minEpochFloor: gate3.minEpochFloor,
+    now: gate3.now,
+    toolName: gate3.toolName,
+    toolCallId: gate3.toolCallId,
+    command: gate3.command,
+    args: gate3.args,
+    credentialSource: gate3.credentialSource,
+    credentials: scoped,
+    resolveAuthorization: gate3.resolveAuthorization,
+  });
+  if (result.denied) {
+    throw new CredentialGateDenied(result.reason ?? 'required scoped mount undeliverable', result.warnings);
+  }
+  const injectedNames = new Set(result.injected.map((c) => c.name));
+  const dropped = new Set(scoped.filter((c) => !injectedNames.has(c.name)).map((c) => c.name));
+  if (dropped.size === 0) return mounts;
+  return mounts.filter((spec) => !dropped.has(spec));
+}
+
+/**
+ * Apply GATE 3 to a k8s `--serviceaccount` reference (AC-50, channel
+ * `k8s-serviceaccount`). Returns the service-account name to emit, or `undefined` when the
+ * scoped serviceaccount failed authorization (flag stripped). Throws when a REQUIRED scoped
+ * serviceaccount is undeliverable. When `gate3` is undefined the value passes through.
+ */
+function applyGate3ToServiceAccount(
+  serviceAccount: string | undefined,
+  gate3: Gate3Options | undefined,
+): string | undefined {
+  if (serviceAccount === undefined) return undefined;
+  if (!gate3 || !gate3.scopedServiceAccount) return serviceAccount;
+  if (gate3.scopedServiceAccount.name !== serviceAccount) {
+    // The invocation's service account is not the scoped one — pass through unchanged.
+    return serviceAccount;
+  }
+  const spec = gate3.scopedServiceAccount;
+  const result = gateCredentialInjection({
+    issuerRoots: gate3.issuerRoots,
+    policyDocHash: gate3.policyDocHash,
+    currentConfigEpoch: gate3.currentConfigEpoch,
+    minEpochFloor: gate3.minEpochFloor,
+    now: gate3.now,
+    toolName: gate3.toolName,
+    toolCallId: gate3.toolCallId,
+    command: gate3.command,
+    args: gate3.args,
+    credentialSource: gate3.credentialSource,
+    credentials: [{
+      name: serviceAccount,
+      value: serviceAccount,
+      alias: spec.alias,
+      channel: 'k8s-serviceaccount',
+      ...(spec.required ? { required: true } : {}),
+    }],
+    resolveAuthorization: gate3.resolveAuthorization,
+  });
+  if (result.denied) {
+    throw new CredentialGateDenied(result.reason ?? 'required scoped serviceaccount undeliverable', result.warnings);
+  }
+  // Strip the flag when the scoped serviceaccount was not authorized (dropped).
+  return result.injected.length > 0 ? serviceAccount : undefined;
+}
+
+/**
  * Transform a SpawnArgs + agent name into an InvocationCommand based on the
  * invocation mode. This is a pure function — no subprocess is started.
  *
@@ -204,7 +307,11 @@ export function buildInvocationCommand(
     // Mount the host cwd into the container at workdir.
     args.push('-v', `${spawnArgs.cwd}:${workdir}`);
     args.push('-w', workdir);
-    for (const vol of mode.volumes ?? []) {
+    // GATE 3 — the docker `-v` credential-mount channel (AC-50). A scoped mount is emitted
+    // only with a valid authorization; an unauthorized scoped mount is OMITTED (and if
+    // marked required, the spawn is denied). Non-credential mounts pass through unchanged.
+    const gatedVolumes = applyGate3ToMounts([...(mode.volumes ?? [])], gate3);
+    for (const vol of gatedVolumes) {
       args.push('-v', vol);
     }
     if (mode.network) args.push('--network', mode.network);
@@ -369,7 +476,11 @@ function buildK8sInvocation(
   if (mode.context) args.push('--context', mode.context);
   if (namespace) args.push('-n', namespace);
   args.push('run', '--rm', '-i', '--restart=Never', `--image=${image}`, podName);
-  if (mode.serviceAccount) args.push(`--serviceaccount=${mode.serviceAccount}`);
+  // GATE 3 — the k8s `--serviceaccount` credential channel (AC-50). A scoped serviceaccount
+  // is emitted only with a valid authorization; unauthorized → the flag is STRIPPED (and if
+  // required, the spawn is denied). A non-scoped serviceaccount passes through unchanged.
+  const gatedServiceAccount = applyGate3ToServiceAccount(mode.serviceAccount, gate3);
+  if (gatedServiceAccount) args.push(`--serviceaccount=${gatedServiceAccount}`);
   if (mode.podStartupTimeoutMs !== undefined) {
     // kubectl expects a duration; ms -> seconds rounded up.
     const secs = Math.max(1, Math.ceil(mode.podStartupTimeoutMs / 1000));

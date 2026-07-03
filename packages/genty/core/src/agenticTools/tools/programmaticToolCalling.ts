@@ -81,6 +81,11 @@ export function createProgrammaticToolCallingTool(
             toolName: name,
             input: toolParams,
             caller: "code_executor",
+            // Milestone D (AC-34a) — the ACTUAL executing tool-call id for this nested call,
+            // so GATE 1 (PolicyVerifierHookBridge) can bind the CommandAuthorization to this
+            // exact call. Without it a covered nested call is DENIED (never bound to the
+            // authorization's own id, which would be an X===X tautology).
+            toolCallId: `code-executor:${calls.length}:${name}`,
             signal: typeof toolContext === "object" && toolContext && "signal" in toolContext
               ? toolContext.signal as AbortSignal | undefined
               : undefined,
