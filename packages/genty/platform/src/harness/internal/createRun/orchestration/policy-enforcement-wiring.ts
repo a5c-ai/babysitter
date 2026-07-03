@@ -49,6 +49,42 @@ export interface RunPolicyGates {
 const cache = new Map<string, Promise<RunPolicyGates>>();
 
 /**
+ * Milestone E — the run's authorization store resolver, registered per workspace (the ALLOW
+ * path, §5 / AC-9 / AC-49). The orchestrator creates a run-level `AuthorizationStore` (from
+ * `@a5c-ai/policy-adapter`), populates it when a policy is satisfied from the run's trusted
+ * artifacts, and registers its `resolver` here keyed by workspace. `resolveRunPolicyGates`
+ * then threads that resolver into `loadPolicyEnforcementGate` so a legitimately-authorized
+ * covered action is ALLOWED — WITHOUT every session/spawn call site having to pass the
+ * resolver explicitly. With no store registered (or one that resolves none), a covered action
+ * DENIES (unchanged fail-closed Milestone-D posture). A resolver registered for a workspace
+ * MUST be re-applied to that workspace's cached gate, so registration clears the memo.
+ */
+const authResolverByWorkspace = new Map<string, AuthorizationResolver>();
+
+/**
+ * Register the run's authorization-store resolver for a workspace so the load-bearing gates
+ * can ALLOW a legitimately-authorized covered action (AC-9 / AC-49). Clears the per-workspace
+ * gate memo so the next `resolveRunPolicyGates` rebuilds the gate WITH the resolver threaded.
+ */
+export function registerRunAuthorizationResolver(
+  workspace: string | undefined,
+  resolveAuthorization: AuthorizationResolver,
+): void {
+  const key = workspace ?? '';
+  authResolverByWorkspace.set(key, resolveAuthorization);
+  // The gate is memoized per workspace; a newly-registered resolver must take effect, so drop
+  // the cached (resolver-less) gate for this workspace.
+  cache.delete(key);
+}
+
+/** Test-only / end-of-run: drop the registered resolver for a workspace. */
+export function unregisterRunAuthorizationResolver(workspace: string | undefined): void {
+  const key = workspace ?? '';
+  authResolverByWorkspace.delete(key);
+  cache.delete(key);
+}
+
+/**
  * Build a DENY-ALL pair of gates. Used only when the config anchor is pinned (enforcement
  * requested) but the policy adapter could not be loaded / reported inactive — a state that
  * MUST fail closed rather than silently disable enforcement. Both gates deny every call so
@@ -72,6 +108,13 @@ export function resolveRunPolicyGates(
   const key = workspace ?? '';
   const existing = cache.get(key);
   if (existing) return existing;
+
+  // ALLOW path (AC-9 / AC-49): if the caller did not pass a resolver explicitly, fall back to
+  // the run's registered authorization-store resolver for this workspace (registered by the
+  // orchestrator). This threads the ALLOW path into EVERY session/spawn call site without each
+  // one passing the resolver. With no registered resolver, `undefined` ⇒ deny (fail closed).
+  const effectiveResolveAuthorization =
+    resolveAuthorization ?? authResolverByWorkspace.get(key);
 
   // Whether the off-workspace config anchor is pinned. When it IS pinned, enforcement is
   // meant to be active and ANY failure to load the adapter is fail-closed (deny-all covered
@@ -97,7 +140,7 @@ export function resolveRunPolicyGates(
       // Dynamic import keeps the policy-adapter (ESM) out of any CJS build graph, matching
       // the SDK's proven-verification.ts / trusted-breakpoint-policy.ts pattern.
       const mod = await import('@a5c-ai/policy-adapter');
-      const result = await mod.loadPolicyEnforcementGate(workspace ?? process.cwd(), resolveAuthorization);
+      const result = await mod.loadPolicyEnforcementGate(workspace ?? process.cwd(), effectiveResolveAuthorization);
       if (result.enforcementActive !== true) {
         // Adapter reports inactive. If the anchor is pinned this is a contradiction (the
         // adapter fails closed when pinned), so install a deny-all gate; otherwise no gate.

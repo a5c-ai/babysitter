@@ -53,16 +53,21 @@ function anchorPinned(): boolean {
   return typeof v === 'string' && v.length > 0;
 }
 
-async function resolveGate3Context(projectRoot: string): Promise<
-  | {
-      issuerRoots: unknown[];
-      currentConfigEpoch: number;
-      minEpochFloor: number;
-      credentialSource?: unknown;
-      policyDocHashFor: (toolName: string, command: string) => string;
-    }
-  | undefined
-> {
+interface Gate3ContextLike {
+  issuerRoots: unknown[];
+  currentConfigEpoch: number;
+  minEpochFloor: number;
+  credentialSource?: {
+    scopedCredentials?: {
+      scopedEnvKeys?: Record<string, { alias: string; required?: boolean }>;
+      scopedMounts?: Record<string, { alias: string; required?: boolean }>;
+      scopedServiceAccount?: { name: string; alias: string; required?: boolean };
+    };
+  };
+  policyDocHashFor: (toolName: string, command: string) => string;
+}
+
+async function resolveGate3Context(projectRoot: string): Promise<Gate3ContextLike | undefined> {
   const key = projectRoot;
   const existing = cache.get(key);
   if (existing) return existing as Promise<never>;
@@ -71,7 +76,7 @@ async function resolveGate3Context(projectRoot: string): Promise<
       const mod = await import('@a5c-ai/policy-adapter');
       const result = await mod.loadPolicyEnforcementGate(projectRoot);
       if (result.enforcementActive !== true) return undefined;
-      return result.gate3Context;
+      return result.gate3Context as Gate3ContextLike | undefined;
     } catch {
       // Anchor pinned but adapter unloadable → return a trust-empty context so scoped creds
       // fail authorization (fail closed). Unpinned → undefined (no gating).
@@ -133,4 +138,47 @@ export async function resolveSpawnGate3(
     ...(scoped.scopedMounts ? { scopedMounts: scoped.scopedMounts } : {}),
     ...(scoped.scopedServiceAccount ? { scopedServiceAccount: scoped.scopedServiceAccount } : {}),
   };
+}
+
+/**
+ * Milestone E — AUTO-ACTIVATE GATE 3 from the SIGNED config (§9.3 / AC-23a / AC-40 / AC-50).
+ *
+ * The scoped-credential DECLARATION (which env keys / mounts / serviceaccount are scoped, and
+ * to which trusted alias) is DEPLOYMENT CONFIGURATION, not agent-writable input. It lives in
+ * the manifest-verified `credential-scope-source.json` (`scopedCredentials`), so a real spawn
+ * is gated end-to-end WITHOUT a caller passing `RunOptions.policyGate3` and WITHOUT the agent
+ * being able to declare its own scoping.
+ *
+ * When the anchor is pinned AND the signed source declares scoped credentials, this returns a
+ * `Gate3Options` built from the SAME manifest-verified config that drives GATE 1 / the session
+ * gate. When the anchor is unpinned, or the signed source declares no scoped credentials, this
+ * returns `undefined` (GATE 3 gates only what a caller explicitly declared, back-compat).
+ *
+ * `resolveAuthorization` is the run's authorization-store resolver (the ALLOW path); with none,
+ * a scoped credential fails authorization and its channel is dropped (fail closed).
+ */
+export async function resolveSpawnGate3FromConfig(
+  projectRoot: string,
+  binding: Omit<SpawnGateBinding, 'resolveAuthorization'> & {
+    resolveAuthorization?: () => unknown;
+  },
+): Promise<Gate3Options | undefined> {
+  if (!anchorPinned()) return undefined;
+  const ctx = await resolveGate3Context(projectRoot);
+  if (!ctx) return undefined;
+  const declared = ctx.credentialSource?.scopedCredentials;
+  if (!declared) return undefined;
+
+  const scoped: SpawnScopedCredentials = {
+    ...(declared.scopedEnvKeys ? { scopedEnvKeys: declared.scopedEnvKeys } : {}),
+    ...(declared.scopedMounts ? { scopedMounts: declared.scopedMounts } : {}),
+    ...(declared.scopedServiceAccount ? { scopedServiceAccount: declared.scopedServiceAccount } : {}),
+  };
+  return resolveSpawnGate3(projectRoot, scoped, {
+    toolName: binding.toolName,
+    toolCallId: binding.toolCallId,
+    command: binding.command,
+    args: binding.args,
+    resolveAuthorization: binding.resolveAuthorization ?? (() => undefined),
+  });
 }

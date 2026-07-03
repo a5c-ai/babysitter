@@ -27,7 +27,7 @@ import type { ErrorCode, RetryPolicy } from './types.js';
 import type { InvocationMode } from './invocation.js';
 import { ActiveSpawn, computeDelay, isWindows, resolveExitOutcome, resolveSpawnArgs } from './spawn-runner-utils.js';
 import { buildInvocationCommand, runCleanupDetached, type InvocationCommandWithCleanup, type Gate3Options } from './spawn-invocation.js';
-import { resolveSpawnGate3 } from './policy-spawn-gate.js';
+import { resolveSpawnGate3, resolveSpawnGate3FromConfig } from './policy-spawn-gate.js';
 export { buildInvocationCommand, type InvocationCommand, type InvocationCommandWithCleanup, type K8sCleanup } from './spawn-invocation.js';
 
 /**
@@ -112,13 +112,21 @@ async function runOnce(
 
   // GATE 3 (§9.3 / AC-23a / AC-50) — build the credential-injection gate from the SAME
   // manifest-verified config that drives GATE 1 / the session gate. When the config anchor
-  // is pinned AND this run declares scoped credentials, `buildInvocationCommand` gates every
+  // is pinned AND scoped credentials are declared, `buildInvocationCommand` gates every
   // credential channel it constructs; unpinned / no scoped creds → undefined (unchanged).
+  //
+  // Two activation paths, either of which gates the live spawn WITHOUT test glue:
+  //  (1) explicit — a caller passed `RunOptions.policyGate3` with the scoped declaration; or
+  //  (2) auto — the anchor is pinned and the SIGNED, manifest-verified credential-scope source
+  //      DECLARES scoped credentials (`scopedCredentials`). The declaration is deployment
+  //      config (signed, not agent-writable), so a real scoped-credential spawn is gated end
+  //      to end from config alone. Explicit wins when both are present.
   let gate3: Gate3Options | undefined;
+  const projectRoot = options.policyGate3?.projectRoot ?? options.cwd ?? process.cwd();
   if (options.policyGate3) {
     const p = options.policyGate3;
     gate3 = await resolveSpawnGate3(
-      p.projectRoot ?? options.cwd ?? process.cwd(),
+      projectRoot,
       {
         ...(p.scopedEnvKeys ? { scopedEnvKeys: p.scopedEnvKeys } : {}),
         ...(p.scopedMounts ? { scopedMounts: p.scopedMounts } : {}),
@@ -132,6 +140,17 @@ async function runOnce(
         resolveAuthorization: p.resolveAuthorization ?? (() => undefined),
       },
     );
+  } else {
+    // Auto-activate from the signed config when the anchor is pinned. `resolveSpawnGate3FromConfig`
+    // is a no-op (undefined) unless the anchor is pinned AND the signed source declares scoped
+    // credentials — so the un-enforced default deployment is unchanged.
+    gate3 = await resolveSpawnGate3FromConfig(projectRoot, {
+      toolName: adapter.agent,
+      toolCallId: handle.runId,
+      command: spawnArgs.command,
+      args: [...spawnArgs.args],
+      resolveAuthorization: options.policyResolveAuthorization,
+    });
   }
 
   // Transform the spawnArgs according to the configured invocation mode.

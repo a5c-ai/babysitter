@@ -222,6 +222,15 @@ export interface RunOptions {
     resolveAuthorization?: () => unknown;
   };
 
+  /**
+   * Milestone E (ALLOW path, §5 / AC-9 / AC-50) — the run's authorization-store resolver,
+   * threaded into GATE 3 when it AUTO-ACTIVATES from the signed credential-scope source (i.e.
+   * when the anchor is pinned and the signed source declares scoped credentials, without an
+   * explicit `policyGate3`). With none, an auto-gated scoped credential fails authorization and
+   * its channel is dropped (fail closed). Ignored when `policyGate3.resolveAuthorization` is set.
+   */
+  policyResolveAuthorization?: () => unknown;
+
   // --- Provider Configuration ---
 
   /** Provider configuration for model/provider selection. */

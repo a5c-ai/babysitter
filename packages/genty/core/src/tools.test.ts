@@ -430,6 +430,65 @@ describe("agent-core tools", () => {
     );
   });
 
+  // Milestone E (AC-49 / AC-33) — the code_executor nested-dispatch INVARIANT: with the policy
+  // anchor pinned but NO policy-gated dispatcher wired, a nested call must NOT run ungated.
+  it("REFUSES a code_executor nested call ungated when the policy anchor is pinned (fail closed, AC-49)", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-gated-"));
+    writeFileSync(path.join(workspace, "note.txt"), "alpha\n", "utf8");
+    const prev = process.env.POLICY_CONFIG_ROOT_FP;
+    process.env.POLICY_CONFIG_ROOT_FP = "fp:config-root:pinned";
+    try {
+      const codeExecutor = getToolDefinitions(workspace, {
+        programmaticToolCalling: true,
+        // No toolDispatcher — the ungated direct tool.execute( path.
+      }).find((tool) => tool.name === "code_executor");
+      if (!codeExecutor) {
+        throw new Error("Expected code_executor to be registered");
+      }
+      const result = await codeExecutor.execute("code-mode-gated", {
+        code: "return await tools.read({ path: 'note.txt' });",
+      });
+      // The nested call is refused BEFORE tool.execute runs — the covered action cannot escape.
+      expect(getText(result)).toContain("policy enforcement is active");
+      expect(getText(result)).not.toContain("alpha");
+    } finally {
+      if (prev === undefined) delete process.env.POLICY_CONFIG_ROOT_FP;
+      else process.env.POLICY_CONFIG_ROOT_FP = prev;
+    }
+  });
+
+  it("still routes a code_executor nested call through the dispatcher when the anchor IS pinned (gated path allowed)", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-gated-ok-"));
+    writeFileSync(path.join(workspace, "note.txt"), "alpha\n", "utf8");
+    const prev = process.env.POLICY_CONFIG_ROOT_FP;
+    process.env.POLICY_CONFIG_ROOT_FP = "fp:config-root:pinned";
+    try {
+      const dispatch = vi.fn(async (
+        _context: unknown,
+        executor: (_tool: { name: string }, context: { input: unknown }) => Promise<unknown>,
+      ) => ({
+        output: await executor({ name: "read" }, { input: { path: "note.txt" } }),
+        durationMs: 1,
+      }));
+      const codeExecutor = getToolDefinitions(workspace, {
+        programmaticToolCalling: true,
+        toolDispatcher: { dispatch },
+      }).find((tool) => tool.name === "code_executor");
+      if (!codeExecutor) {
+        throw new Error("Expected code_executor to be registered");
+      }
+      const result = await codeExecutor.execute("code-mode-gated-ok", {
+        code: "return await tools.read({ path: 'note.txt' });",
+      });
+      const payload = JSON.parse(getText(result)) as { result: string };
+      expect(payload.result).toContain("alpha");
+      expect(dispatch).toHaveBeenCalled();
+    } finally {
+      if (prev === undefined) delete process.env.POLICY_CONFIG_ROOT_FP;
+      else process.env.POLICY_CONFIG_ROOT_FP = prev;
+    }
+  });
+
   it("propagates code_executor tool context into nested tool calls", async () => {
     const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-context-"));
     const controller = new AbortController();

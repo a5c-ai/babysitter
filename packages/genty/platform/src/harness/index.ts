@@ -81,6 +81,10 @@ export {
   withPolicyGate,
   applyPolicyGateSync,
   __resetRunPolicyGatesCache,
+  // Milestone E (ALLOW path, §5 / AC-9 / AC-49) — register the run's authorization-store
+  // resolver so the load-bearing gates can ALLOW a legitimately-authorized covered action.
+  registerRunAuthorizationResolver,
+  unregisterRunAuthorizationResolver,
 } from "./internal/createRun/orchestration/policy-enforcement-wiring";
 export type {
   RunPolicyGates,

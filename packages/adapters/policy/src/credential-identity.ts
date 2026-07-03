@@ -18,6 +18,22 @@ import { createHash } from 'node:crypto';
 /** Maps a credential ALIAS (ARN, key-id, secret name) → its stable secret-store id. */
 export type CredentialAliasMap = Record<string, string>;
 
+/**
+ * The DEPLOYMENT-CONFIG declaration of which spawn delivery-channel credentials are scoped
+ * (AC-40 / AC-50). This is NOT agent-writable input — it is hashed into the signed config
+ * manifest (AC-36), so a compromised agent cannot declare a broad credential as a narrow
+ * scope, nor un-scope a credential to smuggle it past GATE 3. Each entry names a trusted
+ * `alias` (present in `aliasMap`) so GATE 3 resolves its scope from the trusted source.
+ */
+export interface ScopedCredentialDeclaration {
+  /** env-var key → { trusted alias, required } — the docker `-e` / ssh / k8s env channel. */
+  scopedEnvKeys?: Record<string, { alias: string; required?: boolean }>;
+  /** docker `-v` mount spec → { trusted alias, required } (AC-50). */
+  scopedMounts?: Record<string, { alias: string; required?: boolean }>;
+  /** k8s `--serviceaccount` name → { trusted alias, required } (AC-50). */
+  scopedServiceAccount?: { name: string; alias: string; required?: boolean };
+}
+
 export interface CredentialScopeSource {
   /** Alias → stable secret-store identity (canonicalized before hashing). */
   aliasMap: CredentialAliasMap;
@@ -25,6 +41,13 @@ export interface CredentialScopeSource {
   scopeByIdentity: Record<string, string>;
   /** Canonical identities known to be backed by >1 distinct credential → deny. */
   ambiguousIdentities?: string[];
+  /**
+   * DEPLOYMENT-CONFIG: which spawn delivery-channel credentials are scoped (AC-40 / AC-50).
+   * When present and the anchor is pinned, GATE 3 auto-activates from this signed declaration
+   * — no agent-writable `policyGate3` input needed. Absent ⇒ GATE 3 gates only what a caller
+   * explicitly declares via `RunOptions.policyGate3` (back-compat).
+   */
+  scopedCredentials?: ScopedCredentialDeclaration;
 }
 
 export interface CredentialScopeResolution {

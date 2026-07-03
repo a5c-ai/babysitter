@@ -22,6 +22,24 @@ export function shouldEnableProgrammaticToolCalling(options: AgenticToolOptions)
   return Boolean(options.programmaticToolCalling);
 }
 
+/**
+ * Milestone E — code_executor nested-dispatch INVARIANT (§9.4 / AC-49 / AC-33).
+ *
+ * A nested `callTool(...)` inside `code_executor` normally runs `tool.execute(...)` directly
+ * when no `toolDispatcher` is configured (the pre-policy path). That directly bypasses the
+ * session `policyToolGate` for the nested covered action — an alternate execution path that
+ * evades enforcement. When the off-workspace config anchor is PINNED (`POLICY_CONFIG_ROOT_FP`
+ * set), the run is policy-enforced, so a nested call MUST traverse a policy-gated dispatcher;
+ * if none is wired, the ungated direct path is REFUSED (fail closed) rather than silently run.
+ *
+ * When the anchor is UNPINNED (enforcement inactive, the default deployment) the direct path
+ * is unchanged (back-compat). This is a bound off-workspace pin — never an agent-writable flag.
+ */
+export function isPolicyAnchorPinned(): boolean {
+  const v = process.env.POLICY_CONFIG_ROOT_FP;
+  return typeof v === "string" && v.length > 0;
+}
+
 export function createProgrammaticToolCallingTool(
   options: AgenticToolOptions,
   availableTools: CustomToolDefinition[],
@@ -67,13 +85,25 @@ export function createProgrammaticToolCallingTool(
           throw new Error(`Tool "${name}" is not available to code_executor.`);
         }
         calls.push({ tool: name, params: toolParams });
+        const nestedToolCallId = `code-executor:${calls.length}:${name}`;
         const executeDirectly = async () => unwrapToolResult(await tool.execute(
-          `code-executor:${calls.length}:${name}`,
+          nestedToolCallId,
           toolParams,
           onUpdate,
           toolContext,
         ));
         if (!options.toolDispatcher) {
+          // Milestone E (AC-49 / AC-33) — FAIL CLOSED: with the policy anchor pinned, a nested
+          // covered action MUST go through the policy-gated dispatcher. No dispatcher wired ⇒
+          // the direct `tool.execute(` path would bypass the session policyToolGate, so refuse.
+          // (Anchor unpinned ⇒ enforcement inactive ⇒ direct path unchanged, back-compat.)
+          if (isPolicyAnchorPinned()) {
+            throw new Error(
+              `code_executor nested call to "${name}" is refused: policy enforcement is active ` +
+                `(POLICY_CONFIG_ROOT_FP pinned) but no policy-gated tool dispatcher is wired, so ` +
+                `the nested call cannot be gated (fail closed, AC-49).`,
+            );
+          }
           return executeDirectly();
         }
         const dispatched = await options.toolDispatcher.dispatch(
@@ -85,7 +115,7 @@ export function createProgrammaticToolCallingTool(
             // so GATE 1 (PolicyVerifierHookBridge) can bind the CommandAuthorization to this
             // exact call. Without it a covered nested call is DENIED (never bound to the
             // authorization's own id, which would be an X===X tautology).
-            toolCallId: `code-executor:${calls.length}:${name}`,
+            toolCallId: nestedToolCallId,
             signal: typeof toolContext === "object" && toolContext && "signal" in toolContext
               ? toolContext.signal as AbortSignal | undefined
               : undefined,

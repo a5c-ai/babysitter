@@ -126,4 +126,15 @@ export const EXEC_SEAM_REGISTRY: readonly ExecSeamEntry[] = [
       'GATE 3 PRODUCTION resolver — resolveSpawnGate3 loads the Gate3Context from the shared ' +
       'loadPolicyEnforcementGate and builds a Gate3Options for the spawn (AC-40 / AC-50).',
   },
+  {
+    id: 'genty-code-executor-nested-dispatch',
+    file: 'packages/genty/core/src/agenticTools/tools/programmaticToolCalling.ts',
+    onCoveredPath: true,
+    role: 'blocking',
+    description:
+      'genty code_executor nested tool-call seam. A nested callTool runs tool.execute( ' +
+      'either through the policy-gated toolDispatcher.dispatch (GATE 1 re-entry) or, when no ' +
+      'dispatcher is wired AND the policy anchor is pinned, is REFUSED (fail closed) so a nested ' +
+      'covered action cannot escape the session policyToolGate (AC-49 / AC-33).',
+  },
 ];

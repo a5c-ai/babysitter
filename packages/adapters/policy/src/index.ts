@@ -83,6 +83,17 @@ export type {
   IssueFromDecisionRequest,
 } from './authorization-issuer.js';
 
+// ── Milestone E — PRODUCTION authorization store (ALLOW path, AC-9 / AC-49) ────
+
+export { createAuthorizationStore } from './authorization-store.js';
+export type {
+  AuthorizationStore,
+  StoreAuthorizationResolver,
+  AuthorizationResolveContext,
+  InsertFromDecisionRequest,
+  InsertResult,
+} from './authorization-store.js';
+
 export {
   canonicalizeCredentialIdentity,
   resolveCredentialScope,
@@ -91,6 +102,7 @@ export type {
   CredentialScopeSource,
   CredentialAliasMap,
   CredentialScopeResolution,
+  ScopedCredentialDeclaration,
 } from './credential-identity.js';
 
 // ── Milestone D — tool-layer enforcement (exec-seam registry, AC-56) ─────────
