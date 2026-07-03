@@ -1,0 +1,58 @@
+# Milestone E — canonical end-to-end scenario policy document.
+#
+# Authorizes the `aws` CLI (via the Bash tool) to run a scoped set of S3 write
+# subcommands ONLY when a full trust chain of signed evidence is satisfied:
+#
+#   chain `human-plus-opus`  (AND across its two requirements):
+#     1. a signed HUMAN breakpoint approval for scope `aws:prod:s3`, not expired;
+#     2. a signed MODEL-DECISION attestation whose modelId is on the opus
+#        allowlist (`claude-opus-.*`). Because the action names a
+#        `credentialScope`, proxy attestation is REQUIRED by default (AC-39) —
+#        the in-process (agent-held) attestation is rejected.
+#
+#   chain `two-human-quorum`  (alternate shape, OR): a distinct-holder quorum of
+#     2 human approvals and NO model condition — proves the policy component is
+#     not hardcoded to one flow (configurability, §7 / AC-19a).
+#
+# This file is hashed into the signed config-manifest (AC-46) and is NOT trusted
+# because it is on disk — it is trusted because it appears in the current-epoch
+# manifest signed by the off-workspace config root (AC-36).
+version: 1
+authorizationTtlSeconds: 120
+commandDefaultAllow: false
+defaultDeny:
+  - "aws:prod:*"
+actions:
+  - id: aws-prod-write
+    match:
+      tool: "Bash"
+      argv:
+        program: "aws"
+        subcommandEquals: ["s3 cp", "s3 rm", "s3 sync"]
+        # AC-38c — only these transparent wrappers may lead the covered program.
+        wrapperAllowlist: ["time", "sudo"]
+        recognizedPrograms: ["aws"]
+      credentialScope: "aws:prod:*"
+    # requireProxyAttestation omitted -> defaults to TRUE (credentialScope present, AC-39).
+    chains:
+      - id: human-plus-opus
+        requirements:
+          - step:
+              kind: human-approval
+              trustedIdentities: ["role:sre-oncall"]
+              conditions:
+                scopeEquals: "aws:prod:s3"
+                notExpired: true
+          - step:
+              kind: model-decision
+              conditions:
+                modelIdMatches: "claude-opus-.*"
+      - id: two-human-quorum
+        requirements:
+          - quorum:
+              of: "human-approval"
+              min: 2
+              trustedIdentities: ["role:sre-oncall"]
+              conditions:
+                scopeEquals: "aws:prod:s3"
+                notExpired: true
