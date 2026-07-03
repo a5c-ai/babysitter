@@ -19,6 +19,7 @@ import { checkRunWorkDirLeak } from "./workDirLeak";
 import { assertRuntimeHookAllowed, callRuntimeHook } from "./hooks/runtime";
 import { validateAgainstSchema } from "./schemaValidator";
 import { enforceSignedBreakpointAnswer } from "../breakpoints/enforce-signed-breakpoint";
+import { loadTrustedBreakpointPolicy } from "../breakpoints/trusted-breakpoint-policy";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -190,60 +191,83 @@ export async function commitEffectCancellation(
 }
 
 /**
- * Milestone C (AC-4 / AC-28 / AC-48) — enforced signed human breakpoints.
+ * Milestone C (AC-4 / AC-7 / AC-28 / AC-35 / AC-36 / AC-48) — enforced signed human
+ * breakpoints, anchored to the INTEGRITY-PROTECTED trust config (never task.json).
  *
- * When the breakpoint task's metadata declares `signatureRequired: true`, an
- * `ok`-status answer must carry a VALID human signature (with `approved` inside the
- * signed set). An unsigned / invalid / tampered / unsigned-`approved` answer is
- * REJECTED fail-closed: this runs BEFORE the result is written and EFFECT_RESOLVED is
- * emitted, so a rejected answer leaves the effect PENDING (no resolution). When the
- * metadata does NOT require a signature (the pre-Milestone-C default), the gate is a
- * no-op — existing runs are unaffected.
+ * TRUST SOURCE. The signature REQUIREMENT and the set of trusted `human` keys are
+ * sourced ONLY from the out-of-agent trust anchor the design §10 defines — the pinned
+ * config root (`POLICY_CONFIG_ROOT_FP`, off-workspace) → the signed
+ * `.policy/config-manifest.json` (monotonic-epoch, AC-46) → `.policy/trust-roots.json`
+ * + `.policy/breakpoint-policy.json` — via `loadTrustedBreakpointPolicy`
+ * (breakpoints/trusted-breakpoint-policy.ts). The per-effect `tasks/<id>/task.json` —
+ * which the workspace-writable agent can delete/corrupt/rewrite — is NEVER the source
+ * of the requirement or the trusted keys. The breakpoint IDENTITY is taken from the
+ * append-only JOURNAL (the effect's `invocationKey`, recorded at breakpoint-creation),
+ * not task.json.
  *
- * Fail closed: any exception in reading metadata or verifying is a rejection (never a
- * silent pass-through) once a signature is required. Non-breakpoint effects and
- * non-`ok` statuses are unaffected.
+ * FAIL CLOSED (defect 1). When the config anchor is pinned but cannot be trustworthily
+ * established (missing/edited/corrupt/untrusted manifest or config, below-floor epoch),
+ * a breakpoint the trusted policy marks as requiring a signature is REJECTED — never
+ * skipped. When NO anchor is pinned (pre-Milestone-C default), enforcement is inactive
+ * and unsigned answers are unaffected (back-compat).
+ *
+ * DEFECT 2. The trusted human root set is passed to the enforcement decision, which
+ * additionally requires the raw-verified signer fingerprint to be a member — so a key
+ * the attacker drops into a run-dir directory is not trusted even if proven's raw
+ * verify succeeds.
+ *
+ * This runs BEFORE the result is written / EFFECT_RESOLVED is emitted, so a rejected
+ * answer leaves the effect PENDING. Non-breakpoint effects / non-`ok` statuses are
+ * unaffected.
  */
 async function enforceSignedBreakpointGate(options: CommitEffectResultOptions, record: EffectRecord) {
   if (record.kind !== "breakpoint" && record.taskId !== "__sdk.breakpoint") return;
   if (options.result.status !== "ok") return;
 
-  let enforcement: { signatureRequired?: unknown; trustedKeysDir?: unknown } | undefined;
-  try {
-    const taskDef = await readTaskDefinition(options.runDir, options.effectId);
-    const metadata = taskDef?.metadata as Record<string, unknown> | undefined;
-    const breakpoint = taskDef?.breakpoint as Record<string, unknown> | undefined;
-    // The enforcement config may live under task metadata or the breakpoint block.
-    enforcement =
-      (metadata?.signatureEnforcement as typeof enforcement) ??
-      (breakpoint?.signatureEnforcement as typeof enforcement) ??
-      // Back-compat direct flags on metadata / breakpoint.
-      (typeof metadata?.signatureRequired === "boolean"
-        ? { signatureRequired: metadata.signatureRequired, trustedKeysDir: metadata.trustedKeysDir }
-        : undefined) ??
-      (typeof breakpoint?.signatureRequired === "boolean"
-        ? { signatureRequired: breakpoint.signatureRequired, trustedKeysDir: breakpoint.trustedKeysDir }
-        : undefined);
-  } catch (err) {
-    // If the task def is unreadable we cannot know whether a signature is required.
-    // Fail OPEN here ONLY for readability failure would violate fail-closed; but an
-    // unreadable task def means no enforcement config could be asserted at authoring.
-    // We therefore do NOT block back-compat runs on a read error — enforcement is an
-    // opt-in declared at breakpoint creation. (A required-signature breakpoint whose
-    // def is unreadable is an authoring/infra failure surfaced elsewhere.)
-    void err;
-    return;
+  // Load the trust-anchored policy. projectRoot is the base for the default `.policy`
+  // location; the real off-workspace pin is POLICY_CONFIG_DIR / the env pins. This is
+  // NOT the per-effect task dir.
+  const policy = await loadTrustedBreakpointPolicy(process.cwd());
+
+  // No anchor pinned → enforcement inactive → back-compat pass-through.
+  if (!policy.enforcementActive) return;
+
+  // The breakpoint id comes from the append-only journal (the effect's invocationKey),
+  // NOT task.json — so the adversary cannot erase the requirement by editing task.json.
+  const breakpointId = deriveBreakpointIdFromRecord(record);
+
+  const requiresSignature = policy.requiresSignature(breakpointId);
+  if (!requiresSignature) return;
+
+  // A signature IS required for this breakpoint. If the trust anchor could not be
+  // established, we fail CLOSED (deny) — the requirement cannot be trustworthily
+  // determined, so the post is rejected and the effect stays pending.
+  if (policy.configError) {
+    logCommitFailure(options, "signed_breakpoint_rejected", {
+      taskId: record.taskId,
+      kind: record.kind,
+      reason: `trusted config unavailable: ${policy.configError}`,
+    });
+    throw new RunFailedError(
+      `Signed-breakpoint enforcement could not establish trust for effect ${options.effectId}: ${policy.configError}`,
+      {
+        details: {
+          reason: "signed_breakpoint_rejected",
+          effectId: options.effectId,
+          taskId: record.taskId,
+          kind: record.kind,
+        },
+      },
+    );
   }
 
-  if (!enforcement || enforcement.signatureRequired !== true) return;
-
-  // A signature IS required for this breakpoint. Extract the answer object from the
-  // committed value and enforce.
+  // Extract the answer object from the committed value and enforce, anchoring WHICH
+  // keys are trusted to the manifest-verified trust-roots (defect 2).
   const answer = extractBreakpointAnswer(options.result.value);
   const decision = await enforceSignedBreakpointAnswer(answer, {
     signatureRequired: true,
-    trustedKeysDir:
-      typeof enforcement.trustedKeysDir === "string" ? enforcement.trustedKeysDir : undefined,
+    trustedKeysDir: policy.trustedKeysBaseDir,
+    trustedHumanFingerprints: policy.trustedHumanFingerprints,
   });
 
   if (!decision.accepted) {
@@ -264,6 +288,25 @@ async function enforceSignedBreakpointGate(options: CommitEffectResultOptions, r
       },
     );
   }
+}
+
+/**
+ * Derive the breakpointId from the effect's JOURNAL-recorded invocation key (never
+ * task.json). Breakpoint effects use `__sdk.breakpoint.<breakpointId>` (with an optional
+ * `.<n>` occurrence suffix for repeated breakpoints, see intrinsics/breakpoint.ts).
+ * Returns undefined when the shape does not match — the trusted policy then applies its
+ * fail-closed default (an unidentifiable breakpoint under an active anchor requires a
+ * signature).
+ */
+function deriveBreakpointIdFromRecord(record: EffectRecord): string | undefined {
+  const key = record.invocationKey;
+  const prefix = "__sdk.breakpoint.";
+  if (typeof key !== "string" || !key.startsWith(prefix)) return undefined;
+  let rest = key.slice(prefix.length);
+  // Strip a trailing numeric occurrence suffix (".1", ".2", …) added for repeats.
+  const suffixMatch = rest.match(/\.(\d+)$/);
+  if (suffixMatch) rest = rest.slice(0, rest.length - suffixMatch[0].length);
+  return rest.length > 0 ? rest : undefined;
 }
 
 /**

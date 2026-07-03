@@ -8,8 +8,10 @@ import { WebSocket, WebSocketServer } from 'ws';
 import type { IdentityKeyPair } from '@a5c-ai/genty-core/trust';
 import {
   signCompletionAttestation,
+  accumulateStreamAttestation,
   AttestationSidecarStore,
 } from './attestation.js';
+import type { StreamAttestationAccumulator } from './attestation.js';
 
 import { Hono } from 'hono';
 import type { Context } from 'hono';
@@ -1180,6 +1182,12 @@ async function handleOpenAiResponsesWebSocketMessage(
       return;
     }
     if (completionEngine.stream) {
+      // NOTE (AC-13 bounded non-goal): the OpenAI-Responses WebSocket transport does
+      // NOT emit a proxy attestation. The attestation sidecar store + proxy key live
+      // in `createTransportMuxApp` (the HTTP app closure); this WS handler runs in a
+      // separate `startProxyServer` scope with no access to them. This is fail-closed
+      // (no attestation is produced, so a policy requiring proxy attestation denies a
+      // covered action taken over this transport) — never a partial/unsigned one.
       await sendOpenAiResponsesWebSocketStream(
         ws,
         trackCompletionStream(completionEngine.stream(plan.request), metrics, config),
@@ -1291,12 +1299,27 @@ function codecStreamResponse(
   );
 }
 
+/**
+ * Milestone C (AC-13) — a streaming attestation sink. The route supplies an
+ * `accumulator` (bound to the request id + proxy key + input hash) and a `commit`
+ * callback that writes the finalized envelope into the sidecar store. The sink is
+ * fed every stream event; it signs ONLY at the terminal `done` event (over the
+ * fully-accumulated tool-call arguments) and commits exactly once. If the stream
+ * aborts/errors before `done`, `commit` is NEVER called — no partial/unsigned
+ * attestation is produced (fail closed).
+ */
+interface StreamAttestationSink {
+  accumulator: StreamAttestationAccumulator;
+  commit: (envelope: ReturnType<StreamAttestationAccumulator['onEvent']>) => void;
+}
+
 function trackCompletionStream(
   stream: AsyncIterable<CompletionStreamEvent>,
   metrics: MetricsTracker,
   config: ProxyConfig,
   costFeedbackSink?: CostFeedbackSink,
   costFeedbackMetadata?: CostFeedbackMetadata,
+  streamAttestation?: StreamAttestationSink,
 ): AsyncIterable<CompletionStreamEvent> {
   return {
     async *[Symbol.asyncIterator]() {
@@ -1304,6 +1327,22 @@ function trackCompletionStream(
 
       try {
         for await (const event of stream) {
+          // AC-13: accumulate tool-call deltas; the sink signs + returns the
+          // envelope ONLY at the terminal `done`. Any failure here MUST NOT
+          // mutate the streamed body — attestation errors fail closed to "no
+          // attestation" and never break the proxied response.
+          if (streamAttestation) {
+            try {
+              const signed = streamAttestation.accumulator.onEvent(event);
+              if (signed) {
+                // Terminal event only: commit the fully-signed attestation.
+                streamAttestation.commit(signed);
+              }
+            } catch {
+              // Fail closed: no attestation recorded; the gate denies covered actions.
+            }
+          }
+
           if (event.type === 'done') {
             if (event.usage) {
               metrics.record(event.usage.promptTokens, event.usage.completionTokens);
@@ -1321,6 +1360,9 @@ function trackCompletionStream(
           metrics.recordRequest();
         }
       } catch (error) {
+        // The stream aborted before `done`: no attestation is committed (the sink
+        // only commits at the terminal event), so an aborted stream yields NO
+        // attestation — never a partial/unsigned one.
         metrics.recordError();
         throw error;
       }
@@ -1364,6 +1406,7 @@ async function resolveCompletion(
     forceStreaming?: boolean;
     costFeedbackSink?: CostFeedbackSink;
     costFeedbackMetadata?: CostFeedbackMetadata;
+    streamAttestation?: StreamAttestationSink;
   } = {},
 ): Promise<CompletionResult | Response> {
   if (plan.streamRequested) {
@@ -1385,7 +1428,14 @@ async function resolveCompletion(
 
     return renderStreamResponse(
       config.exposedTransport,
-      trackCompletionStream(completionEngine.stream(plan.request), metrics, config, options.costFeedbackSink, options.costFeedbackMetadata),
+      trackCompletionStream(
+        completionEngine.stream(plan.request),
+        metrics,
+        config,
+        options.costFeedbackSink,
+        options.costFeedbackMetadata,
+        options.streamAttestation,
+      ),
       config,
     );
   }
@@ -1600,6 +1650,39 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     }
   }
 
+  /**
+   * Build a streaming attestation sink (AC-13) for a request, or `undefined` when
+   * attestation is disabled / the proxy key failed to load / no request id. The sink
+   * accumulates streamed tool-call deltas and, ONLY at the terminal `done` event,
+   * signs the ModelDecisionPayload and writes it to the sidecar keyed by request id —
+   * producing the SAME shape of proxy attestation as the non-streaming path. If the
+   * stream aborts before `done`, `commit` is never invoked, so no attestation is
+   * recorded (fail closed — never a partial/unsigned attestation).
+   */
+  function buildStreamAttestationSink(
+    requestId: string,
+    plan: { request: CompletionRequest },
+  ): StreamAttestationSink | undefined {
+    if (!attestationEnabled || !attestationKeyPair) return undefined;
+    if (typeof requestId !== 'string' || requestId.length === 0) return undefined;
+    const inputMessagesHash = createHash('sha256')
+      .update(JSON.stringify(plan.request.messages ?? []))
+      .digest('hex');
+    const accumulator = accumulateStreamAttestation({
+      keyPair: attestationKeyPair,
+      modelId: config.targetModel,
+      provider: config.targetProvider,
+      inputMessagesHash,
+      requestId,
+    });
+    return {
+      accumulator,
+      commit: (env) => {
+        if (env) attestationStore.put(requestId, env);
+      },
+    };
+  }
+
   app.onError((error, c) => {
     metrics.recordError();
     return c.json({ error: { message: error instanceof Error ? error.message : String(error) } }, 500);
@@ -1676,7 +1759,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     plan.request.model = config.targetModel;
     const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
     const result = await trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata, streamAttestation: buildStreamAttestationSink(c.get('requestId') as string, plan) }),
       metrics,
       { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
@@ -1696,7 +1779,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     plan.request.model = config.targetModel;
     const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
     const result = await trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata, streamAttestation: buildStreamAttestationSink(c.get('requestId') as string, plan) }),
       metrics,
       { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
@@ -1717,7 +1800,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     plan.request.model = config.targetModel;
     const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
     const result = await trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata, streamAttestation: buildStreamAttestationSink(c.get('requestId') as string, plan) }),
       metrics,
       { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
@@ -1738,7 +1821,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     plan.request.model = config.targetModel;
     const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
     const result = await trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { forceStreaming, costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { forceStreaming, costFeedbackSink, costFeedbackMetadata: feedbackMetadata, streamAttestation: buildStreamAttestationSink(c.get('requestId') as string, plan) }),
       metrics,
       { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
@@ -1782,7 +1865,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     plan.request.model = config.targetModel;
     const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
     const result = await trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata, streamAttestation: buildStreamAttestationSink(c.get('requestId') as string, plan) }),
       metrics,
       { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
@@ -1800,7 +1883,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     plan.request.model = config.targetModel;
     const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
     const result = await trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata, streamAttestation: buildStreamAttestationSink(c.get('requestId') as string, plan) }),
       metrics,
       { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
@@ -1817,7 +1900,14 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     });
   });
 
-  return app;
+  // Expose the attestation sidecar store on the returned app so a co-located policy
+  // component (and tests) can resolve model-decision evidence by request/tool-call id.
+  // The store is populated by both the non-streaming (emitCompletionAttestation) and
+  // streaming (buildStreamAttestationSink → trackCompletionStream) paths (AC-12/AC-13).
+  const muxApp = app as typeof app & { attestationStore: AttestationSidecarStore };
+  muxApp.attestationStore = attestationStore;
+
+  return muxApp;
 }
 
 async function nodeRequestBody(req: http.IncomingMessage): Promise<Buffer | undefined> {

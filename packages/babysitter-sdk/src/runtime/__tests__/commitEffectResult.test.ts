@@ -14,6 +14,8 @@ import { createRunDir } from "../../storage/createRunDir";
 import { readStateCache } from "../replay/stateCache";
 import { readTaskDefinition, readTaskResult } from "../../storage/tasks";
 import { BABYSITTER_SDK_VERSION } from "../../sdkVersion";
+import { createHash } from "node:crypto";
+import { createKeyPair, signPayload } from "@a5c-ai/genty-core/trust";
 
 let tmpRoot: string;
 
@@ -41,12 +43,32 @@ const shellSchemaTask: DefinedTask<{
   },
 };
 
+const breakpointTaskDef: DefinedTask<{ label: string }, { approved: boolean }> = {
+  id: "__sdk.breakpoint",
+  async build(args) {
+    return { kind: "breakpoint", title: args.label, metadata: { breakpointId: args.label } };
+  },
+};
+
+const savedPolicyEnv: Record<string, string | undefined> = {};
+const POLICY_ENV_KEYS = [
+  "POLICY_CONFIG_ROOT_FP",
+  "POLICY_CONFIG_MIN_EPOCH",
+  "POLICY_CONFIG_ROOT_KEY",
+  "POLICY_CONFIG_DIR",
+];
+
 beforeEach(async () => {
   tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "babysitter-commit-"));
+  for (const k of POLICY_ENV_KEYS) savedPolicyEnv[k] = process.env[k];
 });
 
 afterEach(async () => {
   vi.restoreAllMocks();
+  for (const k of POLICY_ENV_KEYS) {
+    if (savedPolicyEnv[k] === undefined) delete process.env[k];
+    else process.env[k] = savedPolicyEnv[k];
+  }
   await fs.rm(tmpRoot, { recursive: true, force: true });
 });
 
@@ -642,6 +664,126 @@ describe("commitEffectCancellation", () => {
         effectId: effect.effectId,
       })
     ).resolves.toBeDefined();
+  });
+});
+
+describe("commitEffectResult — signed-breakpoint gate (Milestone C, defects 1 & 2)", () => {
+  const sha256 = (s: string): string => createHash("sha256").update(s).digest("hex");
+  const MANIFEST_FIELDS = ["payloadType", "configEpoch", "files", "issuedAt"];
+
+  /**
+   * Build a trust-anchored `.policy` dir requiring a signature for all breakpoints, pin
+   * it via env, and return the config dir. Mirrors the Milestone-A signed-manifest shape.
+   */
+  async function pinTrustedPolicyRequiringSignature(): Promise<string> {
+    const configDir = await fs.mkdtemp(path.join(os.tmpdir(), "commit-policy-"));
+    const humanKp = createKeyPair();
+    const configRoot = createKeyPair();
+    const trustRootsBytes = JSON.stringify({
+      roots: [{ fingerprint: humanKp.fingerprint, kind: "human", publicKey: humanKp.publicKey }],
+    });
+    const bpPolicyBytes = JSON.stringify({ requireSignatureForAllBreakpoints: true });
+    const manifest = signPayload(
+      configRoot.privateKey,
+      configRoot.fingerprint,
+      {
+        payloadType: "config-manifest" as const,
+        configEpoch: 1,
+        files: [
+          { path: "trust-roots.json", sha256: sha256(trustRootsBytes) },
+          { path: "breakpoint-policy.json", sha256: sha256(bpPolicyBytes) },
+        ],
+        issuedAt: "2026-07-03T00:00:00.000Z",
+      },
+      MANIFEST_FIELDS,
+    );
+    await fs.writeFile(path.join(configDir, "config-manifest.json"), JSON.stringify(manifest));
+    await fs.writeFile(path.join(configDir, "trust-roots.json"), trustRootsBytes);
+    await fs.writeFile(path.join(configDir, "breakpoint-policy.json"), bpPolicyBytes);
+
+    process.env.POLICY_CONFIG_ROOT_FP = configRoot.fingerprint;
+    process.env.POLICY_CONFIG_MIN_EPOCH = "1";
+    process.env.POLICY_CONFIG_ROOT_KEY = configRoot.publicKey;
+    process.env.POLICY_CONFIG_DIR = configDir;
+    return configDir;
+  }
+
+  async function requestBreakpointEffect(breakpointId: string) {
+    const { runDir, runId } = await createTestRun(tmpRoot);
+    const context = await buildTaskContext(runDir, runId);
+    try {
+      await runTaskIntrinsic({
+        task: breakpointTaskDef,
+        args: { label: breakpointId },
+        invokeOptions: { key: `__sdk.breakpoint.${breakpointId}`, label: breakpointId },
+        context,
+      });
+    } catch (error) {
+      if (error instanceof EffectRequestedError) {
+        return { runDir, runId, effectId: error.action.effectId, invocationKey: error.action.invocationKey };
+      }
+      throw error;
+    }
+    throw new Error("Expected EffectRequestedError");
+  }
+
+  test("DEFECT 1: unsigned {approved:true} is REJECTED when the trusted policy requires a signature (fail closed)", async () => {
+    let configDir = "";
+    try {
+      configDir = await pinTrustedPolicyRequiringSignature();
+      const effect = await requestBreakpointEffect("deploy-prod");
+
+      await expect(
+        commitEffectResult({
+          runDir: effect.runDir,
+          effectId: effect.effectId,
+          result: { status: "ok", value: { approved: true, responderId: "attacker" } },
+        }),
+      ).rejects.toThrow(RunFailedError);
+
+      // Fail closed: the effect stays PENDING (no EFFECT_RESOLVED emitted).
+      const index = await buildEffectIndex({ runDir: effect.runDir });
+      expect(index.getByEffectId(effect.effectId)?.status).toBe("requested");
+    } finally {
+      if (configDir) await fs.rm(configDir, { recursive: true, force: true });
+    }
+  });
+
+  test("DEFECT 1: deleting the breakpoint's task.json does NOT let an unsigned answer through", async () => {
+    let configDir = "";
+    try {
+      configDir = await pinTrustedPolicyRequiringSignature();
+      const effect = await requestBreakpointEffect("deploy-prod");
+
+      // The workspace-writable agent erases the per-effect task.json.
+      await fs.rm(path.join(effect.runDir, "tasks", effect.effectId, "task.json"), { force: true });
+
+      await expect(
+        commitEffectResult({
+          runDir: effect.runDir,
+          effectId: effect.effectId,
+          result: { status: "ok", value: { approved: true } },
+        }),
+      ).rejects.toThrow(RunFailedError);
+
+      const index = await buildEffectIndex({ runDir: effect.runDir });
+      expect(index.getByEffectId(effect.effectId)?.status).toBe("requested");
+    } finally {
+      if (configDir) await fs.rm(configDir, { recursive: true, force: true });
+    }
+  });
+
+  test("no config anchor pinned → unsigned breakpoint answer commits (back-compat)", async () => {
+    // No POLICY_CONFIG_ROOT_FP pinned → enforcement inactive.
+    delete process.env.POLICY_CONFIG_ROOT_FP;
+    const effect = await requestBreakpointEffect("harmless-note");
+    await expect(
+      commitEffectResult({
+        runDir: effect.runDir,
+        effectId: effect.effectId,
+        result: { status: "ok", value: { approved: true } },
+      }),
+    ).resolves.toMatchObject({ resultRef: expect.any(String) });
   });
 });
 

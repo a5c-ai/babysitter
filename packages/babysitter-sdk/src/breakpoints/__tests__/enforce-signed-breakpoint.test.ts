@@ -192,6 +192,54 @@ describe("Milestone C — enforced signed breakpoints (AC-28, AC-4)", () => {
   });
 });
 
+// ── Defect 2 — WHICH keys are trusted comes from the trust-roots, not task.json ─
+
+describe("Milestone C — trusted-human membership (defect 2, AC-35)", () => {
+  it("valid raw signature but signer NOT in trustedHumanFingerprints → REJECT", async () => {
+    vi.resetModules();
+    vi.doMock("@a5c-ai/tasks-adapter/proven", () => ({
+      // The raw signature verifies (the attacker self-signed with its OWN key and
+      // pointed proven at a dir holding that key), returning the attacker fingerprint.
+      verifyAnswer: vi.fn().mockResolvedValue({
+        valid: true,
+        publicKeyFingerprint: "fp-attacker-selfsigned",
+        verifiedAt: "2026-07-03T10:05:00.000Z",
+      }),
+    }));
+    const { enforceSignedBreakpointAnswer: gate } = await import(
+      "../enforce-signed-breakpoint"
+    );
+    const decision = await gate(signedAnswer(), {
+      signatureRequired: true,
+      // The ONLY trusted human root is Alice — NOT the attacker's self-signed key.
+      trustedHumanFingerprints: ["fp-human-alice"],
+    });
+    expect(decision.accepted).toBe(false);
+    expect(decision.reason).toMatch(/not a trusted human root/);
+    vi.doUnmock("@a5c-ai/tasks-adapter/proven");
+  });
+
+  it("valid raw signature AND signer IS in trustedHumanFingerprints → ACCEPT", async () => {
+    vi.resetModules();
+    vi.doMock("@a5c-ai/tasks-adapter/proven", () => ({
+      verifyAnswer: vi.fn().mockResolvedValue({
+        valid: true,
+        publicKeyFingerprint: "fp-human-alice",
+        verifiedAt: "2026-07-03T10:05:00.000Z",
+      }),
+    }));
+    const { enforceSignedBreakpointAnswer: gate } = await import(
+      "../enforce-signed-breakpoint"
+    );
+    const decision = await gate(signedAnswer(), {
+      signatureRequired: true,
+      trustedHumanFingerprints: ["fp-human-alice"],
+    });
+    expect(decision.accepted).toBe(true);
+    vi.doUnmock("@a5c-ai/tasks-adapter/proven");
+  });
+});
+
 // ── Back-compat — signature NOT required: unsigned unaffected ──────────────────
 
 describe("Milestone C — signed breakpoints back-compat (not-required)", () => {

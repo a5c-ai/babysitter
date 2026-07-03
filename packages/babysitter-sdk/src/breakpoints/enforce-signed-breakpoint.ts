@@ -38,6 +38,16 @@ export interface SignedBreakpointEnforcementConfig {
   signatureRequired: boolean;
   /** Directory of trusted public keys, forwarded to proven `verifyAnswer`. */
   trustedKeysDir?: string;
+  /**
+   * The set of trusted `human` root fingerprints (AC-35), sourced ONLY from the
+   * integrity-protected, manifest-verified trust-roots config (never task.json). When
+   * provided (non-undefined), the answer's raw signature MUST resolve to a fingerprint
+   * in THIS set, else the answer is rejected — so a key an attacker drops into a run-dir
+   * directory is not trusted even if the raw signature otherwise verifies (defect 2).
+   * When `undefined`, no membership check is applied (legacy pure-decision callers /
+   * unit tests that assert only the raw-verify + completeness behavior).
+   */
+  trustedHumanFingerprints?: string[];
 }
 
 export interface SignedBreakpointEnforcementDecision {
@@ -105,6 +115,24 @@ export async function enforceSignedBreakpointAnswer(
         accepted: false,
         reason: verification.reason ?? "signature verification failed",
       };
+    }
+
+    // AC-35 (defect 2): WHICH keys are trusted must come from the integrity-protected
+    // trust-roots config, NOT from wherever proven happened to resolve a key. Even
+    // though the raw signature verified, require the resolving fingerprint to be a
+    // trusted `human` root — so a self-signed answer using a key the attacker dropped
+    // into a run-dir directory is rejected.
+    if (config.trustedHumanFingerprints !== undefined) {
+      const resolvedFp = verification.verificationResult?.publicKeyFingerprint;
+      if (typeof resolvedFp !== "string" || resolvedFp.length === 0) {
+        return { accepted: false, reason: "signer fingerprint could not be resolved" };
+      }
+      if (!config.trustedHumanFingerprints.includes(resolvedFp)) {
+        return {
+          accepted: false,
+          reason: `signer ${resolvedFp} is not a trusted human root`,
+        };
+      }
     }
 
     // The signature verified AND the security-critical fields were signed; only honor
