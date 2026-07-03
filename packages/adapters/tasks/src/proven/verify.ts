@@ -1,18 +1,7 @@
 import { createPublicKey, verify as cryptoVerify } from "node:crypto";
-import type { ProvenBreakpointAnswer, ProvenVerificationResult, BreakpointAnswer } from "../types.js";
+import type { ProvenBreakpointAnswer, ProvenVerificationResult } from "../types.js";
 import { loadTrustedPublicKeys } from "./keys.js";
-
-/**
- * Rebuild the canonical signing payload for verification.
- */
-function buildSigningPayload(answer: BreakpointAnswer, signedFields: string[]): Buffer {
-  const parts: string[] = [];
-  for (const field of signedFields) {
-    const value = answer[field as keyof BreakpointAnswer];
-    parts.push(`${field}=${value ?? ""}`);
-  }
-  return Buffer.from(parts.join("\n"), "utf-8");
-}
+import { buildHardenedSigningPayload, buildLegacySigningPayload } from "./sign.js";
 
 /**
  * Verify a proven breakpoint answer against trusted public keys.
@@ -57,10 +46,17 @@ export async function verifyAnswer(
     type: "spki",
   });
 
-  const payload = buildSigningPayload(provenAnswer, provenAnswer.signedFields);
   const signatureBuffer = Buffer.from(provenAnswer.signature, "base64");
 
-  const isValid = cryptoVerify(null, payload, publicKey, signatureBuffer);
+  // Dual-read (AC-54): accept the hardened canonical form (produced by the
+  // current signer) OR the legacy `field=value\n` form (for signatures produced
+  // before hardening). This is NOT a security fallback — both are exact,
+  // cryptographically verified byte forms; a tampered answer matches neither.
+  const hardenedPayload = buildHardenedSigningPayload(provenAnswer, provenAnswer.signedFields);
+  const legacyPayload = buildLegacySigningPayload(provenAnswer, provenAnswer.signedFields);
+  const isValid =
+    cryptoVerify(null, hardenedPayload, publicKey, signatureBuffer) ||
+    cryptoVerify(null, legacyPayload, publicKey, signatureBuffer);
 
   return {
     valid: isValid,
