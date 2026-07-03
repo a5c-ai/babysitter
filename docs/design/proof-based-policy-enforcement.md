@@ -1,6 +1,6 @@
 # Proof-Based Policy Enforcement — Design Specification
 
-Status: **Draft 2 (post adversarial security review)** · Date: 2026-07-03 · Owner: Security/Platform
+Status: **Draft 3 (post second adversarial security review)** · Date: 2026-07-03 · Owner: Security/Platform
 Research input (frozen, read in full before implementing): [`.a5c/processes/proof-policy-enforcement.research.md`](../../.a5c/processes/proof-policy-enforcement.research.md)
 
 > **Revision note (Draft 2).** An adversarial security review (score 62/100) found 5 viable
@@ -21,6 +21,28 @@ Research input (frozen, read in full before implementing): [`.a5c/processes/proo
 > rule (AC-19/AC-41), argsHash recomputed at GATE 3 (AC-32/AC-23a), `evidenceEnvelopeHashes` covers
 > every required step (AC-9/AC-42), proven-bridge derived evidence still evaluates as `human`
 > (AC-3/AC-43), and a non-blocking-GATE-2 + passthrough-denial acceptance test (AC-44).
+
+> **Revision note (Draft 3).** A **second** adversarial security review (score 74/100) confirmed the
+> five Draft-1 attacks are closed but found **3 residual blocking attacks** against Draft 2. This
+> revision closes each precisely and completely, preserving every previously-closed AC. Stable AC ids
+> are preserved; ACs whose fix changed are updated in place; new criteria are added as **AC-46+**.
+> The three residual blocking issues and their governing ACs:
+>
+> | # | Residual blocking issue (Draft 2) | Closed by |
+> |---|-----------------------------------|-----------|
+> | 6 | **Config rollback / downgrade.** AC-36/37 sign `sha256(file bytes)` with no version/counter, so an older validly-signed, more-permissive `trust-roots + policy` set (incl. an older revocation list — un-revoking stolen keys) can be swapped back in. | **AC-46** (signed config **manifest** with a monotonic `configEpoch` covering ALL config files together), **AC-47** (off-workspace minimum-epoch floor pinned beside `POLICY_CONFIG_ROOT_FP`; every gate rejects `configEpoch < floor`), AC-27/AC-36/AC-37/AC-45 revised |
+> | 7 | **Proven-bridge unsigned `approved` bit.** `proven/verify.ts:60` rebuilds the signing payload from attacker-supplied `provenAnswer.signedFields` and never requires `approved` to be signed; the bridge then trusts `payload.approved` and mints "human" evidence. | **AC-48** (bridge asserts legacy `signedFields ⊇ {breakpointId, approved, responderId}` — the AC-2 completeness rule applied to the legacy proven answer — BEFORE deriving evidence; else deny), AC-3/AC-43 revised |
+> | 8 | **GATE 3 backstop scope.** GATE 3 only mediates scoped-credential ENV-VAR injection, so (i) policy-covered non-credential actions have no backstop when GATE 2 is advisory and GATE 1 is bypassed, and (ii) file/mount/IMDS-delivered credentials evade the env gate. | **AC-49** (GATE 1 + genty dispatcher/session seam declared LOAD-BEARING, un-bypassable for ALL covered actions; execution-path enumeration acceptance test), **AC-50** (GATE 3 extended to non-env credential channels `spawn-invocation.ts` controls — docker `-v`, k8s secrets — with an explicit bounded non-goal + warning for channels it cannot mediate, e.g. IMDS), AC-23a/AC-33/AC-40/AC-44 revised |
+>
+> Additional review items folded in cheaply (Draft 3): **domain separation** — a bound
+> `payloadType` constant is added to every payload and to `signedFields` so a signature is
+> non-transferable across evidence kinds (**AC-51**); **one canonical argv/args serialization** shared
+> byte-for-byte by proxy and every gate, with a conformance test (**AC-52**, closes argsHash
+> divergence); **argv wrapper allowlist** — the wrapper handling of AC-38 becomes an allowlist of
+> recognized programs per covered scope rather than a denylist (**AC-38c**); **heterogeneous quorum
+> composition** — how `quorum` composes with typed `steps[]` so "human+opus AND 2-human-quorum" is one
+> chain (**AC-41a**); and **collision-resistant credential identity** for AC-40 scope keying with
+> deny-on-ambiguous (**AC-40a**).
 
 ## 0. Summary
 
@@ -55,10 +77,28 @@ adds them in the policy adapter:**
    or that the key's declared *kind* matches the policy step. The policy adapter wraps it with a
    verifier that resolves key material **only** from the trusted store, selects by
    `(requiredKind, allowedFingerprints)`, binds the fingerprint, and rejects cross-kind (AC-35).
-3. **Config integrity.** Trust-roots and policy files live on the workspace, which the in-scope
-   adversary (compromised/workspace-writable agent) can edit. This design requires them to be
-   signed by an **out-of-agent root of trust**, verified before any root or policy is honored
-   (AC-36/AC-37).
+3. **Config integrity + rollback resistance.** Trust-roots and policy files live on the workspace,
+   which the in-scope adversary (compromised/workspace-writable agent) can edit. This design requires
+   them to be signed by an **out-of-agent root of trust**, verified before any root or policy is
+   honored (AC-36/AC-37). Draft 3 adds that the config root signs **one manifest** covering **all**
+   config files together, carrying a **monotonic `configEpoch`** integer; every gate rejects any
+   config whose epoch is below an off-workspace pinned floor (`POLICY_CONFIG_MIN_EPOCH`), so an older
+   validly-signed, more-permissive config set — including an older revocation list — cannot be rolled
+   back in (AC-46/AC-47).
+
+**Two cross-cutting hardening rules Draft 3 makes explicit, because the reused primitives do not
+provide them:**
+
+4. **Domain separation.** Genty's `canonicalize` binds `signedFields` but no payload-type tag, so a
+   signature over one payload kind is byte-identical to (and thus transferable to) a structurally
+   compatible payload of a *different* kind. Every payload in this design carries a bound
+   `payloadType` constant that MUST be in `signedFields`; the verifier binds the expected
+   `payloadType` per kind and denies on mismatch (AC-51).
+
+5. **One canonical serialization for argv and args.** Proxy-side and every gate-side `argsHash` /
+   `commandHash` MUST be produced by a **single, total, loss-preserving** canonicalizer exported from
+   the policy adapter, so hashes are byte-identical across producers and consumers; a conformance
+   test pins this (AC-52).
 
 Every requirement below has a stable acceptance-criterion ID (`AC-n`) and is mapped to exactly
 one milestone (A–E) in §12.
@@ -92,14 +132,25 @@ The following are explicitly **out of scope** for this design and must not be bu
 5. **Policy authorship UI / TUI.** Policies are YAML/JSON files edited by hand in this iteration.
    Signing them (AC-37) is a mechanical `policy-adapter sign-config` CLI step, not a UI.
 6. **Rewriting proven's canonical form immediately.** proven keeps its text canonical form for
-   backward-compatible verification; new evidence uses the JSON form with a bridge (§4.3).
+   backward-compatible verification; new evidence uses the JSON form with a bridge (§4.3). **Draft-3
+   note:** the load-bearing defense against a proven answer with a stripped `signedFields` is the
+   bridge-side AC-48 completeness assertion at the trust boundary; hardening `proven/verify.ts:60`
+   itself to reject an under-specified `signedFields` is desirable defense-in-depth but is a
+   follow-up, not required for the guarantee.
 7. **Signing the passthrough-proxy path in this iteration** (documented gap, §6.5).
+8. **Gating substrate-delivered credentials** (cloud instance metadata / IMDS / IRSA /
+   workload-identity, credentials in a container image, pre-existing files on a mount the agent
+   already controls, secret endpoints the process calls itself). `spawn-invocation.ts` does not
+   construct these deliveries, so GATE 3 cannot see or gate them (AC-50). This is a **bounded,
+   warned** non-goal: the evaluator emits an audit-logged warning and refuses to claim a GATE-3
+   backstop for any scoped action whose credential would arrive by such a channel; mitigation is a
+   substrate control (no broad instance role for agent pods, minimal images, egress policy).
 
 ### 1.3 Milestones
 
 | ID | Milestone | Scope |
 |----|-----------|-------|
-| **A** | trust-core | Unified envelope, evidence taxonomy, identity/key model, `CommandAuthorization` type, trusted-store verifier wrapper, trust-roots config + config-integrity root-of-trust + key ops. |
+| **A** | trust-core | Unified envelope (with bound `payloadType`), evidence taxonomy, identity/key model, `CommandAuthorization` type, trusted-store verifier wrapper, trust-roots config + config-integrity root-of-trust + monotonic-epoch config manifest + off-workspace epoch floor + key ops. |
 | **B** | policy-engine | Policy document schema (incl. canonicalized argv matcher + config-signature verification), evaluator, `@a5c-ai/policy-adapter` package, authorization issuance. |
 | **C** | evidence-producers | Proxy model-attestation, in-process genty attestation, enforced signed breakpoint approvals. |
 | **D** | tool-layer-enforcement | Verification at adapters GATE 1/2/3 + genty dispatcher/session. |
@@ -177,24 +228,94 @@ Required-field sets (each MUST appear in `signedFields`): see AC-8 (authorizatio
 (per-evidence). The build-time lint is retained only as defense-in-depth for repo-authored payloads;
 it is **not** the enforcement mechanism.
 
+**AC-51 (domain separation — bound `payloadType`).** Genty's `canonicalize` (`signing.ts:65-68`)
+binds `signedFields` and `_meta` but **no payload-type tag**, so a signature over payload kind X is
+byte-identical to a signature over a structurally compatible payload of kind Y — an
+`engine`-signed `ModelDecisionPayload` whose field shape overlaps another engine-signed type could be
+presented for the wrong step. To make signatures **non-transferable across payload types**, every
+payload type in this design carries a constant discriminant field
+`payloadType: 'human-approval' | 'model-decision' | 'delegation' | 'command-authorization' |
+'config-manifest'`, and `payloadType` MUST be a member of `REQUIRED_SIGNED_FIELDS[kind]` for **every**
+kind (so it is always inside the signature, per AC-2). `verifyEnvelopeTrusted(envelope, kind, ...)`
+takes the expected `payloadType` for that kind and denies unless `envelope.payload.payloadType`
+equals it **and** `payloadType ∈ signedFields`. This is a bound constant, not caller-supplied trust
+(the wrapper `kind` claim is checked against the trust root's kind per AC-5/AC-35 as before);
+`payloadType` closes the *cross-payload-type* transfer that the `kind`/trust-root check alone does
+not (two different payload types can both be `engine`-signed).
+
+**AC-52 (one total, loss-preserving canonical argv/args serialization — closes argsHash divergence).**
+`argsHash` and `commandHash` are computed in at least three places — the proxy producer (AC-12/13),
+GATE 1 (§9.1), and GATE 3 (§9.3, the last recomputation before exec) — and any byte-level divergence
+between producer and consumer silently breaks the binding (a mismatch denies a legitimate call, or,
+worse, a lossy normalization lets two different arg objects collide). This design therefore mandates
+**one** canonicalizer, `canonicalizeArgs(value): string` and `canonicalizeArgv(command): string[]`,
+exported from `@a5c-ai/policy-adapter` and imported by **every** producer and gate (the proxy imports
+it too — it is a leaf util with no adapter-runtime dependency). It MUST be:
+- **Total** — defined for every JSON-representable args value; it never throws on well-formed input
+  and has an explicit deny-path for input it cannot represent (e.g. non-finite numbers), never a
+  silent coercion.
+- **Loss-preserving** — it does not drop, reorder-collide, or fold distinct inputs to the same bytes
+  (it builds on genty `deepSortKeys` for object-key ordering but preserves array order, string bytes,
+  and value types; it does not lowercase, trim, or unicode-fold). `argsHash = sha256(canonicalizeArgs(args))`.
+- **Shared byte-for-byte** — the proxy-side and every gate-side hash are produced by the identical
+  function. **AC-52a (conformance test):** an acceptance test feeds a fixed corpus of args/argv
+  fixtures through the proxy path and each gate path and asserts the resulting `argsHash`/`commandHash`
+  are byte-identical, and that two distinct fixtures never collide. A hash produced by any code path
+  that does **not** route through `canonicalizeArgs`/`canonicalizeArgv` is a design violation caught
+  by this test.
+
 ### 3.2 Migration / bridge for proven breakpoint answers
 
-**AC-3 (revised).** A bridge in `@a5c-ai/policy-adapter` converts a legacy `ProvenBreakpointAnswer`
-(text-canonical, `proven/sign.ts`) into a `SignedEnvelope<PermissionEvidencePayload>` **without
-re-signing the human's intent as the adapter's own**: the bridge verifies the legacy answer via
-proven `verifyAnswer` (`proven/verify.ts:20-72`) **against a fingerprint that is a `human` trust
-root** (AC-35), and on success emits a *derived* `PermissionEvidence` envelope whose payload records
+**AC-3 (revised — Draft 3).** A bridge in `@a5c-ai/policy-adapter` converts a legacy
+`ProvenBreakpointAnswer` (text-canonical, `proven/sign.ts`) into a
+`SignedEnvelope<PermissionEvidencePayload>` **without re-signing the human's intent as the adapter's
+own**: the bridge verifies the legacy answer via proven `verifyAnswer` (`proven/verify.ts:20-72`)
+**against a fingerprint that is a `human` trust root** (AC-35), **passes the AC-48 legacy-completeness
+assertion**, and only on success emits a *derived* `PermissionEvidence` envelope whose payload records
 the original human `publicKeyFingerprint`, `breakpointId`, and `approved`.
+
+**AC-48 (proven-bridge legacy `signedFields` completeness — closes residual issue 7).** `verifyAnswer`
+(`proven/verify.ts:60`) rebuilds the signing payload from the **attacker-supplied**
+`provenAnswer.signedFields` (`buildSigningPayload(provenAnswer, provenAnswer.signedFields)`) and
+imposes **no** requirement that `approved` — or any security-critical field — actually appears in the
+signed set. An attacker with any single validly-signed proven answer from a `human` key (e.g. a
+signed *rejection*, or an answer signed over only `{id, text}`) can present a forged
+`ProvenBreakpointAnswer` that sets `approved: true`, `breakpointId: <target>` as **unsigned** payload
+fields while listing a `signedFields` that omits them; `verifyAnswer` returns `valid: true` because
+the signature covers only the fields the attacker chose to include, and the Draft-2 bridge then reads
+`provenAnswer.approved` and mints "human approved" evidence. This is the same class of hole AC-2
+closed for the new-form envelopes, but it was **not** applied to the legacy proven answer inside the
+bridge.
+
+The bridge MUST, **before deriving any evidence**, apply the AC-2 completeness rule to the legacy
+answer and fail closed (deny, no evidence emitted) unless **all** hold:
+
+- `{ breakpointId, approved, responderId } ⊆ new Set(provenAnswer.signedFields)` — i.e. `approved`
+  and the identity/target-binding fields were **actually within the human-signed set**. (The
+  canonical proven signer signs all three today, `proven/sign.ts:9-17`; a legitimate answer therefore
+  passes, a stripped-`signedFields` forgery does not.)
+- Each of those fields is **present** on `provenAnswer` (a `signedFields` entry naming an absent field
+  is treated as missing → deny), mirroring AC-2's "present on payload" clause.
+- Only then does the bridge trust `provenAnswer.approved`; and it derives evidence **only when
+  `approved === true`** (a signed rejection never yields an approval envelope).
+
+Any exception in this check is a denial. This assertion runs at the bridge (the trust boundary),
+not as a proven-side lint, so a compromised producer emitting a stripped-`signedFields` answer is
+rejected at consumption. (Hardening `proven/verify.ts` itself to reject an under-specified
+`signedFields` is desirable defense-in-depth and noted in §1.2 non-goal 6's follow-up, but the
+**load-bearing** check is AC-48 in the bridge, because the bridge is where the `approved` bit is
+promoted to human evidence.)
 
 **AC-43 (derived evidence still evaluates as `kind:'human'`).** The derived envelope is
 *co-signed* by the adapter's bridging identity for storage integrity, but the policy evaluator MUST
 NOT treat the bridging (engine) signature as the trust anchor for a `human-approval` step. The
 bridge is honored **only if** the recorded `originalHumanFingerprint` is a currently-valid,
-non-revoked `human` trust root and the original proven verification passed; the evaluator resolves
-the `human-approval` step against `originalHumanFingerprint` (kind `human`), not against the adapter
-issuer key. Otherwise a compromised adapter could launder any approval into a "human" one by
-re-signing it. The derived-payload MUST carry `{ originalHumanFingerprint, breakpointId, approved,
-provenVerified: true }` in `signedFields`.
+non-revoked `human` trust root, the original proven verification passed, **and the AC-48
+legacy-completeness assertion passed**; the evaluator resolves the `human-approval` step against
+`originalHumanFingerprint` (kind `human`), not against the adapter issuer key. Otherwise a
+compromised adapter could launder any approval into a "human" one by re-signing it. The
+derived-payload MUST carry `{ payloadType: 'human-approval', originalHumanFingerprint, breakpointId,
+approved, provenVerified: true }` in `signedFields` (AC-51 binds `payloadType`).
 
 During the transition, breakpoint producers MAY emit **both** the legacy `.proven.json` and a new
 `PermissionEvidence` envelope (dual-write); the research §Gap-1 permits "emit both during
@@ -219,9 +340,9 @@ kind is the single, deliberate exception to the no-new-schema rule (review issue
 
 | Evidence | Payload type | Source | Producer key | Trust-root kind |
 |----------|-----------------------|--------|--------------|-----------------|
-| **human-approval** | `PermissionEvidencePayload` (`tool-signing.ts:13-20`), reused unchanged: `{action, scope, approvedBy, approvedAt, expiresAt?, conditions?}` | breakpoint answer | human responder key (proven `.keys/private`) | `human` |
-| **model-decision** | **`ModelDecisionPayload`** — `ModelResponsePayload` (`model-signing.ts:4-12`) **extended** with signed `toolCalls[]` (§4.1a, AC-34) | transport proxy (authoritative) **or** genty session (in-process) | proxy engine key **or** genty adapter key | `engine` |
-| **delegation** | `DelegationChainLink` (`types.ts:29-33`) carried in `AgentRequestPayload.delegationChain` (`agent-signing.ts:12`) | agent | agent identity key | `agent` |
+| **human-approval** | `PermissionEvidencePayload` (`tool-signing.ts:13-20`), reused with a bound `payloadType:'human-approval'` added (AC-51): `{payloadType, action, scope, approvedBy, approvedAt, expiresAt?, conditions?}` | breakpoint answer | human responder key (proven `.keys/private`) | `human` |
+| **model-decision** | **`ModelDecisionPayload`** — `ModelResponsePayload` (`model-signing.ts:4-12`) **extended** with `payloadType:'model-decision'` + signed `toolCalls[]` (§4.1a, AC-34/AC-51) | transport proxy (authoritative) **or** genty session (in-process) | proxy engine key **or** genty adapter key | `engine` |
+| **delegation** | `DelegationChainLink` (`types.ts:29-33`) carried in `AgentRequestPayload.delegationChain` (`agent-signing.ts:12`), with a bound `payloadType:'delegation'` (AC-51) | agent | agent identity key | `agent` |
 
 ### 4.1a Model-decision payload extension — the tool-call binding (**AC-34**, review issue 1)
 
@@ -245,13 +366,15 @@ interface SignedToolCall {
   argsHash: string;     // sha256 of canonical JSON of that call's arguments (deepSortKeys)
 }
 interface ModelDecisionPayload extends ModelResponsePayload {
+  payloadType: 'model-decision'; // AC-51 domain-separation constant, MUST be in signedFields
   toolCalls: SignedToolCall[];   // EVERY tool call the model emitted this turn, each bound
 }
 ```
 
-`toolCalls` (and its `toolCallId`/`name`/`argsHash` sub-fields) MUST be in `signedFields`
-(enforced at runtime by AC-2 / AC-10 step 8). The `argsHash` uses the same canonical hashing helper
-as `CommandAuthorization.argsHash` (AC-8) so proxy-side and gate-side hashes are byte-identical.
+`payloadType`, `toolCalls` (and its `toolCallId`/`name`/`argsHash` sub-fields) MUST be in
+`signedFields` (enforced at runtime by AC-2 / AC-10 step 8 and AC-51). The `argsHash` is computed by
+the shared `canonicalizeArgs` (AC-52) — the **same** helper as `CommandAuthorization.argsHash`
+(AC-8) — so proxy-side and gate-side hashes are byte-identical.
 
 **AC-34a (binding at issuance and verification).** A model-decision step is satisfied for a given
 executing tool call **iff** the attestation contains a `SignedToolCall` whose `toolCallId` equals
@@ -340,8 +463,9 @@ It MUST, in order, and fail closed (deny) at the first failure:
 - **(d) Reject cross-kind.** Redundant with (b) but stated explicitly: if the resolved root's kind
   ≠ the step's required kind (e.g. an `engine` root presented for a `human-approval` step) → deny.
   This closes "engine key satisfies a human step."
-- **(e) Enforce `signedFields` completeness** for the envelope's kind (AC-2) → deny on any missing
-  required field.
+- **(e) Enforce `signedFields` completeness + bound `payloadType`** for the envelope's kind (AC-2,
+  AC-51) → deny on any missing required field, or if `payload.payloadType` is absent from
+  `signedFields` or does not equal the expected constant for `requiredKind`.
 - **(f) Check root validity** — not `revoked`, and (for key-expiry-bearing roots) not expired at
   the envelope's `signedAt` (AC-27) → deny otherwise.
 - **(g) Only now** call genty `verifySignature(resolvedPublicKey, envelope)` (or `verifyTrustChain`
@@ -358,8 +482,10 @@ which MUST be in `signedFields`:
 
 ```ts
 interface CommandAuthorizationPayload {
+  payloadType: 'command-authorization'; // AC-51 domain-separation constant, MUST be in signedFields
   policyId: string;            // which policy document granted this
   policyDocHash: string;       // sha256 of the integrity-verified policy doc (AC-36) that granted this
+  configEpoch: number;         // AC-46: monotonic config epoch under which this authorization was issued
   matchedChainId: string;      // the specific chain that was satisfied (§7)
   toolName: string;            // exact tool identity (e.g. "Bash", MCP tool name)
   toolCallId: string;          // REQUIRED: the exact tool-call id this authorization is bound to (AC-34a)
@@ -380,10 +506,11 @@ interface CommandAuthorizationPayload {
 AC-2 enforces this — `REQUIRED_SIGNED_FIELDS['command-authorization']` is the full field set above).
 An authorization missing any field from `signedFields` is denied at every gate.
 
-`commandHash`/`argsHash` are computed with a canonical hashing helper in the policy adapter that
-reuses genty's `deepSortKeys` ordering so hashing is stable across producers. `toolCallId` is
-mandatory (Draft 1 made it optional "when known") because tool-call binding is now the load-bearing
-defense against replay-within-turn (AC-34).
+`commandHash`/`argsHash` are computed with the **single shared** `canonicalizeArgv`/`canonicalizeArgs`
+helper (AC-52), which builds on genty's `deepSortKeys` ordering so hashing is byte-identical across
+the proxy producer and every gate. `toolCallId` is mandatory (Draft 1 made it optional "when known")
+because tool-call binding is now the load-bearing defense against replay-within-turn (AC-34).
+`payloadType` (AC-51) and `configEpoch` (AC-46) are part of the authorization's signed field set.
 
 **Issuance rules — AC-9 (revised).** The issuer produces an authorization **iff** the policy engine
 (§7) returns `granted` for the requested `{toolName, canonicalArgv, args, credentialScope,
@@ -421,15 +548,21 @@ denies:
    allowedFingerprints = step.trustedIdentities)` passes against a currently-valid, non-revoked trust
    root (AC-35). For a `model-decision` step, the envelope MUST additionally contain a
    `SignedToolCall` matching this call's `toolCallId` + `argsHash` (AC-34a).
-8. **Per-evidence `signedFields` completeness** (AC-2): for each evidence kind, its
-   `REQUIRED_SIGNED_FIELDS` set is present in that envelope's `signedFields` — human-approval:
-   `{action, scope, approvedBy, approvedAt, expiresAt?}`; model-decision: `{modelId, provider,
-   inputMessagesHash, toolCalls}` (incl. each `toolCalls[].toolCallId/name/argsHash`); delegation:
-   `{delegatorFingerprint, delegatorSignature, delegatedAt}`. A missing field → deny.
+8. **Per-evidence `signedFields` completeness** (AC-2) **and bound `payloadType`** (AC-51): for each
+   evidence kind, its `REQUIRED_SIGNED_FIELDS` set is present in that envelope's `signedFields` and
+   `payload.payloadType` equals the expected constant — human-approval: `{payloadType:'human-approval',
+   action, scope, approvedBy, approvedAt, expiresAt?}`; model-decision: `{payloadType:'model-decision',
+   modelId, provider, inputMessagesHash, toolCalls}` (incl. each `toolCalls[].toolCallId/name/argsHash`);
+   delegation: `{payloadType:'delegation', delegatorFingerprint, delegatorSignature, delegatedAt}`. A
+   missing field or wrong `payloadType` → deny.
 9. `policyDocHash` equals the sha256 of the integrity-verified policy document (AC-36) governing this
    action at the gate, and `matchedChainId` names a chain that still exists in it.
+10. **`configEpoch` floor** (AC-46/AC-47): `authorization.configEpoch` equals the `configEpoch` of the
+    currently-honored config manifest at this gate **and** `authorization.configEpoch >=` the
+    off-workspace pinned `POLICY_CONFIG_MIN_EPOCH` floor. A stale authorization issued under a
+    rolled-back or below-floor epoch → deny.
 
-Any exception thrown during steps 1–9 is a **denial**, never a pass (research §Constraints;
+Any exception thrown during steps 1–10 is a **denial**, never a pass (research §Constraints;
 CLAUDE.md "fallbacks are evil").
 
 ---
@@ -593,12 +726,23 @@ Schema elements:
      canonical basename as `program`. `program` matching is on the resolved basename, so
      `/usr/local/bin/aws`, a symlink to it, and bare `aws` all canonicalize to `aws`.
   3. Reject/deny (do not silently non-match) when the program cannot be resolved, or when a wrapper
-     that defeats canonicalization is detected (e.g. `env`, `xargs`, backticks/`$()` command
-     substitution around the program token) for a policy-covered scope — these MUST NOT fall through
-     to default-allow; a covered scope with an unresolvable program is treated as a covered-but-
-     unauthorized action → deny (AC-38a).
+     that defeats canonicalization is detected for a policy-covered scope — these MUST NOT fall
+     through to default-allow; a covered scope with an unresolvable program is treated as a
+     covered-but-unauthorized action → deny (AC-38a).
   4. `subcommandEquals` / `subcommandMatches` operate on the **normalized** subcommand tokens
      (`argv[1..]` with flags separated), not the raw string.
+- **`argv` wrapper handling (AC-38c — allowlist, not denylist).** Draft 2 said to *detect* a
+  denylist of defeating wrappers (`env`, `xargs`, `$()`, ...). A denylist is unbounded — the next
+  unlisted wrapper (`nice`, `stdbuf`, `time`, `nohup`, `setsid`, `doas`, a shell builtin, an unknown
+  launcher) slips through. Draft 3 inverts it: for a **policy-covered scope**, canonicalization
+  **succeeds only if every leading token is on an allowlist of recognized, transparent wrappers**
+  declared **per covered scope** (e.g. a scope may permit `sudo -u <user>` or `time` and recurse
+  through them to the real program), and the finally-resolved program is a recognized program for
+  that scope. Any leading token **not** on the scope's wrapper allowlist — or any construct that
+  breaks static resolution (command substitution `$()`/backticks, variable-indirect program
+  `$PROG`, `eval`, piping the program name in) — makes the program **unresolvable → deny** (AC-38a),
+  never default-allow. The allowlist is closed and reviewable; adding a wrapper is a policy edit
+  signed into the config manifest (AC-46), not an open bypass surface.
 - **`commandDefaultAllow` (AC-38b — default-allow becomes opt-in for command-bearing tools).** The
   global default-allow-for-uncovered behavior is **retained only for non-command-bearing tools**.
   For command-bearing tools (any tool that can execute a shell command / carries an `argv`),
@@ -624,6 +768,21 @@ Schema elements:
   keys: the evaluator groups accepted evidences by the underlying identity resolved from the trust
   root and counts distinct identities, not distinct keys. Complements the platform quorum in
   `approvalChains.ts:96-158`.
+- **`quorum` composition with heterogeneous `steps[]` (AC-41a).** Draft 2 left it ambiguous whether a
+  chain could mix ordered typed steps *and* a quorum (so "human+opus AND 2-human-quorum" needed two
+  separate chains, which changes the semantics from AND to OR). Draft 3 makes a chain a list of
+  **requirements** evaluated with **AND**, where each requirement is one of:
+  `{ step: {kind, trustedIdentities, conditions} }` (a single typed step) **or**
+  `{ quorum: {of, min, trustedIdentities?, conditions?} }` (a distinct-holder quorum, AC-41). A chain
+  is satisfied iff **every** requirement is satisfied (AND), and grant is on the first fully-satisfied
+  chain (AC-19a). This lets one chain express `human-approval(alice) AND model-decision(opus) AND
+  quorum(human-approval, min:2)` as three AND-ed requirements. `evidenceStepBindings` (AC-42) records
+  one binding per satisfied requirement — for a quorum requirement, one binding **per contributing
+  evidence** (min entries), each pinning its `{stepIndex, requiredKind, envelopeHash}`; the issuer
+  refuses to issue if any requirement (or any of a quorum's `min` contributors) lacks a bound, verified
+  envelope. The legacy top-level `quorum:` form in the §7 example remains valid sugar for a
+  single-requirement chain. An evidence envelope MUST NOT be counted toward more than one requirement
+  in the same chain (no double-use across a typed step and a quorum).
 - **`expiry`** — per-step `notExpired` uses `isPermissionValid` (`tool-signing.ts:50-55`) for
   `PermissionEvidence`, and `expiresAt`/key-expiry checks (proven `verify.ts:39-51`) for keys.
 
@@ -715,17 +874,21 @@ are the enforcing gates (documented per-gate coverage).
 
 ### 9.3 GATE 3 — credential injection backstop (`core/spawn-invocation.ts`)
 
-**AC-23a (credential binding, the backstop).** Credentials currently flow as generic env vars with
-no gate (`spawn-invocation.ts` docker 86-89, ssh 120-124, k8s 211-216 / 249-251). A credential
-about to be injected is tagged with a `credentialScope` (AC-40). Before injection, GATE 3 requires a
-valid `CommandAuthorization` whose `credentialScope` matches; **no valid authorization → the scoped
-credential is not injected** (it is dropped from the env map, and if the policy marks it required,
-the spawn is denied). GATE 3 is the **last** point before exec, so it **recomputes** `argsHash` and
-`commandHash` (canonicalized argv, AC-38) from the exact command/args being spawned and re-checks
-them against the authorization (AC-10 steps 4/5) — the hashes are never carried forward from GATE 1.
-This is the backstop against alternate execution paths (§11): even if a gate is bypassed,
-unauthorized scoped creds never reach the process, and a command mutated between GATE 1 and exec
-fails the recomputed-hash check here.
+**AC-23a (revised — Draft 3 — credential binding across ALL delivery channels).** Credentials
+currently flow with no gate through **multiple** channels that `spawn-invocation.ts` controls, not
+env vars alone: docker `-e K=V` (86-89) **and** docker `-v` mounts (79, 81); ssh `K=V` prefix
+(120-124); k8s exec `env K=V` (211-216); k8s ephemeral `--env=K=V` (249-251) and
+`--serviceaccount=`/secret references (239). A credential about to be delivered by **any** of these
+channels is tagged with a `credentialScope` from the trusted out-of-agent source (AC-40/AC-40a).
+Before delivery, GATE 3 requires a valid `CommandAuthorization` whose `credentialScope` matches;
+**no valid authorization → the scoped credential is not delivered** by that channel (env var dropped,
+`-v` mount omitted, secret/serviceaccount reference stripped), and if the policy marks it required,
+the spawn is denied. GATE 3 is the **last** point before exec, so it **recomputes** `argsHash` and
+`commandHash` (shared canonicalizer, AC-52 / AC-38) from the exact command/args being spawned and
+re-checks them against the authorization (AC-10 steps 4/5) — the hashes are never carried forward
+from GATE 1. This is a backstop for the credential-delivery surface; the **load-bearing**
+enforcement for every covered action (credential-bearing or not) is AC-49. AC-50 defines exactly
+which credential channels GATE 3 mediates and which are a bounded, warned non-goal.
 
 **AC-40 (trusted, out-of-agent credential→scope source).** The mapping from an actual credential to
 its `credentialScope` tag MUST come from a source **outside the agent process** — the same
@@ -735,6 +898,68 @@ assert "these creds are scope `aws:prod:s3-ro`" for creds that are actually broa
 the scope tag from this trusted source keyed by the credential's identity, not from any
 agent-supplied hint. If the trusted source has no scope for a credential that a policy marks scoped,
 GATE 3 denies (fail closed) rather than injecting an untagged credential.
+
+**AC-40a (collision-resistant credential identity; deny on ambiguous).** The "credential's identity"
+GATE 3 keys the scope lookup on MUST be **collision-resistant**, not a guessable/forgeable label: it
+is `sha256` of the credential's *stable secret-store identity* (broker key id, KMS ARN/key-version,
+or secret name+version), **never** the credential value's prefix, the env-var name, or an
+agent-supplied alias. The trusted source (AC-40) is a map keyed by this identity. If two distinct
+credentials resolve to the **same** identity key (a collision or a mis-keyed broker entry), or if a
+credential's identity is **absent/ambiguous** in the trusted map, GATE 3 **denies** (fail closed) —
+it never guesses a scope, and never picks the narrower of two candidate scopes. This prevents an
+attacker from getting a broad credential tagged with a narrow scope by exploiting a weak identity
+key.
+
+**AC-49 (load-bearing, un-bypassable gates for ALL covered actions — closes residual issue 8(i)).**
+Draft 2 leaned on GATE 3 as "the backstop," but GATE 3 only ever sees a *scoped credential injection*.
+A policy-covered action that injects **no** scoped credential (e.g. a covered `Bash rm -rf`, a
+covered MCP tool, a `kubectl delete` with the pod's ambient service-account) has **nothing** for
+GATE 3 to gate; if GATE 2 is advisory (non-blocking adapter, §9.2) and GATE 1 is bypassed, such an
+action would execute unchecked. Draft 3 therefore **designates GATE 1 and the genty
+dispatcher/session seam (§9.4) as the LOAD-BEARING, un-bypassable enforcement for every covered
+action — credential-bearing or not** — and requires proof that every tool-execution path traverses at
+least one blocking gate:
+
+- **Invariant.** For a **covered** action, at least one *blocking* gate on the path (GATE 1
+  `beforeToolUse` deny, §9.1; **or** the genty dispatcher `dispatcher.dispatch` / session
+  `definition.execute` verifier, §9.4) MUST evaluate the policy and be able to return `deny` **before**
+  execution. GATE 2 (advisory for non-blocking adapters) and GATE 3 (credential-only) are **defense-in-depth,
+  not the sole line**. A covered action reaching exec without having passed a blocking gate is a
+  design defect.
+- **AC-49a (execution-path enumeration acceptance test).** From the research execution-path map
+  (research §4 genty decision/execution points; §5 the three adapters gates; §6.3 dispatcher seam),
+  the test **enumerates every tool-execution entry path** — genty session `session.ts:1251`
+  `definition.execute`; genty MCP dispatcher `effects.ts:561-601` `dispatcher.dispatch`; adapters
+  GATE 1 `dispatch.ts:133-188`; spawned-harness GATE 2 `spawn-runtime-hooks.ts:99-117`; and the spawn
+  path `spawn-invocation.ts` (local/docker/ssh/k8s) — and asserts that for a covered action **each
+  path hits at least one gate that blocks on policy denial**. The test fails if any enumerated path
+  can reach execution of a covered action without a blocking gate. This converts "enforcement at all
+  gates" from prose into an executable coverage check, and is the acceptance evidence for AC-33's
+  alternate-path defense.
+
+**AC-50 (GATE 3 credential-channel coverage; bounded, warned non-goal — closes residual issue 8(ii)).**
+GATE 3 mediates the credential-delivery channels that `spawn-invocation.ts` **constructs and can
+therefore see** — enumerated in AC-23a: env injection (docker `-e`, ssh `K=V`, k8s `env`/`--env`),
+docker `-v` file mounts, and k8s secret/service-account references (`--serviceaccount`, mounted secret
+volumes it emits). For each, "no valid authorization" means the channel is **omitted** (mount dropped,
+secret ref stripped), not merely the env var. Channels GATE 3 **cannot** mediate are an explicit,
+**bounded non-goal with a warning**, not a silent gap:
+- **Out-of-scope (documented):** credentials the process obtains **without** `spawn-invocation.ts`
+  constructing the delivery — cloud **instance metadata (IMDS/IRSA/workload-identity)**, pre-existing
+  files on a shared/mounted path the agent already controls, credentials embedded in a container image,
+  and network-reachable secret endpoints the process calls itself. GATE 3 does not see these, so it
+  **cannot** enforce scope on them.
+- **Why env/mount is the primary channel:** `spawn-invocation.ts` is the one seam this design controls
+  for *injecting* credentials into a spawned process, so it is where scoped injection is gated. The
+  out-of-scope channels are properties of the **execution substrate** (VM metadata, image contents),
+  mitigated by substrate controls (no broad instance role for agent pods, minimal images, network
+  egress policy) — called out here as an operator warning, and cross-referenced from §1.2.
+- **Mandatory warning + fail-closed default.** When a policy action declares a `credentialScope` that
+  the deployment **cannot** deliver through a GATE-3-mediated channel (i.e. it would arrive via IMDS or
+  a pre-existing mount), the evaluator MUST emit a loud **audit-logged warning** at load time and, for
+  such an action, MUST NOT report `granted` on the assumption GATE 3 will backstop it — because it
+  will not. High-assurance scoped credentials MUST be delivered through a GATE-3-mediated channel; the
+  design does not claim to gate substrate-delivered credentials.
 
 ### 9.4 genty dispatcher / session
 
@@ -760,18 +985,21 @@ expressible without breaking every uncovered dev action.
 attestation key is provisioned to the proxy host and referenced by `attestationKeyPath` (§6.1);
 it is **never** placed where the agent process can read it.
 
-**AC-26 (revised — trust-roots config format, location & signature).** Trust roots live in a single
-git-tracked file `.policy/trust-roots.json` at repo root (public material only), an array of
-`TrustRoot` records (§4.2, each now carrying key material per AC-6) plus a `revoked` list. Policy
-documents live under `.policy/policies/*.yaml`. Private keys are **never** git-tracked: human private
-keys stay under `.breakpoints/.keys/private/` (gitignored, existing proven layout); engine/issuer
-private keys under `.policy/.keys/private/` (added to `.gitignore`). Public keys are git-tracked
-(`trusted/` + `trust-roots.json`).
+**AC-26 (revised — Draft 3 — trust-roots config format, location, signed manifest).** Trust roots
+live in a single git-tracked file `.policy/trust-roots.json` at repo root (public material only), an
+array of `TrustRoot` records (§4.2, each now carrying key material per AC-6) plus a `revoked` list.
+Policy documents live under `.policy/policies/*.yaml`. Private keys are **never** git-tracked: human
+private keys stay under `.breakpoints/.keys/private/` (gitignored, existing proven layout);
+engine/issuer private keys under `.policy/.keys/private/` (added to `.gitignore`). Public keys are
+git-tracked (`trusted/` + `trust-roots.json`).
 
-Both `.policy/trust-roots.json` and every `.policy/policies/*.yaml` are accompanied by a detached
-signature file `<name>.sig.json` (a `SignedEnvelope` over the sha256 of the file's canonical bytes),
-signed by the **out-of-agent config root-of-trust** (AC-36). Git-tracking a file does **not** make
-it trusted; the signature does.
+**Draft 3 replaces per-file detached signatures with a single signed `configEpoch` manifest** (AC-46).
+Rather than one `<name>.sig.json` per file — which permits **partial rollback** of one file to an
+older validly-signed version — there is exactly **one** signed manifest,
+`.policy/config-manifest.json`, that lists **every** config file (`trust-roots.json` and every
+`policies/*.yaml`) with its sha256, plus a monotonically increasing `configEpoch` integer, all signed
+as one `SignedEnvelope<ConfigManifestPayload>` by the out-of-agent config root-of-trust (AC-36).
+Git-tracking a file does **not** make it trusted; presence in the current-epoch signed manifest does.
 
 ### 10.1 Config integrity — the out-of-agent root of trust (**AC-36/AC-37**, review issue 3)
 
@@ -780,19 +1008,38 @@ it trusted; the signature does.
 workspace, so such an agent could **add its own fingerprint as a `human` root, relax an `argv`
 matcher, or widen a `credentialScope` glob, then self-authorize.** No signature check stopped it.
 
-**AC-36 (config root-of-trust; files signed, verified before honoring).** There is a distinguished
-**config root-of-trust** key whose private half is held **outside every agent process** — the same
-place the transport proxy / issuer keys live (the orchestrator/proxy host, or a hardware token / KMS
-in production), never on the agent-writable workspace and never under any path an agent step can
-write. Its public half is pinned as a `kind:'config'` root. Every gate and the evaluator MUST, before
-honoring **any** trust root or policy document:
-1. Load `<file>.sig.json` and verify it via `verifyEnvelopeTrusted(sig, requiredKind:'config',
-   allowedFingerprints: [pinnedConfigRootFp])` (AC-35) against the pinned config-root fingerprint.
-2. Recompute sha256 of the file's canonical bytes and require it to equal the hash in the signed
-   payload. Mismatch, missing signature, or wrong signer → **deny all** (fail closed): if the config
-   itself is untrusted, no action is authorized. `CommandAuthorization.policyDocHash` (AC-8) is this
-   same hash, so a gate confirms it enforced the exact signed document under which the authorization
-   was issued.
+**AC-36 (revised — Draft 3 — config root-of-trust; one signed manifest, verified before honoring).**
+There is a distinguished **config root-of-trust** key whose private half is held **outside every
+agent process** — the same place the transport proxy / issuer keys live (the orchestrator/proxy host,
+or a hardware token / KMS in production), never on the agent-writable workspace and never under any
+path an agent step can write. Its public half is pinned as a `kind:'config'` root. Configuration is
+covered by **one** signed manifest:
+
+```ts
+interface ConfigManifestPayload {
+  payloadType: 'config-manifest';   // AC-51 domain-separation constant
+  configEpoch: number;              // AC-46: monotonically increasing; strictly greater on every re-sign
+  files: { path: string; sha256: string }[];  // EVERY config file: trust-roots.json + every policies/*.yaml
+  issuedAt: string;                 // ISO
+}
+```
+
+Every gate and the evaluator MUST, before honoring **any** trust root or policy document:
+1. Load `.policy/config-manifest.json` and verify it via `verifyEnvelopeTrusted(manifest,
+   requiredKind:'config', allowedFingerprints: [pinnedConfigRootFp])` (AC-35, which also enforces
+   `payloadType === 'config-manifest'` per AC-51) against the pinned config-root fingerprint.
+2. **Enforce the epoch floor (AC-47):** require `manifest.payload.configEpoch >=
+   POLICY_CONFIG_MIN_EPOCH` (the off-workspace pin). Below the floor → **deny all**.
+3. For **every** config file about to be honored, recompute sha256 of its canonical bytes and require
+   it to equal the entry in `manifest.files` for that path; a config file **not listed** in the
+   manifest, or whose hash disagrees, → **deny all**. (This binds trust-roots and every policy doc to
+   the *same* epoch, so no single file can be rolled back independently — AC-46.)
+4. Mismatch, missing manifest, wrong signer, below-floor epoch, or an unlisted/edited file → **deny
+   all** (fail closed): if the config itself is untrusted, no action is authorized.
+   `CommandAuthorization.policyDocHash` (AC-8) is the per-doc hash from this same manifest and
+   `CommandAuthorization.configEpoch` records the manifest epoch, so a gate confirms it enforced the
+   exact signed documents, under the exact epoch, that the authorization was issued under (AC-10
+   steps 9–10).
 
 Because the signing key is off the workspace, an in-scope compromised agent can edit the files but
 **cannot produce a valid signature** for the edit; the tampered config is rejected. This is the
@@ -801,6 +1048,41 @@ the files on a read-only path the agent cannot write. Signing is preferred becau
 files being copied, distributed, or served over git, and does not depend on per-deployment mount
 permissions.)
 
+**AC-46 (monotonic config epoch — one manifest covers all config, closes residual issue 6).** Draft 2
+signed `sha256(file bytes)` per file with **no version, counter, or nonce**. A validly-signed *older*
+config set therefore remains valid forever: an in-scope adversary who retains a previously-signed
+`trust-roots.json` + policy set (e.g. from git history, or a prior deploy) can **swap the older,
+more-permissive set back in** — and because the revocation list lives inside `trust-roots.json`, the
+rollback **un-revokes** any key that was revoked after that snapshot (re-enabling a stolen key), and
+restores any policy loosened since (wider `credentialScope` globs, relaxed `argv` matchers). Each
+file's signature verifies in isolation, so nothing detects the downgrade. **AC-46 binds a
+monotonically increasing integer `configEpoch` into a single signed manifest** that covers **all**
+config files together (AC-36):
+- The config root signs **one** `ConfigManifestPayload` per config change; `configEpoch` MUST be
+  **strictly greater** than the previous manifest's epoch on every re-sign (the `sign-config` CLI,
+  AC-37, refuses to emit a manifest whose epoch is `<=` the epoch it is replacing, unless an explicit
+  operator `--force-epoch` override records an intentional reset in the audit log).
+- Because trust-roots (incl. the revocation list) and every policy doc are hashed **into the same
+  manifest under the same epoch**, **partial rollback of one file is impossible**: you cannot pair an
+  old `trust-roots.json` with a new policy set (or vice-versa) — the manifest hash for the swapped
+  file will not match, and there is no per-file signature to verify it independently. Revocation
+  therefore cannot be downgraded independently of the epoch.
+
+**AC-47 (off-workspace minimum-epoch floor; every gate rejects below-floor config).** The rollback
+defense requires a monotonic reference the adversary cannot rewind. That reference is an
+**off-workspace pin**: `POLICY_CONFIG_MIN_EPOCH` is pinned in the **same** code/deploy artifact as
+`POLICY_CONFIG_ROOT_FP` (AC-37) — the deploy image / env, never a workspace file an agent can edit.
+Every gate and the evaluator, after verifying the manifest signature (AC-36), MUST reject any config
+whose `configEpoch < POLICY_CONFIG_MIN_EPOCH` (**deny all**), and MUST reject any
+`CommandAuthorization` whose `configEpoch` is below the floor or does not equal the currently-honored
+manifest epoch (AC-10 step 10). Advancing the floor is a deploy operation performed **together with**
+signing a new config epoch, so a rolled-back-but-validly-signed older manifest (epoch below the
+current floor) is rejected even though its signature verifies. The floor is what converts "monotonic
+counter" into an enforceable anti-rollback bound: the manifest proves *which* epoch; the pinned floor
+proves the *minimum acceptable* epoch, and neither can be moved by editing the workspace. (Where a
+hardware monotonic counter / KMS key-version is available in production, the floor MAY be sourced from
+it instead of a static pin; the static deploy pin is the baseline.)
+
 **AC-37 (bootstrap / root-of-trust provisioning).** The top of the trust hierarchy is provisioned
 out-of-band, once, before any agent runs, and its story is:
 - The config root-of-trust keypair is generated on the operator's trusted host (or KMS/HSM) via
@@ -808,25 +1090,40 @@ out-of-band, once, before any agent runs, and its story is:
   half is stored where agents cannot read it (proxy/orchestrator host secret store, KMS, or token);
   the public half's fingerprint is **pinned in code/deploy config** (`POLICY_CONFIG_ROOT_FP` env /
   a committed `pinned-config-root.json` that is itself part of the deploy image, not the workspace),
-  so the pin cannot be swapped by editing a workspace file.
-- Signing a config change is an explicit operator step: `policy-adapter sign-config <file>` runs on
-  the trusted host and emits `<file>.sig.json`. Agents never hold this key, so agents cannot sign
-  config.
-- The config root signs (directly or via a short intermediate) the initial `trust-roots.json`, which
-  in turn names the `human`/`engine`/`agent` roots. Revocation of the config root itself is a deploy
-  operation (rotate the pin), out of scope for online revocation (§1.2 non-goal 4).
-- **Chain summary:** pinned config root (off-workspace) → signs `trust-roots.json` + policy docs →
-  those name the evidence-signing roots → evidence chains authorize commands. Every link is verified
-  by `verifyEnvelopeTrusted`; the only link anchored by a code/deploy pin (not a file) is the config
-  root, which is what makes the whole tree resistant to the workspace-writable adversary.
+  so the pin cannot be swapped by editing a workspace file. **The minimum-epoch floor
+  `POLICY_CONFIG_MIN_EPOCH` (AC-47) is pinned in the same artifact, beside `POLICY_CONFIG_ROOT_FP`.**
+- Signing a config change is an explicit operator step: `policy-adapter sign-config` runs on the
+  trusted host, hashes **all** config files into one `ConfigManifestPayload` with the next
+  `configEpoch` (strictly greater than the current epoch — AC-46), and emits the single signed
+  `.policy/config-manifest.json`. Agents never hold this key, so agents cannot sign config or mint a
+  higher epoch. Advancing the deploy-pinned floor is done together with rolling out a new epoch.
+- The config root signs (via the manifest) the initial `trust-roots.json` + policy docs at epoch 1
+  (with the floor pinned at 1); `trust-roots.json` in turn names the `human`/`engine`/`agent` roots.
+  Revocation of the config root itself is a deploy operation (rotate the pin), out of scope for online
+  revocation (§1.2 non-goal 4).
+- **Chain summary:** pinned config root + pinned epoch floor (off-workspace) → sign one
+  `config-manifest.json` (epoch ≥ floor) covering `trust-roots.json` + policy docs → those name the
+  evidence-signing roots → evidence chains authorize commands. Every link is verified by
+  `verifyEnvelopeTrusted`; the only links anchored by a code/deploy pin (not a file) are the config
+  root **and the epoch floor**, which together make the tree resistant to both tampering and rollback
+  by the workspace-writable adversary.
 
-**AC-27 (rotation & revocation).** Rotation reuses proven `rotateKey` (`keys.ts:122-148`): it marks
-the old public key `expiresAt` and provisions a new pair. Verification honors key expiry at
-**signing time** (`proven/verify.ts:39-51`; `isPermissionValid` `tool-signing.ts:50-55`) so an old
-signature made while the key was valid still verifies unless the key is explicitly revoked.
-Revocation is a `revoked: true` flag / fingerprint list in `trust-roots.json`; a revoked
-fingerprint fails verification immediately regardless of signing time. What is git-tracked:
-public keys, trust-roots config, policy docs, revocation list. What is local-only: all private keys.
+**AC-27 (revised — Draft 3 — rotation & revocation, downgrade-protected).** Rotation reuses proven
+`rotateKey` (`keys.ts:122-148`): it marks the old public key `expiresAt` and provisions a new pair.
+Verification honors key expiry at **signing time** (`proven/verify.ts:39-51`; `isPermissionValid`
+`tool-signing.ts:50-55`) so an old signature made while the key was valid still verifies unless the
+key is explicitly revoked. Revocation is a `revoked: true` flag / fingerprint list in
+`trust-roots.json`; a revoked fingerprint fails verification immediately regardless of signing time.
+
+**Revocation cannot be downgraded independently (AC-46).** Because the revocation list lives inside
+`trust-roots.json` and `trust-roots.json` is hashed into the single signed manifest under the current
+`configEpoch`, rolling the revocation list back to un-revoke a stolen key requires swapping in an
+older `trust-roots.json` — which changes the manifest hash and lowers `configEpoch` below the pinned
+floor (AC-47), so it is rejected. **Every revocation MUST therefore be published by signing a new,
+strictly-higher config epoch and advancing the deploy floor**, so the un-revoked state (a lower
+epoch) is permanently below the floor. What is git-tracked: public keys, trust-roots config, policy
+docs, revocation list, `config-manifest.json`. What is local-only: all private keys. What is
+deploy-pinned (off-workspace): `POLICY_CONFIG_ROOT_FP` and `POLICY_CONFIG_MIN_EPOCH` (AC-37/AC-47).
 
 ---
 
@@ -857,19 +1154,52 @@ Each row is an acceptance criterion with a defense grounded in the design.
   the execution gate itself (§9) against the **exact** `argsHash`/`commandHash`/`credentialScope`
   about to run, not at an earlier decision point; a mutated command/args after issuance produces a
   hash mismatch → deny.
-- **AC-33 — Bypass via alternate execution path.** Defense: enforcement at all three adapters gates
-  **plus** the genty dispatcher/session, and the GATE 3 credential backstop (§9.3): with no valid
-  authorization the scoped credential is never injected, so an alternate path that skips GATE 1/2
-  still cannot obtain production credentials. The credential→scope tag itself comes from the trusted
-  out-of-agent source (AC-40), so the agent cannot relabel broad creds as a narrow scope to dodge a
-  policy.
+- **AC-33 — Bypass via alternate execution path.** Defense: GATE 1 and the genty dispatcher/session
+  seam are the **load-bearing, un-bypassable** blocking gates for **every** covered action —
+  credential-bearing or not (AC-49); the AC-49a execution-path enumeration test asserts each
+  enumerated exec path hits a blocking gate. GATE 2 (advisory for non-blocking adapters) and the GATE
+  3 credential backstop across **all** delivery channels it controls (AC-50) are defense-in-depth:
+  with no valid authorization the scoped credential is never delivered by any GATE-3-mediated channel,
+  so an alternate path that skips GATE 1/2 still cannot obtain scoped credentials it controls. The
+  credential→scope tag comes from the trusted out-of-agent source keyed by collision-resistant
+  credential identity (AC-40/AC-40a), so the agent cannot relabel broad creds as a narrow scope. GATE
+  3's substrate-delivered-credential limits (IMDS, pre-existing mounts) are a bounded, warned non-goal
+  (AC-50), not a silent hole.
 - **AC-45 — Config / policy tampering by a compromised agent** (adds its own trust root, relaxes an
   `argv` matcher, widens a `credentialScope`, then self-authorizes). Defense: `.policy/trust-roots.json`
-  and every policy doc are signed by the **out-of-agent config root** (AC-36) whose fingerprint is
-  pinned in deploy config, not on the workspace; every gate verifies the config signature before
-  honoring any root or policy and denies-all on mismatch. The agent can edit the files but cannot
-  produce a valid signature (AC-37), so tampered config is rejected. `CommandAuthorization.policyDocHash`
-  ties each authorization to the exact signed policy doc.
+  and every policy doc are hashed into the **single out-of-agent config-root-signed manifest** (AC-36)
+  whose fingerprint is pinned in deploy config, not on the workspace; every gate verifies the manifest
+  signature and per-file hashes before honoring any root or policy and denies-all on mismatch. The
+  agent can edit the files but cannot produce a valid signature (AC-37), so tampered config is
+  rejected. `CommandAuthorization.policyDocHash` + `configEpoch` tie each authorization to the exact
+  signed policy doc under the exact epoch.
+- **AC-46 — Config rollback / downgrade by a compromised agent** (swaps a validly-signed *older*,
+  more-permissive `trust-roots + policy` set back in, un-revoking a stolen key and re-widening scopes).
+  Defense (residual issue 6): the single signed manifest carries a **monotonic `configEpoch`** (AC-46)
+  covering all config files together, and every gate rejects any `configEpoch` below the off-workspace
+  pinned `POLICY_CONFIG_MIN_EPOCH` floor (AC-47) and any authorization whose `configEpoch` is below the
+  floor or ≠ the current manifest epoch (AC-10 step 10). Revocation is published by advancing the epoch
+  + floor (AC-27), so the un-revoked older state is permanently below the floor. Partial rollback of one
+  file is impossible — all files share one manifest hash + epoch. Test: sign epoch N, advance floor to
+  N, present the epoch-(N-1) manifest → **deny all**.
+- **AC-48 — Proven-bridge unsigned `approved` bit** (a forged `ProvenBreakpointAnswer` sets
+  `approved:true` as an **unsigned** field, listing a `signedFields` that omits it; `verifyAnswer`
+  still returns valid because it rebuilds the payload from the attacker's `signedFields`,
+  `proven/verify.ts:60`). Defense (residual issue 7): the bridge applies the AC-2 completeness rule to
+  the legacy proven answer — it denies unless `{breakpointId, approved, responderId} ⊆
+  provenAnswer.signedFields` and each is present — **before** deriving any human evidence, and derives
+  only when `approved === true` (AC-48/AC-3/AC-43). Test: a proven answer valid under a `human` key but
+  with `approved` absent from `signedFields` yields **no** human evidence → chain unsatisfied → deny.
+- **AC-49 — Covered non-credential action on a bypassed/advisory path** (a covered `Bash rm -rf` or MCP
+  tool that injects no scoped credential, with GATE 2 advisory and GATE 1 skipped). Defense (residual
+  issue 8(i)): GATE 1 and the genty dispatcher/session seam are load-bearing blocking gates for **all**
+  covered actions (AC-49); the AC-49a enumeration test asserts every exec path hits a blocking gate, so
+  no covered action reaches exec unchecked even when no credential is involved.
+- **AC-51 — Cross-payload-type signature transfer** (an `engine`-signed envelope of one payload type
+  presented for a step expecting a different `engine`-signed type). Defense: every payload carries a
+  bound `payloadType` constant in `signedFields`, and `verifyEnvelopeTrusted` denies unless
+  `payload.payloadType` equals the expected constant for the step's kind (AC-51). Test: present a
+  `model-decision` envelope for a `command-authorization` slot → deny.
 - **AC-44 — Non-blocking-GATE-2 coverage + passthrough denial (acceptance test).** Two fail-closed
   behaviors that Draft 1 asserted but did not test: (i) for a **non-blocking** GATE-2 adapter
   (`mode !== 'blocking'`, §9.2), GATE 2 cannot hard-enforce, so the test asserts that GATE 1 and/or
@@ -877,7 +1207,9 @@ Each row is an acceptance criterion with a defense grounded in the design.
   when GATE 2 is advisory. (ii) A model call routed through **passthrough proxy mode** (no
   `completionEngine`, §6.5) produces no attestation, so an action requiring proxy attestation (incl.
   any credential-touching action defaulting to it, AC-39) MUST be **denied** on that path. AC-44 is
-  the explicit acceptance test for both.
+  the explicit acceptance test for both. **(Draft 3)** The non-blocking-GATE-2 case is subsumed by the
+  broader AC-49a enumeration test: with GATE 2 advisory, a blocking gate (GATE 1 or the genty seam)
+  still denies a covered-but-unauthorized call whether or not it carries a credential.
 
 ---
 
@@ -885,16 +1217,22 @@ Each row is an acceptance criterion with a defense grounded in the design.
 
 | Milestone | Acceptance criteria |
 |-----------|---------------------|
-| **A — trust-core** | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-25, AC-26, AC-27, **AC-34** (model-decision payload extension type), **AC-35** (trusted-store verifier wrapper), **AC-36** (config-integrity verification), **AC-37** (root-of-trust bootstrap), **AC-43** (proven bridge → human) |
-| **B — policy-engine** | AC-9, AC-10, AC-19, AC-19a, AC-20, AC-21, AC-21a, AC-22, **AC-38** (canonicalized argv matcher), **AC-38a**, **AC-38b** (command default-allow opt-in), **AC-41** (quorum distinct-holder), **AC-42** (evidence covers every step) |
+| **A — trust-core** | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-25, AC-26, AC-27, **AC-34** (model-decision payload extension type), **AC-35** (trusted-store verifier wrapper), **AC-36** (config-integrity verification), **AC-37** (root-of-trust bootstrap), **AC-43** (proven bridge → human), **AC-46** (monotonic config-epoch manifest), **AC-47** (off-workspace epoch floor), **AC-48** (proven-bridge legacy signedFields completeness), **AC-51** (domain-separation `payloadType`), **AC-52**+**AC-52a** (shared canonical argv/args serialization + conformance test) |
+| **B — policy-engine** | AC-9, AC-10, AC-19, AC-19a, AC-20, AC-21, AC-21a, AC-22, **AC-38** (canonicalized argv matcher), **AC-38a**, **AC-38b** (command default-allow opt-in), **AC-38c** (argv wrapper allowlist), **AC-41** (quorum distinct-holder), **AC-41a** (heterogeneous quorum composition), **AC-42** (evidence covers every step) |
 | **C — evidence-producers** | AC-11, AC-12, AC-13, AC-14, AC-15, AC-16, AC-17, AC-18, **AC-34a** (tool-call binding at produce/verify), **AC-39** (proxy-attestation default for credential actions) |
-| **D — tool-layer-enforcement** | AC-23, AC-23a, AC-23b, AC-23c, **AC-40** (trusted credential→scope source) |
-| **E — e2e-integration** | AC-24 (non-goals guard), AC-28, AC-29, AC-30, AC-31, AC-32, AC-33, **AC-44** (non-blocking-GATE-2 + passthrough-denial test), **AC-45** (config-tampering threat) |
+| **D — tool-layer-enforcement** | AC-23, AC-23a, AC-23b, AC-23c, **AC-40** (trusted credential→scope source), **AC-40a** (collision-resistant credential identity), **AC-49** (load-bearing un-bypassable gates), **AC-50** (GATE 3 credential-channel coverage + bounded non-goal) |
+| **E — e2e-integration** | AC-24 (non-goals guard), AC-28, AC-29, AC-30, AC-31, AC-32, AC-33, **AC-44** (non-blocking-GATE-2 + passthrough-denial test), **AC-45** (config-tampering threat), **AC-46** (config-rollback threat test), **AC-48** (proven-bridge unsigned-approved threat test), **AC-49a** (execution-path enumeration test), **AC-51** (cross-payload-type transfer test) |
 
 Every acceptance criterion maps to exactly one milestone. (AC-24, the non-goals guard, is verified
 in E as a scope-regression check.) New ACs from the Draft-2 security revision are assigned as above:
 type/verifier/config-integrity work lands in A, schema/evaluator work in B, producer binding in C,
-credential-scope sourcing in D, and the new threat/behavior tests in E.
+credential-scope sourcing in D, and the new threat/behavior tests in E. **Draft-3 note on dual-listed
+ids:** AC-46, AC-48, AC-49, and AC-51 name a *mechanism* (implemented in its home milestone — A for
+46/47/48/51, D for 49/50) **and** a *threat test* (verified in E). The mechanism AC and its E-row test
+are the same criterion observed at implementation vs. verification time; the milestone of record for
+implementation is the home milestone (A/B/D), and E lists the acceptance **test** that exercises it —
+consistent with how AC-34/AC-34a and AC-30 already appear in both a producer milestone and the E
+threat model. AC-49a and AC-52a are test-only sub-criteria owned by E and A respectively.
 
 ---
 
@@ -909,8 +1247,14 @@ credential-scope sourcing in D, and the new threat/behavior tests in E.
 | Delegation | `trust/agent-signing.ts:5-13`, `types.ts:29-33` | reuse |
 | Chain verify (raw) | `trust/chain.ts:20-55` | reuse (never called directly, see wrapper) |
 | **Trusted-store verifier wrapper** (`verifyEnvelopeTrusted`, AC-35) | `@a5c-ai/policy-adapter` | **NEW code** (wraps genty verify; adds fingerprint-binding + kind + trusted-store resolution) |
-| **Config-integrity verification + signing CLI** (AC-36/AC-37) | `@a5c-ai/policy-adapter` (`init-config-root`, `sign-config`, gate-side `verifyConfigSignature`) | **NEW code** |
-| **Canonicalized argv matcher** (AC-38) | `@a5c-ai/policy-adapter` | **NEW code** (tokenize + resolve program + normalize subcommand) |
+| **Config-integrity verification + signing CLI** (AC-36/AC-37) | `@a5c-ai/policy-adapter` (`init-config-root`, `sign-config`, gate-side `verifyConfigManifest`) | **NEW code** |
+| **Config-epoch manifest + off-workspace floor** (AC-46/AC-47) | `ConfigManifestPayload` + `POLICY_CONFIG_MIN_EPOCH` pin; `sign-config` mints strictly-higher epoch; gates enforce floor | **NEW code** |
+| **Proven-bridge legacy signedFields completeness** (AC-48) | `@a5c-ai/policy-adapter` bridge (wraps `proven/verify.ts:20-72`; asserts `{breakpointId,approved,responderId}⊆signedFields` before deriving) | **NEW code** (bridge assertion) |
+| **Domain-separation `payloadType`** (AC-51) | bound constant added to every payload + `REQUIRED_SIGNED_FIELDS`; checked in `verifyEnvelopeTrusted` | **NEW field + check** |
+| **Shared canonical argv/args serialization** (AC-52) | `canonicalizeArgs`/`canonicalizeArgv` in `@a5c-ai/policy-adapter` (builds on genty `deepSortKeys`), imported by proxy + every gate | **NEW code** (single shared util) |
+| **Canonicalized argv matcher + wrapper allowlist** (AC-38/AC-38c) | `@a5c-ai/policy-adapter` | **NEW code** (tokenize + resolve program + per-scope wrapper allowlist + normalize subcommand) |
+| **Load-bearing gate coverage + exec-path enumeration test** (AC-49/AC-49a) | assertion over existing gates (GATE 1 `dispatch.ts`, genty seam `effects.ts`/`session.ts`); enumeration test | **NEW test** (no new runtime module) |
+| **GATE 3 non-env credential channels** (AC-50) | extend GATE 3 to docker `-v` (`spawn-invocation.ts:79,81`), k8s secret/serviceaccount refs (239) — env channels already in AC-23a | **extend** (bounded non-goal for IMDS/pre-mounts) |
 | **Trusted credential→scope source** (AC-40) | out-of-agent broker/KMS metadata; adapter reads it at GATE 3 | **NEW integration** |
 | Human key gen/rotate | `proven/keys.ts:9-148` | reuse |
 | proven bridge | `proven/verify.ts:20-72` | reuse (bridge new) |
@@ -925,11 +1269,16 @@ credential-scope sourcing in D, and the new threat/behavior tests in E.
 | **Policy adapter** | `packages/adapters/policy` (`@a5c-ai/policy-adapter`) | **NEW package** |
 
 The **only** genuinely new *package* is `@a5c-ai/policy-adapter`. Everything else is an extension or
-composition of existing code, with two flagged exceptions the Draft-2 security revision requires:
+composition of existing code, with the flagged exceptions the security revisions require:
 (1) a **new type** `ModelDecisionPayload`/`SignedToolCall` added beside `trust/model-signing.ts` in
 `@a5c-ai/genty-core` — the single, deliberate relaxation of the no-new-schema rule, needed to bind a
-model decision to a specific tool call (AC-34); and (2) **new security-critical code inside**
-`@a5c-ai/policy-adapter` — the `verifyEnvelopeTrusted` trusted-store wrapper (AC-35), the
-config-integrity verify/sign path (AC-36/AC-37), and the canonicalized-argv matcher (AC-38) — which
-are extensions of, not forks of, existing genty/proven primitives. No third policy engine is created
-(AC-22); the two existing engines delegate trust-chain steps to the adapter.
+model decision to a specific tool call (AC-34; Draft 3 adds a bound `payloadType` field to it and to
+every other payload, AC-51); and (2) **new security-critical code inside** `@a5c-ai/policy-adapter` —
+the `verifyEnvelopeTrusted` trusted-store wrapper (AC-35, incl. `payloadType` binding), the
+config-integrity verify/sign path with the **monotonic-epoch manifest** (AC-36/AC-37/AC-46/AC-47), the
+**proven-bridge legacy-completeness assertion** (AC-48), the **shared canonical argv/args serializer**
+(AC-52), and the canonicalized-argv matcher with a **per-scope wrapper allowlist** (AC-38/AC-38c) —
+which are extensions of, not forks of, existing genty/proven primitives. The Draft-3 GATE-3 extension
+(AC-50) and load-bearing-gate assertion (AC-49) add no new runtime module (they extend
+`spawn-invocation.ts` credential handling and add a coverage test over existing gates). No third policy
+engine is created (AC-22); the two existing engines delegate trust-chain steps to the adapter.
