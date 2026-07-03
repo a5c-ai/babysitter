@@ -27,6 +27,20 @@ npm run lint:hooks-adapter
 | `packages/atlas` | `@a5c-ai/atlas` | Atlas catalog graph SDK, CLI, and data |
 | `packages/atlas/webui` | `@a5c-ai/atlas-webui` | Atlas graph explorer (Next.js) |
 | `packages/adapters/hooks/*` | `hooks-adapter workspace packages` | Hook normalization, CLI, and harness adapters |
+| `packages/adapters/policy` | `@a5c-ai/policy-adapter` | Proof-based policy enforcement trust core: unified signed envelopes, trusted-store key resolution, config-integrity manifest, policy schema + evaluator, `CommandAuthorization` issuance, argv matcher, and the tool-layer enforcement gates |
+
+## Policy Enforcement (proof-based)
+
+The cryptographic policy-enforcement layer (Milestones A–E) lets a command run only when a
+declarative policy's required trust chain of signed evidence is satisfied. Enforcement is
+toggled off-workspace by the pinned `POLICY_CONFIG_ROOT_FP` anchor; unpinned = back-compat
+pass-through, pinned = active + fail-closed.
+
+- Overview + config + schema + gates + runbook: [`docs/policy-enforcement.md`](../policy-enforcement.md)
+- Authoritative design spec: [`docs/design/proof-based-policy-enforcement.md`](../design/proof-based-policy-enforcement.md)
+- Package: [`packages/adapters/policy`](../../packages/adapters/policy) (`@a5c-ai/policy-adapter`), worked example configs under [`packages/adapters/policy/examples`](../../packages/adapters/policy/examples).
+- Trust primitives: [`packages/genty/core/src/trust`](../../packages/genty/core/src/trust) (`SignedEnvelope`, model-decision + in-process attestation, chain, signing).
+- Enforcement surfaces: GATE 1 [`packages/adapters/tools/src/policy-verifier-wiring.ts`](../../packages/adapters/tools/src/policy-verifier-wiring.ts); genty session/MCP gates [`packages/genty/platform/src/harness/internal/createRun/orchestration/policy-enforcement-wiring.ts`](../../packages/genty/platform/src/harness/internal/createRun/orchestration/policy-enforcement-wiring.ts); GATE 3 credential backstop [`packages/adapters/core/src/policy-spawn-gate.ts`](../../packages/adapters/core/src/policy-spawn-gate.ts) + [`spawn-invocation.ts`](../../packages/adapters/core/src/spawn-invocation.ts); proxy attestation [`packages/adapters/transport/src/attestation.ts`](../../packages/adapters/transport/src/attestation.ts); SDK signed-breakpoint gate [`packages/babysitter-sdk/src/breakpoints/`](../../packages/babysitter-sdk/src/breakpoints).
 
 ## Key Entry Points
 

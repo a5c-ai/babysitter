@@ -50,6 +50,8 @@ This document is intentionally conservative. Under the V6 architecture rules, se
 
 **Human Approval Breakpoints**: Risky workflow steps can require explicit user approval before execution
 
+**Proof-Based Policy Enforcement**: A shipped cryptographic enforcement layer (`@a5c-ai/policy-adapter`) lets a specific command run only when a declarative policy's required trust chain of signed evidence (signed human approvals, model-decision attestations, delegation links) is satisfied, minting a short-lived signed `CommandAuthorization` the tool-execution gates verify and fail closed on. It is **off by default** and activates only when an off-workspace config-root anchor is pinned; unpinned deployments are unchanged. This is a concrete enforcement path with test coverage, not a full enterprise RBAC/ABAC stack (see the deferred goals below). Details: [Proof-Based Policy Enforcement](../policy-enforcement.md) · design spec: [proof-based-policy-enforcement.md](../design/proof-based-policy-enforcement.md).
+
 **Deterministic Workflow Gates**: Process-defined shell checks, replay, and task state give V6 a concrete way to validate some operational claims without implying broader security guarantees
 
 **Rollback-Oriented Execution**: Runs, journals, and task artifacts make it possible to inspect what happened and recover from bad orchestration state
@@ -75,8 +77,8 @@ This document is intentionally conservative. Under the V6 architecture rules, se
 The following topics may still matter strategically, but they are not current V6 commitments:
 
 - **Enterprise Identity**: Multi-factor authentication, Single Sign-On integration, and X.509-based service authentication
-- **Enterprise Authorization**: Role-based access control, attribute-based access control, and centralized policy-enforcement narratives
-- **Tamper-Evident Audit Guarantees**: Cryptographic signatures, checksums, or comparable audit-log integrity systems
+- **Enterprise Authorization**: Role-based access control, attribute-based access control, and centralized policy-enforcement narratives. (The shipped [proof-based policy enforcement](../policy-enforcement.md) layer covers *per-action, evidence-gated command authorization*; broad RBAC/ABAC identity management remains deferred.)
+- **Tamper-Evident Audit Guarantees**: Cryptographic signatures, checksums, or comparable audit-log integrity systems. (Signed evidence envelopes and `CommandAuthorization` are shipped for the [policy-enforcement](../policy-enforcement.md) path; general journal/audit-log hash-chaining is still deferred and is an explicit non-goal of that design.)
 - **Active Monitoring and Automated Response**: Anomaly detection, automatic threat mitigation, and automated forensic or recovery flows
 - **Stronger Isolation**: Harder plugin containment, runtime capability enforcement, and deeper resource-abuse controls
 
