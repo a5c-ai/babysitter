@@ -41,3 +41,49 @@ export type {
   DerivedEvidence,
   DerivedHumanApprovalPayload,
 } from './proven-bridge.js';
+
+// ── Milestone B — policy engine ─────────────────────────────────────────────
+
+export {
+  canonicalizeArgs,
+  canonicalizeArgv,
+  argsHash,
+  commandHash,
+} from './canonicalize-args.js';
+
+export { matchArgv } from './argv-matcher.js';
+export type { ArgvMatch, ArgvMatchScope, ArgvMatchResult } from './argv-matcher.js';
+
+export { parsePolicyDocument, loadTrustStore } from './policy-schema.js';
+export type {
+  PolicyDocument,
+  PolicyActionDoc,
+  ActionMatch,
+  ChainDoc,
+  ChainRequirement,
+  TypedStep,
+  QuorumRequirement,
+  StepConditions,
+  EvidenceStepKind,
+} from './policy-schema.js';
+
+export { evaluatePolicy } from './policy-evaluator.js';
+export type {
+  Evidence,
+  EvaluationContext,
+  PolicyDecision as PolicyEvaluationDecision,
+  EvaluateInput,
+} from './policy-evaluator.js';
+
+export { issueCommandAuthorization } from './authorization-issuer.js';
+export type { IssueRequest, IssueResult, IssueEvidence } from './authorization-issuer.js';
+
+export {
+  canonicalizeCredentialIdentity,
+  resolveCredentialScope,
+} from './credential-identity.js';
+export type {
+  CredentialScopeSource,
+  CredentialAliasMap,
+  CredentialScopeResolution,
+} from './credential-identity.js';

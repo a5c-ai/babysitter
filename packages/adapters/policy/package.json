@@ -51,7 +51,8 @@
   },
   "dependencies": {
     "@a5c-ai/genty-core": "6.0.0",
-    "@a5c-ai/tasks-adapter": "6.0.0"
+    "@a5c-ai/tasks-adapter": "6.0.0",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
