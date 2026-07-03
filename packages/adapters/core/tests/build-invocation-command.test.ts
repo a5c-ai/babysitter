@@ -4,7 +4,20 @@
  */
 import { describe, it, expect } from 'vitest';
 
+import { createHash } from 'node:crypto';
+import { createKeyPair, signPayload } from '@a5c-ai/genty-core/trust';
+import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import {
+  argsHash as computeArgsHash,
+  commandHash as computeCommandHash,
+  canonicalizeCredentialIdentity,
+  type CommandAuthorizationPayload,
+  type CredentialScopeSource,
+  type TrustRoot,
+} from '@a5c-ai/policy-adapter';
+
 import { buildInvocationCommand } from '../src/spawn-runner.js';
+import { CredentialGateDenied, type Gate3Options } from '../src/spawn-invocation.js';
 import type { SpawnArgs } from '../src/adapter.js';
 
 const baseSpawn: SpawnArgs = {
@@ -259,6 +272,167 @@ describe('buildInvocationCommand', () => {
       expect(out.args).toContain('fixed-pod');
       expect(out.args).not.toContain('run');
       expect(out.cleanup).toBeUndefined();
+    } finally {
+      if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
+    }
+  });
+});
+
+/**
+ * Milestone D — GATE 3 wiring into buildInvocationCommand (defect #2: gateCredentialInjection
+ * was dead code; the emitters unconditionally emitted docker -e / ssh K=V / k8s env). These
+ * tests prove the gate is now INVOKED before each channel: a scoped credential is emitted only
+ * with a valid CommandAuthorization; with none it is DROPPED (channel omitted); a REQUIRED
+ * scoped credential with no authorization DENIES the spawn (throws CredentialGateDenied).
+ *
+ * strengthenedTests note: these tests are additive — they prove the CALL SITE wiring the
+ * adversarial review (score 22) found missing; the gate primitive itself was already tested.
+ */
+describe('buildInvocationCommand — GATE 3 credential wiring (AC-23a/AC-50, defect #2)', () => {
+  const sha256 = (s: string): string => createHash('sha256').update(s).digest('hex');
+  const CA_FIELDS = [
+    'payloadType', 'policyId', 'policyDocHash', 'configEpoch', 'matchedChainId', 'toolName',
+    'toolCallId', 'commandHash', 'argsHash', 'credentialScope', 'evidenceFingerprints',
+    'evidenceEnvelopeHashes', 'evidenceStepBindings', 'issuedAt', 'expiresAt',
+  ];
+  const ISSUER = createKeyPair();
+  const ISSUER_ROOT: TrustRoot = {
+    fingerprint: ISSUER.fingerprint, kind: 'engine', publicKey: ISSUER.publicKey, label: 'issuer',
+  };
+  const COMMAND = 'claude';
+  const TOOL_CALL_ID = 'call_gate3';
+  const CRED_SCOPE = 'aws:prod:s3-ro';
+  const CONFIG_EPOCH = 5;
+  const POLICY_DOC_HASH = sha256('policy-doc-bytes');
+  const STABLE_ID = 'kms:key/prod-s3-ro';
+  const IDENTITY = canonicalizeCredentialIdentity(STABLE_ID);
+  const CRED_SOURCE: CredentialScopeSource = {
+    aliasMap: { 'arn:aws:kms:us-east-1:123:key/prod-s3-ro': STABLE_ID },
+    scopeByIdentity: { [IDENTITY]: CRED_SCOPE },
+    ambiguousIdentities: [],
+  };
+
+  // The spawn whose docker `-e` channel carries a scoped credential env var.
+  const spawn: SpawnArgs = {
+    command: COMMAND,
+    args: ['--print', 'hi'],
+    env: { AWS_SESSION_TOKEN: 'the-scoped-secret', FOO: 'bar' },
+    cwd: '/repo',
+    usePty: false,
+  };
+  const SCOPED_ARGS = { command: `${COMMAND} --print hi` };
+
+  function makeAuthorization(scopeMatches: boolean): SignedEnvelope<CommandAuthorizationPayload> {
+    const now = Date.now();
+    const payload: CommandAuthorizationPayload = {
+      payloadType: 'command-authorization',
+      policyId: 'aws-prod-write',
+      policyDocHash: POLICY_DOC_HASH,
+      configEpoch: CONFIG_EPOCH,
+      matchedChainId: 'human-only',
+      toolName: 'Bash',
+      toolCallId: TOOL_CALL_ID,
+      // GATE 3 recomputes command/args hashes from the EXACT spawn; bind to them.
+      commandHash: computeCommandHash(spawn.command),
+      argsHash: computeArgsHash(SCOPED_ARGS),
+      credentialScope: scopeMatches ? CRED_SCOPE : 'aws:dev:other',
+      evidenceFingerprints: ['fp'],
+      evidenceEnvelopeHashes: [sha256('e')],
+      evidenceStepBindings: [{ stepIndex: 0, requiredKind: 'human-approval', envelopeHash: sha256('e') }],
+      issuedAt: new Date(now).toISOString(),
+      expiresAt: new Date(now + 120_000).toISOString(),
+    };
+    return signPayload(ISSUER.privateKey, ISSUER.fingerprint, payload, CA_FIELDS);
+  }
+
+  function gate3(overrides: Partial<Gate3Options> = {}): Gate3Options {
+    return {
+      issuerRoots: [ISSUER_ROOT],
+      policyDocHash: POLICY_DOC_HASH,
+      currentConfigEpoch: CONFIG_EPOCH,
+      minEpochFloor: CONFIG_EPOCH,
+      now: Date.now(),
+      toolName: 'Bash',
+      toolCallId: TOOL_CALL_ID,
+      command: spawn.command,
+      args: SCOPED_ARGS,
+      credentialSource: CRED_SOURCE,
+      scopedEnvKeys: {
+        AWS_SESSION_TOKEN: { alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro' },
+      },
+      ...overrides,
+    };
+  }
+
+  it('no gate → all env emitted (back-compat, path unchanged)', () => {
+    const out = buildInvocationCommand({ mode: 'docker', image: 'i:1' }, spawn, 'claude');
+    expect(out.args).toContain('-e');
+    expect(out.args).toContain('AWS_SESSION_TOKEN=the-scoped-secret');
+    expect(out.args).toContain('FOO=bar');
+  });
+
+  it('scoped credential with a VALID matching authorization is emitted on the docker -e channel', () => {
+    const out = buildInvocationCommand(
+      { mode: 'docker', image: 'i:1' }, spawn, 'claude',
+      gate3({ resolveAuthorization: () => makeAuthorization(true) }),
+    );
+    expect(out.args).toContain('AWS_SESSION_TOKEN=the-scoped-secret');
+    // The non-scoped env var always passes through.
+    expect(out.args).toContain('FOO=bar');
+  });
+
+  it('scoped credential with NO authorization is DROPPED from the docker -e channel', () => {
+    const out = buildInvocationCommand(
+      { mode: 'docker', image: 'i:1' }, spawn, 'claude',
+      gate3({ resolveAuthorization: () => undefined }),
+    );
+    // The scoped credential is omitted; the ordinary env var is unaffected.
+    expect(out.args).not.toContain('AWS_SESSION_TOKEN=the-scoped-secret');
+    expect(out.args).toContain('FOO=bar');
+  });
+
+  it('scoped credential with a WRONG-SCOPE authorization is DROPPED (fail closed)', () => {
+    const out = buildInvocationCommand(
+      { mode: 'docker', image: 'i:1' }, spawn, 'claude',
+      gate3({ resolveAuthorization: () => makeAuthorization(false) }),
+    );
+    expect(out.args).not.toContain('AWS_SESSION_TOKEN=the-scoped-secret');
+  });
+
+  it('a REQUIRED scoped credential with no authorization DENIES the spawn (throws)', () => {
+    expect(() =>
+      buildInvocationCommand(
+        { mode: 'docker', image: 'i:1' }, spawn, 'claude',
+        gate3({
+          resolveAuthorization: () => undefined,
+          scopedEnvKeys: {
+            AWS_SESSION_TOKEN: { alias: 'arn:aws:kms:us-east-1:123:key/prod-s3-ro', required: true },
+          },
+        }),
+      ),
+    ).toThrow(CredentialGateDenied);
+  });
+
+  it('the ssh K=V channel drops an unauthorized scoped credential', () => {
+    const out = buildInvocationCommand(
+      { mode: 'ssh', host: 'h' }, spawn, 'claude',
+      gate3({ resolveAuthorization: () => undefined }),
+    );
+    const remote = out.args[out.args.length - 1]!;
+    expect(remote).not.toContain('AWS_SESSION_TOKEN=');
+    expect(remote).toContain('FOO=bar');
+  });
+
+  it('the k8s ephemeral --env channel drops an unauthorized scoped credential', () => {
+    const prev = process.env['AGENT_MUX_K8S_POD'];
+    delete process.env['AGENT_MUX_K8S_POD'];
+    try {
+      const out = buildInvocationCommand(
+        { mode: 'k8s', ephemeral: true, image: 'i:1' }, spawn, 'claude',
+        gate3({ resolveAuthorization: () => undefined }),
+      );
+      expect(out.args).not.toContain('--env=AWS_SESSION_TOKEN=the-scoped-secret');
+      expect(out.args).toContain('--env=FOO=bar');
     } finally {
       if (prev !== undefined) process.env['AGENT_MUX_K8S_POD'] = prev;
     }

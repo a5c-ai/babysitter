@@ -110,6 +110,13 @@ export interface PolicyVerifierHookBridgeOptions {
   /** The off-workspace pinned minimum-epoch floor (AC-47). */
   minEpochFloor: number;
   /**
+   * AC-42 carry-forward — the number of REQUIRED steps of the chain the covered
+   * action must satisfy. When supplied, the gate enforces that the authorization
+   * bound one evidence per required step (step-coverage). The production wiring seam
+   * derives this from the matched chain.
+   */
+  requiredStepCount?: number;
+  /**
    * Whether the on-disk `.policy` config manifest verified (AC-45). Defaults to
    * `true`; when `false` (tampered config), the gate denies-all — no authorization
    * is honored under untrusted config.
@@ -225,11 +232,20 @@ export class PolicyVerifierHookBridge implements ToolHookBridge {
       const commandString = commandStringOf(context.input);
       const commandHash = computeCommandHash(commandString);
       const argsHash = computeArgsHash(context.input);
-      // The executing tool-call id: an explicit `context.toolCallId` binds this exact
-      // call (AC-34a). When the context does not carry one, bind against the
-      // authorization's own toolCallId (the dispatch layer that HAS the id enforces the
-      // sibling-call binding — see the genty-seam gate, AC-34a).
-      const toolCallId = resolveToolCallId(context, authorization.payload.toolCallId);
+      // The executing tool-call id (AC-34a). It MUST be the ACTUAL id of the tool call
+      // about to run (threaded onto `context.toolCallId`). We NEVER fall back to the
+      // authorization's OWN toolCallId — that would make the gate's binding check an
+      // X===X tautology and let a sibling call's authorization verify. Absent id for a
+      // covered action → DENY.
+      const toolCallId =
+        typeof context.toolCallId === 'string' && context.toolCallId.length > 0
+          ? context.toolCallId
+          : undefined;
+      if (toolCallId === undefined) {
+        return denyResult(
+          'covered action has no executing toolCallId — cannot bind authorization (deny)',
+        );
+      }
 
       const verification = verifyCommandAuthorization(authorization, {
         now: Date.now(),
@@ -242,6 +258,7 @@ export class PolicyVerifierHookBridge implements ToolHookBridge {
         currentConfigEpoch: o.currentConfigEpoch,
         minEpochFloor: o.minEpochFloor,
         issuerRoots: o.issuerRoots,
+        ...(typeof o.requiredStepCount === 'number' ? { requiredStepCount: o.requiredStepCount } : {}),
       });
 
       if (!verification.valid) {
@@ -259,23 +276,4 @@ export class PolicyVerifierHookBridge implements ToolHookBridge {
   async afterToolUse(): Promise<ToolHookResult | undefined> {
     return undefined;
   }
-}
-
-/**
- * Resolve the executing tool-call id from the tool-call context. The authorization
- * is bound to a specific tool-call id (AC-34a); a sibling call's authorization must
- * not verify. `runId` carries the per-call id in the tools-adapter dispatch payload
- * (`HooksMuxToolHookBridge` maps `context.runId` to `toolCallId`); a dedicated
- * `toolCallId` on the context is preferred when present.
- */
-function resolveToolCallId(context: ToolCallContext, authorizationToolCallId: string): string {
-  const anyCtx = context as unknown as { toolCallId?: unknown };
-  if (typeof anyCtx.toolCallId === 'string' && anyCtx.toolCallId.length > 0) {
-    return anyCtx.toolCallId;
-  }
-  // No explicit executing id on the context — bind against the authorization's own id
-  // so a valid, unmutated authorization for this call verifies; the seams that DO carry
-  // a per-call id (genty dispatcher/session, spawn preToolUse) enforce the sibling
-  // binding explicitly.
-  return authorizationToolCallId;
 }

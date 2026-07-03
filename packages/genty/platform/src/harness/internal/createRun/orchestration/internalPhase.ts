@@ -39,6 +39,7 @@ import { buildAgentPrompt, coerceAgentResultValue, runDelegatedHarnessTask } fro
 import { assessRun } from "../resumeState";
 import type { OrchestrationProgressSnapshot, RunOrchestrationPhaseArgs } from "./types";
 import { subscribeVerbosePiEvents } from "./verbose";
+import { resolveRunPolicyGates } from "./policy-enforcement-wiring";
 import { listTasks, readTask } from "../../../../tasks";
 import { addRunSummary } from "../../../../session/history";
 import { createGentySessionContext, destroyGentySessionContext, type GentySessionContext } from "../../../gentySessionContext";
@@ -405,6 +406,12 @@ export async function runInternalOrchestrationPhase(
     }
   }
 
+  // Milestone D (§9.4 / AC-49 / AC-45) — wire the LOAD-BEARING policy tool gate onto the
+  // real orchestrator session. When the off-workspace config anchor is pinned this makes a
+  // covered action without a valid CommandAuthorization DENY before `definition.execute`
+  // runs; when not pinned it is undefined (back-compat, path unchanged).
+  const { policyToolGate } = await resolveRunPolicyGates(args.workspace);
+
   orchestrationSession = registerPiSession(createAgentCoreSession({
     workspace: args.workspace,
     model: gentyCtx?.modelSwitch.currentModel ?? args.model,
@@ -416,6 +423,7 @@ export async function runInternalOrchestrationPhase(
       : undefined,
     appendSystemPrompt,
     ephemeral: true,
+    ...(policyToolGate ? { policyToolGate } : {}),
     ...(gentyCtx?.instructions.systemPromptMode === 'replace' && gentyCtx.instructions.systemPrompt
       ? { systemPrompt: gentyCtx.instructions.systemPrompt }
       : {}),

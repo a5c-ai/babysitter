@@ -71,7 +71,10 @@ const CONFIG_EPOCH = 5;
 const DESCRIPTOR: ToolDescriptor = { name: TOOL_NAME } as ToolDescriptor;
 
 function ctx(overrides: Partial<ToolCallContext> = {}): ToolCallContext {
-  return { toolName: TOOL_NAME, input: ARGS, runId: 'run-1', sessionId: 'sess-1', ...overrides };
+  // Defect #3: the fallback-to-authorization toolCallId tautology was removed, so a
+  // covered action MUST carry the ACTUAL executing tool-call id (matching the CA's
+  // `call_A`), as production now threads through the dispatch layer.
+  return { toolName: TOOL_NAME, input: ARGS, runId: 'run-1', sessionId: 'sess-1', toolCallId: 'call_A', ...overrides };
 }
 
 function makeCA(overrides: Partial<CommandAuthorizationPayload> = {}): CommandAuthorizationPayload {

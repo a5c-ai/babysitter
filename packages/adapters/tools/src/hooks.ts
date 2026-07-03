@@ -187,6 +187,9 @@ export class HooksMuxToolHookBridge implements ToolHookBridge {
       caller: context.caller,
       runId: context.runId,
       sessionId: context.sessionId,
+      // Milestone D (AC-34a): carry the ACTUAL executing tool-call id so the policy
+      // layer binds a CommandAuthorization to this exact call (not `runId`).
+      toolCallId: context.toolCallId,
     };
     if (result) {
       payload.result = result;
@@ -203,7 +206,10 @@ export class HooksMuxToolHookBridge implements ToolHookBridge {
         nativeEventName: rawEventName,
         adapter: this.adapter,
         toolName: context.toolName,
-        toolCallId: context.runId ?? null,
+        // Milestone D (AC-34a): the ACTUAL executing tool-call id when present. Fall
+        // back to `runId` only as a legacy correlation hint — the policy binding uses
+        // `context.toolCallId` (threaded above), never `runId`.
+        toolCallId: context.toolCallId ?? context.runId ?? null,
         source: descriptor.source,
         metadata: {
           ...this.metadata,

@@ -197,6 +197,15 @@ export interface ToolCallContext {
   caller?: string;
   runId?: string;
   sessionId?: string;
+  /**
+   * Milestone D (AC-34a) — the ACTUAL executing tool-call id (the provider/harness
+   * `NormalizedToolCall.id`). This is the id GATE 1 binds a `CommandAuthorization`
+   * against so a sibling call's authorization in the same turn does not verify. It is
+   * DISTINCT from `runId` (a per-run/session correlation id): binding to `runId` would
+   * not distinguish sibling calls. When absent for a COVERED action, GATE 1 DENIES
+   * (never binds to the authorization's own id — that would be an X===X tautology).
+   */
+  toolCallId?: string;
   signal?: AbortSignal;
   onUpdate?: (event: UnifiedToolEvent) => void | Promise<void>;
 }

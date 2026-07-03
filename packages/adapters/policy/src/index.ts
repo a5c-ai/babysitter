@@ -97,3 +97,14 @@ export type {
 
 export { EXEC_SEAM_REGISTRY } from './exec-seam-registry.js';
 export type { ExecSeamEntry, ExecSeamRole } from './exec-seam-registry.js';
+
+// ── Milestone D — PRODUCTION wiring seam (AC-49 / AC-45 / AC-23) ──────────────
+
+export { loadPolicyEnforcementGate, argvScopesOf } from './policy-enforcement-wiring.js';
+export type {
+  PolicyEnforcementGate,
+  LoadPolicyEnforcementResult,
+  AuthorizationResolver,
+  GateCallContext,
+  GateDecision,
+} from './policy-enforcement-wiring.js';

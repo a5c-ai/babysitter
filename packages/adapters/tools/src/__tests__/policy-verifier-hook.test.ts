@@ -118,6 +118,11 @@ function ctx(overrides: Partial<ToolCallContext> = {}): ToolCallContext {
     input: ARGS,
     runId: 'run-1',
     sessionId: 'sess-1',
+    // The ACTUAL executing tool-call id (AC-34a). Defect #3 removed the fallback-to-
+    // authorization tautology, so a covered action MUST carry the real executing id (as
+    // production now threads through the dispatch layer); binding to the authorization's
+    // own id is forbidden.
+    toolCallId: TOOL_CALL_ID,
     ...overrides,
   };
 }

@@ -43,6 +43,7 @@ import {
 } from "./dispatch";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
 import { subscribeVerbosePiEvents } from "./verbose";
+import { resolveRunPolicyGates } from "./policy-enforcement-wiring";
 import type { RunOrchestrationPhaseArgs } from "./types";
 import { extractErrorMessage, extractErrorStack, recoverExternalProcessError } from "./externalPhaseHelpers";
 
@@ -487,6 +488,10 @@ async function resolveExternalAction(args: {
       resolveOutputMode(args.args.json, args.args.outputMode),
       taskHarness,
     );
+    // Milestone D (§9.4 / AC-49) — wire the LOAD-BEARING MCP dispatcher policy gate onto
+    // the effect resolver. When the config anchor is pinned, a covered MCP dispatch without
+    // a valid CommandAuthorization is denied before `dispatcher.dispatch`; unpinned → no gate.
+    const { mcpPolicyGate } = await resolveRunPolicyGates(args.args.workspace);
     const effectResult = await resolveEffectWithRetry(
       args.action,
       args.args.selectedHarnessName,
@@ -503,6 +508,7 @@ async function resolveExternalAction(args: {
         maxIterations: args.args.maxIterations,
         verbose: args.args.verbose,
         outputMode: args.args.outputMode,
+        ...(mcpPolicyGate ? { mcp: { policyGate: mcpPolicyGate } } : {}),
       },
       workerSession,
       args.args.discovered,
