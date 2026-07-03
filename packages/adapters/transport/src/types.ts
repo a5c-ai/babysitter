@@ -21,6 +21,19 @@ export interface ProxyConfig {
   host: string;
   port: number;
   stream: boolean;
+  /**
+   * Milestone C (AC-11) — proxy model-attestation identity. When
+   * `attestationEnabled` is set, the proxy signs a `ModelDecisionPayload` at the
+   * wire seam with the key at `attestationKeyPath` (held OUTSIDE the agent process)
+   * and writes it to the sidecar under `attestationSidecarDir`. The proxy identity
+   * key becomes an `engine` trust root marked `producer:'proxy'` (AC-39).
+   *
+   * Read from `AGENT_MUX_PROXY_ATTESTATION_*` env vars (config.ts).
+   */
+  attestationEnabled?: boolean;
+  attestationKeyPath?: string;
+  attestationFingerprint?: string;
+  attestationSidecarDir?: string;
 }
 
 export interface CompletionRequestMessage {

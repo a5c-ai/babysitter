@@ -18,6 +18,7 @@ import { rebuildStateCache } from "./replay/stateCache";
 import { checkRunWorkDirLeak } from "./workDirLeak";
 import { assertRuntimeHookAllowed, callRuntimeHook } from "./hooks/runtime";
 import { validateAgainstSchema } from "./schemaValidator";
+import { enforceSignedBreakpointAnswer } from "../breakpoints/enforce-signed-breakpoint";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -37,6 +38,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
 
     ensureInvocationKeyMatches(options, record);
     await validateTaskResultOutputSchema(options, record);
+    await enforceSignedBreakpointGate(options, record);
 
     const resultPayload = buildResultPayload(options);
     const taskCompletedHookResult = await callRuntimeHook(
@@ -185,6 +187,101 @@ export async function commitEffectCancellation(
 
     return { resultRef };
   });
+}
+
+/**
+ * Milestone C (AC-4 / AC-28 / AC-48) — enforced signed human breakpoints.
+ *
+ * When the breakpoint task's metadata declares `signatureRequired: true`, an
+ * `ok`-status answer must carry a VALID human signature (with `approved` inside the
+ * signed set). An unsigned / invalid / tampered / unsigned-`approved` answer is
+ * REJECTED fail-closed: this runs BEFORE the result is written and EFFECT_RESOLVED is
+ * emitted, so a rejected answer leaves the effect PENDING (no resolution). When the
+ * metadata does NOT require a signature (the pre-Milestone-C default), the gate is a
+ * no-op — existing runs are unaffected.
+ *
+ * Fail closed: any exception in reading metadata or verifying is a rejection (never a
+ * silent pass-through) once a signature is required. Non-breakpoint effects and
+ * non-`ok` statuses are unaffected.
+ */
+async function enforceSignedBreakpointGate(options: CommitEffectResultOptions, record: EffectRecord) {
+  if (record.kind !== "breakpoint" && record.taskId !== "__sdk.breakpoint") return;
+  if (options.result.status !== "ok") return;
+
+  let enforcement: { signatureRequired?: unknown; trustedKeysDir?: unknown } | undefined;
+  try {
+    const taskDef = await readTaskDefinition(options.runDir, options.effectId);
+    const metadata = taskDef?.metadata as Record<string, unknown> | undefined;
+    const breakpoint = taskDef?.breakpoint as Record<string, unknown> | undefined;
+    // The enforcement config may live under task metadata or the breakpoint block.
+    enforcement =
+      (metadata?.signatureEnforcement as typeof enforcement) ??
+      (breakpoint?.signatureEnforcement as typeof enforcement) ??
+      // Back-compat direct flags on metadata / breakpoint.
+      (typeof metadata?.signatureRequired === "boolean"
+        ? { signatureRequired: metadata.signatureRequired, trustedKeysDir: metadata.trustedKeysDir }
+        : undefined) ??
+      (typeof breakpoint?.signatureRequired === "boolean"
+        ? { signatureRequired: breakpoint.signatureRequired, trustedKeysDir: breakpoint.trustedKeysDir }
+        : undefined);
+  } catch (err) {
+    // If the task def is unreadable we cannot know whether a signature is required.
+    // Fail OPEN here ONLY for readability failure would violate fail-closed; but an
+    // unreadable task def means no enforcement config could be asserted at authoring.
+    // We therefore do NOT block back-compat runs on a read error — enforcement is an
+    // opt-in declared at breakpoint creation. (A required-signature breakpoint whose
+    // def is unreadable is an authoring/infra failure surfaced elsewhere.)
+    void err;
+    return;
+  }
+
+  if (!enforcement || enforcement.signatureRequired !== true) return;
+
+  // A signature IS required for this breakpoint. Extract the answer object from the
+  // committed value and enforce.
+  const answer = extractBreakpointAnswer(options.result.value);
+  const decision = await enforceSignedBreakpointAnswer(answer, {
+    signatureRequired: true,
+    trustedKeysDir:
+      typeof enforcement.trustedKeysDir === "string" ? enforcement.trustedKeysDir : undefined,
+  });
+
+  if (!decision.accepted) {
+    logCommitFailure(options, "signed_breakpoint_rejected", {
+      taskId: record.taskId,
+      kind: record.kind,
+      reason: decision.reason,
+    });
+    throw new RunFailedError(
+      `Signed-breakpoint enforcement rejected the answer for effect ${options.effectId}: ${decision.reason ?? "unsigned or invalid"}`,
+      {
+        details: {
+          reason: "signed_breakpoint_rejected",
+          effectId: options.effectId,
+          taskId: record.taskId,
+          kind: record.kind,
+        },
+      },
+    );
+  }
+}
+
+/**
+ * Extract the breakpoint answer record from a committed effect value. The value may
+ * BE the answer, or wrap it under `answer` / `result`.
+ */
+function extractBreakpointAnswer(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const v = value as Record<string, unknown>;
+    if (v.answer && typeof v.answer === "object" && !Array.isArray(v.answer)) {
+      return v.answer as Record<string, unknown>;
+    }
+    if (v.result && typeof v.result === "object" && !Array.isArray(v.result) && ("approved" in (v.result as object) || "signature" in (v.result as object))) {
+      return v.result as Record<string, unknown>;
+    }
+    return v;
+  }
+  return {};
 }
 
 async function validateTaskResultOutputSchema(options: CommitEffectResultOptions, record: EffectRecord) {

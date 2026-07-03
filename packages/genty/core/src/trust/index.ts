@@ -2,6 +2,15 @@ export { createKeyPair, signPayload, verifySignature } from './signing.js';
 export { createAgentIdentity, createToolIdentity } from './identity.js';
 export { signModelResponse, verifyModelResponse } from './model-signing.js';
 export { signModelDecision, verifyModelDecision, MODEL_DECISION_SIGNED_FIELDS } from './model-decision.js';
+export {
+  signInProcessModelDecision,
+  attachAttestationToContext,
+  IN_PROCESS_ATTESTATION_PRODUCER,
+} from './in-process-attestation.js';
+export type {
+  InProcessAttestationInput,
+  NormalizedToolCallLike,
+} from './in-process-attestation.js';
 export { signAgentRequest, verifyAgentRequest, signPrompt, verifyPrompt, hashContent } from './agent-signing.js';
 export { signToolResult, verifyToolResult, signPermissionEvidence, verifyPermissionEvidence, isPermissionValid } from './tool-signing.js';
 export { verifyTrustChain } from './chain.js';

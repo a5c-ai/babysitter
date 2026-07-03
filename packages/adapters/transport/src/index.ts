@@ -2,6 +2,7 @@ export * from './types.js';
 export * from './config.js';
 export * from './server.js';
 export * from './runtime.js';
+export * from './attestation.js';
 export type { TransportCodec, NormalizedToolDefinition, NormalizedToolCall, NormalizedCostRecord, CodecCapabilities } from './codec.js';
 export {
   AnthropicCodec,

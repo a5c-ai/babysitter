@@ -18,6 +18,10 @@ export function createProxyConfig(overrides: Partial<ProxyConfig> = {}): ProxyCo
     host: DEFAULT_HOST,
     port: DEFAULT_PORT,
     stream: DEFAULT_STREAM,
+    attestationEnabled: undefined,
+    attestationKeyPath: undefined,
+    attestationFingerprint: undefined,
+    attestationSidecarDir: undefined,
   } satisfies ProxyConfig;
 
   for (const [key, value] of Object.entries(overrides)) {
@@ -39,6 +43,13 @@ export function readProxyConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Pr
     host: env.AGENT_MUX_PROXY_HOST || DEFAULT_HOST,
     port: env.AGENT_MUX_PROXY_PORT ? Number(env.AGENT_MUX_PROXY_PORT) : DEFAULT_PORT,
     stream: env.AGENT_MUX_PROXY_STREAM ? env.AGENT_MUX_PROXY_STREAM !== 'false' : DEFAULT_STREAM,
+    // Milestone C (AC-11) — proxy attestation identity from env.
+    attestationEnabled: env.AGENT_MUX_PROXY_ATTESTATION_ENABLED
+      ? env.AGENT_MUX_PROXY_ATTESTATION_ENABLED !== 'false'
+      : undefined,
+    attestationKeyPath: env.AGENT_MUX_PROXY_ATTESTATION_KEY_PATH,
+    attestationFingerprint: env.AGENT_MUX_PROXY_ATTESTATION_FINGERPRINT,
+    attestationSidecarDir: env.AGENT_MUX_PROXY_ATTESTATION_SIDECAR_DIR,
   });
 }
 

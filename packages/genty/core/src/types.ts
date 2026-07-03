@@ -1,6 +1,8 @@
 import type { TObject } from "@sinclair/typebox";
 import type { BackgroundProcessRegistry } from "@a5c-ai/genty-runtime";
 import type { DeferredToolRegistry } from "./deferredToolRegistry";
+import type { SignedEnvelope } from "./trust/types";
+import type { ModelDecisionPayload } from "./trust/model-decision";
 
 export type AgentCoreOutputFormat = "text" | "json_object" | "json_schema";
 
@@ -141,6 +143,25 @@ export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOption
   agentDir?: string;
   /** Adapters adapter/backend name forwarded as `agent`. */
   backend?: string;
+  /**
+   * Milestone C (AC-15) — the genty adapter identity key used to sign the
+   * IN-PROCESS, correlation-grade model-decision attestation for each model turn.
+   * When present, the session signs ONE `ModelDecisionPayload` per turn binding
+   * every tool call and attaches it (plus `endpoint.model`) to each call's
+   * `ToolExecutionContext`. When absent, no in-process attestation is produced and
+   * the tool-execution path is unchanged (back-compat).
+   *
+   * This key is held INSIDE the agent process, so the attestation it produces is
+   * correlation-grade only (AC-39) — NOT the authoritative out-of-agent proxy
+   * attestation. A policy step requiring proxy attestation rejects it.
+   */
+  modelAttestationKey?: {
+    privateKey: string;
+    publicKey: string;
+    fingerprint: string;
+  };
+  /** sha256 over the turn's input messages, bound into the in-process attestation. */
+  modelAttestationInputMessagesHash?: string;
 }
 
 export interface ToolResult {
@@ -162,6 +183,22 @@ export interface ToolExecutionContext {
   cache?: {
     get(key: string, signal?: AbortSignal): Promise<unknown> | unknown;
   };
+  /**
+   * Milestone C (AC-15) — the model id (`endpoint.model`) that drove this turn,
+   * flowed from `runCompletionLoop` into the per-call execution context so a gate
+   * can correlate the executing tool call with the model decision that authorized it.
+   */
+  modelId?: string;
+  /**
+   * Milestone C (AC-15) — the IN-PROCESS (correlation-grade) model-decision
+   * attestation signed once per model turn, binding EVERY tool call the model
+   * emitted. The SAME signed envelope is attached to each call's context; each gate
+   * matches its own `toolCallId` against the signed `toolCalls[]` (AC-34a).
+   *
+   * This producer's key is held INSIDE the agent process, so it is correlation-grade
+   * only (AC-39) — NOT the authoritative out-of-agent proxy attestation.
+   */
+  modelAttestation?: SignedEnvelope<ModelDecisionPayload>;
 }
 
 export type UnifiedToolSource = "builtin" | "mcp" | "plugin" | "custom";

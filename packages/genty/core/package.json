@@ -23,6 +23,16 @@
         "default": "./dist/trust/index.js"
       }
     },
+    "./trust/in-process-attestation": {
+      "import": {
+        "types": "./dist/trust/in-process-attestation.d.ts",
+        "default": "./dist/trust/in-process-attestation.js"
+      },
+      "require": {
+        "types": "./dist/trust/in-process-attestation.d.ts",
+        "default": "./dist/trust/in-process-attestation.js"
+      }
+    },
     "./extensions": {
       "import": {
         "types": "./dist/extensions/index.d.ts",

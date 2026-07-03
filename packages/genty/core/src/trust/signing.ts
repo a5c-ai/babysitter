@@ -1,6 +1,15 @@
 import { createHash, generateKeyPairSync, sign, verify } from 'node:crypto';
 import type { IdentityKeyPair, SignedEnvelope } from './types.js';
 
+/**
+ * Milestone C convenience re-export: `signing.js` is the canonical crypto module,
+ * and the in-process attestation test imports `verifyModelDecision` from here
+ * alongside `createKeyPair`. The implementation lives in `model-decision.js`
+ * (which itself imports the primitives below); re-exporting keeps one signature
+ * check. ESM handles the cyclic module reference at call time.
+ */
+export { signModelDecision, verifyModelDecision } from './model-decision.js';
+
 export function createKeyPair(): IdentityKeyPair {
   const { publicKey, privateKey } = generateKeyPairSync('ed25519', {
     publicKeyEncoding: { type: 'spki', format: 'pem' },

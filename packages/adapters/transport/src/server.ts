@@ -1,8 +1,15 @@
 import * as http from 'node:http';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { WebSocket, WebSocketServer } from 'ws';
+
+import type { IdentityKeyPair } from '@a5c-ai/genty-core/trust';
+import {
+  signCompletionAttestation,
+  AttestationSidecarStore,
+} from './attestation.js';
 
 import { Hono } from 'hono';
 import type { Context } from 'hono';
@@ -1532,9 +1539,66 @@ async function resolveTokenCount(
 }
 
 export function createTransportMuxApp({ config, completionEngine, costFeedbackSink, costFeedbackMetadata }: CreateTransportMuxAppOptions) {
-  const app = new Hono();
+  const app = new Hono<{ Variables: { requestId: string } }>();
   const metrics = new MetricsTracker();
   const thoughtSignatureStore = new Map<string, string>();
+
+  // ── Milestone C (AC-11/AC-14/AC-16) — proxy model-attestation seam ─────────
+  // The proxy signs a ModelDecisionPayload at the wire seam (after completion,
+  // before protocol encoding) with a key held OUTSIDE the agent, and writes it to
+  // an in-memory sidecar keyed by request id + indexed by tool-call id. The
+  // response body is NEVER mutated — attestation lives in the sidecar + a header.
+  const attestationStore = new AttestationSidecarStore();
+  let attestationKeyPair: IdentityKeyPair | undefined;
+  const attestationEnabled = config.attestationEnabled === true;
+  if (attestationEnabled) {
+    // Load the proxy identity key. Any failure DISABLES the producer (fail closed:
+    // no attestation is claimed) rather than throwing — a covered action requiring
+    // proxy attestation then denies at the gate because the sidecar is empty.
+    try {
+      if (typeof config.attestationKeyPath === 'string' && config.attestationKeyPath.length > 0) {
+        const privateKey = readFileSync(config.attestationKeyPath, 'utf-8');
+        const publicKeyPath = `${config.attestationKeyPath}.pub`;
+        const publicKey = readFileSync(publicKeyPath, 'utf-8');
+        const fingerprint =
+          config.attestationFingerprint && config.attestationFingerprint.length > 0
+            ? config.attestationFingerprint
+            : createHash('sha256').update(publicKey).digest('hex');
+        attestationKeyPair = { privateKey, publicKey, fingerprint };
+      }
+    } catch {
+      attestationKeyPair = undefined;
+    }
+  }
+
+  /**
+   * Sign a non-streaming completion attestation and write it to the sidecar keyed
+   * by request id (AC-12). Fail-closed: any error leaves the sidecar untouched and
+   * never mutates the response body. Returns the request id for the response header.
+   */
+  function emitCompletionAttestation(
+    requestId: string,
+    plan: { request: CompletionRequest },
+    result: CompletionResult,
+  ): void {
+    if (!attestationEnabled || !attestationKeyPair) return;
+    try {
+      const inputMessagesHash = createHash('sha256')
+        .update(JSON.stringify(plan.request.messages ?? []))
+        .digest('hex');
+      const env = signCompletionAttestation({
+        keyPair: attestationKeyPair,
+        modelId: config.targetModel,
+        provider: config.targetProvider,
+        inputMessagesHash,
+        result,
+        requestId,
+      });
+      attestationStore.put(requestId, env);
+    } catch {
+      // Fail closed: no attestation is recorded; the gate denies covered actions.
+    }
+  }
 
   app.onError((error, c) => {
     metrics.recordError();
@@ -1563,6 +1627,18 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     }
 
     await next();
+  });
+
+  // ── Milestone C (AC-14) — x-request-id correlation middleware ──────────────
+  // Echo an incoming `x-request-id`, or mint one, expose it on the response header
+  // so the harness can thread it forward, and stash it on the context so route
+  // handlers key the attestation sidecar by it.
+  app.use('*', async (c, next) => {
+    const incoming = c.req.header('x-request-id');
+    const requestId = incoming && incoming.length > 0 ? incoming : randomUUID();
+    c.set('requestId', requestId);
+    await next();
+    c.header('x-request-id', requestId);
   });
 
   app.get('/health', (c) => c.json({ ok: true, transport: config.exposedTransport }));
@@ -1607,6 +1683,8 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     if (result instanceof Response) {
       return result;
     }
+    // AC-12: sign the attestation AFTER completion, BEFORE protocol encoding.
+    emitCompletionAttestation(c.get('requestId') as string, plan, result);
     return c.json(anthropicResponse(result, config));
   });
 
@@ -1625,6 +1703,8 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     if (result instanceof Response) {
       return result;
     }
+    // AC-12: sign the attestation AFTER completion, BEFORE protocol encoding.
+    emitCompletionAttestation(c.get('requestId') as string, plan, result);
     return c.json(openAiChatResponse(result, config));
   });
 
@@ -1644,6 +1724,8 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     if (result instanceof Response) {
       return result;
     }
+    // AC-12: sign the attestation AFTER completion, BEFORE protocol encoding.
+    emitCompletionAttestation(c.get('requestId') as string, plan, result);
     return c.json(openAiResponsesResponse(result, config));
   });
 
