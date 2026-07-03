@@ -195,20 +195,19 @@ describe('Milestone D — GATE 1 policy verifier (AC-23, AC-10, AC-49, AC-53)', 
   });
 
   it('AC-10.3a: authorization bound to a DIFFERENT toolCallId (replay within turn) → deny', async () => {
-    // Authorization issued for call_A; this gate executes call_B (sibling call, same turn).
+    // Authorization issued for call_A; this gate executes sibling call_B in the same turn.
+    // The executing tool-call id MUST be carried on the context so the gate can bind it;
+    // a CA bound to call_A must not authorize the execution of call_B.
     const bridge = makeBridge({ authorization: signCA(makeCA({ toolCallId: 'call_A' })) });
-    const result = await bridge.beforeToolUse(ctx({ input: ARGS }), {
-      ...DESCRIPTOR,
-    } as ToolDescriptor);
-    // The gate recomputes toolCallId for THIS call; simulate call_B via the context.
-    const resB = await makeBridge({
-      authorization: signCA(makeCA({ toolCallId: 'call_A' })),
-    }).beforeToolUse(
-      { ...ctx(), runId: 'run-1', sessionId: 'sess-1' } as ToolCallContext,
-      DESCRIPTOR,
-    );
-    // Either invocation with a mismatched executing tool-call id must deny.
-    expect(result?.decision === 'deny' || resB?.decision === 'deny').toBe(true);
+    const executingCtxB = { ...ctx(), toolCallId: 'call_B' } as ToolCallContext;
+    const result = await bridge.beforeToolUse(executingCtxB, DESCRIPTOR);
+    expect(result?.decision).toBe('deny');
+    expect(result?.reason).toBeTruthy();
+    // Sanity: the SAME gate with the matching executing id (call_A) does NOT deny,
+    // proving the deny above is due to the toolCallId mismatch, not an unrelated cause.
+    const executingCtxA = { ...ctx(), toolCallId: 'call_A' } as ToolCallContext;
+    const resA = await bridge.beforeToolUse(executingCtxA, DESCRIPTOR);
+    expect(resA?.decision).not.toBe('deny');
   });
 
   it('AC-10.5/AC-32: args MUTATED between authorization and the gate → deny (TOCTOU)', async () => {
