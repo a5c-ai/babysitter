@@ -88,8 +88,8 @@
   },
   "dependencies": {
     "@a5c-ai/comm-adapter": "6.0.0",
-    "@a5c-ai/genty-core": "6.0.0",
     "@a5c-ai/policy-adapter": "6.0.0",
+    "@a5c-ai/trust-core": "6.0.0",
     "hono": "^4.12.14",
     "ws": "^8.20.0"
   },

@@ -1,7 +1,7 @@
 /**
  * @a5c-ai/policy-adapter — proof-based policy enforcement trust core (Milestone A).
  *
- * Depends ONLY on @a5c-ai/genty-core (trust primitives) + @a5c-ai/tasks-adapter
+ * Depends ONLY on @a5c-ai/trust-core (trust primitives) + @a5c-ai/tasks-adapter
  * (proven bridge) + Node built-ins, so genty and every adapter can consume it
  * without a cycle (design §8).
  */

@@ -30,13 +30,13 @@
  * as a thrown error the route handler treats as "no attestation" — never a body-mutating
  * or half-formed attestation.
  */
-import { signModelDecision } from '@a5c-ai/genty-core/trust';
+import { signModelDecision } from '@a5c-ai/trust-core';
 import type {
   IdentityKeyPair,
   SignedEnvelope,
   ModelDecisionPayload,
   SignedToolCall,
-} from '@a5c-ai/genty-core/trust';
+} from '@a5c-ai/trust-core';
 import { argsHash } from '@a5c-ai/policy-adapter';
 import type { CompletionResult, CompletionStreamEvent } from './types.js';
 

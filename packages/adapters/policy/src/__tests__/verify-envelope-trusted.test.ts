@@ -16,8 +16,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { createKeyPair, signPayload } from '@a5c-ai/genty-core/trust';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { createKeyPair, signPayload } from '@a5c-ai/trust-core';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 
 // Intended Milestone-A surface of @a5c-ai/policy-adapter (does not yet exist):
 import {

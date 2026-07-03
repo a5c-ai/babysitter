@@ -17,8 +17,8 @@
  * It REUSES the existing condition operators (`matchCondition` shape) rather than
  * forking a third engine (AC-22).
  */
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
-import { isPermissionValid } from '@a5c-ai/genty-core/trust';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
+import { isPermissionValid } from '@a5c-ai/trust-core';
 import {
   verifyEnvelopeTrusted,
   verifyTrustChainTrusted,

@@ -24,8 +24,8 @@
  * rawArguments: string }.
  */
 import { describe, it, expect } from 'vitest';
-import { createKeyPair, verifyModelDecision } from './signing.js';
-import { verifyModelDecision as verifyMD } from './model-decision.js';
+import { createKeyPair, verifyModelDecision } from '@a5c-ai/trust-core';
+import { verifyModelDecision as verifyMD } from '@a5c-ai/trust-core';
 import { argsHash } from '@a5c-ai/policy-adapter';
 
 // The in-process producer + its context-attachment helper the milestone WILL export.

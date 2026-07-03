@@ -17,7 +17,7 @@ import {
   type TrustRoot,
   type TrustStore,
 } from './verify-envelope-trusted.js';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 
 export type { TrustRoot } from './verify-envelope-trusted.js';
 

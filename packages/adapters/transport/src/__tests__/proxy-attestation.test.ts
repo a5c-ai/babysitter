@@ -28,8 +28,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { createKeyPair } from '@a5c-ai/genty-core/trust';
-import type { SignedEnvelope, ModelDecisionPayload } from '@a5c-ai/genty-core/trust';
+import { createKeyPair } from '@a5c-ai/trust-core';
+import type { SignedEnvelope, ModelDecisionPayload } from '@a5c-ai/trust-core';
 import { canonicalizeArgs, argsHash } from '@a5c-ai/policy-adapter';
 
 // The attestation producer + sidecar store the transport milestone WILL export.

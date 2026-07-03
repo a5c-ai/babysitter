@@ -25,9 +25,13 @@
  * silent coercion); an attestation with an empty/absent `toolCalls[]` binds no call.
  */
 import { createHash } from 'node:crypto';
-import { signModelDecision } from './model-decision.js';
-import type { ModelDecisionPayload, SignedToolCall } from './model-decision.js';
-import type { IdentityKeyPair, SignedEnvelope } from './types.js';
+import { signModelDecision } from '@a5c-ai/trust-core';
+import type {
+  ModelDecisionPayload,
+  SignedToolCall,
+  IdentityKeyPair,
+  SignedEnvelope,
+} from '@a5c-ai/trust-core';
 import type { ToolExecutionContext } from '../types.js';
 
 /** The correlation-grade in-process producer marker (AC-39). NEVER `'proxy'`. */

@@ -10,8 +10,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { createKeyPair, signPayload, signModelDecision } from '@a5c-ai/genty-core/trust';
-import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { createKeyPair, signPayload, signModelDecision } from '@a5c-ai/trust-core';
+import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/trust-core';
 
 import {
   createAuthorizationStore,

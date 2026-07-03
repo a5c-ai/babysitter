@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { WebSocket, WebSocketServer } from 'ws';
 
-import type { IdentityKeyPair } from '@a5c-ai/genty-core/trust';
+import type { IdentityKeyPair } from '@a5c-ai/trust-core';
 import {
   signCompletionAttestation,
   accumulateStreamAttestation,

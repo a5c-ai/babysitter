@@ -13,8 +13,8 @@
  * failed proven verification, approved !== true, or ANY thrown exception yields
  * `{ derived: false }` with no evidence emitted. No fallbacks.
  */
-import { createKeyPair, signPayload } from '@a5c-ai/genty-core/trust';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { createKeyPair, signPayload } from '@a5c-ai/trust-core';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 import { verifyAnswer } from '@a5c-ai/tasks-adapter/proven';
 import type { ProvenBreakpointAnswer } from '@a5c-ai/tasks-adapter';
 import type { TrustRoot, TrustStore } from './verify-envelope-trusted.js';

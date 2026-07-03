@@ -30,7 +30,7 @@
  * (unchanged Milestone-D posture). An expired authorization is not returned. No fallbacks:
  * any thrown exception during insertion means no authorization is stored (the action denies).
  */
-import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/trust-core';
 import { issueFromDecision } from './authorization-issuer.js';
 import type { CommandAuthorizationPayload } from './verify-envelope-trusted.js';
 import type { TrustStore } from './verify-envelope-trusted.js';

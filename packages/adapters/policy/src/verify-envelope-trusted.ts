@@ -13,8 +13,8 @@
  */
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { verifySignature, verifyTrustChain } from '@a5c-ai/genty-core/trust';
-import type { SignedEnvelope, TrustChainLink } from '@a5c-ai/genty-core/trust';
+import { verifySignature, verifyTrustChain } from '@a5c-ai/trust-core';
+import type { SignedEnvelope, TrustChainLink } from '@a5c-ai/trust-core';
 
 // ── Evidence taxonomy & payload-type domain separation (AC-51) ──────────────
 

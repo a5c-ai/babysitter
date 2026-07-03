@@ -37,7 +37,7 @@ import {
   verifyConfigManifest,
   type ConfigManifestPayload,
 } from './config-manifest.js';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 import {
   matchArgv,
   type ArgvMatchScope,

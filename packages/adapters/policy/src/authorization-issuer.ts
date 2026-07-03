@@ -15,8 +15,8 @@
  *   - any thrown exception.
  */
 import { createHash } from 'node:crypto';
-import { signPayload } from '@a5c-ai/genty-core/trust';
-import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { signPayload } from '@a5c-ai/trust-core';
+import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/trust-core';
 import {
   verifyEnvelopeTrusted,
   type TrustStore,

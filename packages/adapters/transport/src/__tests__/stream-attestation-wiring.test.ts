@@ -17,7 +17,7 @@ import { createHash } from 'node:crypto';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createKeyPair } from '@a5c-ai/genty-core/trust';
+import { createKeyPair } from '@a5c-ai/trust-core';
 import { argsHash } from '@a5c-ai/policy-adapter';
 
 import { createProxyConfig } from '../config.js';

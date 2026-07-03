@@ -30,8 +30,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { createKeyPair, signPayload, signModelDecision } from '@a5c-ai/genty-core/trust';
-import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { createKeyPair, signPayload, signModelDecision } from '@a5c-ai/trust-core';
+import type { IdentityKeyPair, SignedEnvelope } from '@a5c-ai/trust-core';
 
 import {
   evaluatePolicy,
@@ -733,7 +733,7 @@ describe('Milestone E — e2e: aws-cli behind a human+opus trust chain', () => {
   // ────────────────────────────────────────────────────────────────────────────
 
   it('AC-24 (non-goals guard): the adapter surface is proof primitives, not a PKI/vault/journal-chain module', () => {
-    // The adapter's only runtime deps are genty-core (trust primitives) + tasks-adapter
+    // The adapter's only runtime deps are trust-core (trust primitives) + tasks-adapter
     // (proven bridge) + Node built-ins + yaml (§8 / AC-21). A regression that pulled in a
     // secrets backend, an online-revocation (OCSP) service, or a journal hash-chain module
     // (§1.2 non-goals 1/2/4) would change the public surface. We assert it is the proof
