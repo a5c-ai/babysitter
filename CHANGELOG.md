@@ -11,7 +11,7 @@
 
 ### Bug Fixes
 - fix(policy): wire ALL load-bearing tool-layer gates onto production paths (Milestone D) (93f6d09d6, Tal Muskal, 15 hours ago)
-- fix(policy): wire Milestone-D tool-layer gates onto production paths (5ed5f6a24, Tal Muskal, 16 hours ago)
+- fix(policy): wire Milestone-D tool-layer gates onto production paths (5ed5f6a24, Tal Muskal, 17 hours ago)
 - fix(policy): anchor signed-breakpoint enforcement to trusted config + wire streaming proxy attestation (6c237f529, Tal Muskal, 18 hours ago)
 - fix(policy): close global-option argv-evasion bypass in Milestone-B matcher (d52da64f7, Tal Muskal, 19 hours ago)
 - fix(policy): close four Milestone-B authorization-bypass defects + fold-ins (af7cdfbaa, Tal Muskal, 19 hours ago)
@@ -21,6 +21,7 @@
 - refactor(trust): extract trust primitives to @a5c-ai/trust-core leaf package (8d360b20c, Tal Muskal, 7 hours ago)
 
 ### Documentation
+- docs: daily changelog update (d002a5886, a5c automation, 45 seconds ago)
 - docs(policy): document shipped proof-based policy enforcement (Milestones A-E) (32a127734, Tal Muskal, 14 hours ago)
 - docs(policy): promote 4 review notes to required AC-53..56 per owner approval (82468de0d, Tal Muskal, 21 hours ago)
 - docs(security): proof-policy Draft 3 — close 3 residual adversarial-review attacks (0001bf707, Tal Muskal, 21 hours ago)
@@ -41,6 +42,7 @@
 - chore(graph): track upstream agent versions (733e662aa, a5c automation, 18 hours ago)
 - chore(graph): track upstream agent versions (9d8fbf02f, a5c automation, 18 hours ago)
 - Fix observe command failing to load: quote argument-hint value (#1123) (44a5d58b4, Daniel Kalman, 24 hours ago)
+
 ## [Unreleased] - 2026-07-02
 
 ### Bug Fixes
