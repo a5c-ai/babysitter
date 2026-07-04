@@ -1,12 +1,13 @@
 # Proof-Based Policy Enforcement — Outcome Proofs (Execution Attestation) Design Specification
 
-Status: **Draft 2** (2026-07-04). Frozen input: `.a5c/processes/outcome-proofs.brief.md`.
-Supersedes Draft 1, which an adversarial review (score 34) **failed** on a FATAL producer-seam
-flaw (see §0.1). Draft 2 **redesigns the producer model** and leaves the sound Milestone-F
-verify/consume mechanics unchanged. This spec adds the **outcome-proof / execution-attestation**
-direction to the shipped proof-based policy-enforcement system (Milestones A–E, the *precondition*
-direction). Every decision cites the exact file it extends; every acceptance criterion (AC) has a
-stable id `OP-N` that is independently testable.
+Status: **Draft 3** (2026-07-04). Frozen input: `.a5c/processes/outcome-proofs.brief.md`.
+Supersedes Draft 1 (adversarial review score 34 — **failed** on a FATAL producer-seam flaw, §0.1) and
+Draft 2 (score 78 — fixed the producer flaw with an SDK-owned proven-shell runner, but a second review
+found **two residual hardening gaps** for an execution-owning seam, §0.3). Draft 3 **closes those two
+gaps precisely** and leaves the sound Milestone-F/H verify/consume mechanics unchanged. This spec adds
+the **outcome-proof / execution-attestation** direction to the shipped proof-based policy-enforcement
+system (Milestones A–E, the *precondition* direction). Every decision cites the exact file it extends;
+every acceptance criterion (AC) has a stable id `OP-N` that is independently testable.
 
 Read the base spec first: [`docs/design/proof-based-policy-enforcement.md`](./proof-based-policy-enforcement.md)
 (especially §4.2 authoritative-vs-correlation-grade, §6 producer strategy + honesty boundaries,
@@ -96,6 +97,38 @@ Both remaining signers unify under one `ToolExecutorSigner` interface and one `t
 trust-root kind so the policy evaluator + process gate consume attestations identically regardless of
 producer (§4).
 
+### 0.3 What Draft 2 left open (two residual hardening gaps, closed here)
+
+Draft 2's proven-execution runner genuinely OWNS execution, so the *content* of a proven-shell
+attestation is no longer agent-fabricated. But an execution-owning seam has two further surfaces the
+agent can influence, and Draft 2 did not fully close either. Draft 3 closes both.
+
+- **GAP-1 — the executor itself is PATH/env-hijackable (§5.2, OP-N1).** Draft 2 had the runner take
+  `cwd`+`env` from the agent (`ctx.provenShell({ command, args, cwd?, env? })`). A bare-program
+  `command` such as `'npm'` resolves through `PATH`, so an agent-supplied `env.PATH` can point `npm`
+  at a workspace shim that exits 0. The runner then *honestly* signs an inner-command proof — the
+  observation is real, but the **binary/argv/cwd/env provenance sits with the agent, not the SDK**,
+  defeating the authoritative guarantee **without ever touching `package.json`** (a strictly different
+  attack than OP-T8's script-content tampering). FIX: the runner resolves the program to a **trusted
+  absolute path itself** and runs under a **SANITIZED env derived from the SDK's own environment** —
+  argv0/PATH provenance moves to the SDK. §5.2 + OP-N1 specify the resolution and sanitization rules;
+  OP-T8 is narrowed so only the *contents of a legitimately-resolved script* remain out of scope.
+- **GAP-2 — no kind gate on the agent producer path + unstated replay reconciliation (§5.4, OP-N2).**
+  Draft 2 says proven-shell resolves in-line (no `EFFECT_REQUESTED`, no `task:post`) but never
+  *mandates* rejecting an agent `task:post`/`commitEffectResult` for a `proven-shell` effect, and never
+  reconciles in-line resolution with the request/resolve replay + effect-index model. Grounded in the
+  shipped code, `handleTaskPost` gates only on `record.status === 'requested'`
+  (`cli/main/taskCommands.ts:170`) and `commitEffectResult` only on `record.status !== 'requested'`
+  (`runtime/commitEffectResult.ts:35`) — **neither has a kind gate**, so if a `proven-shell` effect ever
+  entered `requested`, an agent could `task:post` a fabricated `value` + `metadata.toolResultAttestation`
+  for it. FIX: add an explicit `kind === 'proven-shell'` **rejection** to both `task:post` and
+  `commitEffectResult`, and specify that a `proven-shell` effect **never enters an agent-observable
+  `requested` state** — it resolves in-line and its result is journaled once; on replay the journaled
+  result is reused and the command is NOT re-run. §5.4 + OP-N2 specify the gate and the
+  effect-index/replay interaction.
+
+### 0.4 Reuse posture
+
 **Reuse posture.** No new package. The crypto payload extends the shipped primitive
 `ToolResultPayload`/`signToolResult`/`verifyToolResult` in `@a5c-ai/trust-core`
 (`packages/trust-core/src/tool-signing.ts`) rather than forking it; the trust-root kind, the
@@ -134,10 +167,16 @@ signer extends `spawn-runner`. Everything fails closed, no fallbacks (repo rule)
 - **No attestation of a tool the SDK/spawn layer did not itself execute.** The proof is only ever
   over an execution one of the two seams **performed and observed**. An agent-reported `task:post`
   value is never attested (OP-11-DEL). Anything else is unproven → the gate/step denies (§7 OP-B4).
-- **NOT in scope: workspace-script integrity.** The proven-execution runner attests that *the exact
-  argv it ran* returned exit 0. It does **not** prove the *meaning* of that argv: if the agent has
-  write access to the workspace's own `package.json` test script, it can make `npm test` a no-op that
-  exits 0. That is an orthogonal supply-chain concern (§8 OP-T8), out of scope here and stated plainly.
+- **NOT in scope: workspace-script CONTENTS integrity (NARROWED in Draft 3).** The proven-execution
+  runner attests that *the exact absolute binary it resolved, with the exact argv it ran, under the
+  SDK's sanitized env* returned exit 0. **Which binary/argv/cwd/env resolves is IN scope** and is
+  controlled by the runner, not the agent (OP-N1, §5.2): the runner resolves the program to a trusted
+  absolute path and sanitizes env, so an agent-supplied `PATH` shim, a relative program, or an escaping
+  `cwd` are **rejected / not run**. The **only** thing out of scope is the *meaning of the CONTENTS of a
+  legitimately-resolved script*: if the agent has write access to the workspace's own `package.json`
+  `test` script, it can make a genuinely-resolved `npm test` a no-op that exits 0. That residual
+  supply-chain concern is §8 OP-T8, out of scope here and stated plainly — but a hijacked
+  `PATH`/binary/cwd/env is **not** covered by OP-T8; it is closed by OP-N1.
 
 ### 1.3 Milestones
 - **Milestone F — attestation-core** (`trust-core` + `policy-adapter`): the payload, the
@@ -396,21 +435,60 @@ SDK runtime**:
 
 - The intrinsic `runProvenShellIntrinsic` (new, alongside `runTaskIntrinsic`) resolves the effect not
   by emitting an `EFFECT_REQUESTED` for the agent to answer, but by invoking the runner **directly in
-  the SDK runtime process**. The runner calls `node:child_process.execFileSync(command, args, {
-  timeout, maxBuffer, cwd, env })` — **`shell:false`, argv form only** (no `sh -c`, so the agent
-  cannot smuggle a different command through shell metacharacters; a `command` that is not a bare
-  program is rejected, mirroring the anti-evasion `matchArgv` posture, `policy-evaluator.ts:509-547`).
+  the SDK runtime process** (§5.4 / OP-N2: the effect NEVER enters an agent-observable `requested`
+  state). The runner calls `node:child_process.execFileSync(resolvedProgram, args, {
+  timeout, maxBuffer, cwd: resolvedCwd, env: sanitizedEnv })` — **`shell:false`, argv form only** (no
+  `sh -c`, so the agent cannot smuggle a different command through shell metacharacters; a `command`
+  that is not a bare program is rejected, mirroring the anti-evasion `matchArgv` posture,
+  `policy-evaluator.ts:509-547`). The `resolvedProgram`, `resolvedCwd`, and `sanitizedEnv` are all
+  derived by the runner under SDK control per **OP-N1** below — **not** taken from the agent — so
+  binary/argv/cwd/env provenance sits with the SDK.
 - The runner captures the **real** `status` (exit code, or the thrown `error.status`/`error.signal`
   from a non-zero exit), the **real** `stdout` and `stderr` bytes it received, and the wall-clock
   `startedAt`/`finishedAt`. **These are the bytes the SDK itself observed** — there is no `task:post`
-  in this path, so there is no agent-supplied value anywhere in the chain.
+  in this path, so there is no agent-supplied value anywhere in the chain. **`exitCode`, `stdoutHash`,
+  and `stderrHash` (which the predicates read) are computed ONLY from runner-captured bytes** (OP-15b);
+  if `execFileSync` throws because `maxBuffer` was exceeded or the `timeout` elapsed, the runner has no
+  complete captured result and **denies** — it never emits a partial-capture attestation (OP-15b keeps
+  the OP-15 TOCTOU binding airtight).
 - The runner then builds the `ToolResultAttestationPayload`: `commandHash`/`argsHash` over the
-  **exact `command`+`args` it passed to `execFileSync`** (shared canonicalizer, OP-2),
+  **exact `resolvedProgram`+`args` it passed to `execFileSync`** (shared canonicalizer, OP-2 — note the
+  bound `commandHash` names the *resolved absolute program*, OP-N1),
   `exitCode`/`stdoutHash`/`stderrHash` over what it captured, `attestationScope:'inner-command'`,
   `producer:'proven-shell'`, and signs via the resolved `ToolExecutorSigner` (OP-10). The signed
   envelope is written into `StoredTaskResult.metadata.toolResultAttestation` (OP-13) as the effect
   result is committed — but the *value being signed comes from the runner, never from `commitEffectResult`
   `options.result`*.
+
+**OP-N1 — the runner controls binary/argv/cwd/env; the agent cannot hijack resolution.** An
+execution-owning seam is only authoritative if *what it runs* is under its control. The agent supplies
+the command *definition* (`ctx.provenShell({ command, args })`); the runner resolves the actual
+execution parameters itself:
+
+- **Program → trusted absolute path (MUST).** The runner MUST resolve `command` to an **absolute path**
+  itself, and MUST NOT rely on an agent-influenceable `PATH`. Resolution is one of, in order: (i) if
+  `command` is already an absolute path, it MUST resolve inside a configured trusted-root allowlist (the
+  manifest-config-declared `provenShell.programAllowlist` / trusted bin dirs, anchored like the trust
+  roots, OP-9) or be rejected; (ii) otherwise the bare program is resolved against a **sanitized system
+  `PATH`** the SDK derives from its own environment / a manifest-config-declared allowlist — **never**
+  from `env.PATH` supplied by the agent and **never** including the run workspace. If the program cannot
+  be resolved to a trusted absolute path, the runner **denies** (no proof; the effect rejects). The
+  bound `commandHash` (OP-2) is computed over the **resolved absolute program**, so a proof names
+  exactly the binary the SDK ran.
+- **Sanitized env (MUST).** The runner MUST run with an env **derived from the SDK's own environment**
+  (or a manifest-config-declared allowlist), NOT from agent-supplied `env`. In particular `PATH` and any
+  variable that can alter binary/argv0 resolution come from the SDK, never the agent. If `ctx.provenShell`
+  exposes an `env` option at all, it MAY only **ADD** non-`PATH` variables that cannot influence binary
+  resolution (e.g. `CI=1`); it may not override `PATH`, `PATHEXT`, `NODE_OPTIONS`, or any loader/resolver
+  variable — such keys are dropped or the call is rejected. The recommended posture is to **drop the
+  `env` option entirely** and derive env wholly from the SDK. The executor **private key env var
+  (`POLICY_TOOL_EXECUTOR_KEY`) MUST be stripped from `sanitizedEnv`** so it never leaks into the child.
+- **cwd constrained (MUST).** `cwd` MUST be constrained to the run workspace: an agent-supplied `cwd`
+  that resolves (after symlink realpath) **outside** the run workspace root is **rejected**; when omitted,
+  `cwd` is resolved deterministically to the run workspace root. The runner never honors an escaping
+  `cwd`.
+- **Fail closed.** Any resolution failure (untrusted/unresolvable program, a forbidden env key, an
+  escaping cwd) is a **DENY** — the effect rejects, no attestation, mirroring the §5.2 fail-closed throw.
 
 **Where the command definition comes from vs. what is observed.** The agent (process author) declares
 **which** command to run — `ctx.provenShell({ command: 'npm', args: ['test'] })`. The agent does
@@ -419,12 +497,15 @@ policy binds `commandHash` to the required command via OP-17e, so a swapped defi
 **not the OBSERVED outcome**. This is the exact provenance boundary Draft 1 violated.
 
 **Fail closed.** If the anchor is pinned but signing throws (key unresolvable, canonicalization deny,
-`command` not a bare program), the effect **rejects** (`RunFailedError`, mirroring the
-`signed_breakpoint_rejected` throw at `commitEffectResult.ts:279-289`) — an execution that was required
-to be proven but could not be leaves the run unable to advance rather than committing an unproven
-result. When no anchor is pinned, `proven-shell` still executes the command in-SDK and returns the
-result, but attaches **no** attestation (back-compat; a downstream `requireProof`/`tool-result` step
-then denies for lack of proof — never silently passes).
+`command` not a bare program), OR the runner cannot resolve the program to a trusted absolute path, OR
+the agent supplied a forbidden env key or an escaping `cwd` (OP-N1), OR `execFileSync` exceeded
+`maxBuffer` / timed out with no complete capture (OP-15b), the effect **rejects** (`RunFailedError`,
+mirroring the `signed_breakpoint_rejected` throw at `commitEffectResult.ts:279-289`) — an execution that
+was required to be proven but could not be leaves the run unable to advance rather than committing an
+unproven or partially-captured result. When no anchor is pinned, `proven-shell` still executes the
+resolved command in-SDK (under OP-N1 resolution + sanitized env — the hardening is unconditional, not
+gated on the anchor) and returns the result, but attaches **no** attestation (back-compat; a downstream
+`requireProof`/`tool-result` step then denies for lack of proof — never silently passes).
 
 **Where the key lives.** The executor private key is resolved by `resolveToolExecutorSigner` from the
 off-agent env/deploy pin (OP-10) — **not** from the run directory, **not** from `task.json`, **not**
@@ -433,8 +514,12 @@ orchestrating agent's *reasoning context* is the LLM conversation, which never s
 `process.env[POLICY_TOOL_EXECUTOR_KEY]`.
 
 **Honest residual key-custody boundary (OP-B-KEY).** The proven-execution runner is **authoritative
-for the OBSERVATION**: the SDK genuinely ran the command and saw the result, so the *content* of the
-attestation is trustworthy by construction — it is not agent-fabricated. The remaining assumption is
+for the OBSERVATION of the exact absolute program it resolved and ran under a sanitized env**: the SDK
+resolves the binary to a trusted absolute path itself, runs it with SDK-derived env (OP-N1), genuinely
+runs it, and sees the result — so the *content* of the attestation (which binary ran, with which argv,
+in which cwd, and what it returned) is trustworthy by construction and is **not** agent-fabricated. The
+observation claim is therefore honest: it is authoritative for the resolved absolute program, not merely
+for "some `npm` on the agent's `PATH`". The remaining assumption is
 purely about **key custody**, and it is the *same* assumption the base spec makes for the transport
 proxy (§4.2 posture): the SDK runtime's executor key must be kept out of a domain where the agent can
 execute arbitrary code and read `process.env`. In the intended deployment the SDK runtime holds the
@@ -488,6 +573,56 @@ agent's post. Signing an agent-reported value is **not an outcome proof of any g
 "correlation-grade OP-B1" framing that presented it as a weak-but-usable proof is deleted with it. Any
 `ctx.task({ kind: 'shell' })` continues to work exactly as today (agent runs it, `task:post` reports
 it) — it simply **produces no outcome proof**, and a downstream gate that demands one denies.
+
+### 5.4.1 OP-N2 — `proven-shell` kind gate on `task:post` / `commitEffectResult` + replay reconciliation
+
+Deleting the Draft-1 signer removes the path that *signed* an agent value, but it does not by itself
+stop an agent from **posting** a value with a fabricated `metadata.toolResultAttestation` for a
+`proven-shell` effect — because, grounded in the shipped code, neither commit path has a **kind gate**:
+`handleTaskPost` accepts any effect whose `record.status === 'requested'`
+(`cli/main/taskCommands.ts:170`, keyed on `effectId` + `status==='requested'`, no kind check) and it
+carries `--metadata` straight through into `metadata` (`taskCommands.ts:176-177,230,241`);
+`commitEffectResult` guards only on `record.status !== 'requested'` (`commitEffectResult.ts:35`).
+OP-N2 closes this on two fronts.
+
+- **MANDATE — explicit kind gate (MUST).** Both `handleTaskPost` and `commitEffectResult` MUST
+  **reject** any effect whose `record.kind === 'proven-shell'`. Concretely: in `handleTaskPost`
+  (after the `record` lookup at `cli/main/taskCommands.ts:165-173`, before the `commitEffectResult`
+  call at `:215`) add — *if `record.kind === 'proven-shell'` then error `[task:post] effect <id> is
+  proven-shell; its result is produced by the SDK runtime and cannot be posted by an agent` and return
+  a non-zero exit* — and in `commitEffectResult` (a new guard alongside the `record.status` check at
+  `commitEffectResult.ts:35-38`) throw `RunFailedError('Effect <id> is proven-shell and cannot be
+  committed via commitEffectResult')`. **The agent can therefore supply neither `value` nor `metadata`
+  (including a forged `metadata.toolResultAttestation`) for a `proven-shell` effect.** The in-line
+  runner writes the proven-shell result through the SDK's own serialization path (§5.2 / OP-13), not
+  through `commitEffectResult`'s agent-facing options.
+- **No agent-observable `requested` state (MUST).** A `proven-shell` effect MUST NOT enter the
+  `requested` state that `handleTaskPost`/`commitEffectResult` accept, so there is no window for the
+  agent to race a `task:post` against it. Unlike `kind:'shell'`, which emits `EFFECT_REQUESTED` and
+  throws `EffectRequestedError` for the agent to fulfil out-of-band
+  (`intrinsics/task.ts:191-212`), `runProvenShellIntrinsic` runs the command **in-line in the SDK
+  runtime** and resolves the effect within the same runtime turn. The kind gate above is defense in
+  depth: even if a malformed journal presented a `proven-shell` record as `requested`, both commit
+  paths refuse it.
+- **Effect-index / replay reconciliation (MUST — deterministic).** In-line resolution coexists with the
+  request/resolve replay + effect-index model as follows. On **first execution**, the intrinsic
+  computes the same `invocationKey` the task intrinsic uses (`hashInvocationKey`, `intrinsics/task.ts:79`),
+  runs the command **exactly once**, and journals the effect's resolution — the signed attestation plus
+  the captured result — as a resolved effect (an `EFFECT_REQUESTED` immediately followed by, or coalesced
+  into, an `EFFECT_RESOLVED` carrying the runner-produced result; it does **not** dwell in an
+  agent-answerable `requested` state). On **replay**, `getByInvocation(invocationKey)` returns the
+  resolved record and the intrinsic reuses the **journaled result via `handleResolvedRecord`**
+  (`intrinsics/task.ts:88-92,97-106`) — **the command is NOT re-run**, and the previously-signed
+  attestation is read back byte-stable from `StoredTaskResult.metadata.toolResultAttestation` (OP-13).
+  This makes proven-shell replay-deterministic and idempotent: the observation happens once, the proof
+  is durable, and no second execution can diverge.
+
+**Red-test targets (OP-N2).** (a) An agent `task:post`s a fabricated `--value` + `--metadata`
+containing a `toolResultAttestation` for a `proven-shell` effect ⇒ **REJECTED** by the kind gate (and,
+independently, `commitEffectResult` refuses it). (b) A `proven-shell` effect **never appears as a
+pending `requested` effect** an agent-facing lister/`task:post` can resolve — its resolution is in-line
+and its record is `resolved` by the time the runtime turn yields. (c) On replay the journaled result is
+reused and `execFileSync` is **not** called a second time.
 
 ### 5.5 OP-13 — How the attestation rides the effect result / journal
 
@@ -623,10 +758,16 @@ exactly like every other evidence, so the gate confirms it enforced the proven-t
 
 ### 7.1 OP-20 — `ctx.provenShell` task option (replaces the Draft-1 `attestResult` flag)
 
-**OP-20** adds a `ctx.provenShell({ command, args, timeout?, cwd?, env? })` intrinsic that emits a
-`kind: 'proven-shell'` effect (§5.2). Draft 1's `attestResult?: boolean` flag on a `kind:'shell'` task
-is **removed** — it declared intent to attest an agent-reported value, which OP-11-DEL forbids. In
-Draft 2, attestation is not a flag on an agent-executed task; it is intrinsic to the `proven-shell`
+**OP-20** adds a `ctx.provenShell({ command, args, timeout?, cwd?, env? })` intrinsic that resolves a
+`kind: 'proven-shell'` effect **in-line in the SDK runtime** (§5.2; it never enters an agent-observable
+`requested` state, §5.4.1 / OP-N2). **Per OP-N1, the agent-facing `cwd`/`env` options are constrained,
+not honored verbatim:** `command` is resolved by the runner to a trusted absolute path (an
+agent-supplied `PATH` cannot redirect it); `env` may only ADD non-resolver variables (the recommended
+posture drops the option and derives env wholly from the SDK — `PATH`/`PATHEXT`/`NODE_OPTIONS`/loader
+vars and the executor key are never taken from or leaked to the agent); and `cwd` is rejected if it
+escapes the run workspace. Draft 1's `attestResult?: boolean` flag on a `kind:'shell'` task
+is **removed** — it declared intent to attest an agent-reported value, which OP-11-DEL forbids.
+Attestation is not a flag on an agent-executed task; it is intrinsic to the `proven-shell`
 kind, whose defining property is that the **SDK executes it**. When the anchor is pinned, a
 `proven-shell` effect yields a `ToolResultAttestation` over the SDK-observed outcome (OP-13); when the
 anchor is not pinned, it runs and returns the result but attaches no attestation (back-compat). The
@@ -705,12 +846,16 @@ where the guarantee is bounded.
 - **OP-T1 — forged / never-ran result.** The orchestrator emits "tests passed" it never ran. **Blocked:**
   the only path that mints a `proven-shell` proof is the SDK runtime running the command itself (§5.2),
   so there is no `task:post` value to forge — the agent cannot report a passing outcome the SDK did not
-  observe. A `kind:'shell'` task the agent runs out-of-band produces **no** attestation, so a
+  observe. The `proven-shell` **kind gate** (OP-N2) makes this explicit: `task:post` and
+  `commitEffectResult` **reject** a `proven-shell` effect, and it never enters an agent-observable
+  `requested` state, so the agent cannot supply `value` or a forged `metadata.toolResultAttestation` for
+  it. A `kind:'shell'` task the agent runs out-of-band produces **no** attestation, so a
   `requireProof`/`tool-result` step denies (OP-19/OP-16). The agent cannot mint a proof — the executor
-  key is off-agent (OP-9), and `verifyEnvelopeTrusted` resolves keys only from the manifest-verified
-  store, rejecting any non-executor key (OP-7). *Boundary (OP-B-KEY):* the guarantee that the *observed*
-  outcome is genuine is unconditional whenever the runner runs; the only residual assumption is
-  key-custody (the executor key must be off-agent), the same posture as the proxy key (§5.2).
+  key is off-agent (OP-9, stripped from the child's env by OP-N1), and `verifyEnvelopeTrusted` resolves
+  keys only from the manifest-verified store, rejecting any non-executor key (OP-7). *Boundary
+  (OP-B-KEY):* the guarantee that the *observed* outcome of the *resolved absolute program* (OP-N1) is
+  genuine is unconditional whenever the runner runs; the only residual assumption is key-custody (the
+  executor key must be off-agent), the same posture as the proxy key (§5.2).
 - **OP-T2 — wrong-command swap.** The agent presents a real proof of a *different* command as the
   required one. **Blocked:** the proof binds `commandHash`/`argsHash` (OP-2) over the argv the executor
   actually ran; the step/gate's `commandMatches`/`argsHashEquals` predicate (OP-17e) must match the
@@ -736,14 +881,36 @@ where the guarantee is bounded.
   over the exact bytes `execFileSync` returned to it, the spawn signer over the captured
   `exitCode`/`stderrBuf`/stdout at the `exit` event (`spawn-runner.ts:591-613`). The signed
   `stdoutHash`/`stderrHash` bind those exact bytes; a later re-read that differs cannot match.
+  **OP-15b (predicate-source integrity):** the `exitCode`/`stdoutHash`/`stderrHash` the predicates read
+  come **ONLY** from runner-captured bytes — never from any agent-supplied or separately-read source.
+  If `execFileSync` throws because `maxBuffer` was exceeded or the `timeout` elapsed, there is **no
+  complete capture**, so the runner **DENIES** — it MUST NOT emit a partial-capture attestation over
+  truncated bytes. This keeps the OP-15 TOCTOU binding airtight: a proof exists only over a fully
+  captured, runner-observed result.
 - **OP-T7 — cross-kind / cross-payload-type confusion.** A `model-decision` or `command-authorization`
   envelope presented as a `tool-result`. **Blocked:** `payloadType` domain separation (OP-3) + kind
   binding (OP-7) — no non-`tool-executor` root and no non-`tool-result-attestation` payload satisfies a
   `tool-result` step.
-- **OP-T8 — workspace test-script tampering (OUT OF SCOPE, stated).** The agent rewrites the workspace's
-  own `package.json` `test` script to a no-op that exits 0, then has the SDK prove `npm test` exit 0.
-  The proof is *honest* — `npm test` genuinely exited 0 — but its *meaning* is subverted upstream of the
-  execution seam. This is an orthogonal workspace-integrity / supply-chain concern (§1.2), **not
+- **OP-N1 — executor PATH/env/cwd hijack (IN SCOPE, blocked).** The agent supplies `env.PATH` pointing
+  a bare `npm` at a workspace shim that exits 0 (or a relative program, or an escaping `cwd`), aiming to
+  make the runner honestly sign an inner-command proof over a binary the agent controls — **without
+  touching `package.json`**. **Blocked (OP-N1, §5.2):** the runner resolves the program to a **trusted
+  absolute path itself** (rejecting an unresolvable/untrusted program), runs under a **sanitized
+  SDK-derived env** (agent `PATH`/loader vars dropped; executor key stripped), and rejects a `cwd` that
+  escapes the run workspace. Binary/argv/cwd/env provenance is the SDK's, not the agent's, and the bound
+  `commandHash` names the *resolved absolute program*. This is a **strictly different** attack from OP-T8
+  (which is about the *contents* of a legitimately-resolved script), and it is **closed**, not deferred.
+  *Red tests:* (a) an agent-supplied `env.PATH` shim is **not** run — the runner resolves the trusted
+  absolute binary instead (or denies); (b) a relative-program `command` is **rejected**; (c) an escaping
+  `cwd` is **rejected**; (d) `env.PATH`/`NODE_OPTIONS` override attempts are dropped or rejected, and
+  `POLICY_TOOL_EXECUTOR_KEY` never reaches the child.
+- **OP-T8 — workspace test-script CONTENTS tampering (OUT OF SCOPE, NARROWED, stated).** The agent
+  rewrites the workspace's own `package.json` `test` script to a no-op that exits 0, then has the SDK
+  prove `npm test` exit 0 — where `npm` is the *legitimately-resolved absolute binary* (OP-N1 held) and
+  the *cwd/env were the SDK's*. The proof is *honest* — the resolved `npm` genuinely exited 0 — but the
+  *meaning of the script CONTENTS* is subverted upstream of the execution seam. This narrow residual —
+  **only the contents of a legitimately-resolved script**, NOT which binary/argv/cwd/env resolves (those
+  are OP-N1, in scope) — is an orthogonal workspace-integrity / supply-chain concern (§1.2), **not
   addressed** by outcome proofs, and called out plainly so no one over-reads the guarantee. Mitigations
   (attesting a pinned/hashed script, running in a read-only or vetted image via the spawn-layer seam) are
   future work.
@@ -765,11 +932,14 @@ where the guarantee is bounded.
 | OP-9 | Verify + key anchored to manifest-verified config, never agent input | **F** |
 | OP-10 | `ToolExecutorSigner` interface (+ `producer`) + `resolveToolExecutorSigner` | **F** |
 | OP-11 | **Proven-execution runner** (`kind:'proven-shell'`): SDK executes + observes + signs (fail-closed) | **G** |
+| OP-N1 | **Runner controls binary/argv/cwd/env** — trusted absolute program + sanitized SDK env + workspace-constrained cwd; agent PATH/env/relative-program/escaping-cwd rejected | **G** |
+| OP-N2 | **`proven-shell` kind gate** on `task:post` + `commitEffectResult`; no agent-observable `requested` state; in-line resolution + replay reuse (command not re-run) | **G** |
 | OP-11-DEL | **REMOVED** the "sign agent-reported `task:post` value" producer — not an outcome proof | **G** |
 | OP-12 | Spawn-layer signer: signs the launched HARNESS argv exit (harness-invocation scope) | **G** |
 | OP-13 | Attestation rides `StoredTaskResult.metadata.toolResultAttestation` (SDK-produced value only) | **G** |
 | OP-14 | Replay binding: `runId`/`sessionId`/`toolCallId` + freshness | **G**/**H** |
 | OP-15 | TOCTOU: sign over captured result at capture time | **G** |
+| OP-15b | Predicates read `exitCode`/`stdoutHash`/`stderrHash` ONLY from runner-captured bytes; maxBuffer/timeout ⇒ DENY, no partial-capture attestation | **H** |
 | OP-16 | `tool-result` policy step type (no evaluator change to add a policy) | **H** |
 | OP-17 | Result predicates (exitCode/hash/pattern/freshness/command-args binding) | **H** |
 | OP-18 | `requireExecutorProducer` + `requireAttestationScope` (inner-command vs harness scope) | **H** |
@@ -784,7 +954,12 @@ where the guarantee is bounded.
 
 Every `OP-N` maps to exactly one of F (attestation-core), G (producers), H (consumers), except OP-14
 (payload field is F/G, freshness check is H) and OP-28 (a cross-cutting build constraint). OP-11-DEL is
-a removal recorded under G for traceability.
+a removal recorded under G for traceability. The **Draft-3 additions** map cleanly: **OP-N1** (runner
+binary/argv/cwd/env provenance) and **OP-N2** (`proven-shell` kind gate + replay reconciliation) are
+**Milestone G producer** requirements; **OP-15b** (predicate-source integrity) is **Milestone H**, since
+it constrains what the consumer predicates are permitted to read (the maxBuffer/timeout DENY is enforced
+by the G runner, but the *predicate-source* rule it guarantees is a consumer-facing property). No
+previously-closed point is regressed; the sound F/H verify/consume mechanics are unchanged.
 
 ---
 
@@ -801,7 +976,8 @@ a removal recorded under G for traceability.
 | Config-manifest anchor | `policy/src/config-manifest.ts:67-133` | reuse |
 | Policy schema + evaluator | `policy/src/policy-schema.ts`, `policy-evaluator.ts` | **extend** (`tool-result` step + predicates) |
 | Executor signer | `policy/src/tool-executor-signer.ts` | **NEW module** (in existing package) |
-| **Proven-execution runner** | `babysitter-sdk/src/runtime/proven-shell/runner.ts` + `intrinsics/provenShell.ts` | **NEW module** (in existing package) — the SDK-owned execution seam |
+| **Proven-execution runner** | `babysitter-sdk/src/runtime/proven-shell/runner.ts` + `intrinsics/provenShell.ts` | **NEW module** (in existing package) — the SDK-owned execution seam; resolves trusted absolute program + sanitized env + workspace cwd (OP-N1) |
+| **`proven-shell` kind gate** | `cli/main/taskCommands.ts:165-173` (task:post) + `runtime/commitEffectResult.ts:35-38` | **extend** (reject `record.kind==='proven-shell'` — agent cannot post value/metadata, OP-N2) |
 | Spawn-layer signer | `adapters/core/src/spawn-runner.ts:568-613`; gate ctx `policy-spawn-gate.ts:70-96` | **extend** (bind `commandHash` to launched argv, `attestationScope:'harness-invocation'`) |
 | Attestation storage | `babysitter-sdk/src/tasks/serializer.ts:150-185`; `storage/types.ts:119-141` | reuse (`metadata`) |
 | `requireProof` intrinsic | `babysitter-sdk/src/runtime/intrinsics/` | **NEW intrinsic** (extends the intrinsic set) |
@@ -854,7 +1030,10 @@ integrity-covered artifact class the attestation itself rides. It is **never** a
   (OP-11-DEL). The only proofs are over executions a seam performed and observed: the SDK-owned
   proven-execution runner (inner command) and the spawn layer (harness invocation).
 - No attestation of executions outside those two seams — anything else is unproven and denies.
-- **No workspace-script integrity guarantee** — a proven `npm test` exit 0 proves the *argv ran and
-  returned 0*, not that the workspace's test script is trustworthy (OP-T8, §1.2). Orthogonal, out of scope.
+- **No workspace-script CONTENTS integrity guarantee (NARROWED)** — a proven `npm test` exit 0 proves the
+  *resolved absolute binary ran under the SDK's env/cwd and returned 0* (which binary/argv/cwd/env resolve
+  is IN scope, OP-N1), but **not** that the *contents* of the workspace's test script are trustworthy
+  (OP-T8, §1.2). Only the script-contents residual is orthogonal / out of scope; a PATH/binary/cwd/env
+  hijack is closed by OP-N1.
 - No claim that a spawn-layer harness-invocation proof satisfies an inner-command requirement; the two
   scopes are signed and a policy/gate rejects the wrong one (OP-18, OP-T5).
