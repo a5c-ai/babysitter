@@ -1,0 +1,33 @@
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+attributes:
+  displayName: "Anthropic Claude models overview for Claude Sonnet 5"
+  sourceType: vendor-doc
+  trustLevel: official
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/models/overview.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/models/overview.md
+  locator: "Latest models comparison table; Claude Sonnet 5 model IDs, context, max output, capabilities, and cloud availability"
+  retrievedAt: '2026-07-04'
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-claude-sonnet-5-pricing-issue-1180
+attributes:
+  displayName: "Anthropic Claude pricing for Claude Sonnet 5"
+  sourceType: vendor-doc
+  trustLevel: official
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/pricing.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/pricing.md
+  locator: "Model pricing, batch processing, prompt caching, and Claude Sonnet 5 introductory pricing notes"
+  retrievedAt: '2026-07-04'
+---
+nodeKind: EvidenceSource
+id: evidence:anthropic-claude-sonnet-5-deprecations-issue-1180
+attributes:
+  displayName: "Anthropic Claude model deprecations and parameter behavior for Claude Sonnet 5"
+  sourceType: vendor-doc
+  trustLevel: official
+  sourceUrl: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+  sourcePathOrUrl: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+  locator: "Deprecated temperature/top_p/top_k parameter behavior for Claude Sonnet 5"
+  retrievedAt: '2026-07-04'

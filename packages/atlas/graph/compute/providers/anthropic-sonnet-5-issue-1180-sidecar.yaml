@@ -1,0 +1,27 @@
+extendsNode:
+  nodeKind: Provider
+  id: provider:anthropic
+edges:
+  serves:
+    - model:claude-sonnet-5@current
+---
+extendsNode:
+  nodeKind: Provider
+  id: provider:aws-bedrock
+edges:
+  serves:
+    - model:claude-sonnet-5@current
+---
+extendsNode:
+  nodeKind: Provider
+  id: provider:gcp-vertex
+edges:
+  serves:
+    - model:claude-sonnet-5@current
+---
+extendsNode:
+  nodeKind: Provider
+  id: provider:azure-foundry
+edges:
+  serves:
+    - model:claude-sonnet-5@current

@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:claude-sonnet-5
+attributes:
+  displayName: "Claude Sonnet 5"
+  vendor: "Anthropic"
+  homepageUrl: "https://platform.claude.com/docs/en/about-claude/models/overview"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:claude-sonnet-5@current
