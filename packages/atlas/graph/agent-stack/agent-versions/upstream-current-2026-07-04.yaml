@@ -1,0 +1,173 @@
+# Additive upstream release records from the 2026-07-04 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783155105-g3e26cc
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783155105-g3e26cc"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783155105-g3e26cc"
+  currentVersion: "0.0.1783155105-g3e26cc"
+  releasedAt: "2026-07-04"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783155105-g3e26cc"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from 0.0.1783069983-gce9c8b to 0.0.1783155105-g3e26cc."
+    - "npm metadata exposes homepage https://ampcode.com/ but no repository or issue tracker for build-specific release notes."
+    - "Install command remains npm install -g @ampcode/cli; the package name did not change."
+    - "No confirmed CLI flag, transport, MCP, model, package-name, or migration change was published for this timestamped build."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783155105-g3e26cc."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783155105-g3e26cc-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-201
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.201"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.201"
+  currentVersion: "2.1.201"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.201"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
+  cliCommand: "claude"
+  summary: "Claude Code release removing mid-conversation system-role harness reminders from Claude Sonnet 5 sessions."
+  assimilationNotes:
+    - "Latest npm moved from 2.1.199 to 2.1.201."
+    - "Claude Sonnet 5 sessions no longer use the mid-conversation system role for harness reminders, affecting prompt/harness reminder injection assumptions."
+    - "This follows the 2.1.197 switch to Claude Sonnet 5 defaults and 1M-token context behavior already recorded in prior graph entries."
+    - "No package-name, install-method, CLI flag, transport, or migration change was published."
+  releaseHighlights:
+    - "Claude Sonnet 5 sessions avoid mid-conversation system-role harness reminders."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-201-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-201
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.201"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.201"
+  currentVersion: "0.3.201"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.201"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
+  summary: "Claude Agent SDK release updated to parity with Claude Code v2.1.201."
+  assimilationNotes:
+    - "Latest npm moved from 0.3.199 to 0.3.201."
+    - "SDK parity with Claude Code 2.1.201 means SDK-driven Claude Sonnet 5 sessions should reflect the no mid-conversation system-role harness reminder behavior."
+    - "Published update commands remain npm/yarn/pnpm/bun add @anthropic-ai/claude-agent-sdk@0.3.201."
+    - "No package-name, install-method, transport, or migration change beyond version upgrade was published."
+  releaseHighlights:
+    - "Claude Code 2.1.201 parity."
+    - "Versioned npm, yarn, pnpm, and bun update commands."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-201-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-5
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.5"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.5"
+  currentVersion: "16.3.5"
+  releasedAt: "2026-07-04"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.5"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.5"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release improving OAuth launch URLs and scopes, OpenAI tool strictness, tool-call validation, large artifact reads, ACP terminal creation, retention storage, LSP diagnostics, task-branch merges, and Windows/session robustness."
+  assimilationNotes:
+    - "Latest upstream moved from 16.3.4 to 16.3.5."
+    - "OAuthCallbackFlow adds a loopback GET /launch route and OAuthAuthInfo.launchUrl for short copy targets, affecting MCP/auth UI and callback flow metadata."
+    - "/mcp reauth and /mcp add now carry OAuth scopes from WWW-Authenticate challenges and protected-resource metadata, affecting MCP OAuth scope propagation."
+    - "OpenAI-family function tool payloads preserve explicit tool.strict === false, affecting tool schema serialization for OpenAI Responses, Codex Responses, and completions backends."
+    - "Tool-call validation strips stray line terminators from schema-matching enum and identifier fields before dispatch, affecting argument normalization."
+    - "Large artifact:// reads are bounded before materializing full MCP/tool artifacts, affecting read/search/copy behavior and OOM risk."
+    - "ACP terminal/create wraps shell commands with the resolved shell and args, affecting ACP terminal bridge behavior."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "OAuth launchUrl loopback redirect and S256-safe copy target."
+    - "MCP OAuth scope propagation fixes."
+    - "Explicit OpenAI tool.strict false preservation."
+    - "Tool-call enum and identifier newline trimming."
+    - "Bounded large artifact:// raw reads."
+    - "ACP terminal/create shell wrapping."
+    - "Mnemopi retention and Windows compaction/session fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-5-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-6
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.6"
+  currentVersion: "0.19.6"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.6"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding dataviz bundled skill, configurable nested subagents, opt-in per-tool-call execution timeouts, daemon vision/session artifact APIs, mobile MCP relative coordinates, and stream/serve/web-shell hardening."
+  assimilationNotes:
+    - "Latest npm moved from 0.19.5 to 0.19.6."
+    - "Dataviz is now a bundled skill, affecting built-in skill catalog metadata."
+    - "Sub-agents can spawn nested sub-agents up to a configurable depth, affecting delegation depth and safety limits."
+    - "Scheduler adds opt-in per-tool-call execution timeout and configurable recurring cron/loop expiration, affecting launch/session timeout controls."
+    - "Daemon APIs add session artifacts and expose visionModelId in workspace provider status, affecting daemon transport/API modeling."
+    - "Mobile MCP now supports opt-in 0-1000 relative coordinates, affecting MCP tool capability metadata."
+    - "Stream idle timeout defaults were raised and daemon NDJSON stream handling was optimized, affecting stream timeout and parser behavior."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Bundled dataviz skill."
+    - "Nested sub-agent spawning with configurable depth."
+    - "Per-tool-call execution timeout and cron/loop expiration controls."
+    - "Daemon session artifact APIs and vision model selection/status."
+    - "Mobile MCP relative coordinate support."
+    - "Raised stream idle timeout and daemon NDJSON stream optimization."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-6-2026-07-04

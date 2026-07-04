@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-03T09:46:37.145Z",
+  "generatedAt": "2026-07-04T09:08:58.010Z",
   "targets": [
     {
       "id": "antigravity",
@@ -132,15 +132,15 @@
   "npmLatest": [
     {
       "packageName": "@ampcode/cli",
-      "latestVersion": "0.0.1783069983-gce9c8b"
+      "latestVersion": "0.0.1783155105-g3e26cc"
     },
     {
       "packageName": "@anthropic-ai/claude-agent-sdk",
-      "latestVersion": "0.3.199"
+      "latestVersion": "0.3.201"
     },
     {
       "packageName": "@anthropic-ai/claude-code",
-      "latestVersion": "2.1.199"
+      "latestVersion": "2.1.201"
     },
     {
       "packageName": "@factory/cli",
@@ -152,11 +152,11 @@
     },
     {
       "packageName": "@pi-ai/sdk",
-      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-07-03T09_46_36_126Z-debug-0.log\n"
+      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-07-04T09_08_56_758Z-debug-0.log\n"
     },
     {
       "packageName": "@qwen-code/qwen-code",
-      "latestVersion": "0.19.5"
+      "latestVersion": "0.19.6"
     },
     {
       "packageName": "openai",

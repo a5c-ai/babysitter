@@ -3,29 +3,29 @@
     {
       "agent": "amp",
       "source": "npm:@ampcode/cli",
-      "latestVersion": "0.0.1783069983-gce9c8b",
-      "previousGraphVersion": "0.0.1782969322-gf53f17",
+      "latestVersion": "0.0.1783155105-g3e26cc",
+      "previousGraphVersion": "0.0.1783069983-gce9c8b",
       "status": "new-version-recorded"
     },
     {
       "agent": "antigravity",
       "source": "github:google-antigravity/antigravity-cli",
       "latestVersion": "1.0.16",
-      "previousGraphVersion": "1.0.15",
-      "status": "new-version-recorded"
+      "previousGraphVersion": "1.0.16",
+      "status": "already-recorded"
     },
     {
       "agent": "claude-code",
       "source": "npm:@anthropic-ai/claude-code + github:anthropics/claude-code",
-      "latestVersion": "2.1.199",
-      "previousGraphVersion": "2.1.198",
+      "latestVersion": "2.1.201",
+      "previousGraphVersion": "2.1.199",
       "status": "new-version-recorded"
     },
     {
       "agent": "claude-agent-sdk",
       "source": "npm:@anthropic-ai/claude-agent-sdk + github:anthropics/claude-agent-sdk-typescript",
-      "latestVersion": "0.3.199",
-      "previousGraphVersion": "0.3.198",
+      "latestVersion": "0.3.201",
+      "previousGraphVersion": "0.3.199",
       "status": "new-version-recorded"
     },
     {
@@ -44,7 +44,7 @@
     },
     {
       "agent": "copilot-cli",
-      "source": "npm:@github/copilot + github:github/copilot-cli",
+      "source": "github:github/copilot-cli",
       "latestVersion": "1.0.68",
       "previousGraphVersion": "1.0.68",
       "status": "already-recorded"
@@ -60,8 +60,8 @@
       "agent": "droid",
       "source": "npm:@factory/cli",
       "latestVersion": "0.164.0",
-      "previousGraphVersion": "0.162.1",
-      "status": "new-version-recorded"
+      "previousGraphVersion": "0.164.0",
+      "status": "already-recorded"
     },
     {
       "agent": "gemini",
@@ -80,8 +80,8 @@
     {
       "agent": "omp",
       "source": "npm:@oh-my-pi/pi-coding-agent + github:can1357/oh-my-pi",
-      "latestVersion": "16.3.4",
-      "previousGraphVersion": "16.3.0",
+      "latestVersion": "16.3.5",
+      "previousGraphVersion": "16.3.4",
       "status": "new-version-recorded"
     },
     {
@@ -100,7 +100,7 @@
     },
     {
       "agent": "pi",
-      "source": "npm:@earendil-works/pi-coding-agent + github:earendil-works/pi",
+      "source": "github:earendil-works/pi",
       "latestVersion": "0.80.3",
       "previousGraphVersion": "0.80.3",
       "status": "already-recorded"
@@ -115,103 +115,81 @@
     {
       "agent": "qwen",
       "source": "npm:@qwen-code/qwen-code + github:QwenLM/qwen-code",
-      "latestVersion": "0.19.5",
-      "previousGraphVersion": "0.19.4",
+      "latestVersion": "0.19.6",
+      "previousGraphVersion": "0.19.5",
       "status": "new-version-recorded"
     }
   ],
   "newVersions": [
     {
       "agent": "amp",
-      "oldVersion": "0.0.1782969322-gf53f17",
-      "newVersion": "0.0.1783069983-gce9c8b",
-      "releaseNotesUrl": "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783069983-gce9c8b"
-    },
-    {
-      "agent": "antigravity",
-      "oldVersion": "1.0.15",
-      "newVersion": "1.0.16",
-      "releaseNotesUrl": "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.0.16"
+      "oldVersion": "0.0.1783069983-gce9c8b",
+      "newVersion": "0.0.1783155105-g3e26cc",
+      "releaseNotesUrl": "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783155105-g3e26cc"
     },
     {
       "agent": "claude-code",
-      "oldVersion": "2.1.198",
-      "newVersion": "2.1.199",
-      "releaseNotesUrl": "https://github.com/anthropics/claude-code/releases/tag/v2.1.199"
+      "oldVersion": "2.1.199",
+      "newVersion": "2.1.201",
+      "releaseNotesUrl": "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
     },
     {
       "agent": "claude-agent-sdk",
-      "oldVersion": "0.3.198",
-      "newVersion": "0.3.199",
-      "releaseNotesUrl": "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.199"
-    },
-    {
-      "agent": "droid",
-      "oldVersion": "0.162.1",
-      "newVersion": "0.164.0",
-      "releaseNotesUrl": "https://www.npmjs.com/package/@factory/cli/v/0.164.0"
+      "oldVersion": "0.3.199",
+      "newVersion": "0.3.201",
+      "releaseNotesUrl": "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
     },
     {
       "agent": "omp",
-      "oldVersion": "16.3.0",
-      "newVersion": "16.3.4",
-      "releaseNotesUrl": "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.4"
+      "oldVersion": "16.3.4",
+      "newVersion": "16.3.5",
+      "releaseNotesUrl": "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.5"
     },
     {
       "agent": "qwen",
-      "oldVersion": "0.19.4",
-      "newVersion": "0.19.5",
-      "releaseNotesUrl": "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.5"
+      "oldVersion": "0.19.5",
+      "newVersion": "0.19.6",
+      "releaseNotesUrl": "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
     }
   ],
-  "issuesCreated": [],
-  "issuesExisting": [
+  "issuesCreated": [
     {
       "agent": "amp",
-      "version": "0.0.1783069983-gce9c8b",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1127"
-    },
-    {
-      "agent": "antigravity",
-      "version": "1.0.16",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1128"
+      "version": "0.0.1783155105-g3e26cc",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1166"
     },
     {
       "agent": "claude-code",
-      "version": "2.1.199",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1129"
+      "version": "2.1.201",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1167"
     },
     {
       "agent": "claude-agent-sdk",
-      "version": "0.3.199",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1130"
-    },
-    {
-      "agent": "droid",
-      "version": "0.164.0",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1131"
+      "version": "0.3.201",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1168"
     },
     {
       "agent": "omp",
-      "version": "16.3.4",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1132"
+      "version": "16.3.5",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1169"
     },
     {
       "agent": "qwen",
-      "version": "0.19.5",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1133"
+      "version": "0.19.6",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1170"
     }
   ],
+  "issuesExisting": [],
   "changedFiles": [
-    "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-07-03.yaml",
+    "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-07-04.yaml",
+    "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-07-04.yaml",
     "artifacts/agent-version-tracker/upstream-targets-and-latest.json",
-    "artifacts/agent-version-tracker/summary.json",
-    "packages/atlas/tsconfig.json"
+    "artifacts/agent-version-tracker/summary.json"
   ],
   "notes": [
     "Excluded all @a5c-ai/* packages from upstream package checks.",
     "@pi-ai/sdk is referenced by packages/adapters/codecs/src/pi-sdk-adapter.ts but npm returned E404 for @pi-ai/sdk@latest.",
-    "Cursor changelog was checked; the latest unambiguous dated entry remains the already-recorded 2026-06-30 team marketplace update.",
-    "Codex 0.143.0-alpha.*, Copilot 1.0.69-0, Gemini nightly, Qwen nightly/cua-driver-rs, and OpenClaw beta releases were observed but not recorded as stable latest agent versions."
+    "Copilot v1.0.69-0, Gemini nightly 0.51.0-nightly.20260704.gf7af4e518, OpenClaw v2026.7.1-beta.1, and Qwen nightly/cua-driver-rs releases were observed but not recorded as stable latest agent versions.",
+    "Antigravity 1.0.16, Codex 0.142.5, OpenAI Node SDK 6.45.0, Copilot 1.0.68, Droid 0.164.0, Gemini 0.49.0, Hermes 0.18.0, OpenClaw 2026.6.11, OpenCode 1.17.13, Pi 0.80.3, and Cursor's 2026-06-30 changelog marker were already recorded in the graph."
   ]
 }
