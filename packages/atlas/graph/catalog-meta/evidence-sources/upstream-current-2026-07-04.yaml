@@ -1,22 +1,23 @@
+# Evidence captured during the 2026-07-04 upstream agent-version tracker run.
 nodeKind: EvidenceSource
 id: evidence:amp-0-0-1783155105-g3e26cc-2026-07-04
 attributes:
-  displayName: "Amp CLI npm package 0.0.1783155105-g3e26cc"
-  kindLabel: npm-package
+  displayName: "Sourcegraph Amp 0.0.1783155105-g3e26cc npm package metadata"
+  kindLabel: package-metadata
   trustLevel: trust-level:official-web
   sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783155105-g3e26cc"
   sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783155105-g3e26cc"
-  locator: "@ampcode/cli npm version 0.0.1783155105-g3e26cc"
-  capturedAt: "2026-07-04T09:15:00Z"
+  locator: "npm @ampcode/cli v0.0.1783155105-g3e26cc"
+  capturedAt: "2026-07-04T09:20:00Z"
   observedAt: "2026-07-04T08:59:45Z"
   observedBy: codex-babysitter-yolo
-  freshnessWindowDays: 14
+  freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-07-04T09:15:00Z"
+  reviewedAt: "2026-07-04T09:20:00Z"
   notes: |
-    npm metadata identified @ampcode/cli 0.0.1783155105-g3e26cc as latest.
-    No public build-specific changelog, CLI flag, transport, MCP, model,
-    package-name, or migration change was found for this timestamped build.
+    npm metadata reports @ampcode/cli version 0.0.1783155105-g3e26cc as the
+    latest dist-tag. No public build-specific changelog was found in searched
+    official surfaces during this run.
 edges:
   has_trust_level:
     - trust-level:official-web
@@ -33,12 +34,12 @@ attributes:
   sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
   sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
   locator: "anthropics/claude-code release v2.1.201"
-  capturedAt: "2026-07-04T09:15:00Z"
+  capturedAt: "2026-07-04T09:20:00Z"
   observedAt: "2026-07-03T23:50:35Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-07-04T09:15:00Z"
+  reviewedAt: "2026-07-04T09:20:00Z"
   notes: |
     Official Claude Code 2.1.201 release notes state that Claude Sonnet 5
     sessions no longer use the mid-conversation system role for harness
@@ -53,27 +54,84 @@ edges:
 nodeKind: EvidenceSource
 id: evidence:claude-agent-sdk-0-3-201-2026-07-04
 attributes:
-  displayName: "Claude Agent SDK v0.3.201 release notes"
+  displayName: "Claude Agent SDK TypeScript v0.3.201 release notes"
   kindLabel: release-notes
   trustLevel: trust-level:official-web
   sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
   sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
   locator: "anthropics/claude-agent-sdk-typescript release v0.3.201"
-  capturedAt: "2026-07-04T09:15:00Z"
+  capturedAt: "2026-07-04T09:20:00Z"
   observedAt: "2026-07-03T23:50:34Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-07-04T09:15:00Z"
+  reviewedAt: "2026-07-04T09:20:00Z"
   notes: |
-    Official Claude Agent SDK 0.3.201 release notes document parity with Claude
-    Code v2.1.201 and provide npm, yarn, pnpm, and bun update commands.
+    Official Claude Agent SDK TypeScript 0.3.201 release notes state that the
+    SDK was updated to parity with Claude Code v2.1.201 and include versioned
+    npm/yarn/pnpm/bun install commands.
 edges:
   has_trust_level:
     - trust-level:official-web
   references:
     - agentVersion:claude-agent-sdk:0-3-201
     - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-68-2026-07-04
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.68 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.68"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.68"
+  locator: "github/copilot-cli release v1.0.68"
+  capturedAt: "2026-07-04T09:20:00Z"
+  observedAt: "2026-07-01T21:17:41Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-04T09:20:00Z"
+  notes: |
+    Official GitHub Copilot CLI 1.0.68 release notes document Kimi K2.7 Code
+    support, IDE disconnect recovery, slash-command alias completions, agents
+    screen session browse/resume/switch, plan budget display, sandbox
+    filesystem policy hardening, and multibyte diagnostic preservation.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-68
+    - agent:copilot-cli
+---
+nodeKind: EvidenceSource
+id: evidence:hermes-agent-0-18-0-2026-07-04
+attributes:
+  displayName: "Hermes Agent v0.18.0 release notes and package metadata"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/NousResearch/Hermes-Agent/releases/tag/v2026.7.1"
+  sourcePathOrUrl: "https://github.com/NousResearch/Hermes-Agent/releases/tag/v2026.7.1"
+  locator: "NousResearch/Hermes-Agent release v2026.7.1 and PyPI/npm hermes-agent 0.18.0"
+  capturedAt: "2026-07-04T09:20:00Z"
+  observedAt: "2026-07-01T20:08:06Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-04T09:20:00Z"
+  notes: |
+    Official Hermes Agent v2026.7.1 release notes identify Hermes Agent 0.18.0
+    and describe Mixture-of-Agents as selectable models, verification evidence,
+    completion contracts, /learn, /journey, background fan-out, desktop
+    projects, gateway scale-to-zero/drain coordination, and Vertex AI provider
+    support. npm hermes-agent 0.18.0 is an unofficial bridge that installs the
+    matching Python hermes-agent package, and PyPI reports 0.18.0 as latest.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:hermes:0-18-0
+    - agent:hermes
 ---
 nodeKind: EvidenceSource
 id: evidence:omp-16-3-5-2026-07-04
@@ -84,24 +142,51 @@ attributes:
   sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.5"
   sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.5"
   locator: "can1357/oh-my-pi release v16.3.5"
-  capturedAt: "2026-07-04T09:15:00Z"
+  capturedAt: "2026-07-04T09:20:00Z"
   observedAt: "2026-07-04T03:41:23Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-07-04T09:15:00Z"
+  reviewedAt: "2026-07-04T09:20:00Z"
   notes: |
-    Official Oh-My-Pi 16.3.5 release notes document OAuth launchUrl and MCP
-    scope propagation fixes, explicit OpenAI tool.strict false preservation,
-    tool-call argument cleanup, bounded artifact reads, ACP terminal shell
-    wrapping, retention fixes, LSP diagnostics fixes, task-branch merge fixes,
-    CUDA side-runtime repair, and Windows/session robustness fixes.
+    Official Oh-My-Pi 16.3.5 release notes document OAuth launch URL handling,
+    MCP OAuth scope preservation, explicit tool.strict:false preservation for
+    OpenAI-family function tools, large artifact raw-read paging, ACP
+    terminal/create shell wrapping, and worker stderr diagnostics.
 edges:
   has_trust_level:
     - trust-level:official-web
   references:
     - agentVersion:omp:16-3-5
     - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-17-13-2026-07-04
+attributes:
+  displayName: "OpenCode v1.17.13 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.13"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.13"
+  locator: "anomalyco/opencode release v1.17.13"
+  capturedAt: "2026-07-04T09:20:00Z"
+  observedAt: "2026-07-01T15:19:06Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-04T09:20:00Z"
+  notes: |
+    Official OpenCode 1.17.13 release notes document forced reasoning mode for
+    OpenAI-compatible reasoning models, stale GitHub Copilot response item ID
+    replay prevention, question prompt state fixes, a searchable desktop v2
+    model picker, WSL setup improvements, session tab hover previews, and
+    per-window desktop tab scoping.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-17-13
+    - agent:opencode
 ---
 nodeKind: EvidenceSource
 id: evidence:qwen-code-0-19-6-2026-07-04
@@ -112,18 +197,18 @@ attributes:
   sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
   sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
   locator: "QwenLM/qwen-code release v0.19.6"
-  capturedAt: "2026-07-04T09:15:00Z"
+  capturedAt: "2026-07-04T09:20:00Z"
   observedAt: "2026-07-03T16:36:59Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-07-04T09:15:00Z"
+  reviewedAt: "2026-07-04T09:20:00Z"
   notes: |
     Official Qwen Code 0.19.6 release notes document a bundled dataviz skill,
-    configurable nested subagents, per-tool-call execution timeout, daemon
-    vision/session artifact APIs, mobile MCP relative coordinates, raised stream
-    idle timeout behavior, daemon NDJSON stream optimization, and web-shell
-    improvements.
+    configurable nested subagents, opt-in per-tool-call execution timeouts,
+    raised stream idle timeout defaults, daemon session artifact APIs, daemon
+    vision model selection/status, mobile-mcp relative coordinates, and web
+    shell session/model UX improvements.
 edges:
   has_trust_level:
     - trust-level:official-web

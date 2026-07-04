@@ -17,8 +17,8 @@ attributes:
   assimilationNotes:
     - "Latest npm moved from 0.0.1783069983-gce9c8b to 0.0.1783155105-g3e26cc."
     - "npm metadata exposes homepage https://ampcode.com/ but no repository or issue tracker for build-specific release notes."
-    - "Install command remains npm install -g @ampcode/cli; the package name did not change."
-    - "No confirmed CLI flag, transport, MCP, model, package-name, or migration change was published for this timestamped build."
+    - "The npm README still documents npm install -g @ampcode/cli and the prior @sourcegraph/amp package name as backwards-compatible."
+    - "No confirmed CLI flag, transport, MCP, model, package-name, install-method, or migration change was published for this timestamped build."
   releaseHighlights:
     - "npm package update to @ampcode/cli 0.0.1783155105-g3e26cc."
   installMethods:
@@ -47,11 +47,10 @@ attributes:
   summary: "Claude Code release removing mid-conversation system-role harness reminders from Claude Sonnet 5 sessions."
   assimilationNotes:
     - "Latest npm moved from 2.1.199 to 2.1.201."
-    - "Claude Sonnet 5 sessions no longer use the mid-conversation system role for harness reminders, affecting prompt/harness reminder injection assumptions."
-    - "This follows the 2.1.197 switch to Claude Sonnet 5 defaults and 1M-token context behavior already recorded in prior graph entries."
+    - "Claude Sonnet 5 sessions no longer use the mid-conversation system role for harness reminders, affecting prompt assembly and system-role/harness-reminder modeling."
     - "No package-name, install-method, CLI flag, transport, or migration change was published."
   releaseHighlights:
-    - "Claude Sonnet 5 sessions avoid mid-conversation system-role harness reminders."
+    - "Claude Sonnet 5 harness reminders no longer use mid-conversation system-role messages."
   installMethods:
     - install:npm
 edges:
@@ -74,15 +73,15 @@ attributes:
   sourcePackage: "@anthropic-ai/claude-agent-sdk"
   upstreamReleaseTag: "v0.3.201"
   releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
-  summary: "Claude Agent SDK release updated to parity with Claude Code v2.1.201."
+  summary: "Claude Agent SDK TypeScript release updated to parity with Claude Code v2.1.201."
   assimilationNotes:
     - "Latest npm moved from 0.3.199 to 0.3.201."
-    - "SDK parity with Claude Code 2.1.201 means SDK-driven Claude Sonnet 5 sessions should reflect the no mid-conversation system-role harness reminder behavior."
-    - "Published update commands remain npm/yarn/pnpm/bun add @anthropic-ai/claude-agent-sdk@0.3.201."
-    - "No package-name, install-method, transport, or migration change beyond version upgrade was published."
+    - "SDK parity with Claude Code v2.1.201 means the Claude Sonnet 5 harness-reminder system-role change should be reflected in SDK prompt/harness integration assumptions."
+    - "Package remains @anthropic-ai/claude-agent-sdk; release notes keep npm/yarn/pnpm/bun add commands for 0.3.201."
+    - "No package-name, transport, or migration change beyond version upgrade was published."
   releaseHighlights:
     - "Claude Code 2.1.201 parity."
-    - "Versioned npm, yarn, pnpm, and bun update commands."
+    - "Versioned npm/yarn/pnpm/bun install examples."
   installMethods:
     - install:npm
 edges:
@@ -90,6 +89,86 @@ edges:
     - agent:claude-agent-sdk
   sourced_from:
     - evidence:claude-agent-sdk-0-3-201-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-68
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.68"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.68"
+  currentVersion: "1.0.68"
+  releasedAt: "2026-07-01"
+  sourcePackage: "@github/copilot"
+  upstreamReleaseTag: "v1.0.68"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.68"
+  cliCommand: "gh copilot"
+  summary: "GitHub Copilot CLI release adding Kimi K2.7 Code support, session browsing/switching, plan-budget display, IDE disconnect recovery, and sandbox/path hardening."
+  assimilationNotes:
+    - "Latest npm moved from 1.0.67 to 1.0.68."
+    - "Kimi K2.7 Code support affects model catalog mappings."
+    - "Session browsing, resume, and switching from the agents screen affect session-management capability metadata."
+    - "Plan budget details in statusline and /usage affect usage parser expectations."
+    - "IDE tools remain available across transient IDE disconnects but return clear errors while disconnected, affecting IDE bridge error handling."
+    - "File edits and patches are kept within sandbox filesystem policy, and sandbox symlink conflict edits are rejected, affecting sandbox policy enforcement."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Kimi K2.7 Code model support."
+    - "Agents-screen session browse/resume/switch."
+    - "Plan budget details in statusline and /usage."
+    - "Transient IDE disconnect recovery."
+    - "Sandbox filesystem-policy and symlink-conflict hardening."
+  installMethods:
+    - install:gh-extension
+edges:
+  version_of:
+    - agent:copilot-cli
+  sourced_from:
+    - evidence:copilot-cli-1-0-68-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:hermes:0-18-0
+attributes:
+  agentId: "hermes"
+  agentProductId: agent:hermes
+  displayName: "Hermes Agent 0.18.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.18.0"
+  currentVersion: "0.18.0"
+  releasedAt: "2026-07-01"
+  sourcePackage: "hermes-agent"
+  upstreamReleaseTag: "v2026.7.1"
+  releaseNotesUrl: "https://github.com/NousResearch/Hermes-Agent/releases/tag/v2026.7.1"
+  cliCommand: "hermes"
+  summary: "Hermes Agent release making Mixture-of-Agents selectable as models, adding completion contracts and verification evidence, /learn, /journey, background subagent fan-out, desktop projects, scale-to-zero gateway behavior, and Vertex AI provider support."
+  assimilationNotes:
+    - "Latest PyPI and npm bridge moved from 0.17.0 to 0.18.0."
+    - "Mixture-of-Agents presets are selectable virtual models and stream reference/aggregator output, affecting model/provider capability mappings and stream rendering."
+    - "/goal completion contracts, verification evidence, and pre_verify hooks affect completion/verification workflow modeling."
+    - "/learn and /journey affect command catalog and skill/memory lifecycle metadata."
+    - "Background delegate_task fan-out affects subagent lifecycle and async result handling."
+    - "Gateway scale-to-zero and drain coordination affect hosted gateway lifecycle/transport assumptions."
+    - "Vertex AI provider support with auto-refreshed OAuth2 tokens affects provider auth configuration."
+    - "npm bridge package remains hermes-agent and installs the matching Python package; no package rename was published."
+  releaseHighlights:
+    - "First-class Mixture-of-Agents model presets."
+    - "Verification evidence and /goal completion contracts."
+    - "/learn and /journey commands."
+    - "Background subagent fan-out."
+    - "Desktop Projects and memory graph."
+    - "Gateway scale-to-zero and drain coordination."
+    - "Google Vertex AI provider support."
+  installMethods:
+    - install:npm
+    - install:pip
+edges:
+  version_of:
+    - agent:hermes
+  sourced_from:
+    - evidence:hermes-agent-0-18-0-2026-07-04
 ---
 nodeKind: AgentVersion
 id: agentVersion:omp:16-3-5
@@ -106,24 +185,22 @@ attributes:
   upstreamReleaseTag: "v16.3.5"
   releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.5"
   cliCommand: "omp"
-  summary: "Oh-My-Pi release improving OAuth launch URLs and scopes, OpenAI tool strictness, tool-call validation, large artifact reads, ACP terminal creation, retention storage, LSP diagnostics, task-branch merges, and Windows/session robustness."
+  summary: "Oh-My-Pi release improving OAuth launch URLs/scope handling, OpenAI-family tool.strict:false preservation, tool-call validation, MCP artifact paging, ACP terminal/create shell wrapping, and worker stderr diagnostics."
   assimilationNotes:
-    - "Latest upstream moved from 16.3.4 to 16.3.5."
-    - "OAuthCallbackFlow adds a loopback GET /launch route and OAuthAuthInfo.launchUrl for short copy targets, affecting MCP/auth UI and callback flow metadata."
-    - "/mcp reauth and /mcp add now carry OAuth scopes from WWW-Authenticate challenges and protected-resource metadata, affecting MCP OAuth scope propagation."
-    - "OpenAI-family function tool payloads preserve explicit tool.strict === false, affecting tool schema serialization for OpenAI Responses, Codex Responses, and completions backends."
-    - "Tool-call validation strips stray line terminators from schema-matching enum and identifier fields before dispatch, affecting argument normalization."
-    - "Large artifact:// reads are bounded before materializing full MCP/tool artifacts, affecting read/search/copy behavior and OOM risk."
-    - "ACP terminal/create wraps shell commands with the resolved shell and args, affecting ACP terminal bridge behavior."
+    - "Latest npm moved from 16.3.4 to 16.3.5."
+    - "OAuthCallbackFlow now exposes a short /launch URL and OAuthAuthInfo.launchUrl, affecting OAuth UI/link presentation."
+    - "/mcp reauth and /mcp add preserve OAuth scopes from WWW-Authenticate and protected-resource metadata, affecting MCP OAuth reconnect behavior."
+    - "OpenAI-family function tool payloads preserve explicit tool.strict === false, affecting OpenAI Responses/Codex Responses tool schema serialization."
+    - "Large artifact:// reads page before materializing raw content, affecting MCP/tool artifact read handling and OOM prevention."
+    - "ACP terminal/create wraps shell lines with the resolved shell command and args, affecting ACP terminal bridge command mapping."
     - "No package-name or install-method migration was published."
   releaseHighlights:
-    - "OAuth launchUrl loopback redirect and S256-safe copy target."
-    - "MCP OAuth scope propagation fixes."
-    - "Explicit OpenAI tool.strict false preservation."
-    - "Tool-call enum and identifier newline trimming."
-    - "Bounded large artifact:// raw reads."
+    - "Short OAuth /launch URL for S256 OAuth flows."
+    - "MCP OAuth scope preservation."
+    - "OpenAI-family tool.strict:false preservation."
+    - "Large artifact:// read paging."
     - "ACP terminal/create shell wrapping."
-    - "Mnemopi retention and Windows compaction/session fixes."
+    - "Worker stderr diagnostics."
   installMethods:
     - install:npm
 edges:
@@ -131,6 +208,43 @@ edges:
     - agent:omp
   sourced_from:
     - evidence:omp-16-3-5-2026-07-04
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-17-13
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.17.13"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.17.13"
+  currentVersion: "1.17.13"
+  releasedAt: "2026-07-01"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.17.13"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.13"
+  cliCommand: "opencode"
+  summary: "OpenCode release forcing reasoning mode for OpenAI-compatible reasoning models, avoiding stale GitHub Copilot response item replay, and improving desktop question prompts, model picker, WSL setup, and tab/session UI."
+  assimilationNotes:
+    - "Latest npm moved from 1.17.12 to 1.17.13."
+    - "OpenAI-compatible reasoning models now force reasoning mode so reasoning settings apply on custom deployments, affecting provider/model reasoning configuration."
+    - "Stale GitHub Copilot response item IDs are no longer replayed, affecting Copilot provider response-continuation handling."
+    - "Desktop v2 model picker/model-management flow and WSL server setup changes affect desktop adapter capability metadata."
+    - "Question prompts can be minimized/restored and kept open while reviewing, affecting prompt/UI state modeling."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Forced reasoning mode for OpenAI-compatible reasoning models."
+    - "Stale GitHub Copilot response item replay fix."
+    - "Searchable desktop v2 model picker and model management."
+    - "WSL server setup improvements."
+    - "Question prompt minimize/restore and review-state fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+  sourced_from:
+    - evidence:opencode-1-17-13-2026-07-04
 ---
 nodeKind: AgentVersion
 id: agentVersion:qwen:0-19-6
@@ -147,23 +261,23 @@ attributes:
   upstreamReleaseTag: "v0.19.6"
   releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
   cliCommand: "qwen"
-  summary: "Qwen Code release adding dataviz bundled skill, configurable nested subagents, opt-in per-tool-call execution timeouts, daemon vision/session artifact APIs, mobile MCP relative coordinates, and stream/serve/web-shell hardening."
+  summary: "Qwen Code release adding dataviz skill, nested subagents, daemon vision-model and session-artifact APIs, per-tool-call timeout, mobile MCP relative coordinates, and web-shell session/model UX improvements."
   assimilationNotes:
     - "Latest npm moved from 0.19.5 to 0.19.6."
-    - "Dataviz is now a bundled skill, affecting built-in skill catalog metadata."
-    - "Sub-agents can spawn nested sub-agents up to a configurable depth, affecting delegation depth and safety limits."
-    - "Scheduler adds opt-in per-tool-call execution timeout and configurable recurring cron/loop expiration, affecting launch/session timeout controls."
-    - "Daemon APIs add session artifacts and expose visionModelId in workspace provider status, affecting daemon transport/API modeling."
-    - "Mobile MCP now supports opt-in 0-1000 relative coordinates, affecting MCP tool capability metadata."
-    - "Stream idle timeout defaults were raised and daemon NDJSON stream handling was optimized, affecting stream timeout and parser behavior."
+    - "Bundled dataviz skill affects default skill inventory."
+    - "Subagents can spawn nested subagents up to configurable depth, affecting subagent lifecycle/depth policy."
+    - "Per-tool-call execution timeout is opt-in, affecting scheduler and launchBehavior/promptExtraFlags modeling if surfaced by adapters."
+    - "Stream idle timeout default was raised and now hints the environment knob, affecting stream timeout expectations."
+    - "Daemon session artifact APIs and visionModelId provider status affect daemon API and model-selection surfaces."
+    - "mobile-mcp supports opt-in 0-1000 relative coordinates, affecting mobile tool coordinate normalization."
     - "No package-name or install-method migration was published."
   releaseHighlights:
     - "Bundled dataviz skill."
-    - "Nested sub-agent spawning with configurable depth."
-    - "Per-tool-call execution timeout and cron/loop expiration controls."
-    - "Daemon session artifact APIs and vision model selection/status."
-    - "Mobile MCP relative coordinate support."
-    - "Raised stream idle timeout and daemon NDJSON stream optimization."
+    - "Configurable nested subagent depth."
+    - "Opt-in per-tool-call execution timeout."
+    - "Raised stream idle timeout default with env-knob hint."
+    - "Daemon session artifact APIs and vision model selection."
+    - "mobile-mcp relative coordinate support."
   installMethods:
     - install:npm
 edges:
