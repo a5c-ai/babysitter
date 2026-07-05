@@ -1,0 +1,168 @@
+# Additive upstream release records from the 2026-07-05 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783228622-g9b591b
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783228622-g9b591b"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783228622-g9b591b"
+  currentVersion: "0.0.1783228622-g9b591b"
+  releasedAt: "2026-07-05"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783228622-g9b591b"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from 0.0.1783069983-gce9c8b to 0.0.1783228622-g9b591b."
+    - "npm metadata identifies the package as prebuilt Amp CLI binaries for enterprise/internal package-archive distribution."
+    - "The README still documents npm install -g @ampcode/cli and says the prior @sourcegraph/amp package name works for backwards compatibility for the time being."
+    - "No confirmed CLI flag, transport, MCP, model, package-name, install-method, or migration change was published for this timestamped build."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783228622-g9b591b."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783228622-g9b591b-2026-07-05
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-201
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.201"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.201"
+  currentVersion: "2.1.201"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.201"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
+  cliCommand: "claude"
+  summary: "Claude Code release changing Claude Sonnet 5 harness-reminder message role handling."
+  assimilationNotes:
+    - "Latest npm moved from 2.1.199 to 2.1.201."
+    - "Claude Sonnet 5 sessions no longer use the mid-conversation system role for harness reminders, affecting transcript/message-role normalization and any adapter assumptions that reminders arrive as system messages."
+    - "No package-name, install-method, CLI-flag, transport, MCP, or migration change was published."
+  releaseHighlights:
+    - "Claude Sonnet 5 harness reminders no longer use mid-conversation system role."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-201-2026-07-05
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-201
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.201"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.201"
+  currentVersion: "0.3.201"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.201"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
+  summary: "Claude Agent SDK release updating to parity with Claude Code v2.1.201."
+  assimilationNotes:
+    - "Latest npm moved from 0.3.199 to 0.3.201."
+    - "The SDK release notes state parity with Claude Code v2.1.201, so consumers should inherit the Claude Sonnet 5 harness-reminder role behavior change."
+    - "Update commands remain npm/yarn/pnpm/bun add @anthropic-ai/claude-agent-sdk@0.3.201; no package-name or install-method migration was published."
+    - "No SDK-specific new API, transport, MCP, or CLI flag change was published beyond parity."
+  releaseHighlights:
+    - "Parity with Claude Code v2.1.201."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-201-2026-07-05
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-6
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.6"
+  currentVersion: "16.3.6"
+  releasedAt: "2026-07-04"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.6"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.6"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release persisting credential rate-limit blocks, hardening Fable/Mythos exhausted-account selection, compacting recovered auto-retry errors, and rewriting native scrollback commit behavior."
+  assimilationNotes:
+    - "Latest upstream moved from 16.3.4 to 16.3.6."
+    - "Auth schema v5 adds persisted auth_credential_blocks plus broker snapshots/SSE and POST/DELETE credential block endpoints, affecting auth storage schema, account-rotation state, and gateway/sibling-process synchronization."
+    - "Confirmed exhausted Claude Fable/Mythos credentials now receive proactive hard blocks with resetsAt, affecting account ranking and fallback heuristics."
+    - "Recovered auto-retry errors now compact to a dim note and are excluded from resumed model context, affecting transcript parsing and resume-context reconstruction."
+    - "Native scrollback now commits visual records exactly once with finalized/frozen zones, affecting TUI transcript rendering expectations."
+    - "cmux browser run calls now attach tab-close rejection handling and abort composition, affecting browser-tool lifecycle and session crash handling."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Persisted credential rate-limit blocks with auth schema v5."
+    - "Proactive Claude Fable/Mythos exhausted-account hard blocks."
+    - "Recovered auto-retry error compaction."
+    - "Native scrollback visual-record commit model."
+    - "cmux tab-close rejection crash fix."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-6-2026-07-05
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-6
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.6"
+  currentVersion: "0.19.6"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.6"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding dataviz skill, nested subagents, per-tool-call timeout configuration, daemon artifact APIs, vision model selection, and web-shell/serve hardening."
+  assimilationNotes:
+    - "Latest npm moved from 0.19.5 to 0.19.6."
+    - "Bundled dataviz skill affects built-in skill catalog and skill-discovery expectations."
+    - "Subagents can spawn nested subagents up to configurable depth, affecting subagent recursion limits and task-tree rendering."
+    - "Scheduler adds opt-in per-tool-call execution timeout and configurable cron/loop job expiration, affecting launch/config schemas for task execution budgets."
+    - "Daemon adds session artifact APIs plus visionModelId provider status and web-shell model dialog support, affecting daemon API bindings and UI model selectors."
+    - "Core raises stream idle timeout default and hints the environment knob, affecting timeout defaults and environment documentation."
+    - "macOS seatbelt profile path resolution now uses bundle dir, affecting packaged macOS sandbox launch behavior."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Dataviz bundled skill."
+    - "Nested subagents with configurable depth."
+    - "Per-tool-call timeout and cron/loop expiration configuration."
+    - "Daemon session artifact APIs and vision model status."
+    - "Raised stream idle timeout default."
+    - "macOS seatbelt profile path fix."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-6-2026-07-05

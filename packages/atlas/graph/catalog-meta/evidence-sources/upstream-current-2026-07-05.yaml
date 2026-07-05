@@ -1,0 +1,134 @@
+# Evidence captured during the 2026-07-05 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1783228622-g9b591b-2026-07-05
+attributes:
+  displayName: "Sourcegraph Amp 0.0.1783228622-g9b591b npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783228622-g9b591b"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783228622-g9b591b"
+  locator: "npm @ampcode/cli v0.0.1783228622-g9b591b"
+  capturedAt: "2026-07-05T09:34:17Z"
+  observedAt: "2026-07-05T05:25:35Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-05T09:34:17Z"
+  notes: |
+    npm metadata reports @ampcode/cli version 0.0.1783228622-g9b591b as the
+    latest dist-tag. No public build-specific changelog was found in searched
+    official surfaces during this run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1783228622-g9b591b
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-201-2026-07-05
+attributes:
+  displayName: "Claude Code v2.1.201 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
+  locator: "anthropics/claude-code release v2.1.201"
+  capturedAt: "2026-07-05T09:34:17Z"
+  observedAt: "2026-07-03T23:50:35Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-05T09:34:17Z"
+  notes: |
+    Official Claude Code 2.1.201 release notes state that Claude Sonnet 5
+    sessions no longer use the mid-conversation system role for harness
+    reminders.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-201
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-201-2026-07-05
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.201 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.201"
+  capturedAt: "2026-07-05T09:34:17Z"
+  observedAt: "2026-07-03T23:50:34Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-05T09:34:17Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.201 release notes state that the
+    SDK was updated to parity with Claude Code v2.1.201 and include versioned
+    npm/yarn/pnpm/bun install commands.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-201
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:omp-16-3-6-2026-07-05
+attributes:
+  displayName: "Oh-My-Pi v16.3.6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.6"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.6"
+  locator: "can1357/oh-my-pi release v16.3.6"
+  capturedAt: "2026-07-05T09:34:17Z"
+  observedAt: "2026-07-04T13:08:27Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-05T09:34:17Z"
+  notes: |
+    Official Oh-My-Pi 16.3.6 release notes document persisted credential
+    rate-limit blocks with auth schema v5, proactive Fable/Mythos exhausted
+    account hard blocks, recovered auto-retry error compaction, native
+    scrollback visual-record commit behavior, and a cmux tab-close rejection
+    crash fix.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:16-3-6
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-19-6-2026-07-05
+attributes:
+  displayName: "Qwen Code v0.19.6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  locator: "QwenLM/qwen-code release v0.19.6"
+  capturedAt: "2026-07-05T09:34:17Z"
+  observedAt: "2026-07-03T16:36:59Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-05T09:34:17Z"
+  notes: |
+    Official Qwen Code 0.19.6 release notes document a bundled dataviz skill,
+    nested subagents with configurable depth, opt-in per-tool-call execution
+    timeouts, raised stream idle timeout defaults, daemon session artifact APIs,
+    daemon vision model selection/status, mobile-mcp relative coordinates, and
+    web-shell/serve hardening.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-19-6
+    - agent:qwen
