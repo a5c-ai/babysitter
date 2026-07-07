@@ -1,0 +1,250 @@
+# Additive upstream release records from the 2026-07-07 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783414941-g212a2a
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783414941-g212a2a"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783414941-g212a2a"
+  currentVersion: "0.0.1783414941-g212a2a"
+  releasedAt: "2026-07-07"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783414941-g212a2a"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from 0.0.1783069983-gce9c8b to 0.0.1783414941-g212a2a."
+    - "npm metadata exposes homepage https://ampcode.com/ but no repository or issue tracker for build-specific release notes."
+    - "The npm README still documents npm install -g @ampcode/cli and says the prior @sourcegraph/amp package name works for backwards compatibility."
+    - "No confirmed CLI flag, transport, MCP, model, package-name, install, or migration change was published for this timestamped build."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783414941-g212a2a."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783414941-g212a2a-2026-07-07
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-202
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.202"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.202"
+  currentVersion: "2.1.202"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.202"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.202"
+  cliCommand: "claude"
+  summary: "Claude Code release adding dynamic workflow sizing and workflow OpenTelemetry attributes, changing PR review behavior, and fixing remote-control, mTLS, background-session, installer, skill, MCP, and worktree resume issues."
+  assimilationNotes:
+    - "Latest npm moved from 2.1.199 to 2.1.202."
+    - "New /config dynamic workflow size setting affects workflow launch/config surfaces and should be reflected where launchBehavior exposes workflow sizing."
+    - "workflow.run_id and workflow.name OpenTelemetry attributes affect telemetry normalization for workflow-spawned agents."
+    - "/review <pr> returned to a fast single-pass review, while /code-review <level> <pr#> handles multi-agent review; command routing and help text should reflect the split."
+    - "Remote Control fixes cover command dispatch into interactive sessions, captionless image/file delivery, and permission mode display."
+    - "MCP server configs with url but no type now produce clearer type: http guidance; config validation diagnostics should match."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Dynamic workflow size setting in /config."
+    - "workflow.run_id and workflow.name OpenTelemetry attributes."
+    - "/review single-pass behavior and /code-review multi-agent path."
+    - "Remote Control command, file/image, and permission-mode fixes."
+    - "mTLS rotation, installer retry, skill duplication, and worktree resume fixes."
+    - "MCP config diagnostic improvement for url without type."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-202-2026-07-07
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-202
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.202"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.202"
+  currentVersion: "0.3.202"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.202"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.202"
+  summary: "Claude Agent SDK release adding parent_agent_id to subagent session messages and fixing apply_flag_settings control-error handling."
+  assimilationNotes:
+    - "Latest npm moved from 0.3.199 to 0.3.202."
+    - "New parent_agent_id field on subagent session messages affects session persistence and tree reconstruction for depth-2+ agent trees."
+    - "apply_flag_settings with a non-object settings value now returns a control error instead of crashing the session, affecting control-plane error handling tests."
+    - "Package remains @anthropic-ai/claude-agent-sdk with npm/yarn/pnpm/bun update commands for 0.3.202."
+  releaseHighlights:
+    - "parent_agent_id on subagent session messages."
+    - "apply_flag_settings non-object settings control error."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-202-2026-07-07
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-164-1
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.164.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.164.1"
+  currentVersion: "0.164.1"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.164.1"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific GitHub release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from 0.164.0 to 0.164.1."
+    - "npm metadata identifies repository git+https://github.com/Factory-AI/factory.git with package directory apps/cli."
+    - "The npm README still documents npm install -g @factory/cli, droid startup from a project directory, and the ! bash-mode toggle."
+    - "No public version-specific CLI flag, transport, API, model, package-name, install, or migration change is confirmed for 0.164.1."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.164.1."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-164-1-2026-07-07
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-11
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.11"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.11"
+  currentVersion: "16.3.11"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.11"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.11"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release fixing Codex Responses plan input handling, compact/resume usage diagnostics, session title generation, many-core Linux startup prompts, and llama.cpp per-model vision metadata detection."
+  assimilationNotes:
+    - "Latest upstream moved from 16.3.4 to 16.3.11."
+    - "openai-codex-responses fresh plan execution now mirrors final instructions as user input when a request only has system/developer guidance, affecting Codex Responses launch payload construction."
+    - "Codex WebSocket compact/resume diagnostics now record request shape and raw-vs-displayed usage buckets, affecting transport-adapter debug stats parsing."
+    - "Session title generation moved to marker-based parsing and unwraps JSON-shaped responses, affecting title parsing and display tests."
+    - "Linux startup prompt reads CPU model from /proc/cpuinfo instead of os.cpus(), reducing per-core sysfs probes on many-core hosts."
+    - "llama.cpp model discovery honors per-model architecture.input_modalities, affecting model capability detection for vision-capable router presets."
+    - "Catalog adds Claude Haiku 4.5 (JP) and tencent/hy3 via ZenMux and updates synthetic model naming, MiniMax-M3 context window, and pricing."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Codex Responses instruction-only plan input fix."
+    - "Codex WebSocket compact/resume usage diagnostics."
+    - "Marker-based session title generation."
+    - "Linux /proc/cpuinfo startup prompt optimization."
+    - "llama.cpp per-model vision metadata detection."
+    - "Claude Haiku 4.5 (JP) and tencent/hy3 catalog support."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-11-2026-07-07
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-17-14
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.17.14"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.17.14"
+  currentVersion: "1.17.14"
+  releasedAt: "2026-07-06"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.17.14"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.14"
+  cliCommand: "opencode"
+  summary: "OpenCode release adding code-mode MCP adapter support and desktop UX improvements, with MCP metadata/schema, provider routing, reasoning replay, and TUI spinner fixes."
+  assimilationNotes:
+    - "Latest npm moved from 1.17.13 to 1.17.14."
+    - "Code mode MCP adapter can run confined orchestration scripts against connected MCP tools; adapter capability discovery should model code-mode-gated execute access."
+    - "execute tool is hidden unless code mode is enabled, affecting tool catalog and permission expectations."
+    - "Paginated MCP tool catalogs preserve tool metadata and output schema validation, affecting MCP catalog pagination parsing."
+    - "GitHub Copilot model routing now honors advertised chat or responses endpoints, affecting provider endpoint selection."
+    - "Cerebras reasoning replay now uses the provider-supported field, affecting reasoning replay payloads."
+    - "No package-name or install-method migration was published; install remains npm install -g opencode-ai."
+  releaseHighlights:
+    - "Code mode MCP adapter for confined orchestration scripts."
+    - "execute tool hidden unless code mode is enabled."
+    - "MCP paginated tool catalog metadata/schema fix."
+    - "GitHub Copilot endpoint routing fix."
+    - "Cerebras reasoning replay fix."
+    - "Desktop provider connect, terminal, tab, model search, and review panel improvements."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+  sourced_from:
+    - evidence:opencode-1-17-14-2026-07-07
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-6
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.6"
+  currentVersion: "0.19.6"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.6"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding dataviz skill, nested subagents, daemon and web-shell vision/session APIs, configurable scheduler timeouts, recurring job expiration, and mobile/desktop automation driver updates."
+  assimilationNotes:
+    - "Latest npm moved from 0.19.5 to 0.19.6."
+    - "New bundled dataviz skill affects built-in skill catalog expectations."
+    - "Subagents can spawn nested subagents up to configurable depth, affecting task-tree/session-tree rendering."
+    - "Scheduler adds opt-in per-tool-call execution timeout and configurable recurring cron/loop job expiration, affecting launch/config surfaces."
+    - "Daemon/web-shell adds vision model selection, visionModelId provider status, session artifact APIs, and nested subagent task tree display."
+    - "mobile-mcp vendors opt-in 0-1000 relative coordinates, affecting mobile automation coordinate normalization."
+    - "Serve mode respects disabled skill settings and optimizes daemon NDJSON streaming, affecting hosted mode skill/tool exposure."
+    - "Docs mention model.reasoningEffort and correct stale CLI flags/keybindings; adapter docs/help should align."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Bundled dataviz skill."
+    - "Nested subagents with configurable depth."
+    - "Per-tool-call execution timeout and recurring job expiration."
+    - "Daemon session artifact APIs and vision model status."
+    - "Web-shell nested subagent tree and slash-command discovery improvements."
+    - "mobile-mcp 0-1000 relative coordinates."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-6-2026-07-07
