@@ -175,14 +175,15 @@
       "version": "0.19.6"
     }
   ],
-  "issuesCreated": [],
-  "issuesExisting": [
+  "issuesCreated": [
     "https://github.com/a5c-ai/babysitter/issues/1202",
     "https://github.com/a5c-ai/babysitter/issues/1203",
     "https://github.com/a5c-ai/babysitter/issues/1204",
     "https://github.com/a5c-ai/babysitter/issues/1205",
     "https://github.com/a5c-ai/babysitter/issues/1206",
-    "https://github.com/a5c-ai/babysitter/issues/1208",
+    "https://github.com/a5c-ai/babysitter/issues/1208"
+  ],
+  "issuesExisting": [
     "https://github.com/a5c-ai/babysitter/issues/1170",
     "https://github.com/a5c-ai/babysitter/issues/1179"
   ],
