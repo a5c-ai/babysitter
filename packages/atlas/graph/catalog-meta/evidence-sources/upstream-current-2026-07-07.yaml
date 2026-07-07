@@ -1,0 +1,183 @@
+# Evidence captured during the 2026-07-07 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1783414941-g212a2a-2026-07-07
+attributes:
+  displayName: "Sourcegraph Amp 0.0.1783414941-g212a2a npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783414941-g212a2a"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783414941-g212a2a"
+  locator: "npm @ampcode/cli v0.0.1783414941-g212a2a"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-07T09:10:15Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli version 0.0.1783414941-g212a2a as the
+    latest dist-tag. No public build-specific changelog was found in official
+    searched surfaces during this run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1783414941-g212a2a
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-202-2026-07-07
+attributes:
+  displayName: "Claude Code v2.1.202 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.202"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.202"
+  locator: "anthropics/claude-code release v2.1.202"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-06T22:51:16Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    Official Claude Code 2.1.202 release notes document dynamic workflow size,
+    workflow OpenTelemetry attributes, /review and /code-review behavior, Remote
+    Control fixes, mTLS and installer retry fixes, and MCP diagnostics.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-202
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-202-2026-07-07
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.202 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.202"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.202"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.202"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-06T22:51:17Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.202 release notes document
+    parent_agent_id on subagent session messages and safer apply_flag_settings
+    control-error handling for non-object settings values.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-202
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-164-1-2026-07-07
+attributes:
+  displayName: "Factory Droid CLI 0.164.1 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.164.1"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.164.1"
+  locator: "npm @factory/cli v0.164.1"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-06T17:13:45Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    npm metadata reports @factory/cli 0.164.1 as latest and identifies the
+    repository as Factory-AI/factory apps/cli. No public per-version release
+    notes were found in searched official surfaces during this run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-164-1
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:omp-16-3-11-2026-07-07
+attributes:
+  displayName: "Oh-My-Pi v16.3.11 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.11"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.11"
+  locator: "can1357/oh-my-pi release v16.3.11"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-06T16:10:16Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    Official Oh-My-Pi 16.3.11 release notes document Codex Responses plan input
+    handling, Codex compact/resume diagnostics, marker-based session title
+    parsing, Linux startup prompt CPU detection, llama.cpp vision metadata, and
+    model catalog changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:16-3-11
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-17-14-2026-07-07
+attributes:
+  displayName: "OpenCode v1.17.14 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.14"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.14"
+  locator: "anomalyco/opencode release v1.17.14"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-06T18:50:53Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    Official OpenCode 1.17.14 release notes document a code-mode MCP adapter,
+    execute-tool gating, paginated MCP catalog fixes, provider routing fixes,
+    Cerebras reasoning replay, TUI spinner fixes, and desktop improvements.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-17-14
+    - agent:opencode
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-19-6-2026-07-07
+attributes:
+  displayName: "Qwen Code v0.19.6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  locator: "QwenLM/qwen-code release v0.19.6"
+  capturedAt: "2026-07-07T10:20:00Z"
+  observedAt: "2026-07-03T16:36:59Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-07T10:20:00Z"
+  notes: |
+    Official Qwen Code 0.19.6 release notes document a dataviz bundled skill,
+    nested subagents, scheduler timeouts, daemon artifact APIs, web-shell vision
+    model selection, mobile-mcp coordinates, and model.reasoningEffort docs.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-19-6
+    - agent:qwen
