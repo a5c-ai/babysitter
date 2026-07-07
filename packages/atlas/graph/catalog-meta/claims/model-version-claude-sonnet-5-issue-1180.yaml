@@ -1,0 +1,97 @@
+---
+nodeKind: Claim
+id: claim:model-version-claude-sonnet-5-current-identity
+attributes:
+  claimId: model-version-claude-sonnet-5-current-identity
+  subjectId: model:claude-sonnet-5@current
+  predicate: has_model_identity
+  object: claude-sonnet-5
+  value: claude-sonnet-5
+  statement: model:claude-sonnet-5@current tracks Anthropic Claude Sonnet 5 with Claude API model ID claude-sonnet-5.
+  confidence: high
+  evidenceSourceIds:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  updatedAt: '2026-07-04'
+edges:
+  evidenced_by:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  about:
+    - model:claude-sonnet-5@current
+---
+nodeKind: Claim
+id: claim:model-version-claude-sonnet-5-current-context-window
+attributes:
+  claimId: model-version-claude-sonnet-5-current-context-window
+  subjectId: model:claude-sonnet-5@current
+  predicate: has_context_window_tokens
+  object: '1000000'
+  value: 1000000
+  statement: model:claude-sonnet-5@current has a 1M-token context window and 128k-token synchronous Messages API max output.
+  confidence: high
+  evidenceSourceIds:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  updatedAt: '2026-07-04'
+edges:
+  evidenced_by:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  about:
+    - model:claude-sonnet-5@current
+---
+nodeKind: Claim
+id: claim:model-version-claude-sonnet-5-current-provider-aliases
+attributes:
+  claimId: model-version-claude-sonnet-5-current-provider-aliases
+  subjectId: model:claude-sonnet-5@current
+  predicate: has_provider_aliases
+  object: claude-sonnet-5, anthropic.claude-sonnet-5
+  value: claude-sonnet-5; anthropic.claude-sonnet-5
+  statement: model:claude-sonnet-5@current is listed with Claude API and Google Cloud ID claude-sonnet-5 and AWS Bedrock ID anthropic.claude-sonnet-5.
+  confidence: high
+  evidenceSourceIds:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  updatedAt: '2026-07-04'
+edges:
+  evidenced_by:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  about:
+    - model:claude-sonnet-5@current
+---
+nodeKind: Claim
+id: claim:model-version-claude-sonnet-5-current-capabilities
+attributes:
+  claimId: model-version-claude-sonnet-5-current-capabilities
+  subjectId: model:claude-sonnet-5@current
+  predicate: has_capabilities
+  object: adaptive-thinking, vision, tool-use, prompt-caching, batch-api
+  value: adaptive-thinking; vision; text+image input; text output; prompt caching; batch API; tool use
+  statement: model:claude-sonnet-5@current supports adaptive thinking, text and image input, text output, prompt caching, batch processing, and tool use; Anthropic lists extended thinking as not supported.
+  confidence: high
+  evidenceSourceIds:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - evidence:anthropic-claude-sonnet-5-pricing-issue-1180
+  updatedAt: '2026-07-04'
+edges:
+  evidenced_by:
+    - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - evidence:anthropic-claude-sonnet-5-pricing-issue-1180
+  about:
+    - model:claude-sonnet-5@current
+---
+nodeKind: Claim
+id: claim:model-version-claude-sonnet-5-current-parameter-deprecations
+attributes:
+  claimId: model-version-claude-sonnet-5-current-parameter-deprecations
+  subjectId: model:claude-sonnet-5@current
+  predicate: has_deprecated_parameter_behavior
+  object: temperature, top_p, top_k
+  value: non-default temperature/top_p/top_k return 400 on Claude Sonnet 5
+  statement: Anthropic's deprecations page says temperature, top_p, and top_k are deprecated on Claude Sonnet 5 and return a 400 error when set to non-default values.
+  confidence: high
+  evidenceSourceIds:
+    - evidence:anthropic-claude-sonnet-5-deprecations-issue-1180
+  updatedAt: '2026-07-04'
+edges:
+  evidenced_by:
+    - evidence:anthropic-claude-sonnet-5-deprecations-issue-1180
+  about:
+    - model:claude-sonnet-5@current
