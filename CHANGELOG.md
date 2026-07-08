@@ -9,7 +9,6 @@
 - Track Claude Sonnet 5 in Atlas graph [#1181](https://github.com/a5c-ai/babysitter/pull/1181) (9e443cbcf, Tal Muskal, 12 hours ago)
 - Track upstream agent CLI versions [#1198](https://github.com/a5c-ai/babysitter/pull/1198) (524760523, Tal Muskal, 12 hours ago)
 
-
 ## [Unreleased] - 2026-07-04
 
 ### Features
