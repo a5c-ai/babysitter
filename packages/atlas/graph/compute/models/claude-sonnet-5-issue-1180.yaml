@@ -1,0 +1,124 @@
+nodeKind: ModelVersion
+id: model:claude-sonnet-5@current
+attributes:
+  displayName: "Claude Sonnet 5"
+  modelFamilyId: model-family:claude-sonnet-5
+  versionRange: '>=5.0.0 <5.1.0'
+  kind: chat
+  contextWindowTokens: 1000000
+  maxOutputTokens: 128000
+  costPerMTokInput: 3.0
+  costPerMTokCachedInput: 0.3
+  costPerMTokCacheWrite5m: 3.75
+  costPerMTokCacheWrite1h: 6.0
+  costPerMTokOutput: 15.0
+  supportsExtendedThinking: false
+  supportsAdaptiveThinking: true
+  supportsThinking: true
+  supportsThinkingBudgetTokens: false
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-07-04'
+  knowledgeCutoffDate: '2026-01-01'
+  modelCardUrl: https://platform.claude.com/docs/en/about-claude/models/overview
+  supportsFineTuning: false
+  regions:
+    - global
+  providerModelIds:
+    - claude-sonnet-5
+    - anthropic.claude-sonnet-5
+  providerAvailability:
+    - provider: provider:anthropic
+      status: ga
+      modelId: claude-sonnet-5
+      transport: model-transport:anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - provider: provider:aws-bedrock
+      status: ga
+      modelId: anthropic.claude-sonnet-5
+      transport: model-transport:anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+      notes: |
+        Anthropic lists Claude Sonnet 5 as available on Bedrock through
+        Claude in Amazon Bedrock, using the Messages-API Bedrock endpoint.
+    - provider: provider:gcp-vertex
+      status: ga
+      modelId: claude-sonnet-5
+      transport: model-transport:vertex-anthropic-messages
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - provider: provider:azure-foundry
+      status: ga
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+      notes: "Anthropic lists current Claude models as available through Microsoft Foundry."
+  pricingNotes: |
+    Anthropic's model overview lists Claude Sonnet 5 at $3/MTok input and
+    $15/MTok output with an introductory-pricing footnote. The pricing page
+    should remain the source of truth for temporary promotional rates.
+  compatibilityNotes: |
+    Anthropic deprecates non-default temperature, top_p, and top_k values on
+    Claude Sonnet 5. Requests setting those parameters to non-default values
+    return a 400 error.
+edges:
+  belongs_to_family:
+    - target: model-family:claude-sonnet-5
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:claude-sonnet-5
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+    - provider:gcp-vertex
+    - provider:azure-foundry
+  speaks:
+    - model-transport:anthropic-messages
+    - model-transport:vertex-anthropic-messages
+  supports:
+    - target: capability:adaptive-thinking
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - target: capability:supports-batch-api
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-pricing-issue-1180
+    - target: capability:supports-prompt-caching
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-pricing-issue-1180
+    - target: capability:supports-thinking
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      notes: Anthropic lists adaptive thinking for Claude Sonnet 5, while extended thinking is not supported.
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - target: capability:supports-tool-use
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+    - target: capability:vision-input
+      versionRange: '>=5.0.0 <5.1.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:anthropic-claude-sonnet-5-models-overview-issue-1180
+  supports_effort_level:
+    - target: effort-level:low
+    - target: effort-level:medium
+    - target: effort-level:high
