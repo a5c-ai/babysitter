@@ -1,0 +1,272 @@
+# Evidence captured during the 2026-07-08 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-0-2026-07-08
+attributes:
+  displayName: "Antigravity CLI 1.1.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.0"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.0"
+  locator: "google-antigravity/antigravity-cli release 1.1.0"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-08T03:25:54Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.0 release notes document public agent-mode
+    cycling, request-review as the default file-write review mode, an Agent
+    Mode setting, create-file confirmation previews, /plan replacing /planning,
+    and removal of /fast slash commands.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-0
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1783500564-g5a62da-2026-07-08
+attributes:
+  displayName: "Sourcegraph Amp 0.0.1783500564-g5a62da npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783500564-g5a62da"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783500564-g5a62da"
+  locator: "npm @ampcode/cli v0.0.1783500564-g5a62da"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-08T08:57:35Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli 0.0.1783500564-g5a62da as the latest
+    timestamped Amp CLI package. The package README still documents npm
+    install -g @ampcode/cli and @sourcegraph/amp backward compatibility; no
+    public build-specific changelog was found during this run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1783500564-g5a62da
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-204-2026-07-08
+attributes:
+  displayName: "Claude Code v2.1.204 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.204"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.204"
+  locator: "anthropics/claude-code release v2.1.204"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-08T00:27:50Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Claude Code 2.1.204 release notes state that hook events now
+    stream during SessionStart hooks in headless sessions, fixing remote
+    workers being idle-reaped mid-hook.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-204
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-204-2026-07-08
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.204 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.204"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.204"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.204"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-08T00:27:49Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.204 release notes state that the
+    SDK was updated to parity with Claude Code v2.1.204 and include versioned
+    npm, yarn, pnpm, and bun update commands.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-204
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:codex-0-143-0-2026-07-08
+attributes:
+  displayName: "Codex CLI 0.143.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.143.0"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.143.0"
+  locator: "openai/codex release rust-v0.143.0"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-08T01:31:10Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Codex 0.143.0 release notes document remote plugins enabled by
+    default, system proxy routing for auth and Responses API traffic, codex
+    remote-control pair, Bedrock GPT-5.6 Sol/Terra/Luna max reasoning effort,
+    MCP tool search defaults, ChatGPT-hosted MCP session auth, and app-server
+    environment/thread/fork inspection APIs.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex:0-143-0
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-167-0-2026-07-08
+attributes:
+  displayName: "Factory Droid CLI 0.167.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.167.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.167.0"
+  locator: "npm @factory/cli v0.167.0"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-07T23:40:05Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    npm metadata reports @factory/cli 0.167.0 as the latest release and still
+    documents npm install -g @factory/cli, the droid command, PATH guidance,
+    bash-mode toggle, review workflows, integrations, and Factory documentation
+    links. No build-specific changelog was found in npm metadata.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-167-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:hermes-0-18-2-2026-07-08
+attributes:
+  displayName: "Hermes Agent v0.18.2 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.7.2"
+  sourcePathOrUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.7.2"
+  locator: "NousResearch/hermes-agent release v2026.7.7.2"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-08T03:11:22Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Hermes Agent v0.18.2 notes describe a same-day patch on top of
+    v0.18.1 that unpins the WhatsApp Baileys dependency from a git commit and
+    uses published 7.0.0-rc13 for reliable installs and tagged-release Docker
+    builds. The notes list hermes update and pip install -U hermes-agent.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:hermes:0-18-2
+    - agent:hermes
+---
+nodeKind: EvidenceSource
+id: evidence:omp-16-3-11-2026-07-08
+attributes:
+  displayName: "Oh-My-Pi v16.3.11 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.11"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.11"
+  locator: "can1357/oh-my-pi release v16.3.11"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-06T16:10:16Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Oh-My-Pi 16.3.11 release notes document fixes for Codex
+    instruction-only fresh plan requests, Codex WebSocket compact/resume
+    diagnostics, marker-based title generation, Linux startup prompt CPU
+    probing, llama.cpp per-model vision metadata detection, and catalog updates
+    for Claude Haiku 4.5 (JP) and tencent/hy3.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:16-3-11
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-17-15-2026-07-08
+attributes:
+  displayName: "OpenCode v1.17.15 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.15"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.15"
+  locator: "anomalyco/opencode release v1.17.15"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-07T15:31:38Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official OpenCode 1.17.15 release notes document Z.ai context-window
+    overflow classification, graceful handling for unavailable config
+    directories, restored model details tooltips, v2 command-palette refresh,
+    terminal shortcut priority, unread tabs for pending questions, session tab
+    title persistence, and desktop theme/titlebar fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-17-15
+    - agent:opencode
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-19-7-2026-07-08
+attributes:
+  displayName: "Qwen Code v0.19.7 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.7"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.7"
+  locator: "QwenLM/qwen-code release v0.19.7"
+  capturedAt: "2026-07-08T09:35:00Z"
+  observedAt: "2026-07-07T17:22:03Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-08T09:35:00Z"
+  notes: |
+    Official Qwen Code 0.19.7 release notes document daemon runtime.activity
+    status, web-shell daemon status/session/scheduled-task/token-analytics
+    surfaces, ACP vision-bridge and EventBus changes, model fallback, max
+    subagent settings, PreToolUse ask confirmations, parameter-level tool
+    permissions, tools.visible config, and per-tool-call execution timeout.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-19-7
+    - agent:qwen

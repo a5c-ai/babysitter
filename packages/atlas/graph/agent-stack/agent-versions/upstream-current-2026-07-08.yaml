@@ -1,0 +1,347 @@
+# Additive upstream release records from the 2026-07-08 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-1-0
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.1.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.1.0"
+  currentVersion: "1.1.0"
+  releasedAt: "2026-07-08"
+  upstreamReleaseTag: "1.1.0"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.0"
+  cliCommand: "agy"
+  summary: "Antigravity CLI release making execution-mode cycling public, adding request-review mode, settings persistence for agent mode, new-file diff previews, and replacing /planning with /plan."
+  assimilationNotes:
+    - "Latest official google-antigravity/antigravity-cli release moved from tracked 1.0.16 to 1.1.0."
+    - "Agent execution mode cycling is public across default, accept-edits, and plan, affecting launch/mode metadata and TUI shortcut expectations."
+    - "request-review is now the default execution behavior before file writes and shows an interactive line-level diff preview, affecting permission and review-flow assumptions."
+    - "The Agent Mode /settings option persists the default mode without manual settings.json edits or --mode startup flags."
+    - "/plan replaces legacy /planning and /fast slash commands were removed, affecting command catalogs and promptExtraFlags/slash-command tests."
+    - "No package-name or install-method migration was identified."
+  releaseHighlights:
+    - "Public execution-mode cycling: default, accept-edits, plan."
+    - "Default request-review mode with interactive diff previews before writes."
+    - "Agent Mode setting persisted from /settings."
+    - "Create-file confirmation preview for write_to_file without overwrite."
+    - "/plan replaces /planning; /fast slash commands removed."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:antigravity-cli
+  sourced_from:
+    - evidence:antigravity-1-1-0-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783500564-g5a62da
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783500564-g5a62da"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783500564-g5a62da"
+  currentVersion: "0.0.1783500564-g5a62da"
+  releasedAt: "2026-07-08"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783500564-g5a62da"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from tracked 0.0.1783329373-gb3eec2 to 0.0.1783500564-g5a62da."
+    - "npm metadata still describes @ampcode/cli as the Amp CLI distribution and points to https://ampcode.com/."
+    - "The README still documents npm install -g @ampcode/cli and says @sourcegraph/amp remains backward-compatible for now."
+    - "No confirmed CLI flag, transport/API, MCP, model, package-name, or migration change was published for this timestamped build."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783500564-g5a62da."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783500564-g5a62da-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-204
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.204"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.204"
+  currentVersion: "2.1.204"
+  releasedAt: "2026-07-08"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.204"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.204"
+  cliCommand: "claude"
+  summary: "Claude Code release fixing hook event streaming during SessionStart hooks in headless sessions."
+  assimilationNotes:
+    - "Latest npm moved from tracked 2.1.201 to 2.1.204."
+    - "Hook events now stream during SessionStart hooks in headless sessions, avoiding remote workers being idle-reaped mid-hook."
+    - "This affects hook streaming, headless/remote worker lifecycle supervision, and adapter tests that assert SessionStart event flow."
+    - "No package-name, install-method, CLI flag, transport/API, model default, or migration change was published."
+  releaseHighlights:
+    - "SessionStart hook events stream correctly in headless sessions."
+    - "Remote workers should no longer be idle-reaped mid-hook because hook events were missing."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-204-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-204
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.204"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.204"
+  currentVersion: "0.3.204"
+  releasedAt: "2026-07-08"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.204"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.204"
+  summary: "Claude Agent SDK TypeScript release updated to parity with Claude Code v2.1.204."
+  assimilationNotes:
+    - "Latest npm moved from tracked 0.3.201 to 0.3.204."
+    - "The SDK release notes state parity with Claude Code v2.1.204, so SDK consumers inherit the SessionStart hook event-streaming fix."
+    - "Versioned npm, yarn, pnpm, and bun update commands remain the published update path."
+    - "No package-name, transport/API, CLI flag, model, or migration change beyond the parity update was published."
+  releaseHighlights:
+    - "Parity with Claude Code v2.1.204."
+    - "Versioned npm/yarn/pnpm/bun update commands documented."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-204-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:codex:0-143-0
+attributes:
+  agentId: "codex"
+  agentProductId: agent:codex
+  displayName: "Codex CLI 0.143.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.143.0"
+  currentVersion: "0.143.0"
+  releasedAt: "2026-07-08"
+  sourcePackage: "@openai/codex"
+  upstreamReleaseTag: "rust-v0.143.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.143.0"
+  cliCommand: "codex"
+  summary: "Codex CLI release enabling remote plugins by default, adding system proxy routing, manual remote-control pairing, Bedrock GPT-5.6 models, MCP tool search defaults, and app-server inspection APIs."
+  assimilationNotes:
+    - "Latest npm moved from tracked 0.142.5 to 0.143.0."
+    - "Remote plugins are enabled by default with richer catalog rows, npm marketplace sources, and local/remote version visibility, affecting plugin discovery and marketplace metadata surfaces."
+    - "Authentication and Responses API traffic can route through macOS and Windows system proxies, including PAC and WPAD, affecting transport proxy configuration."
+    - "New codex remote-control pair command generates manual pairing codes from a running daemon, affecting launchBehavior and remote-control command catalogs."
+    - "MCP tools use tool search by default and ChatGPT-hosted MCP servers can use session authentication, affecting MCP adapter expectations."
+    - "App-server clients can inspect environments, list descendant threads, and fork history through a turn, affecting app-server API/client schemas."
+    - "Amazon Bedrock GPT-5.6 Sol, Terra, and Luna models gained first-class max reasoning effort support."
+    - "Install command remains npm install -g @openai/codex."
+  releaseHighlights:
+    - "Remote plugins enabled by default."
+    - "System proxy support for auth and Responses API traffic on macOS/Windows."
+    - "codex remote-control pair command."
+    - "Bedrock GPT-5.6 Sol/Terra/Luna with max reasoning effort."
+    - "MCP tool search default and ChatGPT-hosted MCP session auth."
+    - "App-server environment inspection, descendant-thread listing, and fork-through-turn APIs."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex
+  sourced_from:
+    - evidence:codex-0-143-0-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-167-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.167.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.167.0"
+  currentVersion: "0.167.0"
+  releasedAt: "2026-07-07"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.167.0"
+  cliCommand: "droid"
+  summary: "Factory Droid npm release; npm metadata documents the unchanged @factory/cli install path, bash-mode toggle, enterprise integrations, and Factory documentation links."
+  assimilationNotes:
+    - "Latest npm moved from tracked 0.164.0 to 0.167.0."
+    - "The npm package README still documents npm install -g @factory/cli plus brew install factory/tap/droid in adapter metadata, so no package-name migration was found."
+    - "README still documents the droid command, ! bash-mode toggle, native diff/review workflows, Jira/Notion/Slack integrations, and Factory documentation links."
+    - "No build-specific changelog, new CLI flag, transport/API, model, or migration change was found in npm metadata for 0.167.0."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.167.0."
+    - "Install and PATH guidance unchanged in package metadata."
+    - "Documented bash-mode toggle and enterprise/tool integration positioning remain unchanged."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-167-0-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:hermes:0-18-2
+attributes:
+  agentId: "hermes"
+  agentProductId: agent:hermes
+  displayName: "Hermes Agent 0.18.2"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.18.2"
+  currentVersion: "0.18.2"
+  releasedAt: "2026-07-08"
+  sourcePackage: "hermes-agent"
+  upstreamReleaseTag: "v2026.7.7.2"
+  releaseNotesUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.7.2"
+  cliCommand: "hermes"
+  summary: "Hermes Agent patch release fixing WhatsApp bridge install reliability by using published Baileys 7.0.0-rc13 instead of a pinned git commit."
+  assimilationNotes:
+    - "Latest npm/PyPI bridge moved from tracked 0.18.0 to 0.18.2."
+    - "The patch unpins WhatsApp Baileys from a git commit and uses the published 7.0.0-rc13 release, affecting install and tagged-release Docker build reliability."
+    - "Published update commands remain hermes update for existing installs and pip install -U hermes-agent for Python installs; the npm bridge still exposes hermes and hermes-agent commands."
+    - "No CLI flag, transport/API, model, or migration change beyond the dependency/install reliability fix was published."
+  releaseHighlights:
+    - "WhatsApp bridge dependency now installs from published Baileys 7.0.0-rc13."
+    - "Tagged-release Docker builds should no longer depend on a pinned git commit for Baileys."
+  installMethods:
+    - install:pip
+    - install:npm
+edges:
+  version_of:
+    - agent:hermes
+  sourced_from:
+    - evidence:hermes-0-18-2-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-11
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.11"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.11"
+  currentVersion: "16.3.11"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.11"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.11"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release fixing Codex instruction-only fresh plan requests, WebSocket compact/resume diagnostics, title generation, startup prompt CPU probing, and llama.cpp vision metadata detection."
+  assimilationNotes:
+    - "Latest npm moved from tracked 16.3.10 to 16.3.11; issue #1206 already tracks this agent/version pair."
+    - "openai-codex-responses fresh plan execution requests with only system/developer guidance now mirror the final instruction as user input so Codex accepts the first turn."
+    - "Codex WebSocket compact/resume diagnostics now record request shape and usage buckets, affecting debug stats and WebSocket telemetry."
+    - "Session title generation switched to marker-based parsing for all models and unwraps JSON-shaped responses, affecting title parsing."
+    - "Linux startup prompt construction reads /proc/cpuinfo instead of os.cpus(), affecting startup behavior on many-core hosts."
+    - "llama.cpp model discovery honors per-model architecture.input_modalities from /v1/models, affecting vision-capability detection."
+    - "Catalog adds Claude Haiku 4.5 (JP) and tencent/hy3 via ZenMux; no package-name or install-method migration was published."
+  releaseHighlights:
+    - "Codex instruction-only plan requests mirrored as user input."
+    - "Codex WebSocket compact/resume diagnostics."
+    - "Marker-based session title parsing."
+    - "Linux startup prompt avoids os.cpus() per-core probes."
+    - "llama.cpp per-model vision metadata detection."
+    - "Claude Haiku 4.5 (JP) and tencent/hy3 model catalog support."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-11-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-17-15
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.17.15"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.17.15"
+  currentVersion: "1.17.15"
+  releasedAt: "2026-07-07"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.17.15"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.15"
+  cliCommand: "opencode"
+  summary: "OpenCode release improving Z.ai context-window overflow classification and desktop model-picker/command-palette/session-tab behavior."
+  assimilationNotes:
+    - "Latest npm moved from tracked 1.17.13 to 1.17.15."
+    - "Z.ai context-window overflow errors are classified more accurately, affecting provider error mapping and oversized-request failure handling."
+    - "Unavailable config directories are handled more gracefully while reading config, affecting adapter install/detect/config probes."
+    - "Desktop restored model detail tooltips in the model picker and refreshed the v2 command palette, affecting UI metadata assumptions."
+    - "Terminal shortcuts now take priority when focused, tabs show unread state for pending questions, and session tab titles survive reload while data is loading."
+    - "Install command remains npm install -g opencode-ai; brew and curl install alternatives remain adapter metadata."
+  releaseHighlights:
+    - "Z.ai context-window overflow classification."
+    - "Graceful handling for unavailable config directories."
+    - "Restored model detail tooltips in model picker."
+    - "v2 command palette refresh and desktop session-tab fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+  sourced_from:
+    - evidence:opencode-1-17-15-2026-07-08
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-7
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.7"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.7"
+  currentVersion: "0.19.7"
+  releasedAt: "2026-07-07"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.7"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.7"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding daemon/web-shell status and session-management surfaces, ACP/runtime fixes, scheduler/task capabilities, model fallback, permission syntax, and model/tool reliability fixes."
+  assimilationNotes:
+    - "Latest npm moved from tracked 0.19.6 to 0.19.7."
+    - "Daemon status API adds runtime.activity fields and web-shell adds a daemon status page, affecting daemon transport/API mapping."
+    - "Web-shell adds MCP mentions, custom @ mention panels, session archive/delete/sidebar management, scheduled-task management, token-usage analytics, split view, and in-place Settings/Daemon Status panels."
+    - "ACP initialize advertises vision-bridge image capability, ACP bridge adds EventBus subscriber byte cap, and session settings are passed explicitly, affecting ACP capability and runtime handling."
+    - "Core adds model fallback chains, maxSubAgents, PreToolUse hook ask surfaced as TUI confirmation, tool parameter permission syntax, and tools.visible config."
+    - "Scheduler adds per-tool-call execution timeout and dedicated named sessions for scheduled tasks, affecting config and task-launch surfaces."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Daemon runtime.activity status API and web-shell status page."
+    - "Web-shell MCP mentions, session management, scheduled tasks, token analytics, split view, and Settings/Daemon Status panels."
+    - "ACP vision-bridge image capability and bridge/runtime fixes."
+    - "Model fallback chain, maxSubAgents, PreToolUse ask confirmations, and parameter-level tool permissions."
+    - "Per-tool-call execution timeout and dedicated scheduled-task sessions."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-7-2026-07-08
