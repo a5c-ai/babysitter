@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - 2026-07-09
+
+### Maintenance
+- No non-merge commits in the last 24 hours.
+
 ## [Unreleased] - 2026-07-04
 
 ### Features
