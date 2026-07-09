@@ -168,7 +168,18 @@ flowchart LR
     F --> AG["AnswerGraph = derived_from subgraph read back (INV-A8)"]
 ```
 
-**Phase 1 — Compile + match (pure read over `proj`).** Path/guard/filter resolution reads **only** the deterministic projection of `/ontology` and existing facts at `asOf` — never replica-local sync state or a wall clock. Two replicas at the same `asOf` MUST compile the **byte-identical** segment set (INV-A2). If more than one segment satisfies the linkage, the result set surfaces **all** of them as a typed choice (`Segment.alternatives`); kip MUST NOT auto-collapse the match (N5, INV-A7). The deterministic presentation order is `weight` desc, then the [§3.4](./24-synchronization-and-convergence.md) `orderKey`/`factCID` tiebreak; `tags` is an advisory pre-sort *within* an exact `weight` tie and is **never** the tiebreak. **Inheritance** (patent inherence) is resolved here: discovery traversal walks `is_a` subtype `EdgeKind`s so a relation defined on a parent `NodeKind` is reachable from a child — a pure function of ontology facts, never an ambient in-code class hierarchy.
+**The API channel for the two phases (m7-22).** The split is a first-class surface on `Repo`
+([SDK API surface](./40-sdk-api-surface.md)): **`compileContextualQuery(q): Promise<Segment>`** is
+phase 1 only — the pure read, `alternatives` enumerated, no dispatch, no fact;
+**`executeSegment(segment, opts?): Promise<AnswerGraph>`** is phase 2 only — executes ONE
+caller-chosen segment; and **`runContextualQuery(q): Promise<AnswerGraph | { kind: "choice"; segments:
+Segment[] }>`** is the compile+execute convenience whose **discriminated return** carries the typed
+choice: exactly one match ⇒ it executes and returns the `AnswerGraph`; multiple matches ⇒ it returns
+`{ kind: "choice", segments }` and executes **nothing** until the caller picks a segment and calls
+`executeSegment` (N5, INV-A7 — the "caller chooses" arrow in the diagram above is this return value,
+not an out-of-band prompt).
+
+**Phase 1 — Compile + match (pure read over `proj`).** Path/guard/filter resolution reads **only** the deterministic projection of `/ontology` and existing facts at `asOf` — never replica-local sync state or a wall clock. Two replicas at the same `asOf` MUST compile the **byte-identical** segment set (INV-A2). If more than one segment satisfies the linkage, the result set surfaces **all** of them as a typed choice (`Segment.alternatives`, and the `{ kind: "choice" }` return above); kip MUST NOT auto-collapse the match (N5, INV-A7). The deterministic presentation order is `weight` desc, then the [§3.4](./24-synchronization-and-convergence.md) `orderKey`/`factCID` tiebreak; `tags` is an advisory pre-sort *within* an exact `weight` tie and is **never** the tiebreak. **Inheritance** (patent inherence) is resolved here: discovery traversal walks `is_a` subtype `EdgeKind`s so a relation defined on a parent `NodeKind` is reachable from a child — a pure function of ontology facts, never an ambient in-code class hierarchy.
 
 **Phase 2 — Execute (the only side effect: signed facts).** The orchestrator owns the loop, walking the steps in the **deterministic topological order over `Segment.deps`** (the linear `steps[]` order when `deps` is empty). For each step it builds a `MicroagentInvocation` whose `input` is the materialized output of its `deps` producer(s), first **verifies the seed/input complies with the binding's `constraint`** (claim 8) and enforces any `requires`/`condition` guard (claim 12) as pure `proj` reads, dispatches the bound microagent, and **validates `MicroagentResult.output` against the manifest `outputSchema`** before minting anything.
 
@@ -237,6 +248,39 @@ New types/relations/functionalities are introduced by emitting **signed schema f
 **Who may grow the map** (patent operator/learning-module/user breadth): a schema/relation/functionality update is a signed fact of the *same shape* and folds through the *same* `proj`, whether authored by a learner microagent ([§5b.2](./32-knowledge-autoencoding.md)) or a human operator out-of-band. There is no privileged map-writer; effectiveness is decided by `proj`, not by who proposed it.
 
 ### Functionality descriptor = `MicroagentManifest`
+
+The manifest is the real `@a5c-ai/genty-core` contract
+(`packages/genty/core/src/microagents/types.ts` — reused verbatim, "do not invent fields", SPEC §5b.1),
+promoted here to the normative kip-side interface so implementers need not leave the doc set
+(cross-linked from the [SDK API surface](./40-sdk-api-surface.md)):
+
+```ts
+type IsolationMode = "subprocess" | "worker" | "container";
+
+interface MicroagentManifest {
+  name: string;                        // (name, version) is the registration/selection key (§5b.2 LearnOptions)
+  version: string;
+  description: string;                 // the descriptor's documentation/help facet
+  inputSchema: unknown;                // JSON Schema for MicroagentInvocation.input
+  outputSchema: unknown;               // JSON Schema the orchestrator validates MicroagentResult.output against
+  isolation: IsolationMode;
+  runtime: {
+    entrypoint: string;                // the executable the runner spawns
+    skills?: string[]; tools?: string[]; scripts?: string[]; processes?: string[];
+    model?: string; timeout?: number; env?: Record<string, string>;
+  };
+  tags?: string[];                     // advisory selection metadata only — never a gate
+  builtIn?: boolean;
+}
+```
+
+**Manifest "signing" is the ordinary fact envelope (m7-23).** A manifest is **registered** iff a
+**signature-valid microagent-registration fact** for its `(name, version)` is set-resident; there is no
+separate manifest-signature mechanism — the registration fact's Ed25519 envelope (§2.4) *is* the
+signature. So INV-A13's "registered-but-unsigned manifest" means precisely: **no signature-valid
+registration fact for that `(name, version)` in `S`** (a gate-rejected registration never enters `S`,
+so the two phrasings coincide), and `learn()`/binding against such a name is rejected with
+`ERR_UNREGISTERED_MANIFEST` ([Errors](./40-sdk-api-surface.md#errors--the-typed-kiperror-model-m7-10)).
 
 The patent's descriptor record maps onto manifest fields exhaustively: publisher → `builtIn`/provenance; testing/health → a `runtime.scripts` self-check + `outputSchema` validation; documentation/help file → `description`; identification tags → `tags`; and the descriptor's "list of links to databases and references" → the manifest's data-resource/source bindings (`runtime.tools`/`env` resource refs — the `data-resource` references a Miner consumes in [§5b.3](./33-mining-discovery-ingestion.md)). **None of these gate fact membership** — only the Ed25519 signature does (C2-1). Manifest metadata is *advisory selection*. The patent's parallel realizer-type taxonomy (claim 16 search-module, 17 conversion-module, 18-19 web-service {REST/SOAP/SQL} and code-script {XSLT/regex/Python/…}) is fully GENERALIZED by `MicroagentManifest.runtime{entrypoint}` + `IsolationMode`: the realizer *kind* is just which executable the `entrypoint` names under which `IsolationMode` — advisory selection metadata, never a gate. No realizer enum is reified.
 

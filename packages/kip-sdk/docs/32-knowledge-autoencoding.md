@@ -89,6 +89,8 @@ function converged(s: LearnerLoopState): "accept" | "exhausted" | "continue" {
 
 INV-A5 forces `loss ≥ threshold` forever under each of (a) tiny `maxIterations`, (b) tiny `maxWallMs` with a slow/hung decode, (c) tiny `maxInvocations` with high fan-out, and asserts `converged()` returns `"exhausted"` in every case. A build whose `converged` ignores `maxWallMs` or `maxInvocations` **fails**.
 
+**Declared test seams (m7-18 — so INV-A5 is deterministic, never a sleep-based flaky test).** The loop contract names two normative seams (SPEC §5b.2): the wall-time axis reads an **injectable monotonic clock** (the source of `elapsedMs`; production default = the process monotonic clock — a *loop-driver* input, never a `proj` input, so substrate determinism is untouched), and the conformance harness MAY register **stub microagent manifests** with scripted behaviors (hang, fail, timeout, fixed loss sequence) to drive the budget/failure paths. INV-A5(b)'s "hung decode" and INV-A12's scripted loss sequence run through exactly these seams ([conformance](./60-conformance-and-testability.md)).
+
 ## Manifest selection is explicit (N5)
 
 Before the loop runs, the orchestrator MUST know *which* encode/decode/learner/loss microagents realize it for this artifact. kip does **not** infer them from `rawKind` or any heuristic — the caller **names** each by `(name, version)` via `LearnOptions.{encode,decode,learner,loss}` (the §5b.2 dual of [§5b.1's](./31-contextual-functionalities.md) explicit `registerFunctionality` binding). Those selected `(name,version)` pairs are exactly the ones the `kip:learn` fact records in its key `(rawRef, ontologyAsOf, encode/decode/learner-manifest)`, so the recorded result is reproducible against the *same named agents*. A named manifest that is unregistered/unsigned is **rejected**, never silently substituted (N5). The artifact's content-kind is likewise declared once (`LearnOptions.rawKind`) and threaded unchanged into every `DecodeAgent.rawKind`, so encode and decode always agree on the kind.
@@ -100,7 +102,6 @@ INV-A13 asserts the loop dispatches **exactly** the named manifests (perturbing 
 ### Per-iteration failure is treated as infinite loss (N5)
 
 > This is the autoencoding specialization of **dispatch-failure** (#4) and **exhausted** (#8) in the consolidated [failure & conflict model](./27-failure-and-conflict-model.md).
-
 
 An encode/decode/learner dispatch that errors (non-zero `exitCode`) or returns `outputSchema`-invalid output **consumes one `invocation` (and its `elapsedMs`) against budget** and is scored as an **infinite-loss** iteration — the loop NEVER converges on a failed candidate (`bestLoss` is not improved by it). Persistent failure drains the budget and terminates via `converged → "exhausted"`; there is **no best-effort accept** of a failed candidate (N5). This mirrors the [§5b.1](./31-contextual-functionalities.md) dispatch-failure rule: a failed agent yields no trusted output, ever.
 

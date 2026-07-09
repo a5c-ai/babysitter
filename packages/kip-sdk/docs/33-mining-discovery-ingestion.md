@@ -101,7 +101,7 @@ Claims 31/32 cover the **output/display stage** — "enhancing a display of said
 
 - (a) `AcquisitionResult.proposed` lands **quarantined-until-trusted** — committed facts project `untrusted`/`quarantined` and become trusted only via the ordinary §8.1 authority path, never trusted-on-import;
 - (b) each `sameAs` entry becomes exactly one signed `same_as` fact (never an in-place rewrite), a contradicting merge surfacing `kip:conflict`;
-- (c) Discoverer traversal **terminates within its declared bound** (a fixture graph that would crawl unbounded is cut off);
+- (c) Discoverer traversal **terminates within its declared bound** (a fixture graph that would crawl unbounded is cut off) — "declared bound" = the **mandatory `depth`/`maxFanout` fields of `TraversalSpec`** ([SDK API surface](./40-sdk-api-surface.md#supporting-api-types-normative), [retrieval §5.2](./26-retrieval.md)) plus `RecallQuery.expand`'s `hops`/`maxFanout` caps for the recall half;
 - (d) a family microagent that writes `/heads` directly **fails** the suite (INV-A1 parity for the sourceless Miner);
 - (e) a **mixed `proposed` batch** preserves kind (each `AssertInput` → `assert`, each `RetractInput` → `retract`; no coercion);
 - (f) the returned `{ facts: FactId[] }` is **exactly** the `proposed` order followed by the `sameAs` order;

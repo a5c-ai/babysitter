@@ -2,7 +2,7 @@
 
 Purpose: the read/snapshot/stream/provenance seams kip exposes so an on-top context-management layer can assemble run context — kip provides the **seams**, not the layer.
 
-Source: SPEC §4c (1670–1761).
+Source: SPEC §4c.
 
 ---
 
@@ -47,17 +47,24 @@ replica, so they **MUST NOT** be a durable pin target. `dagTips` is intentionall
 ```ts
 // The DURABLE frontier is author-HLC space only — NO commit CIDs (C2-3, M2-2). dagTips dropped.
 type PinStatus = "pin-complete" | "pin-incomplete";  // (M3-2) incomplete until all sub-frontier facts present
-type Frontier = { perReplicaHlc: Record<ReplicaId, HlcStamp> }; // author-HLC frontier; survives concurrent excision
-// A replicaId ABSENT from perReplicaHlc means "−∞ for that replica" (m3-3): facts authored by a replica
-// not in the map are NOT ≤-frontier and are EXCLUDED. A pin thus captures exactly the replicas it
-// enumerated at pin time; a later-joining replica's low-author-HLC facts fall OUTSIDE the pin (they are
-// absent ⇒ −∞ ⇒ excluded), so the pinned subset is deterministic and not silently grown by new replicas.
+type ChainId = string;                               // "<replicaId>/<keyFpr>" — one authored chain (§4b.1/m7-1)
+type Frontier = {
+  perReplicaHlc: Record<ReplicaId, HlcStamp>;        // coarse author-HLC cut (subscribe cursors, m-5); survives concurrent excision
+  chainSeq: Record<ChainId, number>;                 // NORMATIVE pin selector (m7-2): highest seq per (replicaId,key) chain at pin time
+};
+// A replicaId ABSENT from perReplicaHlc means "−∞ for that replica" (m3-3), and a chain ABSENT from
+// chainSeq means "excluded" (m3-3 extended, m7-2): facts of a chain not in the map are NOT ≤-frontier
+// and are EXCLUDED. A pin thus captures exactly the (replicaId, key) chains it enumerated at pin time;
+// a later-joining replica's/key's facts fall OUTSIDE the pin (absent ⇒ excluded), so the pinned subset
+// is deterministic, not silently grown by new replicas or keys — and an ENTIRELY-ABSENT chain can never
+// make completeness undecidable (it is simply not in the pin).
 
 interface SnapshotRef {
   scope: ScopeRef;
-  frontier: Frontier;                 // author-HLC frontier of the pinned fact-set (no commit CIDs)
-  // (M3-2) A pin DENOTES the deterministically-selected subset { f ∈ S : f.authorHlc ≤ frontier[f.replicaId] }
-  //   (replicaId absent ⇒ excluded, m3-3). factSetDigest is the order-independent merkle root (over orderKey)
+  frontier: Frontier;                 // author-HLC + per-chain seq frontier of the pinned fact-set (no commit CIDs)
+  // (M3-2/m7-2) A pin DENOTES the deterministically-selected subset
+  //   { f ∈ S : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }
+  //   (chain absent ⇒ excluded, m3-3/m7-2). factSetDigest is the order-independent merkle root (over orderKey)
   //   of THAT subset — recomputed from the current set, NOT a snapshot hash of "the set as it was when pinned".
   factSetDigest: CID;                 // merkle root of the sub-frontier subset; THE durable resolution target — re-resolves after any rewrite (C-4, C2-3, M3-2)
   // NOTE: dagTips: CID[] is intentionally ABSENT. Commit CIDs are transport, not identity; under
@@ -69,12 +76,15 @@ A pin **does not** denote "the bytes of the set at pin time"; it denotes the
 **deterministically-selected subset**
 
 ```
-{ f ∈ S_current : f.authorHlc ≤ frontier[f.replicaId] }
+{ f ∈ S_current : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }
 ```
 
-where a `replicaId` **absent** from the frontier map is treated as `−∞` ⇒ that replica's facts are
-excluded (m3-3). `factSetDigest` is the **order-independent merkle root over `orderKey`** of *that
-subset*, recomputed from whatever set the resolving replica currently holds. Because it re-resolves
+where a chain **absent** from the frontier map is excluded (m3-3/m7-2). `factSetDigest` is the
+**order-independent merkle root over `orderKey`** of *that
+subset*, recomputed from whatever set the resolving replica currently holds. A pin is re-resolved
+against the current set via **`resolvePin(ref)`** on the [SDK surface](./40-sdk-api-surface.md), which
+returns `{ status: PinStatus, factSetDigest }` — the observable [INV-14](./60-conformance-and-testability.md#inv-14)
+tests drive. Because it re-resolves
 against the current set rather than dangling on a stale or non-canonical commit CID, a pin
 **re-resolves after any excision rewrite — including concurrent excision** (C-4, C2-3). See
 [synchronization & convergence](./24-synchronization-and-convergence.md) for the excision/rewrite
@@ -89,15 +99,27 @@ therefore **valid only when COMPLETE**: every fact ≤ frontier has been receive
 
 - **`pin-incomplete`** — the replica has **not** yet received every sub-frontier fact (it cannot yet
   prove the subset is final). Resolution **MUST** return the `pin-incomplete` status, **never a silent
-  partial read** (N5). Completion is **monotone**: once a sub-frontier fact arrives it is never
-  removed, so a pin transitions `incomplete → complete` exactly once and never back.
-  - **Completeness is LOCALLY DECIDABLE** via the per-replica HLC-counter contiguity rule (m4-1). A
-    replica decides "I hold every fact `≤ frontier[R]` from replica `R`" **without** enumerating facts
-    it has never seen, because HLC counters are **per-(replicaId, key) monotone and gap-free by
-    construction**. Completeness for `R` holds **iff** the replica holds an **unbroken `(wall, counter)`
-    chain from `R`'s genesis up to `frontier[R]`** with no missing counter. A detected gap (a missing
-    counter below the frontier) ⇒ `pin-incomplete`; a contiguous chain ⇒ complete for `R`. This makes
-    `pin-incomplete → pin-complete` decidable from local state alone, so INV-14 is testable (see
+  partial read** (N5). Completion is **monotone under normal receipt**: once a sub-frontier fact
+  arrives it is never removed by ordinary receipt/fold, so under normal operation a pin transitions
+  `incomplete → complete` exactly once and never back. **A-7 — this is NOT an unconditional guarantee
+  against retention-driven eviction:** §3.5a eviction MAY reclaim the bytes of a pinned sub-frontier
+  fact, which MAY regress a `pin-complete` pin back to `pin-incomplete` pending re-fetch — the same
+  bounded liveness residual as [R3](./90-open-questions.md#r3), never a wrong `pin-complete` (see
+  [INV-14](./60-conformance-and-testability.md#inv-14) and [SPEC.md A-7](../SPEC.md)).
+  - **Completeness is LOCALLY DECIDABLE** via the per-`(replicaId,key)` **`seq`-contiguity rule**
+    (m4-1, restated over `seq` — m7-1/m7-2). A replica decides "I hold every pinned fact of chain `C`"
+    **without** enumerating facts it has never seen, because the **signed per-`(replicaId, key)` chain
+    sequence `seq`** is monotone and gap-free **by construction at the author**
+    ([convergence §1.2a](./24-synchronization-and-convergence.md)) — the HLC `(wall,counter)` pair is
+    NOT the witness (the receive-advance rule legitimately perforates it, and counters reset when
+    `wall` advances). Completeness is decided **per chain, unioned over every chain the pin
+    enumerates**: for each `chainId ∈ frontier.chainSeq`, the replica must hold **every
+    `seq ∈ [0, frontier.chainSeq[chainId]]`** of that `(replicaId, key)` pair — `seq = 0` is the pair's
+    **chain genesis**. A detected gap (a missing `seq` below the chain's pinned frontier) on **any**
+    enumerated chain ⇒ `pin-incomplete`; all chains contiguous ⇒ complete. `(wall, counter)` values on
+    the links play no contiguity role and never collide across keys (chains are keyed by
+    `(replicaId, keyFpr)`, not by stamps). This makes `pin-incomplete → pin-complete` decidable from
+    local state alone, so INV-14 is testable (see
     [conformance & testability](./60-conformance-and-testability.md)).
 - **`pin-complete`** — every fact ≤ frontier is present; the subset is final and its `factSetDigest`
   matches. **Two replicas that have both reached completeness for the same frontier compute the

@@ -1,0 +1,29 @@
+name: kip-docs-link-check
+
+# Docs link/anchor integrity gate for the kip-sdk doc set (docs/81 legend, DEBTS D-13/D-14 mitigation):
+# fails on any dangling relative link or missing per-id anchor in packages/kip-sdk/{SPEC.md,docs/**}.
+
+on:
+  pull_request:
+    paths:
+      - "packages/kip-sdk/**"
+      - ".github/workflows/kip-docs-link-check.yml"
+  push:
+    branches: [main, staging]
+    paths:
+      - "packages/kip-sdk/**"
+      - ".github/workflows/kip-docs-link-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check kip-sdk doc links & anchors
+        run: node packages/kip-sdk/scripts/check-doc-links.mjs

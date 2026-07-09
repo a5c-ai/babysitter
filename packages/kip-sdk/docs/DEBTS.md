@@ -7,20 +7,24 @@
 
 This register catalogs **documentation** debt only (not implementation debt). It is verified against the
 docs under `packages/kip-sdk/docs/` and, for faithfulness, against `packages/kip-sdk/SPEC.md` (the source
-of truth). **It does NOT fix the debts** — each entry records a suggested fix for later work.
+of truth). **It both catalogs each debt AND tracks its resolution:** every entry records the evidence, a
+suggested fix, and a `Status` line stating whether (and how) the fix was applied — the register is the
+resolution record, not merely a backlog.
 
 ## Summary
 
 > Counts below are the register-wide rollup across both audit rounds (round 1: D-01–D-21; round 2: D-22–D-26).
 > See the per-round breakdown in "Audit round 2 — new docs (27, 28) + integrity".
 
-| Severity | Count |
-|---|---|
-| Critical | 2 |
-| Major | 6 |
-| Minor | 18 |
-| **Total kept** | **26** |
-| Dropped (unsubstantiated) | 1 |
+| Severity | Count | Resolved | Partially resolved | Open |
+|---|---|---|---|---|
+| Critical | 2 | 2 | 0 | 0 |
+| Major | 6 | 6 | 0 | 0 |
+| Minor | 18 | 17 | 1 (D-12: the 81 split) | 0 |
+| **Total kept** | **26** | **25** | **1** | **0** |
+| Dropped (unsubstantiated) | 1 | — | — | — |
+
+> **Rollup:** 26 kept · 25 resolved · 1 partially resolved (D-12's `81` monolith split remains open) · 0 untouched.
 
 | Category | Count |
 |---|---|
@@ -190,7 +194,7 @@ of truth). **It does NOT fix the debts** — each entry records a suggested fix 
   - `81-roadmap-epics-and-tasks.md` is 1261 lines — the largest doc by ~4.6x (next largest, `70-decision-records-adr.md`, is 388).
 - **Why it is debt:** An architecturally central view (the active-layer overview tying together the three §5b subsystems) is a 53-line stub, while a planning WBS is a 1261-line monolith. The overview under-serves its tie-it-together role and the WBS over-concentrates planning concerns that change at a different cadence than the architecture.
 - **Suggested fix:** Expand `30` with the cross-cutting active-layer contracts shared by §5b.1–.3 (orchestrator-authoring lifecycle, asOf-reproducibility residual, typed-choice rule) currently re-explained in each of 31/32/33; and split `81` into per-milestone task files (or move the subtask WBS to a generated appendix).
-- **Status:** Resolved — expanded `30-active-knowledge-overview.md` from a stub into a real overview: added "How the three subsystems relate" (the layered acquisition→autoencoding→contextual dependency) and "Cross-cutting contracts" (orchestrator-authoring lifecycle, asOf-reproducibility residual R5, typed-choice rule N5/INV-A7) with links to 31/32/33 and the failure model; faithful to §5b intro, no new claims. (The `81` split was out of scope for this architecture-doc pass and is not addressed here.)
+- **Status:** Partially resolved — the `30` half is done: expanded `30-active-knowledge-overview.md` from a stub into a real overview ("How the three subsystems relate" + "Cross-cutting contracts": orchestrator-authoring lifecycle, asOf-reproducibility residual R5, typed-choice rule N5/INV-A7) with links to 31/32/33 and the failure model; faithful to §5b intro, no new claims. **The `81` half is OPEN:** `81-roadmap-epics-and-tasks.md` remains a single-file monolith (~23% of the set); splitting it into per-milestone task files (or a generated appendix) is still to-do.
 
 ### D-13: WBS legend promises per-id links, but every FR/NFR/INV link points to the file root
 
@@ -199,11 +203,11 @@ of truth). **It does NOT fix the debts** — each entry records a suggested fix 
 - **Locations:** [81-roadmap-epics-and-tasks.md](./81-roadmap-epics-and-tasks.md) L22-L23, L286, L347 · [10-functional-requirements.md](./10-functional-requirements.md) (no `<a id>` anchors) · [11-non-functional-requirements.md](./11-non-functional-requirements.md) · [60-conformance-and-testability.md](./60-conformance-and-testability.md)
 - **Evidence:**
   - `81` L22: "**Implements:** ... **FR-\*** (linked to [./10-functional-requirements.md])".
-  - `81` L286 (actual per-task link, no `#anchor`): "**Implements:** [FR-D4](./10-functional-requirements.md) · [NFR-A1](./11-non-functional-requirements.md)".
+  - `81` L286 (actual per-task link, no `#anchor`): "**Implements:** [FR-D4](./10-functional-requirements.md#fr-d4) · [NFR-A1](./11-non-functional-requirements.md#nfr-a1)".
   - `10/11/60` contain 0 `<a id=...>` anchors and define FR/NFR/INV ids as bold inline labels, so there is no `#fr-d4` / `#nfr-a1` / `#inv-7` slug to target.
 - **Why it is debt:** The legend states each id is "linked to" its requirement, but the hundreds of per-task FR/NFR/INV links resolve only to the top of a long doc — the promised id-level traceability navigation is not delivered.
 - **Suggested fix:** Either add explicit `<a id="fr-d4">` anchors (or `### FR-D4` headings) in 10/11/60 and point each `81` link at `...md#fr-d4`, or soften the legend wording from "linked to [the requirement]" to "links to the requirements doc."
-- **Status:** Resolved — softened the `81` legend (faithful minimal fix): the Implements/Exit-criteria bullets now state the id text names the exact FR/NFR/INV while the link resolves to the requirements **doc** (10/11/60 carry no per-id `#anchor` slugs; ids are bold inline labels), so no per-id deep link is promised.
+- **Status:** Resolved — softened the `81` legend (faithful minimal fix): the Implements/Exit-criteria bullets now state the id text names the exact FR/NFR/INV while the link resolves to the requirements **doc** (10/11/60 carry no per-id `#anchor` slugs; ids are bold inline labels), so no per-id deep link is promised. **Update (round-3 pass) — upgraded to the full fix:** per-id `<a id="fr-a1">`-style anchors were added to every FR/NFR/INV bold label in 10/11/60, all FR/NFR/INV links across the doc set now deep-link to those anchors, the `81` legend was restored to promise (and deliver) id-level traceability, and the links are machine-checked in CI (see D-14 update).
 
 ### D-14: All 76 in-page task dependency links rely on hand-authored `<a id="T#.#">` tags
 
@@ -215,7 +219,7 @@ of truth). **It does NOT fix the debts** — each entry records a suggested fix 
   - `81` L300 (dependency link): "**Depends on:** [T1.1](#T1.1)".
 - **Why it is debt:** Every `[T#.#](#T#.#)` dependency link resolves ONLY through the explicit `<a id="T#.#">` tag — not through the heading's auto-generated slug. Any future edit that drops or mistypes one `<a id>` silently breaks the link with no build-time check. All 76 are currently intact, but the convention is undocumented and brittle.
 - **Suggested fix:** Document the `<a id="T#.#">` anchor convention near the legend (L24), and/or add a CI link-check (markdown-link-check / remark-validate-links) over `packages/kip-sdk/docs` so a dropped anchor or mistyped id fails the build.
-- **Status:** Resolved — added a maintenance `[!NOTE]` to the `81` legend documenting that `[T#.#](#T#.#)` links resolve through hand-authored `<a id="T#.#">` tags (not heading slugs), that a dropped/mistyped anchor breaks silently with no build error, that contributors MUST verify task-anchor links by hand when editing, and naming a CI link-checker (markdown-link-check / remark-validate-links over `packages/kip-sdk/docs`) as the documented mitigation.
+- **Status:** Resolved — added a maintenance `[!NOTE]` to the `81` legend documenting that `[T#.#](#T#.#)` links resolve through hand-authored `<a id="T#.#">` tags (not heading slugs), that a dropped/mistyped anchor breaks silently with no build error, that contributors MUST verify task-anchor links by hand when editing, and naming a CI link-checker (markdown-link-check / remark-validate-links over `packages/kip-sdk/docs`) as the documented mitigation. **Update (round-3 pass) — the named mitigation is now WIRED:** `.github/workflows/kip-docs-link-check.yml` runs `packages/kip-sdk/scripts/check-doc-links.mjs` over `packages/kip-sdk/{SPEC.md,docs/**}` on every PR/push touching the package, failing the build on any dangling relative link or missing anchor (task anchors and the new per-id FR/NFR/INV anchors included); the `81` note was updated accordingly.
 
 ### D-15: `orderKey` field ordering restated in 5+ places instead of linking the canonical definition
 
@@ -277,7 +281,7 @@ of truth). **It does NOT fix the debts** — each entry records a suggested fix 
   - `80-roadmap-and-milestones.md` L94: parenthetical INV glosses duplicating 60's titles.
 - **Why it is debt:** `60` is the canonical INV catalog; `24` §7 and `80`'s exit-criteria re-spell each INV's gloss. These short glosses are the part most likely to drift if an invariant's scope is tightened.
 - **Suggested fix:** Keep INV titles/bodies canonical in `60`. In `24` §7 and `80`'s exit-criteria, list bare INV ids as links without re-glossing, or quote the 60 title verbatim with a link.
-- **Status:** Resolved — INV titles/bodies kept canonical in `60`; `24` §7 now lists the INV ids bare (one sentence, no per-INV gloss) and `80`'s exit-criteria lines (M0/M1/M2/M3/M4/M8) now list bare `[INV-n](./60-conformance-and-testability.md)` links without the duplicated parenthetical glosses. No timeline introduced.
+- **Status:** Resolved — INV titles/bodies kept canonical in `60`; `24` §7 now lists the INV ids bare (one sentence, no per-INV gloss) and `80`'s exit-criteria lines (M0/M1/M2/M3/M4/M8) now list bare `[INV-n](./60-conformance-and-testability.md)` links without the duplicated parenthetical glosses. No timeline introduced. **Update (round-3 pass):** the fix originally skipped M5/M6/M7 (their exit lines still re-glossed each INV-A\* body as plain bold text); those three lines are now converted to bare linked ids as well, completing the D-19 treatment across all milestones. (Where `80` now annotates a *sub-invariant scoping* — e.g. "INV-4a … the full INV-4 gates M2" — that is milestone-scope information owned by 80, not a re-gloss of 60's canonical body.)
 
 ### D-20: git-substrate §1.2 layout block collapses four named manifest retention caps to a generic "retention caps"
 
@@ -424,3 +428,44 @@ and `interfaces.ts` — and confirmed. **5 substantiated, 0 dropped.** The integ
 references, so no link/anchor fixes were required. The convergence core (§3.2/§3.4/§4b.4), the timeline-free
 roadmap, and INV-A1/N5 were preserved; all fixes are summarize-and-link or faithful corrections to real
 package symbols (no invented APIs).
+
+---
+
+## Audit round 3 — m7-1..m7-18 seq-chain hardening, M0-seam/ingest() fixes, and this pass's findings
+
+> Third pass, consolidating what previously lived only as inline "Update (round-3 pass)" notes on
+> D-13/D-14/D-19, plus a new adversarial spec/docs convergence sweep across the full doc set (30 items,
+> spanning integration citation drift, a security gap in fork-recovery excision, SDK-ergonomics gaps in
+> the authoring surface, and a glossary/terminology sweep). The convergence core (§3.2 gate, §3.4 `proj`,
+> §4b.4 SEC) was touched only for one narrow, explicitly-scoped disambiguation (the `Repo.ingest()` vs
+> the internal §3.2 six-step procedure — one procedure, two entry points, not two things sharing a name).
+
+**What changed in this round, summarized:**
+
+1. **The m7-1..m7-18 seq-chain hardening pass** (reflected inline via the D-13/D-14/D-19 "Update
+   (round-3 pass)" notes below): per-id `<a id="fr-a1">`-style anchors added to every FR/NFR/INV bold
+   label across 10/11/60 with CI link-checking wired (`.github/workflows/kip-docs-link-check.yml` →
+   `scripts/check-doc-links.mjs`); the `(wall,counter)` legacy phrasing was normatively redefined to the
+   `seq` per-`(replicaId,key)` chain-contiguity witness (§4b.1/m7-1) and swept across the doc set (this
+   round's item 22 continues that sweep into 11/50/70/prior-art/glossary).
+2. **M0-seam / `ingest()` fixes:** the gate-observable `Repo.ingest(f)` seam (B-2, INV-6a/INV-13a) was
+   added and is now explicitly disambiguated from the §3.2 internal six-step write-through procedure —
+   one procedure, two entry points (direct already-signed-fact entry via `ingest()`, or construct+sign
+   entry via `assertFact`/`retractFact`).
+3. **This round's findings** (30 items; see the parent conversation / commit history for the full list):
+   integration-doc citation drift fixes (`28-stack-integration.md`'s stale `../SPEC.md` line numbers and
+   the nonexistent `canonical-form.ts` citation), the `rxFrom`-keyed salience contradiction in
+   `26-retrieval.md`, a new **excise-evidence** authorization safeguard for fork-recovery excision (R11)
+   closing a self-evidence-destruction gap, SDK-ergonomics widening (`assertFact`/`retractFact` echo
+   back `id`/`hlc`/`seq`; `supersedeFact`/`reAttestFact` added to `Repo`/`Tx`), and a glossary/terminology
+   consolidation pass (`KipError`, `promisor`, `Frontier.chainSeq`, `Fork demotion` entries).
+
+| Area | Status |
+|---|---|
+| Citation/faithfulness drift (integration docs) | Fixed |
+| `rxFrom` salience contradiction (retrieval) | Fixed |
+| Fork-recovery excision evidence-destruction gap (security) | Fixed (new `excise-evidence` capability) |
+| SDK authoring-surface ergonomics (assertFact/retractFact/supersedeFact/reAttestFact) | Fixed |
+| `ingest()` vs §3.2 procedure disambiguation | Fixed (one narrow SPEC.md §3.2 note) |
+| Glossary/terminology sweep (`(wall,counter)` → `seq`, new entries) | Fixed |
+| Convergence core (§3.2/§3.4/§4b.4) | Untouched beyond the one scoped disambiguation line |

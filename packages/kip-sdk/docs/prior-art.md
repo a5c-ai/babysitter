@@ -76,7 +76,7 @@ chain semantics) passed **five consecutive adversarial audits unbroken**.
 | **C3-1** | Ingest gate reading replica-local state → divergence; fixed by the **signature-only ingest gate** (every other trust question is a set-pure `proj` demotion). |
 | **C4-1** | Signature-only gate's unbounded storage split into **LOGICAL membership (signature-only)** vs **DURABLE storage (transport-layer retention policy)**; SEC restated per-shared-subset. |
 | **C4-2** | Anti-backdating moved off the voluntary `causedBy` field to the **involuntary per-key author-HLC monotonicity rule**. |
-| **C5-1** | Eviction × monotonicity backdating closed by the **per-key chain-completeness gate** (a `(wall,counter)` gap ⇒ `pending`, never a silent trusted backdate). |
+| **C5-1** | Eviction × monotonicity backdating closed by the **per-key chain-completeness gate** (a `seq` gap ⇒ `pending`, never a silent trusted backdate). |
 
 ### Honestly-accepted residual bounds (R1–R4 — NOT bugs)
 

@@ -5,7 +5,7 @@
 
 **Source:** whole-spec map of `../SPEC.md`.
 
-> **`../SPEC.md` (3555 lines) remains the single authoritative source.** This documentation set is a
+> **`../SPEC.md` (~3.9k lines) remains the single authoritative source.** This documentation set is a
 > faithful decomposition for pre-development reading and planning. Where any doc and the spec
 > disagree, the spec wins. Companion sources: `../PRIOR-ART.md` (prior-art survey) and
 > `../SCORECARD.md` (six-round adversarial convergence record).
@@ -40,6 +40,7 @@ These five invariants run through every document; nothing in the set may contrad
 | [00-vision-and-scope.md](./00-vision-and-scope.md) | Thesis, what kip is / is not, goals G1–G8, non-goals N1–N5. | §1 |
 | [glossary.md](./glossary.md) | Authoritative definitions: Fact, fact set, proj, EID, CID, HLC, INGEST-GATE, PROJ-demotion, microagent, functionality, learner, etc. | §1 Terminology + throughout |
 | [prior-art.md](./prior-art.md) | The HP hard-problems / T tensions the spec resolves; pointer to PRIOR-ART.md and the scorecard. No new claims. | PRIOR-ART.md + SCORECARD.md |
+| [DEBTS.md](./DEBTS.md) | Verified documentation-debt register **and resolution record** for this doc set: every audited finding, its evidence, suggested fix, and resolution status. | audit of docs/ vs SPEC.md |
 
 ### Requirements
 
@@ -76,7 +77,7 @@ These five invariants run through every document; nothing in the set may contrad
 |---|---|---|
 | [25-context-enablement-seams.md](./25-context-enablement-seams.md) | pin/asOf/recall/subscribe/provenance seams the context layer consumes (kip provides seams, not the layer — N1). | §4c |
 | [26-retrieval.md](./26-retrieval.md) | Hybrid vector→graph→RRF pipeline, typed as-of traversal, derived/incremental indexing, salience projection. | §5 |
-| [28-stack-integration.md](./28-stack-integration.md) | How kip integrates with the rest of the stack (babysitter-sdk, genty, adapters, atlas, kradle): what kip consumes/provides, the seams used, data flow, and ALREADY-IN-SPEC / GROUNDED-NEW / SPECULATIVE status per point. | SPEC + real packages |
+| [28-stack-integration.md](./28-stack-integration.md) | How kip integrates with the rest of the stack (trust-core, babysitter-sdk, genty, adapters, atlas, kradle) plus the repo-level implementation wiring (package name, workspace/build-chain position): what kip consumes/provides, the seams used, data flow, and ALREADY-IN-SPEC / GROUNDED-NEW / SPECULATIVE status per point. | SPEC + real packages |
 | [40-sdk-api-surface.md](./40-sdk-api-surface.md) | The Kip/Repo interface: lifecycle, facts, reads, distribution, provenance/ops, and the §5b active-layer seams. Illustrative-normative shapes. | §6 |
 
 ### Active knowledge

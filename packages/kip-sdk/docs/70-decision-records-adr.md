@@ -20,7 +20,7 @@ Each ADR distills one decision the spec already made and defends. **Status is Ac
 
 **Decision.** The INGEST-GATE admits a fact **iff** it is well-formed and its Ed25519 signature verifies over the canonical payload — **and nothing else**. A signature-valid fact is **always** admitted, even if old, unregistered, out-of-namespace, or revoked; all of those become **`proj`-time demotions**, never drops. Schema is likewise **not** a gate (M-8): non-conforming facts quarantine in `proj`, never rejected.
 
-**Consequences.** Equal received sets ⇒ equal admitted sets ⇒ byte-identical `/heads` (the SEC antecedent). Offline-first and convergence become compatible (a fact authored offline and synced late still verifies, C3-2). The cost is the DoS surface (ADR-013) and the need to move *all* trust to `proj`.
+**Consequences.** Equal received sets ⇒ equal admitted sets ⇒ byte-identical `/heads` (the SEC antecedent). Offline-first and convergence become compatible (a fact authored offline and synced late still verifies, C3-2). The cost is the DoS surface (ADR-010) and the need to move *all* trust to `proj`.
 
 **Rejected alternatives.** A receiver-physical-clock drift-ε ingest gate (made membership replica-local, dropped honest offline facts, still left a backdating band — C3-1/C3-2/C3-3); a key-log gate at ingest (second membership-divergence axis, M3-4).
 
@@ -114,7 +114,7 @@ Each ADR distills one decision the spec already made and defends. **Status is Ac
 
 **Context.** A far-ahead `wall` stamp would win all `lww-hlc` races forever (monotonic poisoning); a compromised key could backdate. The v3 `causedBy`-only rule was author-forgeable (omit `causedBy` ⇒ vacuous ancestry ⇒ no demotion, C4-2), and an eviction route could silently flip a backdate to trusted (C5-1).
 
-**Decision.** Police drift **inside `proj` with set-resident causal rules, never at the gate, never against a receiver clock**. PRIMARY: **per-key author-HLC monotonicity gated on per-key chain completeness** — `F` from `K` projects trusted only over `K`'s complete gap-free `(wall,counter)` chain (else `pending`), and is demoted `untrusted-anachronistic` if `S` holds a higher-HLC non-ancestor same-key fact in that complete chain. SECONDARY (tightening): voluntary `causedBy` dominance. Plus `causedBy` well-formedness demotion (M4-2).
+**Decision.** Police drift **inside `proj` with set-resident causal rules, never at the gate, never against a receiver clock**. PRIMARY: **per-key author-HLC monotonicity gated on per-key chain completeness** — `F` from `K` projects trusted only over `K`'s complete gap-free `seq` chain (else `pending`), and is demoted `untrusted-anachronistic` if `S` holds a higher-HLC non-ancestor same-key fact in that complete chain. SECONDARY (tightening): voluntary `causedBy` dominance. Plus `causedBy` well-formedness demotion (M4-2).
 
 **Consequences.** Backdating is bounded **relative to the key's own observed activity** — a key that emitted nothing higher can self-date a lone first-emission (acknowledged residual [R1](./90-open-questions.md)). Eviction-safe and monotone (INV-16/18/19). Honest late facts are kept (C3-2), unlike a clock gate. See [security](./50-security-trust-tenancy.md#83b-resource-exhaustion--dos-threat-model-c4-1-m4-5).
 

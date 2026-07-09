@@ -2,7 +2,7 @@
 
 > Purpose: the conceptual surface of kip — nodes/edges/properties, the cell + segment model, schema/ontology with versioned upcasters, episodic vs. semantic layers, and the provenance envelope.
 
-**Source:** SPEC §2 (lines ~241–412). Reads against the convergence core: cells/segments are produced by [`proj`](./24-synchronization-and-convergence.md), never authored.
+**Source:** SPEC §2 (line hints drift as SPEC grows; §-numbers are the citation). Reads against the convergence core: cells/segments are produced by [`proj`](./24-synchronization-and-convergence.md), never authored.
 
 ---
 
@@ -16,6 +16,34 @@ type CID = string;          // git object id (hex)
 type NodeKind = string;     // schema-defined, e.g. "person", "episode"
 type EdgeKind = string;     // schema-defined, e.g. "works_at", "derived_from"
 type PropKey = string;
+type ReplicaId = string;    // the author's stable, self-chosen replica id — signed (part of hlc and of the canonical payload, §2.4)
+                             // NORMATIVE (A-3, §4b.1/m7-1): a replicaId MUST be chosen so that no two
+                             //   CONCURRENTLY-WRITING processes ever share the same (replicaId, key) pair —
+                             //   a collision self-inflicts a fork (§4b.1, fork-detection §4b.1/A-2 — see the
+                             //   `(replicaId, key)` fork rule) and is the AUTHOR's responsibility
+                             //   to avoid (e.g. a process-unique nonce/instance id minted at process start,
+                             //   NOT a fixed hostname or a value shared across process restarts/instances).
+                             //   CHARSET CONSTRAINT: replicaId MUST NOT contain "/" — ChainId is rendered
+                             //   "<replicaId>/<keyFpr>" (§4b.1/m7-1), so an embedded "/" would make chain
+                             //   keys ambiguous to parse.
+                             // OPERATIONAL NOTE (A-8): a key SHOULD have at most one actively-writing
+                             //   replicaId at any moment — concurrent same-key emission from two different
+                             //   replicaIds can demote one side's facts on merge (§4b.1); see SPEC.md A-8.
+
+type ActorId = string;       // who/what asserted a fact — agent, human, or importer identity (Provenance.author, §2.4)
+type Ed25519Sig = string;    // base64-encoded 64-byte Ed25519 signature over the canonical payload (Provenance.signature, §2.4)
+
+/** The HLC stamp on every fact (§4b.1): author-stamped and signed. */
+interface HlcStamp { wall: number /* int64 ms */; counter: number /* uint32 */; replicaId: ReplicaId }
+
+/** A valid-time endpoint (`validFrom`/`validTo`). An author MAY supply either a full HLC stamp or a
+ *  plain wall-clock instant (ISO-8601 string or epoch-ms). CANONICAL ENCODING + TOTAL ORDER (m7-19 —
+ *  normative, because `orderKey`'s first component sorts on it): every HlcOrTime value canonicalizes
+ *  to the bigint `wall * 2^32 + counter`, where a plain instant coerces to `(wall = epochMs,
+ *  counter = 0)`. Comparison is over that bigint — so mixed representations in one cell sort
+ *  identically on every replica (ties fall through to orderKey's later components, §3.4). Two
+ *  implementations that sort mixed values differently are non-conformant (INV-3). */
+type HlcOrTime = HlcStamp | string /* ISO-8601 */ | number /* epoch ms */;
 type BlobRef = { blob: CID };                       // tagged: a reference to a large value blob (m-1)
 type PropValue = string | number | boolean | null | BlobRef; // large values → tagged BlobRef, never a bare CID string
 
@@ -23,7 +51,10 @@ interface NodeView {
   eid: EID;
   kind: NodeKind;
   props: Record<PropKey, PropCell>;   // each cell carries its own provenance + temporality
-  provenance: Provenance;             // latest asserting fact's provenance
+  provenance: Provenance;             // "LATEST" defined precisely (m7-8): the orderKey-max TRUSTED assert
+                                      //   among the facts covering the view's resolved asOf across ALL of
+                                      //   this node's cells, node-existence included — the node-level
+                                      //   summary of the same §3.4 total order, never a separate heuristic
 }
 
 interface EdgeView {
@@ -33,7 +64,7 @@ interface EdgeView {
   to: EID;
   props: Record<PropKey, PropCell>;
   validFrom: HlcOrTime; validTo: HlcOrTime | null;   // valid-time interval (Graphiti-style)
-  provenance: Provenance;
+  provenance: Provenance;                            // same m7-8 rule as NodeView, over the edge's cells
 }
 ```
 
@@ -145,11 +176,13 @@ interface FactAnnotation {
 The canonical signed payload of a `Fact` is built deterministically from **exactly** these fields, in this order, and the `factCID` is the content hash of that payload:
 
 ```
-[ v, type, target, value?, validFrom, validTo, hlc, causedBy?, supersedes?, reAttests?, author,
+[ v, type, target, value?, validFrom, validTo, hlc, seq, causedBy?, supersedes?, reAttests?, author,
   publicKeyFingerprint, replicaId ]
 ```
 
-That is, **every** author/replica/version-distinguishing field (`publicKeyFingerprint`, `replicaId`, the schema version `v`) is **in** the canonical payload. The `signature` field is the **only** field excluded (one cannot sign over one's own signature); `commit` and `rxFrom` are post-hoc annotations and are likewise excluded.
+That is, **every** author/replica/version-distinguishing field (`publicKeyFingerprint`, `replicaId`, the schema version `v`) is **in** the canonical payload, and so is the per-`(replicaId, key)` **chain sequence `seq`** (§4b.1/m7-1 — the signed contiguity witness read by the chain-completeness gate and pin-completeness; excluded from `orderKey`; see [convergence §1](./24-synchronization-and-convergence.md)). The `signature` field is the **only** field excluded (one cannot sign over one's own signature); `commit` and `rxFrom` are post-hoc annotations and are likewise excluded.
+
+**Well-formedness is normatively defined (m7-6)** — including that `signedFields` MUST equal the canonical list above exactly and in order (a mismatch is reject-malformed, never a partial verification): the enumerated checklist lives in [git substrate §2.1](./22-git-substrate.md#21-the-ingest-gate--signature-validity-only).
 
 **Consequences (normative):**
 
