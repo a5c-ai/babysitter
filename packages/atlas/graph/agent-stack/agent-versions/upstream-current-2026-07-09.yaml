@@ -179,38 +179,44 @@ edges:
     - evidence:codex-rust-v0-143-0-2026-07-09
 ---
 nodeKind: AgentVersion
-id: agentVersion:copilot:1-2-0
+id: agentVersion:copilot:1-0-69
 attributes:
   agentId: "copilot"
   agentProductId: agent:copilot-cli
-  displayName: "GitHub Copilot CLI extension 1.2.0"
+  displayName: "GitHub Copilot CLI 1.0.69"
   runtimeFamily: "cli-harness"
   releaseChannel: "stable"
-  versionRange: "1.2.0"
-  currentVersion: "1.2.0"
-  releasedAt: "2025-10-30"
-  sourcePackage: "github/gh-copilot"
-  upstreamReleaseTag: "v1.2.0"
-  releaseNotesUrl: "https://github.com/github/gh-copilot/releases/tag/v1.2.0"
+  versionRange: "1.0.69"
+  currentVersion: "1.0.69"
+  releasedAt: "2026-07-07"
+  sourcePackage: "@github/copilot"
+  upstreamReleaseTag: "v1.0.69"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.69"
   cliCommand: "gh copilot"
-  summary: "GitHub gh-copilot extension release announcing deprecation and migration toward the newer Copilot CLI and gh agent-task command set."
+  summary: "GitHub Copilot CLI release adding plugin dashboards and reloads, MCP OAuth/list/manager improvements, auto allow-all mode, reasoning-effort UI, delegate PR base selection, and session resume performance fixes."
   assimilationNotes:
-    - "Latest github/gh-copilot release is v1.2.0; graph previously recorded GitHub Copilot CLI 1.0.68 from the separate github/copilot-cli line."
-    - "The release notes announce the gh-copilot CLI extension deprecation and direct users to the newer Copilot CLI product."
-    - "Users are also pointed to the gh agent-task command set for kicking off and monitoring GitHub-hosted agent tasks."
-    - "Affected surface is migration planning and adapter target disambiguation: gh extension flows should not be conflated with the newer standalone Copilot CLI package."
-    - "No new gh-copilot feature flags were published; migration guidance is to evaluate github/copilot-cli and gh agent-task."
+    - "Latest stable github/copilot-cli release moved from recorded 1.0.68 to 1.0.69; prerelease 1.0.69-* builds were observed but not recorded as stable."
+    - "Installed plugin extensions can reload without restarting a session and a new /plugins dashboard manages installed plugins, affecting plugin lifecycle and command catalog modeling."
+    - "New /mcp list, mid-turn MCP manager access, CLI OAuth callback sign-in, OAuth-gated tool registration, and needs-auth retention affect MCP status and authentication flows."
+    - "Auto allow-all mode auto-approves requests judged acceptable by an LLM; /allow-all auto now requires experimental mode."
+    - "Footer reasoning-effort labels, minimal reasoning effort for gemini-3.5-flash, and reliable --reasoning-effort startup application affect model/reasoning UI metadata."
+    - "Delegate PRs now target the current branch by default and /delegate --base can choose another target branch."
+    - "Session resume/switch performance, large diff rendering, model/user pickers, sandbox network-policy behavior for web_fetch, and tgrep memory fallback were improved."
+    - "Install method remains gh extension install github/gh-copilot / @github/copilot; no package-name migration was published for the current github/copilot-cli line."
   releaseHighlights:
-    - "Deprecation notice for gh-copilot extension."
-    - "Migration pointer to newer Copilot CLI."
-    - "Migration pointer to gh agent-task."
+    - "/plugins dashboard and plugin extension reloads."
+    - "/mcp list, mid-turn MCP manager access, and OAuth callback flow."
+    - "Auto allow-all mode gated by experimental mode."
+    - "Reasoning-effort labels and gemini-3.5-flash minimal effort."
+    - "/delegate --base for PR target branch selection."
+    - "Session resume and large diff performance improvements."
   installMethods:
     - install:gh-extension
 edges:
   version_of:
     - agent:copilot-cli
   sourced_from:
-    - evidence:gh-copilot-1-2-0-2026-07-09
+    - evidence:copilot-cli-1-0-69-2026-07-09
 ---
 nodeKind: AgentVersion
 id: agentVersion:droid:0-168-2
