@@ -23,10 +23,10 @@
  *   - packages/kip-sdk/docs/21-data-model.md        (Fact-adjacent value/envelope types)
  */
 
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { CANONICAL_ENVELOPE_FIELDS, canonicalPayloadString } from "./canonical-payload";
+import { CANONICAL_ENVELOPE_FIELDS, canonicalPayloadString, deepSortKeys } from "./canonical-payload";
 import { checkWellFormed } from "./well-formed";
 import { ChainSequencer, chainIdFor } from "./chain-sequencer";
 import { tick as hlcTick, receiveTick as hlcReceiveTick } from "./hlc";
@@ -40,7 +40,7 @@ import {
   type Ed25519KeyPair,
 } from "./signing";
 import { gitBlobId, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
-import { proj, traverse, type ProjOptions } from "./proj";
+import { canon, compareByContent, compareOrderKey, orderKey, proj, traverse, type ProjOptions } from "./proj";
 import type { CellReducerAssociations } from "./cell-reducers";
 
 // ---------------------------------------------------------------------------
@@ -661,6 +661,22 @@ export class KipRepo implements Repo {
   private localHlc: HlcStamp | undefined;
   private readonly knownMaxVersion: number | undefined;
   private readonly cellReducers: CellReducerAssociations | undefined;
+  /**
+   * M2/T3.2 addition: this replica's own `FactAnnotation.rxFrom` record (docs/23 §1/§2.1) —
+   * "receiver-assigned at first verified ingest", kept ONLY for the txTime belief-audit lens
+   * (`asOf({txTime, believer})`), never consulted by `proj`/`orderKey`/any trust decision (the
+   * SAME exclusion `ingest()`'s own doc comment already establishes for `localHlc`'s receive-tick).
+   *
+   * Keyed by the fact's REAL content `oid` (the same oid `writeFactBlob`/`ingest` already compute),
+   * NOT by the caller-declared `f.id` — well-formed.ts's item-4 check is a length-only heuristic for
+   * externally-supplied facts, so two admitted facts can legitimately declare the SAME `id` with
+   * DIFFERENT content, and keying this map by `f.id` alone would let one fact's `ingest()` call
+   * overwrite (or mask) the other's `rxFrom` stamp, corrupting the belief-audit lens for a fact that
+   * was never actually re-ingested. Keying by `oid` instead makes two distinct-content facts collide
+   * here only on a real hash collision, exactly like the storage-layer keying in substrate.ts. See
+   * round3-witness-collision-fix.test.ts.
+   */
+  private readonly rxFromByOid = new Map<string, HlcStamp>();
 
   /**
    * TODO(M0/T1.1): a full `open()`-driven construction (genesis manifest, on-disk substrate) is
@@ -684,18 +700,16 @@ export class KipRepo implements Repo {
      */
     rootKeys?: string[];
     /**
-     * MAJOR-FINDING addition (round-3 wiring fix): the highest schema version `getNode`/`getEdge`/
-     * `query`'s `proj()` fold treats as "known" (see `ProjOptions.knownMaxVersion`, proj.ts) —
-     * previously only reachable as `proj()`'s own internal default (`1`), never as something a
-     * `KipRepo` caller could actually configure end-to-end. Defaults to `proj()`'s own default.
+     * The highest schema version `getNode`/`getEdge`/`query`'s `proj()` fold treats as "known"
+     * (see `ProjOptions.knownMaxVersion`, proj.ts) — configurable here so it is reachable
+     * end-to-end, not just a `proj()`-internal default. Defaults to `proj()`'s own default (`1`).
      */
     knownMaxVersion?: number;
     /**
-     * MAJOR-FINDING addition (round-3 wiring fix): a per-cell `CellReducerRef` association
-     * (cell-reducers.ts's `CellReducerAssociations`) threaded into every `proj()` call this repo
-     * makes (`getNode`/`getEdge`/`query`) — the seam that finally makes `gsetReducer`/
-     * `pncounterReducer` REACHABLE end-to-end from a real `KipRepo`, not merely unit-testable in
-     * isolation against raw `Fact` arrays (round-2's own documented gap; see cell-reducers.ts and
+     * A per-cell `CellReducerRef` association (cell-reducers.ts's `CellReducerAssociations`)
+     * threaded into every `proj()` call this repo makes (`getNode`/`getEdge`/`query`) — the seam
+     * that makes `gsetReducer`/`pncounterReducer` reachable end-to-end from a real `KipRepo`, not
+     * merely unit-testable in isolation against raw `Fact` arrays (see cell-reducers.ts and
      * proj.ts's `reduceCellByRef`).
      */
     cellReducers?: CellReducerAssociations;
@@ -934,13 +948,27 @@ export class KipRepo implements Repo {
       return { admitted: false, reason: "signature-invalid" };
     }
 
-    // ADMIT: write /facts/<shardHi>/<shardLo>/<f.id>.json — a real, content-addressed, idempotent
-    // git-blob write (INV-7's CID dedup happens inside `writeFactBlob`/`writeBlob`, T1.6).
-    this.getSubstrate().writeFactBlob(f.id, JSON.stringify(f));
+    // ADMIT: write the fact's content-addressed git-blob object (INV-7's CID dedup happens inside
+    // `writeFactBlob`/`writeBlob`, T1.6) at /facts/<oidShardHi>/<oidShardLo>/<oid>.json — keyed by
+    // the REAL content oid, never the caller-declared `f.id` (see substrate.ts's top-level doc
+    // comment for why: the oid-keyed object store is the SOLE content source, with only a
+    // lightweight eviction WITNESS pointer namespaced by BOTH `oid` and `f.id`, for `pin`/
+    // `resolvePin`'s A-7 retention-eviction story, never a duplicate copy of the fact's bytes).
+    const { oid } = this.getSubstrate().writeFactBlob(f.id, JSON.stringify(f));
 
     // Advance local HLC past f.hlc (receive-advance, docs/22 §2.1 step 3) — audit-only, never
     // touches this fact's own seq chain (m7-1), never affects the returned verdict.
     this.localHlc = hlcReceiveTick(this.localHlc, f.hlc, this.replicaId);
+
+    // M2/T3.2 addition: stamp `FactAnnotation.rxFrom` = this replica's local HLC AT FIRST verified
+    // ingest (docs/23 §1/§2.1) — genuinely `this.localHlc` right after the receive-tick above, so it
+    // is strictly monotone in THIS replica's own ingest order. Recorded ONLY the first time this
+    // fact's own real content `oid` (not the caller-declared `f.id` — see `rxFromByOid`'s doc
+    // comment) is admitted (re-offering an already-admitted fact, INV-7a, must never overwrite the
+    // ORIGINAL belief-order stamp with a later one).
+    if (!this.rxFromByOid.has(oid)) {
+      this.rxFromByOid.set(oid, this.localHlc);
+    }
 
     return { admitted: true };
   }
@@ -961,14 +989,13 @@ export class KipRepo implements Repo {
    * incremental/cached `/heads`, an M1-scope simplification; correctness, not staleness, is the
    * exit criterion here) so a subsequent `ingest()` is always reflected on the next read.
    *
-   * `asOf` is M2/T3.2 scope (bitemporal snapshot lens) — honoring it here would mean either
-   * silently ignoring the caller's requested lens (a fallback, banned by the repo's own
-   * "fallbacks are evil" rule) or fabricating a lens this milestone doesn't implement, so an
-   * explicit `asOf` throws rather than silently reading the unscoped projection instead.
+   * M2/T3.2 UPDATE: `asOf` now genuinely delegates to `this.asOf(asOf)` (below) rather than
+   * throwing — an explicit lens request is honored, not silently ignored (the repo's own
+   * "fallbacks are evil" rule cuts the other way now that a real lens exists to route to).
    */
   async getNode(eid: EID, asOf?: AsOf): Promise<NodeView | null> {
     if (asOf !== undefined) {
-      throw new Error("unimplemented: getNode with asOf (M2/T3.2 bitemporal snapshot lens)");
+      return (await this.asOf(asOf)).getNode(eid);
     }
     return proj(this.currentFacts(), this.projOptions()).getNode(eid);
   }
@@ -976,29 +1003,30 @@ export class KipRepo implements Repo {
   /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment). */
   async getEdge(eid: EID, asOf?: AsOf): Promise<EdgeView | null> {
     if (asOf !== undefined) {
-      throw new Error("unimplemented: getEdge with asOf (M2/T3.2 bitemporal snapshot lens)");
+      return (await this.asOf(asOf)).getEdge(eid);
     }
     return proj(this.currentFacts(), this.projOptions()).getEdge(eid);
   }
 
   /**
    * T2.7.2: typed directional BFS with MANDATORY `depth`/`maxFanout` (m7-21, no unbounded default)
-   * over the current `proj` projection. `spec.asOf` is M2/T3.2 scope — see `getNode`'s doc comment
-   * for why an explicit `asOf` throws rather than silently traversing the unscoped projection.
+   * over the current `proj` projection. `spec.asOf` (M2/T3.2) now delegates to the SAME lens
+   * `getNode`/`getEdge` use (see above) rather than throwing.
    */
   async *query(spec: TraversalSpec): AsyncIterable<NodeView | EdgeView> {
     if (spec.asOf !== undefined) {
-      throw new Error("unimplemented: query with asOf (M2/T3.2 bitemporal snapshot lens)");
+      const view = await this.asOf(spec.asOf);
+      yield* view.query(spec);
+      return;
     }
     const projection = proj(this.currentFacts(), this.projOptions());
     yield* traverse(projection, spec);
   }
 
   /**
-   * MAJOR-FINDING addition (round-3 wiring fix): threads this repo's constructor-supplied
-   * `knownMaxVersion`/`cellReducers` into every `proj()` call (`getNode`/`getEdge`/`query`) — the
-   * gap round-2 left open where these existed only as `proj()`-internal defaults/unit-tested-in-
-   * isolation seams, never reachable from a real `KipRepo` read path.
+   * Threads this repo's constructor-supplied `knownMaxVersion`/`cellReducers` into every `proj()`
+   * call (`getNode`/`getEdge`/`query`), so these are reachable from a real `KipRepo` read path
+   * rather than only `proj()`-internal defaults/unit-tested-in-isolation seams.
    */
   private projOptions(): ProjOptions {
     return { knownMaxVersion: this.knownMaxVersion, cellReducers: this.cellReducers };
@@ -1008,9 +1036,19 @@ export class KipRepo implements Repo {
    * every durably-written `/facts/**` blob, deduplicated by content hash (INV-7a), parsed back
    * into `Fact` envelopes. */
   private currentFacts(): Fact[] {
+    return this.currentFactsWithOid().map(({ fact }) => fact);
+  }
+
+  /**
+   * The same fold as `currentFacts()` above, but keeps each surviving fact's real content `oid`
+   * alongside its parsed `Fact` envelope — needed by `asOf`'s txTime belief-audit lens (below) to
+   * look up `rxFromByOid` by the SAME collision-safe key `ingest()` stamps it with, rather than the
+   * caller-declared (and unverified) `Fact.id`.
+   */
+  private currentFactsWithOid(): Array<{ oid: string; fact: Fact }> {
     return this.getSubstrate()
-      .listFactBlobs()
-      .map((json) => JSON.parse(json) as Fact);
+      .listFactBlobsWithOid()
+      .map(({ oid, json }) => ({ oid, fact: JSON.parse(json) as Fact }));
   }
 
   // TODO(M4/T5.5): hybrid vector+graph+RRF recall pipeline.
@@ -1018,21 +1056,185 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: recall");
   }
 
-  // TODO(M2/T3.2): bitemporal snapshot lens (valid-time / belief-audit txTime).
-  async asOf(_asOf: AsOf): Promise<ReadView> {
-    throw new Error("unimplemented: asOf");
+  /**
+   * T3.2: the bitemporal snapshot lens — the two INDEPENDENT axes docs/23 §2.1/§3 tables out.
+   *
+   * `validTime` (INV-11, convergent): filters each returned view's `PropCell.segments` down to the
+   * (at most one, since segments are non-overlapping) segment covering the instant — a pure
+   * function of the admitted set, NEVER `rxFrom`, NEVER a commit-DAG walk (docs/23 §3's "proj-pure"
+   * clause). When `validTime` is omitted, the full (unfiltered) segment geometry is returned, same
+   * as a plain `getNode`/`getEdge` read.
+   *
+   * `txTime`+`believer` (INV-4, per-replica AUDIT, explicitly non-convergent): selects the subset
+   * of the admitted set whose `FactAnnotation.rxFrom` (this replica's OWN receive-tick history,
+   * `rxFromByOid`) is `<= txTime`, THEN `proj`-folds that subset — "what did replica R believe at
+   * transaction-time T", never a world-truth claim. `believer` other than this repo's own
+   * `replicaId` is out of reach without M3's `sync` (this replica has no way to observe another
+   * replica's `rxFrom` order) — rejected explicitly rather than silently substituting this
+   * replica's own belief for the requested one (see this task's disputes for the scope note; the
+   * frozen INV-4 suite itself documents this exact single-replica scope).
+   */
+  async asOf(asOf: AsOf): Promise<ReadView> {
+    const believer = asOf.believer ?? this.replicaId;
+    let facts: Fact[];
+    if (asOf.txTime !== undefined) {
+      if (believer !== this.replicaId) {
+        throw new Error(
+          "unimplemented: asOf({txTime, believer}) for a believer other than this replica's own replicaId " +
+            "— cross-replica belief-audit requires M3 sync machinery (this replica cannot observe another " +
+            "replica's rxFrom ingest order)",
+        );
+      }
+      const cutoff = asOf.txTime;
+      facts = this.currentFactsWithOid()
+        .filter(({ oid }) => {
+          // Looked up by the fact's real content `oid` (matching how `ingest()` stamps
+          // `rxFromByOid`), NOT by the caller-declared `f.id` — see `rxFromByOid`'s own doc comment
+          // for why keying this by the unverified declared id would be a same-class bug.
+          const rxFrom = this.rxFromByOid.get(oid);
+          // A durably-held fact this replica never itself recorded an in-memory rxFrom for (e.g. a
+          // fresh `KipRepo` instance re-opened against an existing `dir`, since `rxFromByOid` is
+          // in-memory-only this round — see its own doc comment) is conservatively EXCLUDED from the
+          // belief-audit lens rather than guessed either way — never fabricating a belief this
+          // replica cannot actually attest to.
+          if (rxFrom === undefined) return false;
+          return canon(rxFrom) <= canon(cutoff);
+        })
+        .map(({ fact }) => fact);
+    } else {
+      // The convergent validTime-only lens (INV-11): the full currently-admitted set, exactly like
+      // a plain `getNode`/`getEdge` read — never consults `rxFrom` at all.
+      facts = this.currentFacts();
+    }
+
+    const projection = proj(facts, this.projOptions());
+    const validTime = asOf.validTime;
+
+    const applyValidTimeLens = <T extends NodeView | EdgeView>(view: T | null): T | null => {
+      if (!view || validTime === undefined) return view;
+      return filterViewToInstant(view, validTime);
+    };
+
+    const view: ReadView = {
+      getNode: async (eid: EID) => applyValidTimeLens(projection.getNode(eid)),
+      getEdge: async (eid: EID) => applyValidTimeLens(projection.getEdge(eid)),
+      async *query(spec: Omit<TraversalSpec, "asOf">) {
+        for (const item of traverse(projection, spec as TraversalSpec)) {
+          const filtered = applyValidTimeLens(item);
+          if (filtered) yield filtered;
+        }
+      },
+      // TODO(M4/T5.5): the hybrid vector+graph+RRF recall pipeline is out of M2 scope — same gap
+      // as `KipRepo.recall` itself (below).
+      recall: async () => {
+        throw new Error("unimplemented: recall (M4/T5.5 hybrid recall pipeline)");
+      },
+    };
+    return view;
   }
 
-  // TODO(M3/T3.5): frontier-addressed SnapshotRef (survives excision, ADR-006).
-  async pin(_scope: ScopeRef, _asOf?: AsOf): Promise<SnapshotRef> {
-    throw new Error("unimplemented: pin");
+  /**
+   * T3.5: a frontier-addressed `SnapshotRef` (ADR-006) — durably content-addresses the
+   * per-`(replicaId,keyFpr)` CHAIN frontier (`frontier.chainSeq`, "highest seq per chain AT PIN
+   * TIME", docs/25's `Frontier` doc comment), never a commit CID (C2-3/M2-2: pins survive excision
+   * because they never point at transport). `factSetDigest` is an order-independent merkle-style
+   * digest (`computeFactSetDigest`, sorted by the SAME `orderKey` ordering `proj()` itself uses,
+   * with a `compareByContent` tiebreak — see that method's own doc comment for why `orderKey` alone
+   * is NOT sufficient: two admitted facts can share a forged, caller-declared `id` and genuinely tie)
+   * over the deterministically-selected sub-frontier subset AT PIN TIME — `resolvePin` below always
+   * RECOMPUTES this from whatever the resolving replica currently holds, never trusting this
+   * pin-time value as a cached answer (docs/25: "recomputed from the current set, NOT a snapshot
+   * hash of the set as it was when pinned").
+   *
+   * `scope.tenant`/`scope.namespace`-based narrowing is NOT implemented (see this task's disputes):
+   * this SDK's own frozen fixtures never namespace `EID`s by tenant, so there is no sound way to
+   * filter the frontier by `scope` without inventing an un-spec'd convention — the pinned frontier
+   * spans every chain this replica currently holds, matching INV-14a's own single-replica,
+   * no-narrowing test scope. An explicit `asOf` is rejected rather than silently ignored (a combined
+   * time-cut + chain-frontier pin is M3+ scope, not yet a sound composition here).
+   */
+  async pin(_scope: ScopeRef, asOf?: AsOf): Promise<SnapshotRef> {
+    if (asOf !== undefined) {
+      throw new Error("unimplemented: pin with asOf (a combined time-cut + chain-frontier pin is M3+ scope)");
+    }
+    const facts = this.currentFacts();
+    const chainSeq = this.computeChainFrontier(facts);
+    const subset = this.subsetForFrontier(facts, chainSeq);
+    const factSetDigest = this.computeFactSetDigest(subset);
+    return { frontier: { chainSeq }, factSetDigest };
   }
 
-  // TODO(M3/T3.5): re-resolve a pin against the current set (pin-incomplete vs pin-complete).
+  /**
+   * T3.5: re-resolve `ref` against whatever this replica CURRENTLY holds (docs/25's
+   * pin-completeness rule): per enumerated `chainId`, every `seq` in `[0, frontier.chainSeq[chainId]]`
+   * MUST be present (seq-CONTIGUITY, never `hlc`) — a single detected gap on ANY enumerated chain
+   * flips the whole pin `"pin-incomplete"` (N5: never a silent partial digest). A chain the pin
+   * never enumerated is simply excluded from both the completeness check and the digest — never
+   * grown by facts arriving on a chain the pin didn't capture. When complete, `factSetDigest` is
+   * RECOMPUTED fresh from the current set (never reused verbatim from `ref.factSetDigest`) so a
+   * `resolvePin` genuinely proves "the subset I hold right now digests to X", including regressing
+   * to `pin-incomplete` after a simulated local-store eviction (A-7) and recovering the ORIGINAL
+   * digest once the evicted bytes are restored (both exercised by inv-14a.test.ts).
+   */
   async resolvePin(
-    _ref: SnapshotRef,
+    ref: SnapshotRef,
   ): Promise<{ status: "pin-incomplete" } | { status: "pin-complete"; factSetDigest: CID }> {
-    throw new Error("unimplemented: resolvePin");
+    const facts = this.currentFacts();
+    const seqsByChain = new Map<ChainId, Set<number>>();
+    for (const f of facts) {
+      const chainId = chainIdFor(f.replicaId, f.provenance.publicKeyFingerprint);
+      const held = seqsByChain.get(chainId);
+      if (held) held.add(f.seq);
+      else seqsByChain.set(chainId, new Set([f.seq]));
+    }
+    for (const [chainId, maxSeq] of Object.entries(ref.frontier.chainSeq)) {
+      const held = seqsByChain.get(chainId) ?? new Set<number>();
+      for (let seq = 0; seq <= maxSeq; seq += 1) {
+        if (!held.has(seq)) return { status: "pin-incomplete" };
+      }
+    }
+    const subset = this.subsetForFrontier(facts, ref.frontier.chainSeq);
+    return { status: "pin-complete", factSetDigest: this.computeFactSetDigest(subset) };
+  }
+
+  /** The `(replicaId,keyFpr)` chain frontier "at pin time" — the highest `seq` THIS replica has
+   * currently seen per chain (docs/25's `Frontier.chainSeq` doc comment), regardless of whether
+   * every lower `seq` has actually been delivered yet (that gap is what `resolvePin` detects). */
+  private computeChainFrontier(facts: readonly Fact[]): Record<ChainId, number> {
+    const frontier: Record<ChainId, number> = {};
+    for (const f of facts) {
+      const chainId = chainIdFor(f.replicaId, f.provenance.publicKeyFingerprint);
+      const current = frontier[chainId];
+      if (current === undefined || f.seq > current) frontier[chainId] = f.seq;
+    }
+    return frontier;
+  }
+
+  /** The deterministically-selected pin subset (docs/25, verbatim):
+   * `{ f ∈ S_current : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }` —
+   * a chain ABSENT from `frontier` is EXCLUDED entirely, never implicitly included. */
+  private subsetForFrontier(facts: readonly Fact[], frontier: Record<ChainId, number>): Fact[] {
+    return facts.filter((f) => {
+      const chainId = chainIdFor(f.replicaId, f.provenance.publicKeyFingerprint);
+      const maxSeq = frontier[chainId];
+      return maxSeq !== undefined && f.seq <= maxSeq;
+    });
+  }
+
+  /** An order-independent digest of `facts`: sort by the SAME `orderKey` ordering `proj()` uses
+   * (never by ingest/array position), WITH `compareByContent` appended as a secondary key (see
+   * `compareOrderKey`'s doc comment in proj.ts for why a bare `orderKey` comparison alone can
+   * genuinely tie between distinct-content facts — `Array.prototype.sort` is stable, so without this
+   * secondary key, tied facts would keep whatever relative ingest/array position they happened to
+   * occupy, which differs across replicas). Each fact's key order is also canonicalized
+   * (`deepSortKeys`, the same helper every other content-equality check in this codebase relies on)
+   * before hashing. Two replicas holding the identical subset — regardless of the order they
+   * received it in — always compute the identical digest. See round4-digest-tiebreak-fix.test.ts.
+   */
+  private computeFactSetDigest(facts: readonly Fact[]): CID {
+    const sorted = [...facts].sort((a, b) => compareOrderKey(orderKey(a), orderKey(b)) || compareByContent(a, b));
+    const canonicalized = sorted.map((f) => deepSortKeys(f));
+    return createHash(this.hashAlgo).update(JSON.stringify(canonicalized)).digest("hex");
   }
 
   // TODO(M3/T4.2): content-addressed set-union sync delta.
@@ -1127,6 +1329,38 @@ export class KipRepo implements Repo {
   ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }> {
     throw new Error("unimplemented: learn");
   }
+}
+
+// ---------------------------------------------------------------------------
+// 9b. M2/T3.2 helper: the `asOf({validTime})` per-segment instant filter.
+// ---------------------------------------------------------------------------
+
+/**
+ * True iff `seg`'s own `[validFrom, validTo)` (half-open — `validTo === null` means the open tail)
+ * contains the instant `at` — the SAME half-open convention `proj.ts`'s own `covers()` sweep uses,
+ * so `asOf({validTime})` picks the identical segment a plain fold's geometry already implies.
+ */
+function segmentCoversInstant(seg: CellSegment, at: bigint): boolean {
+  if (canon(seg.validFrom) > at) return false;
+  if (seg.validTo === null) return true;
+  return canon(seg.validTo) > at;
+}
+
+/**
+ * `asOf({validTime: V})` = `proj(S)` "filtered to segments covering V" (docs/23 §3, verbatim) — a
+ * PURE, per-cell narrowing of an already-materialized `NodeView`/`EdgeView`'s `PropCell.segments`
+ * arrays to the (at most one, since segments are non-overlapping by construction) segment covering
+ * the instant `validTime`. Never re-derives `kind`/`provenance`/edge topology — those are properties
+ * of the WHOLE view, not of a single valid-time slice, and `proj`'s existence-gating has already
+ * baked "does this entity exist at this instant" into each prop cell's own segment geometry.
+ */
+function filterViewToInstant<T extends NodeView | EdgeView>(view: T, validTime: HlcOrTime): T {
+  const at = canon(validTime);
+  const props: Record<PropKey, PropCell> = {};
+  for (const [prop, cell] of Object.entries(view.props)) {
+    props[prop] = { segments: cell.segments.filter((seg) => segmentCoversInstant(seg, at)) };
+  }
+  return { ...view, props };
 }
 
 // ---------------------------------------------------------------------------

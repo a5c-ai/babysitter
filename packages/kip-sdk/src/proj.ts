@@ -4,8 +4,10 @@
  * `NodeView`/`EdgeView` projections) from the admitted fact SET. Implements the WBS pipeline in
  * dependency order:
  *
- *   T2.1 orderKey (a genuine TOTAL order over set-resident fields, ending in
- *        publicKeyFingerprint then factCID so two distinct admitted facts never tie) ->
+ *   T2.1 orderKey (a deterministic ordering over set-resident fields, ending in
+ *        publicKeyFingerprint then factCID; NOT a genuine total order over content — see
+ *        `compareOrderKey`'s doc comment for why a `factCID` tie is possible and how callers that
+ *        need full determinism close it) ->
  *   T2.2 the fold pipeline (sort by orderKey -> group by cell -> upcast -> reduce; a pure,
  *        whole-set function, never a pairwise/binary merge) ->
  *   T2.3 cell reducers (the DEFAULT `lww-hlc` sweep: at each elementary valid-time sub-interval,
@@ -17,36 +19,30 @@
  *        never a silent orderKey/hash tiebreak) ->
  *   T2.7 the read surface `getNode`/`getEdge`/typed traversal that `index.ts`'s `KipRepo` calls.
  *
- * T2.4 (versioned upcasters) SCOPE NOTE (ROUND-2 UPDATE): SPEC.md §2.2 defines upcasting against a
- * per-tenant ONTOLOGY (`NodeKindDef.version` + declarative upcasters keyed on it). `index.ts`'s
- * `Repo` surface still exposes NO ontology/schema-registration method (no `NodeKindDef`/
- * `defineNodeKind`-shaped API) — this is the exact gap INV-8's own test file documents ("SURFACE
- * GAP") rather than papering over, and remains genuinely unimplemented (there is still no way to
- * declare a per-kind "current version" or a required-field schema). What round-2 DOES add: a
- * fact's `v` is no longer BLINDLY passed through regardless of magnitude — `reduceRawCell` now
- * quarantines (a real, typed `CellSegment{kind:"quarantine"}`, see index.ts) any fact whose `v`
- * exceeds `proj()`'s configured `knownMaxVersion` (default `1`, the only version this SDK's own
- * fixtures/self-authored facts currently declare) instead of trusting its `value`. This still never
- * throws and never fabricates data (INV-8's core clause) — it is the honest, minimal "unknown
- * versions pass through as opaque-quarantined" half of INV-8 taken as far as it can go without a
- * real per-tenant "known version" registry — see this task's `disputes` output for why a genuine
- * per-kind version comparison remains out of reach absent that registry. ROUND-3 UPDATE: this
- * threshold is no longer only a `proj()`-internal default — `KipRepo`'s own constructor now accepts
- * a `knownMaxVersion` option threaded through every `getNode`/`getEdge`/`query` call (index.ts),
- * closing round 2's own flagged gap that it was otherwise unreachable end-to-end.
+ * T2.4 (versioned upcasters) SCOPE NOTE: SPEC.md §2.2 defines upcasting against a per-tenant
+ * ONTOLOGY (`NodeKindDef.version` + declarative upcasters keyed on it). `index.ts`'s `Repo` surface
+ * still exposes no ontology/schema-registration method (no `NodeKindDef`/`defineNodeKind`-shaped
+ * API), so a real per-kind version comparison remains out of reach — the gap INV-8's own test file
+ * documents ("SURFACE GAP", see also this task's `disputes`). What IS implemented: a fact's `v` is
+ * not blindly passed through regardless of magnitude — `reduceRawCell` quarantines (a typed
+ * `CellSegment{kind:"quarantine"}`, see index.ts) any fact whose `v` exceeds `proj()`'s configured
+ * `knownMaxVersion` (default `1`) instead of trusting its `value`, the honest "unknown versions
+ * pass through as opaque-quarantined" half of INV-8's never-throw/never-fabricate contract.
+ * `KipRepo`'s constructor threads a `knownMaxVersion` option through every `getNode`/`getEdge`/
+ * `query` call (index.ts) so this threshold is configurable end-to-end, not just a `proj()`-internal
+ * default.
  *
- * T2.3 SCOPE NOTE (ROUND-3 UPDATE): round 2 left `gsetReducer`/`pncounterReducer` real and unit-
- * tested but UNREACHABLE from `getNode`/`getEdge`/`query` (flagged as a MAJOR gap: no `KipRepo`
- * caller could ever select them end-to-end). Round 3 wires them in: `getNode`/`getEdge` now
- * dispatch every node-prop/edge-prop cell through `reduceCellByRef`, which consults a caller-
- * supplied `cellReducers` association (`ProjOptions.cellReducers`, threaded from `KipRepo`'s own
- * constructor option, see index.ts) and only falls back to the DEFAULT `lww-hlc` sweep
- * (`reduceRawCell`, still existence-gating/conflict-surfacing/quarantine-aware) when no association
- * names a cell. This is still SHORT of a full per-`NodeKindDef`/`EdgeKindDef` ontology-driven
- * registration surface (the exact gap inv-3.test.ts's and inv-7.test.ts's own `it.skip` blocks
- * document remains genuinely unimplemented — those frozen tests still cannot SELECT a reducer
- * without a schema-registration API) — see disputes — but a `CellReducerAssociations` map is now a
- * real, minimal, directly end-to-end-testable seam rather than only unit-testable in isolation.
+ * T2.3 SCOPE NOTE: `gsetReducer`/`pncounterReducer` (cell-reducers.ts) are real, unit-tested cell
+ * reducers, reachable end-to-end via `getNode`/`getEdge`'s `reduceCellByRef`, which dispatches every
+ * node-prop/edge-prop cell through a caller-supplied `cellReducers` association
+ * (`ProjOptions.cellReducers`, threaded from `KipRepo`'s own constructor option, see index.ts) and
+ * falls back to the DEFAULT `lww-hlc` sweep (`reduceRawCell`, still existence-gating/conflict-
+ * surfacing/quarantine-aware) when no association names a cell. This is still SHORT of a full
+ * per-`NodeKindDef`/`EdgeKindDef` ontology-driven registration surface (the gap inv-3.test.ts's and
+ * inv-7.test.ts's own `it.skip` blocks document remains genuinely unimplemented — those frozen
+ * tests still cannot SELECT a reducer without a schema-registration API, see disputes) — but
+ * `CellReducerAssociations` is a real, minimal, directly end-to-end-testable seam rather than only
+ * unit-testable in isolation.
  */
 import type {
   CellSegment,
@@ -111,16 +107,31 @@ export function decanon(v: bigint): HlcOrTime {
   return { wall: Number(wall), counter: Number(counter), replicaId: DECANON_BOUNDARY_SENTINEL_REPLICA_ID };
 }
 
-type OrderKeyTuple = readonly [bigint, bigint, number, string, string, string];
+export type OrderKeyTuple = readonly [bigint, bigint, number, string, string, string];
 
-function orderKey(f: Fact): OrderKeyTuple {
+/**
+ * Exported (was module-private) so `index.ts`'s `pin()`/`resolvePin()` can compute a
+ * `factSetDigest` that is a "merkle root over orderKey" (docs/25-context-enablement-seams.md's
+ * `SnapshotRef` doc comment) using the SAME ordering `proj()` itself uses, rather than
+ * reimplementing a parallel ordering just for pin's digest. See `compareOrderKey`'s doc comment for
+ * why `computeFactSetDigest` additionally appends `compareByContent` before hashing.
+ */
+export function orderKey(f: Fact): OrderKeyTuple {
   return [canon(f.validFrom), BigInt(Math.trunc(f.hlc.wall)), f.hlc.counter, f.replicaId, f.provenance.publicKeyFingerprint, f.id];
 }
 
-/** Total order comparison — INV-3 requires no two DISTINCT admitted facts ever tie (the final
- * `factCID` component is a genuine tiebreak because the canonical payload covers every
- * author/replica/version-distinguishing field, §2.4/M2-1). */
-function compareOrderKey(a: OrderKeyTuple, b: OrderKeyTuple): -1 | 0 | 1 {
+/** Deterministic comparison over `OrderKeyTuple`'s components — NOT a genuine total order in the
+ * strict sense INV-3 would want: the final component, `factCID`, is the caller-DECLARED `Fact.id`,
+ * never verified against a real content hash for externally-supplied facts (well-formed.ts's item-4
+ * admission check is a documented LENGTH-ONLY heuristic, see its doc comment). Two admitted facts
+ * with DIFFERENT content can therefore legitimately share the same declared `id` and tie on EVERY
+ * component here, including this supposedly-final tiebreak. Any caller that needs full determinism
+ * over such a tie MUST append a content-based tiebreak afterwards — see `maxByOrderKey`'s use of
+ * `compareByContent` for the pattern every real consumer (`maxByOrderKey`, `computeFactSetDigest`
+ * in index.ts, `tiedGroupDiffersOn`) already follows. Do not remove those `compareByContent`
+ * tiebreaks as "redundant" — see round2-critic-fixes.test.ts and round4-digest-tiebreak-fix.test.ts
+ * for the regressions this invariant guards against. */
+export function compareOrderKey(a: OrderKeyTuple, b: OrderKeyTuple): -1 | 0 | 1 {
   for (let i = 0; i < a.length; i += 1) {
     const av = a[i];
     const bv = b[i];
@@ -143,19 +154,14 @@ function compareOrderKey(a: OrderKeyTuple, b: OrderKeyTuple): -1 | 0 | 1 {
  * function of content, so the same representative is chosen regardless of which order the group's
  * members happen to be enumerated in on a given replica.
  *
- * ROOT-CAUSE FIX (round 4): raw `JSON.stringify(a)`/`JSON.stringify(b)` is sensitive to each `Fact`
- * object's own property INSERTION order, not just its field VALUES — two facts that are deep-equal
- * (identical field values, e.g. one rebuilt from the other with keys spread in a different sequence)
- * previously produced DIFFERENT `JSON.stringify` output and therefore could compare differently
- * depending on incidental JS object key order. Because `ingest()`'s signature verification uses
- * `canonicalPayloadString` (which DOES call `deepSortKeys`, canonical-payload.ts) while raw fact
- * persistence/storage does NOT canonicalize key order, an externally-supplied fact's wire-level key
- * order is fully attacker-controlled and unconstrained by admission — so two replicas could receive
- * byte-different-but-content-identical copies of a colliding fact and compute DIFFERENT
- * `compareByContent` winners, reopening the exact SEC-breaking divergence class this whole milestone
- * has been fixing. Fixed by reusing the SAME `deepSortKeys` canonicalization `canonicalPayloadString`
- * already relies on (imported from canonical-payload.ts, never reimplemented here) before stringifying
- * each side, so the comparison is a pure function of content regardless of key insertion order. */
+ * INVARIANT: comparison is over `deepSortKeys(a)`/`deepSortKeys(b)` (canonical-payload.ts's own
+ * canonicalization helper, never reimplemented here), NOT raw `JSON.stringify`. Raw `JSON.stringify`
+ * is sensitive to a `Fact` object's property INSERTION order, not just its field VALUES — and since
+ * `ingest()`'s signature verification canonicalizes via `canonicalPayloadString` (which calls
+ * `deepSortKeys`) while raw fact storage does not, an externally-supplied fact's wire-level key order
+ * is attacker-controlled and unconstrained by admission. Canonicalizing before stringifying keeps
+ * this comparison a pure function of content regardless of key insertion order — see
+ * round4-digest-tiebreak-fix.test.ts for the regression this guards against. */
 export function compareByContent(a: Fact, b: Fact): -1 | 0 | 1 {
   const as = JSON.stringify(deepSortKeys(a));
   const bs = JSON.stringify(deepSortKeys(b));
@@ -163,32 +169,23 @@ export function compareByContent(a: Fact, b: Fact): -1 | 0 | 1 {
 }
 
 /**
- * ROOT-CAUSE FIX (round 3 — replaces round 2's narrower `maxTiedGroup`, which fixed only
- * `reduceRawCell`'s own prop-value sweep and left every OTHER `maxByOrderKey` call site
- * (`kindWinner` in `getNode`/`getEdge`, `pickProvenance`, `cell-reducers.ts`'s `assertedBy` picks)
- * silently vulnerable to the exact same bug three independent critics live-reproduced there):
- * `orderKey` is declared a TOTAL order (SPEC.md §3.4/§4b.4: "two distinct admitted facts can never
- * tie on all components") because its final tiebreak, `factCID`, is supposed to cover every
- * author/replica/version-distinguishing field of the canonical payload. That totality claim is
- * sound for SELF-MINTED facts (index.ts's `mintFact` always derives `id` as the REAL content hash)
- * but NOT for externally-supplied facts: well-formed.ts's item-4 self-consistency check is a
- * documented, deliberately WEAK length-only bound (see well-formed.ts's own dispute comment), not a
- * real hash-recompute-and-compare. So an external caller can declare a false `id` that collides
- * with another fact's `id` while asserting different content — producing a GENUINE orderKey tie
- * (every component, including the "total" factCID tiebreak, compares equal) between two facts that
- * are not actually the same fact.
+ * `orderKey`'s final tiebreak, `factCID`, is the caller-DECLARED `Fact.id` — sound as a true
+ * differentiator for SELF-MINTED facts (index.ts's `mintFact` always derives `id` as the real
+ * content hash) but NOT for externally-supplied facts, since well-formed.ts's item-4
+ * self-consistency check is a documented, deliberately weak length-only bound (see its doc
+ * comment), not a real hash-recompute-and-compare. So a genuine orderKey tie (every component,
+ * including `factCID`, compares equal) between two facts that are not actually the same fact is
+ * possible — see `compareOrderKey`'s doc comment.
  *
- * `maxByOrderKey` now returns BOTH a deterministic `winner` (picked by `compareByContent`, a pure
- * function of the tied group's CONTENT, never of which element happened to arrive first in this
- * replica's local `facts` array — `Substrate.listFactBlobs` returns facts in first-write/ingest
- * order, see substrate.ts) AND the full `tied` group, so every caller can itself decide whether a
- * tie is a harmless content-identical duplicate (order truly doesn't matter, `winner` is fine as
- * projected) or a genuine content-different conflict that must be surfaced honestly rather than
- * laundered as if silently picking `winner` were the documented semantics. This makes `winner`
- * itself already convergent (two replicas ingesting the same tied set in opposite orders now always
- * pick the SAME `winner`, closing the SEC/convergence violation on its own), while `tied` lets
- * callers ALSO flag the ambiguity when the group is genuinely content-different (see `kindWinner`/
- * `pickProvenance` below, and `reduceRawCell`'s own conflict-surfacing use).
+ * `maxByOrderKey` therefore returns BOTH a deterministic `winner` (picked by `compareByContent`, a
+ * pure function of the tied group's CONTENT, never of which element happened to arrive first in
+ * this replica's local `facts` array — `Substrate.listFactBlobs` returns facts in first-write/ingest
+ * order, see substrate.ts) AND the full `tied` group, so every caller can decide whether a tie is a
+ * harmless content-identical duplicate (`winner` is fine as projected) or a genuine content-different
+ * conflict that must be surfaced honestly (see `kindWinner`/`pickProvenance` below, and
+ * `reduceRawCell`'s own conflict-surfacing use). This makes `winner` itself convergent: two replicas
+ * ingesting the same tied set in opposite orders always pick the SAME `winner`. See
+ * round2-critic-fixes.test.ts / round3-witness-collision-fix.test.ts for the regression coverage.
  */
 export interface MaxByOrderKeyResult {
   readonly winner: Fact;
@@ -221,13 +218,10 @@ export function maxByOrderKey(facts: readonly Fact[]): MaxByOrderKeyResult {
  * different `provenance.confidence`, when the caller only cares about `value`) is correctly treated
  * as a harmless tie, never a false-positive conflict.
  *
- * ROOT-CAUSE FIX (round 4): comparing via raw `JSON.stringify(extract(f))` fails in the OPPOSITE
- * direction from `compareByContent`'s bug above — two facts whose `extract(f)` results are deep-equal
- * (identical field values) but happen to differ in incidental object-key insertion order previously
- * produced different JSON strings, so this returned a false-positive "differs" verdict (spuriously
- * flagging `conflicted: true`/`kip:conflict` for a tied group with no real disagreement). Fixed by
- * canonicalizing each side through the SAME `deepSortKeys` helper `compareByContent`/
- * `canonicalPayloadString` use before stringifying, so the diff check is a pure function of content. */
+ * INVARIANT: compares `deepSortKeys(extract(f))`, not raw `JSON.stringify(extract(f))` — the same
+ * `deepSortKeys` canonicalization `compareByContent` uses, so this diff check is a pure function of
+ * content and never flags a false-positive "differs" verdict for two facts that are deep-equal but
+ * happen to differ in incidental object-key insertion order. See round4-digest-tiebreak-fix.test.ts. */
 function tiedGroupDiffersOn<T>(tied: readonly Fact[], extract: (f: Fact) => T): boolean {
   if (tied.length <= 1) return false;
   const keys = new Set(tied.map((f) => JSON.stringify(deepSortKeys(extract(f)))));
@@ -286,13 +280,13 @@ function covers(f: Fact, a: bigint, b: bigint | null): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * ROOT-CAUSE FIX (round 3, vulnerable site #3): `bId`/any id encountered while walking `causedBy`
- * may be a COLLIDED id (see `buildFactsById` below) — a caller-declared `id` string that two or
- * more DIFFERENT-content facts share (well-formed.ts's item-4 self-consistency check never verifies
- * `id` against a real content hash for externally-supplied facts). A collided id has no single
- * well-defined referent, so this walk must never SOUNDLY claim dominance through one: `collidedIds`
- * makes that explicit rather than silently trusting whichever content-variant `factsById.get(id)`
- * happens to resolve to.
+ * `bId`/any id encountered while walking `causedBy` may be a COLLIDED id (see `buildFactsById`
+ * below) — a caller-declared `id` string that two or more DIFFERENT-content facts share
+ * (well-formed.ts's item-4 self-consistency check never verifies `id` against a real content hash
+ * for externally-supplied facts). A collided id has no single well-defined referent, so this walk
+ * must never soundly claim dominance through one: `collidedIds` makes that explicit rather than
+ * silently trusting whichever content-variant `factsById.get(id)` happens to resolve to. See
+ * round2-critic-fixes.test.ts.
  */
 function causedByDominates(a: Fact, bId: FactId, factsById: ReadonlyMap<FactId, Fact>, collidedIds: ReadonlySet<FactId>): boolean {
   if (collidedIds.has(bId)) return false; // ambiguous target identity — never claim dominance through it
@@ -409,8 +403,8 @@ function reduceRawCell(
       continue;
     }
 
-    // ROUND-2 CRITICAL FIX (see `maxByOrderKey`'s doc comment): resolve the orderKey-max winner via
-    // the whole tied-for-max group, never via a `reduce`'s ingest-order-dependent left-to-right pick.
+    // Resolve the orderKey-max winner via the whole tied-for-max group (see `maxByOrderKey`'s doc
+    // comment), never via a `reduce`'s ingest-order-dependent left-to-right pick.
     const { tied: tiedMax } = maxByOrderKey(covering);
     // ROOT-CAUSE FIX (this task, MINOR site #3 — see `valuesEqual`'s doc comment above for why this
     // is the same latent class): canonicalize each side through `deepSortKeys` before stringifying,
@@ -516,18 +510,17 @@ function gateByExistence(rawSegments: readonly CellSegment[], existSegments: rea
 }
 
 /**
- * ROOT-CAUSE FIX (round 3, wiring gap): dispatches a node-prop/edge-prop CELL to whichever
- * `CellReducerRef` `cellReducers` (the caller-supplied association, see `ProjOptions`) names for
- * it, defaulting to the built-in `lww-hlc` sweep (`reduceRawCell`) when none is supplied or the
- * association names `"lww-hlc"` explicitly. This is the seam that makes `gsetReducer`/
- * `pncounterReducer` (cell-reducers.ts) REACHABLE from `getNode`/`getEdge`/`query` — previously they
- * were real, independently unit-tested implementations with no way for a `KipRepo` caller to ever
- * select them (round-2's own documented gap). `gset`/`pncounter` segments are still existence-gated
- * via the SAME `gateByExistence` the default sweep uses (a known, minimal-scope approximation: these
- * reducers produce ONE wide segment per SPEC.md §3.4's resolution table rather than
- * `reduceRawCell`'s per-elementary-sub-interval geometry, so a mid-range existence retraction clips
- * the whole wide segment rather than only the sub-range actually non-existent — a coarser but still
- * sound, never-fabricating result; see this task's disputes).
+ * Dispatches a node-prop/edge-prop CELL to whichever `CellReducerRef` `cellReducers` (the
+ * caller-supplied association, see `ProjOptions`) names for it, defaulting to the built-in
+ * `lww-hlc` sweep (`reduceRawCell`) when none is supplied or the association names `"lww-hlc"`
+ * explicitly. This is the seam that makes `gsetReducer`/`pncounterReducer` (cell-reducers.ts)
+ * reachable from `getNode`/`getEdge`/`query`, not merely unit-testable in isolation. `gset`/
+ * `pncounter` segments are still existence-gated via the SAME `gateByExistence` the default sweep
+ * uses (a known, minimal-scope approximation: these reducers produce ONE wide segment per SPEC.md
+ * §3.4's resolution table rather than `reduceRawCell`'s per-elementary-sub-interval geometry, so a
+ * mid-range existence retraction clips the whole wide segment rather than only the sub-range
+ * actually non-existent — a coarser but still sound, never-fabricating result; see this task's
+ * disputes).
  */
 function reduceCellByRef(
   cellKey: string,
@@ -569,27 +562,23 @@ function latestAssertedFactId(segments: readonly CellSegment[]): FactId | undefi
  * machinery yet (M2/M8), so "resolved asOf" and "TRUSTED" both take their only sound M1-scope
  * reading: the latest (open-tail-or-final-segment) winning assert across every cell.
  *
- * ROOT-CAUSE FIX (round 3, vulnerable site #2): `candidates` here spans MULTIPLE cells (the
- * existence cell's latest assert plus each prop cell's latest assert) — a live-reproduced,
- * genuinely CROSS-CELL tie is possible (an existence fact and an unrelated prop fact sharing a
- * colliding `id`, or two facts whose orderKey ties on every component but whose `provenance` still
- * differs in a field `orderKey` doesn't read, e.g. `author`/`confidence`). Previously this called
- * the OLD `maxByOrderKey` directly and returned whichever fact's `.provenance` happened to win the
- * ingest-order-dependent left-to-right pick. Now: the fixed `maxByOrderKey` already makes the
- * `winner` pick itself content-deterministic (closing the SEC/convergence violation on its own),
- * and additionally, when the tied group's `provenance` genuinely differs across members (not just a
- * harmless duplicate), the returned `Provenance` is honestly flagged `conflicted: true` rather than
- * silently vouching for one arbitrary member's authorship as if it were unambiguous.
+ * `candidates` here spans MULTIPLE cells (the existence cell's latest assert plus each prop cell's
+ * latest assert), so a genuinely CROSS-CELL tie is possible (an existence fact and an unrelated prop
+ * fact sharing a colliding `id`, or two facts whose orderKey ties on every component but whose
+ * `provenance` still differs in a field `orderKey` doesn't read, e.g. `author`/`confidence`).
+ * `maxByOrderKey` makes the `winner` pick itself content-deterministic, and when the tied group's
+ * `provenance` genuinely differs across members (not just a harmless duplicate), the returned
+ * `Provenance` is honestly flagged `conflicted: true` rather than silently vouching for one arbitrary
+ * member's authorship as if it were unambiguous.
  *
- * `collidedIds` (round-3, vulnerable site #3's downstream half): `candidates` is assembled by
- * `getNode`/`getEdge` via `factsById.get(latestAssertedFactId(...))` per cell — once `factsById`
- * canonicalizes a collided id to ONE deterministic representative (see `buildFactsById`), two
- * different cells' "latest assert" lookups for the SAME colliding id resolve to the identical
- * representative object, so `tiedGroupDiffersOn` above would no longer observe any difference (the
- * ambiguity was already silently collapsed by the representative pick). Explicitly checking
- * `collidedIds.has(winner.id)` here still flags that ambiguity honestly, per this task's
- * requirement that a collided id's provenance contribution be treated as ambiguous downstream
- * rather than picked silently — even though the pick itself is already sound/deterministic.
+ * `collidedIds`: `candidates` is assembled by `getNode`/`getEdge` via
+ * `factsById.get(latestAssertedFactId(...))` per cell — once `factsById` canonicalizes a collided id
+ * to ONE deterministic representative (see `buildFactsById`), two different cells' "latest assert"
+ * lookups for the SAME colliding id resolve to the identical representative object, so
+ * `tiedGroupDiffersOn` above would no longer observe any difference (the ambiguity was already
+ * silently collapsed by the representative pick). Explicitly checking `collidedIds.has(winner.id)`
+ * here still flags that ambiguity honestly rather than treating an already-collapsed collision as
+ * unambiguous. See round2-critic-fixes.test.ts / round3-witness-collision-fix.test.ts.
  */
 /**
  * ROOT-CAUSE FIX (this task, CRITICAL finding — live-reproduced by a critic through the real
@@ -627,19 +616,19 @@ function pickProvenance(candidates: readonly Fact[], collidedIds: ReadonlySet<Fa
 export const KIP_CONFLICT_KIND = "kip:conflict";
 
 /**
- * ROOT-CAUSE FIX (round 3, vulnerable site #3): `factsById = new Map(facts.map(f => [f.id, f]))`
- * was a plain last-write-wins index — on an `id` COLLISION (two different-content facts sharing a
- * caller-declared `id`, see `maxByOrderKey`'s doc comment for why well-formed.ts's item-4 check
- * allows this), whichever fact happened to be LAST in this replica's local `facts` array (i.e.
- * local ingest order) silently overwrote the Map entry — feeding an ingest-order-dependent fact
- * into `pickProvenance`'s candidate lookup and `causedByDominates`'s causal walk.
+ * A plain `new Map(facts.map(f => [f.id, f]))` would be a last-write-wins index: on an `id`
+ * COLLISION (two different-content facts sharing a caller-declared `id`, see `maxByOrderKey`'s doc
+ * comment for why well-formed.ts's item-4 check allows this), whichever fact happened to be LAST in
+ * this replica's local `facts` array (local ingest order) would silently win the Map entry, feeding
+ * an ingest-order-dependent fact into `pickProvenance`'s candidate lookup and
+ * `causedByDominates`'s causal walk.
  *
- * Fixed: group by `id` first, then for each id pick a representative via `compareByContent` (pure
- * content function, never array/ingest position) so `factsById.get(id)` is now a deterministic
- * function of the WHOLE fact set regardless of ingest order, even for a collided id. `collidedIds`
+ * Instead: group by `id` first, then for each id pick a representative via `compareByContent` (pure
+ * content function, never array/ingest position) so `factsById.get(id)` is a deterministic function
+ * of the WHOLE fact set regardless of ingest order, even for a collided id. `collidedIds`
  * additionally names every id with more than one DISTINCT content variant, so downstream consumers
  * (`causedByDominates`) can treat a collided id's causal contribution as ambiguous rather than
- * silently trusting one arbitrary variant's `causedBy` chain.
+ * silently trusting one arbitrary variant's `causedBy` chain. See round2-critic-fixes.test.ts.
  */
 function buildFactsById(facts: readonly Fact[]): { factsById: Map<FactId, Fact>; collidedIds: Set<FactId> } {
   const groups = new Map<FactId, Fact[]>();
@@ -651,14 +640,10 @@ function buildFactsById(facts: readonly Fact[]): { factsById: Map<FactId, Fact>;
   const factsById = new Map<FactId, Fact>();
   const collidedIds = new Set<FactId>();
   for (const [id, group] of groups) {
-    // ROOT-CAUSE FIX (this task, MAJOR finding — live-reproduced by two critics): this collision
-    // detector previously compared members via raw `JSON.stringify(f)`, the exact same fragile
-    // pattern `compareByContent`/`tiedGroupDiffersOn` were fixed for in round 4 (see their doc
-    // comments above) — two content-identical facts sharing an `id` but differing only in incidental
-    // key-insertion order (fully attacker-controlled, see `compareByContent`'s doc comment) would
-    // previously be spuriously flagged as a genuine id COLLISION, surfacing a false `conflicted: true`/
-    // `kip:conflict` for a harmless duplicate. Fixed by canonicalizing each side through the same
-    // `deepSortKeys` helper before stringifying, so this is a pure function of content.
+    // Compares members via `deepSortKeys(f)`, the same canonicalization `compareByContent`/
+    // `tiedGroupDiffersOn` use (see their doc comments above) — not raw `JSON.stringify(f)`, which
+    // would spuriously flag two content-identical facts sharing an `id` (differing only in
+    // incidental, attacker-controlled key-insertion order) as a genuine id COLLISION.
     if (group.length > 1 && new Set(group.map((f) => JSON.stringify(deepSortKeys(f)))).size > 1) collidedIds.add(id);
     factsById.set(id, group.length === 1 ? group[0] : [...group].sort(compareByContent)[0]);
   }
@@ -742,12 +727,10 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     const existSegments = mergeAdjacent(reduceRawCell(existFacts, [], factsById, collidedIds, knownMaxVersion));
     const existBreakpoints = collectBreakpoints(existSegments);
 
-    // ROUND-2 FIX #2: prop key iteration/insertion order must be a pure function of the fact SET's
-    // content (prop names), never of ingest/delivery order. A `Set` built by scanning `facts` in
-    // array order iterates in FIRST-ENCOUNTERED order, which is local ingest order — so the
-    // resulting `NodeView.props` object's key order (and therefore its JSON/`Object.keys` order)
-    // silently depended on ingest order pre-fix. Sorting before populating `props` makes key order
-    // a pure function of the prop name.
+    // Prop key iteration/insertion order must be a pure function of the fact SET's content (prop
+    // names), never of ingest/delivery order — sorting `propKeys` before populating `props` makes
+    // `NodeView.props`' key order (and therefore its JSON/`Object.keys` order) a pure function of
+    // the prop name, not a `Set`'s first-encountered (ingest-order-derived) iteration order.
     const propKeySet = new Set<PropKey>();
     for (const f of facts) {
       if (f.target.kind === "node-prop" && f.target.eid === eid) propKeySet.add(f.target.prop);
@@ -768,20 +751,13 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     }
 
     const assertOnlyExist = existFacts.filter((f) => f.type !== "retract");
-    // ROOT-CAUSE FIX (round 3, vulnerable site #1): resolve the SAME way `reduceRawCell` resolves a
-    // covering-fact tie — via the fixed `maxByOrderKey`'s whole tied group — rather than a separate,
-    // parallel `maxByOrderKey`-returns-bare-Fact pick that silently kept whichever fact happened to
-    // be first in `assertOnlyExist`'s (ingest-order-derived) array. When the tied group genuinely
-    // disagrees on `nodeKind` (not merely on some OTHER field, e.g. `provenance`), surface
+    // Resolves the SAME way `reduceRawCell` resolves a covering-fact tie — via `maxByOrderKey`'s
+    // whole tied group — rather than picking whichever fact happens to be first in
+    // `assertOnlyExist`'s (ingest-order-derived) array. When the tied group disagrees on `nodeKind`
+    // OR on the fact's own existence `value` (`isTruthyExistence` — two existence facts sharing a
+    // colliding id can disagree on whether the node exists at all, not just on its kind), surface
     // `KIP_CONFLICT_KIND` instead of laundering an ingest-order-dependent pick as this node's kind.
-    //
-    // ROOT-CAUSE FIX (round 4, MAJOR finding): this comparison previously read ONLY `nodeKind` across
-    // the tied group, never the facts' own `value` (the actual existence datum, via
-    // `isTruthyExistence`). Two existence facts sharing a forged colliding id with the SAME nodeKind
-    // but OPPOSITE existence value (one says the node exists, one says it doesn't) tied like every
-    // other field yet silently returned a clean, non-conflicted kind — even though whether the entity
-    // exists at all is genuinely disputed. `isTruthyExistence(f.value)` is now part of the same
-    // tied-group comparison, so a disputed existence value also surfaces `KIP_CONFLICT_KIND`.
+    // See round2-critic-fixes.test.ts / round4-digest-tiebreak-fix.test.ts.
     const { winner: kindWinner, tied: kindTied } = maxByOrderKey(assertOnlyExist);
     const kindTarget = kindWinner.target as Extract<Target, { kind: "node" }>;
     const kindConflict = tiedGroupDiffersOn(kindTied, (f) => [
@@ -831,16 +807,10 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     }
 
     const assertOnlyExist = existFacts.filter((f) => f.type !== "retract");
-    // ROOT-CAUSE FIX (round 3, vulnerable site #1 — edge variant, see `getNode`'s identical fix
-    // above): resolve via the fixed `maxByOrderKey`'s whole tied group. An edge's "kind" also
-    // includes topology (`from`/`to`) — a tied group that disagrees on EITHER `edgeKind` OR
-    // `from`/`to` is a genuine topology conflict (a critic live-reproduced two replicas diverging on
-    // an edge's endpoints themselves, not merely its label), so all three are checked.
-    //
-    // ROOT-CAUSE FIX (round 4, MAJOR finding — edge variant, see `getNode`'s identical fix above):
-    // also compare the facts' own existence `value` (`isTruthyExistence`) — a disputed "does this
-    // edge exist at all" tie must surface `KIP_CONFLICT_KIND` too, not just a disputed edgeKind/
-    // topology.
+    // Edge variant of `getNode`'s identical fix above: resolves via `maxByOrderKey`'s whole tied
+    // group. An edge's "kind" also includes topology (`from`/`to`) and its own existence `value`
+    // (`isTruthyExistence`) — a tied group that disagrees on `edgeKind`, `from`/`to`, OR whether the
+    // edge exists at all is a genuine conflict, so all four are checked.
     const { winner: kindWinner, tied: kindTied } = maxByOrderKey(assertOnlyExist);
     const kindTarget = kindWinner.target as Extract<Target, { kind: "edge" }>;
     const kindConflict = tiedGroupDiffersOn(kindTied, (f) => {

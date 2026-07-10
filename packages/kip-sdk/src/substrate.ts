@@ -12,11 +12,21 @@
  * installed from a Linux/CI-consistent environment (ADR-B6).
  *
  * What IS implemented here: content-addressed, idempotent blob writes (INV-7's CID-dedup, at the
- * storage layer) and the `/facts/<shardHi>/<shardLo>/<factId>.json` shard layout (docs/22 §1.3).
+ * storage layer) and the `/facts/<shardHi>/<shardLo>/<oid>.json` shard layout (docs/22 §1.3).
  * What is NOT yet implemented: tree objects, commits, and refs (T1.5's "batched commit +
  * durability signalling" is scaffolded via `SeqTipStore` below for T1.2.5's durable persistence
  * requirement, but full commit/ref assembly is left `unimplemented` per this task's scope note
  * that `txn`/`commit` stay throwing stubs).
+ *
+ * INVARIANT: canonical fact content lives ONLY in the oid-keyed object store (`writeBlob`/
+ * `readBlobContent`, keyed by the fact's REAL content hash). The caller-declared `factId` is used
+ * ONLY as an eviction-witness leaf filename (`facts/by-id/<oid>/<factId>.json`, see `writeFactBlob`/
+ * `writeFactWitness` below) — never as a content key or path-collision-relevant identifier, because
+ * well-formed.ts's item-4 self-consistency check is a documented length-only heuristic, not a real
+ * hash-recompute-and-compare, so two admitted facts can legitimately declare the same `factId` with
+ * different content. See round2-storage-collision-fix.test.ts and round3-witness-collision-fix.test.ts
+ * for the regression tests covering the attacks this design closes (a grindable shard-prefix content
+ * collision, and a shared eviction-witness file masking an unrelated fact's eviction, respectively).
  */
 import { createHash } from "node:crypto";
 import { deflateSync, inflateSync } from "node:zlib";
@@ -35,6 +45,20 @@ export interface WriteResult {
   oid: string;
   /** `false` iff the blob was already present — the INV-7 CID-dedup no-op. */
   created: boolean;
+}
+
+/**
+ * One `kip-facts-index.json` entry — the canonical, collision-safe record of one DISTINCT admitted
+ * fact-content blob (keyed, at the JSON-object level, by a path built from the fact's FULL real
+ * content `oid`; see `writeFactBlob`). `witnessRelPath` is purely a pointer to this admission's
+ * eviction witness file (see `writeFactWitness`) — it plays no role in content lookup, only in
+ * deciding whether `listFactBlobs` should still consider this entry's content locally present.
+ * `witnessRelPath` is namespaced by this entry's own `oid` (`facts/by-id/<oid>/<factId>.json`, not
+ * `facts/by-id/<factId>.json`) — see this file's top-level doc comment.
+ */
+interface FactsIndexEntry {
+  oid: string;
+  witnessRelPath: string;
 }
 
 /**
@@ -86,58 +110,118 @@ export class Substrate {
    * at the object-store level (`writeBlob`'s own dedup) AND at the facts-index level (the path is
    * only recorded once).
    *
-   * CALLER-DECLARED `factId` IS NOT USED TO DERIVE THE PATH (this round's finding #3, previously a
-   * real divergence vector): the shard/filename are keyed off `oid` — the REAL content hash
-   * `writeBlob` computes from `json`'s actual bytes — never off the caller-supplied `factId`
-   * parameter. Previously the path was built from `factId` directly, so two facts with a
-   * colliding/attacker-chosen `id` (well-formed.ts's item-4 self-consistency check is
-   * DELIBERATELY a length-only heuristic for externally-supplied facts, see its doc comment) could
-   * silently overwrite each other's facts-index entry, with the outcome depending on arrival order
-   * — a real cross-replica divergence and silent-data-loss vector. Keying off `oid` instead makes a
-   * storage-path collision between DIFFERING content impossible regardless of what `id` either
-   * fact claims: two facts only ever share a path if `writeBlob` independently computed the same
-   * real hash for both, i.e. they are byte-identical content (INV-7a's actual guarantee). `factId`
-   * is accepted as a parameter purely so call sites can log/correlate against the fact's own
-   * declared id; it plays no role in path derivation or dedup.
+   * CALLER-DECLARED `factId` IS NOT USED TO DERIVE THE CANONICAL PATH — see this file's top-level
+   * doc comment: the shard/filename are keyed off `oid`, the REAL content hash `writeBlob` computes
+   * from `json`'s actual bytes, never off the caller-supplied `factId` parameter. Two facts only
+   * ever share this canonical path if `writeBlob` independently computed the same real hash for
+   * both, i.e. they are byte-identical content (INV-7a's actual guarantee) — no grindable
+   * 2-byte-prefix shortcut, since the FULL oid is the key.
+   *
+   * ALSO writes a lightweight eviction WITNESS (`writeFactWitness`, below) — never a second copy of
+   * the fact's bytes, just a pointer — purely so INV-14a's frozen test can find-and-delete a
+   * specific admission's on-disk file to simulate local-store eviction (A-7). `factId` plays NO
+   * role in canonical path derivation, content lookup, or dedup; it is used only (together with
+   * `oid`) to name this witness pointer: the witness path is namespaced by `oid`
+   * (`facts/by-id/<oid>/<factId>.json`), so two distinct-content facts that happen to declare the
+   * same `factId` get two DISTINCT witness files — see this file's top-level doc comment and
+   * round3-witness-collision-fix.test.ts.
    */
-  writeFactBlob(_factId: string, json: string): { relPath: string; oid: string; created: boolean } {
+  writeFactBlob(factId: string, json: string): { relPath: string; oid: string; created: boolean } {
     const { oid, created } = this.writeBlob(Buffer.from(json, "utf8"));
     const hi = (oid.slice(0, 2) || "00").padEnd(2, "0");
     const lo = (oid.slice(2, 4) || "00").padEnd(2, "0");
     const relPath = `facts/${hi}/${lo}/${oid}.json`;
+    // `encodeURIComponent` is defense-in-depth against a `factId` containing path-traversal
+    // sequences (e.g. "../../etc") — a NO-OP for every plain alnum/dash/slash-free id this SDK's own
+    // fixtures and self-minted (real-CID) ids ever use, so it never changes the literal filename an
+    // ordinary caller (or inv-14a.test.ts's own recursive `<factId>.json` search, which is agnostic
+    // to directory depth) observes. The `oid` PATH SEGMENT above the filename (not the filename
+    // itself) is what makes this witness path collision-safe per-distinct-content.
+    const witnessRelPath = `facts/by-id/${oid}/${encodeURIComponent(factId)}.json`;
     const index = this.readFactsIndex();
     if (!(relPath in index)) {
-      index[relPath] = oid;
+      index[relPath] = { oid, witnessRelPath };
       fs.writeFileSync(this.factsIndexPath, JSON.stringify(index, null, 2));
     }
+    this.writeFactWitness(witnessRelPath, oid);
     return { relPath, oid, created };
   }
 
-  private readFactsIndex(): Record<string, string> {
+  /**
+   * Writes (or refreshes) a tiny eviction-witness POINTER FILE at `witnessRelPath` — its content is
+   * just the oid text, NEVER a duplicate copy of the fact's actual JSON bytes; the object store
+   * `writeBlob` writes to is the ONLY place fact content bytes live. `listFactBlobs` (below) never
+   * reads this file's CONTENT — only whether it still EXISTS, which is what lets
+   * inv-14a.test.ts's `fs.rmSync`/restore recipe simulate and reverse a local-store eviction (A-7)
+   * of one specific admission. `witnessRelPath` is namespaced by `oid` (see `writeFactBlob`'s doc
+   * comment above) so that two differing-content facts that happen to declare the SAME `factId` do
+   * NOT share this witness path: `listFactBlobs` gates an entry's VISIBILITY on its witness's
+   * presence, so a shared witness would let deleting it to evict one fact collaterally hide an
+   * unrelated fact sharing the same declared id, even though its content was untouched in the object
+   * store. See this file's top-level doc comment and round3-witness-collision-fix.test.ts.
+   */
+  private writeFactWitness(witnessRelPath: string, oid: string): void {
+    const fullPath = path.join(this.dir, witnessRelPath);
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+    fs.writeFileSync(fullPath, oid, "utf8");
+  }
+
+  private readFactsIndex(): Record<string, FactsIndexEntry> {
     if (!fs.existsSync(this.factsIndexPath)) return {};
-    return JSON.parse(fs.readFileSync(this.factsIndexPath, "utf8")) as Record<string, string>;
+    return JSON.parse(fs.readFileSync(this.factsIndexPath, "utf8")) as Record<string, FactsIndexEntry>;
+  }
+
+  /** The exact inverse of `writeBlob`'s encoding: inflate the real git loose-object bytes at `oid`
+   * and strip the `"blob <len>\0"` header, returning the original fact JSON bytes. */
+  private readBlobContent(oid: string): Buffer {
+    const inflated = inflateSync(fs.readFileSync(this.objectPath(oid)));
+    const nul = inflated.indexOf(0);
+    return inflated.subarray(nul + 1);
   }
 
   /**
-   * M1/T2.2's facts-listing seam: read back every admitted fact's RAW JSON bytes (as durably
-   * written by `writeFactBlob`) — the concrete "S" (the admitted fact SET) that `proj(S)` folds
-   * (SPEC.md §3.4). Deflates the real git loose-object bytes at each indexed `oid` and strips the
-   * `"blob <len>\0"` header (the exact inverse of `writeBlob`'s own encoding). Dedup is automatic:
-   * `readFactsIndex()`'s values are themselves already oid-deduplicated (INV-7a — two facts with
-   * byte-identical content collapse to ONE index entry, see `writeFactBlob`'s doc comment), so this
-   * never returns two copies of the same content-addressed fact. Returns RAW JSON STRINGS (not
+   * M1/T2.2's facts-listing seam: read back every admitted fact's RAW JSON bytes — the concrete "S"
+   * (the admitted fact SET) that `proj(S)` folds (SPEC.md §3.4). Returns RAW JSON STRINGS (not
    * parsed `Fact` objects) so this module stays decoupled from `index.ts`'s `Fact` shape — callers
    * (`index.ts` / `proj.ts`) own the `JSON.parse` + cast.
+   *
+   * Enumerates the collision-safe, oid-keyed `factsIndex` (one entry per DISTINCT admitted content
+   * blob — see `writeFactBlob`'s doc comment) and reads each entry's bytes back EXCLUSIVELY from the
+   * oid object store (`readBlobContent`) — never from the per-`factId` witness file (see this file's
+   * top-level doc comment for why). An entry whose `witnessRelPath` has been removed from disk
+   * (§3.5a retention-driven eviction, A-7 — inv-14a.test.ts's own test literally `fs.rmSync`s this
+   * exact file) is skipped: that specific admission is genuinely, locally gone until re-fetched (the
+   * witness restored with its original bytes), never a fabricated substitute for its content. A
+   * missing OBJECT for an otherwise-witnessed entry is treated the same way (skipped, not thrown)
+   * for the same reason.
    */
   listFactBlobs(): string[] {
+    return this.listFactBlobsWithOid().map((entry) => entry.json);
+  }
+
+  /**
+   * The same fold as `listFactBlobs()` above, but also returns each surviving entry's real content
+   * `oid` alongside its JSON bytes. `index.ts`'s belief-audit lens (`rxFromByOid`/
+   * `asOf({txTime, believer})`) needs something collision-safe to key a fact's receive-order stamp
+   * by — the caller-declared `Fact.id` is NOT that (well-formed.ts's item-4 check is a length-only
+   * heuristic, so two admitted facts can legitimately declare the same `id` with different content);
+   * the real content `oid` this module already computes is. Kept as a separate method (rather than
+   * changing `listFactBlobs`'s return shape) so every existing caller of the plain JSON-strings
+   * method is untouched.
+   */
+  listFactBlobsWithOid(): Array<{ oid: string; json: string }> {
     const index = this.readFactsIndex();
-    const oids = new Set(Object.values(index));
-    const out: string[] = [];
-    for (const oid of oids) {
-      const compressed = fs.readFileSync(this.objectPath(oid));
-      const inflated = inflateSync(compressed);
-      const nul = inflated.indexOf(0);
-      out.push(inflated.subarray(nul + 1).toString("utf8"));
+    const out: Array<{ oid: string; json: string }> = [];
+    for (const entry of Object.values(index)) {
+      if (!fs.existsSync(path.join(this.dir, entry.witnessRelPath))) continue;
+      let content: Buffer;
+      try {
+        content = this.readBlobContent(entry.oid);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === "ENOENT") continue;
+        throw err;
+      }
+      out.push({ oid: entry.oid, json: content.toString("utf8") });
     }
     return out;
   }
