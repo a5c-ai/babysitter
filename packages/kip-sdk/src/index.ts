@@ -40,6 +40,8 @@ import {
   type Ed25519KeyPair,
 } from "./signing";
 import { gitBlobId, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
+import { proj, traverse, type ProjOptions } from "./proj";
+import type { CellReducerAssociations } from "./cell-reducers";
 
 // ---------------------------------------------------------------------------
 // 1. Core scalar / branded types (docs/21-data-model.md §1)
@@ -152,6 +154,18 @@ export interface Provenance {
   signedFields: string[];
   source?: { uri: string; cid?: CID };
   confidence?: number; // [0,1], advisory only
+  /**
+   * MAJOR-FINDING addition (M1 round-3 task, proj.ts's `pickProvenance`): set `true` ONLY when this
+   * `Provenance` was chosen from a genuinely tied (identical orderKey, including the "total" order's
+   * `factCID` tiebreak) but CONTENT-DIFFERENT candidate group — e.g. a cross-cell tie between an
+   * existence fact and an unrelated prop fact sharing a colliding `id` (well-formed.ts's item-4
+   * self-consistency check is a documented, deliberately weak length-only bound for externally-
+   * supplied facts, not a real hash-recompute-and-compare — see proj.ts's `maxByOrderKey` doc
+   * comment). An honest ambiguity flag, never fabricating which candidate's authorship is "the"
+   * correct one; absent (never `false`) for every ordinary, unambiguous pick, so this field never
+   * appears in any projection the frozen M0/M1 conformance suite exercises.
+   */
+  conflicted?: boolean;
 }
 
 /** Annotated AFTER durable recording — NOT signed, NOT part of FactId, NOT read by proj/orderKey. */
@@ -210,10 +224,29 @@ export type ReAttestInput = Omit<Fact, "id" | "hlc" | "seq" | "type" | "supersed
 // 4. Cell + segment model, NodeView/EdgeView (docs/21 §2/§1)
 // ---------------------------------------------------------------------------
 
+/**
+ * MAJOR-FINDING addition (M1 round-2 task): a FOURTH `CellSegment` variant realizing INV-8's
+ * "typed result (value | quarantine)" / "unknown versions pass through as opaque-quarantined"
+ * clause (docs/60-conformance-and-testability.md#inv-8) — previously vacuously true because no
+ * such variant existed for any code path to produce (see proj.ts's T2.4 scope note and inv-8's own
+ * `it.skip` documenting this exact gap). Minimal, honest trigger (proj.ts's `reduceRawCell`): a
+ * fact whose `v` exceeds the projection's configured `knownMaxVersion` quarantines that segment
+ * instead of a passthrough `value` — still terminates, still never throws, still never fabricates
+ * data (the ONLY thing withheld is treating an unrecognized-version fact's `value` as trustworthy),
+ * matching INV-8's own text without inventing a full per-ontology-kind upcaster registry.
+ */
 export type CellSegment<V = PropValue> =
   | { kind: "value"; value: V; validFrom: HlcOrTime; validTo: HlcOrTime | null; assertedBy: FactId }
   | { kind: "unknown"; validFrom: HlcOrTime; validTo: HlcOrTime | null }
-  | { kind: "conflict"; validFrom: HlcOrTime; validTo: HlcOrTime | null; candidates: FactId[] };
+  | { kind: "conflict"; validFrom: HlcOrTime; validTo: HlcOrTime | null; candidates: FactId[] }
+  | {
+      kind: "quarantine";
+      validFrom: HlcOrTime;
+      validTo: HlcOrTime | null;
+      assertedBy: FactId;
+      v: number;
+      reason: "unknown-version";
+    };
 
 export interface PropCell<V = PropValue> {
   segments: CellSegment<V>[];
@@ -626,6 +659,8 @@ export class KipRepo implements Repo {
   private chainSequencer: ChainSequencer;
   private ownKeyPair: Ed25519KeyPair | undefined;
   private localHlc: HlcStamp | undefined;
+  private readonly knownMaxVersion: number | undefined;
+  private readonly cellReducers: CellReducerAssociations | undefined;
 
   /**
    * TODO(M0/T1.1): a full `open()`-driven construction (genesis manifest, on-disk substrate) is
@@ -648,11 +683,29 @@ export class KipRepo implements Repo {
      * populated from the local operator's own keypair.
      */
     rootKeys?: string[];
+    /**
+     * MAJOR-FINDING addition (round-3 wiring fix): the highest schema version `getNode`/`getEdge`/
+     * `query`'s `proj()` fold treats as "known" (see `ProjOptions.knownMaxVersion`, proj.ts) —
+     * previously only reachable as `proj()`'s own internal default (`1`), never as something a
+     * `KipRepo` caller could actually configure end-to-end. Defaults to `proj()`'s own default.
+     */
+    knownMaxVersion?: number;
+    /**
+     * MAJOR-FINDING addition (round-3 wiring fix): a per-cell `CellReducerRef` association
+     * (cell-reducers.ts's `CellReducerAssociations`) threaded into every `proj()` call this repo
+     * makes (`getNode`/`getEdge`/`query`) — the seam that finally makes `gsetReducer`/
+     * `pncounterReducer` REACHABLE end-to-end from a real `KipRepo`, not merely unit-testable in
+     * isolation against raw `Fact` arrays (round-2's own documented gap; see cell-reducers.ts and
+     * proj.ts's `reduceCellByRef`).
+     */
+    cellReducers?: CellReducerAssociations;
   }) {
     this.explicitDir = options?.dir;
     this.hashAlgo = options?.hashAlgo ?? "sha1";
     this.replicaId = options?.replicaId ?? `replica-${randomUUID()}`;
     this.chainSequencer = new ChainSequencer();
+    this.knownMaxVersion = options?.knownMaxVersion;
+    this.cellReducers = options?.cellReducers;
     if (options?.keyPair) {
       this.ownKeyPair = options.keyPair;
       this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
@@ -902,19 +955,62 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: putEdge");
   }
 
-  // TODO(M2/T2.7): project a NodeView from proj-materialized cells.
-  async getNode(_eid: EID, _asOf?: AsOf): Promise<NodeView | null> {
-    throw new Error("unimplemented: getNode");
+  /**
+   * T2.7.1: project a `NodeView` from `proj`-materialized cells. `proj` is a pure, whole-set fold
+   * (T2.2) over every admitted fact this repo currently holds — recomputed fresh on every call (no
+   * incremental/cached `/heads`, an M1-scope simplification; correctness, not staleness, is the
+   * exit criterion here) so a subsequent `ingest()` is always reflected on the next read.
+   *
+   * `asOf` is M2/T3.2 scope (bitemporal snapshot lens) — honoring it here would mean either
+   * silently ignoring the caller's requested lens (a fallback, banned by the repo's own
+   * "fallbacks are evil" rule) or fabricating a lens this milestone doesn't implement, so an
+   * explicit `asOf` throws rather than silently reading the unscoped projection instead.
+   */
+  async getNode(eid: EID, asOf?: AsOf): Promise<NodeView | null> {
+    if (asOf !== undefined) {
+      throw new Error("unimplemented: getNode with asOf (M2/T3.2 bitemporal snapshot lens)");
+    }
+    return proj(this.currentFacts(), this.projOptions()).getNode(eid);
   }
 
-  // TODO(M2/T2.7): project an EdgeView from proj-materialized cells.
-  async getEdge(_eid: EID, _asOf?: AsOf): Promise<EdgeView | null> {
-    throw new Error("unimplemented: getEdge");
+  /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment). */
+  async getEdge(eid: EID, asOf?: AsOf): Promise<EdgeView | null> {
+    if (asOf !== undefined) {
+      throw new Error("unimplemented: getEdge with asOf (M2/T3.2 bitemporal snapshot lens)");
+    }
+    return proj(this.currentFacts(), this.projOptions()).getEdge(eid);
   }
 
-  // TODO(M2/T2.7, M4/T5.4): typed directional as-of BFS/DFS with mandatory depth/maxFanout.
-  async *query(_spec: TraversalSpec): AsyncIterable<NodeView | EdgeView> {
-    throw new Error("unimplemented: query");
+  /**
+   * T2.7.2: typed directional BFS with MANDATORY `depth`/`maxFanout` (m7-21, no unbounded default)
+   * over the current `proj` projection. `spec.asOf` is M2/T3.2 scope — see `getNode`'s doc comment
+   * for why an explicit `asOf` throws rather than silently traversing the unscoped projection.
+   */
+  async *query(spec: TraversalSpec): AsyncIterable<NodeView | EdgeView> {
+    if (spec.asOf !== undefined) {
+      throw new Error("unimplemented: query with asOf (M2/T3.2 bitemporal snapshot lens)");
+    }
+    const projection = proj(this.currentFacts(), this.projOptions());
+    yield* traverse(projection, spec);
+  }
+
+  /**
+   * MAJOR-FINDING addition (round-3 wiring fix): threads this repo's constructor-supplied
+   * `knownMaxVersion`/`cellReducers` into every `proj()` call (`getNode`/`getEdge`/`query`) — the
+   * gap round-2 left open where these existed only as `proj()`-internal defaults/unit-tested-in-
+   * isolation seams, never reachable from a real `KipRepo` read path.
+   */
+  private projOptions(): ProjOptions {
+    return { knownMaxVersion: this.knownMaxVersion, cellReducers: this.cellReducers };
+  }
+
+  /** Reads back the FULL admitted fact SET `S` this repo currently holds (T2.2's fold input) —
+   * every durably-written `/facts/**` blob, deduplicated by content hash (INV-7a), parsed back
+   * into `Fact` envelopes. */
+  private currentFacts(): Fact[] {
+    return this.getSubstrate()
+      .listFactBlobs()
+      .map((json) => JSON.parse(json) as Fact);
   }
 
   // TODO(M4/T5.5): hybrid vector+graph+RRF recall pipeline.

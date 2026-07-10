@@ -19,7 +19,7 @@
  * that `txn`/`commit` stay throwing stubs).
  */
 import { createHash } from "node:crypto";
-import { deflateSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -116,6 +116,30 @@ export class Substrate {
   private readFactsIndex(): Record<string, string> {
     if (!fs.existsSync(this.factsIndexPath)) return {};
     return JSON.parse(fs.readFileSync(this.factsIndexPath, "utf8")) as Record<string, string>;
+  }
+
+  /**
+   * M1/T2.2's facts-listing seam: read back every admitted fact's RAW JSON bytes (as durably
+   * written by `writeFactBlob`) — the concrete "S" (the admitted fact SET) that `proj(S)` folds
+   * (SPEC.md §3.4). Deflates the real git loose-object bytes at each indexed `oid` and strips the
+   * `"blob <len>\0"` header (the exact inverse of `writeBlob`'s own encoding). Dedup is automatic:
+   * `readFactsIndex()`'s values are themselves already oid-deduplicated (INV-7a — two facts with
+   * byte-identical content collapse to ONE index entry, see `writeFactBlob`'s doc comment), so this
+   * never returns two copies of the same content-addressed fact. Returns RAW JSON STRINGS (not
+   * parsed `Fact` objects) so this module stays decoupled from `index.ts`'s `Fact` shape — callers
+   * (`index.ts` / `proj.ts`) own the `JSON.parse` + cast.
+   */
+  listFactBlobs(): string[] {
+    const index = this.readFactsIndex();
+    const oids = new Set(Object.values(index));
+    const out: string[] = [];
+    for (const oid of oids) {
+      const compressed = fs.readFileSync(this.objectPath(oid));
+      const inflated = inflateSync(compressed);
+      const nul = inflated.indexOf(0);
+      out.push(inflated.subarray(nul + 1).toString("utf8"));
+    }
+    return out;
   }
 }
 
