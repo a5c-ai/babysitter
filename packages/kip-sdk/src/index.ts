@@ -246,6 +246,29 @@ export type CellSegment<V = PropValue> =
       assertedBy: FactId;
       v: number;
       reason: "unknown-version";
+    }
+  | {
+      /**
+       * M3/T4.7 addition (INV-9/INV-12 conformance): a FIFTH `CellSegment` variant realizing
+       * docs/24-synchronization-and-convergence.md §4.3's "reads that would resolve through an
+       * EXCISED fact return a typed 'excised' placeholder segment ... never silently fabricated
+       * data" clause. Distinct from `"unknown"`: `"unknown"` means "no covering assert ever
+       * existed for this sub-interval"; `"excised"` means "a covering assert once existed here but
+       * its bytes were physically erased (§4.5)" — a `getNode`/`getEdge`/`query` LIVE read (no
+       * `asOf`) whose cell loses its ONLY covering assert to excision instead re-folds that
+       * sub-interval to plain `"unknown"` (docs §4.5 "Heads re-fold", verbatim: "if a cell loses
+       * its only covering assert it becomes unknown") — `"excised"` is specifically the
+       * historical-`asOf`-read placeholder for a validTime instant that resolves THROUGH the now-
+       * erased fact. Added here as a MINIMAL typed placeholder (no `proj`/`asOf` code path
+       * produces it yet — `excise()`/`asOf` remain M3 stubs, see this file's other TODOs) so the
+       * frozen inv-9.test.ts conformance file can type-check the shape it asserts against, mirroring
+       * the established precedent of the `"quarantine"` variant above (added ahead of its
+       * producing code path for the same reason, M1 round-2).
+       */
+      kind: "excised";
+      validFrom: HlcOrTime;
+      validTo: HlcOrTime | null;
+      excisedFactId: FactId;
     };
 
 export interface PropCell<V = PropValue> {
