@@ -5,9 +5,6 @@
 ### Documentation
 - docs(kip-sdk): phase A adversarial spec/docs convergence + scorecard re-score (7cc61d721, Tal Muskal, 9 hours ago)
 
-### Documentation
-- docs(kip-sdk): phase A adversarial spec/docs convergence + scorecard re-score (7cc61d721, Tal Muskal, 9 hours ago)
-
 ## [Unreleased] - 2026-07-04
 
 ### Features
