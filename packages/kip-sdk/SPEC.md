@@ -3689,6 +3689,23 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   the declared subset — m7-6) and a **driver-less-merge fixture** (a bare `git merge` in a clone without
   the kip-regen driver: the text-merged `/manifest.json` MUST fail the genesis-CID check as a hard
   error, and the stale `/heads` MUST be re-folded on first read — m7-4).
+  - **M0 scope note for the gate-only sub-case (INV-6a — accepted residual R12, §9).** At M0, before the
+    §8.1 fact-based trust overlay exists, a replica's local key-registry (its own identity,
+    explicitly-configured genesis `rootKeys`, or independently-imported peer keys) MAY legitimately
+    cause a genuinely-unregistered-fingerprint fact and a registered-fingerprint fact carrying a
+    matching-format placeholder signature to receive **different** admit/reject verdicts across
+    replicas with different local registries — a deliberate, bounded exception to INV-6a's "no
+    key-registration predicate" clause (docs/60 §5), required so real cryptographic verification
+    (which MUST always win once a replica has independently established real key material for a
+    fingerprint) is never defeated by a forgeable placeholder fallback. This does **not** weaken
+    INV-6's own guarantee above (the ingest gate still rejects only signature-invalid/malformed facts,
+    identically on every replica, for every fact whose fingerprint IS locally registered — the
+    exception is scoped strictly to the M0-only, gate-observable comparison across genuinely
+    unregistered fingerprints). Full byte-pure INV-6a purity — verdicts independent of ANY
+    replica-local state, including key registration — is restored once M8's fact-based trust overlay
+    (§8.1: `KeyAuthorization` facts admitted through the same substrate, so "is this key registered"
+    becomes a set-pure function of the admitted fact set, not per-replica local config) lands. Tracked
+    as accepted residual **R12** (§9).
 - **INV-7 (idempotent ingestion).** Re-ingesting any fact set is a no-op — CID dedup holds because the
   author-stamped, signed HLC is part of the CID (M-4), so the same logical fact has one CID on all
   replicas (no double-count under `pncounter`).
@@ -4114,9 +4131,31 @@ labeled `pending` or a self-dated lone first-emission. They are accepted, not op
   excising a fork/well-formedness-demoted fact requires the higher-privileged `excise-evidence`
   capability, distinct from ordinary GDPR-erasure `excise`, so the same key that forked (or a colluding
   ordinary-excise-scope holder) cannot unilaterally erase the evidence of the fork.
+- **R12 — M0's local-registry-dependent verification is a bounded, intentional INV-6a exception, not a
+  violation (§8.4 INV-6/INV-6a, §8.1, M0/M8).** Provenance (§4.1) carries only a one-way SHA-256
+  fingerprint of the signer's public key, never the raw key material — so verifying a signature from a
+  genuinely-unregistered fingerprint is cryptographically impossible from the fact's bytes alone; there
+  is no key to check the signature against. At M0, before M8's fact-based trust overlay exists, the
+  ingest gate MUST consult its local key-registry (own identity, genesis `rootKeys`, imported peer keys)
+  to decide whether real Ed25519 verification or the conformance-suite's placeholder-signature
+  convention applies — **real verification always wins** whenever a key is registered, so the
+  placeholder convention can never forge a fact against a key this replica actually trusts. This makes
+  the gate's admit/reject verdict depend on per-replica key-registry state for genuinely-unregistered
+  fingerprints, a bounded exception to INV-6a's "no key-registration predicate" clause (never to INV-6's
+  parent guarantee, and never to a REGISTERED fingerprint's verdict, which is always real-crypto-decided
+  identically everywhere). **Safe** (never admits a forged fact against a registered key; the exception
+  only ever narrows *which* genuinely-unregistered-fingerprint fixtures a given replica's placeholder
+  path can exercise) and **bounded** (resolves automatically once M8's fact-based trust overlay, §8.1,
+  makes key-registration a set-pure function of the admitted fact set rather than per-replica local
+  config, restoring full byte-pure INV-6a purity). Identified during M0's TDD implementation (real
+  Ed25519 verification via `verifySignature` beats a forgeable placeholder fallback for any fingerprint
+  this replica has independently established trust in) rather than during the earlier documentation-only
+  hardening rounds.
 
 R1–R6 were verified non-CRITICAL in the round-6 adversarial audit; R7–R11 were added by the round-7
-documentation-hardening pass as honest namings of bounds the design already implied — none hides a
+documentation-hardening pass as honest namings of bounds the design already implied; R12 was added
+during M0's TDD implementation phase (Phase D) when the tension between real-crypto-must-win and
+INV-6a's literal "no key-registration predicate" text surfaced in the ingest-gate code — none hides a
 CRITICAL, none weakens an existing guarantee. The genuinely deferred (ops/context-layer) questions
 follow.
 

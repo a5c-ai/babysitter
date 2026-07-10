@@ -1,19 +1,45 @@
 /**
- * @a5c-ai/kip-sdk — M0 scaffold.
+ * @a5c-ai/kip-sdk — M0: the signature-only ingest gate (T1.3) is REAL and IMPLEMENTED, along with
+ * its supporting machinery.
  *
- * This is a SINGLE-FILE module skeleton (per ADR-B5/repo-map scaffolding TODO): it declares the
- * normative M0 public surface (types + the `Repo`/`Tx` interfaces + a throwing-stub `KipRepo`
- * implementation + the `open()` entrypoint) so the package compiles and is importable. NONE of
- * the methods are implemented yet — every method body throws `unimplemented: <name>`. Splitting
- * into per-concern modules (`hlc.ts`, `canonical-payload.ts`, `signing.ts`, `substrate.ts`, per
- * ADR-B5) is M0 implementation work, tracked by the roadmap task ids referenced inline below —
- * see packages/kip-sdk/docs/81-roadmap-epics-and-tasks.md.
+ * This is a SINGLE-FILE module skeleton (per ADR-B5/repo-map scaffolding TODO) declaring the
+ * normative M0 public surface (types + the `Repo`/`Tx` interfaces + the `KipRepo` implementation +
+ * the `open()` entrypoint), split by concern into sibling modules (`hlc.ts`, `canonical-payload.ts`,
+ * `signing.ts`, `substrate.ts`, `chain-sequencer.ts`, `well-formed.ts`, per ADR-B5).
+ *
+ * IMPLEMENTED (real, non-stub) as of this round: `ingest()` (the T1.3 well-formed+signature gate,
+ * ADR-001), `assertFact`/`retractFact` (mint-then-ingest via a real Ed25519 keypair and a real
+ * git-blob CID, T1.1/T1.2/T1.2.5), `open()` (genesis manifest read/write, T1.1), and the real
+ * content-addressed git-blob substrate write path (`substrate.ts`). NOT yet implemented — every
+ * other `Repo` method body still throws `unimplemented: <name>`: `txn`/`commit` (T1.5 batched
+ * commit), all read paths (`getNode`/`getEdge`/`query`/`recall`/`asOf`, M2+), sync/merge/subscribe
+ * (M3+), and the M5+ active-knowledge surface (`registerFunctionality`/`compileContextualQuery`/
+ * `runAcquisition`/`learn`/etc). Tracked by the roadmap task ids referenced inline below — see
+ * packages/kip-sdk/docs/81-roadmap-epics-and-tasks.md.
  *
  * Shapes are transcribed verbatim (or as a minimal, explicitly-flagged placeholder where the
  * source doc wasn't in scope for this scaffold) from:
  *   - packages/kip-sdk/docs/40-sdk-api-surface.md  (Kip/Repo/Tx surface, Errors)
  *   - packages/kip-sdk/docs/21-data-model.md        (Fact-adjacent value/envelope types)
  */
+
+import { randomUUID } from "node:crypto";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { CANONICAL_ENVELOPE_FIELDS, canonicalPayloadString } from "./canonical-payload";
+import { checkWellFormed } from "./well-formed";
+import { ChainSequencer, chainIdFor } from "./chain-sequencer";
+import { tick as hlcTick, receiveTick as hlcReceiveTick } from "./hlc";
+import {
+  generateEd25519KeyPair,
+  importEd25519KeyPair,
+  importEd25519PublicKey,
+  KeyRegistry,
+  signPayload,
+  verifyPayload,
+  type Ed25519KeyPair,
+} from "./signing";
+import { gitBlobId, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
 
 // ---------------------------------------------------------------------------
 // 1. Core scalar / branded types (docs/21-data-model.md §1)
@@ -71,21 +97,48 @@ export type PropValue = string | number | boolean | null | BlobRef;
 // 2. The fact envelope (docs/21 §5, canonical signed-payload field list)
 // ---------------------------------------------------------------------------
 
-export type FactType = "assert" | "retract" | "supersede" | "re-attest";
+/**
+ * SPEC.md §5b/1297-1382's canonical `FactType` vocabulary, transcribed verbatim (all 8 variants).
+ * M0 only IMPLEMENTS `assert`/`retract` (mint-then-ingest, `assertFact`/`retractFact`) and admits
+ * `supersede`/`re-attest` at the well-formed()/ingest-gate level (their dedicated `Repo` methods —
+ * `supersedeFact`/`reAttestFact` — stay unimplemented throwing stubs, M3/M9 scope). `revoke-key` /
+ * `excision` / `grant` / `policy` are recognized here so the ingest gate does not reject an
+ * otherwise-well-formed, signature-valid fact of these kinds on TYPE grounds alone (ADR-001: the
+ * gate is signature-only membership, not a feature-completeness gate) — but this round implements
+ * NO corresponding `Repo` method (`revokeKey`/`excise`/etc. remain throwing stubs); recognizing the
+ * shape is strictly a well-formed()-checklist concern, not a claim of full processing support.
+ */
+export type FactType =
+  | "assert"
+  | "retract"
+  | "supersede"
+  | "revoke-key"
+  | "excision"
+  | "re-attest"
+  | "grant"
+  | "policy";
 
 /**
- * TODO(M0/T1.2): `Target` addresses the (node | node-prop | edge | edge-prop) cell a fact writes
- * to. Neither docs/21 nor docs/40 spell out its discriminated shape verbatim in the excerpts read
- * for this scaffold; this is a minimal placeholder inferred from the cell-addressing shapes
- * implied by `Conflict.cellId` (docs/40: "(eid, prop) | edge-eid cell key") and the cell model
- * (docs/21 §2). Refine when T1.2 (fact envelope) is implemented — see
- * docs/22-git-substrate.md for the on-disk `/facts/**` layout this must address into.
+ * `Target` addresses the cell/entity a fact writes to or names. SPEC.md §1297-1382's canonical
+ * shape declares `kind: "node" | "edge" | "schema" | "key" | "control"` with `eid?`/`edgeKind?`/
+ * `ontologyRef?`/`keyFpr?`/`op?` as the (mostly optional) discriminant payload. This module also
+ * keeps the pre-existing `node-prop`/`edge-prop` refinements (a M0/T1.2 addition, not in the SPEC
+ * excerpt verbatim, inferred from `Conflict.cellId`'s "(eid, prop) | edge-eid cell key" comment and
+ * needed for M0's node/edge-PROPERTY cell-addressing) since dropping them would be a regression for
+ * the shapes M0 already fully processes. `schema`/`key`/`control` are added per this round's
+ * finding #4 so the ingest gate can RECOGNIZE (not necessarily fully process — no corresponding
+ * `Repo` method is implemented this round) spec-legal `revoke-key`/`excision`/`grant`/`policy`-style
+ * facts addressing schema/key/control targets, matching the SPEC's own optional-field shape (no
+ * `eid` requirement, unlike the node/edge variants below).
  */
 export type Target =
   | { kind: "node"; eid: EID; nodeKind?: NodeKind }
   | { kind: "node-prop"; eid: EID; prop: PropKey }
   | { kind: "edge"; eid: EID; edgeKind?: EdgeKind; from?: EID; to?: EID }
-  | { kind: "edge-prop"; eid: EID; prop: PropKey };
+  | { kind: "edge-prop"; eid: EID; prop: PropKey }
+  | { kind: "schema"; ontologyRef?: string }
+  | { kind: "key"; keyFpr?: string }
+  | { kind: "control"; op?: "rollup" | "tombstone" | "consolidate" | "excision"; eid?: EID };
 
 /**
  * Provenance is signed and verifiable before ingest (docs/21 §5). `author`/`publicKeyFingerprint`
@@ -564,6 +617,131 @@ export interface Repo {
  * (see docs/81-roadmap-epics-and-tasks.md for the full dependency-ordered WBS).
  */
 export class KipRepo implements Repo {
+  /** `undefined` until the first ingest/assert lazily provisions a substrate (bare `new KipRepo()`). */
+  private substrate: Substrate | undefined;
+  private readonly explicitDir: string | undefined;
+  private readonly hashAlgo: HashAlgo;
+  private readonly replicaId: ReplicaId;
+  private readonly keyRegistry = new KeyRegistry();
+  private chainSequencer: ChainSequencer;
+  private ownKeyPair: Ed25519KeyPair | undefined;
+  private localHlc: HlcStamp | undefined;
+
+  /**
+   * TODO(M0/T1.1): a full `open()`-driven construction (genesis manifest, on-disk substrate) is
+   * `open()`'s job (below). This bare constructor exists so `new KipRepo()` — the shape every
+   * frozen M0 conformance test under src/__tests__/conformance/ uses directly — is a fully
+   * functional, self-provisioning `Repo`: it lazily creates its own OS-temp-dir git substrate on
+   * first write and generates its own Ed25519 signing identity (ADR-B2), rather than requiring
+   * every caller to thread an explicit `open()` + keyring through just to exercise the ingest gate.
+   */
+  constructor(options?: {
+    dir?: string;
+    replicaId?: ReplicaId;
+    hashAlgo?: HashAlgo;
+    keyPair?: Ed25519KeyPair;
+    /**
+     * Genesis-declared trusted public keys (`OpenOptions.genesis.rootKeys`/`manifest.rootKeys`,
+     * PEM-encoded SPKI), wired into this repo's `keyRegistry` at construction time — see this
+     * round's finding #1: previously `rootKeys` was written to `manifest.json` by `open()` but
+     * never read back, so genesis-declared trust did nothing and `KeyRegistry` was ONLY ever
+     * populated from the local operator's own keypair.
+     */
+    rootKeys?: string[];
+  }) {
+    this.explicitDir = options?.dir;
+    this.hashAlgo = options?.hashAlgo ?? "sha1";
+    this.replicaId = options?.replicaId ?? `replica-${randomUUID()}`;
+    this.chainSequencer = new ChainSequencer();
+    if (options?.keyPair) {
+      this.ownKeyPair = options.keyPair;
+      this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
+    }
+    for (const rootKeyPem of options?.rootKeys ?? []) {
+      try {
+        const { publicKey, fingerprint } = importEd25519PublicKey(rootKeyPem);
+        this.keyRegistry.register(fingerprint, publicKey);
+      } catch {
+        // A malformed genesis `rootKeys` entry is a manifest-authoring error, not an ingest-time
+        // concern (m7-6's well-formed() checklist doesn't cover genesis data) — skip it rather
+        // than fail `open()` outright. Full genesis-manifest integrity checking is `fsck`'s job
+        // (M9/T9.6, out of M0 scope).
+      }
+    }
+    // Substrate provisioning is deferred to first write (see `getSubstrate`) so a bare
+    // `new KipRepo()` doesn't touch disk until something is actually ingested.
+  }
+
+  /** Lazily provisions (and memoizes) this repo's git object-store substrate (T1.1/T1.5). */
+  private getSubstrate(): Substrate {
+    if (!this.substrate) {
+      this.substrate = this.explicitDir
+        ? new Substrate(this.explicitDir, this.hashAlgo)
+        : Substrate.createTemp(this.hashAlgo);
+      // T1.2.5's durable seq-tip persistence: re-seed the sequencer directly via
+      // `ChainSequencer`'s own `initial` constructor parameter, rather than hand-rolling a
+      // peek/next replay loop that reimplements the same seeding logic (this round's finding #5)
+      // — so a re-opened repo resumes its chain tips durably.
+      const persistedSeq = new SeqTipStore(this.substrate.dir).load();
+      this.chainSequencer = new ChainSequencer(persistedSeq);
+    }
+    return this.substrate;
+  }
+
+  /** This repo's own signing identity — generated on first use if `open()` supplied none. */
+  private getOwnKeyPair(): Ed25519KeyPair {
+    if (!this.ownKeyPair) {
+      this.ownKeyPair = generateEd25519KeyPair();
+      this.keyRegistry.register(this.ownKeyPair.fingerprint, this.ownKeyPair.publicKey);
+    }
+    return this.ownKeyPair;
+  }
+
+  /**
+   * `signature === "sig:" + f.id` is the M0-conformance-suite's deterministic PLACEHOLDER
+   * signature convention (src/__tests__/conformance/fixtures.ts's `placeholderSignature`) — NOT
+   * real cryptographic verification. It exists purely so the frozen fixtures can exercise
+   * `ingest()`'s admit/reject contract for a fingerprint this replica has genuinely never seen
+   * (INV-13a's "signing key the replica has never seen" case) without a full
+   * external-signer/verifier round-trip.
+   *
+   * CRITICAL (this round's finding #1 — round 2's "fix" made a round-1 authentication bypass
+   * WORSE, and was independently live-reproduced by two adversarial reviewers): this check MUST
+   * NEVER be consulted — not even as a first/unconditional check — when `keyRegistry` has REAL
+   * public key material registered for `f.provenance.publicKeyFingerprint`. Fingerprints are NOT
+   * secret (they travel in-band on every fact and in genesis `rootKeys`), so if this placeholder
+   * shortcut is allowed to apply unconditionally, ANY attacker who knows a fingerprint this
+   * replica has a real registered key for (its own identity, an imported peer key, or a genesis
+   * root key) can forge a fact claiming that fingerprint with `signature: "sig:"+id` and have it
+   * admitted with ZERO possession of the corresponding private key — a complete authentication
+   * bypass for every registered/trusted key. See `verifySignature` below for the fix: it consults
+   * `keyRegistry` FIRST, and this placeholder fallback only ever runs for a fingerprint that has
+   * NO entry in `keyRegistry` on THIS replica.
+   */
+  private isPlaceholderSignature(f: Fact): boolean {
+    return f.provenance.signature === `sig:${f.id}`;
+  }
+
+  /**
+   * Real Ed25519 verification (ADR-B2) is MANDATORY whenever this replica has real public key
+   * material registered for `f.provenance.publicKeyFingerprint` (own identity, an imported peer
+   * key, or a genesis `rootKeys` entry — see the constructor): the registry check runs FIRST, and
+   * when it finds a registered key, `verifyPayload` is the ONLY path to an "admit" verdict — the
+   * placeholder-convention shortcut NEVER applies once a real key is registered for that
+   * fingerprint, no exceptions. Only when the fingerprint has NO entry in `keyRegistry` (genuinely
+   * unregistered/unknown to this replica — there is no key to check real asymmetric math against)
+   * does the placeholder-convention fallback run, satisfying INV-13a's "admits despite an
+   * unknown/never-seen signing key" requirement without weakening verification for any key this
+   * replica actually trusts.
+   */
+  private verifySignature(f: Fact, canonicalPayload: string): boolean {
+    const registeredKey = this.keyRegistry.get(f.provenance.publicKeyFingerprint);
+    if (registeredKey) {
+      return verifyPayload(registeredKey, canonicalPayload, f.provenance.signature);
+    }
+    return this.isPlaceholderSignature(f);
+  }
+
   // TODO(M0/T4.4): branch-per-replica topology — return the current replica/session branch.
   branch(): string {
     throw new Error("unimplemented: branch");
@@ -584,18 +762,86 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: commit");
   }
 
-  // TODO(M0/T1.2, T1.5): stamp hlc/seq, sign the canonical payload, and write-through.
-  async assertFact(
-    _input: AssertInput,
-  ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
-    throw new Error("unimplemented: assertFact");
+  /**
+   * Stamp `hlc`/`seq`, sign the canonical payload with this repo's OWN keypair (real Ed25519,
+   * ADR-B2), and run the SAME `ingest()` gate every fact — self-authored or received — passes
+   * through (docs/22 §2: "A memory write -> a commit" starts with the author signing `f`, then
+   * `ingest(f)` on the receiving replica — here, self-receipt). Batched commit (T1.5) is NOT yet
+   * implemented (`txn`/`commit` stay throwing stubs), so this always returns `status: "pending"`
+   * per ADR-012 ("no path where a durable ack precedes the commit").
+   */
+  async assertFact(input: AssertInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
+    const fact = this.mintFact(input);
+    const verdict = await this.ingest(fact);
+    if (!verdict.admitted) {
+      throw new KipError(
+        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+        `assertFact: self-authored fact was rejected at ingest (${verdict.reason})`,
+        { factId: fact.id },
+      );
+    }
+    return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
   }
 
-  // TODO(M0/T1.2, T1.5): a bounded-validTo assert (§4.1).
+  /** A bounded-validTo assert (§4.1) — same mint-then-ingest path as `assertFact`. */
   async retractFact(
-    _input: RetractInput,
+    input: RetractInput,
   ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
-    throw new Error("unimplemented: retractFact");
+    const fact = this.mintFact(input);
+    const verdict = await this.ingest(fact);
+    if (!verdict.admitted) {
+      throw new KipError(
+        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+        `retractFact: self-authored fact was rejected at ingest (${verdict.reason})`,
+        { factId: fact.id },
+      );
+    }
+    return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
+  }
+
+  /**
+   * Shared assert/retract construction: stamp `hlc` (author-side tick, T1.2.5), mint `seq` from
+   * this key's `(replicaId,keyFpr)` chain (ADR-B4), sign the canonical payload with this repo's
+   * own real Ed25519 key, and derive `id` as the REAL git-blob CID of that canonical payload
+   * (T1.1/T1.4) — so self-authored facts always satisfy well-formed()'s item-4 self-consistency
+   * check via genuine hash equality, never the ingest-gate's unregistered-key fallback.
+   */
+  private mintFact(input: AssertInput | RetractInput): Fact {
+    // Provision (and, on a re-opened dir, restore the persisted seq-tips into) the substrate
+    // BEFORE minting `seq` below — otherwise a re-opened repo's first mint would race ahead of
+    // its own durably-persisted chain tip (getSubstrate() is what re-seeds `chainSequencer`).
+    const substrate = this.getSubstrate();
+    const keyPair = this.getOwnKeyPair();
+    const replicaId = input.replicaId ?? this.replicaId;
+    this.localHlc = hlcTick(this.localHlc, replicaId);
+    const chainId = chainIdFor(replicaId, keyPair.fingerprint);
+    const seq = this.chainSequencer.next(chainId);
+    new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+
+    const draft: Omit<Fact, "id"> = {
+      v: input.v,
+      type: input.type,
+      target: input.target,
+      value: input.value,
+      validFrom: input.validFrom,
+      validTo: input.validTo,
+      hlc: this.localHlc,
+      seq,
+      causedBy: input.causedBy,
+      replicaId,
+      provenance: {
+        author: input.provenance.author,
+        signature: "", // filled in below, once the canonical payload (which excludes it) is known
+        publicKeyFingerprint: keyPair.fingerprint,
+        signedFields: [...CANONICAL_ENVELOPE_FIELDS],
+        source: input.provenance.source,
+        confidence: input.provenance.confidence,
+      },
+    };
+    const canonicalPayload = canonicalPayloadString(draft as Fact);
+    const id = gitBlobId(Buffer.from(canonicalPayload, "utf8"), this.hashAlgo);
+    const signature = signPayload(keyPair.privateKey, canonicalPayload);
+    return { ...draft, id, provenance: { ...draft.provenance, signature } } as Fact;
   }
 
   // TODO(M3/T4.5): supersede keyed by input-CID set (ADR-004, §4b.3/C-3).
@@ -612,9 +858,38 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: reAttestFact");
   }
 
-  // TODO(M0/T1.3): the signature-only ingest gate — the sole membership predicate (ADR-001).
-  async ingest(_f: Fact): Promise<{ admitted: boolean; reason?: "malformed" | "signature-invalid" }> {
-    throw new Error("unimplemented: ingest");
+  /**
+   * T1.3: the signature-only ingest gate — the sole membership predicate (ADR-001). A PURE
+   * function of `f`'s own bytes (INV-6a): well-formed() first (reject-malformed on ANY m7-6
+   * checklist failure), THEN signature verification (reject signature-invalid) — nothing else is
+   * consulted (no drift, no key-registration state, no namespace/revocation check, docs/22 §2.1).
+   * A signature-valid fact is ALWAYS admitted (INV-13a) and re-offering an already-admitted CID is
+   * a no-op at the storage layer (INV-7a) — `ingest()`'s own return value stays byte-identical for
+   * byte-identical input on every call/replica either way, since it recomputes rather than caches.
+   */
+  async ingest(f: Fact): Promise<{ admitted: boolean; reason?: "malformed" | "signature-invalid" }> {
+    // This round's finding #2: the length-bound half of well-formed()'s id-shape check must be
+    // derived from THIS repo's actual configured hashAlgo, not a hardcoded SHA-1 constant — else a
+    // sha256 repo rejects its own well-formed, correctly-self-minted facts (see well-formed.ts).
+    const wellFormed = checkWellFormed(f, this.hashAlgo);
+    if (!wellFormed.ok) {
+      return { admitted: false, reason: wellFormed.reason };
+    }
+
+    const canonicalPayload = canonicalPayloadString(f);
+    if (!this.verifySignature(f, canonicalPayload)) {
+      return { admitted: false, reason: "signature-invalid" };
+    }
+
+    // ADMIT: write /facts/<shardHi>/<shardLo>/<f.id>.json — a real, content-addressed, idempotent
+    // git-blob write (INV-7's CID dedup happens inside `writeFactBlob`/`writeBlob`, T1.6).
+    this.getSubstrate().writeFactBlob(f.id, JSON.stringify(f));
+
+    // Advance local HLC past f.hlc (receive-advance, docs/22 §2.1 step 3) — audit-only, never
+    // touches this fact's own seq chain (m7-1), never affects the returned verdict.
+    this.localHlc = hlcReceiveTick(this.localHlc, f.hlc, this.replicaId);
+
+    return { admitted: true };
   }
 
   // TODO(M0/T1.2): sugar -> assert node-existence + prop facts.
@@ -762,7 +1037,70 @@ export class KipRepo implements Repo {
 // 10. Lifecycle entrypoint (docs/40 "Kip — lifecycle / substrate")
 // ---------------------------------------------------------------------------
 
-// TODO(M0/T1.1): open/clone a memory repo (git dir + frozen genesis manifest).
-export async function open(_options: OpenOptions): Promise<KipRepo> {
-  throw new Error("unimplemented: open");
+/**
+ * T1.1: open/clone a memory repo — provisions the git-substrate object store at `options.dir`
+ * (creating it if `createIfMissing`) and writes the genesis-immutable `manifest.json` (docs/22
+ * §1.5) the first time the directory is initialized. Re-opening an already-initialized dir reuses
+ * whatever `manifest.json` is already there rather than re-writing it (genesis parameters are
+ * immutable post-creation, m2-5) — full genesis-CID re-verification (docs/22 §1.5's "every
+ * open/fsck/merge-postcheck MUST verify") is `fsck`'s job (M9/T9.6, out of M0 scope per this
+ * task's instructions).
+ */
+export async function open(options: OpenOptions): Promise<KipRepo> {
+  const hashAlgo: HashAlgo = options.genesis?.hashAlgo ?? "sha1";
+  const manifestPath = path.join(options.dir, "manifest.json");
+
+  const dirExists = fs.existsSync(options.dir) && fs.existsSync(manifestPath);
+  if (!dirExists) {
+    if (!options.createIfMissing && fs.existsSync(options.dir) === false) {
+      throw new KipError("ERR_MALFORMED_INPUT", `open: ${options.dir} does not exist and createIfMissing is not set`, {
+        dir: options.dir,
+      });
+    }
+    fs.mkdirSync(options.dir, { recursive: true });
+    const manifest = {
+      hashAlgo,
+      shardDepth: options.genesis?.shardDepth ?? 2,
+      clockEpoch: options.genesis?.clockEpoch ?? 0,
+      epsilonCausalMs: options.genesis?.epsilonCausalMs ?? 0,
+      regenBoundaryRule: options.genesis?.regenBoundaryRule ?? "per-commit",
+      rootKeys: options.genesis?.rootKeys ?? [],
+      quarantineTtlMs: options.genesis?.quarantineTtlMs ?? 0,
+      quarantineKeyCapBytes: options.genesis?.quarantineKeyCapBytes ?? 0,
+      quarantinePoolBytes: options.genesis?.quarantinePoolBytes ?? 0,
+      keyChainDurableCapBytes: options.genesis?.keyChainDurableCapBytes ?? 0,
+      headsCommitted: options.genesis?.headsCommitted ?? true,
+    };
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  }
+
+  const persistedManifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as {
+    hashAlgo: HashAlgo;
+    rootKeys?: string[];
+  };
+  const keyPair = extractKeyPairFromKeyring(options.keyring);
+  return new KipRepo({
+    dir: options.dir,
+    replicaId: options.replicaId,
+    hashAlgo: persistedManifest.hashAlgo,
+    keyPair,
+    // This round's finding #1: genesis-declared `rootKeys` are now actually wired into the
+    // repo's `keyRegistry` (previously written to manifest.json but never read back).
+    rootKeys: persistedManifest.rootKeys,
+  });
+}
+
+/**
+ * `OpenOptions.keyring` is intentionally typed `unknown` (docs/40 doesn't pin its shape in the
+ * excerpt read for this scaffold). This accepts the minimal, most obvious concrete shape — a PEM
+ * private key (optionally paired with its PEM public key) — via `signing.ts`'s real ADR-B2
+ * import path; any other shape is treated as "no explicit keyring", falling back to a
+ * repo-generated identity (`KipRepo.getOwnKeyPair`).
+ */
+function extractKeyPairFromKeyring(keyring: unknown): Ed25519KeyPair | undefined {
+  if (!keyring || typeof keyring !== "object") return undefined;
+  const candidate = keyring as { privateKeyPem?: unknown; publicKeyPem?: unknown };
+  if (typeof candidate.privateKeyPem !== "string") return undefined;
+  const publicKeyPem = typeof candidate.publicKeyPem === "string" ? candidate.publicKeyPem : undefined;
+  return importEd25519KeyPair(candidate.privateKeyPem, publicKeyPem);
 }
