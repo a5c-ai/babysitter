@@ -1,0 +1,393 @@
+# Additive upstream release records from the 2026-07-10 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783674082-g314196
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783674082-g314196"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783674082-g314196"
+  currentVersion: "0.0.1783674082-g314196"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783674082-g314196"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1783587756-gbe085c to 0.0.1783674082-g314196."
+    - "npm metadata identifies the package as the Amp frontier coding agent CLI and exposes the amp binary through platform optional dependencies."
+    - "No public build-specific release notes, CLI flag, transport/API, model, package-name, install-method, or migration change was found for this timestamped build."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783674082-g314196."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783674082-g314196-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-1-1
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.1.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.1.1"
+  currentVersion: "1.1.1"
+  releasedAt: "2026-07-10"
+  upstreamReleaseTag: "1.1.1"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.1"
+  cliCommand: "agy"
+  summary: "Antigravity CLI release adding custom agent selection, agent listing, artifact search navigation, print-mode error fixes, nested subagent relays, and workspace hook reloads."
+  assimilationNotes:
+    - "Latest official google-antigravity/antigravity-cli release moved from recorded 1.1.0 to 1.1.1."
+    - "New --agent flag and agent/agents subcommands affect launchBehavior prompt flags and command catalog modeling."
+    - "Artifact detail viewer adds in-file keyword search with / plus n/N navigation, affecting TUI keybinding expectations."
+    - "Print mode now writes server-side failures to stderr and exits non-zero, affecting non-interactive adapter error handling."
+    - "Nested subagent updates and tool confirmations are recursively relayed to the root conversation, affecting subagent event tracking."
+    - "Workspace-local hooks are reloaded when workspaces change after trust, affecting hook discovery lifecycle."
+    - "No package-name or install-method migration was identified."
+  releaseHighlights:
+    - "--agent launch flag and agent listing subcommands."
+    - "Artifact detail search and jump navigation."
+    - "Non-zero print-mode server error handling."
+    - "Nested subagent update and confirmation relays."
+    - "Workspace-local hook reload after trust changes."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:antigravity-cli
+  sourced_from:
+    - evidence:antigravity-1-1-1-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-206
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.206"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.206"
+  currentVersion: "2.1.206"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.206"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.206"
+  cliCommand: "claude"
+  summary: "Claude Code release adding /cd path suggestions, a CLAUDE.md trimming /doctor check, public gateway login support, safer worktree entry confirmation, background-agent upgrade improvements, and MCP timeout/auth fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.205 to 2.1.206."
+    - "/cd now suggests directory paths like /add-dir, affecting slash-command completion behavior."
+    - "/doctor now proposes trimming checked-in CLAUDE.md content that Claude can derive from the codebase, affecting diagnostics and repository hygiene prompts."
+    - "/commit-push-pr auto-allows git push to the configured push remote, affecting command approval policy modeling."
+    - "Gateway /login supports Anthropic-operated public gateway endpoints."
+    - "EnterWorktree asks before entering git worktrees outside .claude/worktrees, affecting worktree safety prompts."
+    - "MCP per-server request_timeout_ms is honored for --mcp-config and .mcp.json fresh sessions; OAuth token refresh and permission-prompt MCP startup failures were fixed."
+    - "No package-name or install-method migration was published; install remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "/cd directory path suggestions."
+    - "/doctor CLAUDE.md trimming check."
+    - "Public gateway login endpoint support."
+    - "Worktree entry confirmation outside .claude/worktrees."
+    - "MCP request timeout and OAuth refresh fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-206-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-206
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.206"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.206"
+  currentVersion: "0.3.206"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.206"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.206"
+  summary: "Claude Agent SDK TypeScript release adding command_lifecycle stream-json and SDK session frames for uuid-stamped message terminal states."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.205 to 0.3.206."
+    - "New command_lifecycle frames report queued, started, completed, cancelled, and discarded terminal states for uuid-stamped messages."
+    - "Stream-json and SDK session consumers need schema support for command_lifecycle events."
+    - "Zero-API results no longer report stale duration_api_ms."
+    - "No package-name or transport migration was published; versioned npm, yarn, pnpm, and bun update commands remain the documented path."
+  releaseHighlights:
+    - "command_lifecycle event frames."
+    - "Terminal state reporting for uuid-stamped messages."
+    - "duration_api_ms stale-value fix for zero-API results."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-206-2026-07-10
+---
+nodeKind: AgentVersion
+id: agent-version:codex@0.144.1
+attributes:
+  agentId: "codex"
+  agentProductId: agent:codex
+  displayName: "Codex CLI 0.144.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.144.1"
+  currentVersion: "0.144.1"
+  releasedAt: "2026-07-09"
+  sourcePackage: "@openai/codex"
+  upstreamReleaseTag: "rust-v0.144.1"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.1"
+  cliCommand: "codex"
+  summary: "Codex CLI patch release fixing standalone installer metadata handling and macOS/code-mode host reliability."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.143.0 to 0.144.1."
+    - "Standalone installs now tolerate compact or reordered GitHub release metadata, affecting install/update reliability."
+    - "macOS package installs expose the code-mode host alongside the codex executable."
+    - "Code mode falls back to the embedded runtime when the companion host binary is unavailable."
+    - "No package-name, CLI flag, transport/API, model, or migration change was published; install remains npm install -g @openai/codex."
+  releaseHighlights:
+    - "Standalone installer GitHub metadata fix."
+    - "macOS code-mode host packaging fix."
+    - "Embedded runtime fallback for code mode."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex
+  sourced_from:
+    - evidence:codex-rust-v0-144-1-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:codex-sdk:6-46-0
+attributes:
+  agentId: "codex-sdk"
+  agentProductId: agent:codex-sdk
+  displayName: "OpenAI Node SDK 6.46.0"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "6.46.0"
+  currentVersion: "6.46.0"
+  releasedAt: "2026-07-09"
+  sourcePackage: "openai"
+  upstreamReleaseTag: "v6.46.0"
+  releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.46.0"
+  summary: "OpenAI Node SDK release adding GPT-5.6 Sol API updates and fixing Assistants array deltas plus runner tool-call ID normalization."
+  assimilationNotes:
+    - "Latest npm moved from recorded 6.42.0 to 6.46.0."
+    - "API metadata includes GPT-5.6 Sol updates, affecting model capability catalogs for SDK-driven Codex/Responses clients."
+    - "Assistants streaming array delta entries are placed by index instead of appended, affecting stream merge behavior."
+    - "Runner normalizes missing tool call IDs, affecting tool-call event handling in SDK consumers."
+    - "Documentation adds Azure Assistants examples, assistant stream failure guidance, and file search result limits."
+    - "No package-name or install-method migration was published; package remains openai."
+  releaseHighlights:
+    - "GPT-5.6 Sol API updates."
+    - "Assistants array delta index placement fix."
+    - "Runner missing tool-call ID normalization."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex-sdk
+  sourced_from:
+    - evidence:openai-node-6-46-0-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-70
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.70"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.70"
+  currentVersion: "1.0.70"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@github/copilot"
+  upstreamReleaseTag: "v1.0.70"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.70"
+  cliCommand: "gh copilot"
+  summary: "GitHub Copilot CLI release adding GPT-5.6 support, sandbox session flags, /refine, repository-local settings, exact plugin SHA pinning, MCP resource RPCs, and SDK live-MCP management APIs."
+  assimilationNotes:
+    - "Latest stable github/copilot-cli release moved from recorded 1.0.69 to 1.0.70."
+    - "GPT-5.6 model support affects model catalogs and commentary guidance."
+    - "New --sandbox and --no-sandbox flags affect launchBehavior promptExtraFlags for per-session shell sandbox control."
+    - "New /refine command affects slash-command catalog modeling."
+    - "New --repo and --local flags for /settings and /model affect command argument modeling."
+    - "Trusted repositories can pin model, effort level, context tier, and extend URL/MCP/skill deny lists through .github/copilot/settings.json."
+    - "MCP resource read/list/listTemplates RPCs and SDK APIs for live MCP server management affect MCP adapter/proxy surfaces."
+    - "Plugin source configuration can pin exact commit SHAs through a sha field."
+    - "No install method or package-name migration was published."
+  releaseHighlights:
+    - "GPT-5.6 model support."
+    - "--sandbox and --no-sandbox session flags."
+    - "/refine prompt rewrite command."
+    - "Repository-local model/settings policy."
+    - "Paginated MCP resource RPCs and live MCP SDK APIs."
+    - "Exact plugin SHA pinning."
+  installMethods:
+    - install:gh-extension
+    - install:npm
+edges:
+  version_of:
+    - agent:copilot-cli
+  sourced_from:
+    - evidence:copilot-cli-1-0-70-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-169-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.169.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.169.0"
+  currentVersion: "0.169.0"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.169.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes beyond the Factory changelog stream were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.168.2 to 0.169.0."
+    - "npm metadata identifies @factory/cli as the Factory Droid CLI and points repository metadata at Factory-AI/factory."
+    - "Factory public release notes currently document recent Droid CLI surfaces through v0.164.0, including grouped slash commands, cloud sync control, MCP auth fixes, droid exec background-process behavior, and $EDITOR allow/deny-list editing; no public 0.169.0-specific feature list was found."
+    - "Node engine remains >=20.0.0 and the droid binary entry point remains bin/droid."
+    - "No confirmed 0.169.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @factory/cli."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.169.0."
+    - "No public build-specific changelog located for 0.169.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-169-0-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-15
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.15"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.15"
+  currentVersion: "16.3.15"
+  releasedAt: "2026-07-09"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.15"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.15"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release adding prompt-cache affinity headers, GPT-5.6 Pro reasoning-mode aliases, xAI device-code OAuth, Grok 4.5, Meta Muse Spark 1.1, and removing the bundled Tester subagent."
+  assimilationNotes:
+    - "Latest npm moved from recorded 16.3.12 to 16.3.15."
+    - "Breaking API rename: OpenAIResponsesCacheOptions, normalizeOpenAIResponsesPromptCacheKey, and getOpenAIResponsesPromptCacheKey became endpoint-neutral OpenAICacheOptions, normalizeOpenAIPromptCacheKey, and getOpenAIPromptCacheKey."
+    - "OpenAI-family chat completions now support automatic and explicit prompt-cache affinity headers, affecting provider transport metadata."
+    - "GPT-5.6 Pro aliases send reasoning mode pro on OpenAI Responses and Codex Responses requests while honoring requestModelId so aliases request the base upstream model."
+    - "xAI OAuth now uses a dedicated device-code flow instead of redirect/loopback server."
+    - "Catalog adds Grok 4.5, gpt-5.6 base models and gpt-5.6 luna/sol/terra pro variants, meta/muse-spark-1.1, and thinking modes on poolside/laguna models."
+    - "Testing guidance moved into the main system prompt and the bundled Tester subagent was removed."
+    - "Install command remains npm install -g @oh-my-pi/pi-coding-agent."
+  releaseHighlights:
+    - "npm package update to @oh-my-pi/pi-coding-agent 16.3.15."
+    - "Endpoint-neutral OpenAI prompt-cache API rename."
+    - "GPT-5.6 Pro reasoning-mode aliases."
+    - "xAI device-code OAuth."
+    - "Grok 4.5 and Meta Muse Spark 1.1 catalog support."
+    - "Bundled Tester subagent removed."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-15-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-17-18
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.17.18"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.17.18"
+  currentVersion: "1.17.18"
+  releasedAt: "2026-07-09"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.17.18"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.18"
+  cliCommand: "opencode"
+  summary: "OpenCode release fixing GitHub Copilot zero-billing-batch model pricing crashes and adding a Meta Muse Spark model-specific system prompt."
+  assimilationNotes:
+    - "Latest npm moved from recorded 1.17.16 to 1.17.18."
+    - "GitHub Copilot provider models with zero billing batch size no longer cause crashes or bad pricing data, affecting provider/model pricing handling."
+    - "Meta Muse Spark now has a model-specific system prompt, affecting model catalog prompt metadata."
+    - "No package-name, install-method, CLI flag, transport/API, or migration change was published; install remains npm install -g opencode-ai."
+  releaseHighlights:
+    - "GitHub Copilot zero-billing-batch pricing crash fix."
+    - "Meta Muse Spark model-specific system prompt."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+  sourced_from:
+    - evidence:opencode-1-17-18-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:pi:0-80-6
+attributes:
+  agentId: "pi"
+  agentProductId: agent:pi
+  displayName: "Pi 0.80.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.80.6"
+  currentVersion: "0.80.6"
+  releasedAt: "2026-07-09"
+  sourcePackage: "@earendil-works/pi-coding-agent"
+  upstreamReleaseTag: "v0.80.6"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.80.6"
+  cliCommand: "pi"
+  summary: "Pi release adding max thinking level across CLI, SDK, RPC, model selection, and themes, plus request-wide input-token pricing tiers and long-context/model metadata fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.78.1 to 0.80.6."
+    - "New opt-in max thinking level above xhigh is available through CLI --thinking max, SDK, RPC, model selection, and themes, affecting launchBehavior and capability metadata."
+    - "Request-wide input-token pricing tiers improve long-context cost accounting for GPT-5.4, GPT-5.5, GPT-5.6, custom models, modelOverrides, and extension providers."
+    - "shellPath now expands ~ to the home directory."
+    - "Inherited post-compaction output-token budgeting ignores stale pre-compaction assistant usage."
+    - "GPT-5.6 metadata keeps direct OpenAI requests in the 272K short-context tier while exposing Codex backend 372K context with long-context pricing; the nonexistent bare gpt-5.6 alias was removed."
+    - "Anthropic message conversion preserves signed empty thinking blocks to avoid newer-Claude thinking-block errors."
+    - "No package-name or install-method migration was published; install remains npm install -g @earendil-works/pi-coding-agent."
+  releaseHighlights:
+    - "--thinking max and max thinking support across SDK/RPC/model selection."
+    - "Input-token pricing tiers for long-context cost accounting."
+    - "~ expansion for shellPath."
+    - "Post-compaction budgeting and GPT-5.6 metadata fixes."
+    - "Anthropic signed empty thinking-block preservation."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:pi
+  sourced_from:
+    - evidence:pi-0-80-6-2026-07-10
