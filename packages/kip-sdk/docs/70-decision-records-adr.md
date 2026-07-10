@@ -386,3 +386,109 @@ The spec explicitly **promoted** two former open questions to the convergence co
 
 - **Supersession convergence (OQ-2 → core, §4b.3, C-3/C2-2)** — captured in **ADR-004/ADR-005**. The LLM decision is a recorded `supersede` fact keyed by input CIDs; concurrent contradictory supersessions surface `kip:conflict` by the default reducer, never a hash tiebreak.
 - **Anti-poisoning / anti-backdating (OQ-7 → core, §4b.1, M-2/C3-1/C4-2)** — captured in **ADR-007**. Enforced inside `proj` keyed on author-HLC, with the involuntary per-key rule as the primary bound.
+
+---
+
+## Implementation decisions (ADR-B1–B7)
+
+The ADRs above distill decisions the spec already made. The ADRs below are **new implementation decisions** for the kip-sdk build itself — how M0-M3 (and the M8 boundary) get implemented in this repo. They do not introduce new spec semantics; they choose concrete tooling/module/test conventions to realize the spec. Each is **Status: proposed**, pending human approval via a breakpoint.
+
+---
+
+## ADR-B1: Git substrate access layer — isomorphic-git for M0-M3 plumbing, shell-out system git only for M8 promisor mechanics
+
+**Status:** accepted
+
+**Context.** M0-M3 need portable, content-addressed object/tree/commit/ref plumbing that is byte-deterministic and Windows-portable (INV-12). M8 additionally needs promisor/repack mechanics (`repackExcluding`, `markPromisor`, `configurePromisorRemote`) that are obscure, native-git-specific operations.
+
+**Decision.** Hybrid — **isomorphic-git** (pure JS) for M0-M3's portable object/tree/commit/ref plumbing; **shell out to system git (>=2.38)** only for M8's promisor/repack mechanics, behind a small **`PackAdmin`** interface, checked at `kip init`/`fsck` time.
+
+**Consequences.** M0-M3 stay dependency-light and Windows-portable with full control over byte-determinism; the M8 boundary is isolated behind one narrow interface so the system-git dependency is opt-in and only reached by promisor/repack code paths.
+
+**Rejected alternatives.** isomorphic-git alone (no promisor-marking API; a high-risk bet on an unverified reimplementation of obscure git internals); system git for everything (loses INV-12's byte-determinism control and reintroduces a hard system dependency for the 95% of ops that don't need it); a custom codec from scratch (multi-month reimplementation duplicating isomorphic-git's already-tested work).
+
+*Traceability: docs/22-git-substrate.md §6.2a (m7-3), §1.4-1.5 (m7-4); docs/60 INV-12; docs/80 M0-M3 vs M8 scoping.*
+
+---
+
+## ADR-B2: Ed25519 signing/verification — node:crypto native implementation
+
+**Status:** accepted
+
+**Decision.** Use `node:crypto`'s native Ed25519 (`generateKeyPairSync`/`sign`/`verify`), zero new dependency, matching `packages/trust-core/src/signing.ts`'s existing pattern exactly.
+
+**Consequences.** A standard, well-understood operation with the dependency surface held at zero, sidestepping the Windows-lockfile-pollution risk; kip-sdk's signing code mirrors the closest sibling package's already-proven pattern.
+
+**Rejected alternatives.** `@noble/ed25519` (strong, audited, zero-dep, but a net-new dependency when `node:crypto` already does the job and the closest sibling package already proves the pattern; its main edge — pure-JS portability to non-OpenSSL runtimes — isn't a kip-sdk requirement).
+
+*Traceability: SPEC.md §2.4; docs/22 §2.1; packages/trust-core/src/signing.ts.*
+
+---
+
+## ADR-B3: Canonical payload encoding — in-house canonical JSON encoder modeled on trust-core, with a fixed version-invariant field list
+
+**Status:** accepted
+
+**Decision.** An in-house canonical JSON encoder modeled on `packages/trust-core/src/signing.ts`'s `canonicalize`/`deepSortKeys`/`extractFields`, adapted to SPEC §2.4's **fixed, VERSION-INVARIANT field list** (a hardcoded array per A-10, not derived from payload keys).
+
+**Consequences.** A proven implementation pattern already exists in-repo as a template; canonical JSON keeps conformance fixtures debuggable and adds zero dependencies, while the hardcoded field list keeps the byte recipe pinned to the spec rather than to whatever keys a payload happens to carry.
+
+**Rejected alternatives.** CBOR (new dependency, no functional gain, worse debuggability for INV-6 fixtures); custom binary TLV (pure complexity for a requirement canonical JSON already satisfies); importing trust-core's `canonicalize()` directly as a dependency (bakes in a different envelope shape and a fields-fallback pattern that doesn't match kip-sdk's fixed version-invariant list — risks silently diverging from the spec's pinned byte recipe; best used as a template to mirror, not a dependency).
+
+*Traceability: SPEC.md §2.4; docs/22 §2.1 clause 4 (A-10); packages/trust-core/src/signing.ts:74-95.*
+
+---
+
+## ADR-B4: Hybrid logical clock implementation — in-house HLC module with a fully separate ChainSequencer
+
+**Status:** accepted
+
+**Decision.** An in-house HLC module (`HlcStamp = {wall, counter, replicaId}`) with standard `tick()`/`receiveTick()` send/receive-advance semantics, plus a fully separate **`ChainSequencer`** per `(replicaId,key)` minting the `seq` field (`seq=0` at genesis, strictly previous+1, durably persisted, never advanced by receipt, never reset by wall rollover) — two independent counters sharing no state.
+
+**Consequences.** The shape is simple and fully spec-pinned (overflow/carry semantics, seq/hlc separation rationale); in-house gives the tight control INV-14/16/19's conformance tests need.
+
+**Rejected alternatives.** Existing npm HLC packages (none implement kip's project-specific `seq` chain-sequencer axis, which the spec explicitly separates from HLC; importing the generic half buys little since the `seq` machinery still needs hand-rolling and the send/receive-advance logic is only a few dozen lines).
+
+*Traceability: docs/24 §1, §1.2 (M-2), §1.2a (m7-1); docs/60 INV-14/16/19.*
+
+---
+
+## ADR-B5: Module/build conventions — match packages/trust-core exactly
+
+**Status:** accepted
+
+**Decision.** Match `packages/trust-core` exactly — commonjs, plain `tsc` build, vitest with colocated `*.test.ts` files, tsconfig ES2022/strict/composite, `types.ts`+`index.ts` barrel layout with per-concern modules (`hlc.ts`, `canonical-payload.ts`, `signing.ts`, `substrate.ts`).
+
+**Consequences.** Identical consumption model to trust-core, keeping monorepo tooling consistent; no new build tooling to maintain.
+
+**Rejected alternatives.** A dual ESM+CJS build via tsup/rollup (every other internal-consumption-only package in this monorepo ships CJS-only; no stated ESM/browser/standalone-publish requirement exists in M0-M3 scope; adds a bundler dependency and more Windows-lockfile-pollution surface for no current benefit).
+
+*Traceability: packages/trust-core/package.json, tsconfig.json, vitest.config.ts; root package.json workspaces + build:sdk chain (kip-sdk not yet present — scaffolding TODO).*
+
+---
+
+## ADR-B6: Dependency / lockfile policy — zero new runtime dependencies for M0-M3
+
+**Status:** accepted
+
+**Decision.** Zero new runtime dependencies for M0-M3. Reuse confirmed-present devDeps (`typescript`, `vitest`, `rimraf`, `@types/node` matching trust-core's versions). No new `npm install` needed beyond registering the new workspace member itself, which must be done from a Linux/CI-consistent environment (WSL2 or CI container), never native Windows.
+
+**Consequences.** This repo has a documented failure mode where a Windows `npm install` pins win32 native bindings as non-optional, breaking Linux `npm ci`; ADR-B2/B3/B4 already eliminate every candidate new dependency, so M0-M3 needs no exception to this policy.
+
+**Rejected alternatives.** `@noble/ed25519` (moot given ADR-B2; documented as a fallback procedure only — if reconsidered later, install from Linux, verify `npm ci` on both platforms, diff the lockfile for any os/cpu-scoped optional-dependency blocks pinned non-optional before committing).
+
+*Traceability: packages/trust-core/package.json devDependencies; root package.json (kip-sdk absent from workspaces).*
+
+---
+
+## ADR-B7: Test layout for conformance invariants — one file per invariant under src/__tests__/conformance/
+
+**Status:** accepted
+
+**Decision.** One test file per invariant (including milestone sub-invariants as their own files) under `src/__tests__/conformance/`, named `inv-<id>.test.ts`, each with a single top-level `describe('INV-<id>: <verbatim short title>', ...)` block. Each milestone gets a named test-gate script (e.g. `test:conformance:m0`) running exactly its exit-criteria file set via vitest's file-glob.
+
+**Consequences.** "Which files satisfy M0's exit gate" becomes a mechanical, greppable question matching the roadmap's own per-milestone INV-id lists.
+
+**Rejected alternatives.** Grouping related invariants into fewer files (breaks milestone-gated structure — exit criteria are precise per-milestone INV-id lists); describe-block naming alone with no file-name binding (loses file-glob milestone selection, a weaker than compile/glob-time signal).
+
+*Traceability: docs/60 §0 and the full INV catalog; docs/80 per-milestone Exit criteria rows.*
