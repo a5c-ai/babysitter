@@ -93,6 +93,16 @@ export interface BaseFactOverrides {
   validTo?: HlcOrTime | null;
   /** M1 addendum: voluntary causal-dominance declaration (left unused by M0's own fixtures). */
   causedBy?: FactId[];
+  /**
+   * M2 addendum (INV-14a, docs/60-conformance-and-testability.md#inv-14a): explicit per-
+   * `(replicaId,key)` chain-sequence position (`seq`, §4b.1/m7-1) — `seq = 0` is a chain's
+   * genesis, `seq = n` its `(n+1)`-th fact. Every pre-M2 fixture call site left this unset and
+   * got the hardcoded baseline of `1`; this override is purely additive (defaults to `1`,
+   * unchanged meaning for every existing M0/M1 call site) because M2's pin/chain-frontier tests
+   * are the first to need a REAL, multi-fact `(replicaId,key)` chain (seq 0, 1, 2, ...) to
+   * exercise the seq-contiguity completeness rule `pin()`/`resolvePin()` decide over.
+   */
+  seq?: number;
 }
 
 /**
@@ -131,7 +141,7 @@ export function makeWellFormedFact(overrides: BaseFactOverrides = {}): Fact {
     validFrom: overrides.validFrom ?? hlc.wall,
     validTo: overrides.validTo === undefined ? null : overrides.validTo,
     hlc,
-    seq: 1,
+    seq: overrides.seq ?? 1,
     causedBy: overrides.causedBy,
     replicaId,
     provenance,
