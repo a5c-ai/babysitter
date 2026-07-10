@@ -1,16 +1,40 @@
 /**
- * Shared, non-test fixture helpers for the M0 exit-gate conformance suite
- * (INV-6a / INV-13a / INV-7a — see inv-6a.test.ts, inv-13a.test.ts, inv-7a.test.ts).
+ * Shared, non-test fixture helpers for the M0/M1 exit-gate conformance suite
+ * (INV-6a / INV-13a / INV-7a from M0; INV-1 / INV-3 / INV-4a / INV-7 / INV-8 from M1 — see
+ * inv-6a.test.ts, inv-13a.test.ts, inv-7a.test.ts, inv-1.test.ts, inv-3.test.ts, inv-4a.test.ts,
+ * inv-7.test.ts, inv-8.test.ts).
  *
  * This file intentionally does NOT end in `.test.ts` (vitest.config.ts only includes
  * `src/**\/*.test.ts`), so it contributes no test cases of its own — per ADR-B7, each
  * invariant's own file is the sole home for its `describe('INV-<id>: ...', ...)` block.
  *
  * Everything here is built exclusively against the public surface declared in
- * packages/kip-sdk/src/index.ts (the M0 scaffold): the `Fact`/`Provenance`/`HlcStamp`/`Target`
+ * packages/kip-sdk/src/index.ts (the M0/M1 scaffold): the `Fact`/`Provenance`/`HlcStamp`/`Target`
  * shapes, `KipRepo`, and nothing else. No SDK method is invented beyond what index.ts declares.
+ *
+ * M1 addendum: the M1 conformance files need MULTIPLE facts that (a) target the exact same cell
+ * (same `(eid, prop)` or same edge `eid`), (b) carry deliberately-chosen `value`/`validFrom`/
+ * `validTo`/`type` (`assert` vs `retract`) geometry, and (c) are byte-identical-except-content so
+ * two independent `KipRepo` instances can be fed the SAME fact SET in different delivery orders
+ * (the T12.1 "single-process fold + perturbation rig" this suite's INV-1/INV-3 gate on, per
+ * docs/80-roadmap-and-milestones.md's M1 exit-criteria note). `makeWellFormedFact`'s
+ * `BaseFactOverrides` is extended (additively — no existing M0 test call site's field set
+ * changes meaning) with `value`/`validFrom`/`validTo`/`type`/`v`/`causedBy` overrides rather than
+ * hand-mutating the returned `Fact` object at every call site (the M0 tests' own established
+ * pattern of post-construction mutation, e.g. inv-13a.test.ts's `fact.validFrom = 0`, is left
+ * untouched — this is purely additive constructor-time sugar for the M1 suite's heavier fixture
+ * needs).
  */
-import type { Fact, FactId, HlcStamp, Provenance, ReplicaId, Target } from "../../index";
+import type {
+  Fact,
+  FactId,
+  HlcOrTime,
+  HlcStamp,
+  Provenance,
+  PropValue,
+  ReplicaId,
+  Target,
+} from "../../index";
 
 /**
  * The canonical signed-envelope field list this suite treats as authoritative for the m7-6
@@ -57,6 +81,18 @@ export interface BaseFactOverrides {
   replicaId?: ReplicaId;
   target?: Target;
   provenance?: Partial<Provenance>;
+  /** M1 addendum: schema version stamped into the fact (INV-8's upcaster keying field). */
+  v?: number;
+  /** M1 addendum: `assert` (default) vs `retract` — a retract is a bounded-validTo assert (§4.1). */
+  type?: "assert" | "retract";
+  /** M1 addendum: the cell's authored value (defaults to `"v"`, matching the pre-M1 baseline). */
+  value?: PropValue;
+  /** M1 addendum: the fact's valid-time interval start (defaults to `hlc.wall`, the pre-M1 baseline). */
+  validFrom?: HlcOrTime;
+  /** M1 addendum: the fact's valid-time interval end, `null` = open-ended (defaults to `null`). */
+  validTo?: HlcOrTime | null;
+  /** M1 addendum: voluntary causal-dominance declaration (left unused by M0's own fixtures). */
+  causedBy?: FactId[];
 }
 
 /**
@@ -88,14 +124,15 @@ export function makeWellFormedFact(overrides: BaseFactOverrides = {}): Fact {
   };
   return {
     id,
-    v: 1,
-    type: "assert",
+    v: overrides.v ?? 1,
+    type: overrides.type ?? "assert",
     target,
-    value: "v",
-    validFrom: hlc.wall,
-    validTo: null,
+    value: overrides.value ?? "v",
+    validFrom: overrides.validFrom ?? hlc.wall,
+    validTo: overrides.validTo === undefined ? null : overrides.validTo,
     hlc,
     seq: 1,
+    causedBy: overrides.causedBy,
     replicaId,
     provenance,
   };
