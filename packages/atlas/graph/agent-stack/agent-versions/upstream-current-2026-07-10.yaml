@@ -188,7 +188,7 @@ attributes:
   releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.46.0"
   summary: "OpenAI Node SDK release adding GPT-5.6 Sol API updates and fixing Assistants array deltas plus runner tool-call ID normalization."
   assimilationNotes:
-    - "Latest npm moved from recorded 6.42.0 to 6.46.0."
+    - "Latest npm moved from recorded 6.45.0 to 6.46.0."
     - "API metadata includes GPT-5.6 Sol updates, affecting model capability catalogs for SDK-driven Codex/Responses clients."
     - "Assistants streaming array delta entries are placed by index instead of appended, affecting stream merge behavior."
     - "Runner normalizes missing tool call IDs, affecting tool-call event handling in SDK consumers."
@@ -370,7 +370,7 @@ attributes:
   cliCommand: "pi"
   summary: "Pi release adding max thinking level across CLI, SDK, RPC, model selection, and themes, plus request-wide input-token pricing tiers and long-context/model metadata fixes."
   assimilationNotes:
-    - "Latest npm moved from recorded 0.78.1 to 0.80.6."
+    - "Latest npm moved from recorded 0.80.3 to 0.80.6."
     - "New opt-in max thinking level above xhigh is available through CLI --thinking max, SDK, RPC, model selection, and themes, affecting launchBehavior and capability metadata."
     - "Request-wide input-token pricing tiers improve long-context cost accounting for GPT-5.4, GPT-5.5, GPT-5.6, custom models, modelOverrides, and extension providers."
     - "shellPath now expands ~ to the home directory."

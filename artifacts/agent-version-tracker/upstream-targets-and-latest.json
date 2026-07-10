@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-09T10:07:11.258Z",
+  "generatedAt": "2026-07-10T10:04:40.109Z",
   "targets": [
     {
       "id": "antigravity",
@@ -132,27 +132,27 @@
   "npmLatest": [
     {
       "packageName": "@ampcode/cli",
-      "latestVersion": "0.0.1783587756-gbe085c"
+      "latestVersion": "0.0.1783674082-g314196"
     },
     {
       "packageName": "@anthropic-ai/claude-agent-sdk",
-      "latestVersion": "0.3.205"
+      "latestVersion": "0.3.206"
     },
     {
       "packageName": "@anthropic-ai/claude-code",
-      "latestVersion": "2.1.205"
+      "latestVersion": "2.1.206"
     },
     {
       "packageName": "@factory/cli",
-      "latestVersion": "0.168.2"
+      "latestVersion": "0.169.0"
     },
     {
       "packageName": "@openai/codex",
-      "latestVersion": "0.143.0"
+      "latestVersion": "0.144.1"
     },
     {
       "packageName": "@pi-ai/sdk",
-      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-07-09T10_07_09_144Z-debug-0.log\n"
+      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-07-10T10_04_37_875Z-debug-0.log\n"
     },
     {
       "packageName": "@qwen-code/qwen-code",
@@ -160,11 +160,11 @@
     },
     {
       "packageName": "openai",
-      "latestVersion": "6.45.0"
+      "latestVersion": "6.46.0"
     },
     {
       "packageName": "opencode-ai",
-      "latestVersion": "1.17.16"
+      "latestVersion": "1.17.18"
     }
   ]
 }
