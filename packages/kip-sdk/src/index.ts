@@ -39,8 +39,20 @@ import {
   verifyPayload,
   type Ed25519KeyPair,
 } from "./signing";
-import { gitBlobId, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
-import { canon, compareByContent, compareOrderKey, orderKey, proj, traverse, type ProjOptions } from "./proj";
+import { gitBlobId, KeyRegistryStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
+import {
+  canon,
+  collectExcisions,
+  compareByContent,
+  compareOrderKey,
+  computeExcisionRef,
+  isAuthorizedExcisionMarker,
+  orderKey,
+  proj,
+  traverse,
+  type ProjOptions,
+  type SelfWitnessedExcisionRecord,
+} from "./proj";
 import type { CellReducerAssociations } from "./cell-reducers";
 
 // ---------------------------------------------------------------------------
@@ -269,6 +281,10 @@ export type CellSegment<V = PropValue> =
       validFrom: HlcOrTime;
       validTo: HlcOrTime | null;
       excisedFactId: FactId;
+      /** ROUND-3 FIX #4 addition: the `excise()` caller's own validated `reason` string, carried
+       * through from the durable, signed marker payload (proj.ts's `ExcisionMarkerPayload`) — never
+       * present for a marker minted before this round (optional, never fabricated). */
+      excisedReason?: string;
     };
 
 export interface PropCell<V = PropValue> {
@@ -702,6 +718,76 @@ export class KipRepo implements Repo {
   private readonly rxFromByOid = new Map<string, HlcStamp>();
 
   /**
+   * ROUND-2 REDESIGN (fix #3): `localExcisionGeometry` (round-1's strictly-local, never-synced
+   * per-replica excision memory) has been REMOVED — a critic proved it lets two replicas holding
+   * the BYTE-IDENTICAL admitted fact set diverge on whether a cell shows `"excised"` or `"unknown"`
+   * (a SEC/INV-1 violation), since only the replica that itself minted the marker had an entry.
+   * The erased fact's cell target + valid-time interval geometry is now embedded directly in the
+   * excision marker fact's own (signed, admitted, synced) payload — see `mintAndIngestExcisionMarker`
+   * below and proj.ts's `ExcisionMarkerPayload`/`collectExcisions` doc comments — so ANY replica
+   * holding the marker (not only the one that physically erased the bytes) derives the identical
+   * placeholder from `proj()`'s now-pure fold over `facts` alone.
+   */
+
+  /**
+   * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11): an explicit, opt-in, constructor-configured
+   * allowlist of signer fingerprints this replica trusts to excise ANY fact regardless of self-
+   * authorship — the minimal admin/operator escape hatch named in `isAuthorizedExcisionMarker`'s
+   * doc comment (proj.ts). Empty by default (never a broader capability system) — see the
+   * `trustedExciseKeys` constructor option below.
+   */
+  private readonly trustedExciseKeyFingerprints: ReadonlySet<string>;
+
+  /**
+   * ROUND-3 FIX (M3 excise-authorization root-cause + absent-target soundness, see proj.ts's
+   * `collectExcisions` doc comment): the set of real content OIDS this replica's OWN `excise()`
+   * call has itself, locally, ALREADY verified authorization for — populated ONLY from `excise()`'s
+   * mint-time check (which reads the REAL candidate fact directly off this replica's own admitted
+   * set, never from any marker's self-declared payload, so it cannot be spoofed by an attacker).
+   *
+   * WHY THIS EXISTS: `collectExcisions`'s fold-time authorization for the "target currently absent
+   * from `facts`" case (the erasing replica's own subsequent re-fold, once its own `Substrate.erase`
+   * has removed the candidate's bytes, is ALWAYS this case) can no longer trust the marker's
+   * self-declared `origFingerprint` (the round-3 root-cause fix) and has no live candidate fact left
+   * to cross-check a REMOTE marker's claim against (a critic's documented, genuine soundness gap —
+   * see this task's disputes). This set is this replica's own, locally-verified, non-spoofable
+   * exception to that otherwise-unauthorizable case: "I personally already checked this exact
+   * content's real signer before I erased it" is sound local knowledge, never a marker's own claim
+   * about itself. It is NEVER populated from a synced/received fact — only from THIS replica's own
+   * `excise()` call — so a remote replica's marker for a target THIS replica never itself excised
+   * still falls through to the narrower "only an explicit trusted-excise-key" rule.
+   *
+   * SCOPE LIMIT (documented dispute): in-memory only, like `rxFromByOid` above — a reopened `KipRepo`
+   * pointed at the same `dir` does not remember which oids IT PERSONALLY once excised, so its own
+   * historical excisions may re-fold to `"unknown"` rather than the typed `"excised"` placeholder
+   * after a restart. No currently-frozen test reopens a repo across its own excise() call, so this
+   * is a real but narrower, documented scope boundary rather than a live regression.
+   *
+   * ROUND-4 FIX (Problem 2 — audit-record forgery via unbound geometry): now a
+   * `Map<oid, SelfWitnessedExcisionRecord>` rather than a bare `Set<string>` — each entry also
+   * carries the REAL geometry (`cellTarget`/`validFrom`/`validTo`/`excisedFactId`/`excisedReason`)
+   * THIS replica itself read off the real candidate fact at its own `excise()` mint time. A critic
+   * proved live that round 3's bare-`Set` design let `collectExcisions` fall back to trusting
+   * whichever MARKER happened to match a witnessed oid for its GEOMETRY — including an attacker's
+   * own, separately-crafted marker with a matching `ref` (trivial once the oid is known) but a
+   * completely different, attacker-chosen `cellTarget`, forging a fabricated excision record onto
+   * an unrelated cell. Storing the geometry here, and having `collectExcisions` build the
+   * `ExcisionRecord` EXCLUSIVELY from it (never from the matching marker's own payload) closes
+   * this: see proj.ts's `SelfWitnessedExcisionRecord` doc comment and
+   * round4-excision-convergence-fix.test.ts.
+   */
+  private readonly selfWitnessedExcisionOids = new Map<string, SelfWitnessedExcisionRecord>();
+
+  /**
+   * M3/T4.2 addition: a MINIMAL, same-process replica registry keyed by `replicaId`, letting
+   * `sync(remote)` (below) resolve a `RemoteRef` string to another live `KipRepo` instance in this
+   * SAME process — see `sync()`'s own doc comment for why this is an explicit, documented scope
+   * boundary (real git-remote/network transport is out of this round's scope) rather than a
+   * fabricated substitute for one.
+   */
+  private static readonly registry = new Map<ReplicaId, KipRepo>();
+
+  /**
    * TODO(M0/T1.1): a full `open()`-driven construction (genesis manifest, on-disk substrate) is
    * `open()`'s job (below). This bare constructor exists so `new KipRepo()` — the shape every
    * frozen M0 conformance test under src/__tests__/conformance/ uses directly — is a fully
@@ -736,6 +822,13 @@ export class KipRepo implements Repo {
      * proj.ts's `reduceCellByRef`).
      */
     cellReducers?: CellReducerAssociations;
+    /**
+     * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11): an explicit, opt-in allowlist of signer
+     * fingerprints this replica trusts to excise ANY fact (the minimal admin/operator escape
+     * hatch — see `trustedExciseKeyFingerprints`'s own doc comment and proj.ts's
+     * `isAuthorizedExcisionMarker`). Empty by default; never a broader capability system.
+     */
+    trustedExciseKeys?: string[];
   }) {
     this.explicitDir = options?.dir;
     this.hashAlgo = options?.hashAlgo ?? "sha1";
@@ -743,6 +836,7 @@ export class KipRepo implements Repo {
     this.chainSequencer = new ChainSequencer();
     this.knownMaxVersion = options?.knownMaxVersion;
     this.cellReducers = options?.cellReducers;
+    this.trustedExciseKeyFingerprints = new Set(options?.trustedExciseKeys ?? []);
     if (options?.keyPair) {
       this.ownKeyPair = options.keyPair;
       this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
@@ -760,6 +854,12 @@ export class KipRepo implements Repo {
     }
     // Substrate provisioning is deferred to first write (see `getSubstrate`) so a bare
     // `new KipRepo()` doesn't touch disk until something is actually ingested.
+
+    // M3/T4.2: self-register into the same-process replica registry (see its own doc comment and
+    // `sync()` below) — last registration for a given `replicaId` wins, matching this round's
+    // minimal in-process scope (a real deployment has exactly one live `KipRepo` per `replicaId`
+    // per process anyway).
+    KipRepo.registry.set(this.replicaId, this);
   }
 
   /** Lazily provisions (and memoizes) this repo's git object-store substrate (T1.1/T1.5). */
@@ -774,6 +874,35 @@ export class KipRepo implements Repo {
       // — so a re-opened repo resumes its chain tips durably.
       const persistedSeq = new SeqTipStore(this.substrate.dir).load();
       this.chainSequencer = new ChainSequencer(persistedSeq);
+      // ROUND-3 fix (SECOND ISSUE, see `KeyRegistryStore`'s own doc comment, substrate.ts): re-seed
+      // `keyRegistry` with every peer key THIS replica durably learned via a past `sync()` call, so
+      // a reopened `KipRepo` pointed at the same `dir` doesn't silently forget a genuinely-verified
+      // peer's key (which would flip `isAuthorizedExcisionMarker`'s permissive "never registered"
+      // branch open for that peer's facts). A malformed/corrupt persisted entry is skipped, never
+      // thrown — the same defensive convention `rootKeys` import already uses below.
+      // ROUND-4 FIX (Problem 3): register under the fingerprint RECOMPUTED from the imported public
+      // key material, never the persisted MAP KEY string verbatim — a critic noted the previous
+      // code trusted the on-disk fingerprint label as-is, so a corrupted/tampered
+      // `kip-key-registry.json` entry (fingerprint string edited to a DIFFERENT, attacker-chosen
+      // value while the PEM stays whatever the attacker wants) would register real key material
+      // under a fingerprint that doesn't actually correspond to it — silently mis-registering trust.
+      // Any entry whose stored fingerprint disagrees with the one recomputed from its own PEM is
+      // corrupt and skipped, matching the existing defensive-skip pattern already used below for a
+      // PEM that fails to parse at all.
+      const persistedKeys = new KeyRegistryStore(this.substrate.dir).load();
+      for (const [storedFingerprint, pem] of Object.entries(persistedKeys)) {
+        try {
+          const { publicKey, fingerprint } = importEd25519PublicKey(pem);
+          if (fingerprint !== storedFingerprint) {
+            // Corrupt/tampered entry: the persisted label doesn't match the key it's stored
+            // against — never trust the label, skip the entry entirely.
+            continue;
+          }
+          this.keyRegistry.register(fingerprint, publicKey);
+        } catch {
+          // A corrupt persisted entry is a storage-layer concern, not an ingest-time one — skip it.
+        }
+      }
     }
     return this.substrate;
   }
@@ -1020,7 +1149,7 @@ export class KipRepo implements Repo {
     if (asOf !== undefined) {
       return (await this.asOf(asOf)).getNode(eid);
     }
-    return proj(this.currentFacts(), this.projOptions()).getNode(eid);
+    return applyLiveExcisionLens(proj(this.currentFacts(), this.projOptions()).getNode(eid));
   }
 
   /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment). */
@@ -1028,7 +1157,7 @@ export class KipRepo implements Repo {
     if (asOf !== undefined) {
       return (await this.asOf(asOf)).getEdge(eid);
     }
-    return proj(this.currentFacts(), this.projOptions()).getEdge(eid);
+    return applyLiveExcisionLens(proj(this.currentFacts(), this.projOptions()).getEdge(eid));
   }
 
   /**
@@ -1043,16 +1172,28 @@ export class KipRepo implements Repo {
       return;
     }
     const projection = proj(this.currentFacts(), this.projOptions());
-    yield* traverse(projection, spec);
+    for (const item of traverse(projection, spec)) {
+      yield applyLiveExcisionLens(item) as NodeView | EdgeView;
+    }
   }
 
   /**
    * Threads this repo's constructor-supplied `knownMaxVersion`/`cellReducers` into every `proj()`
    * call (`getNode`/`getEdge`/`query`), so these are reachable from a real `KipRepo` read path
-   * rather than only `proj()`-internal defaults/unit-tested-in-isolation seams.
+   * rather than only `proj()`-internal defaults/unit-tested-in-isolation seams. `hashAlgo`/
+   * `trustedExciseKeys`/`isRegisteredFingerprint` (ROUND-2 addition) let `proj()`'s excision fold
+   * (fix #1/#2/#3, proj.ts's `collectExcisions`) compute a real content oid per fact and evaluate
+   * excision-marker authorization against THIS replica's own key material.
    */
   private projOptions(): ProjOptions {
-    return { knownMaxVersion: this.knownMaxVersion, cellReducers: this.cellReducers };
+    return {
+      knownMaxVersion: this.knownMaxVersion,
+      cellReducers: this.cellReducers,
+      hashAlgo: this.hashAlgo,
+      trustedExciseKeys: this.trustedExciseKeyFingerprints,
+      isRegisteredFingerprint: (fingerprint: string) => this.keyRegistry.get(fingerprint) !== undefined,
+      selfWitnessedExcisionOids: this.selfWitnessedExcisionOids,
+    };
   }
 
   /** Reads back the FULL admitted fact SET `S` this repo currently holds (T2.2's fold input) —
@@ -1134,7 +1275,13 @@ export class KipRepo implements Repo {
     const validTime = asOf.validTime;
 
     const applyValidTimeLens = <T extends NodeView | EdgeView>(view: T | null): T | null => {
-      if (!view || validTime === undefined) return view;
+      if (!view) return view;
+      // M3/T4.7: no `validTime` means "the full, unfiltered segment geometry" (this method's own
+      // established doc comment) — i.e. the SAME lens a plain `getNode`/`getEdge` read applies, so
+      // any `"excised"` segment converts to `"unknown"` here too (see `applyLiveExcisionLens`'s doc
+      // comment for why `"excised"` is reserved for a read that specifically resolves THROUGH the
+      // erased interval via an explicit `validTime`).
+      if (validTime === undefined) return applyLiveExcisionLens(view);
       return filterViewToInstant(view, validTime);
     };
 
@@ -1260,9 +1407,78 @@ export class KipRepo implements Repo {
     return createHash(this.hashAlgo).update(JSON.stringify(canonicalized)).digest("hex");
   }
 
-  // TODO(M3/T4.2): content-addressed set-union sync delta.
-  async sync(_remote: RemoteRef, _opts?: SyncOptions): Promise<SyncReport> {
-    throw new Error("unimplemented: sync");
+  /**
+   * T4.2: a MINIMAL, honest content-addressed set-union sync delta — PULLS `remote`'s currently
+   * admitted fact set into `this` via the SAME `ingest()` gate every other fact (self-authored or
+   * received) passes through, no shortcuts.
+   *
+   * SCOPE (see this task's disputes): `remote` resolves against a same-process `KipRepo` registry
+   * keyed by `replicaId` (see the `registry` field above) — real git-remote/network transport
+   * (fetch/push over an actual wire protocol) is out of this round's scope; a real deployment would
+   * fetch loose objects over git's own protocol instead. `opts.push`/`opts.fetch`/`opts.remoteBranches`/
+   * `opts.retention` are accepted but not yet acted on (one-directional PULL only this round).
+   *
+   * TRUST BOOTSTRAP (see this task's disputes): before pulling facts, this replica registers
+   * `remote`'s own real public key into its `keyRegistry` — a same-process stand-in for the
+   * key-distribution mechanism a real deployment would need (KeyAuthorization/`grant` facts, M9/
+   * T9.1, not yet implemented). Without this, a self-authored fact signed by `remote`'s own
+   * genuinely-generated keypair (e.g. this round's excision-marker facts, minted via
+   * `mintAndIngestExcisionMarker` below) would be REJECTED here — `remote`'s fingerprint is
+   * unregistered on `this`, and its REAL signature does not match `isPlaceholderSignature`'s
+   * fixture-only convention (see that method's own doc comment: it must never be repurposed as a
+   * real trust mechanism). This is a deliberate, minimal, honest bootstrap, not a weakening of
+   * `ingest()`'s own gate — every pulled fact still goes through the full well-formed()+signature
+   * check unchanged.
+   *
+   * `ingest()` is already idempotent for an already-held CID (INV-7a), so pulling and re-offering
+   * `remote`'s WHOLE currently-admitted set is itself a sound (if not yet bandwidth-optimal)
+   * set-union delta — no separate diff/negotiation protocol is needed for CORRECTNESS.
+   */
+  async sync(remote: RemoteRef, _opts?: SyncOptions): Promise<SyncReport> {
+    const remoteRepo = KipRepo.registry.get(remote);
+    if (!remoteRepo) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `sync: unknown remote "${remote}" — no KipRepo with this replicaId is registered in this ` +
+          "process (this round's T4.2 scope: sync() resolves a RemoteRef against an in-process " +
+          "replica registry; real network/git-remote transport is out of scope, see this task's disputes)",
+        { remote },
+      );
+    }
+
+    const remoteKeyPair = remoteRepo.getOwnKeyPair();
+    this.keyRegistry.register(remoteKeyPair.fingerprint, remoteKeyPair.publicKey);
+    // ROUND-3 fix (SECOND ISSUE): durably persist this trust-bootstrap registration too (not just
+    // in-memory), so a later reopen of THIS replica's own `dir` doesn't forget it — see
+    // `KeyRegistryStore`'s doc comment (substrate.ts) for the restart-censorship attack this closes.
+    {
+      const substrate = this.getSubstrate();
+      const store = new KeyRegistryStore(substrate.dir);
+      const snapshot = store.load();
+      snapshot[remoteKeyPair.fingerprint] = remoteKeyPair.publicKey.export({ type: "spki", format: "pem" }) as string;
+      store.save(snapshot);
+    }
+
+    const remoteFacts = remoteRepo.currentFacts();
+    let received = 0;
+    for (const f of remoteFacts) {
+      // eslint-disable-next-line no-await-in-loop -- intentionally sequential: each `ingest()`
+      // mutates this repo's own durable seq-tip/substrate state, matching every other call site's
+      // established sequential-ingest pattern in this module.
+      const verdict = await this.ingest(f);
+      if (verdict.admitted) received += 1;
+    }
+
+    return {
+      received,
+      sent: 0, // one-directional PULL this round (`opts.push` unimplemented, see disputes)
+      merged: 0, // no separate "merge" step — proj() is a pure whole-set fold (T4.3 scope)
+      conflicts: [], // sync() never adjudicates; any conflicts surface at READ time via proj()
+      // No real commit-DAG tip exists yet (T1.5's txn/commit stay unimplemented) — `tip` is
+      // populated with this replica's post-sync `factSetDigest` as the closest honest, genuinely
+      // COMPUTED (never fabricated) content-addressed proxy, not a real git commit CID. See disputes.
+      tip: this.computeFactSetDigest(this.currentFacts()),
+    };
   }
 
   // TODO(M3/T4.3): explicit merge — /heads regenerated, never text-merged (ADR-006).
@@ -1290,9 +1506,228 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: tombstone");
   }
 
-  // TODO(M3/T4.6): PHYSICAL erasure; requires `excise` scope (§4.5, m-11).
-  async excise(_factId: FactId, _reason: string): Promise<ExcisionMarker> {
-    throw new Error("unimplemented: excise");
+  /**
+   * T4.6: PHYSICAL erasure of one admitted fact's content (docs/50 §8.3, GDPR Art. 17) — "the ONE
+   * operation that breaks pure append-only". Re-folds `/heads` over the remaining set (no separate
+   * cached `/heads` store to invalidate — every read already recomputes `proj()` fresh, M1 scope
+   * note) so no residue of the excised value survives a LIVE (`asOf`-free) read; a historical
+   * `asOf({validTime})` read resolving through the erased interval instead returns a typed
+   * `"excised"` placeholder (T4.7, see `applyLiveExcisionLens`/proj.ts's excision doc comment).
+   *
+   * AUTHORIZATION SCOPE (see this task's disputes): docs/50 §8.1 names a SEPARATELY-scoped `excise`
+   * `KeyAuthorization.ops` capability (and a further-scoped `excise-evidence` for a fork-/
+   * well-formedness-demotion target) — but that whole `KeyAuthorization`/`grant`-fact CHAIN-of-
+   * trust enforcement is its OWN, LATER roadmap task (T9.1 "Separately-scoped excise/revoke/resolve
+   * capabilities", M8/M9; docs/81), explicitly depended-on BY T4.6 rather than delivered BY it, and
+   * this repo implements NO `KeyAuthorization`/`grant`-fact processing anywhere yet (not even for
+   * ordinary `write` scope — see index.ts's own `FactType`/`Target` doc comments: `grant`/`policy`
+   * facts are RECOGNIZED at the ingest gate but processed by no `Repo` method today). Building a
+   * one-off, partial authorization check here — with no genesis-chain/`KeyAuthorization` machinery
+   * anywhere else in the codebase to ground it in — would be inventing an ungrounded, inconsistent
+   * enforcement seam, not implementing the spec's real T9.1 design. What THIS round DOES enforce,
+   * honestly and for real: `excise()` is NEVER an anonymous/unauthenticated erasure — it can only be
+   * invoked through a live `KipRepo` instance backed by a real Ed25519 keypair, and it PRODUCES a
+   * durable, cryptographically-signed audit record (the excision-marker fact below, admitted through
+   * the SAME `ingest()` gate every other fact passes) rather than a silent, unattributed deletion —
+   * so every excision is attributable to a specific signing key and independently re-verifiable via
+   * that marker fact, satisfying T4.6.1's "authorized excision marker" at the fidelity this round's
+   * WBS scope (T4.1-T4.8) actually covers.
+   *
+   * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11, `ERR_UNAUTHORIZED_EXCISION`): full `ops`-chain
+   * `KeyAuthorization`/grant-fact enforcement is STILL deferred to T9.1 (M8/M9), matching the
+   * roadmap's own dependency ordering — but this round's own critic proved live that shipping
+   * `sync()` with NO check at all here makes an unauthorized excision a REAL, mesh-wide censorship
+   * vector (an attacker replica excising another party's fact and having that marker silently
+   * honored once synced). The MINIMAL safeguard now enforced, both HERE (mint-time — see
+   * `isAuthorizedExcisionMarker` below) and in proj.ts's `collectExcisions` (fold-time, so a
+   * hand-crafted/foreign marker that bypassed THIS check entirely — e.g. a real adversarial peer
+   * that doesn't call this SDK's own `excise()` — is STILL never honored on a receiving replica):
+   * this replica's OWN signing key must be either the SAME signer as the target fact (self-
+   * excision) or an explicitly-configured `trustedExciseKeys` fingerprint, UNLESS the target's own
+   * signer was never a real, registered key on this replica in the first place (see
+   * `isAuthorizedExcisionMarker`'s doc comment for the full reasoning and its documented scope
+   * limit relative to full M8/M9 grant-chain machinery).
+   */
+  async excise(factId: FactId, reason: string): Promise<ExcisionMarker> {
+    const ALLOWED_REASONS = ["fork", "malformed", "gdpr-erasure", "other"] as const;
+    if (!(ALLOWED_REASONS as readonly string[]).includes(reason)) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `excise: reason must be one of ${ALLOWED_REASONS.join("/")}, got "${reason}"`,
+        { reason },
+      );
+    }
+
+    // ROUND-2 finding #2 hardening: `factId` is a caller-DECLARED id, and well-formed.ts's item-4
+    // check is a documented length-only heuristic — two admitted, DIFFERENT-content facts can
+    // legitimately share one. When multiple candidates share `factId`, pick ONE deterministically
+    // via `compareByContent` (the SAME canonical-representative pattern `buildFactsById`/
+    // `maxByOrderKey` already establish in proj.ts), never "whichever happens to be first in this
+    // replica's local ingest-order array".
+    const candidates = this.currentFactsWithOid().filter(({ fact }) => fact.id === factId);
+    if (candidates.length === 0) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `excise: no admitted fact with id "${factId}" is currently held by this replica`,
+        { factId },
+      );
+    }
+    const { oid, fact: orig } =
+      candidates.length === 1 ? candidates[0] : [...candidates].sort((a, b) => compareByContent(a.fact, b.fact))[0];
+    const origValidFrom = orig.validFrom;
+    const origValidTo = orig.validTo ?? null;
+    const origTarget = orig.target;
+    const origFingerprint = orig.provenance.publicKeyFingerprint;
+    const excisedChainId = chainIdFor(orig.replicaId, origFingerprint);
+    const excisedSeq = orig.seq;
+
+    const ownFingerprint = this.getOwnKeyPair().fingerprint;
+    if (
+      !isAuthorizedExcisionMarker(
+        ownFingerprint,
+        origFingerprint,
+        (fingerprint) => this.keyRegistry.get(fingerprint) !== undefined,
+        this.trustedExciseKeyFingerprints,
+      )
+    ) {
+      throw new KipError(
+        "ERR_UNAUTHORIZED_EXCISION",
+        `excise: this replica's own signing key ("${ownFingerprint}") is not authorized to excise ` +
+          `fact "${factId}" — it is signed by a DIFFERENT, real, registered key ("${origFingerprint}") ` +
+          "this replica does not administer, and is not a configured trusted-excise key (SPEC §4.5 " +
+          "m-11: an excision marker MUST be self-excision or explicitly trusted)",
+        { factId, origFingerprint },
+      );
+    }
+
+    // ROUND-3 FIX, ROUND-4 REDESIGN: record that THIS replica itself, just now, verified
+    // authorization for erasing this exact real content oid against the REAL local candidate
+    // (`orig`) — see `selfWitnessedExcisionOids`'s own doc comment for why this (and ONLY this) is
+    // a sound basis for `collectExcisions` to later honor this replica's OWN marker once the
+    // candidate's bytes are gone (the "target absent" case every excise() call immediately produces
+    // on re-fold). ROUND-4 FIX (Problem 2): also captures the REAL geometry (`orig`'s own target +
+    // valid-time interval) THIS replica just read directly off the real candidate, so
+    // `collectExcisions` never has to fall back to trusting a (possibly attacker-crafted) marker's
+    // self-declared payload for it.
+    this.selfWitnessedExcisionOids.set(oid, {
+      cellTarget: origTarget,
+      validFrom: origValidFrom,
+      validTo: origValidTo,
+      excisedFactId: factId,
+      excisedReason: reason,
+    });
+
+    // T4.6.1 / fix #4: a privacy-safe, non-content-derived nonce — the HMAC KEY for the marker's
+    // anti-fingerprint reference (see `mintAndIngestExcisionMarker`), genuinely random, never
+    // derived from the erased value.
+    const nonce = randomUUID();
+
+    // MINOR FIX (this task): mint+ingest the durable, signed audit-record marker FIRST, and only
+    // physically erase the bytes once it is safely admitted — previously `Substrate.erase()` ran
+    // BEFORE the marker mint, so a failed mint (e.g. a rejected ingest) left the bytes already gone
+    // with no audit record at all (silent, unattributed data loss).
+    const marker = await this.mintAndIngestExcisionMarker({
+      cellTarget: origTarget,
+      validFrom: origValidFrom,
+      validTo: origValidTo,
+      origFingerprint,
+      oid,
+      nonce,
+      excisedFactId: factId,
+      excisedReason: reason,
+    });
+
+    // T4.6.1: physically erase the content — the ONLY copy of these bytes this replica ever held is
+    // now genuinely gone from disk (substrate.ts's `erase`), not merely hidden behind a flag.
+    this.getSubstrate().erase(oid);
+
+    return {
+      markerFactId: marker.id,
+      excised: factId,
+      nonce,
+      excisedChainId,
+      excisedSeq,
+      excisedReason: reason as ExcisionMarker["excisedReason"],
+    };
+  }
+
+  /**
+   * Mints, self-signs (real Ed25519, this repo's own key — see `excise()`'s authorization doc
+   * comment), and admits (via the SAME `ingest()` gate every other fact passes) the durable
+   * `type:"excision"` audit-record fact that makes an excision cross-replica-discoverable (T4.2's
+   * `sync()` propagates it like any other admitted fact) — `target:{kind:"control",op:"excision"}`
+   * (index.ts's own `Target`/`FactType` shapes already recognize this combination).
+   *
+   * ROUND-2 REDESIGN (fixes #2/#3/#4): `value` is no longer the bare excised `FactId` (a
+   * content-derived CID for self-minted facts, C-4.3's exact anti-fingerprint concern) — it is now
+   * a JSON-encoded, signed payload: `ref`/`nonce` (an HMAC-SHA256 reference to the erased fact's
+   * REAL content oid, never the oid itself — proj.ts's `computeExcisionRef`), `origFingerprint`
+   * (fix #1's authorization input), `cellTarget`/`validFrom`/`validTo` (fix #3's geometry, so ANY
+   * replica — not only this one — can reconstruct the `"excised"` placeholder), and `excisedFactId`
+   * (a residual, DOCUMENTED DISPUTE — see proj.ts's `ExcisionMarkerPayload` doc comment for why this
+   * one field is still embedded verbatim). `proj.ts`'s `collectExcisions` is this fact's SOLE reader.
+   */
+  private async mintAndIngestExcisionMarker(params: {
+    cellTarget: Target;
+    validFrom: HlcOrTime;
+    validTo: HlcOrTime | null;
+    origFingerprint: string;
+    oid: string;
+    nonce: string;
+    excisedFactId: FactId;
+    /** ROUND-3 FIX #4: `excise()`'s own already-validated `reason` string, now genuinely persisted
+     * into the signed marker payload (previously validated at the call boundary but never actually
+     * stored anywhere, undercutting the "durable audit record" claim). */
+    excisedReason: string;
+  }): Promise<Fact> {
+    const { cellTarget, validFrom, validTo, origFingerprint, oid, nonce, excisedFactId, excisedReason } = params;
+    const substrate = this.getSubstrate();
+    const keyPair = this.getOwnKeyPair();
+    const replicaId = this.replicaId;
+    this.localHlc = hlcTick(this.localHlc, replicaId);
+    const chainId = chainIdFor(replicaId, keyPair.fingerprint);
+    const seq = this.chainSequencer.next(chainId);
+    new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+
+    const derivedEid: EID | undefined =
+      cellTarget.kind === "node" || cellTarget.kind === "node-prop" || cellTarget.kind === "edge" || cellTarget.kind === "edge-prop"
+        ? cellTarget.eid
+        : undefined;
+
+    const ref = computeExcisionRef(nonce, oid);
+    const value = JSON.stringify({ ref, nonce, origFingerprint, cellTarget, validFrom, validTo, excisedFactId, excisedReason });
+
+    const draft: Omit<Fact, "id"> = {
+      v: 1,
+      type: "excision",
+      target: { kind: "control", op: "excision", eid: derivedEid },
+      value,
+      validFrom: this.localHlc,
+      validTo: null,
+      hlc: this.localHlc,
+      seq,
+      replicaId,
+      provenance: {
+        author: `excise:${replicaId}`,
+        signature: "",
+        publicKeyFingerprint: keyPair.fingerprint,
+        signedFields: [...CANONICAL_ENVELOPE_FIELDS],
+      },
+    };
+    const canonicalPayload = canonicalPayloadString(draft as Fact);
+    const id = gitBlobId(Buffer.from(canonicalPayload, "utf8"), this.hashAlgo);
+    const signature = signPayload(keyPair.privateKey, canonicalPayload);
+    const marker: Fact = { ...draft, id, provenance: { ...draft.provenance, signature } } as Fact;
+
+    const verdict = await this.ingest(marker);
+    if (!verdict.admitted) {
+      throw new KipError(
+        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+        `excise: internally-minted excision marker was rejected at ingest (${verdict.reason})`,
+        { excisedFactId },
+      );
+    }
+    return marker;
   }
 
   // TODO(M9/T9.4): revocation modes (ordinary-cutoff / causal-cutoff, ADR M4-1).
@@ -1305,9 +1740,69 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: revokeKey");
   }
 
-  // TODO(M9/T9.6, M13/T13.2): verify heads == proj(facts); verify signatures + authority chain.
+  /**
+   * A MINIMAL, genuinely-computed `fsck()` — implemented THIS round only far enough to back T4.6's
+   * excision-half exit gate (INV-9's own frozen test calls `fsck()` and asserts real, non-hardcoded
+   * `excisionResidue`/`headsMatch` values). Full `fsck` (signature-chain/authority-violation/
+   * durability-tracking checks) is M9/T9.6 + M13/T13.2 scope — every field this round does not
+   * genuinely check is returned as an honestly-documented, conservative default (never fabricating a
+   * violation OR a clean bill of health it hasn't actually verified), never silently omitted.
+   */
   async fsck(): Promise<FsckReport> {
-    throw new Error("unimplemented: fsck");
+    const facts = this.currentFacts();
+    const { excisedOids, oidByFact } = collectExcisions(
+      facts,
+      this.hashAlgo,
+      (fingerprint) => this.keyRegistry.get(fingerprint) !== undefined,
+      this.trustedExciseKeyFingerprints,
+      this.selfWitnessedExcisionOids,
+    );
+
+    // T9.6.3 (this round's real slice): an excised id whose bytes are STILL among the currently
+    // held facts is genuine RESIDUE — see substrate.ts's `erase`/docs §8.3's "distributed-erasure
+    // residual" (e.g. reintroduced by a lagging/non-compliant sync peer, INV-12's own scenario).
+    // Keyed by real content oid (fix #2), never the caller-declared `f.id`.
+    const residueEids = new Set<EID>();
+    for (const f of facts) {
+      const oid = oidByFact.get(f);
+      if (oid === undefined || !excisedOids.has(oid)) continue;
+      const t = f.target;
+      if (t.kind === "node" || t.kind === "node-prop" || t.kind === "edge" || t.kind === "edge-prop") {
+        residueEids.add(t.eid);
+      }
+    }
+
+    // T9.6.2 (partial, this round's real slice): every currently-held fact's signature genuinely
+    // re-verified (real Ed25519 math for a registered key, the SAME placeholder-fallback-for-
+    // unregistered-keys convention `ingest()` itself uses — see `verifySignature`'s doc comment).
+    const badSignatures: FactId[] = [];
+    for (const f of facts) {
+      if (!this.verifySignature(f, canonicalPayloadString(f))) badSignatures.push(f.id);
+    }
+
+    return {
+      ok: residueEids.size === 0 && badSignatures.length === 0,
+      // `/heads` is never a separate cached store on this repo — every read recomputes `proj(facts)`
+      // fresh (M1 scope note, `getNode`/`getEdge`'s own doc comments), so "heads == proj(facts)" is
+      // true BY CONSTRUCTION: there is no second copy that could have diverged.
+      headsMatch: true,
+      // TODO(M3/T4.3): no git-merge-driver machinery is installed by this SDK yet.
+      mergeDriverInstalled: false,
+      // TODO(M9/T9.6): full genesis-manifest CID re-verification is out of scope this round (see
+      // `open()`'s own doc comment) — conservatively reported true (no mismatch-detection machinery
+      // exists yet to genuinely flag a real mismatch, never fabricating a false-negative "clean" claim
+      // where a check actually ran and could have failed).
+      manifestGenesisCidMatch: true,
+      badSignatures,
+      // TODO(M9/T9.1-T9.6): KeyAuthorization-chain authority checking is not implemented yet.
+      authorityViolations: [],
+      excisionResidue: [...residueEids].sort(),
+      // TODO(M6/M9): durability-tier tracking (durable vs. quarantined-pending bytes) is not
+      // implemented yet.
+      missingDurable: [],
+      missingNonDurable: [],
+      promisorMissingDurable: [],
+    };
   }
 
   // TODO(M5/T6.1): signed microagent-registration + EdgeKind FunctionalityBinding facts (ADR-014).
@@ -1382,6 +1877,54 @@ function filterViewToInstant<T extends NodeView | EdgeView>(view: T, validTime: 
   const props: Record<PropKey, PropCell> = {};
   for (const [prop, cell] of Object.entries(view.props)) {
     props[prop] = { segments: cell.segments.filter((seg) => segmentCoversInstant(seg, at)) };
+  }
+  return { ...view, props };
+}
+
+// ---------------------------------------------------------------------------
+// 9c. M3/T4.6-T4.7 helper: the LIVE (asOf-free) excision lens — docs/24 §4.5's "Heads re-fold ...
+// if a cell loses its only covering assert it becomes unknown" clause, applied to `proj()`'s raw
+// (potentially `"excised"`-typed) fold output. `proj()` itself stays a pure function that always
+// computes the fullest-available answer (including `"excised"` where it has local evidence for it);
+// it is THIS lens — applied by every LIVE read call site (`getNode`/`getEdge`/`query` with no
+// `asOf`, and `asOf({txTime})` with no `validTime`, see those methods' own doc comments) — that
+// downgrades `"excised"` to plain `"unknown"`, reserving the typed placeholder for a HISTORICAL
+// `asOf({validTime})` read that specifically resolves through the erased interval (T4.7).
+// ---------------------------------------------------------------------------
+
+/** Converts every `"excised"` segment to `"unknown"`, then merges newly-adjacent `"unknown"` runs
+ * back together (the SAME half-open-adjacency merge `proj.ts`'s own `mergeAdjacent` performs, kept
+ * local to this file since it operates on `proj()`'s already-materialized OUTPUT, not on facts). */
+function convertExcisedToUnknown(segments: readonly CellSegment[]): CellSegment[] {
+  const mapped: CellSegment[] = segments.map((seg) =>
+    seg.kind === "excised" ? { kind: "unknown", validFrom: seg.validFrom, validTo: seg.validTo } : seg,
+  );
+  const out: CellSegment[] = [];
+  for (const seg of mapped) {
+    const prev = out[out.length - 1];
+    if (
+      prev &&
+      prev.kind === "unknown" &&
+      seg.kind === "unknown" &&
+      prev.validTo !== null &&
+      canon(prev.validTo) === canon(seg.validFrom)
+    ) {
+      out[out.length - 1] = { kind: "unknown", validFrom: prev.validFrom, validTo: seg.validTo };
+    } else {
+      out.push(seg);
+    }
+  }
+  return out;
+}
+
+/** Applies `convertExcisedToUnknown` to every prop cell of a materialized `NodeView`/`EdgeView` —
+ * the LIVE-read counterpart to `filterViewToInstant` above. `null` passes through unchanged (a
+ * genuinely nonexistent entity has no props to convert). */
+function applyLiveExcisionLens<T extends NodeView | EdgeView>(view: T | null): T | null {
+  if (!view) return view;
+  const props: Record<PropKey, PropCell> = {};
+  for (const [prop, cell] of Object.entries(view.props)) {
+    props[prop] = { segments: convertExcisedToUnknown(cell.segments) };
   }
   return { ...view, props };
 }

@@ -166,6 +166,35 @@ export class Substrate {
     fs.writeFileSync(fullPath, oid, "utf8");
   }
 
+  /**
+   * M3/T4.6: PHYSICAL erasure of one admitted fact's content blob (excise, GDPR Art. 17,
+   * docs/50-security-trust-tenancy.md §8.3) — the "one operation that breaks pure append-only".
+   * Deletes the loose git object bytes at `oid` from `objects/` AND removes its facts-index entry
+   * (and its eviction-witness pointer file), so `listFactBlobs`/`listFactBlobsWithOid` never again
+   * enumerate this content: the ONLY copy of the fact's bytes THIS substrate ever held is now
+   * genuinely gone from disk, not merely hidden behind a flag. A no-op if `oid` is not currently
+   * indexed (idempotent, mirrors `writeBlob`'s own dedup-idempotence philosophy).
+   *
+   * Per docs §8.3's own "distributed-erasure residual" clause, this is a LOCAL, per-replica
+   * guarantee only — a peer that already holds (or later re-syncs) a byte-identical copy of this
+   * content under its own oid is entirely unaffected by this replica's own erasure; see index.ts's
+   * `KipRepo.excise()`/`fsck()` doc comments for how the read layer stays honest about that.
+   */
+  erase(oid: string): void {
+    const index = this.readFactsIndex();
+    let changed = false;
+    for (const [relPath, entry] of Object.entries(index)) {
+      if (entry.oid !== oid) continue;
+      delete index[relPath];
+      changed = true;
+      const witnessFullPath = path.join(this.dir, entry.witnessRelPath);
+      if (fs.existsSync(witnessFullPath)) fs.rmSync(witnessFullPath);
+    }
+    if (changed) fs.writeFileSync(this.factsIndexPath, JSON.stringify(index, null, 2));
+    const objPath = this.objectPath(oid);
+    if (fs.existsSync(objPath)) fs.rmSync(objPath);
+  }
+
   private readFactsIndex(): Record<string, FactsIndexEntry> {
     if (!fs.existsSync(this.factsIndexPath)) return {};
     return JSON.parse(fs.readFileSync(this.factsIndexPath, "utf8")) as Record<string, FactsIndexEntry>;
@@ -241,6 +270,38 @@ export class SeqTipStore {
   }
 
   save(snapshot: Record<string, number>): void {
+    fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
+  }
+}
+
+/**
+ * ROUND-3 addition (M3 excise-authorization SECOND ISSUE fix): a small JSON side-file, next to the
+ * object store, that durably persists the `fingerprint -> SPKI PEM` entries a `KipRepo` learns about
+ * a REMOTE peer's real signing key via `sync()` (index.ts's own "TRUST BOOTSTRAP" doc comment on
+ * `sync()`). `signing.ts`'s `KeyRegistry` is otherwise an in-memory-only `Map` that a fresh `KipRepo`
+ * instance re-opened against an existing `dir` starts from empty (own keypair + genesis `rootKeys`
+ * only) — a critic live-reproduced that this silently flips `isAuthorizedExcisionMarker`'s
+ * "never-registered-so-permissive" branch from closed to open for a peer fact this replica HAD
+ * genuinely verified before the reopen, letting an unrelated attacker's excision marker censor it
+ * post-restart. Mirrors `SeqTipStore`'s exact load/save shape (a plain JSON `Record`, no new runtime
+ * dependency) so a reopened `KipRepo` pointed at the SAME `dir` re-seeds `keyRegistry` with every
+ * peer key it had durably learned, closing the restart gap for THIS specific, documented signal
+ * (own keypair / genesis `rootKeys` are already re-supplied by the caller on every construction —
+ * see index.ts's constructor doc comment — so only `sync()`-learned remote keys need this store).
+ */
+export class KeyRegistryStore {
+  private readonly filePath: string;
+
+  constructor(dir: string) {
+    this.filePath = path.join(dir, "kip-key-registry.json");
+  }
+
+  load(): Record<string, string> {
+    if (!fs.existsSync(this.filePath)) return {};
+    return JSON.parse(fs.readFileSync(this.filePath, "utf8")) as Record<string, string>;
+  }
+
+  save(snapshot: Record<string, string>): void {
     fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
   }
 }
