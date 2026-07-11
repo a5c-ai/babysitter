@@ -1,0 +1,245 @@
+# Additive upstream release records from the 2026-07-11 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783757231-g462a93
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783757231-g462a93"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783757231-g462a93"
+  currentVersion: "0.0.1783757231-g462a93"
+  releasedAt: "2026-07-11"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783757231-g462a93"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1783674082-g314196 to 0.0.1783757231-g462a93."
+    - "npm metadata identifies the package as the Amp frontier coding agent CLI and exposes the amp binary through platform optional dependencies."
+    - "No public build-specific release notes, CLI flag, transport/API, model, package-name, install-method, or migration change was found for this timestamped build."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783757231-g462a93."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783757231-g462a93-2026-07-11
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-207
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.207"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.207"
+  currentVersion: "2.1.207"
+  releasedAt: "2026-07-11"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.207"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.207"
+  cliCommand: "claude"
+  summary: "Claude Code release making auto mode available on managed providers, changing Claude Opus defaults, and hardening managed settings, plugin config, transcripts, MCP, and launcher behavior."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.206 to 2.1.207."
+    - "Auto mode is available without CLAUDE_CODE_ENABLE_AUTO_MODE on Bedrock, Vertex AI, and Foundry and can be disabled via disableAutoMode in settings, affecting auto-mode capability and settings modeling."
+    - "Bedrock, Vertex, and Claude Platform on AWS now default to Claude Opus 4.8, affecting provider/model default catalogs."
+    - "Auto mode no longer reads autoMode from repo-resident .claude/settings.local.json; user settings are required, affecting launch/config resolution."
+    - "Non-interactive remote managed settings are no longer permanently recorded as consented without a security consent dialog, affecting SDK and claude -p trust handling."
+    - "Shell-form plugin hooks, monitors, and MCP headersHelper commands now reject ${user_config.*}; exec-form hooks or CLAUDE_PLUGIN_OPTION_* variables are required, affecting plugin command generation."
+    - "Project-level .claude/settings.json no longer supplies pluginConfigs; only user, --settings, and managed settings are honored."
+    - "No package-name or install-method migration was published; install remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "Auto mode enabled on Bedrock, Vertex AI, and Foundry without env opt-in."
+    - "Bedrock, Vertex, and Claude Platform on AWS default to Claude Opus 4.8."
+    - "Plugin user_config shell interpolation rejection."
+    - "Managed settings consent and pluginConfigs scope fixes."
+    - "Terminal streaming, transcript, worktree, Remote Control, and Bedrock SSO fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-207-2026-07-11
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-207
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.207"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.207"
+  currentVersion: "0.3.207"
+  releasedAt: "2026-07-11"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.207"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.207"
+  summary: "Claude Agent SDK TypeScript release fixing canUseTool allow behavior and publishing the Agent tool structured-result type."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.206 to 0.3.207."
+    - "canUseTool returning { behavior: 'allow' } without updatedInput now runs the tool with original input instead of being rejected as a deny, affecting permission-hook result parsing."
+    - "Agent tool structured results now have the published AgentToolCompletedOutput SDK type matching emitted objects, affecting TypeScript adapter typings."
+    - "No package-name or transport migration was published; versioned npm, yarn, pnpm, and bun update commands remain the documented path."
+  releaseHighlights:
+    - "canUseTool allow-without-updatedInput contract fix."
+    - "AgentToolCompletedOutput structured-result type."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-207-2026-07-11
+---
+nodeKind: AgentVersion
+id: agentVersion:cursor:changelog-2026-07-10
+attributes:
+  agentId: "cursor"
+  agentProductId: agent:cursor
+  displayName: "Cursor 3.11"
+  runtimeFamily: "desktop-agent"
+  releaseChannel: "stable"
+  versionRange: "2026-07-10-changelog"
+  currentVersion: "3.11"
+  releasedAt: "2026-07-10"
+  releaseNotesUrl: "https://cursor.com/changelog/side-chat"
+  cliCommand: "cursor"
+  summary: "Cursor changelog entry for side chats, transcript search, redesigned project/repo pickers, and expanded cloud-agent hook coverage."
+  assimilationNotes:
+    - "Latest Cursor changelog moved from recorded 2026-06-30/team MCPs entry to the 2026-07-10 3.11 side-chat entry."
+    - "Side chats are durable full agent conversations with main-chat context, affecting conversation/session modeling and cross-thread context references."
+    - "Conversation search indexes agent transcripts and supports Cmd+K global search plus Cmd+F in-chat match navigation, affecting transcript index/search metadata."
+    - "Project and repo pickers now group local, cloud, remote-machine, and no-repo workflows with multi-root selection moved into Cloud and This Computer flyouts."
+    - "Cloud agent hooks now cover prompts, responses, thinking, subagents, compaction, and turn completion, affecting hook capability catalogs."
+    - "No public package-name, install-method, local CLI flag, transport protocol, or migration step was published for adapter launch surfaces."
+  releaseHighlights:
+    - "Side chats via /side, /btw, or chat-panel plus button."
+    - "Agent transcript search in Agents Window and in-chat Cmd+F."
+    - "Redesigned project, repo, branch, remote-machine, and multi-root pickers."
+    - "New cloud-agent hook coverage for prompt/response/thinking/subagent/compaction/turn events."
+  installMethods:
+    - install:desktop-app
+edges:
+  version_of:
+    - agent:cursor
+  sourced_from:
+    - evidence:cursor-changelog-2026-07-10
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-170-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.170.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.170.0"
+  currentVersion: "0.170.0"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.170.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.169.0 to 0.170.0."
+    - "npm metadata identifies @factory/cli as the Factory Droid CLI and points repository metadata at Factory-AI/factory."
+    - "Node engine remains >=20.0.0 and the droid binary entry point remains bin/droid."
+    - "No confirmed 0.170.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @factory/cli."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.170.0."
+    - "No public build-specific changelog located for 0.170.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-170-0-2026-07-11
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-4-3
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.4.3"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.4.3"
+  currentVersion: "16.4.3"
+  releasedAt: "2026-07-11"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.4.3"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.4.3"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release line adding /vibe worker orchestration, credential-free web search, max thinking and Responses Lite changes, plus breaking catalog and launch-adapter API changes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 16.3.15 to 16.4.3."
+    - "Breaking catalog change: reasoning effort ladders are now wire-exact, removed shifted effort maps and unsupported tiers clamp down, affecting model capability and thinking-level catalogs."
+    - "Breaking coding-agent change: bundled agent explore was renamed to scout, including configuration keys, prompts, and task definitions."
+    - "Breaking coding-agent API change: selectLaunchAdapter() now returns LaunchAdapterSelection instead of DapResolvedAdapter | null, affecting launch adapter consumers."
+    - "New /vibe mode drives persistent background worker sessions with vibe_spawn, vibe_send, vibe_wait, vibe_kill, and vibe_list tools plus a live TUI worker wall, affecting command, tool, and subagent catalogs."
+    - "Credential-free web search providers were added with stealth-browser escalation and recency filters, affecting web-search tool/provider capability modeling."
+    - "Max thinking is first-class across providers and --thinking/:max model suffixes; GPT-5.6 Responses Lite transport, prompt-cache affinity, and Codex version headers changed provider transport metadata."
+    - "Install command remains npm install -g @oh-my-pi/pi-coding-agent."
+  releaseHighlights:
+    - "/vibe persistent background worker mode and vibe_* tools."
+    - "Credential-free web search providers and Public Web aggregation."
+    - "PCRE2 grep fallback for lookaround/backreferences."
+    - "Wire-exact reasoning effort tiers and max thinking support."
+    - "Responses Lite transport and Codex version header fixes."
+    - "explore-to-scout and selectLaunchAdapter API breaking changes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-4-3-2026-07-11
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-9
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.9"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.9"
+  currentVersion: "0.19.9"
+  releasedAt: "2026-07-10"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.9"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.9"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding update commands, transcript replay, workspace/runtime status APIs, isolated scheduled-task controls, review inline comments, and broad daemon/web-shell/channel fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.19.8 to 0.19.9."
+    - "New qwen update and /update commands with auto-update support affect command catalog and updater behavior."
+    - "Serve/daemon surfaces add workspace-qualified core REST routes, cursor-paged transcript replay, session runtime status, session owner indexes, persisted session artifacts, and multi-workspace sidebar registration, affecting daemon/API modeling."
+    - "Scheduled tasks add create_sub_session isolated run controls and preconditions, then record parentSessionId for sub-sessions, affecting scheduled-task and sub-session graph semantics."
+    - "Review can post Suggestion findings as inline comments and assign accountability for large diff lines, affecting review capability modeling."
+    - "Core fixes include NO_PROXY honoring for model requests, Anthropic-compatible tool_use/tool_result pairing, forceGlobalCacheScope for Anthropic proxy providers, and max_tokens clamping to context window."
+    - "No package-name or install-method migration was published; install remains npm install -g @qwen-code/qwen-code."
+  releaseHighlights:
+    - "qwen update and /update auto-update commands."
+    - "Workspace-qualified REST routes and cursor-paged transcript replay."
+    - "Session runtime status, owner index, and persisted artifacts."
+    - "Scheduled-task isolated run controls and sub-session parentSessionId."
+    - "Review Suggestion inline comments."
+    - "NO_PROXY, Anthropic pairing, global cache scope, and max_tokens fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-9-2026-07-11
