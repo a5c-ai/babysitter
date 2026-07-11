@@ -120,8 +120,11 @@ Official marketplace install:
 
 ```bash
 codex plugin marketplace add a5c-ai/babysitter-codex
-
+codex plugin add babysitter --marketplace babysitter
 ```
+
+> `--marketplace babysitter` is the marketplace **name** declared in the repo's
+> `.agents/plugins/marketplace.json` (not the repo name).
 
 [Plugin README](plugins/babysitter-unified/per-harness/codex/README.md)
 
