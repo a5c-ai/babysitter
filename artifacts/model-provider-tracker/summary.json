@@ -1,317 +1,157 @@
 {
   "providers": [
-    "anthropic",
-    "openai",
-    "google-gemini",
-    "xai",
-    "meta-llama",
-    "deepseek",
-    "mistral",
-    "alibaba-qwen",
-    "amazon-nova-bedrock",
-    "cohere",
-    "together-ai",
-    "fireworks-ai",
-    "groq"
+    "Anthropic",
+    "OpenAI",
+    "Google Gemini",
+    "xAI",
+    "Meta",
+    "DeepSeek",
+    "Mistral",
+    "Alibaba Qwen",
+    "Amazon Nova/Bedrock",
+    "Cohere",
+    "Together AI",
+    "Fireworks AI",
+    "Groq"
   ],
   "findings": [
     {
       "provider": "Anthropic",
-      "latestModels": [
-        "claude-fable-5",
-        "claude-mythos-5",
-        "claude-opus-4-8",
-        "claude-sonnet-4-6",
-        "claude-haiku-4-5",
-        "claude-mythos-preview"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover Claude Fable 5, Claude Mythos 5, Claude Sonnet 5, Opus 4.8, Sonnet 4.6, Haiku 4.5, and Mythos Preview.",
-      "evidenceUrls": [
-        "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md",
-        "https://platform.claude.com/docs/en/about-claude/models/overview.md",
-        "https://platform.claude.com/docs/en/about-claude/pricing.md",
-        "https://platform.claude.com/docs/en/about-claude/model-deprecations.md"
-      ],
-      "issues": [
-        991,
-        992
-      ]
+      "model": "Claude Fable 5 / Mythos 5 / Sonnet 5 / Opus 4.8",
+      "latestVersion": "tracked",
+      "inGraph": true,
+      "status": "Existing graph records and claims cover the current Anthropic releases found in this pass."
     },
     {
       "provider": "OpenAI",
-      "latestModels": [
-        "gpt-5.6-sol",
-        "gpt-5.6-terra",
-        "gpt-5.6-luna",
-        "gpt-5.5",
-        "gpt-5.5-pro",
-        "gpt-5.4",
-        "gpt-5.4-mini",
-        "gpt-5.4-nano",
-        "gpt-5.3-codex",
-        "gpt-oss-120b",
-        "gpt-oss-20b"
-      ],
-      "graphStatus": "partial",
-      "status": "Existing graph records cover GPT-5.5/5.4/Codex/gpt-oss, but GPT-5.6 Sol/Terra/Luna preview remains absent from compute model records. Existing issue #1085 was reopened for preview verification and graph work.",
-      "evidenceUrls": [
-        "https://developers.openai.com/api/docs/models",
-        "https://platform.openai.com/docs/models"
-      ],
-      "issues": [
-        356,
-        429,
-        430,
-        533,
-        1085
-      ]
+      "model": "GPT-5.6 Sol/Terra/Luna",
+      "latestVersion": "5.6",
+      "inGraph": false,
+      "status": "Existing issue #1085 covers the new GPT-5.6 series; exact model-card/pricing docs still need graph evidence capture."
     },
     {
       "provider": "Google Gemini",
-      "latestModels": [
-        "gemini-3.5-flash",
-        "gemini-3.1-pro",
-        "gemini-3.1-flash-live",
-        "gemini-3.1-flash-tts"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover Gemini 3.5 Flash, Gemini 3.1 model cards, live/TTS variants, image records, and Gemini 2.x lifecycle work.",
-      "evidenceUrls": [
-        "https://ai.google.dev/gemini-api/docs/models",
-        "https://ai.google.dev/gemini-api/docs/changelog",
-        "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models"
-      ],
-      "issues": [
-        357,
-        534,
-        884,
-        900
-      ]
+      "model": "Gemini Omni Flash Preview",
+      "latestVersion": "gemini-omni-flash-preview",
+      "inGraph": false,
+      "status": "New issue #1319 created for Gemini Interactions/video model coverage."
     },
     {
       "provider": "xAI",
-      "latestModels": [
-        "grok-4.5",
-        "grok-4.3",
-        "grok-build-0.1"
-      ],
-      "graphStatus": "covered",
-      "status": "Graph records now cover Grok 4.5, Grok 4.3, and Grok Build 0.1. Existing issue #1258 was reopened during the audit and addressed with a Grok 4.5 graph record.",
-      "evidenceUrls": [
-        "https://docs.x.ai/docs/models"
-      ],
-      "issues": [
-        358,
-        906,
-        1258
-      ]
+      "model": "Grok 4.5",
+      "latestVersion": "4.5",
+      "inGraph": true,
+      "status": "Existing issue #1258 was reopened during this pass; the graph now includes model:grok-4-5@current with xAI provider, family, transport, evidence, and claim links."
     },
     {
-      "provider": "Meta Llama",
-      "latestModels": [
-        "llama-4-maverick",
-        "llama-4-scout"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issue 364 cover the official Llama 4 release audit; no newer official Llama release was confirmed during this check.",
-      "evidenceUrls": [
-        "https://ai.meta.com/blog/llama-4-multimodal-intelligence/",
-        "https://www.llama.com/docs/model-cards-and-prompt-formats/"
-      ],
-      "issues": [
-        364
-      ]
+      "provider": "xAI / Amazon Bedrock",
+      "model": "Grok 4.3 on Bedrock",
+      "latestVersion": "xai.grok-4.3",
+      "inGraph": "partial",
+      "status": "New issue #1323 created because the local Grok 4.3 graph only serves provider:xai, not Bedrock Mantle."
+    },
+    {
+      "provider": "Meta",
+      "model": "Muse Spark 1.1",
+      "latestVersion": "1.1",
+      "inGraph": false,
+      "status": "New issue #1320 created for Meta Model API/model graph coverage."
     },
     {
       "provider": "DeepSeek",
-      "latestModels": [
-        "deepseek-v4-pro",
-        "deepseek-v4-flash",
-        "deepseek-r1",
-        "deepseek-coder"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover DeepSeek V4 Pro/Flash and provider availability through DeepSeek-compatible and OpenAI-compatible APIs.",
-      "evidenceUrls": [
-        "https://api-docs.deepseek.com/",
-        "https://www.deepseek.com/"
-      ],
-      "issues": [
-        359,
-        431
-      ]
+      "model": "DeepSeek V4 Pro / Flash, R1",
+      "latestVersion": "tracked",
+      "inGraph": true,
+      "status": "Current graph contains DeepSeek V4 Pro, V4 Flash, V3, R1, and R1 Distill Qwen 32B."
     },
     {
       "provider": "Mistral",
-      "latestModels": [
-        "mistral-large-3",
-        "mistral-medium-3.5",
-        "mistral-small-4",
-        "codestral-25.08",
-        "pixtral"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover Mistral Large/Medium/Small, Codestral, and Pixtral lifecycle updates.",
-      "evidenceUrls": [
-        "https://docs.mistral.ai/getting-started/models/models_overview/",
-        "https://docs.mistral.ai/platform/pricing/"
-      ],
-      "issues": [
-        360,
-        432,
-        903
-      ]
+      "model": "Devstral 2 / OCR 4",
+      "latestVersion": "devstral-2512 / mistral-ocr-4-0",
+      "inGraph": false,
+      "status": "New issue #1321 created for Mistral code-agent and OCR/document model coverage."
     },
     {
       "provider": "Alibaba Qwen",
-      "latestModels": [
-        "qwen3-coder-next",
-        "qwen3.7-plus",
-        "qwen3.6-flash",
-        "qwen3.5-omni"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover Qwen3-Coder Next, Qwen 3.7/3.6, and Qwen3.5 Omni updates.",
-      "evidenceUrls": [
-        "https://qwenlm.github.io/",
-        "https://www.alibabacloud.com/help/en/model-studio/"
-      ],
-      "issues": [
-        361,
-        433,
-        882
-      ]
+      "model": "Qwen3.7 / Qwen Coder",
+      "latestVersion": "tracked",
+      "inGraph": true,
+      "status": "Graph contains Qwen3.7 Max/Plus, Qwen3 Coder Next, and Qwen3 Coder 480B/30B records."
     },
     {
       "provider": "Amazon Nova / Bedrock",
-      "latestModels": [
-        "amazon.nova-2-pro",
-        "amazon.nova-2-lite-v1:0",
-        "amazon.nova-2-sonic-v1:0",
-        "amazon.nova-2-omni"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover Nova 2 Pro/Lite/Sonic/Omni and Bedrock model-card availability.",
-      "evidenceUrls": [
-        "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
-        "https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html",
-        "https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-sonic.html"
-      ],
-      "issues": [
-        362,
-        535,
-        904
-      ]
+      "model": "Nova 2 family",
+      "latestVersion": "tracked",
+      "inGraph": true,
+      "status": "Graph contains Nova 2 Lite, Omni, Sonic, and Pro Preview records; Grok Bedrock availability captured separately in #1323."
     },
     {
       "provider": "Cohere",
-      "latestModels": [
-        "command-a-plus-05-2026",
-        "embed-v4.0",
-        "command-a-reasoning",
-        "command-a-vision"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover Command A+, Embed v4.0, and Command A reasoning/vision variants.",
-      "evidenceUrls": [
-        "https://docs.cohere.com/docs/command-a-plus",
-        "https://docs.cohere.com/docs/embed-v4"
-      ],
-      "issues": [
-        363,
-        905
-      ]
+      "model": "Command A / Embed v4",
+      "latestVersion": "tracked",
+      "inGraph": true,
+      "status": "Graph contains Command A Plus, Command A Reasoning, Command A Vision, Command R Plus, Embed v4, and Embed English v3."
     },
     {
       "provider": "Together AI",
-      "latestModels": [
-        "serverless-model-catalog-2026-05",
-        "deepseek-v4-pro",
-        "deepseek-v4-flash"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing provider catalog records and closed issues cover the Together AI serverless catalog delta.",
-      "evidenceUrls": [
-        "https://docs.together.ai/docs/serverless-models",
-        "https://docs.together.ai/reference/models"
-      ],
-      "issues": [
-        365,
-        435
-      ]
+      "model": "Serverless catalog",
+      "latestVersion": "reviewed",
+      "inGraph": "partial",
+      "status": "Existing provider-version graph tracks the 2026-05 serverless catalog; no specific new Together-exclusive model issue was created in this pass."
     },
     {
       "provider": "Fireworks AI",
-      "latestModels": [
-        "serverless-model-catalog-2026-05",
-        "deepseek-v4-pro",
-        "deepseek-v4-flash"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing provider catalog records and closed issues cover the Fireworks AI serverless catalog delta.",
-      "evidenceUrls": [
-        "https://docs.fireworks.ai/models",
-        "https://fireworks.ai/models"
-      ],
-      "issues": [
-        365,
-        435
-      ]
+      "model": "GLM 5.2 Fast",
+      "latestVersion": "5.2 Fast",
+      "inGraph": false,
+      "status": "New issue #1322 created for Fireworks serverless model availability and exact model ID follow-up."
     },
     {
       "provider": "Groq",
-      "latestModels": [
-        "openai-compatible-catalog-2026-05"
-      ],
-      "graphStatus": "covered",
-      "status": "Existing provider catalog records and closed issues cover Groq OpenAI-compatible model availability; no new untracked official Groq-only model was confirmed.",
-      "evidenceUrls": [
-        "https://console.groq.com/docs/models"
-      ],
-      "issues": [
-        365,
-        435
-      ]
+      "model": "Supported models catalog",
+      "latestVersion": "reviewed",
+      "inGraph": "partial",
+      "status": "Existing provider-version graph tracks Groq OpenAI-compatible provider metadata; no Groq-hosted exclusive gap was identified beyond broader model availability follow-up."
     }
   ],
-  "issuesCreated": [],
+  "issuesCreated": [
+    {
+      "number": 1319,
+      "title": "Track Gemini Omni Flash Preview",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1319"
+    },
+    {
+      "number": 1320,
+      "title": "Track Meta Muse Spark 1.1",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1320"
+    },
+    {
+      "number": 1321,
+      "title": "Track Mistral Devstral 2 and OCR 4",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1321"
+    },
+    {
+      "number": 1322,
+      "title": "Track Fireworks GLM 5.2 Fast availability",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1322"
+    },
+    {
+      "number": 1323,
+      "title": "Track Grok 4.3 availability on Amazon Bedrock",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1323"
+    }
+  ],
   "issuesExisting": [
-    355,
-    356,
-    357,
-    358,
-    359,
-    360,
-    361,
-    362,
-    363,
-    364,
-    365,
-    429,
-    430,
-    431,
-    432,
-    433,
-    435,
-    532,
-    533,
-    534,
-    535,
-    882,
-    884,
-    900,
-    903,
-    904,
-    905,
-    906
-    ,
-    991,
-    992,
-    1084,
-    1085,
-    1180,
-    1258
+    {
+      "number": 1085,
+      "title": "Track OpenAI GPT-5.6 Sol/Terra/Luna preview",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1085"
+    },
+    {
+      "number": 1258,
+      "title": "Track xAI Grok 4.5",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1258"
+    }
   ],
   "changedFiles": [
     "packages/atlas/graph/compute/models/grok-4-5.yaml",
@@ -323,102 +163,100 @@
   ],
   "summaryTable": [
     {
-      "provider": "Anthropic",
-      "model": "Claude Fable / Mythos / Opus / Sonnet / Haiku",
-      "latestVersion": "Fable 5, Mythos 5; Opus 4.8/Sonnet 4.6/Haiku 4.5 already tracked",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #991, #992, #1084, #1180, and #532"
+      "Provider": "Anthropic",
+      "Model": "Claude Fable/Mythos/Sonnet/Opus",
+      "Latest Version": "Fable 5 / Mythos 5 / Sonnet 5 / Opus 4.8",
+      "In Graph?": "Yes",
+      "Status": "Tracked"
     },
     {
-      "provider": "OpenAI",
-      "model": "GPT-5.x / GPT-OSS / Codex",
-      "latestVersion": "GPT-5.6 preview plus GPT-5.5 family and gpt-oss records",
-      "inGraph": "Partial",
-      "status": "GPT-5.6 preview absent from compute records; existing issue #1085 reopened. GPT-5.5/gpt-oss covered by graph records."
+      "Provider": "OpenAI",
+      "Model": "GPT",
+      "Latest Version": "GPT-5.6 Sol/Terra/Luna",
+      "In Graph?": "No",
+      "Status": "Existing issue #1085"
     },
     {
-      "provider": "Google",
-      "model": "Gemini",
-      "latestVersion": "Gemini 3.5 Flash and Gemini 3.1 variants",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #357, #534, #884, #900"
+      "Provider": "Google Gemini",
+      "Model": "Gemini Omni Flash",
+      "Latest Version": "gemini-omni-flash-preview",
+      "In Graph?": "No",
+      "Status": "Created #1319"
     },
     {
-      "provider": "xAI",
-      "model": "Grok",
-      "latestVersion": "Grok 4.5 / Grok 4.3 / Grok Build 0.1",
-      "inGraph": "Yes",
-      "status": "Grok 4.5 graph record added; Grok 4.3/Build already covered."
+      "Provider": "xAI",
+      "Model": "Grok",
+      "Latest Version": "Grok 4.5",
+      "In Graph?": "Yes",
+      "Status": "Graph updated; existing issue #1258 reopened"
     },
     {
-      "provider": "Meta",
-      "model": "Llama",
-      "latestVersion": "Llama 4 Scout/Maverick",
-      "inGraph": "Yes",
-      "status": "Covered by closed issue #364"
+      "Provider": "Meta",
+      "Model": "Muse Spark",
+      "Latest Version": "1.1",
+      "In Graph?": "No",
+      "Status": "Created #1320"
     },
     {
-      "provider": "DeepSeek",
-      "model": "DeepSeek",
-      "latestVersion": "DeepSeek V4 Pro/Flash",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #359 and #431"
+      "Provider": "DeepSeek",
+      "Model": "DeepSeek",
+      "Latest Version": "V4 Pro / V4 Flash",
+      "In Graph?": "Yes",
+      "Status": "Tracked"
     },
     {
-      "provider": "Mistral",
-      "model": "Mistral / Codestral / Pixtral",
-      "latestVersion": "Mistral Large 3, Medium 3.5, Small 4, Codestral 25.08",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #360, #432, #903"
+      "Provider": "Mistral",
+      "Model": "Devstral / OCR",
+      "Latest Version": "Devstral 2 / OCR 4",
+      "In Graph?": "No",
+      "Status": "Created #1321"
     },
     {
-      "provider": "Alibaba",
-      "model": "Qwen",
-      "latestVersion": "Qwen3-Coder Next, Qwen3.7/3.6, Qwen3.5 Omni",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #361, #433, #882"
+      "Provider": "Alibaba Qwen",
+      "Model": "Qwen",
+      "Latest Version": "Qwen3.7 / Qwen3 Coder",
+      "In Graph?": "Yes",
+      "Status": "Tracked"
     },
     {
-      "provider": "Amazon",
-      "model": "Nova / Bedrock",
-      "latestVersion": "Nova 2 Pro/Lite/Sonic/Omni",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #362, #535, #904"
+      "Provider": "Amazon Nova/Bedrock",
+      "Model": "Nova / Bedrock-hosted xAI",
+      "Latest Version": "Nova 2 / xai.grok-4.3",
+      "In Graph?": "Partial",
+      "Status": "Created #1323 for Grok Bedrock edge"
     },
     {
-      "provider": "Cohere",
-      "model": "Command / Embed",
-      "latestVersion": "Command A+, Command A reasoning/vision, Embed v4",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #363 and #905"
+      "Provider": "Cohere",
+      "Model": "Command / Embed",
+      "Latest Version": "Command A / Embed v4",
+      "In Graph?": "Yes",
+      "Status": "Tracked"
     },
     {
-      "provider": "Together AI",
-      "model": "Serverless inference catalog",
-      "latestVersion": "2026-05 catalog snapshot",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #365 and #435"
+      "Provider": "Together AI",
+      "Model": "Serverless catalog",
+      "Latest Version": "2026-05 catalog",
+      "In Graph?": "Partial",
+      "Status": "No new issue"
     },
     {
-      "provider": "Fireworks AI",
-      "model": "Serverless inference catalog",
-      "latestVersion": "2026-05 catalog snapshot",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #365 and #435"
+      "Provider": "Fireworks AI",
+      "Model": "GLM",
+      "Latest Version": "GLM 5.2 Fast",
+      "In Graph?": "No",
+      "Status": "Created #1322"
     },
     {
-      "provider": "Groq",
-      "model": "OpenAI-compatible inference catalog",
-      "latestVersion": "2026-05 catalog snapshot",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #365 and #435"
+      "Provider": "Groq",
+      "Model": "Hosted catalog",
+      "Latest Version": "Reviewed",
+      "In Graph?": "Partial",
+      "Status": "No new issue"
     }
   ],
-  "summary": "Checked every requested major provider. The current Atlas graph covers the major Anthropic Claude, Google Gemini, xAI Grok, Meta Llama, DeepSeek, Mistral, Qwen, Amazon Nova, Cohere, Together, Fireworks, Groq inference-catalog, and most OpenAI updates found in provider docs and existing evidence. One current graph gap remains: OpenAI GPT-5.6 preview models. Existing issue #1085 was commented and reopened rather than creating a duplicate because GPT-5.6 still needs preview metadata verification. Existing issue #1258 was reopened during the audit and addressed with a Grok 4.5 graph record.",
-  "verificationNotes": [
-    "Atlas build passed after restoring workspace dependencies with npm install.",
-    "gh issue list --label model-version-update --state all shows existing issues for the significant checked updates, including reopened #1085 and #1258.",
-    "No duplicate issues were created for already-covered provider updates.",
-    "Graph YAML updates were made for xAI Grok 4.5; OpenAI GPT-5.6 remains tracked by reopened issue #1085 pending preview metadata verification."
+  "notes": [
+    "Atlas build completed after installing missing workspace dependencies.",
+    "Graph YAML changes were made for xAI Grok 4.5. Other gaps were captured as issue-backed follow-ups because several require exact model-card/pricing/API metadata before safe graph edits.",
+    "Working tree had pre-existing unrelated modifications; they were not reverted."
   ]
 }
