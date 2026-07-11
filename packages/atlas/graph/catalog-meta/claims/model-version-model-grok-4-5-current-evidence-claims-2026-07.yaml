@@ -1,0 +1,131 @@
+nodeKind: Claim
+id: claim:model-version-model-grok-4-5-current-model-id
+attributes:
+  subjectId: model:grok-4-5@current
+  attribute: providerModelIds
+  value: grok-4.5
+  subjectKind: ModelVersion
+  statement: model:grok-4-5@current maps to the xAI API model ID grok-4.5.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  claimedAt: '2026-07-11T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1258 Grok 4.5 model identity.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  about_subject:
+    - model:grok-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-5-current-contextwindowtokens
+attributes:
+  subjectId: model:grok-4-5@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:grok-4-5@current contextWindowTokens is 1000000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  claimedAt: '2026-07-11T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1258 Grok 4.5 context window.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  about_subject:
+    - model:grok-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-5-current-maxoutputtokens
+attributes:
+  subjectId: model:grok-4-5@current
+  attribute: maxOutputTokens
+  value: '8192'
+  subjectKind: ModelVersion
+  statement: model:grok-4-5@current maxOutputTokens is 8192.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  claimedAt: '2026-07-11T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1258 Grok 4.5 max output.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  about_subject:
+    - model:grok-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-5-current-api-family
+attributes:
+  subjectId: model:grok-4-5@current
+  attribute: speaks
+  value: model-transport:openai-compat, model-transport:openai-responses
+  subjectKind: ModelVersion
+  statement: model:grok-4-5@current is served through xAI OpenAI-compatible chat/completions and responses-style API backends.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-api-reference-docs
+    - evidence:xai-grok-4-5-issue-1258
+  claimedAt: '2026-07-11T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1258 transport compatibility.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-api-reference-docs
+    - evidence:xai-grok-4-5-issue-1258
+  about_subject:
+    - model:grok-4-5@current
+---
+nodeKind: Claim
+id: claim:model-version-model-grok-4-5-current-capabilities
+attributes:
+  subjectId: model:grok-4-5@current
+  attribute: supports
+  value: capability:supports-tool-use, capability:supports-structured-output
+  subjectKind: ModelVersion
+  statement: model:grok-4-5@current supports tool use and structured outputs through xAI's OpenAI-compatible model configuration.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  claimedAt: '2026-07-11T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1258 Grok 4.5 capability support.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-4-5-model-docs
+    - evidence:xai-grok-4-5-issue-1258
+  about_subject:
+    - model:grok-4-5@current

@@ -1,0 +1,51 @@
+nodeKind: ModelVersion
+id: model:grok-4-5@current
+attributes:
+  displayName: "Grok 4.5"
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:grok-4
+  versionRange: '>=4.5.0 <4.6.0'
+  kind: reasoning
+  contextWindowTokens: 1000000
+  maxOutputTokens: 8192
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-05-29'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-05-29'
+  modelCardUrl: https://docs.x.ai/developers/models/grok-4-5
+  supportsFineTuning: false
+  regions:
+    - global
+  providerModelIds:
+    xai: grok-4.5
+  notes: |
+    xAI docs list Grok 4.5 as the recommended code and chat model.
+    Pricing tables are dynamic in the reviewed docs, so exact per-token
+    rates are tracked by issue #1258 before numeric pricing claims are
+    added.
+edges:
+  belongs_to_family:
+    - target: model-family:grok-4
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:grok-4
+  served_by:
+    - provider:xai
+  speaks:
+    - model-transport:openai-compat
+    - model-transport:openai-responses
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=4.5.0 <4.6.0'
+      level: full
+    - target: capability:supports-structured-output
+      versionRange: '>=4.5.0 <4.6.0'
+      level: full

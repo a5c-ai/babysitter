@@ -25,8 +25,8 @@
         "claude-haiku-4-5",
         "claude-mythos-preview"
       ],
-      "graphStatus": "partial",
-      "status": "Open graph gaps for Claude Fable 5 and Claude Mythos 5; existing graph already tracks Opus 4.8, Sonnet 4.6, Haiku 4.5, and Mythos Preview.",
+      "graphStatus": "covered",
+      "status": "Existing graph records and closed issues cover Claude Fable 5, Claude Mythos 5, Claude Sonnet 5, Opus 4.8, Sonnet 4.6, Haiku 4.5, and Mythos Preview.",
       "evidenceUrls": [
         "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5.md",
         "https://platform.claude.com/docs/en/about-claude/models/overview.md",
@@ -41,6 +41,9 @@
     {
       "provider": "OpenAI",
       "latestModels": [
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
         "gpt-5.5",
         "gpt-5.5-pro",
         "gpt-5.4",
@@ -50,8 +53,8 @@
         "gpt-oss-120b",
         "gpt-oss-20b"
       ],
-      "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover the checked GPT-5.x, Codex, and gpt-oss updates.",
+      "graphStatus": "partial",
+      "status": "Existing graph records cover GPT-5.5/5.4/Codex/gpt-oss, but GPT-5.6 Sol/Terra/Luna preview remains absent from compute model records. Existing issue #1085 was reopened for preview verification and graph work.",
       "evidenceUrls": [
         "https://developers.openai.com/api/docs/models",
         "https://platform.openai.com/docs/models"
@@ -60,7 +63,8 @@
         356,
         429,
         430,
-        533
+        533,
+        1085
       ]
     },
     {
@@ -88,17 +92,19 @@
     {
       "provider": "xAI",
       "latestModels": [
+        "grok-4.5",
         "grok-4.3",
         "grok-build-0.1"
       ],
       "graphStatus": "covered",
-      "status": "Existing graph records and closed issues cover the checked Grok 4.3 and Grok Build 0.1 updates; API remains OpenAI-compatible.",
+      "status": "Graph records now cover Grok 4.5, Grok 4.3, and Grok Build 0.1. Existing issue #1258 was reopened during the audit and addressed with a Grok 4.5 graph record.",
       "evidenceUrls": [
         "https://docs.x.ai/docs/models"
       ],
       "issues": [
         358,
-        906
+        906,
+        1258
       ]
     },
     {
@@ -269,18 +275,7 @@
       ]
     }
   ],
-  "issuesCreated": [
-    {
-      "number": 991,
-      "title": "Track Claude Fable 5",
-      "url": "https://github.com/a5c-ai/babysitter/issues/991"
-    },
-    {
-      "number": 992,
-      "title": "Track Claude Mythos 5",
-      "url": "https://github.com/a5c-ai/babysitter/issues/992"
-    }
-  ],
+  "issuesCreated": [],
   "issuesExisting": [
     355,
     356,
@@ -310,8 +305,20 @@
     904,
     905,
     906
+    ,
+    991,
+    992,
+    1084,
+    1085,
+    1180,
+    1258
   ],
   "changedFiles": [
+    "packages/atlas/graph/compute/models/grok-4-5.yaml",
+    "packages/atlas/graph/compute/model-families/grok-4.yaml",
+    "packages/atlas/graph/compute/providers/xai.yaml",
+    "packages/atlas/graph/catalog-meta/evidence-sources/xai-grok-4-3.yaml",
+    "packages/atlas/graph/catalog-meta/claims/model-version-model-grok-4-5-current-evidence-claims-2026-07.yaml",
     "artifacts/model-provider-tracker/summary.json"
   ],
   "summaryTable": [
@@ -319,15 +326,15 @@
       "provider": "Anthropic",
       "model": "Claude Fable / Mythos / Opus / Sonnet / Haiku",
       "latestVersion": "Fable 5, Mythos 5; Opus 4.8/Sonnet 4.6/Haiku 4.5 already tracked",
-      "inGraph": "Partial",
-      "status": "Issues #991 and #992 open for new Claude 5 graph records"
+      "inGraph": "Yes",
+      "status": "Covered by closed issues #991, #992, #1084, #1180, and #532"
     },
     {
       "provider": "OpenAI",
       "model": "GPT-5.x / GPT-OSS / Codex",
-      "latestVersion": "GPT-5.5 family and gpt-oss records",
-      "inGraph": "Yes",
-      "status": "Covered by closed issues #356, #429, #430, #533"
+      "latestVersion": "GPT-5.6 preview plus GPT-5.5 family and gpt-oss records",
+      "inGraph": "Partial",
+      "status": "GPT-5.6 preview absent from compute records; existing issue #1085 reopened. GPT-5.5/gpt-oss covered by graph records."
     },
     {
       "provider": "Google",
@@ -339,9 +346,9 @@
     {
       "provider": "xAI",
       "model": "Grok",
-      "latestVersion": "Grok 4.3 / Grok Build 0.1",
+      "latestVersion": "Grok 4.5 / Grok 4.3 / Grok Build 0.1",
       "inGraph": "Yes",
-      "status": "Covered by closed issues #358 and #906"
+      "status": "Grok 4.5 graph record added; Grok 4.3/Build already covered."
     },
     {
       "provider": "Meta",
@@ -407,11 +414,11 @@
       "status": "Covered by closed issues #365 and #435"
     }
   ],
-  "summary": "Checked every requested major provider. The current Atlas graph already covers the major GPT, Gemini, Grok, Llama, DeepSeek, Mistral, Qwen, Nova, Cohere, Together, Fireworks, and Groq updates found in provider docs and existing evidence. New Anthropic Claude 5 gaps were identified for claude-fable-5 and claude-mythos-5; issues #991 and #992 are open with exact model IDs, API family, release date, links, context, capabilities, pricing, cross-provider availability, graph changes, and transport-adapter notes. No graph YAML was changed in this run.",
+  "summary": "Checked every requested major provider. The current Atlas graph covers the major Anthropic Claude, Google Gemini, xAI Grok, Meta Llama, DeepSeek, Mistral, Qwen, Amazon Nova, Cohere, Together, Fireworks, Groq inference-catalog, and most OpenAI updates found in provider docs and existing evidence. One current graph gap remains: OpenAI GPT-5.6 preview models. Existing issue #1085 was commented and reopened rather than creating a duplicate because GPT-5.6 still needs preview metadata verification. Existing issue #1258 was reopened during the audit and addressed with a Grok 4.5 graph record.",
   "verificationNotes": [
-    "Atlas build passed after dependency repairs and packages/atlas/tsconfig.json node type scoping.",
-    "gh issue list --label model-version-update --state open shows #991 and #992 as the only open model-version-update issues.",
+    "Atlas build passed after restoring workspace dependencies with npm install.",
+    "gh issue list --label model-version-update --state all shows existing issues for the significant checked updates, including reopened #1085 and #1258.",
     "No duplicate issues were created for already-covered provider updates.",
-    "Only the summary artifact was added by the research step; graph YAML updates should proceed through #991 and #992."
+    "Graph YAML updates were made for xAI Grok 4.5; OpenAI GPT-5.6 remains tracked by reopened issue #1085 pending preview metadata verification."
   ]
 }
