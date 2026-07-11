@@ -1,0 +1,71 @@
+name: kip-inv12-golden-digest
+
+# INV-12 (packages/kip-sdk/docs/60-conformance-and-testability.md#inv-12) second required fidelity:
+# "true cross-OS coverage is a named CI matrix job (windows-latest + ubuntu-latest) that regenerates
+# the fixture set and asserts the commit-object bytes equal a committed golden digest — both
+# fidelities are required to claim INV-12 passes." (D-27, packages/kip-sdk/docs/DEBTS.md)
+#
+# The FIRST fidelity (in-process TZ/autocrlf/locale perturbation) already exists in
+# packages/kip-sdk/src/__tests__/conformance/inv-12.test.ts (a frozen conformance file, not touched
+# by this workflow). This workflow provides the SECOND fidelity: on each OS in the matrix it builds
+# kip-sdk, then runs packages/kip-sdk/src/__tests__/inv12-golden-digest.test.ts, which regenerates a
+# small, fixed, deterministic fact set via KipRepo.regenerateHeads() and asserts the resulting
+# commit-object oid(s) equal the value committed in
+# packages/kip-sdk/src/__tests__/fixtures/inv12-golden-digest.json. Because both matrix legs assert
+# against that SAME committed golden value, a real cross-OS byte-DAG divergence (TZ handling, line
+# endings, path separators, locale, etc.) fails on whichever OS produces the different oid — and the
+# two OSes can never silently agree with each other while both disagreeing with the golden value,
+# since each is checked independently against the identical fixed target.
+
+on:
+  pull_request:
+    paths:
+      - "packages/kip-sdk/**"
+      - ".github/workflows/kip-inv12-golden-digest.yml"
+  push:
+    branches: [main, staging]
+    paths:
+      - "packages/kip-sdk/**"
+      - ".github/workflows/kip-inv12-golden-digest.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  golden-digest:
+    name: INV-12 golden digest (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --legacy-peer-deps
+
+      - name: Workaround - npm ci on a Windows-generated lockfile may miss Linux optional deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          npm install --no-save @esbuild/linux-x64 @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build kip-sdk
+        run: npm run build:kip
+
+      - name: Regenerate the INV-12 fixture set and check against the committed golden digest
+        working-directory: packages/kip-sdk
+        run: npx vitest run src/__tests__/inv12-golden-digest.test.ts --reporter=verbose
