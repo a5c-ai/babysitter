@@ -270,35 +270,34 @@ function covers(f: Fact, a: bigint, b: bigint | null): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// M3/T4.6-T4.7 addition: excision, ROUND-2 REDESIGN (fixes #1/#2/#3/#4 — see `collectExcisions`'s
-// own doc comment for the full reasoning). ONE unified, PURE fold over `facts` now produces BOTH
-// signals a cell reduce needs, replacing round-1's two-signal split (a global, convergent
-// `excisedFactIds` set PLUS a strictly-local, never-synced `KipRepo.localExcisionGeometry` map that
-// a critic proved lets two replicas holding the BYTE-IDENTICAL admitted set diverge on whether a
-// cell shows `"excised"` or `"unknown"` — a SEC/INV-1 violation):
+// M3/T4.6-T4.7: excision. ONE unified, pure fold over `facts` (`collectExcisions`) produces BOTH
+// signals a cell reduce needs:
 //
 //   1. `excisedOids` — a GLOBAL, cross-replica-convergent set of REAL CONTENT OIDS (never the
-//      caller-declared `f.id`, fix #2) excluded from `asserts`/`retracts` in EVERY cell they'd
-//      otherwise cover, regardless of whether this replica's own copy of the bytes happens to
-//      still be locally present (docs/50 §8.3's "distributed-erasure residual" case) — a value
-//      physically erased by ONE replica can never silently resurface as a trusted `value`/covering-
-//      assert on ANY replica that has merely learned of an AUTHORIZED excision marker.
+//      caller-declared `f.id`) excluded from `asserts`/`retracts` in EVERY cell they'd otherwise
+//      cover, regardless of whether this replica's own copy of the bytes happens to still be
+//      locally present (docs/50 §8.3's "distributed-erasure residual" case) — a value physically
+//      erased by ONE replica can never silently resurface as a trusted `value`/covering-assert on
+//      ANY replica that has merely learned of an AUTHORIZED excision marker.
 //
-//   2. `excisionsByCell` (`ExcisionRecord[]` per cell) — now ALSO a pure function of `facts` alone
-//      (fix #3): every AUTHORIZED marker embeds its own target's `cellTarget`/`validFrom`/`validTo`
-//      (see `ExcisionMarkerPayload`'s doc comment), so ANY replica holding the marker — not only
-//      the one that physically erased the bytes — can reconstruct the identical `"excised"`
-//      placeholder. It is honored only when the marker's own `ref` currently matches NO candidate
-//      fact in `facts` ("confirmed absent right now", never a stale "was absent once" claim) — the
-//      SAME honest distinction that makes INV-9 (single-replica, bytes genuinely and durably gone)
-//      see `"excised"` while INV-12 (two replicas, each replica's own excision's target gets
+//   2. `excisionsByCell` (`ExcisionRecord[]` per cell) — also a pure function of `facts` alone:
+//      every AUTHORIZED marker embeds its own target's `cellTarget`/`validFrom`/`validTo` (see
+//      `ExcisionMarkerPayload`'s doc comment), so ANY replica holding the marker — not only the one
+//      that physically erased the bytes — can reconstruct the identical `"excised"` placeholder.
+//      It is honored only when the marker's own `ref` currently matches NO candidate fact in
+//      `facts` ("confirmed absent right now", never a stale "was absent once" claim) — the same
+//      honest distinction that makes INV-9 (single-replica, bytes genuinely and durably gone) see
+//      `"excised"` while INV-12 (two replicas, each replica's own excision's target gets
 //      reintroduced by the OTHER, still-innocent peer during sync) converges on `"unknown"` for
 //      BOTH fields on BOTH replicas — not a discrepancy, but two genuinely different residual
-//      states, now derived identically by ANY replica holding the same admitted set.
+//      states, derived identically by any replica holding the same admitted set.
 //
-// Authorization (fix #1, SPEC §4.5 m-11) gates BOTH signals identically: an excision marker that
-// fails `isAuthorizedExcisionMarker` is dropped BEFORE either signal is computed from it — never
+// Authorization (SPEC §4.5 m-11, see `isAuthorizedExcisionMarker`) gates BOTH signals identically:
+// an excision marker that fails it is dropped before either signal is computed from it — never
 // folded into the exclusion set, never contributes an `"excised"` placeholder either.
+//
+// This design is the outcome of several rounds of adversarial-TDD hardening; the full history of
+// what earlier approaches got wrong and why lives in reviews/build-final-report.md.
 // ---------------------------------------------------------------------------
 
 /** Per-cell excision-placeholder geometry (see file-level doc comment above). */
@@ -306,38 +305,29 @@ export interface ExcisionRecord {
   excisedFactId: FactId;
   validFrom: HlcOrTime;
   validTo: HlcOrTime | null;
-  /** ROUND-3 FIX #4 addition (audit-record durability): the excise() caller's own validated
-   * `reason` string, carried through from the signed marker payload — `undefined` only for a
-   * marker minted by pre-this-round code that never embedded it (never thrown, never fabricated). */
+  /** The excise() caller's own validated `reason` string, carried through from the signed marker
+   * payload — `undefined` only for a marker minted before this field existed (never thrown, never
+   * fabricated). */
   excisedReason?: string;
 }
 
 /**
- * ROUND-4 FIX (Problem 2 — audit-record forgery via unbound geometry): the geometry THIS
- * VERIFYING replica itself captured, locally, at the exact moment ITS OWN `excise()` call read
- * the REAL candidate fact's own `target`/`validFrom`/`validTo` off its own admitted set (see
- * `KipRepo.excise`, index.ts) — never a marker's self-declared payload. Keyed by the excised
- * fact's REAL content oid (the same key `selfWitnessedExcisionOids` has always used).
+ * The excision geometry THIS VERIFYING replica itself captured, locally, at the exact moment its
+ * OWN `excise()` call read the REAL candidate fact's own `target`/`validFrom`/`validTo` off its own
+ * admitted set (see `KipRepo.excise`, index.ts) — never a marker's self-declared payload. Keyed by
+ * the excised fact's REAL content oid (the same key `selfWitnessedExcisionOids` uses).
  *
- * WHY THIS EXISTS (the round-3 finding this closes): round 3's `collectExcisions` CASE-2 used a
- * bare `Set<string>` of witnessed oids purely as a YES/NO authorization gate, then — once that
- * gate passed — still built the `ExcisionRecord` from the INCOMING MARKER's own self-declared
- * `cellTarget`/`validFrom`/`validTo`/`excisedFactId`/`excisedReason`. A critic proved live that
- * this lets ANY admitted sync peer who merely knows the SAME real content oid the victim already
- * self-excised (e.g. from having seen the bytes before erasure, or from any other side channel)
- * mint their OWN separate, validly-self-signed marker with a matching `ref` (trivial once the oid
- * is known — `ref` is just `HMAC(attacker_nonce, oid)`) but a COMPLETELY DIFFERENT, attacker-
- * chosen `cellTarget` — since the `ref` matches an oid the victim's own local record already
- * vouches for, `collectExcisions` honored it and injected the ATTACKER's fabricated geometry into
- * the victim's OWN projection, forging a GDPR-erasure record on a cell that was never actually
- * excised. Storing a `Map<oid, SelfWitnessedExcisionRecord>` instead of a bare `Set<oid>` closes
- * this: once a marker's `ref` is recognized as `selfWitnessed` (matches an oid THIS replica's own
- * record covers), the geometry used to build the `ExcisionRecord` — and the CELL KEY it gets
- * folded into — comes ENTIRELY from that local record, never from the specific marker fact that
- * happened to match. Any number of competing markers (the replica's own real one, an attacker's
- * forged one, a re-synced duplicate) resolving to the SAME oid now all deterministically produce
- * the IDENTICAL, correct `ExcisionRecord` — there is no attacker-controlled input left in this
- * path at all. See round4-excision-convergence-fix.test.ts.
+ * This exists because a marker's `ref` match only proves the sender knows the real content oid — it
+ * says nothing about whether that same marker's `cellTarget`/`validFrom`/`validTo` are genuine. Any
+ * admitted peer who merely learns the same real oid (e.g. by having seen the bytes before erasure)
+ * can mint their own validly-self-signed marker with a matching `ref` but a completely different,
+ * attacker-chosen `cellTarget`. Storing this local geometry, and having `collectExcisions` build the
+ * `ExcisionRecord` — cell key included — EXCLUSIVELY from it once a marker's `ref` is recognized as
+ * self-witnessed, closes that gap: any number of competing markers resolving to the SAME oid (the
+ * replica's own real one, an attacker's forged one, a re-synced duplicate) all deterministically
+ * produce the IDENTICAL, correct `ExcisionRecord` — there is no attacker-controlled input left in
+ * this path. See round4-excision-convergence-fix.test.ts and reviews/build-final-report.md for the
+ * live-reproduced attack this closes.
  */
 export interface SelfWitnessedExcisionRecord {
   cellTarget: Target;
@@ -348,49 +338,41 @@ export interface SelfWitnessedExcisionRecord {
 }
 
 /**
- * ROUND-2 CRITICAL-FINDING FIX #4 (anti-fingerprint marker, SPEC §4.5 C-4.3) + FIX #3 (set-pure
- * "excised" geometry, closing the SEC-breaking per-replica-memory divergence) + FIX #1 (excision
- * authorization, SPEC §4.5 m-11) — the durable `type:"excision"` marker fact's `value` is now this
- * JSON-encoded, SIGNED payload rather than the bare excised `FactId` string round-1 stored:
+ * The durable `type:"excision"` marker fact's `value` is this JSON-encoded, SIGNED payload
+ * (SPEC §4.5 C-4.3, m-11):
  *
- *   - `ref`/`nonce` (fix #4): `ref = HMAC-SHA256(key=nonce, message=<excised fact's REAL content
- *     oid>)`. The marker's persisted bytes NEVER carry the excised content's own oid/CID directly
- *     — only this keyed reference, which lets ANY replica holding a CANDIDATE fact verify a MATCH
- *     (recompute `HMAC(nonce, candidateOid)` and compare) without ever being able to invert `ref`
- *     back into the oid without already possessing a candidate to test. `nonce` is safe to
- *     disclose alongside `ref` (it is not the erased content, just the HMAC key) — this is the
- *     "tenant-salted HMAC of the removed CID" C-4.3 asks for, with the marker itself carrying its
- *     own salt so no separate genesis-shared-secret machinery is needed this round.
- *   - `origFingerprint` (fix #1): the ERASED fact's OWN signer fingerprint, embedded so ANY replica
- *     — including one that never held the original bytes — can verify "is this marker's OWN
- *     signer authorized to erase THIS specific author's data" (self-excision) purely from the
- *     admitted set, with no per-replica side-channel.
- *   - `cellTarget`/`validFrom`/`validTo` (fix #3): the erased fact's own cell target + valid-time
- *     interval, embedded so ANY replica admitting this marker — not just the one that physically
- *     erased the bytes — can reconstruct the identical `"excised"` placeholder geometry. This
- *     replaces `KipRepo.localExcisionGeometry` (round-1's per-replica, never-synced memory, which a
- *     critic proved lets two replicas holding the BYTE-IDENTICAL admitted set diverge — one shows
- *     `"excised"`, the other `"unknown"` — breaking SEC/INV-1). `excisionsByCell` below is now
- *     derived ENTIRELY from `facts` itself, exactly like `excisedOids`.
- *   - `excisedFactId` (residual, DOCUMENTED DISPUTE): the erased fact's caller-DECLARED id, kept
- *     for `CellSegment{kind:"excised"}.excisedFactId` display purposes ONLY — never consulted by
- *     the exclusion-matching (`ref`/`nonce` alone drive that) or authorization logic. Embedding
- *     this is in genuine tension with C-4.3's "never a stable fingerprint of the erased content":
- *     INV-9's own FROZEN assertion requires the EXACT original declared id to be reproducible even
- *     in the single-replica, bytes-durably-gone scenario (no candidate fact left anywhere to derive
- *     it from), and fix #3 additionally requires ANY replica — not just the excising one — to
- *     reconstruct an IDENTICAL placeholder, which is impossible without SOME durable, convergent
- *     carrier of this value. See this task's `disputes` output for the full reasoning; the
- *     SECURITY-relevant matching/authorization decisions never depend on this field.
- *   - `excisedReason` (ROUND-3 FIX #4): the excise() caller's own validated `reason` string
- *     (`"fork" | "malformed" | "gdpr-erasure" | "other"`, index.ts's `ALLOWED_REASONS`), now
- *     genuinely embedded in the SIGNED, durable, synced marker payload — previously validated at
- *     `excise()`'s own call boundary but never actually persisted anywhere, undercutting the
- *     "durable, cryptographically-signed audit record" claim `excise()`'s own doc comment makes.
- *     OPTIONAL here (never required for a marker to parse/be honored) so a marker minted by
- *     pre-this-round code, or any well-formed foreign marker that simply omits it, is still parsed
- *     and honored exactly as before — this field is display/audit-only, never consulted by matching
- *     (`ref`/`nonce`) or authorization logic.
+ *   - `ref`/`nonce`: `ref = HMAC-SHA256(key=nonce, message=<excised fact's REAL content oid>)`. The
+ *     marker's persisted bytes NEVER carry the excised content's own oid/CID directly — only this
+ *     keyed reference, which lets ANY replica holding a CANDIDATE fact verify a MATCH (recompute
+ *     `HMAC(nonce, candidateOid)` and compare) without ever being able to invert `ref` back into
+ *     the oid without already possessing a candidate to test. `nonce` is safe to disclose alongside
+ *     `ref` (it is not the erased content, just the HMAC key) — this is C-4.3's "tenant-salted HMAC
+ *     of the removed CID", with the marker itself carrying its own salt so no separate genesis-
+ *     shared-secret machinery is needed.
+ *   - `origFingerprint`: the ERASED fact's OWN signer fingerprint, embedded so ANY replica —
+ *     including one that never held the original bytes — can verify "is this marker's OWN signer
+ *     authorized to erase THIS specific author's data" (self-excision) purely from the admitted
+ *     set, with no per-replica side-channel. NOTE: `collectExcisions` never authorizes off this
+ *     self-declared field alone when a real candidate is still present — see its own doc comment.
+ *   - `cellTarget`/`validFrom`/`validTo`: the erased fact's own cell target + valid-time interval,
+ *     embedded so ANY replica admitting this marker — not just the one that physically erased the
+ *     bytes — can reconstruct the identical `"excised"` placeholder geometry (`excisionsByCell` is
+ *     a pure function of `facts` alone, exactly like `excisedOids`).
+ *   - `excisedFactId` (DOCUMENTED, DELIBERATE EXCEPTION): the erased fact's caller-DECLARED id,
+ *     kept for `CellSegment{kind:"excised"}.excisedFactId` display purposes ONLY — never consulted
+ *     by the exclusion-matching (`ref`/`nonce` alone drive that) or authorization logic. This is in
+ *     tension with C-4.3's "never a stable fingerprint of the erased content", but INV-9's own
+ *     FROZEN assertion requires the EXACT original declared id to be reproducible even in the
+ *     single-replica, bytes-durably-gone scenario (no candidate fact left anywhere to derive it
+ *     from), and any replica — not just the excising one — must reconstruct an identical
+ *     placeholder, which is impossible without some durable, convergent carrier of this value. See
+ *     this task's `disputes` output / reviews/build-final-report.md for the full reasoning; the
+ *     security-relevant matching/authorization decisions never depend on this field.
+ *   - `excisedReason`: the excise() caller's own validated `reason` string (`"fork" | "malformed" |
+ *     "gdpr-erasure" | "other"`, index.ts's `ALLOWED_REASONS`), embedded in the SIGNED, durable,
+ *     synced marker payload. OPTIONAL (never required for a marker to parse/be honored) so a
+ *     marker that omits it is still parsed and honored exactly as before — this field is
+ *     display/audit-only, never consulted by matching (`ref`/`nonce`) or authorization logic.
  */
 interface ExcisionMarkerPayload {
   ref: string;
@@ -447,40 +429,38 @@ export function computeExcisionRef(nonce: string, oid: string): string {
 }
 
 /**
- * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11): an excision marker is honored — folded into
- * `excisedOids`/`excisionsByCell` — iff its OWN signer is authorized to erase the TARGET fact's
- * data. Full `KeyAuthorization`/grant-chain enforcement is explicitly M8/M9 scope (not built this
- * round); this is the MINIMAL, honest safeguard round-1's critic named:
+ * An excision marker is honored — folded into `excisedOids`/`excisionsByCell` — iff its OWN signer
+ * is authorized to erase the TARGET fact's data (SPEC §4.5 m-11). Full `KeyAuthorization`/grant-chain
+ * enforcement is explicitly M8/M9 scope (not built yet); this is the minimal, honest safeguard:
  *
  *   (a) `markerFingerprint === origFingerprint` — self-excision: the same signer who authored the
  *       data is the one erasing it.
- *   (b) `trustedExciseKeys.has(markerFingerprint)` — an explicit, opt-in, constructor-configured
- *       admin/operator escape hatch (never a broader capability system). ROUND-5 FIX (Finding 2):
- *       ALSO requires `isRegisteredFingerprint(markerFingerprint)` — a fingerprint merely LISTED in
- *       `trustedExciseKeys` (a constructor-only, never-synced config option) carries no cryptographic
- *       weight on its own; without this, an operator who lists a fingerprint in `trustedExciseKeys`
- *       but forgets to ALSO register that fingerprint's real public key (an easy, silent
- *       misconfiguration — `trustedExciseKeys: string[]` and `rootKeys`/`keyPair` registration are
- *       two entirely independent constructor options) leaves the door open for ANY sync peer to
- *       forge a marker claiming that trusted fingerprint via `ingest()`'s documented
- *       unregistered-key placeholder-signature fallback (`isPlaceholderSignature`, this same file's
- *       INV-13a residual) and have it honored as if genuinely, cryptographically trusted. Requiring
- *       the fingerprint to ALSO be a REAL, registered key closes this structurally: a
- *       `trustedExciseKeys` marker is only ever honored when it carries a real, verified Ed25519
- *       signature, never a placeholder one. See round5-excise-final-hardening.test.ts.
+ *   (b) `trustedExciseKeys.has(markerFingerprint) && isRegisteredFingerprint(markerFingerprint)` —
+ *       an explicit, opt-in, constructor-configured admin/operator escape hatch (never a broader
+ *       capability system). The registered-fingerprint check is load-bearing, not incidental: a
+ *       fingerprint merely LISTED in `trustedExciseKeys` (a constructor-only, never-synced config
+ *       option) carries no cryptographic weight on its own — `trustedExciseKeys: string[]` and
+ *       `rootKeys`/`keyPair` registration are two entirely independent constructor options, so
+ *       without this check a sync peer could forge a marker claiming a trusted fingerprint via
+ *       `ingest()`'s documented unregistered-key placeholder-signature fallback
+ *       (`isPlaceholderSignature`, this file's INV-13a residual) and have it honored as if
+ *       genuinely, cryptographically trusted. Requiring the fingerprint to ALSO be a real,
+ *       registered key means a `trustedExciseKeys` marker is only ever honored when it carries a
+ *       real, verified Ed25519 signature. See round5-excise-final-hardening.test.ts.
  *   (c) `!isRegisteredFingerprint(origFingerprint)` — the ERASED fact's own signer was never a
- *       REAL, cryptographically-verified key on THIS verifying replica in the first place (i.e. it
- *       was only ever admitted via `ingest()`'s documented unregistered-key placeholder-signature
- *       fallback, INV-13a's own scenario) — there is no genuine cryptographic authority to check
- *       the marker's signer against, so this replica's own local decision to have trusted/admitted
- *       that data in the first place extends to trusting its own decision to erase it too. This is
- *       the SAME "no real trust chain exists yet" category `ingest()` already treats permissively
- *       (not a NEW weakening) — it does NOT apply to genuinely-authenticated data (self-authored via
- *       `assertFact`, or admitted via a registered peer/root key), which is exactly the CRITICAL
- *       live-reproduced scenario this fix closes: an attacker's OWN legitimately-registered (but
- *       unprivileged) key can never satisfy (a) or (b) against a victim's real registered-key
- *       authored fact, so the victim's own replica — which HAS that fact's fingerprint genuinely
- *       registered (it is the victim's own identity) — rejects the attacker's marker outright.
+ *       REAL, cryptographically-verified key on THIS verifying replica (i.e. it was only ever
+ *       admitted via `ingest()`'s documented unregistered-key placeholder-signature fallback,
+ *       INV-13a's own scenario) — there is no genuine cryptographic authority to check the marker's
+ *       signer against, so this replica's own local decision to have trusted/admitted that data in
+ *       the first place extends to trusting its own decision to erase it too. This is the SAME "no
+ *       real trust chain exists yet" category `ingest()` already treats permissively; it does NOT
+ *       apply to genuinely-authenticated data (self-authored via `assertFact`, or admitted via a
+ *       registered peer/root key) — an attacker's OWN legitimately-registered (but unprivileged) key
+ *       can never satisfy (a) or (b) against a victim's real registered-key-authored fact, so the
+ *       victim's own replica (which HAS that fact's fingerprint genuinely registered, being the
+ *       victim's own identity) rejects the attacker's marker outright.
+ *
+ * See reviews/build-final-report.md for the adversarial-TDD history that arrived at this exact rule.
  */
 export function isAuthorizedExcisionMarker(
   markerFingerprint: string,
@@ -495,34 +475,29 @@ export function isAuthorizedExcisionMarker(
 }
 
 /**
- * ROUND-3 ROOT-CAUSE FIX: `origFingerprint` here MUST be the TARGET's own REAL, admitted
- * `provenance.publicKeyFingerprint` — read directly off a genuine candidate `Fact` object this
- * verifying replica currently holds — NEVER the marker's own self-declared `origFingerprint` field
- * (`ExcisionMarkerPayload.origFingerprint`). That field is entirely attacker-controlled: an
- * adversary who legitimately owns a real, registered keypair can craft a validly-self-signed marker
- * whose `ref` targets a VICTIM's fact (by real content oid, which requires already knowing it — this
- * part is sound) while setting `origFingerprint` to the ATTACKER'S OWN fingerprint. Since
- * `isAuthorizedExcisionMarker`'s branch (a) is `markerFingerprint === origFingerprint`, and BOTH
- * values are attacker-controlled/self-consistent under that spoof, "self-excision" trivially and
- * falsely passes even though the attacker never authored the victim's data — round 2's own critic
- * live-reproduced exactly this attack through a real `KipRepo`/`sync()` round-trip. `collectExcisions`
- * below never calls `isAuthorizedExcisionMarker` with the marker's OWN `parsed.origFingerprint`
- * value — only with a REAL candidate fact's own `provenance.publicKeyFingerprint`, which the
- * marker's author cannot forge (it is read from a fact this replica independently verified/admitted
- * on its own signature, not from the marker's payload). See `collectExcisions`'s own doc comment for
- * the full two-case (candidate present / candidate absent) reasoning this necessitates.
+ * IMPORTANT: `origFingerprint` passed to `isAuthorizedExcisionMarker` here MUST be the TARGET's own
+ * REAL, admitted `provenance.publicKeyFingerprint` — read directly off a genuine candidate `Fact`
+ * object this verifying replica currently holds — NEVER the marker's own self-declared
+ * `origFingerprint` field (`ExcisionMarkerPayload.origFingerprint`), which is entirely attacker-
+ * controlled (a forger with a real registered keypair could craft a marker whose `ref` targets a
+ * victim's fact while self-declaring `origFingerprint` as their own, trivially and falsely passing
+ * "self-excision"). `collectExcisions` below never calls `isAuthorizedExcisionMarker` with the
+ * marker's own `parsed.origFingerprint` value — only with a real candidate fact's own
+ * `provenance.publicKeyFingerprint`, which the marker's author cannot forge. See `collectExcisions`'s
+ * own doc comment for the full two-case (candidate present / candidate absent) reasoning this
+ * necessitates.
  */
 
 export interface ExcisionFoldResult {
-  /** Real content oids excluded from every cell they'd otherwise cover (fix #2 — keyed by the
-   * fact's REAL content oid, never the caller-declared `f.id`, closing the id-collision collateral-
-   * censorship vector: two admitted facts sharing a declared id but DIFFERENT content no longer
-   * both get excluded just because ONE of them was legitimately excised). */
+  /** Real content oids excluded from every cell they'd otherwise cover — keyed by the fact's REAL
+   * content oid, never the caller-declared `f.id`, closing the id-collision collateral-censorship
+   * vector: two admitted facts sharing a declared id but DIFFERENT content no longer both get
+   * excluded just because ONE of them was legitimately excised. */
   excisedOids: ReadonlySet<string>;
-  /** Per-cell `"excised"` placeholder geometry — a PURE function of `facts` alone (fix #3), never
+  /** Per-cell `"excised"` placeholder geometry — a PURE function of `facts` alone, never
    * per-replica memory. Only populated for a marker whose OWN `ref` currently matches NO candidate
-   * fact in `facts` ("confirmed absent right now", the same "distributed-erasure residual"
-   * self-healing semantics round-1 already established — see the file-level doc comment). */
+   * fact in `facts` ("confirmed absent right now" — the same "distributed-erasure residual"
+   * self-healing semantics described in the file-level doc comment above). */
   excisionsByCell: ReadonlyMap<string, ExcisionRecord[]>;
   /** Every admitted fact's own real content oid, computed once per `proj()` call and reused by
    * `reduceRawCell`/`reduceCellByRef`'s exclusion filters — avoids recomputing `gitBlobId` per cell. */
@@ -531,15 +506,14 @@ export interface ExcisionFoldResult {
 
 /**
  * The GLOBAL, cross-replica-convergent excision fold — a pure function of `facts` (plus this
- * VERIFYING replica's own `isRegisteredFingerprint`/`trustedExciseKeys`/`selfWitnessedExcisionOids`,
+ * VERIFYING replica's own `isRegisteredFingerprint`/`trustedExciseKeys`/`selfWitnessedExcisionOids`;
  * see `isAuthorizedExcisionMarker`'s doc comment for the documented, honest scope-limit on how
- * convergent AUTHORIZATION verdicts can be without full M8/M9 grant-chain machinery — the
- * ADMITTED SET and its exclusion-worthy CONTENT stay pure; only the trust-escape-hatch config can
+ * convergent AUTHORIZATION verdicts can be without full M8/M9 grant-chain machinery — the admitted
+ * set and its exclusion-worthy content stay pure; only the trust-escape-hatch config can
  * legitimately differ by replica, the same category as `knownMaxVersion`/`cellReducers`).
  *
- * ROUND-3 REDESIGN (fixes the round-2 critical finding: authorization trivially bypassable via a
- * spoofed, self-declared `origFingerprint`). Every marker is now resolved through exactly ONE of two
- * cases, decided BEFORE authorization is even evaluated:
+ * Every marker is resolved through exactly ONE of two cases, decided BEFORE authorization is even
+ * evaluated:
  *
  *   1. TARGET CURRENTLY PRESENT — the marker's `ref` matches a REAL candidate fact still in `facts`.
  *      Authorization is decided against that CANDIDATE'S OWN, REAL `provenance.publicKeyFingerprint`
@@ -550,65 +524,54 @@ export interface ExcisionFoldResult {
  *   2. TARGET CURRENTLY ABSENT — no candidate fact is left in `facts` to cross-check the marker's
  *      claimed authorship against at all (the "distributed-erasure residual" case; this is ALSO the
  *      case every excise() call's own immediate re-fold hits, once `Substrate.erase` has removed the
- *      candidate's bytes). A critic specifically flagged that this case CANNOT be soundly authorized
- *      from the marker's self-declared payload alone — there is nothing genuine to check a
- *      self-claimed "I am erasing my own data" assertion against. So the marker's OWN claimed
- *      self-excision is NEVER trusted here; it is honored ONLY when EITHER (a) its signer is an
- *      explicit, operator-configured `trustedExciseKeys` fingerprint, or (b) THIS verifying replica
- *      itself already, independently verified (at ITS OWN `excise()` mint time, against the real
- *      candidate it held then — never from any marker payload) that erasing this exact real content
- *      oid was authorized (`selfWitnessedExcisionOids`, index.ts — populated ONLY by this replica's
- *      own `excise()` calls, NEVER by anything received over `sync()`).
+ *      candidate's bytes). There is nothing genuine to check a self-claimed "I am erasing my own
+ *      data" assertion against, so the marker's OWN claimed self-excision is NEVER trusted here; it
+ *      is honored ONLY when EITHER (a) its signer is an explicit, operator-configured
+ *      `trustedExciseKeys` fingerprint, or (b) THIS verifying replica itself already, independently
+ *      verified (at ITS OWN `excise()` mint time, against the real candidate it held then — never
+ *      from any marker payload) that erasing this exact real content oid was authorized
+ *      (`selfWitnessedExcisionOids`, index.ts — populated ONLY by this replica's own `excise()`
+ *      calls, NEVER by anything received over `sync()`).
  *
- * This is a real, narrower capability regression versus round 2's "any replica missing the bytes
- * converges on `excised` via marker geometry alone" property: a replica that never held a target's
- * bytes and receives ONLY an unrecognized third party's self-claimed marker for it now correctly
- * shows `"unknown"`, not `"excised"` — see this task's `disputes` output and
- * round2-excise-security-fixes.test.ts's updated test (c) for the concrete, deliberately-narrowed
- * scenario.
+ * A consequence worth noting: a replica that never held a target's bytes and receives ONLY an
+ * unrecognized third party's self-claimed marker for it shows `"unknown"`, not `"excised"` — see
+ * round2-excise-security-fixes.test.ts's test (c) for the scenario. See reviews/build-final-report.md
+ * for the full adversarial-TDD history behind this design.
  */
 /**
- * ROUND-5 FIX (Finding 1 — SEC/INV-1 divergence via `excisedReason`): `collectExcisions`'s CASE-2(ii)
- * self-witnessed branch builds `cellTarget`/`validFrom`/`validTo`/`excisedFactId` EXCLUSIVELY from
- * THIS replica's own local `SelfWitnessedExcisionRecord` (round 4's fix, and rightly so — those
- * fields are guaranteed identical across any two replicas that witnessed the SAME real content, and
- * sourcing them locally is exactly what closes round 4's audit-forgery vector). But `excisedReason`
- * is different in kind: it is a caller-SUPPLIED string, not content-derived, so TWO DIFFERENT
- * replicas can each independently, legitimately self-excise the SAME real oid via `excise(id, reason)`
- * calls with DIFFERENT `reason` values (e.g. one calls it `"gdpr-erasure"`, the other calls it
- * `"malformed"` on its own separately-declared `factId` for the identical bytes). Once both markers
- * are synced, the two replicas hold a BYTE-IDENTICAL admitted fact set — sourcing `excisedReason`
- * from "whichever replica's own local record happens to be consulted" therefore diverges, a genuine
- * SEC/INV-1 violation a round-5 critic live-reproduced.
+ * `collectExcisions`'s CASE-2(ii) self-witnessed branch builds `cellTarget`/`validFrom`/`validTo`/
+ * `excisedFactId` EXCLUSIVELY from THIS replica's own local `SelfWitnessedExcisionRecord` — those
+ * fields are guaranteed identical across any two replicas that witnessed the SAME real content, so
+ * sourcing them locally is sound. But `excisedReason` is different in kind: it is a caller-SUPPLIED
+ * string, not content-derived, so TWO DIFFERENT replicas can each independently, legitimately
+ * self-excise the SAME real oid via `excise(id, reason)` calls with DIFFERENT `reason` values (e.g.
+ * one calls it `"gdpr-erasure"`, the other `"malformed"`, on its own separately-declared `factId` for
+ * the identical bytes). Once both markers are synced, the two replicas hold a BYTE-IDENTICAL admitted
+ * fact set, so `excisedReason` must be resolved as a deterministic function of THAT set — never
+ * "whichever replica's own local record happens to be consulted" — or the two replicas diverge (a
+ * SEC/INV-1 violation).
  *
- * THE FIX: make `excisedReason` a DETERMINISTIC function of the admitted marker set — the SAME
- * "multiple candidates, need one pure-content pick" problem `maxByOrderKey`/`compareByContent`
- * already solve elsewhere in this file (see e.g. `reduceRawCell`'s own `excisedFactId`-tiebreak use).
- * Every ADMITTED fact in `facts` that (a) parses as a well-formed excision marker, (b) whose own
- * `ref`/`nonce` resolves to this exact `oid`, AND (c) whose OWN signer fingerprint is a REAL,
- * cryptographically-registered key on THIS replica (`isRegisteredFingerprint`) is gathered into one
- * pool; `maxByOrderKey` (a pure function of `facts` alone, convergent regardless of ingest order)
- * picks the winner, and that winner's OWN parsed `excisedReason` — never the local record's — is what
- * gets projected.
+ * This is the SAME "multiple candidates, need one pure-content pick" problem `maxByOrderKey`/
+ * `compareByContent` already solve elsewhere in this file. Every ADMITTED fact in `facts` that
+ * (a) parses as a well-formed excision marker, (b) whose own `ref`/`nonce` resolves to this exact
+ * `oid`, AND (c) whose OWN signer fingerprint is a REAL, cryptographically-registered key on THIS
+ * replica (`isRegisteredFingerprint`) is gathered into one pool; `maxByOrderKey` (a pure function of
+ * `facts` alone, convergent regardless of ingest order) picks the winner, and that winner's OWN
+ * parsed `excisedReason` — never the local record's — is what gets projected.
  *
- * Condition (c) is load-bearing, not incidental: without it, an attacker's admitted-but-UNREGISTERED
- * (placeholder-signature-fallback, see `isPlaceholderSignature`/Finding 2's fix) marker — which
- * requires no real signing key, only knowledge of the target oid, to craft a `ref` match — could
- * inject an arbitrary fabricated `excisedReason` into the pool and potentially win the tiebreak,
- * reopening a Finding-2-flavored forgery AND breaking convergence (since an attacker's marker may
- * reach one replica but not another — see round4-excision-convergence-fix.test.ts (b)'s asymmetric-
- * exposure scenario, which this fix must keep passing). A GENUINE self-`excise()` call always mints
- * its marker with the replica's OWN real signing key (registered on itself at construction, and
- * durably registered on every peer it ever `sync()`s with via the trust-bootstrap), so restricting
- * the pool to registered-fingerprint markers keeps it exactly as broad as — never broader than — the
- * set of markers `sync()`'s own trust model would let a legitimate excision reach, while still
- * excluding any placeholder-signed forgery.
+ * Condition (c) is load-bearing, not incidental: without it, an admitted-but-UNREGISTERED
+ * (placeholder-signature-fallback, see `isPlaceholderSignature`) marker — which requires no real
+ * signing key, only knowledge of the target oid, to craft a `ref` match — could inject an arbitrary
+ * fabricated `excisedReason` into the pool. A GENUINE self-`excise()` call always mints its marker
+ * with the replica's OWN real signing key, so restricting the pool to registered-fingerprint markers
+ * keeps it exactly as broad as — never broader than — the set of markers `sync()`'s own trust model
+ * would let a legitimate excision reach, while still excluding any placeholder-signed forgery.
  *
  * `undefined` is returned only if genuinely no matching marker in `facts` carries a registered
  * signature (the pool is empty) — but this cannot happen when called from CASE-2(ii) below, since
  * `selfWitnessedRecord` having matched already implies THIS replica's own `excise()` call minted and
  * ingested (with its own, always-registered key) at least one matching marker into `facts`.
- * See round5-excise-final-hardening.test.ts.
+ * See round5-excise-final-hardening.test.ts and reviews/build-final-report.md.
  */
 function pickConvergentSelfWitnessedReason(
   oid: string,
@@ -667,7 +630,7 @@ export function collectExcisions(
 
     if (matchedOid !== undefined) {
       // CASE 1 — target currently present: ground authorization in the CANDIDATE's own real signer,
-      // never the marker's self-declared claim (the round-3 root-cause fix).
+      // never the marker's self-declared claim (see this function's doc comment above for why).
       const candidateFingerprint = (factsByOid.get(matchedOid) as Fact[])[0].provenance.publicKeyFingerprint;
       if (!isAuthorizedExcisionMarker(markerFingerprint, candidateFingerprint, isRegisteredFingerprint, trustedExciseKeys)) {
         continue; // UNAUTHORIZED: never folded into the exclusion set, never admitted as a basis for censorship.
@@ -678,41 +641,31 @@ export function collectExcisions(
 
     // CASE 2 — target currently absent: no candidate to cross-check the marker's claim against.
     // Honored via exactly ONE of two sound bases — NEVER the marker's own self-declared payload
-    // (ROUND-4 FIX, Problem 2: see `SelfWitnessedExcisionRecord`'s doc comment for the audit-
-    // forgery this closes):
+    // (see `SelfWitnessedExcisionRecord`'s doc comment for the audit-forgery this avoids):
     //
-    //   (i)  an explicit `trustedExciseKeys` fingerprint — this signer is FULLY, operator-
+    //   (i)  an explicit `trustedExciseKeys` fingerprint that ALSO satisfies
+    //        `isRegisteredFingerprint(markerFingerprint)` — this signer is FULLY, operator-
     //        delegated authority to author excisions, so trusting THEIR OWN signed marker's
     //        self-declared geometry is the intended, sound meaning of that trust grant (unlike an
-    //        unprivileged peer merely piggybacking on someone else's witnessed oid, case (ii)).
-    //        ROUND-5 FIX (Finding 2): ALSO requires `isRegisteredFingerprint(markerFingerprint)` —
-    //        see `isAuthorizedExcisionMarker`'s doc comment above for why a `trustedExciseKeys`
-    //        LISTING alone (never synced, never cryptographically checked by itself) must not be
-    //        satisfiable by a placeholder-signed marker from a fingerprint the operator forgot to
-    //        also register real key material for. Without this, CASE 2 is the exact place a critic
-    //        proved this hole is live: the target is absent, so there is no candidate to cross-check
-    //        against at all, and this direct `trustedExciseKeys.has(...)` check (unlike CASE 1's,
-    //        which already routes through `isAuthorizedExcisionMarker`) previously had NO
-    //        registered-key gate whatsoever.
+    //        unprivileged peer merely piggybacking on someone else's witnessed oid, case (ii)). The
+    //        registered-key gate matters here specifically: the target is absent, so there is no
+    //        candidate to cross-check against, and a bare `trustedExciseKeys.has(...)` check would
+    //        otherwise be satisfiable by a placeholder-signed marker (see
+    //        `isAuthorizedExcisionMarker`'s doc comment for the same reasoning applied to CASE 1).
     //   (ii) this replica's OWN prior, real, local record of having independently verified and
-    //        performed this exact excision itself (`selfWitnessedExcisionOids`, now a
-    //        `Map<oid, SelfWitnessedExcisionRecord>`) — when this is the basis, the
-    //        `ExcisionRecord` (cell key AND geometry) is built EXCLUSIVELY from THAT LOCAL
-    //        RECORD, never from the marker that happened to match it. A marker with a matching
-    //        `ref` but attacker-chosen `cellTarget`/`validFrom`/`validTo`/`excisedFactId` can
-    //        therefore never inject fabricated geometry: it is either redundant (produces the
-    //        identical record the local truth already would) or simply ignored (its own payload
-    //        is never consulted once selfWitnessed is established). ROUND-5 FIX (Finding 1): the
-    //        `excisedReason` field is the one part of that "local truth" that can LEGITIMATELY
-    //        differ across two replicas that each independently, soundly self-excised the SAME real
-    //        content with a DIFFERENT caller-supplied `reason` string — see
-    //        `pickConvergentSelfWitnessedReason`'s doc comment below for why that one field is
-    //        instead resolved as a deterministic function of the admitted marker set.
+    //        performed this exact excision itself (`selfWitnessedExcisionOids`) — when this is the
+    //        basis, the `ExcisionRecord` (cell key AND geometry) is built EXCLUSIVELY from THAT
+    //        LOCAL RECORD, never from the marker that happened to match it. A marker with a
+    //        matching `ref` but attacker-chosen `cellTarget`/`validFrom`/`validTo`/`excisedFactId`
+    //        can therefore never inject fabricated geometry: it is either redundant (produces the
+    //        identical record the local truth already would) or simply ignored. `excisedReason` is
+    //        the one field resolved differently — see `pickConvergentSelfWitnessedReason`'s doc
+    //        comment below for why it is instead a deterministic function of the admitted marker set.
     //
     // Neither trustedExciseKeys nor an own local record ⇒ no sound basis to authorize an absent
-    // target at all — never honored; the cell correctly falls through to plain `"unknown"`
-    // (ROUND-4 FIX, Problem 1: a replica with zero relevant local knowledge never fabricates an
-    // `"excised"` placeholder for ANY marker, however it is signed).
+    // target at all — never honored; the cell correctly falls through to plain `"unknown"` (a
+    // replica with zero relevant local knowledge never fabricates an `"excised"` placeholder for
+    // ANY marker, however it is signed).
     if (trustedExciseKeys.has(markerFingerprint) && isRegisteredFingerprint(markerFingerprint)) {
       const cellKey = cellKeyFor(marker.cellTarget);
       if (cellKey === null) continue;
@@ -744,8 +697,8 @@ export function collectExcisions(
       excisedFactId: selfWitnessedRecord.excisedFactId,
       validFrom: selfWitnessedRecord.validFrom,
       validTo: selfWitnessedRecord.validTo,
-      // ROUND-5 FIX (Finding 1): `excisedReason` alone is resolved as a deterministic function of
-      // the ADMITTED marker set (never blindly from this replica's own local record) — see
+      // `excisedReason` alone is resolved as a deterministic function of the ADMITTED marker set
+      // (never blindly from this replica's own local record) — see
       // `pickConvergentSelfWitnessedReason`'s doc comment above.
       excisedReason: pickConvergentSelfWitnessedReason(selfWitnessedOid, facts, isRegisteredFingerprint),
     };
@@ -1228,13 +1181,10 @@ export interface ProjResult {
  * naming an existence cell key is simply never consulted, never silently misapplied.
  */
 /**
- * ROUND-2 REDESIGN: `localExcisions` (round-1's per-replica, never-synced excision memory) has been
- * REMOVED — see `collectExcisions`'s doc comment for why the excised/unknown decision is now a pure
- * function of `facts` alone (fix #3). `hashAlgo`/`trustedExciseKeys`/`isRegisteredFingerprint` are
- * the new inputs `collectExcisions` needs; see `isAuthorizedExcisionMarker`'s doc comment for why
- * the latter two are the one deliberately-per-replica-configurable exception (fix #1's escape hatch
- * and its permissive-for-never-registered-keys default), in the SAME documented category as
- * `knownMaxVersion`/`cellReducers` below.
+ * `hashAlgo`/`trustedExciseKeys`/`isRegisteredFingerprint` feed `collectExcisions`'s excision fold
+ * (see its own doc comment) — the excised/unknown decision is a pure function of `facts` alone,
+ * plus this deliberately-per-replica-configurable trust escape hatch, in the SAME documented
+ * category as `knownMaxVersion`/`cellReducers` below.
  */
 export interface ProjOptions {
   knownMaxVersion?: number;
@@ -1243,23 +1193,18 @@ export interface ProjOptions {
   trustedExciseKeys?: ReadonlySet<string>;
   isRegisteredFingerprint?: (fingerprint: string) => boolean;
   /**
-   * ROUND-3 addition, ROUND-4 REDESIGN — see `collectExcisions`'s doc comment (CASE 2) and
-   * `SelfWitnessedExcisionRecord`'s own doc comment: the real content oids THIS verifying
-   * replica's OWN `excise()` calls have themselves, locally, already verified authorization for
-   * (never populated from anything received over `sync()`), each mapped to the GEOMETRY this
-   * replica itself captured off the real candidate at that same mint time. ROUND-4 FIX (Problem
-   * 2): a bare `Set<string>` (round 3) let `collectExcisions` fall back to trusting the MATCHING
-   * MARKER's own self-declared geometry once the authorization gate passed — a critic proved this
-   * lets an admitted peer who merely knows the same witnessed oid forge an unrelated cell's
-   * excision record. Now a `Map<oid, SelfWitnessedExcisionRecord>`, so the geometry used is always
-   * this replica's OWN locally-captured truth, never any marker's payload. Lets a replica's own
-   * legitimate self-excision still resolve to a typed `"excised"` placeholder once the bytes are
-   * gone from `facts` (the "target absent" case every `excise()` call's own subsequent re-fold
-   * hits), without trusting a marker's self-declared payload for that same case when it comes from
-   * an unrecognized third party. Defaults to empty — a direct unit-test call to `proj()` with no
-   * such context supplied behaves exactly like round 2 was scoped to reject absent-target markers
-   * from an unrecognized signer (see `collectExcisions`'s CASE 2, which then only honors an explicit
-   * `trustedExciseKeys` fingerprint).
+   * See `collectExcisions`'s doc comment (CASE 2) and `SelfWitnessedExcisionRecord`'s own doc
+   * comment: the real content oids THIS verifying replica's OWN `excise()` calls have themselves,
+   * locally, already verified authorization for (never populated from anything received over
+   * `sync()`), each mapped to the geometry this replica itself captured off the real candidate at
+   * that same mint time. Keying by `Map<oid, SelfWitnessedExcisionRecord>` means the geometry used
+   * is always this replica's OWN locally-captured truth, never any marker's payload — lets a
+   * replica's own legitimate self-excision still resolve to a typed `"excised"` placeholder once
+   * the bytes are gone from `facts` (the "target absent" case every `excise()` call's own
+   * subsequent re-fold hits), without trusting a marker's self-declared payload for that same case
+   * when it comes from an unrecognized third party. Defaults to empty — a direct unit-test call to
+   * `proj()` with no such context supplied then only honors an explicit `trustedExciseKeys`
+   * fingerprint for an absent target (see `collectExcisions`'s CASE 2).
    */
   selfWitnessedExcisionOids?: ReadonlyMap<string, SelfWitnessedExcisionRecord>;
 }

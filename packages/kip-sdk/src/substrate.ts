@@ -276,19 +276,20 @@ export class SeqTipStore {
 }
 
 /**
- * ROUND-3 addition (M3 excise-authorization SECOND ISSUE fix): a small JSON side-file, next to the
- * object store, that durably persists the `fingerprint -> SPKI PEM` entries a `KipRepo` learns about
- * a REMOTE peer's real signing key via `sync()` (index.ts's own "TRUST BOOTSTRAP" doc comment on
- * `sync()`). `signing.ts`'s `KeyRegistry` is otherwise an in-memory-only `Map` that a fresh `KipRepo`
- * instance re-opened against an existing `dir` starts from empty (own keypair + genesis `rootKeys`
- * only) — a critic live-reproduced that this silently flips `isAuthorizedExcisionMarker`'s
- * "never-registered-so-permissive" branch from closed to open for a peer fact this replica HAD
- * genuinely verified before the reopen, letting an unrelated attacker's excision marker censor it
- * post-restart. Mirrors `SeqTipStore`'s exact load/save shape (a plain JSON `Record`, no new runtime
+ * A small JSON side-file, next to the object store, that durably persists the
+ * `fingerprint -> SPKI PEM` entries a `KipRepo` learns about a REMOTE peer's real signing key via
+ * `sync()` (index.ts's own "TRUST BOOTSTRAP" doc comment on `sync()`). `signing.ts`'s `KeyRegistry`
+ * is otherwise an in-memory-only `Map` that a fresh `KipRepo` instance re-opened against an existing
+ * `dir` starts from empty (own keypair + genesis `rootKeys` only) — without this store, that would
+ * silently flip `isAuthorizedExcisionMarker`'s "never-registered-so-permissive" branch from closed
+ * to open for a peer fact this replica HAD genuinely verified before the reopen, letting an
+ * unrelated attacker's excision marker censor it post-restart (the restart-censorship attack this
+ * closes). Mirrors `SeqTipStore`'s exact load/save shape (a plain JSON `Record`, no new runtime
  * dependency) so a reopened `KipRepo` pointed at the SAME `dir` re-seeds `keyRegistry` with every
- * peer key it had durably learned, closing the restart gap for THIS specific, documented signal
- * (own keypair / genesis `rootKeys` are already re-supplied by the caller on every construction —
- * see index.ts's constructor doc comment — so only `sync()`-learned remote keys need this store).
+ * peer key it had durably learned (own keypair / genesis `rootKeys` are already re-supplied by the
+ * caller on every construction — see index.ts's constructor doc comment — so only `sync()`-learned
+ * remote keys need this store). See reviews/build-final-report.md for the fuller adversarial-TDD
+ * history.
  */
 export class KeyRegistryStore {
   private readonly filePath: string;

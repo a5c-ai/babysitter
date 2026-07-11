@@ -288,9 +288,9 @@ export type CellSegment<V = PropValue> =
       validFrom: HlcOrTime;
       validTo: HlcOrTime | null;
       excisedFactId: FactId;
-      /** ROUND-3 FIX #4 addition: the `excise()` caller's own validated `reason` string, carried
-       * through from the durable, signed marker payload (proj.ts's `ExcisionMarkerPayload`) — never
-       * present for a marker minted before this round (optional, never fabricated). */
+      /** The `excise()` caller's own validated `reason` string, carried through from the durable,
+       * signed marker payload (proj.ts's `ExcisionMarkerPayload`) — `undefined` only for a marker
+       * minted before this field existed (optional, never fabricated). */
       excisedReason?: string;
     };
 
@@ -727,44 +727,46 @@ export class KipRepo implements Repo {
   private readonly rxFromByOid = new Map<string, HlcStamp>();
 
   /**
-   * ROUND-2 REDESIGN (fix #3): `localExcisionGeometry` (round-1's strictly-local, never-synced
-   * per-replica excision memory) has been REMOVED — a critic proved it lets two replicas holding
-   * the BYTE-IDENTICAL admitted fact set diverge on whether a cell shows `"excised"` or `"unknown"`
-   * (a SEC/INV-1 violation), since only the replica that itself minted the marker had an entry.
-   * The erased fact's cell target + valid-time interval geometry is now embedded directly in the
+   * The erased fact's cell target + valid-time interval geometry is embedded directly in the
    * excision marker fact's own (signed, admitted, synced) payload — see `mintAndIngestExcisionMarker`
    * below and proj.ts's `ExcisionMarkerPayload`/`collectExcisions` doc comments — so ANY replica
    * holding the marker (not only the one that physically erased the bytes) derives the identical
-   * placeholder from `proj()`'s now-pure fold over `facts` alone.
+   * placeholder from `proj()`'s pure fold over `facts` alone. (There is deliberately no per-replica,
+   * never-synced excision-geometry cache here — that shape was tried and proved to let two replicas
+   * holding the byte-identical admitted set diverge on whether a cell shows `"excised"` or
+   * `"unknown"`, a SEC/INV-1 violation; see reviews/build-final-report.md.)
    */
 
   /**
-   * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11): an explicit, opt-in, constructor-configured
-   * allowlist of signer fingerprints this replica trusts to excise ANY fact regardless of self-
-   * authorship — the minimal admin/operator escape hatch named in `isAuthorizedExcisionMarker`'s
-   * doc comment (proj.ts). Empty by default (never a broader capability system) — see the
-   * `trustedExciseKeys` constructor option below.
+   * An explicit, opt-in, constructor-configured allowlist of signer fingerprints this replica
+   * trusts to excise ANY fact regardless of self-authorship (SPEC §4.5 m-11) — the minimal
+   * admin/operator escape hatch named in `isAuthorizedExcisionMarker`'s doc comment (proj.ts).
+   * Empty by default (never a broader capability system) — see the `trustedExciseKeys` constructor
+   * option below.
    */
   private readonly trustedExciseKeyFingerprints: ReadonlySet<string>;
 
   /**
-   * ROUND-3 FIX (M3 excise-authorization root-cause + absent-target soundness, see proj.ts's
-   * `collectExcisions` doc comment): the set of real content OIDS this replica's OWN `excise()`
-   * call has itself, locally, ALREADY verified authorization for — populated ONLY from `excise()`'s
-   * mint-time check (which reads the REAL candidate fact directly off this replica's own admitted
-   * set, never from any marker's self-declared payload, so it cannot be spoofed by an attacker).
+   * The set of real content OIDS this replica's OWN `excise()` call has itself, locally, ALREADY
+   * verified authorization for — populated ONLY from `excise()`'s mint-time check (which reads the
+   * REAL candidate fact directly off this replica's own admitted set, never from any marker's
+   * self-declared payload, so it cannot be spoofed by an attacker). Each entry is a
+   * `SelfWitnessedExcisionRecord` (proj.ts) carrying the REAL geometry
+   * (`cellTarget`/`validFrom`/`validTo`/`excisedFactId`/`excisedReason`) this replica itself read
+   * off the real candidate fact at its own `excise()` mint time — never sourced from a marker's own
+   * (potentially attacker-crafted) payload; see `SelfWitnessedExcisionRecord`'s doc comment for the
+   * forgery this closes.
    *
    * WHY THIS EXISTS: `collectExcisions`'s fold-time authorization for the "target currently absent
    * from `facts`" case (the erasing replica's own subsequent re-fold, once its own `Substrate.erase`
-   * has removed the candidate's bytes, is ALWAYS this case) can no longer trust the marker's
-   * self-declared `origFingerprint` (the round-3 root-cause fix) and has no live candidate fact left
-   * to cross-check a REMOTE marker's claim against (a critic's documented, genuine soundness gap —
-   * see this task's disputes). This set is this replica's own, locally-verified, non-spoofable
-   * exception to that otherwise-unauthorizable case: "I personally already checked this exact
-   * content's real signer before I erased it" is sound local knowledge, never a marker's own claim
-   * about itself. It is NEVER populated from a synced/received fact — only from THIS replica's own
-   * `excise()` call — so a remote replica's marker for a target THIS replica never itself excised
-   * still falls through to the narrower "only an explicit trusted-excise-key" rule.
+   * has removed the candidate's bytes, is ALWAYS this case) cannot trust the marker's self-declared
+   * `origFingerprint`, and has no live candidate fact left to cross-check a REMOTE marker's claim
+   * against. This set is this replica's own, locally-verified, non-spoofable exception to that
+   * otherwise-unauthorizable case: "I personally already checked this exact content's real signer
+   * before I erased it" is sound local knowledge, never a marker's own claim about itself. It is
+   * NEVER populated from a synced/received fact — only from THIS replica's own `excise()` call — so
+   * a remote replica's marker for a target THIS replica never itself excised still falls through to
+   * the narrower "only an explicit trusted-excise-key" rule.
    *
    * SCOPE LIMIT (documented dispute): in-memory only, like `rxFromByOid` above — a reopened `KipRepo`
    * pointed at the same `dir` does not remember which oids IT PERSONALLY once excised, so its own
@@ -772,18 +774,8 @@ export class KipRepo implements Repo {
    * after a restart. No currently-frozen test reopens a repo across its own excise() call, so this
    * is a real but narrower, documented scope boundary rather than a live regression.
    *
-   * ROUND-4 FIX (Problem 2 — audit-record forgery via unbound geometry): now a
-   * `Map<oid, SelfWitnessedExcisionRecord>` rather than a bare `Set<string>` — each entry also
-   * carries the REAL geometry (`cellTarget`/`validFrom`/`validTo`/`excisedFactId`/`excisedReason`)
-   * THIS replica itself read off the real candidate fact at its own `excise()` mint time. A critic
-   * proved live that round 3's bare-`Set` design let `collectExcisions` fall back to trusting
-   * whichever MARKER happened to match a witnessed oid for its GEOMETRY — including an attacker's
-   * own, separately-crafted marker with a matching `ref` (trivial once the oid is known) but a
-   * completely different, attacker-chosen `cellTarget`, forging a fabricated excision record onto
-   * an unrelated cell. Storing the geometry here, and having `collectExcisions` build the
-   * `ExcisionRecord` EXCLUSIVELY from it (never from the matching marker's own payload) closes
-   * this: see proj.ts's `SelfWitnessedExcisionRecord` doc comment and
-   * round4-excision-convergence-fix.test.ts.
+   * See proj.ts's `SelfWitnessedExcisionRecord` doc comment, round4-excision-convergence-fix.test.ts,
+   * and reviews/build-final-report.md for the fuller history.
    */
   private readonly selfWitnessedExcisionOids = new Map<string, SelfWitnessedExcisionRecord>();
 
@@ -832,10 +824,10 @@ export class KipRepo implements Repo {
      */
     cellReducers?: CellReducerAssociations;
     /**
-     * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11): an explicit, opt-in allowlist of signer
-     * fingerprints this replica trusts to excise ANY fact (the minimal admin/operator escape
-     * hatch — see `trustedExciseKeyFingerprints`'s own doc comment and proj.ts's
-     * `isAuthorizedExcisionMarker`). Empty by default; never a broader capability system.
+     * An explicit, opt-in allowlist of signer fingerprints this replica trusts to excise ANY fact
+     * (SPEC §4.5 m-11; the minimal admin/operator escape hatch — see
+     * `trustedExciseKeyFingerprints`'s own doc comment and proj.ts's `isAuthorizedExcisionMarker`).
+     * Empty by default; never a broader capability system.
      */
     trustedExciseKeys?: string[];
   }) {
@@ -894,21 +886,15 @@ export class KipRepo implements Repo {
       // — so a re-opened repo resumes its chain tips durably.
       const persistedSeq = new SeqTipStore(this.substrate.dir).load();
       this.chainSequencer = new ChainSequencer(persistedSeq);
-      // ROUND-3 fix (SECOND ISSUE, see `KeyRegistryStore`'s own doc comment, substrate.ts): re-seed
-      // `keyRegistry` with every peer key THIS replica durably learned via a past `sync()` call, so
-      // a reopened `KipRepo` pointed at the same `dir` doesn't silently forget a genuinely-verified
-      // peer's key (which would flip `isAuthorizedExcisionMarker`'s permissive "never registered"
-      // branch open for that peer's facts). A malformed/corrupt persisted entry is skipped, never
-      // thrown — the same defensive convention `rootKeys` import already uses below.
-      // ROUND-4 FIX (Problem 3): register under the fingerprint RECOMPUTED from the imported public
-      // key material, never the persisted MAP KEY string verbatim — a critic noted the previous
-      // code trusted the on-disk fingerprint label as-is, so a corrupted/tampered
-      // `kip-key-registry.json` entry (fingerprint string edited to a DIFFERENT, attacker-chosen
-      // value while the PEM stays whatever the attacker wants) would register real key material
-      // under a fingerprint that doesn't actually correspond to it — silently mis-registering trust.
-      // Any entry whose stored fingerprint disagrees with the one recomputed from its own PEM is
-      // corrupt and skipped, matching the existing defensive-skip pattern already used below for a
-      // PEM that fails to parse at all.
+      // Re-seed `keyRegistry` with every peer key THIS replica durably learned via a past `sync()`
+      // call (see `KeyRegistryStore`'s own doc comment, substrate.ts), so a reopened `KipRepo`
+      // pointed at the same `dir` doesn't silently forget a genuinely-verified peer's key (which
+      // would flip `isAuthorizedExcisionMarker`'s permissive "never registered" branch open for
+      // that peer's facts). Each entry is registered under the fingerprint RECOMPUTED from its own
+      // imported public key material, never the persisted map-key string verbatim: an entry whose
+      // stored fingerprint disagrees with the one recomputed from its own PEM is corrupt/tampered
+      // (the label doesn't match the key it's stored against) and is skipped entirely, the same
+      // defensive convention used for a PEM that fails to parse at all.
       const persistedKeys = new KeyRegistryStore(this.substrate.dir).load();
       for (const [storedFingerprint, pem] of Object.entries(persistedKeys)) {
         try {
@@ -923,7 +909,7 @@ export class KipRepo implements Repo {
           // A corrupt persisted entry is a storage-layer concern, not an ingest-time one — skip it.
         }
       }
-      // D-28 fix: re-seed `selfWitnessedExcisionOids` from its durable `SelfWitnessedExcisionStore`
+      // D-28: re-seed `selfWitnessedExcisionOids` from its durable `SelfWitnessedExcisionStore`
       // side-file, the SAME way `keyRegistry` is just re-seeded from `KeyRegistryStore` above — so a
       // reopened `KipRepo` pointed at the same `dir` still remembers which oids IT PERSONALLY
       // already verified and excised in a prior process lifetime (see `selfWitnessedExcisionOids`'s
@@ -1211,9 +1197,9 @@ export class KipRepo implements Repo {
    * Threads this repo's constructor-supplied `knownMaxVersion`/`cellReducers` into every `proj()`
    * call (`getNode`/`getEdge`/`query`), so these are reachable from a real `KipRepo` read path
    * rather than only `proj()`-internal defaults/unit-tested-in-isolation seams. `hashAlgo`/
-   * `trustedExciseKeys`/`isRegisteredFingerprint` (ROUND-2 addition) let `proj()`'s excision fold
-   * (fix #1/#2/#3, proj.ts's `collectExcisions`) compute a real content oid per fact and evaluate
-   * excision-marker authorization against THIS replica's own key material.
+   * `trustedExciseKeys`/`isRegisteredFingerprint` let `proj()`'s excision fold (proj.ts's
+   * `collectExcisions`) compute a real content oid per fact and evaluate excision-marker
+   * authorization against THIS replica's own key material.
    */
   private projOptions(): ProjOptions {
     return {
@@ -1478,9 +1464,9 @@ export class KipRepo implements Repo {
 
     const remoteKeyPair = remoteRepo.getOwnKeyPair();
     this.keyRegistry.register(remoteKeyPair.fingerprint, remoteKeyPair.publicKey);
-    // ROUND-3 fix (SECOND ISSUE): durably persist this trust-bootstrap registration too (not just
-    // in-memory), so a later reopen of THIS replica's own `dir` doesn't forget it — see
-    // `KeyRegistryStore`'s doc comment (substrate.ts) for the restart-censorship attack this closes.
+    // Durably persist this trust-bootstrap registration too (not just in-memory), so a later reopen
+    // of THIS replica's own `dir` doesn't forget it — see `KeyRegistryStore`'s doc comment
+    // (substrate.ts) for the restart-censorship attack this avoids.
     {
       const substrate = this.getSubstrate();
       const store = new KeyRegistryStore(substrate.dir);
@@ -1563,12 +1549,12 @@ export class KipRepo implements Repo {
    * that marker fact, satisfying T4.6.1's "authorized excision marker" at the fidelity this round's
    * WBS scope (T4.1-T4.8) actually covers.
    *
-   * ROUND-2 CRITICAL-FINDING FIX #1 (SPEC §4.5 m-11, `ERR_UNAUTHORIZED_EXCISION`): full `ops`-chain
+   * AUTHORIZATION ENFORCEMENT (SPEC §4.5 m-11, `ERR_UNAUTHORIZED_EXCISION`): full `ops`-chain
    * `KeyAuthorization`/grant-fact enforcement is STILL deferred to T9.1 (M8/M9), matching the
-   * roadmap's own dependency ordering — but this round's own critic proved live that shipping
-   * `sync()` with NO check at all here makes an unauthorized excision a REAL, mesh-wide censorship
-   * vector (an attacker replica excising another party's fact and having that marker silently
-   * honored once synced). The MINIMAL safeguard now enforced, both HERE (mint-time — see
+   * roadmap's own dependency ordering — but shipping `sync()` with NO check at all here would make
+   * an unauthorized excision a REAL, mesh-wide censorship vector (an attacker replica excising
+   * another party's fact and having that marker silently honored once synced). The MINIMAL
+   * safeguard enforced instead, both HERE (mint-time — see
    * `isAuthorizedExcisionMarker` below) and in proj.ts's `collectExcisions` (fold-time, so a
    * hand-crafted/foreign marker that bypassed THIS check entirely — e.g. a real adversarial peer
    * that doesn't call this SDK's own `excise()` — is STILL never honored on a receiving replica):
@@ -1588,12 +1574,11 @@ export class KipRepo implements Repo {
       );
     }
 
-    // ROUND-2 finding #2 hardening: `factId` is a caller-DECLARED id, and well-formed.ts's item-4
-    // check is a documented length-only heuristic — two admitted, DIFFERENT-content facts can
-    // legitimately share one. When multiple candidates share `factId`, pick ONE deterministically
-    // via `compareByContent` (the SAME canonical-representative pattern `buildFactsById`/
-    // `maxByOrderKey` already establish in proj.ts), never "whichever happens to be first in this
-    // replica's local ingest-order array".
+    // `factId` is a caller-DECLARED id, and well-formed.ts's item-4 check is a documented
+    // length-only heuristic — two admitted, DIFFERENT-content facts can legitimately share one.
+    // When multiple candidates share `factId`, pick ONE deterministically via `compareByContent`
+    // (the SAME canonical-representative pattern `buildFactsById`/`maxByOrderKey` already establish
+    // in proj.ts), never "whichever happens to be first in this replica's local ingest-order array".
     const candidates = this.currentFactsWithOid().filter(({ fact }) => fact.id === factId);
     if (candidates.length === 0) {
       throw new KipError(
@@ -1630,15 +1615,14 @@ export class KipRepo implements Repo {
       );
     }
 
-    // ROUND-3 FIX, ROUND-4 REDESIGN: record that THIS replica itself, just now, verified
-    // authorization for erasing this exact real content oid against the REAL local candidate
-    // (`orig`) — see `selfWitnessedExcisionOids`'s own doc comment for why this (and ONLY this) is
-    // a sound basis for `collectExcisions` to later honor this replica's OWN marker once the
-    // candidate's bytes are gone (the "target absent" case every excise() call immediately produces
-    // on re-fold). ROUND-4 FIX (Problem 2): also captures the REAL geometry (`orig`'s own target +
-    // valid-time interval) THIS replica just read directly off the real candidate, so
-    // `collectExcisions` never has to fall back to trusting a (possibly attacker-crafted) marker's
-    // self-declared payload for it.
+    // Record that THIS replica itself, just now, verified authorization for erasing this exact real
+    // content oid against the REAL local candidate (`orig`) — see `selfWitnessedExcisionOids`'s own
+    // doc comment for why this (and ONLY this) is a sound basis for `collectExcisions` to later
+    // honor this replica's OWN marker once the candidate's bytes are gone (the "target absent" case
+    // every excise() call immediately produces on re-fold). Also captures the REAL geometry
+    // (`orig`'s own target + valid-time interval) THIS replica just read directly off the real
+    // candidate, so `collectExcisions` never has to fall back to trusting a (possibly
+    // attacker-crafted) marker's self-declared payload for it.
     const selfWitnessedRecord: SelfWitnessedExcisionRecord = {
       cellTarget: origTarget,
       validFrom: origValidFrom,
@@ -1698,14 +1682,14 @@ export class KipRepo implements Repo {
    * `sync()` propagates it like any other admitted fact) — `target:{kind:"control",op:"excision"}`
    * (index.ts's own `Target`/`FactType` shapes already recognize this combination).
    *
-   * ROUND-2 REDESIGN (fixes #2/#3/#4): `value` is no longer the bare excised `FactId` (a
-   * content-derived CID for self-minted facts, C-4.3's exact anti-fingerprint concern) — it is now
-   * a JSON-encoded, signed payload: `ref`/`nonce` (an HMAC-SHA256 reference to the erased fact's
-   * REAL content oid, never the oid itself — proj.ts's `computeExcisionRef`), `origFingerprint`
-   * (fix #1's authorization input), `cellTarget`/`validFrom`/`validTo` (fix #3's geometry, so ANY
-   * replica — not only this one — can reconstruct the `"excised"` placeholder), and `excisedFactId`
-   * (a residual, DOCUMENTED DISPUTE — see proj.ts's `ExcisionMarkerPayload` doc comment for why this
-   * one field is still embedded verbatim). `proj.ts`'s `collectExcisions` is this fact's SOLE reader.
+   * `value` is never the bare excised `FactId` (a content-derived CID for self-minted facts would be
+   * exactly the stable-fingerprint-of-erased-content C-4.3 forbids) — it is a JSON-encoded, signed
+   * payload: `ref`/`nonce` (an HMAC-SHA256 reference to the erased fact's REAL content oid, never the
+   * oid itself — proj.ts's `computeExcisionRef`), `origFingerprint` (an authorization input),
+   * `cellTarget`/`validFrom`/`validTo` (geometry, so ANY replica — not only this one — can
+   * reconstruct the `"excised"` placeholder), and `excisedFactId` (a DOCUMENTED, DELIBERATE
+   * EXCEPTION — see proj.ts's `ExcisionMarkerPayload` doc comment for why this one field is still
+   * embedded verbatim). `proj.ts`'s `collectExcisions` is this fact's SOLE reader.
    */
   private async mintAndIngestExcisionMarker(params: {
     cellTarget: Target;
@@ -1715,9 +1699,8 @@ export class KipRepo implements Repo {
     oid: string;
     nonce: string;
     excisedFactId: FactId;
-    /** ROUND-3 FIX #4: `excise()`'s own already-validated `reason` string, now genuinely persisted
-     * into the signed marker payload (previously validated at the call boundary but never actually
-     * stored anywhere, undercutting the "durable audit record" claim). */
+    /** `excise()`'s own already-validated `reason` string, genuinely persisted into the signed
+     * marker payload so it survives as part of the durable audit record. */
     excisedReason: string;
   }): Promise<Fact> {
     const { cellTarget, validFrom, validTo, origFingerprint, oid, nonce, excisedFactId, excisedReason } = params;
