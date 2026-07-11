@@ -5,16 +5,22 @@
 > redundancy. Every entry below was opened at its cited file:line and confirmed both that the quoted
 > text exists and that it actually constitutes the claimed debt.
 
-This register catalogs **documentation** debt only (not implementation debt). It is verified against the
-docs under `packages/kip-sdk/docs/` and, for faithfulness, against `packages/kip-sdk/SPEC.md` (the source
-of truth). **It both catalogs each debt AND tracks its resolution:** every entry records the evidence, a
-suggested fix, and a `Status` line stating whether (and how) the fix was applied — the register is the
-resolution record, not merely a backlog.
+This register catalogs **documentation** debt (rounds 1-3, D-01–D-26) — contradictions, definitional gaps,
+faithfulness drift from `SPEC.md`, architectural-view gaps, completeness gaps, and redundancy in the docs
+under `packages/kip-sdk/docs/`. **Round 4** (D-27–D-31, added after the M0-M3 implementation build — see
+`reviews/build-final-report.md`) extends the register to **implementation** debt: real, honest gaps between
+the shipped `packages/kip-sdk/src/*.ts` and the spec/ADR target state, surfaced during Phase D's TDD rounds
+and accepted as non-blocking. **It both catalogs each debt AND tracks its resolution:** every entry records
+the evidence, a suggested fix, and a `Status` line stating whether (and how) the fix was applied — the
+register is the resolution record, not merely a backlog.
 
 ## Summary
 
-> Counts below are the register-wide rollup across both audit rounds (round 1: D-01–D-21; round 2: D-22–D-26).
-> See the per-round breakdown in "Audit round 2 — new docs (27, 28) + integrity".
+> Counts below are the register-wide rollup across the three **documentation** audit rounds (round 1:
+> D-01–D-21; round 2: D-22–D-26; round 3: anchor/link-checking hardening folded into D-13/D-14/D-19, no new
+> ids). See the per-round breakdown in "Audit round 2 — new docs (27, 28) + integrity". **Round 4**
+> (D-27–D-31, implementation debt, all currently Open) is tracked separately in its own section below and is
+> not included in this docs-only rollup.
 
 | Severity | Count | Resolved | Partially resolved | Open |
 |---|---|---|---|---|
@@ -469,3 +475,70 @@ package symbols (no invented APIs).
 | `ingest()` vs §3.2 procedure disambiguation | Fixed (one narrow SPEC.md §3.2 note) |
 | Glossary/terminology sweep (`(wall,counter)` → `seq`, new entries) | Fixed |
 | Convergence core (§3.2/§3.4/§4b.4) | Untouched beyond the one scoped disambiguation line |
+
+---
+
+## Audit round 4 — implementation-era debt surfaced during Phase D (M0-M3 TDD build)
+
+> This register was originally scoped to **documentation** debt only (see header). Phase D's TDD build of
+> M0-M3 (see `reviews/build-final-report.md`) surfaced genuine **implementation** debt — real, honest gaps
+> between the shipped `packages/kip-sdk/src/*.ts` and the spec/ADR target state, each accepted rather than
+> blocking because it does not compromise a safety guarantee. Logged here (not duplicated from rounds 1-3,
+> which cover docs only) so it is tracked alongside its documentation-debt siblings rather than only living
+> in code comments. Each entry names the milestone/round that surfaced it and was verified against the
+actual current source before being recorded.
+
+### D-27: INV-12 byte-identical regenerated-commit-DAG regeneration is unverified — the substrate git commit/tree/ref layer is a pre-M3 stub
+
+- **Category:** Implementation / substrate
+- **Severity:** Major
+- **Surfaced:** M3, all 4 formal rounds (carried as an `it.skip` untestable item in every round's acceptance) and confirmed unresolved by the round-5 out-of-band closing pass, which fixed the excision-authorization findings but did not touch this residual.
+- **Location:** `packages/kip-sdk/src/substrate.ts` (loose-object writes per ADR-B1's M0 implementation note); `packages/kip-sdk/src/__tests__/conformance/inv-12*.test.ts` (`it.skip`).
+- **Evidence:** ADR-B1 records that `substrate.ts` currently hand-rolls loose-object writes (`zlib.deflateSync` + `node:crypto` hashing) INSTEAD OF isomorphic-git, because installing the dependency was blocked by ADR-B6's zero-new-runtime-dependency policy for M0-M3. INV-12 (byte-identical regenerated commit-DAG + cross-OS/TZ byte recipe) has no public `Repo` seam to inspect raw regenerated commit-DAG objects/bytes (`fsck`/`branch` return only summaries), and no CI cross-OS matrix job exists to check it even if the seam existed.
+- **Why it is debt:** ADR-006 makes byte-identical regeneration of `/heads`'s commit DAG a core convergence claim (concurrent excision is confluent "by construction," INV-12). The current substrate layer that would need to produce that byte-identical DAG is a hand-rolled stub predating M3, never verified against the isomorphic-git target ADR-B1 actually commits to. M3's own acceptance explicitly carries this forward as out-of-scope rather than closing it.
+- **Suggested fix:** Once ADR-B6's Linux/CI-consistent `npm install` procedure is exercised to bring in isomorphic-git (ADR-B1's stated follow-up), add a `PackAdmin`-adjacent inspection seam and a real cross-OS/TZ conformance test for INV-12, replacing the current `it.skip`.
+- **Status:** Open — not a regression, an honestly-carried-forward pre-M3 scope boundary; flagged here so it is tracked as implementation debt, not lost in ADR-B1's prose.
+
+### D-28: `selfWitnessedExcisionOids` is in-memory-only — non-durable across process restart, degrading excision audit fidelity
+
+- **Category:** Implementation / durability
+- **Severity:** Minor
+- **Surfaced:** M3 round 5 (the out-of-band closing round), while verifying `collectExcisions`'s CASE-2(ii) self-witnessed-excision path.
+- **Location:** `packages/kip-sdk/src/index.ts:779` — `private readonly selfWitnessedExcisionOids = new Map<string, SelfWitnessedExcisionRecord>();`
+- **Evidence:** Unlike `keyRegistry`, which is re-seeded from a durable `KeyRegistryStore` (`kip-key-registry.json`) on construction (`index.ts` ~L877-L901), `selfWitnessedExcisionOids` has no persisted-store counterpart — it is populated only by this replica's own live `excise()` calls during the current process lifetime and is empty again on restart.
+- **Why it is debt:** `collectExcisions`'s CASE 2 (target currently absent) honors an excision marker via `selfWitnessedExcisionOids` as one of only two sound bases (the other being an explicit, registered `trustedExciseKeys` entry). After a process restart, a replica that legitimately self-excised content in a prior process run loses that local record, so a re-fold of `proj()` over the same admitted fact set can no longer resolve that cell via CASE-2(ii) — it falls through to `"unknown"` instead of `"excised"` unless a `trustedExciseKeys`-authorized marker also exists. This is SAFE (never a wrong *trusted* value — it degrades to `unknown`, not to un-excising the content) but is an availability/audit-fidelity regression across restarts that the durable `keyRegistry` precedent in the same file does not have.
+- **Suggested fix:** Add a `SelfWitnessedExcisionStore` (mirroring `KeyRegistryStore`'s pattern) that durably persists `(oid → SelfWitnessedExcisionRecord)` and re-seeds `selfWitnessedExcisionOids` at construction, the same way `keyRegistry` is re-seeded.
+- **Status:** Open — accepted for M0-M3 scope (single-process-lifetime test conformance never exercises a restart), flagged for the same durability treatment `keyRegistry` already received.
+
+### D-29: The static `KipRepo.registry` same-process replica map never deregisters entries — unbounded memory growth in long-lived processes
+
+- **Category:** Implementation / resource management
+- **Severity:** Minor
+- **Surfaced:** M3/T4.2 (the same-process replica registry added to stand in for real git-remote/network transport in `sync()`), confirmed still present (no `.delete`/`.clear` call anywhere in `index.ts`) during this report's Phase E verification pass.
+- **Location:** `packages/kip-sdk/src/index.ts:788` — `private static readonly registry = new Map<ReplicaId, KipRepo>();`; every `new KipRepo(...)` self-registers at `index.ts:862` (`KipRepo.registry.set(this.replicaId, this)`) with no corresponding removal path.
+- **Evidence:** A grep of `index.ts` for `registry.delete`/`registry.clear` returns zero matches. `sync()` (`index.ts:1438`) reads `KipRepo.registry.get(remote)` to resolve a same-process stand-in for a real remote peer, but nothing ever removes an entry once a `KipRepo` instance is no longer referenced elsewhere.
+- **Why it is debt:** In test conformance (short-lived processes, small instance counts) this is invisible. In a long-lived host process that repeatedly constructs `KipRepo` instances (e.g., per-session or per-tenant instantiation), every instance is held forever by the static map, which is a real memory leak — the `KipRepo` object graph (including its `Substrate`/`keyRegistry`/`selfWitnessedExcisionOids`) is never eligible for GC even after the caller drops its own reference.
+- **Suggested fix:** Add an explicit `close()`/`dispose()` method that removes `this.replicaId` from `KipRepo.registry` (and document that failing to call it leaks), or switch to a `WeakMap`-friendly registration keyed differently since `replicaId` (a string) can't itself be a `WeakMap` key without an intermediate object.
+- **Status:** Open — explicitly scoped as a same-process transport stand-in for M0-M3 (see `index.ts`'s own "real network/git-remote transport is out of scope" note); this entry tracks the resource-lifetime cost of that stand-in for anyone embedding kip-sdk in a long-lived process before M8/real-transport work replaces it.
+
+### D-30: `SyncReport.tip` (and `MergeReport.tip`) is typed `CID` but populated with a fact-set digest, not a real commit CID
+
+- **Category:** Implementation / API-faithfulness
+- **Severity:** Minor
+- **Surfaced:** M3 (the `sync()` implementation), confirmed during this report's Phase E verification pass.
+- **Location:** `packages/kip-sdk/src/index.ts:439` (`SyncReport.tip: CID`), `index.ts:432` (`MergeReport.tip: CID`), populated at `index.ts:1480` — `tip: this.computeFactSetDigest(this.currentFacts())`.
+- **Evidence:** `CID` (per the type catalog) denotes a git object id (a content hash of an actual git object — blob/tree/commit). `computeFactSetDigest` returns a digest of the *fact set*, not the id of any real git commit object, since `/heads` is a lazily-regenerated projection (ADR-006) and the current substrate layer is the hand-rolled loose-object stub named in D-27/ADR-B1 — there is no regenerated commit object yet whose id `tip` could faithfully report.
+- **Why it is debt:** A caller reading `SyncReport.tip: CID` and expecting a git-resolvable commit id (e.g., to `git show`/`git log` against the real repo) gets a value that is not one — it happens to be stable and comparable across calls (useful as an opaque convergence marker) but is not what the type signature promises. This is the same underlying gap as D-27 (no real regenerated commit DAG yet) surfacing at the public API-typing level.
+- **Suggested fix:** Either rename the field's documented semantics (e.g. `tip: FactSetDigest` with its own branded type, not `CID`) until ADR-B1's isomorphic-git follow-up produces real regenerated commit objects, or wire `tip` to a genuine regenerated-commit CID once D-27 is closed.
+- **Status:** Open — a naming/typing-faithfulness gap, not a correctness bug (the value is still a valid, stable convergence witness); tracked so the `CID` mislabeling isn't mistaken for a resolvable git object id by a future caller.
+
+### D-31: Round-by-round narrative comments accumulated in `proj.ts`/`index.ts`/`substrate.ts`'s excision code warrant a maintainability cleanup pass
+
+- **Category:** Implementation / maintainability
+- **Severity:** Minor
+- **Surfaced:** M3, cumulative across rounds 2-5 (each round's fix left its own "ROUND-N FIX" doc comment in place rather than replacing the prior round's narrative).
+- **Location:** `packages/kip-sdk/src/proj.ts` (`isAuthorizedExcisionMarker`, `collectExcisions`, `pickConvergentSelfWitnessedReason` — see the "ROUND-2 CRITICAL-FINDING FIX", "ROUND-3 ROOT-CAUSE FIX", "ROUND-4 FIX", "ROUND-5 FIX" comment blocks stacked around `proj.ts:449-758`); `index.ts` (`selfWitnessedExcisionOids`, `keyRegistry` re-seeding comments referencing the same round history); `substrate.ts` (`KeyRegistryStore` doc comment referencing "the restart-censorship attack this closes").
+- **Evidence:** `proj.ts`'s excision-authorization functions carry four stacked rounds of "PRE-FIX (round-N) would have..." / "ROUND-N FIX:" prose directly in the code, each explaining what the prior round got wrong and why the current round's approach is sound — genuinely valuable *history*, but now a multi-hundred-line block a new reader must read in full to understand the current, final behavior of a ~30-line function.
+- **Why it is debt:** This is deliberate, honest, and load-bearing during the adversarial-TDD build itself (each comment is real, live-reproduced attacker reasoning, not filler) — but it is process-history-shaped documentation embedded permanently in production source, not a stable maintainability artifact. A future maintainer changing `collectExcisions` has to first read a five-round security narrative before finding the current invariant.
+- **Suggested fix:** Once M3 is fully stable (no further excision-authorization rounds expected), extract the round-by-round narrative into `reviews/build-convergence.md`/`reviews/build-final-report.md` (where this kind of history belongs) and replace the in-code comments with a concise, current-state-only invariant description plus a single pointer to the historical record for "why," mirroring how ADR-B5's own M0 implementation note handles a similar deferred-cleanup case.
+- **Status:** Open — explicitly a cleanup-only item (no behavior change); recorded so it isn't lost once M3's adversarial rounds stop actively referencing it.
