@@ -52,7 +52,7 @@
     {
       "agent": "Cursor",
       "source": "cursor.com/changelog",
-      "previous": "2026-05-29-changelog / 3.6",
+      "previous": "2026-06-30-changelog",
       "latest": "2026-07-10-changelog / 3.11",
       "status": "new-version"
     },
@@ -138,7 +138,7 @@
     {
       "agent": "Cursor",
       "source": "cursor.com/changelog",
-      "previous": "2026-05-29-changelog / 3.6",
+      "previous": "2026-06-30-changelog",
       "latest": "2026-07-10-changelog / 3.11",
       "issue": "https://github.com/a5c-ai/babysitter/issues/1316"
     },
@@ -164,7 +164,8 @@
       "issue": "https://github.com/a5c-ai/babysitter/issues/1315"
     }
   ],
-  "issuesCreated": [
+  "issuesCreated": [],
+  "issuesExisting": [
     {
       "url": "https://github.com/a5c-ai/babysitter/issues/1310",
       "version": "0.0.1783757231-g462a93",
@@ -201,7 +202,6 @@
       "agent": "Qwen Code"
     }
   ],
-  "issuesExisting": [],
   "changedFiles": [
     "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-07-11.yaml",
     "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-07-11.yaml"
