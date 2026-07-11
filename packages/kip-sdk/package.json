@@ -25,7 +25,9 @@
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "test": "vitest run"
   },
-  "dependencies": {},
+  "dependencies": {
+    "isomorphic-git": "^1.38.6"
+  },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "rimraf": "^6.1.3",

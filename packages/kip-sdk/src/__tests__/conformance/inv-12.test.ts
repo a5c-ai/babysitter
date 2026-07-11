@@ -13,39 +13,52 @@
  * `core.autocrlf` are perturbed in-process, per test ... true cross-OS coverage is a named CI
  * matrix job ... both fidelities are required to claim INV-12 passes."
  *
- * SPLIT SCOPE — this file covers the PIN/AS-OF CONVERGENCE half in full and marks the
- * COMMIT-DAG-BYTE-IDENTITY half `it.skip` as untestable-as-written (also reported in this task's
- * `untestable` output), for a concrete, non-negotiable reason: kip's OWN design (docs/24 §4.5,
- * "identity/as-of/pins address the FACT SET, never commit CIDs") deliberately keeps the regenerated
- * git commit DAG a TRANSPORT detail, never an addressable/inspectable part of the `Kip`/`Repo`
- * public surface (index.ts) — there is no `log()`, no commit-export seam, no raw-object accessor;
- * `fsck()` returns only a summary `FsckReport` of booleans and `FactId`/`EID` arrays (no commit
- * bytes), and `branch()` returns only a branch-name string. Asserting "byte-identical regenerated
- * commit objects" would require either (a) reaching into the on-disk substrate's internal object
- * layout/encoding directly — which this task's own instructions forbid reading source for
- * (substrate.ts is out of the index.ts-plus-__tests__ read scope) and which would encode
- * assumptions about internals that are explicitly NOT part of the documented public contract, or
- * (b) inventing a NEW public introspection API the spec does not currently expose on `Repo` —
- * which the task instructions say never to do (never reinterpret/weaken a criterion by
- * substituting an easier, unspec'd surface). The pin/as-of convergence half below, by contrast, is
- * fully testable through the EXISTING public surface (`pin`/`resolvePin`/`asOf`/`sync`/`excise`)
- * and is exactly the half of INV-12 that matters to a caller who — per the spec's own C2-3
- * design — never addresses anything by commit CID in the first place.
+ * SPLIT SCOPE — this file covers BOTH halves of INV-12:
  *
- * Test methodology: `sync()` is the still-unimplemented M3/T4.2 primitive that would ACTUALLY
- * propagate replica A's and replica B's concurrent excisions to each other; this file calls it
- * directly (rather than substituting a same-process ingest-replay shortcut, which would silently
- * skip exercising the real cross-replica propagation seam INV-12 is actually about) so its
- * `unimplemented` throw is what makes this file fail honestly, per this task's TDD framing. The
- * shared PRE-excision baseline fact set is established via direct `ingest()` on both replicas
- * (the established M0/M1 fixture convention — see inv-1.test.ts's own doc comment for why
- * `assertFact` cannot be used to hand two independent replicas byte-identical facts), modelling
- * "two replicas that have already synced once" without assuming `sync()` itself works yet.
+ *   (1) the PIN/AS-OF CONVERGENCE half, below, exercised through the EXISTING public surface
+ *       (`pin`/`resolvePin`/`asOf`/`sync`/`excise`) — the half of INV-12 that matters to a caller
+ *       who, per the spec's own C2-3 design, never addresses anything by commit CID in the first
+ *       place. `sync`/`excise`/`pin`/`resolvePin`/`asOf` are now genuinely implemented (not stubs),
+ *       and this half PASSES.
  *
- * `sync()`/`excise()` currently throw `unimplemented: sync` / `unimplemented: excise` (M3/T4.2,
- * M3/T4.6 not yet implemented) — these tests are EXPECTED TO FAIL right now; failures should
- * surface as the thrown `unimplemented` error propagating through the `await`, not as import/type
- * errors.
+ *   (2) the COMMIT-DAG-BYTE-IDENTITY half, exercised via `KipRepo.regenerateHeads()` — a MINIMAL
+ *       TEST-SUPPORT stub added to index.ts (see `RegeneratedCommit`'s doc comment there) precisely
+ *       because, before this addition, kip's OWN design (docs/24 §4.5, "identity/as-of/pins address
+ *       the FACT SET, never commit CIDs") deliberately kept the regenerated git commit DAG a
+ *       TRANSPORT detail with NO public introspection seam at all — no `log()`, no commit-export
+ *       seam, no raw-object accessor; `fsck()` returns only a summary `FsckReport`, `branch()` only
+ *       a branch-name string. `regenerateHeads()` is a genuinely NEW addition, clearly flagged as
+ *       test-support (never presented as part of the documented docs/40 `Repo` contract, never
+ *       inventing a fake-passing behavior) — its body still just `throw`s
+ *       `unimplemented: regenerateHeads`; no commit/tree/ref regeneration code exists yet
+ *       (isomorphic-git was only just installed). This half is EXPECTED TO FAIL right now via that
+ *       thrown error propagating through the `await`, per this task's TDD framing.
+ *
+ *       NOT covered by this file — explicitly out of scope, not "untestable": the spec's second
+ *       named fidelity, a real CROSS-OS CI matrix job (`windows-latest` + `ubuntu-latest`)
+ *       regenerating the fixture set and asserting commit bytes against a committed golden digest
+ *       (m7-26). That is a later phase's job, per this task's own framing, and cannot be provided
+ *       by an in-process vitest file regardless of what public surface exists.
+ *
+ * Test methodology (pin/as-of half): `sync()` is the M3/T4.2 primitive that ACTUALLY propagates
+ * replica A's and replica B's concurrent excisions to each other; this file calls it directly
+ * (rather than substituting a same-process ingest-replay shortcut, which would silently skip
+ * exercising the real cross-replica propagation seam INV-12 is actually about). The shared
+ * PRE-excision baseline fact set is established via direct `ingest()` on both replicas (the
+ * established M0/M1 fixture convention — see inv-1.test.ts's own doc comment for why `assertFact`
+ * cannot be used to hand two independent replicas byte-identical facts), modelling "two replicas
+ * that have already synced once" without assuming `sync()` itself works yet.
+ *
+ * Test methodology (byte-DAG half): a SINGLE replica ingests two facts and excises one of them,
+ * then calls `regenerateHeads()` TWICE around the SAME logical regeneration of the SAME resulting
+ * admitted set — once with `TZ`/`core.autocrlf`/locale perturbed to a `+0200`-shaped configuration,
+ * once perturbed to a `+0000`-shaped configuration with different `core.autocrlf`/locale (the M4-3
+ * cross-OS/cross-TZ byte recipe's in-process fidelity, m7-26) — asserting the two regenerated
+ * commit-object byte outputs are IDENTICAL, and that the recipe's individual clauses hold (fixed
+ * `+0000` offset, integer-seconds `floor(wall/1000)` timestamp, fixed sentinel committer, unsigned,
+ * LF-only). `regenerateHeads()` throws `unimplemented: regenerateHeads` on its very first call, so
+ * this test is EXPECTED TO FAIL right now via that throw propagating through the `await` — not as
+ * an import/type error.
  */
 import { describe, expect, it } from "vitest";
 import type { Fact } from "../../index";
@@ -136,10 +149,89 @@ describe("INV-12: concurrent-excision pin / as-of convergence + byte-identical r
     );
   });
 
-  it.skip(
-    "UNTESTABLE AS WRITTEN: 'the regenerated commit DAG is byte-identical given the equal remaining ordered set' and the cross-OS/cross-TZ commit-object byte recipe (fixed +0000 offset, LF-only message, no `encoding` header, no `gpgsig`, single sentinel author=committer) cannot be asserted through the current public Kip/Repo surface (index.ts). No method exposes the regenerated commit DAG's raw objects/bytes for inspection: `fsck()` returns only a summary FsckReport (booleans + FactId/EID arrays), `branch()` returns only a branch-name string, and there is no `log()`/commit-export/raw-object seam. Reaching the actual git commit objects would require reading substrate.ts internals (explicitly out of this task's read scope: only index.ts + __tests__ may be read) and would encode undocumented assumptions about on-disk layout rather than the documented public contract — and inventing a NEW introspection API not named anywhere in the read SPEC/docs slice would be reinterpreting/weakening the criterion, which this task's instructions forbid. This half of INV-12 needs either (a) a dedicated public commit-DAG-inspection seam to be added to the SDK surface first, or (b) the named CI matrix job (windows-latest + ubuntu-latest asserting commit bytes against a committed golden digest, m7-26) the spec itself says is required ALONGSIDE the in-process perturbation test — neither of which exists yet. See this task's `untestable` report.",
-    () => {
-      // Intentionally skipped, not faked. See the file-level and it-level comments above.
-    },
-  );
+  it("the regenerated commit DAG is BYTE-IDENTICAL across a +0200/autocrlf-true/locale-de-DE in-process perturbation and a +0000/autocrlf-false/locale-en-US in-process perturbation of the SAME logical regeneration of the SAME post-excision admitted set (INV-12 M3-3/M4-3 byte-recipe, m7-26 in-process execution mechanism) — via KipRepo.regenerateHeads(), a minimal test-support stub added to index.ts for exactly this purpose (see RegeneratedCommit's doc comment there); regenerateHeads() currently throws unimplemented: regenerateHeads (no commit/tree/ref regeneration code exists yet), so this test is EXPECTED TO FAIL right now via that throw propagating through the await", async () => {
+    const eid = "person/inv12-bytedag";
+
+    // Two facts on the SAME (replicaId,key) chain (distinct contiguous seq, same pattern as the
+    // convergence test above): one left standing, one excised — "the equal remaining ordered set"
+    // INV-12's byte-DAG clause is about is this replica's post-excision admitted set.
+    const existence = makeWellFormedFact({
+      target: { kind: "node", eid, nodeKind: "person" },
+      id: "inv12-bytedag-existence",
+      replicaId: "author-inv12-bytedag",
+      seq: 0,
+    });
+    existence.value = true;
+    existence.validFrom = 0;
+    existence.validTo = null;
+
+    const toExcise = makeWellFormedFact({
+      target: { kind: "node-prop", eid, prop: "erasedField" },
+      id: "inv12-bytedag-excised",
+      replicaId: "author-inv12-bytedag",
+      seq: 1,
+    });
+    toExcise.value = "erase-me";
+    toExcise.validFrom = 0;
+    toExcise.validTo = null;
+
+    const repo = new KipRepo({ replicaId: "storage-bytedag" });
+    await repo.ingest(cloneFact(existence));
+    await repo.ingest(cloneFact(toExcise));
+    await repo.excise(toExcise.id, "gdpr-erasure");
+
+    // Perturb the AMBIENT environment (process TZ) around the two regeneration calls — the
+    // m7-26 in-process execution mechanism — restoring it afterward regardless of outcome.
+    const originalTz = process.env.TZ;
+    try {
+      process.env.TZ = "Etc/GMT-2"; // POSIX sign-inverted: Etc/GMT-2 == UTC+02:00 ("+0200"-local)
+      const runPlus0200 = await repo.regenerateHeads({
+        tz: "Etc/GMT-2",
+        coreAutocrlf: true,
+        locale: "de-DE",
+      });
+
+      process.env.TZ = "Etc/UTC"; // "+0000"-local
+      const runPlus0000 = await repo.regenerateHeads({
+        tz: "Etc/UTC",
+        coreAutocrlf: false,
+        locale: "en-US",
+      });
+
+      // INV-12 M4-3 core clause: "runs the regenerator on a +0200-local replica and a +0000
+      // replica with mismatched core.autocrlf and locale, asserting byte-identical commit
+      // objects" — the actual raw bytes and their own content-derived oid must match exactly.
+      expect(runPlus0000.commitBytes).toEqual(runPlus0200.commitBytes);
+      expect(runPlus0000.commitOid).toBe(runPlus0200.commitOid);
+
+      // INV-12 M4-3: "must be fixed +0000, integer-seconds floor(wall/1000)" — never the
+      // process's local TZ (both runs must show +0000 despite the +0200 perturbation above),
+      // never a millisecond value, never a stamped "now".
+      const expectedTimestampSeconds = Math.floor(toExcise.hlc.wall / 1000);
+      expect(runPlus0200.committer.tzOffset).toBe("+0000");
+      expect(runPlus0000.committer.tzOffset).toBe("+0000");
+      expect(runPlus0200.committer.timestampSeconds).toBe(expectedTimestampSeconds);
+      expect(runPlus0000.committer.timestampSeconds).toBe(expectedTimestampSeconds);
+
+      // INV-12 M3-3: "fixed sentinel committer" — never the real fact author's own identity.
+      expect(runPlus0200.committer.name).not.toBe(toExcise.provenance.author);
+      expect(runPlus0200.committer.email).not.toContain(toExcise.provenance.publicKeyFingerprint);
+      expect(runPlus0200.committer).toEqual(runPlus0000.committer);
+
+      // INV-12 M3-3/M4-3: "unsigned DAG" / "gpgsig (absent)" — no signature header at all.
+      expect(runPlus0200.signed).toBe(false);
+      expect(runPlus0000.signed).toBe(false);
+
+      // INV-12 M4-3: "encoding header (absent / UTF-8)" — never a leak of process locale.
+      expect(runPlus0200.encoding === undefined || runPlus0200.encoding === "UTF-8").toBe(true);
+      expect(runPlus0000.encoding === undefined || runPlus0000.encoding === "UTF-8").toBe(true);
+
+      // INV-12 M4-3: "commit-message line endings (LF-only)" — never CRLF, regardless of the
+      // core.autocrlf perturbation above (true in one run, false in the other).
+      expect(runPlus0200.message.includes("\r")).toBe(false);
+      expect(runPlus0000.message.includes("\r")).toBe(false);
+    } finally {
+      process.env.TZ = originalTz;
+    }
+  });
 });

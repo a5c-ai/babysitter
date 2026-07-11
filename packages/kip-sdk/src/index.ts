@@ -485,6 +485,35 @@ export interface FsckReport {
 }
 
 /**
+ * TEST-SUPPORT ADDITION (INV-12 byte-DAG half, docs/60-conformance-and-testability.md#inv-12,
+ * M3-3/M4-3/m7-26) — NOT part of the documented docs/40-sdk-api-surface.md `Repo` contract
+ * (`Repo`'s own members above are transcribed verbatim from that doc). The regenerated git
+ * commit DAG is deliberately kept a TRANSPORT detail, never an addressable identity (docs/24 §4.5,
+ * the `FactSetDigest` doc comment above, D-27/ADR-B1) — callers never see this shape. It exists
+ * solely so a conformance test can inspect the regenerator's byte-level output without reaching
+ * into on-disk substrate internals (which this task's scope forbids reading/depending on).
+ *
+ * Every field here is exactly what INV-12's M4-3 byte-recipe names: a raw regenerated commit
+ * object's decomposed identity/author/committer/message/header fields, PLUS the actual bytes and
+ * their own content-derived oid, so a test can assert byte-for-byte equality directly (never via
+ * a derived/hashed proxy that could itself hide a divergence).
+ */
+export interface RegeneratedCommit {
+  /** The regenerated commit object's own content-derived id (a git-blob-style hash of `commitBytes`). */
+  commitOid: CID;
+  /** The RAW regenerated commit object bytes (header + body) — the actual byte-identity surface INV-12/M4-3 is about. */
+  commitBytes: Uint8Array;
+  author: { name: string; email: string; timestampSeconds: number; tzOffset: string };
+  /** MUST be a FIXED SENTINEL identity (M3-3) — never the real fact author's `provenance.author`/key fingerprint. */
+  committer: { name: string; email: string; timestampSeconds: number; tzOffset: string };
+  message: string;
+  /** Commit `encoding` header. Per INV-12/M4-3: absent, or exactly `"UTF-8"` — never a locale leak. */
+  encoding?: "UTF-8";
+  /** Whether a `gpgsig` header is present. Per INV-12/M3-3/M4-3 the regenerated DAG is UNSIGNED: MUST be `false`. */
+  signed: boolean;
+}
+
+/**
  * TODO(M3/T3.5): `SnapshotRef` is normatively defined in docs/25-context-enablement-seams.md (out
  * of scope for this scaffold's reading list). Placeholder shape per ADR-006 / docs/40 comments:
  * content-addresses the chain-seq + author-HLC frontier + `factSetDigest`, deliberately carrying
@@ -1500,6 +1529,29 @@ export class KipRepo implements Repo {
   // TODO(M3/T4.3): explicit merge — /heads regenerated, never text-merged (ADR-006).
   async merge(_from: BranchRef, _opts?: MergeOptions): Promise<MergeReport> {
     throw new Error("unimplemented: merge");
+  }
+
+  /**
+   * TEST-SUPPORT STUB (INV-12 byte-DAG half — see `RegeneratedCommit`'s doc comment above): would
+   * regenerate the commit DAG for THIS replica's CURRENT admitted fact set — deterministic
+   * `orderKey`-based commit boundaries (docs/24 §4.5), a commit timestamp of
+   * `floor(maxAuthorHlcWall / 1000)` (the batch's max author-HLC `wall`, integer seconds, a FIXED
+   * `+0000` offset — never the process's local TZ), a FIXED SENTINEL committer identity (never the
+   * real fact author's own identity, M3-3), UNSIGNED (no `gpgsig` header), LF-only line endings in
+   * any text it touches, and no `encoding` header (absent or UTF-8) — per INV-12's M3-3/M4-3 byte
+   * recipe (docs/60-conformance-and-testability.md#inv-12).
+   *
+   * `opts` lets a caller perturb the AMBIENT environment the regenerator would read from
+   * (`process.env.TZ`, the repo's own `core.autocrlf` config, process locale) — the in-process
+   * "m7-26 execution mechanism" fidelity — so a test can prove every regenerated field is
+   * set-derived rather than leaked from any of these, by regenerating twice under mismatched
+   * perturbations and asserting byte-identical `commitBytes` both times.
+   *
+   * UNIMPLEMENTED (M3/T4.x — isomorphic-git was only just installed this round; no commit/tree/ref
+   * regeneration code exists yet). Throws, never fakes a passing byte recipe.
+   */
+  async regenerateHeads(_opts?: { tz?: string; coreAutocrlf?: boolean; locale?: string }): Promise<RegeneratedCommit> {
+    throw new Error("unimplemented: regenerateHeads");
   }
 
   // TODO(M3/T4.8): frontier-cursor keyed FactDelta stream (never a scalar HLC).
