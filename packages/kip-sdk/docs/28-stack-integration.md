@@ -91,7 +91,7 @@ flowchart TB
 
 How `packages/kip-sdk` becomes a *buildable monorepo member* — the executable path the seam-conceptual
 sections below assume. Today the package contains only `SPEC.md`, `PRIOR-ART.md`, `SCORECARD.md`,
-`docs/`, and `scripts/`; when implementation starts (roadmap M0 / [81 T1.x](./81-roadmap-epics-and-tasks.md)):
+`docs/`, and `scripts/`; when implementation starts (roadmap M0 / [81a T1.x](./81a-tasks-m0.md)):
 
 - **Package name:** **`@a5c-ai/kip-sdk`** (reserved by this doc; consistent with the
   `@a5c-ai/babysitter-sdk` / `@a5c-ai/trust-core` naming). `private: true` until first publish, like

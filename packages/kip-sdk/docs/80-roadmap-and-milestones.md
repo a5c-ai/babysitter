@@ -91,7 +91,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M0 (the fact set + envelope).
 
-**Exit criteria.** [INV-1](./60-conformance-and-testability.md#inv-1), [INV-3](./60-conformance-and-testability.md#inv-3), [INV-4a](./60-conformance-and-testability.md#inv-4a) (the asOf-free segment-geometry sub-invariant — the full INV-4 needs M2's `asOf` belief oracle and gates M2), [INV-8](./60-conformance-and-testability.md#inv-8), [INV-7](./60-conformance-and-testability.md#inv-7) (full — B-3: needs the `pncounter`/interval-dedup reducer this milestone delivers; M0 exit gates only on the gate-level [INV-7a](./60-conformance-and-testability.md#inv-7a)). The gating harness is T12.1's single-process fold + perturbation rig, whose subtasks depend only on T2.2/T2.3 ([81 T12.1](./81-roadmap-epics-and-tasks.md#T12.1)).
+**Exit criteria.** [INV-1](./60-conformance-and-testability.md#inv-1), [INV-3](./60-conformance-and-testability.md#inv-3), [INV-4a](./60-conformance-and-testability.md#inv-4a) (the asOf-free segment-geometry sub-invariant — the full INV-4 needs M2's `asOf` belief oracle and gates M2), [INV-8](./60-conformance-and-testability.md#inv-8), [INV-7](./60-conformance-and-testability.md#inv-7) (full — B-3: needs the `pncounter`/interval-dedup reducer this milestone delivers; M0 exit gates only on the gate-level [INV-7a](./60-conformance-and-testability.md#inv-7a)). The gating harness is T12.1's single-process fold + perturbation rig, whose subtasks depend only on T2.2/T2.3 ([81 T12.1](./81j-tasks-m9.md#T12.1)).
 
 ---
 
@@ -130,7 +130,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M1 (`proj` is half the SEC theorem) + M2 (as-of/pins address the fact set, needed for excision-survivable pins).
 
-**Exit criteria.** [INV-2a](./60-conformance-and-testability.md#inv-2a) (the substrate-only SEC sub-invariant: plain assert/retract permutations — the full INV-2's revocation/key-authorization/backdating permutations need M8's trust overlay and gate M8), [INV-12](./60-conformance-and-testability.md#inv-12), [INV-13a](./60-conformance-and-testability.md#inv-13a) (re-run under sync), [INV-14](./60-conformance-and-testability.md#inv-14) (full, cross-replica), [INV-9](./60-conformance-and-testability.md#inv-9) — excision half only (excision re-fold + `"excised"` placeholder); the gc/repack/rollup half of INV-9 gates E13's T13.3/T13.4 ([81](./81-roadmap-epics-and-tasks.md#T13.3)), which map to no milestone.
+**Exit criteria.** [INV-2a](./60-conformance-and-testability.md#inv-2a) (the substrate-only SEC sub-invariant: plain assert/retract permutations — the full INV-2's revocation/key-authorization/backdating permutations need M8's trust overlay and gate M8), [INV-12](./60-conformance-and-testability.md#inv-12), [INV-13a](./60-conformance-and-testability.md#inv-13a) (re-run under sync), [INV-14](./60-conformance-and-testability.md#inv-14) (full, cross-replica), [INV-9](./60-conformance-and-testability.md#inv-9) — excision half only (excision re-fold + `"excised"` placeholder); the gc/repack/rollup half of INV-9 gates E13's T13.3/T13.4 ([81k](./81k-tasks-cross-cutting.md#T13.3)), which map to no milestone.
 
 ---
 
