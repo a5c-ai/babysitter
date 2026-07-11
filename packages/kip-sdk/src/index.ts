@@ -39,7 +39,7 @@ import {
   verifyPayload,
   type Ed25519KeyPair,
 } from "./signing";
-import { gitBlobId, KeyRegistryStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
+import { gitBlobId, KeyRegistryStore, SelfWitnessedExcisionStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
 import {
   canon,
   collectExcisions,
@@ -63,6 +63,13 @@ import type { CellReducerAssociations } from "./cell-reducers";
 export type EID = string;
 /** Git object id (hex). */
 export type CID = string;
+/**
+ * D-30: a digest of the current admitted fact SET (`computeFactSetDigest`) — stable and
+ * comparable across calls, but NOT a real git commit object id (there is no regenerated commit
+ * DAG yet, see D-27/ADR-B1). Kept distinct from `CID` so `SyncReport.tip`/`MergeReport.tip`'s
+ * type no longer implies a git-resolvable commit id.
+ */
+export type FactSetDigest = string;
 /** Schema-defined node kind, e.g. "person", "episode". */
 export type NodeKind = string;
 /** Schema-defined edge kind, e.g. "works_at", "derived_from". */
@@ -429,14 +436,16 @@ export interface MergeOptions {
 export interface MergeReport {
   merged: number;
   conflicts: Conflict[];
-  tip: CID;
+  /** D-30: a fact-set digest (`FactSetDigest`), NOT a resolvable git commit `CID` — see that type's doc comment. */
+  tip: FactSetDigest;
 }
 export interface SyncReport {
   received: number;
   sent: number;
   merged: number;
   conflicts: Conflict[];
-  tip: CID;
+  /** D-30: a fact-set digest (`FactSetDigest`), NOT a resolvable git commit `CID` — see that type's doc comment. */
+  tip: FactSetDigest;
 }
 
 /** A surfaced, never-auto-picked contradiction (§3.4). DATA, not an error. */
@@ -862,6 +871,17 @@ export class KipRepo implements Repo {
     KipRepo.registry.set(this.replicaId, this);
   }
 
+  /**
+   * D-29: removes this instance from the static, never-auto-evicting `KipRepo.registry` (see its
+   * own doc comment above). Call this when done with a `KipRepo` in a long-lived host process —
+   * failing to do so leaks the instance (and its `Substrate`/`keyRegistry`/
+   * `selfWitnessedExcisionOids`) forever, since nothing else ever removes a registry entry.
+   * Idempotent; safe to call more than once.
+   */
+  close(): void {
+    KipRepo.registry.delete(this.replicaId);
+  }
+
   /** Lazily provisions (and memoizes) this repo's git object-store substrate (T1.1/T1.5). */
   private getSubstrate(): Substrate {
     if (!this.substrate) {
@@ -902,6 +922,16 @@ export class KipRepo implements Repo {
         } catch {
           // A corrupt persisted entry is a storage-layer concern, not an ingest-time one — skip it.
         }
+      }
+      // D-28 fix: re-seed `selfWitnessedExcisionOids` from its durable `SelfWitnessedExcisionStore`
+      // side-file, the SAME way `keyRegistry` is just re-seeded from `KeyRegistryStore` above — so a
+      // reopened `KipRepo` pointed at the same `dir` still remembers which oids IT PERSONALLY
+      // already verified and excised in a prior process lifetime (see `selfWitnessedExcisionOids`'s
+      // own doc comment for why this durable record is sound local knowledge, never a marker's own
+      // claim about itself).
+      const persistedExcisions = new SelfWitnessedExcisionStore(this.substrate.dir).load();
+      for (const [oid, record] of Object.entries(persistedExcisions)) {
+        this.selfWitnessedExcisionOids.set(oid, record);
       }
     }
     return this.substrate;
@@ -1609,13 +1639,23 @@ export class KipRepo implements Repo {
     // valid-time interval) THIS replica just read directly off the real candidate, so
     // `collectExcisions` never has to fall back to trusting a (possibly attacker-crafted) marker's
     // self-declared payload for it.
-    this.selfWitnessedExcisionOids.set(oid, {
+    const selfWitnessedRecord: SelfWitnessedExcisionRecord = {
       cellTarget: origTarget,
       validFrom: origValidFrom,
       validTo: origValidTo,
       excisedFactId: factId,
       excisedReason: reason,
-    });
+    };
+    this.selfWitnessedExcisionOids.set(oid, selfWitnessedRecord);
+    // D-28 fix: write through to the durable side-file too (mirrors `KeyRegistryStore`'s
+    // sync()-learned-key write-through above), so this record survives a close()+reopen of this
+    // same `dir` — see `getSubstrate()`'s re-seed of `selfWitnessedExcisionOids` above.
+    {
+      const store = new SelfWitnessedExcisionStore(this.getSubstrate().dir);
+      const snapshot = store.load();
+      snapshot[oid] = selfWitnessedRecord;
+      store.save(snapshot);
+    }
 
     // T4.6.1 / fix #4: a privacy-safe, non-content-derived nonce — the HMAC KEY for the marker's
     // anti-fingerprint reference (see `mintAndIngestExcisionMarker`), genuinely random, never

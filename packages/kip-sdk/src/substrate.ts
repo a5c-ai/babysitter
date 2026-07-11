@@ -33,6 +33,7 @@ import { deflateSync, inflateSync } from "node:zlib";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import type { SelfWitnessedExcisionRecord } from "./proj";
 
 export type HashAlgo = "sha1" | "sha256";
 
@@ -302,6 +303,33 @@ export class KeyRegistryStore {
   }
 
   save(snapshot: Record<string, string>): void {
+    fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
+  }
+}
+
+/**
+ * D-28: a small JSON side-file, next to the object store, that durably persists this replica's own
+ * `(oid -> SelfWitnessedExcisionRecord)` map (index.ts's `selfWitnessedExcisionOids`) — mirrors
+ * `KeyRegistryStore`'s exact load/save shape above. Without this, a `KipRepo` reopened against the
+ * SAME `dir` starts that map empty, so a cell this replica legitimately self-excised in a prior
+ * process lifetime re-folds to `"unknown"` instead of `"excised"` on restart (see this replica's
+ * `excise()` doc comment and DEBTS.md D-28). Uses `import type` for `SelfWitnessedExcisionRecord`
+ * (proj.ts) so this stays a type-only reference, erased at compile time — this module still has no
+ * runtime dependency on proj.ts.
+ */
+export class SelfWitnessedExcisionStore {
+  private readonly filePath: string;
+
+  constructor(dir: string) {
+    this.filePath = path.join(dir, "kip-self-witnessed-excisions.json");
+  }
+
+  load(): Record<string, SelfWitnessedExcisionRecord> {
+    if (!fs.existsSync(this.filePath)) return {};
+    return JSON.parse(fs.readFileSync(this.filePath, "utf8")) as Record<string, SelfWitnessedExcisionRecord>;
+  }
+
+  save(snapshot: Record<string, SelfWitnessedExcisionRecord>): void {
     fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
   }
 }
