@@ -1,5 +1,47 @@
 # Changelog
 
+## [Unreleased] - 2026-07-11
+
+### Features
+- 2b1907fcd feat(kip-sdk): M3 implementation (TDD converged, acceptance PASS) (Tal Muskal, 10 hours ago)
+- 1093d8492 feat(kip-sdk): M2 implementation (TDD converged, acceptance PASS) (Tal Muskal, 14 hours ago)
+- 4676bbd2e feat(kip-sdk): M1 implementation (TDD converged, acceptance PASS) (Tal Muskal, 16 hours ago)
+- 183e5b4f1 feat(kip-sdk): M0 implementation (TDD converged min=93, acceptance PASS) (Tal Muskal, 19 hours ago)
+- a8cb67827 feat(kip-sdk): scaffold @a5c-ai/kip-sdk package + workspace registration (Tal Muskal, 22 hours ago)
+
+### Documentation
+- 570b51049 docs(kip-sdk): accepted implementation ADRs (Tal Muskal, 22 hours ago)
+
+### Tests
+- 42a00a6e7 test(kip-sdk): frozen M3 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 14 hours ago)
+- 2f78f3bfc test(kip-sdk): frozen M2 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 16 hours ago)
+- e21ce5b31 test(kip-sdk): frozen M1 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 19 hours ago)
+- 8409c8245 test(kip-sdk): frozen M0 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 21 hours ago)
+
+### Maintenance
+- cd93ef157 Track upstream agent versions for 2026-07-09 (#1257) (a5c-ai[bot], 23 hours ago)
+
+## [Unreleased] - 2026-07-11
+
+### Features
+- 2b1907fcd feat(kip-sdk): M3 implementation (TDD converged, acceptance PASS) (Tal Muskal, 10 hours ago)
+- 1093d8492 feat(kip-sdk): M2 implementation (TDD converged, acceptance PASS) (Tal Muskal, 14 hours ago)
+- 4676bbd2e feat(kip-sdk): M1 implementation (TDD converged, acceptance PASS) (Tal Muskal, 16 hours ago)
+- 183e5b4f1 feat(kip-sdk): M0 implementation (TDD converged min=93, acceptance PASS) (Tal Muskal, 19 hours ago)
+- a8cb67827 feat(kip-sdk): scaffold @a5c-ai/kip-sdk package + workspace registration (Tal Muskal, 22 hours ago)
+
+### Documentation
+- 570b51049 docs(kip-sdk): accepted implementation ADRs (Tal Muskal, 22 hours ago)
+
+### Tests
+- 42a00a6e7 test(kip-sdk): frozen M3 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 14 hours ago)
+- 2f78f3bfc test(kip-sdk): frozen M2 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 16 hours ago)
+- e21ce5b31 test(kip-sdk): frozen M1 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 19 hours ago)
+- 8409c8245 test(kip-sdk): frozen M0 conformance tests (spec-driven, pre-implementation) (Tal Muskal, 21 hours ago)
+
+### Maintenance
+- cd93ef157 Track upstream agent versions for 2026-07-09 (#1257) (a5c-ai[bot], 23 hours ago)
+
 ## [Unreleased] - 2026-07-04
 
 ### Features
