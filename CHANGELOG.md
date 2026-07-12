@@ -12,13 +12,12 @@
 - 05bb3553f fix(codex): stop emitting "noop" decision sentinel + restore README install line (Tal Muskal, 22 hours ago)
 
 ### docs: documentation
-- 5d2618d5c docs: daily changelog update (a5c-ai[bot], 48 seconds ago)
 - f42bac195 docs(kip-sdk): close tracked debts + debt-closure report (Tal Muskal, 13 hours ago)
 - 9e51b8ef2 docs(kip-sdk): close D-12 — split 81-roadmap-epics-and-tasks.md into per-milestone files (Tal Muskal, 19 hours ago)
 - 60eaa6008 docs(kip-sdk): final build report + integration verification (Tal Muskal, 20 hours ago)
 
 ### test: test changes
-- a96a47078 test(kip-sdk): frozen INV-12 byte-DAG conformance test (D-27, pre-implementation) (Tal Muskal, 15 hours ago)
+- a96a47078 test(kip-sdk): frozen INV-12 byte-DAG conformance test (D-27, pre-implementation) (Tal Muskal, 16 hours ago)
 
 ### chore: maintenance
 - 78d397b61 Add 2026-07-10 upstream agent version records (#1291) (a5c-ai[bot], 24 hours ago)
