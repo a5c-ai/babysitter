@@ -10,7 +10,9 @@ faithfulness drift from `SPEC.md`, architectural-view gaps, completeness gaps, a
 under `packages/kip-sdk/docs/`. **Round 4** (D-27–D-31, added after the M0-M3 implementation build — see
 `reviews/build-final-report.md`) extends the register to **implementation** debt: real, honest gaps between
 the shipped `packages/kip-sdk/src/*.ts` and the spec/ADR target state, surfaced during Phase D's TDD rounds
-and accepted as non-blocking. **It both catalogs each debt AND tracks its resolution:** every entry records
+and accepted as non-blocking. **Round 5** (D-32, surfaced by post-closure live-usage testing through the
+real on-disk `open()`/keyring API rather than the internal test bypass) adds one further implementation
+debt, currently Open. **It both catalogs each debt AND tracks its resolution:** every entry records
 the evidence, a suggested fix, and a `Status` line stating whether (and how) the fix was applied — the
 register is the resolution record, not merely a backlog.
 
@@ -21,7 +23,7 @@ register is the resolution record, not merely a backlog.
 > ids). See the per-round breakdown in "Audit round 2 — new docs (27, 28) + integrity". **Round 4**
 > (D-27–D-31, implementation debt, now all Resolved — see the debt-closure run recorded in
 > `reviews/debt-closure-report.md`) is tracked separately in its own section below and is not included in
-> this docs-only rollup.
+> this docs-only rollup. **Round 5** (D-32, Open) is likewise tracked separately, not included here.
 
 | Severity | Count | Resolved | Partially resolved | Open |
 |---|---|---|---|---|
@@ -543,3 +545,24 @@ actual current source before being recorded.
 - **Why it is debt:** This is deliberate, honest, and load-bearing during the adversarial-TDD build itself (each comment is real, live-reproduced attacker reasoning, not filler) — but it is process-history-shaped documentation embedded permanently in production source, not a stable maintainability artifact. A future maintainer changing `collectExcisions` has to first read a five-round security narrative before finding the current invariant.
 - **Suggested fix:** Once M3 is fully stable (no further excision-authorization rounds expected), extract the round-by-round narrative into `reviews/build-convergence.md`/`reviews/build-final-report.md` (where this kind of history belongs) and replace the in-code comments with a concise, current-state-only invariant description plus a single pointer to the historical record for "why," mirroring how ADR-B5's own M0 implementation note handles a similar deferred-cleanup case.
 - **Status:** Resolved — collapsed the stacked round-2/3/4/5 "PRE-FIX would have.../ROUND-N FIX" narrative comments in `proj.ts`/`index.ts`/`substrate.ts` into concise current-state invariant descriptions with a pointer to `reviews/build-final-report.md`, preserving the load-bearing WHY reasoning (commit `d21afb06f`). Independently verified behavior-neutral: frozen conformance directory diff is 0 bytes, `package.json`/`package-lock.json` untouched, `tsc --noEmit` clean, and `vitest run` byte-identical before/after (28 files, 120 passed, 11 skipped, 0 failed); every changed line confirmed via grep to be blank or comment-syntax only, zero logic changed. Score 95/100.
+
+---
+
+## Audit round 5 — implementation-era debt surfaced during post-closure live-usage testing
+
+> After round 4 closed (`reviews/debt-closure-report.md`), the shipped M0-M3 code was exercised through its
+> real, on-disk, public happy-path API (`open()` + `assertFact`/`retractFact` + a live two-replica `sync()`
+> scenario) rather than the internal `ingest()`/in-memory test-fixture bypass every prior conformance test
+> and manual check had used. This surfaced one genuine gap the earlier rounds' testing angle could not have
+> reached. Logged per this register's convention: verified against actual current source before recording.
+
+### D-32: No durable signing-identity persistence across `close()`+`open()` — and no public-API path to establish one — silently breaks cross-replica `sync()` for any pre-restart fact
+
+- **Category:** Implementation / durability, security
+- **Severity:** Major
+- **Surfaced:** post-round-4 live-usage testing (an agent-simulated two-replica session-restart scenario exercising `open()`'s real keyring lifecycle, independently reproduced and verified against source).
+- **Location:** `packages/kip-sdk/src/index.ts:1063-1069` (`getOwnKeyPair()` — generates a fresh random Ed25519 keypair whenever `this.ownKeyPair` is unset); `index.ts:2543-2549` (`extractKeyPairFromKeyring()` — returns `undefined` unless the caller's `OpenOptions.keyring` already contains a `privateKeyPem` string); `signing.ts:33` (`generateEd25519KeyPair`) and the rest of `signing.ts`'s exports (`Ed25519KeyPair`, `importEd25519KeyPair`) are not re-exported from `index.ts`, so they are absent from the package's actual public surface (`package.json`'s `exports` map only exposes `"."`).
+- **Evidence:** `open({dir, replicaId, keyring: undefined}, )` — the documented fallback for "no explicit keyring supplied" — mints a brand-new random signing identity every call; nothing persists it to `dir`, and nothing in the public API lets a caller retrieve/export that generated identity to persist it themselves for next time. Reproduced live: a repo that `assertFact`'d 7 facts, then `close()`+re-`open()`'d the same `dir`, came back with `fsck().badSignatures` listing all 7 prior facts (the reopened instance can no longer verify signatures made by its own prior-session key). Worse, `sync()`-ing that reopened replica to a peer silently dropped every pre-reopen fact as `signature-invalid` (`ingest()`'s ordinary, correct rejection of an unverifiable signature) with no diagnostic surfaced anywhere in `SyncReport` — `received` simply under-counts. A grep of the roadmap/task-breakdown docs (`80-roadmap-and-milestones.md`, `81*.md`) for "keyring" or identity-persistence returns zero hits — this is not a tracked, intentionally-deferred later-milestone item, it fell through unscoped.
+- **Why it is debt:** `docs/40-sdk-api-surface.md` states the keyring is caller-supplied signing key material that "MUST chain to the tenant root" — i.e., the design's intent is that a real embedder brings its own durable identity. But the SDK provides no supported way to either (a) export the auto-generated fallback identity for persistence, or (b) construct a compatible keyring using only the package's public surface (the key-generation/import helpers exist in `signing.ts` but are not part of `index.ts`'s exports). A caller following the documented `keyring: undefined` fallback — which is the only path the current public API actually offers — loses the ability to sync any pre-restart memory to any peer, silently, with no error at the point of failure. This directly undermines the SDK's own stated purpose ("persistent memory across a session").
+- **Suggested fix:** Re-export `generateEd25519KeyPair`/`Ed25519KeyPair`/`importEd25519KeyPair` (or an equivalent) from `index.ts`'s public surface so a caller can mint and persist their own keyring PEM up front; and/or add a `KipRepo` accessor (e.g. `exportKeyring()`) that returns the current (possibly auto-generated) identity's PEM so a first-run caller can persist it for the next `open()` call. Additionally, consider having `sync()`/`SyncReport` surface a non-zero `signature-invalid` rejection count distinctly from `received`, so this failure mode is at least observable rather than silent.
+- **Status:** Open.
