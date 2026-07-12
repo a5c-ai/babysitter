@@ -124,12 +124,15 @@ describe("INV-A2: compile-determinism + DAG order", () => {
     await expect(repo.compileContextualQuery(query)).rejects.toMatchObject({ code: "ERR_COMPILE_CYCLIC_DEPS" });
   });
 
-  it("an ill-typed chain (steps[i].targetKind incompatible with steps[i+1].sourceKind) is rejected at compile with ERR_ILL_TYPED_SEGMENT", async () => {
+  it("a multi-hop chain whose declared target loops back to the seed's own kind is rejected at compile with ERR_ILL_TYPED_SEGMENT (the self-loop heuristic — the ONLY real throw site at M5, D-35; this is NOT a general steps[i].targetKind/steps[i+1].sourceKind adjacent-pair check, which does not exist yet — see index.ts's own DOCUMENTED SCOPE NARROWING doc comment)", async () => {
     const repo = new KipRepo();
     await assertNode(repo, "person/tal", "person");
 
-    // person -[employed_by]-> org, then a SECOND hop declared FROM "vehicle" (never "org") ->
-    // person — the two hops cannot chain type-compatibly (org != vehicle, no is_a relation declared).
+    // person -[employed_by]-> ... -[owned_by]-> person: a 2-hop chain whose declared `target`
+    // ("person") equals the seed's own NodeKind — the self-loop heuristic ERR_ILL_TYPED_SEGMENT
+    // actually implements. No real "org"/"vehicle" kind incompatibility is being checked here (no
+    // schema/is_a API exists at M5 to check one); the throw fires purely because `target === seedKind`
+    // for a `steps.length > 1` chain.
     await repo.registerFunctionality("employed_by", makeManifest({ name: "employed-by-lookup" }), makeBindingOptions({}));
     await repo.registerFunctionality("owned_by", makeManifest({ name: "owned-by-lookup" }), makeBindingOptions({}));
 

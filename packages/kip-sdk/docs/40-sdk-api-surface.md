@@ -329,7 +329,20 @@ type KipErrorCode =
   | "ERR_UNAUTHORIZED_EXCISION"    // excise() without the `excise` scope (m-11; 27's rejected excision marker)
   | "ERR_EXCISE_EVIDENCE_REQUIRED" // excise() targets a fork/malformed-demoted fact without the `excise-evidence` scope (§4.5, §4b.1, R11)
   | "ERR_COMPILE_CYCLIC_DEPS"      // Segment.deps cycle / out-of-range index at compile (INV-A2)
-  | "ERR_ILL_TYPED_SEGMENT"        // steps chaining violates targetKind→sourceKind compatibility (§5b.1)
+  /** INTENDED (full §5b.1 semantics, `Segment.steps` doc): a chain where some adjacent pair's
+   *  `steps[i].targetKind` fails to equal — or be an `is_a` supertype-compatible match of —
+   *  `steps[i+1].sourceKind`. ACTUAL (M5, honest-disclosure precedent, D-35 — CLOSED as a doc-accuracy
+   *  fix, code behavior unchanged): the ONLY real throw site is a narrower self-loop heuristic in
+   *  `compileContextualQuery` — `steps.length > 1 && seedKind === q.target` — NOT a general
+   *  per-adjacent-pair check. No `NodeKindDef`/`is_a` schema-registration API exists yet from which a
+   *  genuine per-hop kind signal could be derived (every intermediate step's `targetKind` is a
+   *  placeholder derived from its own `edgeKind` name, so comparing two such placeholders would be a
+   *  vacuous, self-invented check, not a real one). A chain with two genuinely incompatible
+   *  intermediate hops that never loops back to the seed's own kind compiles WITHOUT error today.
+   *  General per-adjacent-pair checking is DEFERRED until a schema API lands (see index.ts's own
+   *  `compileContextualQuery` DOCUMENTED SCOPE NARROWING doc comment; tracked as a pre-existing gap in
+   *  reviews/build-final-report.md §6's "no ontology/schema-registration API" residual). */
+  | "ERR_ILL_TYPED_SEGMENT"        // ACTUAL (M5): self-loop-only heuristic (seedKind === q.target for a multi-hop chain); see block comment above for intended-vs-actual scope
   | "ERR_UNREGISTERED_MANIFEST"    // learn()/binding names a manifest with no signature-valid registration fact (INV-A13)
   | "ERR_INVALID_WEIGHT"           // NaN/±Infinity weight or range/cmp comparand at registration (INV-A7)
   | "ERR_HASH_ALGO_MISMATCH"       // cross-algo convergence-group membership (m-6) — hard error
