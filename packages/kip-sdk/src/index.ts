@@ -583,53 +583,141 @@ export interface FactDelta {
 }
 
 // ---------------------------------------------------------------------------
-// 6. Active-knowledge (§5b) supporting shapes — placeholders (docs/31/32/33 out of
-//    scope for this scaffold's reading list; refined at their owning M5-M7 tasks).
+// 6. Active-knowledge (§5b) supporting shapes (docs/31-contextual-functionalities.md, M5/T6.1-T6.7).
+//    Transcribed verbatim (normative shape) from the doc's own `FunctionalityBinding`/`ConditionNode`/
+//    `ContextualQuery`/`Segment`/`AnswerGraph`/`MicroagentManifest` blocks — every `Repo` method body
+//    that consumes/produces these still throws `unimplemented: <name>` (M5 is TEST-FIRST TDD; these
+//    are TYPED STUBS only, no behavior). `FunctionalityBinding.tags` is additive (not in docs/31's own
+//    field list) purely so `Repo.registerFunctionality`'s existing `Pick<FunctionalityBinding, ...,
+//    "tags">` binding-options param (below, docs/40) continues to type-check; docs/31 itself only
+//    ever discusses `tags` as MicroagentManifest's own advisory field ("An open free `tag` (manifest
+//    `tags`) is also permitted"), so this mirrors that same advisory-only semantics at the binding
+//    level, never a gate.
 // ---------------------------------------------------------------------------
 
-/** TODO(M5/T6.1): normatively defined in docs/31-contextual-functionalities.md. Placeholder. */
+/** docs/31 §"Functionality descriptor = MicroagentManifest" — the `@a5c-ai/genty-core` isolation enum,
+ *  reused verbatim ("do not invent fields"). */
+export type IsolationMode = "subprocess" | "worker" | "container";
+
+/** docs/31 §"Functionality descriptor = MicroagentManifest" (normative shape, transcribed verbatim —
+ *  the real `@a5c-ai/genty-core` `MicroagentManifest` contract, promoted to the kip-side interface). */
 export interface MicroagentManifest {
-  name: string;
+  name: string; // (name, version) is the registration/selection key (§5b.2 LearnOptions)
   version: string;
-  outputSchema?: unknown;
+  description: string;
+  inputSchema: unknown; // JSON Schema for MicroagentInvocation.input
+  outputSchema: unknown; // JSON Schema the orchestrator validates MicroagentResult.output against
+  isolation: IsolationMode;
+  runtime: {
+    entrypoint: string; // the executable the runner spawns
+    skills?: string[];
+    tools?: string[];
+    scripts?: string[];
+    processes?: string[];
+    model?: string;
+    timeout?: number;
+    env?: Record<string, string>;
+  };
+  tags?: string[]; // advisory selection metadata only — never a gate
+  builtIn?: boolean;
 }
 
-/** TODO(M5/T6.1, ADR-015): declared `/ontology` fact, evaluated as a pure read over proj. Placeholder. */
-export interface ConditionNode {
-  op: string;
-  args?: unknown[];
-}
+/** docs/31 §"FunctionalityBinding (normative shape)" `ConditionNode` — a graded range and/or complex
+ *  predicate over projected PropCells (pure over proj; `unknown` cells propagate `unknown`, never
+ *  defaulted). A `range` with NEITHER min NOR max, or a NaN/±Infinity numeric leaf, is MALFORMED and
+ *  MUST be rejected at registration (ERR_INVALID_WEIGHT, INV-A7) — not enforced by this type alone. */
+export type ConditionNode =
+  | { kind: "range"; prop: PropKey; min?: PropValue; max?: PropValue }
+  | { kind: "cmp"; prop: PropKey; op: "=" | ">" | "<" | ">=" | "<="; value: PropValue }
+  | { kind: "all"; of: ReadonlyArray<ConditionNode> }
+  | { kind: "any"; of: ReadonlyArray<ConditionNode> };
 
-/** TODO(M5/T6.1, ADR-014/015/016): a microagent's binding to an EdgeKind. Placeholder. */
+/** docs/31 §"FunctionalityBinding (normative shape)" — binds a contextual functionality (microagent)
+ *  to an EdgeKind in the ontology (transcribed verbatim). This is the COMPILED step-descriptor shape
+ *  (what a matched `Segment.steps[i]` carries, docs/31's own Segment doc comment) — NOT a shape the
+ *  caller hand-assembles wholesale for `registerFunctionality` (that seam's own `binding?` param below
+ *  picks only the caller-supplied subset: `weight`/`condition`/`requires`/`relationClass`/`tags`;
+ *  `microagentName`/`version` come from the paired `MicroagentManifest.name`/`.version`, and
+ *  `sourceKind`/`targetKind`/`cardinality` are derived by the compiler from the ontology graph — see
+ *  docs/40's own "KNOWN GAP" callout on `registerFunctionality`). */
 export interface FunctionalityBinding {
-  edgeKind: EdgeKind;
-  sourceKind?: NodeKind;
-  targetKind?: NodeKind;
-  weight?: number;
+  edgeKind: EdgeKind; // the contextual relation this realizes
+  microagentName: string; // MicroagentManifest.name (registered descriptor)
+  version: string; // MicroagentManifest.version (semver)
+  /** Source/target NodeKinds the hop connects; MUST be compatible with the manifest schemas. */
+  sourceKind: NodeKind;
+  targetKind: NodeKind;
+  /** CLAIM-12 CONDITIONAL relation: EdgeKinds whose instances MUST be PRESENT (projected) before this
+   *  hop may fire. PURE READ over proj, never against sync state. Distinct from `constraint`. */
+  requires?: EdgeKind[];
+  /** CLAIM-8 CONSTRAINT relation: a predicate the SEED/INPUT (the patent's "known instance") MUST
+   *  satisfy as a precondition of the hop firing — proj VERIFIES the known instance complies. A
+   *  non-compliant seed yields the N5-safe `constraint-violation` outcome (INV-A3(e)). */
+  constraint?: ConditionNode;
+  /** CONDITION NODE — a graded/complex condition gating the hop (claim 12), a PURE READ over proj. */
   condition?: ConditionNode;
-  requires?: ConditionNode;
-  relationClass?: string;
+  /** WEIGHTED relation — a deterministic priority totally ordering competing bindings/segments at the
+   *  SAME asOf. MUST be FINITE: NaN/±Infinity are MALFORMED and rejected at registration
+   *  (ERR_INVALID_WEIGHT) — a NaN weight would make the sort NON-TOTAL (N5). */
+  weight?: number;
+  /** CLAIM-7 RELATION-TYPE TAXONOMY — ADVISORY only; NEVER gates fact membership or hop firing. */
+  relationClass?: "social" | "characterizing" | "ownership" | "property" | "identifying";
+  /** Advisory manifest-tag override at the binding level (see this section's own top doc comment for
+   *  why this field is additive beyond docs/31's own FunctionalityBinding field list). */
   tags?: string[];
+  /** Cardinality the hop produces, for DSL `?`/`/` expectation checking. */
+  cardinality: "one" | "many";
 }
 
-/** TODO(M5/T6.2): the caller's contextual-relation query. Placeholder. */
+/** docs/31 §"Query → Segment → AnswerGraph (normative shapes)" — a contextual query: a known seed
+ *  instance + a desired target type + a linkage expression (transcribed verbatim). */
 export interface ContextualQuery {
-  seed: EID;
-  edgeKind: EdgeKind;
+  seed: EID; // a concrete instance of a known NodeKind the caller already has
+  target: NodeKind; // the type of instance the caller wants
+  /** Ordered, possibly-PARTIAL linkage constraint — EdgeKinds that MUST appear, IN ORDER, as a
+   *  SUBSEQUENCE of any matched Segment.steps. Empty/omitted ⇒ no constraint (compiler discovers a path). */
+  via?: EdgeKind[];
+  /** Deterministic filters over PROJECTED PropCell values (Unknown cells excluded, never defaulted). */
+  filters?: ReadonlyArray<{ prop: PropKey; op: "=" | ">" | "<" | ">=" | "<="; value: PropValue }>;
+  /** Compiled & matched against this fact-set frontier and RECORDED in every emitted fact's provenance. */
   asOf?: AsOf;
 }
 
-/** TODO(M5/T6.2, T6.3, ADR-017): compiled dependency-DAG of steps. Placeholder. */
+/** docs/31 §"Query → Segment → AnswerGraph (normative shapes)" — a matched segment of the ontology
+ *  graph: the ordered chain of contextual EdgeKinds connecting the seed's NodeKind to `target`
+ *  (transcribed verbatim; produced by a PURE READ over proj, no dispatch yet). */
 export interface Segment {
-  steps: unknown[];
-  deps: number[][];
-  alternatives?: Segment[];
+  /** One entry = one single-step query = one MicroagentInvocation (the patent's "number of
+   *  SINGLE-STEP QUERIES", claim 1(d)). For the LINEAR case `deps` is empty/absent and `steps` is a
+   *  chain where every adjacent pair's `steps[i].targetKind` MUST equal — or be an `is_a`
+   *  supertype-compatible match of — `steps[i+1].sourceKind` (ERR_ILL_TYPED_SEGMENT otherwise). */
+  steps: FunctionalityBinding[];
+  /** CLAIM-4/CLAIM-1(e)+24 dependency DAG: each `[producer, consumer]` pair (indices into `steps`)
+   *  declares that step `consumer` consumes step `producer`'s materialized instance(s). EMPTY/absent
+   *  ⇒ the linear case (topo order = `steps[]` index order). A cycle or out-of-range index is
+   *  MALFORMED and rejected at compile (ERR_COMPILE_CYCLIC_DEPS, INV-A2). */
+  deps?: ReadonlyArray<readonly [producer: number, consumer: number]>;
+  /** The OTHER segments that also satisfied the query, ENUMERABLE so the caller can present them.
+   *  `alternatives.length > 0` ⇒ a typed CHOICE surfaced to the caller, NEVER an arbitrary pick (N5,
+   *  INV-A7); `weight` deterministically ORDERS this list for presentation but never collapses it. */
+  alternatives: Segment[];
 }
 
-/** TODO(M5/T6.6): the derived_from subgraph read back after executeSegment. Placeholder. */
+/** docs/31 §"Query → Segment → AnswerGraph (normative shapes)" — the patent's "answer graph":
+ *  requested + intermediate instances and the relation edges that produced them, expressed PURELY as
+ *  `derived_from` provenance over the emitted facts (transcribed verbatim; a READ view, never a
+ *  separately-authored authoritative artifact, INV-A8). */
 export interface AnswerGraph {
-  nodes: NodeView[];
-  edges: EdgeView[];
+  result: EID[]; // requested-type instances; empty ⇒ no answer (N5, never fabricated)
+  intermediates: EID[]; // every in-between instance materialized along the chain
+  /** The ORDERED relation-edge chain seed → intermediate[0] → … → result, one entry per executed
+   *  step, naming WHICH EdgeKind (and the binding's realizer) connected each pair and the
+   *  `derived_from` fact that recorded it. */
+  edges: ReadonlyArray<{ from: EID; to: EID; edgeKind: EdgeKind; viaFactId: FactId }>;
+  /** Every node/edge linked back to seed and its asserting factId via `derived_from`. `producedBy` is
+   *  the FACT-RESIDENT Provenance (never the ephemeral runtime object), so the whole AnswerGraph is a
+   *  pure READ over facts (INV-A8). */
+  derivedFrom: ReadonlyArray<{ eid: EID; factId: FactId; producedBy: Provenance }>;
 }
 
 /** docs/40 LearnOptions — copied verbatim. */
