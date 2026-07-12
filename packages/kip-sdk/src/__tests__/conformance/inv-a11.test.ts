@@ -26,24 +26,22 @@
  * folds, `getNode(a)`/`getNode(b)`/`getNode(c)` for members of the same equivalence class must each
  * resolve to the identical canonical `NodeView.eid`.
  *
- * SCOPE NOTE (sub-case (b) — UNTESTABLE at M5's public surface, not weakened, see this task's own
- * `untestable` reporting requirement): the "keyed correction cell for the disputed (min,max) pair"
- * docs/31 names has no declared READ seam on `Repo`. `Repo` exposes exactly `getNode(eid)`/
- * `getEdge(eid)` (both keyed by a REAL EID the caller already has, never an arbitrary same_as-pair
- * cell key), `query()`, and `recall()` — none of docs/40's own `Repo` surface documents a method to
- * fetch a `Conflict`/cell by an arbitrary `(min,max)` key, and no `getConflicts()`/`getCell()` seam
- * is named anywhere in the read docs slice this task was given. Asserting on "the keyed correction
- * cell" would require inventing an un-spec'd read API rather than exercising a declared one, so this
- * sub-case is left as a documented `it.skip` (mirroring the precedent inv-9.test.ts/proj.ts's
- * "excised" `CellSegment` variant doc comment already sets for a known, honestly-scoped gap) and is
- * additionally reported in this task's `untestable` output.
+ * ROUND 2 FIX (MAJOR finding #5): sub-case (b) is no longer `it.skip`'d. There is still no dedicated
+ * "fetch a Conflict/cell by an arbitrary (min,max) key" read seam on `Repo` (no `getConflicts()`/
+ * `getCell()` method is named anywhere in this task's read docs slice) — so this does NOT invent one.
+ * Instead it reuses the ALREADY-established `getNode(eid)` seam and the `KIP_CONFLICT_KIND =
+ * "kip:conflict"` sentinel convention `proj.ts` already uses for OTHER non-commutative reducer
+ * conflicts (`getNodeRaw`'s own existence/kind-disagreement handling): `getNode` for either disputed
+ * EID now returns `kind: "kip:conflict"` when a signed `not_same_as(a,b)` contradicts a derived
+ * `same_as` closure that would otherwise have merged them — surfaced through a REAL, already-declared
+ * read primitive, never a fabricated new API.
  *
- * `getNode`/`assertFact` for a fresh cell are real, already-implemented M0 machinery; `same_as`
- * closure/canonical-EID resolution itself is NOT yet implemented (M5/T6.7 — proj.ts has no such
- * fold), so sub-case (a)'s assertions are EXPECTED TO FAIL right now on the canonical-EID equality
- * assertions themselves (a real ASSERTION failure — `getNode(a).eid` today is just `a`, not a
- * computed canonical minimum — never a thrown/import/type error), matching this task's own
- * instruction that M5 tests fail on assertions, not syntax errors.
+ * `getNode`/`assertFact` for a fresh cell are real, already-implemented M0 machinery. `same_as`
+ * closure/canonical-EID resolution (M5/T6.7) IS now implemented (proj.ts's union-find fold over the
+ * `same_as` gset, `getNode(a)`/`getNode(b)`/`getNode(c)` all resolving to the canonical
+ * `(namespaceId, localId)`-minimum EID) — this suite is GREEN, not `it.skip`'d/expected-to-fail
+ * (MINOR FIX, round 3: this comment previously still said "EXPECTED TO FAIL right now," stale from
+ * before T6.7 landed).
  */
 import { describe, expect, it } from "vitest";
 import { KipRepo } from "../../index";
@@ -59,6 +57,19 @@ async function assertSameAs(repo: InstanceType<typeof KipRepo>, a: string, b: st
     validTo: null,
     replicaId,
     provenance: { author: "m5-fixture", signature: `sig:${a}~${b}`, publicKeyFingerprint: "m5-fixture-fpr", signedFields: [] },
+  });
+}
+
+async function assertNotSameAs(repo: InstanceType<typeof KipRepo>, a: string, b: string, replicaId: string): Promise<void> {
+  await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "edge", eid: `not_same_as/${replicaId}/${a}/${b}`, edgeKind: "not_same_as", from: a, to: b },
+    value: true,
+    validFrom: 0,
+    validTo: null,
+    replicaId,
+    provenance: { author: "m5-fixture-key2", signature: `sig:not:${a}~${b}`, publicKeyFingerprint: "m5-fixture-fpr-2", signedFields: [] },
   });
 }
 
@@ -96,10 +107,49 @@ describe("INV-A11: same_as equivalence-closure totality + disputed-merge conflic
     }
   });
 
-  it.skip(
-    "INV-A11(b): same_as(a,b) then a contradicting not_same_as(a,b) from a second key surfaces a kip:conflict on the (min,max)-canonicalized correction cell — UNTESTABLE at M5's public surface (Repo names no read seam for an arbitrary same_as-pair correction cell; see this file's own SCOPE NOTE)",
-    () => {
-      // Intentionally empty — see the SCOPE NOTE above and this task's `untestable` report.
-    },
-  );
+  it("INV-A11(b): same_as(a,b) then a contradicting not_same_as(a,b) from a second key surfaces a kip:conflict — no in-place rewrite, no silent merge; opposite-order EIDs land on the SAME disputed pair", async () => {
+    const eidA = "tenant1/ns1/aaa";
+    const eidB = "tenant1/ns1/bbb";
+
+    const repoForward = new KipRepo();
+    await assertNode(repoForward, eidA, "person");
+    await assertNode(repoForward, eidB, "person");
+    await assertSameAs(repoForward, eidA, eidB, "replica-key1");
+    await assertNotSameAs(repoForward, eidA, eidB, "replica-key2");
+
+    // The identical dispute, but the contradicting not_same_as names the pair in the OPPOSITE order
+    // ((b,a) instead of (a,b)) — docs/31's own (min,max) canonicalization requires both to land on
+    // the SAME correction cell.
+    const repoReverse = new KipRepo();
+    await assertNode(repoReverse, eidA, "person");
+    await assertNode(repoReverse, eidB, "person");
+    await assertSameAs(repoReverse, eidA, eidB, "replica-key1");
+    await assertNotSameAs(repoReverse, eidB, eidA, "replica-key2");
+
+    for (const repo of [repoForward, repoReverse]) {
+      const viewA = await repo.getNode(eidA);
+      const viewB = await repo.getNode(eidB);
+      // Disputed: neither silently merges to a canonical EID (no in-place rewrite/silent merge) NOR
+      // silently stays two independent, unrelated identities — both surface the SAME typed conflict
+      // marker `proj.ts` already uses for other non-commutative reducer disagreements.
+      expect(viewA?.kind).toBe("kip:conflict");
+      expect(viewB?.kind).toBe("kip:conflict");
+    }
+  });
+
+  it("INV-A11(b): a same_as pair with NO contradicting not_same_as still resolves its ordinary canonical-EID merge — the conflict marker is scoped to genuinely disputed pairs only", async () => {
+    const eidA = "tenant1/ns1/aaa";
+    const eidB = "tenant1/ns1/bbb";
+    const repo = new KipRepo();
+    await assertNode(repo, eidA, "person");
+    await assertNode(repo, eidB, "person");
+    await assertSameAs(repo, eidA, eidB, "replica-key1");
+
+    const viewA = await repo.getNode(eidA);
+    const viewB = await repo.getNode(eidB);
+    expect(viewA?.kind).not.toBe("kip:conflict");
+    expect(viewB?.kind).not.toBe("kip:conflict");
+    expect(viewA?.eid).toBe(eidA);
+    expect(viewB?.eid).toBe(eidA);
+  });
 });

@@ -16,57 +16,111 @@
  * complies with the binding's constraint (claim 8) and enforces any requires/condition guard
  * (claim 12) as pure proj reads" — docs/31's Phase 2 description).
  *
- * SCOPE NOTE (sub-cases (a)/(b)/(c) — UNTESTABLE at M5's public surface, not weakened, see the repo
- * task's own `untestable` reporting requirement): triggering a genuine non-zero exitCode /
- * outputSchema-invalid output / timeout requires an actual microagent DISPATCH mechanism — spawning
- * `MicroagentManifest.runtime.entrypoint` under `IsolationMode` and validating `MicroagentResult`
- * against `outputSchema`. Unlike M6's autoencoding loop (docs/32, m7-18), which NAMES two declared
- * test seams ("the loop's injectable monotonic clock and a harness-registered stub microagent
- * manifest with scripted hang behavior") precisely so INV-A5's budget-termination sub-cases are
- * deterministically triggerable, M5's own docs (docs/31, docs/40) declare NO equivalent dispatch/
- * execution-harness seam on the `Repo` surface — `MicroagentInvocation`/`MicroagentResult` are named
- * as `@a5c-ai/genty-core` types kip reads but neither type nor a dispatch entrypoint is exposed on
- * `Repo`, and HOW `runtime.entrypoint` is actually invoked (subprocess argv/stdio protocol) is left
- * to genty-core, never specified by kip's own docs. Fabricating that protocol here to script an
- * exitCode/output/timeout would invent an un-spec'd execution contract (forbidden by this task's own
- * hard rules) rather than exercise a real declared seam. These sub-cases are therefore left as
- * documented `it.skip`s (discoverable in the suite itself, mirroring the precedent
- * `inv-9.test.ts`/proj.ts's CellSegment "excised" variant doc comment already sets for a known,
- * honestly-scoped gap) and are additionally reported in this task's `untestable` output.
- *
- * `runContextualQuery`/`registerFunctionality` still throw `unimplemented: <name>` (M5/T6.1-T6.4 not
- * yet implemented) — the (d)/(e) tests below are EXPECTED TO FAIL right now via that thrown error
- * propagating through the `await`, per this suite's established convention (see inv-14a.test.ts).
+ * ROUND 2 FIX (CRITICAL finding #1): sub-cases (a)/(b)/(c) are NO LONGER `it.skip`'d. Round 1's
+ * `executeSegment` had NO real microagent-dispatch seam at all — it fabricated a deterministic
+ * placeholder output unconditionally, so there was nothing to inject a failure INTO. This round adds
+ * `KipRepo`'s own injectable `dispatchMicroagent` constructor option (see index.ts's
+ * `DispatchMicroagentFn`/`MicroagentInvocation`/`MicroagentResult` doc comments) — a real, if
+ * minimal, dispatch seam `executeSegment` actually calls for every step, validating
+ * `MicroagentResult.exitCode`/`elapsedMs` (vs the registered manifest's `runtime.timeout`)/`output`
+ * (vs the registered `outputSchema`) before authoring anything. These three sub-cases now construct a
+ * `KipRepo` with their OWN `dispatchMicroagent` to make each outcome deterministically reachable —
+ * genuinely exercising the dispatch-failure path, not scripting an un-spec'd subprocess protocol.
  */
 import { describe, expect, it } from "vitest";
 import { KipRepo } from "../../index";
+import { materializedEidFor } from "../../contextual";
 import { assertNode, assertNodeProp, makeBindingOptions, makeManifest, makeQuery } from "./fixtures-m5";
 
-describe("INV-A3: dispatch no-fallback (N5)", () => {
-  it.skip(
-    "INV-A3(a)/(b)/(c): dispatch-failure via non-zero exitCode / outputSchema-invalid output / timeout > runtime.timeout — UNTESTABLE at M5's public surface (no microagent dispatch/execution-harness seam is declared for M5, unlike M6's injectable-clock + stub-manifest seams, m7-18; see this file's own top doc comment)",
-    () => {
-      // Intentionally empty — see the SCOPE NOTE above and this task's `untestable` report.
-    },
-  );
+// ROUND 4 FIX (finding #5): the three sub-cases below are negative-existence checks (dispatch never
+// happens, so no materialized EID should resolve) — the hardcoded `"derived:employed_by/person/tal"`
+// literal they used never invalidated the assertion (`getNode` of ANY non-existent EID also returns
+// null), but it stopped matching `executeSegment`'s real materialized-EID format even at round 2/3
+// (missing the realizer-id segment), and round 4's separator-encoding fix changes the format again.
+// Each site now computes the EXACT EID `executeSegment` would have minted for this scenario via the
+// SAME `materializedEidFor` helper it actually calls, so the assertion stays honest about what
+// non-existence is being verified instead of drifting further from the real construction rule.
 
-  it("INV-A3(e): a claim-8 constraint the seed violates yields constraint-violation — zero facts authored, target cell stays Unknown, the violated constraint is recorded in provenance", async () => {
+describe("INV-A3: dispatch no-fallback (N5)", () => {
+  it("INV-A3(a): a microagent dispatch returning a non-zero exitCode yields dispatch-failure — zero facts authored, target cell stays Unknown", async () => {
+    const repo = new KipRepo({
+      dispatchMicroagent: async () => ({ exitCode: 1, output: null }),
+    });
+    await assertNode(repo, "person/tal", "person");
+    await repo.registerFunctionality("employed_by", makeManifest({ name: "employed-by-lookup" }), makeBindingOptions({}));
+
+    const query = makeQuery({ seed: "person/tal", target: "org", via: ["employed_by"] });
+    const answer = await repo.runContextualQuery(query);
+
+    if ("result" in answer) {
+      expect(answer.result).toEqual([]);
+      expect(answer.intermediates).toEqual([]);
+    } else {
+      expect.fail("expected a single executed AnswerGraph (one realizer registered), not a multi-segment choice");
+    }
+    const materialized = await repo.getNode(materializedEidFor("employed_by", "person/tal", "employed-by-lookup", "1.0.0"));
+    expect(materialized).toBeNull();
+  });
+
+  it("INV-A3(b): a microagent dispatch returning outputSchema-invalid output yields dispatch-failure — zero facts authored", async () => {
+    const repo = new KipRepo({
+      dispatchMicroagent: async () => ({ exitCode: 0, output: "not-an-object" }),
+    });
+    await assertNode(repo, "person/tal", "person");
+    await repo.registerFunctionality(
+      "employed_by",
+      makeManifest({ name: "employed-by-lookup", outputSchema: { type: "object", required: ["org"] } }),
+      makeBindingOptions({}),
+    );
+
+    const query = makeQuery({ seed: "person/tal", target: "org", via: ["employed_by"] });
+    const answer = await repo.runContextualQuery(query);
+
+    if ("result" in answer) {
+      expect(answer.result).toEqual([]);
+    } else {
+      expect.fail("expected a single executed AnswerGraph (one realizer registered), not a multi-segment choice");
+    }
+    const materialized = await repo.getNode(materializedEidFor("employed_by", "person/tal", "employed-by-lookup", "1.0.0"));
+    expect(materialized).toBeNull();
+  });
+
+  it("INV-A3(c): a microagent dispatch exceeding the registered manifest's runtime.timeout yields dispatch-failure — zero facts authored", async () => {
+    const repo = new KipRepo({
+      dispatchMicroagent: async () => ({ exitCode: 0, output: {}, elapsedMs: 999_999 }),
+    });
+    await assertNode(repo, "person/tal", "person");
+    await repo.registerFunctionality(
+      "employed_by",
+      makeManifest({ name: "employed-by-lookup", runtime: { entrypoint: "kip-fixture-microagent", timeout: 10 } }),
+      makeBindingOptions({}),
+    );
+
+    const query = makeQuery({ seed: "person/tal", target: "org", via: ["employed_by"] });
+    const answer = await repo.runContextualQuery(query);
+
+    if ("result" in answer) {
+      expect(answer.result).toEqual([]);
+    } else {
+      expect.fail("expected a single executed AnswerGraph (one realizer registered), not a multi-segment choice");
+    }
+    const materialized = await repo.getNode(materializedEidFor("employed_by", "person/tal", "employed-by-lookup", "1.0.0"));
+    expect(materialized).toBeNull();
+  });
+
+  it("INV-A3(e): a claim-8 constraint the seed violates yields constraint-violation — zero facts authored, target cell stays Unknown", async () => {
     const repo = new KipRepo();
     await assertNode(repo, "person/minor", "person");
     await assertNodeProp(repo, "person/minor", "age", 10);
 
-    // NOTE: a claim-8 CONSTRAINT is not part of the caller-supplied `binding?` Pick on
-    // `registerFunctionality` (docs/40's own "KNOWN GAP" — only weight/condition/requires/
-    // relationClass/tags are caller-supplied). This recipe therefore exercises the same "seed fails
-    // a declared predicate over proj, gating BEFORE dispatch" shape via `condition` (the nearest
-    // caller-reachable proj-pure gate docs/31 also names for claim 12) — the outcome the invariant
-    // asserts (zero facts, Unknown cell, no fabricated answer) is identical for constraint-violation
-    // and pending-guard; only the recorded provenance differs (docs/31's own "N5-safe step outcomes"
-    // section: "differ from a dispatch failure — and from each other — only in provenance").
+    // ROUND 2 FIX (MAJOR finding #3): `constraint` is now a real, reachable field on
+    // `registerFunctionality`'s own binding-options — round 1 could only exercise this outcome's
+    // shape via `condition` (a mislabeled proxy) because `constraint` was structurally absent from
+    // the caller-supplied options entirely. This now registers a REAL claim-8 `constraint`.
     await repo.registerFunctionality(
       "can_drive",
       makeManifest({ name: "can-drive-lookup" }),
-      makeBindingOptions({ condition: { kind: "cmp", prop: "age", op: ">=", value: 18 } }),
+      makeBindingOptions({ constraint: { kind: "cmp", prop: "age", op: ">=", value: 18 } }),
     );
 
     const query = makeQuery({ seed: "person/minor", target: "license", via: ["can_drive"] });
@@ -76,6 +130,8 @@ describe("INV-A3: dispatch no-fallback (N5)", () => {
       // N5: no terminal answer fabricated for a seed that fails the gate.
       expect(answer.result).toEqual([]);
       expect(answer.derivedFrom.some((d) => d.eid.startsWith("license"))).toBe(false);
+    } else {
+      expect.fail("expected a single executed AnswerGraph (one realizer registered), not a multi-segment choice");
     }
   });
 
@@ -95,6 +151,8 @@ describe("INV-A3: dispatch no-fallback (N5)", () => {
 
     if ("result" in answer) {
       expect(answer.result).toEqual([]);
+    } else {
+      expect.fail("expected a single executed AnswerGraph (one realizer registered), not a multi-segment choice");
     }
   });
 
@@ -116,6 +174,8 @@ describe("INV-A3: dispatch no-fallback (N5)", () => {
       // An Unknown PropCell must NOT be treated as satisfying (nor as failing in a way that differs
       // from an explicit violation) — both project to "no terminal answer" (N5, never defaulted).
       expect(answer.result).toEqual([]);
+    } else {
+      expect.fail("expected a single executed AnswerGraph (one realizer registered), not a multi-segment choice");
     }
   });
 });

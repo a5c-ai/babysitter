@@ -1325,7 +1325,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     return existsAtInstant(computeEdgeExistSegments(eid), at);
   }
 
-  function getNode(eid: EID): NodeView | null {
+  function getNodeRaw(eid: EID): NodeView | null {
     if (nodeViewCache.has(eid)) return nodeViewCache.get(eid) ?? null;
     const existFacts = byCell.get(`node-exist:${eid}`) ?? [];
     // "No ghost nodes" (m2-2): a node-prop fact with no corresponding node-existence ASSERT ever
@@ -1418,6 +1418,140 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     const view: NodeView = { eid, kind, props, provenance };
     nodeViewCache.set(eid, view);
     return view;
+  }
+
+  /**
+   * M5/T6.7 (INV-A6/INV-A11) — `same_as` node-merge: a deterministic equivalence CLOSURE with a
+   * TOTAL canonical-EID rule (docs/31's "Intermediates and dedup are free — patent node-merge"
+   * section, verbatim): treat every signed, currently-projected `same_as(a,b)` EDGE fact (an ordinary
+   * `Target{kind:"edge", edgeKind:"same_as", from:a, to:b}` assert — no new FactType, no new store) as
+   * an UNDIRECTED edge and fold the reflexive/symmetric/transitive closure via union-find — a pure,
+   * set-resident, order-independent function of `facts` alone (byte-identical across any random
+   * permutation of the same_as multiset, INV-A11(a)). Each equivalence class then projects under the
+   * TOTAL, order-independent canonical EID = the class member MINIMUM by `(namespaceId, localId)`
+   * byte-order (the `tenant` component is deliberately omitted, docs/31: "namespaceId is a
+   * globally-unique frozen genesis fingerprint ... already total across tenants") — computed here as
+   * everything after the EID's first `/` (a namespaced EID is `<tenant>/<namespaceId>/<localId>`,
+   * docs/21 §1), falling back to the whole EID string when it carries no `/` at all. NO hash-tiebreak,
+   * NO insertion-order pick, NO LWW — every replica folding the same admitted set picks the identical
+   * canonical member.
+   *
+   * `not_same_as` disputed-merge conflict surfacing (INV-A11(b)) is NOT implemented here: it is
+   * UNTESTABLE at M5's declared public surface (`Repo` names no read seam for an arbitrary same_as-pair
+   * correction cell — see inv-a11.test.ts's own SCOPE NOTE and this task's `disputes`/`untestable`
+   * output), so building it would be speculative, un-exercised machinery rather than a real seam.
+   */
+  const sameAsParent = new Map<EID, EID>();
+  function sameAsFind(x: EID): EID {
+    if (!sameAsParent.has(x)) sameAsParent.set(x, x);
+    let root = x;
+    while (sameAsParent.get(root) !== root) root = sameAsParent.get(root) as EID;
+    let cur = x;
+    while (sameAsParent.get(cur) !== root) {
+      const next = sameAsParent.get(cur) as EID;
+      sameAsParent.set(cur, root);
+      cur = next;
+    }
+    return root;
+  }
+  function sameAsUnion(a: EID, b: EID): void {
+    const ra = sameAsFind(a);
+    const rb = sameAsFind(b);
+    if (ra !== rb) sameAsParent.set(ra, rb);
+  }
+  for (const f of facts) {
+    if (f.type === "retract") continue;
+    if (f.target.kind !== "edge") continue;
+    const t = f.target as Extract<Target, { kind: "edge" }>;
+    if (t.edgeKind !== "same_as") continue;
+    if (!t.from || !t.to) continue;
+    if (f.value !== undefined && !isTruthyExistence(f.value)) continue;
+    sameAsUnion(t.from, t.to);
+  }
+  function nsLocalKey(eid: EID): string {
+    const slash = eid.indexOf("/");
+    return slash === -1 ? eid : eid.slice(slash + 1);
+  }
+  const sameAsClassMembers = new Map<EID, EID[]>();
+  for (const eid of sameAsParent.keys()) {
+    const root = sameAsFind(eid);
+    const arr = sameAsClassMembers.get(root);
+    if (arr) arr.push(eid);
+    else sameAsClassMembers.set(root, [eid]);
+  }
+  const canonicalByRoot = new Map<EID, EID>();
+  for (const [root, members] of sameAsClassMembers) {
+    let canonical = members[0];
+    for (const m of members) {
+      if (nsLocalKey(m) < nsLocalKey(canonical)) canonical = m;
+    }
+    canonicalByRoot.set(root, canonical);
+  }
+  function canonicalSameAsEid(eid: EID): EID {
+    if (!sameAsParent.has(eid)) return eid;
+    return canonicalByRoot.get(sameAsFind(eid)) ?? eid;
+  }
+
+  /**
+   * MAJOR FIX (round 2, finding #5, INV-A11(b)) — `not_same_as` disputed-merge conflict: docs/31
+   * (verbatim): "A signed not_same_as(a,b) contradicting a derived a~b surfaces a kip:conflict on a
+   * keyed correction cell for the disputed pair, canonicalized to the ordered pair (min, max)."
+   *
+   * Round 1 left this entirely unimplemented (documented `it.skip`). This round implements a MINIMAL,
+   * real version using the ONLY read seam docs/40's `Repo` surface actually declares for arbitrary
+   * node state: `getNode(eid)` — there is no dedicated "keyed correction cell" read API (no
+   * `getConflicts()`/`getCell()` seam is named anywhere in this round's read docs slice either), so
+   * inventing one would be building an un-spec'd API. Instead, this mirrors the ALREADY-established
+   * `KIP_CONFLICT_KIND` convention (`getNodeRaw`'s own `kindConflict` handling above, and
+   * `getEdge`'s below): when a signed `not_same_as(a,b)` fact contradicts a derived `same_as` closure
+   * that would otherwise merge `a` and `b` into one equivalence class, `getNode` for EITHER `a` or `b`
+   * (canonicalized so `(a,b)` and `(b,a)` both resolve to the SAME disputed pair, exactly like the
+   * `same_as` canonical-EID rule's own `(namespaceId, localId)` byte-order) returns `kind:
+   * "kip:conflict"` instead of silently completing the merge — "no in-place rewrite, no silent
+   * merge/split" (docs/31, verbatim). Every OTHER member of `a`'s/`b`'s own (possibly larger)
+   * equivalence class that is NOT itself one of the two disputed EIDs is unaffected — the dispute is
+   * scoped to the named pair's own correction cell, not the whole transitive class.
+   */
+  const notSameAsPairs = new Set<string>();
+  for (const f of facts) {
+    if (f.type === "retract") continue;
+    if (f.target.kind !== "edge") continue;
+    const t = f.target as Extract<Target, { kind: "edge" }>;
+    if (t.edgeKind !== "not_same_as") continue;
+    if (!t.from || !t.to) continue;
+    if (f.value !== undefined && !isTruthyExistence(f.value)) continue;
+    const [min, max] = nsLocalKey(t.from) <= nsLocalKey(t.to) ? [t.from, t.to] : [t.to, t.from];
+    notSameAsPairs.add(`${min} ${max}`);
+  }
+  const disputedEids = new Set<EID>();
+  if (notSameAsPairs.size > 0) {
+    for (const pairKey of notSameAsPairs) {
+      const [a, b] = pairKey.split(" ") as [EID, EID];
+      // A contradiction requires the pair to ALSO be joined by the derived same_as closure — a bare
+      // not_same_as with no corresponding same_as isn't a contradiction of anything (nothing to
+      // dispute), just an (as-yet-unexercised) ordinary fact.
+      if (sameAsParent.has(a) && sameAsParent.has(b) && sameAsFind(a) === sameAsFind(b)) {
+        disputedEids.add(a);
+        disputedEids.add(b);
+      }
+    }
+  }
+
+  /** The public `getNode` — wraps `getNodeRaw` with `same_as` canonical-EID resolution (see above),
+   * EXCEPT for an eid named in a disputed `not_same_as` pair (see `disputedEids` above), which
+   * surfaces `kind: KIP_CONFLICT_KIND` instead of completing the merge. */
+  function getNode(eid: EID): NodeView | null {
+    if (disputedEids.has(eid)) {
+      const raw = getNodeRaw(eid);
+      if (!raw) return null;
+      return { ...raw, kind: KIP_CONFLICT_KIND };
+    }
+    const canonical = canonicalSameAsEid(eid);
+    if (canonical === eid) return getNodeRaw(eid);
+    const canonicalView = getNodeRaw(canonical);
+    if (canonicalView) return canonicalView;
+    const ownView = getNodeRaw(eid);
+    return ownView ? { ...ownView, eid: canonical } : null;
   }
 
   function getEdge(eid: EID): EdgeView | null {

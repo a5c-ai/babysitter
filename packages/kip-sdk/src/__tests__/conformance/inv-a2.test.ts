@@ -25,6 +25,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { KipRepo } from "../../index";
+import { ontologyRefForBinding, serializeBindingPayload } from "../../contextual";
 import { assertNode, makeBindingOptions, makeManifest, makeQuery } from "./fixtures-m5";
 
 describe("INV-A2: compile-determinism + DAG order", () => {
@@ -70,24 +71,35 @@ describe("INV-A2: compile-determinism + DAG order", () => {
     await assertNode(repo, "person/tal", "person");
 
     // Two independent hops off the seed (person -> org via employed_by; person -> school via
-    // studied_at) that a later join step (e.g. "shared_city") could consume as a multi-input join
-    // (docs/31's D-5b.8: "a step MAY consume MORE THAN ONE upstream instance").
+    // studied_at), with `studied_at` declaring a CLAIM-12 `requires` on `employed_by` (the patent's
+    // "a step MAY consume MORE THAN ONE upstream instance" multi-input join, docs/31 D-5b.8) — a
+    // ROUND-2 STRENGTHENING (finding: "vacuous `if (segment.deps)` guard"): round 1 registered NO
+    // `requires` at all, so `segment.deps` was always empty/absent and the `if` below never actually
+    // ran its body against a real dependency edge. Registering a genuine `requires` link makes `deps`
+    // NON-EMPTY for real, so the assertions below are no longer vacuous.
     await repo.registerFunctionality("employed_by", makeManifest({ name: "employed-by-lookup" }), makeBindingOptions({ weight: 1 }));
-    await repo.registerFunctionality("studied_at", makeManifest({ name: "studied-at-lookup" }), makeBindingOptions({ weight: 1 }));
+    await repo.registerFunctionality(
+      "studied_at",
+      makeManifest({ name: "studied-at-lookup" }),
+      makeBindingOptions({ weight: 1, requires: ["employed_by"] }),
+    );
 
     const query = makeQuery({ seed: "person/tal", target: "org", via: ["employed_by", "studied_at"] });
     const segment = await repo.compileContextualQuery(query);
 
-    if (segment.deps) {
-      for (const [producer, consumer] of segment.deps) {
-        // Every `deps` index must reference a real `steps[]` position (no out-of-range index —
-        // MALFORMED per docs/31, rejected at compile) and a producer must precede its consumer.
-        expect(producer).toBeGreaterThanOrEqual(0);
-        expect(producer).toBeLessThan(segment.steps.length);
-        expect(consumer).toBeGreaterThanOrEqual(0);
-        expect(consumer).toBeLessThan(segment.steps.length);
-        expect(producer).toBeLessThan(consumer);
-      }
+    // The `requires` link above MUST have produced a genuinely non-empty `deps` — a build that
+    // silently drops it (or never wires `requires` into `deps` at all) would fail here instead of
+    // vacuously skipping the loop below.
+    expect(segment.deps).toBeDefined();
+    expect((segment.deps ?? []).length).toBeGreaterThan(0);
+    for (const [producer, consumer] of segment.deps ?? []) {
+      // Every `deps` index must reference a real `steps[]` position (no out-of-range index —
+      // MALFORMED per docs/31, rejected at compile) and a producer must precede its consumer.
+      expect(producer).toBeGreaterThanOrEqual(0);
+      expect(producer).toBeLessThan(segment.steps.length);
+      expect(consumer).toBeGreaterThanOrEqual(0);
+      expect(consumer).toBeLessThan(segment.steps.length);
+      expect(producer).toBeLessThan(consumer);
     }
   });
 
@@ -123,5 +135,85 @@ describe("INV-A2: compile-determinism + DAG order", () => {
 
     const query = makeQuery({ seed: "person/tal", target: "person", via: ["employed_by", "owned_by"] });
     await expect(repo.compileContextualQuery(query)).rejects.toMatchObject({ code: "ERR_ILL_TYPED_SEGMENT" });
+  });
+
+  it("ROUND 3 FIX (CRITICAL finding #1): a multi-hop via position with ZERO registered bindings contributes ZERO candidate chains — never a fabricated FunctionalityBinding for the unregistered position", async () => {
+    const repo = new KipRepo();
+    await assertNode(repo, "person/tal", "person");
+
+    // Only "employed_by" is registered; "totally_unregistered_edge" (the second `via` position) has
+    // NO FunctionalityBinding at all — the exact live repro the round-3 critics reported: round 2's
+    // multi-hop branch mapped the unregistered position to `[undefined]` and `buildChain` synthesized
+    // a FAKE binding (`microagentName: "totally_unregistered_edge", version: "0.0.0"`), so
+    // `compileContextualQuery` returned a materializable segment for a functionality NO ONE
+    // registered.
+    await repo.registerFunctionality("employed_by", makeManifest({ name: "employed-by-lookup" }), makeBindingOptions({}));
+
+    const query = makeQuery({
+      seed: "person/tal",
+      target: "org",
+      via: ["employed_by", "totally_unregistered_edge"],
+    });
+    const segment = await repo.compileContextualQuery(query);
+
+    // The fix: NO combination can be built touching the unregistered position, so the whole compile
+    // collapses to the empty segment (mirroring the 0-hop/1-hop branches' own `emptySegment()`
+    // behavior) — never a step naming the unregistered edgeKind as a fabricated microagentName.
+    expect(segment.steps).toEqual([]);
+    expect(segment.alternatives).toEqual([]);
+    for (const alt of [segment, ...segment.alternatives]) {
+      for (const step of alt.steps) {
+        expect(step.microagentName).not.toBe("totally_unregistered_edge");
+      }
+    }
+
+    // The live repro's own assertion: executing this (empty) segment must never materialize a real
+    // "org" result for the unregistered hop.
+    const answer = await repo.executeSegment(segment);
+    expect(answer.result).toEqual([]);
+    expect(answer.intermediates).toEqual([]);
+  });
+
+  it("ROUND 3 FIX (CRITICAL finding #2): compileContextualQuery pinned to an EARLY asOf.validTime does not see a FunctionalityBinding registered at a LATER validFrom — the same pinned validTime is byte-identical regardless of what gets asserted afterward", async () => {
+    const repo = new KipRepo();
+    await assertNode(repo, "person/tal", "person");
+
+    // An "early" realizer, asserted at validFrom=0 (registerFunctionality's own convention).
+    await repo.registerFunctionality("employed_by", makeManifest({ name: "employed-by-early" }), makeBindingOptions({}));
+
+    // A SECOND realizer for the SAME hop, hand-asserted directly (registerFunctionality itself has no
+    // caller-supplied validFrom seam) at a FAR LATER validFrom — simulating "a binding some other
+    // caller registers after the frontier this query wants pinned to."
+    const futureProvenance = { author: "m5-fixture", signature: "sig:future", publicKeyFingerprint: "future-fpr", signedFields: [] };
+    await repo.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "schema", ontologyRef: ontologyRefForBinding("employed_by", "employed-by-future", "1.0.0") },
+      value: serializeBindingPayload({ edgeKind: "employed_by", microagentName: "employed-by-future", version: "1.0.0" }),
+      validFrom: 1_000_000,
+      validTo: null,
+      replicaId: "m5-fixture-replica",
+      provenance: futureProvenance,
+    });
+
+    // Pinned BEFORE the later realizer's own validFrom: only the early realizer is visible, and this
+    // is STABLE — a build that (per round 2) ignored `validTime` entirely for fact-set membership
+    // would see BOTH realizers regardless of which validTime was requested.
+    const earlyQuery = makeQuery({ seed: "person/tal", target: "org", via: ["employed_by"], asOf: { validTime: 500 } });
+    const earlySegment = await repo.compileContextualQuery(earlyQuery);
+    const earlyRealizers = [earlySegment, ...earlySegment.alternatives].map((s) => s.steps[0]?.microagentName);
+    expect(earlyRealizers).toEqual(["employed-by-early"]);
+
+    // Pinned AFTER the later realizer's own validFrom: both are now visible.
+    const lateQuery = makeQuery({ seed: "person/tal", target: "org", via: ["employed_by"], asOf: { validTime: 2_000_000 } });
+    const lateSegment = await repo.compileContextualQuery(lateQuery);
+    const lateRealizers = new Set([lateSegment, ...lateSegment.alternatives].map((s) => s.steps[0]?.microagentName));
+    expect(lateRealizers).toEqual(new Set(["employed-by-early", "employed-by-future"]));
+
+    // Reproducibility: re-compiling the SAME early pin again (as if more time had passed / more facts
+    // had been asserted in the interim) is still byte-identical — never drifting toward the enlarged
+    // live set.
+    const earlySegmentAgain = await repo.compileContextualQuery(earlyQuery);
+    expect(earlySegmentAgain).toEqual(earlySegment);
   });
 });

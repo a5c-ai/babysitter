@@ -50,6 +50,8 @@ describe("INV-A8: answer-graph = derived_from projection", () => {
       for (const eid of [...answer.result, ...answer.intermediates]) {
         expect(reachable.has(eid)).toBe(true);
       }
+    } else {
+      expect.fail(`expected a single executed AnswerGraph (one realizer per position), got a choice: ${JSON.stringify(answer)}`);
     }
   });
 
@@ -68,6 +70,8 @@ describe("INV-A8: answer-graph = derived_from projection", () => {
         expect(entry?.factId).toBeTruthy();
         expect(entry?.producedBy).toBeDefined();
       }
+    } else {
+      expect.fail(`expected a single executed AnswerGraph (one realizer registered), got a choice: ${JSON.stringify(answer)}`);
     }
   });
 
@@ -88,6 +92,45 @@ describe("INV-A8: answer-graph = derived_from projection", () => {
 
     if ("result" in answer) {
       expect(answer.result).toEqual([]);
+    } else {
+      expect.fail(`expected a single executed AnswerGraph (one realizer per position), got a choice: ${JSON.stringify(answer)}`);
     }
+  });
+
+  it("MINOR addition (round 3): a derived_from fact with a corrupted (non-JSON) value projects the kip:malformed-derived-from sentinel edgeKind, never silently mislabeled as an ordinary derived_from edge", async () => {
+    const repo = new KipRepo();
+    await assertNode(repo, "person/tal", "person");
+
+    // A hand-asserted derived_from edge whose VALUE is not valid JSON — `readAnswerGraph`'s own
+    // `JSON.parse` on the edge's value throws, which must surface a distinguishable sentinel label
+    // rather than silently falling back to the plain "derived_from" edgeKind (which would make a
+    // corrupted payload indistinguishable from an honestly-undecorated one).
+    await repo.assertFact({
+      type: "assert",
+      v: 1,
+      target: {
+        kind: "edge",
+        eid: "derived_from:person/tal->derived:corrupted",
+        edgeKind: "derived_from",
+        from: "person/tal",
+        to: "derived:corrupted",
+      },
+      value: "{not-valid-json",
+      validFrom: 0,
+      validTo: null,
+      replicaId: "m5-fixture-replica",
+      provenance: { author: "m5-fixture", signature: "sig:corrupt", publicKeyFingerprint: "corrupt-fpr", signedFields: [] },
+    });
+
+    // `executeSegment` on a Segment with NO steps is a pure read straight through to
+    // `readAnswerGraph(seed, [])` (index.ts: "if (steps.length === 0) return
+    // this.readAnswerGraph(seed, [])"), letting this test exercise the derived_from projection
+    // directly without needing a real microagent dispatch.
+    const answer = await repo.executeSegment({ steps: [], alternatives: [], seed: "person/tal" });
+
+    expect(answer.intermediates).toContain("derived:corrupted");
+    const edge = answer.edges.find((e) => e.from === "person/tal" && e.to === "derived:corrupted");
+    expect(edge).toBeDefined();
+    expect(edge?.edgeKind).toBe("kip:malformed-derived-from");
   });
 });

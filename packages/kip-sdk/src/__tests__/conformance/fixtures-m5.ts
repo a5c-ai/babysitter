@@ -61,12 +61,15 @@ export function makeManifest(overrides: Partial<MicroagentManifest> = {}): Micro
 
 /**
  * A well-formed `FunctionalityBinding`-shaped OPTIONS object for the caller-supplied subset
- * `Repo.registerFunctionality`'s own `binding?` param picks (`weight`/`condition`/`requires`/
- * `relationClass`/`tags` — see that method's own doc comment, docs/40's "KNOWN GAP" note).
+ * `Repo.registerFunctionality`'s own `binding?` param picks (`weight`/`condition`/`constraint`/
+ * `requires`/`relationClass`/`tags` — see that method's own doc comment, docs/40's "KNOWN GAP" note).
+ * `constraint` was added round 2 (MAJOR finding #3 — it was previously entirely absent from this
+ * options shape, making `executeSegment`'s own `constraint` guard structurally unreachable from any
+ * caller).
  */
 export function makeBindingOptions(
-  overrides: Pick<FunctionalityBinding, "weight" | "condition" | "requires" | "relationClass" | "tags"> = {},
-): Pick<FunctionalityBinding, "weight" | "condition" | "requires" | "relationClass" | "tags"> {
+  overrides: Pick<FunctionalityBinding, "weight" | "condition" | "constraint" | "requires" | "relationClass" | "tags"> = {},
+): Pick<FunctionalityBinding, "weight" | "condition" | "constraint" | "requires" | "relationClass" | "tags"> {
   return { ...overrides };
 }
 

@@ -30,6 +30,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { KipRepo } from "../../index";
+import { generateEd25519KeyPair } from "../../signing";
 import { assertNode, makeBindingOptions, makeManifest, makeQuery } from "./fixtures-m5";
 
 describe("INV-A1: microagents-are-clients — no active-layer path mutates state except by appending a signed fact", () => {
@@ -70,9 +71,55 @@ describe("INV-A1: microagents-are-clients — no active-layer path mutates state
         expect(view?.provenance.signature).toBeTruthy();
       }
     } else {
-      // A multi-segment typed choice is itself zero-dispatch/zero-fact (INV-A7) — vacuously
-      // consistent with INV-A1 (nothing was mutated at all).
-      expect(Array.isArray(answer.segments)).toBe(true);
+      // Only ONE realizer is registered for the only registered EdgeKind here ("employed_by"), so
+      // compileContextualQuery's composition-discovery branch can never surface more than one
+      // candidate segment — a `{ kind: "choice" }` return would be a genuine regression, not a
+      // vacuously-consistent alternative outcome (round-2 else-fail strengthening).
+      expect.fail(`expected a single executed AnswerGraph, got a multi-segment choice: ${JSON.stringify(answer)}`);
+    }
+  });
+
+  it("ACCEPTED M5-ONLY RESIDUAL (MAJOR finding, round 3, PINNED — no authority/root-of-trust check on registration facts): a functionality registered by a replica whose OWN key is NOT among the declared genesis rootKeys is compiled and dispatched exactly like a genesis-rooted registration", async () => {
+    // `rootKeys` explicitly names a DIFFERENT (placeholder) operator key — this replica's own
+    // self-generated signing identity (ADR-B2) is NOT among the declared trusted roots. A real
+    // authority-chain check (INV-10, M8 scope) would need to demote/reject this registration; today
+    // `collectRegisteredBindings`/`findRegisteredManifest` (contextual.ts) consult ONLY signature
+    // validity + admission, never which key signed it relative to genesis `rootKeys` — see
+    // `collectRegisteredBindings`'s own doc comment for the honest scope note (no un-spec'd M8
+    // authority-chain machinery is invented here).
+    //
+    // ROUND 4 FIX (finding #4): round 3's placeholder string
+    // `"-----BEGIN PUBLIC KEY-----\nSOME-OTHER-OPERATORS-KEY\n-----END PUBLIC KEY-----"` is NOT valid
+    // PEM key material — `createPublicKey` (node:crypto, via `importEd25519PublicKey`, signing.ts)
+    // throws on it, and a malformed `rootKeys` entry is silently dropped at `open()`/the constructor
+    // (see index.ts's own "a malformed genesis rootKeys entry is a manifest-authoring error, not an
+    // ingest-time" comment), so this test's `rootKeys` array never actually populated the key registry
+    // with anything — functionally IDENTICAL to a bare `new KipRepo()`, even though the assertion still
+    // happened to land on the correct (accepted-residual) conclusion for the wrong reason. Using a
+    // REAL generated Ed25519 keypair's real public-key PEM (a genuinely different, valid, non-self
+    // operator key this replica does not hold the private half of) makes `rootKeys` genuinely populate
+    // the registry with a different, valid key before the assertion below, so the "rogue registration
+    // is accepted anyway" conclusion is now actually exercised against a real non-matching root key,
+    // not a no-op.
+    const otherOperatorKeyPair = generateEd25519KeyPair();
+    const otherOperatorPublicKeyPem = otherOperatorKeyPair.publicKey.export({ type: "spki", format: "pem" }) as string;
+    const repo = new KipRepo({ rootKeys: [otherOperatorPublicKeyPem] });
+    await assertNode(repo, "person/tal", "person");
+
+    const manifest = makeManifest({ name: "rogue-employed-by-lookup", version: "1.0.0" });
+    await repo.registerFunctionality("employed_by", manifest, makeBindingOptions({ weight: 1 }));
+
+    const query = makeQuery({ seed: "person/tal", target: "org" });
+    const answer = await repo.runContextualQuery(query);
+
+    // PINS the current (accepted) behavior: the "rogue" (non-genesis-rooted) registration is
+    // compiled/dispatched/materialized exactly as if it were trusted — this assertion is expected to
+    // start FAILING (forcing a conscious update, never a silent widening) once M8's authority-chain
+    // overlay (INV-10) is wired into the active-knowledge registration path.
+    if ("result" in answer) {
+      expect(answer.result.length).toBe(1);
+    } else {
+      expect.fail(`expected a single executed AnswerGraph, got a multi-segment choice: ${JSON.stringify(answer)}`);
     }
   });
 });

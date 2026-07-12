@@ -56,6 +56,19 @@ import {
   type SelfWitnessedExcisionRecord,
 } from "./proj";
 import type { CellReducerAssociations } from "./cell-reducers";
+import {
+  collectRegisteredBindings,
+  derivedFromEdgeEidFor,
+  evaluateCondition,
+  findConditionNodeMalformation,
+  materializedEidFor,
+  ontologyRefForBinding,
+  ontologyRefForManifest,
+  serializeBindingPayload,
+  topologicalOrder,
+  validateAgainstOutputSchema,
+  type RegisteredBindingRecord,
+} from "./contextual";
 
 // ---------------------------------------------------------------------------
 // 1. Core scalar / branded types (docs/21-data-model.md §1)
@@ -187,6 +200,17 @@ export interface Provenance {
    * appears in any projection the frozen M0/M1 conformance suite exercises.
    */
   conflicted?: boolean;
+  /**
+   * CRITICAL FIX #2 (M5 round-2, INV-A2/docs/31 Phase 2): "provenance.source naming the
+   * MicroagentInvocation... AND RECORDING THE RESOLVED asOf FRONTIER". Stamped ONLY by
+   * `executeSegment` on the facts it authors — the compiled/resolved `AsOf` (`opts.asOf` or the
+   * originating `Segment.asOf`) the hop's guards were evaluated against and the fact was minted
+   * under, so a reproducible mining run can verify exactly which frontier produced this fact.
+   * Never part of the canonical signed payload (`canonical-payload.ts`'s `buildCanonicalEnvelope`
+   * only extracts `author`/`publicKeyFingerprint` off `provenance` — mirrors `source`/`confidence`
+   * above, advisory-only, never affects `factCID`/signature/reducer behavior).
+   */
+  resolvedAsOf?: AsOf;
 }
 
 /** Annotated AFTER durable recording — NOT signed, NOT part of FactId, NOT read by proj/orderKey. */
@@ -622,6 +646,55 @@ export interface MicroagentManifest {
   builtIn?: boolean;
 }
 
+/**
+ * docs/31's own opening paragraph: "All microagent identifiers (MicroagentManifest,
+ * MicroagentInvocation, MicroagentResult, IsolationMode) are the @a5c-ai/genty-core types; do not
+ * invent fields." `@a5c-ai/genty-core` is NOT a dependency of this package (see package.json) and
+ * this round's hard rules forbid adding a new runtime dependency to reach it — so, mirroring the
+ * ALREADY-established convention `MicroagentManifest`/`IsolationMode` set above ("transcribed
+ * verbatim, promoted to a kip-side interface"), these two are defined LOCALLY as well, carrying
+ * exactly the fields docs/31's own text says the execution path reads: "The execution path reads
+ * ONLY MicroagentResult.output, MicroagentResult.exitCode, MicroagentInvocation.input, and the
+ * EFFECTIVE timeout" (the "Timeout rule": "the orchestrator MUST set MicroagentInvocation.timeout to
+ * the bound manifest's runtime.timeout; that single value is the EFFECTIVE timeout the
+ * dispatch-failure outcome is evaluated against").
+ *
+ * CRITICAL FIX #1 (M5 round-2): round 1 had NO invocation/result shape and NO dispatch seam at
+ * all — `executeSegment` fabricated a deterministic placeholder output directly (the exact
+ * "fabricating a plausible output" N5 anti-pattern docs/31 forbids) instead of ever constructing an
+ * invocation or calling anything. `dispatchMicroagent` below is the real (if minimal) dispatch seam
+ * this round adds: an injectable, constructor-supplied function `executeSegment` actually calls,
+ * with a documented default stub for the common case where no test cares about a specific dispatch
+ * outcome. `elapsedMs` on `MicroagentResult` is this round's own honestly-scoped addition (genty-
+ * core's real result shape is not in this task's read docs slice) — it exists purely so the
+ * injectable seam has a concrete, deterministic way to report "ran longer than
+ * `MicroagentInvocation.timeout`" (INV-A3(c)) without spawning a real subprocess/timer.
+ */
+export interface MicroagentInvocation {
+  id: string;
+  manifest: { name: string; version: string };
+  input: unknown;
+  /** The EFFECTIVE timeout (docs/31's "Timeout rule") — derived from the bound manifest's
+   *  `runtime.timeout`, never caller-supplied independently. */
+  timeout?: number;
+}
+
+export interface MicroagentResult {
+  exitCode: number;
+  output: unknown;
+  /** Honestly-scoped addition (see this section's own doc comment) — when present and greater than
+   *  the invoking `MicroagentInvocation.timeout`, `executeSegment` treats the step as dispatch-failure
+   *  (INV-A3(c)), exactly like a non-zero `exitCode` or schema-invalid `output`. */
+  elapsedMs?: number;
+}
+
+/** The injectable microagent-dispatch seam (see `MicroagentInvocation`'s own doc comment) —
+ *  `KipRepo`'s constructor accepts one; the default (`KipRepo`'s own static
+ *  `defaultDispatchMicroagent`) always "succeeds" deterministically so every M5 conformance test that
+ *  is NOT deliberately exercising a dispatch-failure outcome continues to materialize a hop's output
+ *  through this SAME real dispatch → validate → author pipeline. */
+export type DispatchMicroagentFn = (invocation: MicroagentInvocation) => Promise<MicroagentResult>;
+
 /** docs/31 §"FunctionalityBinding (normative shape)" `ConditionNode` — a graded range and/or complex
  *  predicate over projected PropCells (pure over proj; `unknown` cells propagate `unknown`, never
  *  defaulted). A `range` with NEITHER min NOR max, or a NaN/±Infinity numeric leaf, is MALFORMED and
@@ -665,7 +738,17 @@ export interface FunctionalityBinding {
   /** Advisory manifest-tag override at the binding level (see this section's own top doc comment for
    *  why this field is additive beyond docs/31's own FunctionalityBinding field list). */
   tags?: string[];
-  /** Cardinality the hop produces, for DSL `?`/`/` expectation checking. */
+  /**
+   * Cardinality the hop produces, for DSL `?`/`/` expectation checking (docs/31's kip-flavored query
+   * DSL section — `?` expects a list, `/` expects a single). MINOR-FINDING DOCUMENTATION (round 2):
+   * `registerFunctionality`'s own binding-options `Pick` (below) has no caller-supplied cardinality
+   * field, and no per-`(edgeKind,sourceKind,targetKind)` schema-registration API exists at M5 (see
+   * `contextual.ts`'s own top doc comment) from which a REAL per-hop cardinality signal could be
+   * derived — so `compiledStepFrom` (below) stamps this as the fixed constant `"many"` for every
+   * compiled step. This is an honestly-documented fixed constant with NO CONSUMER in this round (the
+   * DSL's own `?`/`/` expectation-checking client layer, docs/31, is explicitly N3-deferred and not
+   * implemented at M5), rather than a silently-wrong/fabricated per-hop signal.
+   */
   cardinality: "one" | "many";
 }
 
@@ -701,6 +784,17 @@ export interface Segment {
    *  `alternatives.length > 0` ⇒ a typed CHOICE surfaced to the caller, NEVER an arbitrary pick (N5,
    *  INV-A7); `weight` deterministically ORDERS this list for presentation but never collapses it. */
   alternatives: Segment[];
+  /** ADDITIVE (beyond docs/31's own field list — mirroring the precedent already set by
+   *  `FunctionalityBinding.tags` above, docs/40's own "KNOWN GAP" note): `executeSegment`'s declared
+   *  signature (docs/40) takes no separate seed/asOf parameter, yet PHASE 2 execution MUST start
+   *  dispatch from a CONCRETE seed instance and record the RESOLVED `asOf` in provenance (docs/31's
+   *  own Phase 2 description) — the compiled `Segment` is the only value that travels from
+   *  `compileContextualQuery` to `executeSegment`, so it is the only place this can ride along.
+   *  Populated by `compileContextualQuery`, read by `executeSegment`; never part of the byte-identity
+   *  comparison INV-A2 actually cares about (that invariant is about `steps`/`deps`/`alternatives`),
+   *  and always identical between two replicas compiling the SAME `ContextualQuery` (INV-A2). */
+  seed?: EID;
+  asOf?: AsOf;
 }
 
 /** docs/31 §"Query → Segment → AnswerGraph (normative shapes)" — the patent's "answer graph":
@@ -748,6 +842,16 @@ export type KipErrorCode =
   | "ERR_UNAUTHORIZED_EXCISION"
   | "ERR_EXCISE_EVIDENCE_REQUIRED"
   | "ERR_COMPILE_CYCLIC_DEPS"
+  /**
+   * Steps chaining violates targetKind→sourceKind compatibility (§5b.1). DOCUMENTED SCOPE NARROWING
+   * (round 2, honest-disclosure precedent matching INV-A3(a-c)/INV-A11(b)): `KipRepo`'s own
+   * `compileContextualQuery` throws this ONLY for a multi-hop chain whose declared target loops back
+   * to the seed's own NodeKind (the self-loop heuristic) — it does NOT implement general
+   * per-adjacent-pair `steps[i].targetKind` vs `steps[i+1].sourceKind` compatibility checking, because
+   * no `NodeKindDef`/`is_a` schema-registration API exists at M5 from which a REAL per-hop kind signal
+   * could be derived (see `compileContextualQuery`'s own doc comment for the full reasoning). This is
+   * named here, not silently claimed as general adjacency enforcement this build does not have.
+   */
   | "ERR_ILL_TYPED_SEGMENT"
   | "ERR_UNREGISTERED_MANIFEST"
   | "ERR_INVALID_WEIGHT"
@@ -763,7 +867,27 @@ export type KipErrorCode =
    * config/behavior disconnect (the manifest's old `"per-commit"` default matched NEITHER
    * spec-named rule while `regenerateHeads()` silently always ran rule (a) regardless).
    */
-  | "ERR_UNSUPPORTED_REGEN_BOUNDARY_RULE";
+  | "ERR_UNSUPPORTED_REGEN_BOUNDARY_RULE"
+  /**
+   * ROUND-4 FIX (finding #3, honest-disclosure precedent matching ERR_ILL_TYPED_SEGMENT's own
+   * DOCUMENTED SCOPE NARROWING above): docs/31 §"Single-step decomposition" (D-5b.8) names a REAL
+   * capability — "a step MAY consume more than one upstream instance (multi-input join)" — that this
+   * build does NOT implement. `executeSegment`'s deps-based producer resolution can only thread a
+   * SINGLE materialized producer into each step's `MicroagentInvocation.input`; a `Segment.deps` DAG
+   * whose consumer has more than one distinct producer (reachable today via `compileContextualQuery`
+   * itself: a step declaring more than one `requires` EdgeKind, each satisfied by a DIFFERENT other
+   * step in the same segment, mints exactly this shape) is REJECTED here rather than silently
+   * narrowed to just the first-materialized producer — which would fabricate a plausible single-input
+   * answer over an incomplete input, the exact silent-narrowing hazard N5 forbids. Thrown by
+   * `compileContextualQuery` (rejecting that candidate chain, mirroring how `ERR_COMPILE_CYCLIC_DEPS`
+   * excludes a malformed combination from `alternatives` rather than silently admitting it) AND
+   * defensively by `executeSegment` itself (for a hand-built `Segment` bypassing compile). A REAL
+   * multi-input join (threading every producer into `MicroagentInvocation.input`, and defining what
+   * `constraint`/`condition` even means against more than one producer's PropCells) is un-spec'd
+   * machinery beyond this round's scope — tracked as a residual for a future round, never silently
+   * implemented as a guess.
+   */
+  | "ERR_MULTI_INPUT_JOIN_UNSUPPORTED";
 
 /**
  * Domain outcomes (`pending`, `pin-incomplete`, a `conflict` segment, `status: "exhausted"`, ...)
@@ -836,7 +960,7 @@ export interface Repo {
   registerFunctionality(
     edgeKind: EdgeKind,
     manifest: MicroagentManifest,
-    binding?: Pick<FunctionalityBinding, "weight" | "condition" | "requires" | "relationClass" | "tags">,
+    binding?: Pick<FunctionalityBinding, "weight" | "condition" | "constraint" | "requires" | "relationClass" | "tags">,
   ): Promise<FactId>;
   compileContextualQuery(q: ContextualQuery): Promise<Segment>;
   executeSegment(segment: Segment, opts?: { asOf?: AsOf }): Promise<AnswerGraph>;
@@ -865,6 +989,17 @@ export interface Repo {
  * rule (a) anyway — see this task's disputes for the follow-up.
  */
 const REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS = "author-hlc-contiguous";
+
+/**
+ * MAJOR FIX (round 2, `readAnswerGraph`, repo rule "fallbacks are evil"): round 1's parse of a
+ * `derived_from` fact's own JSON `value` swallowed a `JSON.parse` failure and silently kept the
+ * literal `"derived_from"` label — masking a genuinely CORRUPTED payload as an ordinary, unremarkable
+ * edge. This sentinel `EdgeKind` (mirroring proj.ts's own `KIP_CONFLICT_KIND = "kip:conflict"`
+ * distinguishable-label convention) is surfaced instead, so a caller inspecting
+ * `AnswerGraph.edges[].edgeKind` can tell "a real derived_from hop whose realized edgeKind happens to
+ * be literally named derived_from" apart from "this fact's own value payload failed to parse".
+ */
+const KIP_MALFORMED_DERIVED_FROM_EDGE_KIND = "kip:malformed-derived-from";
 
 // ---------------------------------------------------------------------------
 // 9. `KipRepo` — a minimal concrete Repo, every method a throwing stub.
@@ -994,6 +1129,30 @@ export class KipRepo implements Repo {
    */
   private readonly regenBoundaryRule: string;
 
+  /** CRITICAL FIX #1 (round 2): the injectable microagent-dispatch seam `executeSegment` calls for
+   *  every step — see the constructor option and `DispatchMicroagentFn`'s own doc comment. */
+  private readonly dispatchMicroagent: DispatchMicroagentFn;
+
+  /**
+   * The default `dispatchMicroagent` — a documented, deterministic "always succeeds" stub used when
+   * no test-supplied dispatch function is configured. It does NOT spawn any real process (no
+   * declared execution-harness seam exists at M5's public surface, see inv-a3.test.ts's own SCOPE
+   * NOTE); it exists purely so ordinary M5 tests (that are not deliberately exercising a dispatch
+   * failure) continue to materialize a hop's output through the SAME real
+   * dispatch → validate-against-outputSchema → author pipeline every step now goes through — never a
+   * fabricated fact authored WITHOUT going through that pipeline (the round-1 anti-pattern this round
+   * fixes). The output is a pure, deterministic function of the invocation's own fields (never
+   * `Date.now()`/`Math.random()`), so re-invoking the SAME invocation for the SAME step is byte-
+   * identical (INV-A6).
+   */
+  private static async defaultDispatchMicroagent(invocation: MicroagentInvocation): Promise<MicroagentResult> {
+    return {
+      exitCode: 0,
+      output: { realizer: invocation.manifest, input: invocation.input },
+      elapsedMs: 0,
+    };
+  }
+
   /**
    * M3/T4.2 addition: a MINIMAL, same-process replica registry keyed by `replicaId`, letting
    * `sync(remote)` (below) resolve a `RemoteRef` string to another live `KipRepo` instance in this
@@ -1053,6 +1212,15 @@ export class KipRepo implements Repo {
      * construction path) is never spuriously flagged as misconfigured.
      */
     regenBoundaryRule?: string;
+    /**
+     * CRITICAL FIX #1 (round 2, T6.3.1/INV-A3): the injectable microagent-dispatch seam
+     * `executeSegment` actually calls for every step — see `DispatchMicroagentFn`'s own doc comment.
+     * Defaults to `KipRepo.defaultDispatchMicroagent` (a documented, deterministic "always succeeds"
+     * stub) so a bare `new KipRepo()` (every M5 conformance test NOT deliberately exercising a
+     * dispatch-failure outcome) continues to materialize hops through this same real pipeline; tests
+     * that need a specific INV-A3(a)/(b)/(c) outcome supply their OWN function here instead.
+     */
+    dispatchMicroagent?: DispatchMicroagentFn;
   }) {
     this.explicitDir = options?.dir;
     this.hashAlgo = options?.hashAlgo ?? "sha1";
@@ -1062,6 +1230,7 @@ export class KipRepo implements Repo {
     this.cellReducers = options?.cellReducers;
     this.trustedExciseKeyFingerprints = new Set(options?.trustedExciseKeys ?? []);
     this.regenBoundaryRule = options?.regenBoundaryRule ?? REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS;
+    this.dispatchMicroagent = options?.dispatchMicroagent ?? KipRepo.defaultDispatchMicroagent;
     if (options?.keyPair) {
       this.ownKeyPair = options.keyPair;
       this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
@@ -1461,6 +1630,95 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * CRITICAL FIX #2 (round 2): the fact-frontier SELECTION half of `asOf()`'s own txTime lens,
+   * factored out so both `asOf()` (below) and the active-knowledge seams (`compileContextualQuery`,
+   * T6.2) can route their reads through the identical, real frontier-selection logic — rather than
+   * `compileContextualQuery` always folding `this.currentFacts()` live regardless of what `q.asOf`
+   * asked for (round 1's bug: `q.asOf` was accepted and even stamped onto the compiled `Segment`, but
+   * never actually consulted to select which facts got folded). See `asOf()`'s own doc comment for
+   * the txTime/believer semantics this preserves unchanged.
+   */
+  private selectFactsForAsOf(asOf: AsOf): Fact[] {
+    const believer = asOf.believer ?? this.replicaId;
+    if (asOf.txTime !== undefined) {
+      if (believer !== this.replicaId) {
+        throw new Error(
+          "unimplemented: asOf({txTime, believer}) for a believer other than this replica's own replicaId " +
+            "— cross-replica belief-audit requires M3 sync machinery (this replica cannot observe another " +
+            "replica's rxFrom ingest order)",
+        );
+      }
+      const cutoff = asOf.txTime;
+      return this.currentFactsWithOid()
+        .filter(({ oid }) => {
+          // Looked up by the fact's real content `oid` (matching how `ingest()` stamps
+          // `rxFromByOid`), NOT by the caller-declared `f.id` — see `rxFromByOid`'s own doc comment
+          // for why keying this by the unverified declared id would be a same-class bug.
+          const rxFrom = this.rxFromByOid.get(oid);
+          // A durably-held fact this replica never itself recorded an in-memory rxFrom for (e.g. a
+          // fresh `KipRepo` instance re-opened against an existing `dir`, since `rxFromByOid` is
+          // in-memory-only this round — see its own doc comment) is conservatively EXCLUDED from the
+          // belief-audit lens rather than guessed either way — never fabricating a belief this
+          // replica cannot actually attest to.
+          if (rxFrom === undefined) return false;
+          return canon(rxFrom) <= canon(cutoff);
+        })
+        .map(({ fact }) => fact);
+    }
+    // The convergent validTime-only lens (INV-11): the full currently-admitted set, exactly like a
+    // plain `getNode`/`getEdge` read — never consults `rxFrom` at all. NOTE: this method deliberately
+    // does NOT ALSO filter fact-set MEMBERSHIP by `asOf.validTime` here — `asOf()`'s own PropCell
+    // segment-geometry lens (`filterViewToInstant`, applied POST-projection below) is the established,
+    // frozen-test-covered mechanism for that axis (INV-4/INV-11/INV-9/INV-12 all exercise THIS exact
+    // fold-everything-then-narrow-the-view convention). `selectFactsForContextualAsOf` (below) is the
+    // NARROWLY-SCOPED sibling that adds REAL pre-fold membership filtering for the active-knowledge
+    // seams that need it (see that method's own doc comment, CRITICAL FIX #2 round 3) — kept separate
+    // so this method's existing, already-passing behavior is untouched.
+    return this.currentFacts();
+  }
+
+  /**
+   * CRITICAL FIX #2 (round 3): a REAL `validTime`-scoped fact-set MEMBERSHIP filter, layered on top of
+   * `selectFactsForAsOf`'s own (unchanged) txTime/believer axis — narrowly scoped to the
+   * active-knowledge seams (`compileContextualQuery`/`executeSegment`'s guard reads) that need to pin
+   * a REPRODUCIBLE frontier, distinct from `asOf()`'s own general-purpose PropCell segment-geometry
+   * lens (`filterViewToInstant`, which narrows an ALREADY-projected `NodeView`/`EdgeView`'s segments
+   * POST-fold — a deliberately different mechanism kept unchanged for `asOf()` itself, see that
+   * method's doc comment).
+   *
+   * Round 2's `selectFactsForAsOf` only ever consulted `asOf.txTime`; a caller-pinned `asOf.validTime`
+   * with NO `txTime` fell through to `this.currentFacts()` UNCONDITIONALLY — so
+   * `compileContextualQuery`/`executeSegment` never actually pinned to a fixed frontier: two calls at
+   * the IDENTICAL pinned `validTime`, made at two different real moments (e.g. before/after a THIRD
+   * caller registers a new `FunctionalityBinding` or asserts a new fact), would silently see the
+   * enlarged admitted set and compile/execute DIFFERENTLY — defeating the exact reproducibility
+   * docs/31 promises ("Reproducibility is relative to the recorded asOf... pass an explicit pinned
+   * asOf for a reproducible mining run").
+   *
+   * The filter excludes any fact whose OWN `validFrom` is STRICTLY AFTER the pinned `validTime` — a
+   * fact that (in valid-time terms) had not yet been declared as of the pinned instant is excluded
+   * from the working set entirely. This mirrors the SAME half-open LOWER bound `segmentCoversInstant`
+   * (§9b below) already applies when picking which segment covers an instant — `AsOf.validTime` and
+   * `Fact.validFrom`/`.validTo` are the IDENTICAL `HlcOrTime` domain, so comparing them directly
+   * invents no new convention. Deliberately does NOT also exclude on `validTo` at this pre-fold
+   * membership stage (unlike `segmentCoversInstant`'s full two-sided containment): a fact whose OWN
+   * `validTo` has since closed may still be exactly what a LATER retract/supersede fact (itself
+   * admitted because its `validFrom <= at`) needs present in the fold to correctly compute segment
+   * geometry — interpreting `validTo` boundaries within a fold is `proj`'s reducer's job, not this
+   * pre-fold filter's. Layering only the lower-bound exclusion on top of the unchanged
+   * `selectFactsForAsOf` therefore reproduces byte-identical `proj()` geometry for any instant <= the
+   * pinned `validTime`, while genuinely hiding anything asserted LATER — closing the reproducibility
+   * gap without duplicating or fighting `proj`'s own fold semantics.
+   */
+  private selectFactsForContextualAsOf(asOf: AsOf | undefined): Fact[] {
+    if (asOf === undefined) return this.currentFacts();
+    const facts = this.selectFactsForAsOf(asOf);
+    if (asOf.validTime === undefined) return facts;
+    const at = canon(asOf.validTime);
+    return facts.filter((f) => canon(f.validFrom) <= at);
+  }
+
+  /**
    * T3.2: the bitemporal snapshot lens — the two INDEPENDENT axes docs/23 §2.1/§3 tables out.
    *
    * `validTime` (INV-11, convergent): filters each returned view's `PropCell.segments` down to the
@@ -1479,40 +1737,19 @@ export class KipRepo implements Repo {
    * frozen INV-4 suite itself documents this exact single-replica scope).
    */
   async asOf(asOf: AsOf): Promise<ReadView> {
-    const believer = asOf.believer ?? this.replicaId;
-    let facts: Fact[];
-    if (asOf.txTime !== undefined) {
-      if (believer !== this.replicaId) {
-        throw new Error(
-          "unimplemented: asOf({txTime, believer}) for a believer other than this replica's own replicaId " +
-            "— cross-replica belief-audit requires M3 sync machinery (this replica cannot observe another " +
-            "replica's rxFrom ingest order)",
-        );
-      }
-      const cutoff = asOf.txTime;
-      facts = this.currentFactsWithOid()
-        .filter(({ oid }) => {
-          // Looked up by the fact's real content `oid` (matching how `ingest()` stamps
-          // `rxFromByOid`), NOT by the caller-declared `f.id` — see `rxFromByOid`'s own doc comment
-          // for why keying this by the unverified declared id would be a same-class bug.
-          const rxFrom = this.rxFromByOid.get(oid);
-          // A durably-held fact this replica never itself recorded an in-memory rxFrom for (e.g. a
-          // fresh `KipRepo` instance re-opened against an existing `dir`, since `rxFromByOid` is
-          // in-memory-only this round — see its own doc comment) is conservatively EXCLUDED from the
-          // belief-audit lens rather than guessed either way — never fabricating a belief this
-          // replica cannot actually attest to.
-          if (rxFrom === undefined) return false;
-          return canon(rxFrom) <= canon(cutoff);
-        })
-        .map(({ fact }) => fact);
-    } else {
-      // The convergent validTime-only lens (INV-11): the full currently-admitted set, exactly like
-      // a plain `getNode`/`getEdge` read — never consults `rxFrom` at all.
-      facts = this.currentFacts();
-    }
+    const facts = this.selectFactsForAsOf(asOf);
+    return this.buildAsOfView(facts, asOf.validTime);
+  }
 
+  /**
+   * The shared `ReadView`-construction body behind `asOf()`'s own PropCell segment-geometry lens —
+   * factored out (round 3, CRITICAL FIX #2) so `resolvedContextualView` (below) can build a `ReadView`
+   * over a DIFFERENTLY-selected (frontier-filtered) fact set while reusing the IDENTICAL lens logic
+   * `asOf()` applies, rather than duplicating it. Extracting this changes no observable behavior of
+   * `asOf()` itself — same inputs, same computation.
+   */
+  private buildAsOfView(facts: Fact[], validTime: HlcOrTime | undefined): ReadView {
     const projection = proj(facts, this.projOptions());
-    const validTime = asOf.validTime;
 
     const applyValidTimeLens = <T extends NodeView | EdgeView>(view: T | null): T | null => {
       if (!view) return view;
@@ -1525,7 +1762,7 @@ export class KipRepo implements Repo {
       return filterViewToInstant(view, validTime);
     };
 
-    const view: ReadView = {
+    return {
       getNode: async (eid: EID) => applyValidTimeLens(projection.getNode(eid)),
       getEdge: async (eid: EID) => applyValidTimeLens(projection.getEdge(eid)),
       async *query(spec: Omit<TraversalSpec, "asOf">) {
@@ -1540,7 +1777,18 @@ export class KipRepo implements Repo {
         throw new Error("unimplemented: recall (M4/T5.5 hybrid recall pipeline)");
       },
     };
-    return view;
+  }
+
+  /**
+   * CRITICAL FIX #2 (round 3): the active-knowledge counterpart to `asOf()` — builds a `ReadView` over
+   * `selectFactsForContextualAsOf`'s REAL validTime-pinned fact set (rather than `asOf()`'s own
+   * `selectFactsForAsOf`, which leaves fact-set membership unfiltered by `validTime`, see that
+   * method's doc comment) so `executeSegment`'s guard reads (`anyEdgeOfKindExists`/`resolvedGetNode`)
+   * genuinely stop seeing facts asserted after the pinned frontier, exactly like
+   * `compileContextualQuery` now does.
+   */
+  private resolvedContextualView(asOf: AsOf): ReadView {
+    return this.buildAsOfView(this.selectFactsForContextualAsOf(asOf), asOf.validTime);
   }
 
   /**
@@ -2029,8 +2277,27 @@ export class KipRepo implements Repo {
   }
 
   // TODO(M9/T9.6): provenance chain for an EID or FactId.
-  async provenanceOf(_ref: EID | FactId): Promise<Provenance[]> {
-    throw new Error("unimplemented: provenanceOf");
+  /**
+   * M5/T6.1 addition (INV-A1's own read-side proof channel): a minimal, honest `provenanceOf` —
+   * resolves `ref` first as an exact `FactId` (every currently-admitted fact whose OWN `.id` equals
+   * `ref`, deterministically ordered by the real §3.4 `orderKey`, never ingest/array position), and
+   * — only when no fact carries that id — as an `EID` (every fact whose `target` addresses that
+   * node/edge/prop cell). Full per-`(eid,prop)` provenance HISTORY semantics (as opposed to "every
+   * admitted fact touching this address") are a documented, minimal M5 scope note: no earlier
+   * milestone's frozen suite exercises this method, and this is the seam INV-A1 itself names for
+   * verifying a `registerFunctionality`/`assertFact` return value denotes a REAL, signed fact — see
+   * this task's disputes.
+   */
+  async provenanceOf(ref: EID | FactId): Promise<Provenance[]> {
+    const facts = this.currentFacts();
+    const byId = facts.filter((f) => f.id === ref);
+    const matches = byId.length > 0
+      ? byId
+      : facts.filter((f) => {
+          const t = f.target;
+          return (t.kind === "node" || t.kind === "node-prop" || t.kind === "edge" || t.kind === "edge-prop") && t.eid === ref;
+        });
+    return matches.slice().sort((a, b) => compareOrderKey(orderKey(a), orderKey(b))).map((f) => f.provenance);
   }
 
   // TODO(M13/T13.3): read-latency snapshot rollup (does NOT free bytes, §3.5).
@@ -2349,30 +2616,781 @@ export class KipRepo implements Repo {
     };
   }
 
-  // TODO(M5/T6.1): signed microagent-registration + EdgeKind FunctionalityBinding facts (ADR-014).
+  /**
+   * T6.1: registers a `FunctionalityBinding` (microagent-registration + binding facts, ADDITIVE —
+   * docs/31: "registering a second realizer for the same hop ADDS an alternative; it does not
+   * overwrite the first", INV-A7). Registration-time validation (T6.1.2, INV-A7): a `NaN`/`±Infinity`
+   * `weight`, or a `condition` `ConditionNode` that is itself malformed (a `range` with neither `min`
+   * nor `max`, or any non-finite numeric leaf), is REJECTED with `ERR_INVALID_WEIGHT` BEFORE anything
+   * is minted — never silently coerced/defaulted (N5), since either would make the presentation/
+   * guard order non-total. The manifest itself is recorded as its own signed fact (descriptor is
+   * advisory selection metadata, never a gate — T6.1.3) purely so a real registered `(name, version)`
+   * identity backs this hop, mirroring `registerFunctionality`'s own docs/40 doc comment.
+   */
   async registerFunctionality(
-    _edgeKind: EdgeKind,
-    _manifest: MicroagentManifest,
-    _binding?: Pick<FunctionalityBinding, "weight" | "condition" | "requires" | "relationClass" | "tags">,
+    edgeKind: EdgeKind,
+    manifest: MicroagentManifest,
+    binding?: Pick<FunctionalityBinding, "weight" | "condition" | "constraint" | "requires" | "relationClass" | "tags">,
   ): Promise<FactId> {
-    throw new Error("unimplemented: registerFunctionality");
+    if (binding?.weight !== undefined && !Number.isFinite(binding.weight)) {
+      throw new KipError(
+        "ERR_INVALID_WEIGHT",
+        `registerFunctionality: weight MUST be finite (a NaN/±Infinity weight makes the presentation ` +
+          `order non-total, N5); got ${binding.weight}`,
+        { edgeKind, weight: binding.weight },
+      );
+    }
+    if (binding?.condition) {
+      const malformation = findConditionNodeMalformation(binding.condition);
+      if (malformation) {
+        throw new KipError(
+          "ERR_INVALID_WEIGHT",
+          `registerFunctionality: malformed condition (${malformation}) — never an always-true gate, N5`,
+          { edgeKind, condition: binding.condition },
+        );
+      }
+    }
+    // MAJOR FIX (round-2 finding #3): `constraint` is a `ConditionNode` exactly like `condition` (the
+    // claim-8 facet reads the SEED/known-instance's own PropCells rather than a required OTHER
+    // instance's, but the MALFORMED-declared-data checklist — a `range` with neither min nor max, any
+    // non-finite numeric leaf — applies identically to both, docs/31's own D-5b.4 decision names
+    // "condition nodes" generically, not `condition` the field specifically).
+    if (binding?.constraint) {
+      const malformation = findConditionNodeMalformation(binding.constraint);
+      if (malformation) {
+        throw new KipError(
+          "ERR_INVALID_WEIGHT",
+          `registerFunctionality: malformed constraint (${malformation}) — never an always-true gate, N5`,
+          { edgeKind, constraint: binding.constraint },
+        );
+      }
+    }
+
+    const orchestratorProvenance: Provenance = {
+      author: "kip-orchestrator:registerFunctionality",
+      signature: "",
+      publicKeyFingerprint: "",
+      signedFields: [],
+    };
+
+    // T6.1.3: the manifest descriptor is advisory selection metadata only — recorded as its own
+    // signed fact so `(name, version)` denotes a real registered identity, but never consulted by
+    // any gate (docs/31).
+    await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "schema", ontologyRef: ontologyRefForManifest(manifest.name, manifest.version) },
+      value: JSON.stringify(manifest),
+      validFrom: 0,
+      validTo: null,
+      replicaId: this.replicaId,
+      provenance: orchestratorProvenance,
+    });
+
+    const bindingResult = await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "schema", ontologyRef: ontologyRefForBinding(edgeKind, manifest.name, manifest.version) },
+      value: serializeBindingPayload({
+        edgeKind,
+        microagentName: manifest.name,
+        version: manifest.version,
+        weight: binding?.weight,
+        condition: binding?.condition,
+        constraint: binding?.constraint,
+        requires: binding?.requires,
+        relationClass: binding?.relationClass,
+        tags: binding?.tags,
+      }),
+      validFrom: 0,
+      validTo: null,
+      replicaId: this.replicaId,
+      provenance: orchestratorProvenance,
+    });
+    return bindingResult.id;
   }
 
-  // TODO(M5/T6.2): PHASE 1 pure-read compile+match over proj at q.asOf (ADR-017/018).
-  async compileContextualQuery(_q: ContextualQuery): Promise<Segment> {
-    throw new Error("unimplemented: compileContextualQuery");
+  /** Builds a compiled `Segment.steps[i]` `FunctionalityBinding` from a registered record — see
+   * `compileContextualQuery`'s own doc comment for the `sourceKind`/`targetKind` derivation rule. */
+  private compiledStepFrom(rec: RegisteredBindingRecord, sourceKind: NodeKind, targetKind: NodeKind): FunctionalityBinding {
+    return {
+      edgeKind: rec.edgeKind,
+      microagentName: rec.microagentName,
+      version: rec.version,
+      sourceKind,
+      targetKind,
+      requires: rec.requires,
+      condition: rec.condition,
+      constraint: rec.constraint,
+      weight: rec.weight,
+      relationClass: rec.relationClass,
+      tags: rec.tags,
+      cardinality: "many",
+    };
   }
 
-  // TODO(M5/T6.3): PHASE 2 execute one caller-chosen segment (topological order over deps).
-  async executeSegment(_segment: Segment, _opts?: { asOf?: AsOf }): Promise<AnswerGraph> {
-    throw new Error("unimplemented: executeSegment");
+  /**
+   * T6.2: PHASE 1 — a PURE READ over `proj` at `q.asOf` (compile + match, no dispatch, no fact,
+   * INV-A2). CRITICAL FIX #2 (round 2): `q.asOf` now genuinely SCOPES this read — routed through
+   * `this.selectFactsForAsOf` (the same fact-frontier selection `asOf()` itself uses, see that
+   * method's own doc comment), rather than always folding `this.currentFacts()` live regardless of
+   * what the caller asked for. `sourceKind`/`targetKind` derivation (the KNOWN GAP docs/40's own
+   * `registerFunctionality` doc comment names — no schema/ontology-registration API exists at M5 to
+   * declare an EdgeKind's own source/target `NodeKind`s, see this module's own top doc comment): the
+   * FIRST step's `sourceKind` is the seed's own projected `NodeKind`; the LAST step's `targetKind` is
+   * `q.target` (the only sound way an answer can materialize); every OTHER (intermediate) step's
+   * `targetKind` defaults to its own `edgeKind` name (an honestly-labeled placeholder, never a
+   * fabricated real-world kind), and the NEXT step's `sourceKind` is defined to equal it — so an
+   * ordinary multi-hop chain (docs/31's D-5b.8 composition) always type-checks by construction.
+   *
+   * The seed MUST already be a concrete, projected instance (docs/31: "a concrete instance of a
+   * known NodeKind the caller ALREADY HAS") — a `seed` that resolves to no projected node throws
+   * `ERR_MALFORMED_INPUT` (MINOR FIX, round 2) rather than silently defaulting `seedKind` to `""` and
+   * proceeding as if an empty-string NodeKind were meaningful.
+   *
+   * Two matches are surfaced as a typed `alternatives` choice, never auto-collapsed (N5, INV-A7):
+   * (a) when `q.via` names exactly ONE `EdgeKind`, every registered REALIZER for that hop becomes its
+   * own candidate `Segment` (multi-realizer choice); (b) when `q.via` is omitted, every registered
+   * `(edgeKind, realizer)` pair anywhere in the ontology becomes its own 1-hop candidate (composition-
+   * discovery's degenerate single-relation case, D-5b.9) — there being no schema to rule any of them
+   * OUT as incompatible with `q.target`; (c) for a MULTI-HOP `via` (length > 1), MAJOR FIX (round 2,
+   * finding #2): every registered realizer at EVERY position is enumerated into the CROSS-PRODUCT of
+   * candidate chains — round 1 silently narrowed each position to `[0]` (the top-weighted realizer),
+   * discarding every other registered realizer at that position, the exact silent-pick N5 violation
+   * INV-A7 exists to forbid. Cross-edgeKind/cross-combination ties are broken by the real §3.4
+   * `orderKey`/`factCID` tiebreak (never registration/ingest-array order or an alphabetical edgeKind
+   * sort — MINOR FIX, round 2).
+   *
+   * A `requires`-induced `Segment.deps` cycle (two steps in the SAME segment each requiring the
+   * other's presence) has no topological order and is rejected with `ERR_COMPILE_CYCLIC_DEPS`
+   * (T6.2.3, INV-A2) for that candidate combination (a malformed combination is excluded from
+   * `alternatives`, never surfaced — docs/31: "MUST NOT be compiled or surfaced" — and the whole call
+   * throws only if NO combination compiles). A multi-hop chain whose only sound typing signal (seed
+   * kind == query target) would require it to loop back to the SEED's OWN kind through otherwise-
+   * unverified intermediate hops is rejected with `ERR_ILL_TYPED_SEGMENT`.
+   *
+   * DOCUMENTED SCOPE NARROWING (MAJOR finding #1, honest-disclosure precedent matching
+   * INV-A3(a-c)/INV-A11(b)): `ERR_ILL_TYPED_SEGMENT`'s ONLY real throw site is this self-loop
+   * heuristic (`seedKind === q.target` for a `steps.length > 1` chain). It does NOT implement general
+   * per-adjacent-pair `steps[i].targetKind` vs `steps[i+1].sourceKind` compatibility checking — because
+   * (as this module's own top doc comment already establishes) `registerFunctionality`'s binding
+   * options carry no caller-supplied `sourceKind`/`targetKind`, and no `NodeKindDef`/`is_a`
+   * schema-registration API exists at M5 from which a REAL per-hop kind signal could be derived; every
+   * intermediate step's `targetKind` here is a placeholder DERIVED FROM the edgeKind name itself (see
+   * above), so any "compatibility" check between two such placeholders would be checking a value this
+   * method itself invented against another value it itself invented — a vacuous, curve-fitted check,
+   * not a real one (this round's own critic finding). Building a genuine adjacent-pair check would
+   * require inventing an un-spec'd schema-declaration API, forbidden by this round's hard rules; this
+   * doc comment (and the `Repo`/`KipErrorCode` doc comments above) name the gap honestly instead of
+   * silently claiming general adjacency enforcement this build does not have.
+   */
+  async compileContextualQuery(q: ContextualQuery): Promise<Segment> {
+    // CRITICAL FIX #2 (round 3): `selectFactsForContextualAsOf`, not the plain `selectFactsForAsOf` /
+    // `currentFacts()` round-2 used — a pinned `q.asOf.validTime` now genuinely excludes facts
+    // asserted after that frontier (see that method's own doc comment), so two compiles at the
+    // IDENTICAL pinned `validTime` are byte-identical regardless of what else gets asserted in
+    // between (INV-A2's own "byte-identical segment set" promise, extended to actually honor a
+    // pinned validTime rather than only a pinned txTime).
+    const facts = this.selectFactsForContextualAsOf(q.asOf);
+    const bindingsByEdgeKind = collectRegisteredBindings(facts);
+    const seedView = proj(facts, this.projOptions()).getNode(q.seed);
+    if (!seedView) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `compileContextualQuery: seed "${q.seed}" does not resolve to any projected node at the ` +
+          "requested asOf — a ContextualQuery.seed must be a concrete instance the caller already has, " +
+          "never silently treated as an unknown/empty NodeKind",
+        { seed: q.seed },
+      );
+    }
+    const seedKind: NodeKind = seedView.kind;
+    const via = q.via ?? [];
+
+    const emptySegment = (): Segment => ({ steps: [], alternatives: [], seed: q.seed, asOf: q.asOf });
+
+    if (via.length === 0) {
+      // Composition-discovery, no `via` constraint (D-5b.9's degenerate single-relation case): every
+      // registered (edgeKind, realizer) is its own 1-hop candidate.
+      const candidateRecs: RegisteredBindingRecord[] = [...bindingsByEdgeKind.values()].flat();
+      if (candidateRecs.length === 0) return emptySegment();
+      // MINOR FIX (round 2): the real §3.4 orderKey/factCID tiebreak, never an alphabetical
+      // edgeKind-name ordering (which `Array.prototype.sort`'s stability would otherwise silently
+      // fall back to for a cross-edgeKind weight tie).
+      candidateRecs.sort((a, b) => {
+        const wa = a.weight ?? Number.NEGATIVE_INFINITY;
+        const wb = b.weight ?? Number.NEGATIVE_INFINITY;
+        if (wa !== wb) return wb - wa;
+        return compareOrderKey(orderKey(a.sourceFact), orderKey(b.sourceFact));
+      });
+      const candidates = candidateRecs.map(
+        (rec): Segment => ({ steps: [this.compiledStepFrom(rec, seedKind, q.target)], alternatives: [], seed: q.seed, asOf: q.asOf }),
+      );
+      const primary = candidates[0];
+      primary.alternatives = candidates.slice(1);
+      return primary;
+    }
+
+    if (via.length === 1) {
+      // A single-hop query: every registered REALIZER for this one EdgeKind is a candidate
+      // (multi-realizer typed choice, INV-A7) — `records` is already sorted (weight desc, then the
+      // real orderKey tiebreak) by `collectRegisteredBindings`/`sortBindingRecords`.
+      const records = bindingsByEdgeKind.get(via[0]) ?? [];
+      const candidates = records.map((rec): Segment => {
+        const step = this.compiledStepFrom(rec, seedKind, q.target);
+        return { steps: [step], alternatives: [], seed: q.seed, asOf: q.asOf };
+      });
+      if (candidates.length === 0) return emptySegment();
+      const primary = candidates[0];
+      primary.alternatives = candidates.slice(1);
+      return primary;
+    }
+
+    // A multi-hop chain (`via.length > 1`): MAJOR FIX (round 2, finding #2) — every position's FULL
+    // registered-realizer list (never narrowed to `[0]`) is enumerated into the cross-product of
+    // candidate chains, so a position with more than one registered realizer surfaces genuine
+    // ambiguity (alternatives) instead of silently picking the top-weighted one.
+    //
+    // CRITICAL FIX #1 (round 3): a `via` position with ZERO registered bindings contributes ZERO
+    // choices to the cross-product — exactly mirroring the 0-hop/1-hop branches above, which both
+    // return `emptySegment()` when nothing is registered. Round 2 mapped an unregistered position to
+    // `[undefined]` (a single "no binding" placeholder choice), and `buildChain` below then
+    // SYNTHESIZED a FABRICATED `FunctionalityBinding` for it (`microagentName: edgeKind, version:
+    // "0.0.0"`) — a real dispatch step for a functionality NO ONE ever registered. Because
+    // `findRegisteredManifest` finds no manifest for that fake `(name, version)`, `executeSegment`'s
+    // `manifest` was `null`, which SILENTLY SKIPPED the `outputSchema` validation and the timeout
+    // check, so the default dispatch stub "succeeded" and minted REAL SIGNED FACTS for an
+    // unregistered functionality — never a sound behavior (N5). An empty `choices` array for any
+    // position makes the whole cross-product empty (the inner `for (const choice of choices)` loop
+    // below has nothing to iterate for ANY prefix, so `combinations` collapses to `[]` and STAYS
+    // empty for every subsequent position), so no combination touching that position is ever built —
+    // never a synthetic binding.
+    const perPositionChoices: Array<ReadonlyArray<RegisteredBindingRecord>> = via.map(
+      (edgeKind) => bindingsByEdgeKind.get(edgeKind) ?? [],
+    );
+    let combinations: Array<Array<RegisteredBindingRecord>> = [[]];
+    for (const choices of perPositionChoices) {
+      const next: Array<Array<RegisteredBindingRecord>> = [];
+      for (const prefix of combinations) {
+        for (const choice of choices) next.push([...prefix, choice]);
+      }
+      combinations = next;
+    }
+
+    const buildChain = (
+      choice: ReadonlyArray<RegisteredBindingRecord>,
+    ): { steps: FunctionalityBinding[]; deps?: ReadonlyArray<readonly [number, number]> } | { error: KipError } => {
+      const chainSteps: FunctionalityBinding[] = [];
+      let priorTargetKind = seedKind;
+      for (let i = 0; i < via.length; i += 1) {
+        const isLast = i === via.length - 1;
+        const targetKind = isLast ? q.target : via[i];
+        // Every position in `choice` is a REAL registered binding by construction (see the
+        // cross-product build above — an unregistered position can never appear in any `combination`
+        // at all), so there is no fallback branch here: `rec` is always defined, never a fabricated
+        // placeholder (CRITICAL FIX #1).
+        const step: FunctionalityBinding = this.compiledStepFrom(choice[i], priorTargetKind, targetKind);
+        chainSteps.push(step);
+        priorTargetKind = targetKind;
+      }
+
+      // T6.2.3: `requires`-induced deps — a step requiring an EdgeKind that is ALSO another step
+      // WITHIN this segment must consume that step's materialized instance (claim-12); a cycle has
+      // no topological order (ERR_COMPILE_CYCLIC_DEPS, INV-A2).
+      const chainDeps: Array<readonly [number, number]> = [];
+      for (let consumer = 0; consumer < chainSteps.length; consumer += 1) {
+        for (const requiredKind of chainSteps[consumer].requires ?? []) {
+          const producer = chainSteps.findIndex((s) => s.edgeKind === requiredKind);
+          if (producer !== -1 && producer !== consumer) chainDeps.push([producer, consumer]);
+        }
+      }
+      if (chainDeps.length > 0 && topologicalOrder(chainSteps.length, chainDeps) === null) {
+        return {
+          error: new KipError(
+            "ERR_COMPILE_CYCLIC_DEPS",
+            "compileContextualQuery: Segment.deps contains a cycle (no topological order exists) — a " +
+              "requires-induced circular dependency between two steps of the same segment",
+            { via, deps: chainDeps },
+          ),
+        };
+      }
+
+      // ROUND-4 FIX (finding #3): a consumer with MORE THAN ONE distinct producer is a real
+      // multi-input join (D-5b.8) — reachable here when a step declares more than one `requires`
+      // EdgeKind, each satisfied by a DIFFERENT other step in this same chain. `executeSegment` has no
+      // multi-producer dispatch machinery (see `ERR_MULTI_INPUT_JOIN_UNSUPPORTED`'s own doc comment),
+      // so a candidate chain shaped like this is REJECTED here — excluded from `alternatives`, exactly
+      // like a cyclic-deps combination — rather than silently compiled and later silently narrowed to
+      // one producer at execute time (N5).
+      const producerCountByConsumer = new Map<number, number>();
+      for (const [, consumer] of chainDeps) {
+        producerCountByConsumer.set(consumer, (producerCountByConsumer.get(consumer) ?? 0) + 1);
+      }
+      for (const [consumer, count] of producerCountByConsumer) {
+        if (count > 1) {
+          return {
+            error: new KipError(
+              "ERR_MULTI_INPUT_JOIN_UNSUPPORTED",
+              `compileContextualQuery: step ${consumer} declares ${count} distinct upstream producers via ` +
+                "requires-induced Segment.deps (a real multi-input join, D-5b.8) — this build has no " +
+                "multi-producer dispatch machinery, so this candidate chain is rejected rather than " +
+                "silently compiled and later narrowed to one producer at execute time (N5)",
+              { via, consumer, deps: chainDeps },
+            ),
+          };
+        }
+      }
+
+      // Ill-typed self-loop guard (see this method's own doc comment's DOCUMENTED SCOPE NARROWING).
+      if (chainSteps.length > 1 && seedKind === q.target) {
+        return {
+          error: new KipError(
+            "ERR_ILL_TYPED_SEGMENT",
+            "compileContextualQuery: a multi-hop chain whose declared target equals the seed's own " +
+              "NodeKind cannot be verified type-compatible without a declared is_a/schema relation — " +
+              "never silently assumed compatible (N5)",
+            { seedKind, target: q.target, via },
+          ),
+        };
+      }
+
+      return { steps: chainSteps, deps: chainDeps.length > 0 ? chainDeps : undefined };
+    };
+
+    const builtSegments: Segment[] = [];
+    let firstError: KipError | undefined;
+    for (const choice of combinations) {
+      const built = buildChain(choice);
+      if ("error" in built) {
+        if (!firstError) firstError = built.error;
+        continue;
+      }
+      builtSegments.push({ steps: built.steps, deps: built.deps, alternatives: [], seed: q.seed, asOf: q.asOf });
+    }
+    if (builtSegments.length === 0) {
+      if (firstError) throw firstError;
+      return emptySegment();
+    }
+    const primary = builtSegments[0];
+    primary.alternatives = builtSegments.slice(1);
+    return primary;
   }
 
-  // TODO(M5/T6.2, T6.3): convenience compile+execute with the discriminated choice return (N5).
-  async runContextualQuery(
-    _q: ContextualQuery,
-  ): Promise<AnswerGraph | { kind: "choice"; segments: Segment[] }> {
-    throw new Error("unimplemented: runContextualQuery");
+  /** Pure `proj` read: does ANY currently-projected edge instance have kind `edgeKind` (claim-12
+   * `requires` guard, T6.4.2) — never scoped to a specific touching node (docs/31 names only "a
+   * required OTHER instance", not a specific adjacency). CRITICAL FIX #2 (round 2): accepts the
+   * resolved `asOf` threaded down from `executeSegment` so the guard is evaluated against the SAME
+   * frontier the segment was compiled/executed against, rather than always reading live state.
+   *
+   * ROUND-4 FIX (finding #2): `candidateEids` (the set of edge EIDs even worth checking) is now
+   * sourced from `selectFactsForContextualAsOf(asOf)` — the SAME pinned-frontier fact set
+   * `compileContextualQuery`/`resolvedGetNode` already fold — rather than always enumerating
+   * `this.currentFacts()` LIVE regardless of `asOf`. Round 3 left this candidate-gathering pass
+   * reading live state; it was harmless in practice (each CANDIDATE is still individually re-checked
+   * against the pinned `resolvedContextualView(asOf)` below, so a candidate whose edge only exists
+   * AFTER the pinned frontier is still correctly excluded by that per-candidate lookup) — but the
+   * doc comment above overclaimed full frontier-scoping while this candidate-gathering step itself
+   * wasn't scoped, a latent risk this closes rather than leaves for a future round to re-discover. */
+  private async anyEdgeOfKindExists(edgeKind: EdgeKind, asOf?: AsOf): Promise<boolean> {
+    const facts = asOf !== undefined ? this.selectFactsForContextualAsOf(asOf) : this.currentFacts();
+    const candidateEids = new Set<EID>();
+    for (const f of facts) {
+      if (f.target.kind === "edge") candidateEids.add(f.target.eid);
+    }
+    if (asOf !== undefined) {
+      // CRITICAL FIX #2 (round 3): `resolvedContextualView` (not the public `asOf()`) so a pinned
+      // `asOf.validTime` genuinely excludes facts asserted after that frontier from THIS guard read
+      // too — `asOf()` itself only narrows the PropCell segment geometry post-fold, never fact-set
+      // membership (see that method's own doc comment).
+      const view = this.resolvedContextualView(asOf);
+      for (const eid of candidateEids) {
+        const edgeView = await view.getEdge(eid);
+        if (edgeView && edgeView.kind === edgeKind) return true;
+      }
+      return false;
+    }
+    const projection = proj(facts, this.projOptions());
+    for (const eid of candidateEids) {
+      const view = projection.getEdge(eid);
+      if (view && view.kind === edgeKind) return true;
+    }
+    return false;
+  }
+
+  /** Resolves a `NodeView` either LIVE (no `asOf`) or through the pinned contextual `asOf` lens — the
+   *  SAME resolved frontier `executeSegment` threads through every guard evaluation (CRITICAL FIX #2).
+   *  Routes through `resolvedContextualView` (round 3), not the public `asOf()`, so a pinned
+   *  `asOf.validTime` genuinely excludes later-asserted facts from fact-set membership, not merely
+   *  from the returned view's PropCell segment geometry. */
+  private async resolvedGetNode(eid: EID, asOf?: AsOf): Promise<NodeView | null> {
+    if (asOf !== undefined) return this.resolvedContextualView(asOf).getNode(eid);
+    return this.getNode(eid);
+  }
+
+  /**
+   * T6.6/INV-A8: reads the `AnswerGraph` back from the emitted `derived_from` subgraph — a PURE READ
+   * over currently-admitted facts, never a separately-tracked/authored artifact. BFS-reachable from
+   * `seed`; `result` is `resultEids` narrowed to what is actually reachable (N5: a step that never
+   * dispatched cannot appear as a fabricated result); `intermediates` is every OTHER reachable EID.
+   */
+  private readAnswerGraph(seed: EID, resultEids: readonly EID[]): AnswerGraph {
+    const facts = this.currentFacts();
+    interface DerivedEdge {
+      from: EID;
+      to: EID;
+      edgeKind: EdgeKind;
+      viaFactId: FactId;
+      fact: Fact;
+    }
+    const outgoing = new Map<EID, DerivedEdge[]>();
+    for (const f of facts) {
+      if (f.type === "retract") continue;
+      if (f.target.kind !== "edge") continue;
+      const t = f.target;
+      if (t.edgeKind !== "derived_from" || !t.from || !t.to) continue;
+      let realizedEdgeKind: EdgeKind = t.edgeKind;
+      if (typeof f.value === "string") {
+        try {
+          const parsed = JSON.parse(f.value) as { edgeKind?: string };
+          if (typeof parsed.edgeKind === "string") realizedEdgeKind = parsed.edgeKind;
+        } catch {
+          // MAJOR FIX (round 2): a corrupted `derived_from` payload (invalid JSON) is surfaced via a
+          // distinguishable sentinel label (see `KIP_MALFORMED_DERIVED_FROM_EDGE_KIND`'s own doc
+          // comment), never silently relabeled as an ordinary "derived_from" edge — never thrown
+          // either (this is a pure read over already-admitted facts; a corrupted VALUE payload is not
+          // itself a caller-input rejection). A validly-parsed payload that simply omits its own
+          // `edgeKind` field (not corrupted, just undecorated) still falls back to the literal
+          // "derived_from" label unchanged — only an actual PARSE FAILURE gets the sentinel.
+          realizedEdgeKind = KIP_MALFORMED_DERIVED_FROM_EDGE_KIND;
+        }
+      }
+      const arr = outgoing.get(t.from) ?? [];
+      arr.push({ from: t.from, to: t.to, edgeKind: realizedEdgeKind, viaFactId: f.id, fact: f });
+      outgoing.set(t.from, arr);
+    }
+
+    const reachable = new Set<EID>();
+    const edges: Array<{ from: EID; to: EID; edgeKind: EdgeKind; viaFactId: FactId }> = [];
+    const seenPairs = new Set<string>();
+    const queue: EID[] = [seed];
+    const visited = new Set<EID>([seed]);
+    while (queue.length > 0) {
+      const cur = queue.shift() as EID;
+      const candidates = (outgoing.get(cur) ?? []).slice().sort((a, b) => compareOrderKey(orderKey(a.fact), orderKey(b.fact)));
+      for (const e of candidates) {
+        // ROUND-4 FIX (finding, same bug class as materializedEidFor/derivedFromEdgeEidFor above,
+        // found while auditing EVERY remaining identity-construction join in this file): `e.from`/
+        // `e.to` are arbitrary, format-unconstrained EIDs (the seed, or a producer/materializedEid a
+        // caller-supplied seed can propagate into) — a raw `${e.from}->${e.to}` template-literal join
+        // has the IDENTICAL delimiter-collision risk `derivedFromEdgeEidFor` closes for the minted
+        // `derived_from` edge EID itself: two DIFFERENT (from, to) pairs could raw-concatenate to the
+        // same `pairKey` if either component contains a literal `->` substring, silently DROPPING a
+        // genuine second `derived_from` edge from the returned `AnswerGraph.edges` (N5). `JSON.stringify`
+        // of the pair (which escapes any `"`/control character inside each component) is an unambiguous,
+        // collision-free key — this is a pure LOCAL dedup key for this read, never itself a minted EID,
+        // so `JSON.stringify` (rather than `materializedEidFor`'s percent-encoding convention) is the
+        // simplest collision-free choice here.
+        const pairKey = JSON.stringify([e.from, e.to]);
+        if (!seenPairs.has(pairKey)) {
+          seenPairs.add(pairKey);
+          edges.push({ from: e.from, to: e.to, edgeKind: e.edgeKind, viaFactId: e.viaFactId });
+        }
+        reachable.add(e.to);
+        if (!visited.has(e.to)) {
+          visited.add(e.to);
+          queue.push(e.to);
+        }
+      }
+    }
+
+    const result = resultEids.filter((eid) => reachable.has(eid));
+    const intermediates = [...reachable].filter((eid) => !result.includes(eid)).sort();
+
+    const derivedFrom: Array<{ eid: EID; factId: FactId; producedBy: Provenance }> = [];
+    for (const eid of [...result, ...intermediates]) {
+      const nodeFacts = facts.filter((f) => f.type !== "retract" && f.target.kind === "node" && f.target.eid === eid);
+      if (nodeFacts.length === 0) continue;
+      const winner = nodeFacts.reduce((best, cur) => (compareOrderKey(orderKey(cur), orderKey(best)) > 0 ? cur : best));
+      derivedFrom.push({ eid, factId: winner.id, producedBy: winner.provenance });
+    }
+
+    return { result, intermediates, edges, derivedFrom };
+  }
+
+  /**
+   * CRITICAL FIX #3 (round 2, INV-A6): looks up an existing, currently-admitted, non-retracted fact
+   * whose `target` + `value` are CONTENT-IDENTICAL to what the caller is ABOUT to author (compared via
+   * `deepSortKeys` canonicalization, the same helper `computeFactSetDigest` already uses for
+   * content-equality elsewhere in this file) — the check-before-write half of hop idempotence. Round 1
+   * always minted a brand-new fact (with a fresh `hlc`/`seq`, hence a fresh `factCID`) on every
+   * `executeSegment` call, even when re-executing the IDENTICAL compiled `Segment` against the SAME
+   * admitted set — so the fact STORE grew (3→5→7 facts across two "identical" executions) even though
+   * the read-side projection looked unchanged (only the read-side "pick the orderKey-max winner" was
+   * masking it). Ties among multiple pre-existing matches resolve via the real `orderKey`, never
+   * ingest/array order.
+   *
+   * ROUND-4 FIX (finding #1): accepts the SAME resolved `asOf` `executeSegment` threads through every
+   * other guard read (`anyEdgeOfKindExists`/`resolvedGetNode`) — round 3 fixed those two call sites but
+   * left this INV-A6 idempotence check reading `this.currentFacts()` LIVE regardless of a caller-pinned
+   * `asOf`, so re-executing a Segment against a PINNED frontier could still see (and dedup against) a
+   * fact asserted AFTER that frontier — a real, if narrow, reproducibility leak for the one guard this
+   * round's critics actually caught unfixed. Routes through `selectFactsForContextualAsOf` (the same
+   * pinned-frontier selector `compileContextualQuery`/`anyEdgeOfKindExists`/`resolvedGetNode` already
+   * use) exactly like those call sites, rather than inventing a new selection mechanism.
+   */
+  private findMatchingFact(target: Target, value: PropValue | undefined, asOf?: AsOf): Fact | undefined {
+    const targetKey = JSON.stringify(deepSortKeys(target));
+    const valueKey = JSON.stringify(deepSortKeys(value as unknown));
+    let best: Fact | undefined;
+    for (const f of this.selectFactsForContextualAsOf(asOf)) {
+      if (f.type === "retract") continue;
+      if (JSON.stringify(deepSortKeys(f.target)) !== targetKey) continue;
+      if (JSON.stringify(deepSortKeys(f.value as unknown)) !== valueKey) continue;
+      if (!best || compareOrderKey(orderKey(f), orderKey(best)) > 0) best = f;
+    }
+    return best;
+  }
+
+  /** Reads back a registered `MicroagentManifest` by `(name, version)` (T6.3.2) — the SAME
+   *  `ontologyRefForManifest` key `registerFunctionality` mints its own registration fact under, so
+   *  `executeSegment` can validate `MicroagentResult.output` against the REAL registered
+   *  `outputSchema` and derive the EFFECTIVE timeout from the REAL registered `runtime.timeout`
+   *  (docs/31's "Timeout rule"), rather than inventing either. `null` when no signature-valid
+   *  registration fact exists for that `(name, version)` — never thrown here (a step whose manifest
+   *  was never actually registered simply cannot be schema/timeout-validated against anything real;
+   *  `executeSegment`'s own caller is responsible for only compiling steps from registered bindings).
+   *
+   *  ROUND-4 FIX (finding #1): accepts the resolved `asOf` `executeSegment` threads through every
+   *  other guard/read (`anyEdgeOfKindExists`/`resolvedGetNode`/`findMatchingFact` above) and routes
+   *  through `selectFactsForContextualAsOf`, the SAME pinned-frontier fact-set selector — round 3
+   *  fixed the other call sites but left this outputSchema/timeout resolution reading
+   *  `this.currentFacts()` LIVE regardless of a caller-pinned `asOf`, so two `executeSegment` calls at
+   *  the IDENTICAL pinned frontier could resolve a DIFFERENT manifest (and therefore a different
+   *  effective timeout/outputSchema) if a manifest with the same `(name, version)` were re-registered
+   *  in between — defeating docs/31's "two replicas at the same asOf compile/execute byte-identically"
+   *  promise for this one lookup. */
+  private findRegisteredManifest(name: string, version: string, asOf?: AsOf): MicroagentManifest | null {
+    const ref = ontologyRefForManifest(name, version);
+    const candidates = this.selectFactsForContextualAsOf(asOf).filter(
+      (f) => f.type !== "retract" && f.target.kind === "schema" && f.target.ontologyRef === ref,
+    );
+    if (candidates.length === 0) return null;
+    const winner = candidates.reduce((best, cur) => (compareOrderKey(orderKey(cur), orderKey(best)) > 0 ? cur : best));
+    if (typeof winner.value !== "string") return null;
+    try {
+      return JSON.parse(winner.value) as MicroagentManifest;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * T6.3: PHASE 2 — executes ONE caller-chosen `Segment` in the deterministic topological order over
+   * `Segment.deps` (the `steps[]` index order when `deps` is empty/absent, docs/31's linear case).
+   * `opts.asOf` (falling back to the compiled `segment.asOf`, CRITICAL FIX #2) is the resolved
+   * frontier every guard evaluation AND every emitted fact's provenance is evaluated/stamped against
+   * (INV-A2's "recorded asOf" requirement). For each step: verify the claim-12 `requires`/`condition`
+   * guard and the claim-8 `constraint` as PURE `proj` reads at that frontier (T6.4.2); on any unmet
+   * guard, STOP the segment (upstream-stop, #7) — the intermediates already committed through step
+   * i-1 remain ordinary facts, but `result` stays empty (N5, no terminal answer fabricated).
+   * Otherwise CRITICAL FIX #1 (round 2): a REAL `MicroagentInvocation` is built from the step +
+   * producer input and dispatched through the injectable `dispatchMicroagent` seam; a thrown
+   * invocation, a non-zero `exitCode`, an elapsed time exceeding the manifest's `runtime.timeout`, or
+   * an `output` failing the registered `outputSchema` are ALL dispatch-failure (#4) — STOP the
+   * segment, mint NOTHING (never a fabricated plausible output, the round-1 anti-pattern this fixes).
+   * Only a validated, successful result is materialized: CRITICAL FIX #3 (INV-A6) makes this a REAL
+   * check-before-write no-op on re-execution — `findMatchingFact` looks for an already-admitted,
+   * content-identical fact before minting a new one, so re-running the identical `Segment` against
+   * the same admitted set mints ZERO new facts (not merely "reads the same" while silently growing
+   * the store). The ORCHESTRATOR (never the "microagent") authors the signed `assert` + `derived_from`
+   * facts (INV-A1, T6.3.3), each provenance-stamped with the resolved `asOf` and the invocation id.
+   * The returned `AnswerGraph` is always read back from those facts (T6.6, INV-A8), never assembled
+   * from in-memory bookkeeping.
+   *
+   * ROUND-4 FIX (finding #3): a step whose `Segment.deps` names MORE THAN ONE distinct materialized
+   * producer (a real multi-input join, D-5b.8) throws `ERR_MULTI_INPUT_JOIN_UNSUPPORTED` rather than
+   * silently narrowing to the first-materialized producer — `compileContextualQuery` already rejects
+   * this shape at compile time (see that method's own doc comment), but this defensive check also
+   * covers a hand-built `Segment` passed straight to `executeSegment`, never bypassing compile's guard.
+   */
+  async executeSegment(segment: Segment, opts?: { asOf?: AsOf }): Promise<AnswerGraph> {
+    const seed = segment.seed;
+    if (seed === undefined) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        "executeSegment: segment carries no seed — it must be produced by compileContextualQuery " +
+          "(a hand-built Segment with no seed has no concrete instance to dispatch from)",
+        {},
+      );
+    }
+    const steps = segment.steps;
+    if (steps.length === 0) return this.readAnswerGraph(seed, []);
+
+    const resolvedAsOf = opts?.asOf ?? segment.asOf;
+
+    const hasDeps = segment.deps !== undefined && segment.deps.length > 0;
+    const order = hasDeps ? topologicalOrder(steps.length, segment.deps as ReadonlyArray<readonly [number, number]>) : steps.map((_, i) => i);
+    if (order === null) {
+      throw new KipError("ERR_COMPILE_CYCLIC_DEPS", "executeSegment: Segment.deps contains a cycle", {});
+    }
+
+    const materialized = new Map<number, EID>();
+    let resultEid: EID | undefined;
+
+    for (const stepIndex of order) {
+      const step = steps[stepIndex];
+      let producer: EID | undefined;
+      if (hasDeps) {
+        const producers = (segment.deps as ReadonlyArray<readonly [number, number]>)
+          .filter(([, consumer]) => consumer === stepIndex)
+          .map(([p]) => materialized.get(p));
+        const definedProducers = producers.filter((p): p is EID => p !== undefined);
+        const distinctDefinedProducers = new Set(definedProducers);
+        if (distinctDefinedProducers.size > 1) {
+          throw new KipError(
+            "ERR_MULTI_INPUT_JOIN_UNSUPPORTED",
+            `executeSegment: step ${stepIndex} has ${distinctDefinedProducers.size} distinct materialized ` +
+              "upstream producers (a real multi-input join, D-5b.8) — this build has no multi-producer " +
+              "dispatch machinery, so silently narrowing to the first-materialized producer is refused " +
+              "rather than fabricating a single-input answer over an incomplete input (N5)",
+            { stepIndex, producers: [...distinctDefinedProducers] },
+          );
+        }
+        producer = definedProducers[0];
+      }
+      if (producer === undefined) {
+        // Linear/no-deps convention (docs/31: "EMPTY deps ⇒ the linear case (topo order = steps[]
+        // index order)"): step i's producer is step i-1's materialized instance, or the seed itself
+        // for step 0.
+        producer = stepIndex === 0 ? seed : materialized.get(stepIndex - 1);
+      }
+      if (producer === undefined) break; // an upstream producer never materialized — upstream-stop.
+
+      // T6.4.2: claim-12 `requires` guard — a pure proj read at the resolved asOf; unmet ⇒
+      // pending-guard, stop (#6/#7).
+      let guardUnmet = false;
+      for (const requiredKind of step.requires ?? []) {
+        if (!(await this.anyEdgeOfKindExists(requiredKind, resolvedAsOf))) {
+          guardUnmet = true;
+          break;
+        }
+      }
+      if (guardUnmet) break;
+
+      // T6.4.2/T6.4.3: claim-12 `condition` / claim-8 `constraint` — pure proj reads over the
+      // producer's OWN PropCells at the resolved asOf; an `unknown` cell is NEVER defaulted to
+      // satisfied (N5).
+      const producerView = await this.resolvedGetNode(producer, resolvedAsOf);
+      if (step.condition && evaluateCondition(step.condition, producerView) !== "satisfied") break;
+      if (step.constraint && evaluateCondition(step.constraint, producerView) !== "satisfied") break;
+
+      // CRITICAL FIX #1 (round 2, T6.3.1/T6.3.2/INV-A3): a REAL MicroagentInvocation, dispatched
+      // through the injectable seam, validated against the manifest's outputSchema — never a
+      // fabricated placeholder output authored unconditionally.
+      const manifest = this.findRegisteredManifest(step.microagentName, step.version, resolvedAsOf);
+      const invocation: MicroagentInvocation = {
+        id: `invocation:${step.edgeKind}:${step.microagentName}@${step.version}:${producer}:${stepIndex}`,
+        manifest: { name: step.microagentName, version: step.version },
+        input: { producer, edgeKind: step.edgeKind },
+        timeout: manifest?.runtime.timeout,
+      };
+      let result: MicroagentResult;
+      try {
+        result = await this.dispatchMicroagent(invocation);
+      } catch {
+        break; // dispatch-failure (#4): the invocation itself threw — no fact, cell stays Unknown.
+      }
+      if (result.exitCode !== 0) break; // INV-A3(a): non-zero exitCode.
+      if (invocation.timeout !== undefined && result.elapsedMs !== undefined && result.elapsedMs > invocation.timeout) {
+        break; // INV-A3(c): elapsed time exceeded the manifest's runtime.timeout.
+      }
+      if (manifest && !validateAgainstOutputSchema(result.output, manifest.outputSchema)) {
+        break; // INV-A3(b): output failed the registered outputSchema.
+      }
+
+      // T6.3.3: orchestrator-only signed authoring (INV-A1) — CRITICAL FIX #3 (INV-A6): check
+      // BEFORE write, so re-executing the identical Segment against the same admitted set mints
+      // ZERO new facts (a genuine no-op, not merely a read-side illusion of one).
+      //
+      // ROUND-4 FIX (CRITICAL, closing the SAME bug class round 2 and round 3 each patched at only
+      // ONE corner): the materialized EID is derived from `(step.edgeKind, producer,
+      // step.microagentName, step.version)` — round 2 percent-encoded only the realizer suffix
+      // (`microagentName`/`version`); round 3 fixed the DIFFERENT `(edgeKind, producer)` collision
+      // dimension (two realizers on the same hop) but left `edgeKind`/`producer` themselves
+      // RAW-CONCATENATED with the same unescaped `/` separator used everywhere else — the identical
+      // separator-collision bug `ontologyRefForBinding`'s own round-2 fix already closed for
+      // registration refs, reappearing a third time here. Since `producer` for step i>0 IS the PRIOR
+      // step's own materialized EID (itself containing unescaped `/` once a chain is 2+ hops), two
+      // DIFFERENT `(edgeKind, producer)` pairs could raw-concatenate to a BYTE-IDENTICAL string (e.g.
+      // `edgeKind="owns/dept", producer="acme"` vs `edgeKind="owns", producer="dept/acme"`, both
+      // `derived:owns/dept/acme/<realizerId>`). `materializedEidFor` (contextual.ts) now
+      // percent-encodes EVERY joined segment — `edgeKind`, `producer`, AND the realizer components —
+      // before joining, so no two distinct quadruples can collide. `derivedFromEdgeEidFor` closes the
+      // companion `->`-separator risk in the `derived_from` edge EID the SAME way: `producer` for
+      // step 0 is the caller-supplied, format-unconstrained `ContextualQuery.seed`, which could itself
+      // contain a literal `->` substring, so both `producer` and `materializedEid` are percent-encoded
+      // there too rather than relying on an unverifiable "seed never contains `->`" assumption.
+      const materializedEid = materializedEidFor(step.edgeKind, producer, step.microagentName, step.version);
+      const nodeTarget: Target = { kind: "node", eid: materializedEid, nodeKind: step.targetKind };
+      const edgeEid = derivedFromEdgeEidFor(producer, materializedEid);
+      const edgeTarget: Target = { kind: "edge", eid: edgeEid, edgeKind: "derived_from", from: producer, to: materializedEid };
+      const edgeValue = JSON.stringify({ edgeKind: step.edgeKind, output: result.output });
+      const provenanceFor = (): Provenance => ({
+        author: "kip-orchestrator:executeSegment",
+        signature: "",
+        publicKeyFingerprint: "",
+        signedFields: [],
+        source: { uri: `microagent-invocation:${invocation.id}` },
+        resolvedAsOf,
+      });
+
+      if (!this.findMatchingFact(nodeTarget, true, resolvedAsOf)) {
+        await this.assertFact({
+          type: "assert",
+          v: 1,
+          target: nodeTarget,
+          value: true,
+          validFrom: 0,
+          validTo: null,
+          replicaId: this.replicaId,
+          provenance: provenanceFor(),
+        });
+      }
+      if (!this.findMatchingFact(edgeTarget, edgeValue, resolvedAsOf)) {
+        await this.assertFact({
+          type: "assert",
+          v: 1,
+          target: edgeTarget,
+          value: edgeValue,
+          validFrom: 0,
+          validTo: null,
+          replicaId: this.replicaId,
+          provenance: provenanceFor(),
+        });
+      }
+      materialized.set(stepIndex, materializedEid);
+      if (stepIndex === steps.length - 1) resultEid = materializedEid;
+    }
+
+    return this.readAnswerGraph(seed, resultEid ? [resultEid] : []);
+  }
+
+  /**
+   * T6.2/T6.3/T6.5: the compile+execute convenience with the DISCRIMINATED return (N5, INV-A7):
+   * exactly one match ⇒ executes it and returns the `AnswerGraph`; multiple matches ⇒ returns
+   * `{ kind: "choice", segments }` and executes NOTHING (zero invocations, zero facts) until the
+   * caller picks one and calls `executeSegment`.
+   */
+  async runContextualQuery(q: ContextualQuery): Promise<AnswerGraph | { kind: "choice"; segments: Segment[] }> {
+    const segment = await this.compileContextualQuery(q);
+    const allSegments = [segment, ...segment.alternatives];
+    if (allSegments.length > 1) {
+      return { kind: "choice", segments: allSegments };
+    }
+    if (segment.steps.length === 0) {
+      // N5: no registered functionality realizes this query at all — no fabricated answer.
+      return { result: [], intermediates: [], edges: [], derivedFrom: [] };
+    }
+    return this.executeSegment(segment);
   }
 
   // TODO(M7/T8.1): dispatch a standalone Miner/Discoverer/Ingestor/RDF family microagent (ADR-022/023).
