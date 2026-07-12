@@ -1134,6 +1134,19 @@ export class KipRepo implements Repo {
   private readonly dispatchMicroagent: DispatchMicroagentFn;
 
   /**
+   * TEST-SUPPORT ADDITION (M6/T7.2, docs/32 §5b.2's declared seam, m7-18): `learn()`'s wall-time
+   * budget axis (`LearnerLoopState.elapsedMs` vs. `LearnOptions.maxWallMs`) is declared to read an
+   * INJECTABLE monotonic clock — "production default = the process monotonic clock — a
+   * *loop-driver* input, never a `proj` input, so substrate determinism is untouched" — precisely so
+   * INV-A5(b)'s "tiny `maxWallMs` + hung decode" case can be driven DETERMINISTICALLY (a scripted
+   * clock that jumps forward on each call) rather than by a real, flaky `sleep`. Stored here as a
+   * typed constructor seam ONLY — `learn()` itself is still an unimplemented throwing stub this
+   * round (M6 is TEST-FIRST TDD, mirroring `dispatchMicroagent`'s own M5 precedent above), so no
+   * wall-time accounting logic consumes this yet.
+   */
+  private readonly clock: () => number;
+
+  /**
    * The default `dispatchMicroagent` — a documented, deterministic "always succeeds" stub used when
    * no test-supplied dispatch function is configured. It does NOT spawn any real process (no
    * declared execution-harness seam exists at M5's public surface, see inv-a3.test.ts's own SCOPE
@@ -1221,6 +1234,15 @@ export class KipRepo implements Repo {
      * that need a specific INV-A3(a)/(b)/(c) outcome supply their OWN function here instead.
      */
     dispatchMicroagent?: DispatchMicroagentFn;
+    /**
+     * TEST-SUPPORT ADDITION (M6/T7.2, docs/32 §5b.2 m7-18): the injectable monotonic clock the
+     * `learn()` wall-time budget axis reads — see `this.clock`'s own doc comment. Defaults to
+     * `Date.now` (an ordinary, real monotonic-enough production default per m7-18's own text — "the
+     * process monotonic clock"); conformance tests exercising INV-A5(b) supply a SCRIPTED clock
+     * (e.g. one that jumps forward a fixed amount per call) instead, so a "hung decode" is driven
+     * deterministically, never by a real `sleep`.
+     */
+    clock?: () => number;
   }) {
     this.explicitDir = options?.dir;
     this.hashAlgo = options?.hashAlgo ?? "sha1";
@@ -1231,6 +1253,7 @@ export class KipRepo implements Repo {
     this.trustedExciseKeyFingerprints = new Set(options?.trustedExciseKeys ?? []);
     this.regenBoundaryRule = options?.regenBoundaryRule ?? REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS;
     this.dispatchMicroagent = options?.dispatchMicroagent ?? KipRepo.defaultDispatchMicroagent;
+    this.clock = options?.clock ?? Date.now;
     if (options?.keyPair) {
       this.ownKeyPair = options.keyPair;
       this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
