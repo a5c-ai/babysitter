@@ -27,9 +27,10 @@ import { createHash, randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { performance } from "node:perf_hooks";
 import * as isomorphicGit from "isomorphic-git";
 import { CANONICAL_ENVELOPE_FIELDS, canonicalPayloadString, deepSortKeys } from "./canonical-payload";
-import { checkWellFormed } from "./well-formed";
+import { checkWellFormed, isWellFormedTarget } from "./well-formed";
 import { ChainSequencer, chainIdFor } from "./chain-sequencer";
 import { tick as hlcTick, receiveTick as hlcReceiveTick } from "./hlc";
 import {
@@ -48,10 +49,12 @@ import {
   compareByContent,
   compareOrderKey,
   computeExcisionRef,
+  foldLearnCell,
   isAuthorizedExcisionMarker,
   orderKey,
   proj,
   traverse,
+  type LearnCellFoldResult,
   type ProjOptions,
   type SelfWitnessedExcisionRecord,
 } from "./proj";
@@ -125,7 +128,28 @@ export interface HlcStamp {
  */
 export type HlcOrTime = HlcStamp | string /* ISO-8601 */ | number /* epoch ms */;
 
-/** Tagged reference to a large value blob (m-1) — large values never a bare CID string. */
+/**
+ * Tagged reference to a large value blob (m-1) — large values never a bare CID string.
+ *
+ * ROUND-2 FIX (M6, MAJOR #2 — documentation-only, no behavior change): `blob` is a caller-DECLARED
+ * `CID` string, never verified/re-hashed against the referenced content by `learn()` or anything
+ * else in this module (unlike a `Fact.id`, which `mintFact` derives as a REAL content hash — see
+ * proj.ts's own `compareOrderKey` doc comment for the parallel caveat about externally-supplied
+ * `Fact.id`s). `learn()`'s `kip:learn`/`kip:learn-exhausted` fact key is built from `rawRef.blob`
+ * (via `ontologyRefForLearn`) with NO out-of-band hash check, so `BlobRef` identity here is
+ * ADVISORY-ONLY: two `learn()` calls over genuinely DIFFERENT raw artifacts that happen to declare
+ * the SAME `rawRef.blob` string collide onto the identical `kip:learn` key (indistinguishable from
+ * two calls over the SAME artifact), while the converse (the SAME artifact declared under two
+ * DIFFERENT `blob` strings) never collides at all. Downstream consumers reading `kip:learn` facts
+ * back MUST NOT treat two facts sharing a key as "provably the same content" without an out-of-band
+ * hash check of their own — this is a pre-existing placeholder-type limitation (`BlobRefInput`'s own
+ * doc comment), not introduced or closed by this fix; see `m6-round2-critic-fixes.test.ts`'s "M6
+ * round-2 finding MAJOR #2: BlobRef identity is advisory-only/caller-declared" describe block for a
+ * conformance test asserting this collision behavior is bounded and understood (same string used
+ * twice ⇒ same key, by design; two distinct strings ⇒ never collide). [ROUND-3 FIX (MINOR,
+ * citation-only): this comment previously cited a non-existent `round2-blobref-collision.test.ts`
+ * file name; corrected to name the actual describe block above.]
+ */
 export type BlobRef = { blob: CID };
 export type PropValue = string | number | boolean | null | BlobRef;
 
@@ -887,7 +911,22 @@ export type KipErrorCode =
    * machinery beyond this round's scope — tracked as a residual for a future round, never silently
    * implemented as a guess.
    */
-  | "ERR_MULTI_INPUT_JOIN_UNSUPPORTED";
+  | "ERR_MULTI_INPUT_JOIN_UNSUPPORTED"
+  /**
+   * ROUND-4 (M6, part b — defense-in-depth against ANY unforeseen accept-commit failure): `learn()`'s
+   * accept-commit sequence (existence facts + accepted `AssertInput[]` + the final `kip:learn` audit
+   * fact) commits several facts one at a time (`Repo.txn()`/`Tx` are still unimplemented throwing
+   * stubs in this build, so a real all-or-nothing transaction is not available — see `learn()`'s own
+   * doc comment). Part (a) above closes every KNOWN malformed-target vector before a candidate can
+   * ever reach this sequence, but `assertFact`'s own `checkWellFormed` (or `ensureExistenceFor`, or
+   * `assertFact` itself) MAY still reject/throw for some OTHER, unforeseen reason after one or more
+   * earlier items in the SAME accepted batch already committed durably. Thrown (never left to escape
+   * as a raw, untyped exception) once a `kip:learn-exhausted` marker recording the failure reason and
+   * every already-committed fact id has been durably authored — so this outcome is NEVER
+   * silent/unaudited (N5), even though it is not the ordinary `"accept"`/`"exhausted"` return
+   * contract `learn()` otherwise promises.
+   */
+  | "ERR_LEARN_COMMIT_FAILED";
 
 /**
  * Domain outcomes (`pending`, `pin-incomplete`, a `conflict` segment, `status: "exhausted"`, ...)
@@ -1139,10 +1178,16 @@ export class KipRepo implements Repo {
    * INJECTABLE monotonic clock — "production default = the process monotonic clock — a
    * *loop-driver* input, never a `proj` input, so substrate determinism is untouched" — precisely so
    * INV-A5(b)'s "tiny `maxWallMs` + hung decode" case can be driven DETERMINISTICALLY (a scripted
-   * clock that jumps forward on each call) rather than by a real, flaky `sleep`. Stored here as a
-   * typed constructor seam ONLY — `learn()` itself is still an unimplemented throwing stub this
-   * round (M6 is TEST-FIRST TDD, mirroring `dispatchMicroagent`'s own M5 precedent above), so no
-   * wall-time accounting logic consumes this yet.
+   * clock that jumps forward on each call) rather than by a real, flaky `sleep`. `learn()` also reads
+   * this SAME clock, once, as the default source for `ontologyAsOf.validTime` when the caller doesn't
+   * pin one (docs/32's R5) — see `learn()`'s own doc comment.
+   *
+   * ROUND-2 FIX (MAJOR #1): the DEFAULT (see the constructor option's own doc comment below) MUST
+   * itself be genuinely monotonic — `Date.now()` is NOT (it tracks the OS wall clock, which NTP/DST/
+   * a manual clock change can step BACKWARD), which would silently defeat the wall-time budget axis
+   * (a backward jump makes `elapsedMs = this.clock() - startClockMs` negative, so `elapsedMs >=
+   * budget.maxWallMs` never trips, INV-A5). `learn()` additionally clamps `elapsedMs` to
+   * `Math.max(0, ...)` as defense-in-depth for any caller-supplied non-monotonic `clock` option.
    */
   private readonly clock: () => number;
 
@@ -1236,11 +1281,17 @@ export class KipRepo implements Repo {
     dispatchMicroagent?: DispatchMicroagentFn;
     /**
      * TEST-SUPPORT ADDITION (M6/T7.2, docs/32 §5b.2 m7-18): the injectable monotonic clock the
-     * `learn()` wall-time budget axis reads — see `this.clock`'s own doc comment. Defaults to
-     * `Date.now` (an ordinary, real monotonic-enough production default per m7-18's own text — "the
-     * process monotonic clock"); conformance tests exercising INV-A5(b) supply a SCRIPTED clock
-     * (e.g. one that jumps forward a fixed amount per call) instead, so a "hung decode" is driven
-     * deterministically, never by a real `sleep`.
+     * `learn()` wall-time budget axis (and, once, `ontologyAsOf`'s default) reads — see `this.clock`'s
+     * own doc comment. ROUND-2 FIX (MAJOR #1): defaults to `performance.timeOrigin + performance.now()`
+     * (`node:perf_hooks`), NOT `Date.now()` — `performance.now()` is spec-guaranteed monotonic
+     * (immune to the OS wall clock being stepped backward by NTP/DST/a manual change), while adding
+     * the fixed `timeOrigin` epoch keeps the result wall-clock-COMPARABLE (an ordinary epoch-millis
+     * number, like `Date.now()`, so it remains sound as `ontologyAsOf.validTime`'s default) — a real
+     * monotonic clock without this property (e.g. a bare `process.hrtime.bigint()` scaled to ms, whose
+     * epoch is arbitrary/process-start-relative) would corrupt `ontologyAsOf.validTime`'s meaning as a
+     * real point on the shared timeline. Conformance tests exercising INV-A5(b) supply a SCRIPTED
+     * clock (e.g. one that jumps forward a fixed amount per call) instead, so a "hung decode" is
+     * driven deterministically, never by a real `sleep`.
      */
     clock?: () => number;
   }) {
@@ -1253,7 +1304,9 @@ export class KipRepo implements Repo {
     this.trustedExciseKeyFingerprints = new Set(options?.trustedExciseKeys ?? []);
     this.regenBoundaryRule = options?.regenBoundaryRule ?? REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS;
     this.dispatchMicroagent = options?.dispatchMicroagent ?? KipRepo.defaultDispatchMicroagent;
-    this.clock = options?.clock ?? Date.now;
+    // ROUND-2 FIX (MAJOR #1): genuinely monotonic (never Date.now()) yet still epoch-comparable —
+    // see this field's own doc comment and the constructor option's doc comment above.
+    this.clock = options?.clock ?? (() => performance.timeOrigin + performance.now());
     if (options?.keyPair) {
       this.ownKeyPair = options.keyPair;
       this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
@@ -3425,13 +3478,706 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: runAcquisition");
   }
 
-  // TODO(M6/T7.1, T7.2): explicit-selection autoencoding loop under a disjunctive budget (ADR-021).
+  /**
+   * T7.1-T7.5 (M6, docs/32-knowledge-autoencoding.md, ADR-021): the encode -> decode ->
+   * reconstruction-loss -> learner autoencoding loop, run ENTIRELY OUTSIDE `proj` (the §5.3
+   * accelerator boundary) under a TOTAL disjunctive budget (`maxIterations` OR `maxWallMs` OR
+   * `maxInvocations` — the FIRST axis to cap trips "exhausted", FR-J1).
+   *
+   *  - T7.1 (INV-A13): `opts.{encode,decode,learner,loss}` are EXPLICIT `(name,version)` selections
+   *    — never a heuristic pick by `rawKind` — resolved via the SAME `findRegisteredManifest` lookup
+   *    `executeSegment` already uses (T6.3.2). An unregistered/unsigned name is REJECTED with a typed
+   *    `ERR_UNREGISTERED_MANIFEST` `KipError` BEFORE the loop runs: no dispatch, no fact authored,
+   *    cells stay `Unknown`.
+   *  - T7.2 (INV-A5): the loop tracks a `LearnerLoopState`-shaped local (iteration/elapsedMs/
+   *    invocations/bestLoss/candidate) and checks the TOTAL disjunctive `converged()` predicate
+   *    (docs/32 §5b.2, verbatim) BEFORE every single dispatch — not merely at iteration boundaries —
+   *    so a tiny `maxInvocations` trips mid-iteration, never after one more call than configured.
+   *    `elapsedMs` is refreshed from the INJECTABLE `this.clock()` seam (m7-18) after every dispatch,
+   *    never a real sleep.
+   *  - T7.3 (INV-A12/INV-A14): `l < s.bestLoss` is the accept-if-STRICTLY-improved update rule (a
+   *    worsening or failed/infinite-loss proposal never overwrites `candidate`, so `bestLoss` is
+   *    monotone non-increasing); `rawKind` is read ONCE from `opts.rawKind` at entry and threaded
+   *    byte-identical into every `DecodeAgent` call across every iteration.
+   *  - T7.4 (FR-J3): on "accept", the winning `candidate` `AssertInput[]` are committed as ORDINARY
+   *    signed facts (via `assertFact` — the SAME path every other write in this module uses), so they
+   *    fold through the SAME M1 reducers/`orderKey` as any other fact (INV-A9's "orderKey-max wins,
+   *    never loss-tiebroken" claim falls out of the already-frozen M1 machinery for free, never a
+   *    bespoke kip:learn-only reducer). ONE signed `kip:learn` audit fact then names its inputs
+   *    (`rawRef` + the selected `(name,version)`s + `ontologyAsOf`) + the achieved loss + the accepted
+   *    `AssertInput[]`. On "exhausted", ONLY a signed `kip:learn-exhausted` marker is committed — no
+   *    candidate facts, no accept fact (N5).
+   *  - T7.5 (INV-A4/INV-A9/FR-J4): the whole loop runs in THIS method body, never inside `proj` — a
+   *    replica folding the recorded facts (via `sync` + `getNode`) never re-invokes any encode/
+   *    decode/loss/learner agent (`proj()` has no reference to `dispatchMicroagent` at all). The
+   *    achieved loss is recorded ONLY inside the `kip:learn` fact's own `value` payload, under a
+   *    `schema`-kind target (mirroring `registerFunctionality`'s own microagent-registration
+   *    convention). ROUND-2 FIX (CRITICAL #2): `proj.ts`'s `cellKeyFor` still (correctly) excludes
+   *    `schema`-kind targets from the GENERIC node/edge fold (`getNode`/`getEdge` never take a
+   *    `schema` target) — but a `kip:learn` fact is NOT thereby excluded from every fold, only from
+   *    that one: `getLearnResult` (below) + `proj.ts`'s `foldLearnCell` give it its OWN real
+   *    correction-class cell, keyed on `(rawRef, ontologyAsOf, encode/decode/learner-manifest)`
+   *    (`ontologyRefForLearn`'s own key), from which the achieved loss VALUE (and the loss
+   *    microagent's own `(name,version)`) are excluded — never the whole fact — exactly as `rxFrom`
+   *    is excluded from `orderKey` elsewhere (FR-J4): two competing accepted sets at the SAME key
+   *    surface a genuine conflict via `getLearnResult`; a same-set/different-loss re-author is a
+   *    no-op.
+   *
+   * UNDISCLOSED-IN-DOCS NOTE (MINOR): on "accept", this method also auto-mints a bare node/edge
+   * EXISTENCE fact (`ensureExistenceFor`) for any accepted candidate targeting a `node-prop`/
+   * `edge-prop` whose node/edge does not already (currently) exist — otherwise proj.ts's "no ghost
+   * nodes/edges" existence-gating would make the accepted prop permanently unreachable via
+   * `getNode`/`getEdge`. This is a reasonable, minimal design choice (mirrors `putNode`/`putEdge`
+   * sugar's own documented existence-fact compilation, FR-A6) but was previously undisclosed at this
+   * public seam; called out here so callers reading back `learn()`'s committed `facts` are not
+   * surprised to see more facts than there were `accepted` `AssertInput[]` entries.
+   */
   async learn(
-    _rawRef: BlobRefInput,
-    _opts: LearnOptions,
+    rawRef: BlobRefInput,
+    opts: LearnOptions,
   ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }> {
-    throw new Error("unimplemented: learn");
+    // T7.1.2 / INV-A13: resolve + validate every named manifest BEFORE any dispatch — reusing
+    // `findRegisteredManifest` (T6.3.2's own "signature-valid registration fact present in S" check)
+    // rather than inventing a second, possibly-divergent notion of "registered".
+    const roles: ReadonlyArray<readonly ["encode" | "decode" | "learner" | "loss", { name: string; version: string }]> = [
+      ["encode", opts.encode],
+      ["decode", opts.decode],
+      ["learner", opts.learner],
+      ["loss", opts.loss],
+    ];
+    const manifestsPartial: Partial<Record<"encode" | "decode" | "learner" | "loss", MicroagentManifest>> = {};
+    for (const [role, sel] of roles) {
+      const found = this.findRegisteredManifest(sel.name, sel.version, opts.asOf);
+      if (!found) {
+        throw new KipError(
+          "ERR_UNREGISTERED_MANIFEST",
+          `learn: the named ${role} manifest "${sel.name}@${sel.version}" has no signature-valid ` +
+            "registration fact in S — rejected BEFORE the loop runs (N5): kip never heuristically " +
+            "substitutes a different manifest by rawKind, never dispatches, and authors no " +
+            "kip:learn/kip:learn-exhausted fact (INV-A13)",
+          { manifest: sel, role },
+        );
+      }
+      manifestsPartial[role] = found;
+    }
+    const manifests = manifestsPartial as Record<"encode" | "decode" | "learner" | "loss", MicroagentManifest>;
+
+    // T7.1.1/T7.3.3: `rawKind` sourced ONCE, right here, and threaded byte-identical into every
+    // DecodeAgent invocation below — never re-inferred or re-read from `opts` per iteration (INV-A14).
+    const rawKind = opts.rawKind;
+
+    // m7-18's declared seam: the wall-time axis reads `this.clock()` — an injectable, genuinely
+    // monotonic clock (ROUND-2 FIX MAJOR #1: defaults to `performance.timeOrigin + performance.now()`,
+    // never `Date.now()` — see `this.clock`'s own doc comment) — NEVER a real `sleep`.
+    //
+    // ROUND-2 FIX (MINOR): read ONCE, right here, and reused for BOTH `startClockMs` (the wall-time
+    // budget axis's own zero point) AND `ontologyAsOf`'s default below — previously `ontologyAsOf`
+    // took a SEPARATE, independent `Date.now()` reading, so it could disagree with `this.clock()`
+    // (a scripted test clock in particular would never influence `ontologyAsOf` at all). A single
+    // reading keeps every "now"-flavored value inside one `learn()` call mutually consistent.
+    const nowMs = this.clock();
+    const startClockMs = nowMs;
+
+    // R5/docs/32's keying caveat: `ontologyAsOf` defaults to this authoring replica's own local
+    // "now" ONLY when the caller has not pinned one; resolved exactly ONCE here (never re-read
+    // mid-loop) and recorded, set-resident, inside the eventual kip:learn/kip:learn-exhausted fact.
+    const ontologyAsOf: AsOf = opts.asOf ?? { validTime: nowMs };
+
+    // T7.3.2/INV-A12(b): the LearnerLoopState seeded EXACTLY from LearnOptions — kept as a plain
+    // local (LearnerLoopState is orchestrator-INTERNAL machinery, never part of the public Repo
+    // surface, per inv-a12.test.ts's own TESTABILITY NOTE) so threshold/budget can never
+    // independently drift from the options that seeded them.
+    const state = {
+      iteration: 0,
+      elapsedMs: 0,
+      invocations: 0,
+      bestLoss: Number.POSITIVE_INFINITY,
+      candidate: [] as AssertInput[],
+      threshold: opts.threshold,
+      budget: { maxIterations: opts.maxIterations, maxWallMs: opts.maxWallMs, maxInvocations: opts.maxInvocations },
+    };
+
+    // T7.2.2: the TOTAL disjunctive budget predicate (docs/32 §5b.2's `converged`, verbatim) — ANY
+    // axis tripping yields "exhausted"; there is no unchecked budget knob.
+    const converged = (): "accept" | "exhausted" | "continue" => {
+      if (state.bestLoss < state.threshold) return "accept";
+      if (state.iteration >= state.budget.maxIterations) return "exhausted";
+      if (state.elapsedMs >= state.budget.maxWallMs) return "exhausted";
+      if (state.invocations >= state.budget.maxInvocations) return "exhausted";
+      return "continue";
+    };
+
+    let invocationSeq = 0;
+    /**
+     * Dispatches ONE encode/decode/learner/loss call through the injectable `dispatchMicroagent`
+     * seam, unconditionally consuming one `invocations` unit and refreshing `elapsedMs` from
+     * `this.clock()` (T7.2.1) — REGARDLESS of outcome (docs/32: a failing dispatch "consumes one
+     * invocation ... and is scored as an infinite-loss iteration"). Returns `null` on ANY N5
+     * dispatch-failure outcome (a thrown invocation, non-zero `exitCode`, or `outputSchema`-invalid
+     * output) — the caller treats a `null` return as this iteration's loss being infinite, never a
+     * best-effort accept.
+     *
+     * ROUND-3 NOTE (CRITICAL #1): a NON-`null` return here is NOT thereby guaranteed to be a
+     * well-shaped success value. `validateAgainstOutputSchema` only checks conformance against the
+     * REGISTERED manifest's OWN `outputSchema` — a permissive schema (e.g. `{}`, every fixture in
+     * this test suite) trivially passes a genuinely `undefined` `result.output` (or any other
+     * loosely-typed value) straight through as `return result.output;` below. Deliberately NOT
+     * folded into this method's own `null` sentinel (that would conflate "dispatch failed" with
+     * "dispatch succeeded but returned an unusable shape" under one signal, losing the distinction a
+     * future caller might want) — each of this method's THREE call sites below independently guards
+     * against `undefined`/non-plain-object (encode/learner/decode) or non-finite-number (loss)
+     * output before destructuring/using it, scoring all of those cases identically to a dispatch
+     * failure (N5) rather than letting a `TypeError` escape `learn()`.
+     *
+     * DOCUMENTED SCOPE NOTE (MINOR, accepted): the `catch` below treats ANY thrown value — a genuine
+     * dispatch failure (the invocation-harness's own documented failure signal) or an unexpected bug
+     * in a caller-supplied `dispatchMicroagent` — identically, as an ordinary infinite-loss iteration,
+     * mirroring `executeSegment`'s own frozen M5 `catch { break; }` (same file, same precedent,
+     * intentionally left unchanged here for consistency between the two dispatch call sites). This is
+     * distinct from "silently accepting a failed candidate" (N5's actual concern, CRITICAL #1 below):
+     * an unexpected exception here still consumes budget and never improves `bestLoss`/`candidate`,
+     * so it cannot cause a wrong ACCEPT — only, at worst, a wrong ("exhausted" instead of a propagated
+     * bug) diagnostic locally, the same tradeoff M5's `executeSegment` already made.
+     */
+    const dispatchOne = async (
+      role: "encode" | "decode" | "learner" | "loss",
+      manifest: MicroagentManifest,
+      input: unknown,
+    ): Promise<unknown | null> => {
+      invocationSeq += 1;
+      const invocation: MicroagentInvocation = {
+        id: `learn:${role}:${manifest.name}@${manifest.version}:${invocationSeq}`,
+        manifest: { name: manifest.name, version: manifest.version },
+        input,
+        timeout: manifest.runtime.timeout,
+      };
+      let result: MicroagentResult;
+      try {
+        // eslint-disable-next-line no-await-in-loop -- intentionally sequential: each dispatch
+        // depends on the PRIOR iteration's outcome (accept-if-improved, T7.3.1).
+        result = await this.dispatchMicroagent(invocation);
+      } catch {
+        result = { exitCode: 1, output: null };
+      }
+      state.invocations += 1;
+      // ROUND-2 FIX (MAJOR #1 defense-in-depth): clamp to 0 so even a caller-supplied non-monotonic
+      // `clock` option can never drive `elapsedMs` negative (which would silently defeat the
+      // `maxWallMs` budget axis for the rest of this run, INV-A5).
+      state.elapsedMs = Math.max(0, this.clock() - startClockMs);
+      if (result.exitCode !== 0) return null;
+      if (!validateAgainstOutputSchema(result.output, manifest.outputSchema)) return null;
+      return result.output;
+    };
+
+    let status: "accept" | "exhausted" = "exhausted";
+
+    for (;;) {
+      const topVerdict = converged();
+      if (topVerdict !== "continue") {
+        status = topVerdict;
+        break;
+      }
+
+      // T7.2.1: ENCODE seeds iteration 0's candidate; every later iteration's candidate comes from
+      // the LEARNER (fed the CURRENT best candidate + its achieved loss, docs/32's LearnerAgent
+      // shape) — never re-encoding from scratch.
+      // eslint-disable-next-line no-await-in-loop -- sequential loop-state machine, see above.
+      const candidateOutput =
+        state.iteration === 0
+          ? await dispatchOne("encode", manifests.encode, { rawRef, ontologyAsOf })
+          : await dispatchOne("learner", manifests.learner, {
+              rawRef,
+              current: state.candidate,
+              loss: state.bestLoss,
+              ontologyAsOf,
+            });
+      // ROUND-3 FIX (CRITICAL #1): `dispatchOne` returns the dispatch's `result.output` VERBATIM
+      // once it clears the exitCode/outputSchema gates — a permissive `outputSchema` (e.g. `{}`,
+      // every fixture in this suite) trivially admits a genuinely `undefined` (or non-object)
+      // `output`, so `candidateOutput` can be `undefined` here even though only `=== null` was
+      // previously checked. Destructuring `.candidateFacts`/`.next` off `undefined` (or any
+      // non-object) below would throw an uncaught `TypeError`, crashing this whole `learn()` call
+      // instead of scoring the iteration as infinite loss (N5). `null`/`undefined`/non-plain-object
+      // are ALL treated identically to an ordinary dispatch failure here — never a best-effort
+      // accept of a shape that isn't even an object.
+      if (candidateOutput === null || candidateOutput === undefined || !isPlainRecord(candidateOutput)) {
+        // N5 dispatch-failure: this WHOLE iteration is scored infinite loss — never improves
+        // bestLoss/candidate — without attempting decode/loss at all (nothing sound to
+        // reconstruct/measure against a candidate that was never actually produced).
+        state.iteration += 1;
+        continue;
+      }
+      // ROUND-2 FIX (CRITICAL #1): the role that just ran is ALREADY known deterministically
+      // (encode at iteration 0, the learner on every later iteration) — so read ONLY that role's own
+      // declared output field (docs/32's `EncodeAgent`/`LearnerAgent` FUNCTION-TYPE aliases:
+      // `{ candidateFacts }` vs `{ next }` are mutually exclusive shapes, never both consulted for
+      // the SAME call). Previously this chained BOTH shapes with `??` and finally `?? []` — so a
+      // malformed/wrong-shaped output (e.g. an encode call whose result carries neither
+      // `candidateFacts` NOR a stray `next`) silently coerced to an EMPTY accepted set rather than
+      // being treated as a dispatch failure — a direct N5 "no best-effort accept of a failed
+      // candidate" violation (`validateAgainstOutputSchema` above is NOT a sufficient guard by
+      // itself: a manifest whose OWN registered `outputSchema` doesn't declare `required`/`properties`
+      // for this field passes permissively, see contextual.ts's `validateAgainstOutputSchema` doc
+      // comment). A missing or non-array field is now scored IDENTICALLY to an outputSchema-invalid
+      // result: infinite loss, this iteration's `candidateFacts` never becomes `state.candidate`.
+      const rawCandidateFacts: unknown =
+        state.iteration === 0
+          ? (candidateOutput as { candidateFacts?: unknown }).candidateFacts
+          : (candidateOutput as { next?: unknown }).next;
+      if (!isAssertInputArray(rawCandidateFacts)) {
+        state.iteration += 1;
+        continue;
+      }
+      const candidateFacts = rawCandidateFacts;
+
+      const midVerdict1 = converged();
+      if (midVerdict1 !== "continue") {
+        status = midVerdict1;
+        break; // budget capped mid-iteration — never "accept" here (no loss measured yet).
+      }
+      // eslint-disable-next-line no-await-in-loop -- sequential loop-state machine, see above.
+      const reconstructedOutput = await dispatchOne("decode", manifests.decode, { candidateFacts, rawKind });
+      // ROUND-3 FIX (CRITICAL #1, same reasoning as the encode/learner guard above): a permissive
+      // decode `outputSchema` can likewise let a genuinely `undefined`/non-object output through —
+      // guard BEFORE destructuring `.reconstructed` so this never throws an uncaught `TypeError`.
+      if (
+        reconstructedOutput === null ||
+        reconstructedOutput === undefined ||
+        !isPlainRecord(reconstructedOutput)
+      ) {
+        state.iteration += 1;
+        continue;
+      }
+      const reconstructed = (reconstructedOutput as { reconstructed: BlobRef }).reconstructed;
+
+      const midVerdict2 = converged();
+      if (midVerdict2 !== "continue") {
+        status = midVerdict2;
+        break;
+      }
+      // eslint-disable-next-line no-await-in-loop -- sequential loop-state machine, see above.
+      const lossOutput = await dispatchOne("loss", manifests.loss, { rawRef, reconstructed });
+      // ROUND-3 FIX (CRITICAL #1 + "cheap" finding, `measuredLoss` type safety): `LossMetric`'s
+      // declared shape (docs/32) is a BARE `number` — unlike encode/decode/learner it is never
+      // object-wrapped, so this guard (unlike the two above) does NOT check `isPlainRecord`;
+      // instead it requires `typeof === "number" && Number.isFinite(...)`. A permissive
+      // `outputSchema` can let `undefined`/`null`/a non-numeric value (e.g. a string) through
+      // unchecked; the OLD code's bare `as number` type assertion would silently corrupt every
+      // later `<` comparison to a non-numeric (or NaN, or lexicographic-string) comparison rather
+      // than ever throwing — still a silent correctness bug, just not a crash. Treated identically
+      // to a dispatch failure: infinite loss, never improves `bestLoss`/`candidate`.
+      if (
+        lossOutput === null ||
+        lossOutput === undefined ||
+        typeof lossOutput !== "number" ||
+        !Number.isFinite(lossOutput)
+      ) {
+        state.iteration += 1;
+        continue;
+      }
+      const measuredLoss = lossOutput;
+
+      // T7.3.1/INV-A12(a): accept-if-STRICTLY-improved — a worsening (or equal) proposal NEVER
+      // overwrites `candidate`; `bestLoss` is monotone non-increasing.
+      if (measuredLoss < state.bestLoss) {
+        state.bestLoss = measuredLoss;
+        state.candidate = candidateFacts;
+      }
+      state.iteration += 1;
+    }
+
+    // T7.4/T7.5: record the outcome as facts, OUTSIDE proj, never inside a proj-pure fold (INV-A4).
+    const committedFactIds: FactId[] = [];
+
+    if (status === "accept") {
+      // ROUND-3 FIX (CRITICAL #2, part b — mid-batch partial-commit hazard): this loop commits
+      // `state.candidate` ONE ITEM AT A TIME, un-transacted. `Repo.txn`/`Tx` (docs/40) is the
+      // declared batching primitive for "many facts, one commit" — but `txn()` is still an
+      // unimplemented throwing stub in THIS build (`TODO(M0/T1.5)`, see this class's own `txn`
+      // method above), so wrapping this sequence in a real transaction is not available without
+      // inventing new batching infrastructure this round is not scoped to build (and the repo's
+      // hard rule against fallbacks cuts against papering over that gap with an ad hoc pseudo-txn).
+      // `executeSegment` (M5, frozen) faces the SAME "multiple facts, no real txn" shape and makes
+      // the SAME choice: commit one at a time, `break` on the first unrecoverable condition.
+      //
+      // ROUND-4 FIX (closes the bug class): round-3's fix here was PREVENTIVE only — strengthening
+      // `isAssertInputArray` so nothing lacking a present `provenance`/`validFrom`/`validTo`/
+      // `replicaId` could ever reach `state.candidate` — but explicitly left open (its own comment
+      // said so) "a target naming a node/edge kind this repo's `checkWellFormed`/`well-formed.ts`
+      // rejects for some OTHER, deeper reason ... could still reject a later item after earlier items
+      // already committed." This round's part (a) (`isAssertInputArray`'s new `isWellFormedTarget`
+      // call, above) now closes every KNOWN such vector (`target: null/undefined`, an unrecognized
+      // `target.kind`) at the SAME earlier gate. Part (b), here, is the DEFENSE-IN-DEPTH backstop for
+      // any UNFORESEEN reason `ensureExistenceFor`/`assertFact` might still reject/throw after one or
+      // more earlier items in `state.candidate` already committed durably: the whole per-item loop
+      // (existence facts + accepted facts) AND the final `kip:learn` audit-fact mint are wrapped in
+      // one `try`, so ANY failure among them is caught below — never left to escape this `learn()`
+      // call as a silent, unaudited partial write (N5). This still does not make the per-item commit
+      // sequence atomic (a real `Repo.txn()` would); it guarantees the OUTCOME is never silent: on
+      // catch, a `kip:learn-exhausted` marker naming the failure + every already-committed fact id is
+      // durably authored before a typed `KipError` is thrown to the caller.
+      //
+      // T7.4.1: the accepted AssertInput[] are committed as ORDINARY signed facts — via the SAME
+      // assertFact() path every other write in this module uses — so they fold through the SAME M1
+      // reducers/orderKey as any other fact (INV-A9's "orderKey-max wins, never loss-tiebroken"
+      // claim falls out of the already-frozen M1 reducer for free, never a bespoke kip:learn-only
+      // reducer). `replicaId`/`provenance` are overridden to THIS orchestrator's own — a candidate
+      // fact's caller-declared `replicaId`/`author` (e.g. a scripted test fixture's placeholder) is
+      // never trusted as this method's own authoring identity (INV-A1: the ORCHESTRATOR authors the
+      // fact, never the microagent).
+      //
+      // "No ghost nodes/edges" (proj.ts's existence-gating, M1's m2-2): a `node-prop`/`edge-prop`
+      // fact with no corresponding `node`/`edge` EXISTENCE assert ever committed projects to
+      // NOTHING (`getNode`/`getEdge` return `null`), mirroring the SAME "existence gates properties"
+      // rule `putNode`/`putEdge` sugar is documented to compile to (FR-A6: "compile to assert
+      // node-existence + prop facts"). encode/learner candidate facts are ordinary `AssertInput[]`
+      // that may name only the prop(s) they care about — the orchestrator ensures the referenced
+      // node/edge is recorded as existing exactly once per accept, never fabricating any PROPERTY
+      // VALUE the microagent didn't itself decide (only the bare "this eid exists" bookkeeping fact
+      // ordinary graph mechanics already require).
+      try {
+        for (const candidateInput of state.candidate) {
+          // eslint-disable-next-line no-await-in-loop -- existence must be established before (or
+          // alongside) its dependent prop fact is meaningful to read back; sequential by construction.
+          const existenceFactId = await this.ensureExistenceFor(candidateInput.target);
+          if (existenceFactId) committedFactIds.push(existenceFactId);
+          // eslint-disable-next-line no-await-in-loop -- each accepted fact's commit is independent
+          // but must be sequential to advance this replica's own HLC/seq chain deterministically.
+          const minted = await this.assertFact({
+            ...candidateInput,
+            replicaId: this.replicaId,
+            provenance: {
+              author: "kip-orchestrator:learn",
+              signature: "",
+              publicKeyFingerprint: "",
+              signedFields: [],
+              source: candidateInput.provenance.source,
+              confidence: candidateInput.provenance.confidence,
+            },
+          });
+          committedFactIds.push(minted.id);
+        }
+
+        // T7.4.1: ONE signed kip:learn audit fact, naming its inputs (rawRef + the selected
+        // (name,version)s + ontologyAsOf) and the achieved loss + accepted AssertInput[] — a
+        // `schema`-kind target (mirroring microagent-registration's own convention), which
+        // `proj.ts`'s `cellKeyFor` already excludes from cell-folding/orderKey/every reducer (FR-J4:
+        // loss is audit-only, exactly like `rxFrom`).
+        const learnRecord = await this.assertFact({
+          type: "assert",
+          v: 1,
+          target: { kind: "schema", ontologyRef: this.ontologyRefForLearn("kip:learn", rawRef, ontologyAsOf, opts) },
+          value: JSON.stringify({
+            rawRef,
+            ontologyAsOf,
+            encode: opts.encode,
+            decode: opts.decode,
+            learner: opts.learner,
+            loss: opts.loss,
+            achievedLoss: state.bestLoss,
+            accepted: state.candidate,
+          }),
+          validFrom: 0,
+          validTo: null,
+          replicaId: this.replicaId,
+          provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
+        });
+        committedFactIds.push(learnRecord.id);
+      } catch (commitErr) {
+        // ROUND-4 FIX (part b, defense-in-depth): ANY failure above — after zero or more earlier
+        // items already committed durably (named in `committedFactIds`) — lands here rather than
+        // escaping `learn()` as a raw, silent exception. Never a silent fallback (CLAUDE.md): author
+        // a REAL, auditable `kip:learn-exhausted` marker naming the failure reason + every
+        // already-committed fact id, THEN re-throw a typed `KipError` so the caller can never mistake
+        // this for an ordinary `"accept"` — the marker is durably recorded BEFORE the throw, so this
+        // outcome is never unaudited even though the promise itself rejects (N5).
+        const failureReason = commitErr instanceof Error ? commitErr.message : String(commitErr);
+        const partiallyCommittedFactIds = [...committedFactIds];
+        let markerFactId: FactId | undefined;
+        let markerFailureReason: string | undefined;
+        try {
+          const exhaustedRecord = await this.assertFact({
+            type: "assert",
+            v: 1,
+            target: {
+              kind: "schema",
+              ontologyRef: this.ontologyRefForLearn("kip:learn-exhausted", rawRef, ontologyAsOf, opts),
+            },
+            value: JSON.stringify({
+              rawRef,
+              ontologyAsOf,
+              encode: opts.encode,
+              decode: opts.decode,
+              learner: opts.learner,
+              loss: opts.loss,
+              bestLossSeen: Number.isFinite(state.bestLoss) ? state.bestLoss : null,
+              partialCommitFailure: { reason: failureReason, partiallyCommittedFactIds },
+            }),
+            validFrom: 0,
+            validTo: null,
+            replicaId: this.replicaId,
+            provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
+          });
+          markerFactId = exhaustedRecord.id;
+        } catch (markerErr) {
+          // Even authoring the audit marker itself failed — still never silent: this failure is
+          // folded into the typed error thrown below, naming BOTH failures + the partially-committed
+          // fact ids, so a caller can audit/tombstone them out of band.
+          markerFailureReason = markerErr instanceof Error ? markerErr.message : String(markerErr);
+        }
+        throw new KipError(
+          "ERR_LEARN_COMMIT_FAILED",
+          `learn: accept-commit failed after ${partiallyCommittedFactIds.length} fact(s) already ` +
+            `durably committed (${failureReason}). ` +
+            (markerFactId !== undefined
+              ? `A kip:learn-exhausted marker (fact ${markerFactId}) recording this failure and the ` +
+                "partially-committed fact ids has been durably authored, so this run is never " +
+                "silent/unaudited (N5)."
+              : "Additionally, authoring the kip:learn-exhausted audit marker itself failed " +
+                `(${markerFailureReason}) — the partially-committed fact ids are named in this ` +
+                "error's context so the caller can still audit/tombstone them out of band."),
+          { partiallyCommittedFactIds, reason: failureReason, markerFactId, markerFailureReason },
+        );
+      }
+    } else {
+      // T7.4.2: NO accept fact — ONE signed kip:learn-exhausted marker, naming the same inputs + the
+      // best loss actually seen. Cells stay Unknown (nothing was ever asserted to the graph).
+      const exhaustedRecord = await this.assertFact({
+        type: "assert",
+        v: 1,
+        target: { kind: "schema", ontologyRef: this.ontologyRefForLearn("kip:learn-exhausted", rawRef, ontologyAsOf, opts) },
+        value: JSON.stringify({
+          rawRef,
+          ontologyAsOf,
+          encode: opts.encode,
+          decode: opts.decode,
+          learner: opts.learner,
+          loss: opts.loss,
+          bestLossSeen: Number.isFinite(state.bestLoss) ? state.bestLoss : null,
+        }),
+        validFrom: 0,
+        validTo: null,
+        replicaId: this.replicaId,
+        provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
+      });
+      committedFactIds.push(exhaustedRecord.id);
+    }
+
+    // ROUND-2 FIX (MINOR, documentation): `state.bestLoss` may legitimately still be
+    // `Number.POSITIVE_INFINITY` here (`status === "exhausted"` and NO iteration ever improved it —
+    // e.g. every dispatch failed, or the budget capped before iteration 0 even completed). `Infinity`
+    // is a perfectly well-typed `number` in JS/TS (never `NaN`), so it is returned AS-IS rather than
+    // silently coerced to some other sentinel — callers that need a JSON-safe form should apply the
+    // SAME `Number.isFinite(...) ? value : null` normalization the internal `kip:learn-exhausted`
+    // fact payload above already applies before persisting.
+    return { facts: committedFactIds, loss: state.bestLoss, status };
   }
+
+  /**
+   * A stable `ontologyRef` naming a `kip:learn`/`kip:learn-exhausted` audit record's key — docs/32:
+   * "(rawRef, ontologyAsOf, encode/decode/learner-manifest)". The loss microagent's OWN
+   * `(name,version)` is recorded in the fact's `value` payload for provenance but deliberately
+   * EXCLUDED from this key, mirroring how the achieved loss VALUE itself is excluded from every
+   * reducer/orderKey (FR-J4). Every path segment is percent-encoded (mirroring
+   * `ontologyRefForBinding`/`ontologyRefForManifest`'s own separator-collision guard, contextual.ts)
+   * so no component can be confused with a segment boundary.
+   */
+  private ontologyRefForLearn(
+    prefix: string,
+    rawRef: BlobRef,
+    ontologyAsOf: AsOf,
+    opts: Pick<LearnOptions, "encode" | "decode" | "learner">,
+  ): string {
+    const seg = (s: string) => encodeURIComponent(s);
+    const asOfKey = JSON.stringify(deepSortKeys(ontologyAsOf as unknown));
+    return (
+      `${prefix}/${seg(rawRef.blob)}/${seg(asOfKey)}/` +
+      `${seg(opts.encode.name)}@${seg(opts.encode.version)}/` +
+      `${seg(opts.decode.name)}@${seg(opts.decode.version)}/` +
+      `${seg(opts.learner.name)}@${seg(opts.learner.version)}`
+    );
+  }
+
+  /**
+   * Ensures the node/edge a `node-prop`/`edge-prop` accepted candidate fact targets is recorded as
+   * existing — proj.ts's "no ghost nodes/edges" gate (m2-2) otherwise makes the prop cell
+   * unreachable via `getNode`/`getEdge` even though the prop fact itself is admitted. Mirrors the
+   * SAME "compile to assert node-existence + prop facts" convention `putNode`/`putEdge` sugar is
+   * documented to realize (FR-A6) — a bare bookkeeping fact (`value: true`, no `nodeKind`/`edgeKind`
+   * asserted since the candidate itself never named one), never a fabricated property value. A
+   * no-op (returns `undefined`) when an existence assert for this eid already exists. `node`/`edge`/
+   * `schema`/`key`/`control` targets need no companion existence fact (a `node`/`edge` target IS the
+   * existence fact itself).
+   *
+   * ROUND-2 FIX (MAJOR #3): "already exists" is decided by `getNode`/`getEdge` — the SAME
+   * projection every other reader in this module uses — NEVER a second, hand-rolled raw scan of
+   * `this.currentFacts()` for any `assert` fact matching the eid. This is a SINGLE-SOURCE-OF-TRUTH
+   * refactor: the raw-scan version was a bespoke reimplementation of "does this eid have existence"
+   * that could silently drift from `proj.ts`'s own existence logic on any future change to it (e.g.
+   * excision/quarantine-awareness); reading through `getNode`/`getEdge` instead means this method
+   * can never disagree with the SAME gate `getNode`/`getEdge` callers already observe.
+   *
+   * ROUND-3 CORRECTION (docstring contradiction, code-quality finding): the sentence this replaces
+   * previously claimed "`getNode`/`getEdge` correctly resolve to `null` after a retraction, so
+   * re-minting existence here is exactly the right, non-stale call" for an asserted-then-retracted
+   * eid — that claim is FACTUALLY WRONG and contradicts this test suite's own honest disclosure
+   * (`m6-round2-critic-fixes.test.ts`'s "EMPIRICAL NOTE", MAJOR #3 describe block): `proj.ts`'s "no
+   * ghost nodes" existence gate (m2-2, frozen M1 machinery) treats ANY `assert`-type existence fact
+   * EVER admitted as PERMANENT existence for this coarse null/non-null decision, REGARDLESS of a
+   * later `retract` — a plain `getNode(eid)`/`getEdge(eid)` call keeps returning non-null even after
+   * the existence fact is retracted (retraction narrows per-prop-cell segment geometry, not this
+   * top-level gate). So this fix does NOT close the "asserted, then retracted, then re-learned"
+   * staleness scenario the round-2 finding described — that scenario remains bound by M1's frozen
+   * "ever-asserted is permanent" existence gate, out of this milestone's scope to change. What this
+   * fix DOES close is real and independent of that: a single source of truth for "does this eid have
+   * existence" that can never drift from `getNode`/`getEdge`'s own semantics, never re-checked
+   * against a second, independently-maintained notion of existence.
+   */
+  private async ensureExistenceFor(target: Target): Promise<FactId | undefined> {
+    let existsTarget: Target;
+    let alreadyExists: boolean;
+    if (target.kind === "node-prop") {
+      existsTarget = { kind: "node", eid: target.eid };
+      alreadyExists = (await this.getNode(target.eid)) !== null;
+    } else if (target.kind === "edge-prop") {
+      existsTarget = { kind: "edge", eid: target.eid };
+      alreadyExists = (await this.getEdge(target.eid)) !== null;
+    } else {
+      return undefined;
+    }
+    if (alreadyExists) return undefined;
+    const minted = await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: existsTarget,
+      value: true,
+      validFrom: 0,
+      validTo: null,
+      replicaId: this.replicaId,
+      provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
+    });
+    return minted.id;
+  }
+
+  /**
+   * ROUND-2 FIX (CRITICAL #2 — docs/32's "reducer/orderKey treatment of the new §5b cells", ADR-021,
+   * INV-A9): reads back the `kip:learn` correction-class cell for a given `(rawRef, ontologyAsOf,
+   * encode/decode/learner-manifest)` key — the SAME key `learn()`'s own
+   * `ontologyRefForLearn("kip:learn", ...)` mints facts under.
+   *
+   * BEFORE this fix, `kip:learn` facts were excluded from EVERY fold (`proj.ts`'s `cellKeyFor`
+   * returns `null` for their `target.kind:"schema"`), so two `learn()` calls at the SAME pinned key
+   * that each independently accepted a genuinely DIFFERENT, non-overlapping `AssertInput[]` set
+   * (touching disjoint node/edge-prop cells, so the ordinary M1 per-target `lww-hlc` reducer never
+   * sees the two calls collide either) would BOTH commit silently — no conflict ever surfaced,
+   * violating docs/32's "competing accepted sets ⇒ `kip:conflict`" guarantee. `proj.ts`'s
+   * `foldLearnCell` is the actual reducer this method delegates to (the achieved loss AND the
+   * loss-manifest's own `(name,version)` are EXCLUDED from the key/orderKey/dedup comparison,
+   * exactly as `rxFrom` is, FR-J4) — this method's own job is only the ontologyRef-keyed fact
+   * lookup `foldLearnCell` itself deliberately does not know how to do (only `ontologyRefForLearn`
+   * knows how to rebuild the key from a caller's `(rawRef, ontologyAsOf, selectors)` tuple).
+   *
+   * `asOf` (optional) pins the read exactly like every other read surface in this module
+   * (`findRegisteredManifest`/`findMatchingFact`) — omitted, it reads the live/current fact set.
+   *
+   * ROUND-3 NOTE (MINOR, doc-only): `getLearnResult` is an M6-SPECIFIC EXTENSION of `KipRepo` — it is
+   * NOT part of the canonical `Repo` interface docs/40-sdk-api-surface.md declares (that surface's
+   * §5b active-knowledge methods are `registerFunctionality`/`compileContextualQuery`/
+   * `executeSegment`/`runContextualQuery`/`runAcquisition`/`learn` only). It exists here purely so
+   * this milestone's own conformance/critic-fix tests (INV-A9, `m6-round2-critic-fixes.test.ts`) have
+   * a way to read back a `kip:learn` cell's fold result without a generic "read an arbitrary fact by
+   * target" accessor existing on the public surface yet (the same gap this file's INV-A5 test
+   * TESTABILITY NOTE calls out). Callers relying on `Repo`-typed values (rather than the concrete
+   * `KipRepo` class) will not see this method.
+   */
+  async getLearnResult(
+    rawRef: BlobRef,
+    ontologyAsOf: AsOf,
+    selectors: Pick<LearnOptions, "encode" | "decode" | "learner">,
+    asOf?: AsOf,
+  ): Promise<{ status: "empty" } | { status: "resolved"; fact: Fact } | { status: "conflict"; conflict: Conflict }> {
+    const ref = this.ontologyRefForLearn("kip:learn", rawRef, ontologyAsOf, selectors);
+    const candidates = this.selectFactsForContextualAsOf(asOf).filter(
+      (f) => f.type !== "retract" && f.target.kind === "schema" && f.target.ontologyRef === ref,
+    );
+    const fold: LearnCellFoldResult = foldLearnCell(candidates);
+    if (fold.status === "empty") return { status: "empty" };
+    if (fold.status === "conflict") {
+      return {
+        status: "conflict",
+        conflict: { cellId: ref, eid: ref, kind: "kip:learn", candidates: [...fold.candidates] },
+      };
+    }
+    return { status: "resolved", fact: fold.winner };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 8a. M6 round-2 fix (CRITICAL #1) helper: a minimal but REAL structural check that a candidate
+// encode/learner dispatch output's `candidateFacts`/`next` field is actually an `AssertInput[]` —
+// used by `learn()` in place of the old two-shape `?? []` coercion chain. Deliberately NOT a full
+// deep validation of every `AssertInput` field (that duplicates `well-formed.ts`'s own job, which
+// `assertFact` already runs when each candidate is eventually committed on "accept") — just enough
+// to distinguish "the dispatch produced this role's OWN declared shape" from "it produced something
+// else entirely" (a bare string, a number, `undefined`, an object missing the field, a non-"assert"-
+// typed item), so a malformed encode/learner output is scored as an infinite-loss iteration (N5)
+// rather than silently treated as "zero candidate facts, but still a valid accept".
+//
+// ROUND-3 FIX (CRITICAL #2, part a): round-2's check only verified `type === "assert"` and
+// `"target" in item` — it never checked for `provenance`/`validFrom`/`validTo`/`replicaId`, all
+// NON-OPTIONAL fields of `AssertInput` (docs/40's authoring-input shape). A candidate item missing
+// `provenance` sailed through this guard, got selected as `state.candidate`, and then crashed at
+// ACCEPT time when `learn()`'s own commit code read `candidateInput.provenance.source` off
+// `undefined` — an unhandled `TypeError`, not a graceful `exhausted`/infinite-loss outcome (N5).
+// Missing `validFrom`/`validTo`/`replicaId` have the SAME failure shape one layer further down: they
+// would pass this check, get selected, and only fail later at `assertFact`'s own
+// `checkWellFormed()` gate (well-formed.ts) — which THROWS a typed `KipError` rather than returning
+// a value — still an uncaught exception escaping this `learn()` call. This is STILL deliberately a
+// SHALLOW presence check (not full `well-formed.ts`-level validation, e.g. `provenance.author`'s own
+// non-emptiness is not re-verified here) — just enough that nothing downstream (the accept-commit
+// loop below, or `assertFact`/`mintFact`'s own field access) can throw on a MISSING required field.
+// A candidate array failing this check is treated as an ordinary infinite-loss iteration — it never
+// becomes `state.candidate`, so it can never reach the accept-commit loop at all.
+// ---------------------------------------------------------------------------
+
+function isPlainRecord(v: unknown): v is Record<string, unknown> {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+
+function isAssertInputArray(value: unknown): value is AssertInput[] {
+  if (!Array.isArray(value)) return false;
+  return value.every(
+    (item) =>
+      isPlainRecord(item) &&
+      item.type === "assert" &&
+      // ROUND-4 FIX (closes the bug class, not just one field): round-3's guard checked ONLY
+      // `"target" in item` — true even when the VALUE is `null`/`undefined`, and equally true for a
+      // `target` naming an unrecognized `.kind` (e.g. `{kind: "nonsense"}`). Both shapes previously
+      // sailed through as "present", got selected as `state.candidate`, and only failed LATER — one
+      // by crashing `ensureExistenceFor`/`assertFact` with an uncaught `TypeError` reading `.kind` off
+      // `null`/`undefined`, the other by correctly but LATE-tripping `assertFact`'s own
+      // `checkWellFormed`/`isWellFormedTarget` (well-formed.ts) AFTER earlier items in the same batch
+      // may already be durably committed (the mid-batch partial-commit hazard). Both traces to the
+      // SAME root cause: this guard checked `target` for PRESENCE, never WELL-FORMEDNESS. Fixed by
+      // calling `isWellFormedTarget` (well-formed.ts) DIRECTLY — the SAME real, deep target-shape
+      // predicate `assertFact`'s own `checkWellFormed` already applies at commit time, reused rather
+      // than reinvented — so a malformed target of EITHER shape is rejected at this ONE validation
+      // point, before any dispatch is scored as anything other than infinite loss. A candidate array
+      // containing such an item can NEVER become `state.candidate`, so it can never reach the
+      // accept-commit loop at all.
+      isWellFormedTarget(item.target) &&
+      // ROUND-3 FIX (CRITICAL #2, part a): presence (not deep well-formedness) of every other
+      // NON-OPTIONAL `AssertInput` field — `validTo` is legitimately `null`, so it is checked via
+      // `in` (key presence) rather than a truthiness/`!== undefined` test that would wrongly reject
+      // an open-ended (`validTo: null`) candidate.
+      item.validFrom !== undefined &&
+      "validTo" in item &&
+      typeof item.replicaId === "string" &&
+      item.replicaId.length > 0 &&
+      // `provenance` must itself be a plain object — this is the field whose absence previously
+      // crashed at ACCEPT time (`candidateInput.provenance.source` off `undefined`).
+      isPlainRecord(item.provenance),
+  );
 }
 
 // ---------------------------------------------------------------------------

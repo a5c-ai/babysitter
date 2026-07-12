@@ -117,7 +117,19 @@ function arraysEqualInOrder(a: unknown, b: readonly unknown[]): boolean {
   return true;
 }
 
-function isWellFormedTarget(target: unknown): target is Target {
+/**
+ * ROUND-4 (M6): exported so `learn()`'s candidate-acceptance guard (`isAssertInputArray`, index.ts)
+ * can validate a candidate `AssertInput.target` is genuinely well-formed (a recognized `.kind`,
+ * correct shape) BEFORE a candidate array can ever become `state.candidate` — reusing this module's
+ * OWN existing target-shape logic rather than duplicating it. This is the SAME predicate
+ * `checkWellFormed` (below) already applies to every fact `assertFact` commits; exporting it lets a
+ * second, EARLIER call site (the pre-acceptance guard) apply the identical check before any dispatch
+ * is scored as anything other than infinite loss, closing the round-3 "malformed target commits
+ * earlier items, then crashes/rejects on a later item" partial-commit hazard at its root cause
+ * (never re-implementing this shape check a second time, which risks the two checks silently
+ * drifting apart).
+ */
+export function isWellFormedTarget(target: unknown): target is Target {
   if (!isPlainObject(target)) return false;
   const kind = target.kind;
   if (typeof kind !== "string" || !KNOWN_TARGET_KINDS.has(kind)) return false;

@@ -147,4 +147,82 @@ describe("INV-A9: kip:learn proj-totality + loss-exclusion from orderKey/reducer
     expect(contentSegments.some((s) => s.kind === "conflict")).toBe(false);
     expect(contentSegments.filter((s) => s.kind === "value" && s.value === "same-value")).toHaveLength(1);
   });
+
+  /**
+   * ROUND-2 ADDITION (CRITICAL #2 regression coverage): the two tests above both exercise "same
+   * TARGET, different/same value" collisions — resolved for free by the pre-existing M1 `lww-hlc`
+   * per-target reducer, since both `learn()` calls' accepted `AssertInput[]` name the SAME
+   * `node-prop` cell. That is NOT the gap this test closes.
+   *
+   * Here, the two `learn()` calls at the SAME pinned key each accept a DISJOINT `AssertInput[]` set —
+   * call 1 asserts a prop on eid A, call 2 asserts a DIFFERENT prop on a DIFFERENT eid B — so their
+   * underlying node-prop facts never collide on any (eid,prop) cell at all; the ordinary M1 reducer
+   * has nothing to adjudicate. Before this round's fix, BOTH accepted sets would silently commit (no
+   * conflict ever surfaced) even though they are two competing claims for the SAME `kip:learn` key
+   * (docs/32's correction-class-cell design). `getLearnResult` (the new read surface backed by
+   * `proj.ts`'s `foldLearnCell`) is asserted here to surface the contradiction honestly as a
+   * `kip:conflict`-shaped result, rather than silently letting both stand with no trace of the
+   * disagreement.
+   */
+  it("INV-A9: same-key, DISJOINT accepted-set targets — genuine conflict surfaces via getLearnResult, never a silent dual-commit", async () => {
+    const eidA = "tenant/ns/inv-a9-disjoint-a";
+    const eidB = "tenant/ns/inv-a9-disjoint-b";
+    const encode = buildManifest({ name: "inv-a9-disjoint-encode" });
+    const decode = buildManifest({ name: "inv-a9-disjoint-decode" });
+    const learner = buildManifest({ name: "inv-a9-disjoint-learner" });
+    const loss = buildManifest({ name: "inv-a9-disjoint-loss" });
+
+    let call = 0;
+    const { dispatch } = makeScriptedDispatch({
+      [encode.name]: () =>
+        encodeOk(call === 0 ? [nodePropAssert(eidA, "propA", "valueA")] : [nodePropAssert(eidB, "propB", "valueB")]),
+      [decode.name]: () => decodeOk(),
+      [loss.name]: () => lossOk(0.1),
+    });
+
+    const replicaId = freshReplicaId("inv-a9-disjoint");
+    const repo = new KipRepo({ replicaId, dispatchMicroagent: dispatch });
+    repos.push(repo);
+    for (const m of [encode, decode, learner, loss]) await registerManifest(repo, m);
+
+    const selectors = {
+      encode: { name: encode.name, version: encode.version },
+      decode: { name: decode.name, version: decode.version },
+      learner: { name: learner.name, version: learner.version },
+    };
+    const opts = baseLearnOptions({
+      threshold: 1.0,
+      asOf: FIXED_AS_OF, // PINNED — same key on every call (docs/32 keying caveat)
+      ...selectors,
+      loss: { name: loss.name, version: loss.version },
+    });
+
+    // Call 1: accepts a fact touching eidA/propA ONLY.
+    call = 0;
+    await expect(repo.learn(FIXED_RAW_REF, opts)).resolves.toMatchObject({ status: "accept" });
+
+    // Call 2: SAME pinned key, but accepts a fact touching a DISJOINT cell (eidB/propB) — no shared
+    // (eid,prop) target with call 1 at all.
+    call = 1;
+    await expect(repo.learn(FIXED_RAW_REF, opts)).resolves.toMatchObject({ status: "accept" });
+
+    // Both underlying node-prop facts DO both take effect in the graph (each call's own target is
+    // reachable) — that half is correct and unchanged (the M1 reducer for THOSE cells has nothing to
+    // adjudicate, since the two calls never share a target).
+    const viewA = await repo.getNode(eidA);
+    const viewB = await repo.getNode(eidB);
+    expect(viewA?.props.propA?.segments.some((s) => s.kind === "value" && s.value === "valueA")).toBe(true);
+    expect(viewB?.props.propB?.segments.some((s) => s.kind === "value" && s.value === "valueB")).toBe(true);
+
+    // But the KEY-LEVEL claim — "this is THE single accepted result for this (rawRef, ontologyAsOf,
+    // manifest) key" — genuinely disagrees between the two calls (disjoint accepted sets), and MUST
+    // be surfaced as a conflict rather than silently letting both stand with no contradiction ever
+    // recorded (docs/32's correction-class-cell guarantee, INV-A9).
+    const result = await repo.getLearnResult(FIXED_RAW_REF, FIXED_AS_OF, selectors);
+    expect(result.status).toBe("conflict");
+    if (result.status === "conflict") {
+      expect(result.conflict.kind).toBe("kip:learn");
+      expect(result.conflict.candidates.length).toBe(2);
+    }
+  });
 });

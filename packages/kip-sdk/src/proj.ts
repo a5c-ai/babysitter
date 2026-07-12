@@ -214,6 +214,97 @@ export function maxByOrderKey(facts: readonly Fact[]): MaxByOrderKeyResult {
   return { winner, tied };
 }
 
+// ---------------------------------------------------------------------------
+// M6 round-2 fix (CRITICAL #2 — docs/32-knowledge-autoencoding.md §"reducer/orderKey treatment of
+// the new §5b cells", ADR-020/ADR-021, INV-A9): a `kip:learn` audit fact is authored under a
+// `target.kind:"schema"` `Target` (index.ts's `learn()`), and `cellKeyFor` above deliberately
+// returns `null` for EVERY `schema`-kind target (this file's own top doc comment: "out of M1's
+// graph-projection scope"). That is correct and unchanged for `node`/`edge`/`node-prop`/`edge-prop`
+// reads (`getNode`/`getEdge` never take a `schema` target at all) — but it ALSO means a `kip:learn`
+// fact was, before this fix, excluded from EVERY fold, not merely from the parts of the fold that
+// genuinely don't apply to it (interval-sweep geometry, existence-gating). docs/32 is explicit that
+// a `kip:learn` fact IS meant to be "a supersede/correction-class cell keyed on `(rawRef,
+// ontologyAsOf, encode/decode/learner-manifest)`" whose recorded LOSS (and the loss microagent's own
+// `(name,version)`, per `index.ts`'s `ontologyRefForLearn` key) is excluded from the key/orderKey/
+// dedup comparison — never that the whole FACT is excluded from folding.
+//
+// `foldLearnCell` is that correction-class reducer, factored out as a small, standalone, directly
+// unit-testable function (mirroring how `maxByOrderKey`/`compareByContent` above are themselves
+// standalone primitives `reduceRawCell` composes) rather than threading `kind:"schema"` through the
+// generic node/edge sweep-line machinery (`reduceRawCell`'s interval geometry, existence-gating, and
+// version-quarantine checks all presuppose a node/edge PropCell shape that a `kip:learn` audit
+// record does not have — a `kip:learn` fact's own `validFrom:0`/`validTo:null` makes it a single,
+// ungapped cell with no interval sweep to perform at all). `index.ts`'s `getLearnResult` calls this
+// with every admitted, non-retracted `kip:learn`-prefixed fact sharing ONE `ontologyRef` key (the
+// caller does the ontologyRef filtering, since only `index.ts` knows how to rebuild that key from a
+// `(rawRef, ontologyAsOf, selectors)` tuple via `ontologyRefForLearn`).
+// ---------------------------------------------------------------------------
+
+/** The result of folding every `kip:learn` fact sharing one `(rawRef, ontologyAsOf,
+ *  encode/decode/learner-manifest)` key (docs/32) — loss and the loss-manifest selector are already
+ *  excluded from that key by construction (`ontologyRefForLearn`), and this fold ADDITIONALLY
+ *  excludes the recorded loss VALUE from the winner/conflict decision (FR-J4, "exactly as `rxFrom`
+ *  is"), so the decision is a pure function of each fact's `orderKey` and its own `accepted`
+ *  `AssertInput[]` payload — never of `achievedLoss`. */
+export type LearnCellFoldResult =
+  | { readonly status: "empty" }
+  | {
+      /** Exactly one DISTINCT `accepted` payload exists among the facts sharing this key (however
+       *  many same-set/different-loss re-authors exist) — resolved to the `orderKey`-max fact,
+       *  NEVER the lowest-loss one (INV-A9's first sub-case), and a same-set/different-loss
+       *  re-author folds as this SAME resolved winner, never a `kip:conflict` (INV-A9's second
+       *  sub-case). */
+      readonly status: "resolved";
+      readonly winner: Fact;
+    }
+  | {
+      /** 2+ GENUINELY distinct `accepted` payloads exist among the facts sharing this key — a real,
+       *  non-commutative contradiction (two `learn()` calls at the same pinned key independently
+       *  accepting different `AssertInput[]` sets, INV-A9's "or `kip:conflict`" alternative) —
+       *  surfaced honestly rather than silently letting whichever facts' OWN underlying node/edge
+       *  targets happen not to collide both take effect with no contradiction ever recorded. */
+      readonly status: "conflict";
+      /** Every candidate fact's id, sorted — deterministic regardless of ingest/array order. */
+      readonly candidates: readonly FactId[];
+    };
+
+/** Extracts the `accepted` `AssertInput[]` payload from a `kip:learn` fact's JSON `value` (the SAME
+ *  shape `index.ts`'s `learn()` writes: `{ rawRef, ontologyAsOf, encode, decode, learner, loss,
+ *  achievedLoss, accepted }`) — `undefined` for anything that fails to parse as that shape (a
+ *  malformed/foreign-shaped fact at this key is never trusted as a genuine accepted-set claim, but
+ *  also never thrown on; it simply cannot contribute a DISTINCT accepted-set grouping of its own
+ *  beyond the single `undefined` bucket every other unparseable fact shares). */
+function extractAcceptedPayload(f: Fact): unknown {
+  if (typeof f.value !== "string") return undefined;
+  try {
+    const parsed = JSON.parse(f.value) as Record<string, unknown>;
+    return parsed.accepted;
+  } catch {
+    return undefined;
+  }
+}
+
+export function foldLearnCell(facts: readonly Fact[]): LearnCellFoldResult {
+  if (facts.length === 0) return { status: "empty" };
+  const bySet = new Map<string, Fact[]>();
+  for (const f of facts) {
+    // Canonicalized (deepSortKeys, never raw JSON.stringify — see `compareByContent`'s own doc
+    // comment for why) so two accepted sets that differ only in incidental key-insertion order are
+    // correctly treated as the SAME set, never a false-positive conflict.
+    const setKey = JSON.stringify(deepSortKeys(extractAcceptedPayload(f) ?? null));
+    const group = bySet.get(setKey);
+    if (group) group.push(f);
+    else bySet.set(setKey, [f]);
+  }
+  if (bySet.size > 1) {
+    return { status: "conflict", candidates: [...new Set(facts.map((f) => f.id))].sort() };
+  }
+  // Exactly one distinct accepted set — resolve the winner by ordinary orderKey-max (never by the
+  // recorded loss, which never enters this comparison at all, INV-A9).
+  const { winner } = maxByOrderKey(facts);
+  return { status: "resolved", winner };
+}
+
 /** True iff `tied` is a GENUINE conflict for the purposes of `extract` — i.e. `extract` yields more
  * than one distinct (canonically-JSON-compared) value across the group. A tied group whose members
  * differ in some field the caller does NOT consume (e.g. two facts with the same `value` but
