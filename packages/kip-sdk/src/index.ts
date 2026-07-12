@@ -73,6 +73,17 @@ import {
   type RegisteredBindingRecord,
 } from "./contextual";
 
+/**
+ * D-32 (docs/DEBTS.md): `signing.ts`'s key-generation/import helpers are used internally by
+ * `mintFact`/`extractKeyPairFromKeyring` above but were never part of THIS package's own public
+ * surface (`package.json`'s `exports` map only exposes `"."`) — so a caller following the
+ * documented `OpenOptions.keyring` seam had no supported way to mint or import a compatible
+ * keyring without reaching into a non-exported internal module. Re-exported here, not
+ * re-implemented: these are the SAME `signing.ts` functions already wired in above.
+ */
+export { generateEd25519KeyPair, importEd25519KeyPair };
+export type { Ed25519KeyPair };
+
 // ---------------------------------------------------------------------------
 // 1. Core scalar / branded types (docs/21-data-model.md §1)
 // ---------------------------------------------------------------------------
@@ -1427,6 +1438,24 @@ export class KipRepo implements Repo {
       this.keyRegistry.register(this.ownKeyPair.fingerprint, this.ownKeyPair.publicKey);
     }
     return this.ownKeyPair;
+  }
+
+  /**
+   * D-32 (docs/DEBTS.md): intended to return THIS repo's CURRENT signing identity — whatever
+   * `getOwnKeyPair()` above resolves to, whether caller-supplied via `OpenOptions.keyring` or
+   * auto-generated on first use — PEM-serialized, so a caller can persist it and pass it back as
+   * `OpenOptions.keyring` into a future `open()` call on the same `dir` and restore the IDENTICAL
+   * signing identity across a `close()`+`open()` cycle (closing the "no durable signing-identity
+   * persistence" gap: today `getOwnKeyPair()` mints a fresh RANDOM identity every time
+   * `this.ownKeyPair` is unset, and nothing durably records it anywhere `open()` reads back).
+   *
+   * NOT YET IMPLEMENTED this round — throws, like every other not-yet-implemented `Repo` method in
+   * this file (see `branch()`/`merge()`/`txn()` above): this is a frozen-test-authoring-round stub
+   * added only so the D-32 test suite type-checks against a real public method name, not a behavior
+   * implementation. Tracked by docs/DEBTS.md D-32.
+   */
+  exportKeyring(): { privateKeyPem: string; publicKeyPem: string } {
+    throw new Error("unimplemented: exportKeyring");
   }
 
   /**
