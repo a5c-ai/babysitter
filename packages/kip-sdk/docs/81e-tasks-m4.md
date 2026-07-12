@@ -52,7 +52,7 @@ Implement opt-in bounded graph expansion (`hops`, `maxFanout`) over as-of-valid 
 - **Exit criteria:** —
 - **Depends on:** [T2.7](./81b-tasks-m1.md#T2.7), [T4.4](./81d-tasks-m3.md#T4.4)
 - **Subtasks:**
-  - [ ] T5.4.1 hops / maxFanout caps over as-of-valid edges
+  - [x] T5.4.1 hops / maxFanout caps over as-of-valid edges
 
 ### <a id="T5.5"></a>T5.5 Hybrid recall pipeline (RRF)
 

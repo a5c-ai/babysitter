@@ -978,6 +978,40 @@ function isTruthyExistence(v: PropValue): boolean {
   return v !== null && v !== false && v !== 0 && v !== "";
 }
 
+/**
+ * T5.4 (FR-C2/NFR-F4): true iff an entity's already-folded, merged existence-cell `segments` (e.g.
+ * `computeEdgeExistSegments`'s output, the SAME `reduceRawCell` + `mergeAdjacent` fold `getEdge`/
+ * `getNode` use for their OWN "no ghost nodes" existence-gating, `gateByExistence` above) resolve to
+ * a truthy `"value"` segment AT a given instant — i.e. does this entity actually exist THEN, not
+ * merely "did an existence fact ever get ingested for it at all" (the `!edgeView`/`!node` null-check
+ * `traverse()` already did, which only catches "never existed", never "expired/retracted by now").
+ *
+ * `at === null` means the LIVE (no-`asOf`) reading of "right now": this projection has no wall
+ * clock — `validFrom`/`validTo` are opaque HLC-or-time values, never sampled against `Date.now()`
+ * anywhere in this module — so the only sound, deterministic notion of "current" is the OPEN tail
+ * segment `reduceRawCell`'s sweep always produces for the interval past the highest breakpoint
+ * (`validTo === null`, i.e. whatever the most-recently-known state is, extended forward with no
+ * further recorded change). `segments` is already sorted ascending by `validFrom` (the sweep's own
+ * `points` array is sorted, `reduceRawCell`), so that tail is always the LAST element.
+ *
+ * `at` a `canon`-ed instant means the `asOf({validTime})` reading: the (at most one, segments are
+ * non-overlapping) segment whose half-open `[validFrom, validTo)` covers `at` — the identical
+ * half-open convention `index.ts`'s `segmentCoversInstant` uses for prop-cell narrowing, duplicated
+ * here (not imported) because `index.ts` imports RUNTIME values (`proj`/`traverse`/`canon`) from
+ * THIS module — importing back would be a circular runtime dependency, not merely a type-only one.
+ */
+function existsAtInstant(segments: readonly CellSegment[], at: bigint | null): boolean {
+  const covering =
+    at === null
+      ? segments[segments.length - 1]
+      : segments.find((seg) => {
+          if (canon(seg.validFrom) > at) return false;
+          if (seg.validTo === null) return true;
+          return canon(seg.validTo) > at;
+        });
+  return covering?.kind === "value" && isTruthyExistence(covering.value);
+}
+
 /** "Existence gates properties — no ghost nodes" (SPEC.md §3.4/m2-2): clip every prop segment to
  * `unknown` over any sub-interval where the entity's existence cell does not resolve to a truthy
  * `value` segment. Because the prop's own sweep was seeded with the existence cell's breakpoints
@@ -1163,6 +1197,11 @@ export interface ProjResult {
   /** Deterministic (sorted) list of edge EIDs touching `eid` in the given direction — the seam
    * `traverse` (below) uses for bounded typed BFS/DFS (T2.7). */
   edgesTouching(eid: EID, direction: "out" | "in" | "both"): EID[];
+  /** T5.4 (FR-C2/NFR-F4): is edge `eid` valid AT `at` (`null` = live "now")? The seam `traverse`
+   * (below) uses to gate BOTH whether an edge is crossed and whether it counts toward
+   * `spec.maxFanout` — never crossing, and never fanout-charging, an edge that is not valid at the
+   * query instant. */
+  edgeValidAt(eid: EID, at: bigint | null): boolean;
 }
 
 /**
@@ -1251,6 +1290,40 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
 
   const nodeViewCache = new Map<EID, NodeView | null>();
   const edgeViewCache = new Map<EID, EdgeView | null>();
+  // T5.4: memoized per-edge existence-cell fold, shared between `getEdge` (which needs the full
+  // segment geometry to gate its OWN props via `gateByExistence`-equivalent logic below) and
+  // `edgeValidAt` (which needs the SAME fold to answer "is this edge valid at instant X", the
+  // traversal-time check `traverse()` was missing entirely before this task). A single shared
+  // computation, not two independent re-derivations of the same fold, so the two call sites can
+  // never silently disagree on what "this edge's existence" means.
+  const edgeExistSegmentsCache = new Map<EID, CellSegment[]>();
+  function computeEdgeExistSegments(eid: EID): CellSegment[] {
+    const cached = edgeExistSegmentsCache.get(eid);
+    if (cached) return cached;
+    const existFacts = byCell.get(`edge-exist:${eid}`) ?? [];
+    const segments = mergeAdjacent(
+      reduceRawCell(
+        existFacts,
+        [],
+        factsById,
+        collidedIds,
+        knownMaxVersion,
+        excisedOids,
+        oidByFact,
+        excisionsByCell.get(`edge-exist:${eid}`) ?? [],
+      ),
+    );
+    edgeExistSegmentsCache.set(eid, segments);
+    return segments;
+  }
+
+  /** T5.4 (FR-C2/NFR-F4): is edge `eid` valid AT `at` (`null` = live "now", see `existsAtInstant`'s
+   * doc comment)? An edge with NO existence facts at all (never ingested) folds to an empty
+   * `segments` array, for which `existsAtInstant` returns `false` — matching `getEdge` returning
+   * `null` for the same edge, never a fabricated `true`. */
+  function edgeValidAt(eid: EID, at: bigint | null): boolean {
+    return existsAtInstant(computeEdgeExistSegments(eid), at);
+  }
 
   function getNode(eid: EID): NodeView | null {
     if (nodeViewCache.has(eid)) return nodeViewCache.get(eid) ?? null;
@@ -1356,18 +1429,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
       edgeViewCache.set(eid, null);
       return null;
     }
-    const existSegments = mergeAdjacent(
-      reduceRawCell(
-        existFacts,
-        [],
-        factsById,
-        collidedIds,
-        knownMaxVersion,
-        excisedOids,
-        oidByFact,
-        excisionsByCell.get(`edge-exist:${eid}`) ?? [],
-      ),
-    );
+    const existSegments = computeEdgeExistSegments(eid);
     const existBreakpoints = collectBreakpoints(existSegments);
 
     // See `getNode`'s identical fix above: sort prop keys so `EdgeView.props`' key order is a pure
@@ -1474,7 +1536,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     return [...new Set([...out, ...inn])].sort();
   }
 
-  return { getNode, getEdge, edgesTouching };
+  return { getNode, getEdge, edgesTouching, edgeValidAt };
 }
 
 // ---------------------------------------------------------------------------
@@ -1488,6 +1550,15 @@ export function* traverse(projection: ProjResult, spec: TraversalSpec): Generato
   const visitedNodes = new Set<EID>();
   const visitedEdges = new Set<EID>();
   let frontier: EID[] = [];
+  // T5.4 (FR-C2/NFR-F4): the query instant every candidate edge is gated against below — `null` for
+  // a LIVE query (no `asOf`), else the caller's `asOf.validTime` canonicalized once up front (this
+  // BFS's single query instant never changes mid-walk). Read directly off `spec.asOf` rather than a
+  // separate threaded parameter: both call sites in index.ts (`KipRepo.query`'s live branch, and the
+  // `asOf({validTime})`-scoped `ReadView.query` closure) hand `traverse` the SAME spec object the
+  // caller supplied — including its `asOf` field — so this is the one authoritative source for "what
+  // instant is this walk happening at", not a second, independently-threaded notion that could drift
+  // from it.
+  const asOfInstant = spec.asOf?.validTime !== undefined ? canon(spec.asOf.validTime) : null;
 
   for (const eid of [...seeds].sort()) {
     const node = projection.getNode(eid);
@@ -1510,6 +1581,13 @@ export function* traverse(projection: ProjResult, spec: TraversalSpec): Generato
         const edgeView = projection.getEdge(edgeEid);
         if (!edgeView) continue;
         if (spec.edgeKinds && !spec.edgeKinds.includes(edgeView.kind)) continue;
+        // T5.4 fix: an edge that ONCE existed (so `getEdge` returns a view) but is not valid AT the
+        // query instant (expired/retracted by `asOfInstant`, or — for a live query — no longer
+        // currently valid) must be neither crossed NOR charged against `spec.maxFanout` — the bug
+        // this task closes: previously this loop only ever checked `!edgeView` ("never existed at
+        // all"), so an edge valid only `[0, 100)` was still crossed by an `asOf({validTime: 500})`
+        // query, reaching the far-side node 400 time-units after the edge expired.
+        if (!projection.edgeValidAt(edgeEid, asOfInstant)) continue;
         fanout += 1;
         if (!visitedEdges.has(edgeEid)) {
           visitedEdges.add(edgeEid);
