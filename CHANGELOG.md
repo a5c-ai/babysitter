@@ -1,5 +1,27 @@
 # Changelog
 
+## [Unreleased] - 2026-07-12
+
+### feat: new features
+- 333b06508 feat(kip-sdk): D-27 isomorphic-git commit-DAG regeneration (INV-12 byte-identity) (Tal Muskal, 13 hours ago)
+- fa2c582dc feat(docs): add proof-based policy enforcement overview and details (Tal Muskal, 20 hours ago)
+
+### fix: bug fixes
+- d21afb06f fix(kip-sdk): close D-31 — Round-narrative comment cleanup (behavior-neutral) (Tal Muskal, 19 hours ago)
+- 449585e8d fix(kip-sdk): close D-29+D-30+D-28 — Static registry leak, SyncReport.tip mistyping, non-durable self-witness map (Tal Muskal, 20 hours ago)
+- 05bb3553f fix(codex): stop emitting "noop" decision sentinel + restore README install line (Tal Muskal, 22 hours ago)
+
+### docs: documentation
+- f42bac195 docs(kip-sdk): close tracked debts + debt-closure report (Tal Muskal, 13 hours ago)
+- 9e51b8ef2 docs(kip-sdk): close D-12 — split 81-roadmap-epics-and-tasks.md into per-milestone files (Tal Muskal, 19 hours ago)
+- 60eaa6008 docs(kip-sdk): final build report + integration verification (Tal Muskal, 20 hours ago)
+
+### test: test changes
+- a96a47078 test(kip-sdk): frozen INV-12 byte-DAG conformance test (D-27, pre-implementation) (Tal Muskal, 15 hours ago)
+
+### chore: maintenance
+- 78d397b61 Add 2026-07-10 upstream agent version records (#1291) (a5c-ai[bot], 24 hours ago)
+
 ## [Unreleased] - 2026-07-08
 
 ### Documentation
