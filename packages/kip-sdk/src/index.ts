@@ -3156,9 +3156,22 @@ export class KipRepo implements Repo {
    * over currently-admitted facts, never a separately-tracked/authored artifact. BFS-reachable from
    * `seed`; `result` is `resultEids` narrowed to what is actually reachable (N5: a step that never
    * dispatched cannot appear as a fabricated result); `intermediates` is every OTHER reachable EID.
+   *
+   * D-34 FIX (INV-A8 reproducibility): accepts the SAME resolved `asOf` `executeSegment` already
+   * threads through every OTHER guard read (`anyEdgeOfKindExists`/`resolvedGetNode`/`findMatchingFact`)
+   * and folds `selectFactsForContextualAsOf(asOf)` instead of unconditionally reading the LIVE
+   * `this.currentFacts()`. Before this fix, a pinned-`asOf` `runContextualQuery`/`executeSegment` call
+   * threaded its frontier through every guard evaluation during EXECUTION, but the read-back
+   * `AnswerGraph` itself was always folded from the live, unpinned set — so re-running the identical
+   * pinned-`asOf` query after an unrelated third party asserted new `derived_from` facts elsewhere
+   * would silently return a DIFFERENT (grown) `AnswerGraph`, violating the exact reproducibility
+   * INV-A8's own doc comment promises. `selectFactsForContextualAsOf` already returns
+   * `this.currentFacts()` unchanged when its `asOf` argument is `undefined` (see that method's own
+   * doc comment), so this is not a second, divergent code path for the unpinned/live case — it is the
+   * SAME selector `findMatchingFact` already calls unconditionally, applied here too.
    */
-  private readAnswerGraph(seed: EID, resultEids: readonly EID[]): AnswerGraph {
-    const facts = this.currentFacts();
+  private readAnswerGraph(seed: EID, resultEids: readonly EID[], asOf?: AsOf): AnswerGraph {
+    const facts = this.selectFactsForContextualAsOf(asOf);
     interface DerivedEdge {
       from: EID;
       to: EID;
@@ -3348,7 +3361,6 @@ export class KipRepo implements Repo {
       );
     }
     const steps = segment.steps;
-    if (steps.length === 0) return this.readAnswerGraph(seed, []);
 
     const resolvedAsOf = opts?.asOf ?? segment.asOf;
 
@@ -3358,14 +3370,16 @@ export class KipRepo implements Repo {
     // `.asOf`, for a caller that skipped compile entirely) — that bypasses compile's guard completely.
     // `resolvedAsOf` is threaded into `selectFactsForContextualAsOf` for every `requires` guard read
     // (`anyEdgeOfKindExists`), every `condition`/`constraint` read (`resolvedGetNode`), manifest
-    // resolution (`findRegisteredManifest`), AND the INV-A6 idempotence dedup check
-    // (`findMatchingFact`) below — reaching the exact same non-convergent `rxFromByOid` branch INV-A2
-    // forbids for `compileContextualQuery`, except reaching it HERE is worse: two replicas executing
-    // the same Segment at the identical pinned `txTime` could materialize/dispatch/dedup DIFFERENT
-    // facts — a genuine, durable signed-fact divergence, not merely a divergent in-memory compiled
-    // Segment. Rejected with the SAME typed error `compileContextualQuery` uses (see
-    // `ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE`'s own doc comment), as early as possible — before
-    // `resolvedAsOf` is used for anything below.
+    // resolution (`findRegisteredManifest`), the INV-A6 idempotence dedup check (`findMatchingFact`)
+    // below, AND (D-34) the INV-A8 `readAnswerGraph` read-back — reaching the exact same
+    // non-convergent `rxFromByOid` branch INV-A2 forbids for `compileContextualQuery`, except
+    // reaching it HERE is worse: two replicas executing the same Segment at the identical pinned
+    // `txTime` could materialize/dispatch/dedup DIFFERENT facts — a genuine, durable signed-fact
+    // divergence, not merely a divergent in-memory compiled Segment. Rejected with the SAME typed
+    // error `compileContextualQuery` uses (see `ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE`'s own doc
+    // comment), as early as possible — before `resolvedAsOf` is used for anything below, INCLUDING the
+    // `steps.length === 0` early-return path (moved ahead of that check so an empty-steps Segment
+    // can't slip a `txTime`-pinned read past this guard and into `readAnswerGraph` unchecked).
     if (resolvedAsOf?.txTime !== undefined) {
       throw new KipError(
         "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE",
@@ -3378,6 +3392,8 @@ export class KipRepo implements Repo {
         { asOf: resolvedAsOf },
       );
     }
+
+    if (steps.length === 0) return this.readAnswerGraph(seed, [], resolvedAsOf);
 
     const hasDeps = segment.deps !== undefined && segment.deps.length > 0;
     const order = hasDeps ? topologicalOrder(steps.length, segment.deps as ReadonlyArray<readonly [number, number]>) : steps.map((_, i) => i);
@@ -3523,7 +3539,7 @@ export class KipRepo implements Repo {
       if (stepIndex === steps.length - 1) resultEid = materializedEid;
     }
 
-    return this.readAnswerGraph(seed, resultEid ? [resultEid] : []);
+    return this.readAnswerGraph(seed, resultEid ? [resultEid] : [], resolvedAsOf);
   }
 
   /**
