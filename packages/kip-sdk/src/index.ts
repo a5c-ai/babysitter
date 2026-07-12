@@ -913,6 +913,34 @@ export type KipErrorCode =
    */
   | "ERR_MULTI_INPUT_JOIN_UNSUPPORTED"
   /**
+   * D-33 FIX (round 6 debt closure, INV-A2): `compileContextualQuery` rejects a `ContextualQuery.asOf`
+   * that names a `txTime` outright, rather than silently routing it through
+   * `selectFactsForContextualAsOf`/`selectFactsForAsOf`'s txTime branch. `asOf({txTime, believer})`'s
+   * OWN doc comment (see `asOf()` above) already establishes `txTime` as a per-replica belief-AUDIT
+   * axis, resolved via `rxFromByOid` — "this replica's OWN receive-tick history", genuinely
+   * non-convergent state two replicas can disagree on even for the identical admitted fact set (e.g.
+   * the same facts ingested in a different order, ordinary under eventual consistency). INV-A2
+   * promises "two replicas compiling the same ContextualQuery at the same asOf produce byte-identical
+   * Segment sets" — a promise `txTime` cannot honor for this seam, since it would make the compiled
+   * Segment set depend on which replica compiled it and in what order it happened to receive facts.
+   * Rather than silently stripping `txTime` (which would make `compileContextualQuery` compile
+   * against a DIFFERENT, unrequested frontier than the caller pinned, an equally dishonest silent
+   * substitution — N5), the caller's request is rejected outright: `validTime` remains the only
+   * convergent pinning axis this compile-determinism seam accepts (see
+   * `selectFactsForContextualAsOf`'s own doc comment for how `validTime` alone continues to work).
+   *
+   * D-33 FOLLOW-UP FIX (round 7 debt closure, attempt 2): adversarial review found `compileContextual
+   * Query` was only ONE of three reachable entry points into `selectFactsForContextualAsOf`'s txTime
+   * branch. `executeSegment(segment, { asOf })` — a public method a caller can invoke DIRECTLY with a
+   * hand-built `Segment`, entirely bypassing `compileContextualQuery`'s guard — and `getLearnResult`'s
+   * own `asOf` param both threaded an unguarded `txTime` into the identical non-convergent
+   * `rxFromByOid` path. Both now throw this SAME code (rather than minting a distinct one) for the
+   * identical INV-A2 reasoning: `executeSegment`'s case is in fact WORSE than a merely-divergent
+   * compiled `Segment`, since a pinned `asOf.txTime` there would make DURABLE, signed facts
+   * (materialized/dispatched/deduped via the INV-A6 idempotence check) diverge across replicas.
+   */
+  | "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE"
+  /**
    * ROUND-4 (M6, part b — defense-in-depth against ANY unforeseen accept-commit failure): `learn()`'s
    * accept-commit sequence (existence facts + accepted `AssertInput[]` + the final `kip:learn` audit
    * fact) commits several facts one at a time (`Repo.txn()`/`Tx` are still unimplemented throwing
@@ -2861,6 +2889,27 @@ export class KipRepo implements Repo {
    * silently claiming general adjacency enforcement this build does not have.
    */
   async compileContextualQuery(q: ContextualQuery): Promise<Segment> {
+    // D-33 FIX (round 6 debt closure, INV-A2): a `q.asOf.txTime` is rejected OUTRIGHT, before it can
+    // reach `selectFactsForContextualAsOf`/`selectFactsForAsOf`'s txTime branch (which resolves via
+    // `this.rxFromByOid` — this replica's OWN, non-convergent receive-tick history). Two replicas
+    // that ingested the SAME facts in a different order (ordinary under eventual consistency) would
+    // otherwise compile genuinely DIFFERENT Segment sets from an `asOf` naming the identical `txTime`
+    // value — violating this exact method's own "byte-identical Segment set" promise (INV-A2).
+    // `txTime` is documented (see `asOf()`'s own doc comment) as a per-replica belief-AUDIT axis, never
+    // a cross-replica compile-determinism input; `validTime` alone remains the convergent pinning axis
+    // this seam accepts (see `ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE`'s own doc comment).
+    if (q.asOf?.txTime !== undefined) {
+      throw new KipError(
+        "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE",
+        "compileContextualQuery: ContextualQuery.asOf.txTime is not supported for this compile-" +
+          "determinism seam — txTime resolves through this replica's own, non-convergent rxFrom " +
+          "receive-tick history (asOf()'s belief-audit lens), so two replicas compiling at the " +
+          "identical txTime value could compile different Segment sets, violating INV-A2's byte-" +
+          "identical-Segment-set promise. Pin asOf.validTime instead (the convergent axis this seam " +
+          "honors), or omit asOf.txTime entirely.",
+        { asOf: q.asOf },
+      );
+    }
     // CRITICAL FIX #2 (round 3): `selectFactsForContextualAsOf`, not the plain `selectFactsForAsOf` /
     // `currentFacts()` round-2 used — a pinned `q.asOf.validTime` now genuinely excludes facts
     // asserted after that frontier (see that method's own doc comment), so two compiles at the
@@ -3303,6 +3352,33 @@ export class KipRepo implements Repo {
 
     const resolvedAsOf = opts?.asOf ?? segment.asOf;
 
+    // D-33 FOLLOW-UP FIX (round 7 debt closure, attempt 2, INV-A2): `compileContextualQuery` rejects
+    // a `ContextualQuery.asOf.txTime` outright (see that method's own doc comment), but this method
+    // has an INDEPENDENT `asOf` entry point of its own — `opts.asOf` (or a hand-built `Segment`'s own
+    // `.asOf`, for a caller that skipped compile entirely) — that bypasses compile's guard completely.
+    // `resolvedAsOf` is threaded into `selectFactsForContextualAsOf` for every `requires` guard read
+    // (`anyEdgeOfKindExists`), every `condition`/`constraint` read (`resolvedGetNode`), manifest
+    // resolution (`findRegisteredManifest`), AND the INV-A6 idempotence dedup check
+    // (`findMatchingFact`) below — reaching the exact same non-convergent `rxFromByOid` branch INV-A2
+    // forbids for `compileContextualQuery`, except reaching it HERE is worse: two replicas executing
+    // the same Segment at the identical pinned `txTime` could materialize/dispatch/dedup DIFFERENT
+    // facts — a genuine, durable signed-fact divergence, not merely a divergent in-memory compiled
+    // Segment. Rejected with the SAME typed error `compileContextualQuery` uses (see
+    // `ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE`'s own doc comment), as early as possible — before
+    // `resolvedAsOf` is used for anything below.
+    if (resolvedAsOf?.txTime !== undefined) {
+      throw new KipError(
+        "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE",
+        "executeSegment: asOf.txTime is not supported here either (via opts.asOf, or a hand-built " +
+          "Segment.asOf that bypassed compileContextualQuery's own guard) — the identical INV-A2 " +
+          "compile-determinism reasoning applies, except reaching this seam would make DURABLE, " +
+          "signed facts (materialized/dispatched/deduped) diverge across replicas rather than merely " +
+          "a compiled Segment. Pin asOf.validTime instead (the convergent axis this seam honors), or " +
+          "omit asOf.txTime entirely.",
+        { asOf: resolvedAsOf },
+      );
+    }
+
     const hasDeps = segment.deps !== undefined && segment.deps.length > 0;
     const order = hasDeps ? topologicalOrder(steps.length, segment.deps as ReadonlyArray<readonly [number, number]>) : steps.map((_, i) => i);
     if (order === null) {
@@ -3536,6 +3612,29 @@ export class KipRepo implements Repo {
     rawRef: BlobRefInput,
     opts: LearnOptions,
   ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }> {
+    // D-33 FOLLOW-UP FIX (round 8 debt closure, attempt 3, INV-A2): the IDENTICAL guard as
+    // `compileContextualQuery`/`executeSegment`/`getLearnResult` — this method's own `opts.asOf` is a
+    // THIRD independent entry point into `findRegisteredManifest` (below), which threads it straight
+    // into `selectFactsForContextualAsOf`, reaching the exact same non-convergent `rxFromByOid`
+    // resolution those methods' guards already forbid. Rejected here, BEFORE the manifest-resolution
+    // loop runs and before `opts.asOf` is used for anything else in this method (including as
+    // `ontologyAsOf`'s default, below — see that assignment's own comment for why that particular
+    // read is safe even so: it is never fed back into `selectFactsForContextualAsOf`, only used as
+    // opaque `ontologyRefForLearn` key material, exactly like `getLearnResult`'s own `ontologyAsOf`
+    // parameter). Same typed error, same reasoning as the other three seams.
+    if (opts.asOf?.txTime !== undefined) {
+      throw new KipError(
+        "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE",
+        "learn: LearnOptions.asOf.txTime is not supported for this compile-determinism seam — the " +
+          "identical INV-A2 reasoning as compileContextualQuery/executeSegment/getLearnResult's own " +
+          "guards applies (see those methods' doc comments): opts.asOf is threaded into " +
+          "findRegisteredManifest for encode/decode/learner/loss manifest resolution, which resolves " +
+          "through this replica's own, non-convergent rxFrom receive-tick history when txTime is set. " +
+          "Pin asOf.validTime instead (the convergent axis this seam honors), or omit asOf.txTime " +
+          "entirely.",
+        { asOf: opts.asOf },
+      );
+    }
     // T7.1.2 / INV-A13: resolve + validate every named manifest BEFORE any dispatch — reusing
     // `findRegisteredManifest` (T6.3.2's own "signature-valid registration fact present in S" check)
     // rather than inventing a second, possibly-divergent notion of "registered".
@@ -3581,6 +3680,14 @@ export class KipRepo implements Repo {
     // R5/docs/32's keying caveat: `ontologyAsOf` defaults to this authoring replica's own local
     // "now" ONLY when the caller has not pinned one; resolved exactly ONCE here (never re-read
     // mid-loop) and recorded, set-resident, inside the eventual kip:learn/kip:learn-exhausted fact.
+    //
+    // D-33 (round 8, attempt 3) NOTE: this `opts.asOf` read is safe even though the guard above
+    // already rejected a `txTime`-bearing `opts.asOf` — `ontologyAsOf` is NEVER fed into
+    // `selectFactsForContextualAsOf` anywhere in this method; it is only ever (a) opaque key
+    // material for `ontologyRefForLearn` (the SAME opaque-key treatment `getLearnResult`'s own
+    // `ontologyAsOf` parameter gets, per that method's doc comment) and (b) a plain data value
+    // passed through to the encode/decode/learner/loss microagents via `dispatchOne`. Nothing here
+    // re-opens the compile-determinism gap the guard above closes.
     const ontologyAsOf: AsOf = opts.asOf ?? { validTime: nowMs };
 
     // T7.3.2/INV-A12(b): the LearnerLoopState seeded EXACTLY from LearnOptions — kept as a plain
@@ -4096,6 +4203,24 @@ export class KipRepo implements Repo {
     selectors: Pick<LearnOptions, "encode" | "decode" | "learner">,
     asOf?: AsOf,
   ): Promise<{ status: "empty" } | { status: "resolved"; fact: Fact } | { status: "conflict"; conflict: Conflict }> {
+    // D-33 FOLLOW-UP FIX (round 7 debt closure, attempt 2, INV-A2): the IDENTICAL guard as
+    // `compileContextualQuery`/`executeSegment` — this method's own `asOf` param (NOT `ontologyAsOf`,
+    // which is only ever used as an opaque ontologyRef key component via `ontologyRefForLearn`, never
+    // fed to any fact-selection read below) threads straight into `selectFactsForContextualAsOf`, so a
+    // pinned `asOf.txTime` would resolve through this replica's own non-convergent `rxFromByOid`
+    // history here too — two replicas reading back the same `kip:learn` cell at the identical
+    // `txTime` value could observe different fold results. Rejected with the SAME typed error, before
+    // `asOf` is used for anything.
+    if (asOf?.txTime !== undefined) {
+      throw new KipError(
+        "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE",
+        "getLearnResult: asOf.txTime is not supported for this read seam — the identical INV-A2 " +
+          "reasoning as compileContextualQuery/executeSegment's own guards applies (see those " +
+          "methods' doc comments): txTime resolves through this replica's own, non-convergent rxFrom " +
+          "receive-tick history. Pin asOf.validTime instead, or omit asOf.txTime entirely.",
+        { asOf },
+      );
+    }
     const ref = this.ontologyRefForLearn("kip:learn", rawRef, ontologyAsOf, selectors);
     const candidates = this.selectFactsForContextualAsOf(asOf).filter(
       (f) => f.type !== "retract" && f.target.kind === "schema" && f.target.ontologyRef === ref,
