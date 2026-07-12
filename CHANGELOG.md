@@ -12,6 +12,7 @@
 - 05bb3553f fix(codex): stop emitting "noop" decision sentinel + restore README install line (Tal Muskal, 22 hours ago)
 
 ### docs: documentation
+- 5d2618d5c docs: daily changelog update (a5c-ai[bot], 48 seconds ago)
 - f42bac195 docs(kip-sdk): close tracked debts + debt-closure report (Tal Muskal, 13 hours ago)
 - 9e51b8ef2 docs(kip-sdk): close D-12 — split 81-roadmap-epics-and-tasks.md into per-milestone files (Tal Muskal, 19 hours ago)
 - 60eaa6008 docs(kip-sdk): final build report + integration verification (Tal Muskal, 20 hours ago)
