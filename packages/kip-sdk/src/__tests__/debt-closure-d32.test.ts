@@ -258,4 +258,29 @@ describe("D-32: durable signing-identity persistence across close()+open()", () 
     expect(fact.status).toBe("pending");
     repo.close();
   });
+
+  it("(round 2, major #2 fix) SyncReport.malformed counts a remote fact ingest() rejects with reason 'malformed', instead of it being silently dropped from every counter", async () => {
+    // A sha256-configured remote's genuinely-computed (real, non-placeholder) fact `id` is a
+    // 64-hex-char content hash — this repo's own well-formed() length bound. A default
+    // sha1-configured local repo's `idLengthBoundFor` is only 40 hex chars (well-formed.ts), so
+    // well-formed() rejects the pulled fact as `malformed` BEFORE signature verification is even
+    // reached — a real, reproducible way to drive ingest()'s OTHER rejection reason through
+    // sync(), distinct from the signature-invalid case criterion 8 above already covers.
+    const remote = new KipRepo({ replicaId: "replica-d32-r2-malformed-remote", hashAlgo: "sha256" });
+    const local = new KipRepo({ replicaId: "replica-d32-r2-malformed-local", hashAlgo: "sha1" });
+    try {
+      await remote.assertFact(makeAssertInput("replica-d32-r2-malformed-remote", "n1"));
+
+      const report = await local.sync("replica-d32-r2-malformed-remote");
+
+      expect(report.received).toBe(0);
+      expect(report.signatureInvalid ?? 0).toBe(0);
+      expect(report.malformed).toBe(1);
+      // The report is provably exhaustive over the remote's fact set: nothing vanishes silently.
+      expect(report.received + (report.signatureInvalid ?? 0) + (report.malformed ?? 0)).toBe(1);
+    } finally {
+      remote.close();
+      local.close();
+    }
+  });
 });

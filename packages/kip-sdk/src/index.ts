@@ -507,6 +507,26 @@ export interface SyncReport {
   conflicts: Conflict[];
   /** D-30: a fact-set digest (`FactSetDigest`), NOT a resolvable git commit `CID` — see that type's doc comment. */
   tip: FactSetDigest;
+  /**
+   * D-32 (docs/DEBTS.md, optional/nice-to-have criterion #8): count of remote facts this `sync()`
+   * call's ingest loop rejected specifically with `reason === "signature-invalid"` — distinct from
+   * `received`'s plain admit-count, so a reopened replica that lost its signing identity (D-32's
+   * central failure mode) silently under-counting `received` is at least OBSERVABLE here instead of
+   * indistinguishable from "the peer just had fewer facts". An additive, optional field (docs/40:
+   * "Implementations MAY extend these shapes with additional optional fields") — never populated
+   * with anything but a real count of THIS call's own rejections.
+   */
+  signatureInvalid?: number;
+  /**
+   * D-32 round 2 (major #2 fix): count of remote facts this `sync()` call's ingest loop rejected
+   * specifically with `reason === "malformed"` — mirrors `signatureInvalid` above exactly, so a
+   * well-formedness rejection is equally OBSERVABLE here rather than silently vanishing from both
+   * `received` and `signatureInvalid` (the same silent-drop failure mode D-32 exists to close, just
+   * for the other `ingest()` rejection reason, docs/40 "ingest" — `reason?: "malformed" |
+   * "signature-invalid"`). When populated, `received + signatureInvalid + malformed ===
+   * remoteFacts.length` for this call — the report is provably exhaustive over the remote set.
+   */
+  malformed?: number;
 }
 
 /** A surfaced, never-auto-picked contradiction (§3.4). DATA, not an error. */
@@ -1449,13 +1469,30 @@ export class KipRepo implements Repo {
    * persistence" gap: today `getOwnKeyPair()` mints a fresh RANDOM identity every time
    * `this.ownKeyPair` is unset, and nothing durably records it anywhere `open()` reads back).
    *
-   * NOT YET IMPLEMENTED this round — throws, like every other not-yet-implemented `Repo` method in
-   * this file (see `branch()`/`merge()`/`txn()` above): this is a frozen-test-authoring-round stub
-   * added only so the D-32 test suite type-checks against a real public method name, not a behavior
-   * implementation. Tracked by docs/DEBTS.md D-32.
+   * IMPLEMENTED (D-32 closure): calls `getOwnKeyPair()` FIRST — so a first-run caller who never
+   * supplied `OpenOptions.keyring` still gets a real, exportable identity back (the auto-generated
+   * fallback is minted-if-needed here, never exported as "nothing" just because it wasn't
+   * explicitly supplied) — then PEM-serializes the resolved `Ed25519KeyPair` using the SAME
+   * `KeyObject.export({...})` conventions `signing.ts`'s `importEd25519KeyPair` round-trips
+   * (`pkcs8`/`pem` for the private half, `spki`/`pem` for the public half) so the returned shape is
+   * byte-for-byte what `OpenOptions.keyring` (via `extractKeyPairFromKeyring` above) already
+   * accepts back on a future `open()` call.
+   *
+   * SECURITY (D-32 round 2, major #1): `privateKeyPem` is raw Ed25519 PRIVATE KEY MATERIAL in
+   * plaintext PKCS8 PEM — a secret credential, not diagnostic data. Never log, telemetrize, print,
+   * or transmit it over an unencrypted channel; treat it exactly like any other private key (docs/
+   * 50-security-trust-tenancy.md §8.3's "the correct primitive is field-level encryption / an OS
+   * keychain, not writing it in the clear" guidance applies here too). The caller is solely
+   * responsible for persisting the returned PEM as a secret — e.g. an OS keychain, a secrets
+   * manager, or an encrypted-at-rest store — never a shared log sink, plain file, or telemetry
+   * pipeline.
    */
   exportKeyring(): { privateKeyPem: string; publicKeyPem: string } {
-    throw new Error("unimplemented: exportKeyring");
+    const keyPair = this.getOwnKeyPair();
+    return {
+      privateKeyPem: keyPair.privateKey.export({ type: "pkcs8", format: "pem" }) as string,
+      publicKeyPem: keyPair.publicKey.export({ type: "spki", format: "pem" }) as string,
+    };
   }
 
   /**
@@ -2082,12 +2119,26 @@ export class KipRepo implements Repo {
 
     const remoteFacts = remoteRepo.currentFacts();
     let received = 0;
+    // D-32 (docs/DEBTS.md, optional criterion #8): counted separately from `received` so a
+    // signature-invalid rejection (e.g. a reopened peer whose signing identity wasn't restored) is
+    // observable in `SyncReport` rather than only showing up as `received` silently under-counting.
+    let signatureInvalid = 0;
+    // D-32 round 2 (major #2 fix): mirrors `signatureInvalid` for the OTHER `ingest()` rejection
+    // reason — without this, a `malformed` verdict was counted in neither `received` nor
+    // `signatureInvalid` and silently vanished from `SyncReport` entirely.
+    let malformed = 0;
     for (const f of remoteFacts) {
       // eslint-disable-next-line no-await-in-loop -- intentionally sequential: each `ingest()`
       // mutates this repo's own durable seq-tip/substrate state, matching every other call site's
       // established sequential-ingest pattern in this module.
       const verdict = await this.ingest(f);
-      if (verdict.admitted) received += 1;
+      if (verdict.admitted) {
+        received += 1;
+      } else if (verdict.reason === "signature-invalid") {
+        signatureInvalid += 1;
+      } else if (verdict.reason === "malformed") {
+        malformed += 1;
+      }
     }
 
     return {
@@ -2099,6 +2150,8 @@ export class KipRepo implements Repo {
       // populated with this replica's post-sync `factSetDigest` as the closest honest, genuinely
       // COMPUTED (never fabricated) content-addressed proxy, not a real git commit CID. See disputes.
       tip: this.computeFactSetDigest(this.currentFacts()),
+      signatureInvalid,
+      malformed,
     };
   }
 
@@ -4520,6 +4573,12 @@ function applyLiveExcisionLens<T extends NodeView | EdgeView>(view: T | null): T
  * immutable post-creation, m2-5) — full genesis-CID re-verification (docs/22 §1.5's "every
  * open/fsck/merge-postcheck MUST verify") is `fsck`'s job (M9/T9.6, out of M0 scope per this
  * task's instructions).
+ *
+ * D-32: return type is intentionally the CONCRETE `KipRepo`, not the `Repo` interface (docs/40's
+ * `Kip.open(): Promise<Repo>`) — this is what exposes `exportKeyring()` (a `KipRepo`-only
+ * accessor, not part of `Repo`) to every caller of the public `open()` entrypoint. Do not narrow
+ * this to `Promise<Repo>` without first re-adding an equivalent keyring-export seam, or callers
+ * silently lose the only supported way to persist a signing identity across restarts (D-32).
  */
 export async function open(options: OpenOptions): Promise<KipRepo> {
   const hashAlgo: HashAlgo = options.genesis?.hashAlgo ?? "sha1";
