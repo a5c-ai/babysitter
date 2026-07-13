@@ -1,0 +1,89 @@
+# Evidence captured during the 2026-07-13 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1783933214-g6a3c71-2026-07-13
+attributes:
+  displayName: "Amp CLI 0.0.1783933214-g6a3c71 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783933214-g6a3c71"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783933214-g6a3c71"
+  locator: "npm @ampcode/cli v0.0.1783933214-g6a3c71"
+  capturedAt: "2026-07-13T10:10:00Z"
+  observedAt: "2026-07-13T09:59:17Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-13T10:10:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli version 0.0.1783933214-g6a3c71 as the
+    latest dist-tag, modified at 2026-07-13T09:07:24Z. The package description
+    identifies it as the Amp frontier coding agent CLI and exposes the amp
+    binary through bin/amp.exe. No public build-specific changelog, CLI flag,
+    transport/API, model, package-name, install-method, or migration change was
+    found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1783933214-g6a3c71
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-144-3-2026-07-13
+attributes:
+  displayName: "Codex CLI rust-v0.144.3 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.3"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.3"
+  locator: "openai/codex release rust-v0.144.3"
+  capturedAt: "2026-07-13T10:10:00Z"
+  observedAt: "2026-07-13T09:59:17Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-13T10:10:00Z"
+  notes: |
+    Official Codex CLI rust-v0.144.3 release notes state that it is a
+    version-only release with no merged pull request changes since
+    rust-v0.144.2. Because the graph's previous latest Codex record was
+    0.144.1, rust-v0.144.2 was also reviewed and documents restoring the
+    previous Guardian auto-review policy, request format, and tool behavior
+    after rolling back a prompting regression. npm metadata reports
+    @openai/codex 0.144.3 as latest, published for platform artifacts and the
+    aggregate package on 2026-07-13.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.144.3
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:omp-16-4-8-2026-07-13
+attributes:
+  displayName: "Oh-My-Pi v16.4.8 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.4.8"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.4.8"
+  locator: "can1357/oh-my-pi release v16.4.8"
+  capturedAt: "2026-07-13T10:10:00Z"
+  observedAt: "2026-07-13T10:07:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-13T10:10:00Z"
+  notes: |
+    Official Oh-My-Pi 16.4.8 release notes document Home/End model-browser
+    navigation, a plan-review c hotkey for copying edited plan markdown to the
+    clipboard, model hub selection visual changes, Perplexity retrieval forcing,
+    JS eval top-level function/var persistence when top-level await is present,
+    PageUp/PageDown and hover fixes, omp-stats parser-boundary coercion for
+    malformed assistant messages, and pi-tui idle input-latency fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:16-4-8
+    - agent:omp
