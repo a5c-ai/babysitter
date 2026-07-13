@@ -23,6 +23,7 @@
  *   - packages/kip-sdk/docs/21-data-model.md        (Fact-adjacent value/envelope types)
  */
 
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -42,7 +43,7 @@ import {
   verifyPayload,
   type Ed25519KeyPair,
 } from "./signing";
-import { gitBlobId, KeyRegistryStore, SelfWitnessedExcisionStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
+import { CommitTipStore, gitBlobId, KeyRegistryStore, SelfWitnessedExcisionStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
 import {
   canon,
   collectExcisions,
@@ -985,7 +986,90 @@ export type KipErrorCode =
    * silent/unaudited (N5), even though it is not the ordinary `"accept"`/`"exhausted"` return
    * contract `learn()` otherwise promises.
    */
-  | "ERR_LEARN_COMMIT_FAILED";
+  | "ERR_LEARN_COMMIT_FAILED"
+  /**
+   * D-36 closure: `KipRepo.txn()` is now a REAL, atomic transaction (see `txn()`'s own doc comment)
+   * — this replica tracks whether one is already active via a single instance flag, and rejects a
+   * nested `txn()` call (one made from inside an already-active txn's own callback) immediately,
+   * rather than silently flattening it into the outer transaction's staging array (which would let
+   * an inner abort's discard also wipe the outer's already-staged writes, or vice versa — neither is
+   * a sound semantics this build invents a guess for) or letting it corrupt/queue behind the outer
+   * one. The inner `txn()` call's own promise rejects with this code before its own callback is ever
+   * invoked (D-36 test (6)).
+   *
+   * ROUND-2 CRITIC FIX (finding 3): also thrown by `assertFact`/`retractFact` themselves when called
+   * DIRECTLY (not via an active txn's own `tx.assertFact`/`tx.retractFact`) while some OTHER `txn()`
+   * call is active elsewhere on this same instance — refusing outright rather than silently absorbing
+   * the unrelated write into that other transaction's staging array (see `assertFact`'s own doc
+   * comment).
+   */
+  | "ERR_TXN_ALREADY_ACTIVE"
+  /**
+   * ROUND-3 CRITIC FIX (code-quality, major finding 1): `txn()`'s post-ingest rollback loop
+   * (`for (const oid of rollbackOids) substrate.erase(oid)`) itself calls into `Substrate.erase()`,
+   * which is UNGUARDED (`fs.rmSync`/`fs.writeFileSync`, substrate.ts) and can genuinely throw (a
+   * Windows file-lock EBUSY/EPERM, disk-full, permission errors). Fallbacks are evil (CLAUDE.md): a
+   * rollback-erase failure is never silently swallowed, never allowed to mask the ORIGINAL commit
+   * failure that triggered the rollback in the first place, and never allowed to skip resetting this
+   * instance's own txn state. When one or more `oid`s fail to erase during rollback, `txn()` attempts
+   * every remaining oid anyway (never abandons the loop after the first failure), ALWAYS resets
+   * `txnActive`/staging state (so this instance is never permanently poisoned), and throws exactly
+   * ONE `KipError` with this code naming BOTH the original failure reason (`context.originalError`)
+   * AND the oid(s) that could not be erased (`context.eraseFailures`) — so a caller/auditor knows
+   * precisely which facts may have survived a failed rollback, rather than silently dropping either
+   * piece of information. See `txn()`'s own doc comment.
+   */
+  | "ERR_TXN_ROLLBACK_FAILED"
+  /**
+   * ROUND-5 CRITIC FIX (all 3 fresh critics independently reproduced, Critical #1): `txn()`'s
+   * post-commit-success tail — folding the shadow seq/hlc clone into the REAL `chainSequencer`/
+   * `localHlc` fields and persisting the result via a SECOND, final `SeqTipStore.save()` call — runs
+   * strictly AFTER the real git commit object is written, every staged fact is durably ingested, AND
+   * `CommitTipStore.save()` has already durably advanced the commit tip (all three already covered by
+   * the EARLIER guarded try/catch+rollback block above). By the time this tail runs, the commit itself
+   * has ALREADY, GENUINELY, DURABLY succeeded — only this call's own local seq/hlc TIP-BOOKKEEPING
+   * write can still fail. Reordering `SeqTipStore.save()` to happen BEFORE the commit-tip save (so it
+   * shares the EARLIER block's rollback) was considered and rejected: that would require also being
+   * able to roll back an already-successful `SeqTipStore.save()` write if a LATER step in that same
+   * guarded block then failed, to preserve `mintFact`'s own documented "an aborted/rolled-back txn
+   * never permanently burns a seq number" invariant (finding 2 above) — real, working rollback
+   * machinery this round doesn't need to invent when a narrower, correctly-scoped fix suffices.
+   * Thrown ONLY for this specific, narrow failure — NEVER the generic/untyped rejection that (pre-fix)
+   * misleadingly implied nothing had been committed, and NEVER left to escape while skipping
+   * `resetTxnState()` (which — pre-fix — permanently stuck `txnActive` `true` forever, rejecting every
+   * subsequent `txn()`/direct `assertFact`/`retractFact` call on this instance with
+   * `ERR_TXN_ALREADY_ACTIVE`, and — chained through `learn()` — silently starved
+   * `authorLearnExhaustedMarker()`'s own fresh `this.txn(...)` call of ever running, since THAT call
+   * would itself immediately hit the same poisoned-instance rejection). `context.commitOid` names the
+   * commit that DID durably succeed; the in-memory `chainSequencer`/`localHlc` are folded BEFORE this
+   * write is attempted, so this live instance keeps minting from the correct, already-advanced state
+   * regardless of whether the persist call itself failed (and self-heals the on-disk tip file on the
+   * very next mint outside any txn, since `mintFact`'s own non-txn branch calls `SeqTipStore.save()` on
+   * every mint) — only a crash before that next write, on a substrate then reopened elsewhere, remains
+   * an acknowledged residual gap, matching this method's own documented "no cross-instance file-
+   * locking" concurrency-scope narrowing (see `txn()`'s own doc comment).
+   */
+  | "ERR_TXN_TIP_PERSIST_FAILED"
+  /**
+   * D-36 ROUND-6 CRITIC FIX (correctness — a `tx` handle invoked after its own `txn()` call already
+   * settled): `tx.assertFact`/`tx.retractFact` (the closures `txn()`, above, hands to `fn`) capture
+   * their OWNING txn() call's own `txnToken` at construction time and, before delegating into
+   * `this.assertFact`/`this.retractFact`, now check that THIS SPECIFIC captured token still
+   * `===`-matches `this.txnToken` (the CURRENTLY active txn's token, `undefined` once none is
+   * active). Before this fix, a `tx` handle captured by out-of-band code (e.g. an unawaited
+   * `setTimeout`/callback closure inside `fn`, invoked after `fn` itself already returned AND the
+   * whole `txn()` call already settled — committed OR aborted) fell through BOTH of `assertFact`'s/
+   * `retractFact`'s own guards: `isThisActiveTxnsOwnDelegatedCall` is `false` (its own `this.txnToken
+   * !== undefined` check fails, since `resetTxnState()` already cleared it), but `this.txnActive` is
+   * ALSO `false` by then — so `this.txnActive && !isThisActiveTxnsOwnDelegatedCall` never fires
+   * either, and the stale call silently proceeded as an ORDINARY, immediately-durable DIRECT write,
+   * entirely outside the already-committed-or-aborted transaction it appears to belong to (a fact
+   * minted and durably ingested with no txn ever "owning" it). This is thrown instead, BEFORE
+   * `this.assertFact`/`this.retractFact` is ever called — so a settled txn's stale handle can never
+   * mint a seq/hlc tick or touch the substrate at all (fallbacks are evil: never silently absorbed as
+   * an unrelated direct write).
+   */
+  | "ERR_TXN_ALREADY_SETTLED";
 
 /**
  * Domain outcomes (`pending`, `pin-incomplete`, a `conflict` segment, `status: "exhausted"`, ...)
@@ -1098,6 +1182,28 @@ const REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS = "author-hlc-contiguous";
  * be literally named derived_from" apart from "this fact's own value payload failed to parse".
  */
 const KIP_MALFORMED_DERIVED_FROM_EDGE_KIND = "kip:malformed-derived-from";
+
+/**
+ * D-36: hoisted to module scope (was a `regenerateHeads()`-local const) so `KipRepo.txn()`'s own
+ * REAL commit-write path (below) can filter `this.currentFacts()` down to the SAME
+ * "knowledge-CONTENT facts only" set `regenerateHeads()` itself uses to build its tree/commit
+ * objects — control/audit facts (excision markers, revoke-key, grant, policy) never enter either
+ * method's commit-tree computation. Both call sites share this ONE literal definition rather than
+ * risking two independently-maintained copies silently drifting apart.
+ */
+const CONTENT_FACT_TYPES: ReadonlySet<FactType> = new Set(["assert", "retract", "supersede", "re-attest"]);
+
+/**
+ * D-36: hoisted to module scope (were `regenerateHeads()`-local consts) — the ONE fixed sentinel
+ * committer/author identity `writeFactsTreeAndCommit` (below) stamps on every commit object it
+ * writes, for BOTH `regenerateHeads()`'s own throwaway scratch-history commits AND `txn()`'s real,
+ * durable commits. Never the real fact author's own identity (regenerateHeads's own doc comment
+ * explains why: a single fixed identity per write-path keeps the byte recipe reproducible/
+ * comparable across calls, rather than embedding a caller-specific author who may not even be a
+ * signer this replica's own keyring recognizes).
+ */
+const KIP_COMMIT_SENTINEL_NAME = "kip-regen";
+const KIP_COMMIT_SENTINEL_EMAIL = "kip-regen@localhost";
 
 // ---------------------------------------------------------------------------
 // 9. `KipRepo` — a minimal concrete Repo, every method a throwing stub.
@@ -1215,6 +1321,86 @@ export class KipRepo implements Repo {
    * changed, that this cache avoids.
    */
   private regenCache: { batches: Fact[][]; commits: RegeneratedDagCommit[] } | undefined;
+
+  /**
+   * D-36: `undefined` whenever no `txn()` call is currently active on this instance; set to a fresh,
+   * empty array for the duration of ONE `txn()` call's own `fn(tx)` invocation. `assertFact`/
+   * `retractFact` (the SAME public, overridable methods every direct caller and `Tx.assertFact`/
+   * `Tx.retractFact` both route through — see `txn()`'s own doc comment for why `Tx`'s methods are
+   * thin `(input) => this.assertFact(input)` delegations rather than a separate re-implementation)
+   * check this field: when set, a minted fact is validated (`computeIngestVerdict`, the SAME
+   * well-formed+signature pair `ingest()` itself runs) and STAGED here instead of being immediately
+   * written to the substrate — nothing durable happens for a staged fact until the whole `txn()` call
+   * resolves and commits every staged fact in one pass (D-36 tests (1)/(2)).
+   *
+   * FOLLOW-UP (round-5 critic MINOR finding 3, deliberately deferred): this field, `txnActive`,
+   * `txnShadowSequencer`, `txnShadowHlc`, and `txnToken` (below) are 5 separate instance flags that
+   * together represent ONE logical "is a txn active, and if so what is its state" concept — a future
+   * pass could consolidate them into a single `this.activeTxn: TxnState | undefined` object so "is a
+   * txn active" becomes one null check. Left as a documented follow-up rather than done in this round:
+   * it is a maintainability improvement, not required for correctness, and touching all 5 call sites
+   * risked destabilizing this round's already-verified fixes under time pressure.
+   */
+  private txnStagingFacts: Fact[] | undefined;
+
+  /**
+   * D-36: guards against a nested `txn()` call (one made from inside an already-active txn's own
+   * `fn` callback) — set `true` for the duration of ONE `txn()` call (from just before `fn(tx)` is
+   * invoked through the commit-or-abort outcome), `false` otherwise. A `txn()` call observing this
+   * already `true` throws `ERR_TXN_ALREADY_ACTIVE` immediately, before its own callback ever runs
+   * (D-36 test (6)) — nesting is never silently flattened, queued, or allowed to corrupt the outer
+   * transaction's own staging array.
+   */
+  private txnActive = false;
+
+  /**
+   * ROUND-5 CRITIC FIX (2 of 3 fresh critics independently reproduced, Critical #2 — REPLACES the
+   * round-2 fix's ambient `inTxDelegatedCall` boolean, which only NARROWED the silent-absorption race
+   * window, never closed it): `assertFact`/`retractFact`'s ambient `txnStagingFacts` ("is SOME txn
+   * active on this instance?") is NOT, by itself, "is THIS call one that the currently active txn's own
+   * `tx.assertFact`/`tx.retractFact` legitimately routed?". The OLD boolean flag was set `true`
+   * synchronously around `await this.assertFact(input)`, but `await` on an already-resolved promise
+   * still yields at least one microtask tick before the `finally` resets it back to `false` — so
+   * EVERY SINGLE tx-routed write (not just an explicit `await`-gated gap the round-2 test covered) left
+   * a REAL window during which an unrelated, direct `repo.assertFact()`/`retractFact()` call landing in
+   * that SAME tick (synchronously, before the microtask queue drained) observed the flag still `true`
+   * and was silently absorbed into the active txn's staging array — discarded forever if that
+   * transaction later aborted.
+   *
+   * The fix: an `AsyncLocalStorage`-scoped per-txn token, not a plain mutable instance field. `txn()`
+   * mints a fresh, unforgeable `Symbol()` for its own session (`this.txnToken`, below) and wraps EVERY
+   * `tx.assertFact`/`tx.retractFact` call's delegation to the SAME public, overridable
+   * `this.assertFact`/`this.retractFact` (unchanged — still routes through a subclass override, e.g.
+   * this suite's own `FlakyOnNthAssertRepo`-style fault injectors, exactly as `txn()`'s own doc comment
+   * documents) inside `txnDelegationStore.run(token, () => ...)`. `AsyncLocalStorage`'s context is
+   * bound to the actual causal call/promise chain a specific invocation descends from — NOT to
+   * wall-clock/microtask ordering — so an unrelated, directly-invoked `assertFact`/`retractFact` call
+   * (never itself wrapped in a `.run()` call) sees `txnDelegationStore.getStore()` as `undefined`
+   * regardless of how tightly it races against an in-flight tx-delegated call, closing the window
+   * entirely rather than merely narrowing it. `assertFact`/`retractFact` verify the store's token
+   * strictly equals `this.txnToken` (the CURRENTLY active txn's own token — symbols are never
+   * accidentally `===`-equal across two different `txn()` calls) before treating a call as legitimately
+   * routed.
+   */
+  private readonly txnDelegationStore = new AsyncLocalStorage<symbol>();
+  /** The currently active `txn()` call's own unique session token (`undefined` when no txn is active)
+   *  — see `txnDelegationStore`'s own doc comment above. */
+  private txnToken: symbol | undefined;
+
+  /**
+   * ROUND-2 CRITIC FIX (finding 2, correctness): a per-txn SHADOW clone of `chainSequencer`/`localHlc`,
+   * live only for the duration of one `txn()` call's own `fn(tx)` invocation (and its subsequent
+   * commit-write phase). `mintFact` mutates THESE shadow fields (never `this.chainSequencer`/
+   * `this.localHlc`/`SeqTipStore` directly) while staging inside an active txn, so a fact minted then
+   * discarded (an aborted txn, or any later commit-write failure) never permanently burns a `seq`
+   * number or leaves a phantom durable seq-tip advance with no corresponding admitted fact — the exact
+   * `pin()`/`resolvePin()` seq-contiguity poisoning the critic reproduced. The shadow is folded into
+   * the REAL `chainSequencer`/`localHlc` fields (and durably persisted to `SeqTipStore`, exactly once)
+   * ONLY after `txn()`'s whole commit-write-and-ingest phase has genuinely, durably succeeded — see
+   * `txn()`'s own doc comment. `undefined` whenever no txn is currently active.
+   */
+  private txnShadowSequencer: ChainSequencer | undefined;
+  private txnShadowHlc: HlcStamp | undefined;
 
   /**
    * D-27 FIX 2 (round 3): this replica's configured `manifest.json` `regenBoundaryRule` value —
@@ -1405,15 +1591,59 @@ export class KipRepo implements Repo {
   /** Lazily provisions (and memoizes) this repo's git object-store substrate (T1.1/T1.5). */
   private getSubstrate(): Substrate {
     if (!this.substrate) {
-      this.substrate = this.explicitDir
+      // D-36 ROUND-7 CRITIC FIX (CRITICAL, silent-permanent-reseed-disable — live-reproduced seq
+      // collision): every step below is built into a LOCAL variable first (`substrate`,
+      // `chainSequencer`, `keyRegistryEntries`, `excisionEntries`), and `this.substrate`/
+      // `this.chainSequencer`/`this.keyRegistry`/`this.selfWitnessedExcisionOids` are only published
+      // at the very end, AFTER every fallible load below (`SeqTipStore.load()`, the fact-blob scan,
+      // `KeyRegistryStore.load()`, `SelfWitnessedExcisionStore.load()`) has completed without throwing.
+      // PRE-FIX, `this.substrate` was assigned FIRST, before any of those loads ran — so a
+      // `CorruptTipFileError` (or any other load failure) on the first call threw once, but every LATER
+      // call short-circuited on `if (!this.substrate)` (since `this.substrate` was already set) and
+      // silently skipped this entire reseed block FOREVER, leaving `chainSequencer` stuck at its
+      // pristine empty default — a real, silent, permanent seq-collision risk. Now, a throw anywhere in
+      // this block leaves `this.substrate` genuinely `undefined`, so the NEXT `getSubstrate()` call
+      // retries the whole sequence (and fails loudly again, consistently) instead of silently
+      // "succeeding" with stale/empty state.
+      const substrate = this.explicitDir
         ? new Substrate(this.explicitDir, this.hashAlgo)
         : Substrate.createTemp(this.hashAlgo);
       // T1.2.5's durable seq-tip persistence: re-seed the sequencer directly via
       // `ChainSequencer`'s own `initial` constructor parameter, rather than hand-rolling a
       // peek/next replay loop that reimplements the same seeding logic (this round's finding #5)
       // — so a re-opened repo resumes its chain tips durably.
-      const persistedSeq = new SeqTipStore(this.substrate.dir).load();
-      this.chainSequencer = new ChainSequencer(persistedSeq);
+      const persistedSeq = new SeqTipStore(substrate.dir).load();
+      // D-36 ROUND-6 CRITIC FIX (MAJOR, convergence-safety — seq-collision across crash+reopen-
+      // elsewhere): the persisted tip file is only ever a HINT for where to resume minting, never
+      // blindly trusted over the real, durably-admitted fact set. If a txn's FINAL `SeqTipStore.save()`
+      // ever failed (even after this same round's crash-safe-write fix makes the WRITE itself atomic,
+      // the file on disk is whatever the LAST successful save left — which can genuinely be BEHIND a
+      // fact that already committed durably via that failed-tip-persist txn, see `ERR_TXN_TIP_PERSIST_
+      // FAILED`'s own doc comment) and the process then crashed before this instance's own next mint
+      // would have self-healed the file, a later `getSubstrate()` reseeding PURELY from the stale file
+      // could mint a seq number that COLLIDES with one a real, durable fact on that same chain already
+      // holds — breaking `resolvePin`/`computeChainFrontier`'s seq-contiguity invariant (both build a
+      // `Set<number>` of seqs per chain, so two distinct facts sharing one seq become indistinguishable
+      // there). Fixed by cross-validating: fold every durably-held fact's own `(chainId, seq)` and take,
+      // per chain, the MAX of (persisted tip, actually-observed max seq) — the real, durable fact set is
+      // the ground truth here, and the persisted tip file is only ever corrected UPWARD by it, never
+      // trusted blindly when it disagrees. This makes the reseed self-healing even against an
+      // arbitrarily stale (but still validly-parseable) tip file. Reads the fact blobs directly off the
+      // LOCAL `substrate` variable (never via `this.currentFactsWithOid()`/`this.getSubstrate()`, which
+      // would recurse back into this same guard while `this.substrate` is still deliberately unset).
+      const observedMaxSeqByChain: Record<string, number> = {};
+      for (const { json } of substrate.listFactBlobsWithOid()) {
+        const fact = JSON.parse(json) as Fact;
+        const factChainId = chainIdFor(fact.replicaId, fact.provenance.publicKeyFingerprint);
+        const priorMax = observedMaxSeqByChain[factChainId];
+        if (priorMax === undefined || fact.seq > priorMax) observedMaxSeqByChain[factChainId] = fact.seq;
+      }
+      const mergedSeq: Record<string, number> = { ...persistedSeq };
+      for (const [factChainId, observedMax] of Object.entries(observedMaxSeqByChain)) {
+        const persistedTip = mergedSeq[factChainId];
+        if (persistedTip === undefined || observedMax > persistedTip) mergedSeq[factChainId] = observedMax;
+      }
+      const chainSequencer = new ChainSequencer(mergedSeq);
       // Re-seed `keyRegistry` with every peer key THIS replica durably learned via a past `sync()`
       // call (see `KeyRegistryStore`'s own doc comment, substrate.ts), so a reopened `KipRepo`
       // pointed at the same `dir` doesn't silently forget a genuinely-verified peer's key (which
@@ -1422,8 +1652,12 @@ export class KipRepo implements Repo {
       // imported public key material, never the persisted map-key string verbatim: an entry whose
       // stored fingerprint disagrees with the one recomputed from its own PEM is corrupt/tampered
       // (the label doesn't match the key it's stored against) and is skipped entirely, the same
-      // defensive convention used for a PEM that fails to parse at all.
-      const persistedKeys = new KeyRegistryStore(this.substrate.dir).load();
+      // defensive convention used for a PEM that fails to parse at all. Collected into a local array
+      // first — `this.keyRegistry` (a `readonly` field, mutated via `.register()` rather than
+      // reassigned) is only actually populated once every load below has succeeded, per this method's
+      // publish-at-the-end discipline above.
+      const persistedKeys = new KeyRegistryStore(substrate.dir).load();
+      const keyRegistryEntries: Array<ReturnType<typeof importEd25519PublicKey>> = [];
       for (const [storedFingerprint, pem] of Object.entries(persistedKeys)) {
         try {
           const { publicKey, fingerprint } = importEd25519PublicKey(pem);
@@ -1432,7 +1666,7 @@ export class KipRepo implements Repo {
             // against — never trust the label, skip the entry entirely.
             continue;
           }
-          this.keyRegistry.register(fingerprint, publicKey);
+          keyRegistryEntries.push({ publicKey, fingerprint });
         } catch {
           // A corrupt persisted entry is a storage-layer concern, not an ingest-time one — skip it.
         }
@@ -1443,7 +1677,14 @@ export class KipRepo implements Repo {
       // already verified and excised in a prior process lifetime (see `selfWitnessedExcisionOids`'s
       // own doc comment for why this durable record is sound local knowledge, never a marker's own
       // claim about itself).
-      const persistedExcisions = new SelfWitnessedExcisionStore(this.substrate.dir).load();
+      const persistedExcisions = new SelfWitnessedExcisionStore(substrate.dir).load();
+
+      // Every fallible load/parse above has completed without throwing — publish everything now.
+      this.substrate = substrate;
+      this.chainSequencer = chainSequencer;
+      for (const { fingerprint, publicKey } of keyRegistryEntries) {
+        this.keyRegistry.register(fingerprint, publicKey);
+      }
       for (const [oid, record] of Object.entries(persistedExcisions)) {
         this.selfWitnessedExcisionOids.set(oid, record);
       }
@@ -1550,9 +1791,432 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: withScope");
   }
 
-  // TODO(M0/T1.5): one-commit-per-txn batching (§3.2 commit granularity).
-  async txn<T>(_fn: (tx: Tx) => Promise<T>): Promise<{ result: T; commit: CID }> {
-    throw new Error("unimplemented: txn");
+  /**
+   * D-36 closure (docs/DEBTS.md), ROUND-2 CRITIC FIXES (findings 1/2/3): a REAL, atomic transaction —
+   * every `tx.assertFact`/`tx.retractFact` call inside `fn` mints a fact (`mintFact`) and, because
+   * `this.txnStagingFacts` is set for the duration of this call, validates it via
+   * `computeIngestVerdict` (the SAME well-formed + signature-verification pair `ingest()` itself runs)
+   * and pushes it onto a staging array PRIVATE to THIS `txn()` call — nothing is written to the
+   * substrate yet, and `mintFact`'s own `ChainSequencer`/`localHlc` advance lands on a per-txn SHADOW
+   * clone (`txnShadowSequencer`/`txnShadowHlc`), never `this.chainSequencer`/`this.localHlc`/
+   * `SeqTipStore` directly (finding 2) — so an aborted or failed txn never permanently burns a `seq`
+   * number. `Tx`'s own methods wrap the SAME public, overridable `this.assertFact`/`this.retractFact`
+   * calls every direct caller uses (never a separate re-implementation, so a subclass overriding those
+   * PUBLIC methods — e.g. this suite's own `FlakyOnNthAssertRepo`-style fault injectors — still
+   * observes every write made through `tx`), but ALSO run that delegated call inside an
+   * `AsyncLocalStorage`-scoped per-txn token (`txnDelegationStore`, ROUND-5 CRITIC FIX replacing the
+   * round-2 fix's ambient `inTxDelegatedCall` boolean — see that field's own doc comment for why a
+   * plain boolean was insufficient) — this is what lets `assertFact`/`retractFact` tell "this call is
+   * THIS txn's own tx-routed write" apart from "this call arrived some other way (a direct, unrelated
+   * caller) while a txn merely happens to be active elsewhere" and refuse the latter outright (see
+   * `assertFact`'s own doc comment) rather than silently absorbing it into this txn's staging array
+   * only to discard it later on an unrelated abort.
+   *
+   * - If `fn(tx)` throws (sync or async): the staging array AND the shadow seq/hlc advance are BOTH
+   *   discarded wholesale — none of the staged facts were ever passed to `ingest()`, and `mintFact`
+   *   never touched the real `chainSequencer`/`localHlc`/`SeqTipStore` for them — so there is nothing
+   *   to roll back at the substrate level (D-36 test (1)) and no seq/hlc advance to undo either
+   *   (finding 2's own regression coverage).
+   * - If `fn(tx)` resolves, the commit-write phase and the per-fact durable ingest now share ONE
+   *   failure domain (finding 1): the real git commit object is built FIRST (`writeFactsTreeAndCommit`,
+   *   below, over the prior durable content facts PLUS this call's own in-memory staged ones — no
+   *   `ingest()` call has happened yet, so a failure here leaves the substrate byte-identical to
+   *   before this call), THEN every staged fact is durably ingested (tracking each newly-created blob
+   *   oid), THEN the commit tip is durably advanced (`CommitTipStore.save`). A failure at ANY point
+   *   from here on (the "unreachable in practice" re-validation branch, or the final tip-save) erases
+   *   every blob THIS call newly ingested (`Substrate.erase`, substrate.ts) before rethrowing — so a
+   *   `txn()` call that rejects for ANY reason, at ANY point after `fn(tx)` resolves, leaves the fact
+   *   set byte-identical to before the call. Only once the commit is fully, durably written is the
+   *   shadow seq/hlc clone folded into the real `chainSequencer`/`localHlc` fields and persisted to
+   *   `SeqTipStore` (finding 2) — a txn's minted seq/hlc numbers are only ever "spent" once the txn
+   *   genuinely, durably commits. Successive `txn()` calls on a reopened `KipRepo` keep extending one
+   *   real, on-disk commit-DAG (D-36 tests (2)/(3)).
+   *
+   * Nesting: a `txn()` call observing `this.txnActive` already `true` (i.e. made from inside another
+   * txn's own `fn` callback) rejects IMMEDIATELY with a typed `ERR_TXN_ALREADY_ACTIVE`, before its own
+   * callback is ever invoked (D-36 test (6)) — never silently flattened into the outer transaction's
+   * staging array, queued, or allowed to corrupt it.
+   *
+   * Scope boundary (convergence-safety, minor finding 1): the commit-DAG this method (and
+   * `regenerateHeads()`) maintains reflects ONLY facts admitted via `txn()`/`regenerateHeads()` itself
+   * — a direct (non-txn) `assertFact`/`retractFact`/`supersedeFact`/`reAttestFact` call durably admits
+   * its fact to the substrate exactly as before, but does NOT append to (or otherwise touch) the
+   * commit-DAG `CommitTipStore` tracks; such a fact is only swept into the DAG's history by a LATER
+   * `txn()` call (which folds every prior durable content fact into its own commit tree) or by an
+   * explicit `regenerateHeads()` call.
+   *
+   * Concurrency scope (convergence-safety, minor finding 3): this method supports SEQUENTIAL access —
+   * one `KipRepo` instance's own `txn()` calls one at a time (enforced above), or successive
+   * close-then-reopen `KipRepo` instances against the SAME `substrate.dir`. TWO `KipRepo` INSTANCES
+   * concurrently racing `txn()` against the same `substrate.dir` (e.g. two separate processes, or two
+   * in-process instances neither of which is the other's txn) is UNSUPPORTED/UNDEFINED — there is no
+   * file-locking around the commit-write critical section (`CommitTipStore`/`SeqTipStore` read-modify-
+   * write) in this build; that is out of scope for this closure and left as documented follow-up work.
+   */
+  async txn<T>(fn: (tx: Tx) => Promise<T>): Promise<{ result: T; commit: CID }> {
+    if (this.txnActive) {
+      throw new KipError(
+        "ERR_TXN_ALREADY_ACTIVE",
+        "txn: a nested txn() call was attempted while an outer txn() is already active/in progress " +
+          "on this repo instance — nesting is not supported (fallbacks are evil: this never silently " +
+          "flattens, queues, or corrupts the outer transaction's own already-staged writes).",
+        {},
+      );
+    }
+    this.txnActive = true;
+    // ROUND-5 CRITIC FIX (Critical #2): mint a fresh, unforgeable per-session token for THIS txn()
+    // call — see `txnDelegationStore`'s own doc comment above.
+    const txnToken = Symbol("kip-txn-token");
+    this.txnToken = txnToken;
+
+    const resetTxnState = (): void => {
+      this.txnStagingFacts = undefined;
+      this.txnActive = false;
+      this.txnShadowSequencer = undefined;
+      this.txnShadowHlc = undefined;
+      this.txnToken = undefined;
+    };
+
+    // D-36 STRUCTURAL FIX (closes the WHOLE "txn-permanently-poisoned" bug class in one place,
+    // replacing 6 rounds — round-6/7/8/9 — of individually-patched per-call-site try/catch blocks,
+    // each of which caught exactly one newly-discovered fallible step and wrapped it in
+    // `resetTxnState()`-then-rethrow; the 6th such instance, `this.currentFacts()`/`.sort()` below,
+    // was found still unguarded despite the pattern already being established twice over): the
+    // method's ENTIRE body from here through its normal `return` is now ONE `try`/`finally`.
+    // `finally` unconditionally calls `resetTxnState()` EXACTLY ONCE, whether this call returns
+    // normally or a fallible step anywhere below throws — known (getSubstrate, tipStore.load,
+    // currentFacts/sort, writeFactsTreeAndCommit, the ingest loop, the final SeqTipStore.save) or any
+    // future one not yet discovered — so no fallible call inside `txn()` can ever again leave
+    // `txnActive`/`txnToken`/`txnShadowSequencer`/`txnShadowHlc` stuck set. This is a bare
+    // `try`/`finally`, never a `try`/`catch`: an exception thrown anywhere in the body below is NEVER
+    // intercepted, wrapped, or replaced by this outer guard — after `finally` runs, it continues to
+    // propagate to the caller completely unmodified (fallbacks are evil, CLAUDE.md — this guarantees
+    // cleanup, it does not swallow or alter failures). `resetTxnState()` itself only ever performs
+    // plain field assignments (see its body above) and can never itself throw, so it can never mask
+    // an original error either. The few inner try/catch blocks that remain below (the rollback-erase
+    // loop, the tip-persist-failure wrapper) do REAL, substantive work beyond cleanup — see each
+    // one's own comment — and are preserved; every try/catch whose SOLE job was
+    // `resetTxnState()`-then-rethrow has been removed as redundant, since this outer `finally` now
+    // covers all of them uniformly.
+    try {
+      // Ensure the substrate (and, on a re-opened dir, this replica's durably-persisted chain tips)
+      // are seeded onto `this.chainSequencer` BEFORE we clone it into this txn's own shadow, below —
+      // mirrors `mintFact`'s own "provision before minting seq" ordering requirement. Fallible (e.g. a
+      // `CorruptTipFileError` from `SeqTipStore.load()` inside `getSubstrate()`'s lazy-provision
+      // block — especially plausible here since this may be the FIRST substrate-touching call this
+      // `KipRepo` instance ever makes); a throw here is caught by the outer `finally` above, like
+      // every other fallible step in this method.
+      this.getSubstrate();
+
+      const staging: Fact[] = [];
+      this.txnStagingFacts = staging;
+      this.txnShadowSequencer = new ChainSequencer(this.chainSequencer.snapshot());
+      this.txnShadowHlc = this.localHlc;
+
+      const tx: Tx = {
+        // ROUND-3 CRITIC FIX (code-quality, minor finding 3): a real runtime check — never an
+        // unchecked `as` type assertion alone — narrows `this.assertFact`/`this.retractFact`'s
+        // genuine `"pending" | "durable"` return-status union down to the `Tx` interface's own
+        // `"pending"`-only contract. Both methods only ever construct a `{ status: "pending" }`
+        // result object today (see their own bodies), so this can never fire in practice — but a
+        // future change to either that ever legitimately returns `"durable"` must not silently lie
+        // to a `tx.assertFact`/`tx.retractFact` caller via a bare cast; it now fails loudly instead.
+        //
+        // ROUND-5 CRITIC FIX (Critical #2): the delegation to `this.assertFact`/`this.retractFact`
+        // (the SAME public, overridable method every direct caller uses — unchanged from round-2) is
+        // now wrapped in `txnDelegationStore.run(txnToken, ...)` instead of toggling a plain
+        // instance-field boolean. See `txnDelegationStore`'s own doc comment for why this closes the
+        // race a boolean flag (reset only after an `await`-induced microtask tick) could not.
+        //
+        // ROUND-6 CRITIC FIX (correctness, ERR_TXN_ALREADY_SETTLED — see that code's own doc
+        // comment): BEFORE delegating at all, check that THIS closure's own captured `txnToken` still
+        // `===`-matches `this.txnToken` — the CURRENTLY active txn's token, which `resetTxnState()`
+        // clears to `undefined` the instant `txn()` (this very call) settles, whether by commit or
+        // abort. A stale `tx` handle invoked by out-of-band code (e.g. an unawaited `setTimeout`
+        // callback inside `fn`) AFTER that has happened fails this check — `this.txnToken` is either
+        // `undefined` (nothing active) or (impossible today, since nested `txn()` is rejected at
+        // entry, but checked for robustness regardless) some OTHER txn's fresh token, never this
+        // stale one — and is rejected outright, before `this.assertFact`/`this.retractFact` (and
+        // therefore `mintFact`) is ever reached, so a settled txn's stale handle can never mint a
+        // seq/hlc tick or silently fall through to an ordinary, immediately-durable direct write.
+        assertFact: async (input) => {
+          if (this.txnToken !== txnToken) {
+            throw new KipError(
+              "ERR_TXN_ALREADY_SETTLED",
+              "tx.assertFact: this call arrived from a tx handle whose OWNING txn() call has already " +
+                "settled (committed or aborted) — a tx handle captured by out-of-band code (e.g. an " +
+                "unawaited setTimeout/callback closure inside fn) must never be allowed to silently " +
+                "fall through to an ordinary, immediately-durable direct write once its own txn() call " +
+                "has resolved or rejected (fallbacks are evil); this write was rejected before it ever " +
+                "reached assertFact/mintFact.",
+              {},
+            );
+          }
+          const result = await this.txnDelegationStore.run(txnToken, () => this.assertFact(input));
+          if (result.status !== "pending") {
+            throw new KipError(
+              "ERR_MALFORMED_INPUT",
+              `tx.assertFact: expected a "pending" status from this txn-delegated call, got ` +
+                `"${result.status}" — Tx's contract only ever admits a still-staged ("pending") ` +
+                "result; a durable one here would mean this write bypassed txn staging entirely.",
+              { factId: result.id },
+            );
+          }
+          return result as Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" };
+        },
+        retractFact: async (input) => {
+          if (this.txnToken !== txnToken) {
+            throw new KipError(
+              "ERR_TXN_ALREADY_SETTLED",
+              "tx.retractFact: this call arrived from a tx handle whose OWNING txn() call has already " +
+                "settled (committed or aborted) — a tx handle captured by out-of-band code (e.g. an " +
+                "unawaited setTimeout/callback closure inside fn) must never be allowed to silently " +
+                "fall through to an ordinary, immediately-durable direct write once its own txn() call " +
+                "has resolved or rejected (fallbacks are evil); this write was rejected before it ever " +
+                "reached retractFact/mintFact.",
+              {},
+            );
+          }
+          const result = await this.txnDelegationStore.run(txnToken, () => this.retractFact(input));
+          if (result.status !== "pending") {
+            throw new KipError(
+              "ERR_MALFORMED_INPUT",
+              `tx.retractFact: expected a "pending" status from this txn-delegated call, got ` +
+                `"${result.status}" — Tx's contract only ever admits a still-staged ("pending") ` +
+                "result; a durable one here would mean this write bypassed txn staging entirely.",
+              { factId: result.id },
+            );
+          }
+          return result as Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" };
+        },
+        // D-36 scope (item 6 of this closure's own instructions): supersedeFact/reAttestFact/putNode/
+        // putEdge remain explicit "unimplemented" stubs on `Tx` too — this debt's scope is
+        // assertFact/retractFact atomicity (the two operations `learn()`'s accept-commit sequence
+        // actually uses), never a silent fake for the others.
+        supersedeFact: (input) =>
+          this.supersedeFact(input) as Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" }>,
+        reAttestFact: (input) =>
+          this.reAttestFact(input) as Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" }>,
+        putNode: (node) => this.putNode(node),
+        putEdge: (edge) => this.putEdge(edge),
+      };
+
+      // Abort semantics: if `fn(tx)` throws (sync or async), the outer `finally` above runs
+      // `resetTxnState()` and the original error propagates unmodified — nothing in the staging
+      // array was ever passed to `ingest()`, and `mintFact` never touched the real
+      // `chainSequencer`/`localHlc`/`SeqTipStore` for anything staged here, so there is nothing to
+      // roll back at the substrate level, and no seq/hlc advance to undo either — exactly as if this
+      // txn's minting had never happened.
+      const result = await fn(tx);
+
+      // fn resolved: further calls should no longer stage (this txn's own `txnDelegationStore`
+      // context window has already closed by the time `fn` returned — `fn`'s own promise settling is
+      // exactly when the `.run(txnToken, ...)` dynamic extent each individual `tx.assertFact`/
+      // `tx.retractFact` call opened has already unwound), but keep `staging`/the shadow seq-hlc
+      // alive until we know the commit-write-and-ingest phase below genuinely, durably succeeds.
+      this.txnStagingFacts = undefined;
+
+      const substrate = this.getSubstrate();
+      const gitdir = path.join(substrate.dir, ".git");
+      const tipStore = new CommitTipStore(substrate.dir);
+      // Fallible (e.g. a `CorruptTipFileError` from a corrupted `kip-commit-tip.json`, or any other
+      // fs error) — a throw here is caught by the outer `finally` above, like every other fallible
+      // step in this method.
+      const parentOid: string | null = tipStore.load().tip;
+      // FINDING 1 FIX: the content-fact tree is computed from the PRIOR durable facts PLUS this
+      // call's own in-memory staged facts — never from `this.currentFacts()` alone post-ingest — so
+      // the real git commit object can be built and written BEFORE any of this call's staged facts
+      // are ingested. `this.currentFacts()`/`.sort()` are themselves fallible (e.g. a corrupted
+      // `kip-facts-index.json`) — a throw here needs NO special handling: it is automatically caught
+      // by the outer `finally` above, exactly like every other fallible step.
+      const priorContentFacts = this.currentFacts().filter((f) => CONTENT_FACT_TYPES.has(f.type));
+      const stagedContentFacts = staging.filter((f) => CONTENT_FACT_TYPES.has(f.type));
+      const contentFacts = [...priorContentFacts, ...stagedContentFacts];
+      if (contentFacts.length === 0) {
+        throw new KipError(
+          "ERR_MALFORMED_INPUT",
+          "txn: no admitted knowledge-content facts to commit (assert/retract/supersede/re-attest) " +
+            "— a txn() call must stage at least one such write for a commit to be meaningful.",
+          {},
+        );
+      }
+      const sorted = [...contentFacts].sort(
+        (a, b) => compareOrderKey(orderKey(a), orderKey(b)) || compareByContent(a, b),
+      );
+      const message = `kip txn: commit (${staging.length} fact(s) staged this call, ${sorted.length} cumulative)\n`;
+
+      // FINDING 1 FIX: build/write the real commit object FIRST — before any staged fact is durably
+      // ingested. A failure here (this is the exact monkeypatch the round-1 critic exercised) means
+      // ZERO of this call's staged facts have touched the substrate yet; nothing to roll back — and
+      // the outer `finally` above catches it like every other fallible step.
+      const { commitOid } = await this.writeFactsTreeAndCommit({
+        dir: substrate.dir,
+        gitdir,
+        facts: sorted,
+        parentOid,
+        message,
+      });
+
+      // The commit object is built. Now durably ingest every staged fact — tracking each
+      // NEWLY-created blob oid (never one that was already durably present before this call, e.g. a
+      // byte-identical re-offer) — so that a later failure in this same phase (the "unreachable in
+      // practice" re-validation branch below, or the final `tipStore.save`) can be rolled back
+      // byte-for-byte via `Substrate.erase` (substrate.ts), leaving the fact set exactly as it was
+      // before this call.
+      const rollbackOids: string[] = [];
+      try {
+        for (const f of staging) {
+          const oid = gitBlobId(Buffer.from(JSON.stringify(f), "utf8"), this.hashAlgo);
+          const alreadyPresent = substrate.hasBlob(oid);
+          // eslint-disable-next-line no-await-in-loop -- durable ingest order must match staging order.
+          const verdict = await this.ingest(f);
+          if (!verdict.admitted) {
+            // Unreachable in practice (see this method's own doc comment) — never a silent fallback:
+            // surfaced as a typed error rather than assumed impossible and left unguarded.
+            throw new KipError(
+              "ERR_MALFORMED_INPUT",
+              `txn: a staged fact failed re-validation at commit time (${verdict.reason}) — every ` +
+                "staged fact already passed computeIngestVerdict at stage time, so this indicates a " +
+                "genuine internal inconsistency, not an ordinary rejection.",
+              { factId: f.id },
+            );
+          }
+          if (!alreadyPresent) rollbackOids.push(oid);
+        }
+        tipStore.save({ tip: commitOid });
+      } catch (err) {
+        // ROUND-3 CRITIC FIX (code-quality, major finding 1): this catch block does REAL,
+        // substantive rollback work — never just cleanup — so it is preserved even under the D-36
+        // structural fix. `Substrate.erase()` (substrate.ts) is itself unguarded and can genuinely
+        // throw (Windows file-lock EBUSY/EPERM, disk-full, permission errors — a live risk in this
+        // exact dev environment). Never let one oid's erase failure (a) stop the loop from
+        // attempting the rest, or (b) mask/replace the ORIGINAL `err` that triggered this rollback
+        // (fallbacks are evil — CLAUDE.md: a rollback-erase failure is surfaced, never swallowed).
+        // `resetTxnState()` is no longer called here directly — the outer `finally` above now
+        // handles it uniformly, exactly once, after this rethrow.
+        const eraseFailures: Array<{ oid: string; reason: string }> = [];
+        for (const oid of rollbackOids) {
+          try {
+            substrate.erase(oid);
+          } catch (eraseErr) {
+            eraseFailures.push({
+              oid,
+              reason: eraseErr instanceof Error ? eraseErr.message : String(eraseErr),
+            });
+          }
+        }
+        if (eraseFailures.length > 0) {
+          const originalReason = err instanceof Error ? err.message : String(err);
+          throw new KipError(
+            "ERR_TXN_ROLLBACK_FAILED",
+            `txn: commit failed (${originalReason}) AND rollback could not erase ${eraseFailures.length} ` +
+              `oid(s) that were durably ingested this call before the failure (${eraseFailures
+                .map((f) => f.oid)
+                .join(", ")}) — those fact blob(s) may still be present in the substrate despite this ` +
+              "txn() call rejecting; see context.eraseFailures for the per-oid reason. The original " +
+              "commit failure is preserved in context.originalError (never masked/dropped).",
+            { originalError: originalReason, eraseFailures, rollbackOids },
+          );
+        }
+        // No erase failures: rethrow the ORIGINAL error byte-identical, exactly as before this fix.
+        throw err;
+      }
+
+      // FINDING 2 FIX: only NOW — after the commit object is written, every staged fact is durably
+      // ingested, AND the commit tip is durably advanced — fold this txn's shadow seq/hlc clone into
+      // the REAL `chainSequencer`/`localHlc` fields and persist it, exactly once. A txn's minted
+      // seq/hlc numbers are only ever "spent" once the txn genuinely, durably commits.
+      if (this.txnShadowSequencer) this.chainSequencer = this.txnShadowSequencer;
+      if (this.txnShadowHlc !== undefined) this.localHlc = this.txnShadowHlc;
+      try {
+        // ROUND-5 CRITIC FIX (all 3 fresh critics, Critical #1 — see `ERR_TXN_TIP_PERSIST_FAILED`'s
+        // own doc comment for the full reasoning): this catch does REAL, substantive work beyond
+        // cleanup — it re-codes the failure as a distinctly-typed `ERR_TXN_TIP_PERSIST_FAILED`
+        // naming the commit that DID durably succeed, rather than letting a generic/untyped
+        // rejection escape that would misleadingly imply nothing had been committed — so it is
+        // preserved even though `resetTxnState()` itself is now handled uniformly by the outer
+        // `finally` above.
+        new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+      } catch (err) {
+        throw new KipError(
+          "ERR_TXN_TIP_PERSIST_FAILED",
+          `txn: the commit itself already succeeded durably (commit ${commitOid} was written, every ` +
+            "staged fact was ingested, and the commit tip was durably advanced) — only this call's " +
+            "FINAL seq/hlc tip-bookkeeping write failed AFTERWARD " +
+            `(${err instanceof Error ? err.message : String(err)}). This instance's in-memory seq/hlc ` +
+            "state is already correctly advanced and will self-heal the on-disk tip file on this " +
+            "instance's next mint; only a crash before that next write, on a substrate then reopened " +
+            "elsewhere, risks a stale on-disk seq-tip file — see context.commitOid for the commit that " +
+            "DID durably succeed.",
+          { commitOid, originalError: err instanceof Error ? err.message : String(err) },
+        );
+      }
+
+      return { result, commit: commitOid };
+    } finally {
+      // GUARANTEED cleanup, exactly once, on EVERY exit path from the try block above — normal
+      // return or a throw from ANY statement within it, known or future. See this outer try/finally's
+      // own doc comment above for the full reasoning.
+      resetTxnState();
+    }
+  }
+
+  /**
+   * D-36: the tree+commit-write RECIPE `regenerateHeads()`'s own per-batch loop uses — extracted
+   * here so `txn()`'s own REAL commit-write path (above) can reuse the identical byte recipe (one
+   * blob per fact, named by the fact's own content-derived blob oid; a tree of those blobs; a fixed
+   * sentinel committer/author; a `floor(maxWall/1000)` timestamp; parent-chained) against THIS
+   * repo's real `substrate.dir`, rather than `regenerateHeads()`'s own throwaway scratch temp dir.
+   * `regenerateHeads()` ITSELF is unchanged — still its own throwaway store, still whole-history
+   * batch regeneration with its own NFR-F5 reuse cache — only this shared low-level recipe moved out
+   * of its body and into one place both call sites invoke.
+   */
+  private async writeFactsTreeAndCommit(params: {
+    dir: string;
+    gitdir: string;
+    facts: Fact[];
+    parentOid: string | null;
+    message: string;
+  }): Promise<{ commitOid: string; commitBytes: Uint8Array; treeOid: string }> {
+    const { dir, gitdir, facts, parentOid, message } = params;
+    const entries: Array<{ mode: "100644"; path: string; oid: string; type: "blob" }> = [];
+    for (const f of facts) {
+      const canonicalContent = JSON.stringify(deepSortKeys(f));
+      // eslint-disable-next-line no-await-in-loop -- each blob write is independent but tiny;
+      // sequential is simplest and this is test-support-recipe code, not a hot path.
+      const blobOid = await isomorphicGit.writeBlob({
+        fs,
+        dir,
+        gitdir,
+        blob: Buffer.from(canonicalContent, "utf8"),
+      });
+      entries.push({ mode: "100644", path: `f-${blobOid}.json`, oid: blobOid, type: "blob" });
+    }
+    const treeOid = await isomorphicGit.writeTree({ fs, dir, gitdir, tree: entries });
+
+    const maxWall = facts.reduce((max, f) => Math.max(max, f.hlc.wall), facts[0].hlc.wall);
+    const timestampSeconds = Math.floor(maxWall / 1000);
+    const sentinelAuthor = {
+      name: KIP_COMMIT_SENTINEL_NAME,
+      email: KIP_COMMIT_SENTINEL_EMAIL,
+      timestamp: timestampSeconds,
+      timezoneOffset: 0,
+    };
+    const commitOid = await isomorphicGit.writeCommit({
+      fs,
+      dir,
+      gitdir,
+      commit: {
+        tree: treeOid,
+        parent: parentOid ? [parentOid] : [],
+        author: sentinelAuthor,
+        committer: sentinelAuthor,
+        message,
+      },
+    });
+    const raw = await isomorphicGit.readObject({ fs, dir, gitdir, oid: commitOid, format: "wrapped" });
+    const commitBytes = new Uint8Array(raw.object as Uint8Array);
+    return { commitOid, commitBytes, treeOid };
   }
 
   // TODO(M0/T1.5): flush auto-batched facts as the publish point (m-9).
@@ -1564,12 +2228,62 @@ export class KipRepo implements Repo {
    * Stamp `hlc`/`seq`, sign the canonical payload with this repo's OWN keypair (real Ed25519,
    * ADR-B2), and run the SAME `ingest()` gate every fact — self-authored or received — passes
    * through (docs/22 §2: "A memory write -> a commit" starts with the author signing `f`, then
-   * `ingest(f)` on the receiving replica — here, self-receipt). Batched commit (T1.5) is NOT yet
-   * implemented (`txn`/`commit` stay throwing stubs), so this always returns `status: "pending"`
-   * per ADR-012 ("no path where a durable ack precedes the commit").
+   * `ingest(f)` on the receiving replica — here, self-receipt).
+   *
+   * D-36: when called from OUTSIDE any active `txn()` (`this.txnStagingFacts` unset, the ordinary
+   * case for a direct caller), behavior is UNCHANGED from before this closure — mint, then
+   * immediately `ingest()` (always returns `status: "pending"`, per ADR-012, "no path where a
+   * durable ack precedes the commit"). When called from INSIDE an active `txn()`'s own callback
+   * (`this.txnStagingFacts` set — reached either directly via `tx.assertFact`, which is a thin
+   * `(input) => this.assertFact(input)` delegation, or via a subclass override that itself calls
+   * `super.assertFact(input)`), the minted fact is instead validated via `computeIngestVerdict` (the
+   * SAME well-formed+signature predicate `ingest()` runs) and STAGED — pushed onto the active txn's
+   * own staging array — rather than written to the substrate; nothing durable happens for it until
+   * the whole `txn()` call resolves and commits every staged fact together (see `txn()`'s own doc
+   * comment).
+   *
+   * ROUND-2 CRITIC FIX (finding 3), REPLACED by ROUND-5 CRITIC FIX (Critical #2, see
+   * `txnDelegationStore`'s own doc comment): a txn IS active (`this.txnActive`/`this.txnStagingFacts`
+   * set) but THIS call did not arrive via that txn's own `tx.assertFact` — i.e. this call's
+   * `AsyncLocalStorage` store either carries no token at all (an ordinary direct call, not wrapped in
+   * any `txnDelegationStore.run(...)`) or carries a token that does not `===`-match `this.txnToken`
+   * (a stale/unrelated txn's own token) — i.e. an unrelated, direct caller invoked `assertFact` while
+   * some OTHER txn() call happens to be in-flight on this same instance. Never silently absorb this
+   * write into that unrelated transaction's staging array (where it would be discarded forever if that
+   * transaction later aborts, with no error distinguishing this from an ordinary successful write):
+   * refuse it outright with a typed error before `mintFact` is even called (so this rejected attempt
+   * never burns a seq/hlc tick either). Unlike the round-2 boolean this replaces, this check is immune
+   * to the microtask-tick timing race a fresh round of critics reproduced against the old flag: an
+   * `AsyncLocalStorage` context is scoped to the actual causal call chain, never to wall-clock/
+   * microtask ordering, so it cannot be "still true" for an unrelated call racing in the same tick.
    */
   async assertFact(input: AssertInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
+    const isThisActiveTxnsOwnDelegatedCall =
+      this.txnToken !== undefined && this.txnDelegationStore.getStore() === this.txnToken;
+    if (this.txnActive && !isThisActiveTxnsOwnDelegatedCall) {
+      throw new KipError(
+        "ERR_TXN_ALREADY_ACTIVE",
+        "assertFact: a direct call was attempted while a txn() call is active elsewhere on this repo " +
+          "instance — silently absorbing an unrelated caller's write into someone else's in-flight " +
+          "transaction (and silently discarding it if that transaction later aborts) is never " +
+          "acceptable (fallbacks are evil); wait for the active txn() to settle (commit or abort), or " +
+          "perform this write via that txn's own tx.assertFact() call instead.",
+        {},
+      );
+    }
     const fact = this.mintFact(input);
+    if (this.txnStagingFacts) {
+      const verdict = this.computeIngestVerdict(fact);
+      if (!verdict.admitted) {
+        throw new KipError(
+          verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+          `assertFact: self-authored fact was rejected while staging inside an active txn() (${verdict.reason})`,
+          { factId: fact.id },
+        );
+      }
+      this.txnStagingFacts.push(fact);
+      return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
+    }
     const verdict = await this.ingest(fact);
     if (!verdict.admitted) {
       throw new KipError(
@@ -1581,11 +2295,38 @@ export class KipRepo implements Repo {
     return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
   }
 
-  /** A bounded-validTo assert (§4.1) — same mint-then-ingest path as `assertFact`. */
+  /** A bounded-validTo assert (§4.1) — same mint-then-(stage-or-ingest) path as `assertFact`; see
+   *  that method's own doc comment for the D-36 txn-staging behavior AND the (round-5, token-based)
+   *  direct-call-during-an-unrelated-active-txn guard, both mirrored here. */
   async retractFact(
     input: RetractInput,
   ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
+    const isThisActiveTxnsOwnDelegatedCall =
+      this.txnToken !== undefined && this.txnDelegationStore.getStore() === this.txnToken;
+    if (this.txnActive && !isThisActiveTxnsOwnDelegatedCall) {
+      throw new KipError(
+        "ERR_TXN_ALREADY_ACTIVE",
+        "retractFact: a direct call was attempted while a txn() call is active elsewhere on this repo " +
+          "instance — silently absorbing an unrelated caller's write into someone else's in-flight " +
+          "transaction (and silently discarding it if that transaction later aborts) is never " +
+          "acceptable (fallbacks are evil); wait for the active txn() to settle (commit or abort), or " +
+          "perform this write via that txn's own tx.retractFact() call instead.",
+        {},
+      );
+    }
     const fact = this.mintFact(input);
+    if (this.txnStagingFacts) {
+      const verdict = this.computeIngestVerdict(fact);
+      if (!verdict.admitted) {
+        throw new KipError(
+          verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+          `retractFact: self-authored fact was rejected while staging inside an active txn() (${verdict.reason})`,
+          { factId: fact.id },
+        );
+      }
+      this.txnStagingFacts.push(fact);
+      return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
+    }
     const verdict = await this.ingest(fact);
     if (!verdict.admitted) {
       throw new KipError(
@@ -1603,6 +2344,16 @@ export class KipRepo implements Repo {
    * own real Ed25519 key, and derive `id` as the REAL git-blob CID of that canonical payload
    * (T1.1/T1.4) — so self-authored facts always satisfy well-formed()'s item-4 self-consistency
    * check via genuine hash equality, never the ingest-gate's unregistered-key fallback.
+   *
+   * ROUND-2 CRITIC FIX (finding 2): while staging inside an active `txn()` call (`this.txnActive` AND
+   * `txn()` has set up this call's own shadow clone), the `seq`/`hlc` advance is computed against
+   * `this.txnShadowSequencer`/`this.txnShadowHlc` — NEVER `this.chainSequencer`/`this.localHlc`
+   * directly, and `SeqTipStore` is NOT persisted here — so a fact minted-then-discarded (an aborted
+   * txn, or any later commit-write failure) never permanently burns a `seq` number. The shadow is
+   * folded into the real fields (and durably persisted, once) only once `txn()`'s whole commit-write
+   * phase genuinely succeeds — see `txn()`'s own doc comment. Outside any active txn (the ordinary,
+   * unchanged case), this mints against the real `chainSequencer`/`localHlc` and persists
+   * `SeqTipStore` immediately, exactly as before this fix.
    */
   private mintFact(input: AssertInput | RetractInput): Fact {
     // Provision (and, on a re-opened dir, restore the persisted seq-tips into) the substrate
@@ -1611,10 +2362,21 @@ export class KipRepo implements Repo {
     const substrate = this.getSubstrate();
     const keyPair = this.getOwnKeyPair();
     const replicaId = input.replicaId ?? this.replicaId;
-    this.localHlc = hlcTick(this.localHlc, replicaId);
     const chainId = chainIdFor(replicaId, keyPair.fingerprint);
-    const seq = this.chainSequencer.next(chainId);
-    new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+
+    let hlc: HlcStamp;
+    let seq: number;
+    if (this.txnActive && this.txnShadowSequencer) {
+      this.txnShadowHlc = hlcTick(this.txnShadowHlc, replicaId);
+      hlc = this.txnShadowHlc;
+      seq = this.txnShadowSequencer.next(chainId);
+      // Deliberately NOT persisted to `SeqTipStore` here — see this method's own doc comment above.
+    } else {
+      this.localHlc = hlcTick(this.localHlc, replicaId);
+      hlc = this.localHlc;
+      seq = this.chainSequencer.next(chainId);
+      new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+    }
 
     const draft: Omit<Fact, "id"> = {
       v: input.v,
@@ -1623,7 +2385,7 @@ export class KipRepo implements Repo {
       value: input.value,
       validFrom: input.validFrom,
       validTo: input.validTo,
-      hlc: this.localHlc,
+      hlc,
       seq,
       causedBy: input.causedBy,
       replicaId,
@@ -1657,6 +2419,29 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * D-36: the well-formed+signature-verification PAIR `ingest()` itself runs (below), extracted so
+   * `assertFact`/`retractFact` can run the IDENTICAL predicate at txn-staging time (before a fact is
+   * pushed onto an active `txn()` call's own staging array) as `ingest()` runs at actual commit time
+   * — one shared definition, never two independently-maintained copies of "is this fact admissible"
+   * that could silently drift apart. Pure (no write, no state mutation) — see `ingest()`'s own doc
+   * comment for why this pair alone is the sole membership predicate (ADR-001).
+   */
+  private computeIngestVerdict(f: Fact): { admitted: boolean; reason?: "malformed" | "signature-invalid" } {
+    // This round's finding #2: the length-bound half of well-formed()'s id-shape check must be
+    // derived from THIS repo's actual configured hashAlgo, not a hardcoded SHA-1 constant — else a
+    // sha256 repo rejects its own well-formed, correctly-self-minted facts (see well-formed.ts).
+    const wellFormed = checkWellFormed(f, this.hashAlgo);
+    if (!wellFormed.ok) {
+      return { admitted: false, reason: wellFormed.reason };
+    }
+    const canonicalPayload = canonicalPayloadString(f);
+    if (!this.verifySignature(f, canonicalPayload)) {
+      return { admitted: false, reason: "signature-invalid" };
+    }
+    return { admitted: true };
+  }
+
+  /**
    * T1.3: the signature-only ingest gate — the sole membership predicate (ADR-001). A PURE
    * function of `f`'s own bytes (INV-6a): well-formed() first (reject-malformed on ANY m7-6
    * checklist failure), THEN signature verification (reject signature-invalid) — nothing else is
@@ -1666,17 +2451,9 @@ export class KipRepo implements Repo {
    * byte-identical input on every call/replica either way, since it recomputes rather than caches.
    */
   async ingest(f: Fact): Promise<{ admitted: boolean; reason?: "malformed" | "signature-invalid" }> {
-    // This round's finding #2: the length-bound half of well-formed()'s id-shape check must be
-    // derived from THIS repo's actual configured hashAlgo, not a hardcoded SHA-1 constant — else a
-    // sha256 repo rejects its own well-formed, correctly-self-minted facts (see well-formed.ts).
-    const wellFormed = checkWellFormed(f, this.hashAlgo);
-    if (!wellFormed.ok) {
-      return { admitted: false, reason: wellFormed.reason };
-    }
-
-    const canonicalPayload = canonicalPayloadString(f);
-    if (!this.verifySignature(f, canonicalPayload)) {
-      return { admitted: false, reason: "signature-invalid" };
+    const verdict = this.computeIngestVerdict(f);
+    if (!verdict.admitted) {
+      return verdict;
     }
 
     // ADMIT: write the fact's content-addressed git-blob object (INV-7's CID dedup happens inside
@@ -1689,6 +2466,23 @@ export class KipRepo implements Repo {
 
     // Advance local HLC past f.hlc (receive-advance, docs/22 §2.1 step 3) — audit-only, never
     // touches this fact's own seq chain (m7-1), never affects the returned verdict.
+    //
+    // ROUND-3 CRITIC FIX (code-quality, minor finding 2 — DOCUMENTED, INTENTIONAL exception): this
+    // mutates the REAL `this.localHlc` directly even when called from INSIDE `txn()`'s own post-
+    // commit durable-ingest loop (`txnActive` true), never the per-txn shadow `txnShadowHlc` `mintFact`
+    // routes through in that same situation (see `mintFact`'s own doc comment/branch). So a txn that
+    // fails LATER in that same ingest loop (or at the final `tipStore.save`) and rolls back its staged
+    // facts still leaves `this.localHlc` advanced past whatever it observed before erasing them. This
+    // is deliberately NOT routed through the shadow, for two reasons: (1) `rxFromByOid`'s stamp
+    // (below) is defined as "this replica's local HLC AT FIRST VERIFIED INGEST" — genuinely observing
+    // the real receive-order the moment a fact's bytes are examined, not a value that could later be
+    // discarded if the surrounding txn aborts; and (2) unlike `seq` (a chain-position counter that
+    // must be exactly reversible — burning a seq number on an aborted txn would open a real, permanent
+    // gap `resolvePin`'s completeness check depends on), an HLC only ever needs to move monotonically
+    // forward (docs/22 §2.1) — it never needs to be exactly reversible, so a receive-tick that ends up
+    // "wasted" on an ultimately-rolled-back fact is harmless: it can only ever advance `localHlc`
+    // further ahead of where it would otherwise be, never behind, and every subsequent real mint's own
+    // `hlcTick` remains correct (still strictly greater than this now-slightly-further-advanced value).
     this.localHlc = hlcReceiveTick(this.localHlc, f.hlc, this.replicaId);
 
     // M2/T3.2 addition: stamp `FactAnnotation.rxFrom` = this replica's local HLC AT FIRST verified
@@ -2283,8 +3077,8 @@ export class KipRepo implements Repo {
       );
     }
 
-    const CONTENT_FACT_TYPES: ReadonlySet<FactType> = new Set(["assert", "retract", "supersede", "re-attest"]);
-
+    // D-36: `CONTENT_FACT_TYPES` is now a module-level constant (was local to this method) shared
+    // with `KipRepo.txn()`'s own real commit-write path — see that constant's own doc comment.
     const allFacts = this.currentFacts();
     if (allFacts.length === 0) {
       throw new KipError("ERR_MALFORMED_INPUT", "regenerateHeads: no admitted facts to regenerate a commit from", {});
@@ -2343,31 +3137,14 @@ export class KipRepo implements Repo {
       }
     }
 
-    const SENTINEL_NAME = "kip-regen";
-    const SENTINEL_EMAIL = "kip-regen@localhost";
+    // D-36: `SENTINEL_NAME`/`SENTINEL_EMAIL` are now the module-level `KIP_COMMIT_SENTINEL_NAME`/
+    // `KIP_COMMIT_SENTINEL_EMAIL` constants (identical values, "kip-regen"/"kip-regen@localhost") —
+    // shared with `writeFactsTreeAndCommit` (below), which `KipRepo.txn()`'s own real commit-write
+    // path also calls, so both write paths stamp the SAME fixed sentinel identity via ONE definition.
 
     const scratchDir = fs.mkdtempSync(path.join(os.tmpdir(), "kip-regen-"));
     try {
       const gitdir = path.join(scratchDir, ".git");
-
-      // Blob oids are cheap, content-addressed, and idempotent to (re)derive — writing them again
-      // for facts that belong to an already-reused batch is NOT the expensive operation NFR-F5
-      // cares about (re-writing COMMIT objects is); every rebuilt batch's CUMULATIVE tree needs
-      // every earlier fact's blob oid regardless, so they are derived once, up front, for the
-      // whole global sorted content-fact list.
-      const blobOids: string[] = [];
-      for (let i = 0; i < sorted.length; i += 1) {
-        const canonicalContent = JSON.stringify(deepSortKeys(sorted[i]));
-        // eslint-disable-next-line no-await-in-loop -- each blob write is independent but tiny;
-        // sequential is simplest and this is test-support code, not a hot path.
-        const blobOid = await isomorphicGit.writeBlob({
-          fs,
-          dir: scratchDir,
-          gitdir,
-          blob: Buffer.from(canonicalContent, "utf8"),
-        });
-        blobOids.push(blobOid);
-      }
 
       const commits: RegeneratedDagCommit[] = cache ? cache.commits.slice(0, reuseCount) : [];
       let cumulativeCount = 0;
@@ -2375,28 +3152,6 @@ export class KipRepo implements Repo {
 
       for (let b = reuseCount; b < batches.length; b += 1) {
         const batch = batches[b];
-        const entries: Array<{ mode: "100644"; path: string; oid: string; type: "blob" }> = [];
-        for (let i = 0; i < cumulativeCount + batch.length; i += 1) {
-          // Round 3 / D-27 FIX 1: named by the fact's OWN content-derived blob oid, never by its
-          // ordinal position among the WHOLE content-fact set — see this method's own doc comment
-          // ("BLOB-PATH NAMING", below) for the byte-divergence bug this closes (a fact's tree-entry
-          // path used to shift when the total content-fact count crossed a zero-pad width boundary,
-          // e.g. 9→10 facts flipping `f9.json` to `f09.json`, even though NOTHING about that fact
-          // itself changed).
-          entries.push({ mode: "100644", path: `f-${blobOids[i]}.json`, oid: blobOids[i], type: "blob" });
-        }
-        // eslint-disable-next-line no-await-in-loop -- each batch's commit depends on the PRIOR
-        // batch's commit oid (real parent chaining), so batches must be built sequentially.
-        const treeOid = await isomorphicGit.writeTree({ fs, dir: scratchDir, gitdir, tree: entries });
-
-        const batchMaxWall = batch.reduce((max, f) => Math.max(max, f.hlc.wall), batch[0].hlc.wall);
-        const timestampSeconds = Math.floor(batchMaxWall / 1000);
-        const sentinelAuthor = {
-          name: SENTINEL_NAME,
-          email: SENTINEL_EMAIL,
-          timestamp: timestampSeconds,
-          timezoneOffset: 0,
-        };
         const parentOid = commits.length > 0 ? commits[commits.length - 1].commitOid : null;
         // Round 3 / D-27 FIX 1 (part 2): the message deliberately does NOT include `batches.length`
         // (the GRAND TOTAL batch count) — round 2's `batch ${b+1}/${batches.length}` phrasing baked
@@ -2413,24 +3168,22 @@ export class KipRepo implements Repo {
         const message = `kip regenerate: batch ${b + 1} (${batch.length} fact(s), ${
           cumulativeCount + batch.length
         } cumulative)\n`;
+        // D-36: every rebuilt batch's own CUMULATIVE tree needs every earlier fact's blob too (a
+        // fresh, per-call, content-addressed idempotent (re)derivation via `writeFactsTreeAndCommit`
+        // below — see that method's own doc comment; blob oids are cheap and idempotent to
+        // re-derive, INV-7, so this is never the expensive operation NFR-F5's own reuse cache above
+        // actually guards against, which is re-writing COMMIT objects for an unchanged batch).
+        const facts = sorted.slice(0, cumulativeCount + batch.length);
 
-        // eslint-disable-next-line no-await-in-loop -- sequential parent chaining, see above.
-        const commitOid = await isomorphicGit.writeCommit({
-          fs,
+        // eslint-disable-next-line no-await-in-loop -- each batch's commit depends on the PRIOR
+        // batch's commit oid (real parent chaining), so batches must be built sequentially.
+        const { commitOid, commitBytes } = await this.writeFactsTreeAndCommit({
           dir: scratchDir,
           gitdir,
-          commit: {
-            tree: treeOid,
-            parent: parentOid ? [parentOid] : [],
-            author: sentinelAuthor,
-            committer: sentinelAuthor,
-            message,
-          },
+          facts,
+          parentOid,
+          message,
         });
-
-        // eslint-disable-next-line no-await-in-loop -- sequential parent chaining, see above.
-        const raw = await isomorphicGit.readObject({ fs, dir: scratchDir, gitdir, oid: commitOid, format: "wrapped" });
-        const commitBytes = new Uint8Array(raw.object as Uint8Array);
 
         // FIX 4: `author`/`committer`/`encoding`/`signed` are DERIVED by parsing the actual rendered
         // commit bytes — never re-echoed hardcoded constants.
@@ -2439,8 +3192,8 @@ export class KipRepo implements Repo {
         commits.push({
           commitOid,
           commitBytes,
-          author: { name: SENTINEL_NAME, email: SENTINEL_EMAIL, ...parsed.author },
-          committer: { name: SENTINEL_NAME, email: SENTINEL_EMAIL, ...parsed.committer },
+          author: { name: KIP_COMMIT_SENTINEL_NAME, email: KIP_COMMIT_SENTINEL_EMAIL, ...parsed.author },
+          committer: { name: KIP_COMMIT_SENTINEL_NAME, email: KIP_COMMIT_SENTINEL_EMAIL, ...parsed.committer },
           message,
           encoding: parsed.encoding,
           signed: parsed.signed,
@@ -3995,32 +4748,20 @@ export class KipRepo implements Repo {
     const committedFactIds: FactId[] = [];
 
     if (status === "accept") {
-      // ROUND-3 FIX (CRITICAL #2, part b — mid-batch partial-commit hazard): this loop commits
-      // `state.candidate` ONE ITEM AT A TIME, un-transacted. `Repo.txn`/`Tx` (docs/40) is the
-      // declared batching primitive for "many facts, one commit" — but `txn()` is still an
-      // unimplemented throwing stub in THIS build (`TODO(M0/T1.5)`, see this class's own `txn`
-      // method above), so wrapping this sequence in a real transaction is not available without
-      // inventing new batching infrastructure this round is not scoped to build (and the repo's
-      // hard rule against fallbacks cuts against papering over that gap with an ad hoc pseudo-txn).
-      // `executeSegment` (M5, frozen) faces the SAME "multiple facts, no real txn" shape and makes
-      // the SAME choice: commit one at a time, `break` on the first unrecoverable condition.
-      //
-      // ROUND-4 FIX (closes the bug class): round-3's fix here was PREVENTIVE only — strengthening
-      // `isAssertInputArray` so nothing lacking a present `provenance`/`validFrom`/`validTo`/
-      // `replicaId` could ever reach `state.candidate` — but explicitly left open (its own comment
-      // said so) "a target naming a node/edge kind this repo's `checkWellFormed`/`well-formed.ts`
-      // rejects for some OTHER, deeper reason ... could still reject a later item after earlier items
-      // already committed." This round's part (a) (`isAssertInputArray`'s new `isWellFormedTarget`
-      // call, above) now closes every KNOWN such vector (`target: null/undefined`, an unrecognized
-      // `target.kind`) at the SAME earlier gate. Part (b), here, is the DEFENSE-IN-DEPTH backstop for
-      // any UNFORESEEN reason `ensureExistenceFor`/`assertFact` might still reject/throw after one or
-      // more earlier items in `state.candidate` already committed durably: the whole per-item loop
-      // (existence facts + accepted facts) AND the final `kip:learn` audit-fact mint are wrapped in
-      // one `try`, so ANY failure among them is caught below — never left to escape this `learn()`
-      // call as a silent, unaudited partial write (N5). This still does not make the per-item commit
-      // sequence atomic (a real `Repo.txn()` would); it guarantees the OUTCOME is never silent: on
-      // catch, a `kip:learn-exhausted` marker naming the failure + every already-committed fact id is
-      // durably authored before a typed `KipError` is thrown to the caller.
+      // D-36 CLOSURE: this whole accept-commit sequence (existence facts + accepted `AssertInput[]`
+      // + the final `kip:learn` audit fact) now runs inside ONE real `this.txn()` call — `Repo.txn`/
+      // `Tx` (docs/40) is the declared batching primitive for "many facts, one commit", and it is no
+      // longer an unimplemented stub (see `KipRepo.txn()`'s own doc comment). Every write below goes
+      // through `tx.assertFact` (a thin delegation to `this.assertFact`, so a subclass override of
+      // the public `assertFact` — e.g. this suite's own fault-injecting test repos — still observes
+      // every one of these calls, exactly as before) rather than `this.assertFact` directly, so
+      // nothing here becomes durable until `txn()`'s own callback resolves and the WHOLE batch
+      // commits together. A throw ANYWHERE inside the callback (an unforeseen `ensureExistenceFor`/
+      // `assertFact` rejection — the "some OTHER, deeper reason" this round's own doc comment on
+      // `ERR_LEARN_COMMIT_FAILED` names) discards the ENTIRE staged batch — `txn()`'s own abort
+      // semantics guarantee ZERO facts from this batch are ever durably admitted, not merely that
+      // failed final marker naming a partial commit that no longer exists (the OLD un-transacted
+      // per-item loop's own behavior, replaced here).
       //
       // T7.4.1: the accepted AssertInput[] are committed as ORDINARY signed facts — via the SAME
       // assertFact() path every other write in this module uses — so they fold through the SAME M1
@@ -4037,77 +4778,44 @@ export class KipRepo implements Repo {
       // rule `putNode`/`putEdge` sugar is documented to compile to (FR-A6: "compile to assert
       // node-existence + prop facts"). encode/learner candidate facts are ordinary `AssertInput[]`
       // that may name only the prop(s) they care about — the orchestrator ensures the referenced
-      // node/edge is recorded as existing exactly once per accept, never fabricating any PROPERTY
-      // VALUE the microagent didn't itself decide (only the bare "this eid exists" bookkeeping fact
-      // ordinary graph mechanics already require).
+      // node/edge is recorded as existing exactly once per accept (deduped WITHIN this one batch via
+      // `ensureExistenceFor`'s own `stagedExistenceEids` set, D-36 test (4)), never fabricating any
+      // PROPERTY VALUE the microagent didn't itself decide.
       try {
-        for (const candidateInput of state.candidate) {
-          // eslint-disable-next-line no-await-in-loop -- existence must be established before (or
-          // alongside) its dependent prop fact is meaningful to read back; sequential by construction.
-          const existenceFactId = await this.ensureExistenceFor(candidateInput.target);
-          if (existenceFactId) committedFactIds.push(existenceFactId);
-          // eslint-disable-next-line no-await-in-loop -- each accepted fact's commit is independent
-          // but must be sequential to advance this replica's own HLC/seq chain deterministically.
-          const minted = await this.assertFact({
-            ...candidateInput,
-            replicaId: this.replicaId,
-            provenance: {
-              author: "kip-orchestrator:learn",
-              signature: "",
-              publicKeyFingerprint: "",
-              signedFields: [],
-              source: candidateInput.provenance.source,
-              confidence: candidateInput.provenance.confidence,
-            },
-          });
-          committedFactIds.push(minted.id);
-        }
+        const { result: batchFactIds } = await this.txn(async (tx) => {
+          const ids: FactId[] = [];
+          const stagedExistenceEids = new Set<EID>();
+          for (const candidateInput of state.candidate) {
+            // eslint-disable-next-line no-await-in-loop -- existence must be established before (or
+            // alongside) its dependent prop fact is meaningful to read back; sequential by construction.
+            const existenceFactId = await this.ensureExistenceFor(candidateInput.target, tx, stagedExistenceEids);
+            if (existenceFactId) ids.push(existenceFactId);
+            // eslint-disable-next-line no-await-in-loop -- each staged fact's mint is independent but
+            // must be sequential to advance this replica's own HLC/seq chain deterministically.
+            const minted = await tx.assertFact({
+              ...candidateInput,
+              replicaId: this.replicaId,
+              provenance: {
+                author: "kip-orchestrator:learn",
+                signature: "",
+                publicKeyFingerprint: "",
+                signedFields: [],
+                source: candidateInput.provenance.source,
+                confidence: candidateInput.provenance.confidence,
+              },
+            });
+            ids.push(minted.id);
+          }
 
-        // T7.4.1: ONE signed kip:learn audit fact, naming its inputs (rawRef + the selected
-        // (name,version)s + ontologyAsOf) and the achieved loss + accepted AssertInput[] — a
-        // `schema`-kind target (mirroring microagent-registration's own convention), which
-        // `proj.ts`'s `cellKeyFor` already excludes from cell-folding/orderKey/every reducer (FR-J4:
-        // loss is audit-only, exactly like `rxFrom`).
-        const learnRecord = await this.assertFact({
-          type: "assert",
-          v: 1,
-          target: { kind: "schema", ontologyRef: this.ontologyRefForLearn("kip:learn", rawRef, ontologyAsOf, opts) },
-          value: JSON.stringify({
-            rawRef,
-            ontologyAsOf,
-            encode: opts.encode,
-            decode: opts.decode,
-            learner: opts.learner,
-            loss: opts.loss,
-            achievedLoss: state.bestLoss,
-            accepted: state.candidate,
-          }),
-          validFrom: 0,
-          validTo: null,
-          replicaId: this.replicaId,
-          provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
-        });
-        committedFactIds.push(learnRecord.id);
-      } catch (commitErr) {
-        // ROUND-4 FIX (part b, defense-in-depth): ANY failure above — after zero or more earlier
-        // items already committed durably (named in `committedFactIds`) — lands here rather than
-        // escaping `learn()` as a raw, silent exception. Never a silent fallback (CLAUDE.md): author
-        // a REAL, auditable `kip:learn-exhausted` marker naming the failure reason + every
-        // already-committed fact id, THEN re-throw a typed `KipError` so the caller can never mistake
-        // this for an ordinary `"accept"` — the marker is durably recorded BEFORE the throw, so this
-        // outcome is never unaudited even though the promise itself rejects (N5).
-        const failureReason = commitErr instanceof Error ? commitErr.message : String(commitErr);
-        const partiallyCommittedFactIds = [...committedFactIds];
-        let markerFactId: FactId | undefined;
-        let markerFailureReason: string | undefined;
-        try {
-          const exhaustedRecord = await this.assertFact({
+          // T7.4.1: ONE signed kip:learn audit fact, naming its inputs (rawRef + the selected
+          // (name,version)s + ontologyAsOf) and the achieved loss + accepted AssertInput[] — a
+          // `schema`-kind target (mirroring microagent-registration's own convention), which
+          // `proj.ts`'s `cellKeyFor` already excludes from cell-folding/orderKey/every reducer
+          // (FR-J4: loss is audit-only, exactly like `rxFrom`).
+          const learnRecord = await tx.assertFact({
             type: "assert",
             v: 1,
-            target: {
-              kind: "schema",
-              ontologyRef: this.ontologyRefForLearn("kip:learn-exhausted", rawRef, ontologyAsOf, opts),
-            },
+            target: { kind: "schema", ontologyRef: this.ontologyRefForLearn("kip:learn", rawRef, ontologyAsOf, opts) },
             value: JSON.stringify({
               rawRef,
               ontologyAsOf,
@@ -4115,57 +4823,106 @@ export class KipRepo implements Repo {
               decode: opts.decode,
               learner: opts.learner,
               loss: opts.loss,
-              bestLossSeen: Number.isFinite(state.bestLoss) ? state.bestLoss : null,
-              partialCommitFailure: { reason: failureReason, partiallyCommittedFactIds },
+              achievedLoss: state.bestLoss,
+              accepted: state.candidate,
             }),
             validFrom: 0,
             validTo: null,
             replicaId: this.replicaId,
             provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
           });
-          markerFactId = exhaustedRecord.id;
+          ids.push(learnRecord.id);
+          return ids;
+        });
+        committedFactIds.push(...batchFactIds);
+      } catch (commitErr) {
+        // ROUND-2 CRITIC FIX (finding 4): a second, CONCURRENT `learn()` call racing this one's own
+        // `this.txn(...)` above rejects with `ERR_TXN_ALREADY_ACTIVE` (this replica supports only one
+        // active txn() at a time) — that is NOT an "unforeseen accept-commit failure" in the sense
+        // this catch block otherwise handles, and authoring a `kip:learn-exhausted` marker for it
+        // would be spurious (this `learn()` call's own batch was never even attempted, so there is
+        // nothing genuinely "exhausted" to audit). Rethrow it as-is, undecorated, rather than folding
+        // it into `ERR_LEARN_COMMIT_FAILED` plus a misleading marker.
+        if (commitErr instanceof KipError && commitErr.code === "ERR_TXN_ALREADY_ACTIVE") {
+          throw commitErr;
+        }
+        // D-36 CLOSURE (part b, defense-in-depth), ROUND-2 CRITIC FIX (finding 1): ANY OTHER failure
+        // of the `this.txn(...)` call above — whether thrown from inside its own `fn` callback, or
+        // from `txn()`'s own post-callback commit-write-and-ingest phase (finding 1's fix gives that
+        // phase the SAME one-shared-failure-domain guarantee: it EITHER durably commits every staged
+        // fact together, or leaves the fact set byte-identical to before the call) — means NOTHING
+        // from this accept attempt is durably admitted; there is no partial commit to name. Lands here
+        // rather than escaping `learn()` as a raw, silent exception. Never a silent fallback
+        // (CLAUDE.md): author a REAL, auditable `kip:learn-exhausted` marker naming the failure
+        // reason, THEN re-throw a typed `KipError` so the caller can never mistake this for an
+        // ordinary `"accept"` — the marker is durably recorded BEFORE the throw, so this outcome is
+        // never unaudited even though the promise itself rejects (N5).
+        //
+        // ROUND-3 CRITIC FIX (convergence-safety, major finding 2): authored via
+        // `authorLearnExhaustedMarker` — its OWN FRESH `this.txn(...)` call (never a bare, non-txn
+        // `assertFact`) — so this marker gets a REAL git commit of its own and is immediately visible
+        // in the commit-DAG `CommitTipStore` tracks, mirroring the no-accept branch below (both call
+        // sites now share the identical recipe so they cannot drift apart again). Safe to open a
+        // fresh txn here: `txn()`'s own `resetTxnState()` (now unconditionally run via `finally`, per
+        // this round's major finding 1 fix) has already reset `txnActive` to `false` by the time this
+        // catch block runs, regardless of how the txn above failed.
+        const failureReason = commitErr instanceof Error ? commitErr.message : String(commitErr);
+        // Structurally ALWAYS empty: `txn()`'s all-or-nothing commit (now genuinely, fully atomic per
+        // finding 1's fix — no window between "some facts ingested" and "commit durably written")
+        // means there is no partial commit left to name — kept (rather than dropped outright) only so
+        // this error's `context` shape stays stable for any caller/test still reading
+        // `partiallyCommittedFactIds`.
+        const partiallyCommittedFactIds: FactId[] = [];
+        let markerFactId: FactId | undefined;
+        let markerFailureReason: string | undefined;
+        try {
+          markerFactId = await this.authorLearnExhaustedMarker({
+            rawRef,
+            ontologyAsOf,
+            opts,
+            bestLoss: state.bestLoss,
+            commitFailureReason: failureReason,
+          });
         } catch (markerErr) {
           // Even authoring the audit marker itself failed — still never silent: this failure is
-          // folded into the typed error thrown below, naming BOTH failures + the partially-committed
-          // fact ids, so a caller can audit/tombstone them out of band.
+          // folded into the typed error thrown below, naming BOTH failures, so a caller can audit
+          // out of band.
           markerFailureReason = markerErr instanceof Error ? markerErr.message : String(markerErr);
         }
         throw new KipError(
           "ERR_LEARN_COMMIT_FAILED",
-          `learn: accept-commit failed after ${partiallyCommittedFactIds.length} fact(s) already ` +
-            `durably committed (${failureReason}). ` +
+          `learn: accept-commit failed (${failureReason}); the whole batch was rolled back atomically ` +
+            "by txn() — zero facts from this accept attempt are durably admitted. " +
             (markerFactId !== undefined
-              ? `A kip:learn-exhausted marker (fact ${markerFactId}) recording this failure and the ` +
-                "partially-committed fact ids has been durably authored, so this run is never " +
-                "silent/unaudited (N5)."
+              ? `A kip:learn-exhausted marker (fact ${markerFactId}) recording this failure has been ` +
+                "durably authored, so this run is never silent/unaudited (N5)."
               : "Additionally, authoring the kip:learn-exhausted audit marker itself failed " +
-                `(${markerFailureReason}) — the partially-committed fact ids are named in this ` +
-                "error's context so the caller can still audit/tombstone them out of band."),
+                `(${markerFailureReason}).`),
           { partiallyCommittedFactIds, reason: failureReason, markerFactId, markerFailureReason },
         );
       }
     } else {
       // T7.4.2: NO accept fact — ONE signed kip:learn-exhausted marker, naming the same inputs + the
       // best loss actually seen. Cells stay Unknown (nothing was ever asserted to the graph).
-      const exhaustedRecord = await this.assertFact({
-        type: "assert",
-        v: 1,
-        target: { kind: "schema", ontologyRef: this.ontologyRefForLearn("kip:learn-exhausted", rawRef, ontologyAsOf, opts) },
-        value: JSON.stringify({
-          rawRef,
-          ontologyAsOf,
-          encode: opts.encode,
-          decode: opts.decode,
-          learner: opts.learner,
-          loss: opts.loss,
-          bestLossSeen: Number.isFinite(state.bestLoss) ? state.bestLoss : null,
-        }),
-        validFrom: 0,
-        validTo: null,
-        replicaId: this.replicaId,
-        provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
+      //
+      // MINOR FIX (convergence-safety, minor finding 2): authored via `authorLearnExhaustedMarker` —
+      // its OWN, fresh `this.txn(...)` call (never a bare `this.assertFact(...)` outside any txn) —
+      // so this marker gets a REAL git commit of its own — otherwise it would durably admit to the
+      // substrate object store but never appear in the commit-DAG `CommitTipStore`/
+      // `regenerateHeads()` track, until swept in by some LATER `txn()` call (see `txn()`'s own doc
+      // comment, "scope boundary"). Safe to open a fresh txn here: `txnActive` is already `false` at
+      // this point (this `else` branch is only reached when the `"accept"` branch's own
+      // `this.txn(...)` above was never entered for this call). ROUND-3 CRITIC FIX (convergence-
+      // safety, major finding 2): now shares the IDENTICAL wrap-in-txn recipe with the accept-
+      // attempt-failure branch above (via `authorLearnExhaustedMarker`), so the two call sites can
+      // never drift apart again.
+      const exhaustedFactId = await this.authorLearnExhaustedMarker({
+        rawRef,
+        ontologyAsOf,
+        opts,
+        bestLoss: state.bestLoss,
       });
-      committedFactIds.push(exhaustedRecord.id);
+      committedFactIds.push(exhaustedFactId);
     }
 
     // ROUND-2 FIX (MINOR, documentation): `state.bestLoss` may legitimately still be
@@ -4176,6 +4933,58 @@ export class KipRepo implements Repo {
     // SAME `Number.isFinite(...) ? value : null` normalization the internal `kip:learn-exhausted`
     // fact payload above already applies before persisting.
     return { facts: committedFactIds, loss: state.bestLoss, status };
+  }
+
+  /**
+   * ROUND-3 CRITIC FIX (convergence-safety, major finding 2): the SINGLE recipe for durably
+   * authoring a `kip:learn-exhausted` marker, shared by BOTH `learn()` call sites that author this
+   * marker (the no-accept/exhausted-with-no-candidates branch, and the accept-attempt-FAILURE
+   * branch) so the two can never drift apart again. Round 2 wrapped only the first branch's marker
+   * in `this.txn(...)`; the second (arguably more important, since it fires on the actual
+   * failure/audit path) still authored via a bare, non-txn `this.assertFact(...)` call — durably
+   * admitting the fact to the substrate object store while leaving `CommitTipStore`'s tip
+   * byte-unchanged, invisible to the commit-DAG until a LATER `txn()`/`regenerateHeads()` swept it
+   * in. Both call sites now open their OWN fresh `this.txn(...)` here — safe in both cases, since
+   * `txnActive` is already `false` by the time either call site runs (the no-accept branch is only
+   * reached when the "accept" branch's own txn was never entered; the accept-FAILURE branch is only
+   * reached from inside that txn's own `catch`, by which point `txn()`'s `resetTxnState()` has
+   * already unconditionally run — see `txn()`'s own doc comment/fix).
+   */
+  private async authorLearnExhaustedMarker(params: {
+    rawRef: BlobRef;
+    ontologyAsOf: AsOf;
+    opts: LearnOptions;
+    bestLoss: number;
+    /** Present only for the accept-attempt-FAILURE call site; omitted for the plain no-accept one. */
+    commitFailureReason?: string;
+  }): Promise<FactId> {
+    const { rawRef, ontologyAsOf, opts, bestLoss, commitFailureReason } = params;
+    const { result: exhaustedFactId } = await this.txn(async (tx) => {
+      const exhaustedRecord = await tx.assertFact({
+        type: "assert",
+        v: 1,
+        target: {
+          kind: "schema",
+          ontologyRef: this.ontologyRefForLearn("kip:learn-exhausted", rawRef, ontologyAsOf, opts),
+        },
+        value: JSON.stringify({
+          rawRef,
+          ontologyAsOf,
+          encode: opts.encode,
+          decode: opts.decode,
+          learner: opts.learner,
+          loss: opts.loss,
+          bestLossSeen: Number.isFinite(bestLoss) ? bestLoss : null,
+          ...(commitFailureReason !== undefined ? { commitFailure: { reason: commitFailureReason } } : {}),
+        }),
+        validFrom: 0,
+        validTo: null,
+        replicaId: this.replicaId,
+        provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
+      });
+      return exhaustedRecord.id;
+    });
+    return exhaustedFactId;
   }
 
   /**
@@ -4238,20 +5047,34 @@ export class KipRepo implements Repo {
    * existence" that can never drift from `getNode`/`getEdge`'s own semantics, never re-checked
    * against a second, independently-maintained notion of existence.
    */
-  private async ensureExistenceFor(target: Target): Promise<FactId | undefined> {
+  private async ensureExistenceFor(
+    target: Target,
+    tx: Tx,
+    stagedExistenceEids: Set<EID>,
+  ): Promise<FactId | undefined> {
+    // D-36 FIX: `stagedExistenceEids` (scoped to ONE `learn()` call's own txn callback) covers a
+    // batch's earlier candidates that already STAGED (not yet durable) an existence fact for this
+    // SAME eid — `getNode`/`getEdge` only fold over durably-admitted facts, so without this set two
+    // accepted candidates targeting the same fresh eid within one batch would each independently
+    // observe "does not exist yet" and mint TWO existence facts instead of one (D-36 test (4)). Minted
+    // via `tx.assertFact` (not `this.assertFact` directly) so this stays inside the active txn's own
+    // staging array, never durable until the whole batch commits (see `txn()`'s own doc comment).
     let existsTarget: Target;
+    let eid: EID;
     let alreadyExists: boolean;
     if (target.kind === "node-prop") {
+      eid = target.eid;
       existsTarget = { kind: "node", eid: target.eid };
-      alreadyExists = (await this.getNode(target.eid)) !== null;
+      alreadyExists = stagedExistenceEids.has(eid) || (await this.getNode(target.eid)) !== null;
     } else if (target.kind === "edge-prop") {
+      eid = target.eid;
       existsTarget = { kind: "edge", eid: target.eid };
-      alreadyExists = (await this.getEdge(target.eid)) !== null;
+      alreadyExists = stagedExistenceEids.has(eid) || (await this.getEdge(target.eid)) !== null;
     } else {
       return undefined;
     }
     if (alreadyExists) return undefined;
-    const minted = await this.assertFact({
+    const minted = await tx.assertFact({
       type: "assert",
       v: 1,
       target: existsTarget,
@@ -4261,6 +5084,7 @@ export class KipRepo implements Repo {
       replicaId: this.replicaId,
       provenance: { author: "kip-orchestrator:learn", signature: "", publicKeyFingerprint: "", signedFields: [] },
     });
+    stagedExistenceEids.add(eid);
     return minted.id;
   }
 
@@ -4373,6 +5197,13 @@ function isAssertInputArray(value: unknown): value is AssertInput[] {
     (item) =>
       isPlainRecord(item) &&
       item.type === "assert" &&
+      // D-36 FIX: `AssertInput`'s schema-version field `v` (docs/21-data-model.md §5.1 / docs/10
+      // FR-A1: author-signed, IN the canonical signed payload) was never checked here before — a
+      // candidate missing/mistyping `v` sailed through this guard, got selected as `state.candidate`,
+      // and only failed LATER at `assertFact`'s own `checkWellFormed` (well-formed.ts), after earlier
+      // items in the SAME accepted batch may already have committed durably (the exact mid-batch
+      // partial-commit hazard D-36 names). Checked at the SAME earlier gate as `target`/`provenance`.
+      typeof item.v === "number" &&
       // ROUND-4 FIX (closes the bug class, not just one field): round-3's guard checked ONLY
       // `"target" in item` — true even when the VALUE is `null`/`undefined`, and equally true for a
       // `target` naming an unrecognized `.kind` (e.g. `{kind: "nonsense"}`). Both shapes previously

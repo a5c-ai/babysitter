@@ -28,7 +28,7 @@
  * for the regression tests covering the attacks this design closes (a grindable shard-prefix content
  * collision, and a shared eviction-witness file masking an unrelated fact's eviction, respectively).
  */
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { deflateSync, inflateSync } from "node:zlib";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -257,6 +257,69 @@ export class Substrate {
   }
 }
 
+/**
+ * D-36 ROUND-6 CRITIC FIX (CRITICAL, convergence-safety — tip-persistence crash-safety): writes a
+ * JSON side-file CRASH-SAFELY by first writing to a temp sibling file IN THE SAME DIRECTORY, then
+ * `fs.renameSync`-ing it over the real target path. A same-volume rename is atomic on both POSIX
+ * and NTFS, so a `fs.writeFileSync` that fails PARTWAY THROUGH (disk-full, a Windows EBUSY/EPERM
+ * file-lock — both already named as live risks elsewhere in this file's own doc comments) can NEVER
+ * leave a truncated/torn file at the real path: either the rename completes (the new content is now
+ * durably in place, atomically, all-at-once) or it doesn't (the OLD file — or no file, on a first
+ * write — is exactly what's still there). There is no observable in-between state, unlike the prior
+ * single unguarded `fs.writeFileSync(filePath, ...)` this replaces for `SeqTipStore`/`CommitTipStore`
+ * (below) — see `CorruptTipFileError`'s own doc comment for the read-side half of this fix. The temp
+ * file's name embeds the pid and a random suffix so concurrent writers (not a supported concurrency
+ * mode for a single substrate dir, see `KipRepo.txn()`'s own "Concurrency scope" doc comment, but
+ * cheap to make safe here regardless) never collide on the same temp path.
+ */
+function writeJsonAtomic(filePath: string, data: unknown): void {
+  const dir = path.dirname(filePath);
+  const tmpPath = path.join(dir, `.${path.basename(filePath)}.tmp-${process.pid}-${randomBytes(6).toString("hex")}`);
+  fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2));
+  fs.renameSync(tmpPath, filePath);
+}
+
+/**
+ * D-36 ROUND-6 CRITIC FIX (CRITICAL, convergence-safety — tip-persistence crash-safety): thrown by
+ * `SeqTipStore.load()`/`CommitTipStore.load()` when the tip file EXISTS on disk but its content
+ * fails to parse as JSON — a corrupt/torn file. Before this fix, both loaders did a bare
+ * `JSON.parse(fs.readFileSync(...))` with no guard at all: a parse failure threw a raw, unexplained
+ * `SyntaxError` straight out of `.load()`, and since `getSubstrate()` (index.ts) calls both loaders
+ * UNGUARDED during `KipRepo.open()`, that raw throw PERMANENTLY BRICKED every future `getSubstrate()`
+ * call (i.e. the entire repo) against that directory — with no indication to the caller of what was
+ * actually wrong or how to recover.
+ *
+ * `writeJsonAtomic` (above) now makes a torn write-in-progress file structurally impossible going
+ * forward (see its own doc comment), so a parse failure here means either (a) a pre-existing corrupt
+ * file from BEFORE this fix was deployed, or (b) genuine external/manual corruption of the file —
+ * either way this is surfaced LOUDLY with a distinct, typed `.code` and the file's own path, giving
+ * an operator a clear diagnosis, rather than either an opaque raw-`SyntaxError` crash (the pre-fix
+ * behavior) OR silently discarding the file's content and starting over as if it never existed (a
+ * fallback CLAUDE.md prohibits: that would let a real, durable seq/commit tip silently regress
+ * without any operator visibility, reopening exactly the seq-collision hazard this same round's
+ * OTHER fix — the `currentFacts()` cross-validation in `getSubstrate()`, index.ts — closes for the
+ * ordinary stale-but-parseable case).
+ */
+export class CorruptTipFileError extends Error {
+  readonly code = "ERR_CORRUPT_TIP_FILE" as const;
+  readonly filePath: string;
+
+  constructor(filePath: string, cause: unknown) {
+    super(
+      `Corrupt tip file at "${filePath}": failed to parse its contents as JSON. This file is now ` +
+        "written atomically (temp-file-then-rename), so a torn write-in-progress file should be " +
+        "structurally impossible going forward — this indicates either a pre-existing corrupt file " +
+        "from before that fix was deployed, or external/manual corruption of the file. Inspect or " +
+        `restore "${filePath}" before reopening this repo against this directory; this file caches ` +
+        "only a durable seq/commit tip — the underlying fact/commit data in this substrate's git " +
+        "object store is unaffected and not itself at risk.",
+      { cause },
+    );
+    this.name = "CorruptTipFileError";
+    this.filePath = filePath;
+  }
+}
+
 /** T1.2.5's "durable seq-tip persistence" — a small JSON side-file next to the object store. */
 export class SeqTipStore {
   private readonly filePath: string;
@@ -267,11 +330,16 @@ export class SeqTipStore {
 
   load(): Record<string, number> {
     if (!fs.existsSync(this.filePath)) return {};
-    return JSON.parse(fs.readFileSync(this.filePath, "utf8")) as Record<string, number>;
+    const raw = fs.readFileSync(this.filePath, "utf8");
+    try {
+      return JSON.parse(raw) as Record<string, number>;
+    } catch (err) {
+      throw new CorruptTipFileError(this.filePath, err);
+    }
   }
 
   save(snapshot: Record<string, number>): void {
-    fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
+    writeJsonAtomic(this.filePath, snapshot);
   }
 }
 
@@ -305,6 +373,38 @@ export class KeyRegistryStore {
 
   save(snapshot: Record<string, string>): void {
     fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
+  }
+}
+
+/**
+ * D-36: a small JSON side-file, next to the object store, that durably persists the real git commit
+ * oid `KipRepo.txn()` last wrote to THIS substrate's own `dir` (via its shared tree/commit-write
+ * recipe with `regenerateHeads()`, see index.ts's `writeFactsTreeAndCommit`) — mirrors `SeqTipStore`'s
+ * exact load/save shape above, just for a single scalar tip instead of a per-chain map. Without this,
+ * a `KipRepo` reopened against the SAME `dir` would have no way to learn what its own last `txn()`
+ * commit's oid was, and every subsequent `txn()` call would either re-parent onto `null` (a second,
+ * disconnected root) or require re-deriving the tip by re-walking `.git` — this store makes it a
+ * plain, durable O(1) read instead.
+ */
+export class CommitTipStore {
+  private readonly filePath: string;
+
+  constructor(dir: string) {
+    this.filePath = path.join(dir, "kip-commit-tip.json");
+  }
+
+  load(): { tip: string | null } {
+    if (!fs.existsSync(this.filePath)) return { tip: null };
+    const raw = fs.readFileSync(this.filePath, "utf8");
+    try {
+      return JSON.parse(raw) as { tip: string | null };
+    } catch (err) {
+      throw new CorruptTipFileError(this.filePath, err);
+    }
+  }
+
+  save(snapshot: { tip: string | null }): void {
+    writeJsonAtomic(this.filePath, snapshot);
   }
 }
 

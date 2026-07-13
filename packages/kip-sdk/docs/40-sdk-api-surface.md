@@ -347,7 +347,11 @@ type KipErrorCode =
   | "ERR_INVALID_WEIGHT"           // NaN/±Infinity weight or range/cmp comparand at registration (INV-A7)
   | "ERR_HASH_ALGO_MISMATCH"       // cross-algo convergence-group membership (m-6) — hard error
   | "ERR_MANIFEST_FORK"            // /manifest.json fails the genesis-CID check (m7-4) — hard error (fork)
-  | "ERR_NO_PROMISOR_PEER";        // eviction requested with no configured re-fetch source (m7-3)
+  | "ERR_NO_PROMISOR_PEER"         // eviction requested with no configured re-fetch source (m7-3)
+  | "ERR_TXN_ALREADY_ACTIVE"       // D-36: a txn() call was attempted (nested, or a direct assertFact/retractFact) while another txn() is already active on this repo instance
+  | "ERR_LEARN_COMMIT_FAILED"      // learn()'s accept-commit txn() failed for an unforeseen reason after passing every known validation gate; a kip:learn-exhausted marker naming the failure is authored before this throws (N5)
+  | "ERR_TXN_ROLLBACK_FAILED"      // txn()'s post-commit-failure rollback could not erase one or more newly-ingested oids (e.g. a locked/undeletable blob); names BOTH the original commit failure and the oid(s) that failed to erase
+  | "ERR_TXN_TIP_PERSIST_FAILED";  // round-5: txn()'s commit/facts/commit-tip already succeeded durably — only the FINAL seq/hlc tip-bookkeeping write (SeqTipStore.save) failed afterward; names context.commitOid (the commit that DID succeed), never implies nothing was committed
 ```
 
 **Per-method channels** (throws = `KipError`; everything else returns typed data):
@@ -355,7 +359,7 @@ type KipErrorCode =
 | Method | Throws | Returns as data |
 |---|---|---|
 | `open` | `ERR_MANIFEST_FORK`, `ERR_HASH_ALGO_MISMATCH`, `ERR_MALFORMED_INPUT` | — |
-| `assertFact`/`retractFact`/`putNode`/`putEdge`/`txn` | `ERR_MALFORMED_INPUT`, `ERR_SCOPE_DENIED`, `ERR_SIGNATURE_INVALID` | `status: "pending"\|"durable"` (m-9) |
+| `assertFact`/`retractFact`/`putNode`/`putEdge`/`txn` | `ERR_MALFORMED_INPUT`, `ERR_SCOPE_DENIED`, `ERR_SIGNATURE_INVALID`, `ERR_TXN_ALREADY_ACTIVE` (nested txn(), or a direct call while another txn() is active), `ERR_TXN_ROLLBACK_FAILED` (txn() only — rollback after a commit failure could not erase every newly-ingested oid), `ERR_TXN_TIP_PERSIST_FAILED` (txn() only — the commit already succeeded durably; only the final seq/hlc tip-bookkeeping write failed afterward) | `status: "pending"\|"durable"` (m-9) |
 | `supersedeFact`/`reAttestFact` | `ERR_MALFORMED_INPUT`, `ERR_SCOPE_DENIED` (resolve-scope supersedes), `ERR_SIGNATURE_INVALID` | `status: "pending"\|"durable"` (m-9) |
 | `ingest` | — (never throws; rejection is EXPECTED/tested behavior, not an error condition, B-2) | `{ admitted, reason? }` — a typed gate verdict, always returned, even for a malformed/signature-invalid/foreign-signed fact |
 | `getNode`/`getEdge`/`query`/`recall`/`asOf` | `ERR_MALFORMED_INPUT` (bad selector) | `unknown`/`conflict` segments, `pending` trust states, `conflicted` results |
@@ -369,7 +373,7 @@ type KipErrorCode =
 | `compileContextualQuery` | `ERR_COMPILE_CYCLIC_DEPS`, `ERR_ILL_TYPED_SEGMENT` | `Segment.alternatives` (the typed choice) |
 | `runContextualQuery`/`executeSegment` | compile errors as above | `{ kind: "choice" }`, empty-`result` `AnswerGraph` (outcomes #4–#7) |
 | `runAcquisition` | `ERR_UNREGISTERED_MANIFEST` | quarantined-until-trusted facts (data) |
-| `learn` | `ERR_UNREGISTERED_MANIFEST` (before the loop, INV-A13) | `status: "accept" \| "exhausted"` (INV-A5) |
+| `learn` | `ERR_UNREGISTERED_MANIFEST` (before the loop, INV-A13), `ERR_LEARN_COMMIT_FAILED` (unforeseen accept-commit failure after every known validation gate; a `kip:learn-exhausted` marker naming the failure is durably authored first), `ERR_TXN_ALREADY_ACTIVE` (rethrown verbatim when a concurrently-racing `learn()` call's own accept-commit `txn()` finds another already active on this instance — never masked as `ERR_LEARN_COMMIT_FAILED`, never authors a spurious exhausted marker for it) | `status: "accept" \| "exhausted"` (INV-A5) |
 
 ---
 
