@@ -15,7 +15,6 @@
 - fix(kip-sdk): close D-33 (review score=95) (00af28689, Tal Muskal, 6 hours ago)
 
 ### Documentation
-- docs: daily changelog update (17ee89692, a5c-ai[bot], 13 seconds ago)
 - docs(kip-sdk): M5+M6 final build report + integration verification (f5b8539eb, Tal Muskal, 11 hours ago)
 - docs(kip-sdk): log D-32 — signing-identity durability gap breaks cross-replica sync after restart (fea09ea51, Tal Muskal, 21 hours ago)
 
