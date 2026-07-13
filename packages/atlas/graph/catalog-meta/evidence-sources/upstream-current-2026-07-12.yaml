@@ -1,0 +1,192 @@
+# Evidence captured during the 2026-07-12 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1783832508-gf7599b-2026-07-12
+attributes:
+  displayName: "Amp CLI 0.0.1783832508-gf7599b npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783832508-gf7599b"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783832508-gf7599b"
+  locator: "npm @ampcode/cli v0.0.1783832508-gf7599b"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T08:43:44Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli version 0.0.1783832508-gf7599b as the
+    latest dist-tag. No public build-specific changelog, CLI flag, transport,
+    API, model, package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1783832508-gf7599b
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-207-2026-07-12
+attributes:
+  displayName: "Claude Code v2.1.207 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.207"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.207"
+  locator: "anthropics/claude-code release v2.1.207"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T08:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    Official Claude Code 2.1.207 release notes document auto mode availability
+    without opt-in on Bedrock, Vertex AI, and Foundry; disableAutoMode settings;
+    Claude Opus 4.8 defaults for Bedrock, Vertex, and Claude Platform on AWS;
+    managed-settings consent fixes; plugin user_config shell interpolation
+    rejection; project-level pluginConfigs removal; and UI/streaming fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-207
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-207-2026-07-12
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.207 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.207"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.207"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.207"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T08:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.207 release notes document the
+    canUseTool allow-without-updatedInput contract fix and the published
+    AgentToolCompletedOutput structured result type for Agent tool output.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-207
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-3-11-2026-07-12
+attributes:
+  displayName: "Cursor 3.11 official changelog"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog"
+  sourcePathOrUrl: "https://cursor.com/changelog"
+  locator: "Cursor changelog 3.11, July 10 2026"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T08:58:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    Official Cursor changelog reports Cursor 3.11 on July 10, 2026 with side
+    chats via /side, /btw, or the chat-panel plus button; conversation search
+    across and within agent transcripts; redesigned project, repo, run-on,
+    branch, and remote-machine pickers; and new cloud-agent conversation hooks.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:3-11
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-170-0-2026-07-12
+attributes:
+  displayName: "Factory Droid CLI 0.170.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.170.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.170.0"
+  locator: "npm @factory/cli v0.170.0"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T08:43:44Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    npm metadata reports @factory/cli version 0.170.0 as the latest dist-tag,
+    identifies the package as Factory Droid CLI, exposes the droid binary,
+    requires Node >=20.0.0, and publishes darwin, linux, and win32 optional
+    platform artifacts. No public version-specific CLI flag, transport/API,
+    model, package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-170-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:omp-16-4-6-2026-07-12
+attributes:
+  displayName: "Oh-My-Pi v16.4.6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.4.6"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.4.6"
+  locator: "can1357/oh-my-pi release v16.4.6"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T09:00:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    Official Oh-My-Pi 16.4.6 release notes document usage-cache invalidation,
+    model-keyed and provider-wildcard retry fallback chains, /models fallback
+    chain editing, /queue and composer queue shorthands, per-model TPS/TTFT
+    tracking in ~/.omp/agent.db, Codex /btw WebSocket routing preservation,
+    many in-process shell builtins, and ast_edit duplicate replacement fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:16-4-6
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-19-9-2026-07-12
+attributes:
+  displayName: "Qwen Code v0.19.9 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.9"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.9"
+  locator: "QwenLM/qwen-code release v0.19.9"
+  capturedAt: "2026-07-12T09:05:00Z"
+  observedAt: "2026-07-12T08:55:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-12T09:05:00Z"
+  notes: |
+    Official Qwen Code 0.19.9 release notes document qwen update and /update
+    auto-update commands, session owner indexes, configurable background memory
+    and vision bridge timeouts, isolated scheduled-task and sub-session support,
+    workspace-qualified REST routes, cursor-paged transcript replay, channel
+    task/webhook features, NO_PROXY handling, Anthropic-compatible protocol
+    pairing fixes, and max_tokens clamping.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-19-9
+    - agent:qwen
