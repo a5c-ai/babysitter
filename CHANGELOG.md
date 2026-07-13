@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased] - 2026-07-13
+
+### Features
+- feat(kip-sdk): D-32 implementation (TDD converged min=91, acceptance PASS) (91469eb94, Tal Muskal, 4 hours ago)
+- feat(kip-sdk): M6 implementation (TDD converged min=63, acceptance PASS) (3891f6d2f, Tal Muskal, 15 hours ago)
+- feat(kip-sdk): M5 implementation (TDD converged min=33, acceptance GAPS) (87f65b505, Tal Muskal, 17 hours ago)
+- feat(kip-sdk): close M4/T5.4 gap (bounded graph expansion) — M5 dependency audit (24b7b5ff1, Tal Muskal, 20 hours ago)
+
+### Bug Fixes
+- fix(kip-sdk): close D-37 (review score=92) (af3c07584, Tal Muskal, 5 hours ago)
+- fix(kip-sdk): close D-35 (review score=92) (f8de43dcd, Tal Muskal, 5 hours ago)
+- fix(kip-sdk): close D-34 (review score=96) (8b1e0fa7b, Tal Muskal, 6 hours ago)
+- fix(kip-sdk): close D-33 (review score=95) (00af28689, Tal Muskal, 6 hours ago)
+
+### Documentation
+- docs(kip-sdk): M5+M6 final build report + integration verification (f5b8539eb, Tal Muskal, 11 hours ago)
+- docs(kip-sdk): log D-32 — signing-identity durability gap breaks cross-replica sync after restart (fea09ea51, Tal Muskal, 21 hours ago)
+
+### Tests
+- test(kip-sdk): frozen D-36 tests (spec-driven, pre-implementation) (ad3bd42cf, Tal Muskal, 4 hours ago)
+- test(kip-sdk): frozen D-32 tests (spec-driven, pre-implementation) (e8dbea566, Tal Muskal, 5 hours ago)
+- test(kip-sdk): frozen M6 conformance tests (spec-driven, pre-implementation) (7084b4cc0, Tal Muskal, 17 hours ago)
+- test(kip-sdk): frozen M5 conformance tests (spec-driven, pre-implementation) (9509fbd46, Tal Muskal, 20 hours ago)
+
 ## [Unreleased] - 2026-07-08
 
 ### Documentation
