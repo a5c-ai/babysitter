@@ -1,0 +1,104 @@
+# Additive upstream release records from the 2026-07-13 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783933214-g6a3c71
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783933214-g6a3c71"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783933214-g6a3c71"
+  currentVersion: "0.0.1783933214-g6a3c71"
+  releasedAt: "2026-07-13"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783933214-g6a3c71"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1783832508-gf7599b to 0.0.1783933214-g6a3c71."
+    - "npm metadata identifies the package as the Amp frontier coding agent CLI and exposes the amp binary."
+    - "No public build-specific release notes, CLI flag, transport/API, model, package-name, install-method, or migration change was found for this timestamped build."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783933214-g6a3c71."
+    - "No public build-specific changelog located for this timestamped build."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783933214-g6a3c71-2026-07-13
+---
+nodeKind: AgentVersion
+id: agent-version:codex@0.144.3
+attributes:
+  agentId: "codex"
+  agentProductId: agent:codex
+  displayName: "Codex CLI 0.144.3"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.144.3"
+  currentVersion: "0.144.3"
+  releasedAt: "2026-07-13"
+  sourcePackage: "@openai/codex"
+  upstreamReleaseTag: "rust-v0.144.3"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.3"
+  cliCommand: "codex"
+  summary: "Codex CLI patch release after 0.144.2 restored the previous Guardian auto-review policy, request format, and tool behavior; 0.144.3 itself is a version-only publication."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.144.1 to 0.144.3."
+    - "The intermediate 0.144.2 release restored the previous Guardian auto-review policy, request format, and tool behavior after rolling back a prompting regression."
+    - "The 0.144.3 release notes state it is a version-only release with no merged pull request changes since rust-v0.144.2."
+    - "No package-name, install-method, CLI flag, transport/API, model, or migration change was published; install remains npm install -g @openai/codex."
+  releaseHighlights:
+    - "Guardian auto-review policy/request/tool behavior rollback from 0.144.2 remains in latest 0.144.3."
+    - "0.144.3 is a version-only publish with no merged PR changes since 0.144.2."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex
+  sourced_from:
+    - evidence:codex-rust-v0-144-3-2026-07-13
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-4-8
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.4.8"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.4.8"
+  currentVersion: "16.4.8"
+  releasedAt: "2026-07-12"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.4.8"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.4.8"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release adding model-browser navigation and plan-review copy affordances, refining model hub visuals, and fixing Perplexity search, JS eval persistence, stats sync, and TUI input latency."
+  assimilationNotes:
+    - "Latest npm moved from recorded 16.4.6 to 16.4.8."
+    - "Model browser now supports Home and End keyboard navigation, affecting TUI keybinding modeling."
+    - "Plan-review overlay adds a c hotkey to copy the current reviewed plan markdown, including in-overlay edits, affecting plan-review UI actions."
+    - "Model hub list and sidebar visuals changed: inline model role chips were removed, hover and keyboard selection treatments were separated, and locked provider labels were simplified."
+    - "Perplexity provider search reliability improved by forcing retrieval for all queries, affecting provider transport behavior."
+    - "JS eval cells now preserve top-level function and var declarations across cells when top-level await is used."
+    - "omp-stats now coerces malformed assistant message records and skips entries with no usage/model attribution instead of aborting session sync on messages.stop_reason NOT NULL constraints."
+    - "pi-tui removes an extra frame of keyboard input latency after idle except for Ctrl+C and Escape double-press gestures."
+    - "No package-name or install-method migration was published; install remains npm install -g @oh-my-pi/pi-coding-agent."
+  releaseHighlights:
+    - "Home/End model-browser navigation."
+    - "Plan-review copy hotkey for reviewed markdown."
+    - "Model hub visual and sidebar refinements."
+    - "Perplexity retrieval reliability fix."
+    - "JS eval top-level declaration persistence fix."
+    - "omp-stats malformed message coercion and TUI input-latency fix."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-4-8-2026-07-13
