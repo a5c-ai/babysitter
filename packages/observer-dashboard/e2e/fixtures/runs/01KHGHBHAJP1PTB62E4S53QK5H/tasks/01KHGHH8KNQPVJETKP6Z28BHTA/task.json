@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHGHH8KNQPVJETKP6Z28BHTA",
+  "taskId": "research-market-trends",
+  "invocationKey": "content/analytics-roll:S000007:research-market-trends",
+  "stepId": "S000007",
+  "kind": "agent",
+  "title": "Research market trends",
+  "io": {
+    "inputJsonPath": "tasks/01KHGHH8KNQPVJETKP6Z28BHTA/input.json",
+    "outputJsonPath": "tasks/01KHGHH8KNQPVJETKP6Z28BHTA/result.json"
+  },
+  "inputs": {
+    "context": "Process content/analytics-roll step S000007",
+    "maxTokens": 5860,
+    "temperature": 0.28,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "research-market-trends",
+    "prompt": {
+      "role": "reviewer",
+      "task": "Research market trends",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHGHTHBV05W9A18JVV6R9NPD",
+  "taskId": "call-translation-api",
+  "invocationKey": "content/analytics-roll:S000015:call-translation-api",
+  "stepId": "S000015",
+  "kind": "skill",
+  "title": "Call translation API",
+  "io": {
+    "inputJsonPath": "tasks/01KHGHTHBV05W9A18JVV6R9NPD/input.json",
+    "outputJsonPath": "tasks/01KHGHTHBV05W9A18JVV6R9NPD/result.json"
+  },
+  "inputs": {
+    "skillName": "call-translation-api",
+    "version": "5.7.7",
+    "config": {
+      "retries": 1,
+      "backoff": "linear"
+    }
+  }
+}

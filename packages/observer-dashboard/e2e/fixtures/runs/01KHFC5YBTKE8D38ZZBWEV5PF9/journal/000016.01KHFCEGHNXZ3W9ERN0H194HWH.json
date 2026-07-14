@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T00:50:42.869Z",
+  "data": {
+    "effectId": "01KHFCEGHNE6ZFQHT4ZQ0NZVBX",
+    "invocationKey": "content/publish-queue:S000008:index-search-documents",
+    "invocationHash": "6d32b752f8dfca5d943f461f9720587bf6d727fb39367037606c70af5fe3c561",
+    "stepId": "S000008",
+    "taskId": "index-search-documents",
+    "kind": "node",
+    "label": "Index search documents",
+    "taskDefRef": "tasks/01KHFCEGHNE6ZFQHT4ZQ0NZVBX/task.json"
+  },
+  "checksum": "13bc506700051bfae5810a013cad79f63e3ffe5979bdeb72f7253d03bee6d057"
+}

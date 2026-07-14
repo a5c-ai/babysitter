@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHCSBHP93K56XEEWXQSZ3S91",
+  "taskId": "research-market-trends",
+  "invocationKey": "sales/lead-scoring:S000007:research-market-trends",
+  "stepId": "S000007",
+  "kind": "agent",
+  "title": "Research market trends",
+  "io": {
+    "inputJsonPath": "tasks/01KHCSBHP93K56XEEWXQSZ3S91/input.json",
+    "outputJsonPath": "tasks/01KHCSBHP93K56XEEWXQSZ3S91/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000007",
+    "maxTokens": 7738,
+    "temperature": 0.38,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "research-market-trends",
+    "prompt": {
+      "role": "writer",
+      "task": "Research market trends",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

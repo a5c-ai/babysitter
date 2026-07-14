@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHJJJY8Q5DVS6RWM4ZDTCCKX",
+  "taskId": "validate-schema",
+  "invocationKey": "content/draft-review:S000001:validate-schema",
+  "stepId": "S000001",
+  "kind": "node",
+  "title": "Validate schema",
+  "io": {
+    "inputJsonPath": "tasks/01KHJJJY8Q5DVS6RWM4ZDTCCKX/input.json",
+    "outputJsonPath": "tasks/01KHJJJY8Q5DVS6RWM4ZDTCCKX/result.json"
+  },
+  "inputs": {
+    "records": 4880,
+    "batchSize": 79,
+    "source": "csv",
+    "destination": "webhook"
+  }
+}

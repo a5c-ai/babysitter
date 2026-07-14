@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHHN87DSE8XYV7NAZHCZK8GN",
+  "taskId": "parse-xml-feed",
+  "invocationKey": "sales/outreach-gen:S000001:parse-xml-feed",
+  "status": "ok",
+  "startedAt": "2026-02-15T22:03:03.964Z",
+  "finishedAt": "2026-02-15T22:03:40.365Z",
+  "result": {
+    "processed": 6449,
+    "failed": 295,
+    "skipped": 42,
+    "duration_ms": 36401,
+    "outputPath": "output/parse-xml-feed-CZK8GN.json"
+  },
+  "value": {
+    "processed": 6449,
+    "failed": 295,
+    "skipped": 42,
+    "duration_ms": 36401,
+    "outputPath": "output/parse-xml-feed-CZK8GN.json"
+  }
+}

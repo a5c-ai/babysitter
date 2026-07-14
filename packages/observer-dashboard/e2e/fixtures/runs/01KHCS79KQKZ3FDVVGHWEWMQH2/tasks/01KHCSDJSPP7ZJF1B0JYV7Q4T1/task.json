@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHCSDJSPP7ZJF1B0JYV7Q4T1",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "sales/lead-scoring:S000009:analyze-competitor-data",
+  "stepId": "S000009",
+  "kind": "agent",
+  "title": "Analyze competitor data",
+  "io": {
+    "inputJsonPath": "tasks/01KHCSDJSPP7ZJF1B0JYV7Q4T1/input.json",
+    "outputJsonPath": "tasks/01KHCSDJSPP7ZJF1B0JYV7Q4T1/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000009",
+    "maxTokens": 2112,
+    "temperature": 0.85,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "analyze-competitor-data",
+    "prompt": {
+      "role": "writer",
+      "task": "Analyze competitor data",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

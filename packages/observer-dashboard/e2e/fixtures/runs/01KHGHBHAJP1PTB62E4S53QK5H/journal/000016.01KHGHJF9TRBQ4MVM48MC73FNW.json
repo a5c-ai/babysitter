@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:39:29.978Z",
+  "data": {
+    "effectId": "01KHGHJF9TANWVBMQBXC9XC2WN",
+    "invocationKey": "content/analytics-roll:S000008:generate-coverage-report",
+    "invocationHash": "b163dd9eb36572842b5bc07fbdb9eadfd8c9169605dc41d0b172c8b8762a1bc1",
+    "stepId": "S000008",
+    "taskId": "generate-coverage-report",
+    "kind": "shell",
+    "label": "Generate coverage report",
+    "taskDefRef": "tasks/01KHGHJF9TANWVBMQBXC9XC2WN/task.json"
+  },
+  "checksum": "093126f15efc37a5f05fba9eb3f7171bea0c1610f9a5e03b0b320c882b4f6a08"
+}

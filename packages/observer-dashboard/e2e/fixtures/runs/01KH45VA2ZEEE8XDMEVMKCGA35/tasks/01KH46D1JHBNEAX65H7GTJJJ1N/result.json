@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH46D1JHBNEAX65H7GTJJJ1N",
+  "taskId": "clear-cache",
+  "invocationKey": "demo-project/publish:S000016:clear-cache",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:33:25.574Z",
+  "finishedAt": "2026-02-10T16:33:32.384Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 9 items",
+    "stderr": "",
+    "duration_ms": 6810
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 9 items",
+    "stderr": "",
+    "duration_ms": 6810
+  }
+}

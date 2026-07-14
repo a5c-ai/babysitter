@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMSNSDPPMM9Y6E838VK71FT",
+  "taskId": "normalize-timestamps",
+  "invocationKey": "content/draft-review:S000002:normalize-timestamps",
+  "stepId": "S000002",
+  "kind": "node",
+  "title": "Normalize timestamps",
+  "io": {
+    "inputJsonPath": "tasks/01KHMSNSDPPMM9Y6E838VK71FT/input.json",
+    "outputJsonPath": "tasks/01KHMSNSDPPMM9Y6E838VK71FT/result.json"
+  },
+  "inputs": {
+    "records": 3879,
+    "batchSize": 323,
+    "source": "s3",
+    "destination": "s3"
+  }
+}

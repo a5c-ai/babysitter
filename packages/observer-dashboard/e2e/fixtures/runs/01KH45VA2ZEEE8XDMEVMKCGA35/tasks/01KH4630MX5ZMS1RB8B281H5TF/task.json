@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH4630MX5ZMS1RB8B281H5TF",
+  "taskId": "run-sentiment-analysis",
+  "invocationKey": "demo-project/publish:S000006:run-sentiment-analysis",
+  "stepId": "S000006",
+  "kind": "skill",
+  "title": "Run sentiment analysis",
+  "io": {
+    "inputJsonPath": "tasks/01KH4630MX5ZMS1RB8B281H5TF/input.json",
+    "outputJsonPath": "tasks/01KH4630MX5ZMS1RB8B281H5TF/result.json"
+  },
+  "inputs": {
+    "skillName": "run-sentiment-analysis",
+    "version": "1.3.17",
+    "config": {
+      "retries": 2,
+      "backoff": "linear"
+    }
+  }
+}

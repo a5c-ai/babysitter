@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHH4MP9AN24KDVJ2NSH2F55N",
+  "taskId": "review-pull-request",
+  "invocationKey": "sales/outreach-gen:S000006:review-pull-request",
+  "status": "ok",
+  "startedAt": "2026-02-15T17:12:46.810Z",
+  "finishedAt": "2026-02-15T17:13:02.540Z",
+  "result": {
+    "summary": "Generated report for Review pull request",
+    "sections": 2,
+    "wordCount": 1122,
+    "confidence": 0.767,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields",
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated report for Review pull request",
+    "sections": 2,
+    "wordCount": 1122,
+    "confidence": 0.767,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields",
+      "Add structured logging for debugging"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6JCBR2G9WGPR8V7A9ETG8K",
+  "taskId": "research-market-trends",
+  "invocationKey": "sales/lead-scoring:S000024:research-market-trends",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:41:15.400Z",
+  "finishedAt": "2026-02-11T14:41:36.111Z",
+  "result": {
+    "summary": "Generated draft for Research market trends",
+    "sections": 7,
+    "wordCount": 3694,
+    "confidence": 0.804,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Implement retry logic for external API calls",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Research market trends",
+    "sections": 7,
+    "wordCount": 3694,
+    "confidence": 0.804,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Implement retry logic for external API calls",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

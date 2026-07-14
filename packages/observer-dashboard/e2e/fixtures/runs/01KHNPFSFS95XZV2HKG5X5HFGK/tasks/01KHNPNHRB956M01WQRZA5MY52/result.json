@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHNPNHRB956M01WQRZA5MY52",
+  "taskId": "run-sentiment-analysis",
+  "invocationKey": "content/publish-queue:S000005:run-sentiment-analysis",
+  "status": "ok",
+  "startedAt": "2026-02-17T11:44:46.078Z",
+  "finishedAt": "2026-02-17T11:45:31.456Z",
+  "result": {
+    "invocations": 18,
+    "successRate": 0.865,
+    "resultCount": 474
+  },
+  "value": {
+    "invocations": 18,
+    "successRate": 0.865,
+    "resultCount": 474
+  }
+}

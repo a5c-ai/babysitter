@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-27T11:00:03.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_SSEA_003",
+    "invocationKey": "kanban/sse-move:S000002:continue-after-approval",
+    "invocationHash": "hash-continue-after-approval",
+    "stepId": "S000002",
+    "taskId": "continue-after-approval",
+    "kind": "agent",
+    "label": "Continue after approval",
+    "taskDefRef": "tasks/01KTEST_KANBAN_SSEA_003/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0003-3"
+}

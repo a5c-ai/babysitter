@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHNPFTX7NS7FEEEBTX0MJNXF",
+  "taskId": "run-lint-checks",
+  "invocationKey": "content/publish-queue:S000001:run-lint-checks",
+  "status": "ok",
+  "startedAt": "2026-02-17T11:41:38.978Z",
+  "finishedAt": "2026-02-17T11:42:34.169Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 36 items",
+    "stderr": "",
+    "duration_ms": 55191
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 36 items",
+    "stderr": "",
+    "duration_ms": 55191
+  }
+}

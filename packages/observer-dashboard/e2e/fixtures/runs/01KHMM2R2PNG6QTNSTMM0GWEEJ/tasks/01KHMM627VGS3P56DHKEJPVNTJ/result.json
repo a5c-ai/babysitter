@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMM627VGS3P56DHKEJPVNTJ",
+  "taskId": "write-test-specifications",
+  "invocationKey": "content/publish-queue:S000003:write-test-specifications",
+  "status": "ok",
+  "startedAt": "2026-02-17T01:42:07.634Z",
+  "finishedAt": "2026-02-17T01:42:45.020Z",
+  "result": {
+    "summary": "Generated draft for Write test specifications",
+    "sections": 2,
+    "wordCount": 414,
+    "confidence": 0.727,
+    "recommendations": [
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Write test specifications",
+    "sections": 2,
+    "wordCount": 414,
+    "confidence": 0.727,
+    "recommendations": [
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

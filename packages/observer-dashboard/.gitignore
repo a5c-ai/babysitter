@@ -1,12 +1,59 @@
-.next/
-dist/
+# dependencies
 node_modules/
-coverage/
-playwright-report/
-test-results/
-e2e/fixtures/runs/
+
+# next.js
+.next/
+out/
+
+# build
+tsconfig.tsbuildinfo
+
+# auto-generated
+next-env.d.ts
+
+# env
 .env
 .env.local
 .env.*.local
 .env.production
 .env.development
+
+# test coverage
+coverage/
+
+# debug
+npm-debug.log*
+
+# local tooling / build artifacts
+.a5c/
+.claude/
+/artifacts/
+dist/
+nul
+
+# test output artifacts
+test-output.log
+test-output.txt
+vitest-output.txt
+/vitest-run-output.txt
+/tmp-commit-msg.txt
+/tmp-reword-msg.txt
+/tmp-*.json
+
+# E2E / Playwright output
+test-results/
+playwright-report/
+e2e-*.txt
+
+# Local docs and screenshots (contents ignored, so a specific file can be re-included)
+/docs/*
+# ...except the README's public board screenshot (public repos only, no private data)
+!/docs/screenshot-board.png
+# ...and the public 0.12.3 vs 0.14.2 visual comparison (curated public run set only)
+!/docs/compare-0.12.3-vs-0.14.2/
+
+# Defects list (user screenshots and notes)
+/Defects List/
+
+/STAKEHOLDER-UX-REVIEW.md
+/IDE-INTEGRATED-DASHBOARD-PDR.md

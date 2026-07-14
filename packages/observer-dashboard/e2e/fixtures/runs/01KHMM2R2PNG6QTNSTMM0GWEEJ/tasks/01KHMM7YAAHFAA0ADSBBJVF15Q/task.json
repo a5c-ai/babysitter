@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMM7YAAHFAA0ADSBBJVF15Q",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "content/publish-queue:S000005:analyze-competitor-data",
+  "stepId": "S000005",
+  "kind": "agent",
+  "title": "Analyze competitor data",
+  "io": {
+    "inputJsonPath": "tasks/01KHMM7YAAHFAA0ADSBBJVF15Q/input.json",
+    "outputJsonPath": "tasks/01KHMM7YAAHFAA0ADSBBJVF15Q/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000005",
+    "maxTokens": 7271,
+    "temperature": 0.74,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "analyze-competitor-data",
+    "prompt": {
+      "role": "researcher",
+      "task": "Analyze competitor data",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

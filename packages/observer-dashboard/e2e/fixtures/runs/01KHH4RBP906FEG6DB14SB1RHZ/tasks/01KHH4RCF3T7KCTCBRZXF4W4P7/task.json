@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4RCF3T7KCTCBRZXF4W4P7",
+  "taskId": "pause-before-retry",
+  "invocationKey": "content/publish-queue:S000001:pause-before-retry",
+  "stepId": "S000001",
+  "kind": "sleep",
+  "title": "Pause before retry",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4RCF3T7KCTCBRZXF4W4P7/input.json",
+    "outputJsonPath": "tasks/01KHH4RCF3T7KCTCBRZXF4W4P7/result.json"
+  },
+  "inputs": {
+    "durationMs": 29239,
+    "reason": "Pause before retry"
+  }
+}

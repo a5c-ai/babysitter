@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T01:46:17.885Z",
+  "data": {
+    "effectId": "01KHMMDQCXNXCPB8Z5YC9866FQ",
+    "invocationKey": "content/publish-queue:S000011:confirm-data-migration-changes",
+    "invocationHash": "ee098c29309264d661bc63227707fb8e0e834fb2c356221a9929e57b3329d680",
+    "stepId": "S000011",
+    "taskId": "confirm-data-migration-changes",
+    "kind": "breakpoint",
+    "label": "Confirm data migration changes?",
+    "taskDefRef": "tasks/01KHMMDQCXNXCPB8Z5YC9866FQ/task.json"
+  },
+  "checksum": "14e552dda3ec855cd170b2a7fd49e8e9026293a191d529b43889750f7fb30952"
+}

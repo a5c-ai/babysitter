@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6HVKEG8VYHS6EDKKZ4K7XN",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "sales/lead-scoring:S000011:analyze-competitor-data",
+  "stepId": "S000011",
+  "kind": "agent",
+  "title": "Analyze competitor data",
+  "io": {
+    "inputJsonPath": "tasks/01KH6HVKEG8VYHS6EDKKZ4K7XN/input.json",
+    "outputJsonPath": "tasks/01KH6HVKEG8VYHS6EDKKZ4K7XN/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000011",
+    "maxTokens": 4782,
+    "temperature": 0.15,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "analyze-competitor-data",
+    "prompt": {
+      "role": "analyst",
+      "task": "Analyze competitor data",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

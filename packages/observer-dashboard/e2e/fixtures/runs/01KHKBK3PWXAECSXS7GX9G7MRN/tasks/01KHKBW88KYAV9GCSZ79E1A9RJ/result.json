@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHKBW88KYAV9GCSZ79E1A9RJ",
+  "taskId": "generate-executive-summary",
+  "invocationKey": "content/analytics-roll:S000009:generate-executive-summary",
+  "status": "ok",
+  "startedAt": "2026-02-16T13:57:43.069Z",
+  "finishedAt": "2026-02-16T13:58:33.488Z",
+  "result": {
+    "summary": "Generated draft for Generate executive summary",
+    "sections": 2,
+    "wordCount": 3295,
+    "confidence": 0.736,
+    "recommendations": [
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Generate executive summary",
+    "sections": 2,
+    "wordCount": 3295,
+    "confidence": 0.736,
+    "recommendations": [
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

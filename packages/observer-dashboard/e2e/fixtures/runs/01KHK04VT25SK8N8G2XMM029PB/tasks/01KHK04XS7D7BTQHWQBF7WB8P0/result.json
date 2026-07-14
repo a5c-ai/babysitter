@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHK04XS7D7BTQHWQBF7WB8P0",
+  "taskId": "filter-duplicates",
+  "invocationKey": "content/publish-queue:S000001:filter-duplicates",
+  "status": "ok",
+  "startedAt": "2026-02-16T10:32:43.785Z",
+  "finishedAt": "2026-02-16T10:33:30.671Z",
+  "result": {
+    "processed": 6139,
+    "failed": 236,
+    "skipped": 61,
+    "duration_ms": 46886,
+    "outputPath": "output/filter-duplicates-7WB8P0.json"
+  },
+  "value": {
+    "processed": 6139,
+    "failed": 236,
+    "skipped": 61,
+    "duration_ms": 46886,
+    "outputPath": "output/filter-duplicates-7WB8P0.json"
+  }
+}

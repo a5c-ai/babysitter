@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH47YK0HJ1CY5FYT4X1XZ5YZ",
+  "taskId": "approve-budget-allocation",
+  "invocationKey": "sample/roster-update:S000014:approve-budget-allocation",
+  "status": "ok",
+  "startedAt": "2026-02-10T17:00:29.764Z",
+  "finishedAt": "2026-02-10T17:00:38.498Z",
+  "result": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-10T17:00:38.498Z"
+  },
+  "value": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-10T17:00:38.498Z"
+  }
+}

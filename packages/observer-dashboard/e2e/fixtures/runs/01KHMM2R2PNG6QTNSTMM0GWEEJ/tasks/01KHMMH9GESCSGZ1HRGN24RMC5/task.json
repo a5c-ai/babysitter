@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMMH9GESCSGZ1HRGN24RMC5",
+  "taskId": "compute-aggregates",
+  "invocationKey": "content/publish-queue:S000014:compute-aggregates",
+  "stepId": "S000014",
+  "kind": "node",
+  "title": "Compute aggregates",
+  "io": {
+    "inputJsonPath": "tasks/01KHMMH9GESCSGZ1HRGN24RMC5/input.json",
+    "outputJsonPath": "tasks/01KHMMH9GESCSGZ1HRGN24RMC5/result.json"
+  },
+  "inputs": {
+    "records": 7269,
+    "batchSize": 90,
+    "source": "s3",
+    "destination": "s3"
+  }
+}

@@ -1,10 +1,18 @@
 import { test, expect } from "@playwright/test";
+import { seedListView } from "../helpers";
 
 // Run performance tests serially so the first test warms up the dev server
 test.describe.configure({ mode: "serial" });
 
 // Give each test plenty of time (dev server compile can be slow)
 test.use({ actionTimeout: 60_000 });
+
+// These tests measure and assert against the legacy list view (project grid,
+// DOM-size budget). The board is now the default view at "/", so seed the
+// persisted list view before each test's navigation.
+test.beforeEach(async ({ page }) => {
+  await seedListView(page);
+});
 
 test.describe("Performance Tests", () => {
   test("dashboard loads and renders content", async ({ page }) => {

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH466T016PRKVSC63N41PC7W",
+  "taskId": "run-lint-checks",
+  "invocationKey": "demo-project/publish:S000010:run-lint-checks",
+  "stepId": "S000010",
+  "kind": "shell",
+  "title": "Run lint checks",
+  "io": {
+    "inputJsonPath": "tasks/01KH466T016PRKVSC63N41PC7W/input.json",
+    "outputJsonPath": "tasks/01KH466T016PRKVSC63N41PC7W/result.json"
+  },
+  "inputs": {
+    "command": "aws",
+    "args": [
+      "sync",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/demo-project",
+    "timeout": 164000
+  }
+}

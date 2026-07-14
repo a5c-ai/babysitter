@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHJJKYBZKJYTG8E7YHHB9738",
+  "taskId": "merge-datasets",
+  "invocationKey": "content/draft-review:S000003:merge-datasets",
+  "stepId": "S000003",
+  "kind": "node",
+  "title": "Merge datasets",
+  "io": {
+    "inputJsonPath": "tasks/01KHJJKYBZKJYTG8E7YHHB9738/input.json",
+    "outputJsonPath": "tasks/01KHJJKYBZKJYTG8E7YHHB9738/result.json"
+  },
+  "inputs": {
+    "records": 4854,
+    "batchSize": 293,
+    "source": "postgres",
+    "destination": "elasticsearch"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T11:46:47.336Z",
+  "data": {
+    "effectId": "01KHNPS8D83K93X8RFAVRTKZ0R",
+    "invocationKey": "content/publish-queue:S000009:build-docker-image",
+    "invocationHash": "7f2ce97f380ef717999a0f87b396edef7bd194bb2883d65f65f20676eb49efea",
+    "stepId": "S000009",
+    "taskId": "build-docker-image",
+    "kind": "shell",
+    "label": "Build Docker image",
+    "taskDefRef": "tasks/01KHNPS8D83K93X8RFAVRTKZ0R/task.json"
+  },
+  "checksum": "d3a87435225ad46d87aae72e6e2766da7c24fe1f03647cea5e2f0c88d8666d19"
+}

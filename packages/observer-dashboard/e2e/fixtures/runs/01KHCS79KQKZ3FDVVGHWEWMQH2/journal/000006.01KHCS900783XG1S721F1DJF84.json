@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-14T00:37:10.279Z",
+  "data": {
+    "effectId": "01KHCS9007DKW6J97GVM2JNN4S",
+    "invocationKey": "sales/lead-scoring:S000003:compress-assets",
+    "invocationHash": "6c58356ec283987dc8946862799af58ed544423d87b3f7099544048385381e21",
+    "stepId": "S000003",
+    "taskId": "compress-assets",
+    "kind": "shell",
+    "label": "Compress assets",
+    "taskDefRef": "tasks/01KHCS9007DKW6J97GVM2JNN4S/task.json"
+  },
+  "checksum": "af35c30ca58d96f8801a55b3e24c9feba95d852c8946708239605e8468cc178c"
+}

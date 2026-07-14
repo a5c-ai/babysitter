@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4NABD29G6BEZBMW2HBS3Z",
+  "taskId": "restart-service",
+  "invocationKey": "sales/outreach-gen:S000007:restart-service",
+  "stepId": "S000007",
+  "kind": "shell",
+  "title": "Restart service",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4NABD29G6BEZBMW2HBS3Z/input.json",
+    "outputJsonPath": "tasks/01KHH4NABD29G6BEZBMW2HBS3Z/result.json"
+  },
+  "inputs": {
+    "command": "npm",
+    "args": [
+      "sync",
+      "--env=prod"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 293000
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMMJD2JWZ6VFMTH23KZ1909",
+  "taskId": "execute-test-suite",
+  "invocationKey": "sales/lead-scoring:S000003:execute-test-suite",
+  "stepId": "S000003",
+  "kind": "shell",
+  "title": "Execute test suite",
+  "io": {
+    "inputJsonPath": "tasks/01KHMMJD2JWZ6VFMTH23KZ1909/input.json",
+    "outputJsonPath": "tasks/01KHMMJD2JWZ6VFMTH23KZ1909/result.json"
+  },
+  "inputs": {
+    "command": "aws",
+    "args": [
+      "sync",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 278000
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T14:03:19.647Z",
+  "data": {
+    "effectId": "01KHKC6HPZRWE3P74HGWMNTBW2",
+    "invocationKey": "content/analytics-roll:S000020:compute-aggregates",
+    "invocationHash": "47750c710429a1645309d6b8dd3f5d00ecac31520a50cb1258937e6fdaf09f19",
+    "stepId": "S000020",
+    "taskId": "compute-aggregates",
+    "kind": "node",
+    "label": "Compute aggregates",
+    "taskDefRef": "tasks/01KHKC6HPZRWE3P74HGWMNTBW2/task.json"
+  },
+  "checksum": "38aeb070b998d41e41f1156b925ce96dd32d257dc1e5e4500d0fa11637b13780"
+}

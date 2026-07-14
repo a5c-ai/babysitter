@@ -1,0 +1,14 @@
+{
+  "runId": "01KHCHFRW3PR5VSRF06CR4GNMY",
+  "request": "content/draft-review",
+  "processId": "content/draft-review",
+  "entrypoint": {
+    "importPath": "../../processes/content-draft-review.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/content-draft-review.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-13T22:21:03.747Z",
+  "completionSecret": "e1eefe3bbbc6dff17413b4bfda305e80",
+  "projectName": "content-scheduler"
+}

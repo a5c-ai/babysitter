@@ -124,10 +124,35 @@ export interface Run {
   failureError?: string;
   failureMessage?: string;
   breakpointQuestion?: string;
+  /** Number of requested-but-unresolved breakpoints (answerable "needs you"). */
+  pendingBreakpoints?: number;
   sourceLabel?: string;
   projectName?: string;
   isStale?: boolean;
   waitingKind?: 'breakpoint' | 'task';
+  /** Orchestrator attachment (read from run.lock + pid liveness).
+   *  §15.1: "scheduled" = a sleeping forever-run between ticks (newest journal
+   *  event is an unresolved `sleep` effect) — idle-healthy, not orphaned. */
+  driver?: 'live' | 'orphaned' | 'none' | 'scheduled';
+  /**
+   * §15.1 (AC-84/85): when `driver === "scheduled"`, the parsed wake time
+   * (`sleep:<ISO>`) from the sleep effect. Future → calm "next run <rel>";
+   * past → amber "wake overdue <rel> — resume". Absent otherwise.
+   */
+  sleepWakeAt?: string;
+  /**
+   * UX-R3 §14.5 (AC-59): the observer recorded an answer for a breakpoint
+   * (result.json written by "observer-dashboard") but the run has NOT been
+   * resumed/advanced yet — non-terminal, no live driver. Keeps the card in
+   * Needs-you in the amber-gray "answer recorded — awaiting resume" state
+   * instead of silently sliding to Stalled, derived from disk (survives a page
+   * refresh) until a resume actually consumes it.
+   */
+  recordedAwaitingResume?: boolean;
+  /** The effectId of the observer-recorded breakpoint awaiting resume (AC-59):
+   *  lets the Needs-you card fetch the recorded answer + render the copyable
+   *  resume command / overwrite control. */
+  recordedBreakpointEffectId?: string;
 }
 
 // Lightweight digest for polling
@@ -145,6 +170,24 @@ export interface RunDigest {
   projectName?: string;
   isStale?: boolean;
   waitingKind?: 'breakpoint' | 'task';
+  /** Orchestrator attachment (read from run.lock + pid liveness).
+   *  §15.1: "scheduled" = sleeping forever-run between ticks (idle-healthy). */
+  driver?: 'live' | 'orphaned' | 'none' | 'scheduled';
+  // ---------------------------------------------------------------------------
+  // Card-parity fields (perf slimming): the default /api/runs list is served
+  // from digests, so getRunDigest computes these cheaply (same journal scan +
+  // breakpoint result.json reads it already performs) to mirror parseRunDir.
+  // ---------------------------------------------------------------------------
+  /** Failed-column "Failed at:" text — the first errored effect's step. */
+  failedStep?: string;
+  /** Failure detail from RUN_FAILED or the last errored EFFECT_RESOLVED. */
+  failureMessage?: string;
+  /** §15.1: parsed wake time (`sleep:<ISO>`) when driver === "scheduled". */
+  sleepWakeAt?: string;
+  /** UX-R3 §14.5 (AC-59): observer-recorded breakpoint answer awaiting resume. */
+  recordedAwaitingResume?: boolean;
+  /** The effectId of the observer-recorded breakpoint awaiting resume. */
+  recordedBreakpointEffectId?: string;
 }
 
 // Project grouping for dashboard
@@ -164,7 +207,15 @@ export interface BreakpointRunInfo {
   effectId: string;
   projectName: string;
   processId: string;
-  breakpointQuestion: string;
+  /**
+   * The REAL on-disk question, when one exists (UX-R2 §13.1). Left unset for
+   * genuinely question-less breakpoints — the data layer never pre-fills the
+   * honest fallback copy (a truthy pre-fill would mask downstream task-level
+   * fallbacks); display surfaces apply it at render time (AC-32).
+   */
+  breakpointQuestion?: string;
+  /** Orchestrator attachment — whether an answer can actually be applied now. */
+  driver?: 'live' | 'orphaned' | 'none' | 'scheduled';
 }
 
 // Project summary (lightweight, no run payloads)
@@ -179,7 +230,15 @@ export interface ProjectSummary {
   completedTasksAggregate: number;
   latestUpdate: string;
   pendingBreakpoints: number;
+  /** Non-terminal runs (waiting/pending) whose orchestrator is not attached. */
+  orphanedRuns: number;
   breakpointRuns: BreakpointRunInfo[];
+  /**
+   * True when the project is in the registry's hiddenProjects list. Hiding
+   * only removes the project from the GRID — alarm surfaces (needs-you
+   * banner/counts) and search still include it (QA F4).
+   */
+  hidden?: boolean;
 }
 
 // Session info

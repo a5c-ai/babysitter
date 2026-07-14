@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T17:16:37.981Z",
+  "data": {
+    "effectId": "01KHH4VS6XT559FKR2YTXWJVX3",
+    "invocationKey": "content/publish-queue:S000003:approve-deployment-to-producti",
+    "invocationHash": "f3431f5031226b9846459e5befc02b7cbb119e1ea2db5f446ec9e14b868ea6d6",
+    "stepId": "S000003",
+    "taskId": "approve-deployment-to-producti",
+    "kind": "breakpoint",
+    "label": "Approve deployment to production?",
+    "taskDefRef": "tasks/01KHH4VS6XT559FKR2YTXWJVX3/task.json"
+  },
+  "checksum": "e38550df0ca05fb13dc973cd6be32bc77bcf42b87273a390bdeff6de484e22bf"
+}

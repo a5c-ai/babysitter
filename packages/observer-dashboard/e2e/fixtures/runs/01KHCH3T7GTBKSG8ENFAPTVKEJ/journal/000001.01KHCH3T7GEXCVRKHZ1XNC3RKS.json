@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-13T22:14:31.920Z",
+  "data": {
+    "runId": "01KHCH3T7GTBKSG8ENFAPTVKEJ",
+    "processId": "sales/lead-scoring",
+    "entrypoint": {
+      "importPath": "../../processes/sales-lead-scoring.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "2605788e96818d8e8a7869b8bd3242573a8739d8cbd1faf796c7f2979b92c60b"
+}

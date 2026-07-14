@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_HIDWK_001",
+  "taskId": "long-hidden-task",
+  "invocationKey": "kanban/hidden-working:S000001:long-hidden-task",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Long-running hidden task",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_HIDWK_001/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_HIDWK_001/result.json"
+  },
+  "agent": {
+    "name": "long-hidden-task",
+    "prompt": {
+      "role": "analyst",
+      "task": "Long-running hidden task",
+      "instructions": [
+        "Do the step",
+        "Return JSON"
+      ]
+    }
+  }
+}

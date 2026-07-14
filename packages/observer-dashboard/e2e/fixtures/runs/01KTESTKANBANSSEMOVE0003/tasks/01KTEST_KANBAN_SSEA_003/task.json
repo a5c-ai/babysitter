@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_SSEA_003",
+  "taskId": "continue-after-approval",
+  "invocationKey": "kanban/sse-move:S000002:continue-after-approval",
+  "stepId": "S000002",
+  "kind": "agent",
+  "title": "Continue after approval",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_SSEA_003/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_SSEA_003/result.json"
+  },
+  "agent": {
+    "name": "continue-after-approval",
+    "prompt": {
+      "role": "analyst",
+      "task": "Continue after approval",
+      "instructions": [
+        "Do the step",
+        "Return JSON"
+      ]
+    }
+  }
+}

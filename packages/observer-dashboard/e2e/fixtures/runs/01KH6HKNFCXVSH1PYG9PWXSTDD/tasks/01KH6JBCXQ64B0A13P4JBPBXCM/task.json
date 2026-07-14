@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6JBCXQ64B0A13P4JBPBXCM",
+  "taskId": "merge-datasets",
+  "invocationKey": "sales/lead-scoring:S000023:merge-datasets",
+  "stepId": "S000023",
+  "kind": "node",
+  "title": "Merge datasets",
+  "io": {
+    "inputJsonPath": "tasks/01KH6JBCXQ64B0A13P4JBPBXCM/input.json",
+    "outputJsonPath": "tasks/01KH6JBCXQ64B0A13P4JBPBXCM/result.json"
+  },
+  "inputs": {
+    "records": 2336,
+    "batchSize": 275,
+    "source": "s3",
+    "destination": "postgres"
+  }
+}

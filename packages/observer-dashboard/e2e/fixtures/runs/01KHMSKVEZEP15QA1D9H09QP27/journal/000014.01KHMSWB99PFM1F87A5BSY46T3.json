@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T03:21:39.881Z",
+  "data": {
+    "effectId": "01KHMSWB992CGX5PQ8E4NR51QY",
+    "invocationKey": "content/draft-review:S000007:draft-outreach-email",
+    "invocationHash": "988e2efb063a513a09b993b140155ee9a3bcd82eed985c367ae1cec4e9df6ea9",
+    "stepId": "S000007",
+    "taskId": "draft-outreach-email",
+    "kind": "agent",
+    "label": "Draft outreach email",
+    "taskDefRef": "tasks/01KHMSWB992CGX5PQ8E4NR51QY/task.json"
+  },
+  "checksum": "1cda9ccd487f1643563e3257235ff7c904474bd26496a077a48b8f483d63028e"
+}

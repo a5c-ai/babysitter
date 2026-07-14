@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANSSEMOVE0003",
+  "request": "kanban/sse-move",
+  "processId": "kanban/sse-move",
+  "projectName": "kanban-board-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-sse-move.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-sse-move.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-27T11:00:00.000Z",
+  "completionSecret": "e2ekanbanfixture00030000"
+}

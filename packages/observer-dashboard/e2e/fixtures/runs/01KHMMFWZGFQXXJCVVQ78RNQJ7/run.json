@@ -1,0 +1,14 @@
+{
+  "runId": "01KHMMFWZGFQXXJCVVQ78RNQJ7",
+  "request": "sales/lead-scoring",
+  "processId": "sales/lead-scoring",
+  "entrypoint": {
+    "importPath": "../../processes/sales-lead-scoring.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/sales-lead-scoring.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-17T01:47:29.136Z",
+  "completionSecret": "6b1bde924b9b83d998501e9250212f7b",
+  "projectName": "sales-pipeline"
+}

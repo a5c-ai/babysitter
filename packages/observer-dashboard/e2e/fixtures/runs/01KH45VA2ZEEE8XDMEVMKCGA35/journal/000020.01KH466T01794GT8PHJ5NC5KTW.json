@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:30:00.193Z",
+  "data": {
+    "effectId": "01KH466T016PRKVSC63N41PC7W",
+    "invocationKey": "demo-project/publish:S000010:run-lint-checks",
+    "invocationHash": "d8b6f306cc1c47b3630d42b45bcfdb7a8edd601da029046b17be61a1219f5b4c",
+    "stepId": "S000010",
+    "taskId": "run-lint-checks",
+    "kind": "shell",
+    "label": "Run lint checks",
+    "taskDefRef": "tasks/01KH466T016PRKVSC63N41PC7W/task.json"
+  },
+  "checksum": "33ee65c78142f9fd45ec5f1459a2399c6be5e19826c1bce7dc4d233123698b25"
+}

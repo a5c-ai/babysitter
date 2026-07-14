@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHKBNGTAV954CPG7AJMQCX4T",
+  "taskId": "invoke-web-scraper",
+  "invocationKey": "content/analytics-roll:S000003:invoke-web-scraper",
+  "stepId": "S000003",
+  "kind": "skill",
+  "title": "Invoke web scraper",
+  "io": {
+    "inputJsonPath": "tasks/01KHKBNGTAV954CPG7AJMQCX4T/input.json",
+    "outputJsonPath": "tasks/01KHKBNGTAV954CPG7AJMQCX4T/result.json"
+  },
+  "inputs": {
+    "skillName": "invoke-web-scraper",
+    "version": "4.4.0",
+    "config": {
+      "retries": 3,
+      "backoff": "linear"
+    }
+  }
+}

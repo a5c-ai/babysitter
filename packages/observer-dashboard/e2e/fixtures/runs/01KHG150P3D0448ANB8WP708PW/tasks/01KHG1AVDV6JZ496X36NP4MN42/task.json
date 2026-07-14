@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHG1AVDV6JZ496X36NP4MN42",
+  "taskId": "index-search-documents",
+  "invocationKey": "sales/deal-sync:S000007:index-search-documents",
+  "stepId": "S000007",
+  "kind": "node",
+  "title": "Index search documents",
+  "io": {
+    "inputJsonPath": "tasks/01KHG1AVDV6JZ496X36NP4MN42/input.json",
+    "outputJsonPath": "tasks/01KHG1AVDV6JZ496X36NP4MN42/result.json"
+  },
+  "inputs": {
+    "records": 592,
+    "batchSize": 379,
+    "source": "s3",
+    "destination": "webhook"
+  }
+}

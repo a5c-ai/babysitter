@@ -1,7 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { seedListView } from "../helpers";
 
 test.describe("Smoke Test", () => {
   test("dashboard loads and displays content", async ({ page }) => {
+    // This smoke test asserts the legacy project grid; the board is now the
+    // default view at "/", so seed the persisted list view before navigating.
+    await seedListView(page);
+
     // Navigate to the dashboard - increase timeout for first compile
     await page.goto("/", { timeout: 60_000, waitUntil: "domcontentloaded" });
 

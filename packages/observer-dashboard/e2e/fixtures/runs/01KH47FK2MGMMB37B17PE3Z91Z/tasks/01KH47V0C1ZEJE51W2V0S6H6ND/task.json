@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47V0C1ZEJE51W2V0S6H6ND",
+  "taskId": "transform-csv-to-json",
+  "invocationKey": "sample/roster-update:S000011:transform-csv-to-json",
+  "stepId": "S000011",
+  "kind": "node",
+  "title": "Transform CSV to JSON",
+  "io": {
+    "inputJsonPath": "tasks/01KH47V0C1ZEJE51W2V0S6H6ND/input.json",
+    "outputJsonPath": "tasks/01KH47V0C1ZEJE51W2V0S6H6ND/result.json"
+  },
+  "inputs": {
+    "records": 3702,
+    "batchSize": 422,
+    "source": "postgres",
+    "destination": "postgres"
+  }
+}

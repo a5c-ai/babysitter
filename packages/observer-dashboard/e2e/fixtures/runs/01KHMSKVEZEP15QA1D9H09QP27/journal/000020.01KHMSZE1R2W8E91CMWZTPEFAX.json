@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T03:23:21.016Z",
+  "data": {
+    "effectId": "01KHMSZE1RV8M07D6TJTC08R1X",
+    "invocationKey": "content/draft-review:S000010:create-architecture-spec",
+    "invocationHash": "4e9b2bcfd858278b9c5a13cb601d9fe631671b0af21e2f22acef6d335390ddfa",
+    "stepId": "S000010",
+    "taskId": "create-architecture-spec",
+    "kind": "agent",
+    "label": "Create architecture spec",
+    "taskDefRef": "tasks/01KHMSZE1RV8M07D6TJTC08R1X/task.json"
+  },
+  "checksum": "97d7fceb7fdf50d33b9d2a6b4152623b5920a3159bd4a27f9ab0d571489e0efa"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-13T06:26:42.309Z",
+  "data": {
+    "effectId": "01KHATW9G57WYZ66CBNZRNJ7Q9",
+    "invocationKey": "sales/deal-sync:S000002:index-search-documents",
+    "invocationHash": "31c614b63d75afd090c9a6c7f56d7d25d3ce205b349f43b1466000578eaaebe9",
+    "stepId": "S000002",
+    "taskId": "index-search-documents",
+    "kind": "node",
+    "label": "Index search documents",
+    "taskDefRef": "tasks/01KHATW9G57WYZ66CBNZRNJ7Q9/task.json"
+  },
+  "checksum": "62a713e1be7d9e9d00c45913cfa65cdc097b3fa6800a0239320cf30369bf10e2"
+}

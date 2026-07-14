@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-14T00:40:09.427Z",
+  "data": {
+    "effectId": "01KHCSEEYKQJCS2F5TQEP80H42",
+    "invocationKey": "sales/lead-scoring:S000010:confirm-data-migration-changes",
+    "invocationHash": "08d33c66c2602cdfa69251fc572ed8983d554f6a78eb72b93445344f4a4692ae",
+    "stepId": "S000010",
+    "taskId": "confirm-data-migration-changes",
+    "kind": "breakpoint",
+    "label": "Confirm data migration changes?",
+    "taskDefRef": "tasks/01KHCSEEYKQJCS2F5TQEP80H42/task.json"
+  },
+  "checksum": "1e3a282a12a47bb57f18c2e83ac7a4f282ece68c54f180eaca1997b794d5825f"
+}

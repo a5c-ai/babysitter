@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4E5ERWEAWJQC4F59QFKBR",
+  "taskId": "transform-csv-to-json",
+  "invocationKey": "sales/outreach-gen:S000001:transform-csv-to-json",
+  "stepId": "S000001",
+  "kind": "node",
+  "title": "Transform CSV to JSON",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4E5ERWEAWJQC4F59QFKBR/input.json",
+    "outputJsonPath": "tasks/01KHH4E5ERWEAWJQC4F59QFKBR/result.json"
+  },
+  "inputs": {
+    "records": 9532,
+    "batchSize": 210,
+    "source": "redis",
+    "destination": "postgres"
+  }
+}

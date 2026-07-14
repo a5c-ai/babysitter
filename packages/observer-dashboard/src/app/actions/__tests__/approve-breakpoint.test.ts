@@ -1,17 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Create hoisted mock functions
-const { mockAccess, mockWriteFile, mockMkdir, mockReaddir, mockFindRunDir } = vi.hoisted(() => ({
+const { mockAccess, mockWriteFile, mockMkdir, mockReaddir, mockReadFile, mockFindRunDir, mockGetVersionInfo } = vi.hoisted(() => ({
   mockAccess: vi.fn(),
   mockWriteFile: vi.fn(),
   mockMkdir: vi.fn(),
   mockReaddir: vi.fn(),
+  mockReadFile: vi.fn(),
   mockFindRunDir: vi.fn(),
+  mockGetVersionInfo: vi.fn(),
 }));
 
 // Mock path-resolver
 vi.mock("@/lib/path-resolver", () => ({
   findRunDir: mockFindRunDir,
+}));
+
+// Mock version-info so tests never shell out to `babysitter --version`
+vi.mock("@/lib/version-info", () => ({
+  getVersionInfo: mockGetVersionInfo,
 }));
 
 // Mock fs with a complete replacement that includes default export
@@ -23,6 +30,7 @@ vi.mock("fs", () => {
         writeFile: mockWriteFile,
         mkdir: mockMkdir,
         readdir: mockReaddir,
+        readFile: mockReadFile,
       },
     },
     promises: {
@@ -30,6 +38,7 @@ vi.mock("fs", () => {
       writeFile: mockWriteFile,
       mkdir: mockMkdir,
       readdir: mockReaddir,
+      readFile: mockReadFile,
     },
   };
 });
@@ -44,6 +53,11 @@ describe("approveBreakpoint", () => {
     // Default: journal dir has some existing entries
     mockMkdir.mockResolvedValue(undefined);
     mockReaddir.mockResolvedValue(["000001.01ABC.json", "000002.01DEF.json"]);
+    // Default: no prior result.json on disk (fresh record) — the double-answer
+    // guard reads it to detect an existing observer answer.
+    mockReadFile.mockRejectedValue(new Error("ENOENT"));
+    // Default: CLI version detection succeeds
+    mockGetVersionInfo.mockReturnValue({ app: "0.12.3", babysitter: "6.0.2" });
   });
 
   // -------------------------------------------------------------------------
@@ -140,6 +154,8 @@ describe("approveBreakpoint", () => {
 
     const parsed = JSON.parse(resultContent as string);
     expect(parsed.status).toBe("ok");
+    // D1: the runtime reads `approved` to tell an approval from a rejection.
+    expect(parsed.value.approved).toBe(true);
     expect(parsed.value.answer).toBe("Deploy approved");
     expect(parsed.value.approvedBy).toBe("observer-dashboard");
     expect(parsed.value.approvedAt).toBeDefined();
@@ -156,9 +172,41 @@ describe("approveBreakpoint", () => {
     expect(journalParsed.data.effectId).toBe("eff-001");
     expect(journalParsed.data.status).toBe("ok");
     expect(journalParsed.data.resultRef).toBe("tasks/eff-001/result.json");
+    // SDK-native entries carry the installed SDK/CLI version at the top level.
+    expect(journalParsed.sdkVersion).toBe("6.0.2");
     expect(journalParsed.checksum).toBeDefined();
     expect(typeof journalParsed.checksum).toBe("string");
     expect(journalParsed.checksum.length).toBe(64); // SHA-256 hex
+
+    // Key order matches SDK-written entries: type, recordedAt, data, sdkVersion, checksum.
+    expect(Object.keys(journalParsed)).toEqual([
+      "type",
+      "recordedAt",
+      "data",
+      "sdkVersion",
+      "checksum",
+    ]);
+  });
+
+  it("omits sdkVersion when CLI version detection fails", async () => {
+    mockGetVersionInfo.mockReturnValue({ app: "0.12.3", babysitter: "N/A" });
+    mockFindRunDir.mockResolvedValue({
+      runDir: "/projects/app/.a5c/runs/run-001",
+      source: defaultSource,
+      projectName: "app",
+      projectPath: "/projects/app",
+    });
+    mockAccess.mockResolvedValue(undefined);
+    mockWriteFile.mockResolvedValue(undefined);
+
+    const result = await approveBreakpoint("run-001", "eff-001", "yes");
+    expect(result.success).toBe(true);
+
+    const [, journalContent] = mockWriteFile.mock.calls[1];
+    const journalParsed = JSON.parse(journalContent as string);
+    // Never forge a version we didn't detect.
+    expect("sdkVersion" in journalParsed).toBe(false);
+    expect(journalParsed.type).toBe("EFFECT_RESOLVED");
   });
 
   it("journal checksum is valid SHA-256 of payload without checksum", async () => {
@@ -227,6 +275,59 @@ describe("approveBreakpoint", () => {
   // -------------------------------------------------------------------------
   // Write failure
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // UX-R3 §14.5 — double-answer guard (AC-62) + write-path unchanged (AC-63)
+  // -------------------------------------------------------------------------
+
+  it("AC-62: overwriting an answer THIS observer already recorded rewrites result.json but does NOT append a second journal entry", async () => {
+    const runDir = "/projects/app/.a5c/runs/run-001";
+    mockFindRunDir.mockResolvedValue({
+      runDir,
+      source: defaultSource,
+      projectName: "app",
+      projectPath: "/projects/app",
+    });
+    mockAccess.mockResolvedValue(undefined);
+    mockWriteFile.mockResolvedValue(undefined);
+    // A prior observer record is on disk.
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        status: "ok",
+        value: { approved: true, answer: "first", approvedBy: "observer-dashboard" },
+      })
+    );
+
+    const result = await approveBreakpoint("run-001", "eff-001", "second");
+    expect(result.success).toBe(true);
+
+    // Exactly ONE write: result.json only (no second EFFECT_RESOLVED journal entry).
+    expect(mockWriteFile).toHaveBeenCalledTimes(1);
+    const [resultPath, content] = mockWriteFile.mock.calls[0];
+    expect(resultPath).toContain("result.json");
+    const parsed = JSON.parse(content as string);
+    expect(parsed.value.answer).toBe("second"); // overwrote, not stacked
+  });
+
+  it("AC-62: a prior result.json NOT written by the observer is treated as a fresh record (still appends one journal entry)", async () => {
+    const runDir = "/projects/app/.a5c/runs/run-001";
+    mockFindRunDir.mockResolvedValue({
+      runDir,
+      source: defaultSource,
+      projectName: "app",
+      projectPath: "/projects/app",
+    });
+    mockAccess.mockResolvedValue(undefined);
+    mockWriteFile.mockResolvedValue(undefined);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({ status: "ok", value: { approved: true, approvedBy: "sdk" } })
+    );
+
+    const result = await approveBreakpoint("run-001", "eff-001", "yes");
+    expect(result.success).toBe(true);
+    // Fresh record semantics: result.json + one journal entry (2 writes).
+    expect(mockWriteFile).toHaveBeenCalledTimes(2);
+  });
 
   it("returns error when file write fails", async () => {
     const runDir = "/projects/app/.a5c/runs/run-001";

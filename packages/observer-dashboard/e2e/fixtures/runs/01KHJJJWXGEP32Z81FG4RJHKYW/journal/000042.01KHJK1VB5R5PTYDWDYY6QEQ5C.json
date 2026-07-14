@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T06:43:51.269Z",
+  "data": {
+    "effectId": "01KHJK1VB5B7TBC358YN8QG31Q",
+    "invocationKey": "content/draft-review:S000021:execute-test-suite",
+    "invocationHash": "e85d7c981f0dde25a8ae353bfd340c93e5395fd1377de89a2706efc2a45fa7b5",
+    "stepId": "S000021",
+    "taskId": "execute-test-suite",
+    "kind": "shell",
+    "label": "Execute test suite",
+    "taskDefRef": "tasks/01KHJK1VB5B7TBC358YN8QG31Q/task.json"
+  },
+  "checksum": "a3aacfa3243cd851695e5862c7e615a0f4cb68377676fced9ec68275d3a052c0"
+}

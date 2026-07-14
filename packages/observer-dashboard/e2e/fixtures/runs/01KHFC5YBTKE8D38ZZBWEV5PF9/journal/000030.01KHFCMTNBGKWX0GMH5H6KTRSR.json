@@ -1,0 +1,9 @@
+{
+  "type": "RUN_COMPLETED",
+  "recordedAt": "2026-02-15T00:54:09.835Z",
+  "data": {
+    "runId": "01KHFC5YBTKE8D38ZZBWEV5PF9",
+    "status": "completed"
+  },
+  "checksum": "8bfde9e8c778bbd96053fa58c6a7749e0fe76881ee76e1af5c24002d50ab222f"
+}

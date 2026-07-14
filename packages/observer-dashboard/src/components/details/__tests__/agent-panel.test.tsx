@@ -57,8 +57,9 @@ describe('AgentPanel', () => {
   it('renders invocationKey via TruncatedId', () => {
     const task = createMockTaskDetail({ invocationKey: 'inv-abcdef1234' });
     render(<AgentPanel task={task} />);
-    // TruncatedId renders last 4 chars with "..." prefix
-    expect(screen.getByText('...1234')).toBeInTheDocument();
+    // Invocation keys are human-meaningful (process:step:task) — TruncatedId
+    // keeps the readable head instead of a "...1234" tail fragment (QA F9).
+    expect(screen.getByText('inv-abcdef1234')).toBeInTheDocument();
   });
 
   it('renders description from input.description when no agent prompt', () => {

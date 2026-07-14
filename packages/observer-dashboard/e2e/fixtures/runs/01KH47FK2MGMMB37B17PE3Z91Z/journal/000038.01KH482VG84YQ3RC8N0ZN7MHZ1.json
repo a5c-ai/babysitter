@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T17:02:47.816Z",
+  "data": {
+    "effectId": "01KH482VG855VBASK121R4Y8MT",
+    "invocationKey": "sample/roster-update:S000019:sync-s3-bucket",
+    "invocationHash": "b76c4444a66261feac5bc55326452d19295f0fcf9ecc886571571d9d04bb1b77",
+    "stepId": "S000019",
+    "taskId": "sync-s3-bucket",
+    "kind": "shell",
+    "label": "Sync S3 bucket",
+    "taskDefRef": "tasks/01KH482VG855VBASK121R4Y8MT/task.json"
+  },
+  "checksum": "5f0fc1ad5f014dbb7bf7440c3901d664e97cb4decaa0f7700495c4a041dbf8f9"
+}

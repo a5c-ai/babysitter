@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-10T16:52:16.596Z",
+  "data": {
+    "runId": "01KH47FK2MGMMB37B17PE3Z91Z",
+    "processId": "sample/roster-update",
+    "entrypoint": {
+      "importPath": "../../processes/sample-roster-update.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "a4a8a14c7a9a6b09d26b234a94b11d35ec9f6dd45a9e8631a06dfc249f32b380"
+}

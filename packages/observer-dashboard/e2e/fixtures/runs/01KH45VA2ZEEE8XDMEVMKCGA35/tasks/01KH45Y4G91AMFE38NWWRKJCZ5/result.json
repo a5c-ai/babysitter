@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH45Y4G91AMFE38NWWRKJCZ5",
+  "taskId": "draft-outreach-email",
+  "invocationKey": "demo-project/publish:S000003:draft-outreach-email",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:25:16.944Z",
+  "finishedAt": "2026-02-10T16:25:53.867Z",
+  "result": {
+    "summary": "Generated analysis for Draft outreach email",
+    "sections": 7,
+    "wordCount": 3099,
+    "confidence": 0.751,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Draft outreach email",
+    "sections": 7,
+    "wordCount": 3099,
+    "confidence": 0.751,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

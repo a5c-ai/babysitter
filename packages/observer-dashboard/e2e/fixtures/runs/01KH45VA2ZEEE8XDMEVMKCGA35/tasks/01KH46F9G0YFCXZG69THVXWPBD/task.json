@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH46F9G0YFCXZG69THVXWPBD",
+  "taskId": "execute-test-suite",
+  "invocationKey": "demo-project/publish:S000018:execute-test-suite",
+  "stepId": "S000018",
+  "kind": "shell",
+  "title": "Execute test suite",
+  "io": {
+    "inputJsonPath": "tasks/01KH46F9G0YFCXZG69THVXWPBD/input.json",
+    "outputJsonPath": "tasks/01KH46F9G0YFCXZG69THVXWPBD/result.json"
+  },
+  "inputs": {
+    "command": "redis-cli",
+    "args": [
+      "sync",
+      "--env=prod"
+    ],
+    "cwd": "/workspace/demo-project",
+    "timeout": 239000
+  }
+}

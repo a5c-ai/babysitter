@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHJK101QWFB0K317WFGYTKHR",
+  "taskId": "restart-service",
+  "invocationKey": "content/draft-review:S000018:restart-service",
+  "status": "ok",
+  "startedAt": "2026-02-16T06:43:23.736Z",
+  "finishedAt": "2026-02-16T06:43:32.389Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 15 items",
+    "stderr": "",
+    "duration_ms": 8653
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 15 items",
+    "stderr": "",
+    "duration_ms": 8653
+  }
+}

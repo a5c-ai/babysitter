@@ -33,22 +33,22 @@ const RUN_COUNT = 50;
 const RUNS_DIR = path.join(__dirname, "runs");
 
 const PROJECT_NAMES = [
-  "podcast-intel",
-  "hockey-7-shifts",
+  "demo-project",
+  "sample-project",
   "sales-pipeline",
   "content-scheduler",
 ];
 
 const PROCESS_IDS: Record<string, string[]> = {
-  "podcast-intel": [
-    "podcast-intel/transcribe",
-    "podcast-intel/summarize",
-    "podcast-intel/publish",
+  "demo-project": [
+    "demo-project/transcribe",
+    "demo-project/summarize",
+    "demo-project/publish",
   ],
-  "hockey-7-shifts": [
-    "hockey/schedule-sync",
-    "hockey/roster-update",
-    "hockey/stats-ingest",
+  "sample-project": [
+    "sample/schedule-sync",
+    "sample/roster-update",
+    "sample/stats-ingest",
   ],
   "sales-pipeline": [
     "sales/lead-scoring",
@@ -537,13 +537,13 @@ async function writeJournalEvent(
 
 function generateRunInputs(run: GeneratedRun): Record<string, unknown> {
   const templates: Record<string, () => Record<string, unknown>> = {
-    "podcast-intel": () => ({
+    "demo-project": () => ({
       feedUrl: `https://feeds.example.com/${pick(["tech-talks", "startup-stories", "dev-diaries"])}/rss`,
       maxEpisodes: randInt(5, 50),
       language: pick(["en", "es", "fr"]),
       outputFormat: pick(["markdown", "html", "json"]),
     }),
-    "hockey-7-shifts": () => ({
+    "sample-project": () => ({
       teamId: `team-${randInt(100, 999)}`,
       season: "2025-2026",
       syncMode: pick(["full", "incremental", "delta"]),

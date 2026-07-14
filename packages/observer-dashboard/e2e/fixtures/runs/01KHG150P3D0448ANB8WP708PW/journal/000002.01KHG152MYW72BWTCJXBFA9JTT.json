@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T06:52:33.822Z",
+  "data": {
+    "effectId": "01KHG152MYVQSN7T9HMZE3ZKX5",
+    "invocationKey": "sales/deal-sync:S000001:write-test-specifications",
+    "invocationHash": "d699d6e39f24e8ff51767b1b171bd45fed646b18cb52b6279d172263e14d9b52",
+    "stepId": "S000001",
+    "taskId": "write-test-specifications",
+    "kind": "agent",
+    "label": "Write test specifications",
+    "taskDefRef": "tasks/01KHG152MYVQSN7T9HMZE3ZKX5/task.json"
+  },
+  "checksum": "a7de6d1e8b24c7ea049dfef26508c682e27b024b1d7dbcb6bbe4bc53dbc940e6"
+}

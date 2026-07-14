@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHNPM0THACBDWT7SQ108QNQ9",
+  "taskId": "create-architecture-spec",
+  "invocationKey": "content/publish-queue:S000004:create-architecture-spec",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Create architecture spec",
+  "io": {
+    "inputJsonPath": "tasks/01KHNPM0THACBDWT7SQ108QNQ9/input.json",
+    "outputJsonPath": "tasks/01KHNPM0THACBDWT7SQ108QNQ9/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000004",
+    "maxTokens": 7301,
+    "temperature": 0.16,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "create-architecture-spec",
+    "prompt": {
+      "role": "writer",
+      "task": "Create architecture spec",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

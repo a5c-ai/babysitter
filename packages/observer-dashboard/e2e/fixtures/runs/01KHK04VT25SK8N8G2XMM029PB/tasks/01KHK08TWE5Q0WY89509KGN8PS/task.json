@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHK08TWE5Q0WY89509KGN8PS",
+  "taskId": "draft-release-notes",
+  "invocationKey": "content/publish-queue:S000004:draft-release-notes",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Draft release notes",
+  "io": {
+    "inputJsonPath": "tasks/01KHK08TWE5Q0WY89509KGN8PS/input.json",
+    "outputJsonPath": "tasks/01KHK08TWE5Q0WY89509KGN8PS/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000004",
+    "maxTokens": 4413,
+    "temperature": 0.2,
+    "model": "claude-haiku-235-20250227"
+  },
+  "agent": {
+    "name": "draft-release-notes",
+    "prompt": {
+      "role": "writer",
+      "task": "Draft release notes",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

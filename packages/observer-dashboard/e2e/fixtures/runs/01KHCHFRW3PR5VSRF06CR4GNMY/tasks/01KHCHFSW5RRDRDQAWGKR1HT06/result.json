@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCHFSW5RRDRDQAWGKR1HT06",
+  "taskId": "process-payment-webhook",
+  "invocationKey": "content/draft-review:S000001:process-payment-webhook",
+  "status": "ok",
+  "startedAt": "2026-02-13T22:21:04.954Z",
+  "finishedAt": "2026-02-13T22:21:44.941Z",
+  "result": {
+    "invocations": 14,
+    "successRate": 0.866,
+    "resultCount": 203
+  },
+  "value": {
+    "invocations": 14,
+    "successRate": 0.866,
+    "resultCount": 203
+  }
+}

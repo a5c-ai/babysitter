@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH480T59R9G3286TA27GHM6Q",
+  "taskId": "validate-schema",
+  "invocationKey": "sample/roster-update:S000016:validate-schema",
+  "stepId": "S000016",
+  "kind": "node",
+  "title": "Validate schema",
+  "io": {
+    "inputJsonPath": "tasks/01KH480T59R9G3286TA27GHM6Q/input.json",
+    "outputJsonPath": "tasks/01KH480T59R9G3286TA27GHM6Q/result.json"
+  },
+  "inputs": {
+    "records": 510,
+    "batchSize": 140,
+    "source": "csv",
+    "destination": "s3"
+  }
+}

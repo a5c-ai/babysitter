@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH46MWFMQP8SFPMJBB3A5E7Z",
+  "taskId": "deploy-to-staging",
+  "invocationKey": "demo-project/publish:S000023:deploy-to-staging",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:37:41.637Z",
+  "finishedAt": "2026-02-10T16:38:32.090Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 70 items",
+    "stderr": "",
+    "duration_ms": 50453
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 70 items",
+    "stderr": "",
+    "duration_ms": 50453
+  }
+}

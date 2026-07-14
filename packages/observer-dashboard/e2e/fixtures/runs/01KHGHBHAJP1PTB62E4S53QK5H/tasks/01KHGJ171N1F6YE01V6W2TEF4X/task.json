@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHGJ171N1F6YE01V6W2TEF4X",
+  "taskId": "transform-csv-to-json",
+  "invocationKey": "content/analytics-roll:S000021:transform-csv-to-json",
+  "stepId": "S000021",
+  "kind": "node",
+  "title": "Transform CSV to JSON",
+  "io": {
+    "inputJsonPath": "tasks/01KHGJ171N1F6YE01V6W2TEF4X/input.json",
+    "outputJsonPath": "tasks/01KHGJ171N1F6YE01V6W2TEF4X/result.json"
+  },
+  "inputs": {
+    "records": 4369,
+    "batchSize": 388,
+    "source": "s3",
+    "destination": "webhook"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHJJT06A3ZJ98F64M3W40579",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "content/draft-review:S000011:generate-api-documentation",
+  "stepId": "S000011",
+  "kind": "agent",
+  "title": "Generate API documentation",
+  "io": {
+    "inputJsonPath": "tasks/01KHJJT06A3ZJ98F64M3W40579/input.json",
+    "outputJsonPath": "tasks/01KHJJT06A3ZJ98F64M3W40579/result.json"
+  },
+  "inputs": {
+    "context": "Process content/draft-review step S000011",
+    "maxTokens": 1141,
+    "temperature": 0.41,
+    "model": "claude-haiku-235-20250227"
+  },
+  "agent": {
+    "name": "generate-api-documentation",
+    "prompt": {
+      "role": "researcher",
+      "task": "Generate API documentation",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Cite sources where applicable"
+      ]
+    }
+  }
+}

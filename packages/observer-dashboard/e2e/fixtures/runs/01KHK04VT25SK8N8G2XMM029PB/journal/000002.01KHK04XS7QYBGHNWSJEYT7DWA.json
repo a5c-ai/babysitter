@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T10:32:43.559Z",
+  "data": {
+    "effectId": "01KHK04XS7D7BTQHWQBF7WB8P0",
+    "invocationKey": "content/publish-queue:S000001:filter-duplicates",
+    "invocationHash": "f2ab0ea5ee88d14f01464f3ae92ba63df56844f8ded40fb99464dad25587048d",
+    "stepId": "S000001",
+    "taskId": "filter-duplicates",
+    "kind": "node",
+    "label": "Filter duplicates",
+    "taskDefRef": "tasks/01KHK04XS7D7BTQHWQBF7WB8P0/task.json"
+  },
+  "checksum": "2c9521b4fd64533e5d5367195bf3d07cbdb9ac88442b3e09c17b93612a47185d"
+}

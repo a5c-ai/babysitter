@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHFCBN3K5Q6TKEWPA0817G5E",
+  "taskId": "generate-executive-summary",
+  "invocationKey": "content/publish-queue:S000006:generate-executive-summary",
+  "status": "ok",
+  "startedAt": "2026-02-15T00:49:09.733Z",
+  "finishedAt": "2026-02-15T00:49:55.584Z",
+  "result": {
+    "summary": "Generated review for Generate executive summary",
+    "sections": 6,
+    "wordCount": 1560,
+    "confidence": 0.935,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Review error handling in async paths"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Generate executive summary",
+    "sections": 6,
+    "wordCount": 1560,
+    "confidence": 0.935,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Review error handling in async paths"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:37:41.572Z",
+  "data": {
+    "effectId": "01KHGHF5E47ZN0QG0KGX0M2PYW",
+    "invocationKey": "content/analytics-roll:S000005:clear-cache",
+    "invocationHash": "7f91566ca8bb8f43b655e64afbda9d843e7fe929129c982644e5639f3e428a70",
+    "stepId": "S000005",
+    "taskId": "clear-cache",
+    "kind": "shell",
+    "label": "Clear cache",
+    "taskDefRef": "tasks/01KHGHF5E47ZN0QG0KGX0M2PYW/task.json"
+  },
+  "checksum": "b43d5bc218352be63c72ae0b2f8a36f4f103833c856b38ae5cb3c4ae0671b16a"
+}

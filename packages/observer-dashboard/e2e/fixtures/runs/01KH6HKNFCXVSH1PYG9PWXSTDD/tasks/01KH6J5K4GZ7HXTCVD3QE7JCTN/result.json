@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6J5K4GZ7HXTCVD3QE7JCTN",
+  "taskId": "create-architecture-spec",
+  "invocationKey": "sales/lead-scoring:S000018:create-architecture-spec",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:37:32.522Z",
+  "finishedAt": "2026-02-11T14:38:27.909Z",
+  "result": {
+    "summary": "Generated draft for Create architecture spec",
+    "sections": 8,
+    "wordCount": 1258,
+    "confidence": 0.724,
+    "recommendations": [
+      "Consider caching for frequently accessed data",
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Create architecture spec",
+    "sections": 8,
+    "wordCount": 1258,
+    "confidence": 0.724,
+    "recommendations": [
+      "Consider caching for frequently accessed data",
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging"
+    ]
+  }
+}

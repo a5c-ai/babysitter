@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4X95BS8VWVVXTXDXBJS2T",
+  "taskId": "execute-test-suite",
+  "invocationKey": "content/publish-queue:S000005:execute-test-suite",
+  "stepId": "S000005",
+  "kind": "shell",
+  "title": "Execute test suite",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4X95BS8VWVVXTXDXBJS2T/input.json",
+    "outputJsonPath": "tasks/01KHH4X95BS8VWVVXTXDXBJS2T/result.json"
+  },
+  "inputs": {
+    "command": "psql",
+    "args": [
+      "build",
+      "--env=prod"
+    ],
+    "cwd": "/workspace/content-scheduler",
+    "timeout": 137000
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHATWT6SJ4QATFEA0NTSCB03",
+  "taskId": "synthesize-user-feedback",
+  "invocationKey": "sales/deal-sync:S000003:synthesize-user-feedback",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Synthesize user feedback",
+  "io": {
+    "inputJsonPath": "tasks/01KHATWT6SJ4QATFEA0NTSCB03/input.json",
+    "outputJsonPath": "tasks/01KHATWT6SJ4QATFEA0NTSCB03/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/deal-sync step S000003",
+    "maxTokens": 7882,
+    "temperature": 0.56,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "synthesize-user-feedback",
+    "prompt": {
+      "role": "researcher",
+      "task": "Synthesize user feedback",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:54:22.189Z",
+  "data": {
+    "effectId": "01KH47KDQDQDSNN7XV868PKA3N",
+    "invocationKey": "sample/roster-update:S000005:merge-datasets",
+    "invocationHash": "0945fca0e10cb0a6d354d1239945d9a115c05c6b972120ed1e985f2fb5f4e314",
+    "stepId": "S000005",
+    "taskId": "merge-datasets",
+    "kind": "node",
+    "label": "Merge datasets",
+    "taskDefRef": "tasks/01KH47KDQDQDSNN7XV868PKA3N/task.json"
+  },
+  "checksum": "2df37551a310118f6744ca21d006db12c93782203e5a74a510e7b9dcaf43fa77"
+}

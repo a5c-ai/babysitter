@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47W2MZPPGH7CW4DQDDFXED",
+  "taskId": "clear-cache",
+  "invocationKey": "sample/roster-update:S000012:clear-cache",
+  "stepId": "S000012",
+  "kind": "shell",
+  "title": "Clear cache",
+  "io": {
+    "inputJsonPath": "tasks/01KH47W2MZPPGH7CW4DQDDFXED/input.json",
+    "outputJsonPath": "tasks/01KH47W2MZPPGH7CW4DQDDFXED/result.json"
+  },
+  "inputs": {
+    "command": "aws",
+    "args": [
+      "migrate",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/sample-project",
+    "timeout": 207000
+  }
+}

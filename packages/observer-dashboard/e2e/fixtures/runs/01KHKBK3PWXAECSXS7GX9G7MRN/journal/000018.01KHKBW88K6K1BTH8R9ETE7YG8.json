@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T13:57:42.291Z",
+  "data": {
+    "effectId": "01KHKBW88KYAV9GCSZ79E1A9RJ",
+    "invocationKey": "content/analytics-roll:S000009:generate-executive-summary",
+    "invocationHash": "9aabf63676ef3c10247e84255df3a55c165cfe7816abfab0d83f62d454898b8e",
+    "stepId": "S000009",
+    "taskId": "generate-executive-summary",
+    "kind": "agent",
+    "label": "Generate executive summary",
+    "taskDefRef": "tasks/01KHKBW88KYAV9GCSZ79E1A9RJ/task.json"
+  },
+  "checksum": "7e34fb61d332349f9888a90d5a8ed72dbe6772081c2bd73fe03de6c32da10b11"
+}

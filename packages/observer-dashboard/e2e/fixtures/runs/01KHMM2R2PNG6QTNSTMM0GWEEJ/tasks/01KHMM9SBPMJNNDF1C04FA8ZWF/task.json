@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMM9SBPMJNNDF1C04FA8ZWF",
+  "taskId": "review-pull-request",
+  "invocationKey": "content/publish-queue:S000008:review-pull-request",
+  "stepId": "S000008",
+  "kind": "agent",
+  "title": "Review pull request",
+  "io": {
+    "inputJsonPath": "tasks/01KHMM9SBPMJNNDF1C04FA8ZWF/input.json",
+    "outputJsonPath": "tasks/01KHMM9SBPMJNNDF1C04FA8ZWF/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000008",
+    "maxTokens": 7211,
+    "temperature": 0.72,
+    "model": "claude-haiku-235-20250227"
+  },
+  "agent": {
+    "name": "review-pull-request",
+    "prompt": {
+      "role": "researcher",
+      "task": "Review pull request",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

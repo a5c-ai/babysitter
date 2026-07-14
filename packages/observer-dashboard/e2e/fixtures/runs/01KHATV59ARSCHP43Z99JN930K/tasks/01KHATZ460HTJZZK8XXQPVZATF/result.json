@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHATZ460HTJZZK8XXQPVZATF",
+  "taskId": "run-lint-checks",
+  "invocationKey": "sales/deal-sync:S000005:run-lint-checks",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:28:15.620Z",
+  "finishedAt": "2026-02-13T06:29:09.471Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 196 items",
+    "stderr": "",
+    "duration_ms": 53851
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 196 items",
+    "stderr": "",
+    "duration_ms": 53851
+  }
+}

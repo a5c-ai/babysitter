@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:36:11.993Z",
+  "data": {
+    "effectId": "01KH46J52SEAH2ACRGDEWG59D4",
+    "invocationKey": "demo-project/publish:S000020:merge-datasets",
+    "invocationHash": "7c35c9f1b15e15dcecd6f71e9f1cf4a324b2b7c6c56cdff2f09dfa74e5b25071",
+    "stepId": "S000020",
+    "taskId": "merge-datasets",
+    "kind": "node",
+    "label": "Merge datasets",
+    "taskDefRef": "tasks/01KH46J52SEAH2ACRGDEWG59D4/task.json"
+  },
+  "checksum": "2eb22b907dd9557dcffcf1da3c67231a1d8c4ea16a713434c7f408d7200ce8cf"
+}

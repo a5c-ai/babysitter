@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6J24X7JZ931VRCCF6MPFQS",
+  "taskId": "build-docker-image",
+  "invocationKey": "sales/lead-scoring:S000016:build-docker-image",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:35:40.233Z",
+  "finishedAt": "2026-02-11T14:36:33.042Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 116 items",
+    "stderr": "",
+    "duration_ms": 52809
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 116 items",
+    "stderr": "",
+    "duration_ms": 52809
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-10T16:23:43.455Z",
+  "data": {
+    "runId": "01KH45VA2ZEEE8XDMEVMKCGA35",
+    "processId": "demo-project/publish",
+    "entrypoint": {
+      "importPath": "../../processes/demo-project-publish.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "a7514af9b7bb7aa6ee41244519bb3ef23aba260a9bfd46eb850501a76ea61d36"
+}

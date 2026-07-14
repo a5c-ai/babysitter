@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9HKCR5HYWQE5J78FTMM6Q9",
+  "taskId": "execute-ocr-pipeline",
+  "invocationKey": "content/publish-queue:S000005:execute-ocr-pipeline",
+  "status": "ok",
+  "startedAt": "2026-02-12T18:25:19.579Z",
+  "finishedAt": "2026-02-12T18:25:22.266Z",
+  "result": {
+    "invocations": 6,
+    "successRate": 0.807,
+    "resultCount": 210
+  },
+  "value": {
+    "invocations": 6,
+    "successRate": 0.807,
+    "resultCount": 210
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHG164TERZD1Y5P5BX1F3YDN",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "sales/deal-sync:S000003:analyze-competitor-data",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Analyze competitor data",
+  "io": {
+    "inputJsonPath": "tasks/01KHG164TERZD1Y5P5BX1F3YDN/input.json",
+    "outputJsonPath": "tasks/01KHG164TERZD1Y5P5BX1F3YDN/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/deal-sync step S000003",
+    "maxTokens": 6372,
+    "temperature": 0.65,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "analyze-competitor-data",
+    "prompt": {
+      "role": "researcher",
+      "task": "Analyze competitor data",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

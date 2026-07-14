@@ -1,5 +1,5 @@
 import { test, expect } from "../fixtures";
-import { getManifest, getRunIdsByStatus } from "../fixtures/test-data";
+import { getManifest, getRunIdsByStatus, getActiveRunCount } from "../fixtures/test-data";
 import type { Manifest, ManifestRun } from "../fixtures/test-data";
 
 /**
@@ -34,7 +34,7 @@ function pickRun(status: ManifestRun["status"]): ManifestRun {
 /**
  * Known waiting run with a resolved breakpoint task.
  *
- * Run 01KH47FK2MGMMB37B17PE3Z91Z (hockey/roster-update) has a breakpoint
+ * Run 01KH47FK2MGMMB37B17PE3Z91Z (sample/roster-update) has a breakpoint
  * task "Approve budget allocation?" at effectId 01KH47YK0HJ1CY5FYT4X1XZ5YZ.
  * The breakpoint was already resolved (approved), but the run is still in
  * "waiting" status because a subsequent agent task is pending.
@@ -58,86 +58,105 @@ const PENDING_BP_RUN_ID = "01KTESTPENDINGBPFIXTURE0";
 const PENDING_BP_EFFECT_ID = "01KTEST_BP_EFFECT_001";
 
 // ---------------------------------------------------------------------------
-// Breakpoint Banner on Dashboard
+// Needs-you alarm surface on the dashboard
+//
+// owner 2026-07-07: deduped needs-you surface — top list removed; alarm =
+// counts banner + kanban column. The redundant top inform-only list
+// (BreakpointBanner) was removed. The slim ExecutiveSummaryBanner counts
+// ("N approvals need your attention") is the view-independent alarm; the
+// per-run question/project/answer affordances live on the kanban Needs-you
+// column card (covered by kanban-board.spec.ts). These tests target the
+// surviving surfaces reachable from each view.
 // ---------------------------------------------------------------------------
 
-test.describe("Breakpoint Banner", () => {
-  test("breakpoint banner is visible on dashboard when pending breakpoints exist", async ({
+test.describe("Needs-you alarm surface", () => {
+  test("counts banner surfaces pending breakpoints on the dashboard", async ({
     dashboardPage,
     page,
   }) => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // The fixture now includes 01KTESTPENDINGBPFIXTURE0 which has an
-    // unresolved breakpoint task. The banner should appear.
-    const banner = page.getByTestId("breakpoint-banner");
+    // The fixture includes 01KTESTPENDINGBPFIXTURE0 (unresolved breakpoint), so
+    // the counts banner raises the approvals alarm. The slim banner shows counts
+    // only — the question/project text now lives on the kanban Needs-you card.
+    const banner = page.getByTestId("executive-summary-banner");
     await expect(banner).toBeVisible({ timeout: 15_000 });
 
-    // Verify it shows "Approval Needed"
-    await expect(banner).toContainText("Approval Needed");
-
-    // Verify it shows the breakpoint question
-    await expect(banner).toContainText("Approve deployment to staging?");
-
-    // Verify it shows the project name
-    await expect(banner).toContainText("test-breakpoint-project");
+    // The approvals segment names the pending-breakpoint count and is the
+    // clickable route into the needs-you surface.
+    const attention = page.getByTestId("summary-segment-attention");
+    await expect(attention).toBeVisible();
+    await expect(attention).toContainText(/approval/i);
+    await expect(attention).toContainText(/your attention/i);
   });
 
-  test("breakpoint banner remains stable during polling cycles (no flickering)", async ({
+  test("counts banner stays stable during polling cycles (no flickering)", async ({
     dashboardPage,
     page,
   }) => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    const banner = page.getByTestId("breakpoint-banner");
+    const banner = page.getByTestId("executive-summary-banner");
     await expect(banner).toBeVisible({ timeout: 15_000 });
 
     // Verify the banner stays visible across multiple polling cycles.
     // The poll interval in test config is 2000ms. We check every second
-    // for 8 seconds to ensure the banner doesn't flicker.
+    // for 8 seconds to ensure the alarm doesn't flicker.
     for (let i = 0; i < 8; i++) {
       await page.waitForTimeout(1000);
       await expect(banner).toBeVisible({ timeout: 2_000 });
+      await expect(page.getByTestId("summary-segment-attention")).toBeVisible();
     }
   });
 
-  test("breakpoint banner shows correct metrics alongside active runs", async ({
+  test("counts banner shows the approvals alarm alongside active-run metrics", async ({
     dashboardPage,
     page,
   }) => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // Verify the banner is showing the pending breakpoint
-    const banner = page.getByTestId("breakpoint-banner");
-    await expect(banner).toBeVisible({ timeout: 15_000 });
+    // Verify the counts banner is raising the pending-breakpoint alarm.
+    await expect(page.getByTestId("executive-summary-banner")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("summary-segment-attention")).toContainText(/approval/i);
 
     // The dashboard still shows In Progress runs correctly
     const activeTile = dashboardPage.getMetricTile("active");
     await expect(activeTile).toBeVisible();
 
-    // Active count includes waiting + pending runs (including the new fixture)
-    const activeCount =
-      (manifest.statusCounts.waiting || 0) + (manifest.statusCounts.pending || 0);
+    // §15.1 (owner gate 2026-07-06b, scheduled-state): Active = waiting + pending
+    // MINUS sleeping "scheduled" runs (a forever-run parked at an unresolved
+    // sleep effect is idle-healthy, not in-progress). getActiveRunCount matches
+    // the tile's single-counting-source definition.
+    const activeCount = await getActiveRunCount();
     await expect(activeTile).toContainText(String(activeCount));
   });
 
-  test("breakpoint banner links to the correct run detail page", async ({
-    dashboardPage,
+  test("kanban Needs-you card links to the correct run detail page", async ({
     page,
   }) => {
-    await dashboardPage.goto();
-    await dashboardPage.waitForData();
+    // owner 2026-07-07: deduped needs-you surface — the per-run "open this run"
+    // affordance the removed top list carried now lives on the kanban Needs-you
+    // card, so this drives the surviving surface. Board is the default view; a
+    // fresh context has no persisted view seed, so a plain goto renders it.
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("kanban-board")).toBeVisible({ timeout: 30_000 });
 
-    const banner = page.getByTestId("breakpoint-banner");
-    await expect(banner).toBeVisible({ timeout: 15_000 });
+    // The pending-breakpoint run is a Needs-you card; its stretched overlay link
+    // opens the run detail page.
+    const card = page
+      .getByTestId("kanban-column-needsyou")
+      .locator(`[data-run-id="${PENDING_BP_RUN_ID}"]`);
+    await expect(card).toBeVisible({ timeout: 15_000 });
 
-    // Click on the banner link (the main area, not the approve button)
-    const bannerLink = banner.locator(`a[href="/runs/${PENDING_BP_RUN_ID}"]`);
-    await expect(bannerLink).toBeVisible();
-    await bannerLink.click();
+    const cardLink = card.getByTestId("kanban-card-link");
+    await expect(cardLink).toHaveAttribute("href", `/runs/${PENDING_BP_RUN_ID}`);
+    // The stretched overlay link (z-0) is covered in the card's center by the
+    // inline breakpoint answer panel (z-10, RunRow pattern). Click near the
+    // card's top-left (Row 1) where the link is unobstructed.
+    await cardLink.click({ position: { x: 6, y: 6 } });
 
     // Should navigate to the run detail page
     await page.waitForURL(`**/runs/${PENDING_BP_RUN_ID}`, { timeout: 10_000 });

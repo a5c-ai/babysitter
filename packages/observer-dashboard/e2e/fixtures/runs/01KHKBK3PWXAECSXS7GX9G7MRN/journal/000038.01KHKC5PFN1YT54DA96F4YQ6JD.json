@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T14:02:51.765Z",
+  "data": {
+    "effectId": "01KHKC5PFNCJT357MST846E0WG",
+    "invocationKey": "content/analytics-roll:S000019:enrich-metadata",
+    "invocationHash": "6cbe91fd7b4aa1a05e288ec552749830f1934c9d9953e680f18ca55184aa75f9",
+    "stepId": "S000019",
+    "taskId": "enrich-metadata",
+    "kind": "node",
+    "label": "Enrich metadata",
+    "taskDefRef": "tasks/01KHKC5PFNCJT357MST846E0WG/task.json"
+  },
+  "checksum": "fcfa739bd7d125810f08532d7431ea862680adaa791e07da536b2c59603c0698"
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6HYD33GXVGR6JBM6WM6Y1D",
+  "taskId": "research-market-trends",
+  "invocationKey": "sales/lead-scoring:S000014:research-market-trends",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:33:36.862Z",
+  "finishedAt": "2026-02-11T14:34:34.441Z",
+  "result": {
+    "summary": "Generated draft for Research market trends",
+    "sections": 7,
+    "wordCount": 2558,
+    "confidence": 0.799,
+    "recommendations": [
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Research market trends",
+    "sections": 7,
+    "wordCount": 2558,
+    "confidence": 0.799,
+    "recommendations": [
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

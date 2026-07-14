@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMM627VGS3P56DHKEJPVNTJ",
+  "taskId": "write-test-specifications",
+  "invocationKey": "content/publish-queue:S000003:write-test-specifications",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Write test specifications",
+  "io": {
+    "inputJsonPath": "tasks/01KHMM627VGS3P56DHKEJPVNTJ/input.json",
+    "outputJsonPath": "tasks/01KHMM627VGS3P56DHKEJPVNTJ/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000003",
+    "maxTokens": 6980,
+    "temperature": 0.38,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "write-test-specifications",
+    "prompt": {
+      "role": "architect",
+      "task": "Write test specifications",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

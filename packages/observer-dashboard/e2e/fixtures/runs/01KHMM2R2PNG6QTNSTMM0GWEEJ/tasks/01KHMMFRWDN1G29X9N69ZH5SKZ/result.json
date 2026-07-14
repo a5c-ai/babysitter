@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMMFRWDN1G29X9N69ZH5SKZ",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "content/publish-queue:S000013:generate-api-documentation",
+  "status": "ok",
+  "startedAt": "2026-02-17T01:47:26.641Z",
+  "finishedAt": "2026-02-17T01:48:10.170Z",
+  "result": {
+    "summary": "Generated specification for Generate API documentation",
+    "sections": 8,
+    "wordCount": 3182,
+    "confidence": 0.865,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Add structured logging for debugging",
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated specification for Generate API documentation",
+    "sections": 8,
+    "wordCount": 3182,
+    "confidence": 0.865,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Add structured logging for debugging",
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

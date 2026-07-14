@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHKC53XJXW0CTGFN20Q84PV8",
+  "taskId": "call-translation-api",
+  "invocationKey": "content/analytics-roll:S000018:call-translation-api",
+  "status": "ok",
+  "startedAt": "2026-02-16T14:02:34.395Z",
+  "finishedAt": "2026-02-16T14:02:49.132Z",
+  "result": {
+    "invocations": 10,
+    "successRate": 0.871,
+    "resultCount": 112
+  },
+  "value": {
+    "invocations": 10,
+    "successRate": 0.871,
+    "resultCount": 112
+  }
+}

@@ -29,7 +29,10 @@ describe('source-discovery', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     invalidateDiscoveryCache();
-    mockAccess.mockRejectedValue(new Error('ENOENT'));
+    // Default: run dirs look real (have run.json) so discovery includes them.
+    // isRunDir() is the only consumer of fs.access; individual tests override to
+    // exercise the "non-run dir is skipped" behavior.
+    mockAccess.mockResolvedValue(undefined);
   });
 
   describe('invalidateDiscoveryCache', () => {
@@ -171,6 +174,45 @@ describe('source-discovery', () => {
       expect(results).toHaveLength(1);
       expect(results[0].runDir).toBe(path.join('/direct/runs', 'run-a'));
       expect(results[0].projectName).toBe('direct');
+    });
+
+    it('skips non-run directories in depth=0 sources (QA F9)', async () => {
+      mockGetConfig.mockResolvedValue({
+        sources: [{ path: '/direct/runs', depth: 0, label: 'direct' }],
+        port: 4800,
+        pollInterval: 2000,
+        theme: 'dark',
+        staleThresholdMs: 3600000,
+        recentCompletionWindowMs: 14400000,
+        retentionDays: 30,
+        hiddenProjects: [],
+      });
+
+      mockReadFile.mockRejectedValue(new Error('ENOENT'));
+
+      mockReaddir.mockImplementation(async (dir: unknown) => {
+        const dirStr = typeof dir === 'string' ? dir : String(dir);
+        if (dirStr === '/direct/runs') {
+          return [
+            { name: 'real-run', isDirectory: () => true },
+            // Stray notes folder (only .md files inside — no run.json/journal)
+            { name: 'ai-org', isDirectory: () => true },
+          ] as unknown as ReturnType<typeof fs.readdir>;
+        }
+        return [] as unknown as ReturnType<typeof fs.readdir>;
+      });
+
+      // run.json exists only for real-run; ai-org has neither run.json nor journal/
+      mockAccess.mockImplementation(async (p: unknown) => {
+        if (String(p) === path.join('/direct/runs', 'real-run', 'run.json')) return undefined;
+        throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+      });
+      mockStat.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+
+      const results = await discoverAllRunDirs();
+
+      expect(results).toHaveLength(1);
+      expect(results[0].runDir).toBe(path.join('/direct/runs', 'real-run'));
     });
 
     it('skips node_modules and hidden directories during scanning', async () => {

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:35:44.250Z",
+  "data": {
+    "effectId": "01KHGHBJVT7NMJQAJX291S4N38",
+    "invocationKey": "content/analytics-roll:S000001:verify-outreach-email-before-s",
+    "invocationHash": "f50b69e8cd2170088523d7f41f16b1944beec9c555abee6d5ae09aba59229f55",
+    "stepId": "S000001",
+    "taskId": "verify-outreach-email-before-s",
+    "kind": "breakpoint",
+    "label": "Verify outreach email before sending?",
+    "taskDefRef": "tasks/01KHGHBJVT7NMJQAJX291S4N38/task.json"
+  },
+  "checksum": "ba6b14f36ba09f6b0fab6673cfb4ef9a85c04278077a5cbe35b66dfb9475b058"
+}

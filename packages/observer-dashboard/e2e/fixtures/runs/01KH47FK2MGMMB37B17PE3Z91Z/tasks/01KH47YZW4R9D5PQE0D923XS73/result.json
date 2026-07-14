@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH47YZW4R9D5PQE0D923XS73",
+  "taskId": "generate-executive-summary",
+  "invocationKey": "sample/roster-update:S000015:generate-executive-summary",
+  "status": "ok",
+  "startedAt": "2026-02-10T17:00:43.144Z",
+  "finishedAt": "2026-02-10T17:01:37.433Z",
+  "result": {
+    "summary": "Generated review for Generate executive summary",
+    "sections": 7,
+    "wordCount": 3884,
+    "confidence": 0.988,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Consider caching for frequently accessed data",
+      "Review error handling in async paths",
+      "Implement retry logic for external API calls",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Generate executive summary",
+    "sections": 7,
+    "wordCount": 3884,
+    "confidence": 0.988,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Consider caching for frequently accessed data",
+      "Review error handling in async paths",
+      "Implement retry logic for external API calls",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

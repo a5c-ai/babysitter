@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T09:18:47.231Z",
+  "data": {
+    "effectId": "01KH8JANDZSASVN19J2JP7WTE0",
+    "invocationKey": "demo-project/publish:S000004:transform-csv-to-json",
+    "invocationHash": "81c773099c2541a48aa418a83a7245061c84177d8d74fd0dec2ab4f59a80557b",
+    "stepId": "S000004",
+    "taskId": "transform-csv-to-json",
+    "kind": "node",
+    "label": "Transform CSV to JSON",
+    "taskDefRef": "tasks/01KH8JANDZSASVN19J2JP7WTE0/task.json"
+  },
+  "checksum": "dba47b6f274caf544959113f2db37ab83a21169491173d36836ff4a24d5dbe60"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47KGZ31XKEAQYX1EVZ3D2G",
+  "taskId": "index-search-documents",
+  "invocationKey": "sample/roster-update:S000006:index-search-documents",
+  "stepId": "S000006",
+  "kind": "node",
+  "title": "Index search documents",
+  "io": {
+    "inputJsonPath": "tasks/01KH47KGZ31XKEAQYX1EVZ3D2G/input.json",
+    "outputJsonPath": "tasks/01KH47KGZ31XKEAQYX1EVZ3D2G/result.json"
+  },
+  "inputs": {
+    "records": 7892,
+    "batchSize": 239,
+    "source": "postgres",
+    "destination": "webhook"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "runId": "01KHHN8629ZBWX36309H65P2K4",
+  "request": "sales/outreach-gen",
+  "processId": "sales/outreach-gen",
+  "entrypoint": {
+    "importPath": "../../processes/sales-outreach-gen.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/sales-outreach-gen.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-15T22:03:01.577Z",
+  "completionSecret": "9048fefefc0e3fd6346bfe370a3817c2",
+  "projectName": "sales-pipeline"
+}

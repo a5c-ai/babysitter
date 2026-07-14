@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH8JDZ56R5H46ZT8DR11K7R3",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "demo-project/publish:S000006:analyze-competitor-data",
+  "status": "ok",
+  "startedAt": "2026-02-12T09:20:36.240Z",
+  "finishedAt": "2026-02-12T09:20:50.472Z",
+  "result": {
+    "summary": "Generated specification for Analyze competitor data",
+    "sections": 8,
+    "wordCount": 629,
+    "confidence": 0.769,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Review error handling in async paths"
+    ]
+  },
+  "value": {
+    "summary": "Generated specification for Analyze competitor data",
+    "sections": 8,
+    "wordCount": 629,
+    "confidence": 0.769,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Review error handling in async paths"
+    ]
+  }
+}

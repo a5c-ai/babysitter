@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHATZ460HTJZZK8XXQPVZATF",
+  "taskId": "run-lint-checks",
+  "invocationKey": "sales/deal-sync:S000005:run-lint-checks",
+  "stepId": "S000005",
+  "kind": "shell",
+  "title": "Run lint checks",
+  "io": {
+    "inputJsonPath": "tasks/01KHATZ460HTJZZK8XXQPVZATF/input.json",
+    "outputJsonPath": "tasks/01KHATZ460HTJZZK8XXQPVZATF/result.json"
+  },
+  "inputs": {
+    "command": "docker",
+    "args": [
+      "migrate",
+      "--env=staging"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 195000
+  }
+}

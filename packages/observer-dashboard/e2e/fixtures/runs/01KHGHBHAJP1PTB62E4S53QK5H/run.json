@@ -1,0 +1,14 @@
+{
+  "runId": "01KHGHBHAJP1PTB62E4S53QK5H",
+  "request": "content/analytics-roll",
+  "processId": "content/analytics-roll",
+  "entrypoint": {
+    "importPath": "../../processes/content-analytics-roll.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/content-analytics-roll.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-15T11:35:42.674Z",
+  "completionSecret": "11633d849b7309c2d3f35c0c21f23c00",
+  "projectName": "content-scheduler"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-17T09:05:39.970Z",
+  "data": {
+    "runId": "01KHNDJ7M21A9S06YJKAD9XMHN",
+    "processId": "sales/outreach-gen",
+    "entrypoint": {
+      "importPath": "../../processes/sales-outreach-gen.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "eddb6ec1c2a4f6652a14fd59796bd2e7abb366d3b4749d39716581d28cf4801d"
+}

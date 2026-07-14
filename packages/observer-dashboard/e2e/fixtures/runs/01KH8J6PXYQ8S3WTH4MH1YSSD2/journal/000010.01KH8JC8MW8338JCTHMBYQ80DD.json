@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T09:19:39.676Z",
+  "data": {
+    "effectId": "01KH8JC8MWFMY19ZCNEVWXWEX8",
+    "invocationKey": "demo-project/publish:S000005:index-search-documents",
+    "invocationHash": "44937f082c00b82652737a00826c20032a0e225d97a080a5ebf49197d8a14a25",
+    "stepId": "S000005",
+    "taskId": "index-search-documents",
+    "kind": "node",
+    "label": "Index search documents",
+    "taskDefRef": "tasks/01KH8JC8MWFMY19ZCNEVWXWEX8/task.json"
+  },
+  "checksum": "43bdfaae5486d4d3f700609820b395ba7e9f78c2c1d6c732a4d62eba7dc9a587"
+}

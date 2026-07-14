@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCS9007DKW6J97GVM2JNN4S",
+  "taskId": "compress-assets",
+  "invocationKey": "sales/lead-scoring:S000003:compress-assets",
+  "status": "ok",
+  "startedAt": "2026-02-14T00:37:12.175Z",
+  "finishedAt": "2026-02-14T00:37:42.952Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 140 items",
+    "stderr": "",
+    "duration_ms": 30777
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 140 items",
+    "stderr": "",
+    "duration_ms": 30777
+  }
+}

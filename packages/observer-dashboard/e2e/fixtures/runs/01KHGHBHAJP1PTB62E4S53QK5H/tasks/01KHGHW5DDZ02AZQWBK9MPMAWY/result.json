@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHGHW5DDZ02AZQWBK9MPMAWY",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "content/analytics-roll:S000016:generate-api-documentation",
+  "status": "ok",
+  "startedAt": "2026-02-15T11:44:49.300Z",
+  "finishedAt": "2026-02-15T11:45:44.789Z",
+  "result": {
+    "summary": "Generated review for Generate API documentation",
+    "sections": 2,
+    "wordCount": 4611,
+    "confidence": 0.903,
+    "recommendations": [
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Generate API documentation",
+    "sections": 2,
+    "wordCount": 4611,
+    "confidence": 0.903,
+    "recommendations": [
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

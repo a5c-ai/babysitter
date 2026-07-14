@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T17:12:45.610Z",
+  "data": {
+    "effectId": "01KHH4MP9AN24KDVJ2NSH2F55N",
+    "invocationKey": "sales/outreach-gen:S000006:review-pull-request",
+    "invocationHash": "9070d898fd2af6338b450cee48e79a0a23685ee261078019e47096db8236619e",
+    "stepId": "S000006",
+    "taskId": "review-pull-request",
+    "kind": "agent",
+    "label": "Review pull request",
+    "taskDefRef": "tasks/01KHH4MP9AN24KDVJ2NSH2F55N/task.json"
+  },
+  "checksum": "a3863dc785dd99b405dde436928991827cedaba0472eb398142d08638461d9a1"
+}

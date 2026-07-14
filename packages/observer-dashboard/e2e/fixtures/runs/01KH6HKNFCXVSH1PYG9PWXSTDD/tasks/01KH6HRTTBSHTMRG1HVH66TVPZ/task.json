@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6HRTTBSHTMRG1HVH66TVPZ",
+  "taskId": "deduplicate-records",
+  "invocationKey": "sales/lead-scoring:S000007:deduplicate-records",
+  "stepId": "S000007",
+  "kind": "node",
+  "title": "Deduplicate records",
+  "io": {
+    "inputJsonPath": "tasks/01KH6HRTTBSHTMRG1HVH66TVPZ/input.json",
+    "outputJsonPath": "tasks/01KH6HRTTBSHTMRG1HVH66TVPZ/result.json"
+  },
+  "inputs": {
+    "records": 2106,
+    "batchSize": 163,
+    "source": "api",
+    "destination": "elasticsearch"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHJJYJXKSMQE62GMTQVZMAJY",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "content/draft-review:S000016:analyze-competitor-data",
+  "status": "ok",
+  "startedAt": "2026-02-16T06:42:06.190Z",
+  "finishedAt": "2026-02-16T06:42:44.645Z",
+  "result": {
+    "summary": "Generated specification for Analyze competitor data",
+    "sections": 6,
+    "wordCount": 1521,
+    "confidence": 0.975,
+    "recommendations": [
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated specification for Analyze competitor data",
+    "sections": 6,
+    "wordCount": 1521,
+    "confidence": 0.975,
+    "recommendations": [
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

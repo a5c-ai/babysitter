@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:42:06.558Z",
+  "data": {
+    "effectId": "01KHGHQ86YS8DNP5R5ZA5AAS9X",
+    "invocationKey": "content/analytics-roll:S000013:normalize-timestamps",
+    "invocationHash": "1b865bdeb9bdf0fee902701a11347a91dce0be2d0096d3210bd6980252ac9caa",
+    "stepId": "S000013",
+    "taskId": "normalize-timestamps",
+    "kind": "node",
+    "label": "Normalize timestamps",
+    "taskDefRef": "tasks/01KHGHQ86YS8DNP5R5ZA5AAS9X/task.json"
+  },
+  "checksum": "71d64db2e4c36a414cf58802a624b3d3b826e067d6e0b609e465f96a3a9fcaa3"
+}

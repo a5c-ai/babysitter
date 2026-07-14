@@ -1,0 +1,8 @@
+{
+  "channels": [
+    "twitter"
+  ],
+  "timezone": "Europe/London",
+  "draftCount": 7,
+  "autoPublish": true
+}

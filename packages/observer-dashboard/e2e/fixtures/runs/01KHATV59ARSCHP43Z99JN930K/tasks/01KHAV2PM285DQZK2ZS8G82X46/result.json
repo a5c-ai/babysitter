@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHAV2PM285DQZK2ZS8G82X46",
+  "taskId": "enrich-metadata",
+  "invocationKey": "sales/deal-sync:S000007:enrich-metadata",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:30:14.055Z",
+  "finishedAt": "2026-02-13T06:30:53.563Z",
+  "result": {
+    "processed": 9661,
+    "failed": 328,
+    "skipped": 116,
+    "duration_ms": 39508,
+    "outputPath": "output/enrich-metadata-G82X46.json"
+  },
+  "value": {
+    "processed": 9661,
+    "failed": 328,
+    "skipped": 116,
+    "duration_ms": 39508,
+    "outputPath": "output/enrich-metadata-G82X46.json"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6J5K4GZ7HXTCVD3QE7JCTN",
+  "taskId": "create-architecture-spec",
+  "invocationKey": "sales/lead-scoring:S000018:create-architecture-spec",
+  "stepId": "S000018",
+  "kind": "agent",
+  "title": "Create architecture spec",
+  "io": {
+    "inputJsonPath": "tasks/01KH6J5K4GZ7HXTCVD3QE7JCTN/input.json",
+    "outputJsonPath": "tasks/01KH6J5K4GZ7HXTCVD3QE7JCTN/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000018",
+    "maxTokens": 4352,
+    "temperature": 0.49,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "create-architecture-spec",
+    "prompt": {
+      "role": "analyst",
+      "task": "Create architecture spec",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMMJC296K7TN70Q9T7NZDAV",
+  "taskId": "invoke-web-scraper",
+  "invocationKey": "content/publish-queue:S000015:invoke-web-scraper",
+  "status": "ok",
+  "startedAt": "2026-02-17T01:48:50.517Z",
+  "finishedAt": "2026-02-17T01:49:33.934Z",
+  "result": {
+    "invocations": 6,
+    "successRate": 0.882,
+    "resultCount": 335
+  },
+  "value": {
+    "invocations": 6,
+    "successRate": 0.882,
+    "resultCount": 335
+  }
+}

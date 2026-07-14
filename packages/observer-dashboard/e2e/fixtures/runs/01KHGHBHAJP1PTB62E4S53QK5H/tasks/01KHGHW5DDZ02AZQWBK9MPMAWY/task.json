@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHGHW5DDZ02AZQWBK9MPMAWY",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "content/analytics-roll:S000016:generate-api-documentation",
+  "stepId": "S000016",
+  "kind": "agent",
+  "title": "Generate API documentation",
+  "io": {
+    "inputJsonPath": "tasks/01KHGHW5DDZ02AZQWBK9MPMAWY/input.json",
+    "outputJsonPath": "tasks/01KHGHW5DDZ02AZQWBK9MPMAWY/result.json"
+  },
+  "inputs": {
+    "context": "Process content/analytics-roll step S000016",
+    "maxTokens": 5391,
+    "temperature": 0.25,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "generate-api-documentation",
+    "prompt": {
+      "role": "writer",
+      "task": "Generate API documentation",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

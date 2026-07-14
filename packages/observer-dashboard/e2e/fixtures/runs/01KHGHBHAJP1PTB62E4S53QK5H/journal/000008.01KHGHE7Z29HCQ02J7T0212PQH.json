@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:37:11.394Z",
+  "data": {
+    "effectId": "01KHGHE7Z2PQDBRY6YG44Y549D",
+    "invocationKey": "content/analytics-roll:S000004:validate-schema",
+    "invocationHash": "5613faa0c47f1ec3a97029c29e8f297002e82acc986c6970e1ce29b4f700480c",
+    "stepId": "S000004",
+    "taskId": "validate-schema",
+    "kind": "node",
+    "label": "Validate schema",
+    "taskDefRef": "tasks/01KHGHE7Z2PQDBRY6YG44Y549D/task.json"
+  },
+  "checksum": "cb0a5c41ae1591a36ff8d73c8c8b9ca4f3e92fc47c26dc27ea5b88a3e7094c4a"
+}

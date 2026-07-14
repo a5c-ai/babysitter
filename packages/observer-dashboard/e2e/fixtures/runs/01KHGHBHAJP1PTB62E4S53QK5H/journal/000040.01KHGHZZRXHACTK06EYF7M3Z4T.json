@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:46:52.829Z",
+  "data": {
+    "effectId": "01KHGHZZRXSCJ5MZN4WD7HVX36",
+    "invocationKey": "content/analytics-roll:S000020:deduplicate-records",
+    "invocationHash": "8c792ba3b7e637e39f542b073527cc8581d3f031e31cc5e4b1163af1028e7b0c",
+    "stepId": "S000020",
+    "taskId": "deduplicate-records",
+    "kind": "node",
+    "label": "Deduplicate records",
+    "taskDefRef": "tasks/01KHGHZZRXSCJ5MZN4WD7HVX36/task.json"
+  },
+  "checksum": "230bf07ae07d80984322beb906ad4acc566ef44cdfaec3b654dc87711c9e5439"
+}

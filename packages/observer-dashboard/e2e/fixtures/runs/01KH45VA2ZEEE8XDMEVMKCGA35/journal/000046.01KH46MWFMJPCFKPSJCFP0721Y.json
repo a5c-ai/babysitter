@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:37:41.492Z",
+  "data": {
+    "effectId": "01KH46MWFMQP8SFPMJBB3A5E7Z",
+    "invocationKey": "demo-project/publish:S000023:deploy-to-staging",
+    "invocationHash": "6a3f30a1b0ec73b0222614e6bc964293a91ae5d503f4751b5cab4aa97a735997",
+    "stepId": "S000023",
+    "taskId": "deploy-to-staging",
+    "kind": "shell",
+    "label": "Deploy to staging",
+    "taskDefRef": "tasks/01KH46MWFMQP8SFPMJBB3A5E7Z/task.json"
+  },
+  "checksum": "96e05eedb66cc58fe94e23d6d4ce61084131515c1f1dcd8410c2b0904983b5c4"
+}

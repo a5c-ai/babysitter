@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHH515FXAS9Y6CGBWHXH0V6J",
+  "taskId": "review-pull-request",
+  "invocationKey": "content/publish-queue:S000011:review-pull-request",
+  "status": "ok",
+  "startedAt": "2026-02-15T17:19:35.985Z",
+  "finishedAt": "2026-02-15T17:20:30.007Z",
+  "result": {
+    "summary": "Generated review for Review pull request",
+    "sections": 5,
+    "wordCount": 2640,
+    "confidence": 0.986,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Increase test coverage for edge cases",
+      "Review error handling in async paths"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Review pull request",
+    "sections": 5,
+    "wordCount": 2640,
+    "confidence": 0.986,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Increase test coverage for edge cases",
+      "Review error handling in async paths"
+    ]
+  }
+}

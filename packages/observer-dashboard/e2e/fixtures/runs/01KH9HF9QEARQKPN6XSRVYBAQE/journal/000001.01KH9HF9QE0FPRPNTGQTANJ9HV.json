@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-12T18:23:04.942Z",
+  "data": {
+    "runId": "01KH9HF9QEARQKPN6XSRVYBAQE",
+    "processId": "content/publish-queue",
+    "entrypoint": {
+      "importPath": "../../processes/content-publish-queue.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "0136bb9c06ea865fb87fe2b1131f2d44fb159a17688a340e01d1855e1c5deb92"
+}

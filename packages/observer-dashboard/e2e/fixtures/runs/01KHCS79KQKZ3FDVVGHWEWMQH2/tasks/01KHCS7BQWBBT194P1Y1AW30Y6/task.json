@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHCS7BQWBBT194P1Y1AW30Y6",
+  "taskId": "clear-cache",
+  "invocationKey": "sales/lead-scoring:S000001:clear-cache",
+  "stepId": "S000001",
+  "kind": "shell",
+  "title": "Clear cache",
+  "io": {
+    "inputJsonPath": "tasks/01KHCS7BQWBBT194P1Y1AW30Y6/input.json",
+    "outputJsonPath": "tasks/01KHCS7BQWBBT194P1Y1AW30Y6/result.json"
+  },
+  "inputs": {
+    "command": "psql",
+    "args": [
+      "build",
+      "--env=prod"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 99000
+  }
+}

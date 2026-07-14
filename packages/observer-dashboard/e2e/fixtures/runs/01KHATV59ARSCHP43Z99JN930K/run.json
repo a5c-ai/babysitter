@@ -1,0 +1,14 @@
+{
+  "runId": "01KHATV59ARSCHP43Z99JN930K",
+  "request": "sales/deal-sync",
+  "processId": "sales/deal-sync",
+  "entrypoint": {
+    "importPath": "../../processes/sales-deal-sync.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/sales-deal-sync.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-13T06:26:05.226Z",
+  "completionSecret": "d8825998d09429350f0dacfd2a85b265",
+  "projectName": "sales-pipeline"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47KDQDQDSNN7XV868PKA3N",
+  "taskId": "merge-datasets",
+  "invocationKey": "sample/roster-update:S000005:merge-datasets",
+  "stepId": "S000005",
+  "kind": "node",
+  "title": "Merge datasets",
+  "io": {
+    "inputJsonPath": "tasks/01KH47KDQDQDSNN7XV868PKA3N/input.json",
+    "outputJsonPath": "tasks/01KH47KDQDQDSNN7XV868PKA3N/result.json"
+  },
+  "inputs": {
+    "records": 867,
+    "batchSize": 432,
+    "source": "s3",
+    "destination": "webhook"
+  }
+}

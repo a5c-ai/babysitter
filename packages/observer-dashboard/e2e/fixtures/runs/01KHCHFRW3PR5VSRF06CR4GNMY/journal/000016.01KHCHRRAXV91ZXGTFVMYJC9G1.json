@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-13T22:25:58.109Z",
+  "data": {
+    "effectId": "01KHCHRRAX4X4F6NH3D3KZ8B77",
+    "invocationKey": "content/draft-review:S000008:wait-for-rate-limit-cooldown",
+    "invocationHash": "68cff0d04ca9e46ce2ac3304745e888b0e06eec7a6c5cb95de1d16fe17fe3d2c",
+    "stepId": "S000008",
+    "taskId": "wait-for-rate-limit-cooldown",
+    "kind": "sleep",
+    "label": "Wait for rate limit cooldown",
+    "taskDefRef": "tasks/01KHCHRRAX4X4F6NH3D3KZ8B77/task.json"
+  },
+  "checksum": "83cb18eea46456e560f62ad1d48eb36b9db6dcb6235be797a495ff3e2f96bc20"
+}

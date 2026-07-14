@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMW7EA6P9C3FCFNFKVCBWW3",
+  "taskId": "sync-s3-bucket",
+  "invocationKey": "sales/deal-sync:S000007:sync-s3-bucket",
+  "stepId": "S000007",
+  "kind": "shell",
+  "title": "Sync S3 bucket",
+  "io": {
+    "inputJsonPath": "tasks/01KHMW7EA6P9C3FCFNFKVCBWW3/input.json",
+    "outputJsonPath": "tasks/01KHMW7EA6P9C3FCFNFKVCBWW3/result.json"
+  },
+  "inputs": {
+    "command": "npm",
+    "args": [
+      "sync",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 32000
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "feedUrl": "https://feeds.example.com/dev-diaries/rss",
+  "maxEpisodes": 10,
+  "language": "fr",
+  "outputFormat": "markdown"
+}

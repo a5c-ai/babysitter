@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH508KDF3EBAKS3X4A42DN1F",
+  "taskId": "deduplicate-records",
+  "invocationKey": "content/draft-review:S000002:deduplicate-records",
+  "status": "ok",
+  "startedAt": "2026-02-11T00:05:23.907Z",
+  "finishedAt": "2026-02-11T00:06:12.258Z",
+  "result": {
+    "processed": 9740,
+    "failed": 331,
+    "skipped": 158,
+    "duration_ms": 48351,
+    "outputPath": "output/deduplicate-records-42DN1F.json"
+  },
+  "value": {
+    "processed": 9740,
+    "failed": 331,
+    "skipped": 158,
+    "duration_ms": 48351,
+    "outputPath": "output/deduplicate-records-42DN1F.json"
+  }
+}

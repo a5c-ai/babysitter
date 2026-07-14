@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCHY5EE2XQA9EDJ4CVKKVQY",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "content/draft-review:S000014:generate-api-documentation",
+  "status": "ok",
+  "startedAt": "2026-02-13T22:28:56.249Z",
+  "finishedAt": "2026-02-13T22:29:48.787Z",
+  "result": {
+    "summary": "Generated draft for Generate API documentation",
+    "sections": 2,
+    "wordCount": 1518,
+    "confidence": 0.814,
+    "recommendations": [
+      "Review error handling in async paths",
+      "Add structured logging for debugging",
+      "Add input validation for user-facing fields",
+      "Add input validation for user-facing fields",
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Generate API documentation",
+    "sections": 2,
+    "wordCount": 1518,
+    "confidence": 0.814,
+    "recommendations": [
+      "Review error handling in async paths",
+      "Add structured logging for debugging",
+      "Add input validation for user-facing fields",
+      "Add input validation for user-facing fields",
+      "Add structured logging for debugging"
+    ]
+  }
+}

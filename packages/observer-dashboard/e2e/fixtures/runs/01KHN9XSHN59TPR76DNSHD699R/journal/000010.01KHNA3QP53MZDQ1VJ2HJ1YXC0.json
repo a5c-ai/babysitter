@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T08:05:19.173Z",
+  "data": {
+    "effectId": "01KHNA3QP57WXYYMHRC14DDP8W",
+    "invocationKey": "content/draft-review:S000005:compute-aggregates",
+    "invocationHash": "1eb23a0a7a42b237242ef030b85c0863d68e3e098b35cda2bf44104497c39386",
+    "stepId": "S000005",
+    "taskId": "compute-aggregates",
+    "kind": "node",
+    "label": "Compute aggregates",
+    "taskDefRef": "tasks/01KHNA3QP57WXYYMHRC14DDP8W/task.json"
+  },
+  "checksum": "1da98a686cb5fc3d3bdecd153c17f7e4625e6be0dec52842d712921d421c43bb"
+}

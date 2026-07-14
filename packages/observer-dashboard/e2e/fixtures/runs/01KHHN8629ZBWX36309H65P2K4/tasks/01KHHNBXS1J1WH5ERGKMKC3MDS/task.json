@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHHNBXS1J1WH5ERGKMKC3MDS",
+  "taskId": "deduplicate-records",
+  "invocationKey": "sales/outreach-gen:S000004:deduplicate-records",
+  "stepId": "S000004",
+  "kind": "node",
+  "title": "Deduplicate records",
+  "io": {
+    "inputJsonPath": "tasks/01KHHNBXS1J1WH5ERGKMKC3MDS/input.json",
+    "outputJsonPath": "tasks/01KHHNBXS1J1WH5ERGKMKC3MDS/result.json"
+  },
+  "inputs": {
+    "records": 7828,
+    "batchSize": 400,
+    "source": "redis",
+    "destination": "webhook"
+  }
+}

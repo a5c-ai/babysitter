@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMSKXAQP34AAJ300B90V258",
+  "taskId": "draft-release-notes",
+  "invocationKey": "content/draft-review:S000001:draft-release-notes",
+  "status": "ok",
+  "startedAt": "2026-02-17T03:17:04.187Z",
+  "finishedAt": "2026-02-17T03:18:01.175Z",
+  "result": {
+    "summary": "Generated analysis for Draft release notes",
+    "sections": 7,
+    "wordCount": 2200,
+    "confidence": 0.999,
+    "recommendations": [
+      "Consider caching for frequently accessed data",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Draft release notes",
+    "sections": 7,
+    "wordCount": 2200,
+    "confidence": 0.999,
+    "recommendations": [
+      "Consider caching for frequently accessed data",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

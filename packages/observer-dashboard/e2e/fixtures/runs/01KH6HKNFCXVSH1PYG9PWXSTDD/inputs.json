@@ -1,0 +1,9 @@
+{
+  "crmInstance": "https://globex.crm.example.com",
+  "pipeline": "enterprise",
+  "dateRange": {
+    "start": "2026-02-10",
+    "end": "2026-02-17"
+  },
+  "threshold": 50
+}

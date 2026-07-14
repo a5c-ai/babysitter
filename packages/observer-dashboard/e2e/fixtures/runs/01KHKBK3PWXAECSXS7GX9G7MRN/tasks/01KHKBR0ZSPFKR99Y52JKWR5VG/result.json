@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHKBR0ZSPFKR99Y52JKWR5VG",
+  "taskId": "run-database-migration",
+  "invocationKey": "content/analytics-roll:S000005:run-database-migration",
+  "status": "ok",
+  "startedAt": "2026-02-16T13:55:25.294Z",
+  "finishedAt": "2026-02-16T13:55:45.224Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 11 items",
+    "stderr": "",
+    "duration_ms": 19930
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 11 items",
+    "stderr": "",
+    "duration_ms": 19930
+  }
+}

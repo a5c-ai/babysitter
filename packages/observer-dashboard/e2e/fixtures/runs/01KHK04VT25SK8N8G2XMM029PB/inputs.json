@@ -1,0 +1,10 @@
+{
+  "channels": [
+    "blog",
+    "linkedin",
+    "newsletter"
+  ],
+  "timezone": "Europe/London",
+  "draftCount": 3,
+  "autoPublish": false
+}

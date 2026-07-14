@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-11T00:08:49.793Z",
+  "data": {
+    "effectId": "01KH50EYC1XJF7XN8JS0MEECS2",
+    "invocationKey": "content/draft-review:S000007:draft-release-notes",
+    "invocationHash": "e015c6bc0bcf4458a0cf33c88c19b934d07c01b08ffba0bef38210a6b8d5a336",
+    "stepId": "S000007",
+    "taskId": "draft-release-notes",
+    "kind": "agent",
+    "label": "Draft release notes",
+    "taskDefRef": "tasks/01KH50EYC1XJF7XN8JS0MEECS2/task.json"
+  },
+  "checksum": "28eef0acf3505e5660bf6feca5dfe23657df6136facc09df3b285c96f40da460"
+}

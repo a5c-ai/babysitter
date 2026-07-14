@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T06:58:45.475Z",
+  "data": {
+    "effectId": "01KHG1GDK3ZGT0SXZGS5HAN01P",
+    "invocationKey": "sales/deal-sync:S000011:enrich-metadata",
+    "invocationHash": "1833edf76befb3089f3dd1e6cecee615cfdc6520f4201afd077929c6d83bdf32",
+    "stepId": "S000011",
+    "taskId": "enrich-metadata",
+    "kind": "node",
+    "label": "Enrich metadata",
+    "taskDefRef": "tasks/01KHG1GDK3ZGT0SXZGS5HAN01P/task.json"
+  },
+  "checksum": "28c9f264c32aaaaffd909c86eadcc56a42706deb4f919d5e61afc369b1acb05e"
+}

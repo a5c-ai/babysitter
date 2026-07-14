@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMSZE1RV8M07D6TJTC08R1X",
+  "taskId": "create-architecture-spec",
+  "invocationKey": "content/draft-review:S000010:create-architecture-spec",
+  "stepId": "S000010",
+  "kind": "agent",
+  "title": "Create architecture spec",
+  "io": {
+    "inputJsonPath": "tasks/01KHMSZE1RV8M07D6TJTC08R1X/input.json",
+    "outputJsonPath": "tasks/01KHMSZE1RV8M07D6TJTC08R1X/result.json"
+  },
+  "inputs": {
+    "context": "Process content/draft-review step S000010",
+    "maxTokens": 5220,
+    "temperature": 0.42,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "create-architecture-spec",
+    "prompt": {
+      "role": "reviewer",
+      "task": "Create architecture spec",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T00:52:41.746Z",
+  "data": {
+    "effectId": "01KHFCJ4MJ7WBZK3BGYSTBST7R",
+    "invocationKey": "content/publish-queue:S000011:synthesize-user-feedback",
+    "invocationHash": "b3fd9457ccbc8f74b5a6f1d95f15b88124e5209e6d5f648a043ddc484dbed7b5",
+    "stepId": "S000011",
+    "taskId": "synthesize-user-feedback",
+    "kind": "agent",
+    "label": "Synthesize user feedback",
+    "taskDefRef": "tasks/01KHFCJ4MJ7WBZK3BGYSTBST7R/task.json"
+  },
+  "checksum": "46dee5940fee3d2d9c7ba3a09712c90d325954c2d00fea8d87dc1a5b53605052"
+}

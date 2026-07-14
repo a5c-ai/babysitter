@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMMF13M9NQEYV1W7X2H58EP",
+  "taskId": "deduplicate-records",
+  "invocationKey": "content/publish-queue:S000012:deduplicate-records",
+  "stepId": "S000012",
+  "kind": "node",
+  "title": "Deduplicate records",
+  "io": {
+    "inputJsonPath": "tasks/01KHMMF13M9NQEYV1W7X2H58EP/input.json",
+    "outputJsonPath": "tasks/01KHMMF13M9NQEYV1W7X2H58EP/result.json"
+  },
+  "inputs": {
+    "records": 7908,
+    "batchSize": 464,
+    "source": "redis",
+    "destination": "s3"
+  }
+}

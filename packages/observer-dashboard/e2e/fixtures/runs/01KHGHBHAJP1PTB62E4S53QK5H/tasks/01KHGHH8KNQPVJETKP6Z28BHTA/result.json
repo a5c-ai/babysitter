@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHGHH8KNQPVJETKP6Z28BHTA",
+  "taskId": "research-market-trends",
+  "invocationKey": "content/analytics-roll:S000007:research-market-trends",
+  "status": "ok",
+  "startedAt": "2026-02-15T11:38:51.890Z",
+  "finishedAt": "2026-02-15T11:39:26.225Z",
+  "result": {
+    "summary": "Generated review for Research market trends",
+    "sections": 4,
+    "wordCount": 2356,
+    "confidence": 0.865,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Consider caching for frequently accessed data",
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Research market trends",
+    "sections": 4,
+    "wordCount": 2356,
+    "confidence": 0.865,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Consider caching for frequently accessed data",
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

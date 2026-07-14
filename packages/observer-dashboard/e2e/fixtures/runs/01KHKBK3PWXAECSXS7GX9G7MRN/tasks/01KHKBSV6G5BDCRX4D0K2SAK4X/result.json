@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHKBSV6G5BDCRX4D0K2SAK4X",
+  "taskId": "validate-schema",
+  "invocationKey": "content/analytics-roll:S000007:validate-schema",
+  "status": "ok",
+  "startedAt": "2026-02-16T13:56:24.314Z",
+  "finishedAt": "2026-02-16T13:57:13.669Z",
+  "result": {
+    "processed": 1297,
+    "failed": 10,
+    "skipped": 11,
+    "duration_ms": 49355,
+    "outputPath": "output/validate-schema-2SAK4X.json"
+  },
+  "value": {
+    "processed": 1297,
+    "failed": 10,
+    "skipped": 11,
+    "duration_ms": 49355,
+    "outputPath": "output/validate-schema-2SAK4X.json"
+  }
+}

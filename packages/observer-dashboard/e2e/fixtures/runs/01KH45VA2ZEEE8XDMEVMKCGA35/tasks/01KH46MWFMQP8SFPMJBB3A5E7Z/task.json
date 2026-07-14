@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH46MWFMQP8SFPMJBB3A5E7Z",
+  "taskId": "deploy-to-staging",
+  "invocationKey": "demo-project/publish:S000023:deploy-to-staging",
+  "stepId": "S000023",
+  "kind": "shell",
+  "title": "Deploy to staging",
+  "io": {
+    "inputJsonPath": "tasks/01KH46MWFMQP8SFPMJBB3A5E7Z/input.json",
+    "outputJsonPath": "tasks/01KH46MWFMQP8SFPMJBB3A5E7Z/result.json"
+  },
+  "inputs": {
+    "command": "docker",
+    "args": [
+      "sync",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/demo-project",
+    "timeout": 243000
+  }
+}

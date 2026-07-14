@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCS8W8T0EWS3XW9KEY38E8J",
+  "taskId": "compute-aggregates",
+  "invocationKey": "sales/lead-scoring:S000002:compute-aggregates",
+  "status": "ok",
+  "startedAt": "2026-02-14T00:37:08.438Z",
+  "finishedAt": "2026-02-14T00:37:09.467Z",
+  "result": {
+    "processed": 5347,
+    "failed": 49,
+    "skipped": 67,
+    "duration_ms": 1029,
+    "outputPath": "output/compute-aggregates-Y38E8J.json"
+  },
+  "value": {
+    "processed": 5347,
+    "failed": 49,
+    "skipped": 67,
+    "duration_ms": 1029,
+    "outputPath": "output/compute-aggregates-Y38E8J.json"
+  }
+}

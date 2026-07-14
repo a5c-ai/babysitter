@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMSQDDB2T9Y0FG4QK0NN75A",
+  "taskId": "validate-schema",
+  "invocationKey": "content/draft-review:S000003:validate-schema",
+  "stepId": "S000003",
+  "kind": "node",
+  "title": "Validate schema",
+  "io": {
+    "inputJsonPath": "tasks/01KHMSQDDB2T9Y0FG4QK0NN75A/input.json",
+    "outputJsonPath": "tasks/01KHMSQDDB2T9Y0FG4QK0NN75A/result.json"
+  },
+  "inputs": {
+    "records": 1471,
+    "batchSize": 409,
+    "source": "s3",
+    "destination": "elasticsearch"
+  }
+}

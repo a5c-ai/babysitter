@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHHNMFS1D89PPY9BG89RQFWZ",
+  "taskId": "execute-test-suite",
+  "invocationKey": "sales/outreach-gen:S000011:execute-test-suite",
+  "stepId": "S000011",
+  "kind": "shell",
+  "title": "Execute test suite",
+  "io": {
+    "inputJsonPath": "tasks/01KHHNMFS1D89PPY9BG89RQFWZ/input.json",
+    "outputJsonPath": "tasks/01KHHNMFS1D89PPY9BG89RQFWZ/result.json"
+  },
+  "inputs": {
+    "command": "redis-cli",
+    "args": [
+      "build",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 242000
+  }
+}

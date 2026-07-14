@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:31:48.708Z",
+  "data": {
+    "effectId": "01KH46A3Z4J2QY0SA63D8Q0N1A",
+    "invocationKey": "demo-project/publish:S000013:invoke-web-scraper",
+    "invocationHash": "e8c7d07ea0d608bb855e0a3224c0c7a871b66a70561c03ff436e659cbd5cf98d",
+    "stepId": "S000013",
+    "taskId": "invoke-web-scraper",
+    "kind": "skill",
+    "label": "Invoke web scraper",
+    "taskDefRef": "tasks/01KH46A3Z4J2QY0SA63D8Q0N1A/task.json"
+  },
+  "checksum": "20ab5580e228293bf072f4c04d949dcf06d12f05bcb2c42f2493019c35306e62"
+}

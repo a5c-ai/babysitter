@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCSAXWZATH71Z768P66CB0C",
+  "taskId": "review-pull-request",
+  "invocationKey": "sales/lead-scoring:S000006:review-pull-request",
+  "status": "ok",
+  "startedAt": "2026-02-14T00:38:14.002Z",
+  "finishedAt": "2026-02-14T00:38:32.712Z",
+  "result": {
+    "summary": "Generated draft for Review pull request",
+    "sections": 2,
+    "wordCount": 280,
+    "confidence": 0.956,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Review pull request",
+    "sections": 2,
+    "wordCount": 280,
+    "confidence": 0.956,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

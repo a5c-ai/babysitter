@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH47X1Z4E2EQBPP7GD6KC6P7",
+  "taskId": "write-test-specifications",
+  "invocationKey": "sample/roster-update:S000013:write-test-specifications",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:59:39.518Z",
+  "finishedAt": "2026-02-10T17:00:25.146Z",
+  "result": {
+    "summary": "Generated specification for Write test specifications",
+    "sections": 3,
+    "wordCount": 2212,
+    "confidence": 0.915,
+    "recommendations": [
+      "Review error handling in async paths"
+    ]
+  },
+  "value": {
+    "summary": "Generated specification for Write test specifications",
+    "sections": 3,
+    "wordCount": 2212,
+    "confidence": 0.915,
+    "recommendations": [
+      "Review error handling in async paths"
+    ]
+  }
+}

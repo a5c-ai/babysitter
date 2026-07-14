@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T09:23:07.185Z",
+  "data": {
+    "effectId": "01KH8JJK9HTF9C537ZBHTQYGG8",
+    "invocationKey": "demo-project/publish:S000011:delay-for-webhook-callback",
+    "invocationHash": "ccddfc0ee2697a3e2a8469770e33c67a1f175e0b8efa9be6ce2a815241f6144a",
+    "stepId": "S000011",
+    "taskId": "delay-for-webhook-callback",
+    "kind": "sleep",
+    "label": "Delay for webhook callback",
+    "taskDefRef": "tasks/01KH8JJK9HTF9C537ZBHTQYGG8/task.json"
+  },
+  "checksum": "1c7de38a68cda55c009a594a18c7493e4b66e5e2183f28c2783c0190bd3de2ae"
+}

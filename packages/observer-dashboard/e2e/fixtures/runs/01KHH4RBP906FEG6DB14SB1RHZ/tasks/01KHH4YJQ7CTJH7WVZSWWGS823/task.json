@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4YJQ7CTJH7WVZSWWGS823",
+  "taskId": "deduplicate-records",
+  "invocationKey": "content/publish-queue:S000007:deduplicate-records",
+  "stepId": "S000007",
+  "kind": "node",
+  "title": "Deduplicate records",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4YJQ7CTJH7WVZSWWGS823/input.json",
+    "outputJsonPath": "tasks/01KHH4YJQ7CTJH7WVZSWWGS823/result.json"
+  },
+  "inputs": {
+    "records": 4218,
+    "batchSize": 51,
+    "source": "postgres",
+    "destination": "postgres"
+  }
+}

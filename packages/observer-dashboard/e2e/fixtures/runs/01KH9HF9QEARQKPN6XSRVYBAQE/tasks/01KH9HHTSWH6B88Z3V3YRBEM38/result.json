@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9HHTSWH6B88Z3V3YRBEM38",
+  "taskId": "review-pull-request",
+  "invocationKey": "content/publish-queue:S000004:review-pull-request",
+  "status": "ok",
+  "startedAt": "2026-02-12T18:24:29.102Z",
+  "finishedAt": "2026-02-12T18:25:17.605Z",
+  "result": {
+    "summary": "Generated analysis for Review pull request",
+    "sections": 6,
+    "wordCount": 1709,
+    "confidence": 0.856,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Review error handling in async paths",
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Review pull request",
+    "sections": 6,
+    "wordCount": 1709,
+    "confidence": 0.856,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Review error handling in async paths",
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

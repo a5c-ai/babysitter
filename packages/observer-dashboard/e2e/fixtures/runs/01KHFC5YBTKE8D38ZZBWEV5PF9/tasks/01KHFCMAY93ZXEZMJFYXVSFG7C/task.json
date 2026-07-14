@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHFCMAY93ZXEZMJFYXVSFG7C",
+  "taskId": "write-test-specifications",
+  "invocationKey": "content/publish-queue:S000014:write-test-specifications",
+  "stepId": "S000014",
+  "kind": "agent",
+  "title": "Write test specifications",
+  "io": {
+    "inputJsonPath": "tasks/01KHFCMAY93ZXEZMJFYXVSFG7C/input.json",
+    "outputJsonPath": "tasks/01KHFCMAY93ZXEZMJFYXVSFG7C/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000014",
+    "maxTokens": 5985,
+    "temperature": 0.3,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "write-test-specifications",
+    "prompt": {
+      "role": "analyst",
+      "task": "Write test specifications",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

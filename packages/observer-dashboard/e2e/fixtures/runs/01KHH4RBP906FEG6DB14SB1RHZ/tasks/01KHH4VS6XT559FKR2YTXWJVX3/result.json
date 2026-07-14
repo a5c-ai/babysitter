@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHH4VS6XT559FKR2YTXWJVX3",
+  "taskId": "approve-deployment-to-producti",
+  "invocationKey": "content/publish-queue:S000003:approve-deployment-to-producti",
+  "status": "ok",
+  "startedAt": "2026-02-15T17:16:39.703Z",
+  "finishedAt": "2026-02-15T17:16:42.305Z",
+  "result": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-15T17:16:42.305Z"
+  },
+  "value": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-15T17:16:42.305Z"
+  }
+}

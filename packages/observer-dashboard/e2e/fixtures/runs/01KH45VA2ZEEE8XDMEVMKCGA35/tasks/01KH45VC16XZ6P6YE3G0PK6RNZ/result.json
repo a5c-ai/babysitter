@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH45VC16XZ6P6YE3G0PK6RNZ",
+  "taskId": "generate-executive-summary",
+  "invocationKey": "demo-project/publish:S000001:generate-executive-summary",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:23:46.169Z",
+  "finishedAt": "2026-02-10T16:24:12.586Z",
+  "result": {
+    "summary": "Generated review for Generate executive summary",
+    "sections": 8,
+    "wordCount": 3105,
+    "confidence": 0.778,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Generate executive summary",
+    "sections": 8,
+    "wordCount": 3105,
+    "confidence": 0.778,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

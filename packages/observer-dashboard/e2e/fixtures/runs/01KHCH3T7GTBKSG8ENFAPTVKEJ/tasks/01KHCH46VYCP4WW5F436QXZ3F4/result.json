@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCH46VYCP4WW5F436QXZ3F4",
+  "taskId": "invoke-web-scraper",
+  "invocationKey": "sales/lead-scoring:S000002:invoke-web-scraper",
+  "status": "ok",
+  "startedAt": "2026-02-13T22:14:46.580Z",
+  "finishedAt": "2026-02-13T22:15:13.966Z",
+  "result": {
+    "invocations": 5,
+    "successRate": 0.859,
+    "resultCount": 447
+  },
+  "value": {
+    "invocations": 5,
+    "successRate": 0.859,
+    "resultCount": 447
+  }
+}

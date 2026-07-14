@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6HTVPCCTXMDSKBWQ9DTRW0",
+  "taskId": "approve-budget-allocation",
+  "invocationKey": "sales/lead-scoring:S000010:approve-budget-allocation",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:31:41.355Z",
+  "finishedAt": "2026-02-11T14:32:01.381Z",
+  "result": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-11T14:32:01.381Z"
+  },
+  "value": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-11T14:32:01.381Z"
+  }
+}

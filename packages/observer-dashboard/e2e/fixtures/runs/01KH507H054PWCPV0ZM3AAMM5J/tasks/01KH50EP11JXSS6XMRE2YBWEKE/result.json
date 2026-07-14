@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH50EP11JXSS6XMRE2YBWEKE",
+  "taskId": "create-architecture-spec",
+  "invocationKey": "content/draft-review:S000006:create-architecture-spec",
+  "status": "ok",
+  "startedAt": "2026-02-11T00:08:42.565Z",
+  "finishedAt": "2026-02-11T00:08:44.583Z",
+  "result": {
+    "summary": "Generated report for Create architecture spec",
+    "sections": 7,
+    "wordCount": 2689,
+    "confidence": 0.77,
+    "recommendations": [
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated report for Create architecture spec",
+    "sections": 7,
+    "wordCount": 2689,
+    "confidence": 0.77,
+    "recommendations": [
+      "Add structured logging for debugging"
+    ]
+  }
+}

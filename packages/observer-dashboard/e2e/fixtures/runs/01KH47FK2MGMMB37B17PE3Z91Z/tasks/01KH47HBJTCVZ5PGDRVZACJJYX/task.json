@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47HBJTCVZ5PGDRVZACJJYX",
+  "taskId": "deduplicate-records",
+  "invocationKey": "sample/roster-update:S000003:deduplicate-records",
+  "stepId": "S000003",
+  "kind": "node",
+  "title": "Deduplicate records",
+  "io": {
+    "inputJsonPath": "tasks/01KH47HBJTCVZ5PGDRVZACJJYX/input.json",
+    "outputJsonPath": "tasks/01KH47HBJTCVZ5PGDRVZACJJYX/result.json"
+  },
+  "inputs": {
+    "records": 5650,
+    "batchSize": 276,
+    "source": "postgres",
+    "destination": "elasticsearch"
+  }
+}

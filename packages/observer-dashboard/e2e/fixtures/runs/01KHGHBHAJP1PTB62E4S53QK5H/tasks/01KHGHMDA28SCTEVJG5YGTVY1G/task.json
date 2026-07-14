@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHGHMDA28SCTEVJG5YGTVY1G",
+  "taskId": "wait-for-rate-limit-cooldown",
+  "invocationKey": "content/analytics-roll:S000010:wait-for-rate-limit-cooldown",
+  "stepId": "S000010",
+  "kind": "sleep",
+  "title": "Wait for rate limit cooldown",
+  "io": {
+    "inputJsonPath": "tasks/01KHGHMDA28SCTEVJG5YGTVY1G/input.json",
+    "outputJsonPath": "tasks/01KHGHMDA28SCTEVJG5YGTVY1G/result.json"
+  },
+  "inputs": {
+    "durationMs": 47067,
+    "reason": "Wait for rate limit cooldown"
+  }
+}

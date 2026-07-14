@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-11T14:28:07.922Z",
+  "data": {
+    "effectId": "01KH6HMC3J5HMYD5EX9E0XZGBZ",
+    "invocationKey": "sales/lead-scoring:S000002:write-test-specifications",
+    "invocationHash": "0f3cc3b223447445c9f8e19a7728247e6d70b27d1bcc3f84a166f3e0be064c7d",
+    "stepId": "S000002",
+    "taskId": "write-test-specifications",
+    "kind": "agent",
+    "label": "Write test specifications",
+    "taskDefRef": "tasks/01KH6HMC3J5HMYD5EX9E0XZGBZ/task.json"
+  },
+  "checksum": "aae463671f95d6c6ab40ea6b191030f2e76ab5b192ccc09b02dd06cb7f9790d6"
+}

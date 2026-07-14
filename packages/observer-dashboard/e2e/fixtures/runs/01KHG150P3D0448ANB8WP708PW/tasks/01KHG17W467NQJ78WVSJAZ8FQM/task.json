@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHG17W467NQJ78WVSJAZ8FQM",
+  "taskId": "generate-executive-summary",
+  "invocationKey": "sales/deal-sync:S000004:generate-executive-summary",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Generate executive summary",
+  "io": {
+    "inputJsonPath": "tasks/01KHG17W467NQJ78WVSJAZ8FQM/input.json",
+    "outputJsonPath": "tasks/01KHG17W467NQJ78WVSJAZ8FQM/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/deal-sync step S000004",
+    "maxTokens": 4807,
+    "temperature": 0.58,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "generate-executive-summary",
+    "prompt": {
+      "role": "writer",
+      "task": "Generate executive summary",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

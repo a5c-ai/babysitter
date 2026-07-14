@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9HH117G051C9MJPYMC3DBV",
+  "taskId": "draft-outreach-email",
+  "invocationKey": "content/publish-queue:S000003:draft-outreach-email",
+  "status": "ok",
+  "startedAt": "2026-02-12T18:24:02.863Z",
+  "finishedAt": "2026-02-12T18:24:23.167Z",
+  "result": {
+    "summary": "Generated draft for Draft outreach email",
+    "sections": 7,
+    "wordCount": 1514,
+    "confidence": 0.903,
+    "recommendations": [
+      "Review error handling in async paths",
+      "Add structured logging for debugging",
+      "Review error handling in async paths"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Draft outreach email",
+    "sections": 7,
+    "wordCount": 1514,
+    "confidence": 0.903,
+    "recommendations": [
+      "Review error handling in async paths",
+      "Add structured logging for debugging",
+      "Review error handling in async paths"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6HXM4PB6Y7VTKD0PBC1W1Y",
+  "taskId": "draft-outreach-email",
+  "invocationKey": "sales/lead-scoring:S000013:draft-outreach-email",
+  "stepId": "S000013",
+  "kind": "agent",
+  "title": "Draft outreach email",
+  "io": {
+    "inputJsonPath": "tasks/01KH6HXM4PB6Y7VTKD0PBC1W1Y/input.json",
+    "outputJsonPath": "tasks/01KH6HXM4PB6Y7VTKD0PBC1W1Y/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000013",
+    "maxTokens": 7814,
+    "temperature": 0.13,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "draft-outreach-email",
+    "prompt": {
+      "role": "researcher",
+      "task": "Draft outreach email",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Cite sources where applicable"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:52:19.333Z",
+  "data": {
+    "effectId": "01KH47FNR5VD7FPZM7X9VPCAX9",
+    "invocationKey": "sample/roster-update:S000001:synthesize-user-feedback",
+    "invocationHash": "cc6238913cfcabd806b330e6be39c5b4ec375ba81e56b44c444f205521363d66",
+    "stepId": "S000001",
+    "taskId": "synthesize-user-feedback",
+    "kind": "agent",
+    "label": "Synthesize user feedback",
+    "taskDefRef": "tasks/01KH47FNR5VD7FPZM7X9VPCAX9/task.json"
+  },
+  "checksum": "da74c51cb681c29e9de0527e46091f8b4f40601010bbbd5a51c83a126a4bcba7"
+}

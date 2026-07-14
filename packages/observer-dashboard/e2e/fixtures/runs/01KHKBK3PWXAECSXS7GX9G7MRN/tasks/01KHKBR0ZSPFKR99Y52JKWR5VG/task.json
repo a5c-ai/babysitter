@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHKBR0ZSPFKR99Y52JKWR5VG",
+  "taskId": "run-database-migration",
+  "invocationKey": "content/analytics-roll:S000005:run-database-migration",
+  "stepId": "S000005",
+  "kind": "shell",
+  "title": "Run database migration",
+  "io": {
+    "inputJsonPath": "tasks/01KHKBR0ZSPFKR99Y52JKWR5VG/input.json",
+    "outputJsonPath": "tasks/01KHKBR0ZSPFKR99Y52JKWR5VG/result.json"
+  },
+  "inputs": {
+    "command": "psql",
+    "args": [
+      "run",
+      "--env=staging"
+    ],
+    "cwd": "/workspace/content-scheduler",
+    "timeout": 105000
+  }
+}

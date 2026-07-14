@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH465WWE8EZ4WQD9NEE2QTA3",
+  "taskId": "write-test-specifications",
+  "invocationKey": "demo-project/publish:S000009:write-test-specifications",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:29:30.612Z",
+  "finishedAt": "2026-02-10T16:29:55.643Z",
+  "result": {
+    "summary": "Generated draft for Write test specifications",
+    "sections": 8,
+    "wordCount": 4385,
+    "confidence": 0.857,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls",
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Write test specifications",
+    "sections": 8,
+    "wordCount": 4385,
+    "confidence": 0.857,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls",
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

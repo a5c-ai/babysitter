@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMMDQCXNXCPB8Z5YC9866FQ",
+  "taskId": "confirm-data-migration-changes",
+  "invocationKey": "content/publish-queue:S000011:confirm-data-migration-changes",
+  "status": "ok",
+  "startedAt": "2026-02-17T01:46:18.422Z",
+  "finishedAt": "2026-02-17T01:46:55.840Z",
+  "result": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-17T01:46:55.840Z"
+  },
+  "value": {
+    "approved": true,
+    "approvedBy": "user",
+    "approvedAt": "2026-02-17T01:46:55.840Z"
+  }
+}

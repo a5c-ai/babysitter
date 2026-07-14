@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-13T22:16:21.464Z",
+  "data": {
+    "effectId": "01KHCH756RWMPR19N0RFNAYV7B",
+    "invocationKey": "sales/lead-scoring:S000004:analyze-competitor-data",
+    "invocationHash": "1923a6bb98413cc6e6366611b07b38aebb44c5599bff9ecfe7709ca0b50cec63",
+    "stepId": "S000004",
+    "taskId": "analyze-competitor-data",
+    "kind": "agent",
+    "label": "Analyze competitor data",
+    "taskDefRef": "tasks/01KHCH756RWMPR19N0RFNAYV7B/task.json"
+  },
+  "checksum": "4dd0124ddfa2e42ee4743e6123eb5590c19cf58d50edcb97c052e8d7c32fa9eb"
+}

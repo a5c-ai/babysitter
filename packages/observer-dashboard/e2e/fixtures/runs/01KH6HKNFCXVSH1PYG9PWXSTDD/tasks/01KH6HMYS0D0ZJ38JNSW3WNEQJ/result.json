@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6HMYS0D0ZJ38JNSW3WNEQJ",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "sales/lead-scoring:S000003:generate-api-documentation",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:28:27.731Z",
+  "finishedAt": "2026-02-11T14:29:10.217Z",
+  "result": {
+    "summary": "Generated report for Generate API documentation",
+    "sections": 3,
+    "wordCount": 3011,
+    "confidence": 0.874,
+    "recommendations": [
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated report for Generate API documentation",
+    "sections": 3,
+    "wordCount": 3011,
+    "confidence": 0.874,
+    "recommendations": [
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

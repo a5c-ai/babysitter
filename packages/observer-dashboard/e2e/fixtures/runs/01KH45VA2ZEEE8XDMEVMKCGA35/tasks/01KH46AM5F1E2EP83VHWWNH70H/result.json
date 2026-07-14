@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH46AM5F1E2EP83VHWWNH70H",
+  "taskId": "delay-for-webhook-callback",
+  "invocationKey": "demo-project/publish:S000014:delay-for-webhook-callback",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:32:06.191Z",
+  "finishedAt": "2026-02-10T16:33:04.409Z",
+  "result": {
+    "sleptMs": 56448,
+    "reason": "Delay for webhook callback"
+  },
+  "value": {
+    "sleptMs": 56448,
+    "reason": "Delay for webhook callback"
+  }
+}

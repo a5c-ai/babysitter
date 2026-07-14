@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHFCEGHNE6ZFQHT4ZQ0NZVBX",
+  "taskId": "index-search-documents",
+  "invocationKey": "content/publish-queue:S000008:index-search-documents",
+  "status": "ok",
+  "startedAt": "2026-02-15T00:50:42.996Z",
+  "finishedAt": "2026-02-15T00:51:09.900Z",
+  "result": {
+    "processed": 3311,
+    "failed": 101,
+    "skipped": 10,
+    "duration_ms": 26904,
+    "outputPath": "output/index-search-documents-0NZVBX.json"
+  },
+  "value": {
+    "processed": 3311,
+    "failed": 101,
+    "skipped": 10,
+    "duration_ms": 26904,
+    "outputPath": "output/index-search-documents-0NZVBX.json"
+  }
+}

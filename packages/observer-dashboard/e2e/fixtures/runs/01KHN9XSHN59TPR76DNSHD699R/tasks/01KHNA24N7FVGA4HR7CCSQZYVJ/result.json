@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHNA24N7FVGA4HR7CCSQZYVJ",
+  "taskId": "sync-s3-bucket",
+  "invocationKey": "content/draft-review:S000004:sync-s3-bucket",
+  "status": "ok",
+  "startedAt": "2026-02-17T08:04:28.395Z",
+  "finishedAt": "2026-02-17T08:05:16.250Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 104 items",
+    "stderr": "",
+    "duration_ms": 47855
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 104 items",
+    "stderr": "",
+    "duration_ms": 47855
+  }
+}

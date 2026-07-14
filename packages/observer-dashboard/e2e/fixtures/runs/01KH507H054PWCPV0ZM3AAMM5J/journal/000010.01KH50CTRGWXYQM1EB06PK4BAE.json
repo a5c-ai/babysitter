@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-11T00:07:40.560Z",
+  "data": {
+    "effectId": "01KH50CTRG5PW8VJF42TWMBETZ",
+    "invocationKey": "content/draft-review:S000005:run-database-migration",
+    "invocationHash": "32f847775423bc9e434502c3b4d9ac2fb8a2a5980fed64a7c11883ed3e7bdee6",
+    "stepId": "S000005",
+    "taskId": "run-database-migration",
+    "kind": "shell",
+    "label": "Run database migration",
+    "taskDefRef": "tasks/01KH50CTRG5PW8VJF42TWMBETZ/task.json"
+  },
+  "checksum": "0fa3fd61bafeb9be4e279b5caffdcabe4da5784b62b8c3b4280696c899f22dea"
+}

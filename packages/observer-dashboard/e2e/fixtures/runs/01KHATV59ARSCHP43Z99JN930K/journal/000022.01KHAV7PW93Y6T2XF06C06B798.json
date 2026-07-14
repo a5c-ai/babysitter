@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-13T06:32:56.457Z",
+  "data": {
+    "effectId": "01KHAV7PW9A895FGA4ZBV12SWX",
+    "invocationKey": "sales/deal-sync:S000011:clear-cache",
+    "invocationHash": "2277c5cc267567763520fbbe1536a4617140f6bceea30d68885cc286eb76faa5",
+    "stepId": "S000011",
+    "taskId": "clear-cache",
+    "kind": "shell",
+    "label": "Clear cache",
+    "taskDefRef": "tasks/01KHAV7PW9A895FGA4ZBV12SWX/task.json"
+  },
+  "checksum": "d86e2fddd4a9f39a39a77ac9029b9df3ec48d8f4e81ce6a286ae8ca4c3aa92d2"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHGHJF9TANWVBMQBXC9XC2WN",
+  "taskId": "generate-coverage-report",
+  "invocationKey": "content/analytics-roll:S000008:generate-coverage-report",
+  "status": "ok",
+  "startedAt": "2026-02-15T11:39:31.447Z",
+  "finishedAt": "2026-02-15T11:39:35.980Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 113 items",
+    "stderr": "",
+    "duration_ms": 4533
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 113 items",
+    "stderr": "",
+    "duration_ms": 4533
+  }
+}

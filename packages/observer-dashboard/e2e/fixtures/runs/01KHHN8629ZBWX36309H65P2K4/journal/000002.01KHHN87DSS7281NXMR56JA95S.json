@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T22:03:02.969Z",
+  "data": {
+    "effectId": "01KHHN87DSE8XYV7NAZHCZK8GN",
+    "invocationKey": "sales/outreach-gen:S000001:parse-xml-feed",
+    "invocationHash": "0b082233d986f75f44ce7eb89e6cc12f4858a2e21695c5c34d12b66793262f6a",
+    "stepId": "S000001",
+    "taskId": "parse-xml-feed",
+    "kind": "node",
+    "label": "Parse XML feed",
+    "taskDefRef": "tasks/01KHHN87DSE8XYV7NAZHCZK8GN/task.json"
+  },
+  "checksum": "af04f8c8f7c45ed7eca8b4aa1551404b67370683295b53ce6ead57192e27da61"
+}

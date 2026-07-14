@@ -1,0 +1,12 @@
+{
+  "type": "EFFECT_RESOLVED",
+  "recordedAt": "2026-01-25T09:00:03.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_LONGA_001",
+    "status": "ok",
+    "resultRef": "tasks/01KTEST_KANBAN_LONGA_001/result.json",
+    "startedAt": "2026-01-25T09:00:02.500Z",
+    "finishedAt": "2026-01-25T09:00:04.500Z"
+  },
+  "checksum": "e2e-kanban-fixture-0001-3"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH46CJ5EQVMEKXB38YQRTE2X",
+  "taskId": "deploy-to-staging",
+  "invocationKey": "demo-project/publish:S000015:deploy-to-staging",
+  "stepId": "S000015",
+  "kind": "shell",
+  "title": "Deploy to staging",
+  "io": {
+    "inputJsonPath": "tasks/01KH46CJ5EQVMEKXB38YQRTE2X/input.json",
+    "outputJsonPath": "tasks/01KH46CJ5EQVMEKXB38YQRTE2X/result.json"
+  },
+  "inputs": {
+    "command": "aws",
+    "args": [
+      "migrate",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/demo-project",
+    "timeout": 61000
+  }
+}

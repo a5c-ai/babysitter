@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHAV7PW9A895FGA4ZBV12SWX",
+  "taskId": "clear-cache",
+  "invocationKey": "sales/deal-sync:S000011:clear-cache",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:32:58.240Z",
+  "finishedAt": "2026-02-13T06:33:29.486Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 45 items",
+    "stderr": "",
+    "duration_ms": 31246
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 45 items",
+    "stderr": "",
+    "duration_ms": 31246
+  }
+}

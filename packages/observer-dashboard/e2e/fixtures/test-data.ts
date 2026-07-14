@@ -121,6 +121,58 @@ export async function getTotalTaskCount(): Promise<number> {
 }
 
 /**
+ * §15.1 (owner gate 2026-07-06b, hidden-model A): count fixture runs that
+ * classify as "scheduled" — a NON-terminal run whose NEWEST journal event is an
+ * unresolved `sleep` effect (a sleeping forever-run between ticks). Such a run
+ * is idle-HEALTHY, NOT active/in-progress, so the Active/"In Progress" tile
+ * (which reads the single counting source) EXCLUDES it. Tests that derive an
+ * expected active count from `manifest.statusCounts` (which counts run.status,
+ * so a sleeping run still shows as "waiting") must subtract these to reconcile
+ * with the tile — this mirrors the parser's `deriveScheduledLiveness` rule.
+ */
+export async function getScheduledRunIds(): Promise<string[]> {
+  const manifest = await getManifest();
+  const scheduled: string[] = [];
+  for (const run of manifest.runs) {
+    // Only non-terminal runs can be sleeping (a terminal run's newest event is
+    // RUN_COMPLETED/RUN_FAILED).
+    if (run.status !== "waiting" && run.status !== "pending") continue;
+    const journalDir = path.join(runDir(run.runId), "journal");
+    let files: string[];
+    try {
+      files = (await fs.readdir(journalDir)).filter((f) => f.endsWith(".json")).sort();
+    } catch {
+      continue;
+    }
+    if (files.length === 0) continue;
+    // Newest journal event = highest-numbered file.
+    const newestFile = files[files.length - 1];
+    try {
+      const raw = JSON.parse(await fs.readFile(path.join(journalDir, newestFile), "utf-8"));
+      if (raw?.type === "EFFECT_REQUESTED" && raw?.data?.kind === "sleep") {
+        scheduled.push(run.runId);
+      }
+    } catch {
+      // Unreadable newest event → not classifiable as scheduled; skip.
+    }
+  }
+  return scheduled;
+}
+
+/**
+ * §15.1: the fixture Active/"In Progress" count as the tile computes it —
+ * non-terminal (waiting/pending) MINUS sleeping "scheduled" runs. The single
+ * source of truth for e2e assertions on the Active tile / banner active count.
+ */
+export async function getActiveRunCount(): Promise<number> {
+  const manifest = await getManifest();
+  const nonTerminal =
+    (manifest.statusCounts.waiting || 0) + (manifest.statusCounts.pending || 0);
+  const scheduled = (await getScheduledRunIds()).length;
+  return nonTerminal - scheduled;
+}
+
+/**
  * Verify that the fixtures directory exists and contains the expected number of runs.
  * Useful as a setup check in test beforeAll hooks.
  */

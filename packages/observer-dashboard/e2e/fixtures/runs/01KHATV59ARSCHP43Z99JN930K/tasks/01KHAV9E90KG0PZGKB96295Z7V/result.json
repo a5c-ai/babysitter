@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHAV9E90KG0PZGKB96295Z7V",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "sales/deal-sync:S000014:analyze-competitor-data",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:33:54.598Z",
+  "finishedAt": "2026-02-13T06:34:54.516Z",
+  "result": {
+    "summary": "Generated analysis for Analyze competitor data",
+    "sections": 4,
+    "wordCount": 4174,
+    "confidence": 0.882,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Analyze competitor data",
+    "sections": 4,
+    "wordCount": 4174,
+    "confidence": 0.882,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

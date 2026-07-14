@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHHN9FC00DX4TCS89ZKHW9MV",
+  "taskId": "synthesize-user-feedback",
+  "invocationKey": "sales/outreach-gen:S000002:synthesize-user-feedback",
+  "status": "ok",
+  "startedAt": "2026-02-15T22:03:45.566Z",
+  "finishedAt": "2026-02-15T22:04:34.572Z",
+  "result": {
+    "summary": "Generated analysis for Synthesize user feedback",
+    "sections": 5,
+    "wordCount": 1707,
+    "confidence": 0.939,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Synthesize user feedback",
+    "sections": 5,
+    "wordCount": 1707,
+    "confidence": 0.939,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

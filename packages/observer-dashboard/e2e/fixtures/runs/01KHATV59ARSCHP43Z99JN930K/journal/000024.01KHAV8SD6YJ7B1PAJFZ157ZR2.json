@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-13T06:33:31.814Z",
+  "data": {
+    "effectId": "01KHAV8SD6WMVD6KNBHBS4CRNR",
+    "invocationKey": "sales/deal-sync:S000012:validate-schema",
+    "invocationHash": "cac7c82786db42205e70a3b2054bec3f31f5e10e3df0e9a9ca9fa36985a702c6",
+    "stepId": "S000012",
+    "taskId": "validate-schema",
+    "kind": "node",
+    "label": "Validate schema",
+    "taskDefRef": "tasks/01KHAV8SD6WMVD6KNBHBS4CRNR/task.json"
+  },
+  "checksum": "a1c40da922f2790f81cc1c587046519daa5df5a75990a800530f0e13a606c777"
+}

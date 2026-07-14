@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T17:04:27.273Z",
+  "data": {
+    "effectId": "01KH485WM9TPKCHC9FWJZX035N",
+    "invocationKey": "sample/roster-update:S000022:draft-outreach-email",
+    "invocationHash": "3647822c47e2daf636abb1c669addc6eafa068be7fac7c3a42ed8364e469d4fd",
+    "stepId": "S000022",
+    "taskId": "draft-outreach-email",
+    "kind": "agent",
+    "label": "Draft outreach email",
+    "taskDefRef": "tasks/01KH485WM9TPKCHC9FWJZX035N/task.json"
+  },
+  "checksum": "911a71d1cac269bd00c00e2398670a20cab0564db7fb47f4275d26dae2955f16"
+}

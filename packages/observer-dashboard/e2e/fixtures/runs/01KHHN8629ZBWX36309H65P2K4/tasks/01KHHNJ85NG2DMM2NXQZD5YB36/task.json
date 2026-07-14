@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHHNJ85NG2DMM2NXQZD5YB36",
+  "taskId": "research-market-trends",
+  "invocationKey": "sales/outreach-gen:S000009:research-market-trends",
+  "stepId": "S000009",
+  "kind": "agent",
+  "title": "Research market trends",
+  "io": {
+    "inputJsonPath": "tasks/01KHHNJ85NG2DMM2NXQZD5YB36/input.json",
+    "outputJsonPath": "tasks/01KHHNJ85NG2DMM2NXQZD5YB36/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/outreach-gen step S000009",
+    "maxTokens": 1258,
+    "temperature": 0.76,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "research-market-trends",
+    "prompt": {
+      "role": "researcher",
+      "task": "Research market trends",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Cite sources where applicable"
+      ]
+    }
+  }
+}

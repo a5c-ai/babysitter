@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH481W247CHBXXCR00Q60REP",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "sample/roster-update:S000018:generate-api-documentation",
+  "status": "ok",
+  "startedAt": "2026-02-10T17:02:16.560Z",
+  "finishedAt": "2026-02-10T17:02:47.232Z",
+  "result": {
+    "summary": "Generated report for Generate API documentation",
+    "sections": 5,
+    "wordCount": 709,
+    "confidence": 0.766,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields",
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated report for Generate API documentation",
+    "sections": 5,
+    "wordCount": 709,
+    "confidence": 0.766,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Add input validation for user-facing fields",
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

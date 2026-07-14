@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T06:37:20.935Z",
+  "data": {
+    "effectId": "01KHJJNY576JENYGMY99KCMNAB",
+    "invocationKey": "content/draft-review:S000005:generate-api-documentation",
+    "invocationHash": "d7c4f7f53b4498ae8fdc428cabaa2505cedfe968f6b9551feaa48b91ee968b30",
+    "stepId": "S000005",
+    "taskId": "generate-api-documentation",
+    "kind": "agent",
+    "label": "Generate API documentation",
+    "taskDefRef": "tasks/01KHJJNY576JENYGMY99KCMNAB/task.json"
+  },
+  "checksum": "7dc729ce746c3b22f9df8258752c2ee11a20bd445d68b3eeaa015ea59d9bd961"
+}

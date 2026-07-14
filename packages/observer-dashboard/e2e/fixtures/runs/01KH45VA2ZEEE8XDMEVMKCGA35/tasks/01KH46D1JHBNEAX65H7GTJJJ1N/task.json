@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH46D1JHBNEAX65H7GTJJJ1N",
+  "taskId": "clear-cache",
+  "invocationKey": "demo-project/publish:S000016:clear-cache",
+  "stepId": "S000016",
+  "kind": "shell",
+  "title": "Clear cache",
+  "io": {
+    "inputJsonPath": "tasks/01KH46D1JHBNEAX65H7GTJJJ1N/input.json",
+    "outputJsonPath": "tasks/01KH46D1JHBNEAX65H7GTJJJ1N/result.json"
+  },
+  "inputs": {
+    "command": "redis-cli",
+    "args": [
+      "run",
+      "--env=prod"
+    ],
+    "cwd": "/workspace/demo-project",
+    "timeout": 124000
+  }
+}

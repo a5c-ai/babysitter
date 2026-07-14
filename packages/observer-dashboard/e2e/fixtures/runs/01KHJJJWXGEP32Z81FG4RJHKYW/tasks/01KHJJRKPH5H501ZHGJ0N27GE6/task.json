@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHJJRKPH5H501ZHGJ0N27GE6",
+  "taskId": "enrich-metadata",
+  "invocationKey": "content/draft-review:S000009:enrich-metadata",
+  "stepId": "S000009",
+  "kind": "node",
+  "title": "Enrich metadata",
+  "io": {
+    "inputJsonPath": "tasks/01KHJJRKPH5H501ZHGJ0N27GE6/input.json",
+    "outputJsonPath": "tasks/01KHJJRKPH5H501ZHGJ0N27GE6/result.json"
+  },
+  "inputs": {
+    "records": 643,
+    "batchSize": 445,
+    "source": "api",
+    "destination": "postgres"
+  }
+}

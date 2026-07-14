@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHFC8HSZYYZ99TYWM7TXE0D9",
+  "taskId": "enrich-metadata",
+  "invocationKey": "content/publish-queue:S000004:enrich-metadata",
+  "status": "ok",
+  "startedAt": "2026-02-15T00:47:27.679Z",
+  "finishedAt": "2026-02-15T00:48:09.000Z",
+  "result": {
+    "processed": 9361,
+    "failed": 276,
+    "skipped": 70,
+    "duration_ms": 41321,
+    "outputPath": "output/enrich-metadata-TXE0D9.json"
+  },
+  "value": {
+    "processed": 9361,
+    "failed": 276,
+    "skipped": 70,
+    "duration_ms": 41321,
+    "outputPath": "output/enrich-metadata-TXE0D9.json"
+  }
+}

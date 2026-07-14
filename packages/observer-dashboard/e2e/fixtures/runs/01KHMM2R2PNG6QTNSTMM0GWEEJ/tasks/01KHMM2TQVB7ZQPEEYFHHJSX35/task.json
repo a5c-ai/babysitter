@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMM2TQVB7ZQPEEYFHHJSX35",
+  "taskId": "merge-datasets",
+  "invocationKey": "content/publish-queue:S000001:merge-datasets",
+  "stepId": "S000001",
+  "kind": "node",
+  "title": "Merge datasets",
+  "io": {
+    "inputJsonPath": "tasks/01KHMM2TQVB7ZQPEEYFHHJSX35/input.json",
+    "outputJsonPath": "tasks/01KHMM2TQVB7ZQPEEYFHHJSX35/result.json"
+  },
+  "inputs": {
+    "records": 4067,
+    "batchSize": 162,
+    "source": "csv",
+    "destination": "s3"
+  }
+}

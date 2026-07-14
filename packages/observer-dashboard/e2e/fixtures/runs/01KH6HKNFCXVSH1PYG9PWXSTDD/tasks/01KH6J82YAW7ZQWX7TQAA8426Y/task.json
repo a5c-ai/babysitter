@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6J82YAW7ZQWX7TQAA8426Y",
+  "taskId": "compute-aggregates",
+  "invocationKey": "sales/lead-scoring:S000020:compute-aggregates",
+  "stepId": "S000020",
+  "kind": "node",
+  "title": "Compute aggregates",
+  "io": {
+    "inputJsonPath": "tasks/01KH6J82YAW7ZQWX7TQAA8426Y/input.json",
+    "outputJsonPath": "tasks/01KH6J82YAW7ZQWX7TQAA8426Y/result.json"
+  },
+  "inputs": {
+    "records": 2946,
+    "batchSize": 175,
+    "source": "csv",
+    "destination": "webhook"
+  }
+}

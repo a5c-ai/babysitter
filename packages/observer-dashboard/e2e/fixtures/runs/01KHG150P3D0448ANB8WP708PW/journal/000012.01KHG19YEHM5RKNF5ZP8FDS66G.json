@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T06:55:13.361Z",
+  "data": {
+    "effectId": "01KHG19YEH45XNCMV47MA6C50Y",
+    "invocationKey": "sales/deal-sync:S000006:generate-executive-summary",
+    "invocationHash": "b8b4e81a5b7da500fcf094043474410645492e9b038da95421c3ece1102088c2",
+    "stepId": "S000006",
+    "taskId": "generate-executive-summary",
+    "kind": "agent",
+    "label": "Generate executive summary",
+    "taskDefRef": "tasks/01KHG19YEH45XNCMV47MA6C50Y/task.json"
+  },
+  "checksum": "b8996a7b215a544a36442c08abc9138995607353487a3acaac0e00dc9dcb894c"
+}

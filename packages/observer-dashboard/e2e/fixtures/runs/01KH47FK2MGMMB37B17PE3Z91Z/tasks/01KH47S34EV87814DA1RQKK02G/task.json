@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47S34EV87814DA1RQKK02G",
+  "taskId": "run-lint-checks",
+  "invocationKey": "sample/roster-update:S000010:run-lint-checks",
+  "stepId": "S000010",
+  "kind": "shell",
+  "title": "Run lint checks",
+  "io": {
+    "inputJsonPath": "tasks/01KH47S34EV87814DA1RQKK02G/input.json",
+    "outputJsonPath": "tasks/01KH47S34EV87814DA1RQKK02G/result.json"
+  },
+  "inputs": {
+    "command": "redis-cli",
+    "args": [
+      "run",
+      "--env=dev"
+    ],
+    "cwd": "/workspace/sample-project",
+    "timeout": 86000
+  }
+}

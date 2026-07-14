@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH8J75C78WDV4YHRT7E119QW",
+  "taskId": "execute-test-suite",
+  "invocationKey": "demo-project/publish:S000002:execute-test-suite",
+  "status": "ok",
+  "startedAt": "2026-02-12T09:16:52.857Z",
+  "finishedAt": "2026-02-12T09:17:41.794Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 121 items",
+    "stderr": "",
+    "duration_ms": 48937
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 121 items",
+    "stderr": "",
+    "duration_ms": 48937
+  }
+}

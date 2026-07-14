@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T11:41:52.885Z",
+  "data": {
+    "effectId": "01KHGHPTVNN9SEC44CT7X3PDR4",
+    "invocationKey": "content/analytics-roll:S000012:generate-api-documentation",
+    "invocationHash": "2b4b1544b27970f554fee932ad5c8e9f046818bc650ca9530557b6fcf0c251ff",
+    "stepId": "S000012",
+    "taskId": "generate-api-documentation",
+    "kind": "agent",
+    "label": "Generate API documentation",
+    "taskDefRef": "tasks/01KHGHPTVNN9SEC44CT7X3PDR4/task.json"
+  },
+  "checksum": "dc62c350fe289e39c64450c414bf826917dbe57a05393f251fa34ee1894d7659"
+}

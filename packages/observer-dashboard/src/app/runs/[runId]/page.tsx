@@ -6,6 +6,7 @@ import { useRunDetail } from "@/hooks/use-run-detail";
 import { useKeyboard } from "@/hooks/use-keyboard";
 import { OutcomeBanner } from "@/components/shared/outcome-banner";
 import { MetricsRow } from "@/components/shared/metrics-row";
+import { TruncatedId } from "@/components/shared/truncated-id";
 import { useNotificationContext } from "@/components/notifications/notification-provider";
 import { cn } from "@/lib/cn";
 import { Loader2, X, ArrowLeft } from "lucide-react";
@@ -206,7 +207,15 @@ export default function RunDetailPage({ params }: { params: { runId: string } })
           Dashboard
         </button>
         <span className="text-xs text-foreground-muted">/</span>
-        <span className="text-xs font-mono text-foreground-secondary">{run.runId.slice(0, 8)}...</span>
+        {/* Breadcrumb short-id doubles as the copy-full-run-id affordance:
+            hover shows the full id, click copies it (owner ask — resuming a
+            run needs the WHOLE id, e.g. `babysitter run:iterate <id>`). */}
+        <TruncatedId
+          id={run.runId}
+          display={`${run.runId.slice(0, 8)}...`}
+          variant="inline"
+          className="text-xs text-foreground-secondary"
+        />
         {run.processId && (
           <>
             <span className="text-xs text-foreground-muted">/</span>
@@ -259,6 +268,7 @@ export default function RunDetailPage({ params }: { params: { runId: string } })
               onTabChange={setActiveTab}
               runDuration={run.duration}
               allTasks={run.tasks}
+              runDriver={run.driver}
             />
           </div>
         )}

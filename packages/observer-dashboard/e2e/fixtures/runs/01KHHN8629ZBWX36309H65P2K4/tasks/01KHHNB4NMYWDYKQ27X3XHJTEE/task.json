@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHHNB4NMYWDYKQ27X3XHJTEE",
+  "taskId": "parse-xml-feed",
+  "invocationKey": "sales/outreach-gen:S000003:parse-xml-feed",
+  "stepId": "S000003",
+  "kind": "node",
+  "title": "Parse XML feed",
+  "io": {
+    "inputJsonPath": "tasks/01KHHNB4NMYWDYKQ27X3XHJTEE/input.json",
+    "outputJsonPath": "tasks/01KHHNB4NMYWDYKQ27X3XHJTEE/result.json"
+  },
+  "inputs": {
+    "records": 7925,
+    "batchSize": 404,
+    "source": "s3",
+    "destination": "elasticsearch"
+  }
+}

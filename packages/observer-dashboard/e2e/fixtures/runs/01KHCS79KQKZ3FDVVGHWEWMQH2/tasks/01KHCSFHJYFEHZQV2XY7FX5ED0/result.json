@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCSFHJYFEHZQV2XY7FX5ED0",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "sales/lead-scoring:S000011:generate-api-documentation",
+  "status": "ok",
+  "startedAt": "2026-02-14T00:40:45.685Z",
+  "finishedAt": "2026-02-14T00:40:54.993Z",
+  "result": {
+    "summary": "Generated draft for Generate API documentation",
+    "sections": 4,
+    "wordCount": 2092,
+    "confidence": 0.716,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Consider caching for frequently accessed data",
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Generate API documentation",
+    "sections": 4,
+    "wordCount": 2092,
+    "confidence": 0.716,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data",
+      "Consider caching for frequently accessed data",
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

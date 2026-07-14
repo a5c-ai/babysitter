@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH8J6RSP7V3WTRP0FPNXP2DD",
+  "taskId": "build-docker-image",
+  "invocationKey": "demo-project/publish:S000001:build-docker-image",
+  "stepId": "S000001",
+  "kind": "shell",
+  "title": "Build Docker image",
+  "io": {
+    "inputJsonPath": "tasks/01KH8J6RSP7V3WTRP0FPNXP2DD/input.json",
+    "outputJsonPath": "tasks/01KH8J6RSP7V3WTRP0FPNXP2DD/result.json"
+  },
+  "inputs": {
+    "command": "docker",
+    "args": [
+      "build",
+      "--env=staging"
+    ],
+    "cwd": "/workspace/demo-project",
+    "timeout": 210000
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHAV8SD6WMVD6KNBHBS4CRNR",
+  "taskId": "validate-schema",
+  "invocationKey": "sales/deal-sync:S000012:validate-schema",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:33:32.526Z",
+  "finishedAt": "2026-02-13T06:33:33.883Z",
+  "result": {
+    "processed": 1510,
+    "failed": 68,
+    "skipped": 11,
+    "duration_ms": 1357,
+    "outputPath": "output/validate-schema-S4CRNR.json"
+  },
+  "value": {
+    "processed": 1510,
+    "failed": 68,
+    "skipped": 11,
+    "duration_ms": 1357,
+    "outputPath": "output/validate-schema-S4CRNR.json"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHH4G9B3647JC3R04Y7S23PT",
+  "taskId": "synthesize-user-feedback",
+  "invocationKey": "sales/outreach-gen:S000003:synthesize-user-feedback",
+  "status": "ok",
+  "startedAt": "2026-02-15T17:10:22.247Z",
+  "finishedAt": "2026-02-15T17:10:52.730Z",
+  "result": {
+    "summary": "Generated review for Synthesize user feedback",
+    "sections": 7,
+    "wordCount": 3730,
+    "confidence": 0.923,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls",
+      "Review error handling in async paths"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Synthesize user feedback",
+    "sections": 7,
+    "wordCount": 3730,
+    "confidence": 0.923,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Implement retry logic for external API calls",
+      "Review error handling in async paths"
+    ]
+  }
+}

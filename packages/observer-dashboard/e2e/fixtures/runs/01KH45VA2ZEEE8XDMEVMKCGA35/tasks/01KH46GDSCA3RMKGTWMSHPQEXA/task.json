@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH46GDSCA3RMKGTWMSHPQEXA",
+  "taskId": "parse-xml-feed",
+  "invocationKey": "demo-project/publish:S000019:parse-xml-feed",
+  "stepId": "S000019",
+  "kind": "node",
+  "title": "Parse XML feed",
+  "io": {
+    "inputJsonPath": "tasks/01KH46GDSCA3RMKGTWMSHPQEXA/input.json",
+    "outputJsonPath": "tasks/01KH46GDSCA3RMKGTWMSHPQEXA/result.json"
+  },
+  "inputs": {
+    "records": 7736,
+    "batchSize": 286,
+    "source": "api",
+    "destination": "webhook"
+  }
+}

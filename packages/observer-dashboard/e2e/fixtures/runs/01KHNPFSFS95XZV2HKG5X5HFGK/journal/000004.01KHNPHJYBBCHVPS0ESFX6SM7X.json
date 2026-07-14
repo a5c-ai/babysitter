@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T11:42:35.979Z",
+  "data": {
+    "effectId": "01KHNPHJYB7CVF9ME4QX4RHBW3",
+    "invocationKey": "content/publish-queue:S000002:process-payment-webhook",
+    "invocationHash": "0512c8d99789b96d381a85bc77457a89c3b154dd00e68131bc0c402e28c31f5a",
+    "stepId": "S000002",
+    "taskId": "process-payment-webhook",
+    "kind": "skill",
+    "label": "Process payment webhook",
+    "taskDefRef": "tasks/01KHNPHJYB7CVF9ME4QX4RHBW3/task.json"
+  },
+  "checksum": "e87c16af6ce1d8a351527a1399ab063b01c390f84179f9f591e8f30947e2f212"
+}

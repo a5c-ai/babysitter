@@ -1,0 +1,17 @@
+{
+  "type": "EFFECT_RESOLVED",
+  "recordedAt": "2026-02-13T22:17:36.691Z",
+  "data": {
+    "effectId": "01KHCH8FWP7DXA8TFV72CKNE02",
+    "status": "error",
+    "resultRef": "tasks/01KHCH8FWP7DXA8TFV72CKNE02/result.json",
+    "startedAt": "2026-02-13T22:17:06.909Z",
+    "finishedAt": "2026-02-13T22:17:36.306Z",
+    "error": {
+      "name": "ProcessError",
+      "message": "Process exited with code 1",
+      "stack": "ProcessError: Process exited with code 1\n    at processTask (tasks/01KHCH8FWP7DXA8TFV72CKNE02/handler.js:42:11)\n    at async runStep (lib/runner.js:187:5)"
+    }
+  },
+  "checksum": "1995fa11b27429f303ff0280a9e590d9598e1943ab14cca0668542b2ef9a6b4d"
+}

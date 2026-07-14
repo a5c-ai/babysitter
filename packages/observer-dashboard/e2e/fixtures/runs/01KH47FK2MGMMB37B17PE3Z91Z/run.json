@@ -1,0 +1,14 @@
+{
+  "runId": "01KH47FK2MGMMB37B17PE3Z91Z",
+  "request": "sample/roster-update",
+  "processId": "sample/roster-update",
+  "entrypoint": {
+    "importPath": "../../processes/sample-roster-update.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/sample-roster-update.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-10T16:52:16.596Z",
+  "completionSecret": "6e9869ef70fa3046f6449cfadbc25efb",
+  "projectName": "sample-project"
+}

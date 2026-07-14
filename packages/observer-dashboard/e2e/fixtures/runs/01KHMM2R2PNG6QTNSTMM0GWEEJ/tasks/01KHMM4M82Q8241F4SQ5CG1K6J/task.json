@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMM4M82Q8241F4SQ5CG1K6J",
+  "taskId": "review-pull-request",
+  "invocationKey": "content/publish-queue:S000002:review-pull-request",
+  "stepId": "S000002",
+  "kind": "agent",
+  "title": "Review pull request",
+  "io": {
+    "inputJsonPath": "tasks/01KHMM4M82Q8241F4SQ5CG1K6J/input.json",
+    "outputJsonPath": "tasks/01KHMM4M82Q8241F4SQ5CG1K6J/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000002",
+    "maxTokens": 7966,
+    "temperature": 0.76,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "review-pull-request",
+    "prompt": {
+      "role": "reviewer",
+      "task": "Review pull request",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

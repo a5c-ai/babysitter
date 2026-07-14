@@ -1,0 +1,14 @@
+{
+  "runId": "01KH45VA2ZEEE8XDMEVMKCGA35",
+  "request": "demo-project/publish",
+  "processId": "demo-project/publish",
+  "entrypoint": {
+    "importPath": "../../processes/demo-project-publish.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/demo-project-publish.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-10T16:23:43.455Z",
+  "completionSecret": "766c9b5cbdad0646cb8e9e66d1a2258c",
+  "projectName": "demo-project"
+}

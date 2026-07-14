@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH50A7P3TBY4FQQZBBW5AMRE",
+  "taskId": "build-docker-image",
+  "invocationKey": "content/draft-review:S000003:build-docker-image",
+  "stepId": "S000003",
+  "kind": "shell",
+  "title": "Build Docker image",
+  "io": {
+    "inputJsonPath": "tasks/01KH50A7P3TBY4FQQZBBW5AMRE/input.json",
+    "outputJsonPath": "tasks/01KH50A7P3TBY4FQQZBBW5AMRE/result.json"
+  },
+  "inputs": {
+    "command": "aws",
+    "args": [
+      "run",
+      "--env=staging"
+    ],
+    "cwd": "/workspace/content-scheduler",
+    "timeout": 163000
+  }
+}

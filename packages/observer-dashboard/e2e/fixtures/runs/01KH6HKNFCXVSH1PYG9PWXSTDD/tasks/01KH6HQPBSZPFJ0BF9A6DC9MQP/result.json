@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH6HQPBSZPFJ0BF9A6DC9MQP",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "sales/lead-scoring:S000006:analyze-competitor-data",
+  "status": "ok",
+  "startedAt": "2026-02-11T14:29:58.373Z",
+  "finishedAt": "2026-02-11T14:30:29.687Z",
+  "result": {
+    "summary": "Generated specification for Analyze competitor data",
+    "sections": 4,
+    "wordCount": 2583,
+    "confidence": 0.864,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Add input validation for user-facing fields"
+    ]
+  },
+  "value": {
+    "summary": "Generated specification for Analyze competitor data",
+    "sections": 4,
+    "wordCount": 2583,
+    "confidence": 0.864,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Add input validation for user-facing fields"
+    ]
+  }
+}

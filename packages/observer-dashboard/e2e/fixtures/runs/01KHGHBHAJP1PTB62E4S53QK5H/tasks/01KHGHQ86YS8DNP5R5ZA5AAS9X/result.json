@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHGHQ86YS8DNP5R5ZA5AAS9X",
+  "taskId": "normalize-timestamps",
+  "invocationKey": "content/analytics-roll:S000013:normalize-timestamps",
+  "status": "ok",
+  "startedAt": "2026-02-15T11:42:07.728Z",
+  "finishedAt": "2026-02-15T11:42:55.049Z",
+  "result": {
+    "processed": 7270,
+    "failed": 94,
+    "skipped": 105,
+    "duration_ms": 47321,
+    "outputPath": "output/normalize-timestamps-5AAS9X.json"
+  },
+  "value": {
+    "processed": 7270,
+    "failed": 94,
+    "skipped": 105,
+    "duration_ms": 47321,
+    "outputPath": "output/normalize-timestamps-5AAS9X.json"
+  }
+}

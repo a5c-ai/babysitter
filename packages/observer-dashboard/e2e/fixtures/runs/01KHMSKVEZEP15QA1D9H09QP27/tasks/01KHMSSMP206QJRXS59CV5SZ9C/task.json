@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMSSMP206QJRXS59CV5SZ9C",
+  "taskId": "parse-xml-feed",
+  "invocationKey": "content/draft-review:S000005:parse-xml-feed",
+  "stepId": "S000005",
+  "kind": "node",
+  "title": "Parse XML feed",
+  "io": {
+    "inputJsonPath": "tasks/01KHMSSMP206QJRXS59CV5SZ9C/input.json",
+    "outputJsonPath": "tasks/01KHMSSMP206QJRXS59CV5SZ9C/result.json"
+  },
+  "inputs": {
+    "records": 9492,
+    "batchSize": 391,
+    "source": "postgres",
+    "destination": "elasticsearch"
+  }
+}

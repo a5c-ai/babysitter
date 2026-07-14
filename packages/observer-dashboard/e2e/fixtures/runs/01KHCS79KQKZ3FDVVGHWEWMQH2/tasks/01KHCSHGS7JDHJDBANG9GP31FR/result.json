@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCSHGS7JDHJDBANG9GP31FR",
+  "taskId": "wait-for-rate-limit-cooldown",
+  "invocationKey": "sales/lead-scoring:S000014:wait-for-rate-limit-cooldown",
+  "status": "ok",
+  "startedAt": "2026-02-14T00:41:51.025Z",
+  "finishedAt": "2026-02-14T00:41:51.463Z",
+  "result": {
+    "sleptMs": 5410,
+    "reason": "Wait for rate limit cooldown"
+  },
+  "value": {
+    "sleptMs": 5410,
+    "reason": "Wait for rate limit cooldown"
+  }
+}

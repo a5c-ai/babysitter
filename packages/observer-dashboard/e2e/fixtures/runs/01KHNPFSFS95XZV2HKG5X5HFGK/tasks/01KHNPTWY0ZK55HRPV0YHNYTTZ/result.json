@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHNPTWY0ZK55HRPV0YHNYTTZ",
+  "taskId": "research-market-trends",
+  "invocationKey": "content/publish-queue:S000011:research-market-trends",
+  "status": "ok",
+  "startedAt": "2026-02-17T11:47:41.648Z",
+  "finishedAt": "2026-02-17T11:47:58.693Z",
+  "result": {
+    "summary": "Generated review for Research market trends",
+    "sections": 4,
+    "wordCount": 3629,
+    "confidence": 0.781,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Increase test coverage for edge cases"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Research market trends",
+    "sections": 4,
+    "wordCount": 3629,
+    "confidence": 0.781,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging",
+      "Increase test coverage for edge cases",
+      "Increase test coverage for edge cases"
+    ]
+  }
+}

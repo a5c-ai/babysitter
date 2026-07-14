@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHAV43PZYT794MP4W5NRBVCT",
+  "taskId": "synthesize-user-feedback",
+  "invocationKey": "sales/deal-sync:S000008:synthesize-user-feedback",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:31:00.123Z",
+  "finishedAt": "2026-02-13T06:31:52.560Z",
+  "result": {
+    "summary": "Generated review for Synthesize user feedback",
+    "sections": 5,
+    "wordCount": 4386,
+    "confidence": 0.723,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Synthesize user feedback",
+    "sections": 5,
+    "wordCount": 4386,
+    "confidence": 0.723,
+    "recommendations": [
+      "Add input validation for user-facing fields",
+      "Consider caching for frequently accessed data",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

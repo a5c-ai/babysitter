@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-11T14:33:36.611Z",
+  "data": {
+    "effectId": "01KH6HYD33GXVGR6JBM6WM6Y1D",
+    "invocationKey": "sales/lead-scoring:S000014:research-market-trends",
+    "invocationHash": "5bbe2b7f412c0c2ee892ed523b8f76ea140ba6e9267de223b750530b39d1d209",
+    "stepId": "S000014",
+    "taskId": "research-market-trends",
+    "kind": "agent",
+    "label": "Research market trends",
+    "taskDefRef": "tasks/01KH6HYD33GXVGR6JBM6WM6Y1D/task.json"
+  },
+  "checksum": "8258a7046a43fc200273ebd462592348c418fef80f092edbf6aca6cd3c9c0831"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHJJWV08ZNA4P43RWDH3KKB2",
+  "taskId": "transform-csv-to-json",
+  "invocationKey": "content/draft-review:S000015:transform-csv-to-json",
+  "status": "ok",
+  "startedAt": "2026-02-16T06:41:08.136Z",
+  "finishedAt": "2026-02-16T06:41:59.156Z",
+  "result": {
+    "processed": 5032,
+    "failed": 25,
+    "skipped": 4,
+    "duration_ms": 51020,
+    "outputPath": "output/transform-csv-to-json-H3KKB2.json"
+  },
+  "value": {
+    "processed": 5032,
+    "failed": 25,
+    "skipped": 4,
+    "duration_ms": 51020,
+    "outputPath": "output/transform-csv-to-json-H3KKB2.json"
+  }
+}

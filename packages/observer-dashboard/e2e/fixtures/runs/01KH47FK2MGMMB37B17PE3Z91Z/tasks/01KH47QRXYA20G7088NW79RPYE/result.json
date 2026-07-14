@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH47QRXYA20G7088NW79RPYE",
+  "taskId": "draft-outreach-email",
+  "invocationKey": "sample/roster-update:S000009:draft-outreach-email",
+  "status": "ok",
+  "startedAt": "2026-02-10T16:56:46.654Z",
+  "finishedAt": "2026-02-10T16:57:25.811Z",
+  "result": {
+    "summary": "Generated review for Draft outreach email",
+    "sections": 3,
+    "wordCount": 2601,
+    "confidence": 0.768,
+    "recommendations": [
+      "Review error handling in async paths",
+      "Consider caching for frequently accessed data",
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Draft outreach email",
+    "sections": 3,
+    "wordCount": 2601,
+    "confidence": 0.768,
+    "recommendations": [
+      "Review error handling in async paths",
+      "Consider caching for frequently accessed data",
+      "Add structured logging for debugging"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHATXJ8S98KEJZDAGEX8CE4W",
+  "taskId": "index-search-documents",
+  "invocationKey": "sales/deal-sync:S000004:index-search-documents",
+  "status": "ok",
+  "startedAt": "2026-02-13T06:27:25.806Z",
+  "finishedAt": "2026-02-13T06:28:13.797Z",
+  "result": {
+    "processed": 3602,
+    "failed": 165,
+    "skipped": 42,
+    "duration_ms": 47991,
+    "outputPath": "output/index-search-documents-X8CE4W.json"
+  },
+  "value": {
+    "processed": 3602,
+    "failed": 165,
+    "skipped": 42,
+    "duration_ms": 47991,
+    "outputPath": "output/index-search-documents-X8CE4W.json"
+  }
+}

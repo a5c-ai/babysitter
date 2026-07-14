@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47FNR5VD7FPZM7X9VPCAX9",
+  "taskId": "synthesize-user-feedback",
+  "invocationKey": "sample/roster-update:S000001:synthesize-user-feedback",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Synthesize user feedback",
+  "io": {
+    "inputJsonPath": "tasks/01KH47FNR5VD7FPZM7X9VPCAX9/input.json",
+    "outputJsonPath": "tasks/01KH47FNR5VD7FPZM7X9VPCAX9/result.json"
+  },
+  "inputs": {
+    "context": "Process sample/roster-update step S000001",
+    "maxTokens": 4820,
+    "temperature": 0.42,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "synthesize-user-feedback",
+    "prompt": {
+      "role": "analyst",
+      "task": "Synthesize user feedback",
+      "instructions": [
+        "Analyze the provided data for sample-project",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

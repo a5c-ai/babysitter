@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6HMC3J5HMYD5EX9E0XZGBZ",
+  "taskId": "write-test-specifications",
+  "invocationKey": "sales/lead-scoring:S000002:write-test-specifications",
+  "stepId": "S000002",
+  "kind": "agent",
+  "title": "Write test specifications",
+  "io": {
+    "inputJsonPath": "tasks/01KH6HMC3J5HMYD5EX9E0XZGBZ/input.json",
+    "outputJsonPath": "tasks/01KH6HMC3J5HMYD5EX9E0XZGBZ/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000002",
+    "maxTokens": 1740,
+    "temperature": 0.16,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "write-test-specifications",
+    "prompt": {
+      "role": "researcher",
+      "task": "Write test specifications",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

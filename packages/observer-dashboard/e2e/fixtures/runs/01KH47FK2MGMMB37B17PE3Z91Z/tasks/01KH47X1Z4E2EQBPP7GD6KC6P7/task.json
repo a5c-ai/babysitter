@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH47X1Z4E2EQBPP7GD6KC6P7",
+  "taskId": "write-test-specifications",
+  "invocationKey": "sample/roster-update:S000013:write-test-specifications",
+  "stepId": "S000013",
+  "kind": "agent",
+  "title": "Write test specifications",
+  "io": {
+    "inputJsonPath": "tasks/01KH47X1Z4E2EQBPP7GD6KC6P7/input.json",
+    "outputJsonPath": "tasks/01KH47X1Z4E2EQBPP7GD6KC6P7/result.json"
+  },
+  "inputs": {
+    "context": "Process sample/roster-update step S000013",
+    "maxTokens": 5190,
+    "temperature": 0.57,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "write-test-specifications",
+    "prompt": {
+      "role": "analyst",
+      "task": "Write test specifications",
+      "instructions": [
+        "Analyze the provided data for sample-project",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Cite sources where applicable"
+      ]
+    }
+  }
+}

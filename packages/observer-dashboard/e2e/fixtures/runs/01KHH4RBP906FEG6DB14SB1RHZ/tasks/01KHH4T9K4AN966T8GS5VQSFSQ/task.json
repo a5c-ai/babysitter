@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4T9K4AN966T8GS5VQSFSQ",
+  "taskId": "analyze-competitor-data",
+  "invocationKey": "content/publish-queue:S000002:analyze-competitor-data",
+  "stepId": "S000002",
+  "kind": "agent",
+  "title": "Analyze competitor data",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4T9K4AN966T8GS5VQSFSQ/input.json",
+    "outputJsonPath": "tasks/01KHH4T9K4AN966T8GS5VQSFSQ/result.json"
+  },
+  "inputs": {
+    "context": "Process content/publish-queue step S000002",
+    "maxTokens": 2859,
+    "temperature": 0.89,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "analyze-competitor-data",
+    "prompt": {
+      "role": "analyst",
+      "task": "Analyze competitor data",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHFCG84GZE72VC19XZJDHJMJ",
+  "taskId": "generate-executive-summary",
+  "invocationKey": "content/publish-queue:S000010:generate-executive-summary",
+  "status": "ok",
+  "startedAt": "2026-02-15T00:51:40.536Z",
+  "finishedAt": "2026-02-15T00:52:40.283Z",
+  "result": {
+    "summary": "Generated analysis for Generate executive summary",
+    "sections": 8,
+    "wordCount": 2008,
+    "confidence": 0.943,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Generate executive summary",
+    "sections": 8,
+    "wordCount": 2008,
+    "confidence": 0.943,
+    "recommendations": [
+      "Increase test coverage for edge cases",
+      "Add structured logging for debugging"
+    ]
+  }
+}

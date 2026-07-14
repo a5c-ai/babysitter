@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHH4XJCPBZREGH7E9XJXVDRN",
+  "taskId": "research-market-trends",
+  "invocationKey": "content/publish-queue:S000006:research-market-trends",
+  "status": "ok",
+  "startedAt": "2026-02-15T17:17:36.981Z",
+  "finishedAt": "2026-02-15T17:18:07.416Z",
+  "result": {
+    "summary": "Generated report for Research market trends",
+    "sections": 4,
+    "wordCount": 392,
+    "confidence": 0.999,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Add structured logging for debugging",
+      "Consider caching for frequently accessed data",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated report for Research market trends",
+    "sections": 4,
+    "wordCount": 392,
+    "confidence": 0.999,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Add structured logging for debugging",
+      "Consider caching for frequently accessed data",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

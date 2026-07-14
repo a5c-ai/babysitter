@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-17T03:17:01.535Z",
+  "data": {
+    "runId": "01KHMSKVEZEP15QA1D9H09QP27",
+    "processId": "content/draft-review",
+    "entrypoint": {
+      "importPath": "../../processes/content-draft-review.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "c7ae5961094e612b17423a4025323ee6d6108ecce7e0f97d2a154fcd59d4bc41"
+}

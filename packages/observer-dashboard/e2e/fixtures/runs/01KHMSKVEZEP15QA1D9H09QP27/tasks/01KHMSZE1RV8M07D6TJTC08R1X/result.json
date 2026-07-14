@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMSZE1RV8M07D6TJTC08R1X",
+  "taskId": "create-architecture-spec",
+  "invocationKey": "content/draft-review:S000010:create-architecture-spec",
+  "status": "ok",
+  "startedAt": "2026-02-17T03:23:22.131Z",
+  "finishedAt": "2026-02-17T03:24:18.272Z",
+  "result": {
+    "summary": "Generated analysis for Create architecture spec",
+    "sections": 7,
+    "wordCount": 3516,
+    "confidence": 0.905,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data"
+    ]
+  },
+  "value": {
+    "summary": "Generated analysis for Create architecture spec",
+    "sections": 7,
+    "wordCount": 3516,
+    "confidence": 0.905,
+    "recommendations": [
+      "Implement retry logic for external API calls",
+      "Implement retry logic for external API calls",
+      "Consider caching for frequently accessed data"
+    ]
+  }
+}

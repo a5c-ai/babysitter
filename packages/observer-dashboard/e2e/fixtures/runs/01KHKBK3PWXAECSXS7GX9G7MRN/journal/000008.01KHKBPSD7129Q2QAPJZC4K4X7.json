@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-16T13:54:43.239Z",
+  "data": {
+    "effectId": "01KHKBPSD7WCYH6RB6RTQF0ZC8",
+    "invocationKey": "content/analytics-roll:S000004:call-translation-api",
+    "invocationHash": "5b9a2e48b942bbb33abd06fd63ff080d155e1c6a6ff71da655ec9253a506fa18",
+    "stepId": "S000004",
+    "taskId": "call-translation-api",
+    "kind": "skill",
+    "label": "Call translation API",
+    "taskDefRef": "tasks/01KHKBPSD7WCYH6RB6RTQF0ZC8/task.json"
+  },
+  "checksum": "c3d2090a82128a9ebcc2d4e40f665ea95ae324fa18e3612fa1291f7cc4e303de"
+}

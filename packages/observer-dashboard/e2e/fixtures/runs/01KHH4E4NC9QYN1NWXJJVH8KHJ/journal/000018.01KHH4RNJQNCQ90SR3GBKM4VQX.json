@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T17:14:55.959Z",
+  "data": {
+    "effectId": "01KHH4RNJQFQJP44B5BH2B32NM",
+    "invocationKey": "sales/outreach-gen:S000009:synthesize-user-feedback",
+    "invocationHash": "818157566e1cf3f58b6d57b402eca0cd424a546c64a5bff1a5e912d0c109397f",
+    "stepId": "S000009",
+    "taskId": "synthesize-user-feedback",
+    "kind": "agent",
+    "label": "Synthesize user feedback",
+    "taskDefRef": "tasks/01KHH4RNJQFQJP44B5BH2B32NM/task.json"
+  },
+  "checksum": "98c415c0e4607c745be4e6f10c3198afa9def4e1c0d2dbd82d6bed5419d6af83"
+}

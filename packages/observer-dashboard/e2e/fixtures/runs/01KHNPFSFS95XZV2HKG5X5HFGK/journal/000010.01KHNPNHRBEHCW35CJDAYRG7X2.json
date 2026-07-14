@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T11:44:45.835Z",
+  "data": {
+    "effectId": "01KHNPNHRB956M01WQRZA5MY52",
+    "invocationKey": "content/publish-queue:S000005:run-sentiment-analysis",
+    "invocationHash": "8fd61b920a182c352952394bfdd0710da6ad8a108083804c53da1ebe2b0986cb",
+    "stepId": "S000005",
+    "taskId": "run-sentiment-analysis",
+    "kind": "skill",
+    "label": "Run sentiment analysis",
+    "taskDefRef": "tasks/01KHNPNHRB956M01WQRZA5MY52/task.json"
+  },
+  "checksum": "6befd3d0c4b28e2762ef5038339e15bbcef9c065e6e10cddd3b5587ca8f70f29"
+}

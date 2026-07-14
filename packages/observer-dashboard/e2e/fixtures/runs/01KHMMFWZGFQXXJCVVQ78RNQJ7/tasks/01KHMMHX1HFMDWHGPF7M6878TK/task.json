@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHMMHX1HFMDWHGPF7M6878TK",
+  "taskId": "execute-test-suite",
+  "invocationKey": "sales/lead-scoring:S000002:execute-test-suite",
+  "stepId": "S000002",
+  "kind": "shell",
+  "title": "Execute test suite",
+  "io": {
+    "inputJsonPath": "tasks/01KHMMHX1HFMDWHGPF7M6878TK/input.json",
+    "outputJsonPath": "tasks/01KHMMHX1HFMDWHGPF7M6878TK/result.json"
+  },
+  "inputs": {
+    "command": "docker",
+    "args": [
+      "exec",
+      "--env=prod"
+    ],
+    "cwd": "/workspace/sales-pipeline",
+    "timeout": 202000
+  }
+}

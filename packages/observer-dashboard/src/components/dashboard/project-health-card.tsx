@@ -284,6 +284,12 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
 
       {/* Expanded: runs list — split into active and completed */}
       {expanded && (() => {
+        // This list intentionally INCLUDES stale runs so they surface somewhere in
+        // the expanded card (successRuns/failedRuns below exclude isStale). Because
+        // of that, its count is broader than the canonical "In Progress" KPI
+        // (metrics.activeRuns = non-stale waiting/pending; see run-cache.ts), so the
+        // section header is labelled "Active & Recent" — matching project-list-view.tsx —
+        // rather than "In Progress", to avoid two "In Progress" numbers disagreeing.
         const activeRuns = runs.filter((r) => r.status === "waiting" || r.status === "pending" || r.isStale);
         const successRuns = runs.filter((r) => r.status === "completed" && !r.isStale);
         const failedRuns = runs.filter((r) => r.status === "failed" && !r.isStale);
@@ -425,12 +431,14 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
                   />
                 </div>
 
-                {/* Active runs — always visible with section header */}
+                {/* Active & recent runs — always visible with section header.
+                    Label matches project-list-view.tsx and stays distinct from the
+                    "In Progress" KPI, since this list also includes stale runs. */}
                 {hasActiveRuns && (
                   <div className="mb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Activity className="h-3.5 w-3.5 text-warning animate-pulse-dot" />
-                      <span className="text-xs font-semibold text-foreground">In Progress</span>
+                      <span className="text-xs font-semibold text-foreground">Active &amp; Recent</span>
                       <span className="rounded-full bg-warning/10 border border-warning/20 px-2 py-px text-xs font-semibold text-warning tabular-nums">
                         {activeRuns.length}
                       </span>

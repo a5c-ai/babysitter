@@ -1,5 +1,5 @@
 import { test, expect } from "../fixtures";
-import { getManifest, type Manifest } from "../fixtures/test-data";
+import { getManifest, getActiveRunCount, type Manifest } from "../fixtures/test-data";
 
 /**
  * Comprehensive E2E tests for the Observer Dashboard page (/).
@@ -13,6 +13,18 @@ let manifest: Manifest;
 test.beforeAll(async () => {
   manifest = await getManifest();
 });
+
+/**
+ * Grid-visible run total. Since the kanban wave-3 fixtures, the manifest's
+ * runCount counts every run SURFACED on the dashboard (grid-visible runs PLUS
+ * the registry-hidden project's needs-you run on the alarm surface — the board
+ * columns sum to exactly that number). The KPI tiles and the "All" pill are
+ * grid-level metrics (QA F4: hiding removes a project from the GRID), so they
+ * count only the runs of the projects in projectCounts.
+ */
+function gridRunCount(): number {
+  return Object.values(manifest.projectCounts).reduce((sum, n) => sum + n, 0);
+}
 
 // ---------------------------------------------------------------------------
 // Dashboard Loading & Header
@@ -71,16 +83,19 @@ test.describe("KPI Metric Tiles", () => {
     const tile = dashboardPage.getMetricTile("total-runs");
     await expect(tile).toBeVisible();
     await expect(tile).toContainText("Total Runs");
-    await expect(tile).toContainText(String(manifest.runCount));
+    await expect(tile).toContainText(String(gridRunCount()));
   });
 
   test("Active tile shows the active run count", async ({ dashboardPage }) => {
     const tile = dashboardPage.getMetricTile("active");
     await expect(tile).toBeVisible();
     await expect(tile).toContainText("In Progress");
-    // Active = waiting + pending
-    const activeCount =
-      (manifest.statusCounts.waiting || 0) + (manifest.statusCounts.pending || 0);
+    // §15.1 (owner gate 2026-07-06b, scheduled-state): Active = waiting + pending
+    // MINUS sleeping "scheduled" runs. A forever-run parked at an unresolved
+    // sleep effect is idle-healthy, not in-progress, so the tile (single
+    // counting source) excludes it — getActiveRunCount reconciles this test with
+    // that definition instead of the stale raw waiting+pending sum.
+    const activeCount = await getActiveRunCount();
     await expect(tile).toContainText(String(activeCount));
   });
 
@@ -99,12 +114,22 @@ test.describe("KPI Metric Tiles", () => {
   });
 
   test("KPI tile values sum correctly", async ({ dashboardPage }) => {
-    // The active + completed + failed should generally equal total
-    // (pending are included in active)
+    // Total-runs tile === grid run count, with scheduled runs present (§15.1
+    // AC-77: the Scheduled column participates in the board total, so the total
+    // tile still reconciles to the full grid count).
+    //
+    // The KPI tiles read the wave-1 single counting source (useAllRuns /
+    // /api/runs), which resolves INDEPENDENTLY of waitForData() (that awaits the
+    // project grid, fed by the digest). So the tile shows 0 until the async
+    // metric settles — poll the parsed value instead of racing a one-shot
+    // innerText read.
     const totalTile = dashboardPage.getMetricTile("total-runs");
-    const totalText = await totalTile.innerText();
-    const totalValue = parseInt(totalText.match(/\d+/)?.[0] || "0", 10);
-    expect(totalValue).toBe(manifest.runCount);
+    await expect
+      .poll(async () => {
+        const digits = (await totalTile.innerText()).match(/\d+/)?.[0];
+        return digits ? parseInt(digits, 10) : null;
+      })
+      .toBe(gridRunCount());
   });
 });
 
@@ -160,6 +185,10 @@ test.describe("Project Health Cards", () => {
     // Use Playwright's auto-retrying toContainText instead of a one-shot
     // innerText() read, which can flake when cards are still hydrating.
     const cards = dashboardPage.getProjectCards();
+    // Auto-retrying visibility wait before the one-shot count() — the count
+    // can otherwise race the grid hydrating and read 0 (same flake class the
+    // comment above describes for innerText()).
+    await expect(cards.first()).toBeVisible({ timeout: 15_000 });
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
 
@@ -169,18 +198,15 @@ test.describe("Project Health Cards", () => {
   });
 
   test("project cards show progress bar when tasks exist", async ({ dashboardPage }) => {
-    // At least one project card should have a progress bar (tasks text)
+    // At least one project card should have a progress bar (tasks text).
+    // Same intent as before, but auto-retrying: the previous one-shot
+    // count()+innerText() loop raced grid hydration and read 0 cards (the
+    // trace showed the locator query resolving before any card mounted while
+    // the failure screenshot, ms later, had fully hydrated "N/M tasks" rows).
+    // Same flake class — and same cure — as "display total run count" above.
     const cards = dashboardPage.getProjectCards();
-    const count = await cards.count();
-    let foundProgress = false;
-    for (let i = 0; i < count; i++) {
-      const text = await cards.nth(i).innerText();
-      if (text.includes("tasks")) {
-        foundProgress = true;
-        break;
-      }
-    }
-    expect(foundProgress).toBe(true);
+    const cardWithProgress = cards.filter({ hasText: "tasks" }).first();
+    await expect(cardWithProgress).toBeVisible({ timeout: 15_000 });
   });
 
   test("expanding a project card reveals run cards", async ({ dashboardPage, page }) => {
@@ -207,32 +233,86 @@ test.describe("Filter Pills", () => {
     await dashboardPage.waitForData();
   });
 
-  test("displays all filter pills (4 base, or 5 with Stale)", async ({ dashboardPage }) => {
-    const pills = dashboardPage.getFilterPills();
+  test("displays the filter pill bar (5 base, up to 7 with Orphaned/Stale)", async ({
+    dashboardPage,
+  }) => {
+    // e2e-pill-count-assertion-outdated: RunFilterBar now renders 7 pills —
+    // All, Needs you, Waiting, Orphaned, Stale, Completed, Failed — but the
+    // Orphaned and Stale pills are hidden when their count is 0. So the always-
+    // present set is 5 and the maximum is 7.
+    // Count the actual status pills by their testid prefix. getFilterPills()
+    // matches every button inside filter-bar, which now also hosts the sort
+    // toggle AND the two Board|List view-toggle segments (SPEC-vibekanban
+    // §6.1), so a raw button count is no longer a meaningful pill count.
+    const pills = dashboardPage.page.locator('[data-testid^="filter-pill-"]');
     const count = await pills.count();
-    // 4 base pills (All, Running, Completed, Failed) + optional Stale pill
-    expect(count).toBeGreaterThanOrEqual(4);
-    expect(count).toBeLessThanOrEqual(5);
+    expect(count).toBeGreaterThanOrEqual(5);
+    expect(count).toBeLessThanOrEqual(7);
+
+    // The 5 always-visible pills must each be present, by testid.
+    for (const value of ["all", "needsyou", "waiting", "completed", "failed"]) {
+      await expect(dashboardPage.getFilterPill(value)).toBeVisible();
+    }
   });
 
   test("All filter pill is active by default", async ({ dashboardPage }) => {
     const allPill = dashboardPage.getFilterPill("all");
     await expect(allPill).toBeVisible();
-    // The active pill has bg-primary/10 class (visually highlighted)
-    await expect(allPill).toHaveClass(/bg-primary/);
+    // UX-R3 §14.2 (owner gate 2026-07-06, option a): the active pill is neutral
+    // (foreground ink + subtle fill + 2px underline), not magenta.
+    await expect(allPill).toHaveClass(/bg-foreground/);
   });
 
   test("filter pills display correct labels", async ({ dashboardPage }) => {
+    // e2e-pill-labels-missing-new-pills: cover the triage pills (Needs you,
+    // Orphaned, Stale) alongside the base set. Note the "waiting" pill is now
+    // labelled "Waiting" (not "Running").
     await expect(dashboardPage.getFilterPill("all")).toContainText("All");
-    await expect(dashboardPage.getFilterPill("waiting")).toContainText("Running");
+    await expect(dashboardPage.getFilterPill("needsyou")).toContainText("Needs you");
+    await expect(dashboardPage.getFilterPill("waiting")).toContainText("Waiting");
     await expect(dashboardPage.getFilterPill("completed")).toContainText("Completed");
     await expect(dashboardPage.getFilterPill("failed")).toContainText("Failed");
+
+    // Orphaned / Stale pills are only rendered when their count > 0, so assert
+    // their labels conditionally (tolerating 0-count buckets in real data).
+    const orphanedPill = dashboardPage.getFilterPill("orphaned");
+    if (await orphanedPill.isVisible().catch(() => false)) {
+      await expect(orphanedPill).toContainText("Orphaned");
+    }
+    const stalePill = dashboardPage.getFilterPill("stale");
+    if (await stalePill.isVisible().catch(() => false)) {
+      await expect(stalePill).toContainText("Stale");
+    }
+  });
+
+  test("triage pills expose aria-pressed state", async ({ dashboardPage }) => {
+    // e2e-pill-labels-missing-new-pills: the pills are toggle buttons; the
+    // active one reports aria-pressed="true". "All" is active on load.
+    await expect(dashboardPage.getFilterPill("all")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await expect(dashboardPage.getFilterPill("needsyou")).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+
+    // Selecting the "Needs you" pill flips the aria-pressed state.
+    await dashboardPage.clickFilterByValue("needsyou");
+    await expect(dashboardPage.getFilterPill("needsyou")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await expect(dashboardPage.getFilterPill("all")).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
   });
 
   test("filter pills show count badges when runs exist", async ({ dashboardPage }) => {
     // The "All" pill should show the total run count
     const allPill = dashboardPage.getFilterPill("all");
-    await expect(allPill).toContainText(String(manifest.runCount));
+    await expect(allPill).toContainText(String(gridRunCount()));
 
     // Completed pill should show completed count
     if ((manifest.statusCounts.completed || 0) > 0) {
@@ -249,120 +329,159 @@ test.describe("Filter Pills", () => {
     }
   });
 
-  test("clicking Running filter shows only projects with active runs", async ({
+  // e2e-filter-tests-stale-contradict-feature: page.tsx now renders the flat
+  // <RunList> (not the project grid) for any non-"all" status filter. These
+  // tests were rewritten to assert the flat run-list is shown and the project
+  // grid is gone, instead of the removed "filtered project grid" behavior.
+
+  test("clicking Waiting filter shows the flat run list, not project cards", async ({
     dashboardPage,
   }) => {
-    await dashboardPage.clickFilter("Running");
+    await dashboardPage.clickFilterByValue("waiting");
 
-    // The active pill should change to Running
-    const runningPill = dashboardPage.getFilterPill("waiting");
-    await expect(runningPill).toHaveClass(/bg-primary/);
+    // The Waiting pill becomes the active (highlighted) pill.
+    await expect(dashboardPage.getFilterPill("waiting")).toHaveClass(/bg-foreground/); // UX-R3 §14.2 (owner gate 2026-07-06, option a): active pill is neutral (foreground ink + fill + underline), not magenta
 
-    // Projects displayed should only be those with active runs
-    // Count projects that have waiting or pending runs
-    const activeProjectNames = new Set(
-      manifest.runs
-        .filter((r) => r.status === "waiting" || r.status === "pending")
-        .map((r) => r.projectName)
-    );
-
-    const cards = dashboardPage.getProjectCards();
-    const cardCount = await cards.count();
-    expect(cardCount).toBe(activeProjectNames.size);
-
-    // Project count label should update
-    await expect(dashboardPage.projectCount).toContainText(
-      `${activeProjectNames.size} project`
-    );
+    // The project grid / cards are replaced by the flat list (or the shared
+    // empty state when there are no waiting runs).
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.projectGrid).toHaveCount(0);
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
   });
 
-  test("clicking Completed filter shows only projects with completed runs", async ({
+  test("clicking Completed filter shows the flat run list of completed runs", async ({
     dashboardPage,
   }) => {
-    await dashboardPage.clickFilter("Completed");
+    // Prefer a bucket known to be non-empty in real data so we can assert rows.
+    if ((manifest.statusCounts.completed || 0) === 0) {
+      test.skip();
+      return;
+    }
 
-    const completedPill = dashboardPage.getFilterPill("completed");
-    await expect(completedPill).toHaveClass(/bg-primary/);
+    await dashboardPage.clickFilterByValue("completed");
+    await expect(dashboardPage.getFilterPill("completed")).toHaveClass(/bg-foreground/); // UX-R3 §14.2 (owner gate 2026-07-06, option a): active pill is neutral (foreground ink + fill + underline), not magenta
 
-    // Count projects that have completed runs
-    const completedProjectNames = new Set(
-      manifest.runs
-        .filter((r) => r.status === "completed")
-        .map((r) => r.projectName)
-    );
-
-    const cards = dashboardPage.getProjectCards();
-    const cardCount = await cards.count();
-    expect(cardCount).toBe(completedProjectNames.size);
+    // Flat list is visible with at least one run row, and no project cards.
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.runList).toBeVisible();
+    await expect(dashboardPage.runRows.first()).toBeVisible({ timeout: 15_000 });
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
   });
 
-  test("clicking Failed filter shows only projects with failed runs", async ({
+  test("clicking Failed filter shows the flat run list, not project cards", async ({
     dashboardPage,
   }) => {
-    await dashboardPage.clickFilter("Failed");
+    await dashboardPage.clickFilterByValue("failed");
+    await expect(dashboardPage.getFilterPill("failed")).toHaveClass(/bg-foreground/); // UX-R3 §14.2 (owner gate 2026-07-06, option a): active pill is neutral (foreground ink + fill + underline), not magenta
 
-    const failedPill = dashboardPage.getFilterPill("failed");
-    await expect(failedPill).toHaveClass(/bg-primary/);
-
-    // Count projects that have failed runs
-    const failedProjectNames = new Set(
-      manifest.runs
-        .filter((r) => r.status === "failed")
-        .map((r) => r.projectName)
-    );
-
-    const cards = dashboardPage.getProjectCards();
-    const cardCount = await cards.count();
-    expect(cardCount).toBe(failedProjectNames.size);
+    // Flat list (or empty state) replaces the grid; cards are gone. If there
+    // are failed runs, at least one row is present.
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+    if ((manifest.statusCounts.failed || 0) > 0) {
+      await expect(dashboardPage.runList).toBeVisible();
+      await expect(dashboardPage.runRows.first()).toBeVisible({ timeout: 15_000 });
+    }
   });
 
-  test("clicking All filter restores all projects", async ({ dashboardPage }) => {
-    // First apply a filter
-    await dashboardPage.clickFilter("Failed");
-    const failedProjectNames = new Set(
-      manifest.runs
-        .filter((r) => r.status === "failed")
-        .map((r) => r.projectName)
-    );
-    const cards = dashboardPage.getProjectCards();
-    await expect(cards).toHaveCount(failedProjectNames.size);
+  test("clicking All filter restores the project grid", async ({ dashboardPage }) => {
+    // Apply a non-"all" filter → flat list, then All → grid restored.
+    await dashboardPage.clickFilterByValue("failed");
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
 
-    // Now click All to restore
-    await dashboardPage.clickFilter("All");
+    await dashboardPage.clickFilterByValue("all");
+    await expect(dashboardPage.getFilterPill("all")).toHaveClass(/bg-foreground/); // UX-R3 §14.2 (owner gate 2026-07-06, option a): active pill is neutral (foreground ink + fill + underline), not magenta
 
-    const allPill = dashboardPage.getFilterPill("all");
-    await expect(allPill).toHaveClass(/bg-primary/);
-
+    // Grid comes back with every project card.
+    await expect(dashboardPage.projectGrid).toBeVisible({ timeout: 15_000 });
     const allProjects = Object.keys(manifest.projectCounts);
     await expect(dashboardPage.getProjectCards()).toHaveCount(allProjects.length);
   });
 
-  test("switching filters updates the project count label", async ({
+  test("switching between grid and flat list toggles the two views", async ({
     dashboardPage,
   }) => {
     const totalProjects = Object.keys(manifest.projectCounts).length;
 
-    // Initially shows all projects
-    await expect(dashboardPage.projectCount).toContainText(
-      `${totalProjects} project`
-    );
+    // Initially the "all" grid shows every project card.
+    await expect(dashboardPage.getProjectCards()).toHaveCount(totalProjects);
+    await expect(dashboardPage.runList).toHaveCount(0);
 
-    // Switch to Failed
-    await dashboardPage.clickFilter("Failed");
-    const failedProjectCount = new Set(
-      manifest.runs
-        .filter((r) => r.status === "failed")
-        .map((r) => r.projectName)
-    ).size;
-    await expect(dashboardPage.projectCount).toContainText(
-      `${failedProjectCount} project`
-    );
+    // Switch to a status filter → flat list, no grid.
+    await dashboardPage.clickFilterByValue("failed");
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
 
-    // Switch back to All
-    await dashboardPage.clickFilter("All");
-    await expect(dashboardPage.projectCount).toContainText(
-      `${totalProjects} project`
-    );
+    // Switch back to All → grid restored, flat list gone.
+    await dashboardPage.clickFilterByValue("all");
+    await expect(dashboardPage.getProjectCards()).toHaveCount(totalProjects);
+    await expect(dashboardPage.runList).toHaveCount(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Flat Run List (filter → list)  — e2e-no-filter-to-flatlist-test
+// ---------------------------------------------------------------------------
+
+test.describe("Flat Run List", () => {
+  test.beforeEach(async ({ dashboardPage }) => {
+    await dashboardPage.goto();
+    await dashboardPage.waitForData();
+  });
+
+  test("selecting a status filter replaces the project grid with the flat run list", async ({
+    dashboardPage,
+  }) => {
+    // Headline UX: pick a non-empty bucket so we can assert real rows. Prefer
+    // completed (usually populated); fall back to failed; otherwise skip.
+    let filter: string | null = null;
+    if ((manifest.statusCounts.completed || 0) > 0) filter = "completed";
+    else if ((manifest.statusCounts.failed || 0) > 0) filter = "failed";
+    if (!filter) {
+      test.skip();
+      return;
+    }
+
+    // Grid is present before filtering.
+    await expect(dashboardPage.projectGrid).toBeVisible();
+
+    await dashboardPage.clickFilterByValue(filter);
+    await dashboardPage.waitForRunList();
+
+    // Flat list and its rows are visible; the project grid and cards are gone.
+    await expect(dashboardPage.runList).toBeVisible();
+    await expect(dashboardPage.runRows.first()).toBeVisible({ timeout: 15_000 });
+    await expect(dashboardPage.projectGrid).toHaveCount(0);
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+
+    // Each run row is a link to the run detail page.
+    const href = await dashboardPage.runRows.first().getAttribute("href");
+    expect(href).toMatch(/^\/runs\/[A-Z0-9]+$/);
+
+    // Clicking "All" restores the project grid.
+    await dashboardPage.clickFilterByValue("all");
+    await expect(dashboardPage.projectGrid).toBeVisible({ timeout: 15_000 });
+    await expect(dashboardPage.runList).toHaveCount(0);
+    await expect(dashboardPage.getProjectCards().first()).toBeVisible();
+  });
+
+  test("clicking a run row navigates to the run detail page", async ({
+    dashboardPage,
+    page,
+  }) => {
+    if ((manifest.statusCounts.completed || 0) === 0) {
+      test.skip();
+      return;
+    }
+
+    await dashboardPage.clickFilterByValue("completed");
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.runRows.first()).toBeVisible({ timeout: 15_000 });
+
+    await dashboardPage.runRows.first().click();
+    await page.waitForURL(/\/runs\/[A-Z0-9]+/, { timeout: 30_000 });
+    expect(page.url()).toContain("/runs/");
   });
 });
 
@@ -579,104 +698,70 @@ test.describe("Pagination", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Empty State (when filter yields no matching projects)
+// Empty State (flat run-list, when a status filter yields no matching runs)
+//   e2e-filter-tests-stale-contradict-feature: retargeted from the removed
+//   filtered project-grid + expand-card model to the flat <RunList>, which
+//   renders the shared <EmptyState> ("No runs found") for a 0-run bucket.
 // ---------------------------------------------------------------------------
 
 test.describe("Empty State", () => {
-  test("shows empty state text when no projects match a filter that has zero count", async ({
+  test("flat list shows the shared empty state for a status bucket with zero runs", async ({
     dashboardPage,
-    page,
   }) => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // Apply filters and verify the project count updates.
-    // If all projects have at least one run of each type, we may not see an empty state.
-    // We can verify the empty-state fallback logic by checking the filter behavior.
-
-    // Check if any filter would result in 0 projects
-    const failedProjects = new Set(
-      manifest.runs
-        .filter((r) => r.status === "failed")
-        .map((r) => r.projectName)
-    );
-    const completedProjects = new Set(
-      manifest.runs
-        .filter((r) => r.status === "completed")
-        .map((r) => r.projectName)
-    );
-    const activeProjects = new Set(
-      manifest.runs
-        .filter((r) => r.status === "waiting" || r.status === "pending")
-        .map((r) => r.projectName)
-    );
-
-    // If all 4 projects appear in every filter, there's no empty state to test
-    // In that case, just verify the empty state element exists in the DOM markup
-    // by expanding a project card and filtering to a status with no matching runs
-    const allProjectCount = Object.keys(manifest.projectCounts).length;
-    if (
-      failedProjects.size < allProjectCount ||
-      completedProjects.size < allProjectCount ||
-      activeProjects.size < allProjectCount
-    ) {
-      // Find a filter that produces fewer projects
-      if (failedProjects.size < allProjectCount) {
-        await dashboardPage.clickFilter("Failed");
-        const cards = dashboardPage.getProjectCards();
-        const count = await cards.count();
-        expect(count).toBeLessThan(allProjectCount);
-      }
-    }
-  });
-
-  test("empty state shows configure message when no runs match within a project", async ({
-    dashboardPage,
-    page,
-  }) => {
-    await dashboardPage.goto();
-    await dashboardPage.waitForData();
-
-    // Apply the Failed filter
-    await dashboardPage.clickFilter("Failed");
-
-    // Find a project with failed runs
-    const failedProjectNames = [
-      ...new Set(
-        manifest.runs
-          .filter((r) => r.status === "failed")
-          .map((r) => r.projectName)
-      ),
+    // Pick a status filter whose bucket is empty in the fixtures so we can
+    // observe the flat-list empty state. If every direct bucket is populated,
+    // skip (nothing to assert without a zero-count bucket).
+    const directStatuses: Array<{ value: string; count: number }> = [
+      { value: "waiting", count: manifest.statusCounts.waiting || 0 },
+      { value: "completed", count: manifest.statusCounts.completed || 0 },
+      { value: "failed", count: manifest.statusCounts.failed || 0 },
     ];
-
-    if (failedProjectNames.length === 0) {
+    const emptyBucket = directStatuses.find((s) => s.count === 0);
+    if (!emptyBucket) {
       test.skip();
       return;
     }
 
-    // Now expand a project that has failed runs - runs should display
-    const projectName = failedProjectNames[0];
-    const card = dashboardPage.getProjectCard(projectName);
-    await card.click();
+    await dashboardPage.clickFilterByValue(emptyBucket.value);
+    await dashboardPage.waitForRunList();
 
-    // Expand collapsed sub-sections (Failed Runs, Completed History) if present
-    await dashboardPage.expandRunSubSections();
+    // The shared empty state text is shown, and there is no project grid/cards.
+    await expect(dashboardPage.page.getByText("No runs found")).toBeVisible();
+    await expect(dashboardPage.runRows).toHaveCount(0);
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+  });
 
-    // Wait for run list to appear
-    const runCards = card.locator('a[href^="/runs/"]');
-    await expect(runCards.first()).toBeVisible({ timeout: 15_000 });
+  test("switching between status filters swaps the flat list contents", async ({
+    dashboardPage,
+  }) => {
+    await dashboardPage.goto();
+    await dashboardPage.waitForData();
 
-    // Now switch to Completed filter while the card is expanded
-    await dashboardPage.clickFilter("Completed");
+    // Apply the Failed filter → flat list (rows if any failed runs exist,
+    // otherwise the shared empty state). Never the project grid.
+    await dashboardPage.clickFilterByValue("failed");
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+    if ((manifest.statusCounts.failed || 0) > 0) {
+      await expect(dashboardPage.runList).toBeVisible();
+      await expect(dashboardPage.runRows.first()).toBeVisible({ timeout: 15_000 });
+    } else {
+      await expect(dashboardPage.page.getByText("No runs found")).toBeVisible();
+    }
 
-    // The card may disappear if the project has no completed runs
-    const hasCompletedRuns = manifest.runs.some(
-      (r) => r.projectName === projectName && r.status === "completed"
-    );
-
-    if (!hasCompletedRuns) {
-      // The card should no longer be visible (project filtered out)
-      await expect(card).not.toBeVisible({ timeout: 5_000 });
+    // Switch to the Completed filter — the flat list updates in place, still
+    // no project grid/cards.
+    await dashboardPage.clickFilterByValue("completed");
+    await dashboardPage.waitForRunList();
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+    if ((manifest.statusCounts.completed || 0) > 0) {
+      await expect(dashboardPage.runList).toBeVisible();
+      await expect(dashboardPage.runRows.first()).toBeVisible({ timeout: 15_000 });
+    } else {
+      await expect(dashboardPage.page.getByText("No runs found")).toBeVisible();
     }
   });
 });
@@ -716,10 +801,13 @@ test.describe("Settings Modal", () => {
     // that interfere with the click handler registration.
     await dashboardPage.waitForData();
 
-    await dashboardPage.settingsButton.click();
+    // Deterministic open (settings-flake class): re-clicks until the modal
+    // mounts instead of one blind click + a long toBeVisible timeout — see
+    // DashboardPage.openSettings for the root-cause note.
+    await dashboardPage.openSettings();
 
     // Settings modal should become visible (Radix Dialog.Portal may take a moment)
-    await expect(page.getByTestId("settings-modal")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("settings-modal")).toBeVisible();
   });
 });
 
@@ -816,7 +904,7 @@ test.describe("Data Integrity", () => {
 
     // Total Runs KPI should equal the sum of all project run counts
     const totalTile = dashboardPage.getMetricTile("total-runs");
-    await expect(totalTile).toContainText(String(manifest.runCount));
+    await expect(totalTile).toContainText(String(gridRunCount()));
 
     // The project count should match the number of unique projects
     const projectCount = Object.keys(manifest.projectCounts).length;

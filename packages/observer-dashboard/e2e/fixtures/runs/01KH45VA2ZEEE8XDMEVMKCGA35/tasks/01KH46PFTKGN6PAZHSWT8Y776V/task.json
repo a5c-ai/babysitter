@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH46PFTKGN6PAZHSWT8Y776V",
+  "taskId": "write-test-specifications",
+  "invocationKey": "demo-project/publish:S000024:write-test-specifications",
+  "stepId": "S000024",
+  "kind": "agent",
+  "title": "Write test specifications",
+  "io": {
+    "inputJsonPath": "tasks/01KH46PFTKGN6PAZHSWT8Y776V/input.json",
+    "outputJsonPath": "tasks/01KH46PFTKGN6PAZHSWT8Y776V/result.json"
+  },
+  "inputs": {
+    "context": "Process demo-project/publish step S000024",
+    "maxTokens": 7119,
+    "temperature": 0.78,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "write-test-specifications",
+    "prompt": {
+      "role": "writer",
+      "task": "Write test specifications",
+      "instructions": [
+        "Analyze the provided data for demo-project",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T06:58:14.724Z",
+  "data": {
+    "effectId": "01KHG1FFJ4S67J4BEFX42KK933",
+    "invocationKey": "sales/deal-sync:S000010:merge-datasets",
+    "invocationHash": "8b0b50d338fe576210e37062d65ca4903a3b8bad62a590f4c7a3ccc1f9935b0e",
+    "stepId": "S000010",
+    "taskId": "merge-datasets",
+    "kind": "node",
+    "label": "Merge datasets",
+    "taskDefRef": "tasks/01KHG1FFJ4S67J4BEFX42KK933/task.json"
+  },
+  "checksum": "a436529908b147ee386b16ea0bbc1bc3587eb60e1246762604597aa79e0e431e"
+}

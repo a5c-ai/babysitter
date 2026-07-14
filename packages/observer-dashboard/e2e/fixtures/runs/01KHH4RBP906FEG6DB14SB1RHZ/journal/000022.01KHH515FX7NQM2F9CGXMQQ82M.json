@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T17:19:34.397Z",
+  "data": {
+    "effectId": "01KHH515FXAS9Y6CGBWHXH0V6J",
+    "invocationKey": "content/publish-queue:S000011:review-pull-request",
+    "invocationHash": "6fe9b948652cd0ed496d8adb56c8d8817bc47fcbfee0f6e33c2623361f655e2f",
+    "stepId": "S000011",
+    "taskId": "review-pull-request",
+    "kind": "agent",
+    "label": "Review pull request",
+    "taskDefRef": "tasks/01KHH515FXAS9Y6CGBWHXH0V6J/task.json"
+  },
+  "checksum": "d50b1ac3a330e60c9181c8e9dc4b47de79240ec03e1b2f7e2b0d21efb12986aa"
+}

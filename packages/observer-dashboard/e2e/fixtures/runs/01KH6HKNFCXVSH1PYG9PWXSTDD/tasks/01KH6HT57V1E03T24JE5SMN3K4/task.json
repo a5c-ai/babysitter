@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH6HT57V1E03T24JE5SMN3K4",
+  "taskId": "review-pull-request",
+  "invocationKey": "sales/lead-scoring:S000009:review-pull-request",
+  "stepId": "S000009",
+  "kind": "agent",
+  "title": "Review pull request",
+  "io": {
+    "inputJsonPath": "tasks/01KH6HT57V1E03T24JE5SMN3K4/input.json",
+    "outputJsonPath": "tasks/01KH6HT57V1E03T24JE5SMN3K4/result.json"
+  },
+  "inputs": {
+    "context": "Process sales/lead-scoring step S000009",
+    "maxTokens": 5113,
+    "temperature": 0.77,
+    "model": "claude-opus-4-20250514"
+  },
+  "agent": {
+    "name": "review-pull-request",
+    "prompt": {
+      "role": "researcher",
+      "task": "Review pull request",
+      "instructions": [
+        "Analyze the provided data for sales-pipeline",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Include confidence scores"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T17:14:46.627Z",
+  "data": {
+    "effectId": "01KHH4RCF3T7KCTCBRZXF4W4P7",
+    "invocationKey": "content/publish-queue:S000001:pause-before-retry",
+    "invocationHash": "6062a0071e6e6d1e88c8aedef1cd5583d597c776f2dbb2fa3b59c5e8718a670c",
+    "stepId": "S000001",
+    "taskId": "pause-before-retry",
+    "kind": "sleep",
+    "label": "Pause before retry",
+    "taskDefRef": "tasks/01KHH4RCF3T7KCTCBRZXF4W4P7/task.json"
+  },
+  "checksum": "1c77f31e0fe41a579fdb52634c1ffa92b8f0a8d9be8abfe36958fb469766c049"
+}

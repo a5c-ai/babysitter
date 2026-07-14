@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH45Y4G91AMFE38NWWRKJCZ5",
+  "taskId": "draft-outreach-email",
+  "invocationKey": "demo-project/publish:S000003:draft-outreach-email",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Draft outreach email",
+  "io": {
+    "inputJsonPath": "tasks/01KH45Y4G91AMFE38NWWRKJCZ5/input.json",
+    "outputJsonPath": "tasks/01KH45Y4G91AMFE38NWWRKJCZ5/result.json"
+  },
+  "inputs": {
+    "context": "Process demo-project/publish step S000003",
+    "maxTokens": 6095,
+    "temperature": 0.14,
+    "model": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "name": "draft-outreach-email",
+    "prompt": {
+      "role": "analyst",
+      "task": "Draft outreach email",
+      "instructions": [
+        "Analyze the provided data for demo-project",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Prioritize accuracy over speed"
+      ]
+    }
+  }
+}

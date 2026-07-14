@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHJK1VB5B7TBC358YN8QG31Q",
+  "taskId": "execute-test-suite",
+  "invocationKey": "content/draft-review:S000021:execute-test-suite",
+  "stepId": "S000021",
+  "kind": "shell",
+  "title": "Execute test suite",
+  "io": {
+    "inputJsonPath": "tasks/01KHJK1VB5B7TBC358YN8QG31Q/input.json",
+    "outputJsonPath": "tasks/01KHJK1VB5B7TBC358YN8QG31Q/result.json"
+  },
+  "inputs": {
+    "command": "aws",
+    "args": [
+      "sync",
+      "--env=staging"
+    ],
+    "cwd": "/workspace/content-scheduler",
+    "timeout": 109000
+  }
+}

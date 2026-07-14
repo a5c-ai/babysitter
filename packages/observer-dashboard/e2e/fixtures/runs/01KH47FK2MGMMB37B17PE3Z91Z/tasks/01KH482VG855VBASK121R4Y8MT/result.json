@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH482VG855VBASK121R4Y8MT",
+  "taskId": "sync-s3-bucket",
+  "invocationKey": "sample/roster-update:S000019:sync-s3-bucket",
+  "status": "ok",
+  "startedAt": "2026-02-10T17:02:48.823Z",
+  "finishedAt": "2026-02-10T17:03:37.355Z",
+  "result": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 34 items",
+    "stderr": "",
+    "duration_ms": 48532
+  },
+  "value": {
+    "exitCode": 0,
+    "stdout": "[OK] Command completed successfully\nProcessed 34 items",
+    "stderr": "",
+    "duration_ms": 48532
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHCH8FWP7DXA8TFV72CKNE02",
+  "taskId": "filter-duplicates",
+  "invocationKey": "sales/lead-scoring:S000005:filter-duplicates",
+  "status": "error",
+  "startedAt": "2026-02-13T22:17:06.909Z",
+  "finishedAt": "2026-02-13T22:17:36.306Z",
+  "error": {
+    "name": "ProcessError",
+    "message": "Process exited with code 1",
+    "stack": "ProcessError: Process exited with code 1\n    at processTask (tasks/01KHCH8FWP7DXA8TFV72CKNE02/handler.js:42:11)\n    at async runStep (lib/runner.js:187:5)"
+  }
+}

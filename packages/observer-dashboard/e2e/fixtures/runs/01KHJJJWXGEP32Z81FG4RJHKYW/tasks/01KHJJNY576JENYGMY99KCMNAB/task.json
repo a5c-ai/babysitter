@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHJJNY576JENYGMY99KCMNAB",
+  "taskId": "generate-api-documentation",
+  "invocationKey": "content/draft-review:S000005:generate-api-documentation",
+  "stepId": "S000005",
+  "kind": "agent",
+  "title": "Generate API documentation",
+  "io": {
+    "inputJsonPath": "tasks/01KHJJNY576JENYGMY99KCMNAB/input.json",
+    "outputJsonPath": "tasks/01KHJJNY576JENYGMY99KCMNAB/result.json"
+  },
+  "inputs": {
+    "context": "Process content/draft-review step S000005",
+    "maxTokens": 2306,
+    "temperature": 0.37,
+    "model": "claude-haiku-235-20250227"
+  },
+  "agent": {
+    "name": "generate-api-documentation",
+    "prompt": {
+      "role": "analyst",
+      "task": "Generate API documentation",
+      "instructions": [
+        "Analyze the provided data for content-scheduler",
+        "Follow the project coding standards",
+        "Return structured JSON output",
+        "Use chain-of-thought reasoning"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-14T00:41:34.305Z",
+  "data": {
+    "effectId": "01KHCSH1V1289VDRFEENVRGVEP",
+    "invocationKey": "sales/lead-scoring:S000013:synthesize-user-feedback",
+    "invocationHash": "a362fd0381a488b647375d91394c08e8837d9a89450761a132d750c2cd068ec8",
+    "stepId": "S000013",
+    "taskId": "synthesize-user-feedback",
+    "kind": "agent",
+    "label": "Synthesize user feedback",
+    "taskDefRef": "tasks/01KHCSH1V1289VDRFEENVRGVEP/task.json"
+  },
+  "checksum": "3fbaa4b37d8592fc44c1783054da125a560ab037490bb83d49539d9d201fb539"
+}

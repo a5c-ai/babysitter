@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-11T14:27:45.900Z",
+  "data": {
+    "effectId": "01KH6HKPKC08CX0NP65ZSWS35B",
+    "invocationKey": "sales/lead-scoring:S000001:execute-ocr-pipeline",
+    "invocationHash": "436b6ffa65bf17efdbb4d5204309f36ebdbe0f1c0b241a1922ab2c0b05f5aabb",
+    "stepId": "S000001",
+    "taskId": "execute-ocr-pipeline",
+    "kind": "skill",
+    "label": "Execute OCR pipeline",
+    "taskDefRef": "tasks/01KH6HKPKC08CX0NP65ZSWS35B/task.json"
+  },
+  "checksum": "efe6295eb1987dfbc4f9c448e36fd6b2e5cb684febf518ff199c646bb8de6b89"
+}

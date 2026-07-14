@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-10T16:55:39.868Z",
+  "data": {
+    "effectId": "01KH47NSJW3KYE1NNFKRTASWRC",
+    "invocationKey": "sample/roster-update:S000008:review-pull-request",
+    "invocationHash": "fe265a61a0afb1655375674e9e4d2485b5341fd4c6474cb8649f60ef85a5c9fe",
+    "stepId": "S000008",
+    "taskId": "review-pull-request",
+    "kind": "agent",
+    "label": "Review pull request",
+    "taskDefRef": "tasks/01KH47NSJW3KYE1NNFKRTASWRC/task.json"
+  },
+  "checksum": "a479b0e0de16d8c5bce556bdac18d172ecbfb07a7a866905f38812ba23318946"
+}

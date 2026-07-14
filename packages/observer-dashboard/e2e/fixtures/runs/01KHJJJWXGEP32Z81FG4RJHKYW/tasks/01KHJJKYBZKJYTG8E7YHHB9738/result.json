@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHJJKYBZKJYTG8E7YHHB9738",
+  "taskId": "merge-datasets",
+  "invocationKey": "content/draft-review:S000003:merge-datasets",
+  "status": "ok",
+  "startedAt": "2026-02-16T06:36:16.625Z",
+  "finishedAt": "2026-02-16T06:37:14.889Z",
+  "result": {
+    "processed": 7117,
+    "failed": 293,
+    "skipped": 41,
+    "duration_ms": 58264,
+    "outputPath": "output/merge-datasets-HB9738.json"
+  },
+  "value": {
+    "processed": 7117,
+    "failed": 293,
+    "skipped": 41,
+    "duration_ms": 58264,
+    "outputPath": "output/merge-datasets-HB9738.json"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-31T10:00:02.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_NOQUEST_1",
+    "invocationKey": "kanban/no-question:S000001:__sdk.breakpoint",
+    "invocationHash": "hash-no-question-breakpoint",
+    "stepId": "S000001",
+    "taskId": "__sdk.breakpoint",
+    "kind": "breakpoint",
+    "label": "breakpoint",
+    "taskDefRef": "tasks/01KTEST_KANBAN_NOQUEST_1/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0007-2"
+}

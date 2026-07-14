@@ -1,4 +1,5 @@
 import { type Page, type Locator, expect } from "@playwright/test";
+import { seedListView } from "../helpers";
 
 /**
  * Page Object for the Observer Dashboard (/).
@@ -48,6 +49,27 @@ export class DashboardPage {
   /** SSE connection status indicator dot. */
   readonly connectionDot: Locator;
 
+  /* ---- Flat run-list locators (e2e-no-flatlist-locator) ---- */
+
+  /**
+   * The flat, self-fetching run list rendered by <RunList> when the status
+   * filter is anything other than "all". Replaces the project grid in that mode.
+   */
+  readonly runList: Locator;
+
+  /**
+   * Individual run rows within the flat list. Each row renders a stretched
+   * overlay <a data-testid="run-row"> anchor (the row container is a
+   * div[role="listitem"]); in real e2e we locate by testid, not by tag.
+   */
+  readonly runRows: Locator;
+
+  /** Loading skeleton state of the flat run list. */
+  readonly runListLoading: Locator;
+
+  /** Error state of the flat run list. */
+  readonly runListError: Locator;
+
   constructor(page: Page) {
     this.page = page;
     this.header = page.locator("header");
@@ -59,17 +81,64 @@ export class DashboardPage {
     this.loadingSkeletons = page.locator(".animate-pulse");
     this.errorBanner = page.getByTestId("error-banner");
     this.emptyState = page.getByTestId("empty-state");
-    this.settingsButton = page.getByRole("button", { name: "Settings" });
+    // Scoped to the header: the shared EmptyState renders its own "Settings"
+    // button ("No runs found" → open Settings), and an unscoped role locator
+    // becomes a strict-mode violation whenever that state flashes mid-test —
+    // one of the settings-modal flake causes.
+    this.settingsButton = page
+      .locator("header")
+      .getByRole("button", { name: "Settings" });
     this.themeToggle = page.locator("button").filter({ hasText: /Switch to/ });
     this.connectionDot = page.locator("[title*='Live updates']");
+    // Flat run-list locators (e2e-no-flatlist-locator).
+    this.runList = page.getByTestId("run-list");
+    this.runRows = page.getByTestId("run-row");
+    this.runListLoading = page.getByTestId("run-list-loading");
+    this.runListError = page.getByTestId("run-list-error");
   }
 
   /* ---- Navigation ---- */
 
-  /** Navigate to the dashboard root. */
+  /**
+   * Navigate to the dashboard root in LIST view.
+   *
+   * The kanban board is the default view at "/" (SPEC-vibekanban §6.1), but
+   * this page object models the legacy list-view surfaces (project grid,
+   * flat run list). Seeding the persisted view before navigation keeps every
+   * legacy spec on the view it was written against; board specs use their own
+   * navigation helper in kanban-board.spec.ts and never go through here.
+   */
   async goto() {
+    await seedListView(this.page);
     // Use domcontentloaded because SSE keeps the "load" event open
     await this.page.goto("/", { waitUntil: "domcontentloaded" });
+  }
+
+  /* ---- Actions ---- */
+
+  /**
+   * Open the Settings modal DETERMINISTICALLY.
+   *
+   * A single blind `settingsButton.click()` is a known flake class under the
+   * parallel dev-server suite: with 12 workers hammering cold Next.js
+   * compiles, a click can land in the window where the header button is
+   * painted but React has not (re)attached its onClick handler yet (hydration
+   * / SSE-triggered re-render race) — the click "succeeds" and nothing opens,
+   * and the follow-up toBeVisible burns its whole timeout. Instead of bumping
+   * timeouts, re-click until the modal actually mounts: the loop converges on
+   * the first attempt after handlers are live, and fails fast overall via
+   * toPass's outer budget.
+   */
+  async openSettings() {
+    const modal = this.page.getByTestId("settings-modal");
+    await expect(this.settingsButton).toBeVisible({ timeout: 30_000 });
+    await expect(async () => {
+      // A previous attempt may have succeeded just after its 2s check ended —
+      // never re-click through the open modal's overlay.
+      if (await modal.isVisible()) return;
+      await this.settingsButton.click({ timeout: 5_000 });
+      await expect(modal).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
   }
 
   /* ---- Queries ---- */
@@ -120,7 +189,7 @@ export class DashboardPage {
 
   /**
    * Return a specific project health card by project name.
-   * @param projectName - The project name, e.g. "podcast-intel".
+   * @param projectName - The project name, e.g. "demo-project".
    */
   getProjectCard(projectName: string): Locator {
     return this.page.getByTestId(`project-card-${projectName}`);
@@ -135,21 +204,39 @@ export class DashboardPage {
 
   /**
    * Return a specific filter pill button by its data-testid value.
-   * @param value - One of "all", "waiting", "completed", "failed".
+   * The current pill set (RunFilterBar) is:
+   *   all | needsyou | waiting | orphaned | stale | completed | failed
+   * The "orphaned" and "stale" pills are hidden when their count is 0, so
+   * callers should guard on visibility before asserting against them
+   * (e2e-no-flatlist-locator / e2e-pill-labels-missing-new-pills).
+   * @param value - One of the pill values listed above.
    */
   getFilterPill(value: string): Locator {
     return this.page.getByTestId(`filter-pill-${value}`);
   }
 
   /**
-   * Click a status filter pill by its label text.
-   * @param status - One of "All", "Running", "Completed", "Failed".
+   * Click a status filter pill by its (case-sensitive substring) label text.
+   * Prefer clickFilterByValue() in new tests — it is robust to label changes
+   * (the pill labels are: All, Needs you, Waiting, Orphaned, Stale, Completed,
+   * Failed) and covers the triage pills.
+   * @param status - A pill label substring, e.g. "Completed", "Failed", "All".
    */
   async clickFilter(status: string) {
     await this.filterBar
       .locator("button")
       .filter({ hasText: status })
       .click();
+  }
+
+  /**
+   * Click a status filter pill by its data-testid value. Robust to label-text
+   * changes (e.g. the "waiting" pill is labelled "Waiting", not "Running")
+   * and works for the triage pills (needsyou/orphaned/stale).
+   * @param value - One of the pill values, e.g. "completed", "waiting", "all".
+   */
+  async clickFilterByValue(value: string) {
+    await this.getFilterPill(value).click();
   }
 
   /**
@@ -220,15 +307,42 @@ export class DashboardPage {
     });
 
     // At least one of these states should be present:
-    // - One of the project grids (active or filtered)
+    // - One of the project grids (active or filtered) — the "all" view
+    // - The flat run list (loaded, loading, or error) — a status-filtered view
+    //   (e2e-no-flatlist-locator: waitForData tolerates the flat-list mode too)
     // - The recent history section (when no active runs exist)
     // - The error banner or empty state
     const projectContent = this.projectGrid
+      .or(this.runList)
+      .or(this.runListLoading)
+      .or(this.runListError)
       .or(this.page.getByTestId("recent-history-section"))
       .or(this.page.getByTestId("idle-empty-state"))
       .or(this.page.getByTestId("idle-with-history-banner"));
     await expect(
       projectContent.or(this.errorBanner).or(this.emptyState)
     ).toBeVisible({ timeout: 60_000 });
+  }
+
+  /**
+   * Wait for the flat run list to settle after selecting a status filter.
+   * Resolves once the loaded list, its error state, or the shared empty state
+   * ("No runs found", shown when a filter has zero runs) is visible. Use this
+   * after clicking a non-"all" pill (e2e-no-flatlist-locator).
+   */
+  async waitForRunList() {
+    // Let the loading skeleton clear if it appeared.
+    await this.runListLoading
+      .waitFor({ state: "hidden", timeout: 30_000 })
+      .catch(() => {
+        // Skeleton may never appear if the fetch resolves quickly.
+      });
+
+    const listContent = this.runList
+      .or(this.runListError)
+      // <RunList> renders the shared <EmptyState> (untestid'd) for a 0-run
+      // bucket; match its heading text so empty filters don't hang the waiter.
+      .or(this.page.getByText("No runs found"));
+    await expect(listContent).toBeVisible({ timeout: 30_000 });
   }
 }

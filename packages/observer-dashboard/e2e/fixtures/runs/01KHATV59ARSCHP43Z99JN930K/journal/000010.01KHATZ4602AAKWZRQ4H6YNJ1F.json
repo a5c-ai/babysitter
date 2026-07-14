@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-13T06:28:15.168Z",
+  "data": {
+    "effectId": "01KHATZ460HTJZZK8XXQPVZATF",
+    "invocationKey": "sales/deal-sync:S000005:run-lint-checks",
+    "invocationHash": "59cacf8841d860bc954b6e4e126277140bd803bfe5066648b46bf5774970ee49",
+    "stepId": "S000005",
+    "taskId": "run-lint-checks",
+    "kind": "shell",
+    "label": "Run lint checks",
+    "taskDefRef": "tasks/01KHATZ460HTJZZK8XXQPVZATF/task.json"
+  },
+  "checksum": "7493bc7d1b7444a8e07bbdfaa07ddcfb1038a06ee35257696fc5dfda0b4540fd"
+}

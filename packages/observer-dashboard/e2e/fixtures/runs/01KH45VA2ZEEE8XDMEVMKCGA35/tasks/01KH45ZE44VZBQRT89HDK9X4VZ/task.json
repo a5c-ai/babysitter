@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH45ZE44VZBQRT89HDK9X4VZ",
+  "taskId": "execute-ocr-pipeline",
+  "invocationKey": "demo-project/publish:S000004:execute-ocr-pipeline",
+  "stepId": "S000004",
+  "kind": "skill",
+  "title": "Execute OCR pipeline",
+  "io": {
+    "inputJsonPath": "tasks/01KH45ZE44VZBQRT89HDK9X4VZ/input.json",
+    "outputJsonPath": "tasks/01KH45ZE44VZBQRT89HDK9X4VZ/result.json"
+  },
+  "inputs": {
+    "skillName": "execute-ocr-pipeline",
+    "version": "3.3.3",
+    "config": {
+      "retries": 1,
+      "backoff": "exponential"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T09:23:12.326Z",
+  "data": {
+    "effectId": "01KH8JJRA6WJFZH14G232N512C",
+    "invocationKey": "demo-project/publish:S000012:generate-executive-summary",
+    "invocationHash": "42aba1897abd33dc8d7891ef0923be971d940e0f3afb2bab13f844d01d3ad410",
+    "stepId": "S000012",
+    "taskId": "generate-executive-summary",
+    "kind": "agent",
+    "label": "Generate executive summary",
+    "taskDefRef": "tasks/01KH8JJRA6WJFZH14G232N512C/task.json"
+  },
+  "checksum": "3335e44cb9973bdb92816e292574d669fcf252ed2f5197697b1b8c133a9cb3be"
+}

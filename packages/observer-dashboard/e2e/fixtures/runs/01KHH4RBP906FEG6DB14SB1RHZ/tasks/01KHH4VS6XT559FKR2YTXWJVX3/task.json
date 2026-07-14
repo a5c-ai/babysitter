@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHH4VS6XT559FKR2YTXWJVX3",
+  "taskId": "approve-deployment-to-producti",
+  "invocationKey": "content/publish-queue:S000003:approve-deployment-to-producti",
+  "stepId": "S000003",
+  "kind": "breakpoint",
+  "title": "Approve deployment to production?",
+  "io": {
+    "inputJsonPath": "tasks/01KHH4VS6XT559FKR2YTXWJVX3/input.json",
+    "outputJsonPath": "tasks/01KHH4VS6XT559FKR2YTXWJVX3/result.json"
+  },
+  "inputs": {
+    "question": "Approve deployment to production?",
+    "title": "Approval: Approve deployment to production",
+    "context": {
+      "files": [
+        {
+          "path": "reports/approve-deployment-to-producti-preview.md",
+          "format": "markdown",
+          "language": "markdown"
+        },
+        {
+          "path": "data/approve-deployment-to-producti-changes.json",
+          "format": "json"
+        }
+      ],
+      "metadata": {
+        "requestedBy": "user",
+        "priority": "high"
+      }
+    }
+  }
+}

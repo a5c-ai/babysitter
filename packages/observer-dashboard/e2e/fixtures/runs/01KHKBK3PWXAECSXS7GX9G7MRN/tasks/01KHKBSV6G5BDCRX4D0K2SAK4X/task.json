@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHKBSV6G5BDCRX4D0K2SAK4X",
+  "taskId": "validate-schema",
+  "invocationKey": "content/analytics-roll:S000007:validate-schema",
+  "stepId": "S000007",
+  "kind": "node",
+  "title": "Validate schema",
+  "io": {
+    "inputJsonPath": "tasks/01KHKBSV6G5BDCRX4D0K2SAK4X/input.json",
+    "outputJsonPath": "tasks/01KHKBSV6G5BDCRX4D0K2SAK4X/result.json"
+  },
+  "inputs": {
+    "records": 7957,
+    "batchSize": 388,
+    "source": "postgres",
+    "destination": "postgres"
+  }
+}

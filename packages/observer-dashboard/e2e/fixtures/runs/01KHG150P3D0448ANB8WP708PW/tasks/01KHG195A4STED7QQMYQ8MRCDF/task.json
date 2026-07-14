@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHG195A4STED7QQMYQ8MRCDF",
+  "taskId": "delay-for-webhook-callback",
+  "invocationKey": "sales/deal-sync:S000005:delay-for-webhook-callback",
+  "stepId": "S000005",
+  "kind": "sleep",
+  "title": "Delay for webhook callback",
+  "io": {
+    "inputJsonPath": "tasks/01KHG195A4STED7QQMYQ8MRCDF/input.json",
+    "outputJsonPath": "tasks/01KHG195A4STED7QQMYQ8MRCDF/result.json"
+  },
+  "inputs": {
+    "durationMs": 49674,
+    "reason": "Delay for webhook callback"
+  }
+}

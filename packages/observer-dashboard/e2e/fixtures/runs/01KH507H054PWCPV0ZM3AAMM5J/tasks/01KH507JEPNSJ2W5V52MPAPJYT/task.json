@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH507JEPNSJ2W5V52MPAPJYT",
+  "taskId": "index-search-documents",
+  "invocationKey": "content/draft-review:S000001:index-search-documents",
+  "stepId": "S000001",
+  "kind": "node",
+  "title": "Index search documents",
+  "io": {
+    "inputJsonPath": "tasks/01KH507JEPNSJ2W5V52MPAPJYT/input.json",
+    "outputJsonPath": "tasks/01KH507JEPNSJ2W5V52MPAPJYT/result.json"
+  },
+  "inputs": {
+    "records": 7606,
+    "batchSize": 197,
+    "source": "api",
+    "destination": "elasticsearch"
+  }
+}

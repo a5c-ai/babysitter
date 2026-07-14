@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-15T00:51:11.358Z",
+  "data": {
+    "effectId": "01KHFCFCBYHSSTTC5XT4T3KS9B",
+    "invocationKey": "content/publish-queue:S000009:execute-test-suite",
+    "invocationHash": "ce6c0feb12d0a580ee3e8884fa344d55407ee8d33361c7315a0ea269735fbecb",
+    "stepId": "S000009",
+    "taskId": "execute-test-suite",
+    "kind": "shell",
+    "label": "Execute test suite",
+    "taskDefRef": "tasks/01KHFCFCBYHSSTTC5XT4T3KS9B/task.json"
+  },
+  "checksum": "0e4ba1c61bd295b2735339f38fb63bf4775e43cf7743c8a4d96ae63fe8f5ae5b"
+}

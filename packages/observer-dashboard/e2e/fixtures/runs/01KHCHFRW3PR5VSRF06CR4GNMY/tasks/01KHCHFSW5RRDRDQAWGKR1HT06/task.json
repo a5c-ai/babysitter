@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHCHFSW5RRDRDQAWGKR1HT06",
+  "taskId": "process-payment-webhook",
+  "invocationKey": "content/draft-review:S000001:process-payment-webhook",
+  "stepId": "S000001",
+  "kind": "skill",
+  "title": "Process payment webhook",
+  "io": {
+    "inputJsonPath": "tasks/01KHCHFSW5RRDRDQAWGKR1HT06/input.json",
+    "outputJsonPath": "tasks/01KHCHFSW5RRDRDQAWGKR1HT06/result.json"
+  },
+  "inputs": {
+    "skillName": "process-payment-webhook",
+    "version": "1.3.7",
+    "config": {
+      "retries": 5,
+      "backoff": "exponential"
+    }
+  }
+}

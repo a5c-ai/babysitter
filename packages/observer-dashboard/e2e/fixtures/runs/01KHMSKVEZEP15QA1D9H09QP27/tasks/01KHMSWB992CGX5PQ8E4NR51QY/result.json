@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHMSWB992CGX5PQ8E4NR51QY",
+  "taskId": "draft-outreach-email",
+  "invocationKey": "content/draft-review:S000007:draft-outreach-email",
+  "status": "ok",
+  "startedAt": "2026-02-17T03:21:40.732Z",
+  "finishedAt": "2026-02-17T03:21:42.897Z",
+  "result": {
+    "summary": "Generated review for Draft outreach email",
+    "sections": 5,
+    "wordCount": 4562,
+    "confidence": 0.923,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Review error handling in async paths",
+      "Implement retry logic for external API calls"
+    ]
+  },
+  "value": {
+    "summary": "Generated review for Draft outreach email",
+    "sections": 5,
+    "wordCount": 4562,
+    "confidence": 0.923,
+    "recommendations": [
+      "Add structured logging for debugging",
+      "Review error handling in async paths",
+      "Implement retry logic for external API calls"
+    ]
+  }
+}

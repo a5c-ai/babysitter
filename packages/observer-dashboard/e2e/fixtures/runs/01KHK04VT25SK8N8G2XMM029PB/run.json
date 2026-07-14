@@ -1,0 +1,14 @@
+{
+  "runId": "01KHK04VT25SK8N8G2XMM029PB",
+  "request": "content/publish-queue",
+  "processId": "content/publish-queue",
+  "entrypoint": {
+    "importPath": "../../processes/content-publish-queue.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/content-publish-queue.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-16T10:32:41.538Z",
+  "completionSecret": "f6c9ef4d87c0a3974ae55dff6d6208ed",
+  "projectName": "content-scheduler"
+}

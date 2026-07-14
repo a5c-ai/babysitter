@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHH4YV3SS7F0A6DKR7DF5Z7E",
+  "taskId": "research-market-trends",
+  "invocationKey": "content/publish-queue:S000008:research-market-trends",
+  "status": "ok",
+  "startedAt": "2026-02-15T17:18:19.029Z",
+  "finishedAt": "2026-02-15T17:18:30.028Z",
+  "result": {
+    "summary": "Generated draft for Research market trends",
+    "sections": 2,
+    "wordCount": 4118,
+    "confidence": 0.756,
+    "recommendations": [
+      "Add structured logging for debugging"
+    ]
+  },
+  "value": {
+    "summary": "Generated draft for Research market trends",
+    "sections": 2,
+    "wordCount": 4118,
+    "confidence": 0.756,
+    "recommendations": [
+      "Add structured logging for debugging"
+    ]
+  }
+}

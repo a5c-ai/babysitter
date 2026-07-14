@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHG195A4STED7QQMYQ8MRCDF",
+  "taskId": "delay-for-webhook-callback",
+  "invocationKey": "sales/deal-sync:S000005:delay-for-webhook-callback",
+  "status": "ok",
+  "startedAt": "2026-02-15T06:54:49.196Z",
+  "finishedAt": "2026-02-15T06:55:08.919Z",
+  "result": {
+    "sleptMs": 19576,
+    "reason": "Delay for webhook callback"
+  },
+  "value": {
+    "sleptMs": 19576,
+    "reason": "Delay for webhook callback"
+  }
+}
