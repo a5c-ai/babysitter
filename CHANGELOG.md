@@ -29,6 +29,7 @@
 - chore(atlas): add upstream version evidence (237ff4f32, a5c-ai[bot], 17 hours ago)
 - chore(atlas): track latest upstream agent versions (886b03f06, a5c-ai[bot], 17 hours ago)
 - Track upstream agent releases for 2026-07-12 (#1361) (4d555b29c, a5c-ai[bot], 23 hours ago)
+
 ## [Unreleased] - 2026-07-13
 
 ### Features
