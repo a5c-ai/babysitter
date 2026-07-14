@@ -44,7 +44,7 @@
     },
     {
       "agent": "copilot",
-      "source": "GitHub github/copilot-cli",
+      "source": "npm @github/copilot / GitHub github/copilot-cli",
       "previous": "1.0.70",
       "latest": "1.0.70",
       "status": "already-recorded"
@@ -86,7 +86,7 @@
     },
     {
       "agent": "openclaw",
-      "source": "GitHub openclaw/openclaw",
+      "source": "npm openclaw / GitHub openclaw/openclaw",
       "previous": "2026.6.11",
       "latest": "2026.7.1",
       "status": "new-record"
@@ -226,9 +226,10 @@
     ".a5c/processes/agent-version-daily-tracker.inputs.json"
   ],
   "notes": [
-    "Excluded all @a5c-ai/* plugin package names from upstream npm checks.",
-    "Catalog-only agents were checked against upstream GitHub/changelog/release pages or known npm upstream packages.",
-    "Atlas build passed after adding the 2026-07-14 AgentVersion records.",
-    "EvidenceSource records were generated for the new upstream release evidence."
+    "Excluded all @a5c-ai/* babysitter plugin package names from upstream npm checks.",
+    "Catalog targets without upstream npm package metadata were checked against official GitHub releases, npm upstream package metadata, or official changelog sources.",
+    "No new graph records were needed for codex-sdk 6.46.0, copilot 1.0.70, cursor 3.11, gemini 0.50.0, hermes 0.18.2, or pi 0.80.6 because existing graph records already cover them.",
+    "npm run build --workspace=@a5c-ai/atlas passed after adding the 2026-07-14 AgentVersion and evidence records.",
+    "npm run verify:metadata is blocked in the current dirty workspace by a pre-existing .agents/plugins/marketplace.json metadata change outside this graph update."
   ]
 }
