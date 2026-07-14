@@ -1,5 +1,34 @@
 # Changelog
 
+## [Unreleased] - 2026-07-14
+
+### Features
+- feat(kip-sdk): D-36 implementation (TDD converged min=93, acceptance PASS) (ea2c8a372, Tal Muskal, 9 hours ago)
+
+### Bug Fixes
+- No changes.
+
+### Refactors
+- No changes.
+
+### Documentation
+- docs(kip-sdk): debt-closure-2 final report + integration verification (467c8c6a0, Tal Muskal, 6 hours ago)
+- docs: remove changelog whitespace churn (24510be65, a5c-ai[bot], 24 hours ago)
+- docs: correct daily changelog scope (02045dd42, a5c-ai[bot], 24 hours ago)
+- docs: daily changelog update (0dadb9afc, a5c-ai[bot], 24 hours ago)
+- docs: daily changelog update (17ee89692, a5c-ai[bot], 24 hours ago)
+
+### Tests
+- No changes.
+
+### CI/CD
+- No changes.
+
+### Maintenance
+- chore(atlas): refresh agent version tracker artifacts (f677751c4, a5c automation, 17 hours ago)
+- chore(atlas): add upstream version evidence (237ff4f32, a5c-ai[bot], 17 hours ago)
+- chore(atlas): track latest upstream agent versions (886b03f06, a5c-ai[bot], 17 hours ago)
+- Track upstream agent releases for 2026-07-12 (#1361) (4d555b29c, a5c-ai[bot], 23 hours ago)
 ## [Unreleased] - 2026-07-13
 
 ### Features
