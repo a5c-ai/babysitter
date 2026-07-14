@@ -111,7 +111,7 @@ Invoke them in Gemini CLI with `/babysitter:<command>`.
 |---------|-------------|
 | `/babysitter:assimilate [target]` | Convert an external methodology, harness, or specification into native babysitter process definitions with skills and agents. Accepts a repo URL, harness name, or spec path. |
 | `/babysitter:cleanup [--dry-run] [--keep-days N]` | Aggregate insights from completed/failed runs into `docs/run-history-insights.md`, then remove old run data. Defaults to keeping runs newer than 7 days. |
-| `/babysitter:observe [--watch-dir dir]` | Launch the real-time observer dashboard (`@a5c-ai/babysitter-observer-dashboard`) and open it in the browser. |
+| `/babysitter:observe [--watch-dir dir]` | Launch the real-time observer dashboard (`@yoavmayer/babysitter-observer-dashboard`) and open it in the browser. |
 
 ### Setup Commands
 

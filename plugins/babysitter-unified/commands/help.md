@@ -230,7 +230,7 @@ SECONDARY COMMANDS
   effect status in your browser. Useful when running /yolo or /forever to watch
   progress without interrupting the run.
 
-  How it works: Runs npx @a5c-ai/babysitter-observer-dashboard@latest which watches
+  How it works: Runs npx @yoavmayer/babysitter-observer-dashboard@latest which watches
   the .a5c/runs/ directory (or a parent directory containing multiple projects) and
   serves a live dashboard. The process is blocking -- it runs until you stop it, and
   it prints the local URL to share with the user. Do not use `babysitter observe`
