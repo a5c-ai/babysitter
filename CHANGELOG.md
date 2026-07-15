@@ -2,16 +2,6 @@
 
 ## [Unreleased] - 2026-07-15
 
-### Documentation
-- edcd5d55d docs: daily changelog update (a5c automation, 5 minutes ago)
-
-### Maintenance
-- cf4889860 chore(atlas): update upstream tracker summary (a5c automation, 19 hours ago)
-- 4cf911509 chore(graph): track upstream agent versions (a5c automation, 19 hours ago)
-
-
-## [Unreleased] - 2026-07-15
-
 ### Maintenance
 - cf4889860 chore(atlas): update upstream tracker summary (a5c automation, 18 hours ago)
 - 4cf911509 chore(graph): track upstream agent versions (a5c automation, 19 hours ago)
