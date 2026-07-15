@@ -222,6 +222,28 @@ export interface Provenance {
   signature: Ed25519Sig;
   publicKeyFingerprint: string;
   signedFields: string[];
+  /**
+   * CONVERGENCE-CORE (M3 round-3 finding #1, docs/24 §3.2/§4.4-step-1): the SPKI-PEM-encoded raw
+   * Ed25519 PUBLIC KEY that `publicKeyFingerprint` is the SHA-256 digest of, carried IN-BAND so the
+   * ingest gate can verify this fact's signature as a PURE FUNCTION OF THE FACT'S BYTES — reading no
+   * `keyRegistry`, no partially-synced key log, no receiver clock, no local state (§4.4-step-1: "Ed25519
+   * verification is deterministic and a function of the fact's bytes alone"). Every replica that receives
+   * these exact bytes therefore computes the IDENTICAL admit/reject verdict, so `equal received sets ⇒
+   * equal admitted sets` holds even for a REAL-signed fact received transitively (authored by C, pulled
+   * via B) on a replica that has never registered C's key — closing the transitive-merge admission
+   * divergence vector. `fingerprintOf(publicKey)` MUST equal `publicKeyFingerprint` (the gate enforces
+   * this binding), so an attacker cannot swap in a key they possess for a fingerprint they do not.
+   *
+   * Deliberately OUTSIDE the canonical signed payload (`canonical-payload.ts`'s `buildCanonicalEnvelope`
+   * never reads it — exactly like `signature`/`source`/`confidence`): it is derivable from the signing
+   * key and its binding to `publicKeyFingerprint` (which IS signed) is what the gate checks, so it needs
+   * no independent signature and never perturbs `factCID`/`id`/`orderKey`/reducers. Absent on the
+   * conformance suite's placeholder-signed fixtures (whose deterministic `signature === "sig:"+id`
+   * convention is the test stand-in for a byte-pure "signature valid" check); present on every
+   * self-authored real-crypto fact this SDK mints (`mintFact`/rollup/excision markers) and on any real
+   * adversarial peer fact modeled in the additive tests.
+   */
+  publicKey?: string;
   source?: { uri: string; cid?: CID };
   confidence?: number; // [0,1], advisory only
   /**
@@ -570,6 +592,15 @@ export interface ExcisionMarker {
 export interface FsckReport {
   ok: boolean;
   headsMatch: boolean;
+  /**
+   * Attests that the normative m7-4 merge-driver PROVISIONING is present in this repo's local git
+   * config: the `[merge "kip-regen"]` section AND its `driver =` command line, plus the `/heads/**` +
+   * `/manifest.json` attribute bindings (docs/22 §1.4). ROUND-2 finding #5 (honesty): this is a
+   * CONFIG-PRESENCE attestation, NOT a guarantee that an executable `kip merge-regen` binary is
+   * resolvable — this SDK ships no such binary and NEVER invokes stock `git merge` (it regenerates
+   * `/heads` by folding `proj()` live over the unioned `/facts` on every read, so the named driver is
+   * correctly-provisioned-but-inert here). See `Substrate.isMergeDriverInstalled`'s doc comment.
+   */
   mergeDriverInstalled: boolean;
   manifestGenesisCidMatch: boolean;
   badSignatures: FactId[];
@@ -654,6 +685,18 @@ export interface RegeneratedCommit extends RegeneratedDagCommit {
 export interface SnapshotRef {
   factSetDigest: CID;
   frontier: Frontier;
+  /**
+   * The valid-time cut of a bitemporal `pin(scope, {validTime})` (round-2 finding #3). Present ONLY
+   * for an asOf-valid-time pin; absent for the plain no-asOf chain-frontier pin. It is load-bearing,
+   * not advisory: `resolvePin` MUST re-apply this exact cut so the resolved digest is computed over
+   * the SAME `{ validFrom ≤ validTimeCut ∧ seq ≤ frontier }` subset the pin captured — future-valid
+   * facts (`validFrom > validTimeCut`) are excluded on BOTH sides, so a past-time pin can never leak
+   * a fact whose valid-time had not begun by the cut. Carrying the cut in the ref (rather than the
+   * frontier alone) is required precisely because `seq` (authoring order) and `validFrom` (valid
+   * time) are independent axes: the frontier alone cannot distinguish an in-cut from an out-of-cut
+   * fact at the same `seq`.
+   */
+  validTimeCut?: HlcOrTime;
 }
 
 /**
@@ -1622,6 +1665,11 @@ export class KipRepo implements Repo {
       const substrate = this.explicitDir
         ? new Substrate(this.explicitDir, this.hashAlgo)
         : Substrate.createTemp(this.hashAlgo);
+      // docs/22 §1.4 m7-4: kip open (of any clone) MUST install the regenerate-not-3-way-merge
+      // driver into the repo-local git config before any other operation — provisioning happens here,
+      // the single lazy substrate-open path every bare `new KipRepo()` and `open()` routes through.
+      // Idempotent (see `Substrate.installMergeDriver`), so re-opening an existing dir re-affirms it.
+      substrate.installMergeDriver();
       // T1.2.5's durable seq-tip persistence: re-seed the sequencer directly via
       // `ChainSequencer`'s own `initial` constructor parameter, rather than hand-rolling a
       // peek/next replay loop that reimplements the same seeding logic (this round's finding #5)
@@ -1756,41 +1804,60 @@ export class KipRepo implements Repo {
    * real cryptographic verification. It exists purely so the frozen fixtures can exercise
    * `ingest()`'s admit/reject contract for a fingerprint this replica has genuinely never seen
    * (INV-13a's "signing key the replica has never seen" case) without a full
-   * external-signer/verifier round-trip.
-   *
-   * CRITICAL (this round's finding #1 — round 2's "fix" made a round-1 authentication bypass
-   * WORSE, and was independently live-reproduced by two adversarial reviewers): this check MUST
-   * NEVER be consulted — not even as a first/unconditional check — when `keyRegistry` has REAL
-   * public key material registered for `f.provenance.publicKeyFingerprint`. Fingerprints are NOT
-   * secret (they travel in-band on every fact and in genesis `rootKeys`), so if this placeholder
-   * shortcut is allowed to apply unconditionally, ANY attacker who knows a fingerprint this
-   * replica has a real registered key for (its own identity, an imported peer key, or a genesis
-   * root key) can forge a fact claiming that fingerprint with `signature: "sig:"+id` and have it
-   * admitted with ZERO possession of the corresponding private key — a complete authentication
-   * bypass for every registered/trusted key. See `verifySignature` below for the fix: it consults
-   * `keyRegistry` FIRST, and this placeholder fallback only ever runs for a fingerprint that has
-   * NO entry in `keyRegistry` on THIS replica.
+   * external-signer/verifier round-trip. It is a PURE FUNCTION OF THE FACT'S BYTES (reads only
+   * `f.provenance.signature` and `f.id`), so it yields a byte-identical verdict on every replica —
+   * the property `verifySignature` (below) relies on for convergence.
    */
   private isPlaceholderSignature(f: Fact): boolean {
     return f.provenance.signature === `sig:${f.id}`;
   }
 
   /**
-   * Real Ed25519 verification (ADR-B2) is MANDATORY whenever this replica has real public key
-   * material registered for `f.provenance.publicKeyFingerprint` (own identity, an imported peer
-   * key, or a genesis `rootKeys` entry — see the constructor): the registry check runs FIRST, and
-   * when it finds a registered key, `verifyPayload` is the ONLY path to an "admit" verdict — the
-   * placeholder-convention shortcut NEVER applies once a real key is registered for that
-   * fingerprint, no exceptions. Only when the fingerprint has NO entry in `keyRegistry` (genuinely
-   * unregistered/unknown to this replica — there is no key to check real asymmetric math against)
-   * does the placeholder-convention fallback run, satisfying INV-13a's "admits despite an
-   * unknown/never-seen signing key" requirement without weakening verification for any key this
-   * replica actually trusts.
+   * The signature-only ingest gate's cryptographic half (docs/24 §3.2 / §4.4-step-1) — a PURE
+   * FUNCTION OF THE FACT'S BYTES. It MUST NOT read `this.keyRegistry` (or any other replica-local,
+   * merge-order-dependent quantity): §4.4-step-1 requires "Ed25519 verification ... a function of the
+   * fact's bytes alone: it reads no clock, no rxFrom, no partially-synced key log, no local state",
+   * so that `equal received sets ⇒ equal admitted sets`. The round-2 code violated this — it verified
+   * a real signature against a REGISTERED key and REJECTED a real-signed fact whose key was NOT
+   * registered on THIS replica. That made admission depend on `keyRegistry`, a map `sync()`/`merge()`
+   * mutate asymmetrically, so a real-signed fact received TRANSITIVELY (authored by C, pulled via B)
+   * was admitted on B but REJECTED on a puller A that never registered C's key — received-equal
+   * replicas admitting DIFFERENT sets, a direct SEC / §4.4-step-1 violation (M3 round-3 finding #1).
+   *
+   * The gate now admits a fact iff its signature is byte-verifiably valid, by exactly two byte-pure
+   * routes — NEVER by keyRegistry membership:
+   *
+   *   (1) IN-BAND real-crypto (self-describing): `f.provenance.publicKey` carries the SPKI-PEM public
+   *       key. Admit iff `fingerprintOf(publicKey) === f.provenance.publicKeyFingerprint` (the
+   *       fingerprint genuinely binds to the carried key — a signed field, so unforgeable) AND the
+   *       Ed25519 signature verifies over the canonical payload against that key. Every replica
+   *       computes this identically from the fact bytes ⇒ convergent admission, and a real-signed fact
+   *       is now admitted on EVERY replica regardless of what keys it has locally registered.
+   *   (2) PLACEHOLDER convention (no in-band key): the deterministic conformance-fixture stand-in for
+   *       "signature valid" (`isPlaceholderSignature`). Also byte-pure.
+   *
+   * A non-placeholder fact carrying NO in-band key is genuinely unverifiable from its own bytes and
+   * is REJECTED `signature-invalid` (INV-6a's own reject case: an unverifiable non-placeholder
+   * signature is not admitted) — objective and identical on every replica. Key-AUTHORIZATION
+   * (registered/unregistered, namespace, revocation) is NEVER an admission concern here: it is a
+   * set-pure `proj()` demotion (docs/24 §3.4 / §4.4-step-2; `registeredFingerprintsInSet` +
+   * `collectExcisions`), so an unregistered key's fact is admitted-then-demoted, never rejected at
+   * the gate. `keyRegistry` therefore no longer participates in membership at all.
    */
   private verifySignature(f: Fact, canonicalPayload: string): boolean {
-    const registeredKey = this.keyRegistry.get(f.provenance.publicKeyFingerprint);
-    if (registeredKey) {
-      return verifyPayload(registeredKey, canonicalPayload, f.provenance.signature);
+    const inBandPublicKeyPem = f.provenance.publicKey;
+    if (inBandPublicKeyPem !== undefined) {
+      let imported: ReturnType<typeof importEd25519PublicKey>;
+      try {
+        imported = importEd25519PublicKey(inBandPublicKeyPem);
+      } catch {
+        // A malformed in-band key PEM cannot verify anything — reject (byte-pure: every replica
+        // reaches the same verdict for these exact bytes). Never falls through to the placeholder
+        // shortcut: a non-placeholder fact that ships an unusable key is signature-invalid, full stop.
+        return false;
+      }
+      if (imported.fingerprint !== f.provenance.publicKeyFingerprint) return false;
+      return verifyPayload(imported.publicKey, canonicalPayload, f.provenance.signature);
     }
     return this.isPlaceholderSignature(f);
   }
@@ -2350,6 +2417,10 @@ export class KipRepo implements Repo {
         author: input.provenance.author,
         signature: "", // filled in below, once the canonical payload (which excludes it) is known
         publicKeyFingerprint: keyPair.fingerprint,
+        // Carry this signing key's raw public half IN-BAND so a peer that pulls this fact (directly or
+        // transitively) can verify it byte-purely at its own ingest gate WITHOUT having registered our
+        // key — the convergence property `verifySignature` depends on (M3 round-3 finding #1).
+        publicKey: keyPair.publicKey.export({ type: "spki", format: "pem" }) as string,
         signedFields: [...CANONICAL_ENVELOPE_FIELDS],
         source: input.provenance.source,
         confidence: input.provenance.confidence,
@@ -2568,7 +2639,8 @@ export class KipRepo implements Repo {
     // `getEdge`/`query`/`traverse` gate on EDGE existence (`edgeValidAt`), NOT on endpoint-node
     // existence, so an edge incident to a tombstoned node remains readable via `getEdge` (a node
     // tombstone closes node-existence only; it does not retract incident edges).
-    const projection = proj(this.currentFacts(), this.projOptions());
+    const facts = this.currentFacts();
+    const projection = proj(facts, this.projOptions(facts));
     if (!projection.nodeLiveVisibleAt(eid, null)) return null;
     return applyLiveExcisionLens(projection.getNode(eid));
   }
@@ -2582,7 +2654,8 @@ export class KipRepo implements Repo {
     if (asOf !== undefined) {
       return (await this.asOf(asOf)).getEdge(eid);
     }
-    return applyLiveExcisionLens(proj(this.currentFacts(), this.projOptions()).getEdge(eid));
+    const facts = this.currentFacts();
+    return applyLiveExcisionLens(proj(facts, this.projOptions(facts)).getEdge(eid));
   }
 
   /**
@@ -2596,7 +2669,8 @@ export class KipRepo implements Repo {
       yield* view.query(spec);
       return;
     }
-    const projection = proj(this.currentFacts(), this.projOptions());
+    const facts = this.currentFacts();
+    const projection = proj(facts, this.projOptions(facts));
     for (const item of traverse(projection, spec)) {
       yield applyLiveExcisionLens(item) as NodeView | EdgeView;
     }
@@ -2610,15 +2684,54 @@ export class KipRepo implements Repo {
    * `collectExcisions`) compute a real content oid per fact and evaluate excision-marker
    * authorization against THIS replica's own key material.
    */
-  private projOptions(): ProjOptions {
+  private projOptions(facts: readonly Fact[]): ProjOptions {
+    // CONVERGENCE-CORE FIX (round-2 finding #2, C2-1/INV-1/§4.4-step-2): the excision-authorization
+    // fold inside `proj()` MUST decide "is this signing fingerprint a genuine, cryptographically-keyed
+    // identity?" as a PURE FUNCTION OF THE ADMITTED SET `S` — never from `this.keyRegistry`, a
+    // replica-local map that `sync()`/`merge()` mutate ASYMMETRICALLY (a peer key is registered on one
+    // replica and not another depending on who-synced-whom). Reading `keyRegistry` there let two
+    // replicas holding the IDENTICAL admitted set compute DIFFERENT excision verdicts ⇒ divergent
+    // `/heads` (a direct SEC/INV-1 violation). `registeredFingerprintsInSet` derives the same predicate
+    // from the fact bytes alone (see its doc comment), so same-set ⇒ byte-identical `/heads` regardless
+    // of merge history. Since M3 round-3 finding #1 the ingest gate is byte-pure too (it verifies a
+    // real signature against the fact's OWN in-band `provenance.publicKey`, not `keyRegistry`), so
+    // `keyRegistry` no longer participates in EITHER membership or `proj` — it feeds only the
+    // author-side `excise()` write-guard.
+    const registered = this.registeredFingerprintsInSet(facts);
     return {
       knownMaxVersion: this.knownMaxVersion,
       cellReducers: this.cellReducers,
       hashAlgo: this.hashAlgo,
       trustedExciseKeys: this.trustedExciseKeyFingerprints,
-      isRegisteredFingerprint: (fingerprint: string) => this.keyRegistry.get(fingerprint) !== undefined,
+      isRegisteredFingerprint: (fingerprint: string) => registered.has(fingerprint),
       selfWitnessedExcisionOids: this.selfWitnessedExcisionOids,
     };
+  }
+
+  /**
+   * SET-PURE derivation of "which signing fingerprints are genuine, cryptographically-keyed
+   * identities in the admitted set `S`" — the trust input `proj()`'s excision-authorization fold
+   * (`collectExcisions`, proj.ts) reads. A fingerprint counts **iff `S` contains at least one fact it
+   * signed with a REAL (non-placeholder) Ed25519 signature** (`!isPlaceholderSignature`). This is a
+   * PURE FUNCTION OF `S`: every replica holding the same admitted set computes the identical predicate
+   * from the fact bytes alone, so excision-authorization verdicts — and therefore `/heads` — are
+   * byte-identical across replicas REGARDLESS of `sync()`/`merge()` history (C2-1/INV-1/§4.4-step-2).
+   *
+   * Why the signature bytes are a sound witness (M3 round-3 finding #1 makes this exact): the ingest
+   * gate is byte-pure — a fact with a REAL (non-placeholder) signature is admitted iff it carries a
+   * valid in-band `provenance.publicKey` bound to `publicKeyFingerprint`, and a placeholder-convention
+   * fact carries no such key. So for any fact still in `S`, "its signer is a genuinely cryptographically
+   * keyed identity" is decided by that fact's OWN bytes (real signature ⇒ keyed; placeholder ⇒ not),
+   * identically on every replica — never by `keyRegistry`. This is the divergence the fix closes: a key
+   * whose only `S`-resident fact is placeholder-signed reads `unregistered` on BOTH replicas (the
+   * convergent answer), even if one replica happens to hold that fingerprint in its local `keyRegistry`.
+   */
+  private registeredFingerprintsInSet(facts: readonly Fact[]): ReadonlySet<string> {
+    const registered = new Set<string>();
+    for (const f of facts) {
+      if (!this.isPlaceholderSignature(f)) registered.add(f.provenance.publicKeyFingerprint);
+    }
+    return registered;
   }
 
   /** Reads back the FULL admitted fact SET `S` this repo currently holds (T2.2's fold input) —
@@ -2765,7 +2878,7 @@ export class KipRepo implements Repo {
    * `asOf()` itself — same inputs, same computation.
    */
   private buildAsOfView(facts: Fact[], validTime: HlcOrTime | undefined): ReadView {
-    const projection = proj(facts, this.projOptions());
+    const projection = proj(facts, this.projOptions(facts));
 
     const applyValidTimeLens = <T extends NodeView | EdgeView>(view: T | null): T | null => {
       if (!view) return view;
@@ -2841,14 +2954,44 @@ export class KipRepo implements Repo {
    * time-cut + chain-frontier pin is M3+ scope, not yet a sound composition here).
    */
   async pin(_scope: ScopeRef, asOf?: AsOf): Promise<SnapshotRef> {
-    if (asOf !== undefined) {
-      throw new Error("unimplemented: pin with asOf (a combined time-cut + chain-frontier pin is M3+ scope)");
-    }
     const facts = this.currentFacts();
-    const chainSeq = this.computeChainFrontier(facts);
-    const subset = this.subsetForFrontier(facts, chainSeq);
+    // M3/T3.5: a COMBINED valid-time cut + chain-frontier pin (docs/40 Repo.pin, "frontier-addressed
+    // snapshot"). ROUND-2 finding #3 fix (bitemporal cut was defeated): the valid-time cut is applied
+    // to BOTH the frontier computation AND the pinned subset/digest, never only the frontier. The
+    // chain frontier is computed over the valid-time-CUT subset (facts whose `validFrom` ≤ the cut) so
+    // a not-yet-valid fact does not raise its chain's frontier; the pinned subset is then the
+    // INTERSECTION `{ seq ≤ frontier ∧ validFrom ≤ cut }` — so a fact whose `validFrom` is AFTER the
+    // cut can NEVER enter the digest even if a later-authored-but-earlier-valid sibling raised the
+    // chain's `seq` frontier past it (the exact `seq`⊥`validFrom` independence the prior code ignored,
+    // pulling future-valid facts into past-time pins). The cut is carried on the returned `SnapshotRef`
+    // (`validTimeCut`) so `resolvePin` re-applies the IDENTICAL intersection — a bitemporal pin that
+    // resolves to the SAME digest on any replica holding the same sub-frontier chains (INV-12/INV-14),
+    // and genuinely EXCLUDES future-valid facts. The no-asOf pin (INV-14a) keeps the unchanged
+    // full-set, no-cut path.
+    const cut = this.pinValidTimeCut(asOf);
+    const canonCut = cut === undefined ? undefined : canon(cut);
+    const inCut = canonCut === undefined ? facts : facts.filter((f) => canon(f.validFrom) <= canonCut);
+    const chainSeq = this.computeChainFrontier(inCut);
+    const subset = this.subsetForFrontier(facts, chainSeq, canonCut);
     const factSetDigest = this.computeFactSetDigest(subset);
-    return { frontier: { chainSeq }, factSetDigest };
+    const ref: SnapshotRef = { frontier: { chainSeq }, factSetDigest };
+    if (cut !== undefined) ref.validTimeCut = cut;
+    return ref;
+  }
+
+  /** The valid-time cut of a `pin(scope, asOf)` (above): `undefined` for a no-asOf pin (no cut — the
+   * full current set), else the pinned `validTime` (facts with `validFrom` ≤ this cut are in-snapshot).
+   * A `txTime`/`believer`-only pin (no `validTime`) is a belief-audit frontier out of M3 scope —
+   * rejected explicitly rather than silently ignoring `asOf`. */
+  private pinValidTimeCut(asOf: AsOf | undefined): HlcOrTime | undefined {
+    if (asOf === undefined) return undefined;
+    if (asOf.validTime === undefined) {
+      throw new Error(
+        "unimplemented: pin with an asOf carrying no validTime (a txTime/believer-only belief-audit " +
+          "frontier pin is out of M3 scope — the frontier-addressed pin is a valid-TIME cut)",
+      );
+    }
+    return asOf.validTime;
   }
 
   /**
@@ -2880,7 +3023,11 @@ export class KipRepo implements Repo {
         if (!held.has(seq)) return { status: "pin-incomplete" };
       }
     }
-    const subset = this.subsetForFrontier(facts, ref.frontier.chainSeq);
+    // ROUND-2 finding #3: re-apply the pin's valid-time cut (if any) so the resolved digest is
+    // computed over the IDENTICAL `{ seq ≤ frontier ∧ validFrom ≤ validTimeCut }` subset the pin
+    // captured — future-valid facts are excluded here exactly as they were in `pin()`.
+    const canonCut = ref.validTimeCut === undefined ? undefined : canon(ref.validTimeCut);
+    const subset = this.subsetForFrontier(facts, ref.frontier.chainSeq, canonCut);
     return { status: "pin-complete", factSetDigest: this.computeFactSetDigest(subset) };
   }
 
@@ -2898,13 +3045,24 @@ export class KipRepo implements Repo {
   }
 
   /** The deterministically-selected pin subset (docs/25, verbatim):
-   * `{ f ∈ S_current : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }` —
-   * a chain ABSENT from `frontier` is EXCLUDED entirely, never implicitly included. */
-  private subsetForFrontier(facts: readonly Fact[], frontier: Record<ChainId, number>): Fact[] {
+   * `{ f ∈ S_current : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)]`
+   * `[ ∧ canon(validFrom) ≤ validTimeCut ] }` — a chain ABSENT from `frontier` is EXCLUDED entirely,
+   * never implicitly included. When `validTimeCut` is supplied (a bitemporal `pin(scope, {validTime})`,
+   * round-2 finding #3) it additionally EXCLUDES any fact whose `validFrom` is after the cut, so a
+   * future-valid fact never leaks into a past-time pin's digest even when a later-authored-but-
+   * earlier-valid sibling raised the chain's `seq` frontier past it; `undefined` (the no-asOf pin)
+   * applies no valid-time filter, the unchanged INV-14a path. */
+  private subsetForFrontier(
+    facts: readonly Fact[],
+    frontier: Record<ChainId, number>,
+    validTimeCut?: bigint,
+  ): Fact[] {
     return facts.filter((f) => {
       const chainId = chainIdFor(f.replicaId, f.provenance.publicKeyFingerprint);
       const maxSeq = frontier[chainId];
-      return maxSeq !== undefined && f.seq <= maxSeq;
+      if (maxSeq === undefined || f.seq > maxSeq) return false;
+      if (validTimeCut !== undefined && canon(f.validFrom) > validTimeCut) return false;
+      return true;
     });
   }
 
@@ -3014,9 +3172,110 @@ export class KipRepo implements Repo {
     };
   }
 
-  // TODO(M3/T4.3): explicit merge — /heads regenerated, never text-merged (ADR-006).
-  async merge(_from: BranchRef, _opts?: MergeOptions): Promise<MergeReport> {
-    throw new Error("unimplemented: merge");
+  /**
+   * T4.3: explicit CONVERGENT branch merge — set union of fact blobs, `/heads` REGENERATED (never
+   * 3-way text-merged: this SDK folds `proj()` live on every read, so the "regenerate not merge"
+   * rule of docs/22 §1.4 holds by construction — `getNode`/`asOf` after merge equal what a control
+   * replica that ingested the SAME union directly computes). Merge = set union is genuinely
+   * associative / commutative / idempotent (docs/24 §4b.2), so ANY merge topology converges to the
+   * same state (docs/24 §5).
+   *
+   * TARGETED, PULL-ONLY (round-2 finding #1 fix — C2-1/N5/docs/24 §5). `merge(from)` resolves the
+   * SPECIFIED `from` branch to a single source and set-unions ONLY that source's facts into this
+   * replica — exactly the way `sync()` resolves its `remote` (see `resolveMergeSource` below). It does
+   * NOT fan out across the whole process registry, and it does NOT push into or otherwise mutate any
+   * peer's substrate: a local merge has NO observable side effect on unrelated replicas. (The prior
+   * implementation ignored `from` entirely and gossiped bidirectionally across the entire static
+   * `KipRepo.registry`, so a single `merge()` call rewrote every co-resident repo's state and `from`
+   * was decorative — the defect this fix closes.)
+   *
+   * Convergence is preserved WITHOUT the push: set-union is associative/commutative/idempotent
+   * (docs/24 §4b.2), so once each participant has pulled the other's facts (`A.merge(B)` and
+   * `B.merge(A)`), both hold the identical union — order-independent (docs/24 §5). `MergeReport.tip`
+   * is a set-derived `FactSetDigest` (order-free), so the two directions rendezvous on the same tip
+   * once both sides hold the same set, WITHOUT one merge reaching into the other replica.
+   *
+   * SCOPE (see this task's disputes; mirrors `sync()`'s own registry-resolution scope note): a real
+   * git-ref transport — fetching `from`'s objects over the wire — is out of this in-process SDK's
+   * scope. A `BranchRef` names a peer in the same-process `KipRepo.registry`, resolved either directly
+   * by `replicaId` or by the trailing `refs/kip/replicas/<id>` path segment. A `from` that resolves to
+   * NO registered replica is an ABSENT source branch: its contribution to the set-union is ∅, so this
+   * replica's set is unchanged (the identity of set-union, NOT a silent fallback — there is no other
+   * source to "pick", nothing is guessed). `opts.intoBranch` is accepted and targets this replica's
+   * own (single, in-process) branch — the only local set there is; a cross-branch retarget needs the
+   * real ref topology that is out of scope.
+   *
+   * `conflicts` is `[]` for the SAME reason `sync()` returns `[]`: merge NEVER auto-adjudicates (N5,
+   * docs/40 "MergeReport.conflicts ... never auto-picked") — a contradiction is DATA surfaced at READ
+   * time by `proj()` (a CONFLICTED cell with its full candidate set), never a merge-time pick. For the
+   * plain assert/retract substrate facts these tests union, no contradiction exists (INV-2a). `merged`
+   * is the size of the resulting unioned admitted set on this replica.
+   */
+  async merge(from: BranchRef, _opts?: MergeOptions): Promise<MergeReport> {
+    const source = this.resolveMergeSource(from);
+    // PULL ONLY the named source (if it resolves to a registered peer): register the source's own
+    // signing key first — the same trust-bootstrap `sync()` performs, so a peer's real-signed self-
+    // authored fact is verifiable here; fixture facts from an unregistered key still admit via the
+    // signature gate unchanged — then re-offer each of its facts through the full `ingest()` gate. No
+    // push into `source` (or any other peer): a local merge leaves every other replica byte-untouched.
+    if (source !== undefined && source !== this) {
+      this.registerPeerKey(source);
+      for (const f of source.currentFacts()) {
+        // eslint-disable-next-line no-await-in-loop -- sequential ingest, the module-wide pattern
+        await this.ingest(f);
+      }
+    }
+    const merged = this.currentFacts();
+    return {
+      merged: merged.length,
+      conflicts: [],
+      tip: this.computeFactSetDigest(merged),
+    };
+  }
+
+  /** Resolve a `merge(from)` `BranchRef` to the single source replica it names, mirroring `sync()`'s
+   * `KipRepo.registry.get(remote)` targeted resolution (finding #1). A `BranchRef` is matched EITHER
+   * directly as a `replicaId` OR by the trailing `refs/kip/replicas/<id>` path segment (the id after
+   * the last `/`). Returns `undefined` for a ref that names no registered replica.
+   *
+   * DECISION (M3 round-3 finding #4 — an unresolvable ref is IDENTITY, not an error, and this is a
+   * deliberate spec-grounded choice, NOT an ambiguous silent no-op): an unresolvable `from` names an
+   * ABSENT source branch whose set-union contribution is the empty set ∅. Because `merge = set union`
+   * is convergent for ANY topology (docs/24 §5) and `∅` is the identity of union, `S ∪ ∅ = S` is the
+   * uniquely-correct, fully-defined result — there is no alternative source being GUESSED or
+   * substituted (which is what "fallbacks are evil" forbids), so `merge()` returns a well-formed
+   * `MergeReport` over the unchanged set rather than throwing. This DIFFERS from `sync()` on purpose:
+   * `sync()` fetches objects from a named REMOTE that is asserted to exist, so a missing remote is a
+   * genuine precondition violation and throws; `merge()` unions a peer BRANCH, and an absent branch is
+   * the ordinary, convergent empty-union case (the frozen `m3-merge-shape` contract requires `merge`
+   * of an unresolvable branch to return a report, not throw). */
+  private resolveMergeSource(from: BranchRef): KipRepo | undefined {
+    const direct = KipRepo.registry.get(from);
+    if (direct !== undefined) return direct;
+    const lastSlash = from.lastIndexOf("/");
+    if (lastSlash === -1) return undefined;
+    const replicaSegment = from.slice(lastSlash + 1);
+    if (replicaSegment.length === 0) return undefined;
+    return KipRepo.registry.get(replicaSegment);
+  }
+
+  /** Trust-bootstrap for a targeted merge (above): register the resolved `source`'s own signing key
+   * into THIS replica's in-memory key registry, mirroring `sync()`'s own key bootstrap. This touches
+   * ONLY this replica's registry (never the source's).
+   *
+   * SCOPE after M3 round-3 finding #1 (`keyRegistry` is now OFF both convergence paths): admission
+   * (`verifySignature`) is BYTE-PURE — it verifies a real signature against the fact's OWN in-band
+   * `provenance.publicKey`, never `keyRegistry` — and proj's excision-authorization fold reads the
+   * set-pure `registeredFingerprintsInSet` (round-2 finding #2), not `keyRegistry`. So this bootstrap
+   * can perturb NEITHER any replica's admitted set NOR its `/heads`. Its only remaining reader is the
+   * author-side `excise()` write-guard (whether THIS replica may itself MINT a marker over the peer's
+   * data), which is off the read/projection convergence path. It is kept for that author-side symmetry
+   * with `sync()`; a co-resident peer's facts admit and project identically with or without it.
+   * In-memory only (unlike `sync()`, which also persists for a restart-censorship defense) — merge is
+   * an in-process convergence operation. */
+  private registerPeerKey(peer: KipRepo): void {
+    const keyPair = peer.getOwnKeyPair();
+    this.keyRegistry.register(keyPair.fingerprint, keyPair.publicKey);
   }
 
   /**
@@ -3275,9 +3534,46 @@ export class KipRepo implements Repo {
     }
   }
 
-  // TODO(M3/T4.8): frontier-cursor keyed FactDelta stream (never a scalar HLC).
-  async *subscribe(_scope: ScopeRef, _since?: Frontier): AsyncIterable<FactDelta> {
-    throw new Error("unimplemented: subscribe");
+  /**
+   * T4.8: the frontier-cursor `FactDelta` stream (docs/40 subscribe; docs/24 §5; m-5). Surfaces the
+   * admitted facts AFTER the supplied `since` frontier (a per-`(replicaId,key)` chain-`seq` cursor,
+   * NEVER a scalar HLC): a fact on chain `C` is surfaced iff `since` does not enumerate `C`, or the
+   * fact's `seq` is STRICTLY GREATER than `since.chainSeq[C]` — never re-delivering a fact at or below
+   * the cursor. Each fact is surfaced as its own typed `FactDelta { facts, affected }` naming the
+   * admitted `FactId` and every entity whose head it touches (INV-13a: admitted-on-receipt is
+   * observable through this seam, never silently dropped). Deterministically ordered by the SAME
+   * `orderKey` `proj()` folds by.
+   *
+   * SCOPE: a FINITE backlog cursor over the currently-held set — it drains the post-frontier facts
+   * then COMPLETES (it does not block awaiting future arrivals). A real deployment would keep the
+   * async-iterable open and yield future deltas as new facts arrive, but the in-process SDK has no
+   * cross-replica push channel to await on (the same in-process scope note `sync()`/`merge()` carry).
+   * `scope.tenant`/`namespace` narrowing is NOT applied — this SDK's fixtures never namespace EIDs by
+   * tenant (the identical scope-narrowing dispute `pin()` documents), so the cursor spans every chain
+   * this replica currently holds.
+   */
+  async *subscribe(_scope: ScopeRef, since?: Frontier): AsyncIterable<FactDelta> {
+    const cursor = since?.chainSeq ?? {};
+    const ordered = this.currentFacts()
+      .slice()
+      .sort((a, b) => compareOrderKey(orderKey(a), orderKey(b)) || compareByContent(a, b));
+    for (const f of ordered) {
+      const chainId = chainIdFor(f.replicaId, f.provenance.publicKeyFingerprint);
+      const cursorSeq = cursor[chainId];
+      if (cursorSeq !== undefined && f.seq <= cursorSeq) continue;
+      yield { facts: [f.id], affected: this.affectedEids(f) };
+    }
+  }
+
+  /** The entity/entities whose head a fact touches — the `FactDelta.affected` set for `subscribe`.
+   * Every cell-addressing target (`node`/`node-prop`/`edge`/`edge-prop`) names exactly one EID; a
+   * non-cell control target (e.g. `key`) touches no entity head. */
+  private affectedEids(f: Fact): EID[] {
+    const t = f.target;
+    if (t.kind === "node" || t.kind === "node-prop" || t.kind === "edge" || t.kind === "edge-prop") {
+      return [t.eid];
+    }
+    return [];
   }
 
   // TODO(M9/T9.6): provenance chain for an EID or FactId.
@@ -3304,9 +3600,95 @@ export class KipRepo implements Repo {
     return matches.slice().sort((a, b) => compareOrderKey(orderKey(a), orderKey(b))).map((f) => f.provenance);
   }
 
-  // TODO(M13/T13.3): read-latency snapshot rollup (does NOT free bytes, §3.5).
-  async rollup(_opts: RollupOptions): Promise<CID> {
-    throw new Error("unimplemented: rollup");
+  /**
+   * T13.3 (docs/22 §5): read-latency consolidation that PERSISTS a real `kip:rollup` marker FACT —
+   * round-2 finding #4 fix. docs/22 §5: a rollup "writes a `kip:rollup` marker fact recording the
+   * covered HLC range + the pre-rollup tip CID". The prior implementation hashed an in-memory object
+   * and DISCARDED it, so the returned CID resolved to nothing — the marker could not be audited or
+   * synced, and INV-9 result-stability held only because rollup was a pure no-op. This version
+   * AUTHORS the marker through the normal mint-then-ingest path (the same path `excise()`'s marker
+   * uses), so the returned CID is the marker fact's real content id, resolvable in `/facts/**` and
+   * synced/re-foldable on a peer like any other fact.
+   *
+   * ENCODING: the 8-variant `FactType` vocabulary (well-formed.ts) has no `rollup` member, so the
+   * marker is authored as a control/audit `type: "policy"` fact targeting `kind: "control", op:
+   * "rollup"` — excluded from `CONTENT_FACT_TYPES`, so it is never folded into any node/edge cell
+   * (`cellKeyFor(control)` is `null`) and never rewrites a projected value. Its signed `value` carries
+   * the `kip:rollup` marker payload — the covered HLC range (`opts.throughHlc`), the pre-rollup tip
+   * (`FactSetDigest` of the admitted set at rollup time), and `opts.scope`.
+   *
+   * RESULT-STABLE per INV-9: a rollup consolidates READ LATENCY only — it does NOT free bytes and does
+   * NOT remove or rewrite any KNOWLEDGE fact. The only fact it adds is a control-type marker that
+   * projects to no cell, so every non-excised read (`getNode`/`asOf`) is byte-identical before and
+   * after — exactly the docs/22 §5 "old fact blobs remain reachable ... and are not freed" guarantee.
+   * The read-latency-BOUNDING `/heads` snapshot materialization (docs/22 §5) is not realized here (this
+   * SDK folds `proj()` live over the unchanged set on every read, so there is no separate materialized
+   * store to snapshot yet — an honest, documented deferral, NOT folded into INV-9's stability claim).
+   * Two rollups over the same covered range are DISTINCT authored events (distinct author-HLC/`seq`),
+   * so they mint distinct marker facts with distinct CIDs — a persisted audit record per rollup, not a
+   * content-addressed idempotent handle.
+   */
+  async rollup(opts: RollupOptions): Promise<CID> {
+    const preRollupTip = this.computeFactSetDigest(this.currentFacts());
+    const marker = await this.mintAndIngestRollupMarker(preRollupTip, opts);
+    return marker.id;
+  }
+
+  /**
+   * Mints and ingests the `kip:rollup` marker fact (see `rollup()` above) via the SAME signed
+   * mint-then-ingest recipe as `mintAndIngestExcisionMarker` — advances this replica's HLC + per-chain
+   * `seq` (durably persisted), builds the canonical payload, computes the real content-CID `id`, signs
+   * it with this replica's own key, and offers it through the full `ingest()` gate (no shortcut). The
+   * marker re-enters `/facts/**` as an ordinary admitted fact. */
+  private async mintAndIngestRollupMarker(preRollupTip: FactSetDigest, opts: RollupOptions): Promise<Fact> {
+    const substrate = this.getSubstrate();
+    const keyPair = this.getOwnKeyPair();
+    const replicaId = this.replicaId;
+    this.localHlc = hlcTick(this.localHlc, replicaId);
+    const chainId = chainIdFor(replicaId, keyPair.fingerprint);
+    const seq = this.chainSequencer.next(chainId);
+    new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+
+    // The signed marker payload (docs/22 §5): the covered HLC range + the pre-rollup tip CID + scope.
+    // `deepSortKeys` canonicalizes key order so the value string is stable for a given input.
+    const value = JSON.stringify(
+      deepSortKeys({ marker: "kip:rollup", throughHlc: opts.throughHlc, preRollupTip, scope: opts.scope ?? null }),
+    );
+
+    const draft: Omit<Fact, "id"> = {
+      v: 1,
+      type: "policy",
+      target: { kind: "control", op: "rollup" },
+      value,
+      validFrom: this.localHlc,
+      validTo: null,
+      hlc: this.localHlc,
+      seq,
+      replicaId,
+      provenance: {
+        author: `rollup:${replicaId}`,
+        signature: "",
+        publicKeyFingerprint: keyPair.fingerprint,
+        // In-band public key (see `mintFact`): keeps this real-signed marker byte-verifiable on any
+        // peer that ingests it via `sync()`/`merge()`, independent of local key registration.
+        publicKey: keyPair.publicKey.export({ type: "spki", format: "pem" }) as string,
+        signedFields: [...CANONICAL_ENVELOPE_FIELDS],
+      },
+    };
+    const canonicalPayload = canonicalPayloadString(draft as Fact);
+    const id = gitBlobId(Buffer.from(canonicalPayload, "utf8"), this.hashAlgo);
+    const signature = signPayload(keyPair.privateKey, canonicalPayload);
+    const marker: Fact = { ...draft, id, provenance: { ...draft.provenance, signature } } as Fact;
+
+    const verdict = await this.ingest(marker);
+    if (!verdict.admitted) {
+      throw new KipError(
+        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+        `rollup: internally-minted kip:rollup marker was rejected at ingest (${verdict.reason})`,
+        { throughHlc: opts.throughHlc },
+      );
+    }
+    return marker;
   }
 
   /**
@@ -3593,6 +3975,10 @@ export class KipRepo implements Repo {
         author: `excise:${replicaId}`,
         signature: "",
         publicKeyFingerprint: keyPair.fingerprint,
+        // In-band public key (see `mintFact`): a real-signed excision marker must be byte-verifiable
+        // on every peer that ingests it via `sync()`/`merge()`, else the marker would be admitted on
+        // its author but rejected on a puller lacking the key — a divergence in the admitted set.
+        publicKey: keyPair.publicKey.export({ type: "spki", format: "pem" }) as string,
         signedFields: [...CANONICAL_ENVELOPE_FIELDS],
       },
     };
@@ -3632,10 +4018,14 @@ export class KipRepo implements Repo {
    */
   async fsck(): Promise<FsckReport> {
     const facts = this.currentFacts();
+    // Same SET-PURE excision-authorization predicate `proj()` uses (see `projOptions`/
+    // `registeredFingerprintsInSet`): `fsck`'s excision fold MUST agree byte-for-byte with the read
+    // path's fold on the same admitted set, so it reads the set-resident predicate, never `keyRegistry`.
+    const registered = this.registeredFingerprintsInSet(facts);
     const { excisedOids, oidByFact } = collectExcisions(
       facts,
       this.hashAlgo,
-      (fingerprint) => this.keyRegistry.get(fingerprint) !== undefined,
+      (fingerprint) => registered.has(fingerprint),
       this.trustedExciseKeyFingerprints,
       this.selfWitnessedExcisionOids,
     );
@@ -3668,8 +4058,10 @@ export class KipRepo implements Repo {
       // fresh (M1 scope note, `getNode`/`getEdge`'s own doc comments), so "heads == proj(facts)" is
       // true BY CONSTRUCTION: there is no second copy that could have diverged.
       headsMatch: true,
-      // TODO(M3/T4.3): no git-merge-driver machinery is installed by this SDK yet.
-      mergeDriverInstalled: false,
+      // docs/22 §1.4 m7-4: genuinely verify the regenerate-not-3-way-merge driver is installed in
+      // the repo-local git config (installed at substrate provisioning, see `getSubstrate` /
+      // `Substrate.installMergeDriver`) — a missing driver would be a reported integrity failure.
+      mergeDriverInstalled: this.getSubstrate().isMergeDriverInstalled(),
       // TODO(M9/T9.6): full genesis-manifest CID re-verification is out of scope this round (see
       // `open()`'s own doc comment) — conservatively reported true (no mismatch-detection machinery
       // exists yet to genuinely flag a real mismatch, never fabricating a false-negative "clean" claim
@@ -3885,7 +4277,7 @@ export class KipRepo implements Repo {
     // pinned validTime rather than only a pinned txTime).
     const facts = this.selectFactsForContextualAsOf(q.asOf);
     const bindingsByEdgeKind = collectRegisteredBindings(facts);
-    const seedView = proj(facts, this.projOptions()).getNode(q.seed);
+    const seedView = proj(facts, this.projOptions(facts)).getNode(q.seed);
     if (!seedView) {
       throw new KipError(
         "ERR_MALFORMED_INPUT",
@@ -4100,7 +4492,7 @@ export class KipRepo implements Repo {
       }
       return false;
     }
-    const projection = proj(facts, this.projOptions());
+    const projection = proj(facts, this.projOptions(facts));
     for (const eid of candidateEids) {
       const view = projection.getEdge(eid);
       if (view && view.kind === edgeKind) return true;

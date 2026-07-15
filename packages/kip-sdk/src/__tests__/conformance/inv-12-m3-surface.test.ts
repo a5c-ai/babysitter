@@ -39,20 +39,20 @@ describe("INV-12: pin / as-of convergence — via the merge() + pin(scope, asOf)
     const seq2 = makeWellFormedFact({ replicaId: authorReplicaId, seq: 2, target: { kind: "node-prop", eid, prop: "p2" }, id: "inv12-m3-pin-2" });
     const chain: Fact[] = [seq0, seq1, seq2];
 
-    // Replica A forms the union then merges a peer branch; Replica B receives the chain in a
-    // different interleaving before merging. Once both hold the identical union, a bitemporal pin
-    // taken on A must resolve to the same digest on B.
-    const repoA = new KipRepo({ replicaId: "inv12-m3-a" });
-    await repoA.ingest(seq0);
-    await repoA.ingest(seq1);
-    await repoA.ingest(seq2);
-    await repoA.merge("refs/kip/replicas/B");
-
+    // Replica B holds the full chain (received in a scrambled interleaving); Replica A holds only a
+    // partial prefix and COMPLETES its chain by a TARGETED merge that pulls B's branch (merge resolves
+    // `from`'s trailing segment to the registered replica id and pulls ONLY that source). B then pulls
+    // A. Once both hold the identical union, a bitemporal pin taken on A must resolve to the same
+    // digest on B — independent of the order each formed the union.
     const repoB = new KipRepo({ replicaId: "inv12-m3-b" });
     await repoB.ingest(seq2);
     await repoB.ingest(seq0);
     await repoB.ingest(seq1);
-    await repoB.merge("refs/kip/replicas/A");
+
+    const repoA = new KipRepo({ replicaId: "inv12-m3-a" });
+    await repoA.ingest(seq0);
+    await repoA.merge("refs/kip/replicas/inv12-m3-b"); // A ← B: pulls seq1,seq2, completing A's chain
+    await repoB.merge("refs/kip/replicas/inv12-m3-a"); // B ← A: idempotent (already holds the union)
 
     const ref = await repoA.pin({ tenant: "tenant-inv12-m3" }, { validTime: Number.MAX_SAFE_INTEGER });
     expect(ref.frontier.chainSeq[chainId]).toBe(2);
@@ -74,13 +74,16 @@ describe("INV-12: pin / as-of convergence — via the merge() + pin(scope, asOf)
     status.validFrom = 0;
     status.validTo = null;
 
+    // Each replica holds one half of the union; each COMPLETES it by a TARGETED merge pulling the
+    // other's branch (both sources exist before either pull, so pull-only merge suffices — no mesh
+    // push). A pulls B, then B pulls A: both converge on {existence, status} by different orderings.
     const repoA = new KipRepo({ replicaId: "inv12-m3-asof-a" });
     await repoA.ingest(existence);
-    await repoA.merge("refs/kip/replicas/B");
-
     const repoB = new KipRepo({ replicaId: "inv12-m3-asof-b" });
     await repoB.ingest(status);
-    await repoB.merge("refs/kip/replicas/A");
+
+    await repoA.merge("refs/kip/replicas/inv12-m3-asof-b"); // A ← B: pulls status
+    await repoB.merge("refs/kip/replicas/inv12-m3-asof-a"); // B ← A: pulls existence
 
     const onA = await (await repoA.asOf({ validTime: 0 })).getNode(eid);
     const onB = await (await repoB.asOf({ validTime: 0 })).getNode(eid);

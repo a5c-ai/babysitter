@@ -51,14 +51,26 @@ describe("INV-13a: admitted-on-receipt — via the merge() + subscribe() surface
     unknownKey.validFrom = 0;
     unknownKey.validTo = null;
 
+    // ROUND-3 finding #3 fix (this test was vacuous: it merged an UNRESOLVABLE ref `branchB` — which
+    // pulls ∅ — and never ingested `unknownKey` into any source, so no branch fact was admitted via
+    // merge at all; `report.merged` only counted the pre-ingested `skewedOld`). A REAL source branch
+    // now holds BOTH facts and is named by its resolvable replica id, so `merge()` genuinely unions
+    // them on receipt.
+    const source = new KipRepo({ replicaId: "inv13a-m3-merge-src" });
+    await source.ingest(skewedOld);
+    await source.ingest(unknownKey);
+
     const repo = new KipRepo({ replicaId: "inv13a-m3-merge" });
-    await repo.ingest(skewedOld);
-    const report = await repo.merge("refs/kip/replicas/branchB");
-    // Every signature-valid branch fact is admitted on receipt, never dropped.
-    expect(report.merged).toBeGreaterThanOrEqual(1);
-    // The unknown-key fact is present (queryable) after merge — admitted, then surfaced by proj.
+    const report = await repo.merge("refs/kip/replicas/inv13a-m3-merge-src");
+    // Every signature-valid branch fact — the old-HLC existence AND the unseen-key prop — is admitted
+    // on receipt via merge, never dropped: the resulting admitted set holds both.
+    expect(report.merged).toBe(2);
+    // The unseen-key fact is genuinely admitted and SURFACED by proj through the merged view.
     const node = await repo.getNode(eid);
-    expect(node).not.toBeUndefined();
+    expect(node).not.toBeNull();
+    expect(node?.props.status.segments).toEqual(
+      expect.arrayContaining([expect.objectContaining({ kind: "value", value: "active" })]),
+    );
   });
 
   it("subscribe() SURFACES every admitted fact as a FactDelta — a fact ingested on this replica appears in the frontier-cursor stream's `facts`, proving admitted-on-receipt is observable through the subscribe seam, not silently dropped (docs/40 subscribe/FactDelta; docs/60 INV-13a 'never dropped')", async () => {

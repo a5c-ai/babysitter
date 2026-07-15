@@ -52,7 +52,10 @@ describe("INV-2a: substrate-only SEC — via the merge() surface method (M3's ex
     role.validTo = null;
     const union: Fact[] = [existence, status, role];
 
-    // Control replica: ingest the whole union directly (the reference /heads).
+    // Control replica: ingest the whole union directly (the reference /heads). It ALSO serves as the
+    // named merge SOURCE branch — merge(from) resolves `from` to the registered replica whose id is
+    // the ref's trailing segment and PULLS ONLY that source (targeted, not a global slurp), so naming
+    // this replica's id in the ref is what makes the merge genuinely union the branch's facts.
     const control = new KipRepo({ replicaId: "inv2a-m3-control" });
     for (const f of union) {
       // eslint-disable-next-line no-await-in-loop -- sequential ingest, the module-wide pattern
@@ -60,11 +63,11 @@ describe("INV-2a: substrate-only SEC — via the merge() surface method (M3's ex
     }
     const controlNode = await control.getNode(eid);
 
-    // Merging replica: holds only `existence`; merge() must union the remaining branch facts and
+    // Merging replica: holds only `existence`; merge() must union the SOURCE branch's facts and
     // regenerate /heads to the identical projection.
     const repo = new KipRepo({ replicaId: "inv2a-m3-merge" });
     await repo.ingest(existence);
-    const report = await repo.merge("refs/kip/replicas/branchB");
+    const report = await repo.merge("refs/kip/replicas/inv2a-m3-control");
     expect(report.conflicts).toEqual([]);
 
     const mergedNode = await repo.getNode(eid);
@@ -78,14 +81,32 @@ describe("INV-2a: substrate-only SEC — via the merge() surface method (M3's ex
     shared.value = true;
     shared.validFrom = 0;
     shared.validTo = null;
+    // ROUND-3 de-tautologization: each replica holds a DISTINCT peer-only fact, and each ref names the
+    // OTHER replica's real resolvable id, so the merge genuinely unions a peer branch (rather than a
+    // no-op over an unresolvable ref that left both sides holding only the identical {shared}).
+    const onlyA = makeWellFormedFact({ target: { kind: "node-prop", eid, prop: "a" }, id: "inv2a-m3-topology-a-fact" });
+    onlyA.value = "aval";
+    onlyA.validFrom = 0;
+    onlyA.validTo = null;
+    const onlyB = makeWellFormedFact({ target: { kind: "node-prop", eid, prop: "b" }, id: "inv2a-m3-topology-b-fact" });
+    onlyB.value = "bval";
+    onlyB.validFrom = 0;
+    onlyB.validTo = null;
 
     const repoA = new KipRepo({ replicaId: "inv2a-m3-topology-a" });
     await repoA.ingest(shared);
+    await repoA.ingest(onlyA);
     const repoB = new KipRepo({ replicaId: "inv2a-m3-topology-b" });
     await repoB.ingest(shared);
+    await repoB.ingest(onlyB);
 
-    const aMergesB = await repoA.merge("refs/kip/replicas/B");
-    const bMergesA = await repoB.merge("refs/kip/replicas/A");
+    const aMergesB = await repoA.merge("refs/kip/replicas/inv2a-m3-topology-b"); // A ← B (unions onlyB)
+    const bMergesA = await repoB.merge("refs/kip/replicas/inv2a-m3-topology-a"); // B ← A (unions onlyA)
+    // Both hold {shared, onlyA, onlyB}; the order-free tips rendezvous regardless of merge direction.
     expect(aMergesB.tip).toBe(bMergesA.tip);
+    // ...and the union genuinely happened: A now sees B's fact.
+    expect((await repoA.getNode(eid))?.props.b.segments).toEqual(
+      expect.arrayContaining([expect.objectContaining({ kind: "value", value: "bval" })]),
+    );
   });
 });

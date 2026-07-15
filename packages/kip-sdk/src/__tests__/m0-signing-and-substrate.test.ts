@@ -62,6 +62,11 @@ describe("M0 (additive): real Ed25519 sign+verify and real git-blob substrate wr
         author: "a",
         signature: "placeholder",
         publicKeyFingerprint: kp.fingerprint,
+        // In-band public key (M3 round-3 finding #1): the byte-pure ingest gate verifies the real
+        // Ed25519 signature against this carried key (after checking `fingerprintOf(key) ===
+        // publicKeyFingerprint`), reading NO keyRegistry. This is exactly the self-describing shape
+        // `mintFact` now emits, so a real-crypto fact verifies identically on every replica.
+        publicKey: kp.publicKey.export({ type: "spki", format: "pem" }) as string,
         signedFields: CANONICAL_FIELDS_IN_ORDER,
       },
     };
@@ -77,7 +82,7 @@ describe("M0 (additive): real Ed25519 sign+verify and real git-blob substrate wr
     expect(good).toEqual({ admitted: true });
 
     // Same signature, but the value changed after signing: a REAL Ed25519 verify must reject this
-    // (proves the registered-key path is genuine crypto, not the unregistered-key placeholder).
+    // (proves the in-band-key path is genuine crypto against the carried key, not a placeholder).
     const tampered: Fact = { ...fact, value: "tampered" };
     const rejected = await repo.ingest(tampered);
     expect(rejected).toEqual({ admitted: false, reason: "signature-invalid" });

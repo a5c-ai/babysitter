@@ -92,6 +92,10 @@ function mintForgedExcisionMarker(params: {
       author: `forged:${params.replicaId}`,
       signature: "",
       publicKeyFingerprint: params.signerKeyPair.fingerprint,
+      // A real adversarial peer carries its own public key in-band (M3 round-3 finding #1) so its
+      // fact is byte-verifiable/admitted on every replica — admission is NOT the security boundary
+      // here; fold-time excision AUTHORIZATION (grounded in the real candidate's fingerprint) is.
+      publicKey: params.signerKeyPair.publicKey.export({ type: "spki", format: "pem" }) as string,
       signedFields: [...CANONICAL_ENVELOPE_FIELDS],
     },
   };

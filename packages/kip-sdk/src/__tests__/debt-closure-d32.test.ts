@@ -208,14 +208,17 @@ describe("D-32: durable signing-identity persistence across close()+open()", () 
     }
   });
 
-  it("(criterion 8, optional/nice-to-have) SyncReport surfaces a distinct signature-invalid rejection count", async () => {
-    // This scenario deliberately reopens WITHOUT restoring the keyring (today's actual default
-    // fallback path), so the reopened replica's pre-restart facts are genuinely
-    // signature-invalid from the peer's perspective — the exact condition D-32's suggested fix
-    // says `SyncReport` should surface a distinct count for, "so this failure mode is at least
-    // observable rather than silent". This is explicitly called out as optional/nice-to-have in
-    // D-32's suggested fix, NOT a hard acceptance requirement — do not block D-32 closure solely
-    // on this one failing.
+  it("(criterion 8, REVISED for M3 round-3 finding #1) a fact authored by a now-lost keypair stays byte-verifiable across a keyring-less reopen — it carries its public key IN-BAND, so the peer ADMITS it (no signature-invalid), a strict improvement over the old failure mode", async () => {
+    // REVISED (recorded in this task's `disputes`): round-2's version of this test asserted the
+    // reopened replica's pre-restart facts were genuinely signature-invalid from the peer's
+    // perspective (the peer never registered the lost keypair, so its real signature could not be
+    // verified) and that `SyncReport.signatureInvalid` should count them. The M3 round-3 finding #1
+    // fix makes every self-authored fact carry its signing public key IN-BAND (docs/24 §4.4-step-1:
+    // signature verification is a pure function of the fact's bytes), so a fact authored by a
+    // now-lost keypair is STILL byte-verifiable and ADMITTED on any peer regardless of key
+    // registration — exactly the offline-first / partition-tolerance guarantee of §4.6 ("verified by
+    // signature regardless of age"). The failure mode this observability counter surfaced therefore
+    // no longer arises from a keyring-less reopen: the count is 0 and the fact is received.
     const srcDir = makeTempDir();
     const peerDir = makeTempDir();
 
@@ -225,15 +228,16 @@ describe("D-32: durable signing-identity persistence across close()+open()", () 
     await src.assertFact(makeAssertInput("replica-sync-observability-src", "n1"));
     src.close();
 
-    // Reopened with NO keyring restoration — the (still-legal) fallback path this criterion's
-    // observability is meant to cover.
+    // Reopened with NO keyring restoration — the reopened replica has a fresh identity, but the
+    // pre-restart fact still carries its ORIGINAL signing key in-band.
     const srcReopened = await open({ dir: srcDir, replicaId: "replica-sync-observability-src", keyring: undefined });
     try {
       const report = (await peer.sync("replica-sync-observability-src")) as SyncReport & {
         signatureInvalid?: number;
       };
-      expect(typeof report.signatureInvalid).toBe("number");
-      expect(report.signatureInvalid).toBeGreaterThan(0);
+      // Self-verifying via the in-band key ⇒ admitted, never dropped as signature-invalid.
+      expect(report.signatureInvalid ?? 0).toBe(0);
+      expect(report.received).toBeGreaterThan(0);
     } finally {
       srcReopened.close();
       peer.close();
