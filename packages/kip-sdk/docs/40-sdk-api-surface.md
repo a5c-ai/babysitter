@@ -365,7 +365,7 @@ type KipErrorCode =
 | `getNode`/`getEdge`/`query`/`recall`/`asOf` | `ERR_MALFORMED_INPUT` (bad selector) | `unknown`/`conflict` segments, `pending` trust states, `conflicted` results |
 | `pin`/`resolvePin`/`subscribe` | `ERR_MALFORMED_INPUT` | `PinStatus` (`pin-incomplete` is data, never an error) |
 | `sync`/`merge` | transport failures (wrapped), `ERR_NO_PROMISOR_PEER` | `SyncReport.conflicts` / `MergeReport.conflicts` (typed, never auto-picked) |
-| `tombstone` | `ERR_SCOPE_DENIED` | — |
+| `tombstone` | `ERR_MALFORMED_INPUT` (empty `eid`/`reason` — the input-validation precondition), `ERR_SCOPE_DENIED` (deferred: the scope/`KeyAuthorization` guard is not yet enforced repo-wide, so this channel is currently unreachable — tracked with the M-stage that lands scope enforcement) | `FactId` (the signed tombstone fact's own content address) |
 | `excise` | `ERR_UNAUTHORIZED_EXCISION`, `ERR_EXCISE_EVIDENCE_REQUIRED` (fork/malformed-demoted target without `excise-evidence` scope) | `ExcisionMarker` |
 | `revokeKey` | `ERR_SCOPE_DENIED` (no `revoke` scope) | — (demotion is a proj outcome) |
 | `fsck` | — | `FsckReport` (failures are report fields, not throws) |

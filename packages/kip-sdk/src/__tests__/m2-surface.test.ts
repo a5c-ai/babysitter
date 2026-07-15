@@ -174,6 +174,15 @@ describe("M2-surface: tombstone — logical, signature-preserving forgetting (do
     expect(historical?.props.status.segments).toEqual(
       expect.arrayContaining([expect.objectContaining({ kind: "value", value: "active" })]),
     );
+
+    // ROUND-2 (spec-fidelity MAJOR): the as-of world-truth lens (docs/23 §2.1 — the lens callers
+    // should prefer) must AGREE with the live read at "now". A post-tombstone validTime read (and the
+    // unspecified-validTime "now" read) drop the entity exactly like the live getNode above — the two
+    // "now" reads are coherent. Without the as-of existence gate this would non-null (incoherence).
+    const asOfNowExplicit = await (await repo.asOf({ validTime: Number.MAX_SAFE_INTEGER })).getNode(eid);
+    expect(asOfNowExplicit).toBeNull();
+    const asOfNowDefault = await (await repo.asOf({})).getNode(eid);
+    expect(asOfNowDefault).toBeNull();
   });
 });
 

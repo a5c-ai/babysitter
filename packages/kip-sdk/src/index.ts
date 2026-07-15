@@ -276,7 +276,15 @@ export interface Fact {
   hlc: HlcStamp; // author-stamped-by-kip (§4b.1)
   seq: number; // per-(replicaId,key) chain sequence, minted at txn-commit boundary (A-5)
   causedBy?: FactId[]; // voluntary causal-dominance declaration (ADR-007 SECONDARY rule)
-  supersedes?: FactId[]; // the input-CID set a `supersede` fact keys on (ADR-004)
+  // docs/23 §1 defines the supersession envelope as the RICH object shape
+  // `{ inputCids: FactId[]; retract: FactId[]; assert?: PropValue }` (keyed by inputCids, C-3): the
+  // `retract` sub-list is the interval-CLOSING mechanism (proj folds it as a scoped retract of the
+  // named facts), `assert` an optional projected-value override. The bare `FactId[]` form is the
+  // legacy flattened shape (== `inputCids`, empty retract) the frozen M0/M1/M2 conformance fixtures
+  // bake (see this task's `disputes`); it is accepted as a strict subset so those tests still pass,
+  // while the object shape carries the full docs/23 §1 semantics. `proj` normalizes both via
+  // `supersedeInputCids`/`supersedeRetractIds` (proj.ts), so equal admitted sets still converge.
+  supersedes?: FactId[] | { inputCids: FactId[]; retract?: FactId[]; assert?: PropValue };
   reAttests?: FactId; // §8.1 M5-3 re-attest mechanism
   replicaId: ReplicaId;
   provenance: Provenance;
@@ -326,7 +334,13 @@ export type CellSegment<V = PropValue> =
       validTo: HlcOrTime | null;
       assertedBy: FactId;
       v: number;
-      reason: "unknown-version";
+      // `"unknown-version"`: `v` exceeds the projection's `knownMaxVersion` (INV-8). "malformed-
+      // supersede": an object-shaped `supersede` that OMITS/empties its `inputCids` key-set — a
+      // signature-valid, admittable fact (well-formed.ts only checks presence-iff-type) that is
+      // nonetheless malformed per docs/23 §1 ("keyed by its input-CID set"). proj is TOTAL over the
+      // admitted set (INV-3): it quarantines such a fact — surfaced, never dropped, never trusted as
+      // a value, never thrown on — rather than letting it reach a `.some()` on `undefined`.
+      reason: "unknown-version" | "malformed-supersede";
     }
   | {
       /**
@@ -2258,84 +2272,21 @@ export class KipRepo implements Repo {
    * microtask ordering, so it cannot be "still true" for an unrelated call racing in the same tick.
    */
   async assertFact(input: AssertInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
-    const isThisActiveTxnsOwnDelegatedCall =
-      this.txnToken !== undefined && this.txnDelegationStore.getStore() === this.txnToken;
-    if (this.txnActive && !isThisActiveTxnsOwnDelegatedCall) {
-      throw new KipError(
-        "ERR_TXN_ALREADY_ACTIVE",
-        "assertFact: a direct call was attempted while a txn() call is active elsewhere on this repo " +
-          "instance — silently absorbing an unrelated caller's write into someone else's in-flight " +
-          "transaction (and silently discarding it if that transaction later aborts) is never " +
-          "acceptable (fallbacks are evil); wait for the active txn() to settle (commit or abort), or " +
-          "perform this write via that txn's own tx.assertFact() call instead.",
-        {},
-      );
-    }
-    const fact = this.mintFact(input);
-    if (this.txnStagingFacts) {
-      const verdict = this.computeIngestVerdict(fact);
-      if (!verdict.admitted) {
-        throw new KipError(
-          verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
-          `assertFact: self-authored fact was rejected while staging inside an active txn() (${verdict.reason})`,
-          { factId: fact.id },
-        );
-      }
-      this.txnStagingFacts.push(fact);
-      return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
-    }
-    const verdict = await this.ingest(fact);
-    if (!verdict.admitted) {
-      throw new KipError(
-        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
-        `assertFact: self-authored fact was rejected at ingest (${verdict.reason})`,
-        { factId: fact.id },
-      );
-    }
-    return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
+    // ROUND-2 (code-quality MAJOR): route through the SINGLE shared mint-then-(stage-or-ingest)
+    // helper `supersedeFact`/`reAttestFact` already use, rather than keeping a byte-identical inline
+    // copy of the guard+mint+stage-or-ingest dance. One source of truth, so the drift risk the
+    // helper's own doc comment warns about is genuinely eliminated (previously three copies existed).
+    return this.mintThenAdmit(input, "assertFact");
   }
 
-  /** A bounded-validTo assert (§4.1) — same mint-then-(stage-or-ingest) path as `assertFact`; see
-   *  that method's own doc comment for the D-36 txn-staging behavior AND the (round-5, token-based)
-   *  direct-call-during-an-unrelated-active-txn guard, both mirrored here. */
+  /** A bounded-validTo assert (§4.1) — same mint-then-(stage-or-ingest) path as `assertFact`; both
+   *  now route through the shared `mintThenAdmit` helper (round-2 code-quality fix), which carries
+   *  the D-36 txn-staging behavior AND the (round-5, token-based) direct-call-during-an-unrelated-
+   *  active-txn guard. */
   async retractFact(
     input: RetractInput,
   ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
-    const isThisActiveTxnsOwnDelegatedCall =
-      this.txnToken !== undefined && this.txnDelegationStore.getStore() === this.txnToken;
-    if (this.txnActive && !isThisActiveTxnsOwnDelegatedCall) {
-      throw new KipError(
-        "ERR_TXN_ALREADY_ACTIVE",
-        "retractFact: a direct call was attempted while a txn() call is active elsewhere on this repo " +
-          "instance — silently absorbing an unrelated caller's write into someone else's in-flight " +
-          "transaction (and silently discarding it if that transaction later aborts) is never " +
-          "acceptable (fallbacks are evil); wait for the active txn() to settle (commit or abort), or " +
-          "perform this write via that txn's own tx.retractFact() call instead.",
-        {},
-      );
-    }
-    const fact = this.mintFact(input);
-    if (this.txnStagingFacts) {
-      const verdict = this.computeIngestVerdict(fact);
-      if (!verdict.admitted) {
-        throw new KipError(
-          verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
-          `retractFact: self-authored fact was rejected while staging inside an active txn() (${verdict.reason})`,
-          { factId: fact.id },
-        );
-      }
-      this.txnStagingFacts.push(fact);
-      return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
-    }
-    const verdict = await this.ingest(fact);
-    if (!verdict.admitted) {
-      throw new KipError(
-        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
-        `retractFact: self-authored fact was rejected at ingest (${verdict.reason})`,
-        { factId: fact.id },
-      );
-    }
-    return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
+    return this.mintThenAdmit(input, "retractFact");
   }
 
   /**
@@ -2355,7 +2306,7 @@ export class KipRepo implements Repo {
    * unchanged case), this mints against the real `chainSequencer`/`localHlc` and persists
    * `SeqTipStore` immediately, exactly as before this fix.
    */
-  private mintFact(input: AssertInput | RetractInput): Fact {
+  private mintFact(input: AssertInput | RetractInput | SupersedeInput | ReAttestInput): Fact {
     // Provision (and, on a re-opened dir, restore the persisted seq-tips into) the substrate
     // BEFORE minting `seq` below — otherwise a re-opened repo's first mint would race ahead of
     // its own durably-persisted chain tip (getSubstrate() is what re-seeds `chainSequencer`).
@@ -2388,6 +2339,12 @@ export class KipRepo implements Repo {
       hlc,
       seq,
       causedBy: input.causedBy,
+      // `supersedes` present iff type==="supersede"; `reAttests` present iff type==="re-attest"
+      // (well-formed.ts item, docs/23 §1) — set ONLY for the matching fact type, left `undefined`
+      // (and dropped from the canonical payload) otherwise, so an assert/retract/tombstone never
+      // carries a spurious supersession/re-attestation key.
+      supersedes: input.type === "supersede" ? input.supersedes : undefined,
+      reAttests: input.type === "re-attest" ? input.reAttests : undefined,
       replicaId,
       provenance: {
         author: input.provenance.author,
@@ -2404,18 +2361,94 @@ export class KipRepo implements Repo {
     return { ...draft, id, provenance: { ...draft.provenance, signature } } as Fact;
   }
 
-  // TODO(M3/T4.5): supersede keyed by input-CID set (ADR-004, §4b.3/C-3).
+  /**
+   * T3.3 (docs/23 §1, "Supersession and re-attestation are recorded as facts (set-pure)"): a
+   * supersession is authored as a NEW, signed `supersede` fact keyed on the input-CID set it
+   * supersedes — never an in-place update (accretion-only, docs/23 §1) — and admitted through the
+   * IDENTICAL mint-then-ingest path as `assertFact`/`retractFact` (the returned `FactId` is the
+   * distinct content address of this new fact, not one of the superseded inputs). `proj` folds it by
+   * its own `value` (winning by `orderKey`-max, or surfacing `kip:conflict` against a genuinely-
+   * concurrent contradictory supersede, proj.ts's `detectConflict`) AND, when the docs/23 §1 object
+   * shape `{ inputCids, retract, assert? }` is supplied, honors the `retract` interval-close — the
+   * named facts are removed from the pick over the supersede's covering span, so the supersession
+   * invalidates a stale input even when that input would otherwise win by `orderKey` (proj.ts's
+   * `supersedeRetractIds`/`effectiveAssertValue`). The legacy flattened `FactId[]` input carries no
+   * `retract`, so it competes by `orderKey` alone (frozen fixtures unaffected). Equal admitted sets
+   * converge byte-identically under the validTime lens (INV-11). The full D-36 txn-staging +
+   * unrelated-active-txn guard mirrors `assertFact` — see that method's doc comment.
+   */
   async supersedeFact(
-    _input: SupersedeInput,
+    input: SupersedeInput,
   ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
-    throw new Error("unimplemented: supersedeFact");
+    return this.mintThenAdmit(input, "supersedeFact");
   }
 
-  // TODO(M9/T9.4): §8.1 M5-3 re-attest mechanism.
+  /**
+   * T3.3 (docs/23 §1, m5-3): a trusted-key re-assertion of a demoted fact's honest content, recorded
+   * as a NEW signed `re-attest` fact naming the demoted fact via `reAttests` — same accretion-only,
+   * mint-then-ingest path as `supersedeFact` above (the returned `FactId` is distinct from the
+   * re-asserted fact's id). `proj` folds it as an ordinary covering assert of its own `value`.
+   *
+   * SCOPED-STUB (round-2 spec-fidelity): today `reAttests` is carried in the signed payload but read
+   * by NO proj code path — a `re-attest` is projection-indistinguishable from a plain `assert`. The
+   * distinguishing INV-17 semantic (a re-attest RESTORES a `kip:revoked-concurrent` casualty that a
+   * supersede does NOT — §8.1) is NOT one of M2-surface's exit invariants and is deferred to the
+   * M-stage that lands INV-17 restoration; the field is minted and durable now so that stage is
+   * purely additive. Until then, do not rely on a re-attest doing anything a covering assert wouldn't.
+   */
   async reAttestFact(
-    _input: ReAttestInput,
+    input: ReAttestInput,
   ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
-    throw new Error("unimplemented: reAttestFact");
+    return this.mintThenAdmit(input, "reAttestFact");
+  }
+
+  /**
+   * Shared mint-then-(stage-or-ingest) body for ALL FOUR authoring entry points that admit a single
+   * self-authored fact directly — `assertFact`, `retractFact`, `supersedeFact`, AND `reAttestFact`
+   * all route through here (round-2 code-quality fix: the inline copies `assertFact`/`retractFact`
+   * previously kept were collapsed into this one). Runs the SAME (round-5, token-based) unrelated-
+   * active-txn guard, then mints the signed fact and either stages it onto the active txn's array or
+   * ingests it durably — genuinely ONE copy of that admission dance, so it can never silently drift.
+   */
+  private async mintThenAdmit(
+    input: AssertInput | RetractInput | SupersedeInput | ReAttestInput,
+    method: string,
+  ): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }> {
+    const isThisActiveTxnsOwnDelegatedCall =
+      this.txnToken !== undefined && this.txnDelegationStore.getStore() === this.txnToken;
+    if (this.txnActive && !isThisActiveTxnsOwnDelegatedCall) {
+      throw new KipError(
+        "ERR_TXN_ALREADY_ACTIVE",
+        `${method}: a direct call was attempted while a txn() call is active elsewhere on this repo ` +
+          "instance — silently absorbing an unrelated caller's write into someone else's in-flight " +
+          "transaction (and silently discarding it if that transaction later aborts) is never " +
+          "acceptable (fallbacks are evil); wait for the active txn() to settle (commit or abort), or " +
+          `perform this write via that txn's own tx.${method}() call instead.`,
+        {},
+      );
+    }
+    const fact = this.mintFact(input);
+    if (this.txnStagingFacts) {
+      const verdict = this.computeIngestVerdict(fact);
+      if (!verdict.admitted) {
+        throw new KipError(
+          verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+          `${method}: self-authored fact was rejected while staging inside an active txn() (${verdict.reason})`,
+          { factId: fact.id },
+        );
+      }
+      this.txnStagingFacts.push(fact);
+      return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
+    }
+    const verdict = await this.ingest(fact);
+    if (!verdict.admitted) {
+      throw new KipError(
+        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+        `${method}: self-authored fact was rejected at ingest (${verdict.reason})`,
+        { factId: fact.id },
+      );
+    }
+    return { id: fact.id, hlc: fact.hlc, seq: fact.seq, status: "pending" };
   }
 
   /**
@@ -2522,10 +2555,29 @@ export class KipRepo implements Repo {
     if (asOf !== undefined) {
       return (await this.asOf(asOf)).getNode(eid);
     }
-    return applyLiveExcisionLens(proj(this.currentFacts(), this.projOptions()).getNode(eid));
+    // T3.3 (docs/23 §5 mechanism #2): a LIVE (default) read is a "now" read gated on
+    // existence-at-now via the SAME positive truthy-existence predicate the prop/edge paths use
+    // (`nodeLiveVisibleAt`, proj.ts). A node that does NOT exist at the current frontier drops from
+    // default reads and this returns `null`. Two cases hit that gate: (1) a logically tombstoned
+    // entity (an existence `retract` closing the open valid-time tail, see `tombstone()`), and (2) a
+    // naturally-expired bounded-existence node whose existence interval has already closed by "now".
+    // Both are correct: neither exists at the current frontier. The signature-preserving original
+    // facts remain, so a historical `asOf({validTime})` BEFORE the close still reconstructs the
+    // entity (that lens applies the SAME gate at its own instant, see `buildAsOfView`). A node still
+    // existing "now" projects its full segment geometry unchanged. SCOPE: this gate is NODE-only —
+    // `getEdge`/`query`/`traverse` gate on EDGE existence (`edgeValidAt`), NOT on endpoint-node
+    // existence, so an edge incident to a tombstoned node remains readable via `getEdge` (a node
+    // tombstone closes node-existence only; it does not retract incident edges).
+    const projection = proj(this.currentFacts(), this.projOptions());
+    if (!projection.nodeLiveVisibleAt(eid, null)) return null;
+    return applyLiveExcisionLens(projection.getNode(eid));
   }
 
-  /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment). */
+  /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment).
+   *  NOTE: unlike `getNode`, this does NOT gate on endpoint-node existence — an edge is its own
+   *  entity with its own existence; a node tombstone closes only that node's existence and leaves
+   *  incident edges live (see `getNode`'s SCOPE note). Edge-level as-of validity is enforced by
+   *  `traverse`/`query` via `edgeValidAt`, never here. */
   async getEdge(eid: EID, asOf?: AsOf): Promise<EdgeView | null> {
     if (asOf !== undefined) {
       return (await this.asOf(asOf)).getEdge(eid);
@@ -2726,8 +2778,21 @@ export class KipRepo implements Repo {
       return filterViewToInstant(view, validTime);
     };
 
+    // ROUND-2 (spec-fidelity MAJOR): the as-of ReadView applies the SAME node-existence gate the
+    // live `getNode` does — evaluated AT this view's instant (`null` = "now" for an unspecified
+    // `validTime`, else the requested `validTime`). Without it, `asOf({validTime: now})` (the
+    // convergent world-truth lens docs/23 §2.1 tells callers to prefer) would still reconstruct a
+    // tombstoned entity while the live `getNode` returns `null` — two "now" reads disagreeing. With
+    // it, a post-tombstone as-of-now read agrees with the live read, yet a pre-tombstone `validTime`
+    // still reconstructs history (existence is truthy at that earlier instant). Gate is NODE-only,
+    // exactly like the live path (`getEdge` gates on edge existence, not endpoint-node existence).
+    const gateInstant = validTime === undefined ? null : canon(validTime);
+
     return {
-      getNode: async (eid: EID) => applyValidTimeLens(projection.getNode(eid)),
+      getNode: async (eid: EID) => {
+        if (!projection.nodeLiveVisibleAt(eid, gateInstant)) return null;
+        return applyValidTimeLens(projection.getNode(eid));
+      },
       getEdge: async (eid: EID) => applyValidTimeLens(projection.getEdge(eid)),
       async *query(spec: Omit<TraversalSpec, "asOf">) {
         for (const item of traverse(projection, spec as TraversalSpec)) {
@@ -3244,9 +3309,76 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: rollup");
   }
 
-  // TODO(M2/T3.3): logical, signature-preserving forgetting (§4.5).
-  async tombstone(_eid: EID, _reason: string): Promise<FactId> {
-    throw new Error("unimplemented: tombstone");
+  /**
+   * T3.3 (docs/23 §5, mechanism #2 — the append-only DEFAULT for "forgetting"): logical,
+   * signature-preserving tombstoning. Authored as an ordinary signed node-existence `retract` that
+   * CLOSES the entity's open valid-time tail at the current frontier ("now") — nothing is deleted,
+   * no bytes are touched, the original facts and their signatures remain. Its two observable
+   * consequences (both exercised by the frozen M2-surface test):
+   *   1. the entity drops from DEFAULT (live) reads — `getNode` gates on NODE existence-at-now (see
+   *      `getNode`), which is now `false` for the closed tail. The as-of world-truth lens agrees:
+   *      `asOf({validTime: now}).getNode` applies the SAME gate and also returns `null` (round-2
+   *      spec-fidelity fix). SCOPE: the gate is NODE-only — `getEdge`/`traverse`/`query` gate on EDGE
+   *      existence (`edgeValidAt`), NOT on endpoint-node existence, so an edge incident to a
+   *      tombstoned node remains readable (a node tombstone closes node-existence only; closing
+   *      incident edges would be a separate, per-edge tombstone).
+   *   2. history BEFORE the tombstone stays as-of-queryable — `asOf({validTime: V})` for any `V`
+   *      before the tombstone point still reconstructs the entity, because the retract only closes
+   *      the interval `[frontier, +infinity)`, leaving `[existenceStart, frontier)` truthy.
+   * Returns the new tombstone fact's own content-addressed `FactId`.
+   *
+   * `validFrom` is bound to a fresh advance of this replica's local HLC frontier (strictly after
+   * every fact ingested so far — `ingest` receive-advances `localHlc`), so for every existence
+   * interval whose valid-time start precedes the frontier the retract closes only the open tail and a
+   * historical read at `validTime: 0` (or any pre-tombstone instant) is never clipped. (An existence
+   * assert with an author-chosen valid-time start in the FUTURE, beyond the current HLC frontier, is
+   * partially clipped by the `[frontier, +inf)` retract — the guarantee is stated over the common
+   * past-dated case, not universally over arbitrary future-dated valid-time.)
+   */
+  async tombstone(eid: EID, reason: string): Promise<FactId> {
+    if (typeof eid !== "string" || eid.length === 0) {
+      throw new KipError("ERR_MALFORMED_INPUT", "tombstone: eid must be a non-empty string", { eid });
+    }
+    if (typeof reason !== "string" || reason.length === 0) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        "tombstone: a non-empty reason is required (the signed audit record of why the entity was " +
+          "forgotten) — a silent, reasonless tombstone is never acceptable (fallbacks are evil)",
+        { eid },
+      );
+    }
+    // The valid-time close point = this replica's own local HLC frontier ("now"). ROUND-2
+    // (convergence-safety): advance the REAL local clock — the SAME `hlcTick` source `mintFact`
+    // advances — to obtain it, rather than the prior `this.localHlc ?? hlcTick(undefined, ...)`
+    // fallback that fabricated a throwaway genesis stamp on an empty repo (fallbacks are evil). On a
+    // populated repo this lands strictly after every ingested fact (`ingest` receive-advances
+    // `localHlc`); on a fresh repo it is the genuine genesis tick of this replica's clock, not a
+    // discarded fabrication. `mintFact` ticks once more below for the retract fact's own signed `hlc`.
+    this.localHlc = hlcTick(this.localHlc, this.replicaId);
+    const frontier: HlcOrTime = this.localHlc;
+    const input: RetractInput = {
+      v: 1,
+      type: "retract",
+      target: { kind: "node", eid },
+      // `reason` is carried in the signed payload for audit (retract values are never read by `proj`,
+      // so this only enriches the durable, signature-covered record — it never affects projection).
+      value: reason,
+      validFrom: frontier,
+      validTo: null,
+      replicaId: this.replicaId,
+      // `signature`/`publicKeyFingerprint`/`signedFields` are placeholders ONLY: `mintFact` reads just
+      // `provenance.author`/`source`/`confidence` and re-derives the real fingerprint, canonical
+      // `signedFields`, and Ed25519 `signature` from this repo's own key — so the tombstone lands
+      // FULLY SIGNED (these empties never reach the durable fact). See `mintFact`.
+      provenance: {
+        author: `tombstone:${this.replicaId}`,
+        signature: "",
+        publicKeyFingerprint: "",
+        signedFields: [],
+      },
+    };
+    const result = await this.mintThenAdmit(input, "tombstone");
+    return result.id;
   }
 
   /**

@@ -140,6 +140,16 @@ describe("INV-4: belief-consistency (per-replica audit) over an M2-surface super
     for (const seg of segments) {
       expect(["value", "unknown", "conflict", "quarantine", "excised"]).toContain(seg.kind);
     }
+    // ROUND-2 (code-quality): pin the fold's SEMANTIC outcome, not merely its geometry — the base
+    // "v1" covers [0,100) and the supersede "v2" wins from its validFrom (100) on (higher validFrom
+    // ⇒ higher orderKey where both cover). A no-op supersede would drop the "v2" segment and still
+    // pass the non-overlap/typed-kind checks above.
+    expect(segments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "value", value: "v1" }),
+        expect.objectContaining({ kind: "value", value: "v2" }),
+      ]),
+    );
   });
 
   it("asOf({txTime, believer}) at R's current frontier AGREES with the direct (rxFrom-unfiltered) read for a set mixing assert + `supersede` + `re-attest` facts — the reachable core of 'agrees with a reference oracle built from R's ingest order', now exercised over the M2-surface fact-type mix (docs/60 INV-4)", async () => {
@@ -199,5 +209,87 @@ describe("INV-4: belief-consistency (per-replica audit) over an M2-surface super
     const belief = await (await repo.asOf({ txTime: nowSurrogate(replicaId), believer: replicaId })).getNode(eid);
     const direct = await repo.getNode(eid);
     expect(belief).toEqual(direct);
+    // ROUND-2: pin that the supersede/re-attest facts genuinely folded — the base "v1" [0,100), the
+    // supersede "v2" [100,200), the re-attest "v1" [200,+inf) all surface as value segments. A
+    // semantic no-op for either new fact type would collapse this geometry yet still pass the
+    // belief==direct equality above (both sides would be equally wrong).
+    expect(direct?.props.status.segments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "value", value: "v1" }),
+        expect.objectContaining({ kind: "value", value: "v2" }),
+      ]),
+    );
+  });
+
+  it("INV-3 totality: a signature-valid, object-shaped `supersede` that OMITS `inputCids` does NOT throw in proj/getNode/detectConflict — it is QUARANTINED (surfaced, never dropped, never trusted as a value), and the rest of the set still folds normally (docs/23 §1 'keyed by its input-CID set'; docs/60 INV-3 proj-totality)", async () => {
+    // Regression guard for the round-2 convergence-safety fix: well-formed.ts only checks
+    // presence-iff-type, so an object-shaped supersede with `{ retract: [] }` and NO `inputCids` is
+    // admittable on EVERY replica. If `proj` threw on it (the pre-fix `.some()` on `undefined`),
+    // totality (INV-3) would be lost cluster-wide. It must instead quarantine.
+    const replicaId = "replica-inv4-m2-malformed-supersede";
+    const eid = "person/inv4-m2-malformed-supersede";
+
+    const existence = makeWellFormedFact({ replicaId, seq: 0, target: { kind: "node", eid, nodeKind: "person" }, id: "inv4-m2-malformed-existence" });
+    existence.value = true;
+    existence.validFrom = 0;
+    existence.validTo = null;
+
+    const baseAssert = makeWellFormedFact({ replicaId, seq: 1, hlc: { wall: 1000 }, target: { kind: "node-prop", eid, prop: "status" }, id: "inv4-m2-malformed-base" });
+    baseAssert.value = "v1";
+    baseAssert.validFrom = 0;
+    baseAssert.validTo = null;
+
+    // A WELL-FORMED supersede on the SAME cell, so `detectConflict` runs with 2 supersedes present —
+    // the malformed one's empty input-CID set must make `.some()` total, never throw.
+    const wellFormedSupersede = makeWellFormedFact({ replicaId, seq: 2, hlc: { wall: 2000 }, target: { kind: "node-prop", eid, prop: "status" }, id: "inv4-m2-malformed-wf-supersede" });
+    wellFormedSupersede.type = "supersede";
+    wellFormedSupersede.supersedes = { inputCids: [baseAssert.id] };
+    wellFormedSupersede.value = "v2";
+    wellFormedSupersede.validFrom = 0;
+    wellFormedSupersede.validTo = null;
+
+    // The MALFORMED supersede: object-shaped, NO `inputCids` key-set, highest orderKey (wins the
+    // sub-interval). Signature-valid and admittable (well-formed.ts checks only presence-iff-type).
+    const malformedSupersede = makeWellFormedFact({ replicaId, seq: 3, hlc: { wall: 5000 }, target: { kind: "node-prop", eid, prop: "status" }, id: "inv4-m2-malformed-supersede" });
+    malformedSupersede.type = "supersede";
+    // NB: `inputCids` deliberately absent — only `retract` present.
+    malformedSupersede.supersedes = { retract: [] } as unknown as Fact["supersedes"];
+    malformedSupersede.value = "vX";
+    malformedSupersede.validFrom = 0;
+    malformedSupersede.validTo = null;
+
+    // A clean, unrelated prop on the SAME node — must still fold to a trusted `value` (the malformed
+    // supersede on `status` must not corrupt the rest of the projection).
+    const cleanProp = makeWellFormedFact({ replicaId, seq: 4, hlc: { wall: 1500 }, target: { kind: "node-prop", eid, prop: "role" }, id: "inv4-m2-malformed-clean" });
+    cleanProp.value = "engineer";
+    cleanProp.validFrom = 0;
+    cleanProp.validTo = null;
+
+    const repo = new KipRepo({ replicaId });
+    expect((await repo.ingest(existence)).admitted).toBe(true);
+    expect((await repo.ingest(baseAssert)).admitted).toBe(true);
+    expect((await repo.ingest(wellFormedSupersede)).admitted).toBe(true);
+    expect((await repo.ingest(malformedSupersede)).admitted).toBe(true);
+    expect((await repo.ingest(cleanProp)).admitted).toBe(true);
+
+    // proj/getNode/detectConflict must be TOTAL — this line threw a TypeError before the fix.
+    const node = await repo.getNode(eid);
+    expect(node).not.toBeNull();
+
+    // The malformed supersede won the `status` sub-interval by orderKey; it is quarantined, never
+    // trusted as a `value`, never dropped.
+    expect(node?.props.status.segments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "quarantine", reason: "malformed-supersede", assertedBy: malformedSupersede.id }),
+      ]),
+    );
+    // No `status` segment silently trusts the malformed supersede's value.
+    for (const seg of node?.props.status.segments ?? []) {
+      if (seg.kind === "value") expect(seg.value).not.toBe("vX");
+    }
+    // The rest of the set folds normally.
+    expect(node?.props.role.segments).toEqual(
+      expect.arrayContaining([expect.objectContaining({ kind: "value", value: "engineer" })]),
+    );
   });
 });

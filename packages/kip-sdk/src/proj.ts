@@ -864,6 +864,53 @@ function valuesEqual(a: PropValue | undefined, b: PropValue | undefined): boolea
   return JSON.stringify(deepSortKeys(a ?? null)) === JSON.stringify(deepSortKeys(b ?? null));
 }
 
+/**
+ * docs/23 §1 supersession-envelope normalizers. `Fact.supersedes` is EITHER the rich object shape
+ * `{ inputCids; retract?; assert? }` (the spec's source-of-truth form) OR the legacy flattened
+ * `FactId[]` (== `inputCids`, empty `retract`, no `assert`) the frozen conformance fixtures bake
+ * (see index.ts's `Fact.supersedes` doc comment + this task's `disputes`). These fold BOTH into the
+ * canonical fields so `proj` treats them identically and equal admitted sets still converge.
+ */
+function supersedeInputCids(f: Fact): readonly FactId[] {
+  const s = f.supersedes;
+  if (s === undefined) return [];
+  if (Array.isArray(s)) return s;
+  // TOTAL by construction (INV-3): an object-shaped supersede may OMIT `inputCids` and still be
+  // signature-valid/admittable (well-formed.ts checks only presence-iff-type), so `s.inputCids` can
+  // be `undefined` — coalesce to `[]` so every caller (`detectConflict`'s `.some()`, the retract
+  // fold) is total and never throws. This is NOT a silent no-op excuse: `isMalformedSupersede`
+  // below flags exactly this (empty key-set) so `reduceRawCell` QUARANTINES such a fact rather than
+  // treating it as a benign empty-inputCids supersede. See docs/23 §1 ("keyed by its input-CID set").
+  return s.inputCids ?? [];
+}
+
+/** docs/23 §1: a `supersede` is "keyed by its input-CID set". An object-shaped supersede whose
+ * `inputCids` is missing or empty (or a legacy flat `[]`) has no key — it is MALFORMED, yet
+ * signature-valid and admittable. proj (INV-3 total) must surface it as `quarantine`, never trust
+ * its value, never drop it, never throw. */
+function isMalformedSupersede(f: Fact): boolean {
+  return f.type === "supersede" && supersedeInputCids(f).length === 0;
+}
+/** The interval-CLOSING list (docs/23 §1): facts a covering `supersede` retracts over its own
+ * valid-time span. Empty for the legacy `FactId[]` shape (no `retract` sub-field), so a flattened
+ * supersede competes by `orderKey` alone exactly as before — frozen fixtures are unaffected. */
+function supersedeRetractIds(f: Fact): readonly FactId[] {
+  const s = f.supersedes;
+  if (s === undefined || Array.isArray(s)) return [];
+  return s.retract ?? [];
+}
+/** The value a fact projects into its cell: the docs/23 §1 `supersedes.assert` override when a
+ * `supersede` carries the object shape with an explicit `assert`, else the fact's own `value`. Falls
+ * back to `f.value` for every non-supersede fact and every legacy `FactId[]`-shaped supersede, so it
+ * is a pure identity for the frozen fixtures. */
+function effectiveAssertValue(f: Fact): PropValue | undefined {
+  const s = f.supersedes;
+  if (f.type === "supersede" && s !== undefined && !Array.isArray(s) && s.assert !== undefined) {
+    return s.assert;
+  }
+  return f.value;
+}
+
 /** Returns the disputed candidate `FactId`s (sorted) if a genuine, unresolved conflict exists
  * among the covering facts for this sub-interval, else `null`. */
 function detectConflict(covering: readonly Fact[], factsById: ReadonlyMap<FactId, Fact>, collidedIds: ReadonlySet<FactId>): FactId[] | null {
@@ -874,10 +921,10 @@ function detectConflict(covering: readonly Fact[], factsById: ReadonlyMap<FactId
     for (let j = i + 1; j < supersedes.length; j += 1) {
       const a = supersedes[i];
       const b = supersedes[j];
-      const aInputs = new Set(a.supersedes ?? []);
-      const overlaps = (b.supersedes ?? []).some((id) => aInputs.has(id));
+      const aInputs = new Set(supersedeInputCids(a));
+      const overlaps = supersedeInputCids(b).some((id) => aInputs.has(id));
       if (!overlaps) continue;
-      if (valuesEqual(a.value, b.value)) continue; // identical outcome — idempotent, no conflict
+      if (valuesEqual(effectiveAssertValue(a), effectiveAssertValue(b))) continue; // identical outcome — idempotent, no conflict
       const aDominates = causedByDominates(a, b.id, factsById, collidedIds);
       const bDominates = causedByDominates(b, a.id, factsById, collidedIds);
       if (aDominates || bDominates) continue; // a declared dominator resolves it, not a tiebreak
@@ -952,7 +999,19 @@ function reduceRawCell(
       continue;
     }
 
-    const covering = asserts.filter((f) => covers(f, a, b));
+    const coveringAll = asserts.filter((f) => covers(f, a, b));
+    // docs/23 §1 supersede `retract` (interval-close): a `supersede` covering THIS sub-interval that
+    // names facts in its `retract` list closes those facts' interval HERE — they are removed from the
+    // pick over exactly the span the supersede covers, so the supersession invalidates the named
+    // input even when that input would otherwise win by `orderKey`-max (a higher-`orderKey` stale
+    // assert). Empty for legacy `FactId[]`-shaped supersedes, so the frozen fixtures fold unchanged.
+    let covering = coveringAll;
+    const retractedHere = new Set<FactId>();
+    for (const f of coveringAll) {
+      if (f.type !== "supersede") continue;
+      for (const id of supersedeRetractIds(f)) retractedHere.add(id);
+    }
+    if (retractedHere.size > 0) covering = coveringAll.filter((f) => !retractedHere.has(f.id));
     if (covering.length === 0) {
       // M3/T4.7: no LIVE covering assert — but if THIS replica's own local excision memory has a
       // (confirmed-currently-absent, see `ExcisionRecord`'s doc comment) record covering this exact
@@ -990,7 +1049,7 @@ function reduceRawCell(
     // ROOT-CAUSE FIX (this task, MINOR site #3 — see `valuesEqual`'s doc comment above for why this
     // is the same latent class): canonicalize each side through `deepSortKeys` before stringifying,
     // matching every other content-equality check in this module.
-    const distinctValues = new Set(tiedMax.map((f) => JSON.stringify(deepSortKeys(f.value ?? null))));
+    const distinctValues = new Set(tiedMax.map((f) => JSON.stringify(deepSortKeys(effectiveAssertValue(f) ?? null))));
     if (distinctValues.size > 1) {
       // Genuinely DIFFERENT content tied for the "total" order's maximum — the orderKey-totality
       // premise the default `lww-hlc` silent tiebreak relies on (SPEC.md §3.4's resolution table:
@@ -1024,7 +1083,15 @@ function reduceRawCell(
       segments.push({ kind: "quarantine", validFrom, validTo, assertedBy: winner.id, v: winner.v, reason: "unknown-version" });
       continue;
     }
-    segments.push({ kind: "value", value: winner.value ?? null, validFrom, validTo, assertedBy: winner.id });
+    // INV-3 totality: a malformed supersede (object-shaped, no `inputCids` key-set — see
+    // `isMalformedSupersede`) that would otherwise WIN this sub-interval is quarantined rather than
+    // passed through as a trusted `value`, so it is surfaced (never a silent no-op) without ever
+    // fabricating a value. The `.some()`/retract folds above are already total for it.
+    if (isMalformedSupersede(winner)) {
+      segments.push({ kind: "quarantine", validFrom, validTo, assertedBy: winner.id, v: winner.v, reason: "malformed-supersede" });
+      continue;
+    }
+    segments.push({ kind: "value", value: effectiveAssertValue(winner) ?? null, validFrom, validTo, assertedBy: winner.id });
   }
   return segments;
 }
@@ -1285,6 +1352,17 @@ function buildFactsById(facts: readonly Fact[]): { factsById: Map<FactId, Fact>;
 export interface ProjResult {
   getNode(eid: EID): NodeView | null;
   getEdge(eid: EID): EdgeView | null;
+  /** T3.3 (docs/23 §5 mechanism #2): is node `eid` still LIVE-VISIBLE at `at` (`null` = live
+   * "now")? The seam a LIVE (default) read uses to drop a logically-tombstoned entity from default
+   * reads. It returns `false` ONLY when the entity is CLEANLY gone at `at` — its covering existence
+   * segment is `unknown`/`excised` (a `retract` that closed/split the valid-time tail, i.e. the
+   * tombstone), or no non-retract existence assert exists at all (a ghost node `getNode` already
+   * nulls). It deliberately returns `true` for a `conflict`/`quarantine` existence segment (an
+   * UNRESOLVED dispute that must still surface as a view, e.g. `KIP_CONFLICT_KIND`, never be
+   * silently swallowed as an absence) and for an asserted `value` segment. A historical
+   * `asOf({validTime})` BEFORE the tombstone reads through the validTime lens, not this gate, so it
+   * still reconstructs the entity. */
+  nodeLiveVisibleAt(eid: EID, at: bigint | null): boolean;
   /** Deterministic (sorted) list of edge EIDs touching `eid` in the given direction — the seam
    * `traverse` (below) uses for bounded typed BFS/DFS (T2.7). */
   edgesTouching(eid: EID, direction: "out" | "in" | "both"): EID[];
@@ -1761,7 +1839,51 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     return [...new Set([...out, ...inn])].sort();
   }
 
-  return { getNode, getEdge, edgesTouching, edgeValidAt };
+  /** T3.3: is node `eid` still LIVE-VISIBLE at `at` (`null` = live "now")? Folds the node-existence
+   * cell the SAME way `getNodeRaw` does (`reduceRawCell` + `mergeAdjacent`) and decides existence via
+   * the IDENTICAL positive predicate the edge/prop gates use (`existsAtInstant` — a TRUTHY `value`
+   * segment covering `at`), so this gate can never drift from `existsAtInstant`/`gateByExistence`
+   * (round-2 convergence-safety MAJOR: the prior negative test `kind !== unknown/excised` wrongly
+   * read a falsy `value`, `quarantine`, or missing-but-conflicting segment as LIVE while every prop
+   * gated to `unknown` and every incident edge read invisible — an internally inconsistent "live but
+   * propertyless" node). SINGLE carve-out: an unresolved existence `conflict` still surfaces as a
+   * live view so a dispute is never silently swallowed as absence (docs/27); a `quarantine` (an
+   * UNTRUSTED existence assert) or a plain falsy/absent `value` reads as NOT live, exactly like the
+   * prop/edge paths. */
+  function nodeLiveVisibleAt(eid: EID, at: bigint | null): boolean {
+    const existFacts = byCell.get(`node-exist:${eid}`) ?? [];
+    if (existFacts.filter((f) => f.type !== "retract").length === 0) return false;
+    const existSegments = mergeAdjacent(
+      reduceRawCell(
+        existFacts,
+        [],
+        factsById,
+        collidedIds,
+        knownMaxVersion,
+        excisedOids,
+        oidByFact,
+        excisionsByCell.get(`node-exist:${eid}`) ?? [],
+      ),
+    );
+    // Positive existence test — the SAME truthy-value predicate edges (`existsAtInstant`) and props
+    // (`gateByExistence`) gate on, so a node reads live ONLY where it genuinely exists at `at`.
+    if (existsAtInstant(existSegments, at)) return true;
+    // Carve-out: never swallow an unresolved existence dispute as an absence — surface a `conflict`
+    // covering segment as a live view (its props/edges still gate to `unknown`, but the node exists
+    // as a disputed entity). Everything else (`unknown`/`excised`/`quarantine`/falsy `value`/missing)
+    // reads as NOT live — consistent with the prop and edge gates.
+    const covering =
+      at === null
+        ? existSegments[existSegments.length - 1]
+        : existSegments.find((seg) => {
+            if (canon(seg.validFrom) > at) return false;
+            if (seg.validTo === null) return true;
+            return canon(seg.validTo) > at;
+          });
+    return covering?.kind === "conflict";
+  }
+
+  return { getNode, getEdge, edgesTouching, edgeValidAt, nodeLiveVisibleAt };
 }
 
 // ---------------------------------------------------------------------------
