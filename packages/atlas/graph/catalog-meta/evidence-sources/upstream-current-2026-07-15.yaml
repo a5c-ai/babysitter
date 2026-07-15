@@ -112,6 +112,34 @@ edges:
     - agent:codex-sdk
 ---
 nodeKind: EvidenceSource
+id: evidence:cursor-3-11-2026-07-15
+attributes:
+  displayName: "Cursor 3.11 official changelog"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/side-chat"
+  sourcePathOrUrl: "https://cursor.com/changelog/side-chat"
+  locator: "Cursor changelog entry 3.11"
+  capturedAt: "2026-07-15T08:55:00Z"
+  observedAt: "2026-07-10T00:00:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-15T08:55:00Z"
+  notes: |
+    Official Cursor 3.11 changelog documents side chats with inherited main
+    chat context, agent transcript search, scoped project and repo pickers for
+    This Computer, Cloud, and remote machines, and new Cloud Agent lifecycle
+    hooks including beforeSubmitPrompt, afterAgentResponse, afterAgentThought,
+    stop, and subagentStart.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:3-11
+    - agent:cursor
+---
+nodeKind: EvidenceSource
 id: evidence:droid-0-172-0-2026-07-15
 attributes:
   displayName: "Factory Droid CLI 0.172.0 npm package metadata"
@@ -138,6 +166,34 @@ edges:
   references:
     - agentVersion:droid:0-172-0
     - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:hermes-agent-0-18-2-2026-07-15
+attributes:
+  displayName: "Hermes Agent v0.18.2 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.7.2"
+  sourcePathOrUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.7.2"
+  locator: "NousResearch/hermes-agent release v2026.7.7.2"
+  capturedAt: "2026-07-15T08:55:00Z"
+  observedAt: "2026-07-08T03:11:22Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-15T08:55:00Z"
+  notes: |
+    Official Hermes Agent 0.18.2 release notes describe a same-day patch on top
+    of 0.18.1 that unpins the WhatsApp Baileys dependency from a git commit and
+    uses the published 7.0.0-rc13 npm release, making installs and tagged
+    release Docker builds reliable. Update guidance remains hermes update or
+    pip install -U hermes-agent.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:hermes:0-18-2
+    - agent:hermes
 ---
 nodeKind: EvidenceSource
 id: evidence:omp-16-5-2-2026-07-15

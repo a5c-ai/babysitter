@@ -141,6 +141,40 @@ edges:
     - evidence:openai-node-6-47-0-2026-07-15
 ---
 nodeKind: AgentVersion
+id: agentVersion:cursor:3-11
+attributes:
+  agentId: "cursor"
+  agentProductId: agent:cursor
+  displayName: "Cursor 3.11"
+  runtimeFamily: "ide-agent"
+  releaseChannel: "stable"
+  versionRange: "3.11"
+  currentVersion: "3.11"
+  releasedAt: "2026-07-10"
+  releaseNotesUrl: "https://cursor.com/changelog/side-chat"
+  cliCommand: "cursor-agent"
+  summary: "Cursor 3.11 changelog release adding side chats, transcript search, scoped project/repo pickers, and expanded Cloud Agent hooks for conversation and subagent lifecycle events."
+  assimilationNotes:
+    - "Latest official Cursor changelog marker moved from recorded 3.6 to 3.11."
+    - "Side chats can run alongside the main chat via /side, /btw, or the plus button while inheriting main-chat context."
+    - "Agent transcript search affects history and session-inspection surfaces."
+    - "Project and repo search is scoped to This Computer, Cloud, or a specific remote machine; picker workflows can create projects and connect GitHub, GitLab, or Azure DevOps in-place."
+    - "New Cloud Agent hooks include beforeSubmitPrompt, afterAgentResponse, afterAgentThought, stop, subagentStart, and more for conversation, reasoning, subagent, compaction, and turn-completion lifecycle control."
+    - "No public installer or package-name migration was identified for this Cursor changelog marker."
+  releaseHighlights:
+    - "Side chats with inherited main-chat context."
+    - "Conversation transcript search."
+    - "Scoped project and repo pickers."
+    - "New Cloud Agent prompt, response, thought, stop, subagent, compaction, and turn-completion hooks."
+  installMethods:
+    - install:desktop-app
+edges:
+  version_of:
+    - agent:cursor
+  sourced_from:
+    - evidence:cursor-3-11-2026-07-15
+---
+nodeKind: AgentVersion
 id: agentVersion:droid:0-172-0
 attributes:
   agentId: "droid"
@@ -169,6 +203,40 @@ edges:
     - agent:droid
   sourced_from:
     - evidence:droid-0-172-0-2026-07-15
+---
+nodeKind: AgentVersion
+id: agentVersion:hermes:0-18-2
+attributes:
+  agentId: "hermes"
+  agentProductId: agent:hermes
+  displayName: "Hermes Agent 0.18.2"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.18.2"
+  currentVersion: "0.18.2"
+  releasedAt: "2026-07-08"
+  sourcePackage: "hermes-agent"
+  upstreamReleaseTag: "v2026.7.7.2"
+  releaseNotesUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.7.2"
+  cliCommand: "hermes"
+  summary: "Hermes Agent 0.18.2 patch release replacing a pinned WhatsApp Baileys git dependency with published 7.0.0-rc13 for reliable installs and Docker tagged-release builds."
+  assimilationNotes:
+    - "Latest npm hermes-agent is 0.18.2; graph previously recorded 0.15.2."
+    - "The v2026.7.7.2 release is a same-day patch on v0.18.1 for the WhatsApp bridge dependency."
+    - "Baileys is no longer pinned to a git commit and now uses published 7.0.0-rc13, affecting install reproducibility and Docker build reliability."
+    - "Update guidance remains hermes update for existing installs or pip install -U hermes-agent."
+    - "No CLI flag, transport/API, model, or package-name migration was published for this patch."
+  releaseHighlights:
+    - "WhatsApp Baileys dependency now uses published 7.0.0-rc13."
+    - "Tagged-release Docker builds and installs are more reliable."
+  installMethods:
+    - install:npm
+    - install:pip
+edges:
+  version_of:
+    - agent:hermes
+  sourced_from:
+    - evidence:hermes-agent-0-18-2-2026-07-15
 ---
 nodeKind: AgentVersion
 id: agentVersion:omp:16-5-2
