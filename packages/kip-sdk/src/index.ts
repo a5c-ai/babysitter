@@ -4785,6 +4785,20 @@ export class KipRepo implements Repo {
         const { result: batchFactIds } = await this.txn(async (tx) => {
           const ids: FactId[] = [];
           const stagedExistenceEids = new Set<EID>();
+          // D-39 FIX: an EXPLICIT `node`/`edge` existence candidate in THIS batch already records
+          // the eid's existence carrying its real `nodeKind`/`edgeKind`. Pre-seed those eids so
+          // `ensureExistenceFor` (invoked for a same-eid `node-prop`/`edge-prop` candidate below)
+          // never mints a SECOND, kind-less existence fact for the same eid — a staged (not-yet-
+          // durable) explicit existence fact is invisible to `ensureExistenceFor`'s own
+          // `getNode`/`getEdge` liveness probe, so without this it would synthesize a duplicate
+          // `{kind:"node", eid}` (no `nodeKind`) fact that folds over and BLANKS the projected
+          // `NodeView.kind`. Order-independent: covers a prop candidate appearing before OR after
+          // its explicit existence candidate. Does not affect the D-36 test-(4) dedup path (two
+          // `node-prop` candidates for one fresh eid, no explicit existence candidate → this set
+          // stays empty for that eid and `ensureExistenceFor`'s own staging dedup still applies).
+          for (const c of state.candidate) {
+            if (c.target.kind === "node" || c.target.kind === "edge") stagedExistenceEids.add(c.target.eid);
+          }
           for (const candidateInput of state.candidate) {
             // eslint-disable-next-line no-await-in-loop -- existence must be established before (or
             // alongside) its dependent prop fact is meaningful to read back; sequential by construction.
