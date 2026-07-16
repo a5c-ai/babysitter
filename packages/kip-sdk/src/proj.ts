@@ -860,7 +860,7 @@ function causedByDominates(a: Fact, bId: FactId, factsById: ReadonlyMap<FactId, 
  * `deepSortKeys` helper keeps this comparison a pure function of content regardless of key order,
  * consistent with every other content-equality check in this module.
  */
-function valuesEqual(a: PropValue | undefined, b: PropValue | undefined): boolean {
+export function valuesEqual(a: PropValue | undefined, b: PropValue | undefined): boolean {
   return JSON.stringify(deepSortKeys(a ?? null)) === JSON.stringify(deepSortKeys(b ?? null));
 }
 

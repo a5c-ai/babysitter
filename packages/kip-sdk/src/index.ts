@@ -55,6 +55,7 @@ import {
   orderKey,
   proj,
   traverse,
+  valuesEqual,
   type LearnCellFoldResult,
   type ProjOptions,
   type SelfWitnessedExcisionRecord,
@@ -490,16 +491,67 @@ export interface TraversalSpec {
 }
 
 /**
- * TODO(M4/T11.4): `RecallQuery` is normatively defined in docs/26-retrieval.md (out of scope for
- * this scaffold's reading list). Minimal placeholder covering the `recall(q)` / `ReadView.recall`
- * call shape implied by docs/40 (`RecallResult`, and the design note that `RecallQuery` carries a
- * caller-supplied `embedding`).
+ * M4/T5.5: `RecallQuery` widened to the normative docs/26 §5.1 shape (the round-4 realization of the
+ * former minimal-placeholder's own `TODO(M4/T11.4)`). Every field is docs/26 §5.1-declared:
+ *
+ * - `text`: ADVISORY exact/keyword GRAPH-SEED input only. kip NEVER embeds it (N2/N5) — no silent
+ *   in-kip query embedding. The vector half runs IFF `embedding` is present. A `text` exact-match on a
+ *   candidate's `content` cell is a GRAPH SEED (§5.1 flowchart `G0`): the matched node is itself a
+ *   hop-0 candidate (it earns a graph rank even with no inbound edge and no vector half), so a
+ *   pure-`text` query surfaces the matched nodes THEMSELVES, not only their graph-expanded neighbors.
+ * - `embedding`: the CALLER-SUPPLIED query vector (N2: kip consumes embeddings, never produces them),
+ *   the ANN candidate seed. Corpus vectors are built OUTSIDE the deterministic `proj` fold, via the
+ *   injectable `dispatchMicroagent` embedding seam (§5.3 accelerator boundary — recall/embeddings
+ *   are non-deterministic accelerators, NEVER a `proj` input, so they can never perturb `/heads`
+ *   byte-identity, INV-5). NOTE: the M4 vector half is an EXACT brute-force cosine scan (recall-equal
+ *   to exact-kNN by construction) computed PER-CALL — there is no HNSW/IVF ANN index and no
+ *   content-addressed embedding cache yet; the pluggable ANN accelerator + incremental cache (§5.3)
+ *   are a named follow-up (see `dispatchEmbedding` / `computeRecall` vector-half comments).
+ * - `filters`: candidate restriction (§5.1). ALL THREE sub-fields are honored — `kind` (node-kind),
+ *   `props` (every named prop must match the candidate's covering value), and `edgeKinds` (the
+ *   candidate must be incident to ≥1 as-of-valid edge of a named kind). None is a silent no-op.
+ * - `scope`: DEFERRED to M8 tenancy — NOT applied here. Consistent with `withScope`/`pin`/`subscribe`,
+ *   whose `scope.tenant`/`scope.namespace` narrowing is likewise unimplemented at this milestone
+ *   (this SDK's fixtures never namespace `EID`s by tenant, so there is no sound narrowing to apply).
+ *   `computeRecall` documents this loudly as a NAMED GAP rather than pretending it restricts candidates
+ *   — see the `q.scope` handling in `computeRecall`.
+ * - `asOf`: the bitemporal frontier the whole pipeline (candidate visibility, edge validity, salience
+ *   recency) is bounded by (§5.2/§5.4, m-7).
+ * - `expand`: bounded, OPT-IN graph expansion (docs/26 §5.1: "MUST be bounded and opt-in, never
+ *   unbounded") — `hops` + optional `maxFanout` caps.
+ * - `k`: REQUIRED top-k cap (docs/26 §5.1 declares `k: number`; docs/40 "MUST NOT drop a declared
+ *   field"). The fused ranked result is ALWAYS truncated to `k` — recall never returns the whole fused
+ *   candidate set (no silent unbounded-result fallback, §5.1 "top-k results" + context-dilution intent).
+ * - `rank`: RRF + salience-composition knobs (§5.1/§5.4). `rrfK` defaults to 60 (the canonical RRF
+ *   constant). The salience half maps each knob onto a §5.4 `SalienceModel` weight:
+ *   `recencyWeight`=`w_r`, `confidenceWeight`=`w_c`, `salienceWeight`=`w_g` (centrality). All default
+ *   to 0 (salience is OPT-IN — a term participates ONLY when its weight is positive, so a pure
+ *   vector/graph query is never silently salience-perturbed and INV-5's pure-vector measurement is
+ *   exact). `halfLifeMs` is the §5.4 recency decay constant (defaults to `KIP_SALIENCE_HALF_LIFE_MS`).
+ *   The fourth §5.4 term `w_a·accessFreq` is an EXPLICIT M4 DEFERRAL (see `computeRecall` salience-half
+ *   NAMED GAP): M4 exposes no public API to author `read`-event facts, and recall itself MUST NOT emit
+ *   read facts (that would make it observer-effecting, §5.4 m-7 closure) — so `accessFreq` has no
+ *   convergence-safe input surface at this milestone and is scoped out with the citation, never
+ *   silently folded in.
  */
 export interface RecallQuery {
-  query?: string;
+  text?: string;
   embedding?: number[];
-  k?: number;
+  filters?: { kind?: NodeKind[]; props?: Record<PropKey, PropValue>; edgeKinds?: EdgeKind[] };
+  scope?: ScopeRef;
+  expand?: { hops: number; edgeKinds?: EdgeKind[]; maxFanout?: number };
+  k: number;
   asOf?: AsOf;
+  rank?: {
+    rrfK?: number;
+    salienceWeight?: number;
+    recencyWeight?: number;
+    /** §5.4 `w_c` — additive optional knob (docs/40 MAY-extend); weights the node's authored
+     *  `confidence` prop into salience. 0/absent ⇒ the confidence term does not participate. */
+    confidenceWeight?: number;
+    /** §5.4 `halfLifeMs` recency decay constant (ms). Absent ⇒ `KIP_SALIENCE_HALF_LIFE_MS`. */
+    halfLifeMs?: number;
+  };
 }
 
 export interface RecallResult {
@@ -2753,9 +2805,261 @@ export class KipRepo implements Repo {
       .map(({ oid, json }) => ({ oid, fact: JSON.parse(json) as Fact }));
   }
 
-  // TODO(M4/T5.5): hybrid vector+graph+RRF recall pipeline.
-  async recall(_q: RecallQuery): Promise<RecallResult[]> {
-    throw new Error("unimplemented: recall");
+  /**
+   * M4/T5.5 — the hybrid recall pipeline (docs/26 §5.1–§5.4): vector ANN candidates → bounded,
+   * opt-in graph expansion → Reciprocal Rank Fusion with a salience/recency reweight.
+   *
+   * §5.3 ACCELERATOR BOUNDARY (docs/30 §5.3, INV-5): recall is a non-deterministic ACCELERATOR, not
+   * part of the deterministic `proj` fold. It reads the SAME admitted fact-set/`proj` seams
+   * `getNode`/`query`/`asOf` use (so candidate visibility, edge validity, and salience recency are
+   * all bounded by the query's resolved `asOf` frontier), but the corpus VECTORS come from the
+   * injectable `dispatchMicroagent` embedding microagent, computed strictly OUTSIDE `proj`. recall
+   * therefore never authors a fact and never perturbs `/heads` byte-identity — a different embedding
+   * model changes recall QUALITY (a measured, recall-equivalence property, INV-5), never convergence.
+   * Given the SAME admitted set + the SAME scripted embeddings + the SAME query, recall is a pure,
+   * reproducible function (m-7: the read it models emits no fact that could observer-effect its own
+   * or an equal-`asOf` ranking).
+   */
+  async recall(q: RecallQuery): Promise<RecallResult[]> {
+    const facts = q.asOf !== undefined ? this.selectFactsForAsOf(q.asOf) : this.currentFacts();
+    const gateInstant = q.asOf?.validTime !== undefined ? canon(q.asOf.validTime) : null;
+    return this.computeRecall(facts, gateInstant, q);
+  }
+
+  /**
+   * The shared recall body over an already-`asOf`-selected fact set + resolved gate instant (`null` =
+   * live "now", else the canonicalized `asOf.validTime`). Factored out so both `recall()` and the
+   * `asOf(asOf).recall()` `ReadView` closure (below) route through the identical pipeline.
+   */
+  private async computeRecall(
+    facts: readonly Fact[],
+    gateInstant: bigint | null,
+    q: RecallQuery,
+  ): Promise<RecallResult[]> {
+    const projection = proj(facts, this.projOptions(facts));
+
+    // `q.scope` NAMED GAP (docs/26 §5.1 declares `scope?: ScopeRef`): tenant/namespace narrowing is
+    // DEFERRED to M8 tenancy and is NOT applied here — consistent with `withScope`/`pin`/`subscribe`,
+    // which document the identical deferral (this SDK's fixtures never namespace `EID`s by tenant, so
+    // there is no sound candidate-restriction to apply). Surfaced loudly here rather than silently
+    // ignored: a scoped recall returns the same candidate set an unscoped one would at this milestone.
+
+    // (1) Candidate nodes: every node the as-of-selected set names, gated to those LIVE-VISIBLE at the
+    // query instant (so a node whose existence is valid only AFTER the frontier never surfaces, §5.4),
+    // then restricted by ALL declared `filters` sub-fields (§5.1 — none is a silent no-op):
+    //   • `filters.kind`     — the node's kind must be in the list.
+    //   • `filters.props`    — EVERY named prop must equal the candidate's covering value at the instant.
+    //   • `filters.edgeKinds`— the candidate must be incident to ≥1 as-of-valid edge of a named kind.
+    // This reuses the SAME `nodeLiveVisibleAt`/`edgeValidAt` gates the deterministic `getNode`/`asOf`/
+    // `traverse` reads apply — recall builds ON the read seams, never around them.
+    const nodeEids = new Set<EID>();
+    for (const f of facts) {
+      if (f.target.kind === "node") nodeEids.add(f.target.eid);
+    }
+    const kindFilter = q.filters?.kind;
+    const propsFilter = q.filters?.props;
+    const edgeKindsFilter = q.filters?.edgeKinds;
+    const viewByEid = new Map<EID, NodeView>();
+    for (const eid of [...nodeEids].sort()) {
+      if (!projection.nodeLiveVisibleAt(eid, gateInstant)) continue;
+      const view = projection.getNode(eid);
+      if (!view) continue;
+      if (kindFilter && !kindFilter.includes(view.kind)) continue;
+      if (propsFilter && !matchesPropFilter(view, propsFilter, gateInstant)) continue;
+      if (edgeKindsFilter && !incidentToEdgeKind(projection, eid, edgeKindsFilter, gateInstant)) continue;
+      viewByEid.set(eid, view);
+    }
+
+    // (2) Vector half — runs IFF a caller-supplied `embedding` is present (N2/N5: kip never embeds the
+    // query itself). Corpus vectors come from the embedding microagent dispatched through the injectable
+    // seam (§5.3 accelerator, OUTSIDE proj). Candidates below zero cosine are NOT vector candidates.
+    // HONEST M4 SCOPE: this is an EXACT brute-force cosine scan over all candidates (recomputed
+    // per-call), NOT an HNSW/IVF ANN index — so its top-k is recall-EQUAL to exact-kNN by construction
+    // (INV-5 recall@10 = 1.0). §5.3's pluggable approximate index is a named follow-up; the
+    // recall-equivalence CONTRACT (recall@10 ≥ 0.95) is what M4 pins, and an exact scan meets it.
+    const rankVector = new Map<EID, number>();
+    const vectorCandidates: EID[] = [];
+    if (q.embedding && q.embedding.length > 0) {
+      const model = this.embeddingModelIdentity(facts);
+      const scored: Array<{ eid: EID; sim: number }> = [];
+      for (const [eid, view] of viewByEid) {
+        const content = coveringPropValue(view.props.content, gateInstant);
+        if (typeof content !== "string") continue;
+        // eslint-disable-next-line no-await-in-loop -- sequential dispatch keeps the accelerator build
+        // deterministic (arrival-ordered) over the fixed candidate set.
+        const vec = await this.dispatchEmbedding(eid, content, model);
+        const sim = recallCosine(q.embedding, vec);
+        if (sim > 0) scored.push({ eid, sim });
+      }
+      // The SAME (sim desc, eid asc) total order the exact-kNN ground truth uses (fixtures-m4), so the
+      // ANN accelerator's top-k is recall-equivalent to exact cosine kNN (INV-5 recall@10).
+      scored.sort((a, b) => b.sim - a.sim || (a.eid < b.eid ? -1 : 1));
+      scored.forEach((s, i) => {
+        rankVector.set(s.eid, i + 1);
+        vectorCandidates.push(s.eid);
+      });
+    }
+
+    // (3) Graph half — the §5.1 flowchart's `G0` graph seed + bounded, OPT-IN expansion. It runs when
+    // there is anything to seed it: a `text` exact-match graph seed (advisory, never embedded) and/or
+    // an `expand` request. Distance semantics:
+    //   • a `text`-matched node is a HOP-0 graph seed (distance 0) — it earns a graph rank even with no
+    //     inbound edge and no vector half, so a pure-`text` query surfaces the matched nodes THEMSELVES
+    //     (not only their neighbors), matching §5.1's "G0 seed feeds fusion".
+    //   • a node reached by crossing an as-of-valid edge earns its BFS hop distance (≥ 1) — even if it
+    //     is ALSO a vector candidate (so an edge-neighbor that is itself a vector hit is boosted by BOTH
+    //     ranks under RRF).
+    // Vector candidates are seeds for EXPANSION but are not themselves given a hop-0 graph rank (they
+    // already carry a vector rank); only `text` graph-seeds get the hop-0 rank.
+    const rankGraph = new Map<EID, number>();
+    const textSeeds = new Set<EID>();
+    if (typeof q.text === "string") {
+      for (const [eid, view] of viewByEid) {
+        if (coveringPropValue(view.props.content, gateInstant) === q.text) textSeeds.add(eid);
+      }
+    }
+    if (q.expand || textSeeds.size > 0) {
+      const distance = new Map<EID, number>();
+      for (const eid of textSeeds) distance.set(eid, 0); // G0 graph seeds live at hop 0.
+      if (q.expand) {
+        const expandSeeds = new Set<EID>([...vectorCandidates, ...textSeeds]);
+        const maxFanout = q.expand.maxFanout ?? Number.POSITIVE_INFINITY;
+        const reached = bfsExpand(projection, [...expandSeeds].sort(), q.expand.hops, maxFanout, q.expand.edgeKinds, gateInstant);
+        for (const [eid, hop] of reached) {
+          const prior = distance.get(eid);
+          if (prior === undefined || hop < prior) distance.set(eid, hop);
+        }
+      }
+      const expanded = [...distance.keys()].filter((eid) => viewByEid.has(eid));
+      expanded.sort((a, b) => (distance.get(a)! - distance.get(b)!) || (a < b ? -1 : 1));
+      expanded.forEach((eid, i) => rankGraph.set(eid, i + 1));
+    }
+
+    // The fused candidate set: everything surfaced by the vector half or the graph half.
+    const candidateEids = new Set<EID>([...vectorCandidates, ...rankGraph.keys()]);
+
+    // (4) Salience half (§5.4) — OPT-IN: participates ONLY when a positive salience-composition weight
+    // is supplied, so a pure vector/graph query is never silently salience-perturbed. Each knob maps to
+    // a §5.4 `SalienceModel` weight:
+    //     salience(eid) = recencyWeight·recency(hlcAge)   // w_r · recency, half-life decayed
+    //                   + confidenceWeight·confidence      // w_c · authored confidence prop
+    //                   + salienceWeight·centrality        // w_g · EXACTLY-SPECIFIED integer in-degree
+    //                                                      //       centrality (deterministic §5.3 class)
+    // `hlcAge` is measured against the resolved `asOf` frontier (the max author-HLC wall of the
+    // as-of-selected set) minus the node's own author-HLC wall — never an evaluation wall clock (m7-9)
+    // — and half-life decayed by `rank.halfLifeMs` (default `KIP_SALIENCE_HALF_LIFE_MS`), so the ranking
+    // is asOf-reproducible.
+    //
+    // NAMED GAP — the fourth §5.4 term `w_a·accessFreq` is DEFERRED at M4 (NOT silently dropped): it is
+    // fed by `read`-event facts, but (a) the M4 slice exposes no public API to author `read` facts, and
+    // (b) recall itself MUST NOT emit read facts — doing so would make it observer-effecting (two
+    // identical `recall(asOf=T)` calls could rank differently), violating the §5.4 m-7 reproducible-
+    // recall closure that the m4-retrieval "pure function of the as-of fact-set" test pins. `accessFreq`
+    // therefore has no convergence-safe input surface until a `read`-fact authoring API lands (a named
+    // follow-up milestone); it is scoped out WITH this citation rather than folded in with a fabricated
+    // input. If added later it MUST remain a pure as-of-bounded read over PRE-EXISTING read facts.
+    const salienceWeight = q.rank?.salienceWeight ?? 0;
+    const recencyWeight = q.rank?.recencyWeight ?? 0;
+    const confidenceWeight = q.rank?.confidenceWeight ?? 0;
+    const halfLifeMs = q.rank?.halfLifeMs ?? KIP_SALIENCE_HALF_LIFE_MS;
+    const rankSalience = new Map<EID, number>();
+    if (salienceWeight > 0 || recencyWeight > 0 || confidenceWeight > 0) {
+      const frontierWall = resolvedFrontierWall(facts);
+      const scored: Array<{ eid: EID; score: number }> = [];
+      for (const eid of candidateEids) {
+        const centrality = projection
+          .edgesTouching(eid, "in")
+          .filter((edgeEid) => projection.edgeValidAt(edgeEid, gateInstant)).length;
+        const recency = recencyTerm(frontierWall, authoredWall(facts, eid), halfLifeMs);
+        // Authored `confidence` prop as the `w_c` signal; ABSENT ⇒ 0 (the additive identity — a node
+        // carrying no authored confidence contributes no confidence term, exactly as a node with no
+        // incoming edges has centrality 0; this is the term's zero element, not a behavioral fallback).
+        const confidence = confidenceWeight > 0 ? confidenceValue(viewByEid.get(eid)!, gateInstant) : 0;
+        scored.push({
+          eid,
+          score: recencyWeight * recency + confidenceWeight * confidence + salienceWeight * centrality,
+        });
+      }
+      scored.sort((a, b) => b.score - a.score || (a.eid < b.eid ? -1 : 1));
+      scored.forEach((s, i) => rankSalience.set(s.eid, i + 1));
+    }
+
+    // (5) Reciprocal Rank Fusion: score(d) = Σ_r 1/(rrfK + rank_r(d)) over exactly the ranks present for
+    // d (vector / graph / salience). Salience/recency knobs already shaped the salience RANK above, so
+    // the RRF sum itself is the pure, unweighted reciprocal-rank formula (docs/26 §5.1).
+    const rrfK = q.rank?.rrfK ?? 60;
+    const results: RecallResult[] = [];
+    for (const eid of candidateEids) {
+      const rv = rankVector.get(eid);
+      const rg = rankGraph.get(eid);
+      const rs = rankSalience.get(eid);
+      let score = 0;
+      if (rv !== undefined) score += 1 / (rrfK + rv);
+      if (rg !== undefined) score += 1 / (rrfK + rg);
+      if (rs !== undefined) score += 1 / (rrfK + rs);
+      const view = viewByEid.get(eid)!;
+      results.push({
+        eid,
+        view,
+        score,
+        ranks: { vector: rv, graph: rg, salience: rs },
+        conflicted: recallIsConflicted(view),
+        provenance: view.provenance,
+      });
+    }
+    results.sort((a, b) => b.score - a.score || (a.eid < b.eid ? -1 : 1));
+    // `k` is REQUIRED (docs/26 §5.1 / docs/40): ALWAYS truncate to top-k — recall never returns the
+    // whole fused candidate set (no silent unbounded-result fallback, §5.1 context-dilution intent).
+    return results.slice(0, q.k);
+  }
+
+  /**
+   * The embedding-microagent identity (docs/26 §5.4 / M-7.2): read back from the set-resident
+   * `kip:embedding-model` schema fact when present, else this SDK's built-in embedder identity. Used
+   * to name the `MicroagentInvocation.manifest` recall dispatches to build the corpus vector
+   * projection.
+   *
+   * §5.3 framing — HONEST M4 SCOPE: §5.3 describes an accelerator projection whose CONTENT-ADDRESSED
+   * cache key covers (source hash + embedding-model identity), so a model change is a detectable cache
+   * MISS. M4 does NOT yet build that cache — `computeRecall` RECOMPUTES every corpus vector per call
+   * (via `dispatchEmbedding`), so this identity is currently used only to NAME the embedding manifest,
+   * not to key a persisted cache. The content-addressed incremental embedding index (and the
+   * model-identity cache key that makes staleness detectable) is a named §5.3 follow-up, not shipped
+   * here — this method deliberately does not claim a cache it does not have.
+   */
+  private embeddingModelIdentity(facts: readonly Fact[]): { name: string; version: string } {
+    for (const f of facts) {
+      if (
+        f.target.kind === "schema" &&
+        typeof f.target.ontologyRef === "string" &&
+        f.target.ontologyRef.startsWith("kip:embedding-model/") &&
+        typeof f.value === "string" &&
+        f.value.includes("@")
+      ) {
+        const at = f.value.lastIndexOf("@");
+        return { name: f.value.slice(0, at), version: f.value.slice(at + 1) };
+      }
+    }
+    return { ...KIP_EMBEDDING_MODEL };
+  }
+
+  /**
+   * Dispatch the embedding microagent (the §5.3 accelerator seam) for one corpus entity's content,
+   * reading its vector off `output.embedding`. A dispatch failure or a missing vector is surfaced as a
+   * throw — never a fabricated/zero vector (N5, "fallbacks are evil").
+   */
+  private async dispatchEmbedding(eid: EID, content: string, model: { name: string; version: string }): Promise<number[]> {
+    const invocation: MicroagentInvocation = {
+      id: `embedding:${model.name}@${model.version}:${eid}`,
+      manifest: { name: model.name, version: model.version },
+      input: { eid, content },
+    };
+    const result = await this.dispatchMicroagent(invocation);
+    const output = result.output as { embedding?: unknown } | null | undefined;
+    if (output && Array.isArray(output.embedding) && output.embedding.every((n) => typeof n === "number")) {
+      return output.embedding as number[];
+    }
+    throw new Error(`recall: embedding microagent ${model.name}@${model.version} returned no embedding vector for ${eid}`);
   }
 
   /**
@@ -2913,11 +3217,11 @@ export class KipRepo implements Repo {
           if (filtered) yield filtered;
         }
       },
-      // TODO(M4/T5.5): the hybrid vector+graph+RRF recall pipeline is out of M2 scope — same gap
-      // as `KipRepo.recall` itself (below).
-      recall: async () => {
-        throw new Error("unimplemented: recall (M4/T5.5 hybrid recall pipeline)");
-      },
+      // M4/T5.5: the hybrid recall pipeline over THIS view's already-selected fact set + instant —
+      // routes through the SAME `computeRecall` body `KipRepo.recall` uses (the view already fixed the
+      // `asOf`, so its `q` carries none).
+      recall: async (q: Omit<RecallQuery, "asOf">) =>
+        this.computeRecall(facts, validTime === undefined ? null : canon(validTime), q),
     };
   }
 
@@ -5848,6 +6152,182 @@ function parseRegeneratedCommitBytes(commitBytes: Uint8Array): {
     author: parseTimeFields(authorLine),
     committer: parseTimeFields(committerLine),
   };
+}
+
+// ---------------------------------------------------------------------------
+// 9a-recall. M4/T5.5 helpers: the recall accelerator's pure, `proj`-external math (§5.1/§5.4). None
+// of these touch the deterministic fold — they operate on already-projected views + the admitted set.
+// ---------------------------------------------------------------------------
+
+/** This SDK's built-in embedding-microagent identity (docs/26 §5.4 / M-7.2) — the fallback when the
+ *  set carries no `kip:embedding-model` schema fact naming a specific model. */
+const KIP_EMBEDDING_MODEL = { name: "kip-embedding-model", version: "1.0.0" } as const;
+
+/**
+ * The default §5.4 recency half-life decay constant (ms) when `RecallQuery.rank.halfLifeMs` is
+ * omitted — 30 days. A documented, spec-grounded DEFAULT for the decay constant the §5.4
+ * `SalienceModel.halfLifeMs` names (not a behavioral fallback/silent-pick: it is a single fixed,
+ * overridable numeric parameter). Recency participates only when `rank.recencyWeight > 0`.
+ */
+const KIP_SALIENCE_HALF_LIFE_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Cosine similarity — the SAME formula the exact-kNN ground truth uses (fixtures-m4), so the ANN
+ *  accelerator ranks recall-equivalently to exact cosine kNN (INV-5). Zero-norm ⇒ 0 (never NaN). */
+function recallCosine(a: readonly number[], b: readonly number[]): number {
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    dot += a[i] * b[i];
+    na += a[i] * a[i];
+    nb += b[i] * b[i];
+  }
+  const denom = Math.sqrt(na) * Math.sqrt(nb);
+  return denom === 0 ? 0 : dot / denom;
+}
+
+/** The value of the `PropCell` segment covering `at` (`null` = live "now" ⇒ the most-recent value
+ *  segment), or `undefined` if no value segment covers it — the SAME half-open geometry the
+ *  `asOf({validTime})` lens applies, so recall reads a node's content exactly as a scoped read would. */
+function coveringPropValue(cell: PropCell | undefined, at: bigint | null): PropValue | undefined {
+  if (!cell) return undefined;
+  const valueSegs = cell.segments.filter(
+    (s): s is Extract<CellSegment, { kind: "value" }> => s.kind === "value",
+  );
+  if (valueSegs.length === 0) return undefined;
+  if (at === null) return valueSegs[valueSegs.length - 1].value;
+  for (const seg of valueSegs) {
+    if (canon(seg.validFrom) > at) continue;
+    if (seg.validTo === null || canon(seg.validTo) > at) return seg.value;
+  }
+  return undefined;
+}
+
+/** m-4: a surfaced cell reads CONFLICTED iff it carries an unresolved `conflict` segment (or its
+ *  provenance was chosen from a content-different tie). Non-conflicting corpus cells ⇒ `false`. */
+function recallIsConflicted(view: NodeView): boolean {
+  if (view.provenance.conflicted === true) return true;
+  for (const cell of Object.values(view.props)) {
+    for (const seg of cell.segments) {
+      if (seg.kind === "conflict") return true;
+    }
+  }
+  return false;
+}
+
+/** The resolved `asOf` frontier for recency (§5.4/m7-9): the MAX author-HLC `wall` of the
+ *  as-of-selected fact set — never an evaluation wall clock, so deterministic-class recency stays
+ *  replica-independent. */
+function resolvedFrontierWall(facts: readonly Fact[]): number {
+  let max = 0;
+  for (const f of facts) {
+    if (f.hlc.wall > max) max = f.hlc.wall;
+  }
+  return max;
+}
+
+/** A node's own author-HLC `wall`: the max `wall` among the facts targeting it (its most-recently
+ *  authored fact) — the reference the `hlcAge` recency discount is measured back from. */
+function authoredWall(facts: readonly Fact[], eid: EID): number {
+  let max = 0;
+  for (const f of facts) {
+    const t = f.target;
+    const targetsEid =
+      (t.kind === "node" || t.kind === "node-prop" || t.kind === "edge" || t.kind === "edge-prop") && t.eid === eid;
+    if (targetsEid && f.hlc.wall > max) max = f.hlc.wall;
+  }
+  return max;
+}
+
+/**
+ * The §5.4 recency time-discount: HALF-LIFE exponential decay over `hlcAge = frontierWall −
+ * authoredWall`, `recency = 2^(−age/halfLifeMs) = exp(−ln2·age/halfLifeMs)` (§5.4 "decay applies
+ * time-discount", `halfLifeMs` = the decay constant). A node authored AT the frontier (age 0) scores
+ * 1; a node exactly one half-life older scores 0.5; the discount is strictly monotone-decreasing in
+ * age, so a more-recently-authored node always scores strictly higher (equal ages ⇒ equal recency,
+ * broken downstream by `eid`). `halfLifeMs > 0` is guaranteed by the default; a non-positive override
+ * would make decay ill-defined, so it is floored to the default.
+ */
+function recencyTerm(frontierWall: number, nodeWall: number, halfLifeMs: number): number {
+  const age = Math.max(0, frontierWall - nodeWall);
+  const hl = halfLifeMs > 0 ? halfLifeMs : KIP_SALIENCE_HALF_LIFE_MS;
+  return Math.exp((-Math.LN2 * age) / hl);
+}
+
+/** The node's authored `confidence` prop value at the instant as a finite number (the §5.4 `w_c`
+ *  signal), or 0 when absent / non-finite (the additive zero element — see the salience-half comment). */
+function confidenceValue(view: NodeView, at: bigint | null): number {
+  const v = coveringPropValue(view.props.confidence, at);
+  return typeof v === "number" && Number.isFinite(v) ? v : 0;
+}
+
+/** True iff `view` matches EVERY (prop, value) in `filter` at the instant (docs/26 §5.1
+ *  `filters.props` — candidate restriction, never a silent no-op). A candidate missing a named prop,
+ *  or whose covering value differs, is excluded. */
+function matchesPropFilter(view: NodeView, filter: Record<PropKey, PropValue>, at: bigint | null): boolean {
+  for (const [prop, want] of Object.entries(filter)) {
+    if (!valuesEqual(coveringPropValue(view.props[prop], at), want)) return false;
+  }
+  return true;
+}
+
+/** True iff `eid` is incident (in OR out) to at least one edge that is as-of-valid at the instant and
+ *  whose kind is in `edgeKinds` (docs/26 §5.1 `filters.edgeKinds` — candidate restriction). */
+function incidentToEdgeKind(
+  projection: ReturnType<typeof proj>,
+  eid: EID,
+  edgeKinds: EdgeKind[],
+  at: bigint | null,
+): boolean {
+  for (const edgeEid of projection.edgesTouching(eid, "both")) {
+    if (!projection.edgeValidAt(edgeEid, at)) continue;
+    const edgeView = projection.getEdge(edgeEid);
+    if (edgeView && edgeKinds.includes(edgeView.kind)) return true;
+  }
+  return false;
+}
+
+/**
+ * Bounded, as-of BFS graph expansion (docs/26 §5.1/§5.2) — mirrors `traverse`'s exact fanout/edge
+ * semantics: out-edges only, `maxFanout` charged only for edges that pass the `edgeKinds` + as-of
+ * `edgeValidAt` gates, never crossing an edge invalid at the query instant. Returns each REACHED
+ * neighbor's minimum hop distance (`≥ 1`) — seeds themselves are recorded only if re-reached across
+ * an edge (so a vector-candidate seed that is also an edge-neighbor still earns a graph rank).
+ */
+function bfsExpand(
+  projection: ReturnType<typeof proj>,
+  seeds: readonly EID[],
+  hops: number,
+  maxFanout: number,
+  edgeKinds: EdgeKind[] | undefined,
+  gateInstant: bigint | null,
+): Map<EID, number> {
+  const distance = new Map<EID, number>();
+  const enqueued = new Set<EID>(seeds);
+  let frontier: EID[] = [...seeds];
+  for (let depth = 0; depth < hops; depth += 1) {
+    const next: EID[] = [];
+    for (const eid of frontier) {
+      let fanout = 0;
+      for (const edgeEid of projection.edgesTouching(eid, "out")) {
+        if (fanout >= maxFanout) break;
+        const edgeView = projection.getEdge(edgeEid);
+        if (!edgeView) continue;
+        if (edgeKinds && !edgeKinds.includes(edgeView.kind)) continue;
+        if (!projection.edgeValidAt(edgeEid, gateInstant)) continue;
+        fanout += 1;
+        const other = edgeView.from === eid ? edgeView.to : edgeView.from;
+        if (!projection.nodeLiveVisibleAt(other, gateInstant)) continue;
+        if (!distance.has(other)) distance.set(other, depth + 1);
+        if (!enqueued.has(other)) {
+          enqueued.add(other);
+          next.push(other);
+        }
+      }
+    }
+    frontier = next;
+  }
+  return distance;
 }
 
 // ---------------------------------------------------------------------------

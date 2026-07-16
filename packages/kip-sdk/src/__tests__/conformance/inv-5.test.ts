@@ -120,6 +120,18 @@ describe("INV-5 — projection rebuildability (scoped, PARAMETERIZED — m7-25)"
     expect(results.length).toBeGreaterThan(0);
   });
 
+  it("HONEST ACCELERATOR SCOPE (M4): the vector accelerator is an EXACT brute-force cosine scan, so recall@10 == 1.0 EXACTLY (not merely ≥ 0.95) — INV-5 here degenerates to a vector-ranking-correctness measurement, and the ≥ 0.95 recall-equivalence threshold has headroom only once a genuinely approximate HNSW/IVF index (a named §5.3 follow-up) lands in the loop", async () => {
+    // This test states the exact-scan property explicitly (per the round-1 convergence-safety /
+    // code-quality findings) rather than leaving recall@10 = 1.0 an unremarked by-construction
+    // artifact: M4 ships no approximate ANN, so retrieved top-k IS exact-kNN top-k. The ≥ 0.95
+    // contract above is what a FUTURE approximate index is held to; the exact scan meets it trivially.
+    const { repo } = makeRepo("inv5-exact-scan");
+    track(repo);
+    await ingestFacts(repo, buildCorpusFacts());
+    const avgRecallAt10 = await measureAverageRecallAt10(repo);
+    expect(avgRecallAt10).toBe(1);
+  });
+
   it("DETERMINISTIC half of the boundary: dropping and rebuilding the deterministic projection is byte-identical — getNode over a rebuilt repo equals the original (INV-5 byte-identity side, NOT recall-threshold)", async () => {
     const facts = buildCorpusFacts();
 

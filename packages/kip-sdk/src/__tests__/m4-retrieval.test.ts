@@ -21,7 +21,8 @@
  *   docs/40 RecallResult shape  — eid/view/score/ranks/conflicted/provenance.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import type { KipRepo, RecallResult } from "../index";
+import type { Fact, KipRepo, RecallQuery, RecallResult } from "../index";
+import { makeWellFormedFact } from "./conformance/fixtures";
 import {
   CORPUS,
   QUERIES,
@@ -394,5 +395,191 @@ describe("recall docs/40 — RecallResult carries eid/view/score/ranks/conflicte
     } as SpecRecallQuery);
     expect(eidsOf(results)).not.toContain("f/person");
     for (const r of results) expect(r.view.kind).toBe("document");
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-2 (spec-fidelity): the §5.4 salience terms beyond centrality/recency — the `w_c·confidence`
+// term and the `halfLifeMs` half-life recency decay — measurably change the ranking (the salience
+// implementation is genuinely exercised, not just the vector half).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("recall §5.4 — the w_c·confidence salience term and halfLifeMs decay measurably reweight the ranking", () => {
+  it("rank.confidenceWeight lifts a high-confidence node: c/z (authored confidence 0.9) ranks strictly higher with confidenceWeight:1 than with confidenceWeight:0 (all nodes share one embedding, so the confidence term is the sole differentiator)", async () => {
+    // Three equal-embedding nodes; c/z is alphabetically LAST (so the vector-rank eid tiebreak puts it
+    // last with no salience), and carries the only authored confidence — so any upward movement is
+    // attributable to the confidence term, not the vector half.
+    const entries: CorpusEntry[] = [
+      { eid: "cf/a", kind: "document", content: "c-cf-a", embedding: [...Q_UNIT] },
+      { eid: "cf/b", kind: "document", content: "c-cf-b", embedding: [...Q_UNIT] },
+      { eid: "cf/z", kind: "document", content: "c-cf-z", embedding: [...Q_UNIT] },
+    ];
+    const { repo } = makeRepo("salience-confidence", entries);
+    track(repo);
+    const facts: Fact[] = [];
+    for (const e of entries) {
+      facts.push(nodeExistenceFact(e.eid, e.kind));
+      facts.push(nodePropFact(e.eid, "content", e.content));
+    }
+    facts.push(nodePropFact("cf/z", "confidence", 0.9));
+    await ingestFacts(repo, facts);
+
+    const base: RecallQuery = { embedding: [...Q_UNIT], k: 10 };
+    const without = await repo.recall({ ...base, rank: { confidenceWeight: 0 } });
+    const withConf = await repo.recall({ ...base, rank: { confidenceWeight: 1 } });
+
+    const posWithout = posOf(without, "cf/z");
+    const posWith = posOf(withConf, "cf/z");
+    expect(posWithout).toBeGreaterThanOrEqual(0);
+    expect(posWith).toBeGreaterThanOrEqual(0);
+    expect(posWith).toBeLessThan(posWithout);
+    // The high-confidence node earns the top salience rank when the confidence term is weighted in.
+    expect(withConf.find((r) => r.eid === "cf/z")!.ranks.salience).toBe(1);
+  });
+
+  it("halfLifeMs is a real decay constant: an older node's salience RANK crosses over as halfLifeMs shrinks — with a long half-life its slowly-decayed recency (+confidence) beats a newer rival (salience rank 1); with a short half-life its decayed recency collapses below the rival (salience rank 2)", async () => {
+    // hl/old: authored at wall 0 (age = frontier), carries confidence 0.5.
+    // hl/new: authored at wall 1_000_000 (age 0, the resolved frontier), no confidence.
+    // With recencyWeight=confidenceWeight=1: salience(old)=decay(age)+0.5, salience(new)=1.
+    const entries: CorpusEntry[] = [
+      { eid: "hl/old", kind: "document", content: "c-hl-old", embedding: [...Q_UNIT] },
+      { eid: "hl/new", kind: "document", content: "c-hl-new", embedding: [...Q_UNIT] },
+    ];
+    const { repo } = makeRepo("salience-halflife", entries);
+    track(repo);
+    await ingestFacts(repo, [
+      nodeExistenceFact("hl/old", "document", { wall: 0 }),
+      nodePropFact("hl/old", "content", "c-hl-old", { wall: 0 }),
+      nodePropFact("hl/old", "confidence", 0.5, { wall: 0 }),
+      nodeExistenceFact("hl/new", "document", { wall: 1_000_000 }),
+      nodePropFact("hl/new", "content", "c-hl-new", { wall: 1_000_000 }),
+    ]);
+
+    const base: RecallQuery = { embedding: [...Q_UNIT], k: 10, rank: { recencyWeight: 1, confidenceWeight: 1 } };
+    const longHalfLife = await repo.recall({ ...base, rank: { ...base.rank, halfLifeMs: 1_000_000_000 } });
+    const shortHalfLife = await repo.recall({ ...base, rank: { ...base.rank, halfLifeMs: 100_000 } });
+
+    // Long half-life ⇒ hl/old's recency barely decays, so salience(old) > salience(new) ⇒ rank 1.
+    expect(longHalfLife.find((r) => r.eid === "hl/old")!.ranks.salience).toBe(1);
+    // Short half-life ⇒ hl/old's recency collapses, confidence 0.5 alone < 1, so it falls to rank 2.
+    expect(shortHalfLife.find((r) => r.eid === "hl/old")!.ranks.salience).toBe(2);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-2 (spec-fidelity): filters.props and filters.edgeKinds are HONORED candidate restrictions,
+// not silent no-ops (docs/26 §5.1).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("recall docs/26 §5.1 — filters.props and filters.edgeKinds restrict candidates (never a silent no-op)", () => {
+  it("filters.props restricts candidates to those whose covering prop value matches every named prop: a same-embedding node with lang='fr' is excluded when filters.props is { lang: 'en' }", async () => {
+    const entries: CorpusEntry[] = [
+      { eid: "fp/en", kind: "document", content: "c-fp-en", embedding: [...QUERIES[0].embedding] },
+      { eid: "fp/fr", kind: "document", content: "c-fp-fr", embedding: [...QUERIES[0].embedding] },
+    ];
+    const { repo } = makeRepo("filters-props", entries);
+    track(repo);
+    await ingestFacts(repo, [
+      nodeExistenceFact("fp/en", "document"),
+      nodePropFact("fp/en", "content", "c-fp-en"),
+      nodePropFact("fp/en", "lang", "en"),
+      nodeExistenceFact("fp/fr", "document"),
+      nodePropFact("fp/fr", "content", "c-fp-fr"),
+      nodePropFact("fp/fr", "lang", "fr"),
+    ]);
+    const results = await repo.recall({
+      embedding: [...QUERIES[0].embedding],
+      k: 10,
+      filters: { props: { lang: "en" } },
+    } as SpecRecallQuery);
+    expect(eidsOf(results)).toContain("fp/en");
+    expect(eidsOf(results)).not.toContain("fp/fr");
+  });
+
+  it("filters.edgeKinds restricts candidates to those incident to an as-of-valid edge of a named kind: a node reachable by a 'cites' edge is kept, an unconnected node is excluded when filters.edgeKinds is ['cites']", async () => {
+    const entries: CorpusEntry[] = [
+      { eid: "fe/src", kind: "document", content: "c-fe-src", embedding: [...Q_UNIT] },
+      { eid: "fe/cited", kind: "document", content: "c-fe-cited", embedding: [...Q_UNIT] },
+      { eid: "fe/lonely", kind: "document", content: "c-fe-lonely", embedding: [...Q_UNIT] },
+    ];
+    const { repo } = makeRepo("filters-edgekinds", entries);
+    track(repo);
+    await ingestFacts(repo, [
+      nodeExistenceFact("fe/src", "document"),
+      nodePropFact("fe/src", "content", "c-fe-src"),
+      nodeExistenceFact("fe/cited", "document"),
+      nodePropFact("fe/cited", "content", "c-fe-cited"),
+      nodeExistenceFact("fe/lonely", "document"),
+      nodePropFact("fe/lonely", "content", "c-fe-lonely"),
+      edgeFact("cite/1", "cites", "fe/src", "fe/cited"),
+    ]);
+    const results = await repo.recall({
+      embedding: [...Q_UNIT],
+      k: 10,
+      filters: { edgeKinds: ["cites"] },
+    } as SpecRecallQuery);
+    // fe/cited (incoming cites) and fe/src (outgoing cites) are both incident to a 'cites' edge.
+    expect(eidsOf(results)).toContain("fe/cited");
+    // fe/lonely has no incident edge of any kind ⇒ excluded by the edgeKinds filter.
+    expect(eidsOf(results)).not.toContain("fe/lonely");
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-2 (spec-fidelity): a pure-`text` graph-seed (G0) surfaces the MATCHED node itself, not only
+// its expanded neighbors (docs/26 §5.1 flowchart — G0 seeds feed fusion).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("recall §5.1 — a pure-text query surfaces the text-matched G0 seed node itself (hop-0 graph rank)", () => {
+  it("a text-only query (no embedding, no expand) exact-matching a node's content surfaces THAT node with a graph rank and no vector rank", async () => {
+    const { repo } = makeRepo("text-seed-g0");
+    track(repo);
+    await ingestFacts(repo, buildCorpusFacts());
+    const results = await repo.recall({ text: "alpha vector zero", k: 10 } as SpecRecallQuery);
+    const seed = results.find((r) => r.eid === "doc/00"); // content === "alpha vector zero"
+    expect(seed).toBeDefined();
+    expect(seed!.ranks.graph).toBeDefined(); // the G0 seed earns a hop-0 graph rank
+    expect(seed!.ranks.vector).toBeUndefined(); // kip never embeds the query (N2/N5)
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-2 (code-quality): the conflicted:TRUE branch of RecallResult.conflicted is exercised (m-4).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("recall m-4 — a surfaced result whose cell reads CONFLICTED carries conflicted:true", () => {
+  it("a node whose facts include an orderKey-colliding contradiction surfaces conflicted:true (the true branch, complementing the conflicted:false corpus case)", async () => {
+    const entries: CorpusEntry[] = [
+      { eid: "c/conf", kind: "document", content: "c-conf-content", embedding: [...Q_UNIT] },
+    ];
+    const { repo } = makeRepo("conflicted-true", entries);
+    track(repo);
+    // A clean existence + content prop (so c/conf embeds + surfaces as a vector candidate), PLUS two
+    // `status` prop facts on the SAME cell sharing a forged colliding id (same id/hlc/replicaId/fpr ⇒ a
+    // full orderKey tie) but DIFFERENT values — which proj surfaces as a `kip:conflict` SEGMENT on the
+    // status cell (the same-cell collision shape m1-orderkey-totality-fix.test.ts pins). recallIsConflicted
+    // detects that conflict segment directly, independent of which clean cell wins node provenance.
+    const collide = {
+      id: "cid-c-conf-collide",
+      hlc: { wall: 12_000, counter: 0 },
+      replicaId: "peer-c-conf",
+      provenance: { publicKeyFingerprint: "unregistered-fpr-c-conf", author: "collide-author" },
+      validFrom: 0,
+      validTo: null,
+    } as const;
+    const statusA = makeWellFormedFact({
+      ...collide,
+      target: { kind: "node-prop", eid: "c/conf", prop: "status" },
+      value: "active",
+    });
+    const statusB = makeWellFormedFact({
+      ...collide,
+      target: { kind: "node-prop", eid: "c/conf", prop: "status" },
+      value: "archived",
+    });
+    const existence = nodeExistenceFact("c/conf", "document");
+    const content = nodePropFact("c/conf", "content", "c-conf-content");
+    await ingestFacts(repo, [existence, content, statusA, statusB]);
+
+    const results = await repo.recall({ embedding: [...Q_UNIT], k: 10 });
+    const conf = results.find((r) => r.eid === "c/conf");
+    expect(conf).toBeDefined();
+    expect(conf!.conflicted).toBe(true);
   });
 });
