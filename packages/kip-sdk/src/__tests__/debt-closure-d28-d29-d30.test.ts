@@ -137,16 +137,19 @@ describe("D-28: selfWitnessedExcisionOids survives a KipRepo close()+reopen agai
 });
 
 describe("D-30: SyncReport.tip / MergeReport.tip are typed FactSetDigest, not CID", () => {
-  it("(c) index.ts declares both fields as `FactSetDigest`, and the runtime value is unchanged (still a fact-set digest, not a real git commit id)", async () => {
+  it("(c) types.ts declares both fields as `FactSetDigest`, and the runtime value is unchanged (still a fact-set digest, not a real git commit id)", async () => {
     // Source-level regression guard: a pure type-alias rename has no runtime-observable signature
     // (both `CID` and `FactSetDigest` are, by this task's own "don't change the runtime value"
     // constraint, plain unbranded `string` aliases) — `tsc --noEmit` passing is the authoritative
     // check for this item (verified separately). This grep-based assertion additionally guards
     // against a future regression that reverts the declared type back to `CID` in the source.
-    const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.ts"), "utf8");
-    expect(indexSource).toMatch(/interface MergeReport \{[\s\S]*?tip: FactSetDigest;[\s\S]*?\}/);
-    expect(indexSource).toMatch(/interface SyncReport \{[\s\S]*?tip: FactSetDigest;[\s\S]*?\}/);
-    expect(indexSource).not.toMatch(/tip: CID/);
+    // ADR-B5 "modularize": the `MergeReport`/`SyncReport` declarations were hoisted verbatim out of
+    // `index.ts` into the sibling `types.ts` barrel-source (re-exported unchanged); this guard follows
+    // them there so it keeps enforcing the exact same `tip: FactSetDigest` / never-`CID` invariant.
+    const typesSource = fs.readFileSync(path.join(__dirname, "..", "types.ts"), "utf8");
+    expect(typesSource).toMatch(/interface MergeReport \{[\s\S]*?tip: FactSetDigest;[\s\S]*?\}/);
+    expect(typesSource).toMatch(/interface SyncReport \{[\s\S]*?tip: FactSetDigest;[\s\S]*?\}/);
+    expect(typesSource).not.toMatch(/tip: CID/);
 
     // Runtime sanity check: the actual VALUE sync() produces for `tip` is untouched — still
     // whatever `computeFactSetDigest` computes (a stable, non-empty hex-looking digest string),
