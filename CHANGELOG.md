@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased] - 2026-07-16
+
+### Features
+- feat(kip-sdk): M3-surface (TDD converged min=92, acceptance PASS) (91c96a9d9, Tal Muskal, 5 hours ago)
+- feat(kip-sdk): M2-surface (TDD converged min=90, acceptance PASS) (5531e46fb, Tal Muskal, 9 hours ago)
+
+### Bug Fixes
+- fix(kip-sdk): D-39 — learn() no longer blanks NodeView.kind when existence+props are learned together (9039a38f4, Tal Muskal, 19 hours ago)
+
+### Documentation
+- docs(kip-sdk): fix-all program plan + design specs (kip CLI / MCP / graph-QA) (0032ca50d, Tal Muskal, 12 hours ago)
+
+### Tests
+- test(kip-sdk): frozen M3-surface tests (spec-driven, pre-implementation) (0e8d42a87, Tal Muskal, 7 hours ago)
+- test(kip-sdk): frozen M2-surface tests (spec-driven, pre-implementation) (5ea739750, Tal Muskal, 11 hours ago)
+
 ## [Unreleased] - 2026-07-13
 
 ### Features
