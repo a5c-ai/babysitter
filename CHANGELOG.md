@@ -15,7 +15,6 @@
 ### Tests
 - test(kip-sdk): frozen M3-surface tests (spec-driven, pre-implementation) (0e8d42a87, Tal Muskal, 7 hours ago)
 - test(kip-sdk): frozen M2-surface tests (spec-driven, pre-implementation) (5ea739750, Tal Muskal, 11 hours ago)
-
 ## [Unreleased] - 2026-07-13
 
 ### Features
