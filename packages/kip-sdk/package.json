@@ -7,6 +7,9 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "kip": "dist/cli/kip.js"
+  },
   "exports": {
     ".": {
       "import": {
