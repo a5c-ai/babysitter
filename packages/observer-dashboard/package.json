@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-observer-dashboard",
-  "version": "6.0.0",
+  "version": "6.0.2",
   "description": "Real-time observability dashboard for babysitter orchestration runs",
   "private": false,
   "publishConfig": {
@@ -65,6 +65,7 @@
     "test:perf": "npx playwright test e2e/tests/performance.spec.ts"
   },
   "dependencies": {
+    "@a5c-ai/babysitter-sdk": "6.0.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-scroll-area": "^1.0.5",

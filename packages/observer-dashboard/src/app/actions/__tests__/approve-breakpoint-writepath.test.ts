@@ -1,12 +1,14 @@
 /**
- * UX-R3 §14.5 (AC-63) — write-path-unchanged invariant, asserted statically.
+ * UX-R3 §14.5 (AC-63) — write-path invariant, asserted statically.
  *
- * The observer's approve-breakpoint server action is the ONLY write path. It
- * must write result.json + one EFFECT_RESOLVED journal entry and NOTHING else:
- * it spawns no driver, runs no `run:iterate`, and executes no post-breakpoint
- * command. This test fails if a second (process-spawning) write path is ever
- * introduced into the action. It intentionally does NOT mock fs — it reads the
- * real source of the action from disk.
+ * The observer's approve-breakpoint server action is the ONLY write path, and
+ * it must delegate the write to the babysitter SDK's supported commit path
+ * (`commitEffectResult`) — never hand-roll result.json / journal mutation,
+ * never spawn a driver, never run `run:iterate`, never execute a
+ * post-breakpoint command. This test fails if a hand-written run mutation or
+ * a second (process-spawning) write path is ever reintroduced. It
+ * intentionally does NOT mock fs — it reads the real source of the action
+ * from disk.
  */
 
 import { describe, it, expect } from "vitest";
@@ -17,6 +19,10 @@ const ACTION_SRC = readFileSync(
   path.resolve(__dirname, "../approve-breakpoint.ts"),
   "utf-8"
 );
+
+// Comment-stripped view: prose in comments may mention forbidden names, the
+// CODE must not.
+const CODE_ONLY = ACTION_SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
 
 describe("approve-breakpoint write path (UX-R3 §14.5 AC-63)", () => {
   it("imports no process-spawning module", () => {
@@ -30,18 +36,23 @@ describe("approve-breakpoint write path (UX-R3 §14.5 AC-63)", () => {
   });
 
   it("never runs the resume command as code (only prose in comments may mention run:iterate)", () => {
-    // A doc comment may reference run:iterate in prose, but the CODE (comments
-    // stripped) must never mention it — no string literal, no template, nothing
-    // that could shell out to the resume command.
-    const codeOnly = ACTION_SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-    expect(codeOnly).not.toMatch(/run:iterate/);
+    expect(CODE_ONLY).not.toMatch(/run:iterate/);
   });
 
-  it("writes exactly the two on-disk artifacts (result.json + one EFFECT_RESOLVED) and no REST/API route", () => {
-    // The two sanctioned writes are present...
-    expect(ACTION_SRC).toMatch(/result\.json/);
-    expect(ACTION_SRC).toMatch(/EFFECT_RESOLVED/);
-    // ...and no additional mutating network surface is invoked from the action.
+  it("delegates the run mutation to the SDK's supported commit path", () => {
+    expect(CODE_ONLY).toMatch(/commitEffectResult/);
+    expect(CODE_ONLY).toMatch(/@a5c-ai\/babysitter-sdk/);
+  });
+
+  it("hand-rolls no result/journal write (no fs, no checksum, no seq allocation)", () => {
+    // The SDK owns result.json + EFFECT_RESOLVED emission under the run lock.
+    // The action itself must not touch the filesystem or forge SDK formats.
+    expect(CODE_ONLY).not.toMatch(/\bfrom\s+["'](node:)?fs["']|require\(\s*["'](node:)?fs["']\s*\)/);
+    expect(CODE_ONLY).not.toMatch(/writeFile|mkdir\s*\(|createHash|\bulid\b|monotonicFactory/i);
+    expect(CODE_ONLY).not.toMatch(/result\.json|EFFECT_RESOLVED/);
+  });
+
+  it("invokes no additional mutating network surface", () => {
     expect(ACTION_SRC).not.toMatch(/\bfetch\s*\(|axios|XMLHttpRequest/);
   });
 });

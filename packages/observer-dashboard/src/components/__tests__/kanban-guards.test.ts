@@ -23,8 +23,14 @@ const KANBAN_DIR = path.join(REPO_ROOT, "src", "components", "kanban");
  * Frozen snapshot of the runtime dependency list on the base branch
  * (feat/observer-liveness-r2). AC-28: the board must not add ANY runtime
  * dependency — @tanstack/react-virtual (virtualization) is already present.
+ *
+ * @a5c-ai/babysitter-sdk was added later (PR #1413 review): the
+ * approve-breakpoint server action must go through the SDK's supported
+ * commit path (commitEffectResult) instead of hand-writing run files. It is
+ * NOT a board dependency; the kanban AC-28 freeze still holds for UI deps.
  */
 const FROZEN_RUNTIME_DEPENDENCIES = [
+  "@a5c-ai/babysitter-sdk",
   "@radix-ui/react-accordion",
   "@radix-ui/react-dialog",
   "@radix-ui/react-scroll-area",
