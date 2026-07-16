@@ -47,6 +47,7 @@
  */
 import {
   KipRepo,
+  generateEd25519KeyPair,
   type CellSegment,
   type Fact,
   type HlcStamp,
@@ -207,6 +208,76 @@ export function seederAuthFact(id: string, namespaces: string[] = ["person", "or
 /** A trusted node-existence fact for `eid` on the seeder's per-eid single-fact chain (seq 0). */
 export function seederExistence(eid: string, nodeKind: string, id: string): Fact {
   return existenceFact(eid, nodeKind, { id, fpr: SEEDER_FPR, wall: 10, replicaId: `chain-seeder-${eid}`, seq: 0 });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// GENESIS ROOTS ARE MANIFEST-PINNED, NEVER A FINGERPRINT PREFIX (round-2 finding F1)
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// The `isGenesisRoot` predicate consults EXCLUSIVELY the manifest-pinned root set (constructor
+// `rootKeyFingerprints`) — the forgeable `startsWith("genesis-root")` recognition was DELETED. So every
+// M8 fixture that relies on a genesis root MUST pin that root's fingerprint at construction. `m8Repo`
+// pins the whole known superset of M8 root fingerprints (harmless: a pinned root no KA references
+// confers nothing), so each test constructs its repo through one helper rather than threading roots.
+
+/** The genesis root that anchors the shared per-namespace GOVERNANCE regime (`governNamespaces`). */
+export const GOV_ROOT_FPR = "genesis-root-m8-gov";
+/** The governor key that regime authorizes (its only purpose is to make a namespace TRUST-GOVERNED). */
+export const GOV_FPR = "m8-namespace-governor-key";
+
+/** Every genesis-root fingerprint the M8 fixtures/tests reference, pinned via `rootKeyFingerprints`. */
+export const M8_ROOT_FPRS: readonly string[] = [
+  SEEDER_ROOT_FPR,
+  GOV_ROOT_FPR,
+  "genesis-root-inv6",
+  "genesis-root-inv10",
+  "genesis-root-inv10-ns",
+  "genesis-root-inv10-uc",
+  "genesis-root-inv15",
+  "genesis-root-inv16",
+  "genesis-root-inv16-lone",
+  "genesis-root-inv16-xrep",
+  "genesis-root-inv17",
+  "genesis-root-inv2",
+  "genesis-root-inv18",
+  "genesis-root-inv19",
+  "genesis-root-m8method",
+];
+
+/** A `KipRepo` with the manifest-pinned M8 genesis root set — the standard M8 fixture constructor. */
+export function m8Repo(label: string, extraRoots: string[] = []): KipRepo {
+  return new KipRepo({ replicaId: freshReplicaId(label), rootKeyFingerprints: [...M8_ROOT_FPRS, ...extraRoots] });
+}
+
+/**
+ * A `KipRepo` whose OWN signing identity is a pinned genesis root (docs/50 §8.1: the operator holds a
+ * genesis root key). The seam methods `revokeKey()`/`reAttestFact()` sign with this key, so under the
+ * value-trust overlay their facts are AUTHORIZED-to-revoke (round-2 finding #3: a revocation is honored
+ * only from a genesis-root / delegated-revoke authority) and TRUSTED-to-write (there is no `isRegistered`
+ * self-trust escape hatch — a genesis-root self-write is the authority). Used by the seam-driven suites.
+ */
+export function m8OperatorRepo(label: string, extraRoots: string[] = []): KipRepo {
+  const operator = generateEd25519KeyPair();
+  return new KipRepo({
+    replicaId: freshReplicaId(label),
+    keyPair: operator,
+    rootKeyFingerprints: [operator.fingerprint, ...M8_ROOT_FPRS, ...extraRoots],
+  });
+}
+
+/**
+ * A trusted `KeyAuthorization` that GOVERNS `namespaces` (authorizes the `GOV_FPR` governor key, chained
+ * to the pinned `GOV_ROOT_FPR`). Establishes the per-namespace §8.1 authority regime so an unauthorized
+ * key writing those namespaces is demoted by REAL authorization state (a genesis-root-chained KA in `S`),
+ * NOT by any fingerprint naming. Several frozen INV fixtures (INV-6/10/13/18) originally wrote a bare
+ * namespace with NO governance-establishing fact — byte-indistinguishable from INV-1's trusted unkeyed
+ * fact — so their demotion could only fire on a fingerprint-name gate; ingesting this makes the namespace
+ * genuinely governed and the demotion real & general (recorded in this milestone's `disputes`).
+ */
+export function governNamespaces(id: string, namespaces: string[] = ["person", "org"]): Fact {
+  return keyAuthFact(
+    { keyFpr: GOV_FPR, namespaces, ops: ["write"], authorizedBy: GOV_ROOT_FPR, effectiveFrom: hlc(0) },
+    { id, signerFpr: GOV_ROOT_FPR, wall: 1 },
+  );
 }
 
 /** Deep clone (byte-equivalent re-offer, not object identity — matches fixtures.ts `cloneFact`). */

@@ -24,16 +24,16 @@
  * never type/import errors. NOTE the modeled KeyAuthorization carrier (fixtures-m8.ts #2).
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
 import type { Fact } from "../../index";
 import {
   existenceFact,
   freshFactId,
-  freshReplicaId,
+  governNamespaces,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8Repo,
   propFact,
   valueSegments,
 } from "./fixtures-m8";
@@ -43,7 +43,7 @@ describe("INV-18: admission-control / retention — the flood never affects trus
     const rootFpr = "genesis-root-inv18";
     const goodFpr = "authorized-key-inv18";
     const floodFpr = "fresh-unregistered-flooder-inv18";
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv18-flood") });
+    const repo = m8Repo("inv18-flood"); // pins `genesis-root-inv18`
     const eid = "person/inv18-flood";
 
     // An authorized, legitimately-trusted value on the target cell.
@@ -76,8 +76,11 @@ describe("INV-18: admission-control / retention — the flood never affects trus
   });
 
   it("(a, N-identity) a flood from N DISTINCT fresh unregistered keys likewise projects quarantined — none of the N keys' values becomes a trusted head (per-key caps do not multiply into a trusted-head ceiling)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv18-nkeys") });
+    const repo = m8Repo("inv18-nkeys");
     const eid = "person/inv18-nkeys";
+    // `person` is GOVERNED by a real authority regime, so none of the N fresh unregistered keys is
+    // authorized — each is demoted by set-resident authorization state (per-key caps do not multiply).
+    await ingestAll(repo, [governNamespaces(freshFactId("inv18-nk-gov"))]);
     const flood: Fact[] = [];
     for (let k = 0; k < 8; k += 1) {
       const kf = `fresh-unregistered-inv18-key-${k}`;

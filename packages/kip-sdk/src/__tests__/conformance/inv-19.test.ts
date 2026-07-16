@@ -23,16 +23,14 @@
  * errors.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
-import type { Fact } from "../../index";
 import {
   clone,
   freshFactId,
-  freshReplicaId,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8Repo,
   propFact,
   seederAuthFact,
   seederExistence,
@@ -56,7 +54,7 @@ function preamble(idTag: string): Fact[] {
 
 describe("INV-19: anti-backdating monotone & never-trusted under partial replication", () => {
   it("a same-key backdate delivered while its LOWER chain link is missing projects PENDING (chain gap) — NOT trusted — then flips to DEMOTED once the link arrives, never once trusted", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv19-monotone") });
+    const repo = m8Repo("inv19-monotone");
     // F' = higher honest fact at seq 0 (wall 5000); F = lower backdate at seq 1 (wall 1000).
     const higher = propFact(eid, "high", "hi", { id: "inv19-higher", fpr, wall: 5000, replicaId: chain, seq: 0 });
     const backdate = propFact(eid, "low", "backdate-loser", { id: "inv19-backdate", fpr, wall: 1000, replicaId: chain, seq: 1 });
@@ -77,8 +75,8 @@ describe("INV-19: anti-backdating monotone & never-trusted under partial replica
     const higher = propFact(eid, "high", "hi", { id: "inv19-shared-higher", fpr, wall: 5000, replicaId: chain, seq: 0 });
     const backdate = propFact(eid, "low", "backdate-loser", { id: "inv19-shared-backdate", fpr, wall: 1000, replicaId: chain, seq: 1 });
 
-    const full = new KipRepo({ replicaId: freshReplicaId("inv19-full") });
-    const victim = new KipRepo({ replicaId: freshReplicaId("inv19-victim") });
+    const full = m8Repo("inv19-full");
+    const victim = m8Repo("inv19-victim");
     await ingestAll(full, [...preamble("full"), higher, backdate]); // complete chain
     await ingestAll(victim, [...preamble("victim"), backdate]); // missing the seq-0 link
 

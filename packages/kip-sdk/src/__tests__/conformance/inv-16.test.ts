@@ -26,15 +26,14 @@
  * value today. Failures are assertion mismatches, never type/import errors.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
 import type { Fact } from "../../index";
 import {
   freshFactId,
-  freshReplicaId,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8Repo,
   propFact,
   seederAuthFact,
   seederExistence,
@@ -52,7 +51,7 @@ describe("INV-16: per-key anti-backdating (chain-completeness gated)", () => {
     const rootFpr = "genesis-root-inv16";
     const fpr = "authorized-key-inv16";
     const chain = "chain-inv16";
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv16-c42") });
+    const repo = m8Repo("inv16-c42");
     const eid = "person/inv16-c42";
     // Complete gap-free chain (seq 0,1) for (chain, fpr): F' higher (wall 5000) at seq 0, then F backdate
     // (wall 1000) at seq 1 — F is authored later (higher seq) yet stamped earlier ⇒ anachronistic.
@@ -75,7 +74,7 @@ describe("INV-16: per-key anti-backdating (chain-completeness gated)", () => {
   it("(genuine residual) a lone self-dated FIRST-emission fact from a key that emitted nothing higher projects TRUSTED (the acknowledged acceptable residual, §3.6)", async () => {
     const rootFpr = "genesis-root-inv16-lone";
     const fpr = "authorized-key-inv16-lone";
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv16-lone") });
+    const repo = m8Repo("inv16-lone");
     const eid = "person/inv16-lone";
     // A single seq-0 fact on the key's chain: the key has NO higher same-key fact, so its self-date is trusted.
     const lone = propFact(eid, "only", "self-dated", { id: freshFactId("inv16-lone-fact"), fpr, wall: 42, replicaId: "chain-inv16-lone", seq: 0 });
@@ -101,8 +100,8 @@ describe("INV-16: per-key anti-backdating (chain-completeness gated)", () => {
       propFact(eid, "high", "hi", { id: "inv16-xrep-higher", fpr, wall: 5000, replicaId: chain, seq: 0 }),
       propFact(eid, "low", "backdate-loser", { id: "inv16-xrep-backdate", fpr, wall: 1000, replicaId: chain, seq: 1 }),
     ];
-    const repoA = new KipRepo({ replicaId: freshReplicaId("inv16-xrep-A") });
-    const repoB = new KipRepo({ replicaId: freshReplicaId("inv16-xrep-B") });
+    const repoA = m8Repo("inv16-xrep-A");
+    const repoB = m8Repo("inv16-xrep-B");
     await ingestAll(repoA, universe);
     await ingestAll(repoB, [...universe].reverse()); // different order
     const a = hasTrustedValueHead(await repoA.getNode(eid), "low", "backdate-loser");

@@ -1341,6 +1341,17 @@ const CONTENT_FACT_TYPES: ReadonlySet<FactType> = new Set(["assert", "retract", 
 const KIP_COMMIT_SENTINEL_NAME = "kip-regen";
 const KIP_COMMIT_SENTINEL_EMAIL = "kip-regen@localhost";
 
+/** §8.3 secret-name redaction pattern — a cell/namespace name matching this is treated as a secret
+ * (redacted at read for unprivileged scopes; a restricted namespace is withheld). A courtesy read
+ * filter, NOT a privacy guarantee (docs/50 §8.3, m7-14). */
+const SECRET_NAME_PATTERN = /(?:token|secret|password)/i;
+
+/** The namespace an EID belongs to (`<namespace>/<local>`, docs/21 §3.6). */
+function namespaceOfEid(eid: EID): string {
+  const slash = eid.indexOf("/");
+  return slash < 0 ? eid : eid.slice(0, slash);
+}
+
 // ---------------------------------------------------------------------------
 // 9. `KipRepo` — a minimal concrete Repo, every method a throwing stub.
 // ---------------------------------------------------------------------------
@@ -1432,6 +1443,10 @@ export class KipRepo implements Repo {
    * and reviews/build-final-report.md for the fuller history.
    */
   private readonly selfWitnessedExcisionOids = new Map<string, SelfWitnessedExcisionRecord>();
+
+  /** Genesis-root key fingerprints (from constructor `rootKeys`), the manifest-pinned root-of-trust
+   * set the M8 value-trust overlay chains `KeyAuthorization.authorizedBy` to (docs/50 §8.1). */
+  private readonly rootKeyFingerprints = new Set<string>();
 
   /**
    * Round 2 / D-27 FIX 2 (NFR-F5 incremental-reuse): the LAST `regenerateHeads()` call's own batch
@@ -1623,6 +1638,17 @@ export class KipRepo implements Repo {
      */
     rootKeys?: string[];
     /**
+     * Manifest-pinned genesis ROOT-of-trust FINGERPRINTS (docs/50 §8.1). The value-trust overlay's
+     * `isGenesisRoot` predicate consults EXCLUSIVELY this set (plus the fingerprints derived from
+     * `rootKeys` PEMs above) — a genesis root of trust is established ONLY by the immutable manifest,
+     * NEVER by a fingerprint string prefix (round-2 finding F1: a `startsWith("genesis-root")` root is
+     * forgeable via the live placeholder-signature ingest seam — an attacker placeholder-signs a
+     * `genesis-root-*` KeyAuthorization and forges the root of trust). This option lets a deployment (or
+     * a conformance fixture whose modeled carriers cannot register a real Ed25519 keypair) pin roots by
+     * fingerprint directly, the same set-resident config category as `rootKeys`/`trustedExciseKeys`.
+     */
+    rootKeyFingerprints?: string[];
+    /**
      * The highest schema version `getNode`/`getEdge`/`query`'s `proj()` fold treats as "known"
      * (see `ProjOptions.knownMaxVersion`, proj.ts) — configurable here so it is reachable
      * end-to-end, not just a `proj()`-internal default. Defaults to `proj()`'s own default (`1`).
@@ -1692,10 +1718,14 @@ export class KipRepo implements Repo {
       this.ownKeyPair = options.keyPair;
       this.keyRegistry.register(options.keyPair.fingerprint, options.keyPair.publicKey);
     }
+    // Manifest-pinned root FINGERPRINTS (docs/50 §8.1) — the sole, un-forgeable genesis root set the
+    // value-trust overlay's `isGenesisRoot` consults (with the PEM-derived fingerprints below).
+    for (const fpr of options?.rootKeyFingerprints ?? []) this.rootKeyFingerprints.add(fpr);
     for (const rootKeyPem of options?.rootKeys ?? []) {
       try {
         const { publicKey, fingerprint } = importEd25519PublicKey(rootKeyPem);
         this.keyRegistry.register(fingerprint, publicKey);
+        this.rootKeyFingerprints.add(fingerprint);
       } catch {
         // A malformed genesis `rootKeys` entry is a manifest-authoring error, not an ingest-time
         // concern (m7-6's well-formed() checklist doesn't cover genesis data) — skip it rather
@@ -1946,9 +1976,122 @@ export class KipRepo implements Repo {
     throw new Error("unimplemented: branch");
   }
 
-  // TODO(M0/T9.5): tenant/namespace lens — return a scoped Repo view.
-  withScope(_scope: ScopeRef): Repo {
-    throw new Error("unimplemented: withScope");
+  /**
+   * M8 tenancy (docs/50 §8.2, C-5.3) — an ADVISORY client-side write guard + read filter. Returns a
+   * `Repo` lens over THIS repo that:
+   *   • WRITES: refuses (`ERR_SCOPE_DENIED`) to author an EID whose namespace is outside the scope's
+   *     namespace — the only thing stopping an HONEST client from writing out of scope. It is NOT the
+   *     authoritative cross-replica control (that is the set-pure `proj` demotion, §8.1) — an attacker
+   *     simply does not run it.
+   *   • READS: filters to the scope. A read of a restricted (secret-named) namespace via an
+   *     unprivileged scope returns NOTHING (no partial leak, §8.2 access-policy), and secret-named
+   *     cells (`token|secret|password`) are redacted at read for unprivileged scopes (§8.3).
+   *
+   * Everything else delegates verbatim to this repo (a Proxy binding each method to the real instance,
+   * so private state is untouched). The full (scope, actor, capability) `allow`/`deny`/`grant`
+   * policy-fact engine is modeled minimally here (the read filter is a namespace/name-pattern
+   * heuristic, the §8.3 "courtesy read filter, NOT a privacy guarantee" form) — see this milestone's
+   * `disputes` for the deferred sub-cases.
+   */
+  withScope(scope: ScopeRef): Repo {
+    const parent = this;
+    const target = this as unknown as Repo;
+    const handler: ProxyHandler<Repo> = {
+      get(t, prop, _receiver) {
+        if (prop === "assertFact") {
+          return (input: AssertInput) => {
+            const eid = KipRepo.eidOfTarget(input.target);
+            if (eid !== null && scope.namespace !== undefined && namespaceOfEid(eid) !== scope.namespace) {
+              return Promise.reject(
+                new KipError(
+                  "ERR_SCOPE_DENIED",
+                  `ERR_SCOPE_DENIED: withScope refuses to author EID '${eid}' outside scope namespace '${scope.namespace}'`,
+                  { eid, scope },
+                ),
+              );
+            }
+            return parent.assertFact(input);
+          };
+        }
+        if (prop === "getNode") {
+          return (eid: EID, asOf?: AsOf) => parent.scopedGetNode(eid, scope, asOf);
+        }
+        // ROUND-2 finding F3: the read filter (secret-namespace WITHHOLD + secret-cell REDACTION) must
+        // cover EVERY read seam, not only `getNode` — else a secret-named cell is trivially readable via
+        // `getEdge`/`query`, contradicting the §8.2 no-partial-leak promise. Applied uniformly here.
+        if (prop === "getEdge") {
+          return (eid: EID, asOf?: AsOf) => parent.scopedGetEdge(eid, scope, asOf);
+        }
+        if (prop === "query") {
+          return (spec: TraversalSpec) => parent.scopedQuery(spec, scope);
+        }
+        if (prop === "withScope") {
+          return (s: ScopeRef) => parent.withScope(s);
+        }
+        const value = Reflect.get(t, prop, t);
+        return typeof value === "function" ? (value as (...a: unknown[]) => unknown).bind(t) : value;
+      },
+    };
+    return new Proxy(target, handler);
+  }
+
+  /** The EID a write targets, or `null` for a non-EID target (`key`/`control`). */
+  private static eidOfTarget(t: Target): EID | null {
+    if (t.kind === "node" || t.kind === "node-prop" || t.kind === "edge" || t.kind === "edge-prop") return t.eid;
+    return null;
+  }
+
+  /**
+   * The `withScope` read path (docs/50 §8.2/§8.3): §8.2 access-policy — a read of a restricted
+   * (secret-named) namespace via an unprivileged scope returns NOTHING (no partial leak); §8.3
+   * secret-redaction — secret-named cells (`token|secret|password`) are redacted at read. Advisory,
+   * SDK-read-path only (any principal with raw git fetch access bypasses it — the honest §8.2/§8.3
+   * residual).
+   */
+  private async scopedGetNode(eid: EID, _scope: ScopeRef, asOf?: AsOf): Promise<NodeView | null> {
+    // §8.2 deny: a restricted namespace (name matches the secret pattern) is not readable through an
+    // unprivileged scope — the whole node is withheld rather than partially leaked.
+    if (SECRET_NAME_PATTERN.test(namespaceOfEid(eid))) return null;
+    const node = await this.getNode(eid, asOf);
+    if (!node) return null;
+    return this.redactSecretCells(node);
+  }
+
+  /** The `getEdge` counterpart of `scopedGetNode` (ROUND-2 finding F3): the SAME secret-namespace
+   * withhold + secret-cell redaction, so a secret-named edge cell is not readable through the read
+   * filter that `getNode` already applies. Advisory / SDK-read-path only (raw git fetch bypasses it). */
+  private async scopedGetEdge(eid: EID, _scope: ScopeRef, asOf?: AsOf): Promise<EdgeView | null> {
+    if (SECRET_NAME_PATTERN.test(namespaceOfEid(eid))) return null;
+    const edge = await this.getEdge(eid, asOf);
+    if (!edge) return null;
+    return this.redactSecretCells(edge);
+  }
+
+  /** The `query`/traversal counterpart (ROUND-2 finding F3): withholds every yielded node/edge in a
+   * secret-named namespace and redacts secret-named cells on the rest, so the traversal seam cannot
+   * bypass the read filter. Advisory / SDK-read-path only. */
+  private async *scopedQuery(spec: TraversalSpec, _scope: ScopeRef): AsyncIterable<NodeView | EdgeView> {
+    for await (const item of this.query(spec)) {
+      if (SECRET_NAME_PATTERN.test(namespaceOfEid(item.eid))) continue; // withheld, not partially leaked
+      yield this.redactSecretCells(item);
+    }
+  }
+
+  /** §8.3 secret-redaction: drop the trusted value heads of any secret-named cell (`token|secret|
+   * password`) of a `NodeView`/`EdgeView`, returning a copy iff anything was redacted. Shared by every
+   * scoped read seam so the filter can never silently drift between `getNode`/`getEdge`/`query`. */
+  private redactSecretCells<V extends { props: Record<PropKey, PropCell> }>(view: V): V {
+    let redactedAny = false;
+    const props: Record<PropKey, PropCell> = {};
+    for (const [key, cell] of Object.entries(view.props)) {
+      if (SECRET_NAME_PATTERN.test(key)) {
+        redactedAny = true;
+        props[key] = { segments: cell.segments.map((s) => (s.kind === "value" ? { ...s, value: "[redacted]" } : s)) };
+      } else {
+        props[key] = cell;
+      }
+    }
+    return redactedAny ? { ...view, props } : view;
   }
 
   /**
@@ -2808,7 +2951,28 @@ export class KipRepo implements Repo {
       trustedExciseKeys: this.trustedExciseKeyFingerprints,
       isRegisteredFingerprint: (fingerprint: string) => registered.has(fingerprint),
       selfWitnessedExcisionOids: this.selfWitnessedExcisionOids,
+      // M8 value-trust overlay (docs/50 §8.1): demote admitted-but-unauthorized/revoked/anachronistic
+      // facts inside the set-pure `proj` fold. `isGenesisRoot`/`isRegistered` are the SAME "may differ
+      // by replica" trust config category as `trustedExciseKeys` (see proj.ts `ValueTrustOptions`); the
+      // demotion DECISION is set-pure (author-HLC keyed over `S`).
+      valueTrust: {
+        isGenesisRoot: (fingerprint: string) => this.isGenesisRootFingerprint(fingerprint),
+      },
     };
+  }
+
+  /**
+   * True iff `fingerprint` is a genesis root of trust for the value-trust overlay (docs/50 §8.1). A
+   * `KeyAuthorization` grants authority only if its `authorizedBy` chains to a genesis root at the
+   * key-add's author-HLC. Genesis roots are EXCLUSIVELY the manifest-pinned root set (constructor
+   * `rootKeys` PEMs and/or `rootKeyFingerprints`) — round-2 finding F1: the former
+   * `startsWith("genesis-root")` string-prefix branch was a FORGEABLE root of trust (placeholder-signed
+   * ingest is live, so an attacker could placeholder-sign a `genesis-root-*` KeyAuthorization and mint
+   * trusted writes even under real pinned `rootKeys`). Trust is now anchored ONLY in the manifest's
+   * pinned root set, never in a fingerprint string pattern.
+   */
+  private isGenesisRootFingerprint(fingerprint: string): boolean {
+    return this.rootKeyFingerprints.has(fingerprint);
   }
 
   /**
@@ -4353,14 +4517,62 @@ export class KipRepo implements Repo {
     return marker;
   }
 
-  // TODO(M9/T9.4): revocation modes (ordinary-cutoff / causal-cutoff, ADR M4-1).
+  /**
+   * M8 (docs/50 §8.1, M4-1) — author a signed `revoke-key` fact demoting `keyFpr`'s facts by the
+   * revoker-chosen `mode`, keyed on AUTHOR-HLC (`effectiveFrom`), NEVER the receiver clock. The fact
+   * is an ordinary signed fact (`type:"revoke-key"`, `target:{kind:"key"}`) carrying the normative
+   * `KeyRevocation` field set JSON-encoded in `value` — gated, synced, and folded like every other
+   * fact; `proj`'s set-pure value-trust overlay reads it to demote (`ordinary-cutoff`: author-HLC ≥
+   * `effectiveFrom`; `causal-cutoff`: additionally honest-concurrent non-ancestors). `mode` DEFAULTS
+   * to the safe `ordinary-cutoff` (§8.1). Returns the signed revoke fact's CID.
+   */
   async revokeKey(
-    _keyFpr: string,
-    _effectiveFrom: HlcStamp,
-    _reason: string,
-    _mode?: "ordinary-cutoff" | "causal-cutoff",
+    keyFpr: string,
+    effectiveFrom: HlcStamp,
+    reason: string,
+    mode: "ordinary-cutoff" | "causal-cutoff" = "ordinary-cutoff",
   ): Promise<FactId> {
-    throw new Error("unimplemented: revokeKey");
+    const substrate = this.getSubstrate();
+    const keyPair = this.getOwnKeyPair();
+    const replicaId = this.replicaId;
+    this.localHlc = hlcTick(this.localHlc, replicaId);
+    const chainId = chainIdFor(replicaId, keyPair.fingerprint);
+    const seq = this.chainSequencer.next(chainId);
+    new SeqTipStore(substrate.dir).save(this.chainSequencer.snapshot());
+
+    const value = JSON.stringify({ keyFpr, effectiveFrom, mode, reason, revokedBy: keyPair.fingerprint });
+    const draft: Omit<Fact, "id"> = {
+      v: 1,
+      type: "revoke-key",
+      target: { kind: "key", keyFpr },
+      value,
+      validFrom: 0,
+      validTo: null,
+      hlc: this.localHlc,
+      seq,
+      replicaId,
+      provenance: {
+        author: `revoke-key:${replicaId}`,
+        signature: "",
+        publicKeyFingerprint: keyPair.fingerprint,
+        publicKey: keyPair.publicKey.export({ type: "spki", format: "pem" }) as string,
+        signedFields: [...CANONICAL_ENVELOPE_FIELDS],
+      },
+    };
+    const canonicalPayload = canonicalPayloadString(draft as Fact);
+    const id = gitBlobId(Buffer.from(canonicalPayload, "utf8"), this.hashAlgo);
+    const signature = signPayload(keyPair.privateKey, canonicalPayload);
+    const revokeFact: Fact = { ...draft, id, provenance: { ...draft.provenance, signature } } as Fact;
+
+    const verdict = await this.ingest(revokeFact);
+    if (!verdict.admitted) {
+      throw new KipError(
+        verdict.reason === "signature-invalid" ? "ERR_SIGNATURE_INVALID" : "ERR_MALFORMED_INPUT",
+        `revokeKey: internally-minted revoke-key fact was rejected at ingest (${verdict.reason})`,
+        { keyFpr },
+      );
+    }
+    return id;
   }
 
   /**

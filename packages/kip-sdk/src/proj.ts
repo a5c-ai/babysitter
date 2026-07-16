@@ -960,6 +960,7 @@ function reduceRawCell(
   excisedOids: ReadonlySet<string> = new Set(),
   oidByFact: ReadonlyMap<Fact, string> = new Map(),
   excisions: readonly ExcisionRecord[] = [],
+  demotedFacts: ReadonlySet<Fact> = new Set(),
 ): CellSegment[] {
   // M3/T4.6, fix #2: an excised fact is excluded from BOTH partitions unconditionally, keyed by its
   // OWN REAL content oid (never the caller-declared `f.id` — two admitted facts can legitimately
@@ -969,8 +970,16 @@ function reduceRawCell(
     const oid = oidByFact.get(f);
     return oid !== undefined && excisedOids.has(oid);
   };
-  const asserts = facts.filter((f) => f.type !== "retract" && !isExcised(f));
-  const retracts = facts.filter((f) => f.type === "retract" && !isExcised(f));
+  // M8 value-trust overlay (docs/50 §8.1, docs/22 §7.3): a fact `proj` DEMOTES untrusted/quarantined/
+  // pending (unauthorized key, out-of-namespace, revoked, malformed/forward `causedBy`, or a per-key
+  // anachronistic backdate — all set-pure, author-HLC keyed, computed once per `proj()` in
+  // `computeValueTrust`) never wins a cell as a trusted `value` head, and (as a retract) never removes
+  // a trusted assert's coverage. It is excluded from the winner pick here exactly as an excised fact
+  // is — surfaced as `unknown` (or, when it was the cell's only cover / the node's existence, a
+  // `null` node), never silently trusted, never silently dropped (N5): it stays an admitted member.
+  const isDemoted = (f: Fact): boolean => demotedFacts.has(f);
+  const asserts = facts.filter((f) => f.type !== "retract" && !isExcised(f) && !isDemoted(f));
+  const retracts = facts.filter((f) => f.type === "retract" && !isExcised(f) && !isDemoted(f));
 
   const pointsSet = new Set<bigint>(extraBreakpoints);
   for (const f of facts) {
@@ -1216,11 +1225,12 @@ function reduceCellByRef(
   excisedOids: ReadonlySet<string>,
   oidByFact: ReadonlyMap<Fact, string>,
   excisions: readonly ExcisionRecord[],
+  demotedFacts: ReadonlySet<Fact> = new Set(),
 ): CellSegment[] {
   const ref = resolveCellReducer(cellReducers, cellKey);
   if (ref === "lww-hlc") {
     return gateByExistence(
-      reduceRawCell(facts, existBreakpoints, factsById, collidedIds, knownMaxVersion, excisedOids, oidByFact, excisions),
+      reduceRawCell(facts, existBreakpoints, factsById, collidedIds, knownMaxVersion, excisedOids, oidByFact, excisions, demotedFacts),
       existSegments,
     );
   }
@@ -1236,6 +1246,7 @@ function reduceCellByRef(
   // sweep (see this file's excision doc comment), keyed by real oid (fix #2) — a non-default
   // `CellReducer` must never see an excised fact's content either.
   const nonExcisedFacts = facts.filter((f) => {
+    if (demotedFacts.has(f)) return false;
     const oid = oidByFact.get(f);
     return oid === undefined || !excisedOids.has(oid);
   });
@@ -1415,6 +1426,384 @@ export interface ProjOptions {
    * fingerprint for an absent target (see `collectExcisions`'s CASE 2).
    */
   selfWitnessedExcisionOids?: ReadonlyMap<string, SelfWitnessedExcisionRecord>;
+  /**
+   * M8 value-trust overlay (docs/50 §8.1, docs/22 §3.6/§7.3): when supplied, `proj` DEMOTES (excludes
+   * from trusted `/heads`, surfaces as `unknown`/`null`, never drops from membership) every admitted
+   * fact that fails a set-pure, author-HLC-keyed trust question — unregistered/unauthorized key,
+   * out-of-namespace write, revoked-by-cutoff, malformed/forward `causedBy`, or a per-key
+   * chain-anachronistic backdate. See `computeValueTrust`. Omitted (undefined) ⇒ NO demotion (every
+   * admitted fact projects as before) — the M0–M7 behaviour, so a direct `proj()` call with no trust
+   * context supplied is unchanged.
+   */
+  valueTrust?: ValueTrustOptions;
+}
+
+/**
+ * Per-replica trust CONFIG the value-trust overlay reads in addition to set-resident quantities — in
+ * the SAME documented "may legitimately differ by replica" category as `knownMaxVersion`/`trustedExciseKeys`
+ * (see `collectExcisions`'s doc comment). The trust DECISION itself is set-pure (a function of the
+ * admitted fact bytes keyed on author-HLC); this only pins WHICH fingerprints are genesis roots.
+ */
+export interface ValueTrustOptions {
+  /** True iff `fpr` is a genesis root of trust (docs/50 §8.1 "root of trust"). A `KeyAuthorization`
+   * grants authority only if its `authorizedBy` chains to a genesis root at the key-add's author-HLC.
+   * The genesis root set is EXCLUSIVELY the manifest-pinned `rootKeyFingerprints` (index.ts) — NEVER a
+   * fingerprint string prefix or naming convention (round-2 finding F1: a string-prefix root is
+   * forgeable via the live placeholder-signature ingest seam). */
+  isGenesisRoot: (fpr: string) => boolean;
+}
+
+// ---------------------------------------------------------------------------
+// M8 — the value-trust overlay (docs/50 §8.1, docs/22 §3.4/§3.6/§7.3, docs/24 C2-1).
+//
+// A SET-PURE function of the admitted set `S`, keyed on each fact's own signed AUTHOR-HLC (NEVER
+// rxFrom / receiver clock / replica-local mutable state), so two replicas holding the same `S`
+// compute byte-identical demotions ⇒ byte-identical `/heads`. It answers, for every admitted DATA
+// fact, "does this fact project TRUSTED?" — the SAME shape as the M3 excision-authorization predicate
+// (`registeredFingerprintsInSet` + `collectExcisions`), applied to VALUE cells rather than excision.
+//
+// The §8.1 KeyAuthorization / KeyRevocation carriers are modeled (fixtures-m8 MODELING CONVENTIONS #2)
+// as ordinary signed facts with `target.kind === "key"` carrying the normative field set JSON-encoded
+// in `value` (`type:"assert"` for a KeyAuthorization, `type:"revoke-key"` for a KeyRevocation).
+// ---------------------------------------------------------------------------
+
+interface KeyAuthPayload {
+  keyFpr: string;
+  namespaces: readonly string[];
+  ops: readonly string[];
+  authorizedBy: string;
+  effectiveFrom: bigint;
+}
+interface KeyRevPayload {
+  keyFpr: string;
+  effectiveFrom: bigint;
+  mode: "ordinary-cutoff" | "causal-cutoff";
+}
+
+function isKeyTarget(f: Fact): boolean {
+  return f.target.kind === "key";
+}
+
+/** The namespace an EID belongs to (`<namespace>/<local>`, docs/21 §3.6). `null` for a non-namespaced
+ * target (never a data fact). */
+function namespaceOfFact(f: Fact): string | null {
+  const t = f.target;
+  let eid: string | undefined;
+  if (t.kind === "node" || t.kind === "node-prop") eid = t.eid;
+  else if (t.kind === "edge" || t.kind === "edge-prop") eid = t.eid;
+  if (eid === undefined) return null;
+  const slash = eid.indexOf("/");
+  return slash < 0 ? eid : eid.slice(0, slash);
+}
+
+/** A DATA fact whose trust the overlay governs (a node/edge existence or property assertion). Key-
+ * management (`target.kind === "key"`) and control/excision facts are not value cells. */
+function isDataFact(f: Fact): boolean {
+  const k = f.target.kind;
+  return k === "node" || k === "node-prop" || k === "edge" || k === "edge-prop";
+}
+
+function parseKeyAuth(f: Fact): KeyAuthPayload | null {
+  if (!isKeyTarget(f)) return null;
+  if (f.type === "revoke-key") return null;
+  if (typeof f.value !== "string" || f.value.length === 0) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(f.value);
+  } catch {
+    return null;
+  }
+  if (!isPlainRecord(parsed)) return null;
+  if (typeof parsed.keyFpr !== "string") return null;
+  if (!Array.isArray(parsed.namespaces)) return null;
+  if (!Array.isArray(parsed.ops)) return null;
+  if (typeof parsed.authorizedBy !== "string") return null;
+  if (parsed.effectiveFrom === undefined || parsed.effectiveFrom === null) return null;
+  return {
+    keyFpr: parsed.keyFpr,
+    namespaces: parsed.namespaces.filter((n): n is string => typeof n === "string"),
+    ops: parsed.ops.filter((o): o is string => typeof o === "string"),
+    authorizedBy: parsed.authorizedBy,
+    effectiveFrom: canon(parsed.effectiveFrom as HlcOrTime),
+  };
+}
+
+function parseKeyRev(f: Fact): KeyRevPayload | null {
+  if (f.type !== "revoke-key") return null;
+  if (!isKeyTarget(f)) return null;
+  if (typeof f.value !== "string" || f.value.length === 0) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(f.value);
+  } catch {
+    return null;
+  }
+  if (!isPlainRecord(parsed)) return null;
+  if (typeof parsed.keyFpr !== "string") return null;
+  if (parsed.effectiveFrom === undefined || parsed.effectiveFrom === null) return null;
+  const mode = parsed.mode === "causal-cutoff" ? "causal-cutoff" : "ordinary-cutoff";
+  return { keyFpr: parsed.keyFpr, effectiveFrom: canon(parsed.effectiveFrom as HlcOrTime), mode };
+}
+
+/**
+ * The set-pure value-trust fold. Returns the set of admitted facts `proj` must DEMOTE (exclude from
+ * trusted `/heads`).
+ *
+ * TRUST IS CONFERRED ONLY BY AUTHORIZATION FACTS IN `S` + THE MANIFEST-PINNED ROOT SET — never by any
+ * fingerprint naming pattern (round-2 findings: `isModeledManagedKey`/`genesis-root`-prefix DELETED).
+ * The model (docs/50 §8.1):
+ *   • A namespace `N` is TRUST-GOVERNED iff `S` holds a genesis-root-chained `KeyAuthorization` scoping
+ *     `N`. In a governed namespace, EVERY data fact must PROVE authority (a covering genesis-root-
+ *     chained `KeyAuthorization`, or a genesis-root self-write) — a signer lacking one is demoted
+ *     regardless of its fingerprint shape or whether it produced a real signature. This generalizes to
+ *     ANY real (SHA-256) fingerprint: admission ≠ trust.
+ *   • A namespace with NO authority regime is UN-GOVERNED and stays legacy-trusted (the pre-M8 default
+ *     that keeps M0–M7 green and satisfies INV-1: an unkeyed fact in an un-governed namespace projects
+ *     a value head). The demotion "activates" per-namespace once a real genesis-root-chained authority
+ *     fact for that namespace exists in `S` — a set-resident distinguisher real in production, not a
+ *     name (see this milestone's `disputes` for the frozen-fixture governance corrections).
+ * See the per-rule comments below.
+ */
+export function computeValueTrust(
+  facts: readonly Fact[],
+  opts: ValueTrustOptions,
+  factsById: ReadonlyMap<FactId, Fact>,
+  collidedIds: ReadonlySet<FactId>,
+): ReadonlySet<Fact> {
+  const { isGenesisRoot } = opts;
+
+  // ---- 1. Trusted KeyAuthorizations (author-HLC-keyed genesis-root chaining, §8.1). ---------------
+  // A KeyAuthorization is trusted iff the key it names as `authorizedBy` (a) SIGNED it (the delegating
+  // key actually authored the delegation) and (b) chains to a genesis root at this key-add's own
+  // author-HLC. Genesis roots are authorizers by definition; a key becomes a further authorizer only
+  // via a trusted KeyAuthorization that granted it `delegate`. A monotone fixpoint over `S`.
+  const kaFacts = facts.filter((f) => parseKeyAuth(f) !== null);
+  const trustedKA = new Set<Fact>();
+  const delegators = new Set<string>(); // non-root keys that hold a trusted `delegate` authorization
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const f of kaFacts) {
+      if (trustedKA.has(f)) continue;
+      const ka = parseKeyAuth(f) as KeyAuthPayload;
+      const signer = f.provenance.publicKeyFingerprint;
+      // The delegating key must itself have signed the authorization it claims to grant.
+      if (signer !== ka.authorizedBy) continue;
+      const authorizerTrusted = isGenesisRoot(ka.authorizedBy) || delegators.has(ka.authorizedBy);
+      if (!authorizerTrusted) continue;
+      trustedKA.add(f);
+      if (ka.ops.includes("delegate") && !delegators.has(ka.keyFpr)) {
+        delegators.add(ka.keyFpr);
+        grew = true;
+      }
+    }
+  }
+
+  // Authorization intervals per key: namespace(s) + ops + effectiveFrom, from trusted KAs only.
+  const authsByKey = new Map<string, KeyAuthPayload[]>();
+  for (const f of trustedKA) {
+    const ka = parseKeyAuth(f) as KeyAuthPayload;
+    const arr = authsByKey.get(ka.keyFpr);
+    if (arr) arr.push(ka);
+    else authsByKey.set(ka.keyFpr, [ka]);
+  }
+  // The set of namespaces that are TRUST-GOVERNED (some trusted KA scopes them). A key writing a
+  // GOVERNED namespace without covering authority is demoted; an UNGOVERNED namespace with no
+  // authority context at all is legacy-trusted (the pre-M8 default that keeps M0–M7 green).
+  const governedNamespaces = new Set<string>();
+  for (const arr of authsByKey.values()) for (const ka of arr) for (const ns of ka.namespaces) governedNamespaces.add(ns);
+
+  // Every fingerprint the set names as the SUBJECT (`keyFpr`) of ANY KeyAuthorization — trusted OR
+  // not (e.g. a forger's self-signed KA, INV-10) — so its facts enter the trust overlay (an untrusted
+  // KA still marks the key as PKI-managed: it must prove authority, not default-trust).
+  const keysNamedByKeyMgmt = new Set<string>();
+  for (const f of kaFacts) {
+    const ka = parseKeyAuth(f) as KeyAuthPayload;
+    keysNamedByKeyMgmt.add(ka.keyFpr);
+  }
+
+  // ---- 2. Revocations (honored ONLY from an AUTHORIZED revoker; demote per mode). -----------------
+  // §8.1: a `revoke-key` is effective iff its author holds `revoke` scope chaining to the genesis root
+  // (`KeyRevocation.revokedBy` "must hold revoke scope (chains to genesis root)"). A revocation whose
+  // signer is NOT a genesis root and holds NO trusted `revoke`-scoped `KeyAuthorization` covering the
+  // target key's namespace(s) is UNAUTHORIZED — it is itself demoted-untrusted (INV-10) and confers no
+  // demotion, closing the censorship/DoS vector where any signature-valid `revoke-key` could demote a
+  // victim key's trusted `/heads`. Set-pure: reads only trusted-KA scopes + author-HLCs in `S`.
+  //
+  // The revoker's authority is checked at the REVOKE fact's own author-HLC. `revoke` scope must cover a
+  // namespace the target key is (or was) authorized to write; when the target has no trusted KA at all
+  // (an already-unauthorized key), any genesis-root-chained `revoke` scope suffices. A revoke by a
+  // genesis root is always authorized (the root of every revocation chain).
+  function revokerAuthorized(revokeFact: Fact, targetKeyFpr: string, revokeHlc: bigint): boolean {
+    const revoker = revokeFact.provenance.publicKeyFingerprint;
+    if (isGenesisRoot(revoker)) return true;
+    const revokeScopes = (authsByKey.get(revoker) ?? []).filter(
+      (a) => a.ops.includes("revoke") && a.effectiveFrom <= revokeHlc,
+    );
+    if (revokeScopes.length === 0) return false;
+    const targetNamespaces = new Set<string>();
+    for (const a of authsByKey.get(targetKeyFpr) ?? []) for (const ns of a.namespaces) targetNamespaces.add(ns);
+    if (targetNamespaces.size === 0) return true; // target has no known authorized scope ⇒ revoke scope suffices
+    return revokeScopes.some((a) => a.namespaces.some((ns) => targetNamespaces.has(ns)));
+  }
+
+  const revsByKey = new Map<string, Array<{ effFrom: bigint; mode: "ordinary-cutoff" | "causal-cutoff"; revokeFact: Fact }>>();
+  for (const f of facts) {
+    const rev = parseKeyRev(f);
+    if (!rev) continue;
+    if (!revokerAuthorized(f, rev.keyFpr, canon(f.hlc))) continue; // unauthorized revoker ⇒ ignored (demoted)
+    const arr = revsByKey.get(rev.keyFpr) ?? [];
+    arr.push({ effFrom: rev.effectiveFrom, mode: rev.mode, revokeFact: f });
+    revsByKey.set(rev.keyFpr, arr);
+  }
+
+  // ---- 3. Per-key chains (for the anti-backdating chain-completeness gate + monotonicity). --------
+  // Keyed by `(Fact.replicaId, signer)` — the §4b.1 per-`(replicaId,key)` contiguity chain. Each chain
+  // tracks which `seq`s are present (completeness) and the facts on it (backdate detection).
+  const chainSeqs = new Map<string, Set<number>>();
+  const factsByKey = new Map<string, Fact[]>();
+  // Chain-completeness (docs/24) counts the FULL per-(replicaId,key) seq chain — ALL fact types, incl.
+  // KeyAuthorization/revoke-key the key authored on its OWN chain (round-2 finding F2) — never data-only,
+  // which would leave a phantom gap and demote a delegate's honest data fact `pending` forever.
+  for (const f of facts) {
+    const signer = f.provenance.publicKeyFingerprint;
+    const chainKey = `${f.replicaId} ${signer}`;
+    const seqs = chainSeqs.get(chainKey) ?? new Set<number>();
+    seqs.add(f.seq);
+    chainSeqs.set(chainKey, seqs);
+    const byKey = factsByKey.get(signer) ?? [];
+    byKey.push(f);
+    factsByKey.set(signer, byKey);
+  }
+
+  const demoted = new Set<Fact>();
+
+  for (const f of facts) {
+    if (!isDataFact(f)) continue;
+    const signer = f.provenance.publicKeyFingerprint;
+    const ns = namespaceOfFact(f);
+    const h = canon(f.hlc);
+
+    // ---- Governance gate -- WHICH facts the value-trust overlay evaluates at all. -----------------
+    // A fact is UNDER TRUST GOVERNANCE (the overlay applies) iff (a) its namespace is governed by a
+    // trusted, genesis-root-chained KeyAuthorization, OR (b) its signing key is itself named as the
+    // SUBJECT of a KeyAuthorization (trusted or not) -- a key someone tried to authorize is in the PKI
+    // regime and must PROVE authority (INV-10 forged-authorizer / out-of-namespace). Both disjuncts are
+    // purely SET-DERIVED from authorization facts in `S` -- there is NO fingerprint-naming gate. A fact
+    // in a namespace with no authority regime AND whose key is no KA subject is a LEGACY fact (no PKI in
+    // play) and stays trusted (the pre-M8 default that keeps the M0-M7 suite green and satisfies INV-1;
+    // the M8 fixtures establish REAL governance so their unauthorized keys demote -- see `disputes`).
+    const governed = (ns !== null && governedNamespaces.has(ns)) || keysNamedByKeyMgmt.has(signer);
+    if (!governed) continue; // un-governed legacy fact -- trusted, overlay does not apply
+
+    // ---- Rule A: key authorization (author-HLC keyed, §8.1 / docs/22 §7.3). -----------------------
+    // In a governed namespace TRUST FLOWS ONLY FROM AUTHORIZATION FACTS: a data fact is trusted iff a
+    // trusted (genesis-root-chained) KeyAuthorization for its key covers this namespace with `write` at
+    // an effectiveFrom <= the fact's author-HLC, OR the signer is itself a genesis root writing its own
+    // tenant (the root of every authority chain). Anything else -- an unchained key (INV-10), an out-of-
+    // namespace write (INV-10), or a wholly-unregistered key (INV-6/13/18) -- is DEMOTED regardless of
+    // its fingerprint shape or whether it produced a real Ed25519 signature. There is NO `isRegistered`
+    // self-trust escape hatch: a freshly-minted real key CANNOT self-authorize into a governed namespace
+    // (round-2 finding: admission != trust, and the demotion must generalize to any real fingerprint).
+    const auths = authsByKey.get(signer) ?? [];
+    const kaAuthorized = auths.some(
+      (a) => a.effectiveFrom <= h && a.ops.includes("write") && ns !== null && a.namespaces.includes(ns),
+    );
+    const authorized = kaAuthorized || isGenesisRoot(signer);
+    if (!authorized) {
+      demoted.add(f);
+      continue;
+    }
+
+    // ---- Rule B: revocation cutoff (author-HLC keyed, M4-1). --------------------------------------
+    const revs = revsByKey.get(signer) ?? [];
+    let revoked = false;
+    for (const r of revs) {
+      if (h >= r.effFrom) {
+        revoked = true; // ordinary AND causal both demote author-HLC ≥ effectiveFrom
+        break;
+      }
+      if (r.mode === "causal-cutoff") {
+        // causal-cutoff ALSO demotes pre-effectiveFrom facts that are NOT causal ancestors of the
+        // revoke fact (honest-concurrent casualties, surfaced-not-dropped, INV-17). A fact IS an
+        // ancestor of the revoke iff the revoke's causedBy closure reaches it. EXCEPTION: a node/edge
+        // EXISTENCE fact below the cutoff is preserved — revoking a key must not un-exist (orphan) an
+        // entity the key legitimately created before `effectiveFrom` (§3.6/M2-3 "the namespace is
+        // never orphaned; pre-cutoff facts remain trusted"); the causal tightening bites CONTENT
+        // (property/value) facts, which is where honest-concurrent VALUE casualties live.
+        const isExistence = f.target.kind === "node" || f.target.kind === "edge";
+        if (!isExistence && !causedByDominates(r.revokeFact, f.id, factsById, collidedIds)) {
+          revoked = true;
+          break;
+        }
+      }
+    }
+    if (revoked) {
+      demoted.add(f);
+      continue;
+    }
+
+    // ---- Rule C: causedBy well-formedness (set-pure, M4-2 / INV-15). ------------------------------
+    if (f.causedBy && f.causedBy.length > 0) {
+      let malformed = false;
+      for (const parentId of f.causedBy) {
+        const parent = factsById.get(parentId);
+        if (!parent) {
+          malformed = true; // dangling (parent not yet in S) ⇒ pending, never trusted
+          break;
+        }
+        if (canon(parent.hlc) > h) {
+          malformed = true; // forward edge (parent author-HLC > child) ⇒ untrusted-malformed
+          break;
+        }
+      }
+      // A cycle through `causedBy` (f reachable from its own parents) is untrusted-malformed.
+      if (!malformed && causedByDominates(f, f.id, factsById, collidedIds)) malformed = true;
+      if (malformed) {
+        demoted.add(f);
+        continue;
+      }
+    }
+
+    // ---- Rule D: per-key anti-backdating, chain-completeness gated (C4-2 + C5-1 / INV-16/19). ------
+    // (i) Chain-completeness gate: F projects trusted only over a complete, gap-free `seq` chain of
+    //     its `(replicaId, key)` up to F's own seq. A missing lower `seq` ⇒ pending (not trusted).
+    const chainKey = `${f.replicaId} ${signer}`;
+    const seqs = chainSeqs.get(chainKey) as Set<number>;
+    let chainComplete = true;
+    for (let s = 0; s < f.seq; s += 1) {
+      if (!seqs.has(s)) {
+        chainComplete = false;
+        break;
+      }
+    }
+    if (!chainComplete) {
+      demoted.add(f); // pending — chain gap
+      continue;
+    }
+    // (ii) Monotonicity demotion (involuntary footprint): F is untrusted-anachronistic iff the same
+    //     key emitted, EARLIER in the chain (a strictly lower seq on the same chain), a fact stamped
+    //     at a HIGHER author-HLC than F — F was authored later yet back-stamps below its own key's
+    //     prior emission — and F is not a causal ancestor of that higher fact. Uses the key's
+    //     INVOLUNTARY seq footprint, so it is not evadable by omitting `causedBy`.
+    let anachronistic = false;
+    const sameKey = factsByKey.get(signer) ?? [];
+    for (const other of sameKey) {
+      if (other === f) continue;
+      if (other.replicaId !== f.replicaId) continue; // per-(replicaId,key) chain
+      if (other.seq >= f.seq) continue; // must be EARLIER-authored in the chain (lower seq)
+      if (canon(other.hlc) <= h) continue; // must be stamped strictly HIGHER (F back-dates below it)
+      if (causedByDominates(other, f.id, factsById, collidedIds)) continue; // F is an ancestor of it
+      anachronistic = true;
+      break;
+    }
+    if (anachronistic) {
+      demoted.add(f);
+      continue;
+    }
+  }
+
+  return demoted;
 }
 
 export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult {
@@ -1436,6 +1825,12 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     trustedExciseKeys,
     selfWitnessedExcisionOids,
   );
+  // M8 value-trust overlay (set-pure, author-HLC keyed): the set of admitted facts `proj` demotes
+  // (never a trusted `/heads` cover, never a member drop). Empty when no `valueTrust` context is
+  // supplied (a direct `proj()` unit-test call, or the pre-M8 read path) ⇒ no demotion.
+  const demotedFacts: ReadonlySet<Fact> = options?.valueTrust
+    ? computeValueTrust(facts, options.valueTrust, factsById, collidedIds)
+    : new Set<Fact>();
 
   const byCell = new Map<string, Fact[]>();
   for (const f of facts) {
@@ -1480,6 +1875,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
         excisedOids,
         oidByFact,
         excisionsByCell.get(`edge-exist:${eid}`) ?? [],
+        demotedFacts,
       ),
     );
     edgeExistSegmentsCache.set(eid, segments);
@@ -1504,7 +1900,10 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     // asserted existence to gate props against either, and previously fell through to
     // `existFacts[0]` (a retract, whose `target.nodeKind` is typically absent) as `kindWinner`,
     // fabricating a `kind: ""` ghost view instead of returning `null`.
-    if (existFacts.filter((f) => f.type !== "retract").length === 0) {
+    // A node whose ONLY existence asserts are DEMOTED (untrusted/pending, M8) has no TRUSTED existence
+    // to gate props against — it projects `null`, exactly like a node whose only existence fact is a
+    // `retract` (fixtures-m8 MODELING CONVENTIONS #3: "a demoted existence fact ⇒ getNode returns null").
+    if (existFacts.filter((f) => f.type !== "retract" && !demotedFacts.has(f)).length === 0) {
       nodeViewCache.set(eid, null);
       return null;
     }
@@ -1518,6 +1917,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
         excisedOids,
         oidByFact,
         excisionsByCell.get(`node-exist:${eid}`) ?? [],
+        demotedFacts,
       ),
     );
     const existBreakpoints = collectBreakpoints(existSegments);
@@ -1560,13 +1960,14 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
         excisedOids,
         oidByFact,
         excisionsByCell.get(propCellKey) ?? [],
+        demotedFacts,
       );
       props[prop] = { segments: gated };
       const latestId = latestAssertedFactId(gated);
       if (latestId) latestCandidates.push(factsById.get(latestId) as Fact);
     }
 
-    const assertOnlyExist = existFacts.filter((f) => f.type !== "retract");
+    const assertOnlyExist = existFacts.filter((f) => f.type !== "retract" && !demotedFacts.has(f));
     // Resolves the SAME way `reduceRawCell` resolves a covering-fact tie — via `maxByOrderKey`'s
     // whole tied group — rather than picking whichever fact happens to be first in
     // `assertOnlyExist`'s (ingest-order-derived) array. When the tied group disagrees on `nodeKind`
@@ -1726,9 +2127,9 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
   function getEdge(eid: EID): EdgeView | null {
     if (edgeViewCache.has(eid)) return edgeViewCache.get(eid) ?? null;
     const existFacts = byCell.get(`edge-exist:${eid}`) ?? [];
-    // See `getNode`'s identical fix above: exclude retract-only existence-cells from the
-    // "no ghost edges" gate.
-    if (existFacts.filter((f) => f.type !== "retract").length === 0) {
+    // See `getNode`'s identical fix above: exclude retract-only AND M8-demoted existence facts from
+    // the "no ghost edges" gate (a demoted-only edge existence ⇒ null).
+    if (existFacts.filter((f) => f.type !== "retract" && !demotedFacts.has(f)).length === 0) {
       edgeViewCache.set(eid, null);
       return null;
     }
@@ -1769,13 +2170,14 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
         excisedOids,
         oidByFact,
         excisionsByCell.get(propCellKey) ?? [],
+        demotedFacts,
       );
       props[prop] = { segments: gated };
       const latestId = latestAssertedFactId(gated);
       if (latestId) latestCandidates.push(factsById.get(latestId) as Fact);
     }
 
-    const assertOnlyExist = existFacts.filter((f) => f.type !== "retract");
+    const assertOnlyExist = existFacts.filter((f) => f.type !== "retract" && !demotedFacts.has(f));
     // Edge variant of `getNode`'s identical fix above: resolves via `maxByOrderKey`'s whole tied
     // group. An edge's "kind" also includes topology (`from`/`to`) and its own existence `value`
     // (`isTruthyExistence`) — a tied group that disagrees on `edgeKind`, `from`/`to`, OR whether the
@@ -1852,7 +2254,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
    * prop/edge paths. */
   function nodeLiveVisibleAt(eid: EID, at: bigint | null): boolean {
     const existFacts = byCell.get(`node-exist:${eid}`) ?? [];
-    if (existFacts.filter((f) => f.type !== "retract").length === 0) return false;
+    if (existFacts.filter((f) => f.type !== "retract" && !demotedFacts.has(f)).length === 0) return false;
     const existSegments = mergeAdjacent(
       reduceRawCell(
         existFacts,
@@ -1863,6 +2265,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
         excisedOids,
         oidByFact,
         excisionsByCell.get(`node-exist:${eid}`) ?? [],
+        demotedFacts,
       ),
     );
     // Positive existence test — the SAME truthy-value predicate edges (`existsAtInstant`) and props

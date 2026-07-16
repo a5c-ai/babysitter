@@ -20,15 +20,14 @@
  * mismatches, never type/import errors.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
 import type { Fact } from "../../index";
 import {
   freshFactId,
-  freshReplicaId,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8Repo,
   propFact,
   seederAuthFact,
   seederExistence,
@@ -51,7 +50,7 @@ function preamble(): Fact[] {
 
 describe("INV-15: causedBy well-formedness (set-pure demotion)", () => {
   it("CONTROL: a well-formed (backward) causedBy edge from the authorized key projects TRUSTED", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv15-control") });
+    const repo = m8Repo("inv15-control");
     const parentId = "inv15-control-parent";
     const parent = propFact(eid, "parent", "p", { id: parentId, fpr, wall: 1000, replicaId: "chain-inv15-ctl", seq: 0 });
     // child author-HLC (2000) > parent author-HLC (1000): a valid backward edge.
@@ -62,7 +61,7 @@ describe("INV-15: causedBy well-formedness (set-pure demotion)", () => {
   });
 
   it("(a) FORWARD causedBy edge (parent author-HLC > child) is demoted untrusted-malformed — NOT a trusted value head", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv15-forward") });
+    const repo = m8Repo("inv15-forward");
     const parentId = "inv15-forward-parent";
     // Chain order (seq): child at seq 0 (wall 2000), parent at seq 1 (wall 5000) — child's own chain is
     // author-HLC-monotone (no anti-backdating demotion), isolating the FORWARD causedBy as the sole defect.
@@ -74,7 +73,7 @@ describe("INV-15: causedBy well-formedness (set-pure demotion)", () => {
   });
 
   it("(b) a causedBy CYCLE is demoted-malformed — neither fact in the cycle projects a trusted value head", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv15-cycle") });
+    const repo = m8Repo("inv15-cycle");
     const aId = "inv15-cycle-a";
     const bId = "inv15-cycle-b";
     // a → b and b → a: a cycle (each names the other as a causedBy parent).
@@ -88,7 +87,7 @@ describe("INV-15: causedBy well-formedness (set-pure demotion)", () => {
   });
 
   it("(c) a DANGLING causedBy (parent not yet in S) leaves the fact PENDING — not a trusted value head — until the parent arrives", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv15-dangling") });
+    const repo = m8Repo("inv15-dangling");
     // The named parent CID is never delivered: the child must project pending, not trusted.
     const child = propFact(eid, "child", "dangling", { id: freshFactId("inv15-dangling-child"), fpr, wall: 2000, replicaId: "chain-inv15-dan", seq: 0, causedBy: ["inv15-never-delivered-parent"] });
     await ingestAll(repo, [...preamble(), child]);

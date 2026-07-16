@@ -22,22 +22,25 @@
  * never type/import errors.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
 import {
   clone,
   existenceFact,
   freshFactId,
-  freshReplicaId,
+  governNamespaces,
   hasTrustedValueHead,
   ingestAll,
+  m8Repo,
   propFact,
 } from "./fixtures-m8";
 
 describe("INV-13 (full): signature-valid ⇒ admitted-on-receipt, even for facts proj will demote", () => {
   it("a fact whose signing key's registration has NOT arrived is admitted on receipt AND still demoted in proj (admitted ≠ trusted; membership preserved for the demoted fact)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv13-demoted-member") });
+    const repo = m8Repo("inv13-demoted-member");
     const eid = "person/inv13-demoted-member";
     const fpr = "unregistered-key-inv13";
+    // `person` is a GOVERNED namespace (a genesis-root-chained authority regime), so the unregistered key
+    // below is genuinely unauthorized — its demotion is real authorization state, not a fingerprint name.
+    await ingestAll(repo, [governNamespaces(freshFactId("inv13-dm-gov"))]);
     const ex = existenceFact(eid, "person", { id: freshFactId("inv13-dm-ex"), fpr, wall: 1000 });
     const prop = propFact(eid, "status", "active", { id: freshFactId("inv13-dm-status"), fpr, wall: 1001 });
     // Membership: admitted on receipt (this half already conformant).
@@ -51,11 +54,12 @@ describe("INV-13 (full): signature-valid ⇒ admitted-on-receipt, even for facts
   });
 
   it("data-before-key-registration ordering under adversarial clock skew: a wildly future-skewed AND a stale author-HLC fact are BOTH admitted (membership never dropped), and BOTH demoted (no covering authorization yet)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv13-skew") });
+    const repo = m8Repo("inv13-skew");
     const fpr = "unregistered-key-inv13-skew";
     const futureEid = "person/inv13-future";
     const staleEid = "person/inv13-stale";
     await ingestAll(repo, [
+      governNamespaces(freshFactId("inv13-skew-gov")),
       existenceFact(futureEid, "person", { id: freshFactId("inv13-fut-ex"), fpr, wall: Number.MAX_SAFE_INTEGER - 1 }),
       propFact(futureEid, "v", "future", { id: freshFactId("inv13-fut-v"), fpr, wall: Number.MAX_SAFE_INTEGER - 1, counter: 1 }),
       existenceFact(staleEid, "person", { id: freshFactId("inv13-stale-ex"), fpr, wall: 0 }),
@@ -70,11 +74,12 @@ describe("INV-13 (full): signature-valid ⇒ admitted-on-receipt, even for facts
   it("cross-replica membership presence: two replicas that both receive the same signature-valid (demotable) fact both admit it — equal received ⇒ equal admitted (the SEC antecedent is reachable, not vacuous)", async () => {
     const fpr = "unregistered-key-inv13-xrep";
     const eid = "person/inv13-xrep";
+    const gov = governNamespaces("inv13-xrep-gov");
     const ex = existenceFact(eid, "person", { id: "inv13-xrep-ex", fpr, wall: 1000 });
     const prop = propFact(eid, "v", "shared", { id: "inv13-xrep-v", fpr, wall: 1001 });
-    const repoA = new KipRepo({ replicaId: freshReplicaId("inv13-xrep-A") });
-    const repoB = new KipRepo({ replicaId: freshReplicaId("inv13-xrep-B") });
-    for (const f of [ex, prop]) {
+    const repoA = m8Repo("inv13-xrep-A");
+    const repoB = m8Repo("inv13-xrep-B");
+    for (const f of [gov, ex, prop]) {
       // eslint-disable-next-line no-await-in-loop -- sequential ingest, module-wide pattern
       const a = await repoA.ingest(clone(f));
       // eslint-disable-next-line no-await-in-loop

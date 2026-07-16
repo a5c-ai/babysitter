@@ -28,10 +28,12 @@ import {
   existenceFact,
   freshFactId,
   freshReplicaId,
+  governNamespaces,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8Repo,
   propFact,
 } from "./fixtures-m8";
 
@@ -39,7 +41,7 @@ describe("INV-10: authority chain (author-HLC keyed)", () => {
   it("a fact whose key chains to the genesis root (via a valid KeyAuthorization) projects TRUSTED", async () => {
     const rootFpr = "genesis-root-inv10";
     const fpr = "authorized-key-inv10";
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv10-trusted") });
+    const repo = m8Repo("inv10-trusted"); // pins `genesis-root-inv10` as a manifest root of trust
     const eid = "person/inv10-trusted";
     await ingestAll(repo, [
       keyAuthFact(
@@ -55,9 +57,11 @@ describe("INV-10: authority chain (author-HLC keyed)", () => {
 
   it("a fact whose key does NOT chain to any genesis root is demoted-untrusted by proj (admitted, not gate-rejected)", async () => {
     const fpr = "unchained-key-inv10";
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv10-unchained") });
+    const repo = m8Repo("inv10-unchained");
     const eid = "person/inv10-unchained";
-    // No KeyAuthorization at all for `fpr`: admitted at the gate, demoted in proj.
+    // `person` is GOVERNED by a real authority regime; `fpr` has NO KeyAuthorization chaining to a root,
+    // so it is admitted at the gate but demoted in proj (its chain does not reach any genesis root).
+    await ingestAll(repo, [governNamespaces(freshFactId("inv10-unchained-gov"))]);
     const ex = existenceFact(eid, "person", { id: freshFactId("inv10-unchained-ex"), fpr, wall: 1000 });
     await expect(repo.ingest(ex)).resolves.toEqual(expect.objectContaining({ admitted: true }));
     await ingestAll(repo, [propFact(eid, "status", "active", { id: freshFactId("inv10-unchained-status"), fpr, wall: 1001 })]);
@@ -86,7 +90,7 @@ describe("INV-10: authority chain (author-HLC keyed)", () => {
   it("namespace binding: an authorized key writing an EID OUTSIDE its authorized namespaces is demoted (a key writes only EIDs in its authorized namespaces, C-5)", async () => {
     const rootFpr = "genesis-root-inv10-ns";
     const fpr = "person-only-key-inv10";
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv10-ns") });
+    const repo = m8Repo("inv10-ns"); // pins `genesis-root-inv10-ns`
     const eid = "org/inv10-out-of-namespace"; // an `org/*` EID, but the key is authorized for `person` only
     await ingestAll(repo, [
       keyAuthFact(

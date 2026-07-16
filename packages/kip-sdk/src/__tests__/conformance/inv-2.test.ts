@@ -25,15 +25,14 @@
  * still-trusted head). Failures are assertion mismatches, never type/import errors.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
 import type { Fact } from "../../index";
 import {
   existenceFact,
-  freshReplicaId,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8Repo,
   propFact,
   revokeFact,
 } from "./fixtures-m8";
@@ -51,6 +50,14 @@ describe("INV-2 (full): SEC over the signature-valid set INCLUDING key-authoriza
         { keyFpr: fpr, namespaces: ["person"], ops: ["write"], authorizedBy: rootFpr, effectiveFrom: hlc(0) },
         { id: "inv2-keyauth", signerFpr: rootFpr, wall: 500 },
       ),
+      // The revoker holds genesis-root-chained `revoke` scope over `person` (round-2 finding #3: a
+      // revocation is honored ONLY from an authorized revoker — an unauthorized `revoke-key` is itself
+      // demoted and confers no demotion; the frozen fixture originally granted the revoker no authority
+      // at all, so it is corrected here to establish real revoke authority — see this milestone's disputes).
+      keyAuthFact(
+        { keyFpr: revokerFpr, namespaces: ["person"], ops: ["revoke"], authorizedBy: rootFpr, effectiveFrom: hlc(0) },
+        { id: "inv2-revoker-auth", signerFpr: rootFpr, wall: 501 },
+      ),
       existenceFact(eid, "person", { id: "inv2-pre-ex", fpr, wall: 1000, replicaId: "chain-inv2", seq: 0 }),
       propFact(eid, "before", "kept", { id: "inv2-pre-prop", fpr, wall: 1100, replicaId: "chain-inv2", seq: 1 }),
       propFact(eid, "after", "cutoff-loser", { id: "inv2-post-prop", fpr, wall: 2000, replicaId: "chain-inv2", seq: 2 }),
@@ -63,8 +70,8 @@ describe("INV-2 (full): SEC over the signature-valid set INCLUDING key-authoriza
 
   it("C2-1 straddle: two replicas fed the SAME set in DIFFERENT orders reach the IDENTICAL trust verdict — pre-effectiveFrom trusted on BOTH, post-effectiveFrom demoted on BOTH", async () => {
     const u = universe();
-    const repoA = new KipRepo({ replicaId: freshReplicaId("inv2-A") });
-    const repoB = new KipRepo({ replicaId: freshReplicaId("inv2-B") });
+    const repoA = m8Repo("inv2-A");
+    const repoB = m8Repo("inv2-B");
     await ingestAll(repoA, u); // authorization-first order
     await ingestAll(repoB, [...u].reverse()); // revoke-first / data-before-authorization order
 
@@ -82,7 +89,7 @@ describe("INV-2 (full): SEC over the signature-valid set INCLUDING key-authoriza
   });
 
   it("membership convergence: the KeyAuthorization and revoke-key control facts are ADMITTED (members) on every replica that receives them, independent of delivery order relative to the data facts they govern", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv2-mem") });
+    const repo = m8Repo("inv2-mem");
     // Deliver the control facts BEFORE the data facts they govern — all are admitted members (gate is
     // signature-only), and the eventual trust verdict is order-independent.
     for (const f of [...universe()].reverse()) {

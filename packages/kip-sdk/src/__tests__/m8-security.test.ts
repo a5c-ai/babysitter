@@ -17,16 +17,16 @@
  * task's `untestable` report.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../index";
-import type { AssertInput, ScopeRef } from "../index";
+import type { AssertInput, KipRepo, ScopeRef } from "../index";
 import {
   existenceFact,
   freshFactId,
-  freshReplicaId,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8OperatorRepo,
+  m8Repo,
   propFact,
   valueSegments,
 } from "./conformance/fixtures-m8";
@@ -49,14 +49,14 @@ describe("M8 method: revokeKey()", () => {
   }
 
   it("returns the signed revoke-key fact's CID (a FactId string)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-revoke-ret") });
+    const repo = m8OperatorRepo("m8m-revoke-ret");
     await seedAuthorizedChain(repo, "person/m8m-revoke-ret", "chain-m8m-ret");
     await expect(repo.revokeKey(fpr, hlc(2000), "misuse", "ordinary-cutoff")).resolves.toEqual(expect.any(String));
     repo.close();
   });
 
   it("DEFAULTS to ordinary-cutoff (mode omitted): demotes author-HLC ≥ effectiveFrom, preserves pre-effectiveFrom as trusted", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-revoke-default") });
+    const repo = m8OperatorRepo("m8m-revoke-default");
     const eid = "person/m8m-revoke-default";
     await seedAuthorizedChain(repo, eid, "chain-m8m-default");
     await expect(repo.revokeKey(fpr, hlc(2000), "misuse")).resolves.toEqual(expect.any(String)); // mode omitted
@@ -67,7 +67,7 @@ describe("M8 method: revokeKey()", () => {
   });
 
   it("effectiveFrom is compared to each fact's AUTHOR-HLC (not the receiver's rxFrom): raising effectiveFrom ABOVE every fact's author-HLC demotes NONE", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-revoke-authhlc") });
+    const repo = m8OperatorRepo("m8m-revoke-authhlc");
     const eid = "person/m8m-revoke-authhlc";
     await seedAuthorizedChain(repo, eid, "chain-m8m-authhlc");
     // effectiveFrom above the highest author-HLC (3000): nothing is ≥ it, so both facts stay trusted.
@@ -83,13 +83,13 @@ describe("M8 method: withScope() tenancy guard (advisory client write guard + re
   const scope: ScopeRef = { tenant: "tenant-A", namespace: "ns-A" };
 
   it("returns a scoped Repo lens (does not throw)", () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-scope-lens") });
+    const repo = m8Repo("m8m-scope-lens");
     expect(() => repo.withScope(scope)).not.toThrow();
     repo.close();
   });
 
   it("REFUSES to author an EID outside the scope's authorized namespaces — throws ERR_SCOPE_DENIED (C-5.3)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-scope-deny") });
+    const repo = m8Repo("m8m-scope-deny");
     const outOfScope: AssertInput = {
       type: "assert",
       v: 1,
@@ -110,7 +110,7 @@ describe("M8 method: withScope() tenancy guard (advisory client write guard + re
   });
 
   it("PERMITS authoring an EID inside the scope's namespace (the write guard is a namespace check, not a blanket refusal)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-scope-allow") });
+    const repo = m8Repo("m8m-scope-allow");
     const inScope: AssertInput = {
       type: "assert",
       v: 1,
@@ -135,7 +135,7 @@ describe("M8: access-policy facts (allow / deny / grant) — policy is data (§8
   it("a read outside an active deny policy returns NOTHING through the SDK read path (no partial leak)", async () => {
     // A deny policy fact over (scope, actor, capability) is authored as data; a scoped read that the
     // policy denies must surface nothing. withScope throws today, so the scoped-read guard fails.
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-policy-deny") });
+    const repo = m8Repo("m8m-policy-deny");
     const eid = "ns-secret/record";
     await ingestAll(repo, [
       keyAuthFact(
@@ -158,14 +158,14 @@ describe("M8: access-policy facts (allow / deny / grant) — policy is data (§8
 
 describe("M8: secret-redaction-on-export (§8.3)", () => {
   it("exportKeyring() returns this replica's raw PRIVATE signing key (a secret credential the §8.3 guidance is about)", () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-export") });
+    const repo = m8Repo("m8m-export");
     const keyring = repo.exportKeyring();
     expect(keyring.privateKeyPem).toEqual(expect.stringContaining("PRIVATE KEY"));
     repo.close();
   });
 
   it("a secret-named cell (token|secret|password) is REDACTED at read for an unprivileged scope (per-read name-pattern filter, §8.3)", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("m8m-redact") });
+    const repo = m8Repo("m8m-redact");
     const eid = "person/m8m-redact";
     await ingestAll(repo, [
       keyAuthFact(

@@ -25,15 +25,14 @@
  * never type/import errors.
  */
 import { describe, expect, it } from "vitest";
-import { KipRepo } from "../../index";
 import {
   existenceFact,
   freshFactId,
-  freshReplicaId,
   hasTrustedValueHead,
   hlc,
   ingestAll,
   keyAuthFact,
+  m8OperatorRepo,
   propFact,
 } from "./fixtures-m8";
 
@@ -42,7 +41,7 @@ const fpr = "authorized-then-revoked-key-inv17";
 
 describe("INV-17: revocation intent, honest-concurrent surfacing & re-attest", () => {
   it("ordinary-cutoff demotes ONLY facts with author-HLC ≥ effectiveFrom and PRESERVES pre-effectiveFrom facts as trusted", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv17-ordinary") });
+    const repo = m8OperatorRepo("inv17-ordinary");
     const eid = "person/inv17-ordinary";
     await ingestAll(repo, [
       keyAuthFact(
@@ -66,7 +65,7 @@ describe("INV-17: revocation intent, honest-concurrent surfacing & re-attest", (
   });
 
   it("causal-cutoff demotes an honest CONCURRENT pre-effectiveFrom fact (non-ancestor of the revocation) that ordinary-cutoff would have kept", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv17-causal") });
+    const repo = m8OperatorRepo("inv17-causal");
     const eid = "person/inv17-causal";
     await ingestAll(repo, [
       keyAuthFact(
@@ -88,7 +87,7 @@ describe("INV-17: revocation intent, honest-concurrent surfacing & re-attest", (
   });
 
   it("a re-attest (reAttestFact naming the demoted fact's CID, signed by a currently-trusted key) RESTORES the honest content to a trusted head", async () => {
-    const repo = new KipRepo({ replicaId: freshReplicaId("inv17-reattest") });
+    const repo = m8OperatorRepo("inv17-reattest");
     const eid = "person/inv17-reattest";
     const demotedCid = freshFactId("inv17-reattest-demoted");
     await ingestAll(repo, [
