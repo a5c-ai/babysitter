@@ -611,6 +611,7 @@ async function cmdAsk(a: HandlerArgs): Promise<number> {
     timeoutMs: timeoutRaw !== undefined ? Number(timeoutRaw) : undefined,
     k: kRaw !== undefined ? Number(kRaw) : undefined,
     asOf,
+    scope: resolved.scope,
     repoDir: resolved.dir,
     dispatch: a.dispatch,
   });

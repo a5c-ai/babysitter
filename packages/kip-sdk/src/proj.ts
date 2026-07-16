@@ -1461,6 +1461,13 @@ export interface ProjResult {
    * `spec.maxFanout` — never crossing, and never fanout-charging, an edge that is not valid at the
    * query instant. */
   edgeValidAt(eid: EID, at: bigint | null): boolean;
+  /** READ-ONLY citation seam (docs/design/kip-graph-qa.md §3.2/§4): the `FactId` of the winning
+   * edge-existence assert backing `getEdge(eid)`'s `EdgeView` at `at` (`null` = live "now"), or
+   * `null` when no edge is valid there. Winner selection is IDENTICAL to `getEdge`'s `kindWinner`
+   * — the SAME `demotedFacts` (M8 trust) exclusion + `maxByOrderKey` content-tiebreak — so the
+   * returned id can never denote a demoted/untrusted fact, nor a fact other than the one `getEdge`
+   * projects. The edge analogue of a node-prop `PropCell` value segment's `assertedBy`. */
+  edgeExistenceFactId(eid: EID, at: bigint | null): FactId | null;
 }
 
 /**
@@ -1981,6 +1988,20 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     return existsAtInstant(computeEdgeExistSegments(eid), at);
   }
 
+  /** docs/design/kip-graph-qa.md §3.2/§4 — the signed edge `FactId` an edge citation binds to.
+   * Reuses `getEdge`'s EXACT existence-winner selection (`existFacts` minus `retract` AND
+   * `demotedFacts`, then `maxByOrderKey`'s content-tiebroken winner), gated on the same
+   * `edgeValidAt(at)` predicate `getEdge`/`traverse` apply — so it returns the identical fact
+   * `getEdge`'s `EdgeView` projects and never a demoted/untrusted or historical (not-yet-valid) id.
+   * Set-pure over `proj`; authors nothing. */
+  function edgeExistenceFactId(eid: EID, at: bigint | null): FactId | null {
+    if (!edgeValidAt(eid, at)) return null;
+    const existFacts = byCell.get(`edge-exist:${eid}`) ?? [];
+    const assertOnlyExist = existFacts.filter((f) => f.type !== "retract" && !demotedFacts.has(f));
+    if (assertOnlyExist.length === 0) return null;
+    return maxByOrderKey(assertOnlyExist).winner.id;
+  }
+
   function getNodeRaw(eid: EID): NodeView | null {
     if (nodeViewCache.has(eid)) return nodeViewCache.get(eid) ?? null;
     const existFacts = byCell.get(`node-exist:${eid}`) ?? [];
@@ -2377,7 +2398,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     return covering?.kind === "conflict";
   }
 
-  return { getNode, getEdge, edgesTouching, edgeValidAt, nodeLiveVisibleAt };
+  return { getNode, getEdge, edgesTouching, edgeValidAt, edgeExistenceFactId, nodeLiveVisibleAt };
 }
 
 // ---------------------------------------------------------------------------

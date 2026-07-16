@@ -2984,6 +2984,26 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * READ-ONLY (INV-A1): the `FactId` of the winning existence assert backing edge `eid` at `asOf`
+   * (`null` when no edge is valid there). The EDGE analogue of a node-prop `PropCell` value segment's
+   * `assertedBy` (already surfaced on `getNode`) — the seam the graph-QA microagent
+   * (docs/design/kip-graph-qa.md §3.2/§4) uses to bind an edge citation to its signed edge fact,
+   * because `provenanceOf(eid)` returns a fact's `Provenance` but not its content-addressed id. It
+   * DELEGATES to the projection's `edgeExistenceFactId` (proj.ts), which reuses `getEdge`'s EXACT
+   * winner selection — the SAME `demotedFacts` (M8 trust) exclusion AND `maxByOrderKey` content
+   * tiebreak — gated on the SAME `edgeValidAt(instant)` predicate `getEdge`/`query`/`traverse` apply
+   * (an edge not yet valid at the lens yields `null`, never a leaked historical id, §8.11). So the
+   * id is guaranteed to denote the IDENTICAL fact `getEdge`'s `EdgeView` projects, and never a
+   * demoted/untrusted edge. A pure read over `proj`; authors nothing (no write seam is touched).
+   */
+  async edgeExistenceFactId(eid: EID, asOf?: AsOf): Promise<FactId | null> {
+    const facts = asOf !== undefined ? this.selectFactsForAsOf(asOf) : this.currentFacts();
+    const gateInstant = asOf?.validTime !== undefined ? canon(asOf.validTime) : null;
+    const projection = proj(facts, this.projOptions(facts));
+    return projection.edgeExistenceFactId(eid, gateInstant);
+  }
+
+  /**
    * T13.3 (docs/22 §5): read-latency consolidation that PERSISTS a real `kip:rollup` marker FACT —
    * round-2 finding #4 fix. docs/22 §5: a rollup "writes a `kip:rollup` marker fact recording the
    * covered HLC range + the pre-rollup tip CID". The prior implementation hashed an in-memory object

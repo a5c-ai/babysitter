@@ -1168,6 +1168,16 @@ export interface Repo {
   subscribe(scope: ScopeRef, since?: Frontier): AsyncIterable<FactDelta>;
 
   provenanceOf(ref: EID | FactId): Promise<Provenance[]>;
+  /**
+   * READ-ONLY (INV-A1): the `FactId` of the winning existence assert backing edge `eid` at `asOf`
+   * (`null` when no edge is valid there). The EDGE analogue of a node-prop `PropCell` value segment's
+   * `assertedBy` (already surfaced on `getNode`) — the seam the graph-QA microagent
+   * (docs/design/kip-graph-qa.md §3.2/§4) binds an edge CLAIM to its signed edge fact through:
+   * `provenanceOf(eid)` surfaces a fact's `Provenance` but NOT its content-addressed `FactId`, so an
+   * edge citation (whose `factId` must trace to a real signed fact) has no other read-surface source
+   * for the id. A pure read over `proj`; authors nothing.
+   */
+  edgeExistenceFactId(eid: EID, asOf?: AsOf): Promise<FactId | null>;
   rollup(opts: RollupOptions): Promise<CID>;
   tombstone(eid: EID, reason: string): Promise<FactId>;
   excise(factId: FactId, reason: string): Promise<ExcisionMarker>;

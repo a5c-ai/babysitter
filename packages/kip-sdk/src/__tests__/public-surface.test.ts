@@ -52,6 +52,10 @@ const EXPECTED_REPO_METHODS = [
   "query",
   "recall",
   "asOf",
+  // read-only graph-QA citation seam (edge analogue of a PropCell value segment's `assertedBy`;
+  // added deliberately for kip-graph-qa.md §3.2/§4 — recorded here so the guard enumerates the
+  // FULL documented Repo surface, never silently hides an added method).
+  "edgeExistenceFactId",
   // distribution
   "pin",
   "resolvePin",

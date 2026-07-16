@@ -7,10 +7,12 @@
  * stdout (INV-A1: it authors NOTHING; N5: it abstains rather than fabricates).
  *
  * This is the bundled, standalone-binary carrier of the QA manifest (spec §5.1 `discoveryDirs`). The
- * actual retrieval+synthesis wiring binds the read-only kip tool surface over the repo named by
- * `repoDir`; that integration is provided by the deploying host's genty runtime and is out of scope
- * for the CLI acceptance suite (which injects a scripted dispatcher). Absent that host wiring this
- * entrypoint abstains rather than guessing (N5).
+ * REAL production retrieval→citation→abstention pipeline now lives in-process in
+ * `src/cli/ask.ts`'s `defaultDispatchMicroagent`, which opens the repo READ-ONLY and calls the
+ * fully-real, unit-tested `answerQuestion` (`src/graph-qa/index.ts`) with a genty-model `synthesize`.
+ * This `.mjs` remains only as the subprocess carrier for a host that dispatches the manifest through
+ * genty's own subprocess runner; absent host wiring of the read surface it abstains rather than
+ * guessing (N5).
  */
 import { readFileSync } from "node:fs";
 

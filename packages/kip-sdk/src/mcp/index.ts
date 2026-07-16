@@ -22,6 +22,7 @@ import type {
   KipErrorCode,
   MicroagentInvocation,
   MicroagentManifest,
+  MicroagentResult,
   NodePut,
   OpenOptions,
   RecallQuery,
@@ -548,7 +549,13 @@ const TOOL_HANDLERS: Record<string, (ctx: HandlerCtx, args: unknown) => Promise<
     // pass `repoDir` so the READ-ONLY microagent can open the same repo and actually retrieve (spec
     // §7.2). `seed`/`maxHops` are NOT forwarded — the manifest (`additionalProperties:false`) rejects
     // them. Read-only (INV-A1): nothing here authors a fact; the answer is returned verbatim.
-    const input: Record<string, unknown> = { question, repoDir: ctx.repoDir };
+    const input: Record<string, unknown> = {
+      question,
+      repoDir: ctx.repoDir,
+      // The synthesis model the production dispatcher binds into the genty-model `synthesize` seam
+      // (kip-graph-qa.md §3.3/§5.3); the manifest's declared `runtime.model` unless overridden.
+      model: ctx.qaManifest.runtime.model,
+    };
     if (a.asOf !== undefined) input.asOf = a.asOf;
     const scope = a.scope ?? ctx.scope;
     if (scope !== undefined) input.scope = scope;
@@ -561,7 +568,19 @@ const TOOL_HANDLERS: Record<string, (ctx: HandlerCtx, args: unknown) => Promise<
       timeout: effectiveTimeout,
     };
 
-    const result = await ctx.dispatch(invocation);
+    // A dispatch that THROWS (e.g. the production synthesizer failing loud because no host model is
+    // bound — kip-graph-qa.md §6.6) is a DISPATCH failure → ERR_ASK_DISPATCH_FAILED, NOT
+    // ERR_MALFORMED_INPUT. A genuine caller-input `ERR_MALFORMED_INPUT` stays on its own channel
+    // (InvalidParams), preserving the two-channel model.
+    let result: MicroagentResult;
+    try {
+      result = await ctx.dispatch(invocation);
+    } catch (e) {
+      if (e instanceof KipError && e.code === "ERR_MALFORMED_INPUT") throw e;
+      throw new AskDispatchError(
+        `graph-QA dispatch failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
 
     // Dispatch-failure detection (spec §7.4 / §9.1, N5): non-zero exit, timeout overrun, or
     // schema-invalid output ⇒ ERR_ASK_DISPATCH_FAILED, NO fabricated answer, NOTHING authored.

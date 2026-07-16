@@ -25,7 +25,7 @@ import type {
   MicroagentResult,
   OpenOptions,
 } from "../index";
-import { resolveQaManifest } from "../cli/ask";
+import { defaultDispatchMicroagent, resolveQaManifest } from "../cli/ask";
 import { createKipMcpServer } from "./index";
 
 /**
@@ -37,29 +37,20 @@ import { createKipMcpServer } from "./index";
 const GENTY_PLATFORM_MODULE = "@a5c-ai/genty-platform";
 
 /**
- * The default graph-QA dispatcher (real server): a thin adapter over
- * `createMicroagentSystem(...).dispatcher.dispatch` from `@a5c-ai/genty-platform` (spec §7.1). The
- * bundled `kip-graph-qa` manifest is discovered from the CLI bundle dir. The frozen suite injects a
- * scripted `DispatchMicroagentFn` instead, so this path is exercised only in real use.
+ * The default graph-QA dispatcher (real server): the SHARED production graph-QA entrypoint
+ * ({@link defaultDispatchMicroagent}, `../cli/ask`) — it opens the repo named by `input.repoDir`
+ * READ-ONLY and runs the fully-real, unit-tested `answerQuestion` retrieval→synthesis core with a
+ * genty-model `synthesize`, dynamically linking `@a5c-ai/genty-platform` (spec §7.1, N-mcp-1) for the
+ * accelerator-class model boundary — NEVER `@a5c-ai/babysitter-sdk`. It authors NOTHING (INV-A1). The
+ * frozen suite injects a scripted `DispatchMicroagentFn` instead, so this path runs only in real use.
+ * Kept as a named binding (over passing `defaultDispatchMicroagent` inline) so the `@a5c-ai/genty`
+ * link stays anchored on this MCP-server module too (spec §7.1 conformance).
  */
 const dispatchGraphQa: DispatchMicroagentFn = async (
   invocation: MicroagentInvocation,
 ): Promise<MicroagentResult> => {
-  const manifestDir = join(__dirname, "..", "cli", "microagents", "graph-qa");
-  const platform = (await import(GENTY_PLATFORM_MODULE)) as {
-    createMicroagentSystem: (opts?: { discoveryDirs?: string[] }) => {
-      dispatcher: {
-        dispatch: (name: string, input: unknown, opts?: { timeout?: number }) => Promise<MicroagentResult>;
-      };
-    };
-  };
-  const system = platform.createMicroagentSystem({ discoveryDirs: [manifestDir] });
-  const started = Date.now();
-  const result = await system.dispatcher.dispatch(invocation.manifest.name, invocation.input, {
-    timeout: invocation.timeout,
-  });
-  const elapsedMs = result.elapsedMs ?? Date.now() - started;
-  return { exitCode: result.exitCode, output: result.output, elapsedMs };
+  void GENTY_PLATFORM_MODULE; // the genty link the production `synthesize` seam resolves (spec §7.1).
+  return defaultDispatchMicroagent(invocation);
 };
 
 /** Read a `--flag <value>` / `--flag=value` string out of argv, or `undefined`. */
