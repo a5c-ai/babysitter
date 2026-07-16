@@ -17,6 +17,15 @@
           "believer": { "type": "string" }
         }
       },
+      "scope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tenant": { "type": "string" },
+          "namespace": { "type": "string" },
+          "snapshot": { "type": "object" }
+        }
+      },
       "k": { "type": "number" },
       "repoDir": { "type": "string" }
     }
