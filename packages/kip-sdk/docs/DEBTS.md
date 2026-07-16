@@ -675,3 +675,98 @@ actual current source before being recorded.
 - **Fix (applied):** Pre-seed `stagedExistenceEids` with every eid that has an explicit `node`/`edge` existence candidate in the batch, so `ensureExistenceFor` never mints a kind-less duplicate. Order-independent (covers a prop candidate appearing before OR after its explicit existence candidate). Does not affect the [[D-36]] test-(4) dedup path (two `node-prop` candidates for one fresh eid with no explicit existence candidate → the set stays empty for that eid and `ensureExistenceFor`'s own staging dedup still applies).
 - **Coverage:** `packages/kip-sdk/src/__tests__/debt-closure-d39.test.ts` (3 cases: existence-before-props, props-before-existence, and a sibling-node-not-blanked case). Full kip-sdk suite green after the fix (52 files / 260 passed / 0 failed).
 - **Status:** Resolved.
+
+---
+
+## Audit round 7 — implementation-era debt surfaced during the `fix-all` spec-completion program (M2–M9 + kip-cli / kip-mcp / graph-qa)
+
+> After the M0–M6 build (rounds 4–6), the **`fix-all`** program drove kip-sdk to full spec completion —
+> M2/M3 substrate+temporal surface, M4 retrieval, M7 acquisition, M8 security/trust/tenancy, M9 conformance,
+> the ADR-B5 modularize split, and the three product surfaces (standalone `kip` CLI, standalone MCP server,
+> read-only graph-QA microagent). See [`reviews/fix-all-report.md`](../reviews/fix-all-report.md) for the
+> whole-program narrative (per-item convergence, critic minimums 88–93, all 10 acceptance passes PASS, final
+> suite 84 files / 526 passed / 10 skipped / 0 failed, integration gate green, `package-lock.json` untouched).
+> Every item's acceptance was PASS; the entries below are the honest, **non-blocking residuals** disclosed by
+> those acceptance passes — accepted rather than blocking because none un-does a safety guarantee (where a
+> capability is genuinely absent, the code fails loud, never fabricating). Each was verified against the
+> actual current `packages/kip-sdk/src/*.ts` source before being recorded. The file layout reflects the
+> modularize split: the SDK implementation now lives in `src/kip-repo.ts` (with types in `src/types.ts`),
+> `src/index.ts` is a 25-line barrel, the CLI in `src/cli/`, the MCP server in `src/mcp/`, and the graph-QA
+> microagent in `src/graph-qa/`.
+
+### D-40: M8 §8.3b RetentionClass byte-accounting (`quarantinePoolBytes` / `keyChainDurableCapBytes`) has no query/inspection seam
+
+- **Category:** Implementation / security-retention observability (honestly disclosed)
+- **Severity:** Minor
+- **Surfaced:** M8 (security/trust/tenancy), acceptance.
+- **Location:** `packages/kip-sdk/src/kip-repo.ts` (the M8 retention/demotion path implementing the manifest's `quarantinePoolBytes` / `keyChainDurableCapBytes` caps).
+- **Evidence:** The §8.3b RetentionClass byte-accounting caps (`quarantinePoolBytes`, the GLOBAL quarantine-pool aggregate bound, and `keyChainDurableCapBytes`, the per-registered-key chain cap) are honored behaviorally, but there is **no public query seam** that returns the current per-class byte accounting — only the *observable* end-to-end property "a flood never touches the trusted `/heads`" is exercised by the conformance tests. A caller cannot ask "how many bytes is the quarantine pool currently holding against its cap."
+- **Why it is debt:** The retention caps are a normative part of the §8.3b byte-retention contract (they are among the four genesis-immutable manifest caps — see D-20). Without a query seam the caps are only *indirectly* testable via the flood-doesn't-reach-trusted-heads observable, so an operator cannot monitor headroom, and a future regression in the accounting (as opposed to the observable outcome) would be harder to catch. This is an observability/inspection gap, not a correctness gap — the caps themselves enforce.
+- **Suggested fix:** Add a read-only accessor (e.g. a `retentionStats()` / `PackAdmin`-adjacent inspection seam) returning the current per-class byte totals against their manifest caps, and add a conformance test that asserts the accounting directly rather than only via the flood observable.
+- **Status:** Open.
+
+### D-41: M8 `kip:revoked-concurrent` has no distinct-status label — no `CellSegment` status-field seam to carry it
+
+- **Category:** Implementation / active-knowledge status fidelity (honestly disclosed)
+- **Severity:** Minor
+- **Surfaced:** M8 (security/trust/tenancy), acceptance.
+- **Location:** `packages/kip-sdk/src/kip-repo.ts` (the revocation/demotion projection path); `packages/kip-sdk/src/types.ts` (`CellSegment`).
+- **Evidence:** The revoked-concurrent case (a value whose signing key was revoked concurrently with the value's own validity window) is handled behaviorally by demotion, but it is **not surfaced with its own distinct status label** — there is no `CellSegment` status-field seam into which a `kip:revoked-concurrent` distinct status could be written, so the case is folded into the existing demotion/untrusted vocabulary rather than being independently observable.
+- **Why it is debt:** A consumer that wants to distinguish "demoted because concurrently revoked" from other demotion reasons cannot, because the projected `CellSegment` carries no field to name that reason. This is safe (the value is correctly demoted, never left trusted) but loses audit granularity that the §8 revocation model conceptually distinguishes.
+- **Suggested fix:** Add a status/reason field to `CellSegment` (or an adjacent projected-status seam) that can carry a distinct `kip:revoked-concurrent` label, and thread the revocation path's reason into it, so the case is independently observable rather than merged into generic demotion.
+- **Status:** Open.
+
+### D-42: M8 governance activates per-namespace on `KeyAuthorization` presence — a documented modeling narrowing vs a strict §8.1 bright line
+
+- **Category:** Implementation / security modeling narrowing (honestly disclosed, by design)
+- **Severity:** Minor
+- **Surfaced:** M8 (security/trust/tenancy), acceptance.
+- **Location:** `packages/kip-sdk/src/kip-repo.ts` (the M8 governance-activation predicate keyed on `KeyAuthorization`-fact presence per namespace).
+- **Evidence:** Value-trust governance (the M8 demotion / key-authorization regime) **activates per-namespace on the presence of `KeyAuthorization` facts**: a namespace that carries `KeyAuthorization` facts is governed, while a namespace with none stays **legacy-trusted** for INV-1 back-compatibility (so pre-M8 facts in an un-governed namespace continue to project as before rather than being retroactively demoted for lacking authorization).
+- **Why it is debt:** §8.1 reads as a strict bright line (all value-trust flows through the key-authorization model). The implemented model **narrows** that to "governed once a namespace opts in by carrying `KeyAuthorization` facts," which is a deliberate, documented back-compat concession — but it means an un-governed namespace is trusted under the legacy rule, not the §8.1 rule, so the two are not identical. Recorded as an honest modeling narrowing, not a silent divergence.
+- **Suggested fix:** Either tighten to the strict §8.1 bright line (all namespaces governed, with an explicit migration/authorization path for legacy facts) if/when back-compat can be dropped, or amend §8.1's normative text to state the per-namespace opt-in-on-`KeyAuthorization`-presence activation as the intended model so the spec and implementation agree.
+- **Status:** Open.
+
+### D-43: M4 retrieval residuals — `accessFreq` salience deferred (observer-effect), exact-cosine vector scan (no ANN), scope/tenancy narrowing deferred to M8
+
+- **Category:** Implementation / retrieval scope narrowing (honestly disclosed)
+- **Severity:** Minor
+- **Surfaced:** M4 (retrieval), acceptance.
+- **Location:** `packages/kip-sdk/src/kip-repo.ts` (`recall` — the vector → graph → RRF + §5.4 salience pipeline).
+- **Evidence:** Three distinct, honestly-disclosed M4 narrowings: (1) the `accessFreq` salience term of §5.4 is **deferred** — there is no read-event authoring API, and `recall` must NOT emit read facts (doing so would be an **observer-effect**: reads mutating the graph they read), so the frequency-of-access salience input has no sound source yet; (2) the vector half of `recall` is an **exact cosine scan** over the candidate set (no ANN / HNSW acceleration index) — INV-5 (recall quality, measured `recall@10 = 1.0`) is satisfied by **measurement, not gamed**, but the scan does not scale like an approximate index; (3) scope / tenancy narrowing inside `recall` is **deferred to M8**'s trust/tenancy model rather than enforced at the M4 retrieval layer.
+- **Why it is debt:** Each narrows the shipped `recall` relative to the full §5.4 salience formula and a production-scale retrieval target. All three are safe: the missing `accessFreq` term only omits a ranking signal (never returns wrong results), the exact scan is correct-but-unscaled, and scope/tenancy is enforced at M8 rather than skipped. But `recall` as shipped is the exact-and-small-corpus version, not the accelerated, full-salience, tenancy-narrowed one.
+- **Suggested fix:** (1) Once a read-event authoring seam exists that does not induce the observer-effect (e.g. an out-of-band, non-fact access log), wire `accessFreq` into §5.4 salience. (2) Add an ANN/HNSW index behind the vector seam for corpus scale, keeping the exact scan as the conformance oracle. (3) Fold M8's scope/tenancy narrowing into `recall` so retrieval respects tenancy at the retrieval layer.
+- **Status:** Open.
+
+### D-44: graph-qa production `ask` has no in-process synthesis model — ships a host-injected `synthesize` seam and fails loud when unwired
+
+- **Category:** Implementation / active-knowledge capability boundary (honestly disclosed, by design)
+- **Severity:** Minor
+- **Surfaced:** graph-qa (read-only NL question → recall/query/asOf → cite/abstain), acceptance.
+- **Location:** `packages/kip-sdk/src/graph-qa/index.ts` (the read-only retrieval / citation / abstention pipeline + the host-injected `synthesize` seam); `packages/kip-sdk/src/cli/ask.ts` and the MCP `kip_ask` tool (the `ask` entry points).
+- **Evidence:** graph-qa ships the **full read-only retrieval / citation / abstention pipeline** and a **documented host-injected `synthesize` seam**, but **no in-process model** — genty runs models out-of-process, so the SDK itself does not embed one. When no host synthesis model is wired, production `ask` **fails loud** via **exit-5 / `ERR_ASK_DISPATCH_FAILED`**; it never fabricates an answer to fill the gap.
+- **Why it is debt:** A caller invoking `kip ask` / `kip_ask` in a process with no host-injected model gets a hard, typed failure rather than an answer — the `ask` verb is only end-to-end functional when the embedder supplies the synthesis seam. This is a deliberate capability boundary (fail-loud over fabricate, consistent with N5 no-fallbacks), not a defect, but it means "`ask` works out of the box" is false without host wiring.
+- **Suggested fix:** Document the host-injected `synthesize` seam prominently at both `ask` entry points (CLI help + MCP tool description) so embedders know the seam is required, and/or provide an optional adapter that wires a genty out-of-process model to the seam so `ask` is functional in the reference deployment without bespoke host code.
+- **Status:** Open.
+
+### D-45: kip-mcp minor gaps — keyringless write-advertising start, `kip_asof` skips the `k` bound, unhandled JSON `null`/batch frames, an orphaned import, and a manifest `asOf.validTime` type gap
+
+- **Category:** Implementation / MCP surface robustness & protocol conformance (honestly disclosed)
+- **Severity:** Minor
+- **Surfaced:** kip-mcp (standalone zero-dep stdio JSON-RPC 2.0 MCP server), acceptance.
+- **Location:** `packages/kip-sdk/src/mcp/server.ts` and `packages/kip-sdk/src/mcp/index.ts` (server lifecycle, tool dispatch, JSON-RPC frame handling); the `kip_asof` tool's recall sub-read; the manifest `asOf.validTime` type.
+- **Evidence:** A cluster of small, independently-confirmed gaps: (1) a **write-advertising server can start keyringless** — the server can come up advertising write tools without a keyring present, so a write attempt would only fail later rather than being refused at start; (2) `kip_asof`'s recall sub-read **skips the `k` bound** — the `k` result-count limit passed for a normal recall is not threaded into the asOf-scoped recall sub-read; (3) JSON `null` frames and JSON-RPC **batch frames are dropped without emitting a `-32600` (Invalid Request)** error, so a malformed/batch frame is silently ignored rather than rejected per JSON-RPC 2.0; (4) an **orphaned `join` import** remains after refactoring; (5) a manifest `asOf.validTime` type **dropped the `"number"` member**, narrowing the accepted type below what callers may supply.
+- **Why it is debt:** Items 1–3 are correctness/protocol-conformance gaps at the MCP surface: the keyringless start defers a write refusal that should happen at startup, the missing `k` bound lets an asOf recall return more than the caller asked for, and the dropped-frame handling is a JSON-RPC 2.0 conformance miss (a compliant server must answer a malformed request with `-32600`). Item 4 is dead code; item 5 is a type-surface narrowing that could reject a valid `number` `validTime`. None crashes the server, but each is a small faithfulness/robustness gap in a surface advertised as JSON-RPC 2.0.
+- **Suggested fix:** (1) Refuse to start (or refuse to advertise write tools) when write tools are enabled but no keyring is present. (2) Thread the `k` bound into `kip_asof`'s recall sub-read. (3) Emit `-32600` for `null` / batch / otherwise-malformed frames instead of dropping them. (4) Remove the orphaned `join` import. (5) Restore `"number"` to the manifest `asOf.validTime` type.
+- **Status:** Open.
+
+### D-46: graph-qa / kip-cli minor gaps — `assert node`/`assert edge` stamped-echo emits `null` `id`/`hlc`/`seq`; `manifestGenesisCid` is a sha256 of `manifest.json` (no genesis-CID accessor)
+
+- **Category:** Implementation / CLI echo faithfulness & manifest identity (honestly disclosed)
+- **Severity:** Minor
+- **Surfaced:** kip-cli / graph-qa, acceptance.
+- **Location:** `packages/kip-sdk/src/cli/kip.ts` (the `assert node` / `assert edge` command echo path); `packages/kip-sdk/src/kip-repo.ts` (`putNode` / `putEdge` return shape; `manifestGenesisCid` derivation).
+- **Evidence:** Two small faithfulness gaps: (1) the CLI's `assert node` / `assert edge` **stamped-echo emits `null` for `id` / `hlc` / `seq`** — because `putNode` / `putEdge` return **only an EID** (not the full stamped `id` / `hlc` / `seq` triple that `assertFact` / `retractFact` echo back per the round-3 SDK-ergonomics widening), so the CLI has nothing to print for those fields and prints `null`; (2) `manifestGenesisCid` is derived as the **sha256 of `manifest.json`**, because there is **no genesis-CID accessor** exposing a real genesis commit CID — the same underlying "no real regenerated commit object to name" gap family as D-27/D-30, here surfacing at the manifest-identity level.
+- **Why it is debt:** (1) A user running `kip assert node`/`assert edge` sees `id: null, hlc: null, seq: null` in the echo, which reads as "the write didn't get stamped" when in fact the node/edge WAS admitted (only its EID is returned) — a misleading echo, not a failed write. (2) `manifestGenesisCid` presents a hash-of-the-manifest-file as if it were a genesis commit CID; it is stable and comparable but is not a git-resolvable genesis object id (mirrors D-30's `tip` semantics gap).
+- **Suggested fix:** (1) Either have `putNode`/`putEdge` return the full stamped `id`/`hlc`/`seq` (matching `assertFact`/`retractFact`'s echo) so the CLI can print real values, or have the CLI omit those fields for node/edge asserts rather than printing `null`. (2) Add a genesis-CID accessor that returns a real genesis commit id once ADR-B1's isomorphic-git regeneration produces one (see D-27), or document `manifestGenesisCid`'s semantics as a manifest-file digest (not a commit CID), the way D-30 renamed `tip`'s semantics.
+- **Status:** Open.
