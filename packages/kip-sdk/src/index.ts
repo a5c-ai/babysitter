@@ -45,7 +45,9 @@ import {
 } from "./signing";
 import { CommitTipStore, gitBlobId, KeyRegistryStore, SelfWitnessedExcisionStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
 import {
+  attestedHoleKey,
   canon,
+  collectAttestedChainHoles,
   collectExcisions,
   compareByContent,
   compareOrderKey,
@@ -3536,10 +3538,21 @@ export class KipRepo implements Repo {
       if (held) held.add(f.seq);
       else seqsByChain.set(chainId, new Set([f.seq]));
     }
+    // A-1 "attested-hole bridge": a physically-excised mid-chain slot is SATISFIED by its present,
+    // authorized excision marker (naming `(excisedChainId, excisedSeq)`), NOT a contiguity gap — the
+    // SAME per-`(replicaId,key)` rule the value-trust chain-completeness gate uses (proj.ts,
+    // docs/22 §3.6 step (i)) — so a mid-chain excise cannot flip a previously `pin-complete` pin to a
+    // permanent `pin-incomplete` (INV-14b's own bricking violation clause).
+    const registered = this.registeredFingerprintsInSet(facts);
+    const attestedHoles = collectAttestedChainHoles(
+      facts,
+      (fingerprint) => registered.has(fingerprint),
+      this.trustedExciseKeyFingerprints,
+    );
     for (const [chainId, maxSeq] of Object.entries(ref.frontier.chainSeq)) {
       const held = seqsByChain.get(chainId) ?? new Set<number>();
       for (let seq = 0; seq <= maxSeq; seq += 1) {
-        if (!held.has(seq)) return { status: "pin-incomplete" };
+        if (!held.has(seq) && !attestedHoles.has(attestedHoleKey(chainId, seq))) return { status: "pin-incomplete" };
       }
     }
     // ROUND-2 finding #3: re-apply the pin's valid-time cut (if any) so the resolved digest is
@@ -4419,6 +4432,8 @@ export class KipRepo implements Repo {
       nonce,
       excisedFactId: factId,
       excisedReason: reason,
+      excisedChainId,
+      excisedSeq,
     });
 
     // T4.6.1: physically erase the content — the ONLY copy of these bytes this replica ever held is
@@ -4462,8 +4477,15 @@ export class KipRepo implements Repo {
     /** `excise()`'s own already-validated `reason` string, genuinely persisted into the signed
      * marker payload so it survives as part of the durable audit record. */
     excisedReason: string;
+    /** A-1 "attested-hole bridge": the erased fact's OWN `(replicaId,key)` chain + `seq`, persisted
+     * into the SIGNED, durable, synced marker payload so ANY replica can treat that physically-erased
+     * slot as an attested hole rather than a contiguity gap (see proj.ts's `collectAttestedChainHoles`
+     * and `ExcisionMarkerPayload`). */
+    excisedChainId: ChainId;
+    excisedSeq: number;
   }): Promise<Fact> {
-    const { cellTarget, validFrom, validTo, origFingerprint, oid, nonce, excisedFactId, excisedReason } = params;
+    const { cellTarget, validFrom, validTo, origFingerprint, oid, nonce, excisedFactId, excisedReason, excisedChainId, excisedSeq } =
+      params;
     const substrate = this.getSubstrate();
     const keyPair = this.getOwnKeyPair();
     const replicaId = this.replicaId;
@@ -4478,7 +4500,19 @@ export class KipRepo implements Repo {
         : undefined;
 
     const ref = computeExcisionRef(nonce, oid);
-    const value = JSON.stringify({ ref, nonce, origFingerprint, cellTarget, validFrom, validTo, excisedFactId, excisedReason });
+    const value = JSON.stringify({
+      ref,
+      nonce,
+      origFingerprint,
+      cellTarget,
+      validFrom,
+      validTo,
+      excisedFactId,
+      excisedReason,
+      // A-1: WHERE in the excised fact's own chain the erased slot sat — the attested-hole coordinates.
+      excisedChainId,
+      excisedSeq,
+    });
 
     const draft: Omit<Fact, "id"> = {
       v: 1,

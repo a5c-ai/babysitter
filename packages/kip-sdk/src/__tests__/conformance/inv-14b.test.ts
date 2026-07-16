@@ -28,22 +28,19 @@
  *     This is the load-bearing correctness half of the invariant (no permanent bricking of later
  *     same-key facts' trust) and it holds today.
  *
- * (b) — the PIN-RE-COMPLETENESS half — depends on the A-1 "attested hole" bridge: `resolvePin`'s
- *     per-`(replicaId,key)` `seq`-contiguity check (INV-14's completeness rule) must treat the
- *     excised `seq` slot as SATISFIED by the present, signature-valid excision marker naming that
- *     `(excisedChainId, excisedSeq)` — otherwise the physically-erased mid-chain slot reads as a
- *     contiguity gap and the pin bricks permanently `pin-incomplete` (INV-14b's own violation
- *     clause). The M9 audit empirically established this bridge is NOT yet wired: the durable
- *     excision-marker payload carries `cellTarget`/`validFrom`/`validTo`/`excisedFactId`/`excisedReason`
- *     but NOT `(excisedChainId, excisedSeq)` (those are on the `ExcisionMarker` RETURN value only),
- *     and `resolvePin` has no excision awareness — so a mid-chain excise flips a previously
- *     `pin-complete` pin to `pin-incomplete`. This half is therefore encoded as `it.fails`: the
- *     assertion below is the SPEC-CORRECT one (`pin-complete`), it currently fails (so `it.fails`
- *     passes and the shippable suite stays green while HONESTLY recording the gap), and the DAY the
- *     A-1 bridge lands `resolvePin` will return `pin-complete`, the inner assertion will pass, and
- *     `it.fails` will start FAILING — forcing whoever implements A-1 to promote `it.fails` → `it`.
- *     It is a real, tracked, self-correcting expected-failure — never a skip and never an assertion
- *     of the wrong (violating) behavior as if it were correct.
+ * (b) — the PIN-RE-COMPLETENESS half — depends on the A-1 "attested hole" bridge, now IMPLEMENTED
+ *     and asserted as an ordinary passing `it`. `resolvePin`'s per-`(replicaId,key)` `seq`-contiguity
+ *     check (INV-14's completeness rule) treats the excised `seq` slot as SATISFIED by the present,
+ *     signature-valid excision marker naming that `(excisedChainId, excisedSeq)` — otherwise the
+ *     physically-erased mid-chain slot would read as a contiguity gap and the pin would brick
+ *     permanently `pin-incomplete` (INV-14b's own violation clause). The A-1 slice wired this end to
+ *     end: the durable, SIGNED excision-marker payload now carries `(excisedChainId, excisedSeq)`
+ *     (proj.ts's `ExcisionMarkerPayload`, alongside `cellTarget`/`validFrom`/`validTo`/`excisedFactId`/
+ *     `excisedReason`), and both `resolvePin` (index.ts) AND the value-trust chain-completeness gate
+ *     (proj.ts's `computeValueTrust` Rule D(i)) consult `collectAttestedChainHoles` — the SAME
+ *     set-pure, authorized-marker attested-hole rule docs/22 §3.6 step (i) names as shared. So a
+ *     mid-chain excise no longer flips a previously `pin-complete` pin to `pin-incomplete`; it
+ *     re-resolves `pin-complete` over the surviving subset.
  */
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -122,7 +119,7 @@ describe("INV-14b: excised chain slot is an attested hole, not a gap (A-1, excis
     );
   });
 
-  it.fails("(b) a pin enumerating the chain re-resolves `pin-complete` over the surviving subset once the excised slot is an attested hole [TRACKED: A-1 attested-hole bridge NOT yet wired into resolvePin — currently `pin-incomplete`; promote `it.fails`→`it` when implemented]", async () => {
+  it("(b) a pin enumerating the chain re-resolves `pin-complete` over the surviving subset once the excised slot is an attested hole [A-1 attested-hole bridge: resolvePin treats the signed excision marker's `(excisedChainId, excisedSeq)` as SATISFIED, not a gap]", async () => {
     const dir = freshRepoDir();
     const replicaId = "replica-inv14b-pin";
     const eid = "person/inv14b-pin";
@@ -139,9 +136,9 @@ describe("INV-14b: excised chain slot is an attested hole, not a gap (A-1, excis
     await repo.excise("inv14b-secret", "gdpr-erasure");
 
     // SPEC-CORRECT expectation (INV-14b(b)): the marker satisfies the seq-1 slot as an attested
-    // hole, so the pin re-resolves `pin-complete` over the surviving subset. This CURRENTLY FAILS
-    // (A-1 bridge unimplemented — `resolvePin` sees seq-1 as a contiguity gap and returns
-    // `pin-incomplete`), which is why this case is `it.fails`.
+    // hole, so the pin re-resolves `pin-complete` over the surviving subset (the A-1 bridge:
+    // `resolvePin` reads the signed marker's `(excisedChainId, excisedSeq)` and treats seq-1 as
+    // filled, never a contiguity gap).
     const after = await repo.resolvePin(ref);
     expect(after.status).toBe("pin-complete");
   });

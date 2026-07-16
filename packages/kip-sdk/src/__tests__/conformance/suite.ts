@@ -23,7 +23,12 @@
  *   - "tracked-gap" — a registered test file exists and asserts the spec-correct behavior, but one
  *                     half of the invariant depends on an as-yet-unimplemented feature and is encoded
  *                     as a self-correcting `it.fails` expected-failure inside that file (surfaced by
- *                     the M9 audit, tracked in CI, never silently omitted). See INV-14b.
+ *                     the M9 audit, tracked in CI, never silently omitted). NO invariant currently
+ *                     carries this disposition — every entry below is fully "covered". The value is
+ *                     retained so a future genuinely-incomplete half can be catalogued honestly (and
+ *                     so `suite-completeness.test.ts` fails loudly if any invariant regresses to a
+ *                     gap). INV-14b was tracked here through M8; its A-1 attested-hole bridge landed
+ *                     in M9, its `it.fails` half became a real passing `it`, and it is now "covered".
  */
 
 /** One §8.4 invariant and where the shipped suite proves it. */
@@ -81,7 +86,8 @@ export const CONFORMANCE_SUITE: readonly ConformanceInvariant[] = [
     title: "excised chain slot is an attested hole, not a gap (A-1, closes the excision×seq interaction)",
     section: "6",
     testFiles: ["inv-14b.test.ts"],
-    coverage: "tracked-gap",
+    // "covered" (default): the A-1 attested-hole bridge landed in M9, so inv-14b.test.ts's (b)
+    // pin-re-completeness half is now a real passing `it` (no `it.fails`), matching (a).
   },
 
   // §7 — Causal plausibility & anti-backdating.
@@ -116,10 +122,15 @@ export const CONFORMANCE_SUITE: readonly ConformanceInvariant[] = [
 export const CONFORMANCE_INVARIANT_IDS: readonly string[] = CONFORMANCE_SUITE.map((i) => i.id);
 
 /**
- * The canonical docs/60 §8.4 invariant-id set, transcribed DIRECTLY from the doc's own `<a id="…">`
- * anchors (INDEPENDENT of `CONFORMANCE_SUITE` above so the completeness test cross-checks the
- * manifest against the SPEC, not against itself). A docs/60 invariant added or removed without a
- * matching manifest edit makes `suite-completeness.test.ts` fail.
+ * The canonical docs/60 §8.4 invariant-id set, transcribed from the doc's own `<a id="…">` anchors
+ * (INDEPENDENT of `CONFORMANCE_SUITE` above so the completeness test cross-checks the manifest
+ * against the SPEC, not against itself).
+ *
+ * This constant is NO LONGER the sole source of truth: `suite-completeness.test.ts` parses the
+ * `<a id="inv-…">` anchors out of `docs/60-conformance-and-testability.md` at test time and asserts
+ * (1) the manifest id set equals the PARSED doc anchors, and (2) THIS hand-maintained mirror also
+ * equals the parsed doc anchors. So a docs/60 invariant added or removed now fails CI even if a
+ * maintainer forgets to touch this array — and if this mirror ever drifts from the doc it fails too.
  */
 export const DOCS60_INVARIANT_IDS: readonly string[] = [
   "INV-1", "INV-2", "INV-2a", "INV-3",

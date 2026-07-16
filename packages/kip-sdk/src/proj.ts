@@ -47,6 +47,7 @@
 import { createHmac } from "node:crypto";
 import type {
   CellSegment,
+  ChainId,
   EdgeKind,
   EdgeView,
   EID,
@@ -474,6 +475,17 @@ interface ExcisionMarkerPayload {
   validTo: HlcOrTime | null;
   excisedFactId: FactId;
   excisedReason?: string;
+  /**
+   * A-1 "attested-hole bridge" (docs/22 §3.6 step (i) / docs/40 `ExcisionMarker`): the erased fact's
+   * OWN `(replicaId,key)` chain — `"<replicaId>/<keyFpr>"` — and its chain position `seq`, embedded in
+   * the SIGNED, durable, synced marker payload so ANY replica (not only the excising one) can treat a
+   * physically-erased mid-chain slot as an ATTESTED HOLE satisfied by this marker rather than an
+   * unexplained contiguity gap (see `collectAttestedChainHoles`). OPTIONAL for back-compat: a marker
+   * that omits them (a pre-A-1 marker) parses/honors exactly as before and simply contributes no
+   * attested hole — never rejected, never thrown (N5). Both must be present together to name a slot.
+   */
+  excisedChainId?: ChainId;
+  excisedSeq?: number;
 }
 
 function isPlainRecord(v: unknown): v is Record<string, unknown> {
@@ -501,6 +513,10 @@ function parseExcisionMarker(f: Fact): ExcisionMarkerPayload | null {
   if (typeof parsed.excisedFactId !== "string" || parsed.excisedFactId.length === 0) return null;
   if (!isPlainRecord(parsed.cellTarget)) return null;
   if (parsed.validFrom === undefined) return null;
+  // A-1: `(excisedChainId, excisedSeq)` are honored ONLY as a well-formed PAIR — a marker declaring
+  // one without the other (or a non-string/non-integer) names no slot at all (never partially trusted).
+  const hasChainId = typeof parsed.excisedChainId === "string" && parsed.excisedChainId.length > 0;
+  const hasSeq = typeof parsed.excisedSeq === "number" && Number.isInteger(parsed.excisedSeq) && parsed.excisedSeq >= 0;
   return {
     ref: parsed.ref,
     nonce: parsed.nonce,
@@ -510,6 +526,8 @@ function parseExcisionMarker(f: Fact): ExcisionMarkerPayload | null {
     validFrom: parsed.validFrom as HlcOrTime,
     validTo: (parsed.validTo ?? null) as HlcOrTime | null,
     excisedReason: typeof parsed.excisedReason === "string" ? parsed.excisedReason : undefined,
+    excisedChainId: hasChainId && hasSeq ? (parsed.excisedChainId as ChainId) : undefined,
+    excisedSeq: hasChainId && hasSeq ? (parsed.excisedSeq as number) : undefined,
   };
 }
 
@@ -563,6 +581,67 @@ export function isAuthorizedExcisionMarker(
   if (markerFingerprint === origFingerprint) return true;
   if (!isRegisteredFingerprint(origFingerprint)) return true;
   return false;
+}
+
+/** The signing-key fingerprint of a `ChainId` (`"<replicaId>/<keyFpr>"`, docs/22 §7 / chain-sequencer.ts's
+ * `chainIdFor`): the substring after the LAST `/` (a `replicaId` may itself contain `/`, the `keyFpr`
+ * — a hash — never does). Returns `null` for a chainId with no `/` (not a well-formed `ChainId`). */
+function keyFprOfChainId(chainId: ChainId): string | null {
+  const slash = chainId.lastIndexOf("/");
+  if (slash < 0 || slash === chainId.length - 1) return null;
+  return chainId.slice(slash + 1);
+}
+
+/** The `${excisedChainId} ${excisedSeq}` key a slot is recorded under in the attested-hole set
+ * (` ` can never occur inside a `ChainId` or a decimal `seq`, so it is an unambiguous separator). */
+export function attestedHoleKey(chainId: ChainId, seq: number): string {
+  return `${chainId} ${seq}`;
+}
+
+/**
+ * A-1 "attested-hole bridge" (docs/22 §3.6 step (i) / docs/24 §1.2a / docs/40 `ExcisionMarker`). The
+ * set of per-`(replicaId,key)` chain slots — `attestedHoleKey(chainId, seq)` — that are ATTESTED HOLES
+ * rather than contiguity gaps: a slot named by a present, admitted (⇒ signature-valid, §2.1 ingest
+ * gate) `type:"excision"` marker whose `(excisedChainId, excisedSeq)` payload identifies it AND whose
+ * OWN signer is authorized to excise that chain's key (§4.5 m-11). Both the value-trust
+ * chain-completeness gate (`computeValueTrust` Rule D(i)) and pin-completeness (`resolvePin`, INV-14)
+ * consult this so a physically-excised mid-chain slot is not read as a missing `seq`.
+ *
+ * SET-PURE: a function of the admitted `facts` alone (plus this verifying replica's own registered-
+ * fingerprint predicate / `trustedExciseKeys` config — the SAME documented, legitimately-per-replica
+ * trust-escape-hatch category `collectExcisions` already relies on). No per-replica `selfWitnessed`
+ * memory, no ingest/array order, no clock — so two replicas holding the byte-identical admitted set
+ * decide the byte-identical hole set.
+ *
+ * SECURITY — authorization is grounded in the SLOT's OWN chain key (`keyFprOf(excisedChainId)`), NEVER
+ * the marker's self-declared `origFingerprint` payload field (which an attacker sets to their own
+ * fingerprint to falsely pass the self-excision clause — the exact spoof `collectExcisions` closes by
+ * reading the real target's fingerprint). Because the hole is only ever honored for the EXACT `chainId`
+ * the marker names, and a pin/gate only consults holes on chains it actually enumerates, an attacker
+ * cannot fabricate a hole on a victim's REGISTERED-key chain (self-excision needs that key's real
+ * signature; the trusted-excise and unregistered-`origFingerprint` clauses do not apply to a genuine
+ * registered victim key) — so a genuine, un-excised gap on a registered chain can never be masked. For
+ * an UNREGISTERED chain any marker suffices, exactly as `collectExcisions`/`excise()` already treat
+ * unregistered data (no real trust chain exists to protect).
+ */
+export function collectAttestedChainHoles(
+  facts: readonly Fact[],
+  isRegisteredFingerprint: (fingerprint: string) => boolean,
+  trustedExciseKeys: ReadonlySet<string>,
+): ReadonlySet<string> {
+  const holes = new Set<string>();
+  for (const f of facts) {
+    const marker = parseExcisionMarker(f);
+    if (!marker) continue;
+    if (marker.excisedChainId === undefined || marker.excisedSeq === undefined) continue;
+    const excisedKeyFpr = keyFprOfChainId(marker.excisedChainId);
+    if (excisedKeyFpr === null) continue;
+    if (!isAuthorizedExcisionMarker(f.provenance.publicKeyFingerprint, excisedKeyFpr, isRegisteredFingerprint, trustedExciseKeys)) {
+      continue; // UNAUTHORIZED marker — never fabricates a hole (a genuine gap must stay a gap).
+    }
+    holes.add(attestedHoleKey(marker.excisedChainId, marker.excisedSeq));
+  }
+  return holes;
 }
 
 /**
@@ -1569,6 +1648,11 @@ export function computeValueTrust(
   opts: ValueTrustOptions,
   factsById: ReadonlyMap<FactId, Fact>,
   collidedIds: ReadonlySet<FactId>,
+  /** A-1: per-`(replicaId,key)` chain slots (`attestedHoleKey`) satisfied by a present, authorized
+   * excision marker — Rule D(i)'s chain-completeness gate treats these as filled, not gaps, so a
+   * physically-excised mid-chain slot does not brick every later same-key fact to `pending` forever
+   * (docs/22 §3.6 step (i)). Defaults to empty (no attested holes ⇒ the pre-A-1 behaviour). */
+  attestedHoles: ReadonlySet<string> = new Set<string>(),
 ): ReadonlySet<Fact> {
   const { isGenesisRoot } = opts;
 
@@ -1770,9 +1854,12 @@ export function computeValueTrust(
     //     its `(replicaId, key)` up to F's own seq. A missing lower `seq` ⇒ pending (not trusted).
     const chainKey = `${f.replicaId} ${signer}`;
     const seqs = chainSeqs.get(chainKey) as Set<number>;
+    const chainId = `${f.replicaId}/${signer}`;
     let chainComplete = true;
     for (let s = 0; s < f.seq; s += 1) {
-      if (!seqs.has(s)) {
+      // A-1: a physically-excised slot is an ATTESTED HOLE (satisfied by its signed excision marker),
+      // not a gap — so a mid-chain excise never bricks a later same-key fact to `pending` forever.
+      if (!seqs.has(s) && !attestedHoles.has(attestedHoleKey(chainId, s))) {
         chainComplete = false;
         break;
       }
@@ -1828,8 +1915,12 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
   // M8 value-trust overlay (set-pure, author-HLC keyed): the set of admitted facts `proj` demotes
   // (never a trusted `/heads` cover, never a member drop). Empty when no `valueTrust` context is
   // supplied (a direct `proj()` unit-test call, or the pre-M8 read path) ⇒ no demotion.
+  // A-1: the set of per-`(replicaId,key)` chain slots satisfied by a present, authorized excision
+  // marker — consumed by BOTH the value-trust chain-completeness gate (below) and pin-completeness
+  // (`resolvePin`, index.ts), the two gates docs/22 §3.6 step (i) names as sharing this exact rule.
+  const attestedHoles = collectAttestedChainHoles(facts, isRegisteredFingerprint, trustedExciseKeys);
   const demotedFacts: ReadonlySet<Fact> = options?.valueTrust
-    ? computeValueTrust(facts, options.valueTrust, factsById, collidedIds)
+    ? computeValueTrust(facts, options.valueTrust, factsById, collidedIds, attestedHoles)
     : new Set<Fact>();
 
   const byCell = new Map<string, Fact[]>();
