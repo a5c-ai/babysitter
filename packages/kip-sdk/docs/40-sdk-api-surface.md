@@ -351,7 +351,10 @@ type KipErrorCode =
   | "ERR_TXN_ALREADY_ACTIVE"       // D-36: a txn() call was attempted (nested, or a direct assertFact/retractFact) while another txn() is already active on this repo instance
   | "ERR_LEARN_COMMIT_FAILED"      // learn()'s accept-commit txn() failed for an unforeseen reason after passing every known validation gate; a kip:learn-exhausted marker naming the failure is authored before this throws (N5)
   | "ERR_TXN_ROLLBACK_FAILED"      // txn()'s post-commit-failure rollback could not erase one or more newly-ingested oids (e.g. a locked/undeletable blob); names BOTH the original commit failure and the oid(s) that failed to erase
-  | "ERR_TXN_TIP_PERSIST_FAILED";  // round-5: txn()'s commit/facts/commit-tip already succeeded durably — only the FINAL seq/hlc tip-bookkeeping write (SeqTipStore.save) failed afterward; names context.commitOid (the commit that DID succeed), never implies nothing was committed
+  | "ERR_TXN_TIP_PERSIST_FAILED"   // round-5: txn()'s commit/facts/commit-tip already succeeded durably — only the FINAL seq/hlc tip-bookkeeping write (SeqTipStore.save) failed afterward; names context.commitOid (the commit that DID succeed), never implies nothing was committed
+  | "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE"  // compileContextualQuery/executeSegment/getLearnResult/runAcquisition: an asOf.txTime frontier resolves through this replica's non-convergent rxFrom receive-tick history; rejected on the compile-determinism/durable-authoring seams (INV-A2), pin asOf.validTime instead
+  | "ERR_ACQUISITION_TARGET_FORBIDDEN"           // runAcquisition (M7): a proposed entry names a CONTROL-PLANE target (schema/key/control); an acquisition microagent may author ONLY data facts (node/edge/node-prop/edge-prop) — authority facts are never acquisition-authored (§8.1 trust path is M8)
+  | "ERR_CONFLICTED_REGISTRATION";               // runAcquisition (M7): the named (name,version) has DIVERGENT registration descriptors (INV-A10 divergent-registration clause) — the seam refuses to LWW-pick one silently ("a LWW-overwrite fails")
 ```
 
 **Per-method channels** (throws = `KipError`; everything else returns typed data):
@@ -372,7 +375,7 @@ type KipErrorCode =
 | `registerFunctionality` | `ERR_INVALID_WEIGHT`, `ERR_UNREGISTERED_MANIFEST` (unsigned), `ERR_SCOPE_DENIED` | divergent re-registration surfaces as a `CONFLICTED` cell (data, §3.4) |
 | `compileContextualQuery` | `ERR_COMPILE_CYCLIC_DEPS`, `ERR_ILL_TYPED_SEGMENT` | `Segment.alternatives` (the typed choice) |
 | `runContextualQuery`/`executeSegment` | compile errors as above | `{ kind: "choice" }`, empty-`result` `AnswerGraph` (outcomes #4–#7) |
-| `runAcquisition` | `ERR_UNREGISTERED_MANIFEST` | quarantined-until-trusted facts (data) |
+| `runAcquisition` | `ERR_UNREGISTERED_MANIFEST` (unregistered/unsigned manifest, before dispatch), `ERR_CONFLICTED_REGISTRATION` (divergent `(name,version)` registration — a LWW-overwrite fails, INV-A10), `ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE` (`asOf.txTime` on this durable-authoring seam, INV-A2), `ERR_MALFORMED_INPUT` (the dispatched microagent's OUTPUT is unusable: non-zero exitCode / fails `outputSchema` / not a well-formed `AcquisitionResult`), `ERR_ACQUISITION_TARGET_FORBIDDEN` (a `proposed` entry names a control-plane `schema`/`key`/`control` target — authority facts are never acquisition-authored, §8.1 trust path is M8) | quarantined-until-trusted facts (data) |
 | `learn` | `ERR_UNREGISTERED_MANIFEST` (before the loop, INV-A13), `ERR_LEARN_COMMIT_FAILED` (unforeseen accept-commit failure after every known validation gate; a `kip:learn-exhausted` marker naming the failure is durably authored first), `ERR_TXN_ALREADY_ACTIVE` (rethrown verbatim when a concurrently-racing `learn()` call's own accept-commit `txn()` finds another already active on this instance — never masked as `ERR_LEARN_COMMIT_FAILED`, never authors a spurious exhausted marker for it) | `status: "accept" \| "exhausted"` (INV-A5) |
 
 ---

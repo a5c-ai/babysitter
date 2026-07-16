@@ -28,7 +28,8 @@
  * to the already-implemented (M4) substrate `query` bound and is GREEN.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { KipRepo, type TraversalSpec } from "../../index";
+import { KipRepo, type AssertInput, type Fact, type TraversalSpec } from "../../index";
+import type { RecordedInvocation } from "./fixtures-m6";
 import {
   FIXED_AS_OF,
   acqNodeAssert,
@@ -36,10 +37,12 @@ import {
   acqPropRetract,
   acqSource,
   acquisitionOk,
+  buildManifest,
   collect,
   freshReplicaId,
   makeScriptedDispatch,
   registerAcquisitionManifest,
+  registerManifest,
   seedEdge,
   seedNode,
   seedNotSameAs,
@@ -268,12 +271,120 @@ describe("INV-A10: acquisition family lifecycle + ordering/kind-preservation + d
       expect((await repo.getNode(nodeB))?.props.p?.segments.some((s) => s.kind === "value" && s.value === "b")).toBe(true);
       expect((await repo.getNode(candidate))?.eid).toBe(existing); // the trailing sameAs fact folded
 
+      // POSITIONAL ordering (round-2 finding #4): the previous assertions only proved cardinality +
+      // value presence — a shuffled/reversed FactId[] would still pass. Assert the ACTUAL 1:1
+      // positional mapping of the returned ids against the known fixture: facts[0] IS the fact
+      // authored for proposed[0] (nodeA), facts[1] for proposed[1] (nodeB), facts[2] for sameAs[0].
+      // factId→target is not on the public read surface, so inspect the admitted set directly (the
+      // same internal-accessor idiom the other conformance suites use).
+      const allFacts = (repo as unknown as { currentFacts: () => Fact[] }).currentFacts();
+      const byId = new Map<string, Fact>(allFacts.map((f) => [f.id, f]));
+      const t0 = byId.get(facts[0]!)?.target;
+      const t1 = byId.get(facts[1]!)?.target;
+      const t2 = byId.get(facts[2]!)?.target;
+      expect(t0).toMatchObject({ kind: "node-prop", eid: nodeA, prop: "p" });
+      expect(t1).toMatchObject({ kind: "node-prop", eid: nodeB, prop: "p" });
+      expect(t2).toMatchObject({ kind: "edge", edgeKind: "same_as", from: candidate, to: existing });
+
       // Source provenance recorded on EVERY minted fact (docs/33 step (3)).
       for (const f of facts) {
         // eslint-disable-next-line no-await-in-loop
         const prov = await repo.provenanceOf(f);
         expect(prov[0]?.source?.uri).toBe(uri);
       }
+    });
+  });
+
+  describe("INV-A10 divergent-registration clause: two registrations of the same (name,version) with DIVERGENT manifests read CONFLICTED — runAcquisition refuses to LWW-pick (docs/33 §Conformance, docs/60)", () => {
+    it("runAcquisition rejects ERR_CONFLICTED_REGISTRATION when the named (name,version) has divergent descriptors — no dispatch, no fact authored (a LWW-overwrite FAILS)", async () => {
+      const eid = "tenant/ns/divergent-obj";
+      const log: RecordedInvocation[] = [];
+      const { dispatch } = makeScriptedDispatch(
+        { "miner-div": () => acquisitionOk({ proposed: [acqNodeAssert(eid, "person")], source: acqSource() }) },
+        log,
+      );
+      const repo = new KipRepo({ replicaId: freshReplicaId("inv-a10-div"), dispatchMicroagent: dispatch });
+      repos.push(repo);
+      const kipRepo = repo as unknown as import("../../index").KipRepo;
+
+      // TWO registrations of the SAME (name,version) with DIVERGENT descriptors (distinct description).
+      const mA = buildManifest({ name: "miner-div", version: "1.0.0", description: "descriptor-A" });
+      const mB = buildManifest({ name: "miner-div", version: "1.0.0", description: "descriptor-B" });
+      await registerManifest(kipRepo, mA);
+      await registerManifest(kipRepo, mB);
+
+      const p = repo.runAcquisition(mA, {}, { asOf: FIXED_AS_OF });
+      await expect(p).rejects.toMatchObject({ code: "ERR_CONFLICTED_REGISTRATION" });
+      // Rejected BEFORE any dispatch — the microagent never ran, and nothing was authored.
+      expect(log.length).toBe(0);
+      expect(await repo.getNode(eid)).toBeNull();
+    });
+
+    it("a single registration (or byte-identical re-registration) is NOT conflicted — runAcquisition dispatches normally", async () => {
+      const eid = "tenant/ns/nondivergent-obj";
+      const { repo } = newRepoWith("miner-same", () =>
+        acquisitionOk({ proposed: [acqNodeAssert(eid, "person")], source: acqSource() }),
+      );
+      const kipRepo = repo as unknown as import("../../index").KipRepo;
+      // Register the IDENTICAL descriptor twice — folds to ONE canonical value, not a conflict.
+      const m = buildManifest({ name: "miner-same", version: "1.0.0", description: "same-descriptor" });
+      await registerManifest(kipRepo, m);
+      await registerManifest(kipRepo, m);
+
+      const p = repo.runAcquisition(m, {}, { asOf: FIXED_AS_OF });
+      await expect(p).resolves.toMatchObject({ facts: expect.any(Array) });
+      expect((await p).facts.length).toBe(1);
+      expect(await repo.getNode(eid)).not.toBeNull();
+    });
+  });
+
+  describe("INV-A10(a) authority guard: an acquisition microagent may author ONLY data facts — a proposed CONTROL-PLANE target is refused (authority facts are never acquisition-authored; §8.1 trust path is M8)", () => {
+    it("a proposed schema (control-plane) target is rejected with ERR_ACQUISITION_TARGET_FORBIDDEN — and the atomic guard means the well-formed sibling in the same batch is NOT committed either", async () => {
+      const goodEid = "tenant/ns/authority-good";
+      const evilTarget: AssertInput = {
+        type: "assert",
+        v: 1,
+        target: { kind: "schema", ontologyRef: "tenant/ns/smuggled-registration" },
+        value: JSON.stringify({ name: "smuggled", version: "1.0.0" }),
+        validFrom: 0,
+        validTo: null,
+        replicaId: "m7-acq-candidate",
+        provenance: acqSource(),
+      };
+      const { repo } = newRepoWith("miner-evil", () =>
+        acquisitionOk({ proposed: [acqNodeAssert(goodEid, "person"), evilTarget], source: acqSource() }),
+      );
+      const manifest = await registerAcquisitionManifest(repo, "miner-evil");
+
+      const p = repo.runAcquisition(manifest, {}, { asOf: FIXED_AS_OF });
+      await expect(p).rejects.toMatchObject({ code: "ERR_ACQUISITION_TARGET_FORBIDDEN" });
+      // Refused BEFORE the commit txn opens — the well-formed sibling did NOT slip through.
+      expect(await repo.getNode(goodEid)).toBeNull();
+    });
+  });
+
+  describe("INV-A10(b) no-fabrication (round-2 finding #1): a sameAs maps to a signed same_as fact ONLY — the orchestrator never mints existence for an endpoint the AcquisitionResult did not propose", () => {
+    it("a sameAs whose BOTH endpoints are unknown (neither proposed nor pre-existing) authors ONLY the same_as edge; getNode of an unknown endpoint reads null (fail-loud, never a fabricated ghost node)", async () => {
+      const candidate = "tenant/ns/ghost-candidate";
+      const existing = "tenant/ns/ghost-existing";
+      const { repo } = newRepoWith("miner-ghost", () =>
+        acquisitionOk({ proposed: [], source: acqSource(), sameAs: [{ candidate, existing }] }),
+      );
+      const manifest = await registerAcquisitionManifest(repo, "miner-ghost");
+
+      const p = repo.runAcquisition(manifest, {}, { asOf: FIXED_AS_OF });
+      await expect(p).resolves.toMatchObject({ facts: expect.any(Array) });
+      const { facts } = await p;
+      // Exactly ONE fact — the same_as edge. NO fabricated existence facts for the two endpoints.
+      expect(facts.length).toBe(1);
+      const allFacts = (repo as unknown as { currentFacts: () => Fact[] }).currentFacts();
+      const authoredTargets = allFacts.map((f) => f.target);
+      // No bare node-existence fact was minted for either merge endpoint (the round-1 fabrication).
+      expect(authoredTargets.some((t) => t.kind === "node" && t.eid === candidate)).toBe(false);
+      expect(authoredTargets.some((t) => t.kind === "node" && t.eid === existing)).toBe(false);
+      // Neither endpoint exists — the honest answer is null, not a fabricated propertyless node.
+      expect(await repo.getNode(candidate)).toBeNull();
+      expect(await repo.getNode(existing)).toBeNull();
     });
   });
 });

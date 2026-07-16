@@ -261,13 +261,16 @@ export interface Provenance {
   conflicted?: boolean;
   /**
    * CRITICAL FIX #2 (M5 round-2, INV-A2/docs/31 Phase 2): "provenance.source naming the
-   * MicroagentInvocation... AND RECORDING THE RESOLVED asOf FRONTIER". Stamped ONLY by
-   * `executeSegment` on the facts it authors — the compiled/resolved `AsOf` (`opts.asOf` or the
-   * originating `Segment.asOf`) the hop's guards were evaluated against and the fact was minted
-   * under, so a reproducible mining run can verify exactly which frontier produced this fact.
-   * Never part of the canonical signed payload (`canonical-payload.ts`'s `buildCanonicalEnvelope`
-   * only extracts `author`/`publicKeyFingerprint` off `provenance` — mirrors `source`/`confidence`
-   * above, advisory-only, never affects `factCID`/signature/reducer behavior).
+   * MicroagentInvocation... AND RECORDING THE RESOLVED asOf FRONTIER". Stamped by the active-layer
+   * authoring seams — `executeSegment` and `runAcquisition` (M7) — on the facts they author: the
+   * compiled/resolved `AsOf` (`opts.asOf` or the originating `Segment.asOf`) the hop's guards were
+   * evaluated against and the fact was minted under, so a reproducible mining run can verify exactly
+   * which frontier produced this fact. `mintFact` now genuinely carries it through onto the minted
+   * fact (an earlier build set it in the authoring provenance but `mintFact`'s provenance rebuild
+   * silently dropped it — the drop is fixed). Never part of the canonical signed payload
+   * (`canonical-payload.ts`'s `buildCanonicalEnvelope` only extracts `author`/`publicKeyFingerprint`
+   * off `provenance` — mirrors `source`/`confidence` above, advisory-only, never affects
+   * `factCID`/signature/reducer behavior).
    */
   resolvedAsOf?: AsOf;
 }
@@ -1019,6 +1022,30 @@ export type KipErrorCode =
    */
   | "ERR_ILL_TYPED_SEGMENT"
   | "ERR_UNREGISTERED_MANIFEST"
+  /**
+   * M7 round-2 (convergence-safety / security — authority-escalation surface): `runAcquisition`
+   * commits an acquisition family microagent's `AcquisitionResult.proposed` as immediately-effective
+   * ORCHESTRATOR-SIGNED facts. The full untrusted/quarantine trust overlay (INV-A10(a) §8.1) is M8,
+   * so until it lands `runAcquisition` MUST NOT let a (possibly compromised/malicious) acquisition
+   * microagent mint CONTROL-PLANE / authority facts — a `schema`/`key`/`control` target would
+   * otherwise be authored as authoritative state (a microagent-registration a later dispatch resolves,
+   * a key/schema fact, etc.). Authority facts are NEVER acquisition-authored: a proposed entry whose
+   * target is not a DATA target (`node`/`edge`/`node-prop`/`edge-prop`) is rejected with this code
+   * BEFORE the commit txn opens (no partial facts). `same_as` merge facts the seam authors itself are
+   * ordinary data edges and unaffected.
+   */
+  | "ERR_ACQUISITION_TARGET_FORBIDDEN"
+  /**
+   * M7 round-2 (INV-A10 divergent-registration clause, docs/33 §Conformance / docs/40): two
+   * microagent-registrations of the SAME `(name, version)` carrying DIVERGENT manifest descriptors
+   * read CONFLICTED — "a LWW-overwrite fails" (docs/60 INV-A10). `runAcquisition` therefore refuses
+   * to dispatch a family whose named `(name, version)` registration is conflicted, rather than
+   * silently LWW-picking one of the divergent descriptors (the violating build docs/60 flags, and a
+   * silent-pick N5/CLAUDE.md "fallbacks are evil" forbids). Thrown BEFORE any dispatch — no microagent
+   * runs, no fact is authored. A single registration (or repeated registration of the byte-identical
+   * descriptor) is not conflicted and dispatches normally.
+   */
+  | "ERR_CONFLICTED_REGISTRATION"
   | "ERR_INVALID_WEIGHT"
   | "ERR_HASH_ALGO_MISMATCH"
   | "ERR_MANIFEST_FORK"
@@ -2476,6 +2503,15 @@ export class KipRepo implements Repo {
         signedFields: [...CANONICAL_ENVELOPE_FIELDS],
         source: input.provenance.source,
         confidence: input.provenance.confidence,
+        // R5 self-describing frontier: carry the caller's advisory `resolvedAsOf` (the resolved
+        // reproducibility pin `executeSegment`/`runAcquisition` stamp on the facts they author)
+        // through onto the minted fact. It is deliberately OUTSIDE `CANONICAL_ENVELOPE_FIELDS` (see
+        // `Provenance.resolvedAsOf`'s JSDoc + `buildCanonicalEnvelope`), so it never perturbs
+        // `factCID`/`id`/`signature`/reducers — purely advisory audit metadata. Previously dropped
+        // here (this rebuild copied only source/confidence), which silently falsified both the
+        // `resolvedAsOf` JSDoc and the `runAcquisition`/`executeSegment` doc-comments claiming it is
+        // "recorded on every authored fact's provenance"; now genuinely recorded.
+        resolvedAsOf: input.provenance.resolvedAsOf,
       },
     };
     const canonicalPayload = canonicalPayloadString(draft as Fact);
@@ -2693,8 +2729,23 @@ export class KipRepo implements Repo {
     // tombstone closes node-existence only; it does not retract incident edges).
     const facts = this.currentFacts();
     const projection = proj(facts, this.projOptions(facts));
-    if (!projection.nodeLiveVisibleAt(eid, null)) return null;
-    return applyLiveExcisionLens(projection.getNode(eid));
+    // Resolve the same_as canonical FIRST, then gate on existence. A merged alias (a `candidate`
+    // named ONLY in a `same_as(candidate, existing)` pair, with no existence fact of its own — the
+    // patent node-merge of a KNOWN existing instance) has no raw existence at `eid`, but the entity
+    // it aliases genuinely exists at its canonical eid. Gating on the RAW `eid` alone would drop such
+    // a merge (invisible), so the M7 acquisition seam previously had to FABRICATE a source-attributed
+    // existence fact for the alias to make the merge observable — authoring a node the acquisition
+    // source never proposed (a spec violation, docs/33: a `sameAs` pair maps to a signed `same_as`
+    // fact ONLY). Gating on `view.eid` (the resolved canonical — identical to `eid` for every
+    // non-merged node, so tombstone/expiry behavior is unchanged) fixes observability in the READ
+    // path instead, requiring no fabricated existence. Additive: a node live at its raw `eid` stays
+    // visible exactly as before; only a raw-invisible alias whose canonical IS live is newly
+    // resolved. When NEITHER the raw eid nor its canonical exists, this still returns `null`
+    // (fail-loud, never a fabricated ghost).
+    const view = projection.getNode(eid);
+    if (!view) return null;
+    if (!projection.nodeLiveVisibleAt(eid, null) && !projection.nodeLiveVisibleAt(view.eid, null)) return null;
+    return applyLiveExcisionLens(view);
   }
 
   /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment).
@@ -4985,6 +5036,28 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * INV-A10 divergent-registration clause (docs/33 §Conformance / docs/60): is the `(name, version)`
+   * registration CONFLICTED — i.e. does S hold two or more non-retracted registration facts on the
+   * SAME `ontologyRefForManifest` cell whose descriptors DIVERGE? `findRegisteredManifest` above
+   * resolves such a cell by orderKey (LWW), which docs/60 names as the VIOLATING build ("a
+   * LWW-overwrite fails"); the acquisition seam consults this to refuse a silent LWW-pick instead
+   * (N5). Divergence is decided by canonical (`deepSortKeys`) value equality over the same
+   * pinned-frontier fact set every other registration read uses — repeated registration of the
+   * byte-identical descriptor folds to ONE canonical value and is NOT conflicted; two different
+   * descriptors are. A pure function of S at `asOf` (convergent across replicas).
+   */
+  private registrationIsConflicted(name: string, version: string, asOf?: AsOf): boolean {
+    const ref = ontologyRefForManifest(name, version);
+    const distinctDescriptors = new Set<string>();
+    for (const f of this.selectFactsForContextualAsOf(asOf)) {
+      if (f.type === "retract") continue;
+      if (f.target.kind !== "schema" || f.target.ontologyRef !== ref) continue;
+      distinctDescriptors.add(JSON.stringify(deepSortKeys(f.value as unknown)));
+    }
+    return distinctDescriptors.size > 1;
+  }
+
+  /**
    * T6.3: PHASE 2 — executes ONE caller-chosen `Segment` in the deterministic topological order over
    * `Segment.deps` (the `steps[]` index order when `deps` is empty/absent, docs/31's linear case).
    * `opts.asOf` (falling back to the compiled `segment.asOf`, CRITICAL FIX #2) is the resolved
@@ -5224,13 +5297,292 @@ export class KipRepo implements Repo {
     return this.executeSegment(segment);
   }
 
-  // TODO(M7/T8.1): dispatch a standalone Miner/Discoverer/Ingestor/RDF family microagent (ADR-022/023).
+  /**
+   * T8.1 (M7, docs/33-mining-discovery-ingestion.md, docs/40 §"runAcquisition", ADR-D-5b.3): the
+   * SOURCELESS (non-edge-bound) seam for the Miner / Discoverer / Ingestor / RDF-Ingestor families —
+   * "privilege-equal genty-microagent clients". The orchestrator dispatches the caller-named family
+   * microagent through the SAME injectable `dispatchMicroagent` seam `executeSegment`/`learn` use, then
+   * commits its returned `AcquisitionResult` as ORDINARY orchestrator-signed facts. INV-A1 holds
+   * throughout: the microagent RETURNS data; only the orchestrator (here) calls `assertFact`/
+   * `retractFact` — a family that could write `/heads` itself is the rejected "trusted-on-import"
+   * daemon (D-5b.3). The open-set rule (docs/33): ANY manifest whose output validates as an
+   * `AcquisitionResult` is a family member — no family is special-cased; the four named families all
+   * commit through this one seam with the identical lifecycle.
+   *
+   * The `AcquisitionResult` → facts mapping is PINNED (docs/33 §"AcquisitionResult → facts data flow",
+   * INV-A10(e)/(f)):
+   *   1. each `proposed` entry → exactly one signed fact with its OWN kind PRESERVED (`AssertInput` →
+   *      `assert` via `assertFact`, `RetractInput` → `retract` via `retractFact`; a mixed batch is
+   *      committed verbatim, never coerced);
+   *   2. each `sameAs` entry → exactly one signed `same_as(candidate, existing)` edge fact ONLY
+   *      (never an in-place rewrite; a contradiction surfaces `kip:conflict` via the §5b.1 union-find
+   *      closure). The orchestrator does NOT synthesize existence for a merge endpoint the
+   *      AcquisitionResult did not `propose` — the patent node-merge merges two KNOWN instances, and
+   *      observing the merge is a READ-path concern (`getNode` resolves the same_as canonical and
+   *      gates on ITS existence), never a licence to fabricate a source-attributed node the miner
+   *      never surfaced (N5);
+   *   3. `AcquisitionResult.source` recorded as `provenance.source` on EVERY minted fact (1)+(2).
+   * The returned `{ facts: FactId[] }` lists all of (1) then (2) in that EXACT order. A node-prop/
+   * edge-prop proposed entry gets its companion node/edge existence fact ensured (proj's "no ghost
+   * nodes" gate, the SAME `ensureExistenceFor` `learn` uses) — that bookkeeping fact is authored but
+   * is NOT one of the returned FactIds (the returned list is exactly one FactId per proposed/sameAs
+   * entry, docs/33).
+   *
+   * Reproducibility (R5): `opts.asOf` pins the frontier manifest-resolution reads at and is recorded
+   * (as advisory `provenance.resolvedAsOf`) on every authored fact — genuinely, via `mintFact`.
+   *
+   * Rejections (all BEFORE any fact is authored; every one is a typed `KipError`, N5 — never silent):
+   *   - `ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE` — `opts.asOf.txTime` set (this seam authors
+   *     DURABLE signed facts; a non-convergent txTime read would diverge them across replicas — the
+   *     IDENTICAL INV-A2 guard `executeSegment`/`learn` apply);
+   *   - `ERR_UNREGISTERED_MANIFEST` — the named `(name, version)` has no signature-valid registration
+   *     fact (never heuristically substituted);
+   *   - `ERR_CONFLICTED_REGISTRATION` — the named `(name, version)` has DIVERGENT registration
+   *     descriptors (INV-A10 divergent-registration clause: "a LWW-overwrite fails" — refuse the
+   *     silent LWW-pick `findRegisteredManifest` would otherwise make);
+   *   - `ERR_MALFORMED_INPUT` — the dispatched microagent's OUTPUT is unusable: non-zero exitCode,
+   *     fails the registered `outputSchema`, or is not a well-formed `AcquisitionResult`;
+   *   - `ERR_ACQUISITION_TARGET_FORBIDDEN` — a `proposed` entry names a control-plane target
+   *     (`schema`/`key`/`control`); authority facts are never acquisition-authored (M7 guard; §8.1
+   *     trust path is M8).
+   */
   async runAcquisition(
-    _manifest: MicroagentManifest,
-    _input: unknown,
-    _opts?: { asOf?: AsOf },
+    manifest: MicroagentManifest,
+    input: unknown,
+    opts?: { asOf?: AsOf },
   ): Promise<{ facts: FactId[] }> {
-    throw new Error("unimplemented: runAcquisition");
+    // INV-A2 parity (same guard as compileContextualQuery/executeSegment/learn): a txTime-pinned
+    // frontier resolves through this replica's own non-convergent rxFrom receive-tick history —
+    // reaching it here would make the DURABLE, signed facts this seam authors diverge across replicas.
+    if (opts?.asOf?.txTime !== undefined) {
+      throw new KipError(
+        "ERR_ASOF_TXTIME_NOT_SUPPORTED_FOR_COMPILE",
+        "runAcquisition: asOf.txTime is not supported for this seam — the identical INV-A2 compile-" +
+          "determinism reasoning as executeSegment/learn applies (opts.asOf is threaded into " +
+          "findRegisteredManifest, which resolves through this replica's non-convergent rxFrom history " +
+          "when txTime is set), except reaching it here would make DURABLE signed acquisition facts " +
+          "diverge across replicas. Pin asOf.validTime instead, or omit asOf.txTime entirely.",
+        { asOf: opts.asOf },
+      );
+    }
+
+    // INV-A13 parity / docs/40: the named family manifest MUST carry a signature-valid registration
+    // fact — resolved via the SAME `findRegisteredManifest` check executeSegment/learn use, BEFORE any
+    // dispatch. An unregistered/unsigned manifest is rejected (never heuristically substituted, N5).
+    const registered = this.findRegisteredManifest(manifest.name, manifest.version, opts?.asOf);
+    if (!registered) {
+      throw new KipError(
+        "ERR_UNREGISTERED_MANIFEST",
+        `runAcquisition: the named family manifest "${manifest.name}@${manifest.version}" has no ` +
+          "signature-valid registration fact in S — rejected BEFORE any dispatch (docs/40): no " +
+          "microagent is dispatched and no fact is authored.",
+        { manifest: { name: manifest.name, version: manifest.version } },
+      );
+    }
+    // INV-A10 divergent-registration clause (docs/33 §Conformance / docs/60): if the named
+    // `(name, version)` carries DIVERGENT registration descriptors it reads CONFLICTED — "a
+    // LWW-overwrite fails". `findRegisteredManifest` above resolves a single winner by orderKey (LWW),
+    // exactly the silent-pick the spec flags as the VIOLATING build; refuse to dispatch against a
+    // conflicted registration rather than launder that pick (N5, no fallbacks). BEFORE any dispatch.
+    if (this.registrationIsConflicted(manifest.name, manifest.version, opts?.asOf)) {
+      throw new KipError(
+        "ERR_CONFLICTED_REGISTRATION",
+        `runAcquisition: the named family manifest "${manifest.name}@${manifest.version}" has ` +
+          "DIVERGENT registration descriptors in S — the registration cell reads CONFLICTED " +
+          "(INV-A10, docs/60). Rejected BEFORE any dispatch rather than silently LWW-picking one " +
+          "descriptor: no microagent is dispatched and no fact is authored.",
+        { manifest: { name: manifest.name, version: manifest.version } },
+      );
+    }
+
+    // Dispatch the family microagent EXACTLY once, through the injectable seam, with the caller's
+    // `input` threaded VERBATIM (INV-A1: the microagent RETURNS data; it never writes the graph).
+    const invocation: MicroagentInvocation = {
+      id: `acquisition:${manifest.name}@${manifest.version}`,
+      manifest: { name: manifest.name, version: manifest.version },
+      input,
+      timeout: registered.runtime.timeout,
+    };
+    const result = await this.dispatchMicroagent(invocation);
+
+    // N5 (fail loudly, never a best-effort accept of a failed dispatch): a non-zero exitCode, an
+    // outputSchema-invalid output, or an output that is not a well-formed AcquisitionResult is a hard
+    // error — no partial facts are authored.
+    if (result.exitCode !== 0) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `runAcquisition: family microagent "${manifest.name}@${manifest.version}" returned a non-zero ` +
+          `exitCode (${result.exitCode}) — no AcquisitionResult to commit (N5, never a best-effort accept).`,
+        { exitCode: result.exitCode },
+      );
+    }
+    if (!validateAgainstOutputSchema(result.output, registered.outputSchema)) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `runAcquisition: family microagent "${manifest.name}@${manifest.version}" output failed its ` +
+          "registered outputSchema — refused rather than committing an unvalidated payload (INV-A3(b) parity).",
+        {},
+      );
+    }
+    const acq = result.output;
+    if (!isAcquisitionResultShape(acq)) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `runAcquisition: family microagent "${manifest.name}@${manifest.version}" output is not a ` +
+          "well-formed AcquisitionResult ({ proposed: (AssertInput|RetractInput)[], source: Provenance, " +
+          "sameAs? }) — refused (N5).",
+        {},
+      );
+    }
+
+    // Authority-escalation guard (M7 round-2): an acquisition microagent RETURNS data, but every
+    // proposed entry the orchestrator commits here is authored as an immediately-effective
+    // ORCHESTRATOR-SIGNED fact. `isWellFormedTarget` (well-formed.ts) admits ALL recognized target
+    // kinds INCLUDING the control-plane kinds `schema`/`key`/`control` — so without this guard a
+    // microagent could propose a microagent-registration (`schema`), key, or control fact and have it
+    // authored as authoritative state (an authority escalation; the full untrusted/quarantine trust
+    // overlay that would otherwise contain it is INV-A10(a)/§8.1, deferred to M8). Authority facts are
+    // NEVER acquisition-authored: restrict proposed targets to DATA kinds (node/edge/node-prop/
+    // edge-prop). Rejected BEFORE the commit txn opens (no partial facts). The `same_as` merge edges
+    // this seam authors itself are ordinary data edges, unaffected.
+    for (const entry of acq.proposed) {
+      if (!isAcquisitionDataTarget(entry.target)) {
+        throw new KipError(
+          "ERR_ACQUISITION_TARGET_FORBIDDEN",
+          `runAcquisition: family microagent "${manifest.name}@${manifest.version}" proposed a ` +
+            `control-plane target (kind "${entry.target.kind}") — acquisition may author ONLY data ` +
+            "facts (node/edge/node-prop/edge-prop). Authority facts (schema/key/control) are never " +
+            "acquisition-authored (M7 authority-escalation guard; the §8.1 trust path is M8). No fact " +
+            "is authored.",
+          { targetKind: entry.target.kind },
+        );
+      }
+    }
+
+    // Source provenance recorded on EVERY authored fact (docs/33 step 3) — the orchestrator's OWN
+    // signed provenance (INV-A1), carrying the AcquisitionResult's source (data-resource id) forward.
+    // A candidate entry's own caller-declared replicaId/author is NEVER trusted as this method's
+    // authoring identity: the ORCHESTRATOR authors, re-stamping replicaId + a real signature below.
+    const acqProvenance = (): Provenance => ({
+      author: "kip-orchestrator:runAcquisition",
+      signature: "", // re-stamped by assertFact/retractFact's own signing step (INV-A1)
+      publicKeyFingerprint: "",
+      signedFields: [],
+      source: acq.source.source,
+      confidence: acq.source.confidence,
+      resolvedAsOf: opts?.asOf,
+    });
+
+    // Commit (1) proposed then (2) sameAs, in that EXACT order, as ONE atomic txn batch (all-or-
+    // nothing durability + commit-DAG visibility, the SAME batching primitive learn's accept path
+    // uses). The returned FactId[] is exactly one id per proposed/sameAs entry — companion existence
+    // bookkeeping facts are authored (proj's no-ghost-nodes gate) but NOT part of the returned list.
+    const { result: committedFactIds } = await this.txn(async (tx) => {
+      const ids: FactId[] = [];
+      // D-39 parity: pre-seed staged existence eids for any EXPLICIT node/edge existence entry so a
+      // same-eid node-prop/edge-prop entry's `ensureExistenceFor` never mints a second kind-less
+      // existence fact that would blank the projected kind.
+      const stagedExistenceEids = new Set<EID>();
+      for (const entry of acq.proposed) {
+        if (entry.target.kind === "node" || entry.target.kind === "edge") stagedExistenceEids.add(entry.target.eid);
+      }
+      for (const entry of acq.proposed) {
+        // Companion existence for a node-prop/edge-prop target (proj m2-2) — authored with the SAME
+        // acquisition source provenance, but NOT counted in the returned FactId[] (docs/33: one
+        // returned id per proposed entry).
+        // eslint-disable-next-line no-await-in-loop -- existence must precede its dependent prop fact.
+        await this.ensureAcquisitionExistence(entry.target, tx, stagedExistenceEids, acqProvenance);
+        const authored = {
+          ...entry,
+          replicaId: this.replicaId,
+          provenance: acqProvenance(),
+        };
+        // Kind PRESERVED 1:1 (INV-A10(e)): an AssertInput mints a signed `assert`, a RetractInput a
+        // signed `retract` — never coerced.
+        // eslint-disable-next-line no-await-in-loop -- sequential HLC/seq chain advance per fact.
+        const minted =
+          entry.type === "retract"
+            ? await tx.retractFact(authored as RetractInput)
+            : await tx.assertFact(authored as AssertInput);
+        ids.push(minted.id);
+      }
+      // (2) each sameAs → one signed same_as(candidate, existing) edge fact (docs/33 step 2, INV-A10(b))
+      // — an ordinary signed edge (docs/31: same_as is a plain-string EdgeKind), NEVER an in-place
+      // rewrite; the §5b.1 union-find closure folds it to the canonical rep and surfaces kip:conflict
+      // against a contradicting not_same_as.
+      for (const { candidate, existing } of acq.sameAs ?? []) {
+        // A `sameAs` pair maps to a signed `same_as` fact ONLY (docs/33 step 2) — the orchestrator
+        // NEVER synthesizes existence for an endpoint the AcquisitionResult did not propose. The
+        // patent node-merge merges two KNOWN instances; observing the merge is a READ-path concern
+        // (getNode resolves the same_as canonical and gates on ITS existence, see getNode), not a
+        // reason to fabricate a source-attributed node the miner never surfaced (N5: fail loud, never
+        // fabricate). If neither endpoint exists, getNode(candidate) reads null — the honest answer.
+        // eslint-disable-next-line no-await-in-loop -- sequential HLC/seq chain advance per fact.
+        const minted = await tx.assertFact({
+          type: "assert",
+          v: 1,
+          target: {
+            kind: "edge",
+            eid: `same_as/${this.replicaId}/${candidate}/${existing}`,
+            edgeKind: "same_as",
+            from: candidate,
+            to: existing,
+          },
+          value: true,
+          validFrom: 0,
+          validTo: null,
+          replicaId: this.replicaId,
+          provenance: acqProvenance(),
+        });
+        ids.push(minted.id);
+      }
+      return ids;
+    });
+
+    return { facts: committedFactIds };
+  }
+
+  /**
+   * M7 (`runAcquisition`): ensure the node/edge a `node-prop`/`edge-prop` proposed entry targets is
+   * recorded as existing (proj's "no ghost nodes" gate, m2-2) — the SAME principle as `learn`'s own
+   * `ensureExistenceFor`, but stamped with the ACQUISITION source provenance (not learn's) so the
+   * companion bookkeeping fact carries the same `provenance.source` as the entry it supports. A no-op
+   * (never counted in the returned FactId[]) when an existence fact for this eid is already durable or
+   * already staged in THIS batch. `node`/`edge`/`schema`/`key`/`control` targets need no companion
+   * fact (a `node`/`edge` target IS the existence fact itself).
+   */
+  private async ensureAcquisitionExistence(
+    target: Target,
+    tx: Tx,
+    stagedExistenceEids: Set<EID>,
+    provenance: () => Provenance,
+  ): Promise<void> {
+    let eid: EID;
+    let existsTarget: Target;
+    let alreadyExists: boolean;
+    if (target.kind === "node-prop") {
+      eid = target.eid;
+      existsTarget = { kind: "node", eid: target.eid };
+      alreadyExists = stagedExistenceEids.has(eid) || (await this.getNode(target.eid)) !== null;
+    } else if (target.kind === "edge-prop") {
+      eid = target.eid;
+      existsTarget = { kind: "edge", eid: target.eid };
+      alreadyExists = stagedExistenceEids.has(eid) || (await this.getEdge(target.eid)) !== null;
+    } else {
+      return;
+    }
+    if (alreadyExists) return;
+    await tx.assertFact({
+      type: "assert",
+      v: 1,
+      target: existsTarget,
+      value: true,
+      validFrom: 0,
+      validTo: null,
+      replicaId: this.replicaId,
+      provenance: provenance(),
+    });
+    stagedExistenceEids.add(eid);
   }
 
   /**
@@ -6073,6 +6425,66 @@ function isAssertInputArray(value: unknown): value is AssertInput[] {
       // `provenance` must itself be a plain object — this is the field whose absence previously
       // crashed at ACCEPT time (`candidateInput.provenance.source` off `undefined`).
       isPlainRecord(item.provenance),
+  );
+}
+
+/**
+ * M7 (`runAcquisition`, docs/33 §"AcquisitionResult → facts data flow"): a structural guard for the
+ * family microagent's OUTPUT payload. A permissive registered `outputSchema` (e.g. `{}`) admits any
+ * shape, so `runAcquisition` deep-checks the AcquisitionResult contract itself before mapping it to
+ * facts — `proposed` an array of well-formed `assert`/`retract` entries (each with a well-formed
+ * target, mirroring `isAssertInputArray`'s own root-cause check), `source` a plain-object Provenance,
+ * and `sameAs` (optional) an array of `{ candidate, existing }` EID pairs. A malformed payload is
+ * refused (N5, fail loudly), never partially committed.
+ */
+function isAcquisitionResultShape(v: unknown): v is {
+  proposed: ReadonlyArray<AssertInput | RetractInput>;
+  source: Provenance;
+  sameAs?: ReadonlyArray<{ candidate: EID; existing: EID }>;
+} {
+  if (!isPlainRecord(v)) return false;
+  if (!Array.isArray(v.proposed)) return false;
+  const proposedOk = v.proposed.every(
+    (item) =>
+      isPlainRecord(item) &&
+      (item.type === "assert" || item.type === "retract") &&
+      typeof item.v === "number" &&
+      isWellFormedTarget(item.target) &&
+      item.validFrom !== undefined &&
+      "validTo" in item &&
+      typeof item.replicaId === "string" &&
+      item.replicaId.length > 0 &&
+      isPlainRecord(item.provenance),
+  );
+  if (!proposedOk) return false;
+  if (!isPlainRecord(v.source)) return false;
+  if (v.sameAs !== undefined) {
+    if (!Array.isArray(v.sameAs)) return false;
+    if (
+      !v.sameAs.every(
+        (p) => isPlainRecord(p) && typeof p.candidate === "string" && typeof p.existing === "string",
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * M7 authority-escalation guard (`runAcquisition`): is `target` a DATA target the acquisition seam may
+ * author? `isWellFormedTarget` (well-formed.ts) admits the control-plane kinds `schema`/`key`/`control`
+ * too, but an acquisition microagent's `proposed` facts are committed as immediately-effective
+ * orchestrator-SIGNED state — so this restricts them to instance-level data targets
+ * (`node`/`edge`/`node-prop`/`edge-prop`). Authority (`schema`/`key`/`control`) facts are never
+ * acquisition-authored (the §8.1 trust path is M8; see `ERR_ACQUISITION_TARGET_FORBIDDEN`).
+ */
+function isAcquisitionDataTarget(target: Target): boolean {
+  return (
+    target.kind === "node" ||
+    target.kind === "edge" ||
+    target.kind === "node-prop" ||
+    target.kind === "edge-prop"
   );
 }
 

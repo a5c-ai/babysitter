@@ -27,6 +27,7 @@ import {
   acqPropAssert,
   acqSource,
   acquisitionOk,
+  buildManifest,
   freshReplicaId,
   makeScriptedDispatch,
   registerAcquisitionManifest,
@@ -184,10 +185,47 @@ describe("M7 runAcquisition — dispatches a standalone family microagent and co
     expect(facts.length).toBe(1);
   });
 
+  it("N5 (fail loud, never a best-effort accept): a dispatched microagent returning a non-zero exitCode is rejected with ERR_MALFORMED_INPUT and authors NO facts", async () => {
+    const eid = "tenant/ns/failed-dispatch-obj";
+    const { dispatch } = makeScriptedDispatch({
+      // The handler "wants" `eid` in the graph but reports failure (exitCode !== 0) — its output must
+      // NOT be committed.
+      miner: () => ({ exitCode: 3, output: { proposed: [acqNodeAssert(eid, "person")], source: acqSource() }, elapsedMs: 0 }),
+    });
+    const repo = new KipRepo({ replicaId: freshReplicaId("m7-fail"), dispatchMicroagent: dispatch });
+    repos.push(repo);
+    const manifest = await registerAcquisitionManifest(repo, "miner");
+
+    const p = repo.runAcquisition(manifest, {}, { asOf: FIXED_AS_OF });
+    await expect(p).rejects.toMatchObject({ code: "ERR_MALFORMED_INPUT" });
+    expect(await repo.getNode(eid)).toBeNull();
+  });
+
+  it("N5: an UNREGISTERED (name,version) is rejected with ERR_UNREGISTERED_MANIFEST BEFORE any dispatch — no microagent runs, no fact is authored", async () => {
+    const log: RecordedInvocation[] = [];
+    const { dispatch } = makeScriptedDispatch(
+      { miner: () => acquisitionOk({ proposed: [], source: acqSource() }) },
+      log,
+    );
+    const repo = new KipRepo({ replicaId: freshReplicaId("m7-unreg"), dispatchMicroagent: dispatch });
+    repos.push(repo);
+    // Build a manifest but DELIBERATELY do not register it.
+    const manifest = { ...(await unregisteredManifest()) };
+
+    const p = repo.runAcquisition(manifest, {}, { asOf: FIXED_AS_OF });
+    await expect(p).rejects.toMatchObject({ code: "ERR_UNREGISTERED_MANIFEST" });
+    expect(log.length).toBe(0); // rejected before dispatch
+  });
+
   function mkRepo(handlerName: string, result: () => ReturnType<typeof acquisitionOk>): { repo: KipRepo } {
     const { dispatch } = makeScriptedDispatch({ [handlerName]: () => result() });
     const repo = new KipRepo({ replicaId: freshReplicaId("m7"), dispatchMicroagent: dispatch });
     repos.push(repo);
     return { repo };
+  }
+
+  async function unregisteredManifest(): Promise<import("../index").MicroagentManifest> {
+    // A structurally-valid manifest that is never registered (no signature-valid registration fact).
+    return buildManifest({ name: "miner", version: "9.9.9" });
   }
 });
