@@ -12,6 +12,12 @@
 - 1feb75c46 feat(kip-sdk): M7-acquisition (TDD converged min=92, acceptance PASS) (Tal Muskal, 22 hours ago)
 - c6137fbc3 feat(kip-sdk): M4-retrieval (TDD converged min=90, acceptance PASS) (Tal Muskal, 23 hours ago)
 
+### Bug Fixes
+- No changes.
+
+### Refactors
+- No changes.
+
 ### Documentation
 - fae53b9ab docs(kip-sdk): fix-all final report + integration verification (Tal Muskal, 10 hours ago)
 - 66fe42ba6 docs: changelog update 2026-07-15 (#1412) (a5c-ai[bot], 24 hours ago)
@@ -25,6 +31,12 @@
 - 1e4e3ca26 test(kip-sdk): frozen M8-security tests (spec-driven, pre-implementation) (Tal Muskal, 21 hours ago)
 - 43f6dd688 test(kip-sdk): frozen M7-acquisition tests (spec-driven, pre-implementation) (Tal Muskal, 23 hours ago)
 - ec980e959 test(kip-sdk): frozen M4-retrieval tests (spec-driven, pre-implementation) (Tal Muskal, 24 hours ago)
+
+### CI/CD
+- No changes.
+
+### Maintenance
+- No changes.
 
 ## [Unreleased] - 2026-07-15
 
