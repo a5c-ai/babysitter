@@ -23,7 +23,7 @@ import type {
 } from "../index";
 import { KipError, open } from "../index";
 import { answerQuestion } from "../graph-qa";
-import type { Synthesize } from "../graph-qa";
+import type { Synthesize, SynthesisOutput } from "../graph-qa";
 
 /** The genty-platform module specifier (spec §1/§5) — the documented seam a deploying host uses to
  *  own `runtime.model`. Held as a string constant (never a compile-time dependency: genty is a
@@ -98,6 +98,153 @@ function gentyModelSynthesize(model: string | undefined, timeoutMs: number | und
         "Supply the model by injecting a `synthesize` into `answerQuestion`, or by dispatching the " +
         "kip-graph-qa manifest through a genty subprocess entrypoint that owns `runtime.model`. " +
         "Refusing to fabricate an answer (N5).",
+    );
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ADR-B8 — the PRODUCTION synthesis seam: spawn the already-authenticated `claude` CLI via
+// `node:child_process` (a Node BUILTIN — kip-sdk's dep set stays exactly `{isomorphic-git}`, the
+// lockfile is untouched, and no `@a5c-ai/babysitter-sdk` / genty / adapters module is imported, so
+// the AC-1 boundary and the string-specifier seam at the top of this file both survive).
+//
+// STATUS: the declarations below are the FROZEN CONTRACT (types + signatures) that
+// `src/__tests__/graph-qa-live.test.ts` pins; the bodies are UNIMPLEMENTED throwing stubs this round
+// (the established frozen-test convention — see `graph-qa.test.ts` / `kip-cli.test.ts` headers), so
+// every test fails on a real ASSERTION, never on a type/import error. Implementation lands next
+// round and rebinds {@link defaultDispatchMicroagent} from {@link gentyModelSynthesize} to
+// {@link harnessCliSynthesize}; nothing on the existing path changes until then.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+
+/** The observed result of ONE harness-CLI process run (ADR-B8: `exitCode` is HALF the success gate). */
+export interface HarnessCliRun {
+  /** The child's exit code. Non-zero ⇒ dispatch failure, whatever the envelope claims. */
+  exitCode: number;
+  /** The child's raw stdout — a single `--output-format json` result envelope when the call worked. */
+  stdout: string;
+  /** The child's raw stderr (diagnostics only; never parsed as an answer). */
+  stderr?: string;
+}
+
+/**
+ * The ONE spawn the production synthesizer issues (ADR-B8's verified invocation contract). Injected
+ * as {@link HarnessCliRunner} so the argv/stdin/cwd/timeout contract is assertable with ZERO spend and
+ * zero machine dependence.
+ */
+export interface HarnessCliRequest {
+  /** The harness binary (the `claude` on PATH — `claude-adapter.ts:42`'s `cliCommand = this.agent`). */
+  command: string;
+  /** The flags ONLY. The fact context MUST NOT appear here (Windows caps argv at ~32k). */
+  args: string[];
+  /** The rendered `{ question, facts }` context — STDIN, never argv (ADR-B8 prompt transport). */
+  stdin: string;
+  /** `os.tmpdir()` — never `repoDir` (no `CLAUDE.md` auto-discovery, no cwd-relative reach). */
+  cwd: string;
+  /** The effective per-call timeout (ADR-B8 flags the bundled 30s as too tight). */
+  timeoutMs: number;
+}
+
+/** Runs one {@link HarnessCliRequest}. The default spawns via `node:child_process`; tests inject. */
+export type HarnessCliRunner = (req: HarnessCliRequest) => Promise<HarnessCliRun>;
+
+/**
+ * The AVAILABILITY probe result (ADR-B8 testability). `available: false` carries the human REASON a
+ * live test reports through `ctx.skip(reason)` — never a silent pass, and never a fabricated answer.
+ */
+export type HarnessCliProbe = { available: true } | { available: false; reason: string };
+
+/** Injection seams for {@link probeHarnessCli} — both real probes are unpaid and spend nothing. */
+export interface HarnessCliProbeDeps {
+  /** Exit code of `claude --version` (0 ⇒ the binary is on PATH). Non-zero on ENOENT. */
+  probeVersion?: () => number;
+  /** Defaults to `process.env` — read for `ANTHROPIC_API_KEY`. */
+  env?: NodeJS.ProcessEnv;
+  /** Defaults to `existsSync(join(homedir(), ".claude", ".credentials.json"))` — the adapters'
+   *  own `authFiles` pattern (`claude-agent-sdk-adapter.ts:189`/`:483`). */
+  credentialsExist?: () => boolean;
+}
+
+/**
+ * Probe whether the local harness CLI can serve a live synthesis: the binary answers `--version` at
+ * exit 0 AND a credential is present (`ANTHROPIC_API_KEY` or `~/.claude/.credentials.json`).
+ *
+ * HONEST BOUNDARY (ADR-B8): the credential check proves credentials EXIST, not that they are VALID —
+ * an expired token still leaves the file on disk. That asymmetry is deliberate and drives the
+ * load-bearing rule: **the probe decides SKIP; everything after the probe decides PASS/FAIL.**
+ */
+export function probeHarnessCli(deps?: HarnessCliProbeDeps): HarnessCliProbe {
+  void deps;
+  throw new Error(
+    "unimplemented: probeHarnessCli — ADR-B8 (probe `claude --version` exit 0 + ANTHROPIC_API_KEY or " +
+      "~/.claude/.credentials.json)",
+  );
+}
+
+/**
+ * Map the effective `runtime.model` to a concrete harness model id (ADR-B8 "MODEL ALIAS MISMATCH").
+ * The bundled manifest ships the SENTINEL `"kip-graph-qa-default"` (`microagent.json:59`), which is
+ * NOT a claude model id — passing it to `--model` would fail. An explicit `--model` override
+ * (`runAsk`'s `effectiveModel`) passes through untouched.
+ */
+export function resolveHarnessModel(model: string | undefined): string {
+  void model;
+  throw new Error("unimplemented: resolveHarnessModel — ADR-B8 (map the `kip-graph-qa-default` sentinel)");
+}
+
+/**
+ * Parse one harness-CLI run into a {@link SynthesisOutput} — the TWO-STAGE parse and the critical
+ * SAFETY GATE (ADR-B8):
+ *
+ *   1. `JSON.parse(stdout)` → the result envelope;
+ *   2. **gate on `exitCode === 0 && is_error === false`** — *** NEVER on `env.subtype` ***: the
+ *      verified auth-failure envelope is `{"subtype":"success","is_error":true,"result":"Not logged
+ *      in · Please run /login"}`, i.e. subtype claims success while `is_error` is true. Gating on
+ *      `subtype` would hand that string to the citation filter and emit it AS AN ANSWER with zero
+ *      citations — precisely the N5 fabrication this design exists to prevent;
+ *   3. `JSON.parse(env.result)` — `result` is a JSON *string*, not an object;
+ *   4. validate `{ answer: string, citations: Array<{ factId: string }> }`.
+ *
+ * ANY deviation throws {@link AskSynthesisUnavailableError} (→ exit 5 / `ERR_ASK_DISPATCH_FAILED`).
+ * It NEVER coerces, and it NEVER surfaces an error string as prose.
+ */
+export function parseHarnessCliResult(run: HarnessCliRun): SynthesisOutput {
+  void run;
+  throw new Error(
+    "unimplemented: parseHarnessCliResult — ADR-B8 (two-stage parse; gate on exitCode + is_error, " +
+      "NEVER subtype)",
+  );
+}
+
+/** Construction options for {@link harnessCliSynthesize}. `run`/`probe` are test-injection seams. */
+export interface HarnessCliSynthesizeOptions {
+  /** The effective `runtime.model` (`runAsk`'s `effectiveModel`), mapped by {@link resolveHarnessModel}. */
+  model?: string;
+  /** The effective per-call timeout; absent ⇒ the ADR-B8 default (the bundled 30s is too tight). */
+  timeoutMs?: number;
+  /** Defaults to a `node:child_process` spawn of the {@link HarnessCliRequest}. */
+  run?: HarnessCliRunner;
+  /** Defaults to {@link probeHarnessCli} with real deps. */
+  probe?: () => HarnessCliProbe;
+}
+
+/**
+ * The PRODUCTION `Synthesize` (ADR-B8) — take the CONTRACT, not the dependency. Renders the READ-ONLY
+ * `{ question, facts }` context, spawns the authenticated `claude` CLI (prompt on STDIN, `cwd =
+ * os.tmpdir()`, `--disallowedTools`), and returns the parsed `{ answer, citations }`.
+ *
+ * Safety is STRUCTURAL, not promised: it is handed only `{ question, facts }` and never the `Repo`
+ * (INV-A1 by construction — the model physically cannot write); `answerQuestion` never calls it on
+ * empty retrieval (no model spend on a silent graph); and every citation it returns is filtered
+ * against `usedFacts` before it can surface. When the binary is absent or unauthenticated — or ANY
+ * step of the contract deviates — it degrades to the EXISTING loud failure
+ * ({@link AskSynthesisUnavailableError} → exit 5), never to a guess (N5).
+ */
+export function harnessCliSynthesize(options?: HarnessCliSynthesizeOptions): Synthesize {
+  return (_ctx) => {
+    void options;
+    throw new Error(
+      "unimplemented: harnessCliSynthesize — ADR-B8 (spawn the authenticated `claude` CLI via " +
+        "node:child_process; prompt on stdin, cwd=os.tmpdir())",
     );
   };
 }
