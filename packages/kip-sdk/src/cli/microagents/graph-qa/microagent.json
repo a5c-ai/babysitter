@@ -50,14 +50,16 @@
           }
         }
       },
-      "usedFacts": { "type": "array", "items": { "type": "string" } }
+      "usedFacts": { "type": "array", "items": { "type": "string" } },
+      "model": { "type": "string" },
+      "error": { "type": "string" }
     }
   },
   "isolation": "subprocess",
   "runtime": {
     "entrypoint": "kip-graph-qa.mjs",
     "model": "kip-graph-qa-default",
-    "timeout": 30000,
+    "timeout": 90000,
     "tools": ["kip-read"]
   },
   "tags": ["kip", "qa", "read-only"],

@@ -31,6 +31,10 @@ import type {
   ScopeRef,
   TraversalSpec,
 } from "../index";
+// The SHARED §3.4 citation/abstention guard — the same code `answerQuestion` and `runAsk` run, so
+// every layer that surfaces a citation applies one auditable rule (round-2 review, finding #1).
+import { bindAndValidateCitations, isAbstentionAnswer } from "../graph-qa";
+import type { Citation } from "../graph-qa";
 
 // --- Tool surface (spec §4) ------------------------------------------------
 
@@ -409,6 +413,33 @@ function isValidAskOutput(output: unknown): boolean {
   return typeof o.answer === "string" && Array.isArray(o.citations);
 }
 
+/**
+ * Filter `kip_ask` citations against the retrieval envelope, PRESERVING each citation's shape.
+ *
+ * The `kip_ask` surface carries citations in TWO shapes, and both are real: kip-mcp.md §7.3 pins the
+ * schema as bare graph ids (`items: { type: "string" }`), while the production dispatcher emits §4
+ * `Citation` objects from `answerQuestion`. This never coerces one into the other — it filters each
+ * in its own shape, so a hallucinated `factId` is dropped either way and nothing else changes.
+ *
+ * Object citations go through the SAME shared guard the CLI and the core use, so there is one rule to
+ * audit (round-2 review, finding #1 "one layer up").
+ */
+function filterAskCitations(citations: readonly unknown[], usedFacts: readonly string[]): unknown[] {
+  const envelope = new Set(usedFacts);
+  const kept: unknown[] = [];
+  for (const c of citations) {
+    if (typeof c === "string") {
+      if (envelope.has(c)) kept.push(c); // a bare graph id (§7.3's declared shape)
+      continue;
+    }
+    if (c !== null && typeof c === "object") {
+      const [bound] = bindAndValidateCitations([c as Citation], usedFacts);
+      if (bound !== undefined) kept.push(bound);
+    }
+  }
+  return kept;
+}
+
 const TOOL_HANDLERS: Record<string, (ctx: HandlerCtx, args: unknown) => Promise<unknown>> = {
   async kip_get_node(ctx, args) {
     const a = asObject(args, "kip_get_node");
@@ -599,8 +630,38 @@ const TOOL_HANDLERS: Record<string, (ctx: HandlerCtx, args: unknown) => Promise<
     if (!isValidAskOutput(result.output)) {
       throw new AskDispatchError("graph-QA output failed schema validation");
     }
-    // Read-only tool (INV-A1): the answer is returned verbatim; no fact is ever authored here.
-    return result.output;
+    // Read-only tool (INV-A1): no fact is ever authored here.
+    //
+    // The output is GUARDED, not returned verbatim (round-2 review, finding #1 "one layer up"): this
+    // is a mapping seam that surfaces a dispatcher's `answer`/`citations` to an MCP client, so it
+    // runs the SAME §3.4 guard `runAsk` and `answerQuestion` run. Both round-1 forgeries reproduced
+    // here through a non-default dispatcher: a forged abstention sentinel reported as an answer, and
+    // a citation whose `factId` is outside the retrieval envelope.
+    //
+    //  - ABSTENTION INVARIANT (absolute — a property of the answer string): the canonical phrase is
+    //    reported as an abstention, never as an answer with `abstained: false`.
+    //  - CITATIONS: filtered against the dispatcher's own `usedFacts` and rebuilt from known keys.
+    //    `eid` CONTENT is rebound where the facts live (`answerQuestion` §3.4) — not here, where the
+    //    graph is out of scope and the check would be self-referential.
+    const out = result.output as {
+      answer: string;
+      abstained?: boolean;
+      citations?: unknown[];
+      usedFacts?: string[];
+    };
+
+    // THE ABSTENTION INVARIANT — absolute, and shape-independent: it reads the answer STRING, so no
+    // dispatcher can report the canonical unanswerable phrase as an answer with `abstained: false`.
+    const abstained = out.abstained === true || isAbstentionAnswer(out.answer);
+    if (abstained) return { ...out, abstained, citations: [] };
+
+    // THE ENVELOPE FILTER — applied ONLY when the dispatcher actually reported a `usedFacts`
+    // envelope. With no envelope there is nothing to validate against, and inventing an empty one
+    // would silently delete every legitimate citation — fabricating absence, which is the same class
+    // of lie as fabricating an answer (N5). §7.3's own schema pins `citations` as bare graph ids and
+    // does not require `usedFacts`, so "no envelope" is a real, supported shape, not a degraded one.
+    if (!Array.isArray(out.usedFacts)) return out;
+    return { ...out, citations: filterAskCitations(out.citations ?? [], out.usedFacts) };
   },
 };
 

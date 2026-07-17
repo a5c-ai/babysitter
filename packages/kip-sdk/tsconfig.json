@@ -7,6 +7,15 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
+    // The incremental build state lives INSIDE `dist`, so deleting `dist` invalidates it atomically.
+    // It used to default to `<packageRoot>/tsconfig.tsbuildinfo`, which SURVIVES `rm -rf dist` — and
+    // then `tsc` reads it, concludes every unchanged input is already emitted, and EXITS 0 HAVING
+    // WRITTEN NO JS. A "clean" `rm -rf dist && npm run build` therefore produced a dist with no
+    // `dist/cli/kip.js` at all (reproduced on this machine, round-2 review): the shipped `kip` bin
+    // simply absent, while the asset bundler still dropped `microagent.json` in beside it and made
+    // the result LOOK populated. Co-locating the state with the output makes the build reproducible
+    // by construction, and keeps incrementality when `dist` is intact (unlike `--force`).
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
     "rootDir": "src",
     "strict": true,
     "moduleResolution": "node",

@@ -867,3 +867,106 @@ describe("criterion 22 — kip_get_node output is a single text content item con
     expect(parsed).toHaveProperty("provenance");
   });
 });
+
+// ===========================================================================
+// Round-2 review, finding #1 "one layer up" — `kip_ask` is a MAPPING SEAM, and it used to return a
+// dispatcher's output VERBATIM. Both round-1 forgeries therefore reproduced here through a
+// NON-DEFAULT dispatcher (unreachable via the shipped `kip-mcp`, which wires
+// `defaultDispatchMicroagent`, but reachable through the host-dispatcher seam ADR-B8 recommends —
+// which falsified the ADR's own "always"). The seam now runs the SAME shared guard the core and the
+// CLI run. Every test below drives a non-default dispatcher.
+// ===========================================================================
+
+/** The canonical abstention phrase (kip-graph-qa.md §6.1) — the substrate's signal, not the model's. */
+const MCP_ABSTENTION_ANSWER = "No supporting facts in the knowledge graph.";
+
+describe("round-2 #1 (one layer up) — kip_ask guards a dispatcher's output instead of trusting it", () => {
+  it("THE FORGED SENTINEL: a dispatcher reporting the canonical unanswerable phrase with abstained:false is corrected to an abstention, not surfaced as an answer", async () => {
+    const { dispatch } = makeAskDispatch({
+      exitCode: 0,
+      output: {
+        answer: MCP_ABSTENTION_ANSWER,
+        abstained: false, // the forgery: the substrate's signal, reported as an ANSWER
+        citations: ["F_e"],
+        usedFacts: ["F_e"],
+      },
+      elapsedMs: 0,
+    });
+    const { server } = await build({ dispatch });
+    const res = await callTool(server, "kip_ask", { question: "Where does Tal work?" });
+
+    const body = toolBody(res) as { answer: string; abstained?: boolean; citations: unknown[] };
+    // The invariant is absolute here because it reads the answer STRING — an envelope a dispatcher
+    // authors itself cannot defeat it.
+    expect(body.abstained).toBe(true); // ← was false, contradicting its own prose
+    expect(body.citations).toEqual([]);
+    expect(body.answer).toBe(MCP_ABSTENTION_ANSWER);
+  });
+
+  it("A HALLUCINATED CITATION is dropped against the dispatcher's own usedFacts envelope — in the §7.3 bare-id shape", async () => {
+    const { dispatch } = makeAskDispatch({
+      exitCode: 0,
+      output: {
+        answer: "Tal works at a5c.",
+        citations: ["F_e", "cid-invented-by-the-model"],
+        usedFacts: ["F_e"],
+      },
+      elapsedMs: 0,
+    });
+    const { server } = await build({ dispatch });
+    const res = await callTool(server, "kip_ask", { question: "Where does Tal work?" });
+
+    const body = toolBody(res) as { citations: string[] };
+    expect(body.citations).toEqual(["F_e"]); // the id shape is PRESERVED, never coerced
+    expect(body.citations).not.toContain("cid-invented-by-the-model");
+  });
+
+  it("…and in the Citation-OBJECT shape the production dispatcher actually emits (both shapes are real; neither is coerced into the other)", async () => {
+    const { dispatch } = makeAskDispatch({
+      exitCode: 0,
+      output: {
+        answer: "Tal works at a5c.",
+        citations: [
+          { factId: "F_e", eid: "edge/tal-a5c", edgeKind: "employed_by" },
+          { factId: "cid-invented", eid: "org/evil-corp" },
+        ],
+        usedFacts: ["F_e"],
+      },
+      elapsedMs: 0,
+    });
+    const { server } = await build({ dispatch });
+    const res = await callTool(server, "kip_ask", { question: "Where does Tal work?" });
+
+    const body = toolBody(res) as { citations: Array<Record<string, unknown>> };
+    expect(body.citations).toHaveLength(1);
+    expect(body.citations[0].factId).toBe("F_e");
+    expect(JSON.stringify(body.citations)).not.toContain("org/evil-corp");
+  });
+
+  it("an unknown key a dispatcher attaches to an object citation does not reach the MCP client", async () => {
+    const { dispatch } = makeAskDispatch({
+      exitCode: 0,
+      output: {
+        answer: "Tal works at a5c.",
+        citations: [{ factId: "F_e", eid: "org/a5c", verified: true, signature: "forged-sig" }],
+        usedFacts: ["F_e"],
+      },
+      elapsedMs: 0,
+    });
+    const { server } = await build({ dispatch });
+    const res = await callTool(server, "kip_ask", { question: "Where does Tal work?" });
+    expect(JSON.stringify(toolBody(res))).not.toContain("forged-sig");
+  });
+
+  it("NO usedFacts envelope ⇒ citations pass through UNTOUCHED: with nothing to validate against, inventing an empty envelope would silently delete real citations (fabricating absence, N5)", async () => {
+    // This is the §7.3 shape criterion 15 pins: `{ answer, citations }` with no `usedFacts`.
+    const { dispatch } = makeAskDispatch(
+      askOk({ answer: "Tal works at a5c.", citations: ["F_e"], nodes: ["org/a5c"] }),
+    );
+    const { server } = await build({ dispatch });
+    const res = await callTool(server, "kip_ask", { question: "Where does Tal work?" });
+
+    const body = toolBody(res) as { citations: string[] };
+    expect(body.citations).toEqual(["F_e"]);
+  });
+});

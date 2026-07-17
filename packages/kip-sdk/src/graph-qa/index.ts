@@ -18,12 +18,14 @@
  * retrieval→assembly→citation-binding pipeline end-to-end (validate input → `recall` seed → bounded
  * typed `query` expansion → `getNode`/`getEdge` hydration with per-datum `FactId` binding → abstain
  * on empty retrieval → injected `synthesize` → drop hallucinated citations). The ONLY thing it does
- * NOT ship in-process is the model call itself: that is the caller-injected `synthesize` seam. In
- * production the SDK ships this whole pipeline plus the documented seam; the host supplies the model
- * synthesizer (genty exposes no in-process one-shot completion API — see `src/cli/ask.ts`
- * `gentyModelSynthesize`), and absent one the answer path fails LOUD on the dispatch-failure channel
- * (exit 5 / `ERR_ASK_DISPATCH_FAILED`), never fabricating (N5). All 15 §8 acceptance criteria are
- * covered by `src/__tests__/graph-qa.test.ts`.
+ * NOT ship in-process is the model call itself: that is the caller-injected `synthesize` seam, which
+ * remains the primary override (and is what the deterministic suites inject). The PRODUCTION default
+ * binds `harnessCliSynthesize` (`src/cli/ask.ts`, ADR-B8): it spawns the already-authenticated local
+ * `claude` CLI via `node:child_process` — a Node builtin, so no dependency crosses this boundary. When
+ * no model is available (binary absent/unauthenticated) or the contract deviates, the answer path
+ * still fails LOUD on the dispatch-failure channel (exit 5 / `ERR_ASK_DISPATCH_FAILED`), never
+ * fabricating (N5). All 15 §8 acceptance criteria are covered by `src/__tests__/graph-qa.test.ts`;
+ * the production seam is covered by `src/__tests__/graph-qa-live.test.ts`.
  */
 import type {
   AsOf,
@@ -85,17 +87,28 @@ export interface SynthesisContext {
   facts: RetrievedFact[];
 }
 
-/** A per-claim citation (kip-graph-qa.md §2 `outputSchema.citations[]` / §4). */
+/**
+ * A per-claim citation (kip-graph-qa.md §2 `outputSchema.citations[]` / §4).
+ *
+ * PROVENANCE IS SUBSTRATE-DERIVED, NOT MODEL-SUPPLIED (round-2 finding #1). Of these fields, only
+ * `factId` (which fact the claim leans on) and `quote` (which span of the model's own prose it
+ * supports) are the model's to choose. `eid`/`prop`/`edgeKind` DESCRIBE the cited fact, so
+ * {@link answerQuestion} RECONSTRUCTS them from the {@link RetrievedFact} the `factId` names and
+ * discards whatever the synthesizer put there — see the §3.4 rebinding step.
+ */
 export interface Citation {
-  /** FactId of the signed fact backing this claim (REQUIRED). */
+  /** FactId of the signed fact backing this claim (REQUIRED). Validated against `usedFacts` (§3.4). */
   factId: string;
-  /** The EID the claim is about (node or edge). */
+  /** The EID the claim is about (node or edge). RECONSTRUCTED from the retrieved fact — never the
+   *  synthesizer's. */
   eid?: string;
-  /** For node-prop citations: the PropKey read. */
+  /** For node-prop citations: the PropKey read. RECONSTRUCTED from the retrieved fact. */
   prop?: string;
-  /** For edge citations: the EdgeKind traversed. */
+  /** For edge citations: the EdgeKind traversed. RECONSTRUCTED from the retrieved fact. */
   edgeKind?: string;
-  /** The answer span this fact supports (for grading). */
+  /** The answer span this fact supports (for grading). The model's OWN prose — accelerator-class
+   *  (§5.3), and the only citation field it contributes besides `factId`. It carries no provenance:
+   *  nothing downstream resolves a `quote` to a fact. */
   quote?: string;
 }
 
@@ -144,7 +157,17 @@ export interface AnswerQuestionDeps {
 export interface GraphQaResult {
   /** The NL answer, OR the canonical abstention phrase (§6). */
   answer: string;
-  /** `true` iff no supporting facts were found (§6): answer is the abstention phrase, arrays empty. */
+  /**
+   * `true` iff the answer is the canonical abstention phrase — i.e. `answer === ABSTENTION_ANSWER`
+   * and `citations` is empty, ALWAYS. Two ways to get here, and the flag is consistent across both:
+   *  - **retrieval abstention** (§6.1, the normal case): no supporting facts were found, so
+   *    `synthesize` was never called and `usedFacts` is empty too;
+   *  - **synthesizer abstention**: facts WERE retrieved but the synthesizer reported the canonical
+   *    phrase, so `usedFacts` stays POPULATED (the retrieval envelope is an audit record of the read
+   *    that happened, §4) while `citations` is empty.
+   * The invariant a consumer may rely on: `abstained === (answer === ABSTENTION_ANSWER)` — the
+   * phrase and the flag can never disagree, and neither is forgeable independently of the other.
+   */
   abstained: boolean;
   /** The per-claim evidence the answer rests on; every `factId` is an element of `usedFacts` (§4). */
   citations: Citation[];
@@ -156,8 +179,77 @@ export interface GraphQaResult {
  * The canonical abstention phrase (kip-graph-qa.md §6.1) — a stable, testable string. When retrieval
  * yields no supporting facts, `answerQuestion` returns this verbatim with empty `citations`/`usedFacts`
  * and `abstained: true`, and never calls `synthesize` (never fabricates from parametric knowledge).
+ *
+ * IT IS THE SUBSTRATE'S SIGNAL, AND IT IS NOT FORGEABLE (round-2 finding #2). Because consumers key
+ * on the string, model output carrying it must never be able to mean something DIFFERENT from what
+ * `answerQuestion` means by it. `answerQuestion` therefore treats a synthesized answer equal to this
+ * phrase as an abstention (`abstained: true`, `citations: []`) rather than as an answer, so
+ * `abstained === (answer === ABSTENTION_ANSWER)` holds no matter what a synthesizer emits.
  */
 export const ABSTENTION_ANSWER = "No supporting facts in the knowledge graph.";
+
+/** `factId` → the retrieved fact backing it. The trusted source for rebinding a citation (§3.4). */
+export type RetrievedFactIndex = ReadonlyMap<string, RetrievedFact>;
+
+/**
+ * Is `answer` the substrate's abstention sentinel? (§6.1a.) The ONE check that makes
+ * `abstained === (answer === ABSTENTION_ANSWER)` hold no matter who produced the answer — a property
+ * of the STRING, so unlike an envelope check it cannot be defeated by a component that authors its
+ * own envelope. Exported so every layer that mints an abstention/answer surface uses the same rule.
+ */
+export function isAbstentionAnswer(answer: string): boolean {
+  return answer.trim() === ABSTENTION_ANSWER;
+}
+
+/**
+ * The §3.4 citation guard, shared by every layer that surfaces citations (round-2 review, finding
+ * #1 "one layer up"): {@link answerQuestion} runs it over model output, and the `kip ask` / `kip_ask`
+ * mapping seams run it over a DISPATCHER's output.
+ *
+ * It does three things, and what it can promise depends on `facts`:
+ *  1. **Filter** — a cited `factId` outside `usedFacts` is DROPPED (never surfaced).
+ *  2. **Rebuild** — the citation is reconstructed from known keys, so an unknown key a producer
+ *     attached cannot ride along.
+ *  3. **Rebind (only with `facts`)** — `eid`/`prop`/`edgeKind` are taken from the RETRIEVED FACT,
+ *     making provenance a deterministic function of retrieval. The producer chooses WHICH fact; it
+ *     never says what the fact is about.
+ *
+ * **The honest boundary.** Without `facts`, (3) is impossible: `eid` cannot be checked against a
+ * graph that is not in scope, so it is the producer's own claim. This is not laziness — at the
+ * mapping seam the check would be *self-referential*: a dispatcher that fabricates a citation also
+ * authors the `usedFacts` it would be validated against, so no guard at that layer can constrain it.
+ * What (1) DOES close there is the realistic case — a host dispatcher faithfully forwarding output
+ * from its own model, where `usedFacts` is genuine and the model invented the `factId`. A host that
+ * holds the retrieved facts should pass them here (or use the `synthesize` seam, which routes
+ * through `answerQuestion` and gets (3) for free).
+ */
+export function bindAndValidateCitations(
+  citations: readonly Citation[],
+  usedFacts: ReadonlySet<string> | readonly string[],
+  facts?: RetrievedFactIndex,
+): Citation[] {
+  const envelope = usedFacts instanceof Set ? usedFacts : new Set(usedFacts as readonly string[]);
+  const bound: Citation[] = [];
+  for (const c of citations) {
+    if (c === null || typeof c !== "object" || typeof c.factId !== "string") continue;
+    if (!envelope.has(c.factId)) continue; // (1) outside the retrieved envelope — dropped.
+    const f = facts?.get(c.factId);
+    // With an index, a `factId` in the envelope but absent from it has unreconstructable provenance:
+    // DROP rather than fall back to the producer's version (N5 — no fallbacks).
+    if (facts !== undefined && f === undefined) continue;
+    // (2)/(3) — rebuilt, from retrieval when we have it.
+    const rebound: Citation = { factId: c.factId };
+    const eid = f !== undefined ? f.eid : c.eid;
+    if (eid !== undefined) rebound.eid = eid;
+    const prop = f !== undefined ? f.prop : c.prop;
+    if (prop !== undefined) rebound.prop = prop;
+    const edgeKind = f !== undefined ? f.edgeKind : c.edgeKind;
+    if (edgeKind !== undefined) rebound.edgeKind = edgeKind;
+    if (typeof c.quote === "string") rebound.quote = c.quote; // the producer's own prose span (§5.3).
+    bound.push(rebound);
+  }
+  return bound;
+}
 
 /**
  * Answer `input.question` over the kip graph, READ-ONLY, grounded in signed facts (kip-graph-qa.md
@@ -289,10 +381,47 @@ export async function answerQuestion(
   // context. ───────────────────────────────────────────────────────────────────────────────────────
   const synthesized = await synthesize({ question, facts });
 
-  // ── 6. BIND & VALIDATE citations against `usedFacts` (§3.4): DROP any cited `factId` outside the
-  // retrieved envelope (a hallucinated citation never surfaces). Every surviving `citation.factId` is
-  // an element of `usedFacts` by construction. ─────────────────────────────────────────────────────
-  const citations = synthesized.citations.filter((c) => usedFacts.has(c.factId));
+  // ── 5b. THE SENTINEL IS THE SUBSTRATE'S, NOT THE MODEL'S (round-2 finding #2). `ABSTENTION_ANSWER`
+  // is a deterministic SIGNAL this function emits on empty retrieval (§6.1) — "a stable, testable
+  // string" consumers key on. A synthesizer that emits it verbatim is therefore reporting an
+  // abstention, and MUST NOT be reported as `abstained: false` / `status: "answered"`: that surface
+  // says "answered" while carrying the canonical unanswerable phrase, and hands a consumer keying on
+  // the phrase a wrong `abstained` reading whose provenance is a model rather than the substrate.
+  // The prompt no longer teaches the sentinel (`ask.ts` renderSynthesisPrompt), so this is the
+  // belt-and-braces half: however the phrase gets into model output — including a hostile fact value
+  // instructing the model to emit it — the substrate reads it as an abstention and stays consistent
+  // with the §6.1 retrieval-abstention path. `usedFacts` deliberately stays POPULATED: the facts
+  // really were retrieved and placed into the context, and §4 makes `usedFacts` the auditable
+  // retrieval envelope — emptying it here would misreport the read that actually happened.
+  if (isAbstentionAnswer(synthesized.answer)) {
+    return { answer: ABSTENTION_ANSWER, abstained: true, citations: [], usedFacts: [...usedFacts] };
+  }
+
+  // ── 6. BIND & VALIDATE citations against `usedFacts` (§3.4). TWO steps, because validating the
+  // `factId` alone is not enough (round-2 finding #1 — probe-confirmed):
+  //
+  //   (a) DROP any cited `factId` outside the retrieved envelope (a hallucinated citation never
+  //       surfaces). Every surviving `citation.factId` is an element of `usedFacts` by construction.
+  //   (b) REBIND the surviving citation's provenance fields from the RETRIEVED FACT rather than
+  //       trusting the synthesizer's copy. A filter that passed the citation OBJECT through verbatim
+  //       let a model bind a REAL, signed `factId` to an INVENTED `eid`/`prop`/`edgeKind` — a
+  //       citation asserting that a genuine signed fact is about an entity it is not about. That is
+  //       manufactured provenance wearing real cryptographic evidence (strictly worse than an obvious
+  //       hallucination, because the `factId` audits clean), and it is reachable by prompt injection
+  //       from attacker-controlled fact VALUES — the threat ADR-B8 names. Rebinding makes
+  //       `eid`/`prop`/`edgeKind` a DETERMINISTIC FUNCTION OF RETRIEVAL (restoring the §5.3
+  //       accelerator boundary for them: the model chooses WHICH fact, never WHAT the fact says), and
+  //       structurally drops any unknown key a synthesizer attached.
+  //
+  // The model's remaining contribution to a citation is `quote` — a span of its own prose, which
+  // carries no provenance and resolves to nothing (§4).
+  //
+  // This runs the SHARED guard ({@link bindAndValidateCitations}) rather than an inline copy, so the
+  // rule the `kip ask` / `kip_ask` mapping seams apply to a dispatcher's output is literally the same
+  // code — one guard, one place to audit (round-2 review, finding #1 "one layer up").
+  const factById = new Map<string, RetrievedFact>();
+  for (const f of facts) if (!factById.has(f.factId)) factById.set(f.factId, f);
+  const citations = bindAndValidateCitations(synthesized.citations, usedFacts, factById);
 
   return {
     answer: synthesized.answer,

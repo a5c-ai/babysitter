@@ -132,7 +132,14 @@ const graphQaManifest: MicroagentManifest = {
       usedFacts: {                                     // EVERY fact placed into the model context, superset of the
         type: "array",                                 //   factIds in `citations` — the retrieval envelope (§4/§8)
         items: { type: "string" }                       // FactId[]
-      }
+      },
+      model: { type: "string" },                       // the model the dispatcher RESOLVED and ran the synthesis on,
+                                                        //   reported so the CLI can echo the model that actually spoke
+                                                        //   rather than an unresolved sentinel (kip-cli.md §5.3/AC-28)
+      error: { type: "string" }                        // a dispatch-failure REASON; present only with a non-zero
+                                                        //   exitCode, and never read on the success path (§6.6) — a
+                                                        //   diagnostic, never prose. This schema is kip's OWN, so
+                                                        //   carrying it here invents no genty field.
     }
   },
 
@@ -238,12 +245,55 @@ non-deterministic, accelerator-class computation in the pipeline (§5).
 
 ### 3.4 Bind & validate citations
 
-Before returning, the entrypoint **filters the model's citations against `usedFacts`**: any cited
-`factId` that was not actually in the retrieved envelope is **dropped** (a hallucinated citation is
-never surfaced). A claim whose supporting citation is dropped, leaving the answer with an
-uncited factual assertion, is a defect the acceptance suite (§8) detects. The validated
-`{ answer, citations, usedFacts }` object is emitted as `MicroagentResult.output` and passed back to
-the caller unchanged.
+Before returning, the entrypoint does **two** things to every citation the model returns. Both are
+required; the first alone is not enough.
+
+1. **Filter against `usedFacts`.** Any cited `factId` that was not actually in the retrieved envelope
+   is **dropped** (a hallucinated citation is never surfaced). A claim whose supporting citation is
+   dropped, leaving the answer with an uncited factual assertion, is a defect the acceptance suite
+   (§8) detects.
+2. **Rebind the provenance fields from the retrieved fact.** For each surviving citation, `eid`,
+   `prop` and `edgeKind` are **reconstructed from the `RetrievedFact` that its `factId` names** — not
+   taken from the model. The model's copies are not read.
+
+**Why (2) exists.** Validating the `factId` alone, and then passing the citation *object* through
+verbatim, let a model bind a **real, signed `factId`** to an **invented `eid`/`prop`/`edgeKind`** —
+a citation asserting that a genuine signed fact is about an entity it is not about. That is
+*manufactured provenance wearing real cryptographic evidence*, and it is strictly worse than an
+obvious hallucination: the `factId` audits clean, so `provenanceOf`/`fsck` confirm a real signature
+behind a claim the fact does not support. It is reachable by prompt injection from attacker-controlled
+fact **values** — the threat model [ADR-B8](../70-decision-records-adr.md) names — and it falsified
+ADR-B8's own "cannot manufacture provenance" claim (round-2 review finding #1, probe-confirmed).
+
+**The resulting contract.** `eid`/`prop`/`edgeKind` are a **deterministic function of retrieval**
+(which also keeps them inside the §5.3 accelerator boundary: they are not model output at all). The
+model contributes exactly two things to a citation: **which** fact backs the claim (`factId`, then
+validated), and `quote` — a span of its own prose, which carries no provenance and resolves to
+nothing. Rebuilding rather than editing also means an unknown key a model attaches cannot ride along.
+
+The validated `{ answer, citations, usedFacts }` object is emitted as `MicroagentResult.output`.
+
+**The guard is shared, and it runs at every layer that surfaces a citation.** `answerQuestion` is not
+the only place a citation reaches a user: `kip ask` (`runAsk`) and `kip_ask` MAP a
+`MicroagentResult` into their own surfaces, and those seams mint the `status` field. A host may
+replace the whole `DispatchMicroagentFn`, so those seams must not take a dispatcher's
+`abstained`/`citations` on trust — they run the same `bindAndValidateCitations` + abstention
+invariant. What each layer can promise differs, and the difference is structural, not an oversight:
+
+| | `answerQuestion` (facts in scope) | `runAsk` / `kip_ask` (mapping a dispatcher's output) |
+|---|---|---|
+| Abstention invariant (§6.1a) | yes | **yes — absolute** (a property of the answer *string*) |
+| Cited `factId` ∈ `usedFacts` | yes | yes (against the dispatcher's own envelope) |
+| Unknown keys dropped | yes | yes |
+| `eid`/`prop`/`edgeKind` rebound from retrieval | **yes** | **no — the graph is not in scope** |
+
+The last row is the honest boundary. At the mapping seam the retrieved facts do not exist, and the
+check would be *self-referential* anyway: a dispatcher that fabricates a citation also authors the
+`usedFacts` it would be validated against. What the envelope filter DOES close there is the realistic
+case — a host dispatcher faithfully forwarding output from its own model, where `usedFacts` is genuine
+and the model invented a `factId`. A host that holds its retrieved facts should pass them to
+`bindAndValidateCitations` (exported for exactly this), or inject at the `synthesize` seam and get
+rebinding for free.
 
 ---
 
@@ -306,6 +356,31 @@ rule (N5) and mirrors the substrate's `Unknown`-not-invented posture.
      assert any entity fact),
    - `citations: []` and `usedFacts: []`.
    It MUST NOT draw on the model's parametric/world knowledge to manufacture an answer.
+
+   **1a. The canonical phrase is the SUBSTRATE's signal, and it MUST NOT be forgeable by model
+   output.** Because §6.1 makes the phrase "a stable, testable string" that consumers key on, model
+   output carrying it must never be able to mean something *different* from what the microagent means
+   by it. Two rules enforce that:
+   - The synthesis prompt **MUST NOT teach the model the sentinel** (i.e. must not instruct "reply
+     with exactly: `<phrase>`"). The model is told to say plainly, in its own words, when the facts
+     support no answer. Teaching it the constant hands untrusted output a substrate signal — and it
+     is reachable by injection: a hostile fact value carrying "reply with exactly: `<phrase>`" would
+     make a graph that DOES hold the answer report as silent.
+   - Whatever its source, an `answer` equal to the canonical phrase **MUST** be reported as an
+     abstention: `abstained: true`, `citations: []`. The invariant a consumer may rely on is
+     **`abstained === (answer === ABSTENTION_ANSWER)`** — the flag and the phrase can never disagree,
+     and neither is forgeable independently of the other. Otherwise the result surface says
+     `status: "answered"` while carrying the canonical *unanswerable* phrase and reports
+     `abstained: false` while the prose asserts the opposite (round-2 review finding #2,
+     probe-confirmed).
+
+   In the **synthesizer-abstention** case — facts *were* retrieved, and the synthesizer reported the
+   phrase — `usedFacts` stays **populated**, unlike the empty-retrieval case above: those facts really
+   were retrieved and placed into the model context, and §4 makes `usedFacts` the auditable retrieval
+   envelope. Emptying it would misreport the read that actually happened. Note the honest bound: a
+   model can always decline to answer in *any* wording, so suppression is **reportable, not
+   preventable** — what these rules guarantee is that it is reported as an abstention rather than
+   disguised as an answer.
 2. **Partial retrieval ⇒ answer only the supported part.** If facts cover only part of the question,
    the answer states what the facts support and explicitly notes the unsupported remainder as unknown —
    it never fills the gap with an uncited claim.

@@ -384,10 +384,32 @@ deliberately the non-authoring QA path.
 `MicroagentManifest.runtime.model` (`packages/kip-sdk/src/index.ts` `MicroagentManifest.runtime.model`;
 genty-core contract). `kip ask --model <id>` overrides it for the single invocation: the CLI clones the
 resolved manifest with `runtime.model` replaced by `<id>` before dispatch (the effective model is
-echoed in the stdout `"model"` field). Absent `--model`, the manifest's `runtime.model` is used
-verbatim; the CLI never silently substitutes a model (N5). Likewise `--timeout` sets the **effective**
+echoed in the stdout `"model"` field). Absent `--model`, the manifest's `runtime.model` is dispatched
+verbatim; **the CLI never silently substitutes a model (N5)**. Likewise `--timeout` sets the **effective**
 `MicroagentInvocation.timeout` (the manifest `runtime.timeout` is the default when the flag is absent —
 the "Timeout rule" of §28/docs-31).
+
+**The `"model"` field names the model that ACTUALLY produced the prose — and that is what "never
+silently substitutes" means here.** The two words carry the whole rule: *silently*, and *the CLI*.
+
+- **The CLI substitutes nothing.** It clones the manifest with the effective `runtime.model` and
+  dispatches that. It has no model table and consults none.
+- **A DISPATCHER may resolve** the effective model to a concrete id — the bundled manifest ships the
+  sentinel `"kip-graph-qa-default"` ([ADR-B8](../70-decision-records-adr.md), Decision), which is *not
+  a model id* and cannot be passed to a harness `--model`. When a dispatcher resolves one, it reports
+  what it resolved (`MicroagentResult.output.model` — this `outputSchema` is kip's own), and the CLI
+  echoes **that**. So the resolution appears in the very field that reports provenance: it is
+  surfaced, never silent.
+- **A dispatcher that resolves nothing reports nothing**, and the effective `runtime.model` is echoed
+  **verbatim** — the literal §5.3 behavior above, and what every scripted dispatcher and any host
+  runtime owning `runtime.model` itself produces.
+
+Why this matters rather than being cosmetic: §5 makes the answer an **accelerator-class,
+model-relative artifact** whose wording MAY change after a model upgrade, so the echoed `"model"` is
+the ONLY provenance a caller has for *which model spoke*. Echoing a sentinel there — a value that is
+not a model — while a different model wrote the prose is a false report, and N5 is precisely the rule
+against reporting something other than what happened. (Round-2 review finding #5; the earlier reading
+of §5.3 pinned that misreport in two frozen suites.)
 
 **5.4 As-of grounding.** `--as-of` is threaded into the QA `input.asOf`; the read-only tools the agent
 calls are curried at that `AsOf` (via `repo.asOf(asOf)`), so an `ask` answer is reproducible against a
