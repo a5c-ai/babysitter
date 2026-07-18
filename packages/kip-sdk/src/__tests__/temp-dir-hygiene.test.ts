@@ -55,12 +55,7 @@ function provisionedSubstrateDir(repo: KipRepo): string | undefined {
 
 describe("D-38 item 5: Substrate.createTemp()/KipRepo.close() must not leak temp dirs", () => {
   it("close() removes every createTemp()-provisioned temp dir (net-new leak == 0)", async () => {
-    // Snapshot of the shared os.tmpdir() kip-sdk-* population before we start (informational; the
-    // load-bearing assertion below is the deterministic per-created-dir existence check).
     const tmpRoot = os.tmpdir();
-    const kipSdkDirCountBefore = fs
-      .readdirSync(tmpRoot)
-      .filter((n) => n.startsWith("kip-sdk-")).length;
 
     const createdDirs: string[] = [];
     for (let i = 0; i < 4; i++) {
@@ -82,11 +77,19 @@ describe("D-38 item 5: Substrate.createTemp()/KipRepo.close() must not leak temp
         `(D-38 item 5 — the disk-exhaustion leak):\n${leaked.join("\n")}`,
     ).toEqual([]);
 
-    // Secondary (informational): our own closed repos must not have grown the shared pool net.
-    const kipSdkDirCountAfter = fs
-      .readdirSync(tmpRoot)
-      .filter((n) => n.startsWith("kip-sdk-")).length;
-    expect(kipSdkDirCountAfter).toBeLessThanOrEqual(kipSdkDirCountBefore + createdDirs.length);
+    // Secondary (DETERMINISTIC, parallelism-independent): a scoped restatement of "we grew the shared
+    // pool net-zero". This reads only THIS test's OWN unique `kip-sdk-*` basenames out of the shared
+    // os.tmpdir() listing — never a raw COUNT of the pool, which other parallel workers concurrently
+    // add to and remove from between two snapshots (the old count+tolerance form depended on the
+    // vitest fork cap to stay under its fudge factor; this form does not — it is exact at any fork
+    // count because it never observes another worker's dirs).
+    const ourBasenames = new Set(createdDirs.map((d) => path.basename(d)));
+    const survivingOurs = fs.readdirSync(tmpRoot).filter((n) => ourBasenames.has(n));
+    expect(
+      survivingOurs,
+      `close() left ${survivingOurs.length}/${createdDirs.length} of THIS test's own createTemp() ` +
+        `dirs in the shared os.tmpdir() pool: ${survivingOurs.join(", ")}`,
+    ).toEqual([]);
   });
 });
 

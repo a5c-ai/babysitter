@@ -12,12 +12,13 @@
  * regen ... INV-2a, 9 (excision half), 12, 13a, 14"). T13.3 ("Rollup & read-latency snapshots")
  * and T13.4 ("Packing & GC of unreachable objects") each explicitly say their own exit criterion
  * "carries the rollup half"/"the gc/repack half of INV-9 deferred out of M3's excision-half gate" —
- * i.e. the roadmap ITSELF states the gc/repack/rollup result-stability clause is NOT M3's
- * responsibility to prove; it gates the later E13 tooling epic instead. This file therefore
- * exercises the excision half in full (see the two `it` blocks below) and marks the gc/repack/
- * rollup half `it.skip` with the exact deferral reason (also reported in this task's
- * `untestable` output) rather than inventing a premature test against machinery the roadmap does
- * not consider M3's to deliver.
+ * i.e. the roadmap ITSELF states the gc/repack result-stability clause is NOT M3's responsibility to
+ * prove; it gates the later E13 tooling epic instead. This file therefore exercises the excision half
+ * in full (see the two `it` blocks below) and marks ONLY the gc/repack half `it.skip` with its exact
+ * deferral reason. ROUND-2 re-audit correction: the ROLLUP half is no longer deferred — `rollup()` is
+ * implemented (kip-repo.ts) and its result-stability ("rollup never changes a non-excised asOf result")
+ * is covered by the sibling inv-9-m3-surface.test.ts; the `it.skip` below is now scoped to the gc/repack
+ * half alone, whose enabling method still does not exist on the public surface.
  *
  * docs/24-synchronization-and-convergence.md §4.5 (condensed, verbatim clauses this file drives):
  * "Excision re-runs `proj` over the remaining set and rewrites `/heads` so no residue of the
@@ -136,10 +137,15 @@ describe("INV-9: GC / excision safety (M3's excision-half exit gate)", () => {
     );
   });
 
+  // SKIP-REASON: roadmap T13.4 (Packing & GC of unreachable objects), docs/81-roadmap-epics-and-tasks.md
+  // — post-M3 E13 tooling that carries the gc/repack half "deferred out of M3's excision-half gate". No
+  // gc/repack/pack method exists on the public surface. (Round-2 re-audit correction: the ROLLUP half is
+  // NO LONGER deferred — `rollup()` is implemented and its result-stability is covered by the sibling
+  // inv-9-m3-surface.test.ts; only the gc/repack half remains genuinely unreachable.) Tracked under D-50.
   it.skip(
-    "UNTESTABLE AT M3 (deferred, not a gap in this file): the gc/repack-half and rollup-half of INV-9's 'never change query results for any non-excised asOf' clause are explicitly carried by T13.3 (Rollup & read-latency snapshots) and T13.4 (Packing & GC of unreachable objects) — both post-M3 E13 tooling tasks whose OWN exit-criteria text says they carry that half 'deferred out of M3's excision-half gate' (docs/81-roadmap-epics-and-tasks.md). index.ts's public surface exposes `rollup(opts)` and no gc/repack method at all, and `rollup()` currently throws `unimplemented` with no corresponding roadmap claim that M3 delivers it — testing 'gc/repack/rollup never change non-excised results' here would exercise machinery the roadmap itself does not scope to this milestone. See this task's `untestable` report.",
+    "UNTESTABLE AT M3 (deferred, gc/repack half only): the GC/REPACK half of INV-9's 'never change query results for any non-excised asOf' clause is carried by roadmap T13.4 (Packing & GC of unreachable objects, docs/81-roadmap-epics-and-tasks.md) — post-M3 E13 tooling deferred out of M3's excision-half gate. index.ts's public surface exposes NO gc/repack/pack method at all, so 'gc/repack never changes a non-excised result' cannot be exercised. (The rollup half of the SAME INV-9 clause is now covered: `rollup()` is implemented and inv-9-m3-surface.test.ts asserts it does not change any non-excised asOf result — see that sibling file.) See this task's `untestable` report.",
     () => {
-      // Intentionally skipped, not faked — deferred to T13.3/T13.4 per the roadmap's own text.
+      // Intentionally skipped, not faked — the gc/repack half is deferred to T13.4 per the roadmap's own text.
     },
   );
 });

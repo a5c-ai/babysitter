@@ -157,6 +157,10 @@ describe("INV-1: proj determinism + replica-local-input independence", () => {
     expect(secondRead).toEqual(firstRead);
   });
 
+  // SKIP-REASON: D-38 sub-goal (a) / D-50 (conformance scaffolding-seam gaps). Deferred, not a
+  // logic gap: the rxFrom-stamp / simulated-receiver-clock / key-registration-arrival perturbation
+  // seam INV-1 names does not exist on the public Repo/KipRepo/OpenOptions surface, and inventing one
+  // is out of this work item's scope. The reachable axis (ingest/delivery order) IS exercised above.
   it.skip(
     "UNTESTABLE AS CURRENTLY SCAFFOLDED (partial): INV-1 also names rxFrom, the receiver's simulated physical clock, and key-registration ARRIVAL order as perturbation axes distinct from ingest/delivery order. index.ts's Repo/KipRepo/OpenOptions surface exposes no seam to inject a fake rxFrom stamp, a simulated receiver clock, or to control key-registration-fact arrival independent of ingest() call order — FactAnnotation.rxFrom is documented as 'annotated AFTER durable recording — NOT ... read by proj/orderKey' but is never returned to a caller to perturb. This file exercises the ingest/delivery-ORDER axis directly (the literal T12.1 harness scope, and the one axis genuinely reachable through the public surface); see this task's `untestable` report.",
     () => {

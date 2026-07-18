@@ -175,6 +175,10 @@ describe("INV-2a: substrate-only SEC sub-case (M3's exit gate)", () => {
     expect(viewC).toEqual(viewA);
   });
 
+  // SKIP-REASON: D-38 sub-goal (a) / D-50 (conformance scaffolding-seam gaps). Deferred, not a logic
+  // gap: inherits inv-1's missing rxFrom-stamp / simulated-receiver-clock injection seam (no such
+  // seam on the public Repo/KipRepo surface; inventing one is out of scope). The reachable
+  // delivery-order/partition axis IS exercised above.
   it.skip(
     "UNTESTABLE AS CURRENTLY SCAFFOLDED (partial, inherited from inv-1.test.ts's own documented gap): INV-2a's parent INV-2 also names rxFrom/receiver-clock perturbation as an axis; index.ts's Repo/KipRepo surface exposes no seam to inject a fake rxFrom stamp or a simulated receiver clock independent of ingest() call order, so only the delivery-order/partition axis (genuinely reachable through the public surface) is exercised above. Key-authorization, revoke-key, resolve-scoped-supersede, and backdated/anachronistic permutations are explicitly OUT of INV-2a's own scope (they belong to the parent INV-2's M8-gated trust-overlay half per docs/60), so their absence here is not a gap in THIS sub-invariant's coverage.",
     () => {

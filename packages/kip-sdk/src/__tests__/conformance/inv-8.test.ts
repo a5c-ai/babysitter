@@ -7,27 +7,21 @@
  * invents missing required data (M-8, honoring the no-fallback rule N5). Class: termination /
  * typed-result. Violation: an upcaster that throws, hangs, or fabricates required data."
  *
- * SURFACE GAP (recorded here AND in this task's `untestable` report, per this task's
- * instructions to record — not reinterpret or weaken — an invariant that cannot be tested as
- * written against the current index.ts surface): index.ts's `CellSegment` discriminated union
- * (§4 of the module) has exactly THREE variants — `"value"`, `"unknown"`, `"conflict"` — with NO
- * fourth `"quarantine"`/`kip:schema-violation` variant. There is therefore no TYPE-LEVEL way for
- * a test on this surface to assert "a segment carries the typed `quarantine` result" — doing so
- * would require inventing a `CellSegment` variant index.ts does not declare, which this task's
- * instructions explicitly forbid. Separately, index.ts exposes NO ontology/schema-registration
- * method (no `NodeKindDef`/`PropSchema`/"required prop" API), so a scenario where an upcaster
- * must decide "is a required field missing" cannot be constructed at all — "never invents
- * missing required data" has no schema to declare a field required against.
+ * SURFACE STATE (round-2 re-audit): the `CellSegment` discriminated union NOW carries a fourth
+ * `kind:"quarantine"` variant (index.ts / types.ts, `reason:"unknown-version"|"malformed-supersede"`)
+ * with a real producing path — `proj.ts`'s `reduceRawCell` quarantines any winner whose `v` exceeds
+ * the projection's `knownMaxVersion` (default `1`) rather than trusting its `value`. That path is
+ * reachable end-to-end from a bare public `new KipRepo()` through `getNode`, so the "typed result
+ * value | quarantine" half of INV-8 IS testable on the current surface and is now asserted directly
+ * (the third `it` below, no longer `it.skip`'d — round-2 finding F1). The `"terminates ... never
+ * throws" half is exercised by the first two `it`s: a fact whose schema version `v` is deliberately
+ * unusual (far-future / stale-historical) must resolve through `getNode`, never reject — a build that
+ * naively threw on an unrecognized `v` (e.g. `"ERR_UNSUPPORTED_SCHEMA_VERSION"`) would fail them.
  *
- * What IS testable against the current surface: the "terminates ... never throws" half, for a
- * fact whose schema version `v` is deliberately unusual (far in the future / a stale historical
- * value), via the one read seam that exists (`getNode`). A build that naively throws/rejects on
- * an unrecognized `v` (e.g. `"ERR_UNSUPPORTED_SCHEMA_VERSION"`) would fail this test; a
- * spec-conformant build must resolve.
- *
- * `getNode` currently throws `unimplemented: getNode` (M1 not yet implemented) — these tests are
- * EXPECTED TO FAIL right now; failures should surface as the thrown `unimplemented` error
- * propagating through the `await`, not as import/type errors.
+ * REMAINING SURFACE GAP (still `it.skip`'d below, genuinely deferred): index.ts exposes NO
+ * ontology/schema-registration method (no `NodeKindDef`/`PropSchema`/"required prop" API), so a
+ * scenario where an upcaster must decide "is a required field missing" cannot be constructed at all —
+ * "never invents missing required data" has no schema to declare a field required against.
  */
 import { describe, expect, it } from "vitest";
 import { KipRepo } from "../../index";
@@ -88,13 +82,44 @@ describe("INV-8: upcaster soundness (terminates, never invents)", () => {
     expect(viewB).toEqual(viewA);
   });
 
-  it.skip(
-    "UNTESTABLE AS CURRENTLY SCAFFOLDED: index.ts's CellSegment discriminated union has only 'value' | 'unknown' | 'conflict' variants — there is no fourth 'quarantine'/kip:schema-violation variant to assert a segment carries the typed `quarantine` result INV-8 names, and inventing one is out of scope per this task's instructions. See this task's `untestable` report.",
-    () => {
-      // Intentionally skipped, not faked.
-    },
-  );
+  it("a fact stamped with a far-future, never-declared schema version projects a TYPED `quarantine` segment through getNode (the 'typed result value | quarantine' half of INV-8: an unknown version is opaque-quarantined, never trusted as a value or silently dropped)", async () => {
+    const eid = "person/inv8-quarantine-typed";
+    const existence = makeWellFormedFact({ target: { kind: "node", eid, nodeKind: "person" } });
+    existence.value = true;
+    existence.validFrom = 0;
+    existence.validTo = null;
 
+    const futureVersioned = makeWellFormedFact({
+      target: { kind: "node-prop", eid, prop: "status" },
+      id: "inv8-quarantine-typed-fact",
+      v: 999_999,
+    });
+    futureVersioned.value = "from-the-future";
+    futureVersioned.validFrom = 0;
+    futureVersioned.validTo = null;
+
+    const repo = new KipRepo();
+    await repo.ingest(existence);
+    await repo.ingest(futureVersioned);
+
+    const view = await repo.getNode(eid);
+    expect(view).not.toBeNull();
+    const segments = view!.props.status.segments;
+    expect(segments).toHaveLength(1);
+    // The typed quarantine result INV-8 names: NOT a trusted `value` (the fact's `v` exceeds the
+    // projection's `knownMaxVersion` default of 1), NOT a silent drop — an opaque, typed carrier.
+    expect(segments[0]).toMatchObject({
+      kind: "quarantine",
+      v: 999_999,
+      reason: "unknown-version",
+      assertedBy: futureVersioned.id,
+    });
+  });
+
+  // SKIP-REASON: D-38 sub-goal (a) / D-50 (conformance scaffolding-seam gaps). Deferred, not a logic
+  // gap: no ontology/schema-registration seam (NodeKindDef/PropSchema/required-prop API) exists on
+  // the public surface, so a "later schema version adds a REQUIRED prop an older fact omits" scenario
+  // cannot be constructed at all. Inventing that seam is out of this work item's scope.
   it.skip(
     "UNTESTABLE AS CURRENTLY SCAFFOLDED: index.ts's Repo surface exposes NO ontology/schema-registration method (no NodeKindDef/PropSchema/'required prop' API) — so a scenario where a later schema version adds a REQUIRED prop that an older fact omits cannot be constructed at all, and 'never invents missing required data' has no declared-required field to test against. See this task's `untestable` report.",
     () => {

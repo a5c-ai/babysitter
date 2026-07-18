@@ -49,6 +49,10 @@ describe("INV-7a: CID dedup at the gate, no reducer required (M0's exit gate, B-
     expect(verdicts[2]).toEqual(verdicts[0]);
   });
 
+  // SKIP-REASON: D-38 sub-goal (a) / D-50 (conformance scaffolding-seam gaps). Deferred, not a logic
+  // gap: no PUBLIC store-inspection seam exists on Repo/KipRepo/OpenOptions to assert "exactly one
+  // /facts blob per distinct CID" directly. The observable idempotence (identical projected result on
+  // re-offer) IS exercised above; adding a private-reflection probe here is out of this work's scope.
   it.skip(
     "UNTESTABLE AS CURRENTLY SCAFFOLDED: the /facts git-tree contains exactly one blob per distinct CID after a re-offer — no store-inspection seam exists on Repo/KipRepo/OpenOptions to verify this directly (see file-header comment and this task's untestable report)",
     () => {

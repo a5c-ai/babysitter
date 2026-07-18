@@ -178,6 +178,10 @@ describe("INV-4: belief-consistency (per-replica audit)", () => {
     expect(directStep3).not.toEqual(directStep2);
   });
 
+  // SKIP-REASON: D-38 sub-goal (a) / D-50 (conformance scaffolding-seam gaps). Deferred, not a logic
+  // gap: the public surface exposes no seam to read back / inject a fact's per-fact rxFrom stamp
+  // (FactAnnotation.rxFrom), so an arbitrary-PAST txTime cut known to fall exactly between fact i and
+  // i+1 cannot be constructed. The reachable "R's current frontier" cut IS exercised above.
   it.skip(
     "UNTESTABLE AS CURRENTLY SCAFFOLDED (partial): INV-4's belief-audit claim also covers an ARBITRARY PAST txTime cut — 'asOf({txTime: T, believer: R}) agrees with a reference oracle built from R's ingest order' for a T strictly earlier than R's current frontier, e.g. pinpointing exactly the state R believed immediately after ingesting fact i but before fact i+1. index.ts's Repo/KipRepo/OpenOptions surface exposes no seam to read back, inject, or otherwise discover the actual per-fact `rxFrom` stamp (`FactAnnotation.rxFrom`, docs/23 §1/§3) a specific ingested fact received on this replica, so a test cannot construct a `txTime` value KNOWN (rather than merely assumed) to correspond to 'exactly after ingesting fact i, strictly before fact i+1' for i less than the current ingest count. The only rxTime cut reachable through the public surface without inventing a new API method is 'R's current frontier' (the sentinel-maximal txTime used by the two tests above), which those tests exercise repeatedly across R's entire ingest history — this it.skip documents the genuinely-past-cut sub-case left out of reach, per this task's `untestable` report.",
     () => {

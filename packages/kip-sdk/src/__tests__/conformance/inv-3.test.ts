@@ -9,17 +9,22 @@
  *
  * Roadmap scope (docs/81-roadmap-epics-and-tasks.md): T2.1 (orderKey total order), T2.3 (cell
  * reducers), and T2.6 (kip:conflict surfacing) are ALL gated directly on INV-3 — so this file
- * covers three angles: (a) deterministic fold of a cell's full fact multiset under permuted
- * ingest order (the default `lww-hlc` reducer, per SPEC.md §3.4's resolution table — the only
- * reducer this suite can SELECT, see the `untestable` note below), (b) the observable consequence
- * of orderKey TOTALITY (a genuine near-tie on every OrderKey component except `factCID` still
- * resolves to one deterministic winner, never an ambiguous/order-dependent one), and (c)
- * `kip:conflict` surfacing for a non-commutative contradiction (two concurrent `supersede` facts
- * over the same input CID asserting different outcomes — SPEC.md §3.4's resolution table row).
+ * covers four angles: (a) deterministic fold of a cell's full fact multiset under permuted
+ * ingest order (the default `lww-hlc` reducer, per SPEC.md §3.4's resolution table), (b) the
+ * observable consequence of orderKey TOTALITY (a genuine near-tie on every OrderKey component
+ * except `factCID` still resolves to one deterministic winner, never an ambiguous/order-dependent
+ * one), (c) `kip:conflict` surfacing for a non-commutative contradiction (two concurrent
+ * `supersede` facts over the same input CID asserting different outcomes — SPEC.md §3.4's
+ * resolution table row), and (d) — round-2 re-audit finding F2 — that a NON-default registered
+ * reducer (`gset`) SELECTED via `KipRepo`'s public `cellReducers` constructor seam
+ * (`node-prop:<eid>:<prop>` -> `CellReducerRef`, threaded through `getNode`'s proj call by proj.ts's
+ * `reduceCellByRef`) also folds deterministically: its union output converges byte-identically across
+ * opposite ingest orders on two replicas. This closes the "only the default reducer is SELECTABLE"
+ * gap the previous `it.skip` documented.
  *
- * `getNode` currently throws `unimplemented: getNode` (M1 not yet implemented) — these tests are
- * EXPECTED TO FAIL right now; failures should surface as the thrown `unimplemented` error
- * propagating through the `await`, not as import/type errors.
+ * Still `it.skip`'d below (genuinely deferred): `orderKey(fact)` itself is not exported on the
+ * public surface, so orderKey totality cannot be checked DIRECTLY against the tuple — only its
+ * observable consequence (angle (b)) is reachable.
  */
 import { describe, expect, it } from "vitest";
 import type { CellSegment, Fact } from "../../index";
@@ -178,6 +183,11 @@ describe("INV-3: reducer determinism + orderKey totality", () => {
     expect(candidates).toEqual(["conflict-supersede-a", "conflict-supersede-b"].sort());
   });
 
+  // SKIP-REASON: D-38 sub-goal (a) / D-50 (conformance scaffolding-seam gaps). Deferred, not a logic
+  // gap: `orderKey(fact)` is not exported on the public surface, so orderKey totality ("no two
+  // distinct admitted facts share an orderKey") cannot be checked directly against the tuple. The
+  // observable consequence (a near-tie resolves to one deterministic, order-independent winner) IS
+  // exercised above.
   it.skip(
     "UNTESTABLE AS CURRENTLY SCAFFOLDED (partial): `orderKey` itself is not exported by index.ts (no `orderKey(fact)` function on the public surface), so totality ('no two distinct admitted facts share an orderKey') cannot be checked directly against the OrderKey tuple type. This suite instead checks the OBSERVABLE CONSEQUENCE of totality (a genuine near-tie resolves to one deterministic, order-independent winner rather than remaining ambiguous — see the first `it` above) — see this task's `untestable` report.",
     () => {
@@ -185,10 +195,50 @@ describe("INV-3: reducer determinism + orderKey totality", () => {
     },
   );
 
-  it.skip(
-    "UNTESTABLE AS CURRENTLY SCAFFOLDED (partial): index.ts's Repo surface has NO ontology/schema-registration method (no NodeKindDef/EdgeKindDef/CellReducerRef exported, no `defineNodeKind`-shaped API) — so a `gset`, `pncounter`, or `custom:<id>` reducer cannot be SELECTED for any cell from the current public surface; only whichever reducer applies by DEFAULT to a bare node-prop cell (lww-hlc, per SPEC.md §3.4) is exercisable here. `every registered CellReducer` is therefore only partially covered (lww-hlc fold determinism + the default supersede-conflict path); a genuinely separate gset/pncounter/custom-reducer fold test is blocked pending a schema-registration seam — see this task's `untestable` report.",
-    () => {
-      // Intentionally skipped, not faked.
-    },
-  );
+  it("a NON-default registered reducer (`gset`) SELECTED via the public `cellReducers` constructor seam folds a cell's multiset into a deterministic union that converges byte-identically across opposite ingest orders — `every registered CellReducer` determinism, not just the lww-hlc default", async () => {
+    const eid = "person/inv3-gset-select";
+    const cellKey = `node-prop:${eid}:tags`;
+
+    const existence = makeWellFormedFact({ target: { kind: "node", eid, nodeKind: "person" } });
+    existence.value = true;
+    existence.validFrom = 0;
+    existence.validTo = null;
+
+    const tagRed = makeWellFormedFact({ target: { kind: "node-prop", eid, prop: "tags" }, id: "inv3-gset-red" });
+    tagRed.value = "red";
+    tagRed.validFrom = 0;
+    tagRed.validTo = null;
+
+    const tagBlue = makeWellFormedFact({ target: { kind: "node-prop", eid, prop: "tags" }, id: "inv3-gset-blue" });
+    tagBlue.value = "blue";
+    tagBlue.validFrom = 0;
+    tagBlue.validTo = null;
+
+    // Two replicas ingest the SAME set in OPPOSITE orders; a total, order-independent reducer MUST
+    // converge to byte-identical segments (INV-3's core determinism claim, at the gset reducer).
+    const reducers = new Map<string, "gset">([[cellKey, "gset"]]);
+    const repoA = await (async () => {
+      const r = new KipRepo({ cellReducers: reducers });
+      await r.ingest(cloneFact(existence));
+      await r.ingest(cloneFact(tagRed));
+      await r.ingest(cloneFact(tagBlue));
+      return r;
+    })();
+    const repoB = await (async () => {
+      const r = new KipRepo({ cellReducers: reducers });
+      await r.ingest(cloneFact(existence));
+      await r.ingest(cloneFact(tagBlue));
+      await r.ingest(cloneFact(tagRed));
+      return r;
+    })();
+
+    const viewA = await repoA.getNode(eid);
+    const viewB = await repoB.getNode(eid);
+    const segmentsA = viewA?.props.tags.segments ?? [];
+    expect(segmentsA).toHaveLength(1);
+    // The gset union is a deterministically-SORTED member array (not a single lww winner) — a shape
+    // the default lww-hlc reducer could never produce, so this pins the non-default reducer as SELECTED.
+    expect(segmentsA[0]).toMatchObject({ kind: "value", value: ["blue", "red"] });
+    expect(viewB).toEqual(viewA);
+  });
 });

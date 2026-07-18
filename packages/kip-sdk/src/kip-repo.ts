@@ -27,7 +27,7 @@ import {
   verifyPayload,
   type Ed25519KeyPair,
 } from "./signing";
-import { CommitTipStore, gitBlobId, KeyRegistryStore, SelfWitnessedExcisionStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
+import { CommitTipStore, forgetCreatedTempDir, gitBlobId, KeyRegistryStore, SelfWitnessedExcisionStore, SeqTipStore, Substrate, type HashAlgo } from "./substrate";
 import {
   attestedHoleKey,
   canon,
@@ -603,9 +603,25 @@ export class KipRepo implements Repo {
    * failing to do so leaks the instance (and its `Substrate`/`keyRegistry`/
    * `selfWitnessedExcisionOids`) forever, since nothing else ever removes a registry entry.
    * Idempotent; safe to call more than once.
+   *
+   * D-38 item 5 (THE disk-exhaustion fix): a bare `new KipRepo()` (no `dir`) lazily provisions its
+   * substrate via `Substrate.createTemp()`, which `mkdtempSync`s a real OS temp dir under
+   * `os.tmpdir()`. That dir is owned SOLELY by this instance, so `close()` `rmSync`s it (recursive,
+   * `force`) — without this, every bare `new KipRepo(); …; close()` cycle leaked its temp dir
+   * forever, which across a suite accumulated tens of thousands of `kip-sdk-*` dirs and twice
+   * exhausted the host `C:` drive (0 bytes free → spurious ENOSPC). An EXPLICIT-`dir` substrate is
+   * caller-owned and is never deleted. `force: true` makes an already-removed dir a no-op, so a
+   * close-after-close (or a close of a repo whose temp dir was already swept) never throws; clearing
+   * `this.substrate` afterward keeps a second `close()` a pure registry no-op.
    */
   close(): void {
     KipRepo.registry.delete(this.replicaId);
+    if (!this.explicitDir && this.substrate) {
+      const tempDir = this.substrate.dir;
+      this.substrate = undefined;
+      fs.rmSync(tempDir, { recursive: true, force: true });
+      forgetCreatedTempDir(tempDir);
+    }
   }
 
   /** Lazily provisions (and memoizes) this repo's git object-store substrate (T1.1/T1.5). */
@@ -656,13 +672,15 @@ export class KipRepo implements Repo {
       // arbitrarily stale (but still validly-parseable) tip file. Reads the fact blobs directly off the
       // LOCAL `substrate` variable (never via `this.currentFactsWithOid()`/`this.getSubstrate()`, which
       // would recurse back into this same guard while `this.substrate` is still deliberately unset).
-      const observedMaxSeqByChain: Record<string, number> = {};
-      for (const { json } of substrate.listFactBlobsWithOid()) {
-        const fact = JSON.parse(json) as Fact;
-        const factChainId = chainIdFor(fact.replicaId, fact.provenance.publicKeyFingerprint);
-        const priorMax = observedMaxSeqByChain[factChainId];
-        if (priorMax === undefined || fact.seq > priorMax) observedMaxSeqByChain[factChainId] = fact.seq;
-      }
+      // D-38 item 3 (DRY): the per-chain max-seq fold is exactly `computeChainFrontier` (below) —
+      // both take the durable fact set and return `Record<ChainId, maxSeq>` keyed by
+      // `chainIdFor(replicaId, publicKeyFingerprint)`. Reuse it rather than re-implementing the fold
+      // inline, so the two can't drift on a future edit. `computeChainFrontier` reads only its
+      // argument (never `this.substrate`), so it is safe to call here while `this.substrate` is still
+      // deliberately unset. Parse the LOCAL `substrate`'s blobs (not `this.currentFacts...`, which
+      // would recurse back into this guard).
+      const observedFacts = substrate.listFactBlobsWithOid().map(({ json }) => JSON.parse(json) as Fact);
+      const observedMaxSeqByChain = this.computeChainFrontier(observedFacts);
       const mergedSeq: Record<string, number> = { ...persistedSeq };
       for (const [factChainId, observedMax] of Object.entries(observedMaxSeqByChain)) {
         const persistedTip = mergedSeq[factChainId];

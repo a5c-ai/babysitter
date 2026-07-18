@@ -37,6 +37,61 @@ import type { SelfWitnessedExcisionRecord } from "./proj";
 
 export type HashAlgo = "sha1" | "sha256";
 
+/**
+ * D-38 item 5 (disk-exhaustion leak): the audit trail of every OS temp dir `Substrate.createTemp()`
+ * has provisioned in THIS process (a bare `new KipRepo()`, no explicit `dir`). `KipRepo.close()`
+ * eagerly `rmSync`s its own temp dir and calls `forgetCreatedTempDir()` to drop it here, so in a
+ * long-lived host process this set does not grow unboundedly. Its second purpose is the D-38-named
+ * "suite-level sweep": a bare `new KipRepo()` that is never `close()`d (the construction path most
+ * conformance tests use) would otherwise leak its temp dir for the life of the process — across a
+ * suite that accumulated tens of thousands of `kip-sdk-*` dirs and twice exhausted the host `C:`
+ * drive. A vitest `afterEach` (`src/__tests__/setup/temp-dir-sweep.ts`) mirrors `sweepCreatedTempDirs()`
+ * — reading this same `globalThis`-backed registry directly (WITHOUT importing this module, to avoid
+ * pre-caching its `node:fs` binding ahead of a test's `vi.mock`) — and removes any still-present tracked
+ * dir after every test, so the shared `os.tmpdir()` population stays bounded during a parallel run.
+ */
+const TEMP_DIR_REGISTRY_KEY = "__kipCreatedTempDirs";
+
+/** The single, process-wide (globalThis-backed) created-temp-dir registry. Backed by `globalThis`
+ * rather than a plain module-scoped `Set` for two reasons: (1) under vitest's per-file module
+ * isolation `substrate.ts` may be re-evaluated per test file, and a globalThis set keeps ONE shared
+ * registry per worker so the suite-level sweep sees every tracked dir; (2) it lets the vitest teardown
+ * (`src/__tests__/setup/temp-dir-sweep.ts`) read the registry WITHOUT importing `substrate.ts` — which
+ * would otherwise pre-cache this module's `node:fs` binding at worker-init and defeat the `node:fs`
+ * mock in files that use `vi.mock("node:fs", …)`. */
+function tempDirRegistry(): Set<string> {
+  const g = globalThis as { [TEMP_DIR_REGISTRY_KEY]?: Set<string> };
+  if (!g[TEMP_DIR_REGISTRY_KEY]) g[TEMP_DIR_REGISTRY_KEY] = new Set<string>();
+  return g[TEMP_DIR_REGISTRY_KEY];
+}
+
+function trackCreatedTempDir(dir: string): void {
+  tempDirRegistry().add(dir);
+}
+
+/** Drop `dir` from the created-temp-dir audit trail — called by `KipRepo.close()` once it has
+ * `rmSync`'d its own `createTemp()`-provisioned dir, so the tracked set mirrors what is still on disk
+ * and does not grow across many bare-repo open/close cycles in a long-lived process. */
+export function forgetCreatedTempDir(dir: string): void {
+  tempDirRegistry().delete(dir);
+}
+
+/** D-38 item 5 suite-level sweep: `rmSync` (recursive, force) every still-present `createTemp()`-
+ * provisioned temp dir tracked in THIS process and forget it. Idempotent and safe to call repeatedly;
+ * `force: true` makes an already-removed dir a no-op. Intended for test teardown (a bare
+ * `new KipRepo()` that never `close()`d its temp dir would otherwise leak it). Returns the number of
+ * dirs it actually removed. */
+export function sweepCreatedTempDirs(): number {
+  const registry = tempDirRegistry();
+  let removed = 0;
+  for (const dir of registry) {
+    if (fs.existsSync(dir)) removed += 1;
+    fs.rmSync(dir, { recursive: true, force: true });
+    registry.delete(dir);
+  }
+  return removed;
+}
+
 export function gitBlobId(content: Buffer, algo: HashAlgo): string {
   const header = Buffer.from(`blob ${content.length}\0`, "utf8");
   return createHash(algo).update(Buffer.concat([header, content])).digest("hex");
@@ -164,6 +219,7 @@ export class Substrate {
 
   static createTemp(hashAlgo: HashAlgo = "sha1"): Substrate {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kip-sdk-"));
+    trackCreatedTempDir(dir);
     return new Substrate(dir, hashAlgo);
   }
 
@@ -357,7 +413,17 @@ function writeJsonAtomic(filePath: string, data: unknown): void {
   const dir = path.dirname(filePath);
   const tmpPath = path.join(dir, `.${path.basename(filePath)}.tmp-${process.pid}-${randomBytes(6).toString("hex")}`);
   fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2));
-  fs.renameSync(tmpPath, filePath);
+  // D-38 item 2: the rename is the one step here that can still fail AFTER the temp sibling is
+  // already on disk (e.g. a Windows EPERM/EBUSY file-lock on the target path). Without this guard,
+  // such a failure re-throws while leaving an orphaned `.<name>.tmp-*` file behind forever. Wrap it
+  // so the temp file is best-effort removed BEFORE rethrowing — the original error still propagates
+  // unmodified (never swallowed, CLAUDE.md N5), we just don't leak the temp sibling on the way out.
+  try {
+    fs.renameSync(tmpPath, filePath);
+  } catch (renameErr) {
+    fs.rmSync(tmpPath, { force: true });
+    throw renameErr;
+  }
 }
 
 /**
@@ -397,6 +463,35 @@ export class CorruptTipFileError extends Error {
       { cause },
     );
     this.name = "CorruptTipFileError";
+    this.filePath = filePath;
+  }
+}
+
+/**
+ * D-38 items 1-2: thrown by `KeyRegistryStore.load()`/`SelfWitnessedExcisionStore.load()` when the
+ * side-file EXISTS on disk but its content fails to parse as JSON — the exact sibling of
+ * `CorruptTipFileError` (D-36) for the two remaining stores that, pre-D-38, still did a bare,
+ * unguarded `JSON.parse(fs.readFileSync(...))` and let a raw `SyntaxError` (no `.code`) escape.
+ * Both stores are read inside `getSubstrate()`'s (index.ts / kip-repo.ts) same lazy-provision load
+ * sequence, so surfacing a torn/corrupt file LOUDLY with a distinct, typed `.code` and the file's own
+ * path — rather than an opaque `SyntaxError` — gives an operator a clear diagnosis. Never silently
+ * defaulted to an empty snapshot (a fallback CLAUDE.md prohibits: a durably-learned peer key or
+ * self-witnessed excision must never silently regress).
+ */
+export class CorruptSideFileError extends Error {
+  readonly code = "ERR_CORRUPT_SIDE_FILE" as const;
+  readonly filePath: string;
+
+  constructor(filePath: string, cause: unknown) {
+    super(
+      `Corrupt side-file at "${filePath}": failed to parse its contents as JSON. This file is now ` +
+        "written atomically (temp-file-then-rename), so a torn write-in-progress file should be " +
+        "structurally impossible going forward — this indicates either a pre-existing corrupt file " +
+        "from before that fix was deployed, or external/manual corruption of the file. Inspect or " +
+        `restore "${filePath}" before reopening this repo against this directory.`,
+      { cause },
+    );
+    this.name = "CorruptSideFileError";
     this.filePath = filePath;
   }
 }
@@ -449,11 +544,16 @@ export class KeyRegistryStore {
 
   load(): Record<string, string> {
     if (!fs.existsSync(this.filePath)) return {};
-    return JSON.parse(fs.readFileSync(this.filePath, "utf8")) as Record<string, string>;
+    const raw = fs.readFileSync(this.filePath, "utf8");
+    try {
+      return JSON.parse(raw) as Record<string, string>;
+    } catch (err) {
+      throw new CorruptSideFileError(this.filePath, err);
+    }
   }
 
   save(snapshot: Record<string, string>): void {
-    fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
+    writeJsonAtomic(this.filePath, snapshot);
   }
 }
 
@@ -508,10 +608,15 @@ export class SelfWitnessedExcisionStore {
 
   load(): Record<string, SelfWitnessedExcisionRecord> {
     if (!fs.existsSync(this.filePath)) return {};
-    return JSON.parse(fs.readFileSync(this.filePath, "utf8")) as Record<string, SelfWitnessedExcisionRecord>;
+    const raw = fs.readFileSync(this.filePath, "utf8");
+    try {
+      return JSON.parse(raw) as Record<string, SelfWitnessedExcisionRecord>;
+    } catch (err) {
+      throw new CorruptSideFileError(this.filePath, err);
+    }
   }
 
   save(snapshot: Record<string, SelfWitnessedExcisionRecord>): void {
-    fs.writeFileSync(this.filePath, JSON.stringify(snapshot, null, 2));
+    writeJsonAtomic(this.filePath, snapshot);
   }
 }

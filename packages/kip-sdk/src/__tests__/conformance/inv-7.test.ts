@@ -15,20 +15,22 @@
  * consequence: that re-ingestion is a no-op AT THE PROJECTED VIEW (`getNode`), i.e. `proj`'s
  * output is unaffected by how many times an already-admitted fact (or fact SET) is re-offered.
  *
- * Mechanism this suite relies on (and why it genuinely tests "no double-count under pncounter"
- * without being able to force a cell to literally use the `pncounter` reducer — see the
- * `untestable` note at the bottom of this file): `proj` folds the ADMITTED FACT **SET**, and
- * INV-7a already establishes that the set itself never grows on a re-offered CID (`ingest()`'s
- * own dedup). Since `proj(S)` is a pure, total function of `S` alone (INV-1), and `S` is
- * unchanged by re-offering a member it already contains, EVERY reducer registered over that cell
- * — `lww-hlc`, `gset`, `pncounter`, or `custom:<id>` alike — necessarily reduces the identical
- * `S` to the identical result. Testing "the view is unchanged by re-offering" is therefore a
- * reducer-agnostic but SOUND test of the exact mechanism the invariant's own text cites
- * ("CID dedup ... no double-count under pncounter").
+ * Mechanism the first tests rely on: `proj` folds the ADMITTED FACT **SET**, and INV-7a already
+ * establishes that the set itself never grows on a re-offered CID (`ingest()`'s own dedup). Since
+ * `proj(S)` is a pure, total function of `S` alone (INV-1), and `S` is unchanged by re-offering a
+ * member it already contains, EVERY reducer registered over that cell — `lww-hlc`, `gset`,
+ * `pncounter`, or `custom:<id>` alike — necessarily reduces the identical `S` to the identical
+ * result. Testing "the view is unchanged by re-offering" is therefore a reducer-agnostic but SOUND
+ * test of the exact mechanism the invariant's own text cites ("CID dedup ... no double-count under
+ * pncounter").
  *
- * `getNode` currently throws `unimplemented: getNode` (M1 not yet implemented) — these tests are
- * EXPECTED TO FAIL right now; failures should surface as the thrown `unimplemented` error
- * propagating through the `await`, not as import/type errors.
+ * ROUND-2 re-audit (finding F2): the `pncounter` reducer CAN now be selected literally for a cell —
+ * `KipRepo`'s public constructor exposes a `cellReducers` association map (`node-prop:<eid>:<prop>` ->
+ * `CellReducerRef`) threaded through every `getNode`/`getEdge`/`query` proj call (see proj.ts's
+ * `reduceCellByRef`). So the "no double-count under pncounter" clause is no longer only inferable — the
+ * last `it` below (previously `it.skip`'d) directly SELECTS `pncounter` and asserts a re-offered
+ * increment is deduped by tag (the summed total is N, not 2N), a value the default `lww-hlc` fold could
+ * never produce.
  */
 import { describe, expect, it } from "vitest";
 import { KipRepo } from "../../index";
@@ -100,10 +102,39 @@ describe("INV-7: idempotent ingestion", () => {
     expect(viewRedundant).toEqual(viewOnce);
   });
 
-  it.skip(
-    "UNTESTABLE AS CURRENTLY SCAFFOLDED (partial): index.ts's Repo surface has NO ontology/schema-registration method (no NodeKindDef/CellReducerRef exported) — so a cell cannot be made to literally DECLARE the `pncounter` reducer from the current public surface, and there is no way to directly assert 'the summed counter value is N, not 2N' for a reducer we can name. This suite instead tests the reducer-AGNOSTIC mechanism the invariant's own text cites as the reason no double-count occurs (CID-deduped SET membership feeding a pure proj fold, see the file-header comment) — which is sound for pncounter specifically as a logical consequence, but does not independently pin a literal summed-counter assertion. See this task's `untestable` report.",
-    () => {
-      // Intentionally skipped, not faked.
-    },
-  );
+  it("selecting the `pncounter` reducer for a cell (via KipRepo's public `cellReducers` constructor seam) sums signed deltas deduped by tag: a re-offered increment does NOT double-count — the total is N, not 2N", async () => {
+    const eid = "person/inv7-pncounter-select";
+    const cellKey = `node-prop:${eid}:balance`;
+
+    const existence = makeWellFormedFact({ target: { kind: "node", eid, nodeKind: "person" } });
+    existence.value = true;
+    existence.validFrom = 0;
+    existence.validTo = null;
+
+    const incrementA = makeWellFormedFact({ target: { kind: "node-prop", eid, prop: "balance" }, id: "inv7-pncounter-inc-a" });
+    incrementA.value = 3;
+    incrementA.validFrom = 0;
+    incrementA.validTo = null;
+
+    const incrementB = makeWellFormedFact({ target: { kind: "node-prop", eid, prop: "balance" }, id: "inv7-pncounter-inc-b" });
+    incrementB.value = 4;
+    incrementB.validFrom = 0;
+    incrementB.validTo = null;
+
+    const repo = new KipRepo({ cellReducers: new Map([[cellKey, "pncounter"]]) });
+    await repo.ingest(cloneFact(existence));
+    await repo.ingest(cloneFact(incrementA));
+    await repo.ingest(cloneFact(incrementB));
+    // Re-offer BOTH increments (byte-identical, same CIDs) — a pncounter dedups by tag, so the
+    // summed total MUST stay 7, never 14.
+    await repo.ingest(cloneFact(incrementA));
+    await repo.ingest(cloneFact(incrementB));
+
+    const view = await repo.getNode(eid);
+    const segments = view!.props.balance.segments;
+    expect(segments).toHaveLength(1);
+    // value === 7 is only producible by the `pncounter` SUM (3 + 4); the default `lww-hlc` fold would
+    // pick a single winner (3 or 4), never their sum — so this pins the reducer was genuinely SELECTED.
+    expect(segments[0]).toMatchObject({ kind: "value", value: 7 });
+  });
 });

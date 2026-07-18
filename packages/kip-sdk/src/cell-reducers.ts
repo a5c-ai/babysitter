@@ -5,18 +5,22 @@
  *
  * SCOPE NOTE (see this task's `disputes` output): `index.ts`'s `Repo` surface exposes no
  * `NodeKindDef`/`EdgeKindDef`/schema-registration API, so there is no PER-ONTOLOGY-KIND seam to
- * hang a "this cell uses `gset`" declaration off of yet — `proj.ts`'s `getNode`/`getEdge` therefore
- * still only ever reach `lww-hlc` (the DEFAULT reducer, SPEC.md §3.4's resolution table) for every
- * prop cell. This module does NOT invent that missing registration surface (that would risk
- * shipping an un-spec'd API a later milestone's real ontology work would have to either honor or
- * break). Instead it proves the `CellReducer` ABSTRACTION itself — the part SPEC.md actually
- * specifies (`reduce(facts): CellSegment<V>[]`, "a PURE function over the WHOLE set of facts for
- * ONE cell, deterministic, total, pre-sorted input") — has more than one real, independently
- * unit-tested implementation: `gsetReducer` and `pncounterReducer` alongside `lww-hlc`'s existing
- * sweep in `proj.ts`. `resolveCellReducer`/`reducerFor` below are the minimal "a way to associate
- * one with a cell" seam the task asks for: a caller-supplied `(cellKey) -> CellReducerRef` map,
- * dispatched to a concrete implementation — small enough to unit-test directly against raw `Fact`
- * arrays without needing `KipRepo`/`proj.ts` to plumb it through end-to-end.
+ * hang a "every cell of kind X uses `gset`" declaration off of yet. What DOES exist (round-3 wiring
+ * fix) is a PER-CELL-KEY association: `KipRepo`'s public constructor takes a `cellReducers`
+ * `(cellKey) -> CellReducerRef` map that `proj.ts`'s `reduceCellByRef` consults on every
+ * `getNode`/`getEdge`/`query` fold — so `gsetReducer`/`pncounterReducer` ARE reachable end-to-end
+ * from a real `KipRepo` for any cell a caller names, and `getNode`/`getEdge` fall back to the DEFAULT
+ * `lww-hlc` sweep (SPEC.md §3.4's resolution table) only for cells no association names. This module
+ * does NOT invent the missing per-ontology-KIND registration surface (that would risk shipping an
+ * un-spec'd API a later milestone's real ontology work would have to either honor or break). It
+ * proves the `CellReducer` ABSTRACTION itself — the part SPEC.md actually specifies
+ * (`reduce(facts): CellSegment<V>[]`, "a PURE function over the WHOLE set of facts for ONE cell,
+ * deterministic, total, pre-sorted input") — has more than one real, independently unit-tested
+ * implementation: `gsetReducer` and `pncounterReducer` alongside `lww-hlc`'s existing sweep in
+ * `proj.ts`. `resolveCellReducer`/`reducerFor` below are the minimal "a way to associate one with a
+ * cell" seam: a caller-supplied `(cellKey) -> CellReducerRef` map dispatched to a concrete
+ * implementation — unit-testable directly against raw `Fact` arrays AND driven end-to-end through
+ * `KipRepo({ cellReducers })` (see inv-3.test.ts / inv-7.test.ts's reducer-selection tests).
  */
 import type { CellSegment, Fact, FactId, HlcOrTime, PropValue } from "./index";
 import { canon, compareByContent as compareFactsByContent, decanon, maxByOrderKey } from "./proj";
