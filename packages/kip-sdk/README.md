@@ -165,6 +165,17 @@ The pre-development spec set lives in [`docs/`](./docs/README.md) (36 documents 
 [`SPEC.md`](./SPEC.md)). This README and the guides under `docs/guide/` are the consumer-facing
 entry point; the numbered `docs/*.md` files are the internal design record.
 
+## For contributors / maintainers
+
+Changing kip-sdk's code? Start with the maintainer docs under [`docs/maintainer/`](./docs/maintainer/):
+
+- [architecture.md](./docs/maintainer/architecture.md) — a tour of the real current module layout
+  (`src/`), the layering, and the load-bearing invariants a change must preserve.
+- [conformance-guide.md](./docs/maintainer/conformance-guide.md) — how the self-guarding invariant
+  suite works and the step-by-step for adding a new `INV-*` test.
+- [contributing.md](./docs/maintainer/contributing.md) — the house rules, prerequisites, the
+  `DEBTS.md` debt-tracking convention, the TDD/adversarial-review workflow, and the build/test gates.
+
 ## License
 
 MIT.

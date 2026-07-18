@@ -89,6 +89,18 @@ These five invariants run through every document; nothing in the set may contrad
 | [32-knowledge-autoencoding.md](./32-knowledge-autoencoding.md) | encode→decode→reconstruction-loss→learner loop; bounded disjunctive budget; kip:learn recorded-as-fact; accelerator-vs-substrate boundary. | §5b.2 |
 | [33-mining-discovery-ingestion.md](./33-mining-discovery-ingestion.md) | Miner/Discoverer/Ingestor families; data-resource→objects-of-interest→query→acquire pipeline; open-set extensibility; all emit signed source-provenanced facts. | §5b.3 |
 
+### For maintainers (implementation-facing)
+
+These docs describe the **built package** (`src/`), not the pre-development spec — read them when
+changing code. See also the package [README](../README.md) and the consumer
+[getting-started guide](./guide/getting-started.md).
+
+| Doc | Purpose | Source |
+|---|---|---|
+| [maintainer/architecture.md](./maintainer/architecture.md) | Tour of the real current module layout (`src/`), the layering, and the invariants a change must preserve. | built `src/` |
+| [maintainer/conformance-guide.md](./maintainer/conformance-guide.md) | How the self-guarding conformance suite works and how to add a new `INV-*` test. | `src/__tests__/conformance/` + [60](./60-conformance-and-testability.md) |
+| [maintainer/contributing.md](./maintainer/contributing.md) | House rules, prerequisites, the `DEBTS.md` convention, the TDD/adversarial-review workflow, and the build/test gates. | [DEBTS.md](./DEBTS.md) + repo CLAUDE.md |
+
 ### Security & planning
 
 | Doc | Purpose | Source |
