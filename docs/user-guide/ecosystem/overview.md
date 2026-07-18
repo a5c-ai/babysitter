@@ -38,7 +38,7 @@ Everything else in the monorepo is built around that engine:
 - An **agent runtime product** (genty) that packages the agent loop, daemon, and platform layers into a single `genty` binary and exposes the headless/internal harness.
 - An **adapters family** (20 package directories) that multiplexes a single integration definition out to many harnesses, transports, CI triggers, plugin formats, and lifecycle hooks.
 - A **real-time dashboard** (observer-dashboard) that streams the journal over SSE.
-- Two **adjacent / forward-looking** components: kradle (a Kubernetes-native Git forge, MVP) and kip-sdk (a memory substrate that is **spec/design only — no shipping code**).
+- Two **adjacent** components: kradle (a Kubernetes-native Git forge, MVP) and kip-sdk (a signed, git-substrate property-graph **memory substrate** — **built and runnable, but `private`/unpublished** and not yet wired into the rest of the stack).
 
 ---
 
@@ -53,7 +53,7 @@ Everything else in the monorepo is built around that engine:
 | **genty** | `@a5c-ai/genty` + `-core` / `-runtime` / `-platform` | The unified agent product (renamed from "tula") that composes the agent stack into the single `genty` binary: agent loop, daemon/session/cost, harness integration and governance. Surfaces the internal/headless harness. | GA | [Genty overview](./genty.md) |
 | **observer-dashboard** | `@a5c-ai/babysitter-observer-dashboard` | A Next.js real-time observability dashboard that streams run/journal events over SSE and virtualizes large run histories. | GA | [Observer Dashboard overview](./observer-dashboard.md) |
 | **kradle** | `@a5c-ai/kradle` + `@a5c-ai/kradle-cli` | A Kubernetes-native Git forge runtime (Argo CD GitOps + Gitea hosting) with a per-org dispatchable assistant. | MVP | [Kradle overview](./kradle.md) |
-| **kip-sdk** | no published package (spec-only); path `packages/kip-sdk` | A **spec/design-only** memory substrate (K/I/P): git-substrate, bitemporal, signed-fact property graph. **No code — Markdown spec only.** | Spec only | [kip-sdk overview](./kip-sdk.md) |
+| **kip-sdk** | `@a5c-ai/kip-sdk` (`private`/`0.0.1`, unpublished); path `packages/kip-sdk` | A signed, git-substrate, bitemporal, signed-fact property-graph **memory substrate** (K/I/P). Built and runnable: `open()`/`KipRepo` SDK, a `kip` CLI, a `kip-mcp` server, graph-QA (`kip ask`), and a 40-invariant conformance suite. Not yet on npm. | Implemented / pre-release | [kip-sdk overview](./kip-sdk.md) |
 
 > The canonical machine-readable map of public/internal packages, apps, and harness plugins lives at [Package & Plugin Map](../../package-and-plugin-map.md).
 
@@ -87,8 +87,8 @@ Pick by what you are trying to do:
 - **"I want a self-hosted, Kubernetes-native Git forge with built-in agent dispatch."**
   Look at [kradle](./kradle.md) — but note it is an **MVP**.
 
-- **"I'm researching the memory/context-management design."**
-  Read [kip-sdk](./kip-sdk.md), and understand it is **spec only — there is no implementation to install.**
+- **"I want a durable, signed, versioned memory substrate for agents."**
+  Read [kip-sdk](./kip-sdk.md) — it is **built and runnable** (SDK + `kip` CLI + `kip-mcp` server + graph-QA), but note it is **`private`/unpublished** (`0.0.1`): consume it via the monorepo workspace or the built `dist/`, not `npm install`.
 
 ---
 
@@ -101,7 +101,7 @@ Be honest about what is shipping versus what is forward-looking:
 | babysitter-sdk / babysitter / atlas / genty / observer-dashboard | **GA** (v6.0.0) | Versioned, runtime, generally available. |
 | adapters family | **GA** | Versioned and consumed by the runtime. A couple of subdirs are thin (see [adapter types](../reference/adapter-types.md) for the honest per-package notes). |
 | kradle | **MVP** | Described by its own README as an "executable MVP runtime and handoff package." Early; expect rough edges. |
-| kip-sdk | **Spec only** | Entirely Markdown — `SPEC.md` + numbered design docs. No `package.json`, no `src/`. Treat any kip "feature" as **design, not shipping code.** |
+| kip-sdk | **Implemented / pre-release** | Real `package.json` + `src/` + tests: `open()`/`KipRepo` SDK, a `kip` CLI, a `kip-mcp` server, graph-QA (`kip ask`), and a 40-invariant conformance suite. Runnable today, but `private: true`/`0.0.1` — **unpublished** (workspace/`dist/`, not `npm install`) and not yet wired into the rest of the stack. |
 
 ---
 

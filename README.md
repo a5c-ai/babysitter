@@ -437,12 +437,15 @@ packages/
   sdk/                    # @a5c-ai/babysitter-sdk — core SDK
   kradle/                 # @a5c-ai/kradle — Kubernetes-native forge
     core/ sdk/ cli/ web/
+  kip-sdk/                # @a5c-ai/kip-sdk — signed git-substrate memory SDK (private/unpublished)
 plugins/                  # Installable plugin packages
   babysitter-unified/     #   Unified plugin for all harnesses
 blueprints/               # Blueprint marketplace registry
   a5c/marketplace/
 library/                  # Process library (methodologies + specializations)
 ```
+
+**Adjacent: `kip-sdk` (memory substrate).** `packages/kip-sdk` (`@a5c-ai/kip-sdk`) is a signed, git-substrate, bitemporal, typed property-graph memory SDK — a durable memory layer where every fact is an append-only, Ed25519-signed record and reads are a deterministic projection over the fact set. It ships a working `open()`/`KipRepo` SDK, a `kip` CLI, a `kip-mcp` server, and graph-QA (`kip ask`). It is built and runnable but `private`/`0.0.1` (unpublished — consume it via the monorepo workspace or the built `dist/`, not `npm install`). See the [kip-sdk README](packages/kip-sdk/README.md) and the [ecosystem overview](docs/user-guide/ecosystem/kip-sdk.md).
 
 ---
 

@@ -84,7 +84,7 @@ This document defines the navigation structure for the Babysitter User Guide doc
       path: /ecosystem/observer-dashboard.md
     - title: kradle (K8s Git forge — MVP)
       path: /ecosystem/kradle.md
-    - title: kip-sdk (memory substrate — spec only)
+    - title: kip-sdk (memory substrate — built, unpublished)
       path: /ecosystem/kip-sdk.md
 ```
 
@@ -232,7 +232,7 @@ For documentation platforms that use JSON configuration (e.g., Docusaurus, ViteP
           { "label": "genty (agent runtime)", "to": "/ecosystem/genty" },
           { "label": "observer-dashboard", "to": "/ecosystem/observer-dashboard" },
           { "label": "kradle (K8s Git forge — MVP)", "to": "/ecosystem/kradle" },
-          { "label": "kip-sdk (memory substrate — spec only)", "to": "/ecosystem/kip-sdk" }
+          { "label": "kip-sdk (memory substrate — built, unpublished)", "to": "/ecosystem/kip-sdk" }
         ]
       },
       {

@@ -39,7 +39,7 @@ This is the GitBook-style table of contents for the Babysitter User Guide. It is
 * [genty (agent runtime)](./ecosystem/genty.md)
 * [observer-dashboard](./ecosystem/observer-dashboard.md)
 * [kradle (K8s Git forge — MVP)](./ecosystem/kradle.md)
-* [kip-sdk (memory substrate — spec only)](./ecosystem/kip-sdk.md)
+* [kip-sdk (memory substrate — built, unpublished)](./ecosystem/kip-sdk.md)
 
 ---
 
@@ -109,7 +109,7 @@ docs/user-guide/
 |   +-- genty.md                          # Unified agent runtime (GA)
 |   +-- observer-dashboard.md             # Real-time SSE dashboard (GA)
 |   +-- kradle.md                         # K8s-native Git forge (MVP)
-|   +-- kip-sdk.md                        # Memory substrate (spec only)
+|   +-- kip-sdk.md                        # Memory substrate (built, unpublished)
 |
 +-- getting-started/                      # Getting Started Section
 |   +-- README.md                         # Overview
