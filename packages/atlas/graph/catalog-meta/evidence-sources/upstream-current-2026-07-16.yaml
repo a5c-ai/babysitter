@@ -1,0 +1,307 @@
+# Evidence captured during the 2026-07-16 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1784177987-g5d539a-2026-07-16
+attributes:
+  displayName: "Amp CLI 0.0.1784177987-g5d539a npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784177987-g5d539a"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784177987-g5d539a"
+  locator: "npm @ampcode/cli v0.0.1784177987-g5d539a"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-16T05:07:49Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli version 0.0.1784177987-g5d539a as the
+    latest dist-tag, published and modified on 2026-07-16. No public
+    build-specific changelog, CLI flag, transport/API, model, package-name,
+    install-method, or migration change was found for this timestamped build.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1784177987-g5d539a
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-3-2026-07-16
+attributes:
+  displayName: "Antigravity CLI 1.1.3 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.3"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.3"
+  locator: "google-antigravity/antigravity-cli release 1.1.3"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-16T01:01:57Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.3 release notes document /codesearch
+    aliases, regex/literal/file-glob search options, copy-on-select,
+    compaction-boundary indicators, async skill loading, cached customization
+    discovery, headless permission-confirmation soft denials, expanded MCP
+    timeout bounds, conversation-history corruption fixes, and symlinked rules
+    de-duplication.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-3
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-211-2026-07-16
+attributes:
+  displayName: "Claude Code v2.1.211 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.211"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.211"
+  locator: "anthropics/claude-code release v2.1.211"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-15T23:02:35Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official Claude Code 2.1.211 release notes document
+    --forward-subagent-text and CLAUDE_CODE_FORWARD_SUBAGENT_TEXT, permission
+    preview hardening, PreToolUse ask behavior for unsandboxed Bash, plugin MCP
+    reconnects after idle web wake, explicit subagent model persistence, file
+    upload validation, background-agent result and respawn fixes, Chrome/Windows
+    fixes, and current documentation links.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-211
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-211-2026-07-16
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.211 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.211"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.211"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.211"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-15T23:02:33Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.211 release notes document
+    SDKAssistantMessage.timestamp in the live stream, alpha exports for
+    rate-limit message-prefix classification, process-exit errors including CLI
+    stderr output, and replay ordering fixes for --replay-user-messages with
+    --include-partial-messages.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-211
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-144-5-2026-07-16
+attributes:
+  displayName: "Codex CLI rust-v0.144.5 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.5"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.5"
+  locator: "openai/codex release rust-v0.144.5"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-16T02:54:48Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official Codex CLI rust-v0.144.5 release notes document improved
+    dangerous-command detection, including more forced rm forms, and clearer
+    rejection reasons when commands are denied.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex:0-144-5
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:openai-node-6-47-0-2026-07-16
+attributes:
+  displayName: "OpenAI Node SDK 6.47.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/openai/v/6.47.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/openai/v/6.47.0"
+  locator: "npm openai v6.47.0"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-15T00:00:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    npm metadata reports openai 6.47.0 as the latest package version. Existing
+    issue #1417 already tracks the detailed OpenAI Node SDK 6.47.0
+    assimilation; this graph record keeps the AgentVersion surface current.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex-sdk:6-47-0
+    - agent:codex-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-71-2026-07-16
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.71 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.71"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.71"
+  locator: "github/copilot-cli release v1.0.71"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-16T01:54:36Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official GitHub Copilot CLI 1.0.71 release notes document
+    COPILOT_TASK_WAIT_TIMEOUT_SECONDS behavior for -p --autopilot, canvas
+    support, plugin marketplace commands, GitHub MCP settings persistence,
+    /voice devices, plan-mode built-in mutator blocking, /worktree and /move
+    split behavior, model picker and session persistence fixes, and numerous
+    shell, plugin, MCP, accessibility, and non-interactive prompt fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-71
+    - agent:copilot-cli
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-173-0-2026-07-16
+attributes:
+  displayName: "Factory Droid CLI 0.173.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.173.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.173.0"
+  locator: "npm @factory/cli v0.173.0"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-16T02:33:21Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    npm metadata reports @factory/cli version 0.173.0 as the latest dist-tag,
+    identifies the package as Factory Droid CLI, exposes the droid binary,
+    requires Node >=20.0.0, and points repository metadata at Factory-AI/factory.
+    No public version-specific CLI flag, transport/API, model, package-name,
+    install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-173-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-18-2-2026-07-16
+attributes:
+  displayName: "OpenCode v1.18.2 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.2"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.2"
+  locator: "anomalyco/opencode release v1.18.2"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-15T16:15:38Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official OpenCode 1.18.2 release notes document nested subagents no longer
+    launching nested subagents by default, a configurable subagent_depth limit,
+    improved Meta model reasoning depth defaults, and desktop fixes for Help,
+    null archive times, and the Windows drawer close button.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-18-2
+    - agent:opencode
+---
+nodeKind: EvidenceSource
+id: evidence:omp-17-0-1-2026-07-16
+attributes:
+  displayName: "Oh-My-Pi v17.0.1 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.1"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.1"
+  locator: "can1357/oh-my-pi release v17.0.1"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-16T04:00:37Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official Oh-My-Pi 17.0.1 release notes document provider compatibility
+    fixes for OpenAI sampling parameters, Google/Cloud Code Assist boolean JSON
+    Schema handling, Vertex Claude thinking beta gating, custom Anthropic
+    endpoints, OpenRouter cost reporting, Codex WebSocket proxy handling,
+    catalog additions including GPT-5.6 Luna/Sol/Terra entries, Codex
+    config.toml MCP import cwd/command fixes, plugin/runtime fixes, browser
+    teardown deadlines, and awaited session disposal.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:17-0-1
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:pi-0-80-7-2026-07-16
+attributes:
+  displayName: "Pi v0.80.7 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/earendil-works/pi/releases/tag/v0.80.7"
+  sourcePathOrUrl: "https://github.com/earendil-works/pi/releases/tag/v0.80.7"
+  locator: "earendil-works/pi release v0.80.7"
+  capturedAt: "2026-07-16T08:55:00Z"
+  observedAt: "2026-07-14T16:41:53Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-16T08:55:00Z"
+  notes: |
+    Official Pi 0.80.7 release notes document the breaking replacement of
+    openai-responses compat.sendSessionIdHeader with
+    compat.sessionAffinityFormat, cache-friendly dynamic tool loading,
+    Ctrl+X message copy, Fable 5 xhigh/max thinking levels, OpenAI/Codex
+    Responses inherited toolChoice support, and provider/session-affinity fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:0-80-7
+    - agent:pi

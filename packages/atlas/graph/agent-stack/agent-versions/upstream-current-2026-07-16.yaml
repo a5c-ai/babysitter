@@ -1,0 +1,363 @@
+# Additive upstream release records from the 2026-07-16 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1784177987-g5d539a
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1784177987-g5d539a"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1784177987-g5d539a"
+  currentVersion: "0.0.1784177987-g5d539a"
+  releasedAt: "2026-07-16"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784177987-g5d539a"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1784014549-g51e7e3 to 0.0.1784177987-g5d539a."
+    - "npm metadata identifies @ampcode/cli as the Amp frontier coding agent CLI and published this version on 2026-07-16."
+    - "The npm README continues to document npm install -g @ampcode/cli and says the prior @sourcegraph/amp package name still works for backward compatibility."
+    - "No public build-specific release notes, CLI flag, transport/API, model, package-name, install-method, or migration change was found for this timestamped build."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1784177987-g5d539a."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+---
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-1-3
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.1.3"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.1.3"
+  currentVersion: "1.1.3"
+  releasedAt: "2026-07-16"
+  upstreamReleaseTag: "1.1.3"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.3"
+  cliCommand: "agy"
+  summary: "Antigravity CLI release adding workspace code search, copy-on-select behavior, context-compaction indicators, faster startup/customization loading, and terminal rendering fixes."
+  assimilationNotes:
+    - "Latest official google-antigravity/antigravity-cli stable release moved from recorded 1.1.2 to 1.1.3."
+    - "New /codesearch command, with /cs and /search aliases, adds interactive workspace search with regex default, literal mode, and file glob filtering; command-surface metadata should include it."
+    - "Copy-on-select behavior in no-flickering mode affects terminal interaction expectations and may change screenshot/TUI selection tests."
+    - "Context-compaction boundary indicators give visible transcript state that should be represented in session-history UX notes."
+    - "Skills now load asynchronously and customization discovery caches filesystem walks, affecting startup timing assumptions."
+    - "No package-name, install-method, transport/API, or migration change was published."
+  releaseHighlights:
+    - "New /codesearch, /cs, and /search command surface."
+    - "Copy-on-select in no-flickering terminal mode."
+    - "Context-compaction boundary indicators."
+    - "Asynchronous skill loading and cached customization discovery."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:antigravity-cli
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-211
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.211"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.211"
+  currentVersion: "2.1.211"
+  releasedAt: "2026-07-15"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.211"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.211"
+  cliCommand: "claude"
+  summary: "Claude Code release adding forwarded subagent text to stream-json output and fixing permission, sandbox, credential, MCP reconnect, model override, and settings-source behavior."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.209 to 2.1.211."
+    - "New --forward-subagent-text flag and CLAUDE_CODE_FORWARD_SUBAGENT_TEXT environment variable include subagent text and thinking in stream-json output; launchBehavior should expose this as an optional prompt/stream flag."
+    - "Permission previews now neutralize bidirectional override, zero-width, and look-alike quote characters before relaying to chat channels, affecting approval-message sanitization."
+    - "Auto mode no longer overrides PreToolUse hook ask decisions for unsandboxed Bash; hook-aware permission modeling should treat ask as a prompt floor."
+    - "Plugin MCP servers reconnect after idle web sessions wake, affecting MCP lifecycle and remote-control reliability assumptions."
+    - "Vertex and Bedrock startup no longer probes default Opus when a model is explicitly configured, reducing false fallback notices."
+    - "Subagents with explicit model overrides retain those overrides after resume/follow-up."
+    - "No package-name or install-method migration was published; install remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "New --forward-subagent-text flag and CLAUDE_CODE_FORWARD_SUBAGENT_TEXT environment variable."
+    - "Approval-preview sanitization hardening."
+    - "PreToolUse hook ask decisions preserved for unsandboxed Bash."
+    - "Plugin MCP server reconnect fix after idle web wake."
+    - "Subagent explicit model override persistence."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-211
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.211"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.211"
+  currentVersion: "0.3.211"
+  releasedAt: "2026-07-15"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.211"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.211"
+  summary: "Claude Agent SDK TypeScript release fixing replay ordering, adding assistant-message timestamps, exporting rate-limit prefix buckets, and improving child-process stderr errors."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.209 to 0.3.211."
+    - "Replay with --replay-user-messages and --include-partial-messages now emits turn-start user replay before turn content events, affecting stream consumers and transcript reconstruction."
+    - "SDKAssistantMessage.timestamp is now emitted as ISO-8601 in live streams; consumers should fall back to receive time for older emitters."
+    - "USAGE_LIMIT_ERROR_PREFIXES and sibling alpha exports support rate-limit classification without hand-maintained prefix lists."
+    - "Process-exit errors now include CLI stderr output, affecting diagnostics surfaced by SDK adapters."
+    - "No package-name, install-method, transport, or migration change beyond version upgrade was published."
+  releaseHighlights:
+    - "Replay event ordering fix for partial-message streams."
+    - "SDKAssistantMessage.timestamp in live streams."
+    - "Rate-limit prefix bucket alpha exports."
+    - "Process-exit errors include CLI stderr."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+---
+nodeKind: AgentVersion
+id: agentVersion:codex:0-144-5
+attributes:
+  agentId: "codex"
+  agentProductId: agent:codex
+  displayName: "Codex CLI 0.144.5"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.144.5"
+  currentVersion: "0.144.5"
+  releasedAt: "2026-07-16"
+  sourcePackage: "@openai/codex"
+  upstreamReleaseTag: "rust-v0.144.5"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.5"
+  cliCommand: "codex"
+  summary: "Codex CLI patch release expanding dangerous-command detection and rejection reasons."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.144.4 to 0.144.5."
+    - "Dangerous-command detection now covers more forced rm forms and returns clearer rejection reasons when commands are denied."
+    - "Sandbox and approval guardrails should treat this as a safety-policy update; forbidden-command tests should include the newly covered forced rm forms."
+    - "No package-name, install-method, transport/API, model support, or migration change was published."
+    - "Install command remains npm install -g @openai/codex."
+  releaseHighlights:
+    - "Expanded dangerous-command detection."
+    - "Clearer command-denial reasons."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex
+---
+nodeKind: AgentVersion
+id: agentVersion:codex-sdk:6-47-0
+attributes:
+  agentId: "codex-sdk"
+  agentProductId: agent:codex-sdk
+  displayName: "OpenAI Node SDK 6.47.0"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "6.47.0"
+  currentVersion: "6.47.0"
+  releasedAt: "2026-07-14"
+  sourcePackage: "openai"
+  upstreamReleaseTag: "v6.47.0"
+  releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.47.0"
+  summary: "OpenAI Node SDK release adding async event iterators, ResponseStream.fromReadableStream, streaming file uploads, runTools context callbacks, and API key owner project access."
+  assimilationNotes:
+    - "Latest npm moved from recorded 6.46.0 to 6.47.0."
+    - "Async event iterators and ResponseStream.fromReadableStream affect streaming adapter helpers and tests around Responses/Assistants stream consumption."
+    - "runTools callbacks can receive context, which may simplify Codex SDK tool bridge metadata propagation."
+    - "Streaming file uploads affect file-upload adapter paths and large artifact handling."
+    - "APIKeyListParams adds owner_project_access, affecting admin/API-key catalog metadata only if surfaced."
+    - "No package-name, install-method, or migration change was published; install remains npm install -g openai where used by the adapter source."
+  releaseHighlights:
+    - "Async event iterators."
+    - "ResponseStream.fromReadableStream."
+    - "Streaming file uploads."
+    - "runTools callback context."
+    - "API key owner_project_access parameter."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex-sdk
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-71
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.71"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.71"
+  currentVersion: "1.0.71"
+  releasedAt: "2026-07-16"
+  upstreamReleaseTag: "v1.0.71"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.71"
+  cliCommand: "gh"
+  summary: "GitHub Copilot CLI release fixing autopilot waits, refreshing memory context, improving MCP/tool freshness, adding voice-device persistence and canvas support, and tightening sandbox/LSP behavior."
+  assimilationNotes:
+    - "Latest official github/copilot-cli stable release moved from recorded 1.0.70 to 1.0.71."
+    - "copilot -p --autopilot now honors COPILOT_TASK_WAIT_TIMEOUT_SECONDS when background shell or agent work outlives the turn; launch timeout handling should mirror plain -p behavior."
+    - "Memory context refreshes after 30 minutes in long-lived sessions, affecting session-state freshness expectations."
+    - "MCP tool lists stay current when servers change, affecting MCP discovery cache invalidation."
+    - "New /voice devices persists microphone choice for voice mode."
+    - "Canvas support enables extension-driven CLI interactions; extension/canvas surfaces should be tracked separately from text streams."
+    - "Sandbox filesystem policy is enforced on LSP file reads and rename edits."
+    - "No package-name or install-method migration was published for the GitHub CLI distribution."
+  releaseHighlights:
+    - "Autopilot timeout fix using COPILOT_TASK_WAIT_TIMEOUT_SECONDS."
+    - "MCP tool-list refresh when servers change."
+    - "/voice devices microphone persistence."
+    - "Canvas support for extension-driven interactions."
+    - "Sandbox filesystem enforcement on LSP reads and renames."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:copilot-cli
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-173-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.173.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.173.0"
+  currentVersion: "0.173.0"
+  releasedAt: "2026-07-16"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.173.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.171.0 to 0.173.0."
+    - "npm metadata identifies @factory/cli as the Factory Droid CLI and points repository metadata at Factory-AI/factory."
+    - "The package README continues to document npm install -g @factory/cli, PATH remediation, launching droid from a project directory, and ! bash-mode toggle."
+    - "No public 0.173.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.173.0."
+    - "No public build-specific changelog located for 0.173.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-18-2
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.18.2"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.18.2"
+  currentVersion: "1.18.2"
+  releasedAt: "2026-07-15"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.18.2"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.2"
+  cliCommand: "opencode"
+  summary: "OpenCode release stopping default nested subagent launches, adding configurable subagent depth, improving Meta reasoning defaults, and fixing desktop/session handling."
+  assimilationNotes:
+    - "Latest npm moved from recorded 1.17.20 to 1.18.2."
+    - "Subagents no longer launch nested subagents by default; configurable subagent_depth controls deeper delegation when needed, affecting subagent orchestration and recursion limits."
+    - "Default reasoning depth improved for Meta models, affecting provider/model capability defaults."
+    - "Desktop adds Mod+N for new tabs and fixes release-build Help button, null archive-time sessions, and Windows drawer chrome conflict."
+    - "No package-name or install-method migration was published; install remains npm install -g opencode-ai."
+  releaseHighlights:
+    - "Nested subagents disabled by default."
+    - "Configurable subagent_depth limit."
+    - "Improved Meta model reasoning defaults."
+    - "Desktop session and shortcut fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:17-0-1
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 17.0.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "17.0.1"
+  currentVersion: "17.0.1"
+  releasedAt: "2026-07-16"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v17.0.1"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.1"
+  cliCommand: "pi"
+  summary: "Oh-My-Pi release fixing OpenRouter cost reporting, unsupported sampling parameters for o-series/GPT-5+ requests, MCP boolean JSON Schema transport compatibility, and Vertex Claude thinking beta routing."
+  assimilationNotes:
+    - "Latest npm moved from recorded 16.5.0 to 17.0.1."
+    - "OpenRouter cost reporting now uses provider authoritative account charge instead of token-price estimates on Responses and Chat Completions streams; usage accounting should prefer provider charge fields when present."
+    - "OpenAI Responses and Chat Completions requests no longer forward unsupported sampling parameters such as temperature to o-series and GPT-5+ models, affecting provider request-shaping logic."
+    - "Boolean JSON Schema MCP tool input subschemas are coerced before sending to Google/Cloud Code Assist Antigravity transport, affecting MCP schema normalization."
+    - "Thinking-enabled Claude requests routed to google-vertex no longer send unsupported effort beta headers or output_config.effort, affecting Vertex request construction."
+    - "No package-name or install-method migration was published; install remains npm install -g @oh-my-pi/pi-coding-agent."
+  releaseHighlights:
+    - "Provider-authoritative OpenRouter cost reporting."
+    - "Unsupported sampling parameters stripped for o-series and GPT-5+ requests."
+    - "MCP boolean JSON Schema compatibility for Google/Cloud Code Assist transport."
+    - "Vertex Claude thinking beta/header gating."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+---
+nodeKind: AgentVersion
+id: agentVersion:pi:0-80-7
+attributes:
+  agentId: "pi"
+  agentProductId: agent:pi
+  displayName: "Pi 0.80.7"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.80.7"
+  currentVersion: "0.80.7"
+  releasedAt: "2026-07-14"
+  sourcePackage: "@earendil-works/pi-coding-agent"
+  upstreamReleaseTag: "v0.80.7"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.80.7"
+  cliCommand: "pi"
+  summary: "Pi release replacing sendSessionIdHeader with sessionAffinityFormat, adding cache-friendly dynamic tool loading, message copy shortcut, and expanded Fable thinking levels."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.80.6 to 0.80.7."
+    - "Breaking change: openai-responses compat.sendSessionIdHeader was removed from models.json; use compat.sessionAffinityFormat with openai, openai-nosession, or openrouter."
+    - "Replace sendSessionIdHeader: false with sessionAffinityFormat: openai-nosession when migrating model configs."
+    - "Dynamic tool loading lets extensions add tools during execution while Anthropic and OpenAI Responses models preserve prompt-cache prefixes, affecting extension and prompt-cache modeling."
+    - "Ctrl+X copies the last assistant message or selected /tree message, affecting keybinding metadata."
+    - "Fable 5 xhigh and max thinking levels expand model capability metadata."
+    - "No package-name or install-method migration was published; install remains npm install -g @earendil-works/pi-coding-agent."
+  releaseHighlights:
+    - "Breaking session-affinity config migration to compat.sessionAffinityFormat."
+    - "Cache-friendly dynamic tool loading."
+    - "Ctrl+X message copy shortcut."
+    - "Fable 5 xhigh and max thinking levels."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:pi
