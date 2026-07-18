@@ -56,7 +56,7 @@ test.describe("Dashboard Loading", () => {
     // Skeletons should no longer be visible
     const skeletons = dashboardPage.loadingSkeletons;
     // The main content skeletons (3 placeholders) should be gone
-    await expect(dashboardPage.projectGrid).toBeVisible({ timeout: 30_000 });
+    await expect(dashboardPage.projectGrid.first()).toBeVisible({ timeout: 30_000 });
   });
 });
 
@@ -394,7 +394,7 @@ test.describe("Filter Pills", () => {
     await expect(dashboardPage.getFilterPill("all")).toHaveClass(/bg-foreground/); // UX-R3 §14.2 (owner gate 2026-07-06, option a): active pill is neutral (foreground ink + fill + underline), not magenta
 
     // Grid comes back with every project card.
-    await expect(dashboardPage.projectGrid).toBeVisible({ timeout: 15_000 });
+    await expect(dashboardPage.projectGrid.first()).toBeVisible({ timeout: 15_000 });
     const allProjects = Object.keys(manifest.projectCounts);
     await expect(dashboardPage.getProjectCards()).toHaveCount(allProjects.length);
   });
@@ -444,7 +444,7 @@ test.describe("Flat Run List", () => {
     }
 
     // Grid is present before filtering.
-    await expect(dashboardPage.projectGrid).toBeVisible();
+    await expect(dashboardPage.projectGrid.first()).toBeVisible();
 
     await dashboardPage.clickFilterByValue(filter);
     await dashboardPage.waitForRunList();
@@ -461,7 +461,7 @@ test.describe("Flat Run List", () => {
 
     // Clicking "All" restores the project grid.
     await dashboardPage.clickFilterByValue("all");
-    await expect(dashboardPage.projectGrid).toBeVisible({ timeout: 15_000 });
+    await expect(dashboardPage.projectGrid.first()).toBeVisible({ timeout: 15_000 });
     await expect(dashboardPage.runList).toHaveCount(0);
     await expect(dashboardPage.getProjectCards().first()).toBeVisible();
   });

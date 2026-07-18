@@ -1453,7 +1453,8 @@ test.describe("Kanban board — UX-R2 §13.5 carried minors & nits (owner gate 2
 //   - [data-testid="kanban-bp-recorded-body"]     honest "nothing published yet" body
 //   - [data-testid="kanban-bp-recorded-answer"]   the existing recorded answer (AC-62)
 //   - [data-testid="kanban-bp-run-iterate"]       copyable, INERT run:iterate command (AC-60)
-//   - [data-testid="kanban-bp-overwrite-toggle"]  overwrite control (AC-62)
+//   - [data-testid="kanban-bp-first-answer-stands"] first-answer-stands copy (AC-62;
+//     review round 3 removed the overwrite toggle — answers cannot be overwritten)
 // ---------------------------------------------------------------------------
 
 // §14.5 frozen copy (verbatim).
@@ -1640,29 +1641,31 @@ test.describe("Kanban board — UX-R3 §14.5 write-path truth (owner gate 2026-0
     }
   });
 
-  test("AC-62: re-opening a recorded card shows the existing answer once and offers Overwrite (never a stacked second answer)", async ({
+  test("AC-62 (first-answer-stands): re-opening a recorded card shows the existing answer once and offers NO overwrite (the first recorded answer stands)", async ({
     page,
   }) => {
+    // Review round 3 replaced the AC-62 overwrite affordance with the
+    // first-answer-stands contract (the SDK commit path refuses a second
+    // answer for a resolved effect), see kanban-breakpoint-panel.tsx and its
+    // unit tests. This spec asserts the shipped contract.
     await interceptRecordedRun(page);
     await gotoBoard(page);
     const card = cardFor(page, RECORDED_RUN_ID);
     await expect(card).toBeVisible({ timeout: 15_000 });
 
-    // The existing recorded answer is shown exactly once, before any overwrite.
+    // The existing recorded answer is shown exactly once...
     const recorded = card.getByTestId("kanban-bp-recorded-answer");
     await expect(recorded).toHaveCount(1);
     await expect(recorded).toContainText(RECORDED_ANSWER);
 
-    // Overwrite control (not a plain re-answer) mounts the approval in
-    // overwrite mode — the submit relabels to "Overwrite answer".
-    const overwrite = card.getByTestId("kanban-bp-overwrite-toggle");
-    await expect(overwrite).toHaveText("Overwrite answer");
-    await overwrite.click();
-    const approval = card.getByTestId("breakpoint-approval");
-    await expect(approval).toBeVisible();
-    await expect(approval.getByTestId("approve-btn")).toHaveText("Overwrite answer");
-    // Still exactly one recorded answer on the card (overwrite, never stack).
-    await expect(card.getByTestId("kanban-bp-recorded-answer")).toHaveCount(1);
+    // ...with the honest first-answer-stands copy instead of any re-answer
+    // affordance: no overwrite toggle, no remounted approval form.
+    await expect(card.getByTestId("kanban-bp-first-answer-stands")).toContainText(
+      "The first recorded answer stands"
+    );
+    await expect(card.getByTestId("kanban-bp-overwrite-toggle")).toHaveCount(0);
+    await expect(card.getByTestId("breakpoint-approval")).toHaveCount(0);
+    await expect(card.getByText(/Overwrite/)).toHaveCount(0);
   });
 });
 

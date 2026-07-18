@@ -70,13 +70,25 @@ vi.mock("@/components/details/task-detail", () => ({
 
 import RunDetailPage from "../page";
 
+/**
+ * Next 15 passes `params` to client pages as a Promise, unwrapped via
+ * React.use(). A plain Promise.resolve() would suspend the first render;
+ * pre-fulfilling the thenable (status/value protocol) lets use() unwrap
+ * it synchronously so the existing sync assertions keep working.
+ */
+function fulfilledParams(runId: string): Promise<{ runId: string }> {
+  const p = Promise.resolve({ runId });
+  Object.assign(p, { status: "fulfilled", value: { runId } });
+  return p;
+}
+
 describe("RunDetailPage header run-id copy affordance", () => {
   beforeEach(() => {
     mockRun = createMockRun({ runId: RUN_ID });
   });
 
   it("renders the truncated breadcrumb id with the FULL run id in its title (hover)", () => {
-    render(<RunDetailPage params={{ runId: RUN_ID }} />);
+    render(<RunDetailPage params={fulfilledParams(RUN_ID)} />);
     const el = screen.getByText(`${RUN_ID.slice(0, 8)}...`);
     expect(el).toHaveAttribute("title", RUN_ID);
   });
@@ -84,7 +96,7 @@ describe("RunDetailPage header run-id copy affordance", () => {
   it("clicking the breadcrumb id copies the FULL run id to the clipboard", async () => {
     const user = userEvent.setup();
     const writeTextSpy = vi.spyOn(navigator.clipboard, "writeText");
-    render(<RunDetailPage params={{ runId: RUN_ID }} />);
+    render(<RunDetailPage params={fulfilledParams(RUN_ID)} />);
     await user.click(screen.getByText(`${RUN_ID.slice(0, 8)}...`));
     expect(writeTextSpy).toHaveBeenCalledWith(RUN_ID);
   });

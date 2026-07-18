@@ -34,13 +34,13 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Now measure a reload (server is warm)
     const startTime = Date.now();
     await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(heading).toBeVisible({ timeout: 60_000 });
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     const reloadTime = Date.now() - startTime;
     console.log(`Dashboard reload time (warm): ${reloadTime}ms`);
@@ -80,7 +80,7 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Count DOM nodes
     const nodeCount = await page.evaluate(() => {
@@ -110,7 +110,7 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Try expanding a project card to reveal run links
     const projectCard = projectGrid.locator("> *").first();
@@ -164,7 +164,7 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Wait a bit for any async errors to surface
     await page.waitForTimeout(2_000);

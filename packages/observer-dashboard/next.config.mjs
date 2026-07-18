@@ -11,22 +11,17 @@ const nextConfig = {
   // This transforms `import { X } from "lucide-react"` into direct subpath
   // imports at build time, dramatically reducing the amount of module code
   // that webpack must parse and eliminating unused icons from the bundle.
-  // Ignore TS errors from @types/react version mismatch in monorepo hoisting.
-  // The observer-dashboard uses React 18, while other workspaces use React 19.
-  // Radix UI peer deps resolve @types/react from root (v19) causing false positives.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    // The babysitter SDK is a server-only CommonJS package (run lock, journal,
-    // hooks dispatcher) with heavy transitive deps. Keep it as a runtime
-    // require instead of webpack-bundling it into the server action chunk.
-    serverComponentsExternalPackages: ['@a5c-ai/babysitter-sdk'],
   },
+  // The babysitter SDK is a server-only CommonJS package (run lock, journal,
+  // hooks dispatcher) with heavy transitive deps. Keep it as a runtime
+  // require instead of webpack-bundling it into the server action chunk.
+  // (Next 15: renamed from experimental.serverComponentsExternalPackages.)
+  serverExternalPackages: ['@a5c-ai/babysitter-sdk'],
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // serverComponentsExternalPackages alone does not survive the monorepo
+      // serverExternalPackages alone does not survive the monorepo
       // workspace symlink (node_modules/@a5c-ai/babysitter-sdk ->
       // ../../packages/babysitter-sdk): webpack resolves the real path first,
       // the prefix never matches, and the SDK dist gets bundled — dragging in

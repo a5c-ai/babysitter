@@ -319,8 +319,12 @@ export class DashboardPage {
       .or(this.page.getByTestId("recent-history-section"))
       .or(this.page.getByTestId("idle-empty-state"))
       .or(this.page.getByTestId("idle-with-history-banner"));
+    // .first(): the intent is "at least ONE surface is visible". Several of
+    // these can legitimately coexist (e.g. the active project grid + the
+    // recent-history section), and React 19 commits them together, so a bare
+    // toBeVisible on the or-chain trips Playwright's strict-mode violation.
     await expect(
-      projectContent.or(this.errorBanner).or(this.emptyState)
+      projectContent.or(this.errorBanner).or(this.emptyState).first()
     ).toBeVisible({ timeout: 60_000 });
   }
 
@@ -343,6 +347,7 @@ export class DashboardPage {
       // <RunList> renders the shared <EmptyState> (untestid'd) for a 0-run
       // bucket; match its heading text so empty filters don't hang the waiter.
       .or(this.page.getByText("No runs found"));
-    await expect(listContent).toBeVisible({ timeout: 30_000 });
+    // .first() for the same strict-mode reason as waitForData().
+    await expect(listContent.first()).toBeVisible({ timeout: 30_000 });
   }
 }

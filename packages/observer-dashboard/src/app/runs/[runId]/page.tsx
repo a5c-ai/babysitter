@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo } from "react";
+import { use, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useRunDetail } from "@/hooks/use-run-detail";
@@ -73,8 +73,9 @@ const TaskDetailPanel = dynamic(
   { ssr: false, loading: DetailPanelSkeleton }
 );
 
-export default function RunDetailPage({ params }: { params: { runId: string } }) {
-  const { runId } = params;
+export default function RunDetailPage({ params }: { params: Promise<{ runId: string }> }) {
+  // Next 15: `params` is a Promise in client pages — unwrap with React.use().
+  const { runId } = use(params);
   const router = useRouter();
   const { run, loading, error, hasBreakpointWaiting: _hasBreakpointWaiting } = useRunDetail(runId);
   const { notifications: _notifications, dismiss: _dismiss, notify: _notify } = useNotificationContext();

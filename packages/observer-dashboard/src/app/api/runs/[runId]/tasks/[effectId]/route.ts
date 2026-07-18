@@ -11,10 +11,10 @@ function isValidId(id: string): boolean {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { runId: string; effectId: string } }
+  { params }: { params: Promise<{ runId: string; effectId: string }> }
 ) {
   try {
-    const { runId, effectId } = params;
+    const { runId, effectId } = await params;
     if (!isValidId(runId) || !isValidId(effectId)) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
