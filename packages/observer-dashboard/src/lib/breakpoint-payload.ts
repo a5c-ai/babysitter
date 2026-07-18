@@ -74,6 +74,22 @@ export const BREAKPOINT_RECORDED_AWAITING_RESUME_CHIP =
 export const BREAKPOINT_RECORDED_AWAITING_RESUME_BODY =
   "Written to the run; the publish step runs when the orchestrator resumes. Nothing was published yet.";
 
+/**
+ * Review round 3 (first-answer-stands): the SDK commit path refuses a second
+ * answer for a resolved effect, so the UI never offers an overwrite. Shown
+ * next to a recorded answer instead of any re-answer affordance.
+ */
+export const BREAKPOINT_FIRST_ANSWER_STANDS =
+  "The first recorded answer stands. Breakpoint answers cannot be overwritten.";
+
+/**
+ * Review round 3 (first-answer-stands): post-submit copy when the SDK
+ * reports the effect was already resolved (someone else answered first, or a
+ * double submit). No change was recorded — never a success toast implying one.
+ */
+export const BREAKPOINT_ALREADY_ANSWERED =
+  "Already answered, first answer stands. This submit recorded nothing.";
+
 /** Parser-resolved payload: questionSource is always present (AC-32 flag). */
 export interface ResolvedBreakpointPayload extends BreakpointPayload {
   questionSource: BreakpointQuestionSource;

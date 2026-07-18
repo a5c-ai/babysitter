@@ -151,7 +151,7 @@ export interface Run {
   recordedAwaitingResume?: boolean;
   /** The effectId of the observer-recorded breakpoint awaiting resume (AC-59):
    *  lets the Needs-you card fetch the recorded answer + render the copyable
-   *  resume command / overwrite control. */
+   *  resume command (first-answer-stands: no overwrite control exists). */
   recordedBreakpointEffectId?: string;
 }
 

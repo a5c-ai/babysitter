@@ -275,9 +275,10 @@ describe("BreakpointApproval", () => {
     expect(mockApproveBreakpoint).not.toHaveBeenCalled();
   });
 
-  it("AC-62: overwrite mode renders on an already-recorded task, shows the existing answer, and relabels the submit to 'Overwrite answer'", () => {
+  it("AC-62 (first-answer-stands): the recorded state shows the existing answer and copy, and offers NO answer form", () => {
     // A resolved task would normally render nothing — recordedAnswer flips it
-    // into overwrite mode.
+    // into the read-only recorded state. The SDK path rejects second answers,
+    // so no overwrite affordance may render.
     const task = makeBreakpointTask({ status: "resolved" });
     render(
       <BreakpointApproval
@@ -292,6 +293,39 @@ describe("BreakpointApproval", () => {
     expect(screen.getByTestId("bp-recorded-answer")).toHaveTextContent(
       "Recorded answer: first choice"
     );
-    expect(screen.getByTestId("approve-btn")).toHaveTextContent("Overwrite answer");
+    expect(screen.getByTestId("bp-first-answer-stands").textContent).toContain(
+      "The first recorded answer stands"
+    );
+    // No submit, no input, no option buttons — nothing that could re-answer.
+    expect(screen.queryByTestId("approve-btn")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("custom-answer-input")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Overwrite/)).not.toBeInTheDocument();
+    // The inert resume command stays visible on an orphaned run (AC-60).
+    expect(screen.getByTestId("kanban-bp-run-iterate-text")).toHaveTextContent(
+      `babysitter run:iterate ${defaultRunId}`
+    );
+  });
+
+  it("first-answer-stands: an alreadyResolved response surfaces the honest 'already answered' copy, never a success toast implying a change", async () => {
+    const user = setupUser();
+    mockApproveBreakpoint.mockResolvedValue({
+      success: true,
+      alreadyResolved: true,
+    });
+
+    const task = makeBreakpointTask();
+    render(<BreakpointApproval task={task} runId={defaultRunId} />);
+
+    await user.type(screen.getByTestId("custom-answer-input"), "second try");
+    await user.click(screen.getByTestId("approve-btn"));
+
+    const resultEl = await screen.findByTestId("approval-result");
+    expect(resultEl.textContent).toContain(
+      "Already answered, first answer stands"
+    );
+    expect(resultEl.textContent).not.toContain("approved successfully");
+    // Amber-gray honesty, never the green success styling.
+    expect(resultEl.className).toContain("status-stalled");
+    expect(resultEl.className).not.toContain("success");
   });
 });

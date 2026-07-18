@@ -584,6 +584,24 @@ export async function parseRunDir(
   };
 }
 
+/**
+ * Read a single effect's task definition (tasks/<effectId>/task.json) — the
+ * same file every parser path above reads for kind/title/metadata. Exposed so
+ * the approve-breakpoint server action can check the effect's kind BEFORE
+ * committing a result (review round 3 blocker: the action must never resolve a
+ * non-breakpoint effect). Returns null when the file is missing or unreadable.
+ */
+export async function readTaskDefinition(
+  runPath: string,
+  effectId: string
+): Promise<Record<string, unknown> | null> {
+  const taskDef = await readJsonSafe<Record<string, unknown>>(
+    path.join(runPath, "tasks", effectId, "task.json"),
+    null
+  );
+  return taskDef ?? null;
+}
+
 export async function parseTaskDetail(
   runPath: string,
   effectId: string

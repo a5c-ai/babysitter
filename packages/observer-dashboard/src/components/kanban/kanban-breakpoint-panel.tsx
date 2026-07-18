@@ -5,6 +5,7 @@ import { useTaskDetail } from "@/hooks/use-run-detail";
 import { BreakpointApproval } from "@/components/breakpoint/breakpoint-approval";
 import { RunIterateCommand } from "@/components/breakpoint/run-iterate-command";
 import {
+  BREAKPOINT_FIRST_ANSWER_STANDS,
   BREAKPOINT_NO_QUESTION_FALLBACK,
   BREAKPOINT_ORPHANED_SEMANTICS,
   BREAKPOINT_READONLY_CONTRACT,
@@ -130,7 +131,8 @@ export function KanbanBreakpointPanel({ run }: KanbanBreakpointPanelProps) {
           {recordedQuestion}
         </p>
 
-        {/* The recorded answer (AC-62: shown before any overwrite). */}
+        {/* The recorded answer (AC-62: shown so the operator knows exactly
+            what stands). */}
         {recordedAnswer && (
           <p
             data-testid="kanban-bp-recorded-answer"
@@ -143,40 +145,19 @@ export function KanbanBreakpointPanel({ run }: KanbanBreakpointPanelProps) {
           </p>
         )}
 
+        {/* Review round 3 (first-answer-stands): the SDK commit path refuses
+            a second answer for a resolved effect, so the card offers NO
+            overwrite control — only the honest copy that the first recorded
+            answer stands. */}
+        <p
+          data-testid="kanban-bp-first-answer-stands"
+          className="text-[11px] leading-snug text-foreground-muted"
+        >
+          {BREAKPOINT_FIRST_ANSWER_STANDS}
+        </p>
+
         {/* Copyable, inert resume command (AC-60) — the observer never runs it. */}
         <RunIterateCommand runId={run.runId} />
-
-        {/* Overwrite control (AC-62): re-answering overwrites the single
-            result.json (no second answer/journal entry), never stacks. */}
-        <button
-          type="button"
-          data-testid="kanban-bp-overwrite-toggle"
-          aria-expanded={expanded}
-          onClick={() => setExpanded((prev) => !prev)}
-          className="inline-flex items-center gap-1 self-start rounded-md border border-border bg-background px-2 py-1 text-xs font-medium text-foreground-secondary hover:text-foreground hover:bg-background-secondary transition-colors"
-        >
-          {expanded ? (
-            <ChevronUp className="h-3 w-3" aria-hidden="true" focusable="false" />
-          ) : (
-            <ChevronDown className="h-3 w-3" aria-hidden="true" focusable="false" />
-          )}
-          Overwrite answer
-        </button>
-        {expanded &&
-          (task ? (
-            <div className="[&_form>div]:flex-col [&_form>div]:items-stretch [&_[data-testid=custom-answer-input]]:min-w-0">
-              <BreakpointApproval
-                task={task}
-                runId={run.runId}
-                orphaned
-                recordedAnswer={recordedAnswer}
-              />
-            </div>
-          ) : (
-            <p className="text-xs text-foreground-muted italic">
-              Loading breakpoint details…
-            </p>
-          ))}
       </div>
     );
   }

@@ -5,7 +5,10 @@ import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { approveBreakpoint } from "@/app/actions/approve-breakpoint";
+import type { ApproveBreakpointResult } from "@/app/actions/approve-breakpoint";
 import {
+  BREAKPOINT_ALREADY_ANSWERED,
+  BREAKPOINT_FIRST_ANSWER_STANDS,
   BREAKPOINT_ORPHANED_RECORDED_CONFIRMATION,
   BREAKPOINT_RECORDED_AWAITING_RESUME_CHIP,
 } from "@/lib/breakpoint-payload";
@@ -23,11 +26,11 @@ interface BreakpointApprovalProps {
    */
   orphaned?: boolean;
   /**
-   * UX-R3 §14.5 (AC-62): when this observer already recorded an answer for the
-   * effect (present on disk, run not yet resumed), the panel enters OVERWRITE
-   * mode — it renders even though the task reads "resolved", shows the existing
-   * answer, and the submit relabels to "Overwrite answer". Submitting rewrites
-   * the single result.json (the action guards against a second journal entry).
+   * UX-R3 §14.5 (AC-62) + review round 3 (first-answer-stands): when an answer
+   * is already recorded for the effect (present on disk, run not yet resumed),
+   * the panel renders a READ-ONLY recorded state — the existing answer plus
+   * copy that the first recorded answer stands. The SDK commit path refuses a
+   * second answer for a resolved effect, so no overwrite is offered.
    */
   recordedAnswer?: string;
 }
@@ -40,19 +43,44 @@ export function BreakpointApproval({
 }: BreakpointApprovalProps) {
   const [customAnswer, setCustomAnswer] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<{
-    success: boolean;
-    error?: string;
-  } | null>(null);
+  const [result, setResult] = useState<ApproveBreakpointResult | null>(null);
 
   const options = task.breakpoint?.options || [];
   const isWaiting = task.status === "requested";
-  const overwriteMode = recordedAnswer !== undefined;
+  const recordedMode = recordedAnswer !== undefined;
 
-  // Render for a waiting breakpoint OR when re-answering an already-recorded
-  // one (overwrite mode). A genuinely resolved breakpoint with no observer
+  // Render for a waiting breakpoint OR the read-only recorded state of an
+  // already-answered one. A genuinely resolved breakpoint with no observer
   // record renders nothing (unchanged behavior).
-  if (!isWaiting && !overwriteMode) return null;
+  if (!isWaiting && !recordedMode) return null;
+
+  // Review round 3 (first-answer-stands): the SDK path rejects second answers,
+  // so an already-recorded breakpoint gets NO answer form — only the recorded
+  // answer and the honest copy that the first recorded answer stands.
+  if (recordedMode) {
+    return (
+      <div data-testid="breakpoint-approval" className="space-y-2">
+        <p
+          data-testid="bp-recorded-answer"
+          className="text-xs leading-snug text-foreground-muted"
+        >
+          Recorded answer:{" "}
+          <span className="font-semibold text-foreground break-words">
+            {recordedAnswer}
+          </span>
+        </p>
+        <p
+          data-testid="bp-first-answer-stands"
+          className="text-xs leading-snug text-foreground-muted"
+        >
+          {BREAKPOINT_FIRST_ANSWER_STANDS}
+        </p>
+        {/* UX-R3 §14.5 / AC-60: on a no-live-driver run the resume command
+            stays visible as copyable, INERT text — the observer never runs it. */}
+        {orphaned && <RunIterateCommand runId={runId} />}
+      </div>
+    );
+  }
 
   function handleApprove(answer: string) {
     if (!answer.trim()) return;
@@ -70,27 +98,12 @@ export function BreakpointApproval({
   }
 
   // Submit copy — UX-R3 §14.5 AC-58: never "Approve"/"Approving"; the observer
-  // RECORDS a decision, it does not perform one. Overwrite mode relabels.
-  const submitIdleLabel = overwriteMode ? "Overwrite answer" : "Record answer";
-  const submitPendingLabel = overwriteMode ? "Overwriting..." : "Recording...";
+  // RECORDS a decision, it does not perform one.
+  const submitIdleLabel = "Record answer";
+  const submitPendingLabel = "Recording...";
 
   return (
     <div data-testid="breakpoint-approval" className="space-y-4">
-      {/* UX-R3 §14.5 / AC-62: the answer already on disk, shown before any
-          re-answer so the operator overwrites knowingly (never a silent
-          second answer). */}
-      {overwriteMode && (
-        <p
-          data-testid="bp-recorded-answer"
-          className="text-xs leading-snug text-foreground-muted"
-        >
-          Recorded answer:{" "}
-          <span className="font-semibold text-foreground break-words">
-            {recordedAnswer}
-          </span>
-        </p>
-      )}
-
       {/* UX-R3 §14.5 / AC-60: on a no-live-driver run the resume command is
           stated here as copyable, INERT text — the observer never runs it. */}
       {orphaned && <RunIterateCommand runId={runId} />}
@@ -164,7 +177,19 @@ export function BreakpointApproval({
       {/* Result feedback */}
       {result &&
         (result.success ? (
-          orphaned ? (
+          result.alreadyResolved ? (
+            // Review round 3 (first-answer-stands): the SDK refused a second
+            // commit — the effect was already answered (race or double
+            // submit). Nothing was recorded by THIS submit, so never a green
+            // success toast implying a change; amber-gray honest copy instead.
+            <div
+              data-testid="approval-result"
+              className="rounded-lg border border-status-stalled/30 bg-status-stalled-muted p-3 flex items-center gap-2 text-sm text-status-stalled"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" focusable="false" />
+              <span data-testid="bp-already-answered">{BREAKPOINT_ALREADY_ANSWERED}</span>
+            </div>
+          ) : orphaned ? (
             // UX-R3 §14.5 / AC-59 + AC-61: a no-driver run is NOT done — the
             // answer is recorded on disk but applied to nothing until a resume.
             // Amber-gray (--status-stalled), never green (--status-ok=done),

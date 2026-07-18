@@ -286,21 +286,24 @@ describe("KanbanBreakpointPanel — recorded, awaiting resume (UX-R3 §14.5)", (
     );
   });
 
-  it("AC-62: shows the existing answer and mounts an Overwrite control (never a second stacked answer)", () => {
+  it("AC-62 (first-answer-stands): shows the existing answer and NO overwrite control (the SDK rejects second answers)", () => {
     setupTaskDetail(recordedDetail("first choice"));
     render(<KanbanBreakpointPanel run={makeRecordedRun()} />);
 
-    // The recorded answer is shown exactly once before any overwrite.
+    // The recorded answer is shown exactly once.
     expect(screen.getAllByTestId("kanban-bp-recorded-answer")).toHaveLength(1);
     expect(screen.getByTestId("kanban-bp-recorded-answer").textContent).toContain(
       "first choice"
     );
 
-    // Overwrite toggle mounts the approval in overwrite mode.
-    const toggle = screen.getByTestId("kanban-bp-overwrite-toggle");
-    expect(toggle).toHaveTextContent("Overwrite answer");
-    fireEvent.click(toggle);
-    expect(screen.getByTestId("breakpoint-approval")).toBeInTheDocument();
-    expect(screen.getByTestId("approve-btn")).toHaveTextContent("Overwrite answer");
+    // First-answer-stands copy replaces any re-answer affordance.
+    expect(
+      screen.getByTestId("kanban-bp-first-answer-stands").textContent
+    ).toContain("The first recorded answer stands");
+    expect(
+      screen.queryByTestId("kanban-bp-overwrite-toggle")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Overwrite/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("breakpoint-approval")).not.toBeInTheDocument();
   });
 });

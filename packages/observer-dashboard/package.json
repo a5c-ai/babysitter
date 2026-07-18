@@ -57,7 +57,8 @@
     "verify:release": "node scripts/verify-release.mjs",
     "start": "next start --port 4800",
     "lint": "next lint",
-    "pretest": "node scripts/ensure-local-deps.mjs",
+    "typecheck": "tsc --noEmit",
+    "pretest": "node scripts/ensure-local-deps.mjs && npm run typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -107,5 +108,8 @@
       "L6"
     ],
     "muxes": []
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.0"
   }
 }

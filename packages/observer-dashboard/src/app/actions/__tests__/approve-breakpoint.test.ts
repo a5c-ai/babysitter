@@ -27,12 +27,17 @@ const tempRunDirs: string[] = [];
  * Create a real run fixture the way the SDK lays one out: a journal with
  * RUN_CREATED + EFFECT_REQUESTED (written through the SDK's own appendEvent,
  * so sequence numbers and checksums are canonical) and a task.json for the
- * breakpoint effect.
+ * breakpoint effect. `kind` is parameterizable so the breakpoint-only guard
+ * can be exercised against a pending non-breakpoint (e.g. shell) effect.
  */
-async function createRunFixture(effectId: string = EFFECT_ID): Promise<string> {
+async function createRunFixture(
+  effectId: string = EFFECT_ID,
+  kind: string = "breakpoint",
+): Promise<string> {
   const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
   tempRunDirs.push(runDir);
 
+  const taskId = kind === "breakpoint" ? "__sdk.breakpoint" : `__sdk.${kind}`;
   await appendEvent({
     runDir,
     eventType: "RUN_CREATED",
@@ -45,18 +50,20 @@ async function createRunFixture(effectId: string = EFFECT_ID): Promise<string> {
       effectId,
       invocationKey: INVOCATION_KEY,
       stepId: "step-1",
-      taskId: "__sdk.breakpoint",
-      kind: "breakpoint",
+      taskId,
+      kind,
       taskDefRef: `tasks/${effectId}/task.json`,
     },
   });
   await writeTaskDefinition(runDir, effectId, {
     effectId,
-    taskId: "__sdk.breakpoint",
+    taskId,
     invocationKey: INVOCATION_KEY,
-    kind: "breakpoint",
-    title: "test breakpoint",
-    metadata: { breakpointId: "test.breakpoint" },
+    kind,
+    title: `test ${kind}`,
+    ...(kind === "breakpoint"
+      ? { metadata: { breakpointId: "test.breakpoint" } }
+      : {}),
   });
 
   return runDir;
@@ -168,6 +175,34 @@ describe("approveBreakpoint", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Breakpoint-only guard (review round 3, blocker)
+  // -------------------------------------------------------------------------
+
+  it("rejects a pending shell-kind effect: no result.json is created and no EFFECT_RESOLVED is appended", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "shell");
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("not a breakpoint effect");
+
+    // The guard fired BEFORE the commit path: nothing was written.
+    await expect(
+      fs.access(path.join(runDir, "tasks", EFFECT_ID, "result.json")),
+    ).rejects.toThrow();
+    const entries = await listJournalEntries(runDir);
+    expect(entries.filter((e) => e.type === "EFFECT_RESOLVED")).toHaveLength(0);
+  });
+
+  it("rejects a pending agent-kind effect the same way (breakpoints only)", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "agent");
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result).toEqual({ success: false, error: "not a breakpoint effect" });
+  });
+
+  // -------------------------------------------------------------------------
   // Success path — SDK commit path writes the canonical artifacts
   // -------------------------------------------------------------------------
 
@@ -244,11 +279,14 @@ describe("approveBreakpoint", () => {
 
     const first = await approveBreakpoint("run-001", EFFECT_ID, "first");
     expect(first.success).toBe(true);
+    expect(first.alreadyResolved).toBeUndefined();
 
     const second = await approveBreakpoint("run-001", EFFECT_ID, "second");
     // The SDK refuses the second commit for an already-resolved effect; the
-    // action surfaces that as the existing "already recorded" success flow.
+    // action surfaces that as the first-answer-stands flow — not an error,
+    // but flagged so the UI never implies a change was recorded.
     expect(second.success).toBe(true);
+    expect(second.alreadyResolved).toBe(true);
     expect(second.error).toBeUndefined();
 
     const entries = await listJournalEntries(runDir);

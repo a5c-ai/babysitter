@@ -8,10 +8,17 @@
 // so this stays a runtime require against the installed package.
 import { commitEffectResult } from "@a5c-ai/babysitter-sdk/dist/runtime/commitEffectResult";
 import { findRunDir } from "@/lib/path-resolver";
+import { readTaskDefinition } from "@/lib/parser";
 
 export interface ApproveBreakpointResult {
   success: boolean;
   error?: string;
+  /**
+   * UX-R3 §14.5 (AC-62): true when the SDK refused the commit because the
+   * effect is already resolved. The first recorded answer stands — nothing was
+   * written by this call, so the UI must not present it as a change.
+   */
+  alreadyResolved?: boolean;
 }
 
 /**
@@ -69,6 +76,18 @@ export async function approveBreakpoint(
     }
     const runDir = found.runDir;
 
+    // --- Breakpoint-only guard (review round 3, blocker) ---
+    // This action is the observer's breakpoint answer path ONLY. Read the
+    // effect's own task definition (the same tasks/<effectId>/task.json the
+    // dashboard parser reads) and refuse to resolve any non-breakpoint effect
+    // through it — a shell/agent/node effect must never be completable from
+    // the dashboard. A missing task.json falls through to the SDK commit
+    // path, which rejects unknown effects with its own honest message.
+    const taskDef = await readTaskDefinition(runDir, effectId);
+    if (taskDef && taskDef.kind !== "breakpoint") {
+      return { success: false, error: "not a breakpoint effect" };
+    }
+
     const now = new Date().toISOString();
     const trimmed = answer.trim();
 
@@ -99,10 +118,11 @@ export async function approveBreakpoint(
     } catch (commitErr: unknown) {
       const msg = commitErr instanceof Error ? commitErr.message : String(commitErr);
       // AC-62: the SDK rejects a second commit for an already-resolved effect.
-      // That is the double-answer flow, not a failure — the first recorded
-      // answer stands and no duplicate EFFECT_RESOLVED entry was written.
+      // That is the double-answer flow, not a failure — but nothing was
+      // written either: the first recorded answer stands. Flag it so the UI
+      // can say so honestly instead of implying a change was recorded.
       if (/already resolved/i.test(msg)) {
-        return { success: true };
+        return { success: true, alreadyResolved: true };
       }
       // Every other SDK rejection (unknown effect, enforcement/policy,
       // signed/protected breakpoint) is surfaced honestly to the UI.

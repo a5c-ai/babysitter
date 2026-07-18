@@ -6,8 +6,14 @@
  * Needed because observer-dashboard uses React 18 while packages/catalog uses
  * React 19. npm hoists React 19 to root, so @testing-library/react and
  * @radix-ui packages resolve the wrong React version during tests.
+ *
+ * Also ensures the workspace dists the tests need are built (see the
+ * workspace-dist section at the bottom): the approve-breakpoint tests run the
+ * REAL @a5c-ai/babysitter-sdk commit path, which needs the SDK dist (and its
+ * workspace deps' dists) to exist on a fresh clone.
  */
 import { existsSync, cpSync, mkdirSync, readdirSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { resolve, dirname, basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -75,4 +81,42 @@ for (const pkg of [
   "class-variance-authority",
 ]) {
   copyIfMissing(pkg);
+}
+
+// ---------------------------------------------------------------------------
+// Workspace dists the tests need (reproducible `npm test` on a fresh clone).
+//
+// The approve-breakpoint action tests exercise the REAL SDK commit path
+// (@a5c-ai/babysitter-sdk dist/runtime/commitEffectResult), so the SDK dist —
+// and the dists of the workspace packages it resolves at runtime — must exist.
+// Build each one individually only when its dist entry file is missing.
+// Ordered by dependency: atlas → tasks-adapter → sdk.
+// ---------------------------------------------------------------------------
+const workspaceDists = [
+  { name: "@a5c-ai/atlas", dir: join(rootDir, "packages", "atlas") },
+  { name: "@a5c-ai/tasks-adapter", dir: join(rootDir, "packages", "adapters", "tasks") },
+  { name: "@a5c-ai/babysitter-sdk", dir: join(rootDir, "packages", "babysitter-sdk") },
+];
+
+for (const { name, dir } of workspaceDists) {
+  // The dist entry file is each package's `main` (dist/index.js for all three).
+  const entry = join(dir, "dist", "index.js");
+  if (existsSync(entry)) continue;
+
+  console.log(`[ensure-local-deps] ${name}: dist entry missing, building...`);
+  try {
+    execSync(`npm run build -w ${name}`, { cwd: rootDir, stdio: "inherit" });
+  } catch {
+    // Tolerated: under filtered installs the tasks-adapter's tsc can exit
+    // nonzero (its @types/express devDep may be absent) while still emitting
+    // JS. The hard gate is the dist entry file existing afterward.
+    console.warn(`[ensure-local-deps] ${name}: build exited nonzero (tolerated if the dist emitted)`);
+  }
+
+  if (!existsSync(entry)) {
+    throw new Error(
+      `[ensure-local-deps] ${name}: dist entry still missing after build (${entry}). ` +
+        `Run "npm run build -w ${name}" from the repo root and inspect its output.`,
+    );
+  }
 }
