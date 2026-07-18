@@ -104,6 +104,18 @@ export function derivedFromEdgeEidFor(producer: EID, materializedEid: EID): EID 
   return `derived_from:${encodeRefSegment(producer)}->${encodeRefSegment(materializedEid)}`;
 }
 
+/**
+ * The DETERMINISTIC edge EID `putEdge` mints when `EdgePut.eid` is omitted (docs/40 — "derived from
+ * `(kind, from, to)` when omitted"). Every component is percent-encoded before joining with the fixed
+ * `:`/`->` structural tokens, so no two distinct `(kind, from, to)` triples can collide on one edge
+ * EID — the identical separator-collision posture `materializedEidFor`/`derivedFromEdgeEidFor` take.
+ * Same triple ⇒ same EID on every replica (so a repeated `putEdge` folds onto the same edge cell,
+ * INV-11), which is exactly the convergence property a deterministic derivation must have.
+ */
+export function edgeEidFor(kind: EdgeKind, from: EID, to: EID): EID {
+  return `${encodeRefSegment(kind)}:${encodeRefSegment(from)}->${encodeRefSegment(to)}`;
+}
+
 /** The JSON shape persisted as a functionality-binding fact's `value` — every field
  * `Repo.registerFunctionality`'s caller-supplied `binding?` param (docs/40) can carry, plus the
  * `(edgeKind, microagentName, version)` registration key itself. */

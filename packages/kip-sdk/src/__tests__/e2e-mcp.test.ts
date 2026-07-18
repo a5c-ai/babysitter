@@ -15,9 +15,11 @@
  * bundled graph-QA manifest landed in `dist` (the cold-build / zero-JS guard has its full form in
  * `e2e-cli.test.ts`; here we assert the artifacts this file depends on).
  *
- * REAL DATA. Read fixtures are seeded via the SDK `open()`/`assertFact` seam (the write `putNode`/
- * `putEdge` seams are still `unimplemented` — so `kip_assert` cannot yet round-trip, and that test
- * fails HONESTLY as a real gap). Everything else drives the shipped server against real facts.
+ * REAL DATA. Read fixtures are seeded via the SDK `open()`/`assertFact` seam (raw signed facts at the
+ * substrate layer). The write `putNode`/`putEdge` seams are IMPLEMENTED, so `kip_assert` round-trips
+ * through the shipped server: the write-path test below asserts, then reads the node back. `kip_ask` is
+ * driven over the real stdio loop on its non-live channels (abstain + dispatch-failure) — never a paid
+ * ask. Everything else drives the shipped server against real facts.
  *
  * HYGIENE. Each server child is spawned with a timeout, driven by writing all request lines then
  * ending stdin (the readline loop drains and the process exits), and SIGKILLed by a watchdog if it
@@ -388,11 +390,11 @@ describe("errors + gating — unknown tool, read-only, notifications, malformed 
 });
 
 // ===========================================================================
-// WRITE PATH — kip_assert then read-back (spec §6.1, criterion 4). EXPECTED TO FAIL: the SDK
-// putNode/putEdge seams are still `unimplemented`, so the write surfaces an InternalError.
+// WRITE PATH — kip_assert then read-back (spec §6.1, criterion 4). The SDK putNode/putEdge seams are
+// IMPLEMENTED, so the assert authors real facts and the subsequent kip_get_node reads them back.
 // ===========================================================================
 
-describe("write path — kip_assert node then read-back (spec §6.1) [expected-fail: SDK putNode unimplemented]", () => {
+describe("write path — kip_assert node then read-back round-trips through the shipped server (spec §6.1)", () => {
   it("kip_assert {kind:'node', node:{eid,kind,props}} returns { eid } and a subsequent kip_get_node returns the NodeView", async () => {
     const dir = await emptyRepo("assert-node");
     const assertCall = rpc("tools/call", {
@@ -413,5 +415,47 @@ describe("write path — kip_assert node then read-back (spec §6.1) [expected-f
     const readBack = JSON.parse((getRes.result as { content: Array<{ text: string }> }).content[0].text) as NodeView;
     expect(readBack.eid).toBe("team/eng");
     expect(readBack.kind).toBe("Team");
+  });
+});
+
+// ===========================================================================
+// kip_ask over the REAL stdio loop — the NON-LIVE channels only (spec §5, §7.4, §9.1; ADR-B8). NEVER
+// spends money: the abstain case short-circuits before any model spawn, and the dispatch-failure case
+// forces the availability probe to fail by pointing KIP_CLAUDE_BIN at a nonexistent path (no `claude`
+// process is ever launched). The one paid live ask belongs to graph-qa-live.test.ts's single gated test.
+// ===========================================================================
+
+describe("ask over stdio — non-live abstain + dispatch-failure through the shipped server (spec §7.4, §9.1)", () => {
+  it("kip_ask on an EMPTY graph returns a NORMAL result frame that abstains (abstained:true, no citations, no model spawn)", async () => {
+    const dir = await emptyRepo("ask-abstain");
+    const call = rpc("tools/call", { name: "kip_ask", arguments: { question: "Where does Tal work?" } });
+    const run = await driveMcp(["--dir", dir, "--replica-id", "r1"], [call], {
+      // Belt-and-braces: an empty retrieval abstains before synthesis, but pin the model binary to a
+      // nonexistent path so this test can NEVER spend money on any machine.
+      env: { KIP_CLAUDE_BIN: join(tmpdir(), "definitely-no-claude-here-mcp-e2e"), KIP_ASK_LIVE: "" },
+    });
+    const res = frameById(run, call.id as number)!;
+    expect(res.error).toBeUndefined();
+    const body = JSON.parse((res.result as { content: Array<{ text: string }> }).content[0].text) as {
+      abstained?: boolean;
+      citations?: unknown[];
+    };
+    expect(body.abstained).toBe(true);
+    expect(body.citations).toEqual([]);
+  });
+
+  it("kip_ask WITH facts but NO model available fails via ERR_ASK_DISPATCH_FAILED (InternalError -32603) — never fabricates", async () => {
+    const dir = await seededRepo("ask-dispatch-fail", seedEmployment);
+    const call = rpc("tools/call", { name: "kip_ask", arguments: { question: "Where does Tal work?" } });
+    const run = await driveMcp(["--dir", dir, "--replica-id", "r1"], [call], {
+      // Force the ADR-B8 availability probe to fail WITHOUT launching any process (nonexistent path):
+      // retrieval finds facts, synthesis has no model → dispatch failure → ERR_ASK_DISPATCH_FAILED.
+      env: { KIP_CLAUDE_BIN: join(tmpdir(), "definitely-no-claude-here-mcp-e2e"), KIP_ASK_LIVE: "" },
+    });
+    const res = frameById(run, call.id as number)!;
+    expect(res.error?.code).toBe(-32603);
+    expect(res.error?.data?.code).toBe("ERR_ASK_DISPATCH_FAILED");
+    // Nothing fabricated: the failure is an error frame, so there is no result envelope carrying an answer.
+    expect(res.result).toBeUndefined();
   });
 });

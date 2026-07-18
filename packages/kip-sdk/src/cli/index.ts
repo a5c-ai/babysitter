@@ -255,7 +255,12 @@ async function cmdAssert(a: HandlerArgs): Promise<number> {
     const vt = flagStr(flags, "valid-to");
     if (vt !== undefined) node.validTo = parseHlcOrTime(vt);
     const returnedEid = await repo.putNode(node);
-    emitStampedEcho(write, json, { id: null, hlc: null, seq: null, status: "pending", eid: returnedEid });
+    // `putNode` is sugar that compiles to MULTIPLE facts and returns only the entity `EID` (docs/40),
+    // so there is no single stamped fact identity to echo. Echo the truthful `{ eid, status }` — never
+    // a null `id`/`hlc`/`seq` masquerading as a real stamp (N5). `status` is `"pending"` by the M1
+    // write invariant: `kip assert` performs no commit, so the write is not yet durable (a `kip commit`/
+    // txn boundary is what flips `pending`→`durable`, §4.2).
+    emitStampedEcho(write, json, { eid: returnedEid, status: "pending" });
     return 0;
   }
 
@@ -278,7 +283,9 @@ async function cmdAssert(a: HandlerArgs): Promise<number> {
     const vt = flagStr(flags, "valid-to");
     if (vt !== undefined) edge.validTo = parseHlcOrTime(vt);
     const returnedEid = await repo.putEdge(edge);
-    emitStampedEcho(write, json, { id: null, hlc: null, seq: null, status: "pending", eid: returnedEid });
+    // Same truthful sugar echo as the node form: `putEdge` returns only the `EID` (docs/40) — no single
+    // stamped fact identity — so echo `{ eid, status }`, never a fabricated null `id`/`hlc`/`seq`.
+    emitStampedEcho(write, json, { eid: returnedEid, status: "pending" });
     return 0;
   }
 
@@ -325,6 +332,16 @@ async function cmdRetract(a: HandlerArgs): Promise<number> {
     validFrom: 0,
     validTo: parseHlcOrTime(validTo),
     replicaId: resolved.replicaId,
+    // The targeted form builds the RetractInput inline (unlike `retract fact`, whose provenance comes
+    // from the file/stdin input), so it MUST supply a provenance for the signed mint-then-admit path:
+    // `retractFact`→`mintFact` reads `provenance.author` and REBUILDS signature/fingerprint/publicKey
+    // from the repo keyPair (INV-A1), exactly as `putNode`/`putEdge` do for their inline provenance.
+    provenance: {
+      author: `kip:retract:${resolved.replicaId}`,
+      signature: "",
+      publicKeyFingerprint: "",
+      signedFields: [],
+    },
   } as unknown as RetractInput;
   const stamped = await repo.retractFact(input);
   emitStampedEcho(write, json, { ...stamped });
@@ -634,15 +651,22 @@ function emitJson(write: Write, value: unknown): void {
   write(`${JSON.stringify(value)}\n`);
 }
 
-/** The `assert`/`retract` stamped-echo shape (spec §4.2/§4.3). `putNode`/`putEdge` return only an
- *  `EID`, so `id`/`hlc`/`seq` are `null` on those forms (see this work item's `disputes`). */
+/** The `assert`/`retract` echo (spec §4.2/§4.3). Two truthful shapes, per the SDK method each form
+ *  calls:
+ *   - **Raw-fact form** (`assertFact`/`retractFact`, ONE fact): the full stamped envelope
+ *     `{ id, hlc, seq, status }`.
+ *   - **Node/edge sugar forms** (`putNode`/`putEdge`): these compile to MULTIPLE facts and return only
+ *     the entity `EID` (docs/40), so there is no single stamped fact identity — the echo is
+ *     `{ eid, status }`. The CLI never emits a null `id`/`hlc`/`seq` pretending to be a real stamp (N5).
+ *  The human render therefore omits the `seq` clause when the echo carries no `seq`. */
 function emitStampedEcho(write: Write, json: boolean, echo: Record<string, unknown>): void {
   if (json) {
     emitJson(write, echo);
     return;
   }
   const label = (echo.eid as string | undefined) ?? (echo.id as string | undefined) ?? "(fact)";
-  write(`asserted ${label} (seq ${String(echo.seq)}, ${String(echo.status)})\n`);
+  const seqClause = echo.seq === undefined ? "" : `seq ${String(echo.seq)}, `;
+  write(`asserted ${label} (${seqClause}${String(echo.status)})\n`);
 }
 
 function renderKipError(werr: Write, json: boolean, e: KipError): void {

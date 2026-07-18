@@ -1,5 +1,6 @@
 /**
- * kip MCP server — FROZEN acceptance suite (spec-driven, pre-implementation).
+ * kip MCP server — acceptance suite (spec-driven). The server (`src/mcp/`) is IMPLEMENTED and this
+ * suite is GREEN; it is kept as the standing acceptance guard for the documented behavior.
  *
  * SOURCE OF TRUTH: `docs/design/kip-mcp.md` §11 "Acceptance criteria" (criteria 1..22), grounded in
  * §2 (stdio JSON-RPC + the §2.3 result envelope), §3 (repo-dir resolution), §4 (the read/write gate
@@ -17,11 +18,9 @@
  * `makeScriptedDispatch` idiom) so no real genty subprocess runs and `kip_ask`'s ZERO-write guarantee
  * is assertable by counting write-seam calls.
  *
- * EXPECTED-FAIL CONVENTION (identical to `kip-cli.test.ts`): `createKipMcpServer` is a throwing
- * `unimplemented` stub (`src/mcp/index.ts`) this round, so every behavioral test FAILS on its leading
- * `await createKipMcpServer(...)` (a rejected promise) — never on a type/syntax/import error (the file
- * type-checks and every imported value symbol exists on the real `src/mcp` surface). They become GREEN
- * once `src/mcp/` lands with the documented handler semantics.
+ * STATUS: `createKipMcpServer` (`src/mcp/index.ts`) is fully implemented, so every behavioral test
+ * here passes against the real handler semantics. (Historically this file was authored pre-
+ * implementation with a throwing stub; that convention no longer applies.)
  *
  * Non-goals: this file does NOT implement the server, adds NO runtime dependency, NEVER touches
  * `package-lock.json`, and does not weaken/skip any existing test.
@@ -749,6 +748,22 @@ describe("criterion 18 — kip_ask whose dispatched microagent fails returns an 
     expect(res.error!.code).toBe(-32603); // InternalError
     expect(res.error!.data?.code).toBe("ERR_ASK_DISPATCH_FAILED");
     expect(methodsCalled(spy).filter((m) => WRITE_METHODS.has(m))).toEqual([]);
+  });
+
+  it("surfaces the dispatcher's failure REASON in the error message when output carries one (D-49(2))", async () => {
+    // A dispatcher that fails loud with a precise reason (e.g. no model bound) — `runAsk` carries this
+    // to the operator via `output.error`; the MCP `kip_ask` handler must do the same, not collapse it
+    // into a bare "exitCode 1".
+    const { dispatch } = makeAskDispatch({
+      exitCode: 1,
+      output: { answer: "", abstained: false, citations: [], usedFacts: [], error: "no model is available — `claude --version` exited 127" },
+      elapsedMs: 0,
+    });
+    const { server } = await build({ dispatch });
+    const res = await callTool(server, "kip_ask", { question: "Where does Tal work?" });
+    expect(res.error).toBeDefined();
+    expect(res.error!.data?.code).toBe("ERR_ASK_DISPATCH_FAILED");
+    expect(res.error!.message).toContain("no model is available");
   });
 
   it("schema-invalid output (missing required answer/citations) → ERR_ASK_DISPATCH_FAILED", async () => {

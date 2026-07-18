@@ -50,6 +50,7 @@ import type { CellReducerAssociations } from "./cell-reducers";
 import {
   collectRegisteredBindings,
   derivedFromEdgeEidFor,
+  edgeEidFor,
   evaluateCondition,
   findConditionNodeMalformation,
   materializedEidFor,
@@ -824,9 +825,18 @@ export class KipRepo implements Repo {
     return this.isPlaceholderSignature(f);
   }
 
-  // TODO(M0/T4.4): branch-per-replica topology — return the current replica/session branch.
+  /**
+   * The current write branch (docs/40 `Repo.branch(): string` — "current replica/session branch";
+   * docs/24 §5 / docs/70 ADR — the branch-per-replica topology). Each replica writes ONLY its own
+   * long-lived `refs/kip/replicas/<id>` branch (no cross-replica write serialization ⇒
+   * coordinator-free), so a repo opened with this `replicaId` writes on, and reports, exactly that
+   * ref. A trivial, pure accessor — NOT a git-branching operation (this in-process SDK holds a single
+   * write branch per open handle, docs/40); it fabricates nothing beyond the spec's declared ref
+   * shape. The CLI (`kip init`/`kip open`) and MCP surface this string as the repo's write-branch
+   * identity.
+   */
   branch(): string {
-    throw new Error("unimplemented: branch");
+    return `refs/kip/replicas/${this.replicaId}`;
   }
 
   /**
@@ -1686,14 +1696,100 @@ export class KipRepo implements Repo {
     return { admitted: true };
   }
 
-  // TODO(M0/T1.2): sugar -> assert node-existence + prop facts.
-  async putNode(_node: NodePut): Promise<EID> {
-    throw new Error("unimplemented: putNode");
+  /**
+   * `putNode` (docs/40 §5b — "sugar; emit facts under the hood"; FR-A6 — "compile to assert
+   * node-existence + prop facts"): mint ONE `node` existence fact carrying the declared `nodeKind`,
+   * then ONE `node-prop` fact per declared prop, each through the SAME signed mint-then-ingest path
+   * `assertFact` uses (INV-A1 — the ONLY write path is a signed fact; no direct graph write). Set-pure
+   * and convergent: `getNode`'s existence gate needs the `node` fact for the props to project (the
+   * "no ghost nodes" rule `ensureExistenceFor` also honors), and a repeated `putNode` for the same
+   * `(eid, kind)` folds onto the same cells (INV-11). Returns the node's `EID`.
+   *
+   * `validFrom` defaults to `0` (the genesis-frontier open interval, the same default the seed
+   * fixtures and the raw-fact path use) and `validTo` to `null` (open-ended) when the caller omits
+   * them — the declared `NodePut` optionals, never a guessed value.
+   */
+  async putNode(node: NodePut): Promise<EID> {
+    const validFrom = node.validFrom ?? 0;
+    const validTo = node.validTo ?? null;
+    const provenance: Provenance = {
+      author: `kip:putNode:${this.replicaId}`,
+      signature: "",
+      publicKeyFingerprint: "",
+      signedFields: [],
+    };
+    // Node-existence fact FIRST — a `node-prop` with no committed existence projects to nothing
+    // (proj.ts's "no ghost nodes" gate, m2-2), so the props below are only readable once this lands.
+    await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "node", eid: node.eid, nodeKind: node.kind },
+      value: true,
+      validFrom,
+      validTo,
+      replicaId: this.replicaId,
+      provenance,
+    });
+    for (const [prop, value] of Object.entries(node.props ?? {})) {
+      // eslint-disable-next-line no-await-in-loop -- sequential to advance this replica's own
+      // HLC/seq chain deterministically (the module-wide authoring pattern).
+      await this.assertFact({
+        type: "assert",
+        v: 1,
+        target: { kind: "node-prop", eid: node.eid, prop },
+        value,
+        validFrom,
+        validTo,
+        replicaId: this.replicaId,
+        provenance,
+      });
+    }
+    return node.eid;
   }
 
-  // TODO(M0/T1.2): sugar -> assert edge + edge-prop facts.
-  async putEdge(_edge: EdgePut): Promise<EID> {
-    throw new Error("unimplemented: putEdge");
+  /**
+   * `putEdge` (docs/40 §5b — "sugar; emit facts under the hood"): mint ONE `edge` existence fact
+   * (carrying `edgeKind`/`from`/`to`), then ONE `edge-prop` fact per declared prop, each through the
+   * SAME signed mint-then-ingest path `assertFact` uses (INV-A1). Returns the edge's `EID` — the
+   * caller-supplied `EdgePut.eid`, or the DETERMINISTIC `edgeEidFor(kind, from, to)` derivation when
+   * omitted (docs/40 — "derived from `(kind, from, to)` when omitted"), so the same triple always
+   * resolves to the same edge cell on every replica (INV-11). Set-pure; `validTo` defaults to `null`
+   * (`validFrom` is a required `EdgePut` field, so it is never defaulted).
+   */
+  async putEdge(edge: EdgePut): Promise<EID> {
+    const eid = edge.eid ?? edgeEidFor(edge.kind, edge.from, edge.to);
+    const validFrom = edge.validFrom;
+    const validTo = edge.validTo ?? null;
+    const provenance: Provenance = {
+      author: `kip:putEdge:${this.replicaId}`,
+      signature: "",
+      publicKeyFingerprint: "",
+      signedFields: [],
+    };
+    await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "edge", eid, edgeKind: edge.kind, from: edge.from, to: edge.to },
+      value: true,
+      validFrom,
+      validTo,
+      replicaId: this.replicaId,
+      provenance,
+    });
+    for (const [prop, value] of Object.entries(edge.props ?? {})) {
+      // eslint-disable-next-line no-await-in-loop -- sequential chain advance, as in `putNode`.
+      await this.assertFact({
+        type: "assert",
+        v: 1,
+        target: { kind: "edge-prop", eid, prop },
+        value,
+        validFrom,
+        validTo,
+        replicaId: this.replicaId,
+        provenance,
+      });
+    }
+    return eid;
   }
 
   /**

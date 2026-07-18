@@ -18,12 +18,14 @@
  * manifest — the zero-JS-clean-build regression guard: if `tsc` alone were relied on, the manifest
  * would be missing and that test MUST fail.
  *
- * REAL DATA WITHOUT A WORKING WRITE PATH. The SDK `putNode`/`putEdge`/`branch` methods are still
- * throwing `unimplemented` stubs in this tree, so `kip init` and `kip assert node/edge` cannot yet
- * round-trip through the binary (those tests fail HONESTLY — a real implementation gap, not a test
- * defect). But `assertFact` IS implemented and persists signed facts to the on-disk substrate, so the
- * read fixtures are seeded via the SDK `open()`/`assertFact` seam (the same idiom `kip-cli.test.ts`'s
- * `initRepoDir` uses) and then read back THROUGH THE SPAWNED BINARY — genuine end-to-end read coverage.
+ * REAL DATA, END TO END. The SDK `putNode`/`putEdge`/`branch` write seams are IMPLEMENTED, so the
+ * write-path tests below (`kip init`, `kip assert node/edge`, `kip retract`) round-trip through the
+ * shipped binary against a real on-disk repo and PASS. READ fixtures are seeded via the SDK
+ * `open()`/`assertFact` seam (the same idiom `kip-cli.test.ts`'s `initRepoDir` uses) — signed facts
+ * persisted to the on-disk substrate — and then read back THROUGH THE SPAWNED BINARY: genuine
+ * end-to-end read coverage. (Seeding reads via `assertFact` rather than `putNode` keeps the read
+ * fixtures at the raw-fact substrate layer; the write path is exercised directly by the write-path
+ * suite.)
  *
  * SAFETY. `kip ask` never spends money here: the empty-graph case abstains before any model spawn, and
  * the dispatch-failure case forces the ADR-B8 probe to fail by pointing `KIP_CLAUDE_BIN` at a
@@ -40,6 +42,7 @@ import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { deflateSync, inflateSync } from "node:zlib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { open } from "../index";
 import type { EdgeView, NodeView, Provenance, PropValue, RecallResult } from "../index";
@@ -148,7 +151,8 @@ function json(stdout: string): unknown {
 
 // ---------------------------------------------------------------------------
 // Fixtures — a real on-disk repo seeded via the SDK `assertFact` seam (writes signed facts the spawned
-// binary reads back). `putNode`/`putEdge` are not used: they are still unimplemented (see file header).
+// binary reads back). READ fixtures seed at the raw-fact substrate layer with `assertFact` (not the
+// `putNode`/`putEdge` sugar, which the write-path suite below exercises directly through the binary).
 // ---------------------------------------------------------------------------
 
 const tmpDirs: string[] = [];
@@ -286,8 +290,11 @@ describe("meta — `kip --version` / `-V` / unknown command (spec §2, §3)", ()
 
 describe("pre-flight — resolution errors are surfaced before any SDK call, exit 3 (spec §2, §6)", () => {
   it("`kip open` on an uninitialized dir exits 3 with `repo not initialized`", async () => {
-    const dir = join(mkdtempSync(join(tmpdir(), "kip-e2e-cli-uninit-")), "nope");
-    tmpDirs.push(dir);
+    // Track the mkdtemp ROOT for cleanup (not the never-created `nope` child) so no empty
+    // `kip-e2e-cli-uninit-*` dir leaks — the D-38 rule (every temp site pushes its mkdtemp root).
+    const root = mkdtempSync(join(tmpdir(), "kip-e2e-cli-uninit-"));
+    tmpDirs.push(root);
+    const dir = join(root, "nope");
     const r = await spawnKip(["open", "--dir", dir, "--replica", "r1"]);
     expect(r.code).toBe(3);
     expect(r.stderr.toLowerCase()).toContain("not initialized");
@@ -311,6 +318,19 @@ describe("pre-flight — resolution errors are surfaced before any SDK call, exi
 // ===========================================================================
 // READ LIFECYCLE — spawned binary reading SDK-seeded on-disk facts (spec §4.4-§4.9).
 // ===========================================================================
+
+describe("open — the success path on an already-initialized repo (spec §4.1, AC-4 first half)", () => {
+  it("`kip open --json` on an initialized repo prints {created:false, branch, manifestGenesisCid} and exits 0", async () => {
+    const dir = await seededRepo("open-existing", seedEmployment);
+    const r = await spawnKip(["open", "--dir", dir, "--replica", "r1", "--json"]);
+    expect(r.code).toBe(0);
+    const out = json(r.stdout) as Record<string, unknown>;
+    expect(out.created).toBe(false);
+    // `branch()` is implemented — the shipped binary surfaces the real branch-per-replica ref shape.
+    expect(out.branch).toBe("refs/kip/replicas/r1");
+    expect(typeof out.manifestGenesisCid).toBe("string");
+  });
+});
 
 describe("get — reads a real NodeView / EdgeView / null through the shipped binary (spec §4.4)", () => {
   it("`kip get <eid> --json` prints the NodeView whose props.segments carry the resolved value; exit 0", async () => {
@@ -418,7 +438,7 @@ describe("asof — a fixed-AsOf sub-read (spec §4.7)", () => {
   });
 });
 
-describe("fsck — integrity gate; the ok path exits 0 with the full report (spec §4.8)", () => {
+describe("fsck — integrity gate; ok→exit 0, !ok→exit 1 with the report still on stdout (spec §4.8, AC-20)", () => {
   it("`kip fsck --json` on a healthy repo prints the FsckReport and exits 0", async () => {
     const dir = await seededRepo("fsck-ok", seedEmployment);
     const r = await spawnKip(["fsck", "--dir", dir, "--replica", "r1", "--json"]);
@@ -427,6 +447,20 @@ describe("fsck — integrity gate; the ok path exits 0 with the full report (spe
     expect(report.ok).toBe(true);
     expect(report).toHaveProperty("headsMatch");
     expect(report.badSignatures).toEqual([]);
+  });
+
+  it("`kip fsck --json` on a TAMPERED repo (a corrupted signature on disk) prints ok:false + the bad factId and exits 1", async () => {
+    // fsck is the ONE read command whose report field maps to a non-zero exit (AC-20 second half): a
+    // failed verdict is DATA on stdout, and exit 1 is the machine gate. Corrupt one persisted fact's
+    // signature at the substrate layer so the real Ed25519 re-verification inside `fsck()` fails.
+    const dir = await seededRepo("fsck-bad", seedEmployment);
+    const tamperedFactId = tamperOneFactSignatureOnDisk(dir);
+    const r = await spawnKip(["fsck", "--dir", dir, "--replica", "r1", "--json"]);
+    expect(r.code).toBe(1);
+    const report = json(r.stdout) as { ok: boolean; badSignatures: string[] };
+    expect(report.ok).toBe(false);
+    expect(report.badSignatures.length).toBeGreaterThan(0);
+    expect(report.badSignatures).toContain(tamperedFactId);
   });
 });
 
@@ -500,11 +534,11 @@ describe("ask — non-live behavior is deterministic and never fabricates (spec 
 });
 
 // ===========================================================================
-// WRITE PATH — spec §4.1/§4.2 (init / assert). EXPECTED TO FAIL: the SDK putNode/putEdge/branch seams
-// are still `unimplemented` in this tree (a real implementation gap the RED gate should surface).
+// WRITE PATH — spec §4.1/§4.2 (init / assert). The SDK putNode/putEdge/branch write seams are
+// IMPLEMENTED, so these paths round-trip through the shipped binary against a real on-disk repo.
 // ===========================================================================
 
-describe("write path — init / assert node / assert edge (spec §4.1, §4.2) [expected-fail: SDK write seams unimplemented]", () => {
+describe("write path — init / assert node / assert edge round-trip through the shipped binary (spec §4.1, §4.2)", () => {
   it("`kip init --create` prints {created:true, manifestGenesisCid, branch} and exits 0", async () => {
     const dir = mkTmp("init");
     const r = await spawnKip(["init", "--create", "--dir", dir, "--replica", "r1", "--root-key", "fpr-root-1", "--json"]);
@@ -515,10 +549,10 @@ describe("write path — init / assert node / assert edge (spec §4.1, §4.2) [e
     expect(out).toHaveProperty("manifestGenesisCid");
   });
 
-  it("`kip assert node --eid e1 --kind Person --prop name=\"Ada\"` prints the stamped echo {id,hlc,seq,status,eid}; exit 0", async () => {
+  it("`kip assert node --eid e1 --kind Person --prop name=\"Ada\"` prints the sugar echo { eid, status } (no fabricated id/hlc/seq); exit 0", async () => {
     const dir = await emptyRepo("assert-node");
     // The keyring is required for writes (spec §2): the SDK `open()` fixture wrote no keyring.json, so
-    // supply one via env so the write pre-flight passes and the failure is the SDK seam, not resolution.
+    // supply one via env so the write pre-flight passes and the write authors through `putNode`.
     const r = await spawnKip(
       ["assert", "node", "--eid", "e1", "--kind", "Person", "--prop", 'name="Ada"', "--dir", dir, "--replica", "r1", "--json"],
       { env: { KIP_KEYRING: writeTempKeyring() } },
@@ -527,9 +561,20 @@ describe("write path — init / assert node / assert edge (spec §4.1, §4.2) [e
     const out = json(r.stdout) as Record<string, unknown>;
     expect(out.eid).toBe("e1");
     expect(["pending", "durable"]).toContain(out.status);
+    // `putNode` returns only the EID (docs/40) — the CLI must NOT fabricate a stamped fact identity
+    // (§4.2, N5). The node it authored is now READABLE back through the binary (a true round-trip).
+    expect(out).not.toHaveProperty("id");
+    expect(out).not.toHaveProperty("hlc");
+    expect(out).not.toHaveProperty("seq");
+    const read = await spawnKip(["get", "e1", "--dir", dir, "--replica", "r1", "--json"]);
+    expect(read.code).toBe(0);
+    const view = json(read.stdout) as NodeView;
+    expect(view.eid).toBe("e1");
+    expect(view.kind).toBe("Person");
+    expect(view.props.name.segments[0]).toMatchObject({ kind: "value", value: "Ada" });
   });
 
-  it("`kip assert edge --kind knows --from e1 --to e2 --valid-from 0` prints the stamped echo; exit 0", async () => {
+  it("`kip assert edge --kind knows --from e1 --to e2 --valid-from 0` prints the sugar echo { eid, status }; exit 0", async () => {
     const dir = await emptyRepo("assert-edge");
     const r = await spawnKip(
       ["assert", "edge", "--kind", "knows", "--from", "e1", "--to", "e2", "--valid-from", "0", "--dir", dir, "--replica", "r1", "--json"],
@@ -539,8 +584,70 @@ describe("write path — init / assert node / assert edge (spec §4.1, §4.2) [e
     const out = json(r.stdout) as Record<string, unknown>;
     expect(out).toHaveProperty("eid");
     expect(["pending", "durable"]).toContain(out.status);
+    expect(out).not.toHaveProperty("id");
+    expect(out).not.toHaveProperty("hlc");
+    expect(out).not.toHaveProperty("seq");
   });
 });
+
+// ===========================================================================
+// retract — the targeted-cell write form (spec §4.3, AC-11). A single retract fact IS authored, so
+// this form DOES echo the full stamped envelope (unlike the node/edge sugar).
+// ===========================================================================
+
+describe("retract — `kip retract --eid --prop --valid-to` authors a retract fact and echoes the stamp (spec §4.3, AC-11)", () => {
+  it("prints the stamped envelope { id, hlc, seq, status } and exits 0", async () => {
+    const dir = await seededRepo("retract", seedEmployment);
+    const r = await spawnKip(
+      ["retract", "--eid", "person/tal", "--prop", "content", "--valid-to", "100", "--dir", dir, "--replica", "r1", "--json"],
+      { env: { KIP_KEYRING: writeTempKeyring() } },
+    );
+    expect(r.code).toBe(0);
+    const out = json(r.stdout) as Record<string, unknown>;
+    // The raw-fact/targeted retract path authors exactly ONE fact via `retractFact`, so the FULL stamped
+    // envelope is present and truthful here (contrast the EID-only node/edge sugar echo above).
+    expect(typeof out.id).toBe("string");
+    expect(out).toHaveProperty("hlc");
+    expect(out).toHaveProperty("seq");
+    expect(["pending", "durable"]).toContain(out.status);
+  });
+});
+
+/** Corrupt ONE persisted fact's Ed25519 signature at the substrate layer (the exact inverse of
+ *  `Substrate.writeBlob`'s `deflate("blob <len>\0" + json)` encoding) so `fsck()`'s real signature
+ *  re-verification flags it. Returns the tampered fact's declared `id` (the value `fsck` reports in
+ *  `badSignatures`). The object filename stays keyed on the ORIGINAL oid — the loader reads bytes back
+ *  by oid without re-hashing, so the corrupted fact is admitted and then caught by the signature check
+ *  (not silently dropped). */
+function tamperOneFactSignatureOnDisk(dir: string): string {
+  const index = JSON.parse(readFileSync(join(dir, "kip-facts-index.json"), "utf8")) as Record<
+    string,
+    { oid: string; witnessRelPath: string }
+  >;
+  const entries = Object.values(index);
+  if (entries.length === 0) throw new Error("tamper: no facts on disk to corrupt");
+  // Read each blob and pick a SEEDED CONTENT fact (an `assert` over a node/edge cell) — never a
+  // genesis/authorization fact, which the repo-open path could re-verify and reject before `fsck` runs.
+  const readFact = (oid: string): { id: string; type?: string; target?: { kind?: string }; provenance: { signature: string } } => {
+    const inflated = inflateSync(readFileSync(join(dir, "objects", oid.slice(0, 2), oid.slice(2))));
+    return JSON.parse(inflated.subarray(inflated.indexOf(0) + 1).toString("utf8"));
+  };
+  const contentKinds = new Set(["node", "node-prop", "edge", "edge-prop"]);
+  const target = entries
+    .map((e) => ({ oid: e.oid, fact: readFact(e.oid) }))
+    .find(({ fact }) => fact.type === "assert" && contentKinds.has(fact.target?.kind ?? ""));
+  if (!target) throw new Error("tamper: no seeded content fact found to corrupt");
+  const { oid, fact } = target;
+  const sig = fact.provenance.signature;
+  // Flip the first base64 char to a DIFFERENT valid base64 char — a well-formed but cryptographically
+  // wrong signature (verifyPayload returns false), leaving the in-band publicKey/fingerprint intact.
+  fact.provenance.signature = (sig[0] === "A" ? "B" : "A") + sig.slice(1);
+  const content = Buffer.from(JSON.stringify(fact), "utf8");
+  const header = Buffer.from(`blob ${content.length}\0`, "utf8");
+  // Overwrite the object at its ORIGINAL oid path (the loader reads by oid without re-hashing).
+  writeFileSync(join(dir, "objects", oid.slice(0, 2), oid.slice(2)), deflateSync(Buffer.concat([header, content])));
+  return fact.id;
+}
 
 /** Drop a readable keyring.json in a temp dir and return its path (satisfies the write keyring
  *  pre-flight; content is opaque to the SDK for this scaffold). */

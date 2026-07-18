@@ -193,10 +193,15 @@ Author a signed `assert` fact (node/edge/prop existence). This is the substrate 
   - `--prop k=v` values are parsed as JSON scalars (`PropValue = string|number|boolean|null|BlobRef`);
     a `k=@<cid>` form denotes a `BlobRef`.
 - **SDK method:** `putNode` / `putEdge` / `assertFact` per form.
-- **stdout JSON:** the stamped envelope echo:
-  `{ "id": <FactId>, "hlc": <HlcStamp>, "seq": <n>, "status": "pending"|"durable", "eid"?: <EID> }`
-  (`eid` present for node/edge forms, which return the `EID`; a `kip commit` or txn boundary flips
-  `pending`→`durable`).
+- **stdout JSON:** the echo shape depends on the SDK method the form calls:
+  - **Raw-fact form** (`assertFact` — exactly ONE fact): the full stamped envelope
+    `{ "id": <FactId>, "hlc": <HlcStamp>, "seq": <n>, "status": "pending"|"durable" }`.
+  - **Node/edge forms** (`putNode`/`putEdge`): these are sugar that compile to **multiple** facts
+    (node/edge existence + one fact per declared prop) and return only the entity `EID`
+    ([../40-sdk-api-surface.md](../40-sdk-api-surface.md) — `putNode(node): Promise<EID>`), so there is
+    **no single stamped fact identity** to echo. The echo is `{ "eid": <EID>, "status": "pending" }` —
+    the CLI never fabricates an `id`/`hlc`/`seq` it cannot obtain (N5, "fallbacks are evil"). A
+    `kip commit` / txn boundary is what flips `pending`→`durable`.
 - **Human:** `asserted <eid|factId> (seq <n>, <status>)`.
 - **Exit:** `0` on accept; `1` on `ERR_MALFORMED_INPUT` / `ERR_SCOPE_DENIED` / `ERR_SIGNATURE_INVALID`.
 
@@ -478,10 +483,10 @@ Each item is phrased so a test author can turn it directly into a vitest asserti
 6. **Keyring policy:** `kip assert node ...` with no resolvable keyring exits 3 (`keyring required to
    author facts`); `kip get <eid>` with no keyring proceeds and exits 0 (reads do not require a keyring).
 7. **`kip assert node --eid e1 --kind Person --prop name=\"Ada\"`** calls `putNode` with the parsed
-   `NodePut` and prints the stamped echo `{ id, hlc, seq, status, eid: "e1" }` with
-   `status ∈ {"pending","durable"}`; exits 0.
+   `NodePut` and prints the truthful sugar echo `{ eid: "e1", status: "pending" }` — `putNode` returns
+   only the `EID` (docs/40), so **no** fabricated `id`/`hlc`/`seq` is emitted (N5); exits 0.
 8. **`kip assert edge --kind knows --from e1 --to e2 --valid-from <t>`** calls `putEdge` with the parsed
-   `EdgePut` and prints `{ id, hlc, seq, status, eid }`; exits 0.
+   `EdgePut` and prints `{ eid, status: "pending" }` (same EID-only sugar echo as AC-7); exits 0.
 9. **`kip assert fact --file bad.json`** where the input fails well-formedness throws
    `ERR_MALFORMED_INPUT`; the CLI exits 1 and prints `{ error: { code: "ERR_MALFORMED_INPUT", ... } }`
    to stderr under `--json`.

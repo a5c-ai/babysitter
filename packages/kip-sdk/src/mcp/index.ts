@@ -341,6 +341,22 @@ const TOOL_DESCRIPTIONS: Record<string, string> = {
 /** A graph-QA dispatch failure (spec §7.4 / §9.1) — mapped to InternalError / ERR_ASK_DISPATCH_FAILED. */
 class AskDispatchError extends Error {}
 
+/**
+ * Read a dispatcher's optional failure REASON off `MicroagentResult.output` (D-49(2)) — the SAME
+ * seam `runAsk` reads (`src/cli/ask.ts`'s `dispatchFailureReason`). `MicroagentResult.output` is typed
+ * `unknown` and the graph-QA `outputSchema` is kip's own, so reading `output.error` invents no genty
+ * field. Without this, every distinct cause (no binary / expired token / prose instead of structured
+ * output / envelope quirk) collapses into the single opaque "exitCode 1" this MCP surface used to
+ * report. Never coerces: anything that is not a non-empty string yields `undefined`. */
+function askDispatchFailureReason(output: unknown): string | undefined {
+  if (output === null || typeof output !== "object") return undefined;
+  const err = (output as Record<string, unknown>).error;
+  if (typeof err !== "string") return undefined;
+  const trimmed = err.trim();
+  if (trimmed.length === 0) return undefined;
+  return trimmed.length <= 500 ? trimmed : `${trimmed.slice(0, 500)}… (${trimmed.length} chars)`;
+}
+
 // --- Small validation helpers (hand-rolled, no JSON-schema engine) ---------
 
 function malformed(message: string): never {
@@ -616,7 +632,14 @@ const TOOL_HANDLERS: Record<string, (ctx: HandlerCtx, args: unknown) => Promise<
     // Dispatch-failure detection (spec §7.4 / §9.1, N5): non-zero exit, timeout overrun, or
     // schema-invalid output ⇒ ERR_ASK_DISPATCH_FAILED, NO fabricated answer, NOTHING authored.
     if (result.exitCode !== 0) {
-      throw new AskDispatchError(`graph-QA dispatch failed (exitCode ${result.exitCode})`);
+      // Surface the dispatcher's REASON when it carried one (D-49(2)) — exactly as `runAsk` does — so
+      // an operator sees the real cause instead of a bare "exitCode 1". It is a DIAGNOSTIC on the
+      // failure channel: it can never become an answer, because this branch returns none.
+      const reason = askDispatchFailureReason(result.output);
+      throw new AskDispatchError(
+        `graph-QA dispatch failed (exitCode ${result.exitCode})` +
+          (reason === undefined ? "" : `: ${reason}`),
+      );
     }
     if (
       effectiveTimeout !== undefined &&

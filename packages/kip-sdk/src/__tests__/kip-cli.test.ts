@@ -10,20 +10,18 @@
  * TEST SURFACE (primary, per the run owner). The command handlers are exercised PROGRAMMATICALLY via
  * `runCli(argv, { cwd, stdout, stderr, ... })` — no subprocess is spawned. stdout/stderr are captured
  * as strings and the returned exit code asserted, so the JSON output shape + exit-code contract
- * (spec §3) is the machine-checkable contract. To stay deterministic and DECOUPLED from which SDK
- * `Repo` methods are still throwing stubs (`putNode`/`putEdge`/`branch`/`commit` are unimplemented in
- * this tree), the command-dispatch criteria inject a SPY `Repo` through the `openRepo` seam and assert
- * (a) which SDK method the parsed argv drives, with what arguments, and (b) the rendered stdout/exit.
- * `kip ask` is made deterministic with an injected scripted `DispatchMicroagentFn` — the M6/M7
- * `makeScriptedDispatch` idiom (see `fixtures-m6.ts`) — so no real genty subprocess runs. Pure-CLI
- * behaviors (usage errors, pre-flight resolution errors, the dependency boundary) are exercised
- * directly, no repo required.
+ * (spec §3) is the machine-checkable contract. To stay deterministic and DECOUPLED from the concrete
+ * SDK `Repo` (the command-dispatch criteria assert the argv→SDK-method wiring, not the substrate), the
+ * dispatch criteria inject a SPY `Repo` through the `openRepo` seam and assert (a) which SDK method the
+ * parsed argv drives, with what arguments, and (b) the rendered stdout/exit. `kip ask` is made
+ * deterministic with an injected scripted `DispatchMicroagentFn` — the M6/M7 `makeScriptedDispatch`
+ * idiom (see `fixtures-m6.ts`) — so no real genty subprocess runs. Pure-CLI behaviors (usage errors,
+ * pre-flight resolution errors, the dependency boundary) are exercised directly, no repo required.
  *
- * EXPECTED-FAIL CONVENTION (identical to `m7-acquisition.test.ts`): `runCli` is a throwing
- * `unimplemented` stub (`src/cli/index.ts`) this round, so every test FAILS on its leading
- * `await run(...)` (a rejected promise) — never on a type/syntax/import error (the file type-checks
- * and every imported value symbol — `runCli`, `open`, `KipError`, `KipRepo` — exists on the real
- * public surface). They become GREEN once `src/cli/` lands with the documented handler signatures.
+ * STATUS: `src/cli/` and the SDK write seams (`putNode`/`putEdge`/`branch`) are IMPLEMENTED and this
+ * suite is GREEN. (Historically this file was frozen pre-implementation, when `runCli` was a throwing
+ * `unimplemented` stub and every test failed on its leading `await run(...)`; it now asserts the shipped
+ * handler behavior.)
  *
  * Non-goal: these tests do NOT re-implement the CLI, and they add NO runtime dependency and NEVER
  * touch `package-lock.json`. They also do not weaken/skip any existing test.
@@ -531,8 +529,8 @@ describe("AC-6 keyring policy: writes require a keyring (exit 3); reads do not (
 // AC-7 — kip assert node.
 // ===========================================================================
 
-describe("AC-7 `kip assert node` parses NodePut, calls putNode, prints the stamped echo (spec §4.2)", () => {
-  it("calls putNode with the parsed --eid/--kind/--prop and prints {id,hlc,seq,status,eid}; exit 0", async () => {
+describe("AC-7 `kip assert node` parses NodePut, calls putNode, prints the sugar echo (spec §4.2)", () => {
+  it("calls putNode with the parsed --eid/--kind/--prop and prints { eid, status } (no fabricated id/hlc/seq); exit 0", async () => {
     const dir = await initRepoDir("assert-node");
     addKeyring(dir);
     const spy = makeSpyRepo({ putNode: async () => "e1" });
@@ -552,9 +550,12 @@ describe("AC-7 `kip assert node` parses NodePut, calls putNode, prints the stamp
     const out = json(r.stdout) as Record<string, unknown>;
     expect(out.eid).toBe("e1");
     expect(["pending", "durable"]).toContain(out.status);
-    expect(out).toHaveProperty("id");
-    expect(out).toHaveProperty("seq");
-    expect(out).toHaveProperty("hlc");
+    // `putNode` compiles to MULTIPLE facts and returns only the `EID` (docs/40) — there is no single
+    // stamped fact identity, so the CLI echoes NONE (a null `id`/`hlc`/`seq` would be a value masquerade,
+    // N5). The full stamped envelope is the raw-fact form's contract (AC-… `assert fact`), not this sugar.
+    expect(out).not.toHaveProperty("id");
+    expect(out).not.toHaveProperty("hlc");
+    expect(out).not.toHaveProperty("seq");
   });
 });
 
@@ -562,8 +563,8 @@ describe("AC-7 `kip assert node` parses NodePut, calls putNode, prints the stamp
 // AC-8 — kip assert edge.
 // ===========================================================================
 
-describe("AC-8 `kip assert edge` parses EdgePut, calls putEdge, prints the stamped echo (spec §4.2)", () => {
-  it("calls putEdge with parsed --kind/--from/--to/--valid-from and prints {id,hlc,seq,status,eid}; exit 0", async () => {
+describe("AC-8 `kip assert edge` parses EdgePut, calls putEdge, prints the sugar echo (spec §4.2)", () => {
+  it("calls putEdge with parsed --kind/--from/--to/--valid-from and prints { eid, status } (no fabricated id/hlc/seq); exit 0", async () => {
     const dir = await initRepoDir("assert-edge");
     addKeyring(dir);
     const spy = makeSpyRepo({ putEdge: async () => "knows/e1/e2" });
@@ -583,6 +584,10 @@ describe("AC-8 `kip assert edge` parses EdgePut, calls putEdge, prints the stamp
     const out = json(r.stdout) as Record<string, unknown>;
     expect(out).toHaveProperty("eid");
     expect(["pending", "durable"]).toContain(out.status);
+    // Same EID-only sugar contract as AC-7: no fabricated stamped identity on the edge form (N5).
+    expect(out).not.toHaveProperty("id");
+    expect(out).not.toHaveProperty("hlc");
+    expect(out).not.toHaveProperty("seq");
   });
 });
 
