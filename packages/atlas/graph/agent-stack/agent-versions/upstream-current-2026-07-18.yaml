@@ -1,0 +1,250 @@
+# Additive upstream release records from the 2026-07-18 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1784350575-g714407
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1784350575-g714407"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1784350575-g714407"
+  currentVersion: "0.0.1784350575-g714407"
+  releasedAt: "2026-07-18"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784350575-g714407"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1784264425-g070593 to 0.0.1784350575-g714407."
+    - "npm metadata identifies @ampcode/cli as the Amp frontier coding agent CLI and shows the package was modified on 2026-07-18."
+    - "No public build-specific release notes, CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1784350575-g714407."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1784350575-g714407-2026-07-18
+---
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-1-4
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.1.4"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.1.4"
+  currentVersion: "1.1.4"
+  releasedAt: "2026-07-18"
+  upstreamReleaseTag: "1.1.4"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.4"
+  cliCommand: "antigravity"
+  summary: "Antigravity CLI release adding chained slash-command parsing and hardening headless settings-policy enforcement."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 1.1.3 to 1.1.4."
+    - "Multiple leading slash commands can now stack in one prompt, so prompt/command parsing needs to preserve ordered slash-command chains such as /plan /grill-me."
+    - "Headless -p / --print runs now honor persisted settings.json policies for permissions, file access, sandbox mode, auto-execution, and artifact review, affecting launchBehavior and permission assumptions."
+    - "Custom agents with subagent: false no longer appear as invocable subagents, affecting subagent discovery modeling."
+    - "Diff viewer scrolling, /btw side-question conversation leakage, custom Enter bindings, and eligibility error messages were fixed."
+    - "No package-name or install-method migration was published for the GitHub release distribution."
+  releaseHighlights:
+    - "Stacked leading slash-command support."
+    - "Headless persisted settings-policy enforcement."
+    - "Custom subagent:false exclusion from available subagents."
+    - "Diff viewer, /btw conversation, Enter binding, and eligibility-message fixes."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:antigravity-cli
+  sourced_from:
+    - evidence:antigravity-1-1-4-2026-07-18
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-214
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.214"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.214"
+  currentVersion: "2.1.214"
+  releasedAt: "2026-07-18"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.214"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.214"
+  cliCommand: "claude"
+  summary: "Claude Code release hardening Bash/PowerShell permission checks, adding abusive-conversation termination, progress heartbeats, memory timestamps, and richer OpenTelemetry metadata."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.212 to 2.1.214."
+    - "Bash and PowerShell permission checks now fail closed for more redirect, long-command, zsh-subscript, help/man, docker daemon-redirect, and remote-confirmation cases, affecting tool governance and approval modeling."
+    - "Single-segment dir/** allow rules and hook if: conditions now match only <cwd>/dir; any-depth matching requires **/dir/**, affecting permission-rule translation."
+    - "New EndConversation tool lets Claude terminate highly abusive or jailbreak sessions, affecting tool/capability inventories and transcript terminal-state handling."
+    - "Long-running tool calls emit periodic progress heartbeats, affecting stream/progress monitoring."
+    - "OpenTelemetry events add message.uuid, client_request_id, tool_source, and CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH, affecting observability adapters."
+    - "Memory frontmatter now includes ISO modified timestamps, and SessionStart hooks report source fork for forked sessions."
+    - "Install command remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "Stricter Bash, PowerShell, docker, file, and remote-session permission checks."
+    - "EndConversation tool."
+    - "Periodic progress heartbeat for long-running tool calls."
+    - "Memory modified timestamp frontmatter."
+    - "OpenTelemetry message correlation, tool provenance, and content-length configuration."
+    - "Fork source reporting for SessionStart hooks."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-214-2026-07-18
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-214
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.214"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.214"
+  currentVersion: "0.3.214"
+  releasedAt: "2026-07-18"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.214"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.214"
+  summary: "Claude Agent SDK TypeScript release tightening permission-mode validation and extending message schemas for scheduled tasks, interrupts, subagent retries, plugin versions, and forked SessionStart hooks."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.212 to 0.3.214."
+    - "set_permission_mode now rejects unrecognized modes instead of silently accepting them; manual is accepted at every ingress, affecting launch/config validation."
+    - "SDKMessageOrigin task-notification can carry subkind scheduled-trigger, affecting scheduled-task message routing."
+    - "interrupt-truncated assistant messages now carry aborted: true, affecting stream consumers that distinguish partial from complete messages."
+    - "tool_progress can include subagent_type and subagent_retry for API rate-limit waits, affecting progress message schemas."
+    - "system/init plugin entries and reload_plugins responses now include manifest version, affecting plugin inventory parsing."
+    - "applyFlagSettings effortLevel type now includes max, and SessionStart hooks report source fork for forked sessions."
+    - "Update commands remain npm/yarn/pnpm/bun package upgrades for @anthropic-ai/claude-agent-sdk@0.3.214."
+  releaseHighlights:
+    - "Permission-mode validation with manual alias support."
+    - "Scheduled-trigger message origin subkind."
+    - "aborted flag for interrupted assistant messages."
+    - "subagent_type and subagent_retry tool_progress fields."
+    - "Plugin manifest version in init/reload responses."
+    - "max effortLevel typing and fork source reporting."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-214-2026-07-18
+---
+nodeKind: AgentVersion
+id: agentVersion:cursor:changelog-2026-07-17
+attributes:
+  agentId: "cursor"
+  agentProductId: agent:cursor
+  displayName: "Cursor changelog 2026-07-17"
+  runtimeFamily: "ide-extension-agent"
+  releaseChannel: "stable"
+  versionRange: "changelog-2026-07-17"
+  currentVersion: "changelog-2026-07-17"
+  releasedAt: "2026-07-17"
+  releaseNotesUrl: "https://cursor.com/changelog"
+  cliCommand: "cursor"
+  summary: "Cursor changelog update improving Cursor in Slack planning, status reporting, multi-repo environments, and cross-channel/thread workflows."
+  assimilationNotes:
+    - "Latest public Cursor changelog moved from recorded 3.11 / 2026-07-10 coverage to the 2026-07-17 Cursor in Slack update."
+    - "Cursor in Slack now shares a plan before work begins and updates status while it runs, affecting remote agent lifecycle/progress modeling."
+    - "Slack tasks can start in named multi-repo environments and request repos outside the current environment mid-task, affecting workspace and repo-selection assumptions."
+    - "Cursor can read from and send messages to other Slack channels and threads during a task, affecting channel/thread permission and notification modeling."
+    - "Slack message rendering removed in-message buttons in favor of compact footer links, and tables, PRs, and artifacts render more cleanly."
+    - "No package-name, install-method, CLI flag, or migration change was published for the desktop/Slack distribution."
+  releaseHighlights:
+    - "Plan-before-start behavior in Slack."
+    - "Running status updates."
+    - "Named multi-repo environment support."
+    - "Cross-channel and cross-thread Slack workflows."
+    - "Slack message rendering changes."
+  installMethods:
+    - install:desktop
+edges:
+  version_of:
+    - agent:cursor
+  sourced_from:
+    - evidence:cursor-changelog-2026-07-17
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-175-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.175.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.175.0"
+  currentVersion: "0.175.0"
+  releasedAt: "2026-07-17"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.175.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.174.0 to 0.175.0."
+    - "npm metadata identifies @factory/cli as Factory Droid CLI and points repository metadata at Factory-AI/factory."
+    - "No public 0.175.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @factory/cli."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.175.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-175-0-2026-07-18
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:17-0-4
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 17.0.4"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "17.0.4"
+  currentVersion: "17.0.4"
+  releasedAt: "2026-07-18"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v17.0.4"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.4"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release fixing Kimi usage reporting and device-id persistence, MFJS tool schemas, Linux ffmpeg recording, transcript compose performance, /quit shutdown, and local embedding cache recovery."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 17.0.2 to 17.0.4."
+    - "Kimi Code usage now carries 5h reset times correctly, affecting usage reporting parsers."
+    - "Kimi device-id persistence is best-effort when ~/.omp/agent is missing or unwritable, preventing fresh-install usage probes from being silently nulled."
+    - "Boolean tool-schema subschemas are coerced to MFJS object forms for native Moonshot/Kimi endpoints and task tool schemas, affecting tool schema serialization."
+    - "Kimi-family models now use MFJS tool schema on all hosts, including OpenRouter-style proxies."
+    - "Linux ffmpeg recording selects the available ALSA input when PulseAudio support is absent and surfaces recorder stderr on failure."
+    - "Session load skips recursive async blob-ref resolution for entries without blob references, and finalized transcript blocks are compacted out of the live compose walk for flat live-tail cost."
+    - "/quit and /exit interactive shutdown now flush in-flight memory extractions without hanging, and corrupt cached embedding models are quarantined and redownloaded."
+    - "No package-name or install-method migration was published; install remains npm install -g @oh-my-pi/pi-coding-agent."
+  releaseHighlights:
+    - "Kimi usage reset-time reporting fix."
+    - "Best-effort Kimi device-id persistence."
+    - "MFJS boolean tool-schema normalization for Moonshot/Kimi and task schemas."
+    - "Linux ffmpeg ALSA recording fallback and stderr surfacing."
+    - "Session blob-ref precheck and transcript compose performance improvements."
+    - "Fast /quit shutdown and corrupt embedding cache self-healing."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-17-0-4-2026-07-18
