@@ -36,6 +36,9 @@ const REPEATABLE_FLAGS = new Set([
   "kind",
   "prop",
   "remote-branch",
+  // `kip index` (ADR-B9c): repeatable advisory globs scoping the analyzed module set.
+  "include",
+  "exclude",
 ]);
 
 /** Single-value flags — consume exactly one following token (or an inline `--flag=value`). */
@@ -74,6 +77,8 @@ const VALUE_FLAGS = new Set([
   "model",
   "timeout",
   "manifest",
+  // `kip index` (ADR-B9c): the provenance sha override anchoring the acquisition.
+  "git-sha",
 ]);
 
 /** Short aliases → canonical long flag name. */

@@ -42,8 +42,17 @@
  */
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
-import { basename, join as joinNative, posix, resolve as resolveNative } from "node:path";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join as joinNative,
+  posix,
+  relative,
+  resolve as resolveNative,
+  sep,
+} from "node:path";
 import type {
   AssertInput,
   BlobRef,
@@ -157,9 +166,60 @@ const RESOLVE_EXTENSIONS = ["", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".
 // Guaranteed tier: synchronous git state (no spawn, no isomorphic-git — see the SYNC CONTRACT NOTE).
 // ============================================================================================
 
-/** The `.git` directory for a non-bare repo. */
-function gitDirOf(repoDir: string): string {
-  return joinNative(repoDir, ".git");
+/**
+ * Locate the ENCLOSING git root by walking UP from `startDir` until a `.git` entry (a directory OR a
+ * gitfile — submodules/linked worktrees) is found; return that enclosing directory. Reaching the
+ * filesystem root without a `.git` throws N5-style, naming the path — the miner NEVER fabricates a sha
+ * or scans a non-repo (round-4 DEFECT 1). Cross-platform via `node:path` (`dirname` fixpoint is the
+ * platform-correct filesystem-root sentinel on win32 drive roots and POSIX `/` alike), synchronous
+ * (keeps the SYNC CONTRACT). Called with an already-`resolveNative`d absolute path.
+ */
+function findGitRoot(startDir: string): string {
+  let dir = startDir;
+  for (;;) {
+    if (existsSync(joinNative(dir, ".git"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) {
+      throw new Error(
+        `code-miner: no enclosing git repository found for ${startDir} ` +
+          "(walked up to the filesystem root without finding a .git)",
+      );
+    }
+    dir = parent;
+  }
+}
+
+/**
+ * The `.git` metadata directory for the enclosing root. A plain repo has a `.git` DIRECTORY; a
+ * submodule / linked worktree has a `.git` FILE (`gitdir: <path>`) pointing at the real metadata dir,
+ * which this resolves (relative targets are resolved against the root). A malformed gitfile throws
+ * loudly (never a silent guess), consistent with the loud-failure ethos.
+ */
+function gitDirOf(gitRoot: string): string {
+  const dotGit = joinNative(gitRoot, ".git");
+  if (statSync(dotGit).isDirectory()) return dotGit;
+  const contents = readFileSync(dotGit, "utf8").trim();
+  const m = /^gitdir:\s*(.+)$/m.exec(contents);
+  if (m === null) {
+    throw new Error(`code-miner: ${dotGit} is a gitfile with no 'gitdir:' line (cannot locate .git metadata)`);
+  }
+  const target = m[1].trim();
+  return isAbsolute(target) ? target : resolveNative(gitRoot, target);
+}
+
+/**
+ * Scope the git-root-relative tracked-file set to files UNDER `givenPath` (a subdirectory of the repo).
+ * When `givenPath` IS the git root the full set is returned unchanged (DEFECT 1: `kip index <root>`
+ * behaves exactly as before). The git index stores POSIX (`/`) paths, so the platform-`sep` relative
+ * prefix is normalized to POSIX before matching. `givenPath` is always inside (or equal to) `gitRoot`
+ * because the root was found by walking UP from it, so the relative prefix never escapes with `..`.
+ */
+function scopeToSubdir(tracked: string[], gitRoot: string, givenPath: string): string[] {
+  const rel = relative(gitRoot, givenPath);
+  if (rel === "" || rel === ".") return tracked;
+  const relPosix = rel.split(sep).join("/");
+  const prefix = relPosix.endsWith("/") ? relPosix : `${relPosix}/`;
+  return tracked.filter((f) => f.startsWith(prefix));
 }
 
 /**
@@ -718,13 +778,19 @@ function applyGlobFilters(files: string[], include?: string[], exclude?: string[
  */
 export function buildCodeMinerResult(input: CodeMinerInput): CodeMinerResult {
   const env = process.env;
-  const repoDir = input.repoDir;
-  const gitDir = gitDirOf(repoDir);
+  // DEFECT 1 fix: the given path may be a SUBDIRECTORY of a repo. Locate the enclosing git root by
+  // walking up (throws N5 if none), read git metadata (HEAD sha, tracked set, repoId) from that root,
+  // and scope the analyzed module set to files UNDER the given path. When the path IS the git root,
+  // `scopeToSubdir` returns the full set, so behavior is unchanged.
+  const givenPath = resolveNative(input.repoDir);
+  const gitRoot = findGitRoot(givenPath);
+  const gitDir = gitDirOf(gitRoot);
   const gitSha = input.gitSha ?? resolveHeadSha(gitDir);
-  const repoId = repoIdOf(repoDir);
+  const repoId = repoIdOf(gitRoot);
 
   const trackedAll = readTrackedFiles(gitDir).sort();
-  const tracked = applyGlobFilters(trackedAll, input.include, input.exclude);
+  const scoped = scopeToSubdir(trackedAll, gitRoot, givenPath);
+  const tracked = applyGlobFilters(scoped, input.include, input.exclude);
   const trackedSet = new Set(tracked);
 
   const proposed: Array<AssertInput | RetractInput> = [];
@@ -739,7 +805,7 @@ export function buildCodeMinerResult(input: CodeMinerInput): CodeMinerResult {
   //     so no probed metric is silently overwritten (round-3 finding).
   const providedBy = new Map<string, ProbedTool>();
   for (const tool of PROBED_TOOLS) {
-    const outcome = probeTool(tool, repoDir, tracked, env, providedBy);
+    const outcome = probeTool(tool, gitRoot, tracked, env, providedBy);
     for (const p of outcome.props) proposed.push(nodePropAssert(rEid, p.prop, p.value));
   }
 
@@ -751,7 +817,7 @@ export function buildCodeMinerResult(input: CodeMinerInput): CodeMinerResult {
   for (const relPath of tracked) {
     let raw: Buffer;
     try {
-      raw = readFileSync(joinNative(repoDir, relPath));
+      raw = readFileSync(joinNative(gitRoot, relPath));
     } catch {
       // Tracked but not readable from the working tree (e.g. deleted) — surface nothing rather than
       // fabricate a module for a file we cannot read (N5). Skipped silently by omission of this path.
