@@ -33,6 +33,17 @@ const tempRunDirs: string[] = [];
 async function createRunFixture(
   effectId: string = EFFECT_ID,
   kind: string = "breakpoint",
+  opts: {
+    /**
+     * Controls tasks/<effectId>/task.json (journal EFFECT_REQUESTED always
+     * uses `kind`):
+     * - "same" (default): task.json kind matches the journal kind
+     * - "missing": no task.json at all (round 4 blocker fixture)
+     * - "corrupt": task.json exists but is not valid JSON
+     * - any other string: task.json declares THAT kind (journal mismatch)
+     */
+    taskJson?: string;
+  } = {},
 ): Promise<string> {
   const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
   tempRunDirs.push(runDir);
@@ -55,18 +66,42 @@ async function createRunFixture(
       taskDefRef: `tasks/${effectId}/task.json`,
     },
   });
+
+  const taskJsonMode = opts.taskJson ?? "same";
+  if (taskJsonMode === "missing") {
+    return runDir; // deliberately NO tasks/<effectId>/task.json
+  }
+  if (taskJsonMode === "corrupt") {
+    await fs.mkdir(path.join(runDir, "tasks", effectId), { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "tasks", effectId, "task.json"),
+      "{ this is not JSON",
+      "utf-8",
+    );
+    return runDir;
+  }
+  const taskJsonKind = taskJsonMode === "same" ? kind : taskJsonMode;
   await writeTaskDefinition(runDir, effectId, {
     effectId,
     taskId,
     invocationKey: INVOCATION_KEY,
-    kind,
-    title: `test ${kind}`,
-    ...(kind === "breakpoint"
+    kind: taskJsonKind,
+    title: `test ${taskJsonKind}`,
+    ...(taskJsonKind === "breakpoint"
       ? { metadata: { breakpointId: "test.breakpoint" } }
       : {}),
   });
 
   return runDir;
+}
+
+/** Assert the guard fired BEFORE the commit path: nothing was written. */
+async function expectNothingWritten(runDir: string, effectId: string = EFFECT_ID) {
+  await expect(
+    fs.access(path.join(runDir, "tasks", effectId, "result.json")),
+  ).rejects.toThrow();
+  const entries = await listJournalEntries(runDir);
+  expect(entries.filter((e) => e.type === "EFFECT_RESOLVED")).toHaveLength(0);
 }
 
 function pointFindRunDirAt(runDir: string) {
@@ -159,7 +194,7 @@ describe("approveBreakpoint", () => {
     expect(result.error).toContain("Run not found");
   });
 
-  it("surfaces the SDK rejection when the effect was never requested", async () => {
+  it("rejects (fail closed) when the effect was never requested — guard fires before the SDK", async () => {
     const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
     tempRunDirs.push(runDir);
     await appendEvent({
@@ -169,9 +204,13 @@ describe("approveBreakpoint", () => {
     });
     pointFindRunDirAt(runDir);
 
+    // Round 4: an unknown effect has no task.json, so the fail-closed
+    // metadata guard rejects it before commitEffectResult is ever reached
+    // (the SDK would also reject it — this is defense in depth).
     const result = await approveBreakpoint("run-001", "eff-unknown", "yes");
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Unknown effectId");
+    expect(result.error).toContain("task definition missing or unreadable");
+    await expectNothingWritten(runDir, "eff-unknown");
   });
 
   // -------------------------------------------------------------------------
@@ -200,6 +239,71 @@ describe("approveBreakpoint", () => {
 
     const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
     expect(result).toEqual({ success: false, error: "not a breakpoint effect" });
+  });
+
+  // -------------------------------------------------------------------------
+  // Fail-closed guard (review round 4, blocker): missing/corrupt task.json
+  // and journal/task-file kind disagreement must never fall through to the
+  // SDK commit path (commitEffectResult does not enforce breakpoint-kind).
+  // -------------------------------------------------------------------------
+
+  it("FAILS CLOSED on a requested shell effect with MISSING task.json: rejects, no result.json, no EFFECT_RESOLVED", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "shell", { taskJson: "missing" });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("task definition missing or unreadable");
+    await expectNothingWritten(runDir);
+  });
+
+  it("FAILS CLOSED on a requested shell effect with CORRUPT task.json: rejects, nothing written", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "shell", { taskJson: "corrupt" });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("task definition missing or unreadable");
+    await expectNothingWritten(runDir);
+  });
+
+  it("rejects when task.json claims breakpoint but the journal EFFECT_REQUESTED record says shell (kind mismatch): nothing written", async () => {
+    // Journal (authoritative, what commitEffectResult resolves) says shell;
+    // a forged/stale task.json claims breakpoint. The journal check must win.
+    const runDir = await createRunFixture(EFFECT_ID, "shell", { taskJson: "breakpoint" });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("journal EFFECT_REQUESTED record");
+    await expectNothingWritten(runDir);
+  });
+
+  it("FAILS CLOSED on a breakpoint-kind task.json whose effect has NO EFFECT_REQUESTED journal record", async () => {
+    // task.json alone must not be sufficient: without the authoritative
+    // journal record the action refuses before the SDK commit.
+    const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
+    tempRunDirs.push(runDir);
+    await appendEvent({
+      runDir,
+      eventType: "RUN_CREATED",
+      event: { runId: path.basename(runDir) },
+    });
+    await writeTaskDefinition(runDir, EFFECT_ID, {
+      effectId: EFFECT_ID,
+      taskId: "__sdk.breakpoint",
+      invocationKey: INVOCATION_KEY,
+      kind: "breakpoint",
+      title: "test breakpoint",
+      metadata: { breakpointId: "test.breakpoint" },
+    });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("no EFFECT_REQUESTED journal record");
+    const entries = await listJournalEntries(runDir);
+    expect(entries.filter((e) => e.type === "EFFECT_RESOLVED")).toHaveLength(0);
   });
 
   // -------------------------------------------------------------------------
@@ -299,13 +403,14 @@ describe("approveBreakpoint", () => {
     expect(stored.value.response).toBe("first");
   });
 
-  // NOTE on signed/protected-breakpoint policy: this SDK version enforces
-  // commit-time policy inside commitEffectResult via the effect index and the
-  // runtime `task.completed` hook (run lock held; rejection happens BEFORE
-  // any result/journal emission). Simulating a signed-policy denial would
-  // require installing a real hooks-adapter configuration in the fixture,
-  // which is out of scope at this layer; the "SDK rejection is surfaced as
-  // { success: false }" contract is covered by the unknown-effect test above,
-  // which exercises the same rejection path (commitEffectResult throws →
-  // the action returns the SDK's message, never a silent success).
+  // NOTE on signed/protected-breakpoint policy: the pinned SDK's
+  // commitEffectResult has no dedicated signed/protected-breakpoint gate
+  // beyond the generic runtime `task.completed` hook, so this release's
+  // safety case is breakpoint-kind-only enforcement in the ACTION (fail
+  // closed on metadata + journal record, covered above). Simulating a
+  // hook-policy denial would require installing a real hooks-adapter
+  // configuration in the fixture, which is out of scope at this layer; the
+  // "SDK rejection is surfaced, never a silent success" contract is covered
+  // by the AC-62 already-resolved test above (commitEffectResult throws →
+  // the action returns honestly).
 });

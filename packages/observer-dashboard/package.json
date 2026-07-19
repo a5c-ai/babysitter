@@ -57,6 +57,7 @@
     "verify:release": "node scripts/verify-release.mjs",
     "start": "next start --port 4800",
     "lint": "next lint",
+    "pretypecheck": "node scripts/ensure-local-deps.mjs",
     "typecheck": "tsc --noEmit",
     "pretest": "node scripts/ensure-local-deps.mjs && npm run typecheck",
     "test": "vitest run",
@@ -67,7 +68,7 @@
     "prebuild": "node scripts/ensure-local-deps.mjs"
   },
   "dependencies": {
-    "@a5c-ai/babysitter-sdk": "6.0.0",
+    "@a5c-ai/babysitter-sdk": "^6.0.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-scroll-area": "^1.0.5",

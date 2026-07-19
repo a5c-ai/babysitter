@@ -7,8 +7,9 @@
 // externalizes every @a5c-ai/babysitter-sdk specifier (see next.config.mjs),
 // so this stays a runtime require against the installed package.
 import { commitEffectResult } from "@a5c-ai/babysitter-sdk/dist/runtime/commitEffectResult";
+import path from "node:path";
 import { findRunDir } from "@/lib/path-resolver";
-import { readTaskDefinition } from "@/lib/parser";
+import { parseJournalDir, readTaskDefinition } from "@/lib/parser";
 
 export interface ApproveBreakpointResult {
   success: boolean;
@@ -31,9 +32,11 @@ export interface ApproveBreakpointResult {
  *
  * - serializes the run mutation under the SDK's run lock (no journal-sequence
  *   races between near-simultaneous submits),
- * - applies the SDK's own enforcement (unknown/already-resolved effects,
- *   runtime task.completed hook policy, and any current or future
- *   signed/protected-breakpoint checks) BEFORE any result/journal emission,
+ * - applies the SDK's own enforcement (unknown/already-resolved effects and
+ *   the runtime task.completed hook policy) BEFORE any result/journal
+ *   emission. NOTE: the SDK does NOT enforce breakpoint-kind — that guard
+ *   lives HERE (fail closed, see below), and breakpoint-kind-only
+ *   enforcement is this action's own responsibility,
  * - writes the result and the EFFECT_RESOLVED journal event in the SDK's
  *   canonical format and rebuilds the state cache, so the run resumes on the
  *   next `run:iterate` without this action forging SDK internals.
@@ -76,16 +79,59 @@ export async function approveBreakpoint(
     }
     const runDir = found.runDir;
 
-    // --- Breakpoint-only guard (review round 3, blocker) ---
-    // This action is the observer's breakpoint answer path ONLY. Read the
-    // effect's own task definition (the same tasks/<effectId>/task.json the
-    // dashboard parser reads) and refuse to resolve any non-breakpoint effect
-    // through it — a shell/agent/node effect must never be completable from
-    // the dashboard. A missing task.json falls through to the SDK commit
-    // path, which rejects unknown effects with its own honest message.
+    // --- Breakpoint-only guard (review rounds 3+4, blocker) ---
+    // This action is the observer's breakpoint answer path ONLY — a
+    // shell/agent/node effect must never be completable from the dashboard.
+    // The guard FAILS CLOSED (round 4 blocker): the SDK's commitEffectResult
+    // validates that the effect exists and is unresolved but does NOT enforce
+    // breakpoint-kind, so falling through on missing metadata would let a
+    // pending non-breakpoint effect be resolved as an approval. Two
+    // independent checks must BOTH pass before the commit call:
+    //
+    // 1. tasks/<effectId>/task.json (the same file the dashboard parser
+    //    reads) must exist, be readable, and declare kind === "breakpoint".
+    //    Missing/unreadable/malformed metadata is a rejection, never a
+    //    fall-through.
     const taskDef = await readTaskDefinition(runDir, effectId);
-    if (taskDef && taskDef.kind !== "breakpoint") {
+    if (taskDef === null) {
+      return {
+        success: false,
+        error:
+          "task definition missing or unreadable — refusing to resolve (breakpoint answers only)",
+      };
+    }
+    if (taskDef.kind !== "breakpoint") {
       return { success: false, error: "not a breakpoint effect" };
+    }
+
+    // 2. The authoritative journal-derived effect record — the same
+    //    EFFECT_REQUESTED record commitEffectResult will resolve — must be a
+    //    breakpoint: kind === "breakpoint" (with taskId === "__sdk.breakpoint"
+    //    accepted as corroboration when the record carries no kind). A task
+    //    file that disagrees with the journal never passes the guard.
+    const journalEvents = await parseJournalDir(path.join(runDir, "journal"));
+    const requestedRecord = journalEvents.find(
+      (e) =>
+        e.type === "EFFECT_REQUESTED" &&
+        (e.payload as Record<string, unknown>).effectId === effectId,
+    );
+    if (!requestedRecord) {
+      return {
+        success: false,
+        error: `no EFFECT_REQUESTED journal record for effect ${effectId} — refusing to resolve`,
+      };
+    }
+    const recordPayload = requestedRecord.payload as Record<string, unknown>;
+    const recordKind = recordPayload.kind;
+    const recordTaskId = recordPayload.taskId;
+    const journalSaysBreakpoint =
+      recordKind === "breakpoint" ||
+      (recordKind == null && recordTaskId === "__sdk.breakpoint");
+    if (!journalSaysBreakpoint) {
+      return {
+        success: false,
+        error: "not a breakpoint effect (journal EFFECT_REQUESTED record)",
+      };
     }
 
     const now = new Date().toISOString();

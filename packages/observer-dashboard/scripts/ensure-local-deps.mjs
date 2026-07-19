@@ -39,16 +39,28 @@ const workspaceDists = [
 for (const { name, dir } of workspaceDists) {
   // The dist entry file is each package's `main` (dist/index.js for all three).
   const entry = join(dir, "dist", "index.js");
-  if (existsSync(entry)) continue;
+  if (existsSync(entry)) {
+    // Loud skip (review round 4): a pre-existing dist is trusted as-is — it is
+    // NOT validated for freshness against the package sources. Delete the dist
+    // (or run "npm run build -w <name>" from the repo root) to force a rebuild.
+    console.log(
+      `[ensure-local-deps] ${name}: dist entry present, SKIPPING build — freshness not validated (delete ${join(dir, "dist")} to force a rebuild)`,
+    );
+    continue;
+  }
 
   console.log(`[ensure-local-deps] ${name}: dist entry missing, building...`);
   try {
     execSync(`npm run build -w ${name}`, { cwd: rootDir, stdio: "inherit" });
-  } catch {
-    // Tolerated: under filtered installs the tasks-adapter's tsc can exit
-    // nonzero (its @types/express devDep may be absent) while still emitting
-    // JS. The hard gate is the dist entry file existing afterward.
-    console.warn(`[ensure-local-deps] ${name}: build exited nonzero (tolerated if the dist emitted)`);
+  } catch (err) {
+    // Fail HARD (review round 4): a nonzero dependency build must never be
+    // hidden — tolerating it can mask real dependency build breakage (e.g.
+    // TypeScript errors) behind a stale or partially-emitted dist.
+    throw new Error(
+      `[ensure-local-deps] ${name}: build exited nonzero. Fix the dependency build ` +
+        `(run "npm run build -w ${name}" from the repo root and inspect its output). ` +
+        `Original error: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   if (!existsSync(entry)) {
