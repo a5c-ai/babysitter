@@ -1,0 +1,294 @@
+# Evidence captured during the 2026-07-19 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1784437277-g74ac3c-2026-07-19
+attributes:
+  displayName: "Amp CLI 0.0.1784437277-g74ac3c npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784437277-g74ac3c"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784437277-g74ac3c"
+  locator: "npm @ampcode/cli v0.0.1784437277-g74ac3c"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-19T07:26:41Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli latest version 0.0.1784437277-g74ac3c.
+    The package description identifies it as the Amp frontier coding agent CLI.
+    No public build-specific changelog, CLI flag, transport/API, model,
+    package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1784437277-g74ac3c
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-4-2026-07-19
+attributes:
+  displayName: "Antigravity CLI 1.1.4 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.4"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.4"
+  locator: "google-antigravity/antigravity-cli release 1.1.4"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-18T00:48:48Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.4 release notes document stacked leading slash
+    commands, /diff viewer scrolling fixes, custom agents with subagent:false no
+    longer appearing as subagents, headless -p/--print honoring persisted
+    settings.json policies, /btw duplicate conversation-list fixes, custom Enter
+    binding handling, and restored eligibility error reasons.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-4
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-215-2026-07-19
+attributes:
+  displayName: "Claude Code v2.1.215 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.215"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.215"
+  locator: "anthropics/claude-code release v2.1.215"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-19T02:56:01Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    Official Claude Code 2.1.215 release notes state that Claude no longer runs
+    /verify and /code-review skills on its own. Official 2.1.214 notes in the
+    same update range document permission-check fixes for allow rules,
+    PowerShell 5.1, Bash file-descriptor redirects, very long commands, zsh
+    comparisons, unsafe help/man invocations, remote-session prompts, and
+    docker commands; they also document EndConversation, progress heartbeats,
+    memory modified timestamps, OpenTelemetry message/tool provenance fields,
+    CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH, and reasoning effort in
+    subagentStatusLine.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-215
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-215-2026-07-19
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.215 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.215"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.215"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.215"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-19T02:56:03Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.215 release notes document parity
+    with Claude Code 2.1.215 and update commands. Official 0.3.214 notes in the
+    same update range document set_permission_mode rejecting unknown modes,
+    scheduled-trigger task notifications, effortLevel max typing, aborted:true
+    interrupted assistant messages, subagent_type/subagent_retry tool_progress
+    fields, plugin manifest versions in init/reload responses, and fork
+    SessionStart source reporting.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-215
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-144-6-2026-07-19
+attributes:
+  displayName: "Codex CLI rust-v0.144.6 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.6"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.6"
+  locator: "openai/codex release rust-v0.144.6"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-18T13:51:52Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    Official Codex CLI rust-v0.144.6 release notes document refreshed bundled
+    instructions for GPT-5.6 Sol, Terra, and Luna, plus corrected context
+    windows to 272,000 tokens.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.144.6
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-175-0-2026-07-19
+attributes:
+  displayName: "Factory Droid CLI 0.175.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.175.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.175.0"
+  locator: "npm @factory/cli v0.175.0"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-19T07:26:41Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    npm metadata reports @factory/cli latest version 0.175.0, identifies it as
+    Factory Droid CLI, and points repository metadata at Factory-AI/factory. No
+    public 0.175.0-specific changelog, CLI flag, transport/API, model,
+    package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-175-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:hermes-agent-0-18-2-2026-07-19
+attributes:
+  displayName: "Hermes Agent v0.18.2 release and package metadata"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/NousResearch/Hermes-Agent/releases/tag/v2026.7.7.2"
+  sourcePathOrUrl: "https://github.com/NousResearch/Hermes-Agent/releases/tag/v2026.7.7.2"
+  locator: "NousResearch/Hermes-Agent release v2026.7.7.2 and PyPI hermes-agent 0.18.2"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-08T03:11:22Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    GitHub release listings identify Hermes Agent v0.18.2 at tag
+    v2026.7.7.2, and PyPI reports hermes-agent 0.18.2 as the latest version.
+    The npm bridge metadata reports hermes-agent 0.18.2 and states that the
+    npm package installs and launches the upstream Python runtime, exposing the
+    hermes and hermes-agent commands.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:hermes:0-18-2
+    - agent:hermes
+---
+nodeKind: EvidenceSource
+id: evidence:omp-17-0-5-2026-07-19
+attributes:
+  displayName: "Oh-My-Pi v17.0.5 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.5"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.5"
+  locator: "can1357/oh-my-pi release v17.0.5"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-18T22:14:42Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    Official Oh-My-Pi 17.0.5 release notes document per-message token
+    estimation caching, per-call tool interruptibility, Anthropic API-key
+    requests defaulting to 1-hour prompt-cache retention with PI_CACHE_RETENTION
+    overrides, retrying transient OpenAI stream truncations once before replay
+    becomes unsafe, Kimi Code K3 thinking fixes, Moonshot/Kimi tool schema
+    compatibility fixes, custom OAuth header fixes, active-session stickiness
+    fixes for plan-gated OpenAI Codex models, and sensitive header redaction in
+    model cache artifacts.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:17-0-5
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:openclaw-2026-7-1-2-2026-07-19
+attributes:
+  displayName: "OpenClaw 2026.7.1-2 package metadata and v2026.7.1 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.7.1"
+  sourcePathOrUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.7.1"
+  locator: "npm openclaw 2026.7.1-2 and openclaw/openclaw release v2026.7.1"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-13T22:33:14Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    npm metadata reports openclaw 2026.7.1-2 as latest. Official OpenClaw
+    2026.7.1 release notes document Control UI and onboarding overhauls,
+    official iOS/Android/macOS app updates, expanded GPT-5.6, Tencent Hy3, and
+    Meta Muse Spark 1.1 provider/model support, openclaw attach for Claude Code
+    temporary session access, Codex delegation and native subagent result
+    tracking improvements, and substantial Telegram, Slack, Discord, Apple
+    Messages, Gateway, scheduled work, remote browser control, workspace
+    terminal, session, and goal updates.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:openclaw:2026-7-1-2
+    - agent:openclaw
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-20-0-2026-07-19
+attributes:
+  displayName: "Qwen Code v0.20.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.20.0"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.20.0"
+  locator: "QwenLM/qwen-code release v0.20.0"
+  capturedAt: "2026-07-19T07:34:00Z"
+  observedAt: "2026-07-19T07:27:26Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-19T07:34:00Z"
+  notes: |
+    Official Qwen Code 0.20.0 release notes document bounded daemon log
+    rotation, deferred stream-json startup warnings, Java ACP init cause
+    preservation and timeout correction, WebShell /goals proxying, review
+    workflow fixes, channel memory recall caching, readonly WebShell ChatRecord
+    replay, TUI runtime deferral from ACP startup, MCP tool-name normalization
+    for strict providers, native tool-calling schema for Gemma 4, and full-plan
+    visibility from exit_plan_mode confirmation. Official 0.19.12 notes in the
+    same update range document no known breaking changes plus session-info
+    aggregation, skill management pages, archived session export, mouse
+    selection/copy in VP mode, prompt ID propagation, and channel memory
+    features.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-20-0
+    - agent:qwen
