@@ -839,3 +839,124 @@ actual current source before being recorded.
 - **Why it is debt:** The whole point of the `ask` verb is answering **genuine free-text natural-language questions** against the graph. As shipped it can only answer when the corpus already contains a `content` prop that mirrors the question — a condition a real NL consumer will almost never satisfy — so in practice `ask` abstains on real questions. This is **safe** (cite-or-abstain holds; it never fabricates and never returns a wrong fact) and is distinct from D-43's *vector*-half exact-cosine/no-ANN narrowing: D-43 is about scale of the vector scan, D-52 is about the **text-seed retrieval being exact-match rather than semantic/lexical**, which is what makes free-text `ask` brittle. It is the honest limitation the maturity demo disclosed rather than hid.
 - **Suggested fix:** Give the graph-QA retrieval **real semantic or text retrieval** so `ask` is robust for actual NL questions — either wire the embedding/vector seam through the text path (so `content`/prop text is embedded and matched by similarity, reusing the M4 vector infrastructure) or add proper lexical/fuzzy text retrieval (e.g. tokenized/BM25-style matching) in place of the exact-content-seed equality check. Until then, `kip ask` is demo-able only with a content-seed and should be documented as such wherever it is presented as answering free-text questions.
 - **Status:** Open (tracked). No code changed in this program for this item — it was surfaced and honestly recorded so the "demo-ready `kip ask`" claim carries its real limitation rather than overstating robustness.
+
+---
+
+## Audit round 9 — the `code-analysis-miner` program (bash-tool code-analysis Miner)
+
+> The **`code-analysis-miner`** program added a real, first-class **code-analysis Miner** to kip-sdk — a
+> bundled `code-miner@1.0.0` `MicroagentManifest`, a `codeMinerDispatch: DispatchMicroagentFn`, and a new
+> `kip index <path>` CLI verb — as an **M7 acquisition-family** addition (ADR-B9 / B9a / B9b / B9c). It reuses
+> the existing `runAcquisition` orchestrator seam (no new write path); the one core change threaded an
+> optional `dispatchMicroagent` through `OpenOptions` → `open()` → `KipRepo`, and **INV-A1 holds structurally**
+> (the miner never receives a `Repo`/write seam; only `runAcquisition` authors signed facts). See
+> [`reviews/code-miner-report.md`](../reviews/code-miner-report.md) for the whole-program narrative (3 TDD
+> rounds, minimums R1=72 → R2=81 → R3=89 vs target 88, per-critic R3 spec-fidelity 89 / tooling-honesty 90 /
+> code-quality 94, acceptance PASS, and the cold-CLI live demo that authored **41 signed code facts** from the
+> graph-qa source using the guaranteed tier alone). The integration gate PASSED (`build:sdk` + kip build +
+> full kip test 692 passed / 8 skipped / 93 files + `verify:metadata`, all green; `package-lock.json`
+> untouched; zero new runtime deps). This round adds **four** new residuals surfaced by the program: D-53
+> (probed-tier lacks automated coverage / live-gated), D-54 (ast-grep/tsc/eslint declared-but-no-extractor),
+> D-55 (newline-LOC off-by-one without trailing newline), and D-56 (`runAcquisition` swallows the miner's
+> verbatim error). D-53 and D-56 were surfaced structurally; the live demo also fixed and re-verified two
+> further demo-only defects (`kip index <subdir>` ENOENT; `--include`/`--exclude`/`--git-sha` unregistered in
+> the arg parser) that are closed and therefore not filed as debt.
+
+### D-53: code Miner probed/accelerator tier is live-gated (`KIP_INDEX_TOOLS`) and has no automated coverage
+
+- **Category:** Test coverage / accelerator-class gap (honestly disclosed; accelerator-class §5.3)
+- **Severity:** Minor
+- **Surfaced:** `code-analysis-miner` — the guaranteed tier is fully covered and demo-verified; the probed
+  tier is exercised only opportunistically (live demo used `rg` under `KIP_INDEX_TOOLS=1`), never in an
+  automated suite.
+- **Location:** the code Miner's probed-tier path (rg / tokei / scc / cloc / ast-grep / tsc / eslint), gated
+  behind the `KIP_INDEX_TOOLS` environment flag; `packages/kip-sdk/src/cli/index.ts` (`kip index`) and the
+  `code-miner` dispatch.
+- **Evidence:** The probed tier only runs when `KIP_INDEX_TOOLS` is set **and** the external tool is present
+  on the machine, so no frozen test in the suite reaches it — the automated coverage is entirely over the
+  guaranteed tier (git + Node builtins). The probed tier was validated only manually, by the live demo, which
+  genuinely used `rg` and recorded `skipped:<tool>` for the absent tools. Like every other accelerator-class
+  seam in this project, its live behavior is **measured**, not gamed, but it is not pinned by an automated
+  test.
+- **Why it is debt:** A whole tier of the Miner (the accelerator/probed metrics) ships without automated
+  coverage, so a regression in the probe-and-skip-with-reason (N5) behavior — an absent tool silently
+  producing a fabricated metric instead of `skipped:<tool>`, or first-available-wins arbitration for the
+  shared `linesOfCode` cell regressing — would not be caught by the suite. This is safe (the guaranteed tier
+  is fully covered and always authors real facts; the probed tier only *adds* honestly-skipped metrics) but
+  it is an honest coverage gap.
+- **Suggested fix:** Add automated coverage for the probed tier that does not depend on the host having the
+  external tools installed — e.g. a fake-`PATH` / injected-probe seam that asserts (a) an absent tool records
+  `skipped:<tool>` and never a fabricated metric, and (b) first-available-wins arbitration for the shared
+  `linesOfCode` cell — so the probed tier's N5 behavior is pinned regardless of the CI machine's toolchain.
+- **Status:** Open (tracked). The guaranteed tier is fully covered and live-demo-verified; the probed tier is
+  live-gated and validated only manually.
+
+### D-54: code Miner declares ast-grep / tsc / eslint in the probed tier but has no extractor for them (skip-only)
+
+- **Category:** Implementation / probed-tier completeness (honestly disclosed; not a correctness defect)
+- **Severity:** Minor
+- **Surfaced:** `code-analysis-miner` — the probed-tier declaration lists ast-grep / tsc / eslint, but the
+  Miner has no code that turns their output into facts.
+- **Location:** the code Miner's probed-tier tool set (ast-grep / tsc / eslint alongside rg / tokei / scc /
+  cloc); `packages/kip-sdk/src/cli/index.ts` (`kip index`) and the `code-miner` dispatch.
+- **Evidence:** ast-grep, tsc, and eslint are named as probed tools, but no extractor consumes their output —
+  so even when the tool is present and `KIP_INDEX_TOOLS` is set, the Miner can only ever record
+  `skipped:<tool>` for them; it never derives a fact from an ast-grep match, a tsc diagnostic, or an eslint
+  finding. They are declared-but-inert.
+- **Why it is debt:** The probed tier over-declares its capability relative to what the Miner actually does:
+  three of the named tools can never contribute a metric or fact in the current implementation. This is
+  **safe** (they skip-with-reason exactly like a genuinely-absent tool — no fabricated data) but it means the
+  declared tool set overstates the Miner's real extraction reach, and a reader could reasonably expect
+  ast-grep/tsc/eslint facts that never arrive.
+- **Suggested fix:** Either add real extractors (ast-grep → structural `code:` facts / edges; tsc →
+  type-diagnostic facts; eslint → lint-finding facts), or remove ast-grep/tsc/eslint from the declared probed
+  tier until an extractor exists, so the declaration matches the behavior.
+- **Status:** Open (tracked). Declared-but-skip-only; no fact is ever authored from ast-grep/tsc/eslint today.
+
+### D-55: code Miner's newline-counted LOC is off-by-one on files with no trailing newline
+
+- **Category:** Implementation / metric accuracy (minor undercount; not a safety defect)
+- **Severity:** Minor
+- **Surfaced:** `code-analysis-miner` — the guaranteed-tier LOC metric counts newlines.
+- **Location:** the code Miner's guaranteed-tier LOC computation (Node-builtins newline count) in the
+  `code-miner` dispatch / `kip index` path.
+- **Evidence:** LOC is computed by counting newline characters. A file whose final line has **no trailing
+  newline** therefore has its last line uncounted — an off-by-one **undercount** of exactly one line for any
+  file that does not end in `\n`.
+- **Why it is debt:** The guaranteed-tier `linesOfCode` metric is systematically low by one for
+  no-trailing-newline files. It is a small, bounded inaccuracy in a metric (not a correctness or safety
+  guarantee — no fact provenance or signature is affected), but it is a real off-by-one in an authored metric
+  value.
+- **Suggested fix:** Count lines as `newlines + (endsWithNewline ? 0 : (fileNonEmpty ? 1 : 0))` — i.e. add a
+  line for a final non-empty line lacking a trailing newline, while keeping a genuinely-empty file at 0 — so
+  the newline-LOC matches the intuitive line count regardless of trailing-newline presence.
+- **Status:** Open (tracked). The guaranteed-tier newline-LOC undercounts by one on files without a trailing
+  newline.
+
+### D-56: `runAcquisition` swallows the code Miner's verbatim error message, surfacing only a generic non-zero exit
+
+- **Category:** Implementation / failure diagnosability (loud failure, but the specific reason is lost)
+- **Severity:** Minor
+- **Surfaced:** `code-analysis-miner` Phase C — the cold-CLI **live demo** (defect **D3**). The demo also
+  found and **fixed** two other CLI defects (`kip index <subdir>` ENOENT → the miner now walks up to the
+  enclosing git root, scopes facts to the subdir, and fails loud on a non-repo; and
+  `--include`/`--exclude`/`--git-sha` read by `cmdIndex` but unregistered in `cli/args.ts` → now registered),
+  both re-verified via a real CLI run — those are closed and not filed here. This entry is the one demo defect
+  recorded as debt rather than fixed in-program.
+- **Location:** `runAcquisition` (the M7 acquisition orchestrator seam) and its generic non-zero-exit N5
+  guard, as consumed by the `code-miner` dispatch / `kip index` path.
+- **Evidence:** When the code Miner throws a precise, actionable error, `runAcquisition` wraps it in its
+  generic non-zero-exit N5 guard, so the operator sees a generic dispatch/non-zero-exit failure rather than
+  the miner's verbatim error string. The failure is **loud** (the run stops, N5 — no fabricated facts), but
+  the specific cause is dropped on the floor, exactly as D-49 item (2) described for the graph-QA dispatch
+  path before it was fixed.
+- **Why it is debt:** The N5 no-fallback / no-fabrication guarantee is correct — the run fails loud and
+  authors nothing — but every distinct miner-side cause collapses into one generic non-zero-exit message,
+  making a real code-indexing failure expensive to diagnose. It is a diagnosability gap on the failure
+  channel, not a correctness or safety regression.
+- **Suggested fix:** Thread the miner's verbatim error message through `runAcquisition`'s non-zero-exit guard
+  to the operator-facing failure (mirroring D-49(2)'s fix, which surfaced the graph-QA dispatch reason on the
+  `output.error` channel and appended it to the failure message) so the specific cause survives, while
+  keeping the failure strictly on the error channel (it authors no facts, so a reason string can never become
+  a fabricated fact — N5 preserved).
+- **Status:** Open (tracked). The failure is loud and safe; only the specific reason is not surfaced.
