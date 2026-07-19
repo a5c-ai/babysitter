@@ -348,6 +348,13 @@ export interface OpenOptions {
   replicaId: ReplicaId;
   keyring: unknown;
   createIfMissing?: boolean;
+  /**
+   * ADR-B9c (the one required core change): an optional microagent-dispatch seam threaded into the
+   * constructed `KipRepo`, so an acquisition surface (`kip index` → `runAcquisition`) reaches a REAL
+   * family microagent instead of the always-succeeds default stub. When omitted, `open()` behaves
+   * exactly as before (the default `KipRepo.defaultDispatchMicroagent` is used).
+   */
+  dispatchMicroagent?: DispatchMicroagentFn;
   genesis?: {
     hashAlgo: "sha1" | "sha256";
     shardDepth: number;

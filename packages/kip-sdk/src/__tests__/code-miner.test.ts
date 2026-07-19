@@ -55,6 +55,9 @@ const FIXTURE_FILES: Record<string, string> = {
 interface FixtureRepo {
   repoDir: string;
   gitSha: string;
+  /** The AUTHORITATIVE git-blob oids (`git hash-object <file>`) per fixture file — the exact content
+   *  address the miner's `content` BlobRef must reproduce (round-3: the NUL-byte git-blob header). */
+  blobOids: Record<string, string>;
   cleanup: () => void;
 }
 
@@ -79,7 +82,10 @@ function makeFixtureRepo(): FixtureRepo {
   git("add", "-A");
   git("-c", "user.email=fixture@kip.test", "-c", "user.name=kip fixture", "commit", "-q", "-m", "fixture");
   const gitSha = git("rev-parse", "HEAD");
-  return { repoDir, gitSha, cleanup: () => rmSync(repoDir, { recursive: true, force: true }) };
+  // The authoritative git-blob oid per file, straight from git — the exact value the miner must emit.
+  const blobOids: Record<string, string> = {};
+  for (const name of Object.keys(FIXTURE_FILES)) blobOids[name] = git("hash-object", name);
+  return { repoDir, gitSha, blobOids, cleanup: () => rmSync(repoDir, { recursive: true, force: true }) };
 }
 
 // --- candidate helpers (normalize over the un-pinned EID prefix; see file header) --------------
@@ -223,6 +229,51 @@ describe("code-analysis Miner (M7) — buildCodeMinerResult / codeMinerDispatch 
     // Default behavior needs NO external binary: the guaranteed tier still produces the core scan.
     const { proposed } = buildCodeMinerResult(input());
     expect(nodesOfKind(proposed, "code:module").length).toBeGreaterThanOrEqual(2);
+
+    // Round-2 finding #1: a GUARANTEED per-module `linesOfCode` node-prop (newline count) is present
+    // with ZERO external tools — a numeric value, computed from the read bytes, not a probed metric.
+    const locProps = nodePropsNamed(proposed, "linesOfCode");
+    expect(locProps.length).toBeGreaterThanOrEqual(2);
+    expect(
+      locProps.every((c) => c.type === "assert" && typeof c.value === "number" && (c.value as number) >= 0),
+    ).toBe(true);
+    // Round-3: the per-module `linesOfCode` equals the EXACT newline count of that fixture file (derived
+    // here from the fixture content, independent of the implementation). A constant-0 LOC would fail this.
+    const locByEid = new Map<string, unknown>();
+    for (const c of locProps) if (c.type === "assert") locByEid.set((c.target as { eid: string }).eid, c.value);
+    for (const [name, content] of Object.entries(FIXTURE_FILES)) {
+      const expectedLoc = (content.match(/\n/g) ?? []).length;
+      const hit = [...locByEid].find(([eid]) => eid.endsWith(name));
+      expect(hit, `linesOfCode node-prop for ${name}`).toBeDefined();
+      expect(hit?.[1], `linesOfCode for ${name}`).toBe(expectedLoc);
+    }
+
+    // Round-2 finding #3: a GUARANTEED per-module `content` node-prop is a BlobRef ({ blob: <cid> }), a
+    // git-blob-style content address present with ZERO external tools.
+    const contentProps = nodePropsNamed(proposed, "content");
+    expect(contentProps.length).toBeGreaterThanOrEqual(2);
+    expect(
+      contentProps.every(
+        (c) =>
+          c.type === "assert" &&
+          typeof c.value === "object" &&
+          c.value !== null &&
+          typeof (c.value as { blob?: unknown }).blob === "string" &&
+          (c.value as { blob: string }).blob.length > 0,
+      ),
+    ).toBe(true);
+    // Round-3: the `content` BlobRef oid equals `git hash-object <file>` EXACTLY (git's NUL-byte blob
+    // header). The round-2 space-header bug produced a DIFFERENT digest, so this assertion fails against
+    // it and passes only with the correct NUL-byte oid.
+    const blobByEid = new Map<string, unknown>();
+    for (const c of contentProps) {
+      if (c.type === "assert") blobByEid.set((c.target as { eid: string }).eid, (c.value as { blob?: unknown }).blob);
+    }
+    for (const [name, oid] of Object.entries(fixture.blobOids)) {
+      const hit = [...blobByEid].find(([eid]) => eid.endsWith(name));
+      expect(hit, `content BlobRef for ${name}`).toBeDefined();
+      expect(hit?.[1], `content blob oid for ${name}`).toBe(oid);
+    }
 
     // N5: an omitted optional analysis is RECORDED with a reason (a `skipped:<tool>` node-prop with a
     // non-empty string reason), never silently dropped.

@@ -11,9 +11,10 @@
  * `ask`, the genty layers — NEVER `@a5c-ai/babysitter-sdk`. The CLI is a memory client, not a run
  * orchestrator: it stands up no `OrchestrationProvider`/`JournalProvider` registry.
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { KipError, open } from "../index";
+import { codeMinerDispatch } from "../miner/code-miner";
 import type {
   AsOf,
   AssertInput,
@@ -81,7 +82,7 @@ interface HandlerArgs {
 
 const USAGE =
   "usage: kip [GLOBAL_OPTS] <command> [ARGS]\n" +
-  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask\n";
+  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index\n";
 
 /**
  * Parse `argv` (already `process.argv.slice(2)`), dispatch the named subcommand, and resolve with the
@@ -154,6 +155,8 @@ export async function runCli(argv: string[], opts: RunCliOptions): Promise<numbe
         return await cmdSync(args);
       case "ask":
         return await cmdAsk(args);
+      case "index":
+        return await cmdIndex(args);
       default:
         werr(`kip: unknown command '${command}'\n${USAGE}`);
         return 2;
@@ -640,6 +643,66 @@ async function cmdAsk(a: HandlerArgs): Promise<number> {
   if (json) emitJson(write, outcome.result);
   else write(humanAsk(outcome.result));
   return 0;
+}
+
+// ===========================================================================
+// index (ADR-B9c) — acquire code facts through the signed runAcquisition lifecycle.
+// ===========================================================================
+
+/**
+ * `kip index <path> [--include <glob>] [--exclude <glob>] [--git-sha <sha>] [--json]` — resolve the
+ * repo (keyring required, it authors signed facts), idempotently register the bundled `code-miner`
+ * manifest, and call `runAcquisition` with `codeMinerDispatch` wired through `open()` (ADR-B9c). The
+ * miner NEVER writes the graph (INV-A1); only `runAcquisition` commits its returned candidates.
+ */
+async function cmdIndex(a: HandlerArgs): Promise<number> {
+  const { flags, positionals, write, werr, json } = a;
+  const repoPath = positionals[1];
+  if (!repoPath) {
+    werr("kip: index requires a <path>\n");
+    return 2;
+  }
+  const targetRepoDir = isAbsolute(repoPath) ? repoPath : join(a.ctx.cwd, repoPath);
+
+  // Thread the code miner as the repo's dispatch seam via OpenOptions (ADR-B9c's one core change).
+  const openRepoWithMiner: OpenRepoFn = (o) => a.openRepo({ ...o, dispatchMicroagent: codeMinerDispatch });
+  const resolved = await resolveRepo(a.ctx, openRepoWithMiner, { requireInitialized: true, requireKeyring: true });
+  const repo = resolved.repo;
+
+  // Idempotently register the bundled manifest (a byte-identical re-registration is a no-op, INV-7).
+  const manifest = resolveCodeMinerManifest();
+  await repo.registerFunctionality(`kip-code-miner:${manifest.name}`, manifest);
+
+  const input: { repoDir: string; gitSha?: string; include?: string[]; exclude?: string[] } = {
+    repoDir: targetRepoDir,
+  };
+  const gitSha = flagStr(flags, "git-sha");
+  if (gitSha !== undefined) input.gitSha = gitSha;
+  const include = flagList(flags, "include");
+  if (include.length) input.include = include;
+  const exclude = flagList(flags, "exclude");
+  if (exclude.length) input.exclude = exclude;
+
+  const { facts } = await repo.runAcquisition(manifest, input, {});
+  if (json) emitJson(write, { facts });
+  else write(`indexed ${targetRepoDir}: ${facts.length} fact(s)\n`);
+  return 0;
+}
+
+/**
+ * Resolve the bundled `code-miner` `MicroagentManifest`, read from the CLI's bundled
+ * `microagents/code-miner/microagent.json` (mirrors `resolveQaManifest`). Throws (never fabricates a
+ * manifest) if the bundle is incomplete.
+ */
+function resolveCodeMinerManifest(): MicroagentManifest {
+  const p = join(__dirname, "microagents", "code-miner", "microagent.json");
+  if (!existsSync(p)) {
+    throw new KipError(
+      "ERR_UNREGISTERED_MANIFEST",
+      "code-miner manifest not found; the kip CLI bundle is incomplete",
+    );
+  }
+  return JSON.parse(readFileSync(p, "utf8")) as MicroagentManifest;
 }
 
 // ===========================================================================

@@ -23,3 +23,9 @@ export type { Ed25519KeyPair } from "./signing";
 export * from "./types";
 
 export { KipError, KipRepo, open } from "./kip-repo";
+
+// ADR-B9 code-analysis Miner — TYPE-ONLY re-exports (erased at runtime, so the `public-surface`
+// value-export guard is unaffected). The `buildCodeMinerResult`/`codeMinerDispatch` VALUES live at
+// `@a5c-ai/kip-sdk/miner/code-miner`'s module path (the frozen tests + the CLI import them there),
+// and are intentionally NOT added to this runtime barrel (which is pinned to its exact value set).
+export type { CodeMinerInput, CodeMinerResult } from "./miner/code-miner";

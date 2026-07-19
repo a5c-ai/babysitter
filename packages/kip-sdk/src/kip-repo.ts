@@ -6126,6 +6126,10 @@ export async function open(options: OpenOptions): Promise<KipRepo> {
     // compare against what THIS repo's manifest declares, not merely a constructor default no
     // `open()` caller could ever override or disagree with.
     regenBoundaryRule: persistedManifest.regenBoundaryRule,
+    // ADR-B9c (the one required core change): thread the optional dispatch seam through so an
+    // acquisition CLI surface (`kip index` → `runAcquisition`) reaches a real family microagent
+    // instead of the always-succeeds stub. Omitted ⇒ the constructor's default stub, unchanged.
+    dispatchMicroagent: options.dispatchMicroagent,
   });
 }
 
