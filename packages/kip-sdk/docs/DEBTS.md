@@ -812,3 +812,30 @@ actual current source before being recorded.
 - **Why it is debt:** The write journey is a hard dead-end from the CLI/MCP surface as shipped — the one bootstrap step the binaries need is the one step they cannot perform. It is a pure ergonomics gap (the SDK workaround is small and now documented), not a correctness bug: nothing produces a wrong result, and the failure is loud (exit 3 with an actionable message). This entry is the honest disclosure the consumer docs point at wherever they hand the reader the SDK workaround.
 - **Suggested fix:** Add a first-class bootstrap command — `kip keygen [--out <path>]` that writes a fresh `{ privateKeyPem, publicKeyPem }` keyring to `<dir>/keyring.json` (or a `--with-keyring` flag on `kip init` that emits genesis **and** a keyring in one step, guarded so it never overwrites an existing key). Until then, the documented workaround (a tiny SDK script using `generateEd25519KeyPair()` / `exportKeyring()`) stands; see [Getting started → Signing keys and a stable identity](./guide/getting-started.md#signing-keys-and-a-stable-identity).
 - **Status:** Open (documented workaround in place). The dead-end is fully documented across the consumer doc set — the CLI ([cli.md](./guide/cli.md#creating-a-keyring)), MCP ([mcp.md](./guide/mcp.md#creating-a-keyring)), README terminal quickstart, and the canonical how-to ([getting-started.md](./guide/getting-started.md#create-a-keyringjson-for-the-cli--mcp)) — each of which references this entry so the reader knows the hand-rolled step is a tracked rough edge. No code was changed (docs-only convergence round).
+
+---
+
+## Audit round 8 — the `kip-mature` program (maturity, test & documentation)
+
+> The **`kip-mature`** program took kip-sdk from spec-complete-but-undocumented-and-CLI-untested to
+> **demo-ready**: a live `kip ask` (ADR-B8 model wiring), real-binary e2e (CLI + MCP), a hardened suite, and
+> full consumer/maintainer/integration docs. See [`reviews/maturity-report.md`](../reviews/maturity-report.md)
+> for the whole-program narrative (per-item convergence, critic minimums 88–93, all 6 acceptance passes PASS,
+> the cold-built live-demo transcript, final suite 91 files / 684 passed / 8 skipped / 0 failed). This program
+> **resolved [[D-44]]** (`kip ask` answers live — ADR-B8 / `graph-qa-live`), **[[D-38]]** (temp-dir leak —
+> `close()` `rmSync` + `afterEach` sweep, verified 0 net-new leak / `suite-hardening`), and **[[D-49]]** (both
+> tails — the `dist` manifest is bundled by a dependency-free build step, and the dispatch-failure reason now
+> reaches the operator on both the CLI and the MCP `kip_ask` surface, the latter closed in `e2e-binaries`);
+> **[[D-50]]** (7 deferred conformance skips) and **[[D-51]]** (no `kip keygen`) remain Open/tracked. The one
+> new residual it surfaced — a real retrieval-brittleness limitation found by the live demo itself — is D-52.
+
+### D-52: graph-QA retrieval is content-seed-brittle — `kip ask` abstains on genuine free-text questions unless a `content` prop mirrors the query verbatim
+
+- **Category:** Implementation / retrieval robustness (honestly disclosed, surfaced by the live demo)
+- **Severity:** Minor (safe — abstains, never guesses — but the headline `ask` verb is not yet robust for real NL)
+- **Surfaced:** `kip-mature` Phase C — the cold-built end-to-end **live demo** (`kip ask`, `KIP_ASK_LIVE=1`, haiku, exit 0). The demo answered correctly and cited a real signed `factId`, but only **after** a `content` prop equal to the question verbatim was seeded onto the graph; without that seed the same `ask` abstains.
+- **Location:** `packages/kip-sdk/src/kip-repo.ts` (`recall` — the vector → graph → RRF + §5.4 salience pipeline, specifically its **text-seed** path); consumed by `packages/kip-sdk/src/graph-qa/index.ts` (the read-only retrieval → cite/abstain pipeline) and the `ask` entry points (`src/cli/ask.ts`, the MCP `kip_ask` tool).
+- **Evidence:** `recall`'s text path is **exact-content-seed matching** — it locates a fact by matching the query text against a fact's `content` prop, not by semantic similarity or fuzzy/lexical text retrieval. In the live demo, `kip ask "…"` returned an answer only once a `content` prop **equal to the question verbatim** had been added to the graph; on a graph carrying the same facts **without** that mirror prop, retrieval found nothing and the graph-QA pipeline correctly **abstained**. So `kip ask` is end-to-end demonstrable today only with a content-seed that pre-encodes the question.
+- **Why it is debt:** The whole point of the `ask` verb is answering **genuine free-text natural-language questions** against the graph. As shipped it can only answer when the corpus already contains a `content` prop that mirrors the question — a condition a real NL consumer will almost never satisfy — so in practice `ask` abstains on real questions. This is **safe** (cite-or-abstain holds; it never fabricates and never returns a wrong fact) and is distinct from D-43's *vector*-half exact-cosine/no-ANN narrowing: D-43 is about scale of the vector scan, D-52 is about the **text-seed retrieval being exact-match rather than semantic/lexical**, which is what makes free-text `ask` brittle. It is the honest limitation the maturity demo disclosed rather than hid.
+- **Suggested fix:** Give the graph-QA retrieval **real semantic or text retrieval** so `ask` is robust for actual NL questions — either wire the embedding/vector seam through the text path (so `content`/prop text is embedded and matched by similarity, reusing the M4 vector infrastructure) or add proper lexical/fuzzy text retrieval (e.g. tokenized/BM25-style matching) in place of the exact-content-seed equality check. Until then, `kip ask` is demo-able only with a content-seed and should be documented as such wherever it is presented as answering free-text questions.
+- **Status:** Open (tracked). No code changed in this program for this item — it was surfaced and honestly recorded so the "demo-ready `kip ask`" claim carries its real limitation rather than overstating robustness.
