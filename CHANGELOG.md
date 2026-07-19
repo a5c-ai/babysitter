@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased] - 2026-07-19
+
+### Features
+- feat(kip-sdk): suite-hardening (converged min=93, acceptance PASS) (c92838501, Tal Muskal, 6 hours ago)
+- feat(kip-sdk): e2e-binaries (converged min=90, acceptance PASS) (be635d9b6, Tal Muskal, 9 hours ago)
+
+### Documentation
+- docs(kip-sdk): docs-integration (converged min=93, acceptance PASS) (bbedd3c9a, Tal Muskal, 3 hours ago)
+- docs(kip-sdk): docs-maintainer (converged min=93, acceptance PASS) (60632d17f, Tal Muskal, 3 hours ago)
+- docs(kip-sdk): docs-consumer (converged min=90, acceptance PASS) (9ab894a03, Tal Muskal, 4 hours ago)
+
+### Tests
+- test(kip-sdk): frozen suite-hardening tests (spec-driven, pre-implementation) (94ad76d49, Tal Muskal, 8 hours ago)
+- test(kip-sdk): frozen e2e-binaries tests (spec-driven, pre-implementation) (4f47fdf10, Tal Muskal, 10 hours ago)
+
+### Maintenance
+- Track upstream agent CLI versions (#1503) (e3b0a4ea8, a5c-ai[bot], 24 hours ago)
+
 ## [Unreleased] - 2026-07-15
 
 ### Maintenance
