@@ -5361,6 +5361,28 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * ADR-B10a — the blob gap (`text-autoencoder` work item). UNIMPLEMENTED PLACEHOLDER: throws so the
+   * frozen `src/__tests__/text-autoencoder.test.ts` assertions fail on a real diff, never on a
+   * missing symbol. The real implementation delegates to the already-public
+   * `Substrate.writeBlob(content)` (`substrate.ts:235`) and returns `{ blob: oid }` — content
+   * addressed and idempotent for free. It MUST NOT call `writeFactBlob`, MUST NOT involve `proj`,
+   * and MUST NOT author/sign/mint a fact.
+   */
+  async putBlob(_content: Uint8Array): Promise<BlobRef> {
+    throw new Error("unimplemented: putBlob (text-autoencoder work item, ADR-B10a)");
+  }
+
+  /**
+   * ADR-B10a — the blob gap (`text-autoencoder` work item). UNIMPLEMENTED PLACEHOLDER, see
+   * {@link KipRepo.putBlob}. The real implementation returns `null` when `hasBlob(ref.blob)` is
+   * false, otherwise reads the bytes, RE-COMPUTES `gitBlobId` over them, and throws
+   * `ERR_MALFORMED_INPUT` on mismatch — a corrupt object store must be loud (N5).
+   */
+  async getBlob(_ref: BlobRef): Promise<Uint8Array | null> {
+    throw new Error("unimplemented: getBlob (text-autoencoder work item, ADR-B10a)");
+  }
+
+  /**
    * ROUND-3 CRITIC FIX (convergence-safety, major finding 2): the SINGLE recipe for durably
    * authoring a `kip:learn-exhausted` marker, shared by BOTH `learn()` call sites that author this
    * marker (the no-accept/exhausted-with-no-candidates branch, and the accept-attempt-FAILURE

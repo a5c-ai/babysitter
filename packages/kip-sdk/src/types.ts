@@ -1213,4 +1213,16 @@ export interface Repo {
     rawRef: BlobRefInput,
     opts: LearnOptions,
   ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }>;
+  /**
+   * ADR-B10a — the blob gap. `putBlob` turns bytes into a REAL content-addressed `BlobRef` (the git
+   * loose-object hash `blob <len>\0<content>`, the same one `mintFact` uses for `Fact.id`);
+   * `getBlob` resolves one back, `null` for a genuinely absent oid and `ERR_MALFORMED_INPUT` on a
+   * hash mismatch — never a zero-length buffer, never a partial read (N5).
+   *
+   * A blob is CONTENT addressed by hash; it is **not a member of S and it is not knowledge**. These
+   * MUST NOT touch `writeFactBlob`/the facts index, MUST NOT involve `proj` in any way, and MUST NOT
+   * author, sign, or mint a fact (so they need no keyring).
+   */
+  putBlob(content: Uint8Array): Promise<BlobRef>;
+  getBlob(ref: BlobRef): Promise<Uint8Array | null>;
 }

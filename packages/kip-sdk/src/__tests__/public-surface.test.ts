@@ -76,6 +76,10 @@ const EXPECTED_REPO_METHODS = [
   "runContextualQuery",
   "runAcquisition",
   "learn",
+  // ADR-B10a blob gap (`text-autoencoder`): bytes in, bytes out. NOT knowledge — a blob is never a
+  // member of S. Declared on `Repo`, so the guard must enumerate them.
+  "putBlob",
+  "getBlob",
 ].sort();
 
 describe("public surface (ADR-B5 modularize guard)", () => {
