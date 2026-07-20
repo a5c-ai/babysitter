@@ -387,6 +387,122 @@ describe("graph-qa round-4 §6.1b — the anchoring surface includes prop KEYS +
 });
 
 // ────────────────────────────────────────────────────────────────────────────────────────────────
+// ABSENT-SUBJECT FABRICATION FIX (round-5) — the round-4 surface WIDENING (bare prop KEYS + node/edge
+// KINDS folded into the anchoring surface) re-opened the §8.4 fabrication hole in a new shape: a
+// question that shares ONLY a schema key with a retrieved node anchored even when the question's
+// actual NAMED SUBJECT was absent from every retrieved fact. Empirically confirmed against the built
+// dist: "What is Zara's role?" over a graph holding ONLY `person/tal` (with `role:"Engineer"`)
+// returned `abstained:false`, answer "Zara's role is Engineer.", citing TAL's signed fact — a
+// fabricated answer about an absent subject wearing a real signed citation (the exact §8.4
+// fabrication).
+//
+// THE FIX — partition the question's non-stopword terms against the SCHEMA VOCABULARY of the
+// retrieved facts (all prop KEYS + node KINDS + edge KINDS):
+//   • schema terms  = query terms that ARE in that vocabulary (e.g. `role`, `status`, `team`, `owns`)
+//   • subject terms = query terms that are NOT (the words naming WHO/WHAT — `zara`, `ceo`, `ledger`)
+// Anchored iff the exact-content match, OR there is ≥1 retrieved fact AND (there are no subject terms
+// — a pure schema question like "What is the status?" — OR at least one subject term appears in a
+// retrieved node/edge's IDENTITY-or-VALUE surface: eid localId + STRUCTURED string/number/boolean
+// prop/edge-prop values, free-text {content,description,summary} VALUES still excluded; NOT prop keys,
+// NOT kinds). A schema key match alone can no longer anchor a subject that is absent. The five cases
+// below pin the honest contract in one place.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa absent-subject fabrication fix (round-5 §6.1b) — a shared SCHEMA key is not subject relevance", () => {
+  it("ABSTAINS on 'What is Zara's role?' over a Tal-only graph (Tal.role='Engineer') — the absent subject 'zara' is unmatched; synthesize is NEVER called", async () => {
+    const repo = freshRepo("absent-subject-role");
+    // ONLY Tal exists, with a STRUCTURED `role` prop. Zara is absent from every fact. The question
+    // shares the SCHEMA KEY "role" with Tal's node, but its named subject "zara" appears in no
+    // retrieved identity/value surface, so the honest outcome is abstention — never a fabricated
+    // answer about Zara citing Tal's signed fact.
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "role", "Engineer");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: 'zara' is absent; only the schema key 'role' overlaps (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "What is Zara's role?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  it("ANSWERS 'Who is the CEO?' over a `role:\"CEO\"` node — 'ceo' matches the structured VALUE, so the subject is anchored", async () => {
+    const repo = freshRepo("absent-subject-ceo-value");
+    await assertNode(repo, "person/alice", "person");
+    await assertProp(repo, "person/alice", "name", "Alice");
+    await assertProp(repo, "person/alice", "role", "CEO");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const role = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "role");
+      return {
+        answer: `The CEO is ${String(role?.eid === "person/alice" ? "Alice" : "")}.`,
+        citations: role ? [{ factId: role.factId, eid: role.eid, prop: "role", quote: String(role.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "Who is the CEO?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    expect((seen?.facts ?? []).some((f) => f.prop === "role" && f.value === "CEO")).toBe(true);
+    expect(result.answer).toContain("Alice");
+  });
+
+  it("ANSWERS 'What is the status?' over a `status:\"blocked\"` node — `status` is a SCHEMA term with NO subject term, so it anchors (round-4 not regressed)", async () => {
+    const repo = freshRepo("absent-subject-status-key");
+    await assertNode(repo, "ticket/kip-99", "ticket");
+    await assertProp(repo, "ticket/kip-99", "status", "blocked");
+    const synth = spySynth((ctx) => {
+      const st = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "status");
+      return {
+        answer: `The status is ${String(st?.value ?? "")}.`,
+        citations: st ? [{ factId: st.factId, eid: st.eid, prop: "status", quote: String(st.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "What is the status?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    expect(result.answer).toContain("blocked");
+  });
+
+  it("ANSWERS 'Which team owns Ledger?' over a graph with a `ledger` node and an `owns` edge — `team`/`owns` are schema terms, `ledger` matches identity", async () => {
+    const repo = freshRepo("absent-subject-team-owns-ledger");
+    // `team`/`component` are node KINDS, `owns` is an edge KIND — all schema vocabulary. The only
+    // SUBJECT term is `ledger`, which matches the `component/ledger` node's identity, so the question
+    // anchors and answers.
+    await assertNode(repo, "team/data-platform", "team");
+    await assertProp(repo, "team/data-platform", "name", "Data Platform Team");
+    await assertNode(repo, "component/ledger", "component");
+    await assertProp(repo, "component/ledger", "name", "Ledger");
+    await assertEdge(repo, "edge/dp-owns-ledger", "owns", "team/data-platform", "component/ledger");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      return { answer: "The Data Platform Team owns Ledger.", citations: [] };
+    });
+    const result = await answerQuestion({ question: "Which team owns Ledger?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    const eids = new Set((seen?.facts ?? []).map((f) => f.eid));
+    expect(eids.has("component/ledger")).toBe(true);
+  });
+
+  it("ABSTAINS on §8.4 'Where does Zara work?' over a Tal-only graph (free-text overlap only) — unchanged", async () => {
+    const repo = freshRepo("absent-subject-zara-work");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", "Where does Tal work?");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: 'zara' is absent; only a free-text value shares 'work' (§8.4)");
+    });
+    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
 // §8.5 — Abstention on an empty graph.
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 describe("graph-qa §8.5 — against a graph with NO facts, any question abstains (recall [] is never synthesized)", () => {
