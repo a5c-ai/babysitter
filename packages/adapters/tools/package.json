@@ -41,7 +41,8 @@
   },
   "dependencies": {
     "@a5c-ai/policy-adapter": "6.0.0",
-    "@a5c-ai/transport-adapter": "6.0.0"
+    "@a5c-ai/transport-adapter": "6.0.0",
+    "@a5c-ai/trust-core": "6.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

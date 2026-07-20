@@ -31,7 +31,7 @@ import {
   type CommandAuthorizationPayload,
   type TrustRoot,
 } from '@a5c-ai/policy-adapter';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 
 import type { ToolCallContext, ToolDescriptor } from './types.js';
 import type { ToolHookBridge, ToolHookResult } from './hooks.js';
