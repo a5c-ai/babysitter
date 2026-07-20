@@ -189,9 +189,10 @@ export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOption
    * automatic, config is advisory only; Gemini: implicit + optional explicit
    * resource).
    *
-   * As of this release only the `anthropic` sub-config is wired up in
-   * `callCompletionApi`; the other vendor sub-configs are declared here so
-   * later phases can extend them without another config-surface change.
+   * The `anthropic`, `openai`, and `azure` sub-configs are wired up in
+   * `callCompletionApi`. The `gemini` sub-config is declared but unsupported:
+   * genty-core has no Gemini endpoint today, so setting it throws rather than
+   * being silently ignored (see the plan's §3.4).
    */
   promptCaching?: {
     /** Master switch. Defaults to false. When false, all sub-options are ignored. */
