@@ -67,6 +67,10 @@ export interface AgentCorePromptResult<TParsed = unknown> {
     totalTokens: number;
     provider?: string;
     model?: string;
+    /** Tokens served from a vendor prompt cache (Anthropic `cache_read_input_tokens`, OpenAI/Azure `cached_tokens`). */
+    cacheReadTokens?: number;
+    /** Tokens written to a vendor prompt cache (Anthropic `cache_creation_input_tokens` only; OpenAI/Azure don't report writes). */
+    cacheWriteTokens?: number;
   };
 }
 
@@ -177,6 +181,51 @@ export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOption
     input: unknown;
     modelId?: string;
   }) => { allowed: boolean; reason?: string };
+  /**
+   * Opt-in vendor-aware prompt caching. When absent, no caching directives are
+   * added to any provider request body (current behavior, byte-identical).
+   * Per-provider knobs are independent because each vendor's cache mechanism
+   * has a different shape (Anthropic: explicit breakpoints; OpenAI/Azure:
+   * automatic, config is advisory only; Gemini: implicit + optional explicit
+   * resource).
+   *
+   * As of this release only the `anthropic` sub-config is wired up in
+   * `callCompletionApi`; the other vendor sub-configs are declared here so
+   * later phases can extend them without another config-surface change.
+   */
+  promptCaching?: {
+    /** Master switch. Defaults to false. When false, all sub-options are ignored. */
+    enabled: boolean;
+    anthropic?: {
+      /**
+       * Where to place cache_control breakpoints. See genty-core's
+       * `docs/research/genty-llm-prompt-caching-plan.md` §4 for placement
+       * rationale. Defaults to `["system", "tools"]` when enabled.
+       */
+      breakpoints?: Array<"tools" | "system" | "history">;
+      /** cache_control.ttl. Anthropic supports "5m" (default) or "1h". */
+      ttl?: "5m" | "1h";
+    };
+    openai?: {
+      /** Forwarded as prompt_cache_key (routing hint only, no-op if unsupported by model). */
+      promptCacheKey?: string;
+    };
+    azure?: {
+      /** Forwarded as prompt_cache_key where the deployment supports it. */
+      promptCacheKey?: string;
+    };
+    gemini?: {
+      /**
+       * "implicit" relies on automatic server-side caching (no request
+       * change). "explicit" requires an out-of-band CachedContent resource.
+       * Defaults to "implicit" when enabled.
+       */
+      mode?: "implicit" | "explicit";
+      /** Required when mode === "explicit". */
+      cachedContentName?: string;
+      ttl?: string; // e.g. "3600s"
+    };
+  };
 }
 
 export interface ToolResult {

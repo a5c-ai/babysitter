@@ -264,6 +264,46 @@ describe("AgentCoreSessionHandle tool-calling loop", () => {
     expect(resultTurn.content).toEqual([{ type: "tool_result", tool_use_id: "toolu_1", content: "result-data" }]);
   });
 
+  it("sums cacheReadTokens/cacheWriteTokens across tool-loop iterations, treating an absent side as 0", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-key");
+
+    // First call (tool_use turn) reports cache read+write tokens.
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      body: textStream([
+        `data: ${JSON.stringify({
+          type: "message_start",
+          message: { usage: { input_tokens: 9, cache_creation_input_tokens: 40, cache_read_input_tokens: 10 } },
+        })}\n\n`,
+        `data: ${JSON.stringify({ type: "content_block_start", index: 0, content_block: { type: "tool_use", id: "toolu_1", name: "lookup" } })}\n\n`,
+        `data: ${JSON.stringify({ type: "content_block_delta", index: 0, delta: { type: "input_json_delta", partial_json: '{"value":"x"}' } })}\n\n`,
+        `data: ${JSON.stringify({ type: "content_block_stop", index: 0 })}\n\n`,
+        `data: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "tool_use" }, usage: { output_tokens: 5 } })}\n\n`,
+        `data: ${JSON.stringify({ type: "message_stop" })}\n\n`,
+      ]),
+    });
+    // Second call (final text turn) reports no cache usage at all.
+    mockFetch.mockResolvedValueOnce({ ok: true, body: anthropicTextStream("final answer") });
+
+    const execute = vi.fn(async (): Promise<ToolResult> => ({ content: [{ type: "text", text: "result-data" }] }));
+    const session = createAgentCoreSession({
+      model: "claude-sonnet-4-6",
+      customTools: [makeTool("lookup", execute)],
+    });
+
+    const result = await session.prompt("Look it up");
+
+    expect(result.success).toBe(true);
+    // 9 + 6 input tokens across both iterations, cache fields only present on
+    // the first iteration and must be treated as 0 on the second (absent) side.
+    expect(result.usage).toMatchObject({
+      inputTokens: 15,
+      cacheReadTokens: 10,
+      cacheWriteTokens: 40,
+    });
+  });
+
   it("does not send tools and never loops on the plain-text path (no customTools)", async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, body: openAiFinalText("plain reply") });
     const session = createAgentCoreSession({ model: "gpt-5.5" });

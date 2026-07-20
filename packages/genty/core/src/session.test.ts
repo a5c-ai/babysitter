@@ -1,3 +1,4 @@
+import { Type } from "@sinclair/typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("node:child_process", () => ({
@@ -6,6 +7,7 @@ vi.mock("node:child_process", () => ({
 
 import * as childProcess from "node:child_process";
 import { createAgentCoreSession } from "./session";
+import type { CustomToolDefinition } from "./types";
 
 const mockFetch = vi.fn();
 
@@ -742,6 +744,214 @@ describe("AgentCoreSessionHandle", () => {
     expect(options).toMatchObject({
       cwd: "/tmp/workspace",
       stdio: ["ignore", "pipe", "pipe"],
+    });
+  });
+
+  describe("Anthropic prompt caching", () => {
+    beforeEach(() => {
+      vi.stubEnv("OPENAI_API_KEY", "");
+      vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-key");
+    });
+
+    function makeTool(name: string): CustomToolDefinition {
+      return {
+        name,
+        label: name,
+        description: `Tool ${name}`,
+        parameters: Type.Object({ value: Type.Optional(Type.String()) }),
+        execute: async () => ({ content: [{ type: "text", text: "ok" }] }),
+      };
+    }
+
+    function anthropicResponseWithUsage(
+      text: string,
+      startUsage: Record<string, number>,
+      deltaUsage: Record<string, number> = { output_tokens: 6 },
+    ) {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        body: textStream([
+          `data: ${JSON.stringify({ type: "message_start", message: { usage: startUsage } })}\n\n`,
+          `data: ${JSON.stringify({ type: "content_block_delta", delta: { type: "text_delta", text } })}\n\n`,
+          `data: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "end_turn" }, usage: deltaUsage })}\n\n`,
+          `data: ${JSON.stringify({ type: "message_stop" })}\n\n`,
+        ]),
+      });
+    }
+
+    it("keeps system as a bare string when promptCaching is absent (byte-identical regression guard)", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        systemPrompt: "You are helpful",
+        customTools: [makeTool("a"), makeTool("b")],
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.system).toBe("You are helpful");
+      expect(body.tools).toEqual([
+        { name: "a", description: "Tool a", input_schema: expect.any(Object) },
+        { name: "b", description: "Tool b", input_schema: expect.any(Object) },
+      ]);
+      expect(JSON.stringify(body)).not.toContain("cache_control");
+    });
+
+    it("keeps system as a bare string when promptCaching.enabled is false", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        systemPrompt: "You are helpful",
+        promptCaching: { enabled: false },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.system).toBe("You are helpful");
+      expect(JSON.stringify(body)).not.toContain("cache_control");
+    });
+
+    it("emits system as a one-element cache_control array when the system breakpoint is requested", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        systemPrompt: "You are helpful",
+        promptCaching: { enabled: true, anthropic: { breakpoints: ["system"] } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.system).toEqual([
+        { type: "text", text: "You are helpful", cache_control: { type: "ephemeral" } },
+      ]);
+    });
+
+    it("does not cache_control the system field when the system breakpoint is not requested", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        systemPrompt: "You are helpful",
+        promptCaching: { enabled: true, anthropic: { breakpoints: ["tools"] } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.system).toBe("You are helpful");
+    });
+
+    it("tags only the last tool with cache_control when the tools breakpoint is requested", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        customTools: [makeTool("a"), makeTool("b"), makeTool("c")],
+        promptCaching: { enabled: true, anthropic: { breakpoints: ["tools"] } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.tools[0].cache_control).toBeUndefined();
+      expect(body.tools[1].cache_control).toBeUndefined();
+      expect(body.tools[2].cache_control).toEqual({ type: "ephemeral" });
+    });
+
+    it("throws before any network call when the config requests more than 4 cache_control breakpoints", async () => {
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        promptCaching: {
+          enabled: true,
+          anthropic: {
+            breakpoints: ["system", "tools", "history", "system", "tools"] as Array<"system" | "tools" | "history">,
+          },
+        },
+      });
+
+      const result = await session.prompt("hi");
+
+      expect(result.success).toBe(false);
+      expect(result.output).toContain("cache_control breakpoints");
+      expect(result.output).toContain("exceeding Anthropic's hard limit of 4");
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it("forwards cache_control.ttl only when configured as 1h", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        systemPrompt: "sys",
+        promptCaching: { enabled: true, anthropic: { breakpoints: ["system"], ttl: "1h" } },
+      });
+      await session.prompt("hi");
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.system[0].cache_control).toEqual({ type: "ephemeral", ttl: "1h" });
+    });
+
+    it("omits ttl from cache_control by default (Anthropic's own 5m default)", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        systemPrompt: "sys",
+        promptCaching: { enabled: true, anthropic: { breakpoints: ["system"] } },
+      });
+      await session.prompt("hi");
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.system[0].cache_control).toEqual({ type: "ephemeral" });
+      expect(body.system[0].cache_control.ttl).toBeUndefined();
+    });
+
+    it("tags the last stable-prefix message when the history breakpoint is requested", async () => {
+      mockAnthropicResponse("ok");
+      const session = createAgentCoreSession({
+        model: "claude-sonnet-4-6",
+        promptCaching: { enabled: true, anthropic: { breakpoints: ["history"] } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      const lastMessage = body.messages[body.messages.length - 1];
+      expect(Array.isArray(lastMessage.content)).toBe(true);
+      expect(lastMessage.content[lastMessage.content.length - 1].cache_control).toEqual({ type: "ephemeral" });
+    });
+
+    it("parses cache_read_input_tokens and cache_creation_input_tokens from the Anthropic SSE stream", async () => {
+      anthropicResponseWithUsage("cached response", {
+        input_tokens: 20,
+        cache_creation_input_tokens: 15,
+        cache_read_input_tokens: 5,
+      });
+      const session = createAgentCoreSession({ model: "claude-sonnet-4-6" });
+
+      const result = await session.prompt("hi");
+
+      expect(result.usage).toEqual({
+        inputTokens: 20,
+        outputTokens: 6,
+        totalTokens: 26,
+        provider: "anthropic",
+        model: "claude-sonnet-4-6",
+        cacheReadTokens: 5,
+        cacheWriteTokens: 15,
+      });
+    });
+
+    it("omits cache token fields when the stream reports no cache usage", async () => {
+      mockAnthropicResponse("plain response");
+      const session = createAgentCoreSession({ model: "claude-sonnet-4-6" });
+
+      const result = await session.prompt("hi");
+
+      expect(result.usage).toEqual({
+        inputTokens: 12,
+        outputTokens: 6,
+        totalTokens: 18,
+        provider: "anthropic",
+        model: "claude-sonnet-4-6",
+      });
     });
   });
 });
