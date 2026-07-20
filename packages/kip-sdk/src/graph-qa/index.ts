@@ -64,16 +64,16 @@ export interface RetrievedFact {
   /** The node or edge EID this datum is about. */
   eid: string;
   /** What was read. */
-  kind: "node" | "node-prop" | "edge";
-  /** For `node-prop`: the PropKey read. */
+  kind: "node" | "node-prop" | "edge" | "edge-prop";
+  /** For `node-prop`/`edge-prop`: the PropKey read. */
   prop?: string;
-  /** For `node-prop`: the covering value; for `node`/`edge` existence: `true`. */
+  /** For `node-prop`/`edge-prop`: the covering value; for `node`/`edge` existence: `true`. */
   value?: PropValue;
-  /** For `edge`: the EdgeKind traversed. */
+  /** For `edge`/`edge-prop`: the EdgeKind of the edge (traversed, resp. qualified). */
   edgeKind?: string;
-  /** For `edge`: the tail EID. */
+  /** For `edge`/`edge-prop`: the tail EID. */
   from?: string;
-  /** For `edge`: the head EID. */
+  /** For `edge`/`edge-prop`: the head EID. */
   to?: string;
   /** `true` iff the covering cell reads CONFLICTED (§6.3). */
   conflicted?: boolean;
@@ -366,8 +366,61 @@ export async function answerQuestion(
     const edge = edgeViews.get(eid)!;
     // eslint-disable-next-line no-await-in-loop -- sequential read; binds the edge to its signed fact.
     const factId = await repo.edgeExistenceFactId(eid, asOf);
-    if (factId === null) continue;
-    record({ factId, eid, kind: "edge", edgeKind: edge.kind, from: edge.from, to: edge.to });
+    if (factId !== null) {
+      record({ factId, eid, kind: "edge", edgeKind: edge.kind, from: edge.from, to: edge.to });
+    }
+
+    // AN EDGE'S PROPS ARE FACTS TOO (§3.2). Recording only `edgeExistenceFactId` said an edge EXISTS
+    // and nothing about what it SAYS, so any answer the learn encoder stored as an edge qualifier —
+    // `reason`, `max_duration_seconds`, a confidence — was structurally invisible to synthesis: the
+    // retrieval half surfaced the right edge, the model cited it, and the answer was still
+    // unreachable ("the graph does not contain facts explaining the reason"). This is the SAME walk
+    // the node loop above performs, over `EdgeView.props` instead of `NodeView.props`, and it
+    // inherits the identical semantics by construction: the `EdgeView` came from `repo.query`, which
+    // already applied this read's `asOf` gate-instant lens (`buildAsOfView`'s `applyValidTimeLens` —
+    // the same lens `getNode(eid, asOf)` applies), and `coveringSegment` is the same covering-cell
+    // resolver, so `unknown`/`quarantine`/`excised` stay ABSENCE and a `conflict` stays a surfaced
+    // contradiction citing every candidate (§6.3). Each edge-prop datum also carries the edge's own
+    // topology (`edgeKind`/`from`/`to`) so a citation naming it rebinds to the edge it qualifies
+    // (§3.4) rather than to a bare EID.
+    //
+    // BOUNDED EXACTLY LIKE THE NODE WALK: `coveringSegment` yields AT MOST ONE covering segment per
+    // prop, and the edge set is already capped by the §3.1 traversal bounds (`k`/`depth`/
+    // `maxFanout`), so this adds O(props-per-edge) data on an already-bounded edge set — the same
+    // growth law node props have. Nothing widens retrieval; this only reads what was already
+    // retrieved.
+    for (const prop of Object.keys(edge.props).sort()) {
+      const seg = coveringSegment(edge.props[prop]);
+      if (!seg) continue;
+      if (seg.kind === "value") {
+        // An edge-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2).
+        record({
+          factId: seg.assertedBy,
+          eid,
+          kind: "edge-prop",
+          prop,
+          value: seg.value,
+          edgeKind: edge.kind,
+          from: edge.from,
+          to: edge.to,
+        });
+      } else {
+        const edgeCandidates = [...seg.candidates];
+        for (const cand of edgeCandidates) {
+          record({
+            factId: cand,
+            eid,
+            kind: "edge-prop",
+            prop,
+            conflicted: true,
+            candidates: edgeCandidates,
+            edgeKind: edge.kind,
+            from: edge.from,
+            to: edge.to,
+          });
+        }
+      }
+    }
   }
 
   // ── 4. ABSTAIN (§6.1) when retrieval yields NO covering facts: the canonical phrase, empty

@@ -703,6 +703,207 @@ describe("graph-qa §8.15 — a two-hop chain cites the FactId of BOTH traversed
 });
 
 // ────────────────────────────────────────────────────────────────────────────────────────────────
+// EDGE-PROP HYDRATION (kip-graph-qa.md §3.2) — regression suite for the retrieval defect where a fact
+// stored on an EDGE PROPERTY was structurally invisible to synthesis.
+//
+// THE DEFECT. The §3 step-3 hydration loop walked `NodeView.props` and bound each covering
+// value/conflict segment to its signed `FactId`, but for an edge it recorded ONLY
+// `edgeExistenceFactId(eid)` — there was no equivalent walk over `EdgeView.props`. So an edge
+// qualifier (`reason`, `max_duration_seconds`, …) — exactly what `kip learn`'s encoder puts on an
+// edge — never reached the model context, and `kip ask` reported "the graph does not contain facts
+// explaining the reason" while `kip get --edge` showed the prop sitting right there. Recall was
+// correct, traversal was correct, and the answer was still unreachable: a RETRIEVAL bug, not a model
+// one, which is why these tests assert on the ASSEMBLED CONTEXT (`SynthesisContext.facts`) rather
+// than on prose — a scripted synthesizer cannot answer from a datum it was never handed.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+
+/** Assert an EDGE-prop fact (the edge qualifier carrier — reads back via `getEdge(eid).props`);
+ *  returns its signed `FactId` (the `PropCell` value segment's `assertedBy`). */
+async function assertEdgeProp(
+  repo: KipRepo,
+  eid: EID,
+  prop: string,
+  value: PropValue,
+  opts?: { validFrom?: number },
+): Promise<string> {
+  const r = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "edge-prop", eid, prop },
+    value,
+    validFrom: opts?.validFrom ?? 0,
+    validTo: null,
+    replicaId: "author",
+    provenance: fixtureProvenance(),
+  });
+  return r.id;
+}
+
+function edgePropFactOf(ctx: SynthesisContext, eid: string, prop: string) {
+  return ctx.facts.find((f) => f.kind === "edge-prop" && f.eid === eid && f.prop === prop);
+}
+
+describe("graph-qa edge-prop hydration — a fact stored ONLY on an edge property reaches synthesis and is citable (§3.2)", () => {
+  // The live shape this reproduces: a design-note graph where the REASON an alternative was rejected
+  // lives on the `objected_to` edge, not on either endpoint node.
+  const QUESTION = "Why was the RPC facade alternative rejected?";
+  const REASON = "maintains synchronous coupling, Ledger outage would take checkout down";
+  const EDGE = "edge/marcus-objected-to-rpc";
+
+  async function seed(repo: KipRepo): Promise<{ Fe: string; Fep: string }> {
+    await assertNode(repo, "person/marcus", "person");
+    await assertProp(repo, "person/marcus", "content", QUESTION); // §5.1 text-seed anchor
+    await assertNode(repo, "option/rpc-facade", "option");
+    await assertProp(repo, "option/rpc-facade", "content", "RPC facade");
+    const Fe = await assertEdge(repo, EDGE, "objected_to", "person/marcus", "option/rpc-facade");
+    // THE ONLY PLACE THE ANSWER EXISTS: an edge property. No node prop carries it.
+    const Fep = await assertEdgeProp(repo, EDGE, "reason", REASON);
+    return { Fe, Fep };
+  }
+
+  it("places the edge-prop value AND its asserting factId into the context handed to synthesize", async () => {
+    const repo = freshRepo("edge-prop-context");
+    const { Fep } = await seed(repo);
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      return { answer: "seen", citations: [] };
+    });
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(seen).toBeDefined();
+    const fact = edgePropFactOf(seen!, EDGE, "reason");
+    expect(fact).toBeDefined();
+    expect(fact!.value).toBe(REASON);
+    expect(fact!.factId).toBe(Fep);
+    // The edge-prop datum names the edge it qualifies, so a citation can be rebound to it (§3.4).
+    expect(fact!.edgeKind).toBe("objected_to");
+  });
+
+  it("includes the edge-prop factId in the usedFacts retrieval envelope (§4)", async () => {
+    const repo = freshRepo("edge-prop-envelope");
+    const { Fe, Fep } = await seed(repo);
+    const result = await answerQuestion(
+      { question: QUESTION },
+      { repo, synthesize: spySynth(() => ({ answer: "seen", citations: [] })) },
+    );
+    expect(result.usedFacts).toContain(Fep);
+    // The edge-existence fact is still bound too — the fix is ADDITIVE, not a replacement.
+    expect(result.usedFacts).toContain(Fe);
+  });
+
+  it("the edge-prop fact is CITABLE: a citation naming it survives §3.4 and is rebound to eid/prop/edgeKind", async () => {
+    const repo = freshRepo("edge-prop-citable");
+    const { Fep } = await seed(repo);
+    // The scripted model answers FROM the edge-prop datum and cites it — exactly how a node-prop
+    // citation is produced (§8.6), which is the parity this suite pins.
+    const synth: Scripted = (ctx) => {
+      const fact = edgePropFactOf(ctx, EDGE, "reason");
+      return {
+        answer: fact ? `It was rejected because it ${String(fact.value)}.` : ABSTENTION_ANSWER,
+        // Deliberately supplies NO eid/prop/edgeKind: they must be RECONSTRUCTED from retrieval.
+        citations: fact ? [{ factId: fact.factId, quote: String(fact.value) }] : [],
+      };
+    };
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.answer).toContain("synchronous coupling");
+    const cited = result.citations.find((c) => c.factId === Fep);
+    expect(cited).toBeDefined();
+    expect(cited!.eid).toBe(EDGE);
+    expect(cited!.prop).toBe("reason");
+    expect(cited!.edgeKind).toBe("objected_to");
+    expect(result.usedFacts).toContain(Fep);
+  });
+
+  it("a NON-string edge-prop value (the `max_duration_seconds: 5` live case) is carried verbatim, not coerced", async () => {
+    const Q = "How long might the storefront show a pending state?";
+    const E = "edge/storefront-displays-pending";
+    const repo = freshRepo("edge-prop-number");
+    await assertNode(repo, "svc/storefront", "service");
+    await assertProp(repo, "svc/storefront", "content", Q);
+    await assertNode(repo, "state/pending", "state");
+    await assertProp(repo, "state/pending", "content", "pending");
+    await assertEdge(repo, E, "displays", "svc/storefront", "state/pending");
+    const Fep = await assertEdgeProp(repo, E, "max_duration_seconds", 5);
+
+    let seen: SynthesisContext | undefined;
+    await answerQuestion(
+      { question: Q },
+      {
+        repo,
+        synthesize: spySynth((ctx) => {
+          seen = ctx;
+          return { answer: "seen", citations: [] };
+        }),
+      },
+    );
+    const fact = edgePropFactOf(seen!, E, "max_duration_seconds");
+    expect(fact).toBeDefined();
+    expect(fact!.value).toBe(5);
+    expect(fact!.factId).toBe(Fep);
+  });
+
+  it("REGRESSION GUARD: node-prop hydration is unchanged — the node-prop datum and its factId are still bound exactly as before", async () => {
+    const repo = freshRepo("edge-prop-node-regression");
+    const { Fep } = await seed(repo);
+    const Fnp = await assertProp(repo, "option/rpc-facade", "status", "rejected");
+    let seen: SynthesisContext | undefined;
+    await answerQuestion(
+      { question: QUESTION },
+      {
+        repo,
+        synthesize: spySynth((ctx) => {
+          seen = ctx;
+          return { answer: "seen", citations: [] };
+        }),
+      },
+    );
+    const np = seen!.facts.find(
+      (f) => f.kind === "node-prop" && f.eid === "option/rpc-facade" && f.prop === "status",
+    );
+    expect(np).toBeDefined();
+    expect(np!.value).toBe("rejected");
+    expect(np!.factId).toBe(Fnp);
+    // A node-prop datum carries NO edge topology — the two kinds stay distinct.
+    expect(np!.edgeKind).toBeUndefined();
+    expect(np!.from).toBeUndefined();
+    // …and the edge-prop datum is a SEPARATE entry, never folded into the node's.
+    expect(edgePropFactOf(seen!, EDGE, "reason")?.factId).toBe(Fep);
+  });
+
+  it("N5 HOLDS: an edge with NO covering props contributes no edge-prop datum, and a graph with no facts still abstains", async () => {
+    const repo = freshRepo("edge-prop-abstain");
+    const Q = "Where does Tal work?";
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", Q);
+    await assertNode(repo, "org/a5c", "org");
+    await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    let seen: SynthesisContext | undefined;
+    await answerQuestion(
+      { question: Q },
+      {
+        repo,
+        synthesize: spySynth((ctx) => {
+          seen = ctx;
+          return { answer: "seen", citations: [] };
+        }),
+      },
+    );
+    // The propless edge yields its existence fact and NOTHING invented on top of it.
+    expect(seen!.facts.some((f) => f.kind === "edge-prop")).toBe(false);
+
+    // And the empty-graph abstention path is untouched: synthesize is never called.
+    const empty = freshRepo("edge-prop-abstain-empty");
+    const spy = spySynth(() => ({ answer: "should never run", citations: [] }));
+    const result = await answerQuestion({ question: "anything at all?" }, { repo: empty, synthesize: spy });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.usedFacts).toEqual([]);
+    expect(spy.mock).not.toHaveBeenCalled();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
 // A faithful, minimal JSON-schema validator for the manifest outputSchema (§8.14). Covers exactly the
 // constructs kip-graph-qa.md §2's outputSchema uses: object/array/string/boolean types, `required`,
 // `additionalProperties: false`, and `items`. Returns a list of violation paths ([] === valid).
