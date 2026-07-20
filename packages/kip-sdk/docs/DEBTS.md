@@ -838,7 +838,54 @@ actual current source before being recorded.
 - **Evidence:** `recall`'s text path is **exact-content-seed matching** — it locates a fact by matching the query text against a fact's `content` prop, not by semantic similarity or fuzzy/lexical text retrieval. In the live demo, `kip ask "…"` returned an answer only once a `content` prop **equal to the question verbatim** had been added to the graph; on a graph carrying the same facts **without** that mirror prop, retrieval found nothing and the graph-QA pipeline correctly **abstained**. So `kip ask` is end-to-end demonstrable today only with a content-seed that pre-encodes the question.
 - **Why it is debt:** The whole point of the `ask` verb is answering **genuine free-text natural-language questions** against the graph. As shipped it can only answer when the corpus already contains a `content` prop that mirrors the question — a condition a real NL consumer will almost never satisfy — so in practice `ask` abstains on real questions. This is **safe** (cite-or-abstain holds; it never fabricates and never returns a wrong fact) and is distinct from D-43's *vector*-half exact-cosine/no-ANN narrowing: D-43 is about scale of the vector scan, D-52 is about the **text-seed retrieval being exact-match rather than semantic/lexical**, which is what makes free-text `ask` brittle. It is the honest limitation the maturity demo disclosed rather than hid.
 - **Suggested fix:** Give the graph-QA retrieval **real semantic or text retrieval** so `ask` is robust for actual NL questions — either wire the embedding/vector seam through the text path (so `content`/prop text is embedded and matched by similarity, reusing the M4 vector infrastructure) or add proper lexical/fuzzy text retrieval (e.g. tokenized/BM25-style matching) in place of the exact-content-seed equality check. Until then, `kip ask` is demo-able only with a content-seed and should be documented as such wherever it is presented as answering free-text questions.
-- **Status:** Open (tracked). No code changed in this program for this item — it was surfaced and honestly recorded so the "demo-ready `kip ask`" claim carries its real limitation rather than overstating robustness.
+- **Status:** **Partially closed** — the *lexical* half of the suggested fix is implemented; the *semantic/embedding* half remains open (re-scoped below).
+
+#### D-52 closure note — what is FIXED
+
+`recall`'s text path is no longer exact-`content` equality. `computeRecall` now builds, for every
+candidate node, a **searchable surface** from its `eid`, its node `kind`, and the string form of
+**every** prop value covering the query's resolved gate instant (via the SAME `coveringPropValue`
+read, so valid-time/`asOf` semantics are byte-for-byte unchanged; `null` and `BlobRef` props
+contribute nothing). Query and surface are tokenized identically — explicit `toLowerCase()` (never
+locale-sensitive), runs of ASCII alphanumerics, a small fixed stopword set — and a node scores by
+the count of **distinct** query terms it matches. Zero matching terms ⇒ **not a seed**. Seeds are
+ordered `(score desc, eid asc)`, truncated to `k`, and carry that order into their hop-0 graph rank.
+The path is a pure function of the fact set + query: no clock, no randomness, no Map-iteration-order
+or locale dependence — two replicas holding the same facts return the identical ranked list
+(pinned by `src/__tests__/debt-closure-d52.test.ts`).
+
+**Backward compatibility:** an exact `props.content === q.text` match is still a seed and is given a
+dominant boost (`RECALL_EXACT_CONTENT_BOOST`) that exceeds any achievable distinct-term score, so it
+still ranks first — including when the query is entirely stopwords and tokenizes to nothing. The
+vector/embedding half is untouched, and `graph-qa/index.ts` is unchanged.
+
+Consequence: the live-demo failure is closed. A `kip learn`-produced graph (nodes with
+`name`/`description` props and typed edges, **no** `content` prop) is now discoverable —
+`recall({ text: "which team owns Ledger", k: 10 })` returns the Ledger and owning-team nodes instead
+of `[]`, so `kip ask` composes to an answer rather than a guaranteed abstention.
+
+#### D-52 residual — what is STILL OPEN
+
+This is **keyword matching, not semantic retrieval.** Concretely, still missing:
+
+- **No embedding/semantic similarity on the text path.** A question that shares **no lexical term**
+  with the graph still retrieves nothing and `ask` still abstains — e.g. asking about "revenue
+  recognition" over a graph that only ever says "booking settlement". Synonyms, paraphrase,
+  morphology (`owns`/`ownership`), and translation are all misses. The vector half remains inert
+  unless the caller supplies `q.embedding` (kip deliberately never embeds the query, N2/N5), so
+  nothing closes this gap today.
+- **No relevance weighting.** Scoring is a flat count of distinct matched terms — no IDF/BM25, so a
+  common term counts exactly as much as a highly discriminative one, and long documents are neither
+  penalized nor normalized.
+- **No stemming/lemmatization, no fuzzy matching**, and the stopword set is small, closed, and
+  English-only.
+- **Non-ASCII text is not tokenized.** The `[a-z0-9]+` tokenizer drops CJK and any non-Latin script
+  entirely, so those graphs remain undiscoverable by the text path.
+- **Recomputed per call** — the surface index is rebuilt on every `recall`, like the vector half
+  (see D-43); there is no persisted inverted index.
+
+Closing the residual means wiring real semantic retrieval (embed the corpus surface and match by
+similarity through the existing §5.3 accelerator seam) — that remains the open half of this item.
 
 ---
 

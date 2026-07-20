@@ -41,7 +41,7 @@
   "runtime": {
     "entrypoint": "kip-learn-learner",
     "model": "kip-graph-qa-default",
-    "timeout": 120000,
+    "timeout": 300000,
     "tools": []
   },
   "tags": ["kip", "learn", "learner"],

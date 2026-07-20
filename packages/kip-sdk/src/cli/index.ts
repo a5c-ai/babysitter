@@ -766,18 +766,29 @@ async function cmdLearn(a: HandlerArgs): Promise<number> {
   };
   const learnDispatch = makeLearnDispatch(learnDeps);
   // Per-iteration progress goes to STDERR (spec §3/AC-31: `--json` stdout carries exactly ONE value).
-  let lossCall = 0;
+  // The displayed number tracks the REAL loop iteration, not the number of loss calls: `learn()`
+  // opens every iteration with exactly one candidate-producing dispatch (encode at iteration 0, the
+  // learner on every later one), and an iteration whose candidate dispatch FAILS never reaches the
+  // loss microagent. Counting loss calls therefore misnumbered every iteration after a failure
+  // (a failed encode printed "iter 1: … failed" and the NEXT iteration also printed "iter 1/N");
+  // counting the candidate dispatch is the loop's own iteration index.
+  let iteration = 0;
   const dispatch: DispatchMicroagentFn = async (invocation) => {
+    if (
+      invocation.manifest.name === LEARN_MANIFEST_NAMES.encode ||
+      invocation.manifest.name === LEARN_MANIFEST_NAMES.learner
+    ) {
+      iteration += 1;
+    }
     const result = await learnDispatch(invocation);
     if (invocation.manifest.name === LEARN_MANIFEST_NAMES.loss) {
-      lossCall += 1;
       const measured = result.exitCode === 0 && typeof result.output === "number" ? result.output : undefined;
       werr(
-        `iter ${lossCall}/${maxIterations}: ${measured === undefined ? "loss not measured (failed iteration)" : `loss ${measured}`}\n`,
+        `iter ${iteration}/${maxIterations}: ${measured === undefined ? "loss not measured (failed iteration)" : `loss ${measured}`}\n`,
       );
     } else if (result.exitCode !== 0) {
       const reason = (result.output as { error?: unknown } | null)?.error;
-      werr(`iter ${lossCall + 1}: ${invocation.manifest.name} failed — ${String(reason ?? "no reason given")}\n`);
+      werr(`iter ${iteration}: ${invocation.manifest.name} failed — ${String(reason ?? "no reason given")}\n`);
     }
     return result;
   };

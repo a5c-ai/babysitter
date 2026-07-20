@@ -24,7 +24,7 @@
   "runtime": {
     "entrypoint": "kip-learn-loss",
     "model": "kip-graph-qa-default",
-    "timeout": 90000,
+    "timeout": 300000,
     "tools": []
   },
   "tags": ["kip", "learn", "loss"],

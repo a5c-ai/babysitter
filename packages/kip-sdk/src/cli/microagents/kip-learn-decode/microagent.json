@@ -26,7 +26,7 @@
   "runtime": {
     "entrypoint": "kip-learn-decode",
     "model": "kip-graph-qa-default",
-    "timeout": 120000,
+    "timeout": 300000,
     "tools": []
   },
   "tags": ["kip", "learn", "decode"],

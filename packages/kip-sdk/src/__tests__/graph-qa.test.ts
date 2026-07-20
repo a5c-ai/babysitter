@@ -253,7 +253,14 @@ describe("graph-qa §8.4 — asking about an entity with ZERO covering facts abs
     const synth = spySynth(() => {
       throw new Error("synthesize MUST NOT be called on empty retrieval (§6.1)");
     });
-    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
+    // D-52: the asked question shares NO lexical term with the graph's searchable surface (kinds,
+    // eids and prop values), so retrieval is genuinely empty. It previously read "Where does Zara
+    // work?", which only retrieved nothing because `recall`'s text path was exact-`content`
+    // equality; under real lexical retrieval that question DOES cover Tal's fact (shared term
+    // "work"), which is correct retrieval, not a fabrication. The §8.4 property under test — an
+    // entity with ZERO covering facts abstains without invoking the model — is unchanged and the
+    // assertions below are identical.
+    const result = await answerQuestion({ question: "Which satellite did Zara launch?" }, { repo, synthesize: synth });
     expect(result.abstained).toBe(true);
     expect(result.answer).toBe(ABSTENTION_ANSWER);
     expect(result.citations).toHaveLength(0);
@@ -365,7 +372,9 @@ describe("graph-qa §8.7 — an ask authors NOTHING (INV-A1): zero write-seam ca
     const before = await digest(repo);
     const spies = WRITE_SEAMS.map((m) => vi.spyOn(repo, m));
 
-    const result = await answerQuestion({ question: "Where does Nobody work?" }, {
+    // D-52: zero lexical overlap with the graph's searchable surface, so retrieval is genuinely
+    // empty and this really exercises the ABSTENTION path (see §8.4's note).
+    const result = await answerQuestion({ question: "Which satellite did Nobody launch?" }, {
       repo,
       synthesize: spySynth(() => ({ answer: "unused", citations: [] })),
     });

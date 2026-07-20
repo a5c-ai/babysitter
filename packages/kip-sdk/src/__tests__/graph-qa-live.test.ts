@@ -493,7 +493,12 @@ describe("ADR-B8 invariants — INV-A1 by construction and the §5.3 accelerator
     const run = vi.fn<HarnessCliRunner>();
     const synthesize = harnessCliSynthesize({ model: "haiku", probe: () => ({ available: true }), run });
 
-    const result = await answerQuestion({ question: "Where does Nobody at all work?" }, { repo, synthesize });
+    // D-52: the question shares NO lexical term with the seeded graph's searchable surface, so
+    // retrieval is genuinely empty. It previously read "Where does Nobody at all work?", which
+    // retrieved nothing only because `recall`'s text path was exact-`content` equality; under real
+    // lexical retrieval that question legitimately covers Tal's fact (shared term "work"). The
+    // property under test — an empty retrieval never spawns the CLI — is unchanged.
+    const result = await answerQuestion({ question: "Which satellite did Zara launch?" }, { repo, synthesize });
 
     expect(result.abstained).toBe(true);
     expect(result.answer).toBe(ABSTENTION_ANSWER);

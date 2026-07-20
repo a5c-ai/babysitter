@@ -2104,9 +2104,34 @@ export class KipRepo implements Repo {
     // already carry a vector rank); only `text` graph-seeds get the hop-0 rank.
     const rankGraph = new Map<EID, number>();
     const textSeeds = new Set<EID>();
+    // D-52 — the text half is DETERMINISTIC LEXICAL matching over each candidate's searchable
+    // surface (eid + kind + every string-valued prop, read at the SAME `gateInstant` so valid-time /
+    // asOf semantics are untouched), scored by the count of DISTINCT query terms it matches. It is a
+    // pure function of the fact set + query: explicit `toLowerCase` (never locale-sensitive), a fixed
+    // ASCII-alphanumeric tokenizer, a fixed stopword set, no clock, no randomness, and a total
+    // (score desc, eid asc) order over an eid-sorted scan — so two replicas holding the same facts
+    // rank identically. BACKWARD COMPATIBLE: an exact `props.content === q.text` match keeps its
+    // pre-D-52 seed status and is given a DOMINANT boost so it still ranks first.
+    // HONEST SCOPE: this is keyword matching, NOT semantic/embedding retrieval — a question sharing
+    // no lexical term with the graph still (correctly) seeds nothing.
+    const textSeedRank = new Map<EID, number>();
     if (typeof q.text === "string") {
-      for (const [eid, view] of viewByEid) {
-        if (coveringPropValue(view.props.content, gateInstant) === q.text) textSeeds.add(eid);
+      const queryTerms = recallSearchTerms(q.text);
+      const scored: Array<{ eid: EID; score: number }> = [];
+      for (const eid of [...viewByEid.keys()].sort()) {
+        const view = viewByEid.get(eid)!;
+        const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
+        let score = exact ? RECALL_EXACT_CONTENT_BOOST : 0;
+        if (queryTerms.size > 0) {
+          const surface = recallSurfaceTerms(eid, view, gateInstant);
+          for (const term of queryTerms) if (surface.has(term)) score += 1;
+        }
+        if (score > 0) scored.push({ eid, score });
+      }
+      scored.sort((a, b) => b.score - a.score || (a.eid < b.eid ? -1 : 1));
+      for (const s of scored.slice(0, q.k)) {
+        textSeeds.add(s.eid);
+        textSeedRank.set(s.eid, textSeedRank.size + 1);
       }
     }
     if (q.expand || textSeeds.size > 0) {
@@ -2122,7 +2147,14 @@ export class KipRepo implements Repo {
         }
       }
       const expanded = [...distance.keys()].filter((eid) => viewByEid.has(eid));
-      expanded.sort((a, b) => (distance.get(a)! - distance.get(b)!) || (a < b ? -1 : 1));
+      // Hop-0 text seeds keep their LEXICAL ranking among themselves (a better term-coverage match
+      // earns the better graph rank); everything else is ordered by hop distance then eid, so the
+      // comparator stays a total order.
+      const seedOrder = (eid: EID): number => textSeedRank.get(eid) ?? Number.MAX_SAFE_INTEGER;
+      expanded.sort(
+        (a, b) =>
+          distance.get(a)! - distance.get(b)! || seedOrder(a) - seedOrder(b) || (a < b ? -1 : 1),
+      );
       expanded.forEach((eid, i) => rankGraph.set(eid, i + 1));
     }
 
@@ -5916,6 +5948,56 @@ function coveringPropValue(cell: PropCell | undefined, at: bigint | null): PropV
     if (seg.validTo === null || canon(seg.validTo) > at) return seg.value;
   }
   return undefined;
+}
+
+/**
+ * D-52 — the dominant score an EXACT `props.content === q.text` match earns, preserving the
+ * pre-D-52 exact-content seed as the top-ranked seed. It exceeds any achievable distinct-term score
+ * (a query cannot contribute more terms than it has), so an exact match always outranks a merely
+ * term-overlapping node, and an exact match is a seed even when the query tokenizes to nothing.
+ */
+const RECALL_EXACT_CONTENT_BOOST = 1_000_000;
+
+/**
+ * D-52 — the fixed, locale-independent stopword set dropped from BOTH the query and the surface, so
+ * function words ("which", "the", "and", "why", "was", "is", …) do not make every node a seed.
+ * Deliberately small and closed: it is part of the deterministic recall contract, not a tunable.
+ */
+const RECALL_STOPWORDS: ReadonlySet<string> = new Set([
+  "a", "an", "and", "are", "as", "at", "be", "been", "but", "by", "did", "do", "does", "for",
+  "from", "had", "has", "have", "how", "i", "if", "in", "into", "is", "it", "its", "of", "on", "or",
+  "that", "the", "their", "them", "then", "there", "these", "they", "this", "to", "was", "were",
+  "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "you",
+]);
+
+/**
+ * D-52 — the deterministic tokenizer: explicit `toLowerCase()` (NOT `toLocaleLowerCase`, which is
+ * locale-sensitive), split on runs of ASCII alphanumerics, stopwords dropped, deduplicated into a
+ * set (so term FREQUENCY never beats distinct-term COVERAGE). No clock, no randomness.
+ */
+function recallSearchTerms(text: string): Set<string> {
+  const terms = new Set<string>();
+  for (const match of text.toLowerCase().matchAll(/[a-z0-9]+/g)) {
+    const term = match[0];
+    if (!RECALL_STOPWORDS.has(term)) terms.add(term);
+  }
+  return terms;
+}
+
+/**
+ * D-52 — a candidate node's SEARCHABLE SURFACE: its `eid`, its node `kind`, and the string form of
+ * every prop value covering `at` (the SAME gate instant the rest of `computeRecall` reads at, so
+ * valid-time/asOf semantics are unchanged). Numbers/booleans stringify; `null` and `BlobRef` props
+ * contribute nothing (a blob handle is an address, not text).
+ */
+function recallSurfaceTerms(eid: EID, view: NodeView, at: bigint | null): Set<string> {
+  const parts: string[] = [eid, view.kind];
+  for (const prop of Object.keys(view.props).sort()) {
+    const value = coveringPropValue(view.props[prop], at);
+    if (typeof value === "string") parts.push(value);
+    else if (typeof value === "number" || typeof value === "boolean") parts.push(String(value));
+  }
+  return recallSearchTerms(parts.join(" "));
 }
 
 /** m-4: a surfaced cell reads CONFLICTED iff it carries an unresolved `conflict` segment (or its
