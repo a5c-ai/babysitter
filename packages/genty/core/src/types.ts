@@ -1,8 +1,7 @@
 import type { TObject } from "@sinclair/typebox";
 import type { BackgroundProcessRegistry } from "@a5c-ai/genty-runtime";
 import type { DeferredToolRegistry } from "./deferredToolRegistry";
-import type { SignedEnvelope } from "./trust/types";
-import type { ModelDecisionPayload } from "./trust/model-decision";
+import type { SignedEnvelope, ModelDecisionPayload } from "@a5c-ai/trust-core";
 
 export type AgentCoreOutputFormat = "text" | "json_object" | "json_schema";
 
