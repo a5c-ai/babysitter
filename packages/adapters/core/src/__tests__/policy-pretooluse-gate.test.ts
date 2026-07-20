@@ -19,8 +19,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { createKeyPair, signPayload } from '@a5c-ai/genty-core/trust';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { createKeyPair, signPayload } from '@a5c-ai/trust-core';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 import {
   argsHash as computeArgsHash,
   commandHash as computeCommandHash,

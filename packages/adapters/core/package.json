@@ -94,7 +94,8 @@
     "@a5c-ai/atlas": "6.0.0",
     "@a5c-ai/adapters-observability": "6.0.0",
     "@a5c-ai/policy-adapter": "6.0.0",
-    "@sinclair/typebox": "^0.34.48"
+    "@sinclair/typebox": "^0.34.48",
+    "@a5c-ai/trust-core": "6.0.0"
   },
   "atlas": {
     "layers": [

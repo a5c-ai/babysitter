@@ -25,7 +25,7 @@ import {
   type CommandAuthorizationPayload,
   type TrustRoot,
 } from '@a5c-ai/policy-adapter';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 
 import type { HookContext, HookDecision, PreToolUseHook } from './runtime-hooks.js';
 

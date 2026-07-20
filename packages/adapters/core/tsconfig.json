@@ -6,6 +6,8 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "../observability" }
+    { "path": "../observability" },
+    { "path": "../policy" },
+    { "path": "../../trust-core" }
   ]
 }

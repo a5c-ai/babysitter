@@ -3,8 +3,8 @@ import { createHash } from 'node:crypto';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createKeyPair, signPayload } from '@a5c-ai/genty-core/trust';
-import type { SignedEnvelope } from '@a5c-ai/genty-core/trust';
+import { createKeyPair, signPayload } from '@a5c-ai/trust-core';
+import type { SignedEnvelope } from '@a5c-ai/trust-core';
 import {
   issueCommandAuthorization,
   canonicalizeCredentialIdentity,
