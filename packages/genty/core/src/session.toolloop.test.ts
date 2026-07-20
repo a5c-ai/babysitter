@@ -410,4 +410,73 @@ describe("AgentCoreSessionHandle tool-calling loop", () => {
     );
     expect(steered).toBe(true);
   });
+
+  describe("usage merging across tool-loop iterations", () => {
+    it("emits no cache token keys at all when caching was never enabled", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        body: textStream([
+          openAiToolCallFrames([
+            { index: 0, id: "call_1", name: "noop", argChunks: ['{"value":', '"x"}'] },
+          ]),
+        ]),
+      });
+      mockFetch.mockResolvedValueOnce({ ok: true, body: openAiFinalText("done") });
+
+      const session = createAgentCoreSession({
+        model: "gpt-5.5",
+        customTools: [
+          makeTool("noop", async (): Promise<ToolResult> => ({ content: [{ type: "text", text: "ok" }] })),
+        ],
+      });
+
+      const result = await session.prompt("go");
+
+      expect(result.success).toBe(true);
+      // Two merged iterations (5+7 in, 3+4 out) — shape must stay identical to
+      // pre-caching callers: no cacheReadTokens/cacheWriteTokens keys at all.
+      expect(result.usage).toEqual({
+        inputTokens: 12,
+        outputTokens: 7,
+        totalTokens: 19,
+        provider: "openai",
+        model: "gpt-5.5",
+      });
+      expect(Object.keys(result.usage!)).not.toContain("cacheReadTokens");
+      expect(Object.keys(result.usage!)).not.toContain("cacheWriteTokens");
+    });
+
+    it("sums cacheReadTokens across iterations when one side reports it", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        body: textStream([
+          openAiToolCallFrames([
+            { index: 0, id: "call_1", name: "noop", argChunks: ['{"value":', '"x"}'] },
+          ]),
+        ]),
+      });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        body: textStream([
+          openAiTextDelta("done"),
+          `data: ${JSON.stringify({
+            choices: [{ delta: {}, finish_reason: "stop" }],
+            usage: { prompt_tokens: 7, completion_tokens: 4, prompt_tokens_details: { cached_tokens: 6 } },
+          })}\n\ndata: [DONE]\n\n`,
+        ]),
+      });
+
+      const session = createAgentCoreSession({
+        model: "gpt-5.5",
+        customTools: [
+          makeTool("noop", async (): Promise<ToolResult> => ({ content: [{ type: "text", text: "ok" }] })),
+        ],
+      });
+
+      const result = await session.prompt("go");
+
+      expect(result.usage?.cacheReadTokens).toBe(6);
+      expect(Object.keys(result.usage!)).not.toContain("cacheWriteTokens");
+    });
+  });
 });

@@ -954,4 +954,164 @@ describe("AgentCoreSessionHandle", () => {
       });
     });
   });
+
+  describe("OpenAI/Azure prompt caching", () => {
+    function useAzureEndpoint() {
+      vi.stubEnv("OPENAI_API_KEY", "");
+      vi.stubEnv("AZURE_OPENAI_API_KEY", "azure-key");
+      vi.stubEnv("AZURE_OPENAI_PROJECT_NAME", "proj");
+    }
+
+    function openAiDoneWithUsage(usage: Record<string, unknown>): string {
+      return `data: ${JSON.stringify({
+        choices: [{ delta: {}, finish_reason: "stop" }],
+        usage,
+      })}\n\ndata: [DONE]\n\n`;
+    }
+
+    function mockOpenAiResponseWithUsage(text: string, usage: Record<string, unknown>) {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        body: textStream([openAiDelta(text), openAiDoneWithUsage(usage)]),
+      });
+    }
+
+    it("adds no new fields to the OpenAI body when promptCaching is absent", async () => {
+      mockApiResponse("ok");
+      const session = createAgentCoreSession({ model: "gpt-4o" });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.prompt_cache_key).toBeUndefined();
+      expect(Object.keys(body).sort()).toEqual(
+        ["max_completion_tokens", "messages", "model", "stream"].sort(),
+      );
+    });
+
+    it("adds no new fields to the Azure body when promptCaching is absent", async () => {
+      useAzureEndpoint();
+      mockApiResponse("ok");
+      const session = createAgentCoreSession({ model: "gpt-4o" });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.prompt_cache_key).toBeUndefined();
+      expect(Object.keys(body).sort()).toEqual(
+        ["max_completion_tokens", "messages", "model", "stream"].sort(),
+      );
+    });
+
+    it("forwards prompt_cache_key on the OpenAI branch when promptCaching.openai.promptCacheKey is set", async () => {
+      mockApiResponse("ok");
+      const session = createAgentCoreSession({
+        model: "gpt-4o",
+        promptCaching: { enabled: true, openai: { promptCacheKey: "session-abc" } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.prompt_cache_key).toBe("session-abc");
+    });
+
+    it("forwards prompt_cache_key on the Azure branch when promptCaching.azure.promptCacheKey is set", async () => {
+      useAzureEndpoint();
+      mockApiResponse("ok");
+      const session = createAgentCoreSession({
+        model: "gpt-4o",
+        promptCaching: { enabled: true, azure: { promptCacheKey: "azure-abc" } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.prompt_cache_key).toBe("azure-abc");
+    });
+
+    it("ignores the openai key on the Azure branch and vice versa (per-vendor sub-config only)", async () => {
+      useAzureEndpoint();
+      mockApiResponse("ok");
+      const session = createAgentCoreSession({
+        model: "gpt-4o",
+        promptCaching: { enabled: true, openai: { promptCacheKey: "openai-only" } },
+      });
+
+      await session.prompt("hi");
+
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.prompt_cache_key).toBeUndefined();
+    });
+
+    it("does not throw and adds nothing to the wire when enabled is true with no vendor sub-config", async () => {
+      mockApiResponse("ok");
+      const session = createAgentCoreSession({
+        model: "gpt-4o",
+        promptCaching: { enabled: true },
+      });
+
+      const result = await session.prompt("hi");
+
+      expect(result.success).toBe(true);
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.prompt_cache_key).toBeUndefined();
+      expect(Object.keys(body).sort()).toEqual(
+        ["max_completion_tokens", "messages", "model", "stream"].sort(),
+      );
+    });
+
+    it("parses usage.prompt_tokens_details.cached_tokens into cacheReadTokens", async () => {
+      mockOpenAiResponseWithUsage("cached", {
+        prompt_tokens: 100,
+        completion_tokens: 10,
+        prompt_tokens_details: { cached_tokens: 80 },
+      });
+      const session = createAgentCoreSession({ model: "gpt-4o" });
+
+      const result = await session.prompt("hi");
+
+      expect(result.usage).toEqual({
+        inputTokens: 100,
+        outputTokens: 10,
+        totalTokens: 110,
+        provider: "openai",
+        model: "gpt-4o",
+        cacheReadTokens: 80,
+      });
+    });
+
+    it("omits cacheReadTokens when the OpenAI chunk has no prompt_tokens_details", async () => {
+      mockApiResponse("plain");
+      const session = createAgentCoreSession({ model: "gpt-4o" });
+
+      const result = await session.prompt("hi");
+
+      expect(result.usage).toEqual({
+        inputTokens: 10,
+        outputTokens: 5,
+        totalTokens: 15,
+        provider: "openai",
+        model: "gpt-4o",
+      });
+      expect(result.usage).not.toHaveProperty("cacheWriteTokens");
+    });
+  });
+
+  describe("Gemini prompt caching guard", () => {
+    it("throws before any fetch when promptCaching.gemini is set on a non-Gemini endpoint", async () => {
+      const session = createAgentCoreSession({
+        model: "gpt-4o",
+        promptCaching: { enabled: true, gemini: { mode: "implicit" } },
+      });
+
+      const result = await session.prompt("hi");
+
+      expect(result.success).toBe(false);
+      expect(result.output).toContain(
+        "Gemini caching requires Gemini endpoint support, which genty-core does not yet have",
+      );
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+  });
 });
