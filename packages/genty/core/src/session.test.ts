@@ -1061,6 +1061,163 @@ describe("AgentCoreSessionHandle", () => {
       );
     });
 
+    describe("warns when a prompt cache key targets a different vendor than the resolved endpoint", () => {
+      function useAnthropicEndpoint() {
+        vi.stubEnv("OPENAI_API_KEY", "");
+        vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-key");
+      }
+
+      function spyStderr() {
+        return vi.spyOn(process.stderr, "write").mockReturnValue(true);
+      }
+
+      function cacheWarnings(spy: ReturnType<typeof spyStderr>): string[] {
+        return spy.mock.calls
+          .map((call) => String(call[0]))
+          .filter((line) => line.includes("promptCacheKey"));
+      }
+
+      it("warns exactly once for an openai key on an Azure-resolved session and omits prompt_cache_key", async () => {
+        useAzureEndpoint();
+        const stderr = spyStderr();
+        mockApiResponse("ok");
+        const session = createAgentCoreSession({
+          model: "gpt-4o",
+          promptCaching: { enabled: true, openai: { promptCacheKey: "openai-only" } },
+        });
+
+        await session.prompt("hi");
+
+        const warnings = cacheWarnings(stderr);
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0]).toContain("promptCaching.openai.promptCacheKey");
+        expect(warnings[0]).toContain("azure");
+        const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+        expect(body.prompt_cache_key).toBeUndefined();
+        expect(Object.keys(body).sort()).toEqual(
+          ["max_completion_tokens", "messages", "model", "stream"].sort(),
+        );
+      });
+
+      it("warns for an azure key on an OpenAI-resolved session and omits prompt_cache_key", async () => {
+        const stderr = spyStderr();
+        mockApiResponse("ok");
+        const session = createAgentCoreSession({
+          model: "gpt-4o",
+          promptCaching: { enabled: true, azure: { promptCacheKey: "azure-only" } },
+        });
+
+        await session.prompt("hi");
+
+        const warnings = cacheWarnings(stderr);
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0]).toContain("promptCaching.azure.promptCacheKey");
+        expect(warnings[0]).toContain("openai");
+        const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+        expect(body.prompt_cache_key).toBeUndefined();
+      });
+
+      it("warns for an openai key on an Anthropic-resolved session", async () => {
+        useAnthropicEndpoint();
+        const stderr = spyStderr();
+        mockAnthropicResponse("ok");
+        const session = createAgentCoreSession({
+          model: "claude-sonnet-4-6",
+          promptCaching: { enabled: true, openai: { promptCacheKey: "openai-only" } },
+        });
+
+        await session.prompt("hi");
+
+        const warnings = cacheWarnings(stderr);
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0]).toContain("promptCaching.openai.promptCacheKey");
+        expect(warnings[0]).toContain("anthropic");
+        const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+        expect(body.prompt_cache_key).toBeUndefined();
+      });
+
+      it("warns for an azure key on an Anthropic-resolved session", async () => {
+        useAnthropicEndpoint();
+        const stderr = spyStderr();
+        mockAnthropicResponse("ok");
+        const session = createAgentCoreSession({
+          model: "claude-sonnet-4-6",
+          promptCaching: { enabled: true, azure: { promptCacheKey: "azure-only" } },
+        });
+
+        await session.prompt("hi");
+
+        const warnings = cacheWarnings(stderr);
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0]).toContain("promptCaching.azure.promptCacheKey");
+        expect(warnings[0]).toContain("anthropic");
+      });
+
+      it("does not warn when the configured vendor matches the resolved endpoint", async () => {
+        const stderr = spyStderr();
+        mockApiResponse("ok");
+        const session = createAgentCoreSession({
+          model: "gpt-4o",
+          promptCaching: { enabled: true, openai: { promptCacheKey: "session-abc" } },
+        });
+
+        await session.prompt("hi");
+
+        expect(cacheWarnings(stderr)).toHaveLength(0);
+        const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+        expect(body.prompt_cache_key).toBe("session-abc");
+      });
+
+      it("applies the matching key and warns only about the non-matching one when both are set", async () => {
+        useAzureEndpoint();
+        const stderr = spyStderr();
+        mockApiResponse("ok");
+        const session = createAgentCoreSession({
+          model: "gpt-4o",
+          promptCaching: {
+            enabled: true,
+            openai: { promptCacheKey: "openai-key" },
+            azure: { promptCacheKey: "azure-key" },
+          },
+        });
+
+        await session.prompt("hi");
+
+        const warnings = cacheWarnings(stderr);
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0]).toContain("promptCaching.openai.promptCacheKey");
+        const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+        expect(body.prompt_cache_key).toBe("azure-key");
+      });
+
+      it("does not warn when caching is disabled even with a non-matching key set", async () => {
+        useAzureEndpoint();
+        const stderr = spyStderr();
+        mockApiResponse("ok");
+        const session = createAgentCoreSession({
+          model: "gpt-4o",
+          promptCaching: { enabled: false, openai: { promptCacheKey: "openai-only" } },
+        });
+
+        await session.prompt("hi");
+
+        expect(cacheWarnings(stderr)).toHaveLength(0);
+      });
+
+      it("does not warn when caching is enabled with no vendor keys set", async () => {
+        const stderr = spyStderr();
+        mockApiResponse("ok");
+        const session = createAgentCoreSession({
+          model: "gpt-4o",
+          promptCaching: { enabled: true },
+        });
+
+        await session.prompt("hi");
+
+        expect(cacheWarnings(stderr)).toHaveLength(0);
+      });
+    });
+
     it("parses usage.prompt_tokens_details.cached_tokens into cacheReadTokens", async () => {
       mockOpenAiResponseWithUsage("cached", {
         prompt_tokens: 100,
