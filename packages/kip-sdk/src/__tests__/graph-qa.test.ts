@@ -253,14 +253,15 @@ describe("graph-qa §8.4 — asking about an entity with ZERO covering facts abs
     const synth = spySynth(() => {
       throw new Error("synthesize MUST NOT be called on empty retrieval (§6.1)");
     });
-    // D-52: the asked question shares NO lexical term with the graph's searchable surface (kinds,
-    // eids and prop values), so retrieval is genuinely empty. It previously read "Where does Zara
-    // work?", which only retrieved nothing because `recall`'s text path was exact-`content`
-    // equality; under real lexical retrieval that question DOES cover Tal's fact (shared term
-    // "work"), which is correct retrieval, not a fabrication. The §8.4 property under test — an
-    // entity with ZERO covering facts abstains without invoking the model — is unchanged and the
-    // assertions below are identical.
-    const result = await answerQuestion({ question: "Which satellite did Zara launch?" }, { repo, synthesize: synth });
+    // THE ORIGINAL QUESTION, RESTORED. Asking about an absent entity ('Zara') in a graph that knows
+    // only about Tal must abstain WITHOUT invoking the model — that is the property §8.4 exists to
+    // pin, and it is a real fabrication guard: handing a synthesizer Tal's facts and the question
+    // "Where does Zara work?" is precisely the setup in which a model answers about the wrong
+    // person. Under naive lexical recall the single incidental term "work" seeded Tal's node and
+    // this guard fired; the fix is the MINIMUM-RELEVANCE FLOOR in `computeRecall`'s text half (a
+    // lone single-term overlap seeds nothing unless the query is fully covered or some node matches
+    // ≥2 distinct terms), NOT a softer question.
+    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
     expect(result.abstained).toBe(true);
     expect(result.answer).toBe(ABSTENTION_ANSWER);
     expect(result.citations).toHaveLength(0);
@@ -958,3 +959,150 @@ function validateAgainstSchema(value: unknown, schema: JsonSchema, path = "$"): 
   }
   return errors;
 }
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-2 CRITIC FIXES (D-52 follow-up).
+//
+// (A) THE MINIMUM-RELEVANCE FLOOR — the deterministic recall contract's answer to "how little lexical
+//     overlap is still relevance?". D-52 replaced exact-`content` equality with distinct-term
+//     matching, which made a learn-shaped graph discoverable but also made ONE incidental shared term
+//     enough to seed retrieval — so a question about an entity the graph has never heard of
+//     ("Where does Zara work?") retrieved an unrelated person's facts and handed them to the model.
+//     That is the exact fabrication setup §8.4's `not.toHaveBeenCalled()` guard exists to prevent.
+//     The floor: a node seeds only if it is the exact-`content` match, or matches EVERY query term,
+//     or some node in the graph matches ≥2 distinct query terms (the question is anchored here).
+//
+// (B) A CONFLICTED EDGE-PROP — the §6.3 contradiction rule, on the edge-prop path the af45ed046
+//     hydration fix added. The node path was pinned (§8.9) and the edge path's `value` half was
+//     pinned, but its `conflict` half — one datum per candidate, both candidate ids in `usedFacts`,
+//     never a silently picked side — was not.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+
+describe("graph-qa minimum-relevance floor — a single incidental shared term is not relevance (§6.1/§8.4)", () => {
+  it("a question whose SUBJECT is absent but which shares ONE term with a node abstains and never calls synthesize", async () => {
+    const repo = freshRepo("floor-single-term");
+    // The graph knows about a deployment runbook. It knows nothing about invoices.
+    await assertNode(repo, "runbook/deploy", "runbook");
+    await assertProp(repo, "runbook/deploy", "content", "How do we deploy the checkout service?");
+    await assertProp(repo, "runbook/deploy", "owner", "platform");
+
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called on a single incidental term overlap");
+    });
+    // Shares exactly ONE term with the graph's surface ("checkout"); the SUBJECT ('invoice
+    // reconciliation') is absent, and no fact here can answer it. The honest outcome is abstention.
+    const result = await answerQuestion(
+      { question: "Which invoice reconciliation job failed during checkout?" },
+      { repo, synthesize: synth },
+    );
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  it("the floor does NOT cost the D-52 capability: a question ANCHORED in the graph (2+ matching terms) still retrieves, including its single-term neighbours", async () => {
+    const repo = freshRepo("floor-anchored");
+    await assertNode(repo, "team/data-platform", "team");
+    await assertProp(repo, "team/data-platform", "name", "Data Platform Team");
+    await assertProp(repo, "team/data-platform", "description", "Owns the Ledger settlement store");
+    await assertNode(repo, "component/ledger", "component");
+    await assertProp(repo, "component/ledger", "name", "Ledger");
+
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      return { answer: "The Data Platform Team owns Ledger.", citations: [] };
+    });
+    const result = await answerQuestion({ question: "which team owns Ledger" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    const eids = new Set((seen?.facts ?? []).map((f) => f.eid));
+    // The anchor (3 matched terms) AND the single-term match it corroborates are both retrieved.
+    expect(eids.has("team/data-platform")).toBe(true);
+    expect(eids.has("component/ledger")).toBe(true);
+  });
+});
+
+describe("graph-qa edge-prop hydration — a CONFLICTED edge-prop surfaces both candidates and picks no side (§6.3)", () => {
+  const QUESTION = "Why was the RPC facade alternative rejected?";
+  const EDGE = "edge/marcus-objected-to-rpc";
+  const replicaId = "edge-conflict-author";
+
+  /** Two overlapping `supersede` facts over ONE base edge-prop assert with DIFFERENT values ⇒ a
+   *  two-candidate `kip:conflict` segment on the EDGE's cell (proj.ts detectConflict) — the edge
+   *  analogue of §8.9's node-prop fixture, built the same way for the same reason. */
+  function makeEdgePropSupersede(id: string, seq: number, value: PropValue, baseId: string): Fact {
+    const f = makeWellFormedFact({ replicaId, seq, id, target: { kind: "edge-prop", eid: EDGE, prop: "reason" } });
+    f.type = "supersede";
+    f.value = value;
+    f.validFrom = 0;
+    f.validTo = null;
+    f.supersedes = [baseId];
+    return f;
+  }
+
+  it("records ONE datum per candidate, both carrying conflicted:true and BOTH candidate factIds in usedFacts", async () => {
+    const repo = freshRepo("edge-prop-conflict");
+    // Endpoints + the text-seed anchor via the ordinary authoring path…
+    await assertNode(repo, "person/marcus", "person");
+    await assertProp(repo, "person/marcus", "content", QUESTION);
+    await assertNode(repo, "option/rpc-facade", "option");
+    await assertEdge(repo, EDGE, "objected_to", "person/marcus", "option/rpc-facade");
+    // …and the conflicting edge qualifier via `ingest` (the only shape yielding two candidates).
+    const base = makeWellFormedFact({
+      replicaId,
+      seq: 0,
+      id: "edge-conf-base",
+      target: { kind: "edge-prop", eid: EDGE, prop: "reason" },
+    });
+    base.value = "pending review";
+    base.validFrom = 0;
+    base.validTo = null;
+    const Fa = "edge-conf-super-a";
+    const Fb = "edge-conf-super-b";
+    for (const f of [
+      base,
+      makeEdgePropSupersede(Fa, 1, "synchronous coupling", "edge-conf-base"),
+      makeEdgePropSupersede(Fb, 2, "cost", "edge-conf-base"),
+    ]) {
+      // eslint-disable-next-line no-await-in-loop -- sequential ingest mirrors the §8.9 rig
+      await repo.ingest(cloneFact(f));
+    }
+
+    // Cross-check the substrate genuinely surfaces a two-candidate conflict on the EDGE's cell.
+    const edge = await repo.getEdge(EDGE);
+    const seg = edge?.props.reason?.segments.find((s) => s.kind === "conflict");
+    expect(seg && "candidates" in seg ? [...seg.candidates].sort() : []).toEqual([Fa, Fb].sort());
+
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const conf = ctx.facts.filter((f) => f.kind === "edge-prop" && f.conflicted === true);
+      return {
+        answer: "The graph holds conflicting reasons.",
+        citations: conf.map((f) => ({ factId: f.factId })),
+      };
+    });
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+
+    const conflicted = (seen?.facts ?? []).filter((f) => f.kind === "edge-prop" && f.conflicted === true);
+    // ONE datum per candidate — never one datum carrying a silently chosen winner.
+    expect(conflicted.map((f) => f.factId).sort()).toEqual([Fa, Fb].sort());
+    for (const f of conflicted) {
+      expect([...(f.candidates ?? [])].sort()).toEqual([Fa, Fb].sort());
+      expect(f.value).toBeUndefined(); // a conflict has NO covering value (§6.3)
+      expect(f.edgeKind).toBe("objected_to"); // still names the edge it qualifies (§3.4 rebinding)
+    }
+    expect(result.usedFacts).toContain(Fa);
+    expect(result.usedFacts).toContain(Fb);
+    // …and both survive the §3.4 citation guard, rebound to the edge, prop and edgeKind.
+    expect(result.citations.map((c) => c.factId).sort()).toEqual([Fa, Fb].sort());
+    for (const c of result.citations) {
+      expect(c.eid).toBe(EDGE);
+      expect(c.prop).toBe("reason");
+      expect(c.edgeKind).toBe("objected_to");
+    }
+  });
+});

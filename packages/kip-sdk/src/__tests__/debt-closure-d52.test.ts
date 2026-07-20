@@ -88,6 +88,22 @@ describe("D-52 — recall's text path does real term matching over the node's se
     const eids = eidsOf(results);
     expect(eids).toContain("ledger-database"); // `name: "Ledger"`
     expect(eids).toContain("data-platform-team"); // kind `team` + description mentions Ledger
+
+    // SENSITIVITY (round-2 finding #4): presence alone is NOT a test of the lexical seeding — a
+    // build whose text half surfaced the WHOLE graph would satisfy `toContain`. These assertions
+    // pin the RANKED ORDER and the seed IDENTITY, so they can only pass if the seeds really are
+    // chosen by distinct-term matching over each node's surface:
+    //   • `data-platform-team` matches all three of {team, owns, ledger} and must rank FIRST;
+    //   • `ledger-database` matches only {ledger} and must rank strictly BELOW it;
+    //   • `cache-warmer` and `rpc-facade-alternative` share NO query term and must be ABSENT
+    //     (an unranked node is not "merely lower" — it must not be retrieved at all).
+    // Verified by mutation: stubbing `recallSurfaceTerms` to an empty surface fails this test.
+    expect(eids[0]).toBe("data-platform-team");
+    expect(eids.indexOf("data-platform-team")).toBeLessThan(eids.indexOf("ledger-database"));
+    expect(results[0].score).toBeGreaterThan(results[eids.indexOf("ledger-database")].score);
+    expect(eids).not.toContain("cache-warmer");
+    expect(eids).not.toContain("rpc-facade-alternative");
+
     // Every returned node earns a hop-0 graph rank (the G0 seed contract) and no vector rank
     // (kip never embeds the query, N2/N5).
     for (const r of results) expect(r.ranks.vector).toBeUndefined();
@@ -109,6 +125,19 @@ describe("D-52 — recall's text path does real term matching over the node's se
     expect(eids).toContain("ledger-database");
     expect(eids).toContain("data-platform-team");
     expect(eids).toContain("rpc-facade-alternative");
+
+    // SENSITIVITY (round-2 finding #4) — the ranked order IS the claim, not mere presence. Distinct
+    // matched query terms of {team, owns, ledger, rpc, facade, alternative, rejected}:
+    //   rpc-facade-alternative → 4 (rpc, facade, alternative, rejected)
+    //   data-platform-team     → 3 (team, owns, ledger)
+    //   ledger-database        → 1 (ledger)
+    //   cache-warmer           → 0 — shares nothing with the question, so it is NOT retrieved even
+    //                                though `expand` would happily have reached anything connected.
+    // A build that seeded on anything other than the lexical surface cannot produce this order.
+    expect(eids[0]).toBe("rpc-facade-alternative");
+    expect(eids[1]).toBe("data-platform-team");
+    expect(eids.indexOf("data-platform-team")).toBeLessThan(eids.indexOf("ledger-database"));
+    expect(eids).not.toContain("cache-warmer");
   });
 
   it("the eid and the node KIND are part of the searchable surface (a node matched only by its kind is a seed)", async () => {

@@ -15,7 +15,13 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { KipError, open } from "../index";
 import { codeMinerDispatch } from "../miner/code-miner";
-import { LEARN_MANIFEST_NAMES, makeLearnDispatch, resolveLearnManifests } from "../learn";
+import {
+  LEARN_MANIFEST_NAMES,
+  makeLearnDispatch,
+  resolveLearnLiveGate,
+  resolveLearnManifests,
+  type LearnDiagnostic,
+} from "../learn";
 import type {
   AsOf,
   AssertInput,
@@ -49,7 +55,7 @@ import {
   resolveRepo,
 } from "./resolve";
 import type { OpenRepoFn, ResolveContext } from "./resolve";
-import { defaultDispatchMicroagent, resolveQaManifest, runAsk } from "./ask";
+import { defaultDispatchMicroagent, probeHarnessCli, resolveQaManifest, runAsk } from "./ask";
 import type { AskResult } from "./ask";
 
 /**
@@ -712,6 +718,19 @@ async function cmdIndex(a: HandlerArgs): Promise<number> {
  */
 async function cmdLearn(a: HandlerArgs): Promise<number> {
   const { flags, positionals, write, werr, json } = a;
+
+  // ── THE OPT-IN GATE, FIRST (ADR-B10f) ───────────────────────────────────────────────────────────
+  // `kip learn` is not one model call: it is up to `3 × maxIterations` spawns of the authenticated
+  // local `claude` CLI, each with a multi-minute timeout — real, unbudgeted spend. The containment
+  // ADR-B10f claims is only real if something ENFORCES it, so the gate is consulted here, before the
+  // repo is opened, before the document is blobbed, and before any body can spawn anything. It is
+  // deliberately the FIRST statement in the command: a refusal must cost nothing and change nothing.
+  const gate = resolveLearnLiveGate({ env: a.ctx.env, probe: probeHarnessCli });
+  if (!gate.enabled) {
+    werr(`kip: learn: ${gate.reason ?? "the live kip learn path is disabled"}\n`);
+    return 2;
+  }
+
   const file = positionals[1];
   if (!file) {
     werr("kip: learn requires a <file>\n");
@@ -763,6 +782,15 @@ async function cmdLearn(a: HandlerArgs): Promise<number> {
       putBlob: async (content: Uint8Array) => requireOpenRepo(holder).putBlob(content),
     },
     ...(flagStr(flags, "model") !== undefined ? { model: flagStr(flags, "model") } : {}),
+    // ADR-B10b/B10e: the loss model's `missing`/`fabricated`/`rationale` are the loop's ONLY
+    // fabrication signal. They are never persisted to a fact and never returned in-band (the loss
+    // return value must stay a bare number, ADR-B10d trap 2) — they go here, to stderr, for the
+    // operator, alongside the per-iteration loss line below.
+    onDiagnostic: (d: LearnDiagnostic) => {
+      if (d.missing.length > 0) werr(`  missing:    ${d.missing.join("; ")}\n`);
+      if (d.fabricated.length > 0) werr(`  fabricated: ${d.fabricated.join("; ")}\n`);
+      if (d.rationale !== undefined && d.rationale.length > 0) werr(`  rationale:  ${d.rationale}\n`);
+    },
   };
   const learnDispatch = makeLearnDispatch(learnDeps);
   // Per-iteration progress goes to STDERR (spec §3/AC-31: `--json` stdout carries exactly ONE value).

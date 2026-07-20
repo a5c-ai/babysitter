@@ -2027,6 +2027,17 @@ export class KipRepo implements Repo {
     gateInstant: bigint | null,
     q: RecallQuery,
   ): Promise<RecallResult[]> {
+    // `k` is REQUIRED and is a BOUND, so it must be a positive integer. Without this guard a
+    // negative `k` reaches `results.slice(0, k)`, where JS reads it from the END — `k: -1` would
+    // silently return "everything except the best hit", i.e. a wrong answer wearing a right shape.
+    // Rejected on the THROW channel (a caller-input error), never repaired to some default.
+    if (!Number.isInteger(q.k) || q.k <= 0) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `recall: \`k\` must be a positive integer bound, got ${JSON.stringify(q.k)}`,
+        { k: q.k },
+      );
+    }
     const projection = proj(facts, this.projOptions(facts));
 
     // `q.scope` NAMED GAP (docs/26 §5.1 declares `scope?: ScopeRef`): tenant/namespace narrowing is
@@ -2117,17 +2128,42 @@ export class KipRepo implements Repo {
     const textSeedRank = new Map<EID, number>();
     if (typeof q.text === "string") {
       const queryTerms = recallSearchTerms(q.text);
-      const scored: Array<{ eid: EID; score: number }> = [];
+      // Pass 1 — the raw lexical measurement per candidate: the exact-`content` boost plus the count
+      // of DISTINCT query terms present in the candidate's searchable surface.
+      const measured: Array<{ eid: EID; exact: boolean; matched: number }> = [];
+      let bestMatched = 0;
       for (const eid of [...viewByEid.keys()].sort()) {
         const view = viewByEid.get(eid)!;
         const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
-        let score = exact ? RECALL_EXACT_CONTENT_BOOST : 0;
+        let matched = 0;
         if (queryTerms.size > 0) {
           const surface = recallSurfaceTerms(eid, view, gateInstant);
-          for (const term of queryTerms) if (surface.has(term)) score += 1;
+          for (const term of queryTerms) if (surface.has(term)) matched += 1;
         }
-        if (score > 0) scored.push({ eid, score });
+        if (exact || matched > 0) measured.push({ eid, exact, matched });
+        if (matched > bestMatched) bestMatched = matched;
       }
+      // Pass 2 — THE MINIMUM-RELEVANCE FLOOR (part of the deterministic recall contract, not a
+      // tunable). A node becomes a seed only when it clears one of three bars:
+      //   (a) it is the exact-`content` match (the pre-D-52 seed, unchanged); or
+      //   (b) it matches EVERY term of the query (the query is fully covered — this is what keeps a
+      //       one-term query like `recall({text:"4711"})` working); or
+      //   (c) SOME candidate in the graph matches at least TWO distinct query terms, i.e. the
+      //       question is genuinely ANCHORED in this graph, in which case a weaker single-term
+      //       overlap is corroborating evidence rather than a coincidence.
+      // What it excludes is exactly the fabrication hazard §8.4 pins: a multi-term question whose
+      // SUBJECT is absent from the graph ("Where does Zara work?") sharing one incidental term with
+      // an unrelated node ("work") no longer seeds retrieval, so the synthesizer is never invoked
+      // with facts that cannot answer the question. One incidental shared term, in a graph where
+      // nothing matches the question more strongly, is not relevance — and the honest answer to an
+      // unanswerable question is the §6.1 abstention, not an irrelevant fact set handed to a model.
+      // DETERMINISTIC and set-pure like the rest of the path: `bestMatched` is a function of the
+      // as-of fact set and the query alone (no clock, no randomness, no arrival order).
+      const clearsFloor = (m: { exact: boolean; matched: number }): boolean =>
+        m.exact || (m.matched > 0 && (m.matched === queryTerms.size || bestMatched >= 2));
+      const scored: Array<{ eid: EID; score: number }> = measured
+        .filter(clearsFloor)
+        .map((m) => ({ eid: m.eid, score: (m.exact ? RECALL_EXACT_CONTENT_BOOST : 0) + m.matched }));
       scored.sort((a, b) => b.score - a.score || (a.eid < b.eid ? -1 : 1));
       for (const s of scored.slice(0, q.k)) {
         textSeeds.add(s.eid);
@@ -5402,12 +5438,16 @@ export class KipRepo implements Repo {
   }
 
   /**
-   * ADR-B10a — the blob gap (`text-autoencoder` work item). UNIMPLEMENTED PLACEHOLDER: throws so the
-   * frozen `src/__tests__/text-autoencoder.test.ts` assertions fail on a real diff, never on a
-   * missing symbol. The real implementation delegates to the already-public
-   * `Substrate.writeBlob(content)` (`substrate.ts:235`) and returns `{ blob: oid }` — content
-   * addressed and idempotent for free. It MUST NOT call `writeFactBlob`, MUST NOT involve `proj`,
-   * and MUST NOT author/sign/mint a fact.
+   * ADR-B10a — the blob API. IMPLEMENTED: delegates to the public `Substrate.writeBlob(content)`
+   * (`substrate.ts:235`) and returns `{ blob: oid }`, where `oid` is the REAL git loose-object id
+   * (`sha1("blob <len>\0<bytes>")`) — so storage is content-addressed and idempotent for free:
+   * putting identical bytes twice yields the identical `BlobRef` and writes one object.
+   *
+   * IT AUTHORS NO FACT AND IS NOT A MEMBER OF S (ADR-B10a prohibition 2, the rule that makes this
+   * safe to expose to a microagent body under INV-A1): it writes to the OID object store ONLY, never
+   * via `writeFactBlob`, so nothing here enters `kip-facts-index.json`, nothing is signed, and `proj`
+   * folds byte-identically before and after. A blob is CONTENT; knowledge is what `learn()` commits
+   * from it. Throws `ERR_MALFORMED_INPUT` when `content` is not a `Uint8Array`/`Buffer`.
    */
   async putBlob(content: Uint8Array): Promise<BlobRef> {
     if (!(content instanceof Uint8Array)) {
@@ -5425,10 +5465,18 @@ export class KipRepo implements Repo {
   }
 
   /**
-   * ADR-B10a — the blob gap (`text-autoencoder` work item). UNIMPLEMENTED PLACEHOLDER, see
-   * {@link KipRepo.putBlob}. The real implementation returns `null` when `hasBlob(ref.blob)` is
-   * false, otherwise reads the bytes, RE-COMPUTES `gitBlobId` over them, and throws
-   * `ERR_MALFORMED_INPUT` on mismatch — a corrupt object store must be loud (N5).
+   * ADR-B10a — the blob API's read half, the inverse of {@link KipRepo.putBlob}. IMPLEMENTED, with
+   * three distinct outcomes and no fourth:
+   *  - **`null`** when this repo genuinely does not hold `ref.blob` — never a zero-length buffer and
+   *    never a partial read. Callers must treat `null` as "absent" and FAIL, never as "empty
+   *    document": `learn()`'s encode/learner/loss bodies turn it into an honest failed iteration
+   *    rather than prompting a model with no source (ADR-B10b, N5).
+   *  - **the bytes**, byte-identical to what was put (UTF-8 or binary, NUL bytes included).
+   *  - **`ERR_MALFORMED_INPUT`** on a malformed `ref`, and — the integrity check — when the stored
+   *    object RE-HASHES to something other than the oid it is filed under. A corrupt object store is
+   *    loud; content is never returned under a hash it does not have.
+   *
+   * Like `putBlob` it reads the object store only: no facts, no `proj`, nothing in S.
    */
   async getBlob(ref: BlobRef): Promise<Uint8Array | null> {
     if (!isPlainRecord(ref) || typeof ref.blob !== "string" || ref.blob.length === 0) {

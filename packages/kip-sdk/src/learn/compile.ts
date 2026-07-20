@@ -41,6 +41,31 @@ export interface CompileGraphOptions {
   replicaId: string;
   /** `provenance.source.uri`, `kip-learn://<rawRef.blob>` (ADR-B10b). */
   source: string;
+  /**
+   * The learned document's `rawRef.blob` oid — the EID NAMESPACE (ADR-B10d "also recorded": eids are
+   * namespaced `doc:<rawRef.blob>#<slug>` **in the compiler, not the prompt**). REQUIRED, because the
+   * namespacing is the only thing standing between two documents and a silent cross-document cell
+   * collision: the M1 cell key is `(eid, prop)`, so two documents whose model slugs an entity
+   * identically would fold onto the SAME cells and `orderKey`-max would let whichever document was
+   * learned LAST win — `ask` would then answer a question about document A with document B's value,
+   * citing a real signed FactId. Namespacing is also what makes RE-learning the same document FOLD
+   * (INV-11) instead of doubling the graph.
+   */
+  rawBlob: string;
+}
+
+/**
+ * The EID namespace applied to every node/edge eid and every edge endpoint (ADR-B10d).
+ *
+ * IDEMPOTENT by construction: the learner is shown the CURRENT graph's (already namespaced) eids and
+ * is instructed to keep them, so its reply comes back pre-namespaced. Re-prefixing it would mint
+ * `doc:X#doc:X#slug` on every iteration — a fresh entity set per iteration, which is exactly the
+ * instability the namespacing exists to prevent. Applied BEFORE the dangling-endpoint check so the
+ * check compares like with like (a `from` naming a node in the same document still resolves).
+ */
+export function namespaceEid(rawBlob: string, eid: string): string {
+  const prefix = `doc:${rawBlob}#`;
+  return eid.startsWith(prefix) ? eid : `${prefix}${eid}`;
 }
 
 /**
@@ -50,6 +75,10 @@ export interface CompileGraphOptions {
  * string; any prop KEY is empty; any prop VALUE is not a `PropValue`; or any edge `from`/`to` names
  * an eid **not present in `nodes`** (ADR-B10d trap 6 — the one integrity check the core does not do
  * for you: a dangling endpoint passes `isWellFormedTarget` and commits an edge into nothing).
+ *
+ * MUST namespace every node eid, edge eid and edge ENDPOINT as `doc:<opts.rawBlob>#<slug>` (ADR-B10d)
+ * before the dangling-endpoint check, idempotently ({@link namespaceEid}), so two documents can never
+ * fold onto the same `(eid, prop)` cells and re-learning one document folds onto its own.
  *
  * MUST emit an EXPLICIT `{kind:"node", eid, nodeKind}` / `{kind:"edge", eid, edgeKind, from, to}`
  * existence candidate alongside the props (ADR-B10d trap 5) so `learn()`'s D-39 pre-seed
@@ -66,6 +95,14 @@ export function compileGraphToAssertInputs(graph: LearnGraph, opts: CompileGraph
   if (nodes.length === 0) {
     throw new Error("compileGraphToAssertInputs: `nodes` is empty — refusing to compile an empty graph");
   }
+  if (typeof opts.rawBlob !== "string" || opts.rawBlob.length === 0) {
+    throw new Error(
+      "compileGraphToAssertInputs: `rawBlob` must be the learned document's non-empty blob oid — it is " +
+        "the eid namespace (ADR-B10d), and compiling without it would let two documents collide on the " +
+        "same (eid, prop) cells",
+    );
+  }
+  const ns = (eid: string): string => namespaceEid(opts.rawBlob, eid);
 
   const provenance = (): Provenance => ({
     // The orchestrator OVERWRITES this at commit time (`kip-repo.ts:5222-5233`); it is a placeholder
@@ -82,7 +119,7 @@ export function compileGraphToAssertInputs(graph: LearnGraph, opts: CompileGraph
 
   for (const node of nodes) {
     if (!isRecord(node)) throw new Error("compileGraphToAssertInputs: every node must be an object");
-    const eid = requireNonEmptyString(node.eid, "node.eid");
+    const eid = ns(requireNonEmptyString(node.eid, "node.eid"));
     const nodeKind = requireNonEmptyString(node.kind, `node ${eid}: kind`);
     if (nodeEids.has(eid)) {
       throw new Error(`compileGraphToAssertInputs: duplicate node eid ${JSON.stringify(eid)}`);
@@ -118,10 +155,13 @@ export function compileGraphToAssertInputs(graph: LearnGraph, opts: CompileGraph
   const edgeEids = new Set<string>();
   for (const edge of edges) {
     if (!isRecord(edge)) throw new Error("compileGraphToAssertInputs: every edge must be an object");
-    const eid = requireNonEmptyString(edge.eid, "edge.eid");
+    const eid = ns(requireNonEmptyString(edge.eid, "edge.eid"));
     const edgeKind = requireNonEmptyString(edge.edgeKind, `edge ${eid}: edgeKind`);
-    const from = requireNonEmptyString(edge.from, `edge ${eid}: from`);
-    const to = requireNonEmptyString(edge.to, `edge ${eid}: to`);
+    // NAMESPACED BEFORE the dangling-endpoint check below, so the check compares namespaced
+    // endpoints against namespaced node eids (ADR-B10d): namespacing after the check would compare
+    // like with unlike and either reject every edge or admit a cross-document endpoint.
+    const from = ns(requireNonEmptyString(edge.from, `edge ${eid}: from`));
+    const to = ns(requireNonEmptyString(edge.to, `edge ${eid}: to`));
     if (edgeEids.has(eid)) {
       throw new Error(`compileGraphToAssertInputs: duplicate edge eid ${JSON.stringify(eid)}`);
     }

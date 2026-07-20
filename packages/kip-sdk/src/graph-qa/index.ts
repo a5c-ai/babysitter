@@ -102,7 +102,9 @@ export interface Citation {
   /** The EID the claim is about (node or edge). RECONSTRUCTED from the retrieved fact — never the
    *  synthesizer's. */
   eid?: string;
-  /** For node-prop citations: the PropKey read. RECONSTRUCTED from the retrieved fact. */
+  /** For node-prop AND edge-prop citations: the PropKey read. RECONSTRUCTED from the retrieved fact.
+   *  (An edge-prop citation carries BOTH `prop` and `edgeKind`: the qualifier and the edge it
+   *  qualifies.) */
   prop?: string;
   /** For edge citations: the EdgeKind traversed. RECONSTRUCTED from the retrieved fact. */
   edgeKind?: string;
@@ -381,8 +383,14 @@ export async function answerQuestion(
     // the same lens `getNode(eid, asOf)` applies), and `coveringSegment` is the same covering-cell
     // resolver, so `unknown`/`quarantine`/`excised` stay ABSENCE and a `conflict` stays a surfaced
     // contradiction citing every candidate (§6.3). Each edge-prop datum also carries the edge's own
-    // topology (`edgeKind`/`from`/`to`) so a citation naming it rebinds to the edge it qualifies
-    // (§3.4) rather than to a bare EID.
+    // topology (`edgeKind`/`from`/`to`) so the SYNTHESIZER sees which edge the qualifier belongs to.
+    // Precisely what survives onto a CITATION: `bindAndValidateCitations` rebinds the three fields a
+    // `Citation` actually has — `eid`, `prop` and `edgeKind` — from this datum, so an edge-prop
+    // citation names the edge's EID, the qualifier's PropKey and the EdgeKind. `from`/`to` are NOT
+    // `Citation` fields and are therefore NOT carried onto the citation; they live on the
+    // `RetrievedFact` (the audit record + the model's context) only. Adding them to `Citation` would
+    // widen a public output shape, so the honest statement is the one made here rather than a
+    // comment claiming a rebinding that does not happen.
     //
     // BOUNDED EXACTLY LIKE THE NODE WALK: `coveringSegment` yields AT MOST ONE covering segment per
     // prop, and the edge set is already capped by the §3.1 traversal bounds (`k`/`depth`/

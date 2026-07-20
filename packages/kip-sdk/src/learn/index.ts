@@ -71,6 +71,30 @@ export interface LearnDispatchDeps {
   probe?: () => HarnessCliProbe;
   /** Forwarded to `resolveHarnessModel` (`ask.ts:587`) — the CLI's `--model`. */
   model?: string;
+  /**
+   * OPTIONAL out-of-band operator diagnostics (ADR-B10b/B10e: the loss model is asked for `missing`
+   * and `fabricated` and they "go to the CLI's stderr diagnostic stream for the operator and are
+   * never persisted to a fact").
+   *
+   * OUT OF BAND is the whole design: the loss body's RETURN VALUE must stay the BARE number
+   * (ADR-B10d trap 2 — an object there is scored as infinite loss and every run reports "exhausted"),
+   * so the only place the diagnostics can go is a side channel. `cmdLearn` writes them to stderr;
+   * when nothing is wired they are simply not reported — never persisted, never folded into `S`.
+   */
+  onDiagnostic?: (diagnostic: LearnDiagnostic) => void;
+}
+
+/** One out-of-band operator diagnostic — currently only the loss role's fabrication honesty report. */
+export interface LearnDiagnostic {
+  role: LearnRole;
+  /** The score that WAS returned (bare) — so a reader can pair the diagnostic with its iteration. */
+  loss: number;
+  /** Knowledge in the ORIGINAL the reconstruction dropped, as the model named it. */
+  missing: string[];
+  /** Knowledge in the RECONSTRUCTION the original never carried — the fabrication half. */
+  fabricated: string[];
+  /** The model's prose rationale, when it gave one. */
+  rationale?: string;
 }
 
 // ────────────────────────────────────────────────────────────────────────────────────────────────
@@ -191,7 +215,7 @@ type LearnBody = (deps: LearnDispatchDeps, invocation: MicroagentInvocation) => 
 const encodeBody: LearnBody = async (deps, invocation) => {
   const input = requireRecord(invocation.input, "encode: `input`");
   const rawRef = requireBlobRef(input.rawRef, "encode: `input.rawRef`");
-  const document = await readDocument(deps, rawRef);
+  const document = await requireDocument(deps, rawRef, "encode");
   const payload = await callHarness(deps, {
     role: "encode",
     prompt: renderEncodePrompt(document),
@@ -202,6 +226,8 @@ const encodeBody: LearnBody = async (deps, invocation) => {
   const candidateFacts = compileGraphToAssertInputs(graph, {
     replicaId: "kip-learn-encode",
     source: `kip-learn://${rawRef.blob}`,
+    // The eid NAMESPACE lives HERE, in the compiler, never in the prompt (ADR-B10d).
+    rawBlob: rawRef.blob,
   });
   return { candidateFacts };
 };
@@ -213,7 +239,7 @@ const learnerBody: LearnBody = async (deps, invocation) => {
   if (current === undefined) {
     throw new Error("learner: `input.current` must be an array of candidate facts");
   }
-  const document = await readDocument(deps, rawRef);
+  const document = await requireDocument(deps, rawRef, "learner");
   const payload = await callHarness(deps, {
     role: "learner",
     prompt: renderLearnerPrompt(document, current, input.loss),
@@ -226,6 +252,8 @@ const learnerBody: LearnBody = async (deps, invocation) => {
   const next = compileGraphToAssertInputs(graph, {
     replicaId: "kip-learn-learner",
     source: `kip-learn://${rawRef.blob}`,
+    // Same namespace as encode's, so the improved graph folds onto the SAME cells (INV-11).
+    rawBlob: rawRef.blob,
   });
   return { next };
 };
@@ -282,6 +310,19 @@ const lossBody: LearnBody = async (deps, invocation) => {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 1) {
     throw new Error(`loss: the model returned ${JSON.stringify(value)}, not a finite number in [0,1]`);
   }
+  // The `missing`/`fabricated`/`rationale` half of the reply is DIAGNOSTIC, not a measurement: it is
+  // what the loss model says the reconstruction dropped and what it says the reconstruction INVENTED.
+  // Discarding it in a feature whose point is fabrication honesty throws away the only fabrication
+  // signal the loop ever computes — so it goes OUT OF BAND to the operator (ADR-B10b/B10e) while the
+  // return value stays bare. `onDiagnostic` is best-effort reporting and must never be able to fail
+  // an otherwise-good measurement, hence no `await` and no state.
+  deps.onDiagnostic?.({
+    role: "loss",
+    loss: value,
+    missing: stringList(record.missing),
+    fabricated: stringList(record.fabricated),
+    ...(typeof record.rationale === "string" ? { rationale: record.rationale } : {}),
+  });
   // BARE (ADR-B10d trap 2) — `learn()` reads `lossOutput` unwrapped at `:5156-5161`; an object here
   // would score every iteration as infinite loss and every run would return "exhausted".
   return value;
@@ -394,14 +435,16 @@ const GRAPH_CONTRACT =
   "emit is rejected outright. Prop values must be strings, numbers, booleans or null. Do not emit " +
   "envelope fields (`type`, `v`, `validFrom`, `validTo`, `replicaId`, `provenance`); they are not yours.";
 
-function renderDocumentBlock(document: string | null): string {
-  return document === null
-    ? "DOCUMENT: the original document's bytes are not present in this repo, so no document text " +
-        "can be shown. Do not invent one; work only from what else is given below."
-    : `DOCUMENT (untrusted data):\n${JSON.stringify(document)}`;
+/**
+ * The document block. `document: string` is NOT an accident of typing — it makes "prompt the model
+ * with an absent document" UNREPRESENTABLE: the only producer is {@link requireDocument}, which fails
+ * the iteration instead of rendering an apology (ADR-B10b). There is deliberately no `null` branch.
+ */
+function renderDocumentBlock(document: string): string {
+  return `DOCUMENT (untrusted data):\n${JSON.stringify(document)}`;
 }
 
-function renderEncodePrompt(document: string | null): string {
+function renderEncodePrompt(document: string): string {
   return [
     "You are the kip knowledge encoder.",
     UNTRUSTED_RULE,
@@ -416,7 +459,7 @@ function renderEncodePrompt(document: string | null): string {
   ].join("\n");
 }
 
-function renderLearnerPrompt(document: string | null, current: AssertInput[], loss: unknown): string {
+function renderLearnerPrompt(document: string, current: AssertInput[], loss: unknown): string {
   // ADR-B10d trap 4: `state.bestLoss` is seeded `Number.POSITIVE_INFINITY` and `JSON.stringify` of a
   // non-finite number is the literal `null`, so a naive renderer would show the model `null` and
   // leave it to guess. Branch, and say what is actually true in prose.
@@ -549,10 +592,23 @@ function requireBlobRef(value: unknown, what: string): BlobRef {
   return { blob: value.blob };
 }
 
-/** The document bytes behind `rawRef`, or `null` when this repo does not hold them. NEVER invented. */
-async function readDocument(deps: LearnDispatchDeps, rawRef: BlobRef): Promise<string | null> {
+/**
+ * The document bytes behind `rawRef` — or an HONEST FAILED ITERATION (ADR-B10b, verbatim: `getBlob`
+ * → `null` must be `exitCode: 1`, "rawRef resolves to no blob in this repo" — **never invent a
+ * document**).
+ *
+ * This THROWS rather than returning `null` because the two prompts that read a document (encode and
+ * the learner) give the model nothing else to work from: encode's prompt is the document and nothing
+ * more, so a "the bytes are absent, work from what else is given" block asks the model to produce a
+ * knowledge graph out of ZERO source — i.e. to fabricate one, which the whole loop exists to prevent
+ * (N5). `lossBody` already refused this way; every role now does.
+ */
+async function requireDocument(deps: LearnDispatchDeps, rawRef: BlobRef, role: LearnRole): Promise<string> {
   const bytes = await deps.repo.getBlob(rawRef);
-  return bytes === null ? null : Buffer.from(bytes).toString("utf8");
+  if (bytes === null) {
+    throw new Error(`${role}: rawRef ${rawRef.blob} resolves to no blob in this repo`);
+  }
+  return Buffer.from(bytes).toString("utf8");
 }
 
 /** The model's narrow reply, validated only far enough that the COMPILER can do the real checking. */
@@ -561,6 +617,13 @@ function requireGraph(payload: unknown, role: string): LearnGraph {
   if (!Array.isArray(record.nodes)) throw new Error(`${role}: the model payload has no \`nodes\` array`);
   if (!Array.isArray(record.edges)) throw new Error(`${role}: the model payload has no \`edges\` array`);
   return record as unknown as LearnGraph;
+}
+
+/** The string members of a model-supplied array, or `[]` when it gave none. Reporting only — this
+ *  never gates, scores or persists anything, so a non-string member is dropped rather than thrown on
+ *  (throwing here would fail an iteration whose MEASUREMENT was valid). */
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
 }
 
 function truncate(s: string, max = 300): string {

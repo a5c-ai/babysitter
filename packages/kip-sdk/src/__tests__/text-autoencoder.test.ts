@@ -382,10 +382,18 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
     };
 
     it("compileGraphToAssertInputs emits EXPLICIT node/edge existence candidates carrying nodeKind/edgeKind (never props alone)", () => {
-      const compiled = compileGraphToAssertInputs(GRAPH, { replicaId: "kip-learn-encode", source: "kip-learn://abc" });
+      const compiled = compileGraphToAssertInputs(GRAPH, {
+        replicaId: "kip-learn-encode",
+        source: "kip-learn://abc",
+        rawBlob: "abc",
+      });
 
       const nodeExistence = compiled.filter((c) => c.target.kind === "node");
-      expect(nodeExistence.map((c) => (c.target as { eid: string }).eid).sort()).toEqual(["doc:ada", "doc:babbage"]);
+      // ADR-B10d: the eids are NAMESPACED BY THE COMPILER as `doc:<rawBlob>#<model slug>`.
+      expect(nodeExistence.map((c) => (c.target as { eid: string }).eid).sort()).toEqual([
+        "doc:abc#doc:ada",
+        "doc:abc#doc:babbage",
+      ]);
       // ADR-B10d trap 5: the existence candidate MUST carry the kind, or `ensureExistenceFor` mints a
       // kind-LESS one that folds over and blanks `NodeView.kind`.
       for (const c of nodeExistence) expect((c.target as { nodeKind?: string }).nodeKind).toBe("person");
@@ -393,10 +401,11 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       const edgeExistence = compiled.filter((c) => c.target.kind === "edge");
       expect(edgeExistence).toHaveLength(1);
       expect(edgeExistence[0].target).toMatchObject({
-        eid: "doc:ada->babbage",
+        eid: "doc:abc#doc:ada->babbage",
         edgeKind: "worked_with",
-        from: "doc:ada",
-        to: "doc:babbage",
+        // The ENDPOINTS are namespaced too — and before the dangling check, so they still resolve.
+        from: "doc:abc#doc:ada",
+        to: "doc:abc#doc:babbage",
       });
 
       // Envelope fields the model is NEVER asked for are supplied by the compiler (ADR-B10).
@@ -420,7 +429,9 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       const candidates = compileGraphToAssertInputs(GRAPH, {
         replicaId: "kip-learn-encode",
         source: "kip-learn://doc",
+        rawBlob: "doc",
       });
+      const ns = (slug: string): string => `doc:doc#${slug}`;
 
       const { dispatch, log } = makeScriptedDispatch({
         [m.encode.name]: () => encodeOk(candidates),
@@ -439,21 +450,21 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       expect(log.length).toBeGreaterThan(0);
 
       // The accepted candidates are ORDINARY signed facts — readable back through the ordinary reads.
-      const ada = await repo.getNode("doc:ada");
+      const ada = await repo.getNode(ns("doc:ada"));
       expect(ada).not.toBeNull();
       expect(ada?.kind).toBe("person"); // ADR-B10d trap 5: NEVER blank
       expect(ada?.props.name?.segments.at(-1)?.value).toBe("Ada Lovelace");
       expect(ada?.props.bornIn?.segments.at(-1)?.value).toBe("London");
 
-      const babbage = await repo.getNode("doc:babbage");
+      const babbage = await repo.getNode(ns("doc:babbage"));
       expect(babbage?.kind).toBe("person");
       expect(babbage?.props.name?.segments.at(-1)?.value).toBe("Charles Babbage");
 
-      const edge = await repo.getEdge("doc:ada->babbage");
+      const edge = await repo.getEdge(ns("doc:ada->babbage"));
       expect(edge).not.toBeNull();
       expect(edge?.kind).toBe("worked_with");
-      expect(edge?.from).toBe("doc:ada");
-      expect(edge?.to).toBe("doc:babbage");
+      expect(edge?.from).toBe(ns("doc:ada"));
+      expect(edge?.to).toBe(ns("doc:babbage"));
       expect(edge?.props.on?.segments.at(-1)?.value).toBe("Analytical Engine");
 
       // Exactly ONE kip:learn audit fact, naming its inputs + the achieved loss (docs/32, ADR-B10c).
@@ -723,6 +734,9 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
         };
       };
       const blobRepo = ownedRepo("infinity-body");
+      // The rawRef must RESOLVE: per ADR-B10b a `getBlob` miss is an honest failed iteration, never a
+      // prompt built around an absent document, so the body is exercised over a real stored blob.
+      const bodyRawRef = await putDocument(blobRepo, DOCUMENT);
       const learnerDispatch = makeLearnDispatch({
         repo: blobRepo,
         run,
@@ -732,7 +746,7 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       const invocation = (loss: number): MicroagentInvocation => ({
         id: `learn:learner:${LEARN_MANIFEST_NAMES.learner}@1.0.0:1`,
         manifest: { name: LEARN_MANIFEST_NAMES.learner, version: "1.0.0" },
-        input: { rawRef: OPAQUE_RAW_REF, current: [] as AssertInput[], loss, ontologyAsOf: { validTime: 1 } },
+        input: { rawRef: bodyRawRef, current: [] as AssertInput[], loss, ontologyAsOf: { validTime: 1 } },
         timeout: 120_000,
       });
 
@@ -769,7 +783,11 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       let compiled: AssertInput[] | undefined;
       let thrown: unknown;
       try {
-        compiled = compileGraphToAssertInputs(DANGLING, { replicaId: "kip-learn-encode", source: "kip-learn://x" });
+        compiled = compileGraphToAssertInputs(DANGLING, {
+          replicaId: "kip-learn-encode",
+          source: "kip-learn://x",
+          rawBlob: "x",
+        });
       } catch (err) {
         thrown = err;
       }
@@ -793,6 +811,9 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
 
     it("the encode body turns a dangling-endpoint model reply into exitCode 1 WITH a reason — never a candidate set", async () => {
       const repo = ownedRepo("dangling-body");
+      // A REAL, resolvable rawRef: the body now refuses a `getBlob` miss outright (ADR-B10b), and
+      // this test is about the DANGLING ENDPOINT rejection, so the document must actually be there.
+      const rawRef = await putDocument(repo, DOCUMENT);
       const run = async (): Promise<HarnessCliRun> => ({
         exitCode: 0,
         stdout: JSON.stringify({ result: JSON.stringify(DANGLING) }),
@@ -802,7 +823,7 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       const result = await dispatch({
         id: `learn:encode:${LEARN_MANIFEST_NAMES.encode}@1.0.0:1`,
         manifest: { name: LEARN_MANIFEST_NAMES.encode, version: "1.0.0" },
-        input: { rawRef: OPAQUE_RAW_REF, ontologyAsOf: { validTime: 1 } },
+        input: { rawRef, ontologyAsOf: { validTime: 1 } },
         timeout: 120_000,
       });
 
