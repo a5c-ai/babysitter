@@ -2131,33 +2131,20 @@ export class KipRepo implements Repo {
     const textSeedRank = new Map<EID, number>();
     if (typeof q.text === "string") {
       const queryTerms = recallSearchTerms(q.text);
-      // Pass 1 — the raw lexical measurement per candidate: the exact-`content` boost plus the count
-      // of DISTINCT query terms present in the candidate's searchable surface.
-      const measured: Array<{ eid: EID; exact: boolean; matched: number }> = [];
-      for (const eid of [...viewByEid.keys()].sort()) {
-        const view = viewByEid.get(eid)!;
-        const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
-        let matched = 0;
-        if (queryTerms.size > 0) {
-          const surface = recallSurfaceTerms(
-            eid,
-            view,
-            gateInstant,
-            incidentEdgeKindsOf(projection, eid, gateInstant),
-          );
-          for (const term of queryTerms) if (surface.has(term)) matched += 1;
-        }
-        if (exact || matched > 0) measured.push({ eid, exact, matched });
-      }
-      // Pass 2 — THE ADMISSION BAR, and it is LOCAL TO THE CANDIDATE (round-3 finding #1, CRITICAL).
-      // A node is a seed iff it is the exact-`content` match, or its OWN surface matches at least one
-      // distinct query term:
+      // THE ADMISSION BAR, and it is LOCAL TO THE CANDIDATE (round-3 finding #1, CRITICAL; round-4
+      // finding #2 — the single source of truth). A node is a seed iff it is the exact-`content`
+      // match, or its OWN surface matches at least one distinct query term:
       //
-      //   clearsFloor(m) = m.exact || m.matched > 0
+      //   admit(candidate) ⟺ exact || matched > 0        ← the `if` guard below, and nowhere else
       //
       // Everything in that predicate is a function of THIS candidate and the query. Nothing else in
       // the graph can change it. That property — call it RETRIEVAL LOCALITY — is the whole point, and
-      // it is pinned by an explicit property test (`debt-closure-d52.test.ts`, "retrieval is LOCAL").
+      // it is pinned by explicit tests (`debt-closure-d52.test.ts`: "retrieval is LOCAL", and the
+      // no-overlap tests that mutation-cover THIS guard — flipping it to admit-all makes a
+      // zero-overlap query return non-`[]` and those tests fail). This is the ONLY admission bar:
+      // round 3 also ran a redundant `.filter(clearsFloor)` on the far side that could never remove
+      // anything (this guard had already dropped every `matched === 0 && !exact` candidate), so
+      // NEITHER copy had genuine mutation coverage — each masked the other. Collapsed to one (round-4).
       //
       // WHAT THIS REPLACES, AND WHY. Round 2 shipped a graph-GLOBAL third bar: a single-term match was
       // admitted only if SOME OTHER node in the graph matched ≥2 distinct terms (`bestMatched >= 2`).
@@ -2177,16 +2164,28 @@ export class KipRepo implements Repo {
       // it just fails in the direction that is harder to notice.
       //
       // WHERE THE FABRICATION GUARD LIVES NOW. It lives where it can actually be evaluated: in
-      // `graph-qa`, which abstains when the QUESTION'S SUBJECT TERMS are absent from every retrieved
-      // fact (§6.1b). That is a relevance check on the EVIDENCE, and it can distinguish the two cases
-      // this bar provably cannot — "Where does Zara work?" against a graph holding only Tal (the
-      // retrieved facts are about Tal, so abstain) versus the same question against a graph holding
-      // Zara (the retrieved facts are about Zara, so answer). Retrieval's job is to surface what
-      // lexically matches; deciding whether that is an ANSWER is the answering layer's job.
-      const clearsFloor = (m: { exact: boolean; matched: number }): boolean => m.exact || m.matched > 0;
-      const scored: Array<{ eid: EID; score: number }> = measured
-        .filter(clearsFloor)
-        .map((m) => ({ eid: m.eid, score: (m.exact ? RECALL_EXACT_CONTENT_BOOST : 0) + m.matched }));
+      // `graph-qa`, which abstains when the QUESTION'S SUBJECT/ATTRIBUTE TERMS are absent from every
+      // retrieved fact (§6.1b). That is a relevance check on the EVIDENCE, and it can distinguish the
+      // two cases this bar provably cannot — "Where does Zara work?" against a graph holding only Tal
+      // (the retrieved facts are about Tal, so abstain) versus the same question against a graph
+      // holding Zara (the retrieved facts are about Zara, so answer). Retrieval's job is to surface
+      // what lexically matches; deciding whether that is an ANSWER is the answering layer's job.
+      const scored: Array<{ eid: EID; score: number }> = [];
+      for (const eid of [...viewByEid.keys()].sort()) {
+        const view = viewByEid.get(eid)!;
+        const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
+        let matched = 0;
+        if (queryTerms.size > 0) {
+          const surface = recallSurfaceTerms(
+            eid,
+            view,
+            gateInstant,
+            incidentEdgeKindsOf(projection, eid, gateInstant),
+          );
+          for (const term of queryTerms) if (surface.has(term)) matched += 1;
+        }
+        if (exact || matched > 0) scored.push({ eid, score: (exact ? RECALL_EXACT_CONTENT_BOOST : 0) + matched });
+      }
       scored.sort((a, b) => b.score - a.score || (a.eid < b.eid ? -1 : 1));
       for (const s of scored.slice(0, q.k)) {
         textSeeds.add(s.eid);

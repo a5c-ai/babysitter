@@ -872,6 +872,17 @@ is itself a "surfaced, never silent" violation (docs/27 §0). The fabrication gu
 for now lives where it can be evaluated — graph-QA's **subject-anchoring relevance check on the
 retrieved evidence** (kip-graph-qa.md §6.1b) — not in the retrieval floor.
 
+**Round-4 amendment — the anchoring surface is WIDENED (finding #1).** Round 3's anchoring surface was
+IDENTITY-ONLY (`eid`/`kind`/`EdgeKind`s + the values of `name`/`title`/`label`). That reintroduced a
+silent false-negative in the SAME "surfaced, never silent" direction: a question keyed on a prop KEY
+or a STRUCTURED prop value — "Who is the CEO?" answered by `role:"CEO"`, "What is the status?" answered
+by `status:"blocked"` — retrieved and hydrated the backing signed fact and then abstained, because the
+answer term appeared in no identity value. Round 4 widens the surface to also include every prop/
+edge-prop KEY and every STRUCTURED (string/number/boolean) prop VALUE, while STILL excluding free-text
+VALUES (`content`/`description`/`summary`), so the Zara-absent fabrication guard (§8.4) keeps abstaining.
+Pinned both directions in `graph-qa.test.ts` (round-4 §6.1b): the CEO/status questions ANSWER, and a
+query term living ONLY in a free-text value still ABSTAINS.
+
 **Backward compatibility:** an exact `props.content === q.text` match is still a seed and is given a
 dominant boost (`RECALL_EXACT_CONTENT_BOOST`) that exceeds any achievable distinct-term score, so it
 still ranks first — including when the query is entirely stopwords and tokenizes to nothing. The
@@ -906,6 +917,15 @@ This is **keyword matching, not semantic retrieval.** Concretely, still missing:
   `status`) or edge kind matches uniformly across a graph and carries little discriminating signal —
   the flat term-count scoring above does not down-weight it (no IDF). It is a recall win with a
   precision cost, contained only by the `k` cap and the graph-QA subject-anchoring check.
+- **The graph-QA anchoring check still excludes free-text VALUES (round-4).** The §6.1b surface indexes
+  `eid`/`kind`/`EdgeKind`s/prop KEYS/STRUCTURED values but NOT the values of `content`/`description`/
+  `summary` — the exclusion that keeps the §8.4 fabrication guard abstaining. The honest residual: a
+  subject that a graph names ONLY inside a free-text blob (never in its `eid`/`kind`/`name` or a
+  structured prop) will be lexically retrieved by `recall` but then abstained on by graph-QA, because
+  the subject term is absent from the anchoring surface. This is the deliberate precision/recall
+  trade-off that separates "the subject is genuinely present" from "a relation word coincidentally
+  appears in unrelated prose"; closing it for the free-text-only-subject case needs the semantic
+  retrieval the first residual above names, not a wider lexical surface (which would reopen §8.4).
 - **Cross-document contradictions do not surface as `kip:conflict` (round-3, cross-ref ADR-B10d).**
   The `doc:<blob>#` eid namespace that makes retrieval local also makes two documents' facts about the
   same real-world entity DISJOINT cells, so a genuine A-vs-B disagreement is stored as two

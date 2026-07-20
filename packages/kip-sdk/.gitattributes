@@ -1,0 +1,12 @@
+# kip-sdk is built and CI-tested across Linux/macOS/Windows. Line endings are normalized to LF for
+# text sources so a Windows checkout can never re-commit CRLF blobs (which show as whole-file diffs
+# and defeat cross-OS review). See docs/DEBTS.md / project note "CRLF on changed files".
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.mts  text eol=lf
+*.cts  text eol=lf
+*.js   text eol=lf
+*.cjs  text eol=lf
+*.mjs  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf

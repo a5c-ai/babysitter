@@ -43,12 +43,19 @@ import { KipError } from "../index";
 import { recallSearchTerms, stripLearnEidNamespace } from "../text-terms";
 
 /**
- * The IDENTITY prop keys whose VALUES name an entity (round-3 §6.1b). A node's `name`/`title`/`label`
- * is what a human calls it — so it is part of the subject-anchoring surface, unlike a free-text
- * `content`/`description` value (which can share an incidental relation term with an unrelated
- * question). Closed and small on purpose: it is part of the relevance contract, not a tunable.
+ * The FREE-TEXT prop keys whose VALUES are prose, not schema vocabulary about the subject (round-4
+ * §6.1b). Their VALUES are EXCLUDED from the subject-anchoring surface — though their KEYS are still
+ * indexed, because a key is schema vocabulary a modeller wrote about the entity. Everything else a
+ * retrieved fact carries — the `eid`, `kind`, `EdgeKind`s, every prop/edge-prop KEY, and every
+ * STRUCTURED (string/number/boolean) prop VALUE — IS part of the surface (round-4 finding #1: a
+ * question keyed on a prop key like "role"/"employer" or a structured value like `role:"CEO"` must be
+ * ABLE to anchor, or it retrieves the backing fact and then silently abstains — a §0 "surfaced, never
+ * silent" violation in the hard-to-notice direction). The exclusion is what keeps the §8.4
+ * Zara-absent fabrication guard abstaining: Tal's `content: "Where does Tal work?"` sharing the verb
+ * "work" with a question about Zara must NOT anchor it. Closed and small on purpose: it is part of the
+ * relevance contract, not a tunable.
  */
-const IDENTITY_PROPS: ReadonlySet<string> = new Set(["name", "title", "label"]);
+const FREE_TEXT_PROPS: ReadonlySet<string> = new Set(["content", "description", "summary"]);
 
 /** The graph-QA input lens (kip-graph-qa.md §2 `inputSchema`): a question + an optional read lens. */
 export interface GraphQaInput {
@@ -350,21 +357,34 @@ export async function answerQuestion(
     for (const cand of rf.candidates ?? []) usedFacts.add(cand);
   };
 
-  // ── SUBJECT-ANCHORING SURFACE (round-3 finding #3 / §6.1b). The IDENTITY terms of everything we
-  // hydrate: each node/edge's `eid` (learn namespace stripped) + its `kind` + the values of its
-  // IDENTITY props (`name`/`title`/`label`). This is deliberately NARROWER than the whole retrieved
-  // surface — it excludes free-text prop VALUES like `content`/`description` — because it answers a
-  // different question than recall did. Recall asks "does this node share ANY term with the query?"
-  // (so relation words can anchor a seed); the anchoring check asks "is any retrieved fact actually
-  // ABOUT the question's SUBJECT?", and a node whose only overlap with the question is an incidental
-  // relation term buried in its prose (Tal's `content: "Where does Tal work?"` sharing the verb
-  // "work" with a question about Zara) is NOT about that subject. Building it from IDENTITY only is
-  // what lets the check distinguish "Zara is in the graph" (answer) from "only Tal is, and he shares
-  // the word 'work'" (abstain) — the two cases a graph-global recall floor provably cannot tell
-  // apart. Same deterministic tokenizer as recall, so "present"/"absent" means the same thing here. */
+  // ── SUBJECT-ANCHORING SURFACE (round-3 finding #3 / round-4 finding #1 / §6.1b). The vocabulary of
+  // everything we hydrate that is actually ABOUT the entity: each node/edge's `eid` (learn namespace
+  // stripped) + its `kind` + every incident `EdgeKind` + every prop/edge-prop KEY + every STRUCTURED
+  // (string/number/boolean) prop VALUE. It EXCLUDES exactly one thing — the VALUES of free-text props
+  // (`content`/`description`/`summary`, {@link FREE_TEXT_PROPS}) — because those are prose that can
+  // share an incidental relation term with an unrelated question. This answers a different question
+  // than recall did: recall asks "does this node share ANY term with the query?" (so relation words
+  // can anchor a seed, INCLUDING ones buried in prose); the anchoring check asks "is any retrieved
+  // fact actually ABOUT the question's SUBJECT or its named ATTRIBUTE?". Widening it to prop KEYS and
+  // structured values (round-4) is what lets a question keyed on the graph's OWN schema vocabulary —
+  // "Who is the CEO?" answered by `role:"CEO"`, "What is the status?" answered by `status:"blocked"`
+  // — anchor and answer, instead of retrieving the backing signed fact and then silently abstaining
+  // (a §0 "surfaced, never silent" violation in the hard-to-notice direction). Excluding free-text
+  // VALUES is what still lets the check distinguish "Zara is in the graph" (answer) from "only Tal is,
+  // and his prose shares the word 'work'" (abstain) — the two cases a graph-global recall floor
+  // provably cannot tell apart. Same deterministic tokenizer as recall, so "present"/"absent" means
+  // the same thing here. */
   const subjectSurface = new Set<string>();
   const addIdentity = (text: string): void => {
     for (const term of recallSearchTerms(text)) subjectSurface.add(term);
+  };
+  /** Add a STRUCTURED prop value (string/number/boolean) to the anchoring surface; a `null`/`BlobRef`
+   *  value contributes nothing (an address is not text about the subject — mirrors `recallSurfaceTerms`
+   *  in kip-repo.ts, so "present"/"absent" stays identical across the two layers). */
+  const addStructuredValue = (value: PropValue): void => {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      addIdentity(String(value));
+    }
   };
 
   for (const eid of [...nodeEids].sort()) {
@@ -377,9 +397,11 @@ export async function answerQuestion(
     for (const prop of Object.keys(node.props).sort()) {
       const seg = coveringSegment(node.props[prop]);
       if (!seg) continue;
+      addIdentity(prop); // the prop KEY is schema vocabulary about the subject (round-4 finding #1).
       if (seg.kind === "value") {
-        // A node-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2).
-        if (IDENTITY_PROPS.has(prop) && typeof seg.value === "string") addIdentity(seg.value);
+        // A node-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2). A
+        // STRUCTURED value anchors; a free-text value (`content`/`description`/`summary`) does not.
+        if (!FREE_TEXT_PROPS.has(prop)) addStructuredValue(seg.value);
         record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
       } else {
         // A `conflict` segment is surfaced as an explicit contradiction citing ALL candidates —
@@ -431,8 +453,11 @@ export async function answerQuestion(
     for (const prop of Object.keys(edge.props).sort()) {
       const seg = coveringSegment(edge.props[prop]);
       if (!seg) continue;
+      addIdentity(prop); // the edge-prop KEY is schema vocabulary about the edge (round-4 finding #1).
       if (seg.kind === "value") {
-        // An edge-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2).
+        // An edge-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2). A
+        // STRUCTURED value anchors; a free-text value does not (same rule as the node walk).
+        if (!FREE_TEXT_PROPS.has(prop)) addStructuredValue(seg.value);
         record({
           factId: seg.assertedBy,
           eid,
@@ -469,11 +494,13 @@ export async function answerQuestion(
     return { answer: ABSTENTION_ANSWER, abstained: true, citations: [], usedFacts: [] };
   }
 
-  // ── 4b. SUBJECT-ANCHORING ABSTENTION (round-3 finding #3 / §6.1b) — the fabrication guard, moved to
-  // the layer that can actually evaluate it. Facts WERE retrieved, but if NONE of them is about the
-  // question's subject — i.e. no query term appears in the IDENTITY of any retrieved node/edge
-  // (`subjectSurface`) — then the overlap that surfaced them was an incidental relation term, not
-  // relevance, and handing those facts to a synthesizer is precisely the "Where does Zara work?"
+  // ── 4b. SUBJECT-ANCHORING ABSTENTION (round-3 finding #3 / round-4 finding #1 / §6.1b) — the
+  // fabrication guard, moved to the layer that can actually evaluate it. Facts WERE retrieved, but if
+  // NONE of them is about the question's subject OR a named attribute — i.e. no query term appears in
+  // any retrieved node/edge's anchoring surface (`subjectSurface`: eid/kind/EdgeKinds/prop KEYS/
+  // structured values, free-text VALUES excluded) — then the overlap that surfaced them was an
+  // incidental relation term buried in prose, not relevance, and handing those facts to a synthesizer
+  // is precisely the "Where does Zara work?"
   // fabrication setup (§8.4): the model would answer about the wrong entity from parametric knowledge.
   // The honest outcome is the §6.1 abstention. This REPLACES the round-2 graph-global recall floor
   // (`bestMatched >= 2` in `computeRecall`), which could not tell "Zara is present" from "only Tal is,

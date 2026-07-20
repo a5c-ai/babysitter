@@ -385,12 +385,17 @@ rule (N5) and mirrors the substrate's `Unknown`-not-invented posture.
    `recall`'s `text` seed is a deterministic LEXICAL match (docs/26 §5.1a): it correctly surfaces any
    node sharing ≥1 query term, INCLUDING a relation term ("work", "owns") that appears in an unrelated
    node's prose. So a non-empty `usedFacts` does not by itself mean the retrieved facts are about the
-   question's **subject**. Before synthesizing, the microagent therefore computes a **subject-anchoring
-   surface** — the IDENTITY terms of every hydrated node/edge: its `eid` (with the `kip learn`
-   `doc:<blob>#` namespace stripped), its `kind`, its incident `EdgeKind`s, and the values of its
-   IDENTITY props (`name`/`title`/`label`) — deliberately EXCLUDING free-text values like
-   `content`/`description`. If **no** query term appears in that surface, the retrieved facts are not
-   about the subject (the overlap that surfaced them was an incidental relation term), and the
+   question's **subject** or a named **attribute**. Before synthesizing, the microagent therefore
+   computes a **subject-anchoring surface** — the vocabulary of every hydrated node/edge: its `eid`
+   (with the `kip learn` `doc:<blob>#` namespace stripped), its `kind`, its incident `EdgeKind`s, every
+   prop/edge-prop KEY, and every STRUCTURED (string/number/boolean) prop VALUE — deliberately EXCLUDING
+   the VALUES of free-text props (`content`/`description`/`summary`). Widening it to prop KEYS and
+   structured values (round-4 finding #1) is what lets a question keyed on the graph's OWN schema
+   vocabulary — "Who is the CEO?" answered by `role:"CEO"`, "What is the status?" answered by
+   `status:"blocked"` — anchor and answer, instead of retrieving the backing signed fact and then
+   silently abstaining (a §0 "surfaced, never silent" violation in the hard-to-notice direction). If
+   **no** query term appears in that surface, the retrieved facts are not
+   about the subject (the overlap that surfaced them was an incidental relation term in prose), and the
    microagent **abstains** exactly as in §6.1: canonical phrase, empty citations, `abstained: true`,
    and **`synthesize` is NEVER called** (no fabrication from parametric knowledge). This is where the
    fabrication guard that "Where does Zara work?" needs actually lives: on a graph holding only Tal,

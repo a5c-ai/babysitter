@@ -305,6 +305,88 @@ describe("graph-qa §8.4 — asking about an entity with ZERO covering facts abs
 });
 
 // ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-4 (finding #1) — the subject-anchoring surface is WIDENED to prop KEYS + STRUCTURED prop
+// VALUES (string/number/boolean), still EXCLUDING free-text values (content/description/summary).
+// Both directions are pinned here:
+//   (a) a question keyed on a STRUCTURED prop value ("Who is the CEO?" answered by `role:"CEO"`) must
+//       be ANSWERED — round-3's identity-only surface (eid/kind/name/title/label) retrieved the
+//       backing signed fact and then SILENTLY ABSTAINED, a docs/27 §0 "surfaced, never silent"
+//       violation in the hard-to-notice direction.
+//   (b) the §8.4 Zara-absent fabrication guard must STILL abstain — a relation term that lives ONLY
+//       in a FREE-TEXT value must never anchor a question whose real subject is absent.
+// The two together prove the surface is a genuine relevance check, not a blanket widen-everything:
+// forcing `subjectAnchored=true` breaks (b); forcing it `false` breaks (a).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa round-4 §6.1b — the anchoring surface includes prop KEYS + STRUCTURED values, but NOT free-text values", () => {
+  it("ANSWERS a question keyed on a STRUCTURED prop value: 'Who is the CEO?' over a `role:\"CEO\"` node does not abstain", async () => {
+    const repo = freshRepo("anchor-structured-value");
+    // The subject's ROLE (a structured, non-free-text value) is what the question names — there is no
+    // `name`/`title`/`label` term "ceo" anywhere, so round-3's identity-only surface would have missed
+    // it and abstained despite retrieving the fact.
+    await assertNode(repo, "person/alice", "person");
+    await assertProp(repo, "person/alice", "name", "Alice");
+    await assertProp(repo, "person/alice", "role", "CEO");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const role = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "role");
+      return {
+        answer: `The CEO is ${String(role?.eid === "person/alice" ? "Alice" : "")}.`,
+        citations: role ? [{ factId: role.factId, eid: role.eid, prop: "role", quote: String(role.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "Who is the CEO?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    // The `role:"CEO"` fact was in the model context and anchored the answer.
+    expect((seen?.facts ?? []).some((f) => f.prop === "role" && f.value === "CEO")).toBe(true);
+    expect(result.answer).toContain("Alice");
+    expect(result.citations.some((c) => c.prop === "role")).toBe(true);
+  });
+
+  it("STILL ABSTAINS when the query term lives ONLY in a FREE-TEXT value: 'Who is the CEO?' over a node whose `content` mentions the CEO but has no structured 'ceo'", async () => {
+    const repo = freshRepo("anchor-freetext-excluded");
+    // "ceo" appears ONLY inside a free-text `content` blob — recall WILL seed this node on the lexical
+    // overlap, but the anchoring surface excludes free-text VALUES, so the retrieved fact is not ABOUT
+    // a CEO subject and the honest outcome is abstention. This is the mutation-check for the free-text
+    // EXCLUSION: drop `content` from FREE_TEXT_PROPS and this node anchors and synthesize is called.
+    await assertNode(repo, "note/restructure", "note");
+    await assertProp(repo, "note/restructure", "content", "The CEO decided to restructure the platform team.");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: 'ceo' is only in a free-text value (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "Who is the CEO?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  it("ANSWERS a question keyed on a prop KEY: 'What is the status?' over a `status:\"blocked\"` node does not abstain", async () => {
+    const repo = freshRepo("anchor-prop-key");
+    await assertNode(repo, "ticket/kip-99", "ticket");
+    await assertProp(repo, "ticket/kip-99", "status", "blocked");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const st = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "status");
+      return {
+        answer: `The status is ${String(st?.value ?? "")}.`,
+        citations: st ? [{ factId: st.factId, eid: st.eid, prop: "status", quote: String(st.value) }] : [],
+      };
+    });
+    // Both the prop KEY "status" and the structured value "blocked" are in the anchoring surface, so
+    // the question anchors on either term.
+    const result = await answerQuestion({ question: "What is the status?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    expect((seen?.facts ?? []).some((f) => f.prop === "status" && f.value === "blocked")).toBe(true);
+    expect(result.answer).toContain("blocked");
+    expect(result.citations.some((c) => c.prop === "status")).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
 // §8.5 — Abstention on an empty graph.
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 describe("graph-qa §8.5 — against a graph with NO facts, any question abstains (recall [] is never synthesized)", () => {
