@@ -1,6 +1,22 @@
 # Changelog
 
+
 ## [Unreleased] - 2026-07-20
+
+### Features
+- 06ae2935a feat(kip-sdk): code-analysis-miner (converged min=89, acceptance PASS) (Tal Muskal, 19 hours ago)
+
+### Bug Fixes
+- d7db8fd69 fix(kip-sdk): kip index subdir walk-up + register --include/--exclude/--git-sha (live-demo defects) (Tal Muskal, 19 hours ago)
+
+### Documentation
+- 6e085977b docs: daily changelog update (tmuskal, 12 seconds ago)
+- 743744639 docs(kip-sdk): code-miner report + live demo verification (Tal Muskal, 15 hours ago)
+- 17c78ffe9 docs(kip-sdk): code-analysis Miner ADR (ADR-B9) (Tal Muskal, 21 hours ago)
+- d34e25784 docs(kip-sdk): maturity report + live demo verification (Tal Muskal, 23 hours ago)
+
+### Tests
+- 84eb35f99 test(kip-sdk): frozen code-analysis-miner tests (spec-driven, pre-implementation) (Tal Muskal, 21 hours ago)
 
 ### Features
 
@@ -120,7 +136,6 @@
 
 ## [6.0.0] - 2026-06-24
 - 2026-06-05
-
 
 
 ### Features
@@ -735,7 +750,6 @@
 - No notable changes.
 
 
-
 ### Fixed
 - Restored the automatic stop-hook drive of `babysitter run:iterate` inside Claude Code and GitHub Copilot sessions. Two regressions had broken the chain: (a) `setBabysitterSessionIdInEnvFile` (and its Copilot twin) rewrote `CLAUDE_ENV_FILE`/`COPILOT_ENV_FILE` via `writeFileSync(tmp)+renameSync`, breaking the harness env-sourcing contract that relies on append-only writes to a stable inode; (b) the session-start PID-marker writer emitted `current-session-pid-<pid>` while the reader expected the slugged `current-session-claude-code-pid-<pid>`, causing the marker rail to always miss. The writer now goes through `getSessionMarkerPath()` so writer and reader agree, and the env-file helpers are append-only. The resolver's last-match regex already tolerates accumulated exports from repeated session rotation, so append-only is safe.
 - Inverted session-ID resolution precedence across all harness adapters to prefer the PID-scoped session marker (authoritative, tied to live ancestor Claude Code PID) over the inheritable `BABYSITTER_SESSION_ID` env var, which previously caused cross-session bleed when a parent shell had a stale export.
@@ -750,13 +764,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.186] - 2026-04-04
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -766,13 +778,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.184] - 2026-04-03
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -782,13 +792,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.182] - 2026-03-15
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -798,13 +806,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.180] - 2026-03-10
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -814,13 +820,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.178] - 2026-03-07
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -830,13 +834,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.176] - 2026-03-06
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -846,13 +848,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.174] - 2026-03-04
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -862,13 +862,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.172] - 2026-03-03
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -878,13 +876,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.170] - 2026-03-03
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -894,13 +890,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.168] - 2026-02-16
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -910,13 +904,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.166] - 2026-02-12
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -926,13 +918,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.164] - 2026-02-10
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -942,13 +932,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.162] - 2026-02-10
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -958,13 +946,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.160] - 2026-02-08
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -974,13 +960,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.158] - 2026-02-02
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -990,13 +974,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.156] - 2026-01-31
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1006,13 +988,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.154] - 2026-01-31
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1022,13 +1002,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.152] - 2026-01-30
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1038,13 +1016,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.150] - 2026-01-28
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1054,13 +1030,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.148] - 2026-01-27
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1070,13 +1044,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.146] - 2026-01-27
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1086,13 +1058,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.144] - 2026-01-27
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1102,13 +1072,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.142] - 2026-01-27
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1118,13 +1086,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.140] - 2026-01-26
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1134,13 +1100,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.138] - 2026-01-26
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1150,13 +1114,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.136] - 2026-01-26
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1166,13 +1128,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.134] - 2026-01-26
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1182,13 +1142,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.132] - 2026-01-26
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1198,13 +1156,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.130] - 2026-01-26
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1214,13 +1170,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.128] - 2026-01-25
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1230,13 +1184,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.126] - 2026-01-25
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1246,13 +1198,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.124] - 2026-01-25
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1262,13 +1212,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.122] - 2026-01-25
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1278,13 +1226,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.120] - 2026-01-25
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1294,13 +1240,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.118] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1310,13 +1254,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.116] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1326,13 +1268,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.114] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1342,13 +1282,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.112] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1358,13 +1296,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.110] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1374,13 +1310,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.108] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1390,13 +1324,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.106] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1406,13 +1338,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.104] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1422,13 +1352,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.102] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1438,13 +1366,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.100] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1454,13 +1380,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.98] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1470,13 +1394,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.96] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1486,13 +1408,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.94] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1502,13 +1422,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.92] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1518,13 +1436,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.90] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1534,13 +1450,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.88] - 2026-01-24
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1550,13 +1464,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.86] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1566,13 +1478,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.84] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1582,13 +1492,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.82] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1598,13 +1506,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.80] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1614,13 +1520,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.78] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1630,13 +1534,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.76] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1646,13 +1548,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.74] - 2026-01-23
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1662,13 +1562,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.72] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1678,13 +1576,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.70] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1694,13 +1590,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.68] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1710,13 +1604,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.66] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1726,13 +1618,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.64] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1742,13 +1632,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.62] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1758,13 +1646,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.60] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1774,13 +1660,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.58] - 2026-01-22
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1790,13 +1674,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.56] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1806,13 +1688,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.54] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1822,13 +1702,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.52] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1838,13 +1716,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.50] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1854,13 +1730,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.48] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1870,13 +1744,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.46] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1886,13 +1758,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.44] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1902,13 +1772,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.42] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1918,13 +1786,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.40] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1934,13 +1800,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.38] - 2026-01-21
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1950,13 +1814,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.36] - 2026-01-20
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1966,13 +1828,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.34] - 2026-01-20
 - No notable changes.
-
 
 
 - No unreleased changes.
@@ -1982,7 +1842,6 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
@@ -1990,13 +1849,11 @@
 - No notable changes.
 
 
-
 - No unreleased changes.
 
 
 ## [0.0.31] - 2026-01-20
 - No notable changes.
-
 
 
 - No unreleased changes.
