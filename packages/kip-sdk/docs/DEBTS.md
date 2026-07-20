@@ -843,21 +843,39 @@ actual current source before being recorded.
 #### D-52 closure note — what is FIXED
 
 `recall`'s text path is no longer exact-`content` equality. `computeRecall` now builds, for every
-candidate node, a **searchable surface** from its `eid`, its node `kind`, and the string form of
-**every** prop value covering the query's resolved gate instant (via the SAME `coveringPropValue`
-read, so valid-time/`asOf` semantics are byte-for-byte unchanged; `null` and `BlobRef` props
-contribute nothing). Query and surface are tokenized identically — explicit `toLowerCase()` (never
-locale-sensitive), runs of ASCII alphanumerics, a small fixed stopword set — and a node scores by
-the count of **distinct** query terms it matches. Zero matching terms ⇒ **not a seed**. Seeds are
-ordered `(score desc, eid asc)`, truncated to `k`, and carry that order into their hop-0 graph rank.
-The path is a pure function of the fact set + query: no clock, no randomness, no Map-iteration-order
-or locale dependence — two replicas holding the same facts return the identical ranked list
-(pinned by `src/__tests__/debt-closure-d52.test.ts`).
+candidate node, a **searchable surface** (`recallSurfaceTerms`) from its `eid` **with the `kip learn`
+`doc:<blob-oid>#` namespace stripped**, its node `kind`, **every prop KEY**, the string form of every
+prop VALUE covering the query's resolved gate instant (via the SAME `coveringPropValue` read, so
+valid-time/`asOf` semantics are byte-for-byte unchanged; `null`/`BlobRef` values contribute nothing,
+though their key is still indexed), and the `EdgeKind` of **every as-of-valid incident edge**. Query
+and surface are tokenized identically by one shared tokenizer (`src/text-terms.ts`) — explicit
+`toLowerCase()` (never locale-sensitive), runs of ASCII alphanumerics, a small fixed stopword set —
+and a node scores by the count of **distinct** query terms it matches. Seeds are ordered
+`(score desc, eid asc)`, truncated to `k`, and carry that order into their hop-0 graph rank. The path
+is a pure function of the fact set + query: no clock, no randomness, no Map-iteration-order or locale
+dependence — two replicas holding the same facts return the identical ranked list (pinned by
+`src/__tests__/debt-closure-d52.test.ts`).
+
+**The seeding predicate (round-3, the ACTUAL bar).** A candidate is a seed **iff** it is the exact
+`props.content === q.text` match **OR its own surface matches ≥1 distinct query term**. The bar is
+**LOCAL to the candidate** — whether node X is seeded never depends on any other node in the graph
+(retrieval locality, pinned by the non-locality property test in `debt-closure-d52.test.ts`). This is
+the round-3 correction of the round-2 note, which read "Zero matching terms ⇒ not a seed" with no
+mention of any bar: round 2 in fact shipped a graph-GLOBAL third bar (`bestMatched >= 2` — admit a
+single-term match only if *some other* node matched ≥2 terms). That bar was a **retrieval
+regression**: on a repo holding `zara` (`name:"Zara"`, `employer:"Acme Corp"`),
+`recall({text:"Where does Zara work?"})` and `recall({text:"Zara employer"})` both returned `[]`
+though the entity was right there, while `recall({text:"Who is Zara?"})` returned `["zara"]` — so
+adding true, relevant terms DESTROYED retrieval; and ingesting one unrelated node containing "zara
+work" flipped the first query to return the irrelevant node FIRST. A silent false-negative abstention
+is itself a "surfaced, never silent" violation (docs/27 §0). The fabrication guard that bar reached
+for now lives where it can be evaluated — graph-QA's **subject-anchoring relevance check on the
+retrieved evidence** (kip-graph-qa.md §6.1b) — not in the retrieval floor.
 
 **Backward compatibility:** an exact `props.content === q.text` match is still a seed and is given a
 dominant boost (`RECALL_EXACT_CONTENT_BOOST`) that exceeds any achievable distinct-term score, so it
 still ranks first — including when the query is entirely stopwords and tokenizes to nothing. The
-vector/embedding half is untouched, and `graph-qa/index.ts` is unchanged.
+vector/embedding half is untouched.
 
 Consequence: the live-demo failure is closed. A `kip learn`-produced graph (nodes with
 `name`/`description` props and typed edges, **no** `content` prop) is now discoverable —
@@ -883,6 +901,16 @@ This is **keyword matching, not semantic retrieval.** Concretely, still missing:
   entirely, so those graphs remain undiscoverable by the text path.
 - **Recomputed per call** — the surface index is rebuilt on every `recall`, like the vector half
   (see D-43); there is no persisted inverted index.
+- **Prop keys and edge kinds widen the surface (round-3).** Indexing prop KEYS and incident EDGE
+  KINDS is what lets relation words anchor a match, but it also means a common schema key (`name`,
+  `status`) or edge kind matches uniformly across a graph and carries little discriminating signal —
+  the flat term-count scoring above does not down-weight it (no IDF). It is a recall win with a
+  precision cost, contained only by the `k` cap and the graph-QA subject-anchoring check.
+- **Cross-document contradictions do not surface as `kip:conflict` (round-3, cross-ref ADR-B10d).**
+  The `doc:<blob>#` eid namespace that makes retrieval local also makes two documents' facts about the
+  same real-world entity DISJOINT cells, so a genuine A-vs-B disagreement is stored as two
+  non-conflicting facts rather than one surfaced `kip:conflict`. Resolving it needs an explicit
+  cross-document entity-resolution/`same_as` layer that no bundled learn role performs.
 
 Closing the residual means wiring real semantic retrieval (embed the corpus surface and match by
 similarity through the existing §5.3 accelerator seam) — that remains the open half of this item.

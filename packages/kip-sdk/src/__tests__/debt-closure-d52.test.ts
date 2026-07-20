@@ -26,6 +26,7 @@ import {
   nodePropFact,
   type SpecRecallQuery,
 } from "./conformance/fixtures-m4";
+import { makeWellFormedFact } from "./conformance/fixtures";
 
 const open: KipRepo[] = [];
 function track(repo: KipRepo): KipRepo {
@@ -89,20 +90,45 @@ describe("D-52 — recall's text path does real term matching over the node's se
     expect(eids).toContain("ledger-database"); // `name: "Ledger"`
     expect(eids).toContain("data-platform-team"); // kind `team` + description mentions Ledger
 
-    // SENSITIVITY (round-2 finding #4): presence alone is NOT a test of the lexical seeding — a
-    // build whose text half surfaced the WHOLE graph would satisfy `toContain`. These assertions
-    // pin the RANKED ORDER and the seed IDENTITY, so they can only pass if the seeds really are
-    // chosen by distinct-term matching over each node's surface:
-    //   • `data-platform-team` matches all three of {team, owns, ledger} and must rank FIRST;
-    //   • `ledger-database` matches only {ledger} and must rank strictly BELOW it;
-    //   • `cache-warmer` and `rpc-facade-alternative` share NO query term and must be ABSENT
-    //     (an unranked node is not "merely lower" — it must not be retrieved at all).
+    // SENSITIVITY (round-2 finding #4; round-3 correction): presence alone is NOT a test of the
+    // lexical seeding — a build whose text half surfaced the WHOLE graph would satisfy `toContain`.
+    // These assertions pin the RANKED ORDER and the seed IDENTITY, so they can only pass if the seeds
+    // really are chosen by distinct-term matching over each node's LOCAL surface:
+    //   • `data-platform-team` matches {team, owns, ledger} (kind/eid `team`, `owns` via its own
+    //     `description` AND its incident `owns` edge kind, `ledger` via `description`) and ranks FIRST;
+    //   • `ledger-database` matches fewer distinct terms and must rank strictly BELOW it. (ROUND-3: it
+    //     now matches `ledger` (name) AND `owns` (its incident `owns` edge kind is part of its
+    //     surface), a widening that the ranked-order assertion tolerates precisely because the bar is
+    //     LOCAL — each node is scored by ITS OWN surface, and `data-platform-team` still scores higher);
+    //   • `cache-warmer` and `rpc-facade-alternative` share NO query term and must be ABSENT (the
+    //     admission bar is `matched > 0`, evaluated on each node's own surface — an unranked node is
+    //     not "merely lower", it must not be retrieved at all).
     // Verified by mutation: stubbing `recallSurfaceTerms` to an empty surface fails this test.
     expect(eids[0]).toBe("data-platform-team");
     expect(eids.indexOf("data-platform-team")).toBeLessThan(eids.indexOf("ledger-database"));
     expect(results[0].score).toBeGreaterThan(results[eids.indexOf("ledger-database")].score);
     expect(eids).not.toContain("cache-warmer");
     expect(eids).not.toContain("rpc-facade-alternative");
+
+    // ROUND-3 STRENGTHENING (retrieval LOCALITY): `ledger-database`'s retrieval must not depend on
+    // `data-platform-team` (the multi-term anchor) also being in the graph. Under the round-2
+    // graph-global floor (`bestMatched >= 2`), a single-term node was admitted ONLY because some
+    // OTHER node cleared 2 terms — so removing the anchor could silently drop it. Here we assert the
+    // bar is local by querying with `ledger-database`'s OWN single distinct term against a graph where
+    // NO node reaches two matches: it must still come back. (Fails under the old non-local floor.)
+    const soloRepo = makeRepo("d52-local-single-term").repo;
+    track(soloRepo);
+    await ingestFacts(soloRepo, [
+      nodeExistenceFact("ledger-database", "component"),
+      nodePropFact("ledger-database", "name", "Ledger"),
+      nodeExistenceFact("unrelated", "note"),
+      nodePropFact("unrelated", "description", "an entirely different subject"),
+    ]);
+    // "Ledger warehouse": `ledger-database` matches only {ledger}; `unrelated` matches nothing; NO
+    // node reaches 2 distinct matched terms, so the round-2 floor would have returned []. The local
+    // bar returns the single-term subject.
+    const solo = await soloRepo.recall({ text: "Ledger warehouse", k: 10 } as SpecRecallQuery);
+    expect(eidsOf(solo)).toEqual(["ledger-database"]);
 
     // Every returned node earns a hop-0 graph rank (the G0 seed contract) and no vector rank
     // (kip never embeds the query, N2/N5).
@@ -126,14 +152,21 @@ describe("D-52 — recall's text path does real term matching over the node's se
     expect(eids).toContain("data-platform-team");
     expect(eids).toContain("rpc-facade-alternative");
 
-    // SENSITIVITY (round-2 finding #4) — the ranked order IS the claim, not mere presence. Distinct
-    // matched query terms of {team, owns, ledger, rpc, facade, alternative, rejected}:
-    //   rpc-facade-alternative → 4 (rpc, facade, alternative, rejected)
+    // SENSITIVITY (round-2 finding #4; round-3 correction) — the ranked order IS the claim, not mere
+    // presence. Distinct matched query terms of {team, owns, ledger, rpc, facade, alternative,
+    // rejected} over each node's LOCAL surface (round-3: the surface now includes prop KEYS and each
+    // node's incident EDGE KINDS, so the counts below reflect that wider — but still per-node-local —
+    // surface):
+    //   rpc-facade-alternative → 4 (rpc, facade, alternative via name/eid; rejected via its `status`
+    //                               value AND its incident `rejected-for` edge kind)
     //   data-platform-team     → 3 (team, owns, ledger)
-    //   ledger-database        → 1 (ledger)
+    //   ledger-database        → 3 (ledger via name; owns + rejected via its two incident edge kinds
+    //                               `owns`/`rejected-for`) — ties data-platform-team on count, and the
+    //                               `(score desc, eid asc)` tie-break puts `data-platform-team` first.
     //   cache-warmer           → 0 — shares nothing with the question, so it is NOT retrieved even
     //                                though `expand` would happily have reached anything connected.
-    // A build that seeded on anything other than the lexical surface cannot produce this order.
+    // A build that seeded on anything other than each node's own lexical surface cannot produce this
+    // order; and because the bar is LOCAL, none of these counts depends on any other node's presence.
     expect(eids[0]).toBe("rpc-facade-alternative");
     expect(eids[1]).toBe("data-platform-team");
     expect(eids.indexOf("data-platform-team")).toBeLessThan(eids.indexOf("ledger-database"));
@@ -308,5 +341,137 @@ describe("D-52 — a node with ZERO matching query terms is not a seed (keyword 
     await ingestFacts(repo, facts);
     const results = await repo.recall({ text: "ledger", k: 3 } as SpecRecallQuery);
     expect(results).toHaveLength(3);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════
+// ROUND-3 — the admission bar is LOCAL to the candidate, and the surface indexes prop KEYS +
+// incident edge KINDS. These pin the round-3 retrieval-regression fix: round 2 shipped a
+// graph-GLOBAL floor (`bestMatched >= 2`) that suppressed correct single-term subject matches and
+// let unrelated nodes flip whether a subject was retrieved. The correct bar is `matched > 0` on each
+// node's OWN surface.
+// ════════════════════════════════════════════════════════════════════════════════════════════════
+
+describe("D-52 round-3 — the minimum-relevance bar is LOCAL (matched > 0 on the candidate's own surface)", () => {
+  it("a graph where NO node matches ≥2 terms still retrieves the single-term subject (the bar is LIVE) — both directions", async () => {
+    const { repo } = makeRepo("d52r3-bar-live");
+    track(repo);
+    await ingestFacts(repo, [
+      nodeExistenceFact("widget/left", "widget"),
+      nodePropFact("widget/left", "label", "alpha"),
+      nodeExistenceFact("widget/right", "widget"),
+      nodePropFact("widget/right", "label", "beta"),
+    ]);
+    // "alpha gamma": `widget/left` matches only {alpha} (1); `widget/right` matches nothing; NO node
+    // reaches 2 distinct matched terms. Under the round-2 graph-global floor `bestMatched >= 2` this
+    // returned [] (a false-negative abstention on a fact the graph holds). The LOCAL bar returns it.
+    expect(eidsOf(await repo.recall({ text: "alpha gamma", k: 10 } as SpecRecallQuery))).toEqual([
+      "widget/left",
+    ]);
+    // Negative direction: a query sharing no term with any node's surface still (correctly) returns [].
+    expect(await repo.recall({ text: "gamma delta", k: 10 } as SpecRecallQuery)).toEqual([]);
+  });
+
+  it("retrieval is LOCAL: ingesting an unrelated node must NOT change whether an existing node is retrieved (non-locality property)", async () => {
+    // The exact reproduction from the round-3 brief. A repo holding `zara` (a person with a `name` and
+    // an `employer`). The question shares its subject term with `zara` and nothing else.
+    const zaraFacts: Fact[] = [
+      nodeExistenceFact("zara", "person"),
+      nodePropFact("zara", "name", "Zara"),
+      nodePropFact("zara", "employer", "Acme Corp"),
+    ];
+    const q = (): SpecRecallQuery => ({ text: "Where does Zara work?", k: 10 } as SpecRecallQuery);
+
+    // WITHOUT the unrelated node: `zara` matches only {zara} (1 term); NO node reaches 2 — the exact
+    // case the round-2 global floor suppressed. The local bar retrieves the subject.
+    const { repo: before } = makeRepo("d52r3-local-before");
+    track(before);
+    await ingestFacts(before, zaraFacts);
+    const beforeEids = eidsOf(await before.recall(q()));
+    expect(beforeEids).toContain("zara");
+
+    // WITH an unrelated node that happens to contain "zara work" (2 terms): under the round-2 floor
+    // this coincidental node flipped the query from [] to non-empty AND ranked the irrelevant node
+    // first. Under the local bar, `zara`'s retrieval is IDENTICAL to the no-unrelated-node case: its
+    // membership does not depend on what other nodes exist.
+    const { repo: after } = makeRepo("d52r3-local-after");
+    track(after);
+    await ingestFacts(after, [
+      ...zaraFacts,
+      nodeExistenceFact("unrelated-note", "note"),
+      nodePropFact("unrelated-note", "description", "zara work log, unrelated"),
+    ]);
+    const afterEids = eidsOf(await after.recall(q()));
+    // The property: `zara`'s presence is unchanged by the unrelated node (locality).
+    expect(afterEids).toContain("zara");
+    expect(afterEids.includes("zara")).toBe(beforeEids.includes("zara"));
+  });
+
+  it("prop KEYS are part of the searchable surface — a query naming only a prop key retrieves the node (mutation-check for the key surface)", async () => {
+    const { repo } = makeRepo("d52r3-prop-key");
+    track(repo);
+    await ingestFacts(repo, [
+      nodeExistenceFact("m/1", "metric"),
+      nodePropFact("m/1", "employer", 4711),
+    ]);
+    // "employer" appears ONLY as a prop KEY (the value is the number 4711; eid `m/1`, kind `metric`).
+    // With prop keys in the surface this matches; REMOVE prop keys from `recallSurfaceTerms` and this
+    // returns [] — so this test fails under that mutation, which the round-2 suite did not.
+    expect(eidsOf(await repo.recall({ text: "employer", k: 10 } as SpecRecallQuery))).toEqual(["m/1"]);
+  });
+
+  it("the exact prop-key relation anchors a natural question: `Zara employer` and `Where does Zara work?` are NOT [] (D-52 flagship regression)", async () => {
+    const { repo } = makeRepo("d52r3-zara-relation");
+    track(repo);
+    await ingestFacts(repo, [
+      nodeExistenceFact("zara", "person"),
+      nodePropFact("zara", "name", "Zara"),
+      nodePropFact("zara", "employer", "Acme Corp"),
+    ]);
+    // The query uses the exact prop KEY holding the answer ("employer"): matches {zara, employer} = 2.
+    expect(eidsOf(await repo.recall({ text: "Zara employer", k: 10 } as SpecRecallQuery))).toContain("zara");
+    // The natural multi-term question: the entity IS in the graph and must not vanish (round-2 bug).
+    expect(eidsOf(await repo.recall({ text: "Where does Zara work?", k: 10 } as SpecRecallQuery))).toContain(
+      "zara",
+    );
+  });
+});
+
+describe("D-52 round-3 — the text path is asOf-lensed: seed set AND ranked order differ across two instants", () => {
+  it("a node whose matching prop is only valid from T1 joins the seed set — and outranks the always-valid node — only at asOf T1", async () => {
+    const T1 = 1_000;
+    // `early` exists from 0 and always matches {ledger} (1 term).
+    const earlyExist = makeWellFormedFact({ target: { kind: "node", eid: "early", nodeKind: "record" } });
+    earlyExist.value = true;
+    earlyExist.validFrom = 0;
+    earlyExist.validTo = null;
+    const earlyProp = makeWellFormedFact({ target: { kind: "node-prop", eid: "early", prop: "tag" } });
+    earlyProp.value = "ledger";
+    earlyProp.validFrom = 0;
+    earlyProp.validTo = null;
+    // `late` exists only from T1 and matches {ledger, settlement} (2 terms) — but not before T1.
+    const lateExist = makeWellFormedFact({ target: { kind: "node", eid: "late", nodeKind: "record" } });
+    lateExist.value = true;
+    lateExist.validFrom = T1;
+    lateExist.validTo = null;
+    const lateProp = makeWellFormedFact({ target: { kind: "node-prop", eid: "late", prop: "tag" } });
+    lateProp.value = "ledger settlement";
+    lateProp.validFrom = T1;
+    lateProp.validTo = null;
+
+    const { repo } = makeRepo("d52r3-asof");
+    track(repo);
+    await ingestFacts(repo, [earlyExist, earlyProp, lateExist, lateProp]);
+
+    const query = { text: "ledger settlement", k: 10 } as SpecRecallQuery;
+
+    // BEFORE T1: only `early` is live-visible, so the SEED SET is {early}.
+    const atEarly = await repo.recall({ ...query, asOf: { validTime: 500 } } as SpecRecallQuery);
+    expect(eidsOf(atEarly)).toEqual(["early"]);
+
+    // AT T1: `late` becomes visible and matches 2 distinct terms, so the SEED SET grows to {late,
+    // early} AND the ranked ORDER differs — `late` (2) now outranks `early` (1).
+    const atLate = await repo.recall({ ...query, asOf: { validTime: T1 } } as SpecRecallQuery);
+    expect(eidsOf(atLate)).toEqual(["late", "early"]);
   });
 });

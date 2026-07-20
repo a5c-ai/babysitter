@@ -22,7 +22,8 @@ flowchart LR
 
 ```ts
 interface RecallQuery {
-  text?: string;                      // ADVISORY: exact/keyword graph seeding only. kip NEVER embeds it (N2).
+  text?: string;                      // ADVISORY graph seed: deterministic LEXICAL matching (§5.1a), not
+                                      //   exact-only. kip NEVER embeds it (N2).
   embedding?: ReadonlyArray<number>;  // CALLER-SUPPLIED query vector (N2: kip consumes embeddings, never
                                       //   produces them) — the ANN candidate seed. The vector half runs iff
                                       //   present (its model identity MUST match the set-resident
@@ -51,6 +52,54 @@ the [context-enablement `recall` seam](./25-context-enablement-seams.md).
 - **Fusion**: **Reciprocal Rank Fusion** `score(d) = Σ_r 1/(rrfK + rank_r(d))` over the vector rank,
   graph-proximity rank, and salience rank. RRF avoids score-scale mismatch between cosine similarity
   and graph distance. The final reweight applies salience/recency knobs.
+
+### 5.1a The `text` graph seed — the shipped, normative contract (D-52)
+
+`text` is not embedded (N2). It is a **deterministic lexical seed** over each candidate node's
+searchable surface, and the following is the exact, replica-independent contract kip ships — it is
+part of the recall contract, not a tunable.
+
+- **Tokenization.** Explicit `toLowerCase()` (never `toLocaleLowerCase` — locale-independent), split
+  on runs of ASCII alphanumerics (`/[a-z0-9]+/g`), dropped through a fixed closed **stopword set**
+  (`a, an, and, are, as, at, be, been, but, by, did, do, does, for, from, had, has, have, how, i, if,
+  in, into, is, it, its, of, on, or, that, the, their, them, then, there, these, they, this, to, was,
+  were, what, when, where, which, while, who, whom, why, will, with, would, you`), and **deduplicated
+  into a set** so term FREQUENCY never beats distinct-term COVERAGE. Both the query and each
+  candidate's surface are tokenized identically (one shared tokenizer, `src/text-terms.ts`).
+- **Candidate surface.** Each node contributes: its `eid` **with the `kip learn` `doc:<blob-oid>#`
+  namespace stripped** (so the literal term `doc` and the content-address oid do not match every
+  learned node); its node `kind`; **every prop KEY**; the string form of every prop VALUE covering the
+  read instant (numbers/booleans stringify; `null`/`BlobRef` values contribute nothing, though their
+  key is still indexed); and the `EdgeKind` of every **as-of-valid incident edge** (either direction).
+  Indexing prop keys and edge kinds is what lets a relation word ("employer", "owns") anchor a match,
+  not only entity names.
+- **Scoring.** A candidate's score is the count of **distinct query terms** present in its surface,
+  plus a dominant boost (`1_000_000`) iff its `content` prop equals `text` verbatim (the pre-D-52
+  exact-content seed, preserved as top rank).
+- **Tie-break / ordering.** Total order: score **descending**, then `eid` **ascending**. No clock, no
+  randomness, no Map-iteration/arrival-order dependence — two replicas holding the same fact set rank
+  identically.
+- **The admission bar is LOCAL to the candidate.** A node is seeded iff it is the exact-`content`
+  match **or its own surface matches ≥1 distinct query term**. Whether node X is seeded **never**
+  depends on what other, unrelated nodes the graph holds (retrieval locality). This deliberately
+  replaces the round-2 graph-global floor (`bestMatched >= 2`), which was non-local: it suppressed
+  correct single-term subject matches when nothing else in the graph matched ≥2 terms (a silent false
+  negative — itself a "surfaced, never silent" violation, docs/27 §0), and collapsed the instant any
+  coincidental ≥2-term node appeared (so it provided no fabrication protection). The
+  fabrication guard that bar was reaching for now lives in graph-QA as a **subject-anchoring relevance
+  check on the retrieved evidence** (kip-graph-qa.md §6.1b), which is where the question's subject and
+  the retrieved facts can actually be compared — not in the retrieval floor.
+- **Seed cap.** At most `k` seeds are admitted (the ranked prefix); the graph half then expands from
+  them under the `expand` bounds.
+- **`k`.** REQUIRED and a positive integer BOUND — `k <= 0`, non-integer, or non-number **throws**
+  `ERR_MALFORMED_INPUT` (never silently repaired; a negative `k` would otherwise index from the end of
+  the result array and return a wrong answer wearing a right shape).
+- **asOf.** Every surface read (prop covering values, incident edge validity) is taken at the same
+  resolved gate instant the rest of the pipeline reads at, so valid-time/asOf semantics are unchanged:
+  a prop value not yet valid, or an edge invalid at the instant, contributes nothing to the surface —
+  the seed set and its ranked order can differ across two `asOf` instants.
+- **Honest scope.** This is keyword matching, not semantic/embedding retrieval — a question sharing no
+  lexical term with the graph's surface correctly seeds nothing.
 
 ---
 

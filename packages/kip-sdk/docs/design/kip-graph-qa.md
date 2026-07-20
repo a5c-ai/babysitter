@@ -381,6 +381,28 @@ rule (N5) and mirrors the substrate's `Unknown`-not-invented posture.
    model can always decline to answer in *any* wording, so suppression is **reportable, not
    preventable** — what these rules guarantee is that it is reported as an abstention rather than
    disguised as an answer.
+   **1b. Subject-anchoring abstention — retrieval is lexical, relevance is checked HERE (round-3).**
+   `recall`'s `text` seed is a deterministic LEXICAL match (docs/26 §5.1a): it correctly surfaces any
+   node sharing ≥1 query term, INCLUDING a relation term ("work", "owns") that appears in an unrelated
+   node's prose. So a non-empty `usedFacts` does not by itself mean the retrieved facts are about the
+   question's **subject**. Before synthesizing, the microagent therefore computes a **subject-anchoring
+   surface** — the IDENTITY terms of every hydrated node/edge: its `eid` (with the `kip learn`
+   `doc:<blob>#` namespace stripped), its `kind`, its incident `EdgeKind`s, and the values of its
+   IDENTITY props (`name`/`title`/`label`) — deliberately EXCLUDING free-text values like
+   `content`/`description`. If **no** query term appears in that surface, the retrieved facts are not
+   about the subject (the overlap that surfaced them was an incidental relation term), and the
+   microagent **abstains** exactly as in §6.1: canonical phrase, empty citations, `abstained: true`,
+   and **`synthesize` is NEVER called** (no fabrication from parametric knowledge). This is where the
+   fabrication guard that "Where does Zara work?" needs actually lives: on a graph holding only Tal,
+   Tal's node is lexically retrieved (his `content` shares the verb "work"), but "zara" is absent from
+   every retrieved identity surface, so the answer is the honest abstention; on a graph holding Zara,
+   "zara" IS in her identity surface, so the question is answered. This REPLACES the round-2
+   graph-global recall floor (`bestMatched >= 2` in `computeRecall`), which could not distinguish these
+   two cases because it never inspected WHAT was retrieved — it counted how many terms some node in the
+   graph matched — and so both suppressed correct subject matches (a silent false negative) and
+   collapsed the moment any coincidental multi-term node appeared. The check is set-pure over the
+   hydrated facts + the question, the same determinism the retrieval half holds.
+
 2. **Partial retrieval ⇒ answer only the supported part.** If facts cover only part of the question,
    the answer states what the facts support and explicitly notes the unsupported remainder as unknown —
    it never fills the gap with an uncited claim.

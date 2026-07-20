@@ -47,6 +47,7 @@ import {
   type SelfWitnessedExcisionRecord,
 } from "./proj";
 import type { CellReducerAssociations } from "./cell-reducers";
+import { recallSearchTerms, stripLearnEidNamespace } from "./text-terms";
 import {
   collectRegisteredBindings,
   derivedFromEdgeEidFor,
@@ -2115,14 +2116,16 @@ export class KipRepo implements Repo {
     // already carry a vector rank); only `text` graph-seeds get the hop-0 rank.
     const rankGraph = new Map<EID, number>();
     const textSeeds = new Set<EID>();
-    // D-52 — the text half is DETERMINISTIC LEXICAL matching over each candidate's searchable
-    // surface (eid + kind + every string-valued prop, read at the SAME `gateInstant` so valid-time /
-    // asOf semantics are untouched), scored by the count of DISTINCT query terms it matches. It is a
-    // pure function of the fact set + query: explicit `toLowerCase` (never locale-sensitive), a fixed
-    // ASCII-alphanumeric tokenizer, a fixed stopword set, no clock, no randomness, and a total
-    // (score desc, eid asc) order over an eid-sorted scan — so two replicas holding the same facts
-    // rank identically. BACKWARD COMPATIBLE: an exact `props.content === q.text` match keeps its
-    // pre-D-52 seed status and is given a DOMINANT boost so it still ranks first.
+    // D-52 / round-3 — the text half is DETERMINISTIC LEXICAL matching over each candidate's
+    // searchable surface (`recallSurfaceTerms`: eid with the learn namespace stripped + kind + every
+    // prop KEY + every string-valued prop VALUE + every incident as-of-valid EDGE KIND, all read at
+    // the SAME `gateInstant` so valid-time/asOf semantics are untouched), scored by the count of
+    // DISTINCT query terms it matches. It is a pure function of the fact set + query: explicit
+    // `toLowerCase` (never locale-sensitive), a fixed ASCII-alphanumeric tokenizer, a fixed stopword
+    // set, no clock, no randomness, and a total (score desc, eid asc) order over an eid-sorted scan
+    // — so two replicas holding the same facts rank identically. BACKWARD COMPATIBLE: an exact
+    // `props.content === q.text` match keeps its pre-D-52 seed status and is given a DOMINANT boost
+    // so it still ranks first.
     // HONEST SCOPE: this is keyword matching, NOT semantic/embedding retrieval — a question sharing
     // no lexical term with the graph still (correctly) seeds nothing.
     const textSeedRank = new Map<EID, number>();
@@ -2131,36 +2134,56 @@ export class KipRepo implements Repo {
       // Pass 1 — the raw lexical measurement per candidate: the exact-`content` boost plus the count
       // of DISTINCT query terms present in the candidate's searchable surface.
       const measured: Array<{ eid: EID; exact: boolean; matched: number }> = [];
-      let bestMatched = 0;
       for (const eid of [...viewByEid.keys()].sort()) {
         const view = viewByEid.get(eid)!;
         const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
         let matched = 0;
         if (queryTerms.size > 0) {
-          const surface = recallSurfaceTerms(eid, view, gateInstant);
+          const surface = recallSurfaceTerms(
+            eid,
+            view,
+            gateInstant,
+            incidentEdgeKindsOf(projection, eid, gateInstant),
+          );
           for (const term of queryTerms) if (surface.has(term)) matched += 1;
         }
         if (exact || matched > 0) measured.push({ eid, exact, matched });
-        if (matched > bestMatched) bestMatched = matched;
       }
-      // Pass 2 — THE MINIMUM-RELEVANCE FLOOR (part of the deterministic recall contract, not a
-      // tunable). A node becomes a seed only when it clears one of three bars:
-      //   (a) it is the exact-`content` match (the pre-D-52 seed, unchanged); or
-      //   (b) it matches EVERY term of the query (the query is fully covered — this is what keeps a
-      //       one-term query like `recall({text:"4711"})` working); or
-      //   (c) SOME candidate in the graph matches at least TWO distinct query terms, i.e. the
-      //       question is genuinely ANCHORED in this graph, in which case a weaker single-term
-      //       overlap is corroborating evidence rather than a coincidence.
-      // What it excludes is exactly the fabrication hazard §8.4 pins: a multi-term question whose
-      // SUBJECT is absent from the graph ("Where does Zara work?") sharing one incidental term with
-      // an unrelated node ("work") no longer seeds retrieval, so the synthesizer is never invoked
-      // with facts that cannot answer the question. One incidental shared term, in a graph where
-      // nothing matches the question more strongly, is not relevance — and the honest answer to an
-      // unanswerable question is the §6.1 abstention, not an irrelevant fact set handed to a model.
-      // DETERMINISTIC and set-pure like the rest of the path: `bestMatched` is a function of the
-      // as-of fact set and the query alone (no clock, no randomness, no arrival order).
-      const clearsFloor = (m: { exact: boolean; matched: number }): boolean =>
-        m.exact || (m.matched > 0 && (m.matched === queryTerms.size || bestMatched >= 2));
+      // Pass 2 — THE ADMISSION BAR, and it is LOCAL TO THE CANDIDATE (round-3 finding #1, CRITICAL).
+      // A node is a seed iff it is the exact-`content` match, or its OWN surface matches at least one
+      // distinct query term:
+      //
+      //   clearsFloor(m) = m.exact || m.matched > 0
+      //
+      // Everything in that predicate is a function of THIS candidate and the query. Nothing else in
+      // the graph can change it. That property — call it RETRIEVAL LOCALITY — is the whole point, and
+      // it is pinned by an explicit property test (`debt-closure-d52.test.ts`, "retrieval is LOCAL").
+      //
+      // WHAT THIS REPLACES, AND WHY. Round 2 shipped a graph-GLOBAL third bar: a single-term match was
+      // admitted only if SOME OTHER node in the graph matched ≥2 distinct terms (`bestMatched >= 2`).
+      // It was introduced to keep §8.4's fabrication guard green, and it did — but as a coincidence
+      // switch, not as relevance:
+      //   • It collapses entirely the moment any coincidence exists. Ingest ONE unrelated note
+      //     containing "zara work" and the very query it was meant to suppress starts returning the
+      //     irrelevant note FIRST. So it never actually protected against fabrication.
+      //   • When no coincidence exists it suppresses CORRECT subject matches. On a repo holding
+      //     `zara` (`name: "Zara"`, `employer: "Acme Corp"`), `recall({text:"Where does Zara work?"})`
+      //     returned `[]` — the entity is right there. Worse, `recall({text:"Who is Zara?"})` returned
+      //     `["zara"]`, so ADDING true, relevant terms to a question DESTROYED retrieval.
+      //   • And it made retrieval non-local: whether `zara` came back depended on facts about
+      //     entirely different entities, which is not a property any retrieval contract can hold.
+      // A silent false negative is not a safe failure. Answering "I don't know" about a fact the
+      // substrate demonstrably holds is itself a violation of "surfaced, never silent" (docs/27 §0) —
+      // it just fails in the direction that is harder to notice.
+      //
+      // WHERE THE FABRICATION GUARD LIVES NOW. It lives where it can actually be evaluated: in
+      // `graph-qa`, which abstains when the QUESTION'S SUBJECT TERMS are absent from every retrieved
+      // fact (§6.1b). That is a relevance check on the EVIDENCE, and it can distinguish the two cases
+      // this bar provably cannot — "Where does Zara work?" against a graph holding only Tal (the
+      // retrieved facts are about Tal, so abstain) versus the same question against a graph holding
+      // Zara (the retrieved facts are about Zara, so answer). Retrieval's job is to surface what
+      // lexically matches; deciding whether that is an ANSWER is the answering layer's job.
+      const clearsFloor = (m: { exact: boolean; matched: number }): boolean => m.exact || m.matched > 0;
       const scored: Array<{ eid: EID; score: number }> = measured
         .filter(clearsFloor)
         .map((m) => ({ eid: m.eid, score: (m.exact ? RECALL_EXACT_CONTENT_BOOST : 0) + m.matched }));
@@ -4950,7 +4973,7 @@ export class KipRepo implements Repo {
   async learn(
     rawRef: BlobRefInput,
     opts: LearnOptions,
-  ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }> {
+  ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted"; fabricated: string[] }> {
     // D-33 FOLLOW-UP FIX (round 8 debt closure, attempt 3, INV-A2): the IDENTICAL guard as
     // `compileContextualQuery`/`executeSegment`/`getLearnResult` — this method's own `opts.asOf` is a
     // THIRD independent entry point into `findRegisteredManifest` (below), which threads it straight
@@ -5110,10 +5133,22 @@ export class KipRepo implements Repo {
       // `clock` option can never drive `elapsedMs` negative (which would silently defeat the
       // `maxWallMs` budget axis for the rest of this run, INV-A5).
       state.elapsedMs = Math.max(0, this.clock() - startClockMs);
+      // ROUND-3 FIX (MAJOR #5): stash THIS loss dispatch's out-of-band diagnostics (the model's
+      // `fabricated`/`missing` list) so the loop can retain the ACCEPTED iteration's `fabricated` for
+      // the audit fact. Read audit-only, never scored — `result.output` stays the bare loss number
+      // the guard below checks. Non-loss roles carry no diagnostics; the field stays `undefined`.
+      if (role === "loss") lastLossDiagnostics = result.diagnostics;
       if (result.exitCode !== 0) return null;
       if (!validateAgainstOutputSchema(result.output, manifest.outputSchema)) return null;
       return result.output;
     };
+
+    // ROUND-3 FIX (MAJOR #5): the loss diagnostics of the MOST RECENT loss dispatch (set inside
+    // `dispatchOne`), and the `fabricated` list of the iteration whose loss was ACCEPTED as best.
+    // Only the accepted iteration's fabrication indictment describes the facts that will actually be
+    // committed, so only it is recorded on the `kip:learn` audit fact.
+    let lastLossDiagnostics: unknown;
+    let acceptedFabricated: string[] = [];
 
     let status: "accept" | "exhausted" = "exhausted";
 
@@ -5228,6 +5263,9 @@ export class KipRepo implements Repo {
       if (measuredLoss < state.bestLoss) {
         state.bestLoss = measuredLoss;
         state.candidate = candidateFacts;
+        // ROUND-3 FIX (MAJOR #5): capture THIS iteration's `fabricated` indictment alongside its
+        // accepted candidate, so the audit fact records the fabrication list for the facts it commits.
+        acceptedFabricated = extractFabricated(lastLossDiagnostics);
       }
       state.iteration += 1;
     }
@@ -5327,6 +5365,12 @@ export class KipRepo implements Repo {
               loss: opts.loss,
               achievedLoss: state.bestLoss,
               accepted: state.candidate,
+              // ROUND-3 FIX (MAJOR #5): the loss model's FABRICATION indictment for the accepted
+              // reconstruction — the loop's only fabrication signal, previously stderr-only and thus
+              // absent from every durable record of the run. Recorded on the audit fact's value JSON
+              // (a `schema` target whose `cellKeyFor` is `null`, so it can never reach
+              // `orderKey`/reducers/trust — audit-only, exactly like the rest of this payload).
+              fabricated: acceptedFabricated,
             }),
             validFrom: 0,
             validTo: null,
@@ -5434,7 +5478,18 @@ export class KipRepo implements Repo {
     // silently coerced to some other sentinel — callers that need a JSON-safe form should apply the
     // SAME `Number.isFinite(...) ? value : null` normalization the internal `kip:learn-exhausted`
     // fact payload above already applies before persisting.
-    return { facts: committedFactIds, loss: state.bestLoss, status };
+    // ROUND-3 FIX (MAJOR #5): the accepted iteration's `fabricated` indictment is returned alongside
+    // the result so the `--json` surface (and any programmatic caller) sees the same fabrication
+    // signal now recorded on the audit fact — no longer stderr-only. Gated on `accept`: on
+    // `exhausted` NO reconstruction was committed (even if an iteration transiently improved
+    // `bestLoss`), so there are no committed facts to indict and the list is empty — matching the
+    // audit fact, which is only authored on the accept branch.
+    return {
+      facts: committedFactIds,
+      loss: state.bestLoss,
+      status,
+      fabricated: status === "accept" ? acceptedFabricated : [],
+    };
   }
 
   /**
@@ -6007,45 +6062,78 @@ function coveringPropValue(cell: PropCell | undefined, at: bigint | null): PropV
 const RECALL_EXACT_CONTENT_BOOST = 1_000_000;
 
 /**
- * D-52 — the fixed, locale-independent stopword set dropped from BOTH the query and the surface, so
- * function words ("which", "the", "and", "why", "was", "is", …) do not make every node a seed.
- * Deliberately small and closed: it is part of the deterministic recall contract, not a tunable.
+ * D-52 / round-3 — a candidate node's SEARCHABLE SURFACE, built from FOUR sources, all of them
+ * LOCAL to the candidate (round-3 finding #1: whether node X is retrievable must never depend on
+ * what OTHER nodes the graph happens to hold):
+ *
+ *  1. its `eid`, with the `kip learn` `doc:<blob-oid>#` namespace STRIPPED ({@link
+ *     stripLearnEidNamespace}) so the literal term `doc` and the content-address oid do not match
+ *     every learned node;
+ *  2. its node `kind`;
+ *  3. every PROP KEY it carries, and
+ *  4. the string form of every prop VALUE covering `at`;
+ *  5. the `EdgeKind` of every as-of-valid edge INCIDENT to it (either direction).
+ *
+ * (3) and (5) are the round-3 addition, and they exist for one reason: RELATION WORDS need somewhere
+ * to anchor. A question is rarely "Zara" — it is "Zara's employer" or "who owns Ledger". Before this,
+ * the relation half of such a question could only match if some human happened to repeat the word
+ * inside a free-text prop value, so a question phrased with the graph's OWN vocabulary — the exact
+ * prop key holding the answer, the exact edge kind connecting the entities — scored ZERO on it. The
+ * schema is text the modeller wrote about the entity; indexing it is indexing what the node says.
+ *
+ * `at` is the SAME gate instant the rest of `computeRecall` reads at (props via `coveringPropValue`,
+ * edges via `edgeValidAt`), so valid-time/asOf semantics are unchanged: a prop whose value is not yet
+ * valid contributes nothing, and an edge invalid at the instant contributes no edge kind.
+ *
+ * Numbers/booleans stringify; `null` and `BlobRef` props contribute no VALUE (a blob handle is an
+ * address, not text) — but their KEY is still indexed, because the key is still schema vocabulary.
  */
-const RECALL_STOPWORDS: ReadonlySet<string> = new Set([
-  "a", "an", "and", "are", "as", "at", "be", "been", "but", "by", "did", "do", "does", "for",
-  "from", "had", "has", "have", "how", "i", "if", "in", "into", "is", "it", "its", "of", "on", "or",
-  "that", "the", "their", "them", "then", "there", "these", "they", "this", "to", "was", "were",
-  "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "you",
-]);
-
-/**
- * D-52 — the deterministic tokenizer: explicit `toLowerCase()` (NOT `toLocaleLowerCase`, which is
- * locale-sensitive), split on runs of ASCII alphanumerics, stopwords dropped, deduplicated into a
- * set (so term FREQUENCY never beats distinct-term COVERAGE). No clock, no randomness.
- */
-function recallSearchTerms(text: string): Set<string> {
-  const terms = new Set<string>();
-  for (const match of text.toLowerCase().matchAll(/[a-z0-9]+/g)) {
-    const term = match[0];
-    if (!RECALL_STOPWORDS.has(term)) terms.add(term);
-  }
-  return terms;
-}
-
-/**
- * D-52 — a candidate node's SEARCHABLE SURFACE: its `eid`, its node `kind`, and the string form of
- * every prop value covering `at` (the SAME gate instant the rest of `computeRecall` reads at, so
- * valid-time/asOf semantics are unchanged). Numbers/booleans stringify; `null` and `BlobRef` props
- * contribute nothing (a blob handle is an address, not text).
- */
-function recallSurfaceTerms(eid: EID, view: NodeView, at: bigint | null): Set<string> {
-  const parts: string[] = [eid, view.kind];
+function recallSurfaceTerms(
+  eid: EID,
+  view: NodeView,
+  at: bigint | null,
+  incidentEdgeKinds: readonly string[] = [],
+): Set<string> {
+  const parts: string[] = [stripLearnEidNamespace(eid), view.kind];
   for (const prop of Object.keys(view.props).sort()) {
+    parts.push(prop); // (3) the prop KEY — schema vocabulary is searchable text.
     const value = coveringPropValue(view.props[prop], at);
     if (typeof value === "string") parts.push(value);
     else if (typeof value === "number" || typeof value === "boolean") parts.push(String(value));
   }
+  for (const kind of [...incidentEdgeKinds].sort()) parts.push(kind); // (5), sorted ⇒ order-free.
   return recallSearchTerms(parts.join(" "));
+}
+
+/**
+ * The `EdgeKind`s of every as-of-valid edge incident to `eid`, in ascending order (a SET, so the
+ * result is independent of `edgesTouching`'s iteration order — determinism, INV-5 m-7).
+ */
+function incidentEdgeKindsOf(
+  projection: ReturnType<typeof proj>,
+  eid: EID,
+  at: bigint | null,
+): string[] {
+  const kinds = new Set<string>();
+  for (const edgeEid of projection.edgesTouching(eid, "both")) {
+    if (!projection.edgeValidAt(edgeEid, at)) continue;
+    const edgeView = projection.getEdge(edgeEid);
+    if (edgeView) kinds.add(edgeView.kind);
+  }
+  return [...kinds].sort();
+}
+
+/**
+ * ROUND-3 FIX (MAJOR #5) — pull the `fabricated` string list out of a loss dispatch's out-of-band
+ * `MicroagentResult.diagnostics` (a `LearnDiagnostic`), defensively. The channel is untyped (`unknown`)
+ * and caller-supplied, so anything that is not a `{ fabricated: string[] }` shape yields `[]` rather
+ * than a throw — a malformed diagnostic must never be able to fail an otherwise-good `learn()` accept.
+ */
+function extractFabricated(diagnostics: unknown): string[] {
+  if (diagnostics === null || typeof diagnostics !== "object") return [];
+  const raw = (diagnostics as { fabricated?: unknown }).fabricated;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === "string");
 }
 
 /** m-4: a surfaced cell reads CONFLICTED iff it carries an unresolved `conflict` segment (or its

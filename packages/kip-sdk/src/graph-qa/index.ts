@@ -40,6 +40,15 @@ import type {
   TraversalSpec,
 } from "../index";
 import { KipError } from "../index";
+import { recallSearchTerms, stripLearnEidNamespace } from "../text-terms";
+
+/**
+ * The IDENTITY prop keys whose VALUES name an entity (round-3 §6.1b). A node's `name`/`title`/`label`
+ * is what a human calls it — so it is part of the subject-anchoring surface, unlike a free-text
+ * `content`/`description` value (which can share an incidental relation term with an unrelated
+ * question). Closed and small on purpose: it is part of the relevance contract, not a tunable.
+ */
+const IDENTITY_PROPS: ReadonlySet<string> = new Set(["name", "title", "label"]);
 
 /** The graph-QA input lens (kip-graph-qa.md §2 `inputSchema`): a question + an optional read lens. */
 export interface GraphQaInput {
@@ -341,16 +350,36 @@ export async function answerQuestion(
     for (const cand of rf.candidates ?? []) usedFacts.add(cand);
   };
 
+  // ── SUBJECT-ANCHORING SURFACE (round-3 finding #3 / §6.1b). The IDENTITY terms of everything we
+  // hydrate: each node/edge's `eid` (learn namespace stripped) + its `kind` + the values of its
+  // IDENTITY props (`name`/`title`/`label`). This is deliberately NARROWER than the whole retrieved
+  // surface — it excludes free-text prop VALUES like `content`/`description` — because it answers a
+  // different question than recall did. Recall asks "does this node share ANY term with the query?"
+  // (so relation words can anchor a seed); the anchoring check asks "is any retrieved fact actually
+  // ABOUT the question's SUBJECT?", and a node whose only overlap with the question is an incidental
+  // relation term buried in its prose (Tal's `content: "Where does Tal work?"` sharing the verb
+  // "work" with a question about Zara) is NOT about that subject. Building it from IDENTITY only is
+  // what lets the check distinguish "Zara is in the graph" (answer) from "only Tal is, and he shares
+  // the word 'work'" (abstain) — the two cases a graph-global recall floor provably cannot tell
+  // apart. Same deterministic tokenizer as recall, so "present"/"absent" means the same thing here. */
+  const subjectSurface = new Set<string>();
+  const addIdentity = (text: string): void => {
+    for (const term of recallSearchTerms(text)) subjectSurface.add(term);
+  };
+
   for (const eid of [...nodeEids].sort()) {
     if (!inScope(eid)) continue;
     // eslint-disable-next-line no-await-in-loop -- sequential hydration keeps the read deterministic.
     const node = await repo.getNode(eid, asOf);
     if (!node) continue;
+    addIdentity(stripLearnEidNamespace(eid));
+    addIdentity(node.kind);
     for (const prop of Object.keys(node.props).sort()) {
       const seg = coveringSegment(node.props[prop]);
       if (!seg) continue;
       if (seg.kind === "value") {
         // A node-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2).
+        if (IDENTITY_PROPS.has(prop) && typeof seg.value === "string") addIdentity(seg.value);
         record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
       } else {
         // A `conflict` segment is surfaced as an explicit contradiction citing ALL candidates —
@@ -366,6 +395,8 @@ export async function answerQuestion(
 
   for (const eid of [...edgeViews.keys()].sort()) {
     const edge = edgeViews.get(eid)!;
+    addIdentity(stripLearnEidNamespace(eid));
+    addIdentity(edge.kind);
     // eslint-disable-next-line no-await-in-loop -- sequential read; binds the edge to its signed fact.
     const factId = await repo.edgeExistenceFactId(eid, asOf);
     if (factId !== null) {
@@ -435,6 +466,25 @@ export async function answerQuestion(
   // citations/usedFacts, `abstained: true`, and — critically — `synthesize` is NEVER called (no
   // fabrication from parametric knowledge, N5). ────────────────────────────────────────────────────
   if (usedFacts.size === 0) {
+    return { answer: ABSTENTION_ANSWER, abstained: true, citations: [], usedFacts: [] };
+  }
+
+  // ── 4b. SUBJECT-ANCHORING ABSTENTION (round-3 finding #3 / §6.1b) — the fabrication guard, moved to
+  // the layer that can actually evaluate it. Facts WERE retrieved, but if NONE of them is about the
+  // question's subject — i.e. no query term appears in the IDENTITY of any retrieved node/edge
+  // (`subjectSurface`) — then the overlap that surfaced them was an incidental relation term, not
+  // relevance, and handing those facts to a synthesizer is precisely the "Where does Zara work?"
+  // fabrication setup (§8.4): the model would answer about the wrong entity from parametric knowledge.
+  // The honest outcome is the §6.1 abstention. This REPLACES the round-2 graph-global recall floor
+  // (`bestMatched >= 2` in `computeRecall`), which could not tell "Zara is present" from "only Tal is,
+  // and he shares the word 'work'" because it never looked at WHAT was retrieved — only at how many
+  // terms SOME node in the graph happened to match. Because the check reads the identity of what was
+  // actually retrieved, it distinguishes the two: Zara-present answers, Zara-absent abstains. And it
+  // is set-pure over the hydrated facts + the query — the same determinism the retrieval half holds.
+  // `synthesize` is NEVER called on this path (no fabrication from parametric knowledge, N5).
+  const subjectTerms = recallSearchTerms(question);
+  const subjectAnchored = [...subjectTerms].some((t) => subjectSurface.has(t));
+  if (!subjectAnchored) {
     return { answer: ABSTENTION_ANSWER, abstained: true, citations: [], usedFacts: [] };
   }
 

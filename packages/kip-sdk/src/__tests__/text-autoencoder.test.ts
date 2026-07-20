@@ -1085,4 +1085,106 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       ).rejects.toThrow(/not-a-learn-manifest/);
     });
   });
+
+  // ══════════════════════════════════════════════════════════════════════════════════════════════
+  // ROUND-3 — kip:unstated prop-only projection (ADR-B10d trap 5 / docs/32) — previously ZERO coverage
+  // ══════════════════════════════════════════════════════════════════════════════════════════════
+
+  describe("round-3 — a prop-only accepted candidate set projects `kind === 'kip:unstated'`, never a blank kind", () => {
+    it("accepting a candidate set that names ONLY a node-prop (no explicit existence candidate) auto-mints an existence fact stamped `kip:unstated`", async () => {
+      // The narrow trap-5 shape: the accepted set carries a node-prop for `unstated/entity` but NEVER
+      // a `{kind:"node", eid, nodeKind}` existence candidate. `ensureExistenceFor` must auto-mint the
+      // existence fact, and (ADR-B10d) it stamps `kip:unstated` rather than leaving the kind blank —
+      // the machine-readable "no kind was ever asserted", distinguishable from a real domain kind.
+      const eid = "unstated/entity";
+      const m = roleManifests("unstated");
+      const { dispatch } = makeScriptedDispatch({
+        [m.encode.name]: () => encodeOk([nodePropAssert(eid, "note", "prop-only, no existence candidate")]),
+        [m.decode.name]: () => decodeOk(),
+        [m.learner.name]: () => learnerOk([nodePropAssert(eid, "note", "prop-only, no existence candidate")]),
+        [m.loss.name]: () => lossOk(0.05),
+      });
+      const repo = ownedRepo("unstated", { dispatchMicroagent: dispatch });
+      for (const manifest of Object.values(m)) await registerManifest(repo, manifest);
+      const rawRef = await putDocument(repo, DOCUMENT);
+
+      const result = await repo.learn(rawRef, baseLearnOptions({ threshold: 0.25, ...selectors(m) }));
+      expect(result.status).toBe("accept");
+      const node = await repo.getNode(eid);
+      expect(node).not.toBeNull();
+      // The heart of the test: the projected kind is the sentinel, NOT "" and NOT a fabricated type.
+      expect(node?.kind).toBe("kip:unstated");
+      expect(node?.props.note?.segments.at(-1)?.value).toBe("prop-only, no existence candidate");
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════════════════════════
+  // ROUND-3 (finding #5) — the loss model's `fabricated` indictment is DURABLE: on the audit fact +
+  // returned from learn(), not stderr-only. And the loss RETURN VALUE stays a BARE number.
+  // ══════════════════════════════════════════════════════════════════════════════════════════════
+
+  describe("round-3 finding #5 — `fabricated` is recorded on the kip:learn audit fact and returned, boundary-safe", () => {
+    it("an accepted run carries the accepted iteration's `fabricated` list on the audit fact's value JSON and on the learn() result", async () => {
+      const eid = "doc:fab-entity";
+      const m = roleManifests("fabricated");
+      const FABRICATED = ["invented a PhD Ada never held", "a birth year not in the document"];
+      // The loss dispatch returns the BARE number on `output` (unchanged contract) and surfaces the
+      // model's fabrication indictment OUT OF BAND on `diagnostics` — exactly what `makeLearnDispatch`
+      // does from the real loss body. `learn()` must retain the ACCEPTED iteration's list.
+      const lossWithDiagnostics = (loss: number): MicroagentResult => ({
+        exitCode: 0,
+        output: loss,
+        elapsedMs: 0,
+        diagnostics: { role: "loss", loss, missing: [], fabricated: FABRICATED },
+      });
+      const { dispatch } = makeScriptedDispatch({
+        [m.encode.name]: () => encodeOk([nodePropAssert(eid, "name", "Ada")]),
+        [m.decode.name]: () => decodeOk(),
+        [m.learner.name]: () => learnerOk([nodePropAssert(eid, "name", "Ada")]),
+        [m.loss.name]: () => lossWithDiagnostics(0.05),
+      });
+      const repo = ownedRepo("fabricated", { dispatchMicroagent: dispatch });
+      for (const manifest of Object.values(m)) await registerManifest(repo, manifest);
+      const rawRef = await putDocument(repo, DOCUMENT);
+
+      const asOf = { validTime: 1_000_000 };
+      const result = await repo.learn(rawRef, baseLearnOptions({ threshold: 0.25, asOf, ...selectors(m) }));
+      expect(result.status).toBe("accept");
+
+      // (1) Returned from learn() — so `--json` (which now emits `result.fabricated`) is no longer blind.
+      expect(result.fabricated).toEqual(FABRICATED);
+
+      // (2) Durable on the kip:learn audit fact's value JSON — read back via getLearnResult (pinned
+      // asOf so the ontologyRef key is deterministic).
+      const back = await repo.getLearnResult(rawRef, asOf, selectors(m));
+      expect(back.status).toBe("resolved");
+      if (back.status !== "resolved") throw new Error("expected a resolved kip:learn fact");
+      const value = JSON.parse(back.fact.value as string) as { fabricated?: unknown };
+      expect(value.fabricated).toEqual(FABRICATED);
+    });
+
+    it("an exhausted run records no fabrication (nothing was accepted) and returns an empty list", async () => {
+      const eid = "doc:no-accept";
+      const m = roleManifests("fab-exhausted");
+      const { dispatch } = makeScriptedDispatch({
+        [m.encode.name]: () => encodeOk([nodePropAssert(eid, "name", "Ada")]),
+        [m.decode.name]: () => decodeOk(),
+        [m.learner.name]: () => learnerOk([nodePropAssert(eid, "name", "Ada")]),
+        // Every loss above threshold ⇒ never accepts, even though a fabrication list is reported.
+        [m.loss.name]: (): MicroagentResult => ({
+          exitCode: 0,
+          output: 0.9,
+          elapsedMs: 0,
+          diagnostics: { role: "loss", loss: 0.9, missing: [], fabricated: ["should not be recorded"] },
+        }),
+      });
+      const repo = ownedRepo("fab-exhausted", { dispatchMicroagent: dispatch });
+      for (const manifest of Object.values(m)) await registerManifest(repo, manifest);
+      const rawRef = await putDocument(repo, DOCUMENT);
+
+      const result = await repo.learn(rawRef, baseLearnOptions({ threshold: 0.25, maxIterations: 2, ...selectors(m) }));
+      expect(result.status).toBe("exhausted");
+      expect(result.fabricated).toEqual([]);
+    });
+  });
 });

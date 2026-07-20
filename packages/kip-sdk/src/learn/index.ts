@@ -57,8 +57,8 @@ const ROLE_BY_MANIFEST_NAME: Readonly<Record<string, LearnRole>> = {
   [LEARN_MANIFEST_NAMES.loss]: "loss",
 };
 
-/** The per-role spawn budget when the invocation carries no `timeout` of its own. */
-const DEFAULT_LEARN_TIMEOUT_MS = 120_000;
+/** The per-role spawn budget when the invocation carries no `timeout` of its own (ADR-B10b). */
+const DEFAULT_LEARN_TIMEOUT_MS = 300_000;
 
 /**
  * The factory's deps. The `Pick` is the whole point (ADR-B10, INV-A1): the bodies are STRUCTURALLY
@@ -193,8 +193,34 @@ export function makeLearnDispatch(deps: LearnDispatchDeps): DispatchMicroagentFn
       );
     }
     try {
-      const output = await BODIES[role](deps, invocation);
-      return { exitCode: 0, output, elapsedMs: Date.now() - started };
+      // ROUND-3 FIX (MAJOR #5): capture the loss body's diagnostic (its `fabricated`/`missing` list)
+      // onto the result's OUT-OF-BAND `diagnostics` channel WITHOUT touching `output` (which must
+      // stay the bare loss number). The wrapper both CAPTURES the diagnostic and FORWARDS it to the
+      // caller's `onDiagnostic` (stderr), so the operator stream is unchanged; the orchestrator now
+      // ALSO gets it, audit-only, for the `kip:learn` fact's value JSON. Forwarding is best-effort
+      // (a throwing reporter is swallowed here too, belt-and-braces with `lossBody`'s own guard).
+      let captured: LearnDiagnostic | undefined;
+      const capturingDeps: LearnDispatchDeps =
+        role === "loss"
+          ? {
+              ...deps,
+              onDiagnostic: (d) => {
+                captured = d;
+                try {
+                  deps.onDiagnostic?.(d);
+                } catch {
+                  /* best-effort forward */
+                }
+              },
+            }
+          : deps;
+      const output = await BODIES[role](capturingDeps, invocation);
+      return {
+        exitCode: 0,
+        output,
+        elapsedMs: Date.now() - started,
+        ...(captured !== undefined ? { diagnostics: captured } : {}),
+      };
     } catch (e) {
       // CARRY THE REASON (D-49(2)): the operator gets the precise sentence, not "exitCode 1".
       return {
@@ -316,13 +342,24 @@ const lossBody: LearnBody = async (deps, invocation) => {
   // signal the loop ever computes — so it goes OUT OF BAND to the operator (ADR-B10b/B10e) while the
   // return value stays bare. `onDiagnostic` is best-effort reporting and must never be able to fail
   // an otherwise-good measurement, hence no `await` and no state.
-  deps.onDiagnostic?.({
-    role: "loss",
-    loss: value,
-    missing: stringList(record.missing),
-    fabricated: stringList(record.fabricated),
-    ...(typeof record.rationale === "string" ? { rationale: record.rationale } : {}),
-  });
+  //
+  // ROUND-3 FIX (MAJOR #4): the reporter is CALLER-INJECTED and can throw. This call sits inside
+  // `lossBody`'s try-scope (its errors are what `learn()` scores as a dispatch failure), so an
+  // exception from a throwing `onDiagnostic` would turn a VALID, finite loss measurement into a
+  // "failed iteration" — a FABRICATED "exhausted". Reporting is best-effort by contract, so its
+  // failure is swallowed here and can never corrupt the measurement it merely narrates. Pinned by
+  // `round2-learn-critic-fixes.test.ts` ("a throwing onDiagnostic does not fail a valid loss").
+  try {
+    deps.onDiagnostic?.({
+      role: "loss",
+      loss: value,
+      missing: stringList(record.missing),
+      fabricated: stringList(record.fabricated),
+      ...(typeof record.rationale === "string" ? { rationale: record.rationale } : {}),
+    });
+  } catch {
+    // Best-effort diagnostics: a broken reporter must not fail an otherwise-good measurement.
+  }
   // BARE (ADR-B10d trap 2) — `learn()` reads `lossOutput` unwrapped at `:5156-5161`; an object here
   // would score every iteration as infinite loss and every run would return "exhausted".
   return value;

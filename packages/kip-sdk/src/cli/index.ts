@@ -719,18 +719,13 @@ async function cmdIndex(a: HandlerArgs): Promise<number> {
 async function cmdLearn(a: HandlerArgs): Promise<number> {
   const { flags, positionals, write, werr, json } = a;
 
-  // ── THE OPT-IN GATE, FIRST (ADR-B10f) ───────────────────────────────────────────────────────────
-  // `kip learn` is not one model call: it is up to `3 × maxIterations` spawns of the authenticated
-  // local `claude` CLI, each with a multi-minute timeout — real, unbudgeted spend. The containment
-  // ADR-B10f claims is only real if something ENFORCES it, so the gate is consulted here, before the
-  // repo is opened, before the document is blobbed, and before any body can spawn anything. It is
-  // deliberately the FIRST statement in the command: a refusal must cost nothing and change nothing.
-  const gate = resolveLearnLiveGate({ env: a.ctx.env, probe: probeHarnessCli });
-  if (!gate.enabled) {
-    werr(`kip: learn: ${gate.reason ?? "the live kip learn path is disabled"}\n`);
-    return 2;
-  }
-
+  // ── USAGE VALIDATION OF `<file>` FIRST (round-3 finding #6). A missing/absent `<file>` is a USAGE
+  // error (exit 2), and it must be REPORTED as one — not folded into the live-gate refusal below. The
+  // round-2 ordering (gate first) meant `kip learn` with no file, or a typo'd path, on a machine
+  // without `KIP_LEARN_LIVE` exited with the GATE's code and the GATE's message, hiding the real
+  // (and more actionable) usage mistake behind an environment message. Presence + existence are
+  // side-effect-free reads, so checking them before the gate still "costs nothing and changes
+  // nothing" (ADR-B10f's refusal invariant) — no repo is opened, no document is blobbed. ────────────
   const file = positionals[1];
   if (!file) {
     werr("kip: learn requires a <file>\n");
@@ -741,6 +736,21 @@ async function cmdLearn(a: HandlerArgs): Promise<number> {
     werr(`kip: learn: no such file: ${filePath}\n`);
     return 2;
   }
+
+  // ── THE OPT-IN GATE (ADR-B10f), with a DISTINCT exit code (round-3 finding #6) ───────────────────
+  // `kip learn` is not one model call: it is up to `3 × maxIterations` spawns of the authenticated
+  // local `claude` CLI, each with a multi-minute timeout — real, unbudgeted spend. The containment
+  // ADR-B10f claims is only real if something ENFORCES it, so the gate is consulted here, before the
+  // repo is opened, before the document is blobbed, and before any body can spawn anything. A refusal
+  // costs nothing and changes nothing. Exit code 7 is the gate refusal's OWN code, distinct from the
+  // usage-error 2 above: a script can now tell "you asked wrong" (2) from "the live path is disabled
+  // in this environment" (7), which are different operator actions (fix the command vs. set the env).
+  const gate = resolveLearnLiveGate({ env: a.ctx.env, probe: probeHarnessCli });
+  if (!gate.enabled) {
+    werr(`kip: learn: ${gate.reason ?? "the live kip learn path is disabled"}\n`);
+    return 7;
+  }
+
   let bytes: Buffer;
   try {
     bytes = readFileSync(filePath);
@@ -863,6 +873,10 @@ async function cmdLearn(a: HandlerArgs): Promise<number> {
       status: result.status,
       loss: lossJson,
       facts: result.facts,
+      // ROUND-3 FIX (MAJOR #5): the accepted reconstruction's fabrication indictment, now durable on
+      // the audit fact AND surfaced here — `--json` was previously blind to the only fabrication
+      // signal the loop computes.
+      fabricated: result.fabricated,
     });
   } else {
     const lossText = lossJson === null ? "(none measured)" : String(lossJson);

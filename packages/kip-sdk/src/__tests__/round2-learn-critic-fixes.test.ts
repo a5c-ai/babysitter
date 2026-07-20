@@ -344,12 +344,57 @@ describe("round-2 finding 3 — `kip learn` enforces the KIP_LEARN_LIVE opt-in g
     });
 
     expect(code).not.toBe(0);
+    // ROUND-3 (finding #6): the gate refusal has its OWN exit code (7), distinct from the usage-error
+    // 2 — a script can tell "the live path is disabled here" from "you asked wrong".
+    expect(code).toBe(7);
     expect(err.join("")).toContain("KIP_LEARN_LIVE");
     // The gate is PURE when the env var is absent: it does not even consult the probe, so a machine
     // with no `claude` binary and a machine with one behave identically here.
     expect(err.join("")).toContain("The probe was NOT consulted.");
     expect(opened, "nothing may be opened, blobbed or authored before the gate passes").toBe(0);
     expect(out.join("")).toBe("");
+  });
+
+  // ROUND-3 (finding #6) — a missing `<file>` is a USAGE error (exit 2), reported BEFORE the gate, so
+  // it is never disguised as a gate refusal even when the live path is disabled.
+  it("a missing <file> is exit 2 (usage), not the gate's exit 7, even with KIP_LEARN_LIVE unset", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "kip-r3-nofile-"));
+    dirs.push(dir);
+    const err: string[] = [];
+    let opened = 0;
+    const code = await runCli(["learn"], {
+      cwd: dir,
+      env: {}, // gate disabled — but the usage error must still win, and it is checked first.
+      stdout: () => {},
+      stderr: (c) => err.push(c),
+      openRepo: async (): Promise<Repo> => {
+        opened += 1;
+        throw new Error("must not open a repo for a usage error");
+      },
+    });
+    expect(code).toBe(2);
+    expect(err.join("")).toContain("requires a <file>");
+    expect(err.join("")).not.toContain("KIP_LEARN_LIVE"); // not reported as a gate refusal
+    expect(opened).toBe(0);
+  });
+
+  // ROUND-3 (finding #6) — a non-existent <file> is likewise exit 2 (usage), before the gate.
+  it("a non-existent <file> is exit 2 (usage), reported before the gate", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "kip-r3-badfile-"));
+    dirs.push(dir);
+    const err: string[] = [];
+    const code = await runCli(["learn", join(dir, "does-not-exist.md")], {
+      cwd: dir,
+      env: {},
+      stdout: () => {},
+      stderr: (c) => err.push(c),
+      openRepo: async (): Promise<Repo> => {
+        throw new Error("must not open a repo for a usage error");
+      },
+    });
+    expect(code).toBe(2);
+    expect(err.join("")).toContain("no such file");
+    expect(err.join("")).not.toContain("KIP_LEARN_LIVE");
   });
 });
 
@@ -419,6 +464,44 @@ describe("round-2 finding 6 — `missing`/`fabricated` are surfaced out of band 
     expect(diagnostics[0].missing).toEqual([]);
     expect(diagnostics[0].fabricated).toEqual([]);
     expect(diagnostics[0].rationale).toBeUndefined();
+  });
+
+  // ROUND-3 (finding #4) — a THROWING reporter must never fail a valid loss measurement.
+  it("a throwing onDiagnostic does NOT fail the iteration — the BARE loss is still returned (never a fabricated 'exhausted')", async () => {
+    const repo = ownedRepo("loss-throwing-diagnostic");
+    const original = await repo.putBlob(Buffer.from(DOCUMENT_A, "utf8"));
+    const reconstructed = await repo.putBlob(Buffer.from("Ada worked on something.\n", "utf8"));
+    const run = async (): Promise<HarnessCliRun> => ({
+      exitCode: 0,
+      stdout: JSON.stringify({
+        result: JSON.stringify({ loss: 0.2, missing: [], fabricated: ["x"], rationale: "r" }),
+      }),
+    });
+    // A reporter that throws on every call. `lossBody` (and `makeLearnDispatch`'s capturing wrapper)
+    // call it inside the try-scope whose failure `learn()` scores as a dispatch failure — so an
+    // unguarded throw here would turn a valid 0.2 loss into a failed iteration, i.e. a FABRICATED
+    // "exhausted". The round-3 fix wraps the call in try/catch; this pins it.
+    const dispatch = makeLearnDispatch({
+      repo,
+      run,
+      probe: alwaysAvailable,
+      onDiagnostic: () => {
+        throw new Error("reporter is broken");
+      },
+    });
+
+    const result = await dispatch({
+      id: `learn:loss:${LEARN_MANIFEST_NAMES.loss}@1.0.0:3`,
+      manifest: { name: LEARN_MANIFEST_NAMES.loss, version: "1.0.0" },
+      input: { rawRef: original, reconstructed },
+      timeout: 90_000,
+    });
+
+    // The measurement survives the broken reporter: exit 0, the BARE number, and the fabrication list
+    // still captured out-of-band on `diagnostics` (so the audit fact still gets it).
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toBe(0.2);
+    expect((result.diagnostics as { fabricated?: unknown } | undefined)?.fabricated).toEqual(["x"]);
   });
 });
 

@@ -256,17 +256,51 @@ describe("graph-qa §8.4 — asking about an entity with ZERO covering facts abs
     // THE ORIGINAL QUESTION, RESTORED. Asking about an absent entity ('Zara') in a graph that knows
     // only about Tal must abstain WITHOUT invoking the model — that is the property §8.4 exists to
     // pin, and it is a real fabrication guard: handing a synthesizer Tal's facts and the question
-    // "Where does Zara work?" is precisely the setup in which a model answers about the wrong
-    // person. Under naive lexical recall the single incidental term "work" seeded Tal's node and
-    // this guard fired; the fix is the MINIMUM-RELEVANCE FLOOR in `computeRecall`'s text half (a
-    // lone single-term overlap seeds nothing unless the query is fully covered or some node matches
-    // ≥2 distinct terms), NOT a softer question.
+    // "Where does Zara work?" is precisely the setup in which a model answers about the wrong person.
+    // ROUND-3: the fix lives HERE, in graph-QA, not in the recall floor. Recall's `text` seed is a
+    // LOCAL lexical match (docs/26 §5.1a), so the incidental term "work" (in Tal's `content`) DOES
+    // seed Tal's node — recall is not the place to decide relevance. `answerQuestion` then applies the
+    // SUBJECT-ANCHORING check (§6.1b): the subject term "zara" is absent from every retrieved node's
+    // IDENTITY surface (Tal's eid/kind/name — `content` is excluded), so the retrieved facts are not
+    // about the question and the honest outcome is abstention, with `synthesize` never called. This
+    // REPLACES the round-2 graph-global recall floor (`bestMatched >= 2`), which suppressed correct
+    // single-term SUBJECT matches too (it could not tell this case from the Zara-present one).
     const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
     expect(result.abstained).toBe(true);
     expect(result.answer).toBe(ABSTENTION_ANSWER);
     expect(result.citations).toHaveLength(0);
     expect(result.usedFacts).toHaveLength(0);
     expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  // ROUND-3 (finding #3) — the OTHER half of the §8.4 property: the SAME natural question, whose
+  // relation lives in a PROP KEY, must be ANSWERED when the subject IS in the graph. Together with the
+  // Zara-absent case above this pins that the subject-anchoring check is a genuine relevance test —
+  // not a blanket suppression of "Where does X work?" questions. A guard that made §8.4 pass by
+  // suppressing retrieval (the round-2 recall floor) FAILS this test, because it also suppressed the
+  // present-subject case; the honest fix (abstain on retrieved-evidence relevance) passes both.
+  it("ROUND-3: when the subject IS in the graph, the same multi-term question (relation in a prop KEY) is ANSWERED, not abstained", async () => {
+    const repo = freshRepo("answer-entity-present");
+    // Zara is present, with her employer under the exact prop key the question's relation names.
+    await assertNode(repo, "person/zara", "person");
+    await assertProp(repo, "person/zara", "name", "Zara");
+    await assertProp(repo, "person/zara", "employer", "Acme Corp");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const emp = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "employer");
+      return {
+        answer: `Zara works at ${String(emp?.value ?? "")}.`,
+        citations: emp ? [{ factId: emp.factId, eid: emp.eid, prop: "employer", quote: String(emp.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    // The subject 'zara' anchored the answer, and the employer fact was in the model context.
+    expect((seen?.facts ?? []).some((f) => f.eid === "person/zara")).toBe(true);
+    expect(result.answer).toContain("Acme Corp");
+    expect(result.citations.some((c) => c.prop === "employer")).toBe(true);
   });
 });
 
@@ -961,16 +995,23 @@ function validateAgainstSchema(value: unknown, schema: JsonSchema, path = "$"): 
 }
 
 // ────────────────────────────────────────────────────────────────────────────────────────────────
-// ROUND-2 CRITIC FIXES (D-52 follow-up).
+// ROUND-2 CRITIC FIXES (D-52 follow-up) — CORRECTED IN ROUND-3.
 //
-// (A) THE MINIMUM-RELEVANCE FLOOR — the deterministic recall contract's answer to "how little lexical
-//     overlap is still relevance?". D-52 replaced exact-`content` equality with distinct-term
-//     matching, which made a learn-shaped graph discoverable but also made ONE incidental shared term
-//     enough to seed retrieval — so a question about an entity the graph has never heard of
-//     ("Where does Zara work?") retrieved an unrelated person's facts and handed them to the model.
-//     That is the exact fabrication setup §8.4's `not.toHaveBeenCalled()` guard exists to prevent.
-//     The floor: a node seeds only if it is the exact-`content` match, or matches EVERY query term,
-//     or some node in the graph matches ≥2 distinct query terms (the question is anchored here).
+// (A) THE FABRICATION GUARD — "a single incidental shared term is not relevance". D-52 replaced
+//     exact-`content` equality with distinct-term matching, which made a learn-shaped graph
+//     discoverable but also made ONE incidental shared term enough to SEED retrieval — so a question
+//     about an entity the graph has never heard of ("Where does Zara work?") retrieved an unrelated
+//     person's facts. That is the exact fabrication setup §8.4's `not.toHaveBeenCalled()` guard exists
+//     to prevent.
+//     ROUND-3 CORRECTION — WHERE THE GUARD LIVES. Round 2 put it in `computeRecall` as a graph-GLOBAL
+//     floor (`bestMatched >= 2`: admit a single-term match only if SOME node in the graph matched ≥2
+//     terms). That was a retrieval regression — non-local, so it also suppressed CORRECT single-term
+//     SUBJECT matches (`recall({text:"Where does Zara work?"})` → [] on a graph that HELD Zara) and
+//     collapsed the instant any coincidental 2-term node appeared. The guard now lives where it can
+//     actually be evaluated: `answerQuestion`'s SUBJECT-ANCHORING check (§6.1b) abstains when no query
+//     term appears in any RETRIEVED node/edge's IDENTITY surface. These tests therefore assert the
+//     graph-QA OUTCOME (abstain vs answer), which is unchanged and correct; the recall layer no longer
+//     carries the floor (its local bar is pinned in `debt-closure-d52.test.ts`).
 //
 // (B) A CONFLICTED EDGE-PROP — the §6.3 contradiction rule, on the edge-prop path the af45ed046
 //     hydration fix added. The node path was pinned (§8.9) and the edge path's `value` half was
@@ -978,7 +1019,7 @@ function validateAgainstSchema(value: unknown, schema: JsonSchema, path = "$"): 
 //     never a silently picked side — was not.
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 
-describe("graph-qa minimum-relevance floor — a single incidental shared term is not relevance (§6.1/§8.4)", () => {
+describe("graph-qa subject-anchoring relevance — a single incidental shared term is not relevance (§6.1b/§8.4)", () => {
   it("a question whose SUBJECT is absent but which shares ONE term with a node abstains and never calls synthesize", async () => {
     const repo = freshRepo("floor-single-term");
     // The graph knows about a deployment runbook. It knows nothing about invoices.
@@ -989,8 +1030,11 @@ describe("graph-qa minimum-relevance floor — a single incidental shared term i
     const synth = spySynth(() => {
       throw new Error("synthesize MUST NOT be called on a single incidental term overlap");
     });
-    // Shares exactly ONE term with the graph's surface ("checkout"); the SUBJECT ('invoice
-    // reconciliation') is absent, and no fact here can answer it. The honest outcome is abstention.
+    // Shares exactly ONE term with the graph's surface ("checkout", buried in the runbook's `content`);
+    // the SUBJECT ('invoice reconciliation') is absent from every retrieved node's IDENTITY (eid/kind/
+    // name), and no fact here can answer it. ROUND-3: recall DOES seed the runbook (the local lexical
+    // bar admits the "checkout" overlap), but `answerQuestion`'s subject-anchoring check finds no
+    // query term in the retrieved identity surface and abstains — the honest outcome.
     const result = await answerQuestion(
       { question: "Which invoice reconciliation job failed during checkout?" },
       { repo, synthesize: synth },
@@ -1002,7 +1046,7 @@ describe("graph-qa minimum-relevance floor — a single incidental shared term i
     expect(synth.mock).not.toHaveBeenCalled();
   });
 
-  it("the floor does NOT cost the D-52 capability: a question ANCHORED in the graph (2+ matching terms) still retrieves, including its single-term neighbours", async () => {
+  it("the guard does NOT cost the D-52 capability: a question ANCHORED in the graph still retrieves and answers, including its single-term neighbours", async () => {
     const repo = freshRepo("floor-anchored");
     await assertNode(repo, "team/data-platform", "team");
     await assertProp(repo, "team/data-platform", "name", "Data Platform Team");
@@ -1019,7 +1063,9 @@ describe("graph-qa minimum-relevance floor — a single incidental shared term i
     expect(result.abstained).toBe(false);
     expect(synth.mock).toHaveBeenCalled();
     const eids = new Set((seen?.facts ?? []).map((f) => f.eid));
-    // The anchor (3 matched terms) AND the single-term match it corroborates are both retrieved.
+    // ROUND-3 STRENGTHENING: the single-term neighbour `component/ledger` is retrieved because "ledger"
+    // is in ITS OWN identity (name/eid) — a LOCAL match, not because the team node cleared ≥2 terms.
+    // Both the multi-term anchor AND its single-term neighbour are retrieved.
     expect(eids.has("team/data-platform")).toBe(true);
     expect(eids.has("component/ledger")).toBe(true);
   });

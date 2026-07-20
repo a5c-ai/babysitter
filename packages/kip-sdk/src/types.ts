@@ -782,6 +782,18 @@ export interface MicroagentResult {
    *  the invoking `MicroagentInvocation.timeout`, `executeSegment` treats the step as dispatch-failure
    *  (INV-A3(c)), exactly like a non-zero `exitCode` or schema-invalid `output`. */
   elapsedMs?: number;
+  /**
+   * ROUND-3 FIX (MAJOR #5) — an OUT-OF-BAND, non-scored side channel for a dispatch's diagnostics.
+   *
+   * It exists so a role whose measured `output` must stay a BARE value (the loss body's number,
+   * ADR-B10d trap 2) can STILL surface the loss model's `fabricated`/`missing` list to the
+   * orchestrator, which records the accepted iteration's `fabricated` on the `kip:learn` audit fact's
+   * value JSON. It is deliberately NOT `output`: nothing validates it against the `outputSchema` and
+   * nothing scores it, so it cannot perturb the accept/exhaust decision — exactly like `elapsedMs`,
+   * it is a report ABOUT the dispatch, never the dispatch's measured result. The orchestrator reads
+   * it audit-only (the `kip:learn` fact is a `schema` target whose `cellKeyFor` is `null`, so it can
+   * never reach `orderKey`/reducers/trust). */
+  diagnostics?: unknown;
 }
 
 /** The injectable microagent-dispatch seam (see `MicroagentInvocation`'s own doc comment) —
@@ -1212,7 +1224,15 @@ export interface Repo {
   learn(
     rawRef: BlobRefInput,
     opts: LearnOptions,
-  ): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }>;
+  ): Promise<{
+    facts: FactId[];
+    loss: number;
+    status: "accept" | "exhausted";
+    /** ROUND-3 FIX (MAJOR #5): the loss model's fabrication indictment for the ACCEPTED
+     *  reconstruction (empty on `exhausted` or when nothing was indicted) — the same list recorded on
+     *  the `kip:learn` audit fact's value JSON, surfaced so `--json` is no longer blind to it. */
+    fabricated: string[];
+  }>;
   /**
    * ADR-B10a — the blob gap. `putBlob` turns bytes into a REAL content-addressed `BlobRef` (the git
    * loose-object hash `blob <len>\0<content>`, the same one `mintFact` uses for `Fact.id`);
