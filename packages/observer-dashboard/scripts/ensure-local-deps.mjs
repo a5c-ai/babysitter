@@ -4,6 +4,21 @@
  * which needs the SDK dist (and its workspace deps' dists) to exist on a
  * fresh clone.
  *
+ * Reproducibility contract (review round 5): the observer gates must be green
+ * from a CLEAN workspace-scoped install (`npm ci --ignore-scripts --workspace
+ * @a5c-ai/babysitter-observer-dashboard`). @a5c-ai/tasks-adapter's build
+ * imports Express types (src/auth/middleware.ts) but no workspace declares
+ * @types/express — a full monorepo install only works because
+ * @docusaurus/core→webpack-dev-server hoists it transitively, and a
+ * workspace-scoped install does not include that chain. This package therefore
+ * declares @types/express as a devDependency so the hoisted install always
+ * satisfies the tasks-adapter build this script performs.
+ *
+ * Skip/rebuild semantics live in ensure-local-deps-lib.mjs (unit-tested):
+ * a pre-existing dist is trusted only alongside the build-ok marker written
+ * after a build that exited 0; a failed build removes its partial dist so it
+ * can never satisfy the next run.
+ *
  * NOTE: this script used to also copy React 18 + @radix-ui/@testing-library
  * packages into the local node_modules to shield the workspace from the
  * monorepo root's hoisted React 19. Since the Next 15 / React 19 upgrade the
@@ -12,10 +27,11 @@
  * (two React instances break context identity in tests and in `next build`
  * prerendering).
  */
-import { existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { ensureWorkspaceDist } from "./ensure-local-deps-lib.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgDir = resolve(__dirname, "..");
@@ -27,7 +43,6 @@ const rootDir = resolve(pkgDir, "../..");
 // The approve-breakpoint action tests exercise the REAL SDK commit path
 // (@a5c-ai/babysitter-sdk dist/runtime/commitEffectResult), so the SDK dist —
 // and the dists of the workspace packages it resolves at runtime — must exist.
-// Build each one individually only when its dist entry file is missing.
 // Ordered by dependency: atlas → tasks-adapter → sdk.
 // ---------------------------------------------------------------------------
 const workspaceDists = [
@@ -37,36 +52,9 @@ const workspaceDists = [
 ];
 
 for (const { name, dir } of workspaceDists) {
-  // The dist entry file is each package's `main` (dist/index.js for all three).
-  const entry = join(dir, "dist", "index.js");
-  if (existsSync(entry)) {
-    // Loud skip (review round 4): a pre-existing dist is trusted as-is — it is
-    // NOT validated for freshness against the package sources. Delete the dist
-    // (or run "npm run build -w <name>" from the repo root) to force a rebuild.
-    console.log(
-      `[ensure-local-deps] ${name}: dist entry present, SKIPPING build — freshness not validated (delete ${join(dir, "dist")} to force a rebuild)`,
-    );
-    continue;
-  }
-
-  console.log(`[ensure-local-deps] ${name}: dist entry missing, building...`);
-  try {
-    execSync(`npm run build -w ${name}`, { cwd: rootDir, stdio: "inherit" });
-  } catch (err) {
-    // Fail HARD (review round 4): a nonzero dependency build must never be
-    // hidden — tolerating it can mask real dependency build breakage (e.g.
-    // TypeScript errors) behind a stale or partially-emitted dist.
-    throw new Error(
-      `[ensure-local-deps] ${name}: build exited nonzero. Fix the dependency build ` +
-        `(run "npm run build -w ${name}" from the repo root and inspect its output). ` +
-        `Original error: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
-
-  if (!existsSync(entry)) {
-    throw new Error(
-      `[ensure-local-deps] ${name}: dist entry still missing after build (${entry}). ` +
-        `Run "npm run build -w ${name}" from the repo root and inspect its output.`,
-    );
-  }
+  ensureWorkspaceDist({
+    name,
+    dir,
+    exec: (pkgName) => execSync(`npm run build -w ${pkgName}`, { cwd: rootDir, stdio: "inherit" }),
+  });
 }

@@ -419,9 +419,11 @@ export async function parseRunDir(
   }
 
   // Count pending breakpoints (requested but not yet resolved). Mirror the
-  // digest logic (parseRunDigest): also check result.json because the dashboard
-  // writes it on approve but cannot append journal events, so the journal alone
-  // may lag behind an already-answered breakpoint.
+  // digest logic (parseRunDigest): also check result.json. The approve action
+  // delegates to SDK commitEffectResult, which writes result.json AND appends
+  // EFFECT_RESOLVED — but those two writes are not atomic, and runs answered
+  // by older dashboard builds may have result.json without the journal event,
+  // so the journal alone may lag behind an already-answered breakpoint.
   let pendingBreakpoints = 0;
   const requestedBreakpointIds = tasks
     .filter((t) => t.kind === "breakpoint" && t.status === "requested")
@@ -797,8 +799,10 @@ export async function getRunDigest(runPath: string): Promise<RunDigest> {
   }
 
   // Count pending breakpoints (requested but not yet resolved).
-  // Also check result.json — the dashboard writes it on approve but can't
-  // write journal events, so the journal alone may lag behind.
+  // Also check result.json — approve delegates to SDK commitEffectResult,
+  // which writes result.json and appends EFFECT_RESOLVED, but the two writes
+  // are not atomic (and older-dashboard runs may lack the journal event), so
+  // the journal alone may lag behind.
   let pendingBreakpoints = 0;
   if (requestedBreakpoints.size > 0) {
     const unresolvedBps = [...requestedBreakpoints].filter(
