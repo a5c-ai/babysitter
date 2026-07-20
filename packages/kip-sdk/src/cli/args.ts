@@ -79,6 +79,13 @@ const VALUE_FLAGS = new Set([
   "manifest",
   // `kip index` (ADR-B9c): the provenance sha override anchoring the acquisition.
   "git-sha",
+  // `kip learn` (ADR-B10e): the accept threshold, the three disjunctive budget axes, and the
+  // document's media type (sourced ONCE and threaded byte-identically into every decode, INV-A14).
+  "threshold",
+  "max-iterations",
+  "max-wall-ms",
+  "max-invocations",
+  "raw-kind",
 ]);
 
 /** Short aliases → canonical long flag name. */

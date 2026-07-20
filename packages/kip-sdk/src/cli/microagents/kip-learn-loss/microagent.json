@@ -1,0 +1,32 @@
+{
+  "name": "kip-learn-loss",
+  "version": "1.0.0",
+  "description": "Scores how much of the ORIGINAL document's knowledge — entities, properties, relations — survives in the RECONSTRUCTION, ignoring wording and style. Returns a BARE finite number in [0,1] (0 = nothing lost, 1 = nothing preserved): learn() reads this output unwrapped, so an object-wrapped {loss} would score every iteration as infinite loss (ADR-B10d trap 2). Never clamped and never defaulted — an out-of-range or missing score is an honest failed iteration, not a manufactured measurement.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["rawRef", "reconstructed"],
+    "additionalProperties": false,
+    "properties": {
+      "rawRef": {
+        "type": "object",
+        "required": ["blob"],
+        "properties": { "blob": { "type": "string", "minLength": 1 } }
+      },
+      "reconstructed": {
+        "type": "object",
+        "required": ["blob"],
+        "properties": { "blob": { "type": "string", "minLength": 1 } }
+      }
+    }
+  },
+  "outputSchema": { "type": "number" },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-learn-loss",
+    "model": "kip-graph-qa-default",
+    "timeout": 90000,
+    "tools": []
+  },
+  "tags": ["kip", "learn", "loss"],
+  "builtIn": false
+}

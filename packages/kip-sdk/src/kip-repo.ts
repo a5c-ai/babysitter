@@ -174,6 +174,15 @@ const REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS = "author-hlc-contiguous";
 const KIP_MALFORMED_DERIVED_FROM_EDGE_KIND = "kip:malformed-derived-from";
 
 /**
+ * ADR-B10d trap 5 (`text-autoencoder`): the kind carried by an existence fact that `learn()`'s
+ * `ensureExistenceFor` had to AUTO-MINT because the accepted candidate set named only props and
+ * never the entity's kind. Same distinguishable-label convention as `KIP_CONFLICT_KIND`: it fabricates
+ * no domain type, it states the fact that no kind was ever asserted — an empty `NodeView.kind` reads
+ * as a real (blank) kind and hides exactly that.
+ */
+const KIP_UNSTATED_KIND = "kip:unstated";
+
+/**
  * D-36: hoisted to module scope (was a `regenerateHeads()`-local const) so `KipRepo.txn()`'s own
  * REAL commit-write path (below) can filter `this.currentFacts()` down to the SAME
  * "knowledge-CONTENT facts only" set `regenerateHeads()` itself uses to build its tree/commit
@@ -5368,8 +5377,19 @@ export class KipRepo implements Repo {
    * addressed and idempotent for free. It MUST NOT call `writeFactBlob`, MUST NOT involve `proj`,
    * and MUST NOT author/sign/mint a fact.
    */
-  async putBlob(_content: Uint8Array): Promise<BlobRef> {
-    throw new Error("unimplemented: putBlob (text-autoencoder work item, ADR-B10a)");
+  async putBlob(content: Uint8Array): Promise<BlobRef> {
+    if (!(content instanceof Uint8Array)) {
+      throw new KipError("ERR_MALFORMED_INPUT", "putBlob: `content` must be a Uint8Array/Buffer");
+    }
+    // A VIEW, never a copy-by-reinterpretation: `Buffer.from(uint8array)` copies the bytes, which is
+    // correct but wasteful for a large document; a subarray view over the same memory is byte-exact.
+    const buf = Buffer.isBuffer(content)
+      ? content
+      : Buffer.from(content.buffer, content.byteOffset, content.byteLength);
+    // The OID OBJECT STORE ONLY (ADR-B10a prohibition 1): never `writeFactBlob`, so nothing here
+    // enters `kip-facts-index.json`, i.e. never a member of the admitted fact set S that `proj` folds.
+    const { oid } = this.getSubstrate().writeBlob(buf);
+    return { blob: oid };
   }
 
   /**
@@ -5378,8 +5398,25 @@ export class KipRepo implements Repo {
    * false, otherwise reads the bytes, RE-COMPUTES `gitBlobId` over them, and throws
    * `ERR_MALFORMED_INPUT` on mismatch — a corrupt object store must be loud (N5).
    */
-  async getBlob(_ref: BlobRef): Promise<Uint8Array | null> {
-    throw new Error("unimplemented: getBlob (text-autoencoder work item, ADR-B10a)");
+  async getBlob(ref: BlobRef): Promise<Uint8Array | null> {
+    if (!isPlainRecord(ref) || typeof ref.blob !== "string" || ref.blob.length === 0) {
+      throw new KipError("ERR_MALFORMED_INPUT", "getBlob: `ref.blob` must be a non-empty oid string");
+    }
+    const oid = ref.blob;
+    const substrate = this.getSubstrate();
+    // A GENUINELY absent oid is `null` — never a zero-length buffer, never a partial read (N5).
+    if (!substrate.hasBlob(oid)) return null;
+    const bytes = substrate.readBlob(oid);
+    const actual = substrate.blobIdOf(bytes);
+    if (actual !== oid) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `getBlob: the object stored at ${oid} re-hashes to ${actual} — the object store is corrupt ` +
+          "(refusing to return content under a hash it does not have, N5)",
+        { oid, actual },
+      );
+    }
+    return bytes;
   }
 
   /**
@@ -5521,10 +5558,23 @@ export class KipRepo implements Repo {
       return undefined;
     }
     if (alreadyExists) return undefined;
+    // ADR-B10d trap 5 (text-autoencoder): this companion fact is minted precisely BECAUSE the
+    // candidate set never named a kind for this eid, so leaving `nodeKind`/`edgeKind` absent projects
+    // `NodeView.kind === ""` — an empty string that reads as a real (blank) kind rather than as "the
+    // candidate never said". The sentinel below states that condition EXPLICITLY, mirroring proj.ts's
+    // own `KIP_CONFLICT_KIND = "kip:conflict"` convention. It fabricates no domain type: it is the
+    // machine-readable form of "no kind was asserted for this eid". The right fix upstream is to emit
+    // an EXPLICIT `{kind:"node", eid, nodeKind}` existence candidate (which `compileGraphToAssertInputs`
+    // always does, and which the D-39 pre-seed keeps this method away from entirely).
     const minted = await tx.assertFact({
       type: "assert",
       v: 1,
-      target: existsTarget,
+      target:
+        existsTarget.kind === "node"
+          ? { kind: "node", eid, nodeKind: KIP_UNSTATED_KIND }
+          : // `from`/`to` are deliberately left ABSENT: the candidate named no endpoints, and
+            // inventing two would be a fabricated edge, which is strictly worse than a blank kind.
+            { kind: "edge", eid, edgeKind: KIP_UNSTATED_KIND },
       value: true,
       validFrom: 0,
       validTo: null,

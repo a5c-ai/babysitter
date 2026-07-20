@@ -340,6 +340,16 @@ export class Substrate {
 
   /** The exact inverse of `writeBlob`'s encoding: inflate the real git loose-object bytes at `oid`
    * and strip the `"blob <len>\0"` header, returning the original fact JSON bytes. */
+  readBlob(oid: string): Buffer {
+    return this.readBlobContent(oid);
+  }
+
+  /** The REAL content hash this substrate's object store keys on (ADR-B10a, `getBlob`'s integrity
+   * re-check). Exposed so callers never have to re-derive `hashAlgo` themselves. */
+  blobIdOf(content: Buffer): string {
+    return gitBlobId(content, this.hashAlgo);
+  }
+
   private readBlobContent(oid: string): Buffer {
     const inflated = inflateSync(fs.readFileSync(this.objectPath(oid)));
     const nul = inflated.indexOf(0);

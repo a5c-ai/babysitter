@@ -812,29 +812,63 @@ describe("text-autoencoder (ADR-B10…B10f): text → graph, end to end and with
       expect(result.output).not.toHaveProperty("candidateFacts");
     });
 
-    it("no dangling edge ever reaches the graph: getEdge on the proposed edge is null after the run", async () => {
-      const m = roleManifests("dangling-e2e");
-      const candidates = compileGraphToAssertInputs(DANGLING, {
-        replicaId: "kip-learn-encode",
-        source: "kip-learn://x",
-      }).slice();
-      const { dispatch } = makeScriptedDispatch({
-        [m.encode.name]: () => encodeOk(candidates),
-        [m.decode.name]: () => decodeOk(),
-        [m.learner.name]: () => learnerOk(candidates),
-        [m.loss.name]: () => lossOk(0.05),
+    it("end to end: a model that proposes a dangling edge produces an EXHAUSTED run and nothing of its proposal reaches the graph", async () => {
+      // The honest end-to-end property. Per ADR-B10d trap 6 the CORE does not reject a dangling
+      // endpoint (`isWellFormedTarget` only validates the edge's OWN eid), so hand-authoring the
+      // dangling `AssertInput[]` and feeding them to a scripted dispatcher would be asserting a
+      // promise `learn()` never made. What IS promised is the whole path: the model's dangling reply
+      // is rejected by the encode/learner bodies' own compiler (:766/:794), every iteration is
+      // therefore an honest N5 failed iteration, and the run ends "exhausted" with an audit marker
+      // and ZERO graph effect. This drives the REAL bodies (`makeLearnDispatch`) — a build that let
+      // a dangling edge through the compiler would accept here and fail every assertion below.
+      const manifests = resolveLearnManifests();
+      // The dispatcher needs the repo, and the repo needs the dispatcher — wired through one
+      // indirection rather than by re-creating either.
+      let bodies: ((invocation: MicroagentInvocation) => Promise<MicroagentResult>) | undefined;
+      const repo = ownedRepo("dangling-e2e", {
+        dispatchMicroagent: async (invocation: MicroagentInvocation): Promise<MicroagentResult> => {
+          if (bodies === undefined) throw new Error("dangling-e2e: the learn bodies were never wired");
+          return bodies(invocation);
+        },
       });
-      const repo = ownedRepo("dangling-e2e", { dispatchMicroagent: dispatch });
-      for (const manifest of Object.values(m)) await registerManifest(repo, manifest);
+      const rawRef = await putDocument(repo, DOCUMENT);
+      // Every OTHER role's scripted model reply is deliberately PERFECT — a faithful reconstruction
+      // and a loss well under the threshold — so that the ONLY thing standing between this run and a
+      // committed dangling edge is the compiler's trap-6 rejection. (With a permissive reply for
+      // decode/loss too, the run would end "exhausted" for the wrong reason and the assertions below
+      // would not discriminate: verified by disabling the trap-6 check and watching this test fail.)
+      const run = async (req: HarnessCliRequest): Promise<HarnessCliRun> => {
+        const reply = req.stdin.startsWith("You are the kip knowledge decoder")
+          ? { document: DOCUMENT }
+          : req.stdin.startsWith("You are the kip reconstruction scorer")
+            ? { loss: 0.01 }
+            : DANGLING; // encode + learner: the dangling proposal itself
+        return { exitCode: 0, stdout: JSON.stringify({ result: JSON.stringify(reply) }) };
+      };
+      bodies = makeLearnDispatch({ repo, run, probe: (): HarnessCliProbe => ({ available: true }) });
+      for (const manifest of Object.values(manifests)) await registerManifest(repo, manifest);
 
-      await repo.learn(OPAQUE_RAW_REF, baseLearnOptions({ threshold: 0.25, maxIterations: 2, ...selectors(m) }));
+      const outcome = await repo.learn(
+        rawRef,
+        baseLearnOptions({
+          threshold: 0.25,
+          maxIterations: 2,
+          encode: { name: manifests.encode.name, version: manifests.encode.version },
+          decode: { name: manifests.decode.name, version: manifests.decode.version },
+          learner: { name: manifests.learner.name, version: manifests.learner.version },
+          loss: { name: manifests.loss.name, version: manifests.loss.version },
+        }),
+      );
 
-      const edge = await repo.getEdge("doc:ada->nowhere");
-      if (edge !== null) {
-        // If an edge exists at all, BOTH of its endpoints must resolve to real nodes — never nothing.
-        expect(await repo.getNode(edge.from)).not.toBeNull();
-        expect(await repo.getNode(edge.to), `edge ${edge.eid} points at a non-existent node`).not.toBeNull();
-      }
+      // (a) NEVER a fabricated accept — the dangling proposal is never scored, so the budget caps.
+      expect(outcome.status).toBe("exhausted");
+      expect(auditFacts(dirOf(repo), "kip:learn/"), "an exhausted run must author NO kip:learn accept fact").toHaveLength(0);
+      expect(auditFacts(dirOf(repo), "kip:learn-exhausted/").length).toBeGreaterThan(0);
+
+      // (b) Nothing from the proposal reached the graph — not the edge, not its live endpoint, and
+      //     certainly not the endpoint that never existed.
+      expect(await repo.getEdge("doc:ada->nowhere"), "the dangling edge must never be committed").toBeNull();
+      expect(await repo.getNode("doc:ada"), "no node from a rejected proposal may be committed").toBeNull();
       expect(await repo.getNode("doc:not-a-node")).toBeNull();
     });
   });

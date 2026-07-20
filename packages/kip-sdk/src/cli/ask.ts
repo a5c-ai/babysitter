@@ -90,7 +90,7 @@ export interface AskResult {
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** The harness binary this synthesizer spawns — the `claude` on PATH (`claude-adapter.ts:42`). */
-const HARNESS_CLI_COMMAND = "claude";
+export const HARNESS_CLI_COMMAND = "claude";
 
 /**
  * The concrete model the sentinel maps to (ADR-B8, Decision — sentinel `runtime.model` mapping). An
@@ -118,7 +118,7 @@ const QA_MODEL_SENTINEL = "kip-graph-qa-default";
  * default-denies un-allowed tools, and {@link HARNESS_STRICT_MCP_ARGS} stops user-scope MCP servers
  * (which are cwd-independent, so `cwd = tmpdir()` does not touch them) from loading at all.
  */
-const HARNESS_DISALLOWED_TOOLS =
+export const HARNESS_DISALLOWED_TOOLS =
   "Bash Edit Write Read Glob Grep WebFetch WebSearch Task NotebookEdit TodoWrite SlashCommand " +
   "BashOutput KillShell";
 
@@ -136,10 +136,10 @@ const HARNESS_DISALLOWED_TOOLS =
  * round-2 dispatch-reason fix carried that exact stderr to the operator instead of collapsing it
  * into "exitCode 1" — the whole point of D-49(2).)
  */
-const HARNESS_STRICT_MCP_ARGS = ["--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}'];
+export const HARNESS_STRICT_MCP_ARGS = ["--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}'];
 
 /** Structured output was observed to consume 2 turns (`stop_reason: "tool_use"`); 3 is the guard. */
-const HARNESS_MAX_TURNS = "3";
+export const HARNESS_MAX_TURNS = "3";
 
 /**
  * The DEFAULT per-call spawn budget. ADR-B8 flags the bundled `runtime.timeout: 30000` as too tight:

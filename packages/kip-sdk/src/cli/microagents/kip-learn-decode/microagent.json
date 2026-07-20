@@ -1,0 +1,34 @@
+{
+  "name": "kip-learn-decode",
+  "version": "1.0.0",
+  "description": "Regenerates prose from a candidate graph ALONE (never from the original document) in the run's rawKind format, stores it with putBlob and returns the real BlobRef. Storing a blob is not authoring a fact: a blob is content, not knowledge, and is never a member of S (ADR-B10a). The outputSchema below is deliberately STRICT — learn() reads this payload with a bare type assertion, so this schema is the guard (ADR-B10d trap 1).",
+  "inputSchema": {
+    "type": "object",
+    "required": ["candidateFacts", "rawKind"],
+    "additionalProperties": false,
+    "properties": {
+      "candidateFacts": { "type": "array" },
+      "rawKind": { "type": "string", "minLength": 1 }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["reconstructed"],
+    "properties": {
+      "reconstructed": {
+        "type": "object",
+        "required": ["blob"],
+        "properties": { "blob": { "type": "string", "minLength": 1 } }
+      }
+    }
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-learn-decode",
+    "model": "kip-graph-qa-default",
+    "timeout": 120000,
+    "tools": []
+  },
+  "tags": ["kip", "learn", "decode"],
+  "builtIn": false
+}

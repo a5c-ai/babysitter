@@ -15,9 +15,11 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { KipError, open } from "../index";
 import { codeMinerDispatch } from "../miner/code-miner";
+import { LEARN_MANIFEST_NAMES, makeLearnDispatch, resolveLearnManifests } from "../learn";
 import type {
   AsOf,
   AssertInput,
+  BlobRef,
   DispatchMicroagentFn,
   EdgePut,
   EdgeView,
@@ -82,7 +84,7 @@ interface HandlerArgs {
 
 const USAGE =
   "usage: kip [GLOBAL_OPTS] <command> [ARGS]\n" +
-  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index\n";
+  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index, learn\n";
 
 /**
  * Parse `argv` (already `process.argv.slice(2)`), dispatch the named subcommand, and resolve with the
@@ -157,6 +159,8 @@ export async function runCli(argv: string[], opts: RunCliOptions): Promise<numbe
         return await cmdAsk(args);
       case "index":
         return await cmdIndex(args);
+      case "learn":
+        return await cmdLearn(args);
       default:
         werr(`kip: unknown command '${command}'\n${USAGE}`);
         return 2;
@@ -687,6 +691,175 @@ async function cmdIndex(a: HandlerArgs): Promise<number> {
   if (json) emitJson(write, { facts });
   else write(`indexed ${targetRepoDir}: ${facts.length} fact(s)\n`);
   return 0;
+}
+
+// ===========================================================================
+// learn (ADR-B10e) — turn a document into graph through the knowledge-autoencoding loop.
+// ===========================================================================
+
+/**
+ * `kip learn <file> [--threshold] [--max-iterations] [--max-wall-ms] [--max-invocations]
+ * [--raw-kind] [--as-of] [--model] [--json]` — store the document as a blob, register the four
+ * bundled learn manifests, and run `learn()`.
+ *
+ * Honest reporting is the point (ADR-B10e): on `exhausted` the loop authored exactly ONE marker fact
+ * and NO knowledge, so the render says so and the exit code is **5** — `kip learn` in a script must
+ * never report success for a run that added nothing. An unmeasured loss prints `(none measured)`,
+ * never `Infinity` (noise) and never `0` (a lie that reads as a perfect score).
+ *
+ * The outcome is NOT reproducible for a threshold near the model's variance: the loss is
+ * model-graded and nondeterministic (ADR-B10c). That is stated, never hidden behind retries.
+ */
+async function cmdLearn(a: HandlerArgs): Promise<number> {
+  const { flags, positionals, write, werr, json } = a;
+  const file = positionals[1];
+  if (!file) {
+    werr("kip: learn requires a <file>\n");
+    return 2;
+  }
+  const filePath = isAbsolute(file) ? file : join(a.ctx.cwd, file);
+  if (!existsSync(filePath)) {
+    werr(`kip: learn: no such file: ${filePath}\n`);
+    return 2;
+  }
+  let bytes: Buffer;
+  try {
+    bytes = readFileSync(filePath);
+  } catch (e) {
+    werr(`kip: learn: cannot read ${filePath}: ${e instanceof Error ? e.message : String(e)}\n`);
+    return 2;
+  }
+
+  const numeric = (name: string, fallback: number): number | undefined => {
+    const raw = flagStr(flags, name);
+    if (raw === undefined) return fallback;
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) {
+      werr(`kip: learn: --${name} must be a positive finite number, got ${JSON.stringify(raw)}\n`);
+      return undefined;
+    }
+    return value;
+  };
+  const threshold = numeric("threshold", 0.25);
+  const maxIterations = numeric("max-iterations", 5);
+  const maxWallMs = numeric("max-wall-ms", 600_000);
+  const maxInvocations = numeric("max-invocations", 30);
+  if (
+    threshold === undefined ||
+    maxIterations === undefined ||
+    maxWallMs === undefined ||
+    maxInvocations === undefined
+  ) {
+    return 2;
+  }
+  const rawKind = flagStr(flags, "raw-kind") ?? inferRawKind(filePath);
+
+  // ADR-B10's "mutable holder": the dispatcher needs the repo `open()` is still constructing. Open
+  // with a dispatcher that READS the holder, then fill it before `learn()` is ever called.
+  const holder: { repo?: Repo } = {};
+  const learnDeps = {
+    repo: {
+      getBlob: async (ref: BlobRef) => requireOpenRepo(holder).getBlob(ref),
+      putBlob: async (content: Uint8Array) => requireOpenRepo(holder).putBlob(content),
+    },
+    ...(flagStr(flags, "model") !== undefined ? { model: flagStr(flags, "model") } : {}),
+  };
+  const learnDispatch = makeLearnDispatch(learnDeps);
+  // Per-iteration progress goes to STDERR (spec §3/AC-31: `--json` stdout carries exactly ONE value).
+  let lossCall = 0;
+  const dispatch: DispatchMicroagentFn = async (invocation) => {
+    const result = await learnDispatch(invocation);
+    if (invocation.manifest.name === LEARN_MANIFEST_NAMES.loss) {
+      lossCall += 1;
+      const measured = result.exitCode === 0 && typeof result.output === "number" ? result.output : undefined;
+      werr(
+        `iter ${lossCall}/${maxIterations}: ${measured === undefined ? "loss not measured (failed iteration)" : `loss ${measured}`}\n`,
+      );
+    } else if (result.exitCode !== 0) {
+      const reason = (result.output as { error?: unknown } | null)?.error;
+      werr(`iter ${lossCall + 1}: ${invocation.manifest.name} failed — ${String(reason ?? "no reason given")}\n`);
+    }
+    return result;
+  };
+
+  const openRepoWithLearn: OpenRepoFn = (o) => a.openRepo({ ...o, dispatchMicroagent: dispatch });
+  const resolved = await resolveRepo(a.ctx, openRepoWithLearn, {
+    requireInitialized: true,
+    requireKeyring: true,
+  });
+  holder.repo = resolved.repo;
+  const repo = resolved.repo;
+
+  // Idempotently register all four (byte-identical re-registration is an INV-7 no-op) — MANDATORY
+  // BEFORE `learn()`, which resolves all four and throws before any dispatch (INV-A13).
+  const manifests = resolveLearnManifests();
+  for (const manifest of Object.values(manifests)) {
+    await repo.registerFunctionality(`kip-learn:${manifest.name}`, manifest);
+  }
+
+  const rawRef = await repo.putBlob(bytes);
+  const asOfRaw = flagStr(flags, "as-of");
+  const selector = (m: MicroagentManifest): { name: string; version: string } => ({
+    name: m.name,
+    version: m.version,
+  });
+  const result = await repo.learn(rawRef, {
+    threshold,
+    maxIterations,
+    maxWallMs,
+    maxInvocations,
+    rawKind,
+    encode: selector(manifests.encode),
+    decode: selector(manifests.decode),
+    learner: selector(manifests.learner),
+    loss: selector(manifests.loss),
+    ...(asOfRaw !== undefined ? { asOf: { validTime: asOfRaw } as AsOf } : {}),
+  });
+
+  const lossJson = Number.isFinite(result.loss) ? result.loss : null;
+  if (json) {
+    emitJson(write, {
+      file: filePath,
+      rawRef: { blob: rawRef.blob },
+      status: result.status,
+      loss: lossJson,
+      facts: result.facts,
+    });
+  } else {
+    const lossText = lossJson === null ? "(none measured)" : String(lossJson);
+    let out = `learned ${filePath} (blob ${rawRef.blob})\nstatus:   ${result.status}\n`;
+    out +=
+      result.status === "accept"
+        ? `loss:     ${lossText} (threshold ${threshold} — met)\nfacts:    ${result.facts.length} committed\n`
+        : `loss:     ${lossText} (threshold ${threshold} — NOT met)\n` +
+          `facts:    ${result.facts.length} committed (a kip:learn-exhausted audit marker only — ` +
+          "NO knowledge was added to the graph)\n";
+    for (const id of result.facts) out += `  ${id}\n`;
+    write(out);
+  }
+  // Exit 5 on `exhausted`: the loop ran honestly but never met the threshold.
+  return result.status === "accept" ? 0 : 5;
+}
+
+function requireOpenRepo(holder: { repo?: Repo }): Repo {
+  if (!holder.repo) {
+    throw new KipError(
+      "ERR_MALFORMED_INPUT",
+      "kip learn: a microagent body was dispatched before the repo was open — refusing to guess",
+    );
+  }
+  return holder.repo;
+}
+
+/** `--raw-kind`'s default, inferred ONCE from the extension and then threaded byte-identically into
+ *  every decode call by `learn()` itself (INV-A14). Unknown extensions get `text/plain`, which is
+ *  what an unrecognized text file demonstrably is — never a guessed richer type. */
+function inferRawKind(filePath: string): string {
+  const lower = filePath.toLowerCase();
+  if (lower.endsWith(".md") || lower.endsWith(".markdown")) return "text/markdown";
+  if (lower.endsWith(".html") || lower.endsWith(".htm")) return "text/html";
+  if (lower.endsWith(".json")) return "application/json";
+  return "text/plain";
 }
 
 /**

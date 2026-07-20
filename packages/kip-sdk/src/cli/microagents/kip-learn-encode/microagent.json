@@ -1,0 +1,47 @@
+{
+  "name": "kip-learn-encode",
+  "version": "1.0.0",
+  "description": "Reads a raw document (resolved from rawRef via getBlob) and emits the typed property graph a reader would need in order to reconstruct the document's knowledge. The model returns only a narrow {nodes, edges} JSON; the body COMPILES it into well-formed AssertInput[] (ADR-B10). Authors nothing (INV-A1): the returned candidateFacts are proposals the orchestrator signs, or does not.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["rawRef"],
+    "additionalProperties": false,
+    "properties": {
+      "rawRef": {
+        "type": "object",
+        "required": ["blob"],
+        "properties": { "blob": { "type": "string", "minLength": 1 } }
+      },
+      "ontologyAsOf": { "type": "object" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["candidateFacts"],
+    "properties": {
+      "candidateFacts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["type", "v", "target", "validFrom", "validTo", "replicaId", "provenance"],
+          "properties": {
+            "type": { "type": "string" },
+            "v": { "type": "number" },
+            "target": { "type": "object" },
+            "replicaId": { "type": "string", "minLength": 1 },
+            "provenance": { "type": "object" }
+          }
+        }
+      }
+    }
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-learn-encode",
+    "model": "kip-graph-qa-default",
+    "timeout": 120000,
+    "tools": []
+  },
+  "tags": ["kip", "learn", "encode"],
+  "builtIn": false
+}

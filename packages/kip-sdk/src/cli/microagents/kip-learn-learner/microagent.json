@@ -1,0 +1,49 @@
+{
+  "name": "kip-learn-learner",
+  "version": "1.0.0",
+  "description": "Given the original document, the CURRENT candidate graph and the reconstruction loss that graph achieved, proposes an IMPROVED graph. The model returns the same narrow {nodes, edges} JSON as encode; the body compiles it into well-formed AssertInput[] and returns it as `next` (never `candidateFacts` — learn() reads exactly one role-specific field, ADR-B10d trap 3). Authors nothing (INV-A1).",
+  "inputSchema": {
+    "type": "object",
+    "required": ["rawRef", "current"],
+    "additionalProperties": false,
+    "properties": {
+      "rawRef": {
+        "type": "object",
+        "required": ["blob"],
+        "properties": { "blob": { "type": "string", "minLength": 1 } }
+      },
+      "current": { "type": "array" },
+      "loss": { "type": "number" },
+      "ontologyAsOf": { "type": "object" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["next"],
+    "properties": {
+      "next": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["type", "v", "target", "validFrom", "validTo", "replicaId", "provenance"],
+          "properties": {
+            "type": { "type": "string" },
+            "v": { "type": "number" },
+            "target": { "type": "object" },
+            "replicaId": { "type": "string", "minLength": 1 },
+            "provenance": { "type": "object" }
+          }
+        }
+      }
+    }
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-learn-learner",
+    "model": "kip-graph-qa-default",
+    "timeout": 120000,
+    "tools": []
+  },
+  "tags": ["kip", "learn", "learner"],
+  "builtIn": false
+}
