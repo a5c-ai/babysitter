@@ -235,7 +235,15 @@ function setupCommandsFor(agentPath: LiveStackAgentPath, agent: LiveStackAgentId
     'npm run generate:plugins',
     `adapters install ${agentMuxAgent}`,
     'npm install --global ./packages/babysitter-sdk',
-    'npm install --global ./packages/adapters/hooks/cli',
+    // Both @a5c-ai/babysitter-sdk and @a5c-ai/hooks-adapter-cli legitimately
+    // declare a bin named `adapters-hooks` (babysitter-sdk's is a re-exec shim of
+    // hooks-adapter-cli's canonical entry). Installing hooks-adapter-cli second
+    // therefore hits npm EEXIST on the already-linked shim. `--force` is the
+    // explicit, correct declaration that this bin has two providers and the
+    // canonical hooks-adapter-cli binary should win — NOT a fallback. hooks-adapter-cli
+    // is still required for its second bin `a5c-hooks-adapter`, which babysitter-sdk
+    // does not re-export (see harness/unified/subprocess.ts).
+    'npm install --global --force ./packages/adapters/hooks/cli',
     `babysitter harness:install-plugin ${agent}`,
     'mkdir -p .a5c-live-test',
     'cp fixtures/summarize-translate-test.mjs .a5c/processes/',

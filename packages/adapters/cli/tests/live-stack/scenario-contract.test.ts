@@ -26,7 +26,7 @@ describe('live stack scenario contract primitives', () => {
       'npm run generate:plugins',
       'adapters install claude',
       'npm install --global ./packages/babysitter-sdk',
-      'npm install --global ./packages/adapters/hooks/cli',
+      'npm install --global --force ./packages/adapters/hooks/cli',
       'babysitter harness:install-plugin claude-code',
       'mkdir -p .a5c-live-test',
       'cp fixtures/summarize-translate-test.mjs .a5c/processes/',
@@ -287,4 +287,54 @@ describe('live stack scenario contract primitives', () => {
     expect(workflow).toMatch(/- name: Upload live stack artifacts[\s\S]*?timeout-minutes:\s*1/);
   });
 
+});
+
+/**
+ * RC-1 regression: every babysitter-plugin (bp/*) Live Stack lane failed at
+ * `npm install --global ./packages/adapters/hooks/cli` because both
+ * @a5c-ai/babysitter-sdk and @a5c-ai/hooks-adapter-cli declare a bin named
+ * `adapters-hooks` — the second global install hit npm EEXIST on the shim the
+ * first one already linked. The fix de-collides with `--force` (an explicit
+ * two-provider declaration, not a fallback), while still installing
+ * hooks-adapter-cli for its `a5c-hooks-adapter` bin that babysitter-sdk does not
+ * re-export. These tests fail if someone reverts the `--force`.
+ */
+describe('RC-1: adapters-hooks global bin collision is de-collided', () => {
+  const sdkBin = JSON.parse(fs.readFileSync('packages/babysitter-sdk/package.json', 'utf8')).bin as Record<string, string>;
+  const hooksCliBin = JSON.parse(fs.readFileSync('packages/adapters/hooks/cli/package.json', 'utf8')).bin as Record<string, string>;
+
+  it('confirms the real collision: both packages declare an `adapters-hooks` bin', () => {
+    // If this ever stops being true the collision is gone and the --force is moot,
+    // but as long as both providers exist the install sequence MUST reconcile them.
+    expect(sdkBin['adapters-hooks']).toBeDefined();
+    expect(hooksCliBin['adapters-hooks']).toBeDefined();
+  });
+
+  it('proves BOTH installs are still required: only hooks-adapter-cli provides `a5c-hooks-adapter`', () => {
+    // subprocess.ts spawns `a5c-hooks-adapter`, which babysitter-sdk does NOT
+    // re-export — so we cannot drop the hooks/cli global install to dodge the
+    // collision; it has to be reconciled instead.
+    expect(hooksCliBin['a5c-hooks-adapter']).toBeDefined();
+    expect(sdkBin['a5c-hooks-adapter']).toBeUndefined();
+  });
+
+  it('emits a de-collided BP setup sequence: the second `adapters-hooks` provider installs with --force', () => {
+    const commands = primaryLiveStackScenario().agent.setupCommands;
+
+    const sdkInstall = commands.find((c) => c.includes('install') && c.includes('./packages/babysitter-sdk'));
+    const hooksInstall = commands.find((c) => c.includes('install') && c.includes('./packages/adapters/hooks/cli'));
+
+    expect(sdkInstall).toBeDefined();
+    expect(hooksInstall).toBeDefined();
+
+    // The first provider links `adapters-hooks` cleanly; the second must --force
+    // over the already-linked shim or it EEXISTs. This assertion fails pre-fix.
+    expect(hooksInstall).toContain('--force');
+    expect(hooksInstall).toContain('--global');
+
+    // And the hooks install must come AFTER the sdk install so --force overwrites
+    // the sdk shim with the canonical hooks-adapter-cli binary (functionally the
+    // same — the sdk bin merely re-execs it).
+    expect(commands.indexOf(hooksInstall!)).toBeGreaterThan(commands.indexOf(sdkInstall!));
+  });
 });

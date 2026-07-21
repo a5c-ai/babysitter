@@ -239,7 +239,11 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
   const usePublishedPackages = options.env['LIVE_STACK_PUBLISHED_PACKAGES'] === '1';
   const localSdkInstallCommands = usePublishedPackages ? [] : [
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/babysitter-sdk'], options.cwd, SETUP_TIMEOUT_MS),
-    commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/adapters/hooks/cli'], options.cwd, SETUP_TIMEOUT_MS),
+    // `--force`: babysitter-sdk and hooks-adapter-cli both declare an `adapters-hooks`
+    // bin (babysitter-sdk's re-execs hooks-adapter-cli's), so the second global install
+    // would otherwise fail with EEXIST on the already-linked shim. hooks-adapter-cli must
+    // still be installed for its `a5c-hooks-adapter` bin (not re-exported by babysitter-sdk).
+    commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', '--force', './packages/adapters/hooks/cli'], options.cwd, SETUP_TIMEOUT_MS),
   ];
   const setupCommands = [
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['run', 'generate:plugins'], options.cwd, SETUP_TIMEOUT_MS),
@@ -411,7 +415,13 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
       }
 
       const artifactPath = await writeScenarioArtifact(options.artifactsDir, scenario, { status: 'failed', command: redactCommands([command])[0], commandResults });
-      return { status: 'failed', scenarioId: scenario.scenarioId, commands: redactCommands(commands), artifactPath, failure: `command failed: ${command.command} ${command.args.join(' ')}` };
+      // Surface the real stderr (tail) — a bare `command failed: <cmd>` hid the
+      // root cause of RC-1 (npm EEXIST on the adapters-hooks bin collision) and
+      // made it hard to diagnose. Redact before including so secrets never leak.
+      const stderrTail = String(redactLiveStackArtifact(result.stderr) ?? '').slice(-600).trim();
+      const stdoutTail = String(redactLiveStackArtifact(result.stdout) ?? '').slice(-200).trim();
+      const detail = stderrTail || stdoutTail;
+      return { status: 'failed', scenarioId: scenario.scenarioId, commands: redactCommands(commands), artifactPath, failure: `command failed: ${command.command} ${command.args.join(' ')} (exit ${result.status})${detail ? ` — ${detail}` : ''}` };
     }
   }
 
