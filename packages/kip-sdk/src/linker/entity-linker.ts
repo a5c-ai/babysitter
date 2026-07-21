@@ -124,10 +124,50 @@ const NAME_STOPWORDS = new Set([
   "todo", "changelog", "license", "contributing", "readme.md",
 ]);
 
-/** A token is DISTINCTIVE (usable as a match identifier) when it clears the min length AND is not a
- *  known generic stopword. Input is the `N_name`-normalized (lower-cased, whitespace-collapsed) token. */
+/** The min-length + stopword FLOOR (round-1/2). A token is above the floor when it clears the min length
+ *  AND is not a known generic stopword. Input is the `N_name`-normalized (lower-cased, whitespace-collapsed)
+ *  token. This floor is retained under `isStrongName` (round 3) but is NOT sufficient on its own — a bare
+ *  common noun (`manager`) clears the floor yet is not distinctive; `isStrongName` adds the positive rule. */
 function isDistinctiveName(nName: string): boolean {
   return nName.length >= MIN_DISTINCTIVE_LEN && !NAME_STOPWORDS.has(nName);
+}
+
+/**
+ * A "STRONG name" — the round-3 principled distinctiveness rule (ADR-B11a) that GATES every cross-doc
+ * `same_as` and every bare-token `documents` match (module matches use the path-qualified rule instead).
+ * A denylist cannot enumerate every common noun, so instead of asking "is this token on a blocklist?" we
+ * require a POSITIVE distinctiveness signal a bare common noun lacks. A single all-lowercase alphabetic
+ * token (`manager`, `client`, `user`, `payment`, `handler`, `request`, `response`, `error`, …) is NOT
+ * strong → NO deterministic link (it defers to the model-assisted Layer 2). A name is strong iff it clears
+ * the min-length + stopword floor AND is EITHER:
+ *   - multi-token — contains internal whitespace after `N_name` (`"Orchid checkout service"`,
+ *     `"Reconciliation Ledger"`); OR
+ *   - carries an internal distinctiveness marker a bare common noun lacks:
+ *       . a hyphen / underscore / slash / colon (`::`) / `@` — a qualified name (`order-service`,
+ *         `@scope/pkg`, `com::acme`);
+ *       . a dot that is NOT merely a bare filename's extension (`com.acme.Ledger` yes; `index.ts` /
+ *         `config.json` no — a dotted bare basename is a generic filename, not a qualified identity);
+ *       . an internal digit (`oauth2`);
+ *       . an internal capital in the ORIGINAL, pre-`toLowerCase` form (camelCase/PascalCase like
+ *         `OrderPlaced`, `linkResolver`) — a LEADING capital (`"Manager"`) is a bare common noun and does
+ *         NOT count, which is the whole distinction from a distinctive compound.
+ * Input is the RAW identity value (the internal-capital test needs the pre-lowercase form). Applied to
+ * concept identity values, to a bare concept slug, AND to the code `code:symbol`/`code:package` token.
+ */
+function isStrongName(raw: string): boolean {
+  const original = raw.normalize("NFC").trim().replace(/\s+/g, " ");
+  const nName = original.toLowerCase();
+  if (!isDistinctiveName(nName)) return false; // min-length + stopword floor (retained).
+  if (nName.includes(" ")) return true; // multi-token.
+  // A dotted bare basename (`index.ts`, `config.json`) is a generic filename, NOT a qualified name — its
+  // lone extension dot must not confer strength (that is exactly how `index.ts` escaped the stopword set).
+  const bareBasename = (original.match(/\./g)?.length === 1) && /^[^/\\]+\.[^./\\]{1,5}$/.test(original);
+  if (/[-_/:@]/.test(original)) return true; // qualified-name separator (hyphen/underscore/slash/`::`/`@`).
+  if (original.includes(".") && !bareBasename) return true; // qualifying dot (not a bare filename extension).
+  if (/\d/.test(original)) return true; // internal digit.
+  const tail = original.slice(1);
+  if (tail !== tail.toLowerCase()) return true; // internal capital (camelCase/PascalCase) in the original.
+  return false;
 }
 
 // --- identifier parsing (ADR-B11: code nodes carry NO name prop → parse out of the hashed eid) -----
@@ -221,6 +261,11 @@ function conceptIdentityPropValues(entry: NodeInventoryEntry): string[] {
  * the eid slug and dedicated identity props (`name`/`title`/`label`). Arbitrary prop values
  * (`example_file`, `status`, …) are incidental and NEVER matched (round-1 linked `{example_file:
  * 'index.ts'}` to `code:module …/index.ts`). Raw (un-normalized) — the caller applies `N_path`.
+ *
+ * The eid SLUG is included but subject to the SAME distinctiveness bar as every other identifier: a
+ * module match needs a path-qualified id (contains `/`) and a symbol/package match needs a STRONG slug
+ * (`isStrongName`). So an auto-generated bare-token slug (`overview`, `intro`) NEVER links — it is not
+ * a privileged signal, just another candidate identifier held to the same rule.
  */
 function conceptDocIdentifiers(entry: NodeInventoryEntry): string[] {
   const slug = conceptSlug(entry.eid);
@@ -233,7 +278,7 @@ function conceptDocIdentifiers(entry: NodeInventoryEntry): string[] {
  * The cross-doc `same_as` match identifiers — drawn ONLY from dedicated IDENTITY props
  * (`name`/`title`/`label`). NEVER the generic eid slug (round-1 merged two props-less `shared-slug-x`
  * concepts) and NEVER an arbitrary prop value (round-1 merged `{status:'draft'}` with `{state:'Draft'}`).
- * Raw (un-normalized) — the caller applies `N_name` + the distinctiveness gate.
+ * Raw (un-normalized) — the caller applies `N_name` + the STRONG-name gate (`isStrongName`).
  */
 function conceptNameIdentifiers(entry: NodeInventoryEntry): string[] {
   return conceptIdentityPropValues(entry);
@@ -263,21 +308,23 @@ function documentsEdge(from: EID, to: EID): AssertInput {
  *       . `code:module`  - the identifier EXACTLY equals the module's FULL git-relative relPath AND is
  *                          path-qualified (contains `/`); a bare basename (`index.ts`) is generic and
  *                          NEVER matches a module;
- *       . `code:symbol`  - the identifier EXACTLY equals the symbol name AND is DISTINCTIVE (clears the
- *                          length + stopword gate);
- *       . `code:package` - the identifier EXACTLY equals the package name AND is DISTINCTIVE.
+ *       . `code:symbol`  - the identifier EXACTLY equals the symbol name AND is a STRONG name
+ *                          (`isStrongName`: multi-token, or an internal digit/capital/qualifier);
+ *       . `code:package` - the identifier EXACTLY equals the package name AND is a STRONG name.
  *     Resolution across kinds is DETERMINISTIC, most-specific first (module then package for a
- *     path-shaped id; symbol then package for a bare distinctive id); a single identifier never fans
+ *     path-shaped id; symbol then package for a bare strong id); a single identifier never fans
  *     out to every kind.
- *   - a `{ candidate, existing }` into `sameAs` when two DIFFERENT-blob concepts share a DISTINCTIVE
- *     `name`/`title`/`label` identity value under `N_name` (NEVER the slug, NEVER an arbitrary prop).
+ *   - a `{ candidate, existing }` into `sameAs` when two DIFFERENT-blob concepts share a STRONG
+ *     `name`/`title`/`label` identity value under `N_name` (NEVER the slug, NEVER an arbitrary prop). A
+ *     bare common noun (`manager`/`client`/`user`) is NOT strong → NO same_as; single-common-noun
+ *     cross-doc resolution is deferred to the model-assisted Layer 2.
  * Deterministic: `proposed` sorted by (edgeKind, from, to); `sameAs` sorted by (candidate, existing).
  *
- * Residual ambiguity (documented, ADR-B11a): two genuinely-distinct entities that share a distinctive
- * name across documents can still false-`same_as` here - this deterministic layer is deliberately
- * conservative (distinctive identity prop only), and a wrong `same_as` stays fully reversible (a signed
- * `not_same_as` contradicts it and surfaces `kip:conflict` instead of merging, proj.ts:2197-2237);
- * disambiguating true homonyms is the job of the future model-assisted Layer 2.
+ * Residual ambiguity (documented, ADR-B11a): two genuinely-distinct entities that share a STRONG
+ * distinctive name across documents (a true homonym) can still false-`same_as` here - this deterministic
+ * layer is deliberately conservative (strong identity name only), and a wrong `same_as` stays fully
+ * reversible (a signed `not_same_as` contradicts it and surfaces `kip:conflict` instead of merging,
+ * proj.ts:2197-2237); disambiguating true homonyms is the job of the future model-assisted Layer 2.
  */
 export function linkResolver(inventory: NodeInventory): LinkResolverResult {
   // (1) Index every code node by its case-preserved N_path identifier → the code eids that carry it.
@@ -300,9 +347,16 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
     }
     const ref = parseCodeEid(entry.kind, entry.eid);
     if (!ref) continue; // unparsable / unexpected shape: abstain (N5), never a mis-split (C).
-    if (ref.kind === "module") addTo(moduleByPath, ref.relPath, entry.eid);
-    else if (ref.kind === "symbol") addTo(symbolByName, ref.symbolName, entry.eid);
-    else addTo(packageByName, ref.pkg, entry.eid);
+    if (ref.kind === "module") {
+      // Only index PATH-QUALIFIED module relPaths. `resolveDocTargets` routes a bare, `/`-less concept id
+      // to symbol/package (never `moduleByPath`), so a bare-basename module (`index.ts`) is unreachable —
+      // indexing it would be dead. Keeping the guard here removes those dead entries by construction.
+      if (ref.relPath.includes("/")) addTo(moduleByPath, ref.relPath, entry.eid);
+    } else if (ref.kind === "symbol") {
+      // The code TOKEN is held to the same STRONG bar as the concept identifier: a dotted bare basename
+      // (`index.ts`) or a bare common noun is not distinctive evidence and must not seed a match.
+      if (isStrongName(ref.symbolName)) addTo(symbolByName, ref.symbolName, entry.eid);
+    } else if (isStrongName(ref.pkg)) addTo(packageByName, ref.pkg, entry.eid);
   }
 
   // Resolve the code targets for ONE concept identity identifier (case-preserved N_path), by the
@@ -315,11 +369,11 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
       const mods = moduleByPath.get(id);
       if (mods && mods.size) return [...mods];
       const pkgs = packageByName.get(id);
-      if (pkgs && pkgs.size && isDistinctiveName(normName(id))) return [...pkgs];
+      if (pkgs && pkgs.size && isStrongName(id)) return [...pkgs];
       return [];
     }
-    // A bare identifier must be DISTINCTIVE to match a symbol/package (rejects foo, api, index).
-    if (!isDistinctiveName(normName(id))) return [];
+    // A bare identifier must be a STRONG name to match a symbol/package (rejects foo, api, index, manager).
+    if (!isStrongName(id)) return [];
     const syms = symbolByName.get(id);
     if (syms && syms.size) return [...syms]; // symbol is more specific than a coarse package.
     const pkgs = packageByName.get(id);
@@ -335,7 +389,7 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
       const id = normPath(raw);
       if (id === "") continue;
       for (const codeEid of resolveDocTargets(id)) {
-        const key = `${c.eid} ${codeEid}`; // NUL separator (collision-safe; eids never contain NUL).
+        const key = `${c.eid}\0${codeEid}`; // NUL (`\0`) separator — collision-safe: an eid never contains a NUL byte, whereas a space could (a relPath may contain spaces).
         if (seenDocPair.has(key)) continue; // dedupe (slug + a prop value may resolve the same code).
         seenDocPair.add(key);
         proposed.push(documentsEdge(c.eid, codeEid));
@@ -343,14 +397,17 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
     }
   }
 
-  // (3) cross-doc same_as: two DIFFERENT-blob concepts sharing a DISTINCTIVE identity-prop name.
+  // (3) cross-doc same_as: two DIFFERENT-blob concepts sharing a STRONG identity-prop name (round 3).
   const byName = new Map<string, Map<EID, string>>(); // N_name -> (conceptEid -> blob)
   for (const c of concepts) {
     const blob = conceptBlob(c.eid);
     const names = new Set<string>();
     for (const raw of conceptNameIdentifiers(c)) {
       const n = normName(raw);
-      if (n !== "" && isDistinctiveName(n)) names.add(n); // distinctive identity names only.
+      // STRONG identity names ONLY (ADR-B11a): a bare common noun (`manager`/`client`/`user`) is not
+      // strong and must NOT merge — it defers to Layer 2. `isStrongName` reads the RAW value (the
+      // camelCase/PascalCase test needs the pre-`toLowerCase` form) but we key the class by `N_name`.
+      if (n !== "" && isStrongName(raw)) names.add(n);
     }
     for (const n of names) {
       let m = byName.get(n);
@@ -372,7 +429,7 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
         if (ba === bb) continue; // SAME blob ⇒ not a cross-doc duplicate (never a same_as).
         const candidate = ea < eb ? ea : eb; // deterministic min-first ordering.
         const existing = ea < eb ? eb : ea;
-        const key = `${candidate} ${existing}`;
+        const key = `${candidate}\0${existing}`;
         if (seenSamePair.has(key)) continue;
         seenSamePair.add(key);
         sameAs.push({ candidate, existing });

@@ -101,12 +101,14 @@ describe("entity-linker: linkResolver is a PURE function (ADR-B11 — reads its 
     expect(pairs.length).toBe(2);
   });
 
-  it("emits ONE `same_as` pair for two DIFFERENT-blob concepts with the same normalized name", () => {
+  it("emits ONE `same_as` pair for two DIFFERENT-blob concepts with the same normalized STRONG name", () => {
     const cA = conceptEid(BLOB_A, "concept-a");
     const cB = conceptEid(BLOB_B, "concept-b");
     const r = linkResolver([
-      conceptNode(cA, [{ key: "name", value: "Widget" }]),
-      conceptNode(cB, [{ key: "name", value: "widget" }]), // N_name folds "Widget"/"widget" → equal
+      // A STRONG multi-token name (round 3, ADR-B11a): `N_name` folds case AND collapses whitespace so the
+      // two spellings are equal, and a multi-token name clears the strong bar (a bare common noun would not).
+      conceptNode(cA, [{ key: "name", value: "Orchid Checkout  Service" }]),
+      conceptNode(cB, [{ key: "name", value: "orchid checkout service" }]), // folds → "orchid checkout service"
     ]);
 
     const sameAs = r.sameAs ?? [];
@@ -193,11 +195,14 @@ describe("entity-linker: N5 precision — EXACT whole-string equality only, abst
     const sameB = conceptEid(BLOB_A, "dup-2"); // SAME blob as sameA
     const crossA = conceptEid(BLOB_A, "x-1");
     const crossB = conceptEid(BLOB_B, "x-2"); // DIFFERENT blob
+    // STRONG multi-token names (round 3): the same-blob suppression is now tested on names that WOULD merge
+    // cross-blob, so the only reason the same-blob pair does not merge is the blob-identity guard — not a
+    // weak name. (A bare common noun like "Alpha"/"Beta" is no longer strong and would never merge at all.)
     const r = linkResolver([
-      conceptNode(sameA, [{ key: "name", value: "Alpha" }]),
-      conceptNode(sameB, [{ key: "name", value: "alpha" }]), // same normalized name, SAME blob → NO same_as
-      conceptNode(crossA, [{ key: "name", value: "Beta" }]),
-      conceptNode(crossB, [{ key: "name", value: "beta" }]), // same normalized name, DIFFERENT blob → same_as
+      conceptNode(sameA, [{ key: "name", value: "Order Service" }]),
+      conceptNode(sameB, [{ key: "name", value: "order service" }]), // same normalized name, SAME blob → NO same_as
+      conceptNode(crossA, [{ key: "name", value: "Reconciliation Ledger" }]),
+      conceptNode(crossB, [{ key: "name", value: "reconciliation ledger" }]), // same normalized name, DIFFERENT blob → same_as
     ]);
 
     const sameAs = r.sameAs ?? [];
@@ -231,11 +236,11 @@ describe("entity-linker: determinism (ADR-B11 — identical inventory yields an 
     // `proposed` documents edges are sorted by (from, to) — equal to their own sorted key list.
     const docKeys = docs.map((c) => {
       const { from, to } = edgeFromTo(c);
-      return `${from} ${to}`;
+      return `${from}\0${to}`;
     });
     expect(docKeys).toEqual([...docKeys].sort());
     // `sameAs` sorted by (candidate, existing).
-    const saKeys = (first.sameAs ?? []).map((p) => `${p.candidate} ${p.existing}`);
+    const saKeys = (first.sameAs ?? []).map((p) => `${p.candidate}\0${p.existing}`);
     expect(saKeys).toEqual([...saKeys].sort());
   });
 });
@@ -327,6 +332,106 @@ describe("entity-linker: round-2 precision - a match must be DISTINCTIVE evidenc
     ]);
     // Only the well-formed module links; no malformed eid produces an edge.
     expect(documentsEdges(r).map(edgeFromTo)).toEqual([{ from: cGood, to: good }]);
+  });
+});
+
+describe("entity-linker: round-3 precision - the STRONG-name rule kills generic single-token merges (ADR-B11a)", () => {
+  // (a) A bare single-token common noun carries no identity signal, so a shared one is an incidental
+  //     coincidence, NOT distinctive evidence — the round-2 min-length+stopword gate could not enumerate
+  //     every common noun, so `Manager`/`Client`/`User`/... still merged. The strong-name rule kills this.
+  it("does NOT same_as when two unrelated concepts share a bare single-token common-noun name", () => {
+    for (const noun of ["Manager", "Client", "User", "Payment", "Handler", "Controller", "Request", "Response", "Error"]) {
+      const a = conceptEid(BLOB_A, `a-${noun}`);
+      const b = conceptEid(BLOB_B, `b-${noun}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: noun }]),
+        conceptNode(b, [{ key: "name", value: noun.toLowerCase() }]), // folds to the same N_name, but is NOT strong
+      ]);
+      expect(r.sameAs ?? [], `"${noun}" is a bare common noun and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  it("DOES same_as on a strong camelCase/PascalCase name across blobs (internal capital ⇒ distinctive)", () => {
+    const a = conceptEid(BLOB_A, "op-a");
+    const b = conceptEid(BLOB_B, "op-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "name", value: "OrderPlaced" }]),
+      conceptNode(b, [{ key: "title", value: "orderPlaced" }]), // both carry an INTERNAL capital → strong; fold → "orderplaced"
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+
+  it("DOES same_as on a strong hyphen-qualified name across blobs (order-service)", () => {
+    const a = conceptEid(BLOB_A, "os-a");
+    const b = conceptEid(BLOB_B, "os-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "name", value: "order-service" }]),
+      conceptNode(b, [{ key: "name", value: "Order-Service" }]), // hyphen ⇒ qualified ⇒ strong; fold → "order-service"
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+
+  // Item 3 coverage: `label` is an accepted IDENTITY_PROP_KEY but had no test — a strong `label` merges.
+  it("a `label` identity prop participates in same_as on a strong name (label coverage)", () => {
+    const a = conceptEid(BLOB_A, "lbl-a");
+    const b = conceptEid(BLOB_B, "lbl-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "label", value: "Reconciliation Ledger" }]),
+      conceptNode(b, [{ key: "label", value: "reconciliation ledger" }]),
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+
+  // Independently pins "same_as draws ONLY from name/title/label" — the shared value here is STRONG (would
+  // merge if it were an identity prop), so the ONLY reason it does not merge is that `owner`/`team` are
+  // arbitrary props. (Mutation: draw same_as from ALL props ⇒ this merges ⇒ the test fails.)
+  it("does NOT same_as on a STRONG value carried by an arbitrary (non-identity) prop", () => {
+    const a = conceptEid(BLOB_A, "arb-a");
+    const b = conceptEid(BLOB_B, "arb-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "owner", value: "Reconciliation Ledger" }]),
+      conceptNode(b, [{ key: "team", value: "reconciliation ledger" }]),
+    ]);
+    expect(r.sameAs ?? []).toEqual([]);
+    expect(documentsEdges(r).length).toBe(0);
+  });
+
+  // Independently pins "documents identifiers are drawn ONLY from identity fields, never arbitrary props".
+  // The prior only-fixture ("index.ts") was a bare basename already blocked by a SEPARATE rule, so
+  // loosening `conceptDocIdentifiers` to ALL props passed zero tests. Here the arbitrary value is a real,
+  // PATH-QUALIFIED module relPath (not otherwise blocked). (Mutation: draw from ALL props ⇒ 1 edge ⇒ fail.)
+  it("does NOT draw documents identifiers from arbitrary props even when the value is a real path-qualified module relPath", () => {
+    const modEid = moduleEid("src/foo/bar.ts");
+    const concept = conceptEid(BLOB_A, "unrelated-doc-slug"); // identity fields do NOT name the module
+    const r = linkResolver([
+      codeNode(modEid, "code:module"),
+      conceptNode(concept, [{ key: "example_file", value: "src/foo/bar.ts" }]), // arbitrary prop = a real relPath
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+  });
+
+  // Item 1 asymmetry: a `code:symbol`/`code:package` literally named with a dotted bare basename escapes a
+  // bare stopword denylist ("index.ts" ∉ NAME_STOPWORDS) — the strong bar treats a filename-extension dot
+  // as NON-qualifying, so such a token is not distinctive and never links.
+  it("does NOT documents when a code:symbol/package token is a dotted bare basename (index.ts / config.json)", () => {
+    const symEid = symbolEid("src/x.ts", "index.ts"); // a symbol literally named "index.ts"
+    const pkgEid = packageEid("config.json"); // a package literally named "config.json"
+    const cSym = conceptEid(BLOB_A, "c-sym");
+    const cPkg = conceptEid(BLOB_A, "c-pkg");
+    const r = linkResolver([
+      codeNode(symEid, "code:symbol"),
+      codeNode(pkgEid, "code:package"),
+      conceptNode(cSym, [{ key: "name", value: "index.ts" }]),
+      conceptNode(cPkg, [{ key: "title", value: "config.json" }]),
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
   });
 });
 
