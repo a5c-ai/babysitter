@@ -116,63 +116,78 @@ describe("entity-linker: linkResolver is a PURE function (ADR-B11 — reads its 
     expect(documentsEdges(r).length).toBe(0);
   });
 
-  it("never emits concept→code as `same_as`, and never emits cross-doc as a `documents` edge", () => {
+  it("never emits concept-to-code as same_as, never cross-doc as documents, and same_as needs a DISTINCTIVE identity prop (not the slug)", () => {
     const modEid = moduleEid("src/a.ts");
-    const cCode = conceptEid(BLOB_A, "src/a.ts"); // concept→code control
-    const cDupA = conceptEid(BLOB_A, "shared-slug-x");
-    const cDupB = conceptEid(BLOB_B, "shared-slug-x"); // cross-doc control (same slug, DIFFERENT blob)
+    const cCode = conceptEid(BLOB_A, "src/a.ts"); // concept->code control (path-qualified slug)
+    const cSlugA = conceptEid(BLOB_A, "shared-slug-x");
+    const cSlugB = conceptEid(BLOB_B, "shared-slug-x"); // same slug, DIFFERENT blob - the slug is NOT an identity signal -> NO same_as
+    const cNameA = conceptEid(BLOB_A, "concept-a");
+    const cNameB = conceptEid(BLOB_B, "concept-b");
     const r = linkResolver([
       codeNode(modEid, "code:module"),
       conceptNode(cCode),
-      conceptNode(cDupA),
-      conceptNode(cDupB),
+      conceptNode(cSlugA),
+      conceptNode(cSlugB),
+      conceptNode(cNameA, [{ key: "name", value: "Payments Gateway" }]),
+      conceptNode(cNameB, [{ key: "name", value: "payments gateway" }]), // distinctive shared name -> same_as
     ]);
 
-    // Every documents edge goes doc:→code: (a concept DOCUMENTS an implementation), never doc:→doc:.
+    // Every documents edge goes doc: -> code: (a concept DOCUMENTS an implementation), never doc: -> doc:.
     for (const c of documentsEdges(r)) {
       const { from, to } = edgeFromTo(c);
       expect(from.startsWith("doc:")).toBe(true);
       expect(to.startsWith("code:")).toBe(true);
     }
-    // Every same_as pair is concept↔concept (doc:↔doc:), never concept↔code.
+    // Every same_as pair is concept<->concept (doc: <-> doc:), never concept<->code.
     for (const p of r.sameAs ?? []) {
       expect(p.candidate.startsWith("doc:")).toBe(true);
       expect(p.existing.startsWith("doc:")).toBe(true);
     }
-    // Positive controls present (fails-now: both are 0 against the empty stub).
+    // documents positive control present.
     expect(documentsEdges(r).map(edgeFromTo)).toContainEqual({ from: cCode, to: modEid });
-    expect((r.sameAs ?? []).length).toBe(1);
-  });
-});
+    // same_as: ONLY the distinctive shared-NAME pair. The shared-SLUG pair must NOT merge -- a generic
+    // eid-slug merge was the round-1 CRITICAL false-merge (payments-api / user-profiles collapsed).
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([cNameA, cNameB]));
+    const flat = sameAs.flatMap((p) => [p.candidate, p.existing]);
+    expect(flat).not.toContain(cSlugA);
+    expect(flat).not.toContain(cSlugB);
+  });});
 
 describe("entity-linker: N5 precision — EXACT whole-string equality only, abstain otherwise", () => {
-  it("abstains on a substring, a PATH case-mismatch, and a no-match — only the exact whole-string match links", () => {
+  it("abstains on a substring, a PATH case-mismatch, a bare basename, and a no-match - only the exact whole-PATH match links", () => {
     const modLong = moduleEid("src/learn/index.ts");
-    const modIndex = moduleEid("index.ts");
-    const cSubstr = conceptEid(BLOB_A, "index"); // substring of a path — NO link
-    const cCase = conceptEid(BLOB_A, "Index.ts"); // case-mismatch of index.ts (N_path preserves case) — NO link
-    const cMiss = conceptEid(BLOB_A, "does/not/exist.ts"); // matches nothing — NO link
-    const cExact = conceptEid(BLOB_A, "index.ts"); // EXACT — the ONLY link
+    const modBare = moduleEid("index.ts"); // a root-level module whose relPath IS a bare basename
+    const cSubstr = conceptEid(BLOB_A, "learn"); // a path SEGMENT (substring) - NO link (no substring matching)
+    const cCase = conceptEid(BLOB_A, "src/learn/Index.ts"); // case-mismatch (N_path preserves case) - NO link
+    const cBare = conceptEid(BLOB_A, "index.ts"); // bare basename - generic/ambiguous - NEVER matches a module
+    const cMiss = conceptEid(BLOB_A, "does/not/exist.ts"); // matches nothing - NO link
+    const cExact = conceptEid(BLOB_A, "src/learn/index.ts"); // EXACT full relPath - the ONLY link
     const r = linkResolver([
       codeNode(modLong, "code:module"),
-      codeNode(modIndex, "code:module"),
+      codeNode(modBare, "code:module"),
       conceptNode(cSubstr),
       conceptNode(cCase),
+      conceptNode(cBare),
       conceptNode(cMiss),
       conceptNode(cExact),
     ]);
 
     const docs = documentsEdges(r);
     expect(docs.length).toBe(1);
-    expect(edgeFromTo(docs[0]!)).toEqual({ from: cExact, to: modIndex });
+    expect(edgeFromTo(docs[0]!)).toEqual({ from: cExact, to: modLong });
 
     const froms = docs.map((c) => edgeFromTo(c).from);
     expect(froms).not.toContain(cSubstr);
     expect(froms).not.toContain(cCase);
+    expect(froms).not.toContain(cBare);
     expect(froms).not.toContain(cMiss);
+    // The root-level `index.ts` module is NEVER linked - a bare-basename identifier is not distinctive.
+    const tos = docs.map((c) => edgeFromTo(c).to);
+    expect(tos).not.toContain(modBare);
     expect(r.sameAs ?? []).toEqual([]);
   });
-
   it("gives a same_as ONLY to a cross-blob duplicate name, never to two SAME-blob concepts with the same name", () => {
     const sameA = conceptEid(BLOB_A, "dup-1");
     const sameB = conceptEid(BLOB_A, "dup-2"); // SAME blob as sameA
@@ -222,6 +237,96 @@ describe("entity-linker: determinism (ADR-B11 — identical inventory yields an 
     // `sameAs` sorted by (candidate, existing).
     const saKeys = (first.sameAs ?? []).map((p) => `${p.candidate} ${p.existing}`);
     expect(saKeys).toEqual([...saKeys].sort());
+  });
+});
+
+describe("entity-linker: round-2 precision - a match must be DISTINCTIVE evidence, never an incidental coincidence", () => {
+  it("does NOT same_as on non-identity prop values (a shared status/state is incidental, not identity)", () => {
+    const cA = conceptEid(BLOB_A, "payments-api");
+    const cB = conceptEid(BLOB_B, "user-profiles");
+    const r = linkResolver([
+      conceptNode(cA, [{ key: "status", value: "draft" }]),
+      conceptNode(cB, [{ key: "state", value: "Draft" }]), // folds to "draft" under N_name, but NOT an identity prop
+    ]);
+    expect(r.sameAs ?? []).toEqual([]);
+    expect(documentsEdges(r).length).toBe(0);
+  });
+
+  it("does NOT documents on an incidental prop mention or a bare basename", () => {
+    const modEid = moduleEid("index.ts");
+    const symEid = symbolEid("src/x.ts", "index");
+    const concept = conceptEid(BLOB_A, "the-config-concept");
+    const r = linkResolver([
+      codeNode(modEid, "code:module"),
+      codeNode(symEid, "code:symbol"),
+      // example_file is an ARBITRARY prop (not name/title/label); "index.ts" is a bare basename; "index" is a stopword.
+      conceptNode(concept, [
+        { key: "example_file", value: "index.ts" },
+        { key: "name", value: "index" },
+      ]),
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  it("does NOT same_as on a generic stopword name shared across blobs (two `overview` sections stay distinct)", () => {
+    const cA = conceptEid(BLOB_A, "sec-1");
+    const cB = conceptEid(BLOB_B, "sec-2");
+    const r = linkResolver([
+      conceptNode(cA, [{ key: "title", value: "Overview" }]),
+      conceptNode(cB, [{ key: "title", value: "overview" }]), // stopword - NO merge
+    ]);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  it("a bare generic identifier (`foo`) never fans documents edges across module/symbol/package (kind-blind fan-out is gone)", () => {
+    const modEid = moduleEid("foo"); // root-level module named `foo` (bare, no separator)
+    const symEid = symbolEid("src/x.ts", "foo");
+    const pkgEid = packageEid("foo");
+    const concept = conceptEid(BLOB_A, "some-concept");
+    const r = linkResolver([
+      codeNode(modEid, "code:module"),
+      codeNode(symEid, "code:symbol"),
+      codeNode(pkgEid, "code:package"),
+      conceptNode(concept, [{ key: "name", value: "foo" }]), // too short + no separator -> NO link to any kind
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+  });
+
+  it("a DISTINCTIVE full-path slug DOES link (positive control for the tightened module rule)", () => {
+    const modEid = moduleEid("src/services/payments/gateway.ts");
+    const concept = conceptEid(BLOB_A, "src/services/payments/gateway.ts");
+    const r = linkResolver([codeNode(modEid, "code:module"), conceptNode(concept)]);
+    const docs = documentsEdges(r);
+    expect(docs.length).toBe(1);
+    expect(edgeFromTo(docs[0]!)).toEqual({ from: concept, to: modEid });
+  });
+
+  it("a DISTINCTIVE shared identity name DOES same_as across blobs (positive control)", () => {
+    const cA = conceptEid(BLOB_A, "c-1");
+    const cB = conceptEid(BLOB_B, "c-2");
+    const r = linkResolver([
+      conceptNode(cA, [{ key: "name", value: "Reconciliation Ledger" }]),
+      conceptNode(cB, [{ key: "title", value: "reconciliation ledger" }]), // distinctive, cross-blob -> same_as
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([cA, cB]));
+  });
+
+  it("path-parsing robustness: a malformed code eid (empty/absent repoId, missing #sym) is skipped, never mis-split", () => {
+    const good = moduleEid("src/robust/ok.ts");
+    const cGood = conceptEid(BLOB_A, "src/robust/ok.ts");
+    const r = linkResolver([
+      { eid: "code:module:", kind: "code:module", props: [] }, // no repoId, no relPath
+      { eid: "code:module::src/x.ts", kind: "code:module", props: [] }, // empty repoId
+      { eid: "code:symbol:repo:src/x.ts", kind: "code:symbol", props: [] }, // no #sym suffix
+      codeNode(good, "code:module"),
+      conceptNode(cGood),
+      conceptNode(conceptEid(BLOB_A, "src/x.ts")), // would mis-link if the empty-repoId eid mis-split to a relPath
+    ]);
+    // Only the well-formed module links; no malformed eid produces an edge.
+    expect(documentsEdges(r).map(edgeFromTo)).toEqual([{ from: cGood, to: good }]);
   });
 });
 

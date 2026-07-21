@@ -94,36 +94,95 @@ function normName(s: string): string {
   return s.normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-// --- identifier parsing (ADR-B11: code nodes carry NO name prop → parse out of the hashed eid) -----
+// --- distinctiveness gate (round-2 precision hardening, ADR-B11a) --------------------------------
+//
+// Layer 1 is deterministic exact-match; a link must be DISTINCTIVE evidence, not an incidental
+// coincidence (three critics scored round-1 89/32/56 on a CRITICAL false-merge — a concept sharing
+// ANY string prop value merged with an unrelated concept). A generic/too-short/stopword token is not
+// distinctive, so matching on it fans out false links. Abstain over guess (N5).
+
+/** Dedicated IDENTITY prop keys (compared case-insensitively). ONLY these props may carry a match
+ *  identifier — arbitrary props (`status`, `example_file`, …) are incidental and NEVER matched. */
+const IDENTITY_PROP_KEYS = new Set(["name", "title", "label"]);
+
+/** A distinctive token must be at least this many chars (`N_name`-normalized). Short tokens (`api`,
+ *  `foo`, `add`) are ambiguous across unrelated entities. `≥ 4` still admits `beta`, `left-pad`, … */
+const MIN_DISTINCTIVE_LEN = 4;
 
 /**
- * Recover the code identifier from a `code:*` eid (case-preserved `N_path`), or `null` for an eid whose
- * shape does not match its declared kind (abstain, N5). Code eids embed a hashed `repoId`:
- *   `code:module:<repoId>:<relPath>`  → relPath (verbatim after the first-`:`-delimited repoId).
- *   `code:symbol:<repoId>:<relPath>#<sym>` → the symbol after the FINAL `#`.
- *   `code:package:<repoId>:<pkg>`     → pkg (verbatim after the repoId).
- * git paths are `/`-separated and colon-free, so splitting the repoId at the FIRST `:` is unambiguous.
+ * Generic terms that recur across unrelated documents/code and therefore carry NO entity-identity
+ * signal — a `same_as` or bare-name `documents` match on one of these is a false merge (round-1
+ * merged two `overview` sections). Kept explicit + documented so the gate is auditable. Compared
+ * against the `N_name`-normalized (lower-cased) token.
  */
-function codeIdentifier(kind: string, eid: EID): string | null {
-  const afterRepoId = (prefix: string): string | null => {
-    if (!eid.startsWith(prefix)) return null;
-    const rest = eid.slice(prefix.length);
-    const c = rest.indexOf(":");
-    return c < 0 ? null : rest.slice(c + 1);
-  };
+const NAME_STOPWORDS = new Set([
+  "overview", "introduction", "intro", "index", "readme", "about", "home",
+  "api", "service", "services", "note", "notes", "doc", "docs", "section",
+  "guide", "reference", "summary", "misc", "other", "others", "main", "core",
+  "common", "util", "utils", "module", "modules", "package", "packages",
+  "code", "test", "tests", "example", "examples", "config", "data", "info",
+  "todo", "changelog", "license", "contributing", "readme.md",
+]);
+
+/** A token is DISTINCTIVE (usable as a match identifier) when it clears the min length AND is not a
+ *  known generic stopword. Input is the `N_name`-normalized (lower-cased, whitespace-collapsed) token. */
+function isDistinctiveName(nName: string): boolean {
+  return nName.length >= MIN_DISTINCTIVE_LEN && !NAME_STOPWORDS.has(nName);
+}
+
+// --- identifier parsing (ADR-B11: code nodes carry NO name prop → parse out of the hashed eid) -----
+
+/** A parsed `code:*` node reference — the identifier the linker matches against, by kind. */
+type CodeRef =
+  | { kind: "module"; relPath: string }
+  | { kind: "symbol"; symbolName: string }
+  | { kind: "package"; pkg: string };
+
+/**
+ * The segment after a `code:*` prefix's hashed `repoId` (`${basename}-${sha1(absPath).slice(0,12)}`,
+ * which is itself colon-free), or `null` when the eid shape is unexpected (abstain, N5 — NEVER a
+ * mis-split). Code eids are `code:<kind>:<repoId>:<rest>`; the FIRST `:` after the prefix ends the
+ * repoId (any `:` in `rest`/relPath comes strictly after it, so the split is unambiguous). Requires a
+ * NON-EMPTY repoId and a NON-EMPTY remainder — a malformed eid (no repoId delimiter, empty repoId, or
+ * empty remainder) yields `null` and is skipped, never silently mis-parsed into a wrong identifier (C).
+ */
+function afterRepoId(eid: EID, prefix: string): string | null {
+  if (!eid.startsWith(prefix)) return null;
+  const rest = eid.slice(prefix.length);
+  const c = rest.indexOf(":");
+  if (c <= 0) return null; // no repoId delimiter, or empty repoId ⇒ unexpected shape ⇒ abstain.
+  const remainder = rest.slice(c + 1);
+  return remainder === "" ? null : remainder;
+}
+
+/**
+ * Recover the parsed identifier from a `code:*` eid (case-preserved `N_path`), or `null` for an eid
+ * whose shape does not match its declared kind (abstain, N5). Code eids embed a hashed `repoId`:
+ *   `code:module:<repoId>:<relPath>`       → { module, relPath }.
+ *   `code:symbol:<repoId>:<relPath>#<sym>` → { symbol, symbolName = after the FINAL `#` }.
+ *   `code:package:<repoId>:<pkg>`          → { package, pkg }.
+ */
+function parseCodeEid(kind: string, eid: EID): CodeRef | null {
   switch (kind) {
     case "code:module": {
-      const rel = afterRepoId("code:module:");
-      return rel === null ? null : normPath(rel);
+      const rel = afterRepoId(eid, "code:module:");
+      if (rel === null) return null;
+      const relPath = normPath(rel);
+      return relPath === "" ? null : { kind: "module", relPath };
     }
     case "code:package": {
-      const pkg = afterRepoId("code:package:");
-      return pkg === null ? null : normPath(pkg);
+      const pkg = afterRepoId(eid, "code:package:");
+      if (pkg === null) return null;
+      const p = normPath(pkg);
+      return p === "" ? null : { kind: "package", pkg: p };
     }
     case "code:symbol": {
-      if (!eid.startsWith("code:symbol:")) return null;
-      const h = eid.lastIndexOf("#");
-      return h < 0 ? null : normPath(eid.slice(h + 1));
+      const body = afterRepoId(eid, "code:symbol:"); // `<relPath>#<sym>`
+      if (body === null) return null;
+      const h = body.lastIndexOf("#");
+      if (h < 0) return null; // a symbol eid must carry a `#sym` suffix ⇒ else abstain.
+      const sym = normPath(body.slice(h + 1));
+      return sym === "" ? null : { kind: "symbol", symbolName: sym };
     }
     default:
       return null;
@@ -148,16 +207,36 @@ function conceptBlob(eid: EID): string {
   return body.startsWith("doc:") ? body.slice("doc:".length) : body;
 }
 
-/**
- * The RAW (un-normalized) identifiers to match for a doc concept (ADR-B11): its slug AND every
- * string-valued prop value (doc props are arbitrary model-authored, so any string may be an identifier).
- */
-function conceptRawIdentifiers(entry: NodeInventoryEntry): string[] {
-  const ids: string[] = [conceptSlug(entry.eid)];
+/** The values of a concept's dedicated IDENTITY props (`name`/`title`/`label`), string-valued only. */
+function conceptIdentityPropValues(entry: NodeInventoryEntry): string[] {
+  const ids: string[] = [];
   for (const p of entry.props) {
-    if (typeof p.value === "string") ids.push(p.value);
+    if (typeof p.value === "string" && IDENTITY_PROP_KEYS.has(p.key.toLowerCase())) ids.push(p.value);
   }
   return ids;
+}
+
+/**
+ * The `documents` (concept→code) match identifiers — drawn ONLY from the concept's IDENTITY fields:
+ * the eid slug and dedicated identity props (`name`/`title`/`label`). Arbitrary prop values
+ * (`example_file`, `status`, …) are incidental and NEVER matched (round-1 linked `{example_file:
+ * 'index.ts'}` to `code:module …/index.ts`). Raw (un-normalized) — the caller applies `N_path`.
+ */
+function conceptDocIdentifiers(entry: NodeInventoryEntry): string[] {
+  const slug = conceptSlug(entry.eid);
+  const ids = conceptIdentityPropValues(entry);
+  if (slug !== "") ids.push(slug);
+  return ids;
+}
+
+/**
+ * The cross-doc `same_as` match identifiers — drawn ONLY from dedicated IDENTITY props
+ * (`name`/`title`/`label`). NEVER the generic eid slug (round-1 merged two props-less `shared-slug-x`
+ * concepts) and NEVER an arbitrary prop value (round-1 merged `{status:'draft'}` with `{state:'Draft'}`).
+ * Raw (un-normalized) — the caller applies `N_name` + the distinctiveness gate.
+ */
+function conceptNameIdentifiers(entry: NodeInventoryEntry): string[] {
+  return conceptIdentityPropValues(entry);
 }
 
 /** A `documents` edge `AssertInput` (concept→code), keyed by a deterministic content-derived eid so a
@@ -177,58 +256,101 @@ function documentsEdge(from: EID, to: EID): AssertInput {
 
 /**
  * The pure, deterministic Layer-1 linker (ADR-B11/B11a). Reads ONLY its `NodeInventory` input and
- * authors nothing (INV-A1). Emits, by EXACT whole-string equality only (abstain otherwise, N5):
- *   - a typed `documents` edge (concept→code) into `proposed` when a concept identifier (slug or a
- *     string prop value), normalized under `N_path`, equals a `code:module`/`code:symbol`/`code:package`
- *     identifier;
- *   - a `{ candidate, existing }` into `sameAs` when two DIFFERENT-blob concepts share an `N_name`.
+ * authors nothing (INV-A1). High-precision: a match must be DISTINCTIVE evidence, not an incidental
+ * coincidence. Emits, by EXACT whole-string equality only (abstain otherwise, N5):
+ *   - a typed `documents` edge (concept-to-code) into `proposed` when a concept IDENTITY identifier
+ *     (its slug or a `name`/`title`/`label` prop value), normalized under `N_path`, matches a code node:
+ *       . `code:module`  - the identifier EXACTLY equals the module's FULL git-relative relPath AND is
+ *                          path-qualified (contains `/`); a bare basename (`index.ts`) is generic and
+ *                          NEVER matches a module;
+ *       . `code:symbol`  - the identifier EXACTLY equals the symbol name AND is DISTINCTIVE (clears the
+ *                          length + stopword gate);
+ *       . `code:package` - the identifier EXACTLY equals the package name AND is DISTINCTIVE.
+ *     Resolution across kinds is DETERMINISTIC, most-specific first (module then package for a
+ *     path-shaped id; symbol then package for a bare distinctive id); a single identifier never fans
+ *     out to every kind.
+ *   - a `{ candidate, existing }` into `sameAs` when two DIFFERENT-blob concepts share a DISTINCTIVE
+ *     `name`/`title`/`label` identity value under `N_name` (NEVER the slug, NEVER an arbitrary prop).
  * Deterministic: `proposed` sorted by (edgeKind, from, to); `sameAs` sorted by (candidate, existing).
+ *
+ * Residual ambiguity (documented, ADR-B11a): two genuinely-distinct entities that share a distinctive
+ * name across documents can still false-`same_as` here - this deterministic layer is deliberately
+ * conservative (distinctive identity prop only), and a wrong `same_as` stays fully reversible (a signed
+ * `not_same_as` contradicts it and surfaces `kip:conflict` instead of merging, proj.ts:2197-2237);
+ * disambiguating true homonyms is the job of the future model-assisted Layer 2.
  */
 export function linkResolver(inventory: NodeInventory): LinkResolverResult {
   // (1) Index every code node by its case-preserved N_path identifier → the code eids that carry it.
-  const codeByPath = new Map<string, Set<EID>>();
+  const moduleByPath = new Map<string, Set<EID>>();
+  const symbolByName = new Map<string, Set<EID>>();
+  const packageByName = new Map<string, Set<EID>>();
+  const addTo = (map: Map<string, Set<EID>>, key: string, eid: EID): void => {
+    let set = map.get(key);
+    if (!set) {
+      set = new Set<EID>();
+      map.set(key, set);
+    }
+    set.add(eid);
+  };
   const concepts: NodeInventoryEntry[] = [];
   for (const entry of inventory) {
     if (isConceptEid(entry.eid)) {
       concepts.push(entry);
       continue;
     }
-    const id = codeIdentifier(entry.kind, entry.eid);
-    if (id === null || id === "") continue; // unparsable / empty ⇒ abstain (N5).
-    let set = codeByPath.get(id);
-    if (!set) {
-      set = new Set<EID>();
-      codeByPath.set(id, set);
-    }
-    set.add(entry.eid);
+    const ref = parseCodeEid(entry.kind, entry.eid);
+    if (!ref) continue; // unparsable / unexpected shape: abstain (N5), never a mis-split (C).
+    if (ref.kind === "module") addTo(moduleByPath, ref.relPath, entry.eid);
+    else if (ref.kind === "symbol") addTo(symbolByName, ref.symbolName, entry.eid);
+    else addTo(packageByName, ref.pkg, entry.eid);
   }
 
-  // (2) concept→code `documents` edges: a concept identifier that EXACTLY equals a code identifier.
+  // Resolve the code targets for ONE concept identity identifier (case-preserved N_path), by the
+  // deterministic most-specific-first precedence. Returns [] (abstain, N5) when nothing distinctive
+  // matches - a single identifier never fans out to every kind.
+  const resolveDocTargets = (id: string): EID[] => {
+    if (id.includes("/")) {
+      // A path-shaped identifier denotes a module (full relPath) - most specific. Fall back to a
+      // scoped package (@scope/pkg) only if no module carries the path.
+      const mods = moduleByPath.get(id);
+      if (mods && mods.size) return [...mods];
+      const pkgs = packageByName.get(id);
+      if (pkgs && pkgs.size && isDistinctiveName(normName(id))) return [...pkgs];
+      return [];
+    }
+    // A bare identifier must be DISTINCTIVE to match a symbol/package (rejects foo, api, index).
+    if (!isDistinctiveName(normName(id))) return [];
+    const syms = symbolByName.get(id);
+    if (syms && syms.size) return [...syms]; // symbol is more specific than a coarse package.
+    const pkgs = packageByName.get(id);
+    if (pkgs && pkgs.size) return [...pkgs];
+    return [];
+  };
+
+  // (2) concept-to-code documents edges: a concept IDENTITY identifier resolving to code targets.
   const proposed: AssertInput[] = [];
   const seenDocPair = new Set<string>();
   for (const c of concepts) {
-    for (const raw of conceptRawIdentifiers(c)) {
+    for (const raw of conceptDocIdentifiers(c)) {
       const id = normPath(raw);
       if (id === "") continue;
-      const codes = codeByPath.get(id);
-      if (!codes) continue; // no exact whole-string match ⇒ abstain (N5).
-      for (const codeEid of codes) {
-        const key = `${c.eid} ${codeEid}`;
-        if (seenDocPair.has(key)) continue; // dedupe (slug + a prop value may both match the same code).
+      for (const codeEid of resolveDocTargets(id)) {
+        const key = `${c.eid} ${codeEid}`; // NUL separator (collision-safe; eids never contain NUL).
+        if (seenDocPair.has(key)) continue; // dedupe (slug + a prop value may resolve the same code).
         seenDocPair.add(key);
         proposed.push(documentsEdge(c.eid, codeEid));
       }
     }
   }
 
-  // (3) cross-doc `same_as`: two DIFFERENT-blob concepts whose N_name identifiers are exactly equal.
-  const byName = new Map<string, Map<EID, string>>(); // N_name → (conceptEid → blob)
+  // (3) cross-doc same_as: two DIFFERENT-blob concepts sharing a DISTINCTIVE identity-prop name.
+  const byName = new Map<string, Map<EID, string>>(); // N_name -> (conceptEid -> blob)
   for (const c of concepts) {
     const blob = conceptBlob(c.eid);
     const names = new Set<string>();
-    for (const raw of conceptRawIdentifiers(c)) {
+    for (const raw of conceptNameIdentifiers(c)) {
       const n = normName(raw);
-      if (n !== "") names.add(n);
+      if (n !== "" && isDistinctiveName(n)) names.add(n); // distinctive identity names only.
     }
     for (const n of names) {
       let m = byName.get(n);
