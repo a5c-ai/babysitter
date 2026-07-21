@@ -4,6 +4,7 @@
  */
 
 import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import type { SessionState, SessionFile } from './types';
 import { SessionError, SessionErrorCode } from './types';
 
@@ -196,6 +197,6 @@ export function validateSessionState(state: SessionState): void {
  * Get the state file path for a session.
  */
 export function getSessionFilePath(stateDir: string, sessionId: string): string {
-  return `${stateDir}/${sessionId}.md`;
+  return path.join(stateDir, `${sessionId}.md`);
 }
 
