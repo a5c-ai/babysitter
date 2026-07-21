@@ -124,6 +124,32 @@ const NAME_STOPWORDS = new Set([
   "todo", "changelog", "license", "contributing", "readme.md",
 ]);
 
+/**
+ * KNOWN FILE EXTENSIONS (round-5 precision fix, ADR-B11a). A curated, reasonably-complete set of
+ * source/config/doc/data file extensions. A slash-free token whose FINAL dotted segment is one of
+ * these (matched CASE-INSENSITIVELY, so `config.JSON` and `config.json` are both filenames, ANY
+ * length) is treated as a generic FILENAME, not a distinctive identity. Kept explicit + lowercase so
+ * the allowlist is auditable; the earlier lowercase-only `\.[a-z0-9]{1,6}$` regex let an
+ * UPPERCASE/mixed-case (`config.JSON`, `index.TS`) or LONG (`foo.gitignore`, `foo.properties`)
+ * extension escape the filename guard and false-link — this allowlist closes that class.
+ */
+const KNOWN_FILE_EXTENSIONS = new Set([
+  // source
+  "ts", "tsx", "js", "jsx", "mjs", "cjs", "py", "rb", "go", "rs", "java", "kt", "kts", "scala",
+  "c", "cc", "cpp", "cxx", "h", "hh", "hpp", "cs", "php", "swift", "m", "mm", "clj", "ex", "exs",
+  "erl", "hs", "lua", "pl", "pm", "r", "dart", "groovy", "gradle", "vue", "svelte", "sh", "bash",
+  "zsh", "bat", "ps1", "psm1",
+  // config / build
+  "json", "yml", "yaml", "toml", "ini", "cfg", "conf", "config", "properties", "lock", "env",
+  "editorconfig", "gitignore", "gitattributes", "gitmodules", "dockerignore", "npmignore",
+  "eslintignore", "prettierignore", "htaccess", "proto", "graphql", "gql",
+  // markup / style / doc
+  "html", "htm", "xml", "xhtml", "svg", "css", "scss", "sass", "less", "md", "mdx", "rst", "adoc",
+  "txt", "rtf", "pdf",
+  // data
+  "sql", "csv", "tsv", "ndjson", "parquet", "avro", "map", "d", "log", "bak", "backup", "tmp",
+]);
+
 /** The min-length + stopword FLOOR (round-1/2). A token is above the floor when it clears the min length
  *  AND is not a known generic stopword. Input is the `N_name`-normalized (lower-cased, whitespace-collapsed)
  *  token. This floor is retained under `isStrongName` (round 3) but is NOT sufficient on its own — a bare
@@ -152,17 +178,21 @@ function isDistinctiveName(nName: string): boolean {
  *         `OrderPlaced`, `linkResolver`) — a LEADING capital (`"Manager"`) is a bare common noun and does
  *         NOT count, which is the whole distinction from a distinctive compound.
  *
- * FILENAME SHAPE (round-4 precision fix, ADR-B11a). A slash-free token that ends in a short, all-lowercase
- * file extension (`\.[a-z0-9]{1,6}$`), REGARDLESS of how many dots it contains, is a filename — NOT an
- * identity. Its dots are discounted wholesale (a filename's dots are not distinctiveness), and any
- * digit/capital signal must live in the STEM, not the extension. Such a token is strong ONLY when its stem
- * independently clears the strong bar via a name-shaped marker (`isStrongStem`: an internal capital or a
- * hyphen/underscore/slash/`::`/`@` — NOT a lone dot or a lone version digit). Net: `webpack.config.js`,
- * `index.test.ts`, `foo.d.ts`, `jest.setup.js`, `tsconfig.base.json`, `v2.ts`, `s3.ts`, `p2p.js`, `h2.py`,
- * `vec3.rs` are NOT strong (no bare-token `documents`, no cross-blob `same_as`); `OrderPlaced.ts` /
- * `order-service.ts` stay strong; a capitalized final segment (`com.acme.Ledger`) is NOT a lowercase file
- * extension, so it is not a filename shape and stays strong via the qualifying-dot rule; a path-qualified
- * relPath (`src/foo/bar.ts`, contains `/`) is not a filename token and still matches a module.
+ * FILENAME SHAPE (round-4 fix + round-5 case/length hardening, ADR-B11a). A slash-free token is a
+ * FILENAME — a generic file, not an identity — when it is a dotfile (leading `.`, e.g. `.env`), ends in a
+ * trailing dot (`foo.`), or its FINAL dotted segment is a KNOWN file extension (`isFilenameShape` →
+ * `KNOWN_FILE_EXTENSIONS`, matched CASE-INSENSITIVELY and of ANY length). Its dots are discounted
+ * wholesale and any distinctiveness must live in the STEM (`isStrongStem`). The earlier lowercase-only
+ * `\.[a-z0-9]{1,6}$` regex let an UPPERCASE/mixed-case (`config.JSON`, `index.TS`, `Foo.Js`) or LONG
+ * (`foo.gitignore`, `foo.htaccess`, `foo.properties`) extension slip past the guard and false-link — the
+ * same generic-filename over-linking class shifted by extension case/length; the known-extension allowlist
+ * closes it. A dotted token whose final segment is NOT a known extension (`com.acme.Ledger`, a version
+ * `v1.2.3`, an IP `10.0.0.1`, `file.backup2`) is NOT a filename: it is strong ONLY when a real
+ * distinctiveness marker survives the dots — an internal capital (`com.acme.Ledger`) — so a pure
+ * lowercase/digit/dot token (a version/IP/unknown-suffix) abstains (N5). Net: `config.JSON`, `index.TS`,
+ * `schema.SQL`, `foo.gitignore`, `.env`, `foo.`, `webpack.config.js`, `v2.ts` are NOT strong (no bare-token
+ * `documents`, no cross-blob `same_as`); `com.acme.Ledger`, `OrderPlaced`, `order-service` stay strong; a
+ * path-qualified relPath (`src/foo/bar.ts`, contains `/`) is not a filename token and still matches a module.
  *
  * Input is the RAW identity value (the internal-capital test needs the pre-lowercase form). Applied to
  * concept identity values, to a bare concept slug, AND to the code `code:symbol`/`code:package` token.
@@ -172,17 +202,44 @@ function isStrongName(raw: string): boolean {
   const nName = original.toLowerCase();
   if (!isDistinctiveName(nName)) return false; // min-length + stopword floor (retained).
   if (nName.includes(" ")) return true; // multi-token.
-  // A FILENAME-shaped token (slash-free, ending in a short all-lowercase extension, ANY dot count) is a
+  // A FILENAME-shaped token (dotfile, trailing dot, or a KNOWN-extension basename — any dot count) is a
   // generic file, not a distinctive identity: discount ALL its dots, and require the STEM alone to clear
-  // the strong bar (rejects `webpack.config.js`, `index.test.ts`, `v2.ts`, `s3.ts`, `vec3.rs`, …).
-  const ext = original.match(/^[^/\\]+(\.[a-z0-9]{1,6})$/);
-  if (ext) return isStrongStem(original.slice(0, original.length - ext[1]!.length));
+  // the strong bar (rejects `config.JSON`, `foo.gitignore`, `.env`, `webpack.config.js`, `v2.ts`, …).
+  if (isFilenameShape(original)) return isStrongStem(filenameStem(original));
   if (/[-_/:@]/.test(original)) return true; // qualified-name separator (hyphen/underscore/slash/`::`/`@`).
-  if (original.includes(".")) return true; // qualifying dot (a filename extension was handled above).
-  if (/\d/.test(original)) return true; // internal digit.
   const tail = original.slice(1);
-  if (tail !== tail.toLowerCase()) return true; // internal capital (camelCase/PascalCase) in the original.
-  return false;
+  const hasInternalCapital = tail !== tail.toLowerCase();
+  // A dotted NON-filename token (`com.acme.Ledger`) is a qualified identity ONLY when a real
+  // distinctiveness marker survives the dots — an internal capital. A pure lowercase/digit/dot token
+  // (a version `v1.2.3`, an IP `10.0.0.1`, `file.backup2`) carries no entity signal ⇒ abstain (N5).
+  if (original.includes(".")) return hasInternalCapital;
+  if (/\d/.test(original)) return true; // internal digit in a dot-free token (`oauth2`).
+  return hasInternalCapital; // internal capital (camelCase/PascalCase) in the original.
+}
+
+/**
+ * Is a slash-free `original` a FILENAME shape (round-5, ADR-B11a)? True when it is a dotfile (leading `.`
+ * like `.env`), ends in a trailing dot (`foo.`), or its final dotted segment is a `KNOWN_FILE_EXTENSIONS`
+ * member matched case-INSENSITIVELY (`config.JSON`, `index.TS`, `foo.gitignore`, `webpack.config.js`). A
+ * token containing a slash/backslash is a PATH, never a filename token (`src/foo/bar.ts` matches a module).
+ */
+function isFilenameShape(original: string): boolean {
+  if (/[/\\]/.test(original)) return false; // a path, not a bare filename token.
+  if (!original.includes(".")) return false; // no dot ⇒ not a filename.
+  if (original.startsWith(".")) return true; // dotfile (`.env`, `.gitignore`).
+  if (original.endsWith(".")) return true; // trailing dot (`foo.`).
+  const lastDot = original.lastIndexOf(".");
+  return KNOWN_FILE_EXTENSIONS.has(original.slice(lastDot + 1).toLowerCase());
+}
+
+/**
+ * The distinctive STEM of a filename token (round-5, ADR-B11a) — everything before the final extension
+ * dot. A dotfile (`.env`) has NO distinctive stem (the whole token is extension-like) ⇒ empty stem.
+ */
+function filenameStem(original: string): string {
+  if (original.startsWith(".")) return ""; // dotfile: no distinctive stem.
+  const lastDot = original.lastIndexOf(".");
+  return lastDot <= 0 ? original : original.slice(0, lastDot);
 }
 
 /**
@@ -190,7 +247,7 @@ function isStrongName(raw: string): boolean {
  * so a stem is distinctive ONLY through a name-shaped marker a bare/versioned filename lacks: a
  * hyphen/underscore/slash/`::`/`@` qualifier (`order-service`) or an internal capital in the ORIGINAL form
  * (`OrderPlaced`). A LONE dot or a LONE digit does NOT qualify — `webpack.config`, `index.test`, `v2`,
- * `vec3` are NOT strong stems. (Multi-token is impossible in a slash-free filename token.)
+ * `vec3`, `config`, `foo` are NOT strong stems. (Multi-token is impossible in a slash-free filename token.)
  */
 function isStrongStem(stem: string): boolean {
   if (/[-_/:@]/.test(stem)) return true; // qualified-name separator.

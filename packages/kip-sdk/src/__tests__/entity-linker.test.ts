@@ -514,6 +514,115 @@ describe("entity-linker: round-4 precision - filename-shaped identity values are
   });
 });
 
+describe("entity-linker: round-5 precision - a filename extension's CASE and LENGTH do not smuggle strength (ADR-B11a)", () => {
+  // (1) UPPERCASE / mixed-case extensions. The round-4 filename guard matched only a lowercase `{1,6}`
+  //     extension, so a filename with an UPPERCASE/mixed extension (`config.JSON`, `index.TS`, `Foo.Js`)
+  //     escaped the guard and false-linked via the bare qualifying-dot rule. A KNOWN extension matched
+  //     case-INSENSITIVELY is a filename regardless of case → its stem (`config`, `index`, `Foo`) is not
+  //     strong → NO same_as. Mutation-verify: reverting to the lowercase-only `{1,6}` regex re-links these.
+  it("does NOT same_as when two cross-blob concepts share an UPPERCASE/mixed-case-extension filename name", () => {
+    for (const fname of ["config.JSON", "index.TS", "data.XML", "schema.SQL", "Foo.Js", "app.Config"]) {
+      const a = conceptEid(BLOB_A, `a-${fname}`);
+      const b = conceptEid(BLOB_B, `b-${fname}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: fname }]),
+        conceptNode(b, [{ key: "name", value: fname }]), // identical filename, different blob → NOT distinctive
+      ]);
+      expect(r.sameAs ?? [], `"${fname}" is a generic filename and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // (2) LONG extensions. The round-4 `{1,6}` cap let a filename with a long extension (`foo.gitignore`,
+  //     `foo.htaccess`, `foo.properties`) escape the guard and false-link. A KNOWN extension of ANY length
+  //     is a filename; a non-known long/digit suffix (`file.backup2`) is not a filename but its lowercase
+  //     dotted shape still carries no distinctiveness marker → also abstains.
+  it("does NOT same_as when two cross-blob concepts share a LONG-extension filename name", () => {
+    for (const fname of ["foo.gitignore", "foo.htaccess", "foo.properties", "foo.editorconfig", "file.backup2"]) {
+      const a = conceptEid(BLOB_A, `a-${fname}`);
+      const b = conceptEid(BLOB_B, `b-${fname}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: fname }]),
+        conceptNode(b, [{ key: "name", value: fname }]),
+      ]);
+      expect(r.sameAs ?? [], `"${fname}" is a generic filename and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // (3) DOTFILES / trailing dot. A leading-dot dotfile (`.env`) or a trailing-dot token (`foo.`) was strong
+  //     via the bare `includes('.')` qualifier. Both are filename-shaped generics → NO same_as.
+  it("does NOT same_as on a dotfile (.env / .npmrc) or a trailing-dot token (foo.)", () => {
+    for (const fname of [".env", ".npmrc", ".gitignore", "foo."]) {
+      const a = conceptEid(BLOB_A, `a-${fname}`);
+      const b = conceptEid(BLOB_B, `b-${fname}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: fname }]),
+        conceptNode(b, [{ key: "name", value: fname }]),
+      ]);
+      expect(r.sameAs ?? [], `"${fname}" is a dotfile/trailing-dot generic and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // A case/length-escaped filename must not seed a bare-token `documents` link either — the code:symbol
+  // token `config.JSON` is held to the same strong bar (never indexed) and the concept id never resolves.
+  it("does NOT documents when a concept and a bare code:symbol token share a case-escaped filename (config.JSON)", () => {
+    const symEid = symbolEid("src/x.ts", "config.JSON"); // a symbol literally named "config.JSON"
+    const cSym = conceptEid(BLOB_A, "c-sym");
+    const r = linkResolver([
+      codeNode(symEid, "code:symbol"),
+      conceptNode(cSym, [{ key: "name", value: "config.JSON" }]),
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  // A version/IP-shaped identity value (a trailing all-numeric dotted segment) is not a distinctive entity
+  // name — no capital survives the dots → abstain. Guards the "decide deterministically on unknown final
+  // segment" rule so a version/IP never false-merges.
+  it("does NOT same_as on a version or IP-shaped identity name (v1.2.3 / 10.0.0.1)", () => {
+    for (const val of ["v1.2.3", "10.0.0.1", "release.20240101"]) {
+      const a = conceptEid(BLOB_A, `a-${val}`);
+      const b = conceptEid(BLOB_B, `b-${val}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: val }]),
+        conceptNode(b, [{ key: "name", value: val }]),
+      ]);
+      expect(r.sameAs ?? [], `"${val}" is a version/IP and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // CRITICAL positive control (no over-correction): `com.acme.Ledger`'s final segment `Ledger` is NOT a
+  // known extension → it is NOT a filename → it keeps its internal-capital distinctiveness and STILL
+  // same_as across blobs. Mutation-verify: treating every unknown dotted final segment as generic breaks this.
+  it("STILL same_as on a dotted qualified identity whose final segment is NOT a known extension (com.acme.Ledger)", () => {
+    const a = conceptEid(BLOB_A, "dq-a");
+    const b = conceptEid(BLOB_B, "dq-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "name", value: "com.acme.Ledger" }]),
+      conceptNode(b, [{ key: "title", value: "Com.Acme.Ledger" }]), // both carry an internal capital ⇒ both strong; fold → "com.acme.ledger"
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+
+  // Positive control: a strong PascalCase name (`OrderPlaced`) is untouched by the filename fix.
+  it("STILL same_as on a strong PascalCase identity name (OrderPlaced) — no over-correction", () => {
+    const a = conceptEid(BLOB_A, "op5-a");
+    const b = conceptEid(BLOB_B, "op5-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "name", value: "OrderPlaced" }]),
+      conceptNode(b, [{ key: "title", value: "orderPlaced" }]),
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+});
+
 // --- end-to-end (scripted linkResolverDispatch + the REAL runAcquisition orchestrator) ----------
 
 async function reached(
