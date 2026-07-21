@@ -731,8 +731,15 @@ async function cmdLink(a: HandlerArgs): Promise<number> {
   const manifest = resolveLinkerManifest();
   await repo.registerFunctionality(`kip-linker:${manifest.name}`, manifest);
 
-  // Enumerate every live code+doc node (ADR-B11b) and hydrate its props via the public getNode.
-  const eids = await repo.nodeEids({ prefixes: ["code:", "doc:"] });
+  // Enumerate every live node (ADR-B11b) and hydrate its props via the public getNode. `--include
+  // <prefix>` (repeatable) REPLACES the default `code:`/`doc:` enumerated prefixes when given;
+  // `--exclude <prefix>` (repeatable) then drops any node whose eid starts with an excluded prefix
+  // (D-64: ADR-B11 declared these flags — they are now honored, not inert).
+  const include = flagList(flags, "include");
+  const exclude = flagList(flags, "exclude");
+  const prefixes = include.length > 0 ? include : ["code:", "doc:"];
+  const enumerated = await repo.nodeEids({ prefixes });
+  const eids = exclude.length > 0 ? enumerated.filter((eid) => !exclude.some((p) => eid.startsWith(p))) : enumerated;
   const nodes: NodeInventory = [];
   for (const eid of eids) {
     // eslint-disable-next-line no-await-in-loop -- a bounded per-node read; order is already sorted.

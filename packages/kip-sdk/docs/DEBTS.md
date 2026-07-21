@@ -992,8 +992,14 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   external tools installed — e.g. a fake-`PATH` / injected-probe seam that asserts (a) an absent tool records
   `skipped:<tool>` and never a fabricated metric, and (b) first-available-wins arbitration for the shared
   `linesOfCode` cell — so the probed tier's N5 behavior is pinned regardless of the CI machine's toolchain.
-- **Status:** Open (tracked). The guaranteed tier is fully covered and live-demo-verified; the probed tier is
-  live-gated and validated only manually.
+- **Status:** Resolved — the probed tier's three host-dependent primitives (tool resolution, `--version`
+  probe, synchronous run) plus the opt-in env are now an injectable `CodeMinerProbeSeam`
+  (`src/miner/code-miner.ts`); production passes `DEFAULT_PROBE_SEAM` (the real ask.ts helpers + `process.env`),
+  so shipped behavior is byte-identical. A HERMETIC test (`src/__tests__/code-miner-debts.test.ts`) injects a
+  fake seam — no real subprocess, no `KIP_INDEX_TOOLS` — and pins the N5 behaviors: a present tool emits its
+  metric WITH the `<metric>Tool` provenance prop; an absent tool records `skipped:<tool>` with a reason and NO
+  fabricated metric; and first-available-wins LOC dedup (tokei writes `linesOfCode`; scc/cloc loud-skip with a
+  reason naming the winner). (D-54 — ast-grep/tsc/eslint declared-but-inert — remains a separate open debt.)
 
 ### D-54: code Miner declares ast-grep / tsc / eslint in the probed tier but has no extractor for them (skip-only)
 
@@ -1034,8 +1040,10 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Count lines as `newlines + (endsWithNewline ? 0 : (fileNonEmpty ? 1 : 0))` — i.e. add a
   line for a final non-empty line lacking a trailing newline, while keeping a genuinely-empty file at 0 — so
   the newline-LOC matches the intuitive line count regardless of trailing-newline presence.
-- **Status:** Open (tracked). The guaranteed-tier newline-LOC undercounts by one on files without a trailing
-  newline.
+- **Status:** Resolved — `newlineLoc` now returns `(count of \n) + (raw.length > 0 && last byte !== \n ? 1 : 0)`
+  in `src/miner/code-miner.ts`, so a file whose final line lacks a trailing newline counts that line, a
+  trailing-newline file is unchanged, and an empty file stays 0. Covered by `src/__tests__/code-miner-debts.test.ts`
+  (no-trailing-newline, one-line-no-newline, trailing-newline, and empty fixtures).
 
 ### D-56: `runAcquisition` swallows the code Miner's verbatim error message, surfacing only a generic non-zero exit
 
@@ -1063,7 +1071,13 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   `output.error` channel and appended it to the failure message) so the specific cause survives, while
   keeping the failure strictly on the error channel (it authors no facts, so a reason string can never become
   a fabricated fact — N5 preserved).
-- **Status:** Open (tracked). The failure is loud and safe; only the specific reason is not surfaced.
+- **Status:** Resolved — `runAcquisition` (`src/kip-repo.ts`) now reads the microagent's verbatim reason off
+  `MicroagentResult.output.error` (via `acquisitionDispatchFailureReason`, the same `output.error` channel the
+  code Miner / learn bodies write and that `runAsk`/the MCP surface read for D-49(2)) and includes it in the
+  thrown `KipError`'s message AND its `context.reason`. The error CODE (`ERR_MALFORMED_INPUT`) and the N5
+  fail-loud, author-nothing contract are unchanged — the reason is a failure-channel diagnostic only. Covered
+  by `src/__tests__/code-miner-debts.test.ts` (a scripted `{exitCode:1, output:{error:"…"}}` dispatch → the
+  reason appears in message + context; a non-zero exit without `output.error` still fails loud with no reason clause).
 
 ---
 
@@ -1346,7 +1360,12 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Register `--include` / `--exclude` in the `kip link` arg parser and thread them into the
   `Repo.nodeEids` inventory enumeration so linking can be scoped, or remove them from the ADR until they are
   wired, so the declaration matches the behavior.
-- **Status:** Open (tracked). Declared in the ADR, not wired into `kip link`.
+- **Status:** Resolved — `cmdLink` (`src/cli/index.ts`) now honors the flags (they were already in the
+  `--include`/`--exclude` repeatable arg set): `--include <prefix>` (repeatable) REPLACES the enumerated
+  `nodeEids` prefixes (default `['code:','doc:']` when absent), and `--exclude <prefix>` (repeatable) drops any
+  enumerated node whose eid starts with an excluded prefix. Covered by `src/__tests__/kip-link-scope.test.ts`,
+  which drives the real CLI (`runCli(['link', …])`) through a spy `Repo` and asserts the flags change the
+  enumerated prefixes and the resulting inventory.
 
 ### D-65: `Repo.nodeEids` is not documented in docs/40 (SDK API surface)
 
@@ -1367,7 +1386,10 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Add `Repo.nodeEids({prefixes})` to `40-sdk-api-surface.md` — its read-only,
   authoring-nothing contract and its prefix-scoped enumeration semantics — alongside the other `Repo` read
   seams.
-- **Status:** Open (tracked). The seam ships and works; it is not yet documented in docs/40.
+- **Status:** Resolved — `nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]>` is now listed in the
+  `40-sdk-api-surface.md` `Repo` reads section, documented as a read-only, sorted enumeration of every LIVE node
+  eid (optionally prefix-filtered) that excludes tombstoned/absent nodes and authors nothing (INV-A1) — matching
+  `src/kip-repo.ts`'s `nodeEids` and the `Repo` interface in `src/types.ts`.
 
 ### D-66: ADR-B11c `same_as` prop-union in retrieval is a designed follow-on (not yet built)
 

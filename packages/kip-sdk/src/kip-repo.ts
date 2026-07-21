@@ -4765,11 +4765,17 @@ export class KipRepo implements Repo {
     // outputSchema-invalid output, or an output that is not a well-formed AcquisitionResult is a hard
     // error — no partial facts are authored.
     if (result.exitCode !== 0) {
+      // D-56: surface the microagent's VERBATIM failure reason (`output.error`) when it carried one, so
+      // the operator sees WHY — not only a generic non-zero exit. The CODE and the N5 fail-loud contract
+      // are unchanged; this only enriches the diagnostic (nothing is committed on this branch).
+      const reason = acquisitionDispatchFailureReason(result.output);
       throw new KipError(
         "ERR_MALFORMED_INPUT",
         `runAcquisition: family microagent "${manifest.name}@${manifest.version}" returned a non-zero ` +
-          `exitCode (${result.exitCode}) — no AcquisitionResult to commit (N5, never a best-effort accept).`,
-        { exitCode: result.exitCode },
+          `exitCode (${result.exitCode})` +
+          (reason === undefined ? "" : `: ${reason}`) +
+          " — no AcquisitionResult to commit (N5, never a best-effort accept).",
+        reason === undefined ? { exitCode: result.exitCode } : { exitCode: result.exitCode, reason },
       );
     }
     if (!validateAgainstOutputSchema(result.output, registered.outputSchema)) {
@@ -5889,6 +5895,24 @@ function isAssertInputArray(value: unknown): value is AssertInput[] {
       // crashed at ACCEPT time (`candidateInput.provenance.source` off `undefined`).
       isPlainRecord(item.provenance),
   );
+}
+
+/**
+ * M7 (`runAcquisition`, D-56): read a dispatched acquisition microagent's optional verbatim failure
+ * REASON off `MicroagentResult.output.error` — the SAME `output.error` channel the code Miner (and the
+ * learn bodies) write on a non-zero-exit failure, and the same seam `runAsk`/the MCP surface read for
+ * graph-QA (D-49(2)). Without it, every distinct miner-side cause collapses into one opaque "non-zero
+ * exitCode (N)". This is a DIAGNOSTIC on the failure channel only — `runAcquisition` commits NOTHING on
+ * a non-zero exit, so a reason string can never become a fabricated fact (N5). Never coerces: anything
+ * that is not a non-empty string yields `undefined`; a long reason is truncated for the message.
+ */
+function acquisitionDispatchFailureReason(output: unknown): string | undefined {
+  if (output === null || typeof output !== "object") return undefined;
+  const err = (output as Record<string, unknown>).error;
+  if (typeof err !== "string") return undefined;
+  const trimmed = err.trim();
+  if (trimmed.length === 0) return undefined;
+  return trimmed.length <= 500 ? trimmed : `${trimmed.slice(0, 500)}… (${trimmed.length} chars)`;
 }
 
 /**

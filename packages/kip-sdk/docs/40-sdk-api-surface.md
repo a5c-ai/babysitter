@@ -92,6 +92,7 @@ interface Repo {
   query(spec: TraversalSpec): AsyncIterable<NodeView | EdgeView>;   // typed graph traversal
   recall(q: RecallQuery): Promise<RecallResult[]>;                  // hybrid vector+graph+RRF
   asOf(asOf: AsOf): Promise<ReadView>;                             // bitemporal snapshot lens
+  nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]>;         // read-only, sorted enumeration of every LIVE node eid (ADR-B11b, the entity-linker node-enumeration seam). Optionally restricted to `opts.prefixes` (an eid whose start matches ANY listed prefix, e.g. `["code:","doc:"]`). Derived from the current admitted set's node-existence scan and the LIVE frontier, so it EXCLUDES tombstoned/absent nodes. A pure read: authors NOTHING (INV-A1).
 
   // --- distribution ---
   pin(scope: ScopeRef, asOf?: AsOf): Promise<SnapshotRef>;          // frontier-addressed snapshot (survives excision)

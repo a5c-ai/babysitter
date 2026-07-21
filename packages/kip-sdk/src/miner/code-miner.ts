@@ -106,8 +106,8 @@ export interface CodeMinerResult {
 const MINER_AUTHOR = "code-miner@1.0.0";
 
 /** The optional analysis binaries (ADR-B9a) — probed, never assumed present. */
-const PROBED_TOOLS = ["rg", "tokei", "scc", "cloc", "ast-grep", "tsc", "eslint"] as const;
-type ProbedTool = (typeof PROBED_TOOLS)[number];
+export const PROBED_TOOLS = ["rg", "tokei", "scc", "cloc", "ast-grep", "tsc", "eslint"] as const;
+export type ProbedTool = (typeof PROBED_TOOLS)[number];
 
 /** Extension → detected format (guaranteed tier; a non-empty classification, never a tool metric). */
 const EXTENSION_FORMATS: Record<string, string> = {
@@ -256,11 +256,14 @@ function gitBlobOid(raw: Buffer): CID {
     .digest("hex");
 }
 
-/** Newline LOC (round-2 finding #1): the count of `\n` bytes — a guaranteed-tier datum computed from
- *  the file's OWN bytes, needing NO external tool. */
+/** Newline LOC (round-2 finding #1): a guaranteed-tier line count computed from the file's OWN bytes,
+ *  needing NO external tool. LOC = (count of `\n`) + a final unterminated line, i.e. add one when the
+ *  file is non-empty AND does not end in `\n` (D-55) — otherwise a file whose last line lacks a trailing
+ *  newline would undercount that line by one. A genuinely-empty file is 0. */
 function newlineLoc(raw: Buffer): number {
   let count = 0;
   for (let i = 0; i < raw.length; i += 1) if (raw[i] === 0x0a) count += 1;
+  if (raw.length > 0 && raw[raw.length - 1] !== 0x0a) count += 1;
   return count;
 }
 
@@ -541,6 +544,35 @@ interface ToolOutcome {
   props: Array<{ prop: string; value: PropValue }>;
 }
 
+/** The synchronous tool-runner signature (`runSync`), extracted so it can be injected (D-53). */
+type RunSyncFn = (
+  binary: ResolvedHarnessBinary,
+  args: string[],
+  repoDir: string,
+  env: NodeJS.ProcessEnv,
+  okExitCodes?: readonly number[],
+) => string;
+
+/**
+ * The probed tier's injectable seam (D-53) — the three host-dependent primitives the probed tier calls
+ * (tool resolution, `--version` probe, and the synchronous run), plus the process env the opt-in gate
+ * reads. Production passes {@link DEFAULT_PROBE_SEAM} (the real ask.ts primitives + `process.env`), so
+ * behavior is unchanged; a hermetic test injects fakes to exercise the N5 probe/skip/first-available-wins
+ * behavior WITHOUT a real subprocess or `KIP_INDEX_TOOLS`. Injecting here (not stubbing `spawnSync`)
+ * keeps the REAL `probeTool` arbitration, the REAL extractors, and the REAL `<metric>Tool` provenance
+ * pairing under test.
+ */
+export interface CodeMinerProbeSeam {
+  /** The env the opt-in `KIP_INDEX_TOOLS` gate + spawn env-allowlist read. */
+  env: NodeJS.ProcessEnv;
+  /** Resolve a probed tool to an absolute binary (or `undefined` when not on PATH). */
+  resolve: (tool: ProbedTool, env: NodeJS.ProcessEnv) => ResolvedHarnessBinary | undefined;
+  /** Probe `<tool> --version`; a non-zero return is a recorded skip (never a fabricated metric). */
+  probeVersion: (binary: ResolvedHarnessBinary) => number;
+  /** Run the resolved binary synchronously and return its stdout (throws → a recorded skip). */
+  run: RunSyncFn;
+}
+
 /**
  * The repo-node metric prop each wired accelerator tool emits — declared STATICALLY so the LOC-collision
  * guard (round-3 finding) can be decided BEFORE spawning. tokei/scc/cloc all count into the SAME
@@ -586,17 +618,18 @@ function probeTool(
   tool: ProbedTool,
   repoDir: string,
   relPaths: string[],
-  env: NodeJS.ProcessEnv,
+  seam: CodeMinerProbeSeam,
   providedBy: Map<string, ProbedTool>,
 ): ToolOutcome {
   const skip = (reason: string): ToolOutcome => ({ props: [{ prop: `skipped:${tool}`, value: reason }] });
+  const env = seam.env;
 
   if (!toolsEnabled(env)) {
     return skip("optional analysis tools are opt-in — set KIP_INDEX_TOOLS=1 to enable");
   }
-  const binary = resolveHarnessBinary(tool, env);
+  const binary = seam.resolve(tool, env);
   if (binary === undefined) return skip(`\`${tool}\` is not on PATH`);
-  if (probeVersionOf(binary) !== 0) return skip(`\`${tool} --version\` did not exit 0 (${binary.path})`);
+  if (seam.probeVersion(binary) !== 0) return skip(`\`${tool} --version\` did not exit 0 (${binary.path})`);
 
   const extractor = TOOL_EXTRACTORS[tool];
   if (extractor === undefined) {
@@ -609,7 +642,7 @@ function probeTool(
     if (owner !== undefined) return skip(`${willEmitProp} already provided by ${owner}`);
   }
   try {
-    const metric = extractor(binary, repoDir, relPaths, env);
+    const metric = extractor(seam.run, binary, repoDir, relPaths, env);
     if (metric === undefined) return skip(`\`${tool}\` produced no parseable metric`);
     providedBy.set(metric.prop, tool); // claim the cell so later same-metric tools loud-skip.
     const props: Array<{ prop: string; value: PropValue }> = [{ prop: metric.prop, value: metric.value }];
@@ -633,6 +666,7 @@ interface ToolMetric {
 }
 
 type ToolExtractor = (
+  run: RunSyncFn,
   binary: ResolvedHarnessBinary,
   repoDir: string,
   relPaths: string[],
@@ -683,15 +717,28 @@ function runSync(
 }
 
 /**
+ * The production probed-tier seam (D-53): the real ask.ts primitives + the live `process.env`. This is
+ * the default `buildCodeMinerResult` passes, so the shipped behavior is byte-identical to before the
+ * seam was introduced. `process.env` is the live, in-place-mutated singleton, so reading through this
+ * captured reference reflects the current environment on every call.
+ */
+export const DEFAULT_PROBE_SEAM: CodeMinerProbeSeam = {
+  env: process.env,
+  resolve: resolveHarnessBinary,
+  probeVersion: probeVersionOf,
+  run: runSync,
+};
+
+/**
  * tokei/scc/cloc share a JSON "code lines" summary; each parses its own shape. Every extractor is
  * scoped to the tracked `relPaths` (finding #7) — passing the git-tracked file list as explicit path
  * args instead of `.`, so the probed metric covers EXACTLY the analyzed module set (the sha-anchored
  * provenance), never untracked or glob-excluded files. An empty tracked set ⇒ a real zero, no spawn.
  */
 const TOOL_EXTRACTORS: Partial<Record<ProbedTool, ToolExtractor>> = {
-  tokei: (bin, repoDir, rel, env) => {
+  tokei: (run, bin, repoDir, rel, env) => {
     if (rel.length === 0) return { prop: "linesOfCode", value: 0, spawned: false };
-    const out = JSON.parse(runSync(bin, ["--output", "json", ...rel], repoDir, env)) as Record<
+    const out = JSON.parse(run(bin, ["--output", "json", ...rel], repoDir, env)) as Record<
       string,
       { code?: number } | undefined
     >;
@@ -702,24 +749,24 @@ const TOOL_EXTRACTORS: Partial<Record<ProbedTool, ToolExtractor>> = {
     }
     return { prop: "linesOfCode", value: code, spawned: true };
   },
-  scc: (bin, repoDir, rel, env) => {
+  scc: (run, bin, repoDir, rel, env) => {
     if (rel.length === 0) return { prop: "linesOfCode", value: 0, spawned: false };
-    const out = JSON.parse(runSync(bin, ["--format", "json", ...rel], repoDir, env)) as Array<{ Code?: number }>;
+    const out = JSON.parse(run(bin, ["--format", "json", ...rel], repoDir, env)) as Array<{ Code?: number }>;
     const code = out.reduce((sum, e) => sum + (typeof e.Code === "number" ? e.Code : 0), 0);
     return { prop: "linesOfCode", value: code, spawned: true };
   },
-  cloc: (bin, repoDir, rel, env) => {
+  cloc: (run, bin, repoDir, rel, env) => {
     if (rel.length === 0) return { prop: "linesOfCode", value: 0, spawned: false };
-    const out = JSON.parse(runSync(bin, ["--json", ...rel], repoDir, env)) as { SUM?: { code?: number } };
+    const out = JSON.parse(run(bin, ["--json", ...rel], repoDir, env)) as { SUM?: { code?: number } };
     const code = out.SUM?.code;
     return typeof code === "number" ? { prop: "linesOfCode", value: code, spawned: true } : undefined;
   },
-  rg: (bin, repoDir, rel, env) => {
+  rg: (run, bin, repoDir, rel, env) => {
     // A deterministic count of TODO/FIXME markers over the tracked set (STDIN-free; paths/flags only).
     // rg exits 1 on ZERO matches — a valid empty result, NOT a failure (finding #6): allow exit 1, whose
     // stdout is empty ⇒ count 0. rg exit ≥2 still throws → a recorded skip.
     if (rel.length === 0) return { prop: "todoMarkers", value: 0, spawned: false };
-    const out = runSync(bin, ["--count-matches", "--no-heading", "TODO|FIXME", ...rel], repoDir, env, [1]);
+    const out = run(bin, ["--count-matches", "--no-heading", "TODO|FIXME", ...rel], repoDir, env, [1]);
     let count = 0;
     for (const line of out.split("\n")) {
       const colon = line.lastIndexOf(":");
@@ -776,8 +823,10 @@ function applyGlobFilters(files: string[], include?: string[], exclude?: string[
  * `AcquisitionResult`. Reads the graph NOTHING (INV-A1) — it only inspects the repo dir. Fully
  * deterministic: a re-run over the same repo state returns a byte-identical candidate set.
  */
-export function buildCodeMinerResult(input: CodeMinerInput): CodeMinerResult {
-  const env = process.env;
+export function buildCodeMinerResult(
+  input: CodeMinerInput,
+  probe: CodeMinerProbeSeam = DEFAULT_PROBE_SEAM,
+): CodeMinerResult {
   // DEFECT 1 fix: the given path may be a SUBDIRECTORY of a repo. Locate the enclosing git root by
   // walking up (throws N5 if none), read git metadata (HEAD sha, tracked set, repoId) from that root,
   // and scope the analyzed module set to files UNDER the given path. When the path IS the git root,
@@ -805,7 +854,7 @@ export function buildCodeMinerResult(input: CodeMinerInput): CodeMinerResult {
   //     so no probed metric is silently overwritten (round-3 finding).
   const providedBy = new Map<string, ProbedTool>();
   for (const tool of PROBED_TOOLS) {
-    const outcome = probeTool(tool, gitRoot, tracked, env, providedBy);
+    const outcome = probeTool(tool, gitRoot, tracked, probe, providedBy);
     for (const p of outcome.props) proposed.push(nodePropAssert(rEid, p.prop, p.value));
   }
 
