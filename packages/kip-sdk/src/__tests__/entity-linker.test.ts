@@ -403,18 +403,23 @@ describe("entity-linker: round-3 precision - the STRONG-name rule kills generic 
     expect(documentsEdges(r).length).toBe(0);
   });
 
-  // Independently pins "documents identifiers are drawn ONLY from identity fields, never arbitrary props".
-  // The prior only-fixture ("index.ts") was a bare basename already blocked by a SEPARATE rule, so
-  // loosening `conceptDocIdentifiers` to ALL props passed zero tests. Here the arbitrary value is a real,
-  // PATH-QUALIFIED module relPath (not otherwise blocked). (Mutation: draw from ALL props ⇒ 1 edge ⇒ fail.)
-  it("does NOT draw documents identifiers from arbitrary props even when the value is a real path-qualified module relPath", () => {
+  // (round-7, ADR-B11a — SUPERSEDES the round-2/3 "arbitrary props never feed documents" stance for the
+  // MODULE case only). A FULL, path-qualified git-relative relPath is a DISTINCTIVE, high-precision identifier
+  // no matter which prop holds it, so the concept→`code:module` rule now draws a path candidate from ANY string
+  // prop and links when it EXACTLY equals a module's full relPath AND is path-qualified (contains `/`). This
+  // closes the learn→link composition gap (`kip learn` files the file path under a `path` prop, identity fields
+  // empty). Here the arbitrary value is a real, PATH-QUALIFIED module relPath → it DOES documents-link.
+  // Symbol/package matching and cross-doc same_as are NOT widened (see the round-7 block below).
+  // (Mutation: restrict module matching back to identity-fields-only ⇒ 0 edges ⇒ this fails.)
+  it("DOES draw a documents identifier from an arbitrary prop when the value is a real path-qualified module relPath", () => {
     const modEid = moduleEid("src/foo/bar.ts");
-    const concept = conceptEid(BLOB_A, "unrelated-doc-slug"); // identity fields do NOT name the module
+    const concept = conceptEid(BLOB_A, "unrelated-doc-slug"); // identity fields do NOT name the module; only the arbitrary prop does
     const r = linkResolver([
       codeNode(modEid, "code:module"),
-      conceptNode(concept, [{ key: "example_file", value: "src/foo/bar.ts" }]), // arbitrary prop = a real relPath
+      conceptNode(concept, [{ key: "example_file", value: "src/foo/bar.ts" }]), // arbitrary prop = a real path-qualified relPath
     ]);
-    expect(documentsEdges(r).length).toBe(0);
+    expect(documentsEdges(r).map(edgeFromTo)).toEqual([{ from: concept, to: modEid }]);
+    expect(r.sameAs ?? []).toEqual([]);
   });
 
   // Item 1 asymmetry: a `code:symbol`/`code:package` literally named with a dotted bare basename escapes a
@@ -728,6 +733,85 @@ describe("entity-linker: round-6 precision - an UPPERCASE unknown extension/acro
       expect(r.sameAs ?? [], `both-PascalCase "${noun}" is a bare common noun and must NOT merge`).toEqual([]);
       expect(documentsEdges(r).length).toBe(0);
     }
+  });
+});
+
+describe("entity-linker: round-7 precision - a FULL path-qualified relPath in ANY prop links a code:module (closes learn→link gap, ADR-B11a)", () => {
+  // THE DEMO CASE. `kip learn` files the file path under a `path` prop with EMPTY name/title/label, so the
+  // identity-fields-only rule abstained and `kip link` authored 0 edges (islands stayed disconnected). A
+  // full, path-qualified relPath is distinctive no matter which prop holds it, so the module rule now draws
+  // it from ANY string prop. Mutation-verify: restricting module matching to identity fields (slug +
+  // name/title/label) makes this find nothing (the slug does not name the module) → 0 edges → FAILS.
+  it("documents-links a code:module when the full path-qualified relPath is carried ONLY by a non-identity `path` prop", () => {
+    const modEid = moduleEid("packages/kip-sdk/src/learn/index.ts");
+    const concept = conceptEid(BLOB_A, "some-learned-concept"); // identity fields EMPTY; slug does NOT name the module
+    const r = linkResolver([
+      codeNode(modEid, "code:module"),
+      conceptNode(concept, [{ key: "path", value: "packages/kip-sdk/src/learn/index.ts" }]),
+    ]);
+    const docs = documentsEdges(r);
+    expect(docs.length).toBe(1);
+    expect(edgeFromTo(docs[0]!)).toEqual({ from: concept, to: modEid });
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  // A BARE basename in an arbitrary prop is an incidental mention, not a path-qualified relPath — the
+  // widening is precision-safe because it requires a `/` separator (a real subdir-qualified path). The
+  // module here IS path-qualified (`src/learn/index.ts`), so its basename `index.ts` still must NOT link.
+  it("does NOT documents-link on a bare basename in an arbitrary prop (`{example_file:'index.ts'}`)", () => {
+    const modEid = moduleEid("src/learn/index.ts"); // a real, path-qualified module whose basename is index.ts
+    const concept = conceptEid(BLOB_A, "the-config-concept");
+    const r = linkResolver([
+      codeNode(modEid, "code:module"),
+      conceptNode(concept, [{ key: "example_file", value: "index.ts" }]), // bare basename, no `/` ⇒ not a path-qualified relPath
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  // Exact-equality is still required: a path-qualified value that matches NO real module relPath abstains.
+  it("does NOT documents-link on a path-qualified prop value that matches NO real code:module relPath", () => {
+    const modEid = moduleEid("src/real/module.ts");
+    const concept = conceptEid(BLOB_A, "c-nomatch");
+    const r = linkResolver([
+      codeNode(modEid, "code:module"),
+      conceptNode(concept, [{ key: "path", value: "src/nope/missing.ts" }]), // path-qualified but no such module ⇒ no edge
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  // same_as is UNCHANGED by the any-prop MODULE relaxation: the cross-doc merge rule still draws ONLY from
+  // distinctive identity NAME props (name/title/label), never from a `path`/arbitrary prop. Two docs that
+  // share the identical path-qualified value under a non-identity prop must NOT merge.
+  // Mutation-verify: drawing same_as from all props ⇒ these merge ⇒ FAILS.
+  it("does NOT same_as when two cross-blob docs share the identical value under a `path`/arbitrary prop (same_as stays identity-only)", () => {
+    const cA = conceptEid(BLOB_A, "pa");
+    const cB = conceptEid(BLOB_B, "pb");
+    const r = linkResolver([
+      conceptNode(cA, [{ key: "path", value: "src/shared/thing.ts" }]),
+      conceptNode(cB, [{ key: "path", value: "src/shared/thing.ts" }]), // identical, cross-blob, but NON-identity prop ⇒ NO merge
+    ]);
+    expect(r.sameAs ?? []).toEqual([]);
+    expect(documentsEdges(r).length).toBe(0); // no module in the inventory ⇒ no documents edge either
+  });
+
+  // The relaxation is MODULE-only: an arbitrary prop must NOT open a symbol/package match. Here the
+  // arbitrary value is a STRONG token that names a code:symbol AND a code:package — but because it comes
+  // from a non-identity prop, neither links (only the module rule reads arbitrary props, and this value is
+  // not a path-qualified module relPath).
+  it("does NOT documents-link a code:symbol/code:package from an arbitrary prop (module-only relaxation)", () => {
+    const symEid = symbolEid("src/x.ts", "OrderPlaced");
+    const pkgEid = packageEid("left-pad");
+    const cSym = conceptEid(BLOB_A, "c-sym");
+    const cPkg = conceptEid(BLOB_A, "c-pkg");
+    const r = linkResolver([
+      codeNode(symEid, "code:symbol"),
+      codeNode(pkgEid, "code:package"),
+      conceptNode(cSym, [{ key: "mentions", value: "OrderPlaced" }]), // strong, but arbitrary prop ⇒ NO symbol link
+      conceptNode(cPkg, [{ key: "dependency", value: "left-pad" }]), // strong, but arbitrary prop ⇒ NO package link
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
   });
 });
 

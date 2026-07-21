@@ -388,6 +388,24 @@ function conceptDocIdentifiers(entry: NodeInventoryEntry): string[] {
 }
 
 /**
+ * ALL string prop values of a concept, from ANY prop key (identity or arbitrary). Used ONLY by the
+ * concept→`code:module` `documents` case (ADR-B11a round 7): a FULL, path-qualified git-relative relPath
+ * is a DISTINCTIVE, high-precision identifier no matter which prop holds it, so a path candidate is drawn
+ * from any prop and linked ONLY when it EXACTLY equals a module's full relPath AND is path-qualified
+ * (`resolveModuleFromAnyProp`). This closes the learn→link composition gap where `kip learn` files the
+ * file path under a `path` prop with empty identity fields. NEVER used for symbol/package or same_as —
+ * those stay identity-field-only (a bare basename / arbitrary token there is collision-prone). Raw
+ * (un-normalized) — the caller applies `N_path`.
+ */
+function conceptAnyStringPropValues(entry: NodeInventoryEntry): string[] {
+  const vals: string[] = [];
+  for (const p of entry.props) {
+    if (typeof p.value === "string") vals.push(p.value);
+  }
+  return vals;
+}
+
+/**
  * The cross-doc `same_as` match identifiers — drawn ONLY from dedicated IDENTITY props
  * (`name`/`title`/`label`). NEVER the generic eid slug (round-1 merged two props-less `shared-slug-x`
  * concepts) and NEVER an arbitrary prop value (round-1 merged `{status:'draft'}` with `{state:'Draft'}`).
@@ -416,14 +434,20 @@ function documentsEdge(from: EID, to: EID): AssertInput {
  * The pure, deterministic Layer-1 linker (ADR-B11/B11a). Reads ONLY its `NodeInventory` input and
  * authors nothing (INV-A1). High-precision: a match must be DISTINCTIVE evidence, not an incidental
  * coincidence. Emits, by EXACT whole-string equality only (abstain otherwise, N5):
- *   - a typed `documents` edge (concept-to-code) into `proposed` when a concept IDENTITY identifier
- *     (its slug or a `name`/`title`/`label` prop value), normalized under `N_path`, matches a code node:
+ *   - a typed `documents` edge (concept-to-code) into `proposed`, normalized under `N_path`, matching a
+ *     code node:
  *       . `code:module`  - the identifier EXACTLY equals the module's FULL git-relative relPath AND is
  *                          path-qualified (contains `/`); a bare basename (`index.ts`) is generic and
- *                          NEVER matches a module;
- *       . `code:symbol`  - the identifier EXACTLY equals the symbol name AND is a STRONG name
- *                          (`isStrongName`: multi-token, or an internal digit/capital/qualifier);
- *       . `code:package` - the identifier EXACTLY equals the package name AND is a STRONG name.
+ *                          NEVER matches a module. The module candidate is drawn from a concept IDENTITY
+ *                          identifier (slug or `name`/`title`/`label`) OR from ANY string prop value
+ *                          (round 7, ADR-B11a) — a full path-qualified relPath is distinctive no matter
+ *                          which prop holds it, which closes the learn→link gap where `kip learn` files
+ *                          the path under a `path` prop (identity fields empty);
+ *       . `code:symbol`  - a concept IDENTITY identifier (slug/`name`/`title`/`label`) EXACTLY equals the
+ *                          symbol name AND is a STRONG name (`isStrongName`: multi-token, or an internal
+ *                          digit/capital/qualifier). NOT widened to arbitrary props (collision-prone);
+ *       . `code:package` - an IDENTITY identifier EXACTLY equals the package name AND is a STRONG name.
+ *                          NOT widened to arbitrary props.
  *     Resolution across kinds is DETERMINISTIC, most-specific first (module then package for a
  *     path-shaped id; symbol then package for a bare strong id); a single identifier never fans
  *     out to every kind.
@@ -501,16 +525,35 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
   // (2) concept-to-code documents edges: a concept IDENTITY identifier resolving to code targets.
   const proposed: AssertInput[] = [];
   const seenDocPair = new Set<string>();
+  const emitDoc = (codeEid: EID, conceptEid: EID): void => {
+    const key = `${conceptEid}\0${codeEid}`; // NUL (`\0`) separator — collision-safe: an eid never contains a NUL byte, whereas a space could (a relPath may contain spaces).
+    if (seenDocPair.has(key)) return; // dedupe (slug + a prop value may resolve the same code).
+    seenDocPair.add(key);
+    proposed.push(documentsEdge(conceptEid, codeEid));
+  };
+  // A FULL path-qualified relPath in ANY prop resolves ONLY a `code:module` (round 7, ADR-B11a). A path is a
+  // distinctive, high-precision identifier regardless of which prop holds it, so this reads any string prop —
+  // but ONLY the module map (never symbol/package, never same_as), and ONLY on an EXACT full-relPath match
+  // that is path-qualified (contains `/`; `moduleByPath` itself only holds path-qualified relPaths). A bare
+  // basename (`index.ts`) has no `/` and matches no real module relPath ⇒ abstain (N5).
+  const resolveModuleFromAnyProp = (id: string): EID[] => {
+    if (!id.includes("/")) return [];
+    const mods = moduleByPath.get(id);
+    return mods && mods.size ? [...mods] : [];
+  };
   for (const c of concepts) {
+    // (2a) IDENTITY identifiers (slug + name/title/label) → module/symbol/package, most-specific-first.
     for (const raw of conceptDocIdentifiers(c)) {
       const id = normPath(raw);
       if (id === "") continue;
-      for (const codeEid of resolveDocTargets(id)) {
-        const key = `${c.eid}\0${codeEid}`; // NUL (`\0`) separator — collision-safe: an eid never contains a NUL byte, whereas a space could (a relPath may contain spaces).
-        if (seenDocPair.has(key)) continue; // dedupe (slug + a prop value may resolve the same code).
-        seenDocPair.add(key);
-        proposed.push(documentsEdge(c.eid, codeEid));
-      }
+      for (const codeEid of resolveDocTargets(id)) emitDoc(codeEid, c.eid);
+    }
+    // (2b) MODULE ONLY, from ANY string prop: a full path-qualified relPath exact match (the learn→link
+    // path-prop fix). Symbol/package matching is NOT widened this way (identity fields only, above).
+    for (const raw of conceptAnyStringPropValues(c)) {
+      const id = normPath(raw);
+      if (id === "") continue;
+      for (const codeEid of resolveModuleFromAnyProp(id)) emitDoc(codeEid, c.eid);
     }
   }
 
