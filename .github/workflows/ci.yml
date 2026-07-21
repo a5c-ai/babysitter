@@ -134,6 +134,20 @@ jobs:
           set -euo pipefail
           npm run build:adapters 2>&1 | tee artifacts/test-logs/adapters-build.log
 
+      - name: Policy / tools / trust-core adapter gates
+        run: |
+          set -euo pipefail
+          # These packages ship the proof-based policy/trust authorization gates.
+          # Their suites previously ran in no workflow, so authorization-gate
+          # wiring could be deleted with a fully green build (release-QA RC/C1-C2).
+          npm run test --workspace=@a5c-ai/trust-core 2>&1 | tee artifacts/test-logs/trust-core-tests.log
+          npm run build --workspace=@a5c-ai/policy-adapter 2>&1 | tee artifacts/test-logs/policy-adapter-build.log
+          npm run typecheck --workspace=@a5c-ai/policy-adapter 2>&1 | tee artifacts/test-logs/policy-adapter-typecheck.log
+          npm run test --workspace=@a5c-ai/policy-adapter 2>&1 | tee artifacts/test-logs/policy-adapter-tests.log
+          npm run build --workspace=@a5c-ai/tools-adapter 2>&1 | tee artifacts/test-logs/tools-adapter-build.log
+          npm run typecheck --workspace=@a5c-ai/tools-adapter 2>&1 | tee artifacts/test-logs/tools-adapter-typecheck.log
+          npm run test --workspace=@a5c-ai/tools-adapter 2>&1 | tee artifacts/test-logs/tools-adapter-tests.log
+
       - name: Build Atlas packages
         run: |
           set -euo pipefail

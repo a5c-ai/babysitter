@@ -13,6 +13,8 @@ const packages = [
   'packages/genty/ui',
   'packages/adapters/gateway',
   'packages/adapters/transport',
+  'packages/adapters/policy',
+  'packages/adapters/tools',
   'packages/adapters/cli',
   'packages/adapters/sdk',
   'packages/adapters/triggers',
