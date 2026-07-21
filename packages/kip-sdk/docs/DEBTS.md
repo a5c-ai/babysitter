@@ -1308,8 +1308,32 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   `code:module` node as a citable target even though its props carry no question-lexical text — so the
   provenance follows the edge the traversal already crosses. A graph-qa follow-on, tracked separately from the
   linker.
-- **Status:** Open (tracked). The graph is unified and traversable via `kip query`; only graph-qa's `ask`
-  citation selection does not yet follow the `documents` edge to the code side.
+- **Status:** Resolved — graph-qa now surfaces the LINKED CODE EVIDENCE deterministically. `answerQuestion`
+  (`src/graph-qa/index.ts`) gained `linkedCodeEvidenceCitations`, a set-pure augmentation that runs AFTER
+  `bindAndValidateCitations` on the non-abstaining path only: for every concept the answer GENUINELY cites (a
+  bound citation whose subject `eid` is a `doc:` concept), if a `documents` edge in the ALREADY-RETRIEVED fact
+  set connects it to a `code:*` node, it appends ONE citation naming that code node (`eid = ` the edge's real
+  `to`), bound to the `documents` edge's REAL signed existence `factId` (already an element of `usedFacts` — the
+  edge fact recorded in step 3) and qualified by `edgeKind: "documents"`. **Honest / N5:** a code citation is
+  added only for a real `documents` edge from a genuinely-cited concept (never a fabricated `factId`, never an
+  edge kind other than `documents`, never a code node no cited concept documents); it is substrate-derived (not
+  routed through the model-facing rebinder because it is not model output) so every field traces to the retrieved
+  edge. **Bounded / read-only (INV-A1):** it reads only the already-hydrated `facts` + the bound `citations`,
+  fetches no new node/edge, and widens no traversal. **Abstention contract preserved:** it runs only past the two
+  abstention early-returns, so an abstaining answer still carries empty citations. Chosen this over injecting a
+  synthetic "code implements this" datum into the synthesis context because the model's *failure* to cite the
+  code node (its props carry no question-lexical text) is the whole defect — binding the linkage post-synthesis
+  makes it DETERMINISTIC rather than leaving it model-dependent. **Honest residual (model-dependent):** whether
+  the answer PROSE names the file is still the model's; this guarantees only that the `code:*` node's linkage
+  FACT is in the citable evidence set deterministically. Covered by four new tests in
+  `src/__tests__/graph-qa.test.ts` ("graph-qa D-62 — a used concept's `documents`-linked code node is surfaced as
+  citable LINKED EVIDENCE"): a POSITIVE case (usedFacts + citations include BOTH the concept fact AND the
+  code:module linked evidence, bound to the real `documents`-edge factId); a NEGATIVE case (a code node reached by
+  a NON-`documents` edge is not spuriously cited); a second NEGATIVE case (a `documents` edge whose concept is not
+  cited adds no code citation); and an ABSTENTION case (an absent-subject question over the linked graph abstains
+  with empty citations). Mutation-verified: replacing the augmentation with `[]` fails ONLY the POSITIVE test.
+  Full kip test suite **836 passed / 8 skipped** (baseline 832 + the 4 new), zero regressions; `package-lock.json`
+  untouched; zero new deps; LF-only.
 
 ### D-63: cross-document `same_as` can still false-merge a genuine homonym — deferred to the model-assisted Layer 2
 

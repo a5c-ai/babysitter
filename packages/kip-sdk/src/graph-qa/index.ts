@@ -57,6 +57,20 @@ import { recallSearchTerms, stripLearnEidNamespace } from "../text-terms";
  */
 const FREE_TEXT_PROPS: ReadonlySet<string> = new Set(["content", "description", "summary"]);
 
+/**
+ * The concept→code link EdgeKind the deterministic entity-linker authors (ADR-B11a,
+ * `src/linker/entity-linker.ts` — `DOCUMENTS_EDGE_KIND`): a `doc:` concept DOCUMENTS a `code:*`
+ * implementation. graph-QA reads it (never authors it, INV-A1) to surface the LINKED CODE EVIDENCE
+ * (D-62): when a cited concept documents a code node, the code side is cited across this edge.
+ */
+const DOCUMENTS_EDGE_KIND = "documents";
+
+/** The namespace prefix of a `doc:` concept node eid (`doc:<blob>#<slug>`, ADR-B10d). */
+const CONCEPT_EID_PREFIX = "doc:";
+
+/** The namespace prefix of a `code:*` node eid (`code:module:…`/`code:symbol:…`/`code:package:…`). */
+const CODE_EID_PREFIX = "code:";
+
 /** The graph-QA input lens (kip-graph-qa.md §2 `inputSchema`): a question + an optional read lens. */
 export interface GraphQaInput {
   /** The natural-language question (REQUIRED, minLength 1). */
@@ -267,6 +281,84 @@ export function bindAndValidateCitations(
     bound.push(rebound);
   }
   return bound;
+}
+
+/**
+ * LINKED CODE EVIDENCE — the deterministic, set-pure citation augmentation that closes DEBTS.md
+ * **D-62** (kip-graph-qa citation selection over a linked `code:*`/`doc:*` graph).
+ *
+ * THE GAP. After `kip link` (`src/linker/entity-linker.ts`) authors a `documents` edge from a `doc:`
+ * concept node to its `code:module` node, a `kip ask` whose answer rests on that concept cited the
+ * CONCEPT side only. The linked `code:module` node's props are `content`(blob)/`format`/`linesOfCode`
+ * — no question-lexical text — so the accelerator-class synthesizer never picks it over the concept
+ * facts that DO match the question. The graph is unified and traversable (the depth-3 both-direction
+ * traversal already crosses the `documents` edge and both the edge fact AND the code node's props are
+ * in `usedFacts`), but the provenance under-served the code side.
+ *
+ * THE FIX, AND WHY IT LIVES HERE (post-`bindAndValidateCitations`, NOT in the synthesis context).
+ * Injecting a "code:module X implements this" datum into the synthesis context would leave the CITATION
+ * up to the model — and the model's failure to cite the code node (no question-lexical text) is the
+ * whole defect, so that path stays model-dependent. Binding the linkage AFTER citation binding makes it
+ * DETERMINISTIC: for every concept the answer GENUINELY cites (a bound citation whose subject `eid` is a
+ * `doc:` concept), if a `documents` edge in the ALREADY-RETRIEVED fact set connects it to a `code:*`
+ * node, add ONE linked-evidence citation naming that code node, bound to the `documents` edge's REAL
+ * signed `factId` (already an element of `usedFacts` — the edge-existence fact recorded in step 3).
+ *
+ * HONESTY / N5. A code citation is added ONLY when a real `documents` edge in the retrieved set connects
+ * the code node to a concept that is genuinely in the answer's used evidence — never for a code node no
+ * cited concept documents, never for an edge kind other than `documents`, never a fabricated `factId`.
+ * The citation is "what the used concept documents": its `eid` is the real `to` of the edge and its
+ * `factId` is the edge's real existence fact, so every field is substrate-derived (it is NOT routed back
+ * through the model-facing rebinder because it is not model output — it is a deterministic function of
+ * the retrieved edge set). It is bounded by the retrieved node/edge set (fetches no new node/edge, widens
+ * no traversal), read-only (authors nothing, INV-A1), and it runs only on the non-abstaining return
+ * path, so the abstention contract (empty citations on abstain) is untouched.
+ *
+ * MODEL-DEPENDENCE RESIDUAL (honest): whether the answer PROSE names the file is still the model's; this
+ * only guarantees the `code:*` node's linkage FACT is in the citable evidence set deterministically.
+ */
+function linkedCodeEvidenceCitations(
+  facts: readonly RetrievedFact[],
+  citations: readonly Citation[],
+  usedFacts: ReadonlySet<string>,
+): Citation[] {
+  // The concepts the answer GENUINELY rests on: a bound citation whose subject eid is a `doc:` concept.
+  const citedConceptEids = new Set<string>();
+  for (const c of citations) {
+    if (typeof c.eid === "string" && c.eid.startsWith(CONCEPT_EID_PREFIX)) citedConceptEids.add(c.eid);
+  }
+  if (citedConceptEids.size === 0) return [];
+
+  // The retrieved `documents` edges from a genuinely-cited concept to a `code:*` node. Bounded by the
+  // already-hydrated `facts`; no new read. Stable order by (edge factId, code eid) for determinism.
+  const docEdges = facts
+    .filter(
+      (f): f is RetrievedFact & { from: string; to: string } =>
+        f.kind === "edge" &&
+        f.edgeKind === DOCUMENTS_EDGE_KIND &&
+        typeof f.from === "string" &&
+        typeof f.to === "string" &&
+        f.to.startsWith(CODE_EID_PREFIX) &&
+        citedConceptEids.has(f.from) &&
+        usedFacts.has(f.factId),
+    )
+    .sort((a, b) => strCmp(a.factId, b.factId) || strCmp(a.to, b.to));
+
+  const linked: Citation[] = [];
+  const seen = new Set<string>(); // dedupe on the edge's existence factId — one edge ⇒ one linked citation.
+  for (const e of docEdges) {
+    if (seen.has(e.factId)) continue;
+    seen.add(e.factId);
+    // "documented by <cited concept> → implemented in <code node>": the claim is ABOUT the code node
+    // (`eid = e.to`), backed by the real `documents` edge fact (`factId`), qualified by its EdgeKind.
+    linked.push({ factId: e.factId, eid: e.to, edgeKind: DOCUMENTS_EDGE_KIND });
+  }
+  return linked;
+}
+
+/** A total, deterministic string comparator (no locale) — mirrors the linker's `cmp` (INV-A1 read). */
+function strCmp(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /**
@@ -581,10 +673,17 @@ export async function answerQuestion(
   for (const f of facts) if (!factById.has(f.factId)) factById.set(f.factId, f);
   const citations = bindAndValidateCitations(synthesized.citations, usedFacts, factById);
 
+  // ── 7. LINKED CODE EVIDENCE (D-62). Deterministically surface the `code:*` side of the union: for
+  // every concept the answer GENUINELY cites, add the `documents`-edge-backed citation naming the code
+  // node it documents (set-pure over the already-retrieved edge set, honest/N5 — see
+  // {@link linkedCodeEvidenceCitations}). Runs ONLY here on the non-abstaining path, so the abstention
+  // contract is untouched, and appends real-`factId`-bound citations without changing the citation shape.
+  const linkedCitations = linkedCodeEvidenceCitations(facts, citations, usedFacts);
+
   return {
     answer: synthesized.answer,
     abstained: false,
-    citations,
+    citations: [...citations, ...linkedCitations],
     usedFacts: [...usedFacts],
   };
 }

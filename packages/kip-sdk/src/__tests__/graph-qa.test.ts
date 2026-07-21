@@ -1350,3 +1350,130 @@ describe("graph-qa edge-prop hydration — a CONFLICTED edge-prop surfaces both 
     }
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-62 — LINKED CODE EVIDENCE. After `kip link` (src/linker/entity-linker.ts) authors a `documents`
+// edge from a `doc:` concept node to its `code:module` node, a `kip ask` whose answer rests on that
+// concept cited the CONCEPT side only: the linked `code:module` node's props (content-blob/format/loc)
+// carry no question-lexical text, so the accelerator-class synthesizer never cited it. The fix
+// (`linkedCodeEvidenceCitations`) is a deterministic, set-pure augmentation that runs AFTER citation
+// binding: for every concept the answer GENUINELY cites, if a `documents` edge in the already-retrieved
+// set connects it to a `code:*` node, it adds ONE linked-evidence citation naming the code node, bound
+// to the `documents` edge's REAL signed factId (already in `usedFacts`). Honest/N5: only a real edge
+// from a genuinely-cited concept; never fabricated, never a code node no cited concept documents; the
+// abstention contract (no citations) is preserved because the augmentation runs only on the
+// non-abstaining path. These tests build the linked graph the demo built and assert the code side is
+// citable deterministically (the PROSE naming the file stays the model's job — only the FACT is pinned).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-62 — a used concept's `documents`-linked code node is surfaced as citable LINKED EVIDENCE", () => {
+  const QUESTION = "which file implements the encode step?";
+  const CONCEPT = "doc:designblob#encode-step";
+  const CODE = "code:module:repo-x9f2c1:src/encoder/encode.ts";
+  const DOC_EDGE = `documents:${CONCEPT}=>${CODE}`;
+
+  /** Build the linked graph: a `code:module` node (props with NO question-lexical text), a `doc:`
+   *  concept node (content text-seed + a summary the model answers from), and a `documents` edge
+   *  concept→code — exactly the shape `kip index` + `kip learn` + `kip link` produce. */
+  async function seedLinked(repo: KipRepo): Promise<{ Fsummary: string; Fdoc: string }> {
+    // The code:module node — reached across the `documents` edge, but its props do not match the
+    // question (the whole reason the synthesizer never cites it: D-62).
+    await assertNode(repo, CODE, "code:module");
+    await assertProp(repo, CODE, "format", "typescript");
+    await assertProp(repo, CODE, "linesOfCode", 42);
+    // The concept node — content is the §5.1 exact text-seed; `summary` is the concept fact the model
+    // cites (the concept side that DOES lexically describe the encode step).
+    await assertNode(repo, CONCEPT, "concept");
+    await assertProp(repo, CONCEPT, "content", QUESTION);
+    const Fsummary = await assertProp(
+      repo,
+      CONCEPT,
+      "summary",
+      "The encode step turns raw text into signed fact assertions.",
+    );
+    const Fdoc = await assertEdge(repo, DOC_EDGE, "documents", CONCEPT, CODE);
+    return { Fsummary, Fdoc };
+  }
+
+  // The scripted model answers naming the file and cites the CONCEPT fact only — reproducing the D-62
+  // behavior (it never cites the code node, whose props carry no question-lexical text).
+  const synth: Scripted = (ctx) => {
+    const summary = ctx.facts.find((f) => f.kind === "node-prop" && f.eid === CONCEPT && f.prop === "summary");
+    return {
+      answer: "The encode step is implemented in src/encoder/encode.ts.",
+      citations: summary ? [{ factId: summary.factId, eid: CONCEPT, prop: "summary", quote: "encode step" }] : [],
+    };
+  };
+
+  it("POSITIVE: usedFacts + citations include BOTH the concept fact AND the code:module linked evidence (bound to the real documents-edge factId)", async () => {
+    const repo = freshRepo("d62-positive");
+    const { Fsummary, Fdoc } = await seedLinked(repo);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    // The concept side is cited (the model's own citation).
+    const conceptCite = result.citations.find((c) => c.factId === Fsummary);
+    expect(conceptCite).toBeDefined();
+    expect(conceptCite?.eid).toBe(CONCEPT);
+
+    // The LINKED CODE EVIDENCE: a citation naming the code node, bound to the REAL `documents` edge
+    // fact, qualified by its EdgeKind — added deterministically, not by the model.
+    const codeCite = result.citations.find((c) => c.eid === CODE);
+    expect(codeCite).toBeDefined();
+    expect(codeCite?.factId).toBe(Fdoc); // a real signed factId (the documents edge existence fact)…
+    expect(codeCite?.edgeKind).toBe("documents");
+
+    // …and every cited factId is in the retrieved envelope (§3.4 invariant preserved).
+    expect(result.usedFacts).toContain(Fsummary);
+    expect(result.usedFacts).toContain(Fdoc);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+
+  it("NEGATIVE: a code:module reached by a NON-`documents` edge from the used concept is NOT spuriously cited", async () => {
+    const repo = freshRepo("d62-negative-edgekind");
+    // Same concept, but the code node is linked by a `mentions` edge, not `documents`. The augmentation
+    // fires ONLY on `documents`, so the code node must not be cited.
+    await assertNode(repo, CODE, "code:module");
+    await assertProp(repo, CODE, "format", "typescript");
+    await assertNode(repo, CONCEPT, "concept");
+    await assertProp(repo, CONCEPT, "content", QUESTION);
+    const Fsummary = await assertProp(repo, CONCEPT, "summary", "The encode step turns raw text into assertions.");
+    await assertEdge(repo, `mentions:${CONCEPT}=>${CODE}`, "mentions", CONCEPT, CODE);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations.some((c) => c.factId === Fsummary)).toBe(true);
+    // No citation points at the code node — there is no `documents` edge to the used concept.
+    expect(result.citations.some((c) => c.eid === CODE)).toBe(false);
+  });
+
+  it("NEGATIVE: a `documents` edge whose concept is NOT cited adds no code citation (the concept must be genuine evidence)", async () => {
+    const repo = freshRepo("d62-negative-uncited");
+    await seedLinked(repo);
+    // The model answers WITHOUT citing the concept (empty citations). No concept is in the answer's used
+    // evidence, so the linked code node must not be cited either.
+    const noCiteSynth: Scripted = () => ({
+      answer: "The encode step is implemented in src/encoder/encode.ts.",
+      citations: [],
+    });
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: noCiteSynth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations).toHaveLength(0); // no cited concept ⇒ no linked code evidence.
+  });
+
+  it("ABSTENTION PRESERVED: an absent-subject question over the linked graph abstains with EMPTY citations (augmentation never fabricates)", async () => {
+    const repo = freshRepo("d62-abstain");
+    await seedLinked(repo);
+    // A question whose named subject is absent from the graph must abstain (§6.1b), and the augmentation
+    // — which only runs on the non-abstaining path — must not conjure a code citation.
+    const synthNever = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: the subject 'zara' is absent (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "What is Zara's role?" }, { repo, synthesize: synthNever });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synthNever.mock).not.toHaveBeenCalled();
+  });
+});
