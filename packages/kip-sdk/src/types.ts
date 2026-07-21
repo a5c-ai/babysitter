@@ -1197,6 +1197,13 @@ export interface Repo {
    * for the id. A pure read over `proj`; authors nothing.
    */
   edgeExistenceFactId(eid: EID, asOf?: AsOf): Promise<FactId | null>;
+  /**
+   * READ-ONLY (INV-A1, ADR-B11b): the sorted, live-gated `EID`s of every node the admitted set names,
+   * optionally restricted to eids starting with ANY of `opts.prefixes`. The minimal node-enumeration
+   * seam the deterministic entity-linker (`kip link`) uses to see every live `code:*`/`doc:*` node,
+   * derived from the SAME node-existence scan `computeRecall` performs — no proj change, authors nothing.
+   */
+  nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]>;
   rollup(opts: RollupOptions): Promise<CID>;
   tombstone(eid: EID, reason: string): Promise<FactId>;
   excise(factId: FactId, reason: string): Promise<ExcisionMarker>;

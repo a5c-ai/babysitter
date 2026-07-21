@@ -1900,14 +1900,29 @@ export class KipRepo implements Repo {
   }
 
   /**
-   * ADR-B11b (entity-linker node-enumeration seam) — UNIMPLEMENTED stub. The real method returns the
-   * sorted, live-gated `EID`s of every node the admitted set names, optionally restricted to
-   * `opts.prefixes`, derived from the SAME node-existence scan `computeRecall` performs — so a
-   * deterministic linker can see every live `code:*`/`doc:*` node with no proj change. It throws until
-   * implemented so the frozen entity-linker tests fail on ASSERTION, never on a missing symbol.
+   * ADR-B11b (entity-linker node-enumeration seam) — the sorted, live-gated `EID`s of every node the
+   * admitted set names, optionally restricted to `opts.prefixes` (an eid whose start matches ANY listed
+   * prefix). Derived from the SAME node-existence scan `computeRecall` performs (iterate admitted facts,
+   * collect `target.kind==='node'` eids, keep those passing `nodeLiveVisibleAt` at the LIVE frontier) —
+   * so a deterministic linker sees every live `code:*`/`doc:*` node with no proj change. A pure read
+   * over the current fact set; authors nothing (INV-A1).
    */
-  nodeEids(_opts?: { prefixes?: string[] }): Promise<EID[]> {
-    return Promise.reject(new Error("unimplemented: nodeEids"));
+  nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]> {
+    const facts = this.currentFacts();
+    const projection = proj(facts, this.projOptions(facts));
+    const prefixes = opts?.prefixes;
+    const eids = new Set<EID>();
+    for (const f of facts) {
+      if (f.target.kind === "node") eids.add(f.target.eid);
+    }
+    const out: EID[] = [];
+    for (const eid of eids) {
+      if (!projection.nodeLiveVisibleAt(eid, null)) continue; // LIVE frontier — excludes tombstoned/absent.
+      if (prefixes && prefixes.length > 0 && !prefixes.some((p) => eid.startsWith(p))) continue;
+      out.push(eid);
+    }
+    out.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    return Promise.resolve(out);
   }
 
   /**

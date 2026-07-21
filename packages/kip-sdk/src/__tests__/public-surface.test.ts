@@ -56,6 +56,10 @@ const EXPECTED_REPO_METHODS = [
   // added deliberately for kip-graph-qa.md §3.2/§4 — recorded here so the guard enumerates the
   // FULL documented Repo surface, never silently hides an added method).
   "edgeExistenceFactId",
+  // read-only node-enumeration seam (ADR-B11b — the entity-linker `kip link` node scan; derived from
+  // the same node-existence fold `computeRecall` performs, so the surface widens by exactly one
+  // eid-list-only method the guard must enumerate).
+  "nodeEids",
   // distribution
   "pin",
   "resolvePin",

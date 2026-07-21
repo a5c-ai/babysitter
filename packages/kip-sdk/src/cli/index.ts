@@ -15,6 +15,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { KipError, open } from "../index";
 import { codeMinerDispatch } from "../miner/code-miner";
+import { linkResolver, linkResolverDispatch, type NodeInventory } from "../linker/entity-linker";
 import {
   LEARN_MANIFEST_NAMES,
   makeLearnDispatch,
@@ -90,7 +91,7 @@ interface HandlerArgs {
 
 const USAGE =
   "usage: kip [GLOBAL_OPTS] <command> [ARGS]\n" +
-  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index, learn\n";
+  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index, link, learn\n";
 
 /**
  * Parse `argv` (already `process.argv.slice(2)`), dispatch the named subcommand, and resolve with the
@@ -165,6 +166,8 @@ export async function runCli(argv: string[], opts: RunCliOptions): Promise<numbe
         return await cmdAsk(args);
       case "index":
         return await cmdIndex(args);
+      case "link":
+        return await cmdLink(args);
       case "learn":
         return await cmdLearn(args);
       default:
@@ -697,6 +700,98 @@ async function cmdIndex(a: HandlerArgs): Promise<number> {
   if (json) emitJson(write, { facts });
   else write(`indexed ${targetRepoDir}: ${facts.length} fact(s)\n`);
   return 0;
+}
+
+// ===========================================================================
+// link (ADR-B11) — join the code and docs islands by asserting signed, reversible link edges.
+// ===========================================================================
+
+/**
+ * `kip link [--dry-run] [--json]` — the deterministic Layer-1 entity linker (ADR-B11). Resolve the repo
+ * (keyring required, it authors signed facts), enumerate every live `code:*`/`doc:*` node through the
+ * read-only `nodeEids` seam (ADR-B11b), hydrate each node's props via the public `getNode`, and hand the
+ * inventory to `linkResolver` through the `runAcquisition` write path with `linkResolverDispatch` wired
+ * on `open()`. Concept→code exact matches become `documents` edges; cross-doc same-entity exact matches
+ * become `same_as` pairs. The resolver reads only its input and authors nothing (INV-A1); only
+ * `runAcquisition` commits.
+ *
+ * Honest reporting (ADR-B10e/B11): the honest zero-link case (`0 documents, 0 same_as`) is SUCCESS
+ * (exit 0), not failure — abstention is correct when nothing matches (N5). `--dry-run` computes and
+ * prints the would-be links without authoring anything.
+ */
+async function cmdLink(a: HandlerArgs): Promise<number> {
+  const { flags, write, json } = a;
+
+  // Thread the linker as the repo's dispatch seam via OpenOptions (mirrors cmdIndex's code miner).
+  const openRepoWithLinker: OpenRepoFn = (o) => a.openRepo({ ...o, dispatchMicroagent: linkResolverDispatch });
+  const resolved = await resolveRepo(a.ctx, openRepoWithLinker, { requireInitialized: true, requireKeyring: true });
+  const repo = resolved.repo;
+
+  // Idempotently register the bundled manifest (a byte-identical re-registration is a no-op, INV-7).
+  const manifest = resolveLinkerManifest();
+  await repo.registerFunctionality(`kip-linker:${manifest.name}`, manifest);
+
+  // Enumerate every live code+doc node (ADR-B11b) and hydrate its props via the public getNode.
+  const eids = await repo.nodeEids({ prefixes: ["code:", "doc:"] });
+  const nodes: NodeInventory = [];
+  for (const eid of eids) {
+    // eslint-disable-next-line no-await-in-loop -- a bounded per-node read; order is already sorted.
+    const view = await repo.getNode(eid);
+    if (!view) continue; // raced/absent — the resolver never sees a node getNode cannot resolve (N5).
+    const props: Array<{ key: string; value: PropValue }> = [];
+    for (const [key, cell] of Object.entries(view.props ?? {})) {
+      const seg = cell.segments?.find((s) => s.kind === "value");
+      if (seg && seg.kind === "value") props.push({ key, value: seg.value });
+    }
+    nodes.push({ eid: view.eid, kind: view.kind, props });
+  }
+
+  // The resolver is PURE — compute the would-be links for the by-kind report/examples either way.
+  const preview = linkResolver(nodes);
+  const documents = preview.proposed.length;
+  const sameAs = preview.sameAs?.length ?? 0;
+  const docExamples = preview.proposed
+    .slice(0, 5)
+    .map((c) => {
+      const t = c.target as { from: string; to: string };
+      return `${t.from} --documents--> ${t.to}`;
+    });
+  const sameExamples = (preview.sameAs ?? []).slice(0, 5).map((p) => `${p.candidate} <-same_as-> ${p.existing}`);
+  const examples = [...docExamples, ...sameExamples];
+
+  if (flagBool(flags, "dry-run")) {
+    if (json) emitJson(write, { facts: [], documents, same_as: sameAs, examples, dryRun: true });
+    else write(renderLink(documents, sameAs, examples, true));
+    return 0;
+  }
+
+  const { facts } = await repo.runAcquisition(manifest, { nodes }, {});
+  if (json) emitJson(write, { facts, documents, same_as: sameAs, examples });
+  else write(renderLink(documents, sameAs, examples, false));
+  return 0;
+}
+
+/** The human render for `kip link` — counts by kind plus up to 5 examples per kind (ADR-B11). */
+function renderLink(documents: number, sameAs: number, examples: string[], dryRun: boolean): string {
+  let s = `${dryRun ? "would link" : "linked"}: documents: ${documents}, same_as: ${sameAs}\n`;
+  for (const ex of examples) s += `  ${ex}\n`;
+  return s;
+}
+
+/**
+ * Resolve the bundled `kip-linker` `MicroagentManifest`, read from the CLI's bundled
+ * `microagents/kip-linker/microagent.json` (mirrors `resolveCodeMinerManifest`). Throws (never
+ * fabricates a manifest) if the bundle is incomplete.
+ */
+function resolveLinkerManifest(): MicroagentManifest {
+  const p = join(__dirname, "microagents", "kip-linker", "microagent.json");
+  if (!existsSync(p)) {
+    throw new KipError(
+      "ERR_UNREGISTERED_MANIFEST",
+      "kip-linker manifest not found; the kip CLI bundle is incomplete",
+    );
+  }
+  return JSON.parse(readFileSync(p, "utf8")) as MicroagentManifest;
 }
 
 // ===========================================================================
