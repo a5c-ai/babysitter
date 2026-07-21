@@ -159,6 +159,22 @@ function isDistinctiveName(nName: string): boolean {
 }
 
 /**
+ * The INTERNAL capitalized-word / camelCase distinctiveness signal (round-6 fix, ADR-B11a). Matches an
+ * `[A-Z][a-z]` pair whose uppercase letter is NOT at index 0 — the leading `.` forces at least one
+ * preceding character, so a lone leading capital (`Manager` → only `Ma` at index 0) never matches. This is
+ * the signal that separates a genuinely proper-cased/compound name from an all-caps acronym/extension:
+ *   - MATCHES (distinctive): `OrderPlaced` (`rPl`), `linkResolver` (`nkR`), `com.acme.Ledger` (`.Le`),
+ *     `HTTPManager` (`PMa`) — a genuine camelCase hump or a segment-initial capitalized word.
+ *   - NO MATCH (not distinctive): `Manager`/`Client`/`Api` (a single leading capital, only `Xy` at index 0),
+ *     and `ZIG`/`JSON`/`API`/`HTTP`/`SQL`/`XML` (all-caps — only upper→upper runs, no `[A-Z][a-z]` at all).
+ * The earlier "contains ANY uppercase after index 0" test wrongly read an all-caps final segment
+ * (`config.ZIG`, `foo.XYZ`) as an internal capital and false-linked; requiring the `[A-Z][a-z]` transition
+ * closes that class. (Tokens reach this test single-line — whitespace already collapsed — so the `.` never
+ * spans a newline.)
+ */
+const INTERNAL_CAPITAL = /.[A-Z][a-z]/;
+
+/**
  * A "STRONG name" — the round-3 principled distinctiveness rule (ADR-B11a) that GATES every cross-doc
  * `same_as` and every bare-token `documents` match (module matches use the path-qualified rule instead).
  * A denylist cannot enumerate every common noun, so instead of asking "is this token on a blocklist?" we
@@ -174,9 +190,13 @@ function isDistinctiveName(nName: string): boolean {
  *       . a dot that is NOT part of a FILENAME shape (`com.acme.Ledger` yes; `index.ts`,
  *         `webpack.config.js`, `v2.ts` no — a filename-shaped token is a generic file, not an identity);
  *       . an internal digit (`oauth2`) — but a digit inside a filename stem/extension does NOT count;
- *       . an internal capital in the ORIGINAL, pre-`toLowerCase` form (camelCase/PascalCase like
- *         `OrderPlaced`, `linkResolver`) — a LEADING capital (`"Manager"`) is a bare common noun and does
- *         NOT count, which is the whole distinction from a distinctive compound.
+ *       . an INTERNAL capitalized-word / camelCase transition in the ORIGINAL, pre-`toLowerCase` form —
+ *         an `[A-Z][a-z]` pair whose uppercase letter is NOT at index 0 (`OrderPlaced` → `rPl`,
+ *         `linkResolver` → `nkR`, or a segment-initial capital after a dot `com.acme.Ledger` → `.Le`). A
+ *         LONE LEADING capital of a single-token word (`"Manager"` → only `Ma` at index 0) is a bare common
+ *         noun and does NOT count, and an ALL-CAPS acronym/extension (`ZIG`, `API`, `JSON`) has NO
+ *         `[A-Z][a-z]` transition at all — that `[A-Z][a-z]` signal is the whole distinction from a
+ *         distinctive compound (round-6 fix, ADR-B11a).
  *
  * FILENAME SHAPE (round-4 fix + round-5 case/length hardening, ADR-B11a). A slash-free token is a
  * FILENAME — a generic file, not an identity — when it is a dotfile (leading `.`, e.g. `.env`), ends in a
@@ -189,10 +209,15 @@ function isDistinctiveName(nName: string): boolean {
  * closes it. A dotted token whose final segment is NOT a known extension (`com.acme.Ledger`, a version
  * `v1.2.3`, an IP `10.0.0.1`, `file.backup2`) is NOT a filename: it is strong ONLY when a real
  * distinctiveness marker survives the dots — an internal capital (`com.acme.Ledger`) — so a pure
- * lowercase/digit/dot token (a version/IP/unknown-suffix) abstains (N5). Net: `config.JSON`, `index.TS`,
- * `schema.SQL`, `foo.gitignore`, `.env`, `foo.`, `webpack.config.js`, `v2.ts` are NOT strong (no bare-token
- * `documents`, no cross-blob `same_as`); `com.acme.Ledger`, `OrderPlaced`, `order-service` stay strong; a
- * path-qualified relPath (`src/foo/bar.ts`, contains `/`) is not a filename token and still matches a module.
+ * lowercase/digit/dot token (a version/IP/unknown-suffix) abstains (N5). The surviving distinctiveness
+ * marker is an INTERNAL capitalized-word transition (`[A-Z][a-z]` not at index 0, `INTERNAL_CAPITAL`): it
+ * fires on `com.acme.Ledger` (`.Le`) but NOT on an all-caps UNKNOWN-extension/acronym suffix (`config.ZIG`,
+ * `foo.XYZ`, `data.SOL` — the round-6 residual: those have no `[A-Z][a-z]` transition, only upper→upper
+ * runs, so they are NOT strong). Net: `config.JSON`, `index.TS`, `schema.SQL`, `config.ZIG`, `foo.XYZ`,
+ * `foo.gitignore`, `.env`, `foo.`, `webpack.config.js`, `v2.ts`, and a bare all-caps `HTTP`/`API`/`SQL` are
+ * NOT strong (no bare-token `documents`, no cross-blob `same_as`); `com.acme.Ledger`, `OrderPlaced`,
+ * `order-service` stay strong; a path-qualified relPath (`src/foo/bar.ts`, contains `/`) is not a filename
+ * token and still matches a module.
  *
  * Input is the RAW identity value (the internal-capital test needs the pre-lowercase form). Applied to
  * concept identity values, to a bare concept slug, AND to the code `code:symbol`/`code:package` token.
@@ -207,14 +232,16 @@ function isStrongName(raw: string): boolean {
   // the strong bar (rejects `config.JSON`, `foo.gitignore`, `.env`, `webpack.config.js`, `v2.ts`, …).
   if (isFilenameShape(original)) return isStrongStem(filenameStem(original));
   if (/[-_/:@]/.test(original)) return true; // qualified-name separator (hyphen/underscore/slash/`::`/`@`).
-  const tail = original.slice(1);
-  const hasInternalCapital = tail !== tail.toLowerCase();
-  // A dotted NON-filename token (`com.acme.Ledger`) is a qualified identity ONLY when a real
-  // distinctiveness marker survives the dots — an internal capital. A pure lowercase/digit/dot token
-  // (a version `v1.2.3`, an IP `10.0.0.1`, `file.backup2`) carries no entity signal ⇒ abstain (N5).
+  const hasInternalCapital = INTERNAL_CAPITAL.test(original);
+  // A dotted NON-filename token (`com.acme.Ledger`) is a qualified identity ONLY when a genuine
+  // capitalized-word transition (`[A-Z][a-z]` not at index 0) survives the dots — a segment-initial or
+  // camelCase capital (`.Le` in `com.acme.Ledger`). An all-caps UNKNOWN-extension/acronym suffix
+  // (`config.ZIG`, `foo.XYZ`) has only upper→upper runs, no `[A-Z][a-z]` transition, and a pure
+  // lowercase/digit/dot token (a version `v1.2.3`, an IP `10.0.0.1`, `file.backup2`) carries no entity
+  // signal ⇒ both abstain (N5). This is the round-6 fix for the uppercase-extension residual (ADR-B11a).
   if (original.includes(".")) return hasInternalCapital;
-  if (/\d/.test(original)) return true; // internal digit in a dot-free token (`oauth2`).
-  return hasInternalCapital; // internal capital (camelCase/PascalCase) in the original.
+  if (/\d/.test(original)) return true; // internal digit in a dot-free token (`oauth2`, `s3bucket`).
+  return hasInternalCapital; // internal camelCase/capitalized-word transition (`OrderPlaced`), not a lone leading capital.
 }
 
 /**
@@ -243,16 +270,17 @@ function filenameStem(original: string): string {
 }
 
 /**
- * The STRONG bar for a FILENAME STEM (round-4, ADR-B11a). A filename's dots and version digits are generic,
- * so a stem is distinctive ONLY through a name-shaped marker a bare/versioned filename lacks: a
- * hyphen/underscore/slash/`::`/`@` qualifier (`order-service`) or an internal capital in the ORIGINAL form
- * (`OrderPlaced`). A LONE dot or a LONE digit does NOT qualify — `webpack.config`, `index.test`, `v2`,
- * `vec3`, `config`, `foo` are NOT strong stems. (Multi-token is impossible in a slash-free filename token.)
+ * The STRONG bar for a FILENAME STEM (round-4 + round-6, ADR-B11a). A filename's dots and version digits are
+ * generic, so a stem is distinctive ONLY through a name-shaped marker a bare/versioned filename lacks: a
+ * hyphen/underscore/slash/`::`/`@` qualifier (`order-service`) or an INTERNAL capitalized-word transition
+ * (`[A-Z][a-z]` not at index 0, `INTERNAL_CAPITAL` — `OrderPlaced`). A LONE dot, a LONE digit, a LONE leading
+ * capital (`Foo`), or an all-caps stem (`HTTP`) does NOT qualify — `webpack.config`, `index.test`, `v2`,
+ * `vec3`, `config`, `foo`, `Foo`, `HTTP` are NOT strong stems. (Multi-token is impossible in a slash-free
+ * filename token.)
  */
 function isStrongStem(stem: string): boolean {
   if (/[-_/:@]/.test(stem)) return true; // qualified-name separator.
-  const tail = stem.slice(1);
-  return tail !== tail.toLowerCase(); // internal capital (camelCase/PascalCase) in the stem.
+  return INTERNAL_CAPITAL.test(stem); // internal camelCase/capitalized-word transition in the stem (not a lone leading capital, not all-caps).
 }
 
 // --- identifier parsing (ADR-B11: code nodes carry NO name prop → parse out of the hashed eid) -----

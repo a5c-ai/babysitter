@@ -623,6 +623,114 @@ describe("entity-linker: round-5 precision - a filename extension's CASE and LEN
   });
 });
 
+describe("entity-linker: round-6 precision - an UPPERCASE unknown extension/acronym is NOT an internal capital (ADR-B11a)", () => {
+  // (1) UPPERCASE UNKNOWN extensions. The round-5 filename allowlist cannot enumerate every extension, so
+  //     an uppercase UNKNOWN suffix (`config.ZIG`, `data.SOL`, `foo.XYZ`, `report.ASM`, `foo.X`) is NOT a
+  //     filename shape and fell through to the bare qualifying-dot rule, where the OLD "any uppercase after
+  //     index 0 ⇒ distinctive" test read the all-caps final segment as an internal capital and false-linked.
+  //     The camelCase refinement requires a genuine `[A-Z][a-z]` transition, which an all-caps segment lacks
+  //     → NO same_as. Mutation-verify: reverting to "any uppercase ⇒ distinctive" re-links every case here.
+  it("does NOT same_as when two cross-blob concepts share an UPPERCASE unknown-extension identity name", () => {
+    for (const fname of ["config.ZIG", "data.SOL", "schema.NIM", "report.ASM", "foo.XYZ", "foo.X"]) {
+      const a = conceptEid(BLOB_A, `a-${fname}`);
+      const b = conceptEid(BLOB_B, `b-${fname}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: fname }]),
+        conceptNode(b, [{ key: "name", value: fname }]), // identical uppercase-suffix token, different blob → NOT distinctive
+      ]);
+      expect(r.sameAs ?? [], `"${fname}" is an all-caps-suffix token and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // (2) BARE all-caps ACRONYMS. A standalone all-caps acronym used as an identity name (`HTTP`, `API`,
+  //     `SQL`, `XML`) is not a proper-cased word: it has no `[A-Z][a-z]` transition → not distinctive →
+  //     deferred to Layer 2. `HTTP` is the load-bearing case (length ≥ 4, not a stopword), so it abstains
+  //     SOLELY via the camelCase rule; `API`/`SQL`/`XML` are also caught by the min-length/stopword floor.
+  //     Mutation-verify: the OLD "any uppercase after index 0 ⇒ distinctive" test makes `HTTP` strong → merges.
+  it("does NOT same_as when two cross-blob concepts share a bare all-caps acronym identity name", () => {
+    for (const acronym of ["HTTP", "API", "SQL", "XML"]) {
+      const a = conceptEid(BLOB_A, `a-${acronym}`);
+      const b = conceptEid(BLOB_B, `b-${acronym}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: acronym }]),
+        conceptNode(b, [{ key: "name", value: acronym }]), // identical all-caps, different blob → all-caps is NOT strong
+      ]);
+      expect(r.sameAs ?? [], `"${acronym}" is a bare acronym and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // An uppercase-unknown-extension token must not seed a bare-token `documents` link either — the
+  // `code:symbol` token `config.ZIG` is held to the same strong bar (never indexed) and the concept id
+  // never resolves; likewise a `code:package` named for a bare acronym.
+  it("does NOT documents when a concept and a bare code:symbol token share an uppercase-suffix token (config.ZIG)", () => {
+    const symEid = symbolEid("src/x.ts", "config.ZIG"); // a symbol literally named "config.ZIG"
+    const cSym = conceptEid(BLOB_A, "c-sym");
+    const r = linkResolver([
+      codeNode(symEid, "code:symbol"),
+      conceptNode(cSym, [{ key: "name", value: "config.ZIG" }]),
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  // POSITIVE control (no over-correction): `com.acme.Ledger`'s `Ledger` segment carries a genuine
+  // `[A-Z][a-z]` transition (`Le`), a segment-initial capital after a dot → still strong → same_as.
+  it("STILL same_as on a dotted qualified identity with a segment-initial capitalized word (com.acme.Ledger)", () => {
+    const a = conceptEid(BLOB_A, "r6dq-a");
+    const b = conceptEid(BLOB_B, "r6dq-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "name", value: "com.acme.Ledger" }]),
+      conceptNode(b, [{ key: "title", value: "COM.acme.Ledger" }]), // both carry the `Le` capitalized-word transition → strong; fold → "com.acme.ledger"
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+
+  // POSITIVE control: a genuine camelCase hump (`OrderPlaced` → `rPl`, an `[A-Z][a-z]` NOT at index 0)
+  // stays strong → same_as. This is the internal-transition the all-caps residual lacks.
+  it("STILL same_as on a strong camelCase identity name (OrderPlaced) — the internal [A-Z][a-z] transition", () => {
+    const a = conceptEid(BLOB_A, "r6op-a");
+    const b = conceptEid(BLOB_B, "r6op-b");
+    const r = linkResolver([
+      conceptNode(a, [{ key: "name", value: "OrderPlaced" }]),
+      conceptNode(b, [{ key: "title", value: "orderPlaced" }]),
+    ]);
+    const sameAs = r.sameAs ?? [];
+    expect(sameAs.length).toBe(1);
+    expect(new Set([sameAs[0]!.candidate, sameAs[0]!.existing])).toEqual(new Set([a, b]));
+  });
+
+  // POSITIVE control: a PATH-qualified relPath still documents-links its module — untouched by the fix.
+  it("STILL documents-links a module for a PATH-qualified relPath (src/foo/bar.ts) — no over-correction", () => {
+    const modEid = moduleEid("src/foo/bar.ts");
+    const concept = conceptEid(BLOB_A, "src/foo/bar.ts");
+    const r = linkResolver([codeNode(modEid, "code:module"), conceptNode(concept)]);
+    const docs = documentsEdges(r);
+    expect(docs.length).toBe(1);
+    expect(edgeFromTo(docs[0]!)).toEqual({ from: concept, to: modEid });
+  });
+
+  // REGRESSION GUARD (do NOT re-open the round-4 bare-common-noun merge): a single leading-capital word
+  // (`Manager`/`Client`) has its ONLY `[A-Z][a-z]` at index 0, which the internal-transition rule excludes
+  // → still NOT strong → NO same_as. Mutation-verify: a raw `[A-Z][a-z]` rule (counting the leading capital)
+  // makes `Manager` strong again → this fails.
+  it("does NOT same_as when two cross-blob concepts BOTH carry a leading-capital-only common noun (Manager/Client)", () => {
+    for (const noun of ["Manager", "Client", "User", "Payment"]) {
+      const a = conceptEid(BLOB_A, `r6pc-a-${noun}`);
+      const b = conceptEid(BLOB_B, `r6pc-b-${noun}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: noun }]),
+        conceptNode(b, [{ key: "name", value: noun }]), // BOTH keep the leading capital → still a bare common noun
+      ]);
+      expect(r.sameAs ?? [], `both-PascalCase "${noun}" is a bare common noun and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+});
+
 // --- end-to-end (scripted linkResolverDispatch + the REAL runAcquisition orchestrator) ----------
 
 async function reached(
