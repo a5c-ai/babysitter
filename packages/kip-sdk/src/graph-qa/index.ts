@@ -176,6 +176,12 @@ export type KipReadHandle = Pick<
   // an EDGE claim to its signed edge `FactId` (kip-graph-qa.md §3.2/§4; `provenanceOf` surfaces a
   // fact's `Provenance` but not its content-addressed id, so this is the id source for edge citations).
   | "edgeExistenceFactId"
+  // The `same_as` prop-union seams (ADR-B11c / D-66): `sameAsClass` enumerates a seed's equivalence
+  // class (reusing proj's already-computed closure) and `getNodeRaw` reads EACH member's OWN cells —
+  // the read `getNode` masks behind the canonical member — so a query seeded on one alias returns the
+  // UNION of the class's distinct props, each fact bound to its OWN `assertedBy` `FactId`. Read-only.
+  | "sameAsClass"
+  | "getNodeRaw"
 >;
 
 export interface AnswerQuestionDeps {
@@ -443,7 +449,16 @@ export async function answerQuestion(
   // of all bound `FactId`s is the `usedFacts` retrieval envelope. ──────────────────────────────────
   const facts: RetrievedFact[] = [];
   const usedFacts = new Set<FactId>();
+  // Idempotent on the datum's identity `(kind, eid, prop, factId)` (D-66): the `same_as` prop-union pass
+  // (§3a) re-reads a class's canonical member — whose OWN cells the main loop already recorded — so a
+  // re-record of an identical datum must be a no-op, never a duplicated `RetrievedFact` in the model
+  // context. A `conflict` cell keeps contributing one datum per candidate (distinct `factId`s ⇒ distinct
+  // keys), unchanged.
+  const recordedKeys = new Set<string>();
   const record = (rf: RetrievedFact): void => {
+    const key = JSON.stringify([rf.kind, rf.eid, rf.prop ?? null, rf.factId]);
+    if (recordedKeys.has(key)) return;
+    recordedKeys.add(key);
     facts.push(rf);
     usedFacts.add(rf.factId);
     for (const cand of rf.candidates ?? []) usedFacts.add(cand);
@@ -513,6 +528,51 @@ export async function answerQuestion(
         const candidates2 = [...seg.candidates];
         for (const cand of candidates2) {
           record({ factId: cand, eid, kind: "node-prop", prop, conflicted: true, candidates: candidates2 });
+        }
+      }
+    }
+  }
+
+  // ── 3a. `same_as` PROP-UNION (ADR-B11c / D-66). Two concepts joined by a signed `same_as` edge are
+  // ONE entity, but `getNode(alias)` returns only the CANONICAL member's cells (proj's node-merge read
+  // semantics — UNCHANGED here), so the loop above recorded one side's facts and MASKED the other
+  // member's distinct props. Close the gap in retrieval, per ADR-B11c: for every already-retrieved
+  // seed, enumerate its `same_as` equivalence class (`repo.sameAsClass`, reusing proj's already-computed
+  // closure — no new traversal), then record EACH class member's OWN node-prop facts read RAW
+  // (`repo.getNodeRaw`, the alias-UNMASKED read `getNode` collapses), each bound to its OWN `assertedBy`
+  // `FactId`. NOTHING is merged — every fact keeps its own eid + `FactId`, so a query seeded on one
+  // alias returns the UNION of the class's distinct props with honest per-fact citations. Bounded (only
+  // the classes of already-retrieved seeds), deterministic (sorted class members + idempotent `record`),
+  // read-only (authors nothing, INV-A1). It runs on the already-non-empty retrieval path and only ADDS
+  // real signed facts, so the §6.1 abstention contract and the §4b subject-anchoring guard (whose
+  // surfaces it extends with each member's OWN identity/schema, never a fabricated one) are untouched.
+  const sameAsMembers = new Set<EID>();
+  for (const seed of [...nodeEids].sort()) {
+    if (!inScope(seed)) continue;
+    // eslint-disable-next-line no-await-in-loop -- sequential read keeps class enumeration deterministic.
+    for (const member of await repo.sameAsClass(seed)) {
+      if (inScope(member)) sameAsMembers.add(member);
+    }
+  }
+  for (const eid of [...sameAsMembers].sort()) {
+    // eslint-disable-next-line no-await-in-loop -- sequential raw hydration keeps the read deterministic.
+    const raw = await repo.getNodeRaw(eid, asOf);
+    if (!raw) continue;
+    addIdentity(stripLearnEidNamespace(eid)); // the member's own eid localId is IDENTITY (round-5).
+    addSchema(raw.kind); // a node KIND is schema vocabulary the whole graph shares, not a subject.
+    for (const prop of Object.keys(raw.props).sort()) {
+      const seg = coveringSegment(raw.props[prop]);
+      if (!seg) continue;
+      addSchema(prop); // the prop KEY is schema vocabulary (which attribute), not the subject (round-5).
+      if (seg.kind === "value") {
+        // The member's OWN node-prop claim cites its OWN winning covering assert's `assertedBy` FactId —
+        // identical binding to the node loop above; `record` dedupes an already-recorded canonical datum.
+        if (!FREE_TEXT_PROPS.has(prop)) addStructuredValue(seg.value);
+        record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+      } else {
+        const memberCandidates = [...seg.candidates];
+        for (const cand of memberCandidates) {
+          record({ factId: cand, eid, kind: "node-prop", prop, conflicted: true, candidates: memberCandidates });
         }
       }
     }

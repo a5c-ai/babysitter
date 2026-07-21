@@ -497,6 +497,11 @@ export interface RecallResult {
 /** The Repo read sub-surface curried at a FIXED AsOf — what `asOf(asOf)` returns. */
 export interface ReadView {
   getNode(eid: EID): Promise<NodeView | null>;
+  /** ADR-B11c/D-66: `eid`'s OWN `NodeView` at this view's instant — its per-EID cells BEFORE `same_as`
+   * canonical resolution (the alias-unmasked read behind the graph-qa prop-union). Applies this view's
+   * SAME existence gate + valid-time lens as `getNode`; it differs ONLY in skipping the canonical
+   * collapse. READ-ONLY (INV-A1). */
+  getNodeRaw(eid: EID): Promise<NodeView | null>;
   getEdge(eid: EID): Promise<EdgeView | null>;
   query(spec: Omit<TraversalSpec, "asOf">): AsyncIterable<NodeView | EdgeView>;
   recall(q: Omit<RecallQuery, "asOf">): Promise<RecallResult[]>;
@@ -1204,6 +1209,25 @@ export interface Repo {
    * derived from the SAME node-existence scan `computeRecall` performs — no proj change, authors nothing.
    */
   nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]>;
+  /**
+   * READ-ONLY (INV-A1, ADR-B11c/D-66): the sorted `same_as` equivalence class of `eid` — every EID proj
+   * folds into `eid`'s union-find class — or `[eid]` when `eid` has no `same_as` edge. Derived from proj's
+   * ALREADY-computed class members (no second closure), so it cannot diverge from the canonical-EID
+   * node-merge; a pure read over the current fact set. The retrieval-layer prop-union (graph-qa) enumerates
+   * a seed's class, then reads EACH member's OWN cells via `getNodeRaw`, so a query seeded on one alias
+   * returns the UNION of the class's distinct props. Merge semantics are UNCHANGED — this only exposes the
+   * closure; authors nothing.
+   */
+  sameAsClass(eid: EID): Promise<EID[]>;
+  /**
+   * READ-ONLY (INV-A1, ADR-B11c/D-66): `eid`'s OWN projected `NodeView` — its per-EID cells BEFORE `same_as`
+   * canonical resolution — or `null` for a ghost/absent eid. Identical to `getNode` for every eid that is NOT
+   * a non-canonical `same_as` alias; for such an alias it returns the alias's OWN props that `getNode` masks
+   * behind the canonical member's cells. Applies the SAME live-existence gate + excision lens (and the SAME
+   * `asOf` lens when given) as `getNode` — it differs ONLY in skipping the canonical collapse. The
+   * union-hydration seam behind the graph-qa `same_as` prop-union; authors nothing.
+   */
+  getNodeRaw(eid: EID, asOf?: AsOf): Promise<NodeView | null>;
   rollup(opts: RollupOptions): Promise<CID>;
   tombstone(eid: EID, reason: string): Promise<FactId>;
   excise(factId: FactId, reason: string): Promise<ExcisionMarker>;

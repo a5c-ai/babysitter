@@ -60,6 +60,12 @@ const EXPECTED_REPO_METHODS = [
   // the same node-existence fold `computeRecall` performs, so the surface widens by exactly one
   // eid-list-only method the guard must enumerate).
   "nodeEids",
+  // read-only `same_as` prop-union seams (ADR-B11c / D-66 — the retrieval-layer entity union): `sameAsClass`
+  // enumerates a seed's `same_as` equivalence class from proj's already-computed closure, and `getNodeRaw`
+  // reads a member's OWN cells (the read `getNode` masks behind the canonical member), so graph-qa unions a
+  // `same_as`-linked entity's distinct props with honest per-fact citations. Both authors-nothing (INV-A1).
+  "sameAsClass",
+  "getNodeRaw",
   // distribution
   "pin",
   "resolvePin",

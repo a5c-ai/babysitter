@@ -1926,6 +1926,45 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * ADR-B11c/D-66 (entity `same_as` prop-union): the sorted `same_as` equivalence class of `eid` — every
+   * EID proj folds into `eid`'s union-find class — or `[eid]` when `eid` has no `same_as` edge. A pure
+   * read over the current fact set, derived from proj's ALREADY-computed class members (`sameAsClass`,
+   * proj.ts), so it cannot diverge from the canonical-EID node-merge; authors nothing (INV-A1). The
+   * `same_as` closure is a set-level fold (NOT valid-time-lensed), so this is a live read; per-member
+   * existence at a read's `asOf` is enforced downstream when the caller hydrates each member via
+   * `getNodeRaw(member, asOf)`.
+   */
+  sameAsClass(eid: EID): Promise<EID[]> {
+    const facts = this.currentFacts();
+    const projection = proj(facts, this.projOptions(facts));
+    return Promise.resolve(projection.sameAsClass(eid));
+  }
+
+  /**
+   * ADR-B11c/D-66: `eid`'s OWN projected `NodeView` — its per-EID cells BEFORE `same_as` canonical
+   * resolution (the union-hydration read behind the graph-qa prop-union). Identical to `getNode` for
+   * every eid that is NOT a non-canonical `same_as` alias; for such an alias it returns the member's OWN
+   * props that `getNode` MASKS behind the canonical member's cells (proj.ts's `getNode`), so each
+   * `same_as` member can contribute its OWN facts + `assertedBy` `FactId`s (no merge, per-fact
+   * citations). Applies the SAME live-existence gate + excision lens (and the SAME `asOf` lens when
+   * given) as `getNode` — it differs ONLY in skipping the canonical collapse. READ-ONLY (INV-A1).
+   */
+  async getNodeRaw(eid: EID, asOf?: AsOf): Promise<NodeView | null> {
+    if (asOf !== undefined) {
+      return (await this.asOf(asOf)).getNodeRaw(eid);
+    }
+    const facts = this.currentFacts();
+    const projection = proj(facts, this.projOptions(facts));
+    const view = projection.getNodeRaw(eid);
+    if (!view) return null;
+    // The SAME live-existence gate `getNode` applies (see its doc comment) — a tombstoned/expired eid
+    // reads `null`. Gated on the RAW `eid` (not a resolved canonical) because this read deliberately
+    // does not resolve `same_as`: a member is visible iff IT exists at the frontier.
+    if (!projection.nodeLiveVisibleAt(eid, null)) return null;
+    return applyLiveExcisionLens(view);
+  }
+
+  /**
    * Threads this repo's constructor-supplied `knownMaxVersion`/`cellReducers` into every `proj()`
    * call (`getNode`/`getEdge`/`query`), so these are reachable from a real `KipRepo` read path
    * rather than only `proj()`-internal defaults/unit-tested-in-isolation seams. `hashAlgo`/
@@ -2516,6 +2555,13 @@ export class KipRepo implements Repo {
       getNode: async (eid: EID) => {
         if (!projection.nodeLiveVisibleAt(eid, gateInstant)) return null;
         return applyValidTimeLens(projection.getNode(eid));
+      },
+      // ADR-B11c/D-66: the alias-unmasked read at THIS view's instant — same existence gate + valid-time
+      // lens as `getNode` above, differing ONLY in reading the eid's OWN cells (`getNodeRaw`) rather than
+      // resolving the `same_as` canonical.
+      getNodeRaw: async (eid: EID) => {
+        if (!projection.nodeLiveVisibleAt(eid, gateInstant)) return null;
+        return applyValidTimeLens(projection.getNodeRaw(eid));
       },
       getEdge: async (eid: EID) => applyValidTimeLens(projection.getEdge(eid)),
       async *query(spec: Omit<TraversalSpec, "asOf">) {

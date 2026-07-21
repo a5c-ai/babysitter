@@ -93,6 +93,8 @@ interface Repo {
   recall(q: RecallQuery): Promise<RecallResult[]>;                  // hybrid vector+graph+RRF
   asOf(asOf: AsOf): Promise<ReadView>;                             // bitemporal snapshot lens
   nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]>;         // read-only, sorted enumeration of every LIVE node eid (ADR-B11b, the entity-linker node-enumeration seam). Optionally restricted to `opts.prefixes` (an eid whose start matches ANY listed prefix, e.g. `["code:","doc:"]`). Derived from the current admitted set's node-existence scan and the LIVE frontier, so it EXCLUDES tombstoned/absent nodes. A pure read: authors NOTHING (INV-A1).
+  sameAsClass(eid: EID): Promise<EID[]>;                            // read-only, sorted `same_as` equivalence class of `eid` (ADR-B11c/D-66, the retrieval prop-union seam) — every EID proj folds into `eid`'s union-find class, or `[eid]` when it has no `same_as` edge. Derived from proj's ALREADY-computed class members (no second closure), so it cannot diverge from the canonical-EID node-merge. A pure read: authors NOTHING (INV-A1).
+  getNodeRaw(eid: EID, asOf?: AsOf): Promise<NodeView | null>;      // read-only, `eid`'s OWN NodeView BEFORE `same_as` canonical resolution (ADR-B11c/D-66) — identical to `getNode` for a non-alias eid; for a `same_as` alias it returns the alias's OWN props that `getNode` masks behind the canonical member's cells. Same live-existence gate + excision/`asOf` lens as `getNode`; differs ONLY in skipping the canonical collapse. The union-hydration seam behind the graph-qa prop-union. Authors NOTHING (INV-A1).
 
   // --- distribution ---
   pin(scope: ScopeRef, asOf?: AsOf): Promise<SnapshotRef>;          // frontier-addressed snapshot (survives excision)

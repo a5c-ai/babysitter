@@ -1435,8 +1435,32 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Implement the ADR-B11c prop-union in retrieval — when a retrieved node is `same_as`-linked
   to another, union their props for recall/answer purposes — so the authored `same_as` edges deliver the
   designed retrieval benefit.
-- **Status:** Open (tracked). `same_as` edges are authored; the ADR-B11c retrieval-side prop-union is a named
-  follow-on, not built.
+- **Status:** Resolved — the ADR-B11c retrieval-side prop-union is **built** (in the retrieval/graph-qa layer,
+  NOT in proj; proj's `same_as` merge semantics are untouched). Three changes:
+  (1) `src/proj.ts` exposes two read-only seams on `ProjResult` — `sameAsClass(eid): EID[]` (the sorted
+  equivalence class, reusing the ALREADY-computed `sameAsClassMembers`/`sameAsFind` from the canonical-EID
+  fold — no second closure) and `getNodeRaw(eid): NodeView | null` (the alias-UNMASKED per-EID read the
+  internal reducer already computes, now surfaced); (2) `src/kip-repo.ts` + `src/types.ts` declare the matching
+  read-only `Repo.sameAsClass(eid): Promise<EID[]>` and `Repo.getNodeRaw(eid, asOf?): Promise<NodeView | null>`
+  (the latter applies the SAME live-existence gate + excision/`asOf` lens as `getNode`, differing ONLY in
+  skipping the canonical collapse; both authors-nothing, INV-A1), and `getNodeRaw` is added to the `ReadView`
+  (`buildAsOfView`) so it is `asOf`-correct; (3) `src/graph-qa/index.ts` adds a bounded, set-pure prop-union
+  pass (§3a) to the hydration loop: for every retrieved seed it enumerates `sameAsClass(seed)` and records
+  EACH member's OWN node-prop facts read via `getNodeRaw`, each bound to its OWN `assertedBy` `FactId` — NO
+  merge, each fact keeps its own eid + `FactId`, so a query seeded on one alias returns the UNION of the
+  class's distinct props with honest per-fact citations. `record` was made idempotent on `(kind,eid,prop,factId)`
+  so the union re-reading the canonical member never double-counts. **Why `getNodeRaw` was needed beyond the
+  ADR's named `sameAsClass` seam:** `getNode(alias)` returns ONLY the canonical member's cells
+  (`proj.ts` node-merge read), so enumeration alone cannot surface the OTHER member's props — the union must
+  read each member's OWN cells raw. INV-A1/read-only, N5/abstention, and the §4b subject-anchoring guard are
+  all preserved (the union runs only on the already-non-empty path and extends the anchoring surface with each
+  member's OWN identity/schema, never a fabricated one). Verified by `src/__tests__/graph-qa.test.ts` (the
+  `graph-qa D-66` block: POSITIVE union of `role`@A + `team`@B each bound to its own factId; NO-MERGE proof that
+  `getNode` still collapses the alias while `getNodeRaw` surfaces B's own cell; determinism; abstention
+  preserved; and composition with D-62 linked-code evidence with no double-count) and enumerated in
+  `src/__tests__/public-surface.test.ts`. Mutation-verified: neutralizing the §3a class-union drops member B's
+  `team` fact from `usedFacts`, failing the POSITIVE and D-62-composition tests. Full suite green (841 passed |
+  8 skipped, +5 over the 836 baseline, zero regressions). See ADR-B11c (now built).
 
 ### D-67: RDF / linked-data `owl:sameAs` ingestion is a designed-but-unbuilt follow-on
 

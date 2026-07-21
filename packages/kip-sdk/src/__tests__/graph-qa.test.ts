@@ -1477,3 +1477,160 @@ describe("graph-qa D-62 — a used concept's `documents`-linked code node is sur
     expect(synthNever.mock).not.toHaveBeenCalled();
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-66 — the `same_as`-alias PROP-UNION (ADR-B11c). Two concepts that live in DIFFERENT documents but
+// denote the same entity are joined by a signed `same_as` edge. proj folds them into one equivalence
+// class and `getNode(alias)` returns ONLY the canonical member's cells — so a `kip ask`/`recall` seeded
+// on one alias saw ONE side's facts, MASKING the other member's distinct props (the D-66 gap). The fix
+// (graph-qa/index.ts §3a) closes it in the RETRIEVAL layer, NOT in proj: for every retrieved seed it
+// enumerates the seed's `same_as` class (`Repo.sameAsClass`, reusing proj's already-computed closure)
+// and records EACH member's OWN node-prop facts read RAW (`Repo.getNodeRaw`, the alias-unmasked read
+// `getNode` collapses), each bound to its OWN `assertedBy` FactId. No merge; per-fact citations stay
+// honest. These tests build the two-document `same_as` graph and assert the UNION is answerable, that
+// proj's merge/read semantics are UNCHANGED, that the result is deterministic, that abstention is
+// preserved, and that the union composes with the D-62 linked-code-evidence augmentation.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-66 — a `same_as`-linked entity is answerable from the UNION of both members' distinct props", () => {
+  const QUESTION = "What is the role and team for Orchid?";
+  // Two DIFFERENT-document concept nodes for the same entity. `blobA` < `blobB` byte-order, so the
+  // `(namespaceId, localId)` canonical rule folds the class onto A — B is the MASKED alias under `getNode`.
+  const A = "doc:blobA#orchid"; // carries the `role` prop
+  const B = "doc:blobB#orchid"; // carries the DISTINCT `team` prop
+  const SAME_AS = `same_as:${A}=${B}`;
+
+  /** Build the two-document union graph: concept A (content text-seed + a `role`), concept B (a distinct
+   *  `team`), and a `same_as` edge A—B — the shape `kip link`'s cross-doc same-entity match authors. */
+  async function seedUnion(repo: KipRepo): Promise<{ Frole: string; Fteam: string; Fsame: string }> {
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION); // §5.1 exact text-seed → recall seeds A
+    const Frole = await assertProp(repo, A, "role", "Engineer");
+    await assertNode(repo, B, "concept");
+    const Fteam = await assertProp(repo, B, "team", "Platform");
+    const Fsame = await assertEdge(repo, SAME_AS, "same_as", A, B);
+    return { Frole, Fteam, Fsame };
+  }
+
+  // The scripted model answers from the UNION: it finds BOTH the `role` fact (member A) and the `team`
+  // fact (member B) in the assembled context and cites each to its own signed factId.
+  const synth: Scripted = (ctx) => {
+    const role = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "role");
+    const team = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "team");
+    const cites = [role, team]
+      .filter((f): f is NonNullable<typeof f> => f !== undefined)
+      .map((f) => ({ factId: f.factId, eid: f.eid, prop: f.prop, quote: String(f.value) }));
+    return { answer: `Orchid's role is ${String(role?.value ?? "")} on ${String(team?.value ?? "")}.`, citations: cites };
+  };
+
+  it("POSITIVE: usedFacts + citations include BOTH member A's `role` fact AND member B's `team` fact, each bound to its own real factId", async () => {
+    const repo = freshRepo("d66-union");
+    const { Frole, Fteam } = await seedUnion(repo);
+
+    // MUTATION SENSITIVITY (documented): B's `team` fact is reachable ONLY through the §3a class-union —
+    // `getNode(B)` masks it behind A's canonical cells (asserted below). Delete the §3a union pass and
+    // `Fteam` never enters `usedFacts`, so both `team` assertions below fail. The union is what surfaces it.
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    // The UNION: both members' distinct facts are in the retrieval envelope…
+    expect(result.usedFacts).toContain(Frole);
+    expect(result.usedFacts).toContain(Fteam);
+
+    // …and cited, each to its OWN real signed factId with its OWN eid (no merge, per-fact citations).
+    const roleCite = result.citations.find((c) => c.factId === Frole);
+    expect(roleCite).toBeDefined();
+    expect(roleCite?.eid).toBe(A);
+    expect(roleCite?.prop).toBe("role");
+    const teamCite = result.citations.find((c) => c.factId === Fteam);
+    expect(teamCite).toBeDefined();
+    expect(teamCite?.eid).toBe(B);
+    expect(teamCite?.prop).toBe("team");
+
+    // §3.4 invariant preserved: every cited factId is in the envelope.
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+
+  it("NO MERGE (proj read semantics UNCHANGED): getNode still collapses the alias to canonical and masks B's props; the union reads B's OWN cells via getNodeRaw", async () => {
+    const repo = freshRepo("d66-nomerge");
+    const { Frole, Fteam } = await seedUnion(repo);
+
+    // `getNode` is UNTOUCHED by this change — the class still folds onto canonical A, and A's canonical
+    // view carries ONLY A's own props (`role`), NEVER B's `team` (the mask that motivated D-66).
+    const viewA = await repo.getNode(A);
+    expect(viewA?.eid).toBe(A);
+    expect(viewA?.props.role).toBeDefined();
+    expect(viewA?.props.team).toBeUndefined();
+    // `getNode(B)` collapses to canonical A EXACTLY as before (no proj merge-semantics change) — its
+    // `team` cell stays masked behind A's canonical view.
+    const viewB = await repo.getNode(B);
+    expect(viewB?.eid).toBe(A);
+    expect(viewB?.props.team).toBeUndefined();
+
+    // The RAW seam the union reads: B's OWN cells, unmasked — `team` present under B's own eid, bound to
+    // B's own `assertedBy` factId; A's raw view keeps `role` (no cell renamed/collapsed onto the other).
+    const rawB = await repo.getNodeRaw(B);
+    expect(rawB?.eid).toBe(B);
+    const teamSeg = rawB?.props.team?.segments.find((s) => s.kind === "value");
+    expect(teamSeg && "assertedBy" in teamSeg ? teamSeg.assertedBy : undefined).toBe(Fteam);
+    const rawA = await repo.getNodeRaw(A);
+    expect(rawA?.props.team).toBeUndefined();
+    const roleSeg = rawA?.props.role?.segments.find((s) => s.kind === "value");
+    expect(roleSeg && "assertedBy" in roleSeg ? roleSeg.assertedBy : undefined).toBe(Frole);
+  });
+
+  it("DETERMINISM: two asks over the same graph produce EQUAL, sorted usedFacts (stable class ordering)", async () => {
+    const repo = freshRepo("d66-determinism");
+    await seedUnion(repo);
+    const first = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const second = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect([...first.usedFacts].sort()).toEqual([...second.usedFacts].sort());
+    // No duplicate facts leak into the envelope despite the union re-reading the canonical member.
+    expect(new Set(first.usedFacts).size).toBe(first.usedFacts.length);
+  });
+
+  it("ABSTENTION PRESERVED: an absent-subject question over the `same_as` graph abstains with EMPTY citations (the union never fabricates)", async () => {
+    const repo = freshRepo("d66-abstain");
+    await seedUnion(repo);
+    const synthNever = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: the subject 'zara' is absent (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "What is Zara's role?" }, { repo, synthesize: synthNever });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synthNever.mock).not.toHaveBeenCalled();
+  });
+
+  it("COMPOSES WITH D-62: a `same_as` union AND a `documents`-linked code node coexist — both members' props AND the linked code evidence are cited, with no double-count", async () => {
+    const repo = freshRepo("d66-d62-compose");
+    const CODE = "code:module:repo-x9f2c1:src/orchid/service.ts";
+    const DOC_EDGE = `documents:${A}=>${CODE}`;
+    const { Frole, Fteam } = await seedUnion(repo);
+    // Member A ALSO documents a code node (the D-62 concept→code link). The union (member B) and the
+    // linked-code augmentation (the code node) must BOTH fire without interfering.
+    await assertNode(repo, CODE, "code:module");
+    await assertProp(repo, CODE, "format", "typescript");
+    const Fdoc = await assertEdge(repo, DOC_EDGE, "documents", A, CODE);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    // The D-66 union: both members' distinct facts are present and cited.
+    expect(result.usedFacts).toContain(Frole);
+    expect(result.usedFacts).toContain(Fteam);
+    expect(result.citations.some((c) => c.factId === Frole && c.eid === A)).toBe(true);
+    expect(result.citations.some((c) => c.factId === Fteam && c.eid === B)).toBe(true);
+
+    // The D-62 linked-code evidence: the `documents`-linked code node is cited once, bound to the REAL
+    // documents-edge factId — added by the augmentation, not double-counted by the union.
+    const codeCites = result.citations.filter((c) => c.eid === CODE);
+    expect(codeCites).toHaveLength(1);
+    expect(codeCites[0]?.factId).toBe(Fdoc);
+    expect(codeCites[0]?.edgeKind).toBe("documents");
+
+    // No duplication anywhere: the envelope has unique factIds and every citation is in it.
+    expect(new Set(result.usedFacts).size).toBe(result.usedFacts.length);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+});

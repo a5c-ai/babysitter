@@ -1468,6 +1468,23 @@ export interface ProjResult {
    * returned id can never denote a demoted/untrusted fact, nor a fact other than the one `getEdge`
    * projects. The edge analogue of a node-prop `PropCell` value segment's `assertedBy`. */
   edgeExistenceFactId(eid: EID, at: bigint | null): FactId | null;
+  /** READ-ONLY (ADR-B11c/D-66): the sorted `same_as` equivalence class of `eid` — every EID this proj
+   * folds into `eid`'s union-find class (the reflexive/symmetric/transitive closure over signed
+   * `same_as` edges), or `[eid]` when `eid` participates in no `same_as` edge. Reuses the SAME
+   * already-computed class members the canonical-EID node-merge is derived from (no second closure), so
+   * it is a pure function of the admitted set (byte-identical across any `same_as` permutation,
+   * INV-A11(a)). The retrieval-layer prop-union seam: enumerate a seed's class, then read EACH member's
+   * OWN cells via `getNodeRaw`. proj's node-merge READ semantics (canonical-only `getNode`) are
+   * UNCHANGED — this only EXPOSES the closure, it does not alter it. */
+  sameAsClass(eid: EID): EID[];
+  /** READ-ONLY (ADR-B11c/D-66): `eid`'s OWN projected `NodeView` — the per-EID cells `getNode` reduces
+   * BEFORE `same_as` canonical resolution — or `null` for a ghost/absent eid. Identical to `getNode`
+   * for every eid that is NOT a non-canonical `same_as` alias; for such an alias it returns the alias's
+   * OWN props, which `getNode` MASKS behind the canonical member's cells (see `getNode` below). The seam
+   * the graph-qa prop-union reads so each `same_as` member contributes its OWN facts + `assertedBy`
+   * `FactId`s — nothing merged, citations stay per-fact. Does NOT apply the `not_same_as` conflict
+   * marker (that stays a `getNode`-only read semantic). */
+  getNodeRaw(eid: EID): NodeView | null;
 }
 
 /**
@@ -2173,6 +2190,15 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     if (!sameAsParent.has(eid)) return eid;
     return canonicalByRoot.get(sameAsFind(eid)) ?? eid;
   }
+  /** ADR-B11c/D-66: the sorted members of `eid`'s `same_as` equivalence class (reusing the
+   * ALREADY-computed `sameAsClassMembers` above — no second closure), or `[eid]` when `eid` is in no
+   * `same_as` edge. A pure function of the folded closure; the ONLY new proj surface for the
+   * retrieval-layer prop-union (ADR-B11c). Merge semantics are untouched. */
+  function sameAsClass(eid: EID): EID[] {
+    if (!sameAsParent.has(eid)) return [eid];
+    const members = sameAsClassMembers.get(sameAsFind(eid)) ?? [eid];
+    return [...members].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  }
 
   /**
    * MAJOR FIX (round 2, finding #5, INV-A11(b)) — `not_same_as` disputed-merge conflict: docs/31
@@ -2398,7 +2424,7 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     return covering?.kind === "conflict";
   }
 
-  return { getNode, getEdge, edgesTouching, edgeValidAt, edgeExistenceFactId, nodeLiveVisibleAt };
+  return { getNode, getNodeRaw, sameAsClass, getEdge, edgesTouching, edgeValidAt, edgeExistenceFactId, nodeLiveVisibleAt };
 }
 
 // ---------------------------------------------------------------------------
