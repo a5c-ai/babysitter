@@ -9,11 +9,11 @@
  * this resolver as `MicroagentInvocation.input`, and authors the returned link facts via
  * `runAcquisition` — exactly the code-miner lifecycle.
  *
- * UNIMPLEMENTED STUB (this round): both `linkResolver` and `linkResolverDispatch` return an EMPTY
- * `AcquisitionResult`, and `Repo.nodeEids` throws. These are frozen inputs to the implementation phase:
- * the acceptance tests in `src/__tests__/entity-linker.test.ts` assert the REAL behavior and therefore
- * FAIL on their own diffs here (a resolver that emits nothing where a `documents`/`same_as` link is
- * required), never on a type/import error.
+ * A concept→code exact match becomes a typed reversible `documents` edge; two different-document
+ * concepts sharing a distinctive (strong) name become a `same_as` pair. Matching is exact and
+ * high-precision (N5): the resolver abstains rather than emit a fuzzy/incidental link, deferring
+ * ambiguous cases (bare common nouns, all-caps acronyms, filename-shaped names) to the future
+ * model-assisted Layer 2. See `isStrongName` for the distinctiveness rule (ADR-B11a).
  */
 import type {
   AssertInput,
