@@ -838,7 +838,16 @@ actual current source before being recorded.
 - **Evidence:** `recall`'s text path is **exact-content-seed matching** — it locates a fact by matching the query text against a fact's `content` prop, not by semantic similarity or fuzzy/lexical text retrieval. In the live demo, `kip ask "…"` returned an answer only once a `content` prop **equal to the question verbatim** had been added to the graph; on a graph carrying the same facts **without** that mirror prop, retrieval found nothing and the graph-QA pipeline correctly **abstained**. So `kip ask` is end-to-end demonstrable today only with a content-seed that pre-encodes the question.
 - **Why it is debt:** The whole point of the `ask` verb is answering **genuine free-text natural-language questions** against the graph. As shipped it can only answer when the corpus already contains a `content` prop that mirrors the question — a condition a real NL consumer will almost never satisfy — so in practice `ask` abstains on real questions. This is **safe** (cite-or-abstain holds; it never fabricates and never returns a wrong fact) and is distinct from D-43's *vector*-half exact-cosine/no-ANN narrowing: D-43 is about scale of the vector scan, D-52 is about the **text-seed retrieval being exact-match rather than semantic/lexical**, which is what makes free-text `ask` brittle. It is the honest limitation the maturity demo disclosed rather than hid.
 - **Suggested fix:** Give the graph-QA retrieval **real semantic or text retrieval** so `ask` is robust for actual NL questions — either wire the embedding/vector seam through the text path (so `content`/prop text is embedded and matched by similarity, reusing the M4 vector infrastructure) or add proper lexical/fuzzy text retrieval (e.g. tokenized/BM25-style matching) in place of the exact-content-seed equality check. Until then, `kip ask` is demo-able only with a content-seed and should be documented as such wherever it is presented as answering free-text questions.
-- **Status:** **Partially closed** — the *lexical* half of the suggested fix is implemented; the *semantic/embedding* half remains open (re-scoped below).
+- **Status:** **Resolved** — closed by the **`text-autoencoder`** program (audit round 10). The *lexical* half
+  of the suggested fix shipped as deterministic recall lexical seeding (commit `55afa73be`), and graph-QA now
+  hydrates and **cites** edge props (commit `af45ed046`), so `kip ask` answers over a `kip learn`-produced
+  graph instead of abstaining by construction — the live-demo failure that surfaced this debt is closed. The
+  D-52 deliverable for this release (make free-text `ask` answer over a learned graph) is met; the residuals
+  documented under "D-52 residual — what is STILL OPEN" below are **not** invented-away — they are **promoted
+  to their own standalone tracked entries**: the *semantic/embedding* half → **[[D-57]]**, the free-text-only
+  subject retrieved-then-abstained → **[[D-59]]**, and the cross-document contradiction no longer surfacing as
+  `kip:conflict` → **[[D-60]]**. (The residual subsection below is retained verbatim as the evidence record
+  for those promotions.)
 
 #### D-52 closure note — what is FIXED
 
@@ -1055,3 +1064,175 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   keeping the failure strictly on the error channel (it authors no facts, so a reason string can never become
   a fabricated fact — N5 preserved).
 - **Status:** Open (tracked). The failure is loud and safe; only the specific reason is not surfaced.
+
+---
+
+## Audit round 10 — the `text-autoencoder` program (text→graph autoencoding)
+
+> The **`text-autoencoder`** program made kip's **text→graph** path real. `Repo.learn()` (the
+> knowledge-autoencoding loop) was already implemented but **dead** — none of the four microagent bodies it
+> dispatches existed, and a raw document had no way to enter kip. This program built (ADR-B10 through
+> ADR-B10f) a content-addressed **blob API** (`putBlob`/`getBlob` via the existing `Substrate.writeBlob`; a
+> stored file is content, not knowledge — no facts authored, projection byte-identical), **four model-backed
+> microagent bodies** (`encode`/`decode`/`learner`/`loss` in `src/learn/`, each spawning the authenticated
+> `claude` CLI through ask.ts's Windows-hardened helpers) behind **one** `makeLearnDispatch` router and four
+> bundled manifests, `compileGraphToAssertInputs` (which compiles the model's narrow `{nodes,edges}` JSON into
+> well-formed, `doc:<blob>#<slug>`-namespaced signed facts — the model never emits `AssertInput` directly),
+> and a **`kip learn <file>`** CLI (opt-in `KIP_LEARN_LIVE` gate, honest exit codes 0/5/2/1/7). It also
+> shipped the two retrieval fixes that let `kip ask` answer over a learned graph — **[[D-52]]** (recall
+> lexical seeding, `55afa73be`) and graph-QA **edge-prop hydration** (`af45ed046`) — **resolving D-52**. See
+> [`reviews/text-autoencoder-report.md`](../reviews/text-autoencoder-report.md) for the whole-program
+> narrative (four adversarial critic rounds, minimums R1=62 → R2=70 → R3=84 → R4=87/68/67; acceptance PASS;
+> and the cold-CLI live demo that turned a real design note into **60 signed facts** — a faithful
+> 13-node/17-edge graph accepted on iteration 1 at loss 0.22 < 0.25, all four factual questions answered
+> correctly with real-`factId` citations, and two absent-subject controls that held their abstention). The
+> integration gate PASSED (`build:sdk` + kip build + full kip test **771 passed / 8 skipped** +
+> `verify:metadata`, all green; `package-lock.json` untouched; zero new runtime deps; `.gitattributes` added
+> enforcing LF). This round adds **five** honest residuals: **D-57** (recall is keyword-not-semantic — the
+> promoted semantic half of D-52), **D-58** (learner non-determinism), **D-59** (free-text-value subject
+> retrieved-then-abstained — promoted from D-52), **D-60** (cross-document contradiction no longer surfaces as
+> `kip:conflict` — promoted from D-52), and **D-61** (temporal invalidation not modeled).
+
+### D-57: graph-QA text retrieval is KEYWORD lexical, not semantic — `kip ask` abstains when the question shares no lexical term with the graph
+
+- **Category:** Implementation / retrieval robustness (honestly disclosed; the open half of D-52)
+- **Severity:** Minor (safe — abstains, never guesses — but `ask` is not robust for real NL paraphrase)
+- **Surfaced:** `text-autoencoder` — the promoted *semantic/embedding* half of D-52. D-52's lexical seeding
+  made a `kip learn`-produced graph discoverable by **shared keyword**; this entry tracks what lexical
+  matching still cannot do.
+- **Location:** `packages/kip-sdk/src/kip-repo.ts` (`computeRecall` — the `recallSurfaceTerms` searchable-
+  surface + shared tokenizer `src/text-terms.ts` text path); consumed by `packages/kip-sdk/src/graph-qa/`
+  and the `ask` entry points (`src/cli/ask.ts`, the MCP `kip_ask` tool).
+- **Evidence:** Recall scores a node by the count of **distinct** query terms that appear in its searchable
+  surface (eid with the `doc:<blob>#` namespace stripped + node `kind` + prop keys + structured prop values +
+  incident edge kinds), tokenized identically to the query. A question that shares **no lexical term** with
+  the graph therefore retrieves nothing and `ask` abstains — synonyms ("revenue recognition" vs "booking
+  settlement"), paraphrase, morphology (`owns`/`ownership`), and translation are all misses. Scoring is a
+  flat distinct-term count (no IDF/BM25, so a common term counts as much as a discriminative one), there is
+  no stemming/lemmatization/fuzzy matching, the stopword set is small/closed/English-only, and the
+  `[a-z0-9]+` tokenizer drops CJK and any non-Latin script entirely. The vector half remains inert unless the
+  caller supplies `q.embedding` (kip deliberately never embeds the query, N2/N5), so nothing closes this gap
+  today. Indexing prop keys and edge kinds is what lets relation words anchor, but a common schema key/edge
+  kind matches uniformly across a graph and the flat scoring does not down-weight it (a recall win with a
+  precision cost, contained only by the `k` cap and the graph-QA subject-anchoring check).
+- **Why it is debt:** The point of `ask` is answering genuine free-text NL questions; as shipped it answers
+  only when the question and the graph share surface keywords. This is **safe** (cite-or-abstain holds; it
+  never fabricates) but the headline verb is not yet robust for real NL. It is distinct from D-43 (the
+  *vector*-half scale/no-ANN narrowing): D-43 is about the vector scan, D-57 is that the *text* path is
+  lexical-not-semantic.
+- **Suggested fix:** Wire **real semantic retrieval** through the existing §5.3 accelerator seam — embed the
+  corpus searchable surface and match by similarity (reusing the M4 vector infrastructure) — and/or add
+  relevance weighting (IDF/BM25), stemming/fuzzy matching, and a Unicode-aware tokenizer. Until then, `ask`
+  is robust only for questions that share lexical terms with the graph and should be documented as such.
+- **Status:** Open (tracked). Lexical seeding shipped (D-52 resolved); semantic retrieval remains the open
+  half.
+
+### D-58: the learn `learner`'s encoding is non-deterministic — the same document produces a different node/edge split across runs
+
+- **Category:** Implementation / reproducibility (accelerator-class; honestly disclosed)
+- **Severity:** Minor (safe — every run authors well-formed, namespaced, signed facts — but not reproducible)
+- **Surfaced:** `text-autoencoder` — the live `kip learn` path spawns a model, whose output varies per call.
+- **Location:** the `learner`/`encode` roles in `packages/kip-sdk/src/learn/index.ts` (each spawns the
+  authenticated `claude` CLI), consumed by `Repo.learn()` and the `kip learn` CLI (`src/cli/`), gated behind
+  `KIP_LEARN_LIVE` (ADR-B10f).
+- **Evidence:** The encoding step asks the model to produce the `{nodes,edges}` graph for a document; the
+  model path is opt-in and **accelerator-class**, so two `kip learn` runs over the **same** document can
+  return a different node/edge decomposition (a different concept split, different slugs, a different
+  edge count) even though `compileGraphToAssertInputs` deterministically namespaces and signs whatever graph
+  it is handed. The loss is a **search signal only** (it drives accept/iterate and never touches
+  `orderKey`/reducers/trust), so non-determinism upstream of the compile step does not compromise convergence
+  of the *admitted* set — but the admitted set itself differs between runs of the same input.
+- **Why it is debt:** Autoencoding a document is not reproducible: re-learning the same file yields a
+  different graph, so a consumer cannot rely on `doc:<blob>#<slug>` eids being stable across re-runs, and two
+  replicas that independently `kip learn` the identical file will not converge to byte-identical facts (they
+  converge only over facts they actually exchange, per SEC). This is **safe** (each run's facts are
+  well-formed and signed; nothing is fabricated) but is a real reproducibility gap intrinsic to the
+  model-backed encoding.
+- **Suggested fix:** Reduce non-determinism where the seam allows — e.g. pin decoding temperature/seed if the
+  host model exposes it, and/or add a deterministic canonicalization/normalization pass over the model's
+  `{nodes,edges}` (stable slug derivation, canonical node/edge ordering) before compile — while documenting
+  that the live model path is inherently accelerator-class and not a determinism guarantee.
+- **Status:** Open (tracked). The live learn path is opt-in and accelerator-class; the same document can
+  produce a different graph across runs.
+
+### D-59: a subject named ONLY inside a free-text prop value is lexically retrieved but then abstained on by graph-QA
+
+- **Category:** Implementation / retrieval precision-recall trade-off (honestly disclosed; promoted from D-52)
+- **Severity:** Minor (safe — abstains, never fabricates — the deliberate §8.4-guard trade-off)
+- **Surfaced:** `text-autoencoder` — the round-4 anchoring-surface widening (D-52 closure note) fixed the
+  prop-key/structured-value case but kept free-text values excluded to hold the §8.4 fabrication guard.
+- **Location:** graph-QA's subject-anchoring relevance check (`kip-graph-qa.md` §6.1b) over the retrieved
+  evidence, in `packages/kip-sdk/src/graph-qa/`; the anchoring surface indexes
+  `eid`/`kind`/`EdgeKind`s/prop KEYS/STRUCTURED prop values but **excludes** the values of
+  `content`/`description`/`summary`.
+- **Evidence:** `recall` will lexically retrieve a node whose free-text blob (`content`/`description`/
+  `summary`) contains the query's subject term, and the backing signed fact is hydrated — but graph-QA's
+  §6.1b anchoring check then **abstains**, because the subject term appears in no identity value or structured
+  prop on the anchoring surface. The exclusion is deliberate: including free-text values would reopen the §8.4
+  absent-subject fabrication (the Tal-only "What is Zara's role?" → "Engineer" defect), so a subject the graph
+  names ONLY in prose is retrieved-then-abstained.
+- **Why it is debt:** A genuinely-present subject that lives only inside free-text prose is unanswerable —
+  graph-QA cannot distinguish "the subject is genuinely present in prose" from "a relation word coincidentally
+  appears in unrelated prose," so it abstains on both. This is **safe** (cite-or-abstain holds; it never
+  fabricates) but it is a real recall gap for prose-only subjects, and the honest cost of the §8.4 guard.
+- **Suggested fix:** Close it via the **semantic retrieval** D-57 names (embedding the free-text surface and
+  matching by similarity lets graph-QA anchor on genuine subject presence rather than raw substring), **not**
+  by widening the lexical anchoring surface to free-text values — which would reopen the §8.4 fabrication
+  guard.
+- **Status:** Open (tracked). Retrieved-then-abstained by design; closing it needs semantic retrieval (D-57),
+  not a wider lexical surface.
+
+### D-60: cross-document contradictions do not surface as `kip:conflict` — the `doc:<blob>#` namespace makes two documents' facts disjoint cells
+
+- **Category:** Implementation / conflict-surfacing (honestly disclosed; promoted from D-52; cross-ref ADR-B10d)
+- **Severity:** Minor (safe — no wrong trusted value — but a genuine A-vs-B disagreement is not surfaced)
+- **Surfaced:** `text-autoencoder` — the `doc:<blob>#` eid namespacing (which fixes the cross-document cell
+  contamination defect (b) in the report) has the dual consequence that two documents' facts about the same
+  real-world entity never share a cell.
+- **Location:** `compileGraphToAssertInputs` / `namespaceEid` in `packages/kip-sdk/src/learn/compile.ts` (the
+  `doc:<blob>#<slug>` eid namespacing), and the reducer/conflict-surfacing layer (`22-git-substrate.md` §4.4)
+  that would otherwise emit `kip:conflict` on competing values for a shared cell.
+- **Evidence:** Because every learned fact's eid is namespaced by the source document's blob oid, document A's
+  fact about entity E and document B's contradicting fact about the same entity E land in **disjoint cells**
+  (`doc:A#e` vs `doc:B#e`), not the same cell. The conflict reducer only surfaces `kip:conflict` for competing
+  values **within one cell**, so a genuine A-vs-B disagreement is stored as two non-conflicting facts and is
+  never flagged. This is the deliberate flip side of the namespacing that closes cross-document cell
+  contamination.
+- **Why it is debt:** Two documents that genuinely disagree about the world do not produce a surfaced
+  `kip:conflict` — the disagreement is silently coexistent rather than flagged for resolution. This is
+  **safe** (no cell ever holds a wrong *trusted* value — the values are simply in different cells) but it
+  means the conflict-surfacing guarantee does not extend across documents.
+- **Suggested fix:** Add an explicit cross-document **entity-resolution / `same_as`** layer (which no bundled
+  learn role performs today) that links `doc:A#e` and `doc:B#e` when they denote the same real-world entity,
+  so competing values become a surfaced `kip:conflict` through the existing `same_as`/reducer machinery
+  rather than remaining disjoint.
+- **Status:** Open (tracked). Namespacing keeps retrieval local and cross-document contamination closed at the
+  cost of cross-document conflict surfacing; resolving it needs an entity-resolution layer.
+
+### D-61: temporal invalidation is not modeled — a decision that supersedes an earlier design choice leaves the stale edge marked `status:"current"`
+
+- **Category:** Implementation / temporal fidelity (honestly disclosed; surfaced by the live demo)
+- **Severity:** Minor (safe — the fact is signed and faithful to the prose — but it overstates present tense)
+- **Surfaced:** `text-autoencoder` Phase C — the cold-CLI **live demo**. The learned graph retained a
+  pre-decision "Orchid writes Ledger" edge as `status:"current"`, slightly overstating present tense even
+  though the same document's ADR structure records that the choice was later superseded.
+- **Location:** the `encode`/`learner` roles in `packages/kip-sdk/src/learn/index.ts` and
+  `compileGraphToAssertInputs` (`src/learn/compile.ts`) — the learned graph carries a `status` prop but no
+  step invalidates an edge that a later decision in the same document supersedes.
+- **Evidence:** In the live demo the design note described an earlier data-flow choice ("Orchid writes
+  Ledger") that a subsequent decision superseded, yet the compiled graph committed that edge with
+  `status:"current"`. The learn loop faithfully encoded the edge the prose stated but did not model the
+  **temporal supersession** — there is no valid-time invalidation of the stale edge when a later fact
+  supersedes the earlier design choice, so a `kip ask` over the graph can present the superseded edge as
+  present-tense.
+- **Why it is debt:** The learned graph overstates the present tense: an edge that a later decision made
+  historical is still marked current, so free-text answers over the graph can report a superseded design
+  choice as live. This is **safe** (every fact is signed and faithful to the sentence that produced it;
+  nothing is fabricated) but it is a real temporal-fidelity gap — the autoencoder captures *what the document
+  says* without capturing *when a statement was superseded*.
+- **Suggested fix:** Model temporal supersession in the learn path — either have the `learner` emit valid-time
+  `validTo`/supersede facts when the document records that a design choice was later changed, or add a
+  post-compile pass that invalidates an edge whose subject a later ADR/decision node supersedes — so stale
+  edges project as historical rather than `status:"current"`.
+- **Status:** Open (tracked). The learned graph does not model temporal invalidation; superseded edges can
+  remain marked current.
