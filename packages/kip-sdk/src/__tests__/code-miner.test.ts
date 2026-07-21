@@ -22,7 +22,7 @@
  *   edgeKinds  code:contains / code:imports (with a `spec` edge-prop) / code:exports / code:depends_on
  *   provenance source.uri = `code-resource://<repoId>@<gitSha>` (the EID-dedup + reproducibility anchor)
  *   EIDs       deterministic, path-derived → a re-index dedups by EID rather than duplicating nodes
- *   tools      guaranteed(git + node builtins) vs probed(rg/tokei/scc/cloc/ast-grep/tsc/eslint) with
+ *   tools      guaranteed(git + node builtins) vs probed(rg/tokei/scc/cloc) with
  *              N5 probe-and-skip-with-reason (an absent tool omits its metric, RECORDED not guessed)
  *
  * EID normalization note: ADR-B9b pins the code:module localId to the git-relative path but does NOT

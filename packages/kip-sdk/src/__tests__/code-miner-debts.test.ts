@@ -21,6 +21,7 @@ import { KipError, KipRepo } from "../index";
 import {
   buildCodeMinerResult,
   DEFAULT_PROBE_SEAM,
+  EXTRACTOR_TOOLS,
   PROBED_TOOLS,
   type CodeMinerProbeSeam,
   type ProbedTool,
@@ -183,6 +184,25 @@ describe("code Miner — probed/accelerator tier honest behavior, hermetic (D-53
     if (!process.env.KIP_INDEX_TOOLS) {
       for (const tool of PROBED_TOOLS) expect(props.find((p) => p.prop === `skipped:${tool}`)).toBeDefined();
       expect(props.find((p) => p.prop.endsWith("Tool"))).toBeUndefined();
+    }
+  });
+});
+
+// ================================================================================================
+// D-54 — the declared probed-tool set matches EXACTLY the tools that have a wired extractor.
+// ================================================================================================
+
+describe("code Miner — no declared-but-inert probed tool (D-54)", () => {
+  it("PROBED_TOOLS declares exactly the extractor-backed tools (no skip-only tool)", () => {
+    // Every declared probed tool MUST have an extractor, and every extractor MUST be declared — else the
+    // miner either over-declares a capability it cannot extract (D-54: ast-grep/tsc/eslint were removed)
+    // or ships an unreachable extractor. Set equality pins the lock-step in both directions.
+    expect([...PROBED_TOOLS].sort()).toEqual([...EXTRACTOR_TOOLS].sort());
+  });
+
+  it("the removed tools (ast-grep/tsc/eslint) are no longer declared", () => {
+    for (const removed of ["ast-grep", "tsc", "eslint"]) {
+      expect((PROBED_TOOLS as readonly string[]).includes(removed)).toBe(false);
     }
   });
 });

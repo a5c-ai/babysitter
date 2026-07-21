@@ -17,7 +17,7 @@
  *     (a git-blob-style SHA-1 content address of the file, ADR-B9b) — with deterministic path-derived
  *     EIDs so a re-index dedups by EID. The guaranteed `linesOfCode` is per-MODULE and is a distinct
  *     cell from any repo-level probed `linesOfCode` total, so the two never collide.
- *   PROBED (N5 loud-skip) — `rg`/`tokei`/`scc`/`cloc`/`ast-grep`/`tsc`/`eslint`, gated behind the
+ *   PROBED (N5 loud-skip) — `rg`/`tokei`/`scc`/`cloc`, gated behind the
  *     opt-in env `KIP_INDEX_TOOLS` (mirroring `KIP_ASK_LIVE`). Resolution/spawn/env reuse the
  *     Windows-hardened primitives exported from `src/cli/ask.ts` (`resolveHarnessBinary`,
  *     `buildHarnessSpawn`, `buildHarnessEnv`, `probeVersionOf`). An absent/failed tool emits a
@@ -105,8 +105,15 @@ export interface CodeMinerResult {
 /** The miner agent id + version (ADR-B9b: `author` = the miner agent id + version). */
 const MINER_AUTHOR = "code-miner@1.0.0";
 
-/** The optional analysis binaries (ADR-B9a) — probed, never assumed present. */
-export const PROBED_TOOLS = ["rg", "tokei", "scc", "cloc", "ast-grep", "tsc", "eslint"] as const;
+/**
+ * The optional analysis binaries (ADR-B9a) — probed, never assumed present. Every entry MUST have a
+ * wired extractor in {@link TOOL_EXTRACTORS} (asserted by the D-54 lock-step test): the miner never
+ * declares a probed tool it cannot extract a metric from. `ast-grep`/`tsc`/`eslint` were REMOVED here
+ * (D-54) — each needs a rule set / tsconfig / eslint config and would emit only a `skipped:<tool>`,
+ * over-declaring capability the miner does not have. Richer type/lint/AST extraction is a deliberate
+ * future capability (see ADR-B9a and DEBTS.md D-54), to be re-declared only alongside a real extractor.
+ */
+export const PROBED_TOOLS = ["rg", "tokei", "scc", "cloc"] as const;
 export type ProbedTool = (typeof PROBED_TOOLS)[number];
 
 /** Extension → detected format (guaranteed tier; a non-empty classification, never a tool metric). */
@@ -777,6 +784,13 @@ const TOOL_EXTRACTORS: Partial<Record<ProbedTool, ToolExtractor>> = {
     return { prop: "todoMarkers", value: count, spawned: true };
   },
 };
+
+/**
+ * The probed tools that actually have a wired metric extractor (the keys of {@link TOOL_EXTRACTORS}).
+ * Exposed so the D-54 lock-step test can assert `PROBED_TOOLS` declares EXACTLY the extractor-backed
+ * set — no declared-but-inert tool that could only ever emit `skipped:<tool>`.
+ */
+export const EXTRACTOR_TOOLS: readonly ProbedTool[] = Object.keys(TOOL_EXTRACTORS) as ProbedTool[];
 
 // ============================================================================================
 // The fact-building core (ADR-B9b) — DETERMINISTIC, synchronous, graph-read-free (INV-A1).

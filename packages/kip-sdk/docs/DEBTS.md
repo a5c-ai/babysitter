@@ -999,7 +999,8 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   fake seam — no real subprocess, no `KIP_INDEX_TOOLS` — and pins the N5 behaviors: a present tool emits its
   metric WITH the `<metric>Tool` provenance prop; an absent tool records `skipped:<tool>` with a reason and NO
   fabricated metric; and first-available-wins LOC dedup (tokei writes `linesOfCode`; scc/cloc loud-skip with a
-  reason naming the winner). (D-54 — ast-grep/tsc/eslint declared-but-inert — remains a separate open debt.)
+  reason naming the winner). (D-54 — ast-grep/tsc/eslint declared-but-inert — is now Resolved by removing
+  those three from the declared probed tier; see D-54 below.)
 
 ### D-54: code Miner declares ast-grep / tsc / eslint in the probed tier but has no extractor for them (skip-only)
 
@@ -1021,7 +1022,23 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Either add real extractors (ast-grep → structural `code:` facts / edges; tsc →
   type-diagnostic facts; eslint → lint-finding facts), or remove ast-grep/tsc/eslint from the declared probed
   tier until an extractor exists, so the declaration matches the behavior.
-- **Status:** Open (tracked). Declared-but-skip-only; no fact is ever authored from ast-grep/tsc/eslint today.
+- **Status:** Resolved — **removed** `ast-grep`/`tsc`/`eslint` (the "remove until an extractor exists" arm of
+  the suggested fix); **implemented none**. Each of the three needs host-specific configuration that makes a
+  clean, config-free, deterministic, zero-new-dep metric impossible right now: `ast-grep` needs a rule
+  set/patterns; `tsc --noEmit` diagnostic counts depend on a resolved `tsconfig` + installed `@types`/
+  `node_modules` and the `tsc` version (not self-contained, and expensive); `eslint --format json` problem
+  counts depend on a resolved eslint config + plugin/version set. All three could therefore only ever emit
+  `skipped:<tool>`, over-declaring reach the miner does not have. Changes: `PROBED_TOOLS` in
+  `src/miner/code-miner.ts` is now `["rg", "tokei", "scc", "cloc"]` (exactly the extractor-backed set); the
+  `code-miner` `microagent.json` `description` and the module/probed-tier doc comments no longer list the three
+  removed tools (the `runtime.tools` array — `["kip-read", "static-analysis"]` — never named them). A new
+  exported `EXTRACTOR_TOOLS` (= `Object.keys(TOOL_EXTRACTORS)`) and a HERMETIC lock-step test in
+  `src/__tests__/code-miner-debts.test.ts` assert `PROBED_TOOLS` equals the extractor-backed set in BOTH
+  directions (no declared-but-inert tool, no unreachable extractor) and that the three removed tools are gone;
+  the existing probed-tier tests (rg/tokei/scc/cloc LOC + todo markers, first-available-wins, N5 skip-with-
+  reason) are unchanged and still green. Richer type/lint/AST extraction (structural `code:` facts, tsc
+  type-diagnostic facts, eslint lint-finding facts) is a **deliberate future capability**, to be re-declared in
+  `PROBED_TOOLS` only alongside a real extractor (see ADR-B9a).
 
 ### D-55: code Miner's newline-counted LOC is off-by-one on files with no trailing newline
 
