@@ -1236,3 +1236,181 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   edges project as historical rather than `status:"current"`.
 - **Status:** Open (tracked). The learned graph does not model temporal invalidation; superseded edges can
   remain marked current.
+
+---
+
+## Audit round 11 — the `entity-linker` program (deterministic code↔concept graph unification)
+
+> The **`entity-linker`** program shipped **Layer 1** of kip's unification story. A kip repo could already hold
+> a **code graph** (`code:*` from `kip index`) and one or more **concept graphs** (`doc:<blob>#slug` from `kip
+> learn`) in the same substrate, but the two lived as **disconnected islands**. This program built (ADR-B11 /
+> B11a / B11b / B11c) a **deterministic** entity linker that connects them into one queryable memory by
+> **asserting signed, reversible link edges** and **never merging identities**: a pure, no-model
+> `linkResolver(inventory) → AcquisitionResult` (INV-A1) behind a `linkResolverDispatch` routed exactly like
+> the code Miner, a minimal read-only `Repo.nodeEids({prefixes})` enumeration seam, and a **`kip link`** CLI
+> (counts by kind, examples, `--json`, `--dry-run`; honest zero-link = exit 0). It authors three rules — a
+> concept→`code:module` **`documents`** edge on a full path-qualified relPath match, concept→symbol/package
+> links from identity fields, and a cross-document **`same_as`** pair on a distinctive (strong) name — all
+> through the existing `runAcquisition` path (no new write path; INV-A1 holds structurally). Its **headline
+> finding**: the code↔concept union needs **ZERO retrieval change** — graph-qa's existing depth-3
+> both-direction traversal already crosses the `documents` edge. See
+> [`reviews/entity-linker-report.md`](../reviews/entity-linker-report.md) for the whole-program narrative (four
+> adversarial critic rounds, minimums R1=32 → R2=84 → R3=85 → R4=85 — the R1=32 flagging a CRITICAL cross-doc
+> `same_as` false-merge — then post-loop precision fixes driving spec-fidelity 89→93→95 and code-quality to a
+> final 90; acceptance PASS; and the live demo that indexed **57 code facts** + learned **55 concept facts**
+> into one repo, `kip link`-ed **2 reversible `documents` edges**, and traversed the boundary in both
+> directions via `kip query --direction both --depth 3` — reversibly and idempotently, after fixing a
+> learn→link composition gap and a `--dry-run` arg-parser bug). The integration gate PASSED (`build:sdk` + kip
+> build + full kip test **820 passed / 8 skipped** + `verify:metadata`, all green; `package-lock.json`
+> untouched; zero new deps; `.gitattributes` LF). This round adds **six** honest residuals: **D-62** (`kip ask`
+> cites the concept side only, not the `code:module` fact across the `documents` edge — graph-qa citation
+> selection), **D-63** (cross-doc `same_as` can false-merge a genuine homonym — Layer-2 deferral), **D-64**
+> (`--include`/`--exclude` unwired on `kip link`), **D-65** (`Repo.nodeEids` absent from docs/40), **D-66**
+> (ADR-B11c `same_as` prop-union in retrieval — designed follow-on), and **D-67** (RDF/linked-data
+> `owl:sameAs` ingestion — designed-but-unbuilt follow-on).
+
+### D-62: `kip ask` over a linked graph cites the concept side only, not the `code:module` fact across the `documents` edge
+
+- **Category:** Implementation / retrieval — citation selection (honestly disclosed; graph-qa, not the linker)
+- **Severity:** Minor (safe — the answer is named correctly and the graph is unified/traversable via `kip query`)
+- **Surfaced:** `entity-linker` — over a repo whose code graph and concept graph are joined by `documents`
+  edges, `kip ask` names the answer correctly but cites the concept node, never the linked `code:module` fact.
+- **Location:** graph-qa's citation-selection path in `packages/kip-sdk/src/graph-qa/` and the `ask` entry
+  points (`src/cli/ask.ts`, the MCP `kip_ask` tool); the `documents` edge is authored by the linker
+  (`linkResolver`), but the gap is downstream in graph-qa's choice of which retrieved fact to cite.
+- **Evidence:** After `kip link` authors a `documents` edge from a concept node to its `code:module` node,
+  `kip ask` answers the question correctly (the graph IS unified — `kip query --direction both --depth 3`
+  crosses the edge in both directions), but the citation it selects is the **concept-side** fact, not the
+  `code:module` fact across the edge. The `code:module` node carries only content-blob / format / loc props
+  with **no question-relevant text**, so graph-qa's citation-selection heuristic never picks it over the
+  concept node whose props do lexically match the question.
+- **Why it is debt:** The answer is correct and the boundary is genuinely traversable, but a user asking about
+  the code gets a citation pointing at the concept description rather than at the code fact it links to, so the
+  provenance under-serves the code side of the union. This is **safe** (the answer is named correctly, nothing
+  is fabricated, and `kip query` exposes the full traversal) and it is a graph-qa **citation-selection** gap,
+  **not** a linker defect — the linker's job (authoring the reversible `documents` edge) is done.
+- **Suggested fix:** Extend graph-qa citation selection to prefer or additionally cite the `code:module` fact
+  reached across a `documents` edge when the answer is about the code side — e.g. treat a `documents`-linked
+  `code:module` node as a citable target even though its props carry no question-lexical text — so the
+  provenance follows the edge the traversal already crosses. A graph-qa follow-on, tracked separately from the
+  linker.
+- **Status:** Open (tracked). The graph is unified and traversable via `kip query`; only graph-qa's `ask`
+  citation selection does not yet follow the `documents` edge to the code side.
+
+### D-63: cross-document `same_as` can still false-merge a genuine homonym — deferred to the model-assisted Layer 2
+
+- **Category:** Implementation / entity-resolution precision (honestly disclosed; deliberate Layer-1/Layer-2 boundary)
+- **Severity:** Minor (safe — narrow, reversible via `not_same_as`/retract; never renames or merges an eid)
+- **Surfaced:** `entity-linker` — the deterministic `same_as` rule pairs two concepts in different documents
+  that share a distinctive (strong) name; a genuine homonym (two distinct entities sharing that name) can be
+  falsely paired.
+- **Location:** the `same_as` rule in `linkResolver` (`packages/kip-sdk/src/` acquisition / link-resolver
+  path), consumed by `kip link`; the pair is authored through `runAcquisition` as a reversible `same_as` edge.
+- **Evidence:** The deterministic rule fires `same_as` only on a **distinctive (strong) name** — multi-token
+  or internal-marker names, with a minimum length and a stopword filter, and a camelCase `[A-Z][a-z]`
+  distinctiveness rule that excludes all-caps acronyms/extensions and filename-shaped strings (the R1
+  false-merge and its follow-on tightenings). Single ambiguous tokens (bare common nouns, all-caps acronyms,
+  filename-shaped names) are **deterministically abstained** (high precision, may miss). But a genuine
+  **homonym** — two distinct real-world entities that legitimately share a distinctive name across documents —
+  can still be paired, because a deterministic name-only rule cannot tell a shared name apart from a shared
+  identity.
+- **Why it is debt:** A `same_as` pair asserts "these two concept nodes denote the same thing"; on a genuine
+  homonym that assertion is wrong. The residual is **narrow** (only distinctive-name collisions across
+  documents), **safe** (nothing is merged — `same_as` is an asserted edge, so a mistaken pair is undone by
+  asserting `not_same_as` or retracting the edge, never by un-merging an identity), and it is the **deliberate
+  boundary** between deterministic Layer 1 and the model-assisted Layer 2: disambiguating a genuine homonym
+  needs context the name alone does not carry.
+- **Suggested fix:** Resolve genuine homonyms in the **model-assisted Layer 2 fuzzy resolver** (context-aware
+  entity resolution over the props/neighbourhood of the two candidates), keeping the deterministic Layer-1 rule
+  as the high-precision floor. Until then, a mistaken cross-document `same_as` is corrected by `not_same_as` /
+  retract.
+- **Status:** Open (tracked). Deterministic name-only `same_as` is high-precision but can false-merge a genuine
+  homonym; disambiguation is deliberately deferred to Layer 2.
+
+### D-64: `--include` / `--exclude` are declared for `kip link` (ADR) but not wired
+
+- **Category:** Implementation / CLI completeness (honestly disclosed; not a correctness defect)
+- **Severity:** Minor
+- **Surfaced:** `entity-linker` acceptance — a documented non-hard gap: the ADR lists `--include` / `--exclude`
+  on `kip link`, but they are not registered/honored.
+- **Location:** the `kip link` CLI (`packages/kip-sdk/src/cli/`) — the arg parser and the `linkResolver`
+  inventory scope; ADR-B11.
+- **Evidence:** ADR-B11 lists `--include` / `--exclude` scoping flags on `kip link`, but they are not wired
+  into the CLI: the flags are declared in the design but not registered in the arg parser nor threaded into the
+  resolver's inventory enumeration, so passing them has no effect (this mirrors the code Miner's
+  `--include`/`--exclude`/`--git-sha` arg-parser gap the `code-analysis-miner` demo found and fixed).
+- **Why it is debt:** The declared CLI surface overstates what `kip link` actually accepts — an operator
+  reading the ADR would expect to scope linking with `--include` / `--exclude`, but the flags are inert. This
+  is **safe** (linking still runs over the full enumerated inventory; nothing is fabricated) but the declared
+  interface does not match the behavior.
+- **Suggested fix:** Register `--include` / `--exclude` in the `kip link` arg parser and thread them into the
+  `Repo.nodeEids` inventory enumeration so linking can be scoped, or remove them from the ADR until they are
+  wired, so the declaration matches the behavior.
+- **Status:** Open (tracked). Declared in the ADR, not wired into `kip link`.
+
+### D-65: `Repo.nodeEids` is not documented in docs/40 (SDK API surface)
+
+- **Category:** Documentation / completeness (honestly disclosed; API-surface gap)
+- **Severity:** Minor
+- **Surfaced:** `entity-linker` acceptance — a documented non-hard gap: the new read-only `Repo.nodeEids`
+  enumeration seam is not enumerated in the SDK API surface doc.
+- **Location:** [40-sdk-api-surface.md](./40-sdk-api-surface.md) (the `Repo` API surface) vs the shipped
+  `Repo.nodeEids({prefixes})` method in `packages/kip-sdk/src/`.
+- **Evidence:** The program added a minimal read-only `Repo.nodeEids({prefixes})` seam that enumerates existing
+  node eids by namespace prefix (so the resolver can see both the `code:` and `doc:` graphs), but
+  `40-sdk-api-surface.md` — the canonical `Repo` API surface — does not list it. A reader building against the
+  documented API surface would not know the enumeration seam exists.
+- **Why it is debt:** The API-surface doc is the authoritative catalog of the `Repo` seam; a shipped public
+  method absent from it is a completeness gap that leaves the enumeration seam undiscoverable from the docs.
+  This is **safe** (the method exists and behaves; only its documentation is missing) but it is a real
+  doc/implementation drift.
+- **Suggested fix:** Add `Repo.nodeEids({prefixes})` to `40-sdk-api-surface.md` — its read-only,
+  authoring-nothing contract and its prefix-scoped enumeration semantics — alongside the other `Repo` read
+  seams.
+- **Status:** Open (tracked). The seam ships and works; it is not yet documented in docs/40.
+
+### D-66: ADR-B11c `same_as` prop-union in retrieval is a designed follow-on (not yet built)
+
+- **Category:** Implementation / retrieval — designed-but-unbuilt follow-on (honestly disclosed)
+- **Severity:** Minor (safe — the `same_as` edge is authored and reversible; retrieval simply does not yet union props)
+- **Surfaced:** `entity-linker` — the linker authors `same_as` pairs (ADR-B11), but the ADR-B11c retrieval-side
+  consumption of those pairs (unioning the props of `same_as`-linked nodes at retrieval time) is a named
+  follow-on, not built.
+- **Location:** the retrieval / graph-qa path in `packages/kip-sdk/src/` (`computeRecall` / `src/graph-qa/`)
+  that would consume `same_as` edges authored by `linkResolver`; ADR-B11c.
+- **Evidence:** ADR-B11c designs a retrieval behavior in which the props of two `same_as`-linked nodes are
+  **unioned** so a question answerable from either node's props can be answered from the union. The linker
+  authors the `same_as` edge, but retrieval does not yet perform that prop-union — a node linked `same_as` to
+  another is not enriched by the other's props at recall/answer time.
+- **Why it is debt:** The `same_as` channel is only half-consumed: the edge is authored, but the retrieval
+  benefit the ADR designs (answering from the union of linked nodes' props) is not realized, so a `same_as`
+  link does not yet improve answerability. This is **safe** (nothing is fabricated; the edge is a faithful,
+  reversible assertion) but it is a designed capability that is not built.
+- **Suggested fix:** Implement the ADR-B11c prop-union in retrieval — when a retrieved node is `same_as`-linked
+  to another, union their props for recall/answer purposes — so the authored `same_as` edges deliver the
+  designed retrieval benefit.
+- **Status:** Open (tracked). `same_as` edges are authored; the ADR-B11c retrieval-side prop-union is a named
+  follow-on, not built.
+
+### D-67: RDF / linked-data `owl:sameAs` ingestion is a designed-but-unbuilt follow-on
+
+- **Category:** Implementation / ingestion — designed-but-unbuilt follow-on (honestly disclosed)
+- **Severity:** Minor (safe — nothing is fabricated; the ingestion path simply does not exist yet)
+- **Surfaced:** `entity-linker` — the `same_as` channel the linker uses is designed to also carry RDF /
+  linked-data `owl:sameAs` assertions (IRIs as global eids), but no ingestion path for RDF/linked-data is built.
+- **Location:** the acquisition family in `packages/kip-sdk/src/` (the `sameAs` channel that `linkResolver`
+  authors into) and the (unbuilt) RDF/linked-data ingestion path; ADR-B11.
+- **Evidence:** The design reuses the same `sameAs` channel to ingest RDF / linked-data `owl:sameAs`
+  statements, treating IRIs as global eids so an external linked-data graph can join kip's memory through the
+  same reversible-edge machinery the entity linker uses. This ingestion is **designed** (it deliberately reuses
+  the `sameAs` channel and the IRI-as-global-eid model) but **not built** — there is no RDF/linked-data reader.
+- **Why it is debt:** A designed interoperability capability (joining external RDF/linked-data graphs via
+  `owl:sameAs` on the same reversible `sameAs` channel) is named in the design but has no implementation, so
+  the union story stops at kip's own code and concept graphs. This is **safe** (the absence is a missing
+  feature, not an incorrect behavior — nothing is fabricated) but it is a designed follow-on that is not yet
+  realized.
+- **Suggested fix:** Build an RDF / linked-data ingestion path that reads `owl:sameAs` statements and authors
+  them onto the existing `sameAs` channel (IRIs as global eids), reusing the entity linker's reversible-edge
+  machinery, so external linked-data graphs can join kip's memory.
+- **Status:** Open (tracked). Designed to reuse the `sameAs` channel (IRIs as global eids); no RDF/linked-data
+  ingestion path is built.
