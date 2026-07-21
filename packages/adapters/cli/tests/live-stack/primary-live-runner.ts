@@ -36,6 +36,24 @@ export interface CommandResult {
   readonly stderr: string;
 }
 
+/**
+ * A non-fatal setup command (e.g. `adapters install`) may legitimately exit
+ * non-zero on an unreliable postinstall, so those exits are tolerated. But a
+ * "Cannot find module .../dist/..." / "GENTY STARTUP FAILED" signature means a
+ * BUILD ARTIFACT is missing or truncated (RC-2: a partial build-all-dist
+ * artifact lacking packages/genty/cli/dist). That is an infrastructure fault,
+ * never a legitimate runtime outcome, so it must fail the scenario fast with a
+ * clear message rather than being swallowed as "non-fatal — continuing" and
+ * resurfacing later as a confusing product-looking failure.
+ */
+export function isInfrastructureArtifactFault(result: CommandResult): boolean {
+  const text = `${result.stdout}\n${result.stderr}`;
+  const missingDistModule = /Cannot find module[^\n]*\bdist\b/i.test(text)
+    || /MODULE_NOT_FOUND[^\n]*\bdist\b/i.test(text);
+  const startupFailed = /GENTY STARTUP FAILED/i.test(text);
+  return missingDistModule || startupFailed;
+}
+
 export interface PrimaryLiveRunOptions {
   readonly env: Record<string, string | undefined>;
   readonly cwd: string;
@@ -369,6 +387,14 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
       // unreliable exit code; don't abort the scenario — continue and let the
       // behavior verifications judge whether the agent actually works.
       if (command.nonFatal) {
+        // A missing/truncated build artifact is an infra fault, not a tolerable
+        // postinstall exit — fail fast with a clear message (RC-2) instead of
+        // swallowing it and resurfacing later as a product-looking failure.
+        if (isInfrastructureArtifactFault(result)) {
+          const failure = `infrastructure fault: build artifact missing or truncated during "${command.command} ${command.args.join(' ')}" (exit ${result.status}). The dist bundle is incomplete (e.g. packages/genty/cli/dist) — this is NOT a product failure. stderr tail: ${result.stderr.slice(-300)}`;
+          const artifactPath = await writeScenarioArtifact(options.artifactsDir, scenario, { status: 'failed', failure, commands: redactCommands(commands) });
+          return { status: 'failed', scenarioId: scenario.scenarioId, commands: redactCommands(commands), artifactPath, failure };
+        }
         console.warn(`[live-stack] non-fatal command exited ${result.status} — continuing: ${command.command} ${command.args.join(' ')}`);
         continue;
       }
