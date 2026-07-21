@@ -1900,6 +1900,17 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * ADR-B11b (entity-linker node-enumeration seam) — UNIMPLEMENTED stub. The real method returns the
+   * sorted, live-gated `EID`s of every node the admitted set names, optionally restricted to
+   * `opts.prefixes`, derived from the SAME node-existence scan `computeRecall` performs — so a
+   * deterministic linker can see every live `code:*`/`doc:*` node with no proj change. It throws until
+   * implemented so the frozen entity-linker tests fail on ASSERTION, never on a missing symbol.
+   */
+  nodeEids(_opts?: { prefixes?: string[] }): Promise<EID[]> {
+    return Promise.reject(new Error("unimplemented: nodeEids"));
+  }
+
+  /**
    * Threads this repo's constructor-supplied `knownMaxVersion`/`cellReducers` into every `proj()`
    * call (`getNode`/`getEdge`/`query`), so these are reachable from a real `KipRepo` read path
    * rather than only `proj()`-internal defaults/unit-tested-in-isolation seams. `hashAlgo`/
