@@ -25,6 +25,8 @@ const BOOLEAN_FLAGS = new Set([
   "fetch",
   "push",
   "heads-committed",
+  // `kip link` (ADR-B11): compute + print the would-be links without authoring any fact.
+  "dry-run",
 ]);
 
 /** Value flags that may appear MORE THAN ONCE, accumulated into an array (spec §4: `--root-key`,
