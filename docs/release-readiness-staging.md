@@ -2,12 +2,18 @@
 
 _QA round run `01KXZE14FY9SSQQ8ENFVZVYXAD`, 2026-07-21. Analyzed staging HEAD `95a0b6bab`+ (branch moved during the round — a concurrent kip-sdk run was actively committing; see Caveats)._
 
-## Verdict: GO — with two explicit, owner-visible caveats
+## Verdict: GO — `ci.yml` is fully green on the fixed staging sha
 
-The bug fixes this release claims to deliver are **real and correct**, but the round found they shipped **structurally unguarded** — their tests either did not exist or did not run in CI, and one shipped fix (RC-1) was actively breaking every plugin-install CI lane. All of that is now closed on `staging`. The two caveats below are **pre-existing conditions**, not regressions introduced by this release, and are the owner's call to accept.
+The bug fixes this release claims to deliver are **real and correct**, but the round found they shipped **structurally unguarded** — their tests either did not exist or did not run in CI, and one shipped fix (RC-1) was actively breaking every plugin-install CI lane. All of that is now closed on `staging` and **confirmed green by a real CI run against the release sha**.
 
-- **Caveat 1 (pre-existing CI red):** `ci.yml`'s "Workspace Coverage" job fails on "Validate transport-adapter workspace QA surface". Untouched by any commit in this release; it was simply invisible because `ci.yml` never ran on the branch (RC-4). Decide whether to accept or fix before tagging.
-- **Caveat 2 (deferred by design):** kip-sdk (the largest part of the diff, a **new/unreleased** package) still has no *committed* CI, and RC-3 (a dispatcher ref-hygiene bug) is external to the product. Both were deferred with owner approval / recommendation.
+**CI confirmation (`ci.yml` run `29812297914` = SUCCESS, all jobs):** Docs QA ✓, Lint/Tests/Package ✓ (the newly-wired policy/tools/trust-core security suites), Observer Dashboard ✓, Workspace Coverage ✓ (Caveat 1 fixed). **Live Stack bp/predefined interactive claude-code/gpt-5.5 lane ✓** — the exact install-mode lane RC-1 was breaking now passes end-to-end.
+
+Only by-design deferrals remain (owner's call), none release-blocking:
+- **kip-sdk CI (recommendation):** the largest part of the diff, but a **new/unreleased** package; its cross-OS workflow already exists untracked as the concurrent kip run's artifact — commit it. Not committed here to avoid clobbering that active run.
+- **RC-4 (recommendation):** `ci.yml` runs only on `pull_request`; add a `staging` push-trigger or branch protection so direct-push landings can't ship unguarded again.
+- **RC-3 (deferred, owner-approved):** external dispatcher ref hygiene, not product code.
+
+_Original Caveat 1 (transport-adapter Workspace Coverage TS2307) was **introduced by this release** (transport-adapter's proxy-attestation wiring added trust-core/policy-adapter deps; the isolated job built only atlas first) and masked by RC-4. Fixed in `26ff42325`: build the dependency closure in order. Reproduced locally (`rm dist` → identical TS2307) and confirmed green in the CI re-run above._
 
 ---
 
