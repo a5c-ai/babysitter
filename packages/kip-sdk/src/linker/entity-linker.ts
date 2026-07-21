@@ -145,12 +145,25 @@ function isDistinctiveName(nName: string): boolean {
  *   - carries an internal distinctiveness marker a bare common noun lacks:
  *       . a hyphen / underscore / slash / colon (`::`) / `@` — a qualified name (`order-service`,
  *         `@scope/pkg`, `com::acme`);
- *       . a dot that is NOT merely a bare filename's extension (`com.acme.Ledger` yes; `index.ts` /
- *         `config.json` no — a dotted bare basename is a generic filename, not a qualified identity);
- *       . an internal digit (`oauth2`);
+ *       . a dot that is NOT part of a FILENAME shape (`com.acme.Ledger` yes; `index.ts`,
+ *         `webpack.config.js`, `v2.ts` no — a filename-shaped token is a generic file, not an identity);
+ *       . an internal digit (`oauth2`) — but a digit inside a filename stem/extension does NOT count;
  *       . an internal capital in the ORIGINAL, pre-`toLowerCase` form (camelCase/PascalCase like
  *         `OrderPlaced`, `linkResolver`) — a LEADING capital (`"Manager"`) is a bare common noun and does
  *         NOT count, which is the whole distinction from a distinctive compound.
+ *
+ * FILENAME SHAPE (round-4 precision fix, ADR-B11a). A slash-free token that ends in a short, all-lowercase
+ * file extension (`\.[a-z0-9]{1,6}$`), REGARDLESS of how many dots it contains, is a filename — NOT an
+ * identity. Its dots are discounted wholesale (a filename's dots are not distinctiveness), and any
+ * digit/capital signal must live in the STEM, not the extension. Such a token is strong ONLY when its stem
+ * independently clears the strong bar via a name-shaped marker (`isStrongStem`: an internal capital or a
+ * hyphen/underscore/slash/`::`/`@` — NOT a lone dot or a lone version digit). Net: `webpack.config.js`,
+ * `index.test.ts`, `foo.d.ts`, `jest.setup.js`, `tsconfig.base.json`, `v2.ts`, `s3.ts`, `p2p.js`, `h2.py`,
+ * `vec3.rs` are NOT strong (no bare-token `documents`, no cross-blob `same_as`); `OrderPlaced.ts` /
+ * `order-service.ts` stay strong; a capitalized final segment (`com.acme.Ledger`) is NOT a lowercase file
+ * extension, so it is not a filename shape and stays strong via the qualifying-dot rule; a path-qualified
+ * relPath (`src/foo/bar.ts`, contains `/`) is not a filename token and still matches a module.
+ *
  * Input is the RAW identity value (the internal-capital test needs the pre-lowercase form). Applied to
  * concept identity values, to a bare concept slug, AND to the code `code:symbol`/`code:package` token.
  */
@@ -159,15 +172,30 @@ function isStrongName(raw: string): boolean {
   const nName = original.toLowerCase();
   if (!isDistinctiveName(nName)) return false; // min-length + stopword floor (retained).
   if (nName.includes(" ")) return true; // multi-token.
-  // A dotted bare basename (`index.ts`, `config.json`) is a generic filename, NOT a qualified name — its
-  // lone extension dot must not confer strength (that is exactly how `index.ts` escaped the stopword set).
-  const bareBasename = (original.match(/\./g)?.length === 1) && /^[^/\\]+\.[^./\\]{1,5}$/.test(original);
+  // A FILENAME-shaped token (slash-free, ending in a short all-lowercase extension, ANY dot count) is a
+  // generic file, not a distinctive identity: discount ALL its dots, and require the STEM alone to clear
+  // the strong bar (rejects `webpack.config.js`, `index.test.ts`, `v2.ts`, `s3.ts`, `vec3.rs`, …).
+  const ext = original.match(/^[^/\\]+(\.[a-z0-9]{1,6})$/);
+  if (ext) return isStrongStem(original.slice(0, original.length - ext[1]!.length));
   if (/[-_/:@]/.test(original)) return true; // qualified-name separator (hyphen/underscore/slash/`::`/`@`).
-  if (original.includes(".") && !bareBasename) return true; // qualifying dot (not a bare filename extension).
+  if (original.includes(".")) return true; // qualifying dot (a filename extension was handled above).
   if (/\d/.test(original)) return true; // internal digit.
   const tail = original.slice(1);
   if (tail !== tail.toLowerCase()) return true; // internal capital (camelCase/PascalCase) in the original.
   return false;
+}
+
+/**
+ * The STRONG bar for a FILENAME STEM (round-4, ADR-B11a). A filename's dots and version digits are generic,
+ * so a stem is distinctive ONLY through a name-shaped marker a bare/versioned filename lacks: a
+ * hyphen/underscore/slash/`::`/`@` qualifier (`order-service`) or an internal capital in the ORIGINAL form
+ * (`OrderPlaced`). A LONE dot or a LONE digit does NOT qualify — `webpack.config`, `index.test`, `v2`,
+ * `vec3` are NOT strong stems. (Multi-token is impossible in a slash-free filename token.)
+ */
+function isStrongStem(stem: string): boolean {
+  if (/[-_/:@]/.test(stem)) return true; // qualified-name separator.
+  const tail = stem.slice(1);
+  return tail !== tail.toLowerCase(); // internal capital (camelCase/PascalCase) in the stem.
 }
 
 // --- identifier parsing (ADR-B11: code nodes carry NO name prop → parse out of the hashed eid) -----
@@ -348,9 +376,13 @@ export function linkResolver(inventory: NodeInventory): LinkResolverResult {
     const ref = parseCodeEid(entry.kind, entry.eid);
     if (!ref) continue; // unparsable / unexpected shape: abstain (N5), never a mis-split (C).
     if (ref.kind === "module") {
-      // Only index PATH-QUALIFIED module relPaths. `resolveDocTargets` routes a bare, `/`-less concept id
-      // to symbol/package (never `moduleByPath`), so a bare-basename module (`index.ts`) is unreachable —
-      // indexing it would be dead. Keeping the guard here removes those dead entries by construction.
+      // Only index PATH-QUALIFIED module relPaths. This is INTENTIONAL defense-in-depth with the
+      // `id.includes("/")` routing in `resolveDocTargets`: a bare, `/`-less concept id is routed to
+      // symbol/package (never `moduleByPath`), so a bare-basename module (`index.ts`) is already
+      // unreachable by that route — but we ALSO refuse to index it here so no future lookup path can ever
+      // reach a bare-basename module. Either gate alone blocks a bare-basename `documents` link; keeping
+      // BOTH is a deliberate belt-and-suspenders invariant (a bare basename is not distinctive evidence),
+      // and it removes the otherwise-dead bare-basename entries by construction.
       if (ref.relPath.includes("/")) addTo(moduleByPath, ref.relPath, entry.eid);
     } else if (ref.kind === "symbol") {
       // The code TOKEN is held to the same STRONG bar as the concept identifier: a dotted bare basename

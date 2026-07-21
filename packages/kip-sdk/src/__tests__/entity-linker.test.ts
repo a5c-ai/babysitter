@@ -435,6 +435,85 @@ describe("entity-linker: round-3 precision - the STRONG-name rule kills generic 
   });
 });
 
+describe("entity-linker: round-4 precision - filename-shaped identity values are generic, not distinctive (ADR-B11a)", () => {
+  // (1) MULTI-DOT filenames: the round-3 bare-basename guard only discounted a SINGLE extension dot, so a
+  //     multi-dot filename (`webpack.config.js`, `index.test.ts`) still counted its dots as qualifiers and
+  //     merged. A filename shape (slash-free, short lowercase extension, ANY dot count) is never strong.
+  it("does NOT same_as when two cross-blob concepts share a multi-dot filename identity name", () => {
+    for (const fname of ["webpack.config.js", "index.test.ts", "foo.d.ts", "jest.setup.js", "tsconfig.base.json"]) {
+      const a = conceptEid(BLOB_A, `a-${fname}`);
+      const b = conceptEid(BLOB_B, `b-${fname}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: fname }]),
+        conceptNode(b, [{ key: "name", value: fname }]), // identical filename, different blob → NOT distinctive
+      ]);
+      expect(r.sameAs ?? [], `"${fname}" is a generic filename and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // (2) DIGIT basenames: a single-extension filename whose stem carries only a version digit (`v2.ts`,
+  //     `s3.ts`, `vec3.rs`) slipped through the round-3 `/\d/` rule. A digit in a filename stem/extension
+  //     is not distinctiveness — the stem must independently clear the strong bar (capital/separator).
+  it("does NOT same_as when two cross-blob concepts share a digit-basename filename identity name", () => {
+    for (const fname of ["v2.ts", "s3.ts", "p2p.js", "h2.py", "vec3.rs"]) {
+      const a = conceptEid(BLOB_A, `a-${fname}`);
+      const b = conceptEid(BLOB_B, `b-${fname}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: fname }]),
+        conceptNode(b, [{ key: "name", value: fname }]),
+      ]);
+      expect(r.sameAs ?? [], `"${fname}" is a versioned filename and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+
+  // A digit-basename filename must not seed a bare-token `documents` link either — the code:symbol/module
+  // token `v2.ts` is held to the same strong bar and is never indexed, and the concept id never resolves.
+  it("does NOT documents when a concept and a bare code:symbol/code:module token share a digit-basename filename (v2.ts)", () => {
+    const symEid = symbolEid("src/x.ts", "v2.ts"); // a symbol literally named "v2.ts"
+    const modBare = moduleEid("v2.ts"); // a root-level module whose bare relPath IS "v2.ts"
+    const cSym = conceptEid(BLOB_A, "c-sym");
+    const cMod = conceptEid(BLOB_A, "c-mod");
+    const r = linkResolver([
+      codeNode(symEid, "code:symbol"),
+      codeNode(modBare, "code:module"),
+      conceptNode(cSym, [{ key: "name", value: "v2.ts" }]),
+      conceptNode(cMod, [{ key: "name", value: "v2.ts" }]),
+    ]);
+    expect(documentsEdges(r).length).toBe(0);
+    expect(r.sameAs ?? []).toEqual([]);
+  });
+
+  // Positive control (guards against over-correction): a genuine PATH-qualified relPath is distinctive (a
+  // path is not a filename token) and STILL documents-links its module — the filename fix must not touch it.
+  it("STILL documents-links a module for a PATH-qualified relPath (src/foo/bar.ts) — no over-correction", () => {
+    const modEid = moduleEid("src/foo/bar.ts");
+    const concept = conceptEid(BLOB_A, "src/foo/bar.ts");
+    const r = linkResolver([codeNode(modEid, "code:module"), conceptNode(concept)]);
+    const docs = documentsEdges(r);
+    expect(docs.length).toBe(1);
+    expect(edgeFromTo(docs[0]!)).toEqual({ from: concept, to: modEid });
+  });
+
+  // (Item 2) TEST-INTEGRITY: the round-3 bare-common-noun test lowercases ONE twin, so a mutation that
+  //   counts a LEADING capital stays green (the lowercased twin is never strong). This pins the corridor
+  //   with BOTH twins carrying the identical leading-capital identity — mutation-verify: making
+  //   `isStrongName` treat a leading capital as distinctive makes THIS test fail.
+  it("does NOT same_as when two cross-blob concepts BOTH carry the identical leading-capital identity name", () => {
+    for (const noun of ["Manager", "Client"]) {
+      const a = conceptEid(BLOB_A, `pc-a-${noun}`);
+      const b = conceptEid(BLOB_B, `pc-b-${noun}`);
+      const r = linkResolver([
+        conceptNode(a, [{ key: "name", value: noun }]),
+        conceptNode(b, [{ key: "name", value: noun }]), // BOTH keep the leading capital → still a bare common noun
+      ]);
+      expect(r.sameAs ?? [], `both-PascalCase "${noun}" is a bare common noun and must NOT merge`).toEqual([]);
+      expect(documentsEdges(r).length).toBe(0);
+    }
+  });
+});
+
 // --- end-to-end (scripted linkResolverDispatch + the REAL runAcquisition orchestrator) ----------
 
 async function reached(
