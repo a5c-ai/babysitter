@@ -1348,3 +1348,25 @@ describe('infrastructure-artifact fault detection (RC-2)', () => {
     expect(result.failure).toContain('infrastructure fault');
   });
 });
+
+describe('RC-1: runner de-collides adapters-hooks global bin', () => {
+  it('emits the hooks-adapter-cli global install with --force in the executed command list', () => {
+    // Guards the RUNNER's actually-executed install list (not only the contract
+    // spec). babysitter-sdk and @a5c-ai/hooks-adapter-cli both declare an
+    // `adapters-hooks` bin; without --force the second global install EEXISTs
+    // and every babysitter-plugin install-mode lane fails at setup (RC-1).
+    const commands = buildPrimaryLiveStackCommands(geminiPluginScenario(), {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { GOOGLE_API_KEY: 'google-secret', LIVE_STACK_TRACE_ID: 'trace-rc1' },
+    });
+    const hooksCliInstall = commands.find(
+      (c) => c.command === 'npm'
+        && c.args.includes('install')
+        && c.args.some((a) => a.includes('adapters/hooks/cli')),
+    );
+    expect(hooksCliInstall, 'expected a hooks-adapter-cli global install command').toBeDefined();
+    expect(hooksCliInstall?.args).toContain('--global');
+    expect(hooksCliInstall?.args).toContain('--force');
+  });
+});
