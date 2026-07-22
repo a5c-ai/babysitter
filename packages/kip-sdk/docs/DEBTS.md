@@ -1577,7 +1577,23 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   abstain (still range-checking confidence ∈ [0,1] and still abstaining on genuinely absent structure); or (c)
   document `--model sonnet` as the recommended tier for `kip resolve` and note that weaker tiers fail safe by
   under-firing. Fix must preserve N5 (abstain on any genuinely malformed/absent verdict; never fabricate).
-- **Status:** Open (tracked). Resolver safety is model-independent; `same`→quarantine recall is model-tier
-  dependent and the shipped default under-fires (fails safe). See **[[D-63]]** (closed by this resolver) and the
-  §5.3 accelerator boundary (the model verdict is a search signal; only the resulting quarantined signed fact
-  touches proj).
+- **Status:** RESOLVED by ADR-B12d — `kip resolve` now selects its OWN structured-output-reliable default tier
+  (`RESOLVER_DEFAULT_MODEL = "sonnet"`) via the pure `resolverEffectiveModel(model)`, used ONLY when `--model`
+  is unset, and reports the effective tier in `kip resolve --json` (`model`, both `--dry-run` and the real run)
+  so it is never a silent substitution. `--model` still overrides verbatim (an operator may knowingly pick
+  `haiku`); the GLOBAL `ask` default (`resolveHarnessModel`/`DEFAULT_HARNESS_MODEL`) is untouched, so
+  `kip ask`/`learn`/`miner` keep their tier/cost. N5 is unchanged — `parseResolverVerdict` is byte-for-byte the
+  same, so a malformed/absent/out-of-range verdict on ANY tier still ABSTAINS (never coerced). The rejected
+  alternative (salvage embedded JSON from a prose response before abstaining) was ruled a forbidden coercion/
+  fallback and NOT taken.
+- **Honest scope — the fix's live demo recorded a NEGATIVE CONTROL.** The prose under-fire is **INTERMITTENT,
+  not deterministic**: the D-69 live demo's `--model haiku` control HONORED `--json-schema` and authored the
+  candidate on **4/4** trials (claude CLI 2.1.195), i.e. it did NOT reproduce the under-fire seen once in the
+  Layer-2 demo. So this fix is honestly framed as **variance-reduction + honest tier reporting**, NOT the repair
+  of a proven-deterministic haiku breakage. The live proof of the FIX (no `--model`): semantic match
+  `orchid`⇄`checkout-svc` quarantined as `kip:same_as?` (0.97) held out of trusted reads then merged on
+  `confirm`; the `Mercury` homonym vetoed via `not_same_as` (0.99); featureless pair abstained; `--json`
+  reported `"model":"sonnet"`. Because the justification is variance-reduction rather than a deterministic-bug
+  fix, the higher default cost (sonnet vs haiku) is an owner-visible trade-off — see the run's owner review.
+  See **[[D-63]]** (closed by this resolver) and the §5.3 accelerator boundary (the model verdict is a search
+  signal; only the resulting quarantined signed fact touches proj, independent of which tier produced it).

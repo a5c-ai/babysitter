@@ -22,6 +22,8 @@ import {
   DEFAULT_RESOLVE_MIN_CONFIDENCE,
   DEFAULT_RESOLVE_TOP_K,
   KIP_SAME_AS_CANDIDATE_KIND,
+  RESOLVER_MODEL_ENV,
+  resolverEffectiveModel,
   NOT_SAME_AS_EDGE_KIND,
   generateResolverCandidatePairs,
   makeResolverDispatch,
@@ -81,7 +83,6 @@ import {
   buildHarnessEnv,
   defaultDispatchMicroagent,
   probeHarnessCli,
-  resolveHarnessModel,
   resolveQaManifest,
   runAsk,
   spawnHarnessCli,
@@ -936,11 +937,18 @@ function parseResolverVerdict(run: HarnessCliRun): ResolverVerdict | null {
   };
 }
 
-/** Spawn the authenticated `claude` CLI ONCE for a pair (ADR-B12c envelope), returning a verdict or null. */
+/**
+ * Spawn the authenticated `claude` CLI ONCE for a pair (ADR-B12c envelope), returning a verdict or null.
+ *
+ * `model` is the ALREADY-RESOLVED effective tier (`resolverEffectiveModel`, ADR-B12d / D-69) — a concrete
+ * id, never the sentinel and never undefined — so it is passed to `--model` verbatim. It is NOT routed
+ * through the global `resolveHarnessModel` (which would default an unset tier to `haiku`, the tier D-69
+ * showed under-fires on `--json-schema`).
+ */
 async function spawnResolverVerdict(
   a: ResolverNodeCtx,
   b: ResolverNodeCtx,
-  model: string | undefined,
+  model: string,
 ): Promise<ResolverVerdict | null> {
   let run: HarnessCliRun;
   try {
@@ -951,7 +959,7 @@ async function spawnResolverVerdict(
         "--output-format",
         "json",
         "--model",
-        resolveHarnessModel(model),
+        model,
         "--json-schema",
         JSON.stringify(RESOLVER_VERDICT_JSON_SCHEMA),
         "--disallowedTools",
@@ -1027,7 +1035,10 @@ async function cmdResolve(a: HandlerArgs): Promise<number> {
   const include = flagList(flags, "include");
   const exclude = flagList(flags, "exclude");
   const dryRun = flagBool(flags, "dry-run");
-  const model = flagStr(flags, "model");
+  // ADR-B12d / D-69: strict precedence — an explicit `--model` wins; else the `KIP_RESOLVE_MODEL`
+  // deployment default; else the structured-output-reliable built-in (`sonnet`), NEVER the global
+  // `haiku`. Reported in `--json` (`model`) below so whichever tier wins is never a silent substitution.
+  const effectiveModel = resolverEffectiveModel(flagStr(flags, "model"), a.ctx.env[RESOLVER_MODEL_ENV]);
 
   // The live gate is checked BEFORE opening the repo or spawning anything (distinct exit 7). `--dry-run`
   // computes candidate pairs deterministically and spends nothing, so it does NOT require the gate.
@@ -1058,9 +1069,9 @@ async function cmdResolve(a: HandlerArgs): Promise<number> {
 
   if (dryRun) {
     const examples = pairs.slice(0, 5).map((p) => `${p.a} =?= ${p.b}`);
-    if (json) emitJson(write, { facts: [], pairs: pairs.length, examples, dryRun: true });
+    if (json) emitJson(write, { facts: [], pairs: pairs.length, examples, dryRun: true, model: effectiveModel });
     else {
-      write(`would adjudicate ${pairs.length} candidate pair(s)\n`);
+      write(`would adjudicate ${pairs.length} candidate pair(s) with model ${effectiveModel}\n`);
       for (const ex of examples) write(`  ${ex}\n`);
     }
     return 0;
@@ -1085,7 +1096,7 @@ async function cmdResolve(a: HandlerArgs): Promise<number> {
     // eslint-disable-next-line no-await-in-loop -- one bounded, opt-in model call per candidate pair.
     const [ca, cb] = await Promise.all([hydrate(pair.a), hydrate(pair.b)]);
     // eslint-disable-next-line no-await-in-loop -- sequential spend control (hard-bounded pair set).
-    const verdict = await spawnResolverVerdict(ca, cb, model);
+    const verdict = await spawnResolverVerdict(ca, cb, effectiveModel);
     verdicts.set(resolverPairKey(pair.a, pair.b), verdict);
   }
 
@@ -1105,9 +1116,9 @@ async function cmdResolve(a: HandlerArgs): Promise<number> {
     else if (entry.target.edgeKind === NOT_SAME_AS_EDGE_KIND) notSameCount += 1;
   }
   const abstained = pairs.length - sameCount - notSameCount;
-  if (json) emitJson(write, { facts, pairs: pairs.length, candidates: sameCount, vetoes: notSameCount, abstained });
+  if (json) emitJson(write, { facts, pairs: pairs.length, candidates: sameCount, vetoes: notSameCount, abstained, model: effectiveModel });
   else {
-    write(`resolved ${pairs.length} pair(s): ${sameCount} candidate(s), ${notSameCount} veto(es), ${abstained} abstained\n`);
+    write(`resolved ${pairs.length} pair(s) with model ${effectiveModel}: ${sameCount} candidate(s), ${notSameCount} veto(es), ${abstained} abstained\n`);
   }
   return 0;
 }

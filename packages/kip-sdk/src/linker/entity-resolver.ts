@@ -76,6 +76,49 @@ export const DEFAULT_RESOLVE_TOP_K = 8;
 /** ADR-B12b: hard cap on TOTAL candidate pairs handed to the model (`--max-pairs`). */
 export const DEFAULT_RESOLVE_MAX_PAIRS = 500;
 
+/**
+ * ADR-B12d / D-69: the default harness model for `kip resolve`'s per-pair adjudication, used ONLY when
+ * the operator passes no `--model`.
+ *
+ * Unlike the GLOBAL graph-QA default (`haiku`, `cli/ask.ts` `DEFAULT_HARNESS_MODEL`), the resolver needs
+ * a tier that RELIABLY honours `claude --json-schema`. The Layer-2 live demo (DEBTS **D-69**) showed
+ * `haiku` returns correct reasoning as free-form PROSE rather than the strict verdict object, so
+ * `parseResolverVerdict` (correctly, N5) ABSTAINS and a true `same` never becomes a quarantined
+ * `kip:same_as?` candidate — the resolver's `same`→quarantine RECALL silently under-fires. A
+ * structured-output-reliable tier emits schema-conforming JSON, so recall no longer depends on the
+ * operator remembering `--model`.
+ *
+ * This moves ONLY the resolver's default: `--model` still overrides it verbatim, the global `ask`
+ * default is untouched (kip ask/learn/miner keep their tier/cost), and N5 is unaffected — a malformed
+ * verdict on ANY tier still ABSTAINS (never coerced into a link). The effective tier is REPORTED in
+ * `kip resolve --json` (`model`), never a silent substitution.
+ */
+export const RESOLVER_DEFAULT_MODEL = "sonnet";
+
+/** The env var a deployment sets to pick `kip resolve`'s adjudication tier without passing `--model` on
+ *  every call (ADR-B12d). Lower precedence than an explicit `--model`, higher than the built-in default. */
+export const RESOLVER_MODEL_ENV = "KIP_RESOLVE_MODEL";
+
+/**
+ * The effective harness model for a `kip resolve` run (ADR-B12d / D-69), resolved by a strict precedence:
+ *
+ *   1. an explicit `--model` override (`model`, trimmed, non-empty) — operator intent, per-call, WINS;
+ *   2. else the deployment default from `KIP_RESOLVE_MODEL` (`envModel`, trimmed, non-empty);
+ *   3. else the structured-output-reliable built-in default ({@link RESOLVER_DEFAULT_MODEL}).
+ *
+ * It NEVER routes through the global `haiku` default. This is standard config precedence (explicit flag >
+ * env > built-in default), NOT an error-masking fallback: every branch is a deliberate configured value,
+ * and whichever wins is reported verbatim in `kip resolve --json` (`model`) so the tier is never silently
+ * substituted. Pure and total.
+ */
+export function resolverEffectiveModel(model: string | undefined, envModel?: string | undefined): string {
+  const flag = model?.trim();
+  if (flag !== undefined && flag.length > 0) return flag;
+  const env = envModel?.trim();
+  if (env !== undefined && env.length > 0) return env;
+  return RESOLVER_DEFAULT_MODEL;
+}
+
 // --- the adjudication verdict schema (ADR-B12c, the strict minimal schema) ------------------------
 
 /** The model's per-pair decision. `same`/`not-same` are the only authoring directions; everything
