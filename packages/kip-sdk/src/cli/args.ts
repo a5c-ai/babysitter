@@ -27,6 +27,9 @@ const BOOLEAN_FLAGS = new Set([
   "heads-committed",
   // `kip link` (ADR-B11): compute + print the would-be links without authoring any fact.
   "dry-run",
+  // `kip resolve confirm/reject` (ADR-B12): operator override that skips the outstanding-candidate
+  // guard (off by default; authors a real same_as/not_same_as without a quarantine lifecycle).
+  "force",
 ]);
 
 /** Value flags that may appear MORE THAN ONCE, accumulated into an array (spec §4: `--root-key`,
