@@ -46,6 +46,7 @@ import type {
   Repo,
   RetractInput,
 } from "../index";
+import { KipError } from "../index";
 import { linkResolver, type NodeInventory } from "./entity-linker";
 
 // --- edge-kind constants (ADR-B12a: the quarantine seam is a dedicated edge KIND) ----------------
@@ -217,7 +218,10 @@ function verdictEntries(
   if (!isWellFormedVerdict(verdict)) return []; // failed/malformed/off-schema ⇒ ABSTAIN (N5).
   if (verdict.decision === "uncertain") return []; // an honest "cannot tell" ⇒ ABSTAIN (N5).
   const confidence = verdict.confidence;
-  if (!isFiniteNumber(confidence) || confidence < minConfidence) return []; // sub-threshold ⇒ ABSTAIN.
+  // A calibrated probability is in [0,1] (ADR-B12c prompt). An out-of-range value (1.5, 999, a negative)
+  // is malformed, not "very confident": REJECT it (ABSTAIN), never clamp — the same rule the sibling
+  // learn-loss scorer applies. The bar is `confidence >= minConfidence && confidence ∈ [0,1]`.
+  if (!isFiniteNumber(confidence) || confidence < minConfidence || confidence < 0 || confidence > 1) return [];
 
   const isSame = verdict.decision === "same";
   const eid = isSame ? sameAsCandidateEid(pair.a, pair.b) : notSameAsEid(pair.a, pair.b);
@@ -391,20 +395,67 @@ function operatorProvenance(): Provenance {
   return { author: RESOLVER_AUTHOR, signature: "", publicKeyFingerprint: "", signedFields: [], source: { uri: "resolver://kip-resolver" } };
 }
 
+/** True iff an outstanding `kip:same_as?` candidate edge exists between the pair (EITHER orientation —
+ *  the content-derived eid is order-sensitive, but an operator may name the pair in either order). */
+async function hasOutstandingCandidate(repo: Repo, from: EID, to: EID, asOf?: AsOf): Promise<boolean> {
+  if ((await repo.edgeExistenceFactId(sameAsCandidateEid(from, to), asOf)) !== null) return true;
+  if ((await repo.edgeExistenceFactId(sameAsCandidateEid(to, from), asOf)) !== null) return true;
+  return false;
+}
+
+/** Retract the outstanding `kip:same_as?` candidate for the pair (whichever orientation is durable),
+ *  pushing each authored retract `FactId`. Idempotent: retracts ONLY an orientation that exists. */
+async function retractOutstandingCandidate(repo: Repo, from: EID, to: EID, facts: FactId[], asOf?: AsOf): Promise<void> {
+  for (const [f, t] of [[from, to], [to, from]] as Array<[EID, EID]>) {
+    const candEid = sameAsCandidateEid(f, t);
+    // eslint-disable-next-line no-await-in-loop -- at most two bounded existence reads per confirm/reject.
+    if ((await repo.edgeExistenceFactId(candEid, asOf)) === null) continue;
+    // eslint-disable-next-line no-await-in-loop -- sequential HLC/seq advance per authored retract.
+    const retracted = await repo.retractFact({
+      type: "retract",
+      v: 1,
+      target: { kind: "edge", eid: candEid, edgeKind: KIP_SAME_AS_CANDIDATE_KIND, from: f, to: t },
+      validFrom: 0,
+      validTo: null,
+      replicaId: RESOLVER_REPLICA,
+      provenance: operatorProvenance(),
+    });
+    facts.push(retracted.id);
+  }
+}
+
 /**
  * `kip resolve confirm <from> <to>` — promotes an outstanding `kip:same_as?` candidate to a REAL,
  * trust-merging `same_as(from,to)` (proj's union-find now folds the class, so the nodes MERGE) and
- * retracts the quarantined candidate edge. Deterministic — NO model, NO live gate. Reversibility is at
- * the FACT level: retracting the authored `same_as` removes the merge fact. Returns the authored
- * `FactId`s.
+ * retracts the quarantined candidate edge. Deterministic — NO model, NO live gate.
+ *
+ * VALIDATION (ADR-B12 quarantine-then-promote): a merge is authored ONLY to promote an OUTSTANDING
+ * candidate the resolver generated. With no outstanding `kip:same_as?` candidate between the pair (either
+ * orientation), this fails LOUDLY and authors nothing (N5 — never a merge no candidate lifecycle
+ * produced), unless the operator passes an explicit `--force` override (off by default).
+ *
+ * REVERSIBILITY (honest, ADR-B12a): reversibility is at the FACT level only — retracting the authored
+ * `same_as` removes the merge FACT (its existence factId goes null). It does NOT auto-UN-MERGE the read:
+ * proj's union-find folds every signature-admitted `same_as` and ignores retraction bookkeeping when
+ * re-projecting the class, so read-level un-merge after a confirm would need a proj change and is a
+ * DOCUMENTED follow-on (DEBTS D-68). Returns the authored `FactId`s.
  */
 export async function resolveConfirm(
   repo: Repo,
   _manifest: MicroagentManifest,
   from: EID,
   to: EID,
-  _opts?: { asOf?: AsOf },
+  opts?: { asOf?: AsOf; force?: boolean },
 ): Promise<{ facts: FactId[] }> {
+  const asOf = opts?.asOf;
+  if (!opts?.force && !(await hasOutstandingCandidate(repo, from, to, asOf))) {
+    throw new KipError(
+      "ERR_MALFORMED_INPUT",
+      `kip resolve confirm: no outstanding kip:same_as? candidate between "${from}" and "${to}" — nothing to ` +
+        "promote. confirm promotes a candidate the resolver generated: run `kip resolve` first, or pass --force to override.",
+      { from, to },
+    );
+  }
   const facts: FactId[] = [];
   const merge = await repo.assertFact({
     type: "assert",
@@ -417,36 +468,47 @@ export async function resolveConfirm(
     provenance: operatorProvenance(),
   });
   facts.push(merge.id);
-  // Retract the outstanding candidate (idempotent: only when one is durable).
-  const candEid = sameAsCandidateEid(from, to);
-  if ((await repo.edgeExistenceFactId(candEid)) !== null) {
-    const retracted = await repo.retractFact({
-      type: "retract",
-      v: 1,
-      target: { kind: "edge", eid: candEid, edgeKind: KIP_SAME_AS_CANDIDATE_KIND, from, to },
-      validFrom: 0,
-      validTo: null,
-      replicaId: RESOLVER_REPLICA,
-      provenance: operatorProvenance(),
-    });
-    facts.push(retracted.id);
-  }
+  await retractOutstandingCandidate(repo, from, to, facts, asOf);
   return { facts };
 }
 
 /**
  * `kip resolve reject <from> <to>` — authors a signed `not_same_as(from,to)` (vetoing a Layer-1
  * `same_as`, so `getNode(from)`/`getNode(to)` surface `kip:conflict` instead of silently merging, D-63)
- * and retracts the outstanding `kip:same_as?` candidate. Deterministic — NO model, NO live gate. Both
- * facts are reversible at the write-channel level (retract). Returns the authored `FactId`s.
+ * and retracts the outstanding `kip:same_as?` candidate. Deterministic — NO model, NO live gate.
+ *
+ * VALIDATION (ADR-B12): a veto is authored ONLY when there is something to veto — an OUTSTANDING
+ * `kip:same_as?` candidate OR an existing `same_as` merge between the pair. With neither, this fails
+ * LOUDLY and authors nothing (N5), unless the operator passes an explicit `--force` override (off by
+ * default).
+ *
+ * REVERSIBILITY (honest, ADR-B12a): reversibility is at the FACT level only — retracting the signed
+ * `not_same_as` removes the veto FACT (its existence factId goes null). It does NOT auto-RE-MERGE the
+ * disputed pair: proj's dispute loop counts raw `not_same_as` asserts and does not consult retraction
+ * bookkeeping, so `getNode(from)`/`getNode(to)` can remain `kip:conflict` after a retract. Read-level
+ * re-merge after a veto would need a proj change and is a DOCUMENTED follow-on (DEBTS D-68). Returns the
+ * authored `FactId`s.
  */
 export async function resolveReject(
   repo: Repo,
   _manifest: MicroagentManifest,
   from: EID,
   to: EID,
-  _opts?: { asOf?: AsOf },
+  opts?: { asOf?: AsOf; force?: boolean },
 ): Promise<{ facts: FactId[] }> {
+  const asOf = opts?.asOf;
+  if (!opts?.force) {
+    const cls = await repo.sameAsClass(from);
+    const hasMerge = from !== to && cls.includes(to);
+    if (!hasMerge && !(await hasOutstandingCandidate(repo, from, to, asOf))) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `kip resolve reject: nothing to veto between "${from}" and "${to}" — no outstanding kip:same_as? ` +
+          "candidate and no same_as merge. reject vetoes a candidate or an existing merge; pass --force to override.",
+        { from, to },
+      );
+    }
+  }
   const facts: FactId[] = [];
   const nsEid = notSameAsEid(from, to);
   const veto = await repo.assertFact({
@@ -460,19 +522,7 @@ export async function resolveReject(
     provenance: operatorProvenance(),
   });
   facts.push(veto.id);
-  const candEid = sameAsCandidateEid(from, to);
-  if ((await repo.edgeExistenceFactId(candEid)) !== null) {
-    const retracted = await repo.retractFact({
-      type: "retract",
-      v: 1,
-      target: { kind: "edge", eid: candEid, edgeKind: KIP_SAME_AS_CANDIDATE_KIND, from, to },
-      validFrom: 0,
-      validTo: null,
-      replicaId: RESOLVER_REPLICA,
-      provenance: operatorProvenance(),
-    });
-    facts.push(retracted.id);
-  }
+  await retractOutstandingCandidate(repo, from, to, facts, asOf);
   return { facts };
 }
 

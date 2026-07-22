@@ -1355,7 +1355,9 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 ### D-63: cross-document `same_as` can still false-merge a genuine homonym — deferred to the model-assisted Layer 2
 
 - **Category:** Implementation / entity-resolution precision (honestly disclosed; deliberate Layer-1/Layer-2 boundary)
-- **Severity:** Minor (safe — narrow, reversible via `not_same_as`/retract; never renames or merges an eid)
+- **Severity:** Minor (safe — narrow, reversible AT THE FACT LEVEL via `not_same_as`/retract; never renames or
+  merges an eid). NB: fact-level, not read-level — a retract removes the signed fact but does not itself
+  auto-re-project the merge state (see **[[D-68]]**).
 - **Surfaced:** `entity-linker` — the deterministic `same_as` rule pairs two concepts in different documents
   that share a distinctive (strong) name; a genuine homonym (two distinct entities sharing that name) can be
   falsely paired.
@@ -1371,8 +1373,9 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   identity.
 - **Why it is debt:** A `same_as` pair asserts "these two concept nodes denote the same thing"; on a genuine
   homonym that assertion is wrong. The residual is **narrow** (only distinctive-name collisions across
-  documents), **safe** (nothing is merged — `same_as` is an asserted edge, so a mistaken pair is undone by
-  asserting `not_same_as` or retracting the edge, never by un-merging an identity), and it is the **deliberate
+  documents), **safe** (nothing is merged — `same_as` is an asserted edge, so a mistaken pair is undone AT THE
+  FACT LEVEL by asserting `not_same_as` or retracting the edge, never by un-merging an identity; read-level
+  re-projection of the merge state after such a retract is the follow-on **[[D-68]]**), and it is the **deliberate
   boundary** between deterministic Layer 1 and the model-assisted Layer 2: disambiguating a genuine homonym
   needs context the name alone does not carry.
 - **Suggested fix:** Resolve genuine homonyms in the **model-assisted Layer 2 fuzzy resolver** (context-aware
@@ -1501,3 +1504,35 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   machinery, so external linked-data graphs can join kip's memory.
 - **Status:** Open (tracked). Designed to reuse the `sameAs` channel (IRIs as global eids); no RDF/linked-data
   ingestion path is built.
+
+### D-68: a Layer-2 retract does not re-project the merge state — read-level reversibility (re-merge after a veto, un-merge after a confirm) needs a proj change
+
+- **Category:** Implementation / entity-resolution reversibility (honestly disclosed; the Layer-2 quarantine
+  seam is reversible at the FACT level but NOT yet at the READ level)
+- **Severity:** Minor (safe — the retract IS honoured as a fact; the residual is that the projected merge
+  state is not auto-recomputed, so a read can lag the operator's latest fact)
+- **Surfaced:** `entity-resolver` — `kip resolve confirm`/`reject` and the veto/candidate retract path
+  (`packages/kip-sdk/src/linker/entity-resolver.ts`), and the ADR-B12a/B12c reversibility claims.
+- **Location:** proj's identity-merge union-find and `not_same_as`/`kip:conflict` dispute loop
+  (`packages/kip-sdk/src/proj.ts` — the `same_as` union-find and the `disputedEids` computation) as read by
+  `getNode`/`sameAsClass`; consumed by the resolver's confirm/reject/retract facts.
+- **Evidence:** Retracting a signed `not_same_as(a,b)` sets its `edgeExistenceFactId` to null (the FACT is
+  gone), yet `getNode(a)`/`getNode(b)` can still surface `kip:conflict`: proj's dispute loop keys on raw
+  `not_same_as` asserts and does not consult the retraction bookkeeping when re-projecting the dispute.
+  Symmetrically, retracting a confirmed `same_as(a,b)` removes the merge FACT but does not auto-un-merge:
+  proj's union-find folds every signature-admitted `same_as` and never reads retraction state. So the write
+  channel is fully reversible (fact-level), but the projected READ (merge / conflict) is not auto-recomputed
+  from the retraction.
+- **Why it is debt:** ADR-B12a/B12c describe the Layer-2 links as reversible; that claim is TRUE at the fact
+  level (a retract removes the signed fact) but was over-broad if read as read-level. This debt records the
+  precise boundary honestly: fact-level reversibility ships now; read-level re-merge (after a veto retract)
+  and un-merge (after a confirm retract) are deliberately NOT built, because they require proj to re-project
+  the union-find / dispute state from the retraction — a proj change held out of the M8-quarantine milestone
+  (proj is unchanged by design this round).
+- **Suggested fix:** Teach proj's `same_as` union-find and `not_same_as` dispute computation to honour the
+  live existence of the edge (fold/dispute only on edges whose `edgeExistenceFactId` is non-null at the lens),
+  so a retracted `same_as` auto-un-merges and a retracted `not_same_as` auto-clears the `kip:conflict`. Until
+  then, read-level re-merge/un-merge after a Layer-2 retract is a documented follow-on, and reversibility is
+  correctly described as fact-level only.
+- **Status:** Open (tracked). Layer-2 links are reversible at the fact level; read-level re-projection of the
+  merge/dispute state after a retract needs a proj change and is deferred.

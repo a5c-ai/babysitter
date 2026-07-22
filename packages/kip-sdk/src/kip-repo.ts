@@ -4921,12 +4921,24 @@ export class KipRepo implements Repo {
     // cell", the SAME idempotence Layer-1's `documentsEdge` intends). Computed BEFORE the txn opens
     // (pre-batch durable state, `currentFacts`). Edge-PROP entries for the same edge still author
     // normally (audit props re-fold LWW). Scoped to edges — nodes are unaffected.
-    const preexistingEdgeExistence = new Map<EID, FactId>();
+    // Keyed on the FULL edge envelope (eid + edgeKind + validity window), NOT the eid alone: a re-proposal
+    // folds idempotently ONLY when it re-asserts the IDENTICAL edge. A genuinely different re-assert on the
+    // same content-derived eid (a changed `edgeKind`, or a changed `validFrom`/`validTo`) must NOT be masked
+    // — masking it would silently drop a miner/linker's changed-validity re-assert.
+    const preexistingEdge = new Map<
+      EID,
+      { factId: FactId; kind: EdgeKind; validFrom: HlcOrTime; validTo: HlcOrTime | null }
+    >();
     for (const entry of acq.proposed) {
-      if (entry.type === "assert" && entry.target.kind === "edge" && !preexistingEdgeExistence.has(entry.target.eid)) {
+      if (entry.type === "assert" && entry.target.kind === "edge" && !preexistingEdge.has(entry.target.eid)) {
         // eslint-disable-next-line no-await-in-loop -- bounded per explicit-edge entry, pre-batch read.
-        const existing = await this.edgeExistenceFactId(entry.target.eid);
-        if (existing !== null) preexistingEdgeExistence.set(entry.target.eid, existing);
+        const existingId = await this.edgeExistenceFactId(entry.target.eid);
+        if (existingId === null) continue;
+        // eslint-disable-next-line no-await-in-loop -- bounded per explicit-edge entry, pre-batch read.
+        const view = await this.getEdge(entry.target.eid);
+        if (view !== null) {
+          preexistingEdge.set(entry.target.eid, { factId: existingId, kind: view.kind, validFrom: view.validFrom, validTo: view.validTo });
+        }
       }
     }
 
@@ -4943,9 +4955,15 @@ export class KipRepo implements Repo {
         // Idempotent edge existence (see above): a re-proposed already-durable edge existence authors
         // nothing new and returns its existing winner id — keeping the returned count 1:1 with proposed
         // while leaving the original existence fact (and its FactId) the stable winner.
-        if (entry.type === "assert" && entry.target.kind === "edge" && preexistingEdgeExistence.has(entry.target.eid)) {
-          ids.push(preexistingEdgeExistence.get(entry.target.eid)!);
-          continue;
+        if (entry.type === "assert" && entry.target.kind === "edge") {
+          const pre = preexistingEdge.get(entry.target.eid);
+          const sameValidTo =
+            pre !== undefined &&
+            (pre.validTo === null ? entry.validTo === null : entry.validTo !== null && canon(pre.validTo) === canon(entry.validTo));
+          if (pre !== undefined && pre.kind === entry.target.edgeKind && canon(pre.validFrom) === canon(entry.validFrom) && sameValidTo) {
+            ids.push(pre.factId);
+            continue;
+          }
         }
         // Companion existence for a node-prop/edge-prop target (proj m2-2) — authored with the SAME
         // acquisition source provenance, but NOT counted in the returned FactId[] (docs/33: one

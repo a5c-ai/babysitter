@@ -21,8 +21,11 @@ import {
   DEFAULT_RESOLVE_MAX_PAIRS,
   DEFAULT_RESOLVE_MIN_CONFIDENCE,
   DEFAULT_RESOLVE_TOP_K,
+  KIP_SAME_AS_CANDIDATE_KIND,
+  NOT_SAME_AS_EDGE_KIND,
   generateResolverCandidatePairs,
   makeResolverDispatch,
+  resolveCandidates,
   resolveConfirm,
   resolveList,
   resolveReject,
@@ -864,7 +867,7 @@ const RESOLVER_VERDICT_JSON_SCHEMA = {
   properties: {
     decision: { type: "string", enum: ["same", "not-same", "uncertain"] },
     linkKind: { type: "string" },
-    confidence: { type: "number" },
+    confidence: { type: "number", minimum: 0, maximum: 1 },
     rationale: { type: "string" },
   },
 } as const;
@@ -920,7 +923,10 @@ function parseResolverVerdict(run: HarnessCliRun): ResolverVerdict | null {
   const p = payload as Record<string, unknown>;
   if (p.decision !== "same" && p.decision !== "not-same" && p.decision !== "uncertain") return null;
   if (typeof p.rationale !== "string") return null;
-  if (p.confidence !== undefined && typeof p.confidence !== "number") return null;
+  // A confidence must be a calibrated probability in [0,1] (matches the `--json-schema` minimum/maximum).
+  // A non-number, or an out-of-range value (1.5, 999, negative, NaN/Infinity), is malformed ⇒ ABSTAIN —
+  // rejected, never clamped, so the downstream N5 bar never sees a fabricated-looking "very confident".
+  if (p.confidence !== undefined && (typeof p.confidence !== "number" || !Number.isFinite(p.confidence) || p.confidence < 0 || p.confidence > 1)) return null;
   if (p.linkKind !== undefined && typeof p.linkKind !== "string") return null;
   return {
     decision: p.decision,
@@ -989,10 +995,13 @@ async function cmdResolve(a: HandlerArgs): Promise<number> {
     const resolved = await resolveRepo(a.ctx, a.openRepo, { requireInitialized: true, requireKeyring: true });
     const manifest = resolveResolverManifest();
     await resolved.repo.registerFunctionality(`kip-resolver:${manifest.name}`, manifest);
+    // `--force` (off by default) overrides the outstanding-candidate validation: without it, confirm/reject
+    // fail loudly (exit 1) when no candidate/merge lifecycle exists to act on (ADR-B12 quarantine-then-promote).
+    const force = flagBool(flags, "force");
     const res =
       sub === "confirm"
-        ? await resolveConfirm(resolved.repo, manifest, from, to, {})
-        : await resolveReject(resolved.repo, manifest, from, to, {});
+        ? await resolveConfirm(resolved.repo, manifest, from, to, { force })
+        : await resolveReject(resolved.repo, manifest, from, to, { force });
     if (json) emitJson(write, { action: sub, from, to, facts: res.facts });
     else write(`${sub}: ${from} <-> ${to} — ${res.facts.length} fact(s)\n`);
     return 0;
@@ -1082,16 +1091,20 @@ async function cmdResolve(a: HandlerArgs): Promise<number> {
 
   const { facts } = await repo.runAcquisition(manifest, { pairs, minConfidence }, {});
 
-  // Report counts by bucket (a confident same/not-same authored; everything else abstained, N5).
+  // Report counts from the ACTUAL authored AcquisitionResult — the SAME pure verdict→edge mapping
+  // (`resolveCandidates`/`verdictEntries`) `runAcquisition` just committed — NOT an independently
+  // re-derived predicate. A predicate that only checks `typeof confidence === "number" && >= min` would
+  // COUNT a non-finite / out-of-range confidence (NaN, Infinity, 1.5) as authored while `verdictEntries`
+  // abstained and committed nothing; deriving from the real proposed set keeps the printed counts honest.
+  const authored = resolveCandidates(pairs, adjudicator, { minConfidence });
   let sameCount = 0;
   let notSameCount = 0;
-  let abstained = 0;
-  for (const pair of pairs) {
-    const v = verdicts.get(resolverPairKey(pair.a, pair.b));
-    if (v && typeof v.confidence === "number" && v.confidence >= minConfidence && v.decision === "same") sameCount += 1;
-    else if (v && typeof v.confidence === "number" && v.confidence >= minConfidence && v.decision === "not-same") notSameCount += 1;
-    else abstained += 1;
+  for (const entry of authored.proposed) {
+    if (entry.type !== "assert" || entry.target.kind !== "edge") continue;
+    if (entry.target.edgeKind === KIP_SAME_AS_CANDIDATE_KIND) sameCount += 1;
+    else if (entry.target.edgeKind === NOT_SAME_AS_EDGE_KIND) notSameCount += 1;
   }
+  const abstained = pairs.length - sameCount - notSameCount;
   if (json) emitJson(write, { facts, pairs: pairs.length, candidates: sameCount, vetoes: notSameCount, abstained });
   else {
     write(`resolved ${pairs.length} pair(s): ${sameCount} candidate(s), ${notSameCount} veto(es), ${abstained} abstained\n`);
