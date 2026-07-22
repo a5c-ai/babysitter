@@ -1382,8 +1382,16 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   entity resolution over the props/neighbourhood of the two candidates), keeping the deterministic Layer-1 rule
   as the high-precision floor. Until then, a mistaken cross-document `same_as` is corrected by `not_same_as` /
   retract.
-- **Status:** Open (tracked). Deterministic name-only `same_as` is high-precision but can false-merge a genuine
-  homonym; disambiguation is deliberately deferred to Layer 2.
+- **Status:** RESOLVED by the model-assisted Layer 2 resolver (ADR-B12, `kip resolve`). The live demo
+  (`KIP_RESOLVE_LIVE=1`) constructed a genuine homonym — `Mercury` the planet vs `Mercury` the element (same
+  distinctive name, disjoint surrounding facts) — and the real `claude` model adjudicated **not-same (0.99)**,
+  authoring a signed `not_same_as` veto; both nodes stayed distinct (`getNode` unchanged). Layer 1's exact-name
+  rule *would* have merged them; Layer 2 vetoed the merge. Complementarily, a real semantic match Layer 1 misses
+  (`Orchid` ≡ "the checkout service", no name overlap) was adjudicated **same (0.88)** and authored as a
+  **quarantined `kip:same_as?` candidate** that did NOT win a trusted read until `kip resolve confirm` promoted
+  it. The deterministic Layer-1 rule remains the high-precision floor; Layer 2 supplies the context-aware
+  disambiguation this debt asked for. See **[[D-69]]** for the model-tier caveat surfaced by the same demo, and
+  **[[D-68]]** for the still-open read-level re-projection follow-on.
 
 ### D-64: `--include` / `--exclude` are declared for `kip link` (ADR) but not wired
 
@@ -1536,3 +1544,40 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   correctly described as fact-level only.
 - **Status:** Open (tracked). Layer-2 links are reversible at the fact level; read-level re-projection of the
   merge/dispute state after a retract needs a proj change and is deferred.
+
+### D-69: the Layer-2 resolver's `same`→quarantine recall is model-tier-dependent — the shipped-default `haiku` does not reliably honour `--json-schema`, so it under-fires on true matches (fails SAFE)
+
+- **Category:** Implementation / model-adjudication robustness (honestly disclosed by the live demo; a recall
+  ceiling, not a correctness defect — it never fabricates and never leaks)
+- **Severity:** Minor (safe — N5 abstains on any non-conforming verdict, so the failure mode is a MISSED
+  quarantined candidate, never a fabricated link and never a false merge)
+- **Surfaced:** `entity-resolver` live demo (`KIP_RESOLVE_LIVE=1`). With the shipped-default harness model
+  (`haiku`, `packages/kip-sdk/src/cli/ask.ts` default), `claude --json-schema` was NOT reliably honoured: on the
+  real semantic-match pair (`Orchid` ≡ "the checkout service") haiku reasoned correctly ("same, 88%") but
+  returned it as **markdown prose** instead of the schema's JSON object. The N5-strict `parseResolverVerdict`
+  then (correctly, safely) **abstained**, so the legitimate `kip:same_as?` candidate was **not authored on the
+  haiku run**. The confident `not_same_as` veto pair *did* return conforming JSON on haiku. The full
+  quarantine→confirm→reject lifecycle was therefore exercised via `--model sonnet`, which emitted
+  schema-conforming JSON on every pair.
+- **Location:** `packages/kip-sdk/src/cli/ask.ts` (default harness model `haiku`) as consumed by the resolver's
+  live dispatch in `packages/kip-sdk/src/linker/entity-resolver.ts` / `src/cli/index.ts` (`cmdResolve`); the
+  N5 parser `parseResolverVerdict`.
+- **Evidence:** Live-demo output JSON — homonym pair adjudicated not-same/0.99 (conforming, veto authored);
+  semantic pair on haiku returned prose → abstained (candidate NOT authored); same pair on sonnet returned
+  `{decision:"same",confidence:0.88}` → quarantined `kip:same_as?` authored; abstain pair uncertain/0.35 →
+  nothing authored. No quarantined candidate ever leaked into a trusted read; no merge was ever fabricated.
+- **Why it is debt:** The resolver's *safety* invariants (never fabricate, never leak a quarantined candidate
+  into a trusted read, never identity-merge) hold on every model tier — but its *recall* (how many true matches
+  become quarantined `kip:same_as?` candidates) depends on the model reliably emitting schema-conforming JSON.
+  The shipped default (`haiku`) under-fires. This is disclosed rather than hidden: the demo showed the honest
+  negative and then completed the lifecycle on a tier that conforms.
+- **Suggested fix:** Either (a) default `kip resolve` to a structured-output-reliable tier (e.g. `sonnet`) while
+  leaving `--model` as the override, accepting the higher per-pair cost for adjudication; or (b) harden the
+  verdict extraction to salvage a fenced/embedded JSON object from an otherwise-prose response BEFORE the N5
+  abstain (still range-checking confidence ∈ [0,1] and still abstaining on genuinely absent structure); or (c)
+  document `--model sonnet` as the recommended tier for `kip resolve` and note that weaker tiers fail safe by
+  under-firing. Fix must preserve N5 (abstain on any genuinely malformed/absent verdict; never fabricate).
+- **Status:** Open (tracked). Resolver safety is model-independent; `same`→quarantine recall is model-tier
+  dependent and the shipped default under-fires (fails safe). See **[[D-63]]** (closed by this resolver) and the
+  §5.3 accelerator boundary (the model verdict is a search signal; only the resulting quarantined signed fact
+  touches proj).
