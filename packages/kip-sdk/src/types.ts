@@ -1210,6 +1210,15 @@ export interface Repo {
    */
   nodeEids(opts?: { prefixes?: string[] }): Promise<EID[]>;
   /**
+   * READ-ONLY (INV-A1, ADR-B12b): the sorted `EID`s of every currently-existing edge the admitted set
+   * names, optionally restricted to `opts.kinds` (an edge whose `edgeKind` is in the list). The edge
+   * analogue of `nodeEids` — the enumeration seam the model-assisted Layer-2 resolver (`kip resolve`)
+   * uses to see the already-decided `same_as`/`not_same_as`/`kip:same_as?` pairs (to exclude them from
+   * re-adjudication) and to list outstanding candidates. Live-gated on edge existence at `opts.asOf`
+   * (retracted edges drop); a pure read over `proj`, authors nothing.
+   */
+  edgeEids(opts?: { kinds?: EdgeKind[]; asOf?: AsOf }): Promise<EID[]>;
+  /**
    * READ-ONLY (INV-A1, ADR-B11c/D-66): the sorted `same_as` equivalence class of `eid` — every EID proj
    * folds into `eid`'s union-find class — or `[eid]` when `eid` has no `same_as` edge. Derived from proj's
    * ALREADY-computed class members (no second closure), so it cannot diverge from the canonical-EID

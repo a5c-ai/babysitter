@@ -88,6 +88,11 @@ const VALUE_FLAGS = new Set([
   "max-wall-ms",
   "max-invocations",
   "raw-kind",
+  // `kip resolve` (ADR-B12): the model-assisted Layer-2 entity resolver's bounded-candidate + N5
+  // adjudication knobs — per-node recall fan-out, the total pair cap, and the confidence bar.
+  "top-k",
+  "max-pairs",
+  "min-confidence",
 ]);
 
 /** Short aliases → canonical long flag name. */

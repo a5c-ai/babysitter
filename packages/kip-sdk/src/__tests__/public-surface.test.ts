@@ -60,6 +60,9 @@ const EXPECTED_REPO_METHODS = [
   // the same node-existence fold `computeRecall` performs, so the surface widens by exactly one
   // eid-list-only method the guard must enumerate).
   "nodeEids",
+  // read-only edge-enumeration seam (ADR-B12b — the entity-resolver `kip resolve` edge scan; the edge
+  // analogue of `nodeEids`, one existing-edge eid-list method the guard must enumerate).
+  "edgeEids",
   // read-only `same_as` prop-union seams (ADR-B11c / D-66 — the retrieval-layer entity union): `sameAsClass`
   // enumerates a seed's `same_as` equivalence class from proj's already-computed closure, and `getNodeRaw`
   // reads a member's OWN cells (the read `getNode` masks behind the canonical member), so graph-qa unions a

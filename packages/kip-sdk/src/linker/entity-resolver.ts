@@ -33,16 +33,20 @@ import type {
   AssertInput,
   AsOf,
   DispatchMicroagentFn,
+  EdgeKind,
   EID,
   FactId,
   MicroagentInvocation,
   MicroagentManifest,
   MicroagentResult,
   Provenance,
+  PropCell,
   PropValue,
+  RecallQuery,
   Repo,
   RetractInput,
 } from "../index";
+import { linkResolver, type NodeInventory } from "./entity-linker";
 
 // --- edge-kind constants (ADR-B12a: the quarantine seam is a dedicated edge KIND) ----------------
 
@@ -159,20 +163,104 @@ export function notSameAsEid(from: EID, to: EID): EID {
   return `${NOT_SAME_AS_EDGE_KIND}/${from}=>${to}`;
 }
 
-// --- STUBS (author from the ADR; the impl phase fills these in) ------------------------------------
+// --- verdict validation + the pure verdict→AcquisitionResult mapping (ADR-B12c, N5) ---------------
+
+/** A finite JS number (rejects `NaN`/`Infinity`, which never clear a confidence bar). */
+function isFiniteNumber(x: unknown): x is number {
+  return typeof x === "number" && Number.isFinite(x);
+}
 
 /**
- * STUB (author nothing). The PURE verdict→`AcquisitionResult` mapping under test: a confident `same`
- * (≥ minConfidence) must author a `kip:same_as?` candidate edge (+ audit props); a confident
- * `not-same` a trusted `not_same_as`; everything else ABSTAINS. Returns an EMPTY result so every
- * acceptance assertion fails on its own diff (no fact authored), never on a throw.
+ * STRICT N5 validation of ONE raw verdict — the exact `additionalProperties:false` schema the live
+ * `--json-schema` enforces, applied to the scripted/parsed value: `decision` MUST be one of the three
+ * enum members, `rationale` MUST be a string, and `confidence`/`linkKind` (when present) MUST have the
+ * right primitive type. Anything else (a missing rationale, an off-schema `decision`, a non-number
+ * confidence) is malformed and ABSTAINS — never a fabricated link (INV-A1/N5).
+ */
+function isWellFormedVerdict(v: unknown): v is ResolverVerdict {
+  if (v === null || typeof v !== "object") return false;
+  const r = v as Record<string, unknown>;
+  if (r.decision !== "same" && r.decision !== "not-same" && r.decision !== "uncertain") return false;
+  if (typeof r.rationale !== "string") return false;
+  if (r.confidence !== undefined && !isFiniteNumber(r.confidence)) return false;
+  if (r.linkKind !== undefined && typeof r.linkKind !== "string") return false;
+  return true;
+}
+
+/** One edge-prop `AssertInput` (the covering value cell for an audit prop on a resolver edge). */
+function edgePropAssert(eid: EID, prop: string, value: PropValue, provenance: Provenance): AssertInput {
+  return {
+    type: "assert",
+    v: 1,
+    target: { kind: "edge-prop", eid, prop },
+    value,
+    validFrom: 0,
+    validTo: null,
+    replicaId: RESOLVER_REPLICA,
+    provenance,
+  };
+}
+
+/**
+ * The N5 verdict→`AssertInput[]` mapping for ONE pair (ADR-B12c). A confident `same` (≥ minConfidence)
+ * yields a QUARANTINED `kip:same_as?` candidate edge (+ audit props); a confident `not-same` a trusted
+ * `not_same_as` veto edge (+ audit props); EVERYTHING else — `uncertain`, a sub-threshold or absent
+ * confidence, a failed/malformed verdict — abstains (empty array, author nothing). The `rationale`/
+ * `confidence` ride along as ordinary edge-prop cells: audit-only, NEVER a proj order/reducer input.
+ */
+function verdictEntries(
+  pair: CandidatePair,
+  verdict: ResolverVerdict | null | undefined,
+  minConfidence: number,
+  source: Provenance,
+): AssertInput[] {
+  if (!isWellFormedVerdict(verdict)) return []; // failed/malformed/off-schema ⇒ ABSTAIN (N5).
+  if (verdict.decision === "uncertain") return []; // an honest "cannot tell" ⇒ ABSTAIN (N5).
+  const confidence = verdict.confidence;
+  if (!isFiniteNumber(confidence) || confidence < minConfidence) return []; // sub-threshold ⇒ ABSTAIN.
+
+  const isSame = verdict.decision === "same";
+  const eid = isSame ? sameAsCandidateEid(pair.a, pair.b) : notSameAsEid(pair.a, pair.b);
+  const edgeKind = isSame ? KIP_SAME_AS_CANDIDATE_KIND : NOT_SAME_AS_EDGE_KIND;
+
+  const out: AssertInput[] = [
+    {
+      type: "assert",
+      v: 1,
+      target: { kind: "edge", eid, edgeKind, from: pair.a, to: pair.b },
+      value: true,
+      validFrom: 0,
+      validTo: null,
+      replicaId: RESOLVER_REPLICA,
+      provenance: { ...source },
+    },
+    edgePropAssert(eid, "rationale", verdict.rationale, { ...source }),
+    edgePropAssert(eid, "confidence", confidence, { ...source }),
+  ];
+  if (verdict.linkKind !== undefined) out.push(edgePropAssert(eid, "linkKind", verdict.linkKind, { ...source }));
+  return out;
+}
+
+/**
+ * The PURE verdict→`AcquisitionResult` mapping (ADR-B12c). For each bounded candidate pair it consults
+ * the adjudicator and maps a confident `same`→`kip:same_as?` candidate edge / a confident
+ * `not-same`→`not_same_as` veto edge / everything-else→ABSTAIN (N5). Authors nothing itself — it only
+ * assembles the `proposed` array of `AssertInput`s the orchestrator (`runAcquisition`) commits (INV-A1).
+ * Deterministic and side-effect-free: the verdict/confidence never touch orderKey/reducers (§5.3).
  */
 export function resolveCandidates(
-  _pairs: readonly CandidatePair[],
-  _adjudicate: ResolverAdjudicator,
-  _opts?: { minConfidence?: number },
+  pairs: readonly CandidatePair[],
+  adjudicate: ResolverAdjudicator,
+  opts?: { minConfidence?: number },
 ): ResolverResult {
-  return { proposed: [], source: resolverPlaceholderProvenance(), sameAs: [] };
+  const minConfidence = opts?.minConfidence ?? DEFAULT_RESOLVE_MIN_CONFIDENCE;
+  const source = resolverPlaceholderProvenance();
+  const proposed: Array<AssertInput | RetractInput> = [];
+  for (const pair of pairs) {
+    const verdict = adjudicate(pair);
+    for (const entry of verdictEntries(pair, verdict, minConfidence, source)) proposed.push(entry);
+  }
+  return { proposed, source, sameAs: [] };
 }
 
 /**
@@ -197,50 +285,195 @@ export function makeResolverDispatch(
   };
 }
 
+/** A stable unordered `(min,max)` key for a pair — the dedupe/exclusion identity (order-insensitive). */
+function unorderedKey(a: EID, b: EID): string {
+  return a < b ? `${a} ${b}` : `${b} ${a}`;
+}
+
+/** The covering scalar value of a projected prop cell (its `"value"` segment), or `undefined`. */
+function coveringValueOf(cell?: PropCell): PropValue | undefined {
+  if (!cell) return undefined;
+  const seg = cell.segments.find((s) => s.kind === "value");
+  return seg && seg.kind === "value" ? seg.value : undefined;
+}
+
 /**
- * STUB (returns `[]`). The DETERMINISTIC, hard-bounded candidate-PAIR generator (ADR-B12b) — the CLI's
- * job, NO model. For each live `code:`/`doc:` node it recalls the top-K lexically nearest OTHER nodes,
- * pairs the seed with each, dedupes unordered `(min,max)` pairs, DROPS pairs already carrying a
- * `same_as`/`not_same_as`/`kip:same_as?` edge, caps per-node at `topK` and TOTAL at `maxPairs`, and is
- * a pure function of the as-of fact set (stable across fact-set permutation). Returns `[]` so the caps
- * hold vacuously but the non-empty/exclusion acceptance assertions fail on their own diff.
+ * The DETERMINISTIC, hard-bounded candidate-PAIR generator (ADR-B12b) — the CLI's job, NO model. For
+ * each live node (enumerated via `nodeEids`, sorted) it hydrates props, derives an identity/lexical
+ * surface, and calls `recall` to get the top-K lexically-nearest OTHER nodes, pairing the seed with
+ * each; it ALSO folds in Layer-1's own strong-name `sameAs` collisions over the inventory (so every
+ * D-63 homonym false-merge candidate is adjudicated). Then it dedupes unordered `(min,max)` pairs,
+ * DROPS pairs already carrying a `same_as`/`not_same_as`/`kip:same_as?` edge, and greedily caps BOTH
+ * per-node degree (`topK`) and the TOTAL (`maxPairs`). A pure function of the as-of fact set (`recall`
+ * is proj-external but deterministic given the set), so the pair set is stable across fact-set
+ * permutation and identical across repeated calls. Authors nothing (INV-A1).
  */
-export function generateResolverCandidatePairs(
-  _repo: Repo,
-  _opts?: { topK?: number; maxPairs?: number; prefixes?: string[]; include?: string; exclude?: string; asOf?: AsOf },
+export async function generateResolverCandidatePairs(
+  repo: Repo,
+  opts?: { topK?: number; maxPairs?: number; prefixes?: string[]; include?: string; exclude?: string; asOf?: AsOf },
 ): Promise<CandidatePair[]> {
-  return Promise.resolve([]);
+  const topK = opts?.topK ?? DEFAULT_RESOLVE_TOP_K;
+  const maxPairs = opts?.maxPairs ?? DEFAULT_RESOLVE_MAX_PAIRS;
+  const prefixes = opts?.include ? [opts.include] : (opts?.prefixes ?? ["code:", "doc:"]);
+  const asOf = opts?.asOf;
+
+  const enumerated = await repo.nodeEids({ prefixes });
+  const seeds = opts?.exclude ? enumerated.filter((eid) => !eid.startsWith(opts.exclude!)) : enumerated;
+
+  // Hydrate each live node's props → a Layer-1 inventory entry + its lexical identity surface.
+  const inventory: NodeInventory = [];
+  const surfaceText = new Map<EID, string>();
+  for (const eid of seeds) {
+    // eslint-disable-next-line no-await-in-loop -- bounded per-node read over an already-sorted list.
+    const view = await repo.getNode(eid, asOf);
+    if (!view) continue; // raced/absent — never adjudicate a node a read cannot resolve (N5).
+    const props: Array<{ key: string; value: PropValue }> = [];
+    const parts: string[] = [];
+    for (const [key, cell] of Object.entries(view.props ?? {})) {
+      const value = coveringValueOf(cell);
+      if (value === undefined) continue;
+      props.push({ key, value });
+      if (typeof value === "string") parts.push(value);
+    }
+    inventory.push({ eid, kind: view.kind, props });
+    surfaceText.set(eid, parts.join(" "));
+  }
+
+  // The already-decided pairs (a same_as / not_same_as / kip:same_as? edge already exists) — excluded.
+  const excluded = new Set<string>();
+  const decidedEdgeEids = await repo.edgeEids({
+    kinds: [SAME_AS_EDGE_KIND, NOT_SAME_AS_EDGE_KIND, KIP_SAME_AS_CANDIDATE_KIND],
+    asOf,
+  });
+  for (const eeid of decidedEdgeEids) {
+    // eslint-disable-next-line no-await-in-loop -- bounded per-edge read.
+    const edge = await repo.getEdge(eeid, asOf);
+    if (edge) excluded.add(unorderedKey(edge.from, edge.to));
+  }
+
+  const degree = new Map<EID, number>();
+  const seen = new Set<string>();
+  const pairs: CandidatePair[] = [];
+  const tryAdd = (x: EID, y: EID): void => {
+    if (x === y || pairs.length >= maxPairs) return;
+    const lo = x < y ? x : y;
+    const hi = x < y ? y : x;
+    const key = `${lo} ${hi}`;
+    if (seen.has(key) || excluded.has(key)) return;
+    if ((degree.get(lo) ?? 0) >= topK || (degree.get(hi) ?? 0) >= topK) return; // per-node cap.
+    seen.add(key);
+    degree.set(lo, (degree.get(lo) ?? 0) + 1);
+    degree.set(hi, (degree.get(hi) ?? 0) + 1);
+    pairs.push({ a: lo, b: hi });
+  };
+
+  // (1) Layer-1 strong-name collisions FIRST (the D-63 homonym candidates get priority, ADR-B12b).
+  const l1 = linkResolver(inventory);
+  for (const { candidate, existing } of l1.sameAs ?? []) tryAdd(candidate, existing);
+
+  // (2) recall top-K nearest OTHER nodes per seed, in sorted seed order (deterministic).
+  for (const seed of seeds) {
+    if (pairs.length >= maxPairs) break;
+    const text = surfaceText.get(seed);
+    if (text === undefined || text.trim().length === 0) continue;
+    const query: RecallQuery = { text, k: topK + 1 }; // +1 to absorb the seed itself when recalled.
+    if (asOf !== undefined) query.asOf = asOf;
+    // eslint-disable-next-line no-await-in-loop -- deterministic bounded recall per seed.
+    const results = await repo.recall(query);
+    for (const r of results) tryAdd(seed, r.eid);
+  }
+
+  return pairs;
+}
+
+/** A deterministic operator-authored provenance for a confirm/reject write (re-signed by the repo). */
+function operatorProvenance(): Provenance {
+  return { author: RESOLVER_AUTHOR, signature: "", publicKeyFingerprint: "", signedFields: [], source: { uri: "resolver://kip-resolver" } };
 }
 
 /**
- * STUB (throws). `kip resolve confirm <from> <to>` — promotes an outstanding `kip:same_as?` candidate
- * to a REAL `same_as` (through `runAcquisition`'s `sameAs` channel, so the nodes now MERGE) and may
- * retract the candidate edge. Deterministic, NO model. Throws until implemented so the acceptance
- * assertions (the pair now merges) fail on a rejected promise where a `{ facts }` resolution is expected.
+ * `kip resolve confirm <from> <to>` — promotes an outstanding `kip:same_as?` candidate to a REAL,
+ * trust-merging `same_as(from,to)` (proj's union-find now folds the class, so the nodes MERGE) and
+ * retracts the quarantined candidate edge. Deterministic — NO model, NO live gate. Reversibility is at
+ * the FACT level: retracting the authored `same_as` removes the merge fact. Returns the authored
+ * `FactId`s.
  */
-export function resolveConfirm(
-  _repo: Repo,
+export async function resolveConfirm(
+  repo: Repo,
   _manifest: MicroagentManifest,
-  _from: EID,
-  _to: EID,
+  from: EID,
+  to: EID,
   _opts?: { asOf?: AsOf },
 ): Promise<{ facts: FactId[] }> {
-  return Promise.reject(new Error("unimplemented: resolveConfirm"));
+  const facts: FactId[] = [];
+  const merge = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "edge", eid: `${SAME_AS_EDGE_KIND}/${from}=>${to}`, edgeKind: SAME_AS_EDGE_KIND, from, to },
+    value: true,
+    validFrom: 0,
+    validTo: null,
+    replicaId: RESOLVER_REPLICA,
+    provenance: operatorProvenance(),
+  });
+  facts.push(merge.id);
+  // Retract the outstanding candidate (idempotent: only when one is durable).
+  const candEid = sameAsCandidateEid(from, to);
+  if ((await repo.edgeExistenceFactId(candEid)) !== null) {
+    const retracted = await repo.retractFact({
+      type: "retract",
+      v: 1,
+      target: { kind: "edge", eid: candEid, edgeKind: KIP_SAME_AS_CANDIDATE_KIND, from, to },
+      validFrom: 0,
+      validTo: null,
+      replicaId: RESOLVER_REPLICA,
+      provenance: operatorProvenance(),
+    });
+    facts.push(retracted.id);
+  }
+  return { facts };
 }
 
 /**
- * STUB (throws). `kip resolve reject <from> <to>` — authors a signed `not_same_as(from,to)` (which
- * vetoes a Layer-1 `same_as`, surfacing `kip:conflict`) and/or retracts the `kip:same_as?` candidate.
- * Deterministic, NO model. Throws until implemented.
+ * `kip resolve reject <from> <to>` — authors a signed `not_same_as(from,to)` (vetoing a Layer-1
+ * `same_as`, so `getNode(from)`/`getNode(to)` surface `kip:conflict` instead of silently merging, D-63)
+ * and retracts the outstanding `kip:same_as?` candidate. Deterministic — NO model, NO live gate. Both
+ * facts are reversible at the write-channel level (retract). Returns the authored `FactId`s.
  */
-export function resolveReject(
-  _repo: Repo,
+export async function resolveReject(
+  repo: Repo,
   _manifest: MicroagentManifest,
-  _from: EID,
-  _to: EID,
+  from: EID,
+  to: EID,
   _opts?: { asOf?: AsOf },
 ): Promise<{ facts: FactId[] }> {
-  return Promise.reject(new Error("unimplemented: resolveReject"));
+  const facts: FactId[] = [];
+  const nsEid = notSameAsEid(from, to);
+  const veto = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "edge", eid: nsEid, edgeKind: NOT_SAME_AS_EDGE_KIND, from, to },
+    value: true,
+    validFrom: 0,
+    validTo: null,
+    replicaId: RESOLVER_REPLICA,
+    provenance: operatorProvenance(),
+  });
+  facts.push(veto.id);
+  const candEid = sameAsCandidateEid(from, to);
+  if ((await repo.edgeExistenceFactId(candEid)) !== null) {
+    const retracted = await repo.retractFact({
+      type: "retract",
+      v: 1,
+      target: { kind: "edge", eid: candEid, edgeKind: KIP_SAME_AS_CANDIDATE_KIND, from, to },
+      validFrom: 0,
+      validTo: null,
+      replicaId: RESOLVER_REPLICA,
+      provenance: operatorProvenance(),
+    });
+    facts.push(retracted.id);
+  }
+  return { facts };
 }
 
 /** One outstanding candidate row `kip resolve list` surfaces for operator review (ADR-B12). */
@@ -253,15 +486,29 @@ export interface OutstandingCandidate {
 }
 
 /**
- * STUB (returns `[]`). `kip resolve list` — reads back the outstanding `kip:same_as?` candidate edges
- * for operator review (a pure read, authors nothing). Returns `[]` so the acceptance assertion (an
- * authored candidate is listed) fails on its own diff.
+ * `kip resolve list` — reads back the outstanding `kip:same_as?` candidate edges for operator review
+ * (a pure read, authors nothing, INV-A1). Enumerates the live candidate edges via the `edgeEids` seam
+ * and hydrates each edge's audit props (confidence/rationale) off `getEdge`.
  */
-export function resolveList(
-  _repo: Repo,
-  _opts?: { asOf?: AsOf },
-): Promise<OutstandingCandidate[]> {
-  return Promise.resolve([]);
+export async function resolveList(repo: Repo, opts?: { asOf?: AsOf }): Promise<OutstandingCandidate[]> {
+  const asOf = opts?.asOf;
+  const eids = await repo.edgeEids({ kinds: [KIP_SAME_AS_CANDIDATE_KIND], asOf });
+  const out: OutstandingCandidate[] = [];
+  for (const eid of eids) {
+    // eslint-disable-next-line no-await-in-loop -- bounded per-candidate read over a sorted list.
+    const edge = await repo.getEdge(eid, asOf);
+    if (!edge) continue;
+    const confidence = coveringValueOf(edge.props.confidence);
+    const rationale = coveringValueOf(edge.props.rationale);
+    out.push({
+      from: edge.from,
+      to: edge.to,
+      eid,
+      confidence: typeof confidence === "number" ? confidence : undefined,
+      rationale: typeof rationale === "string" ? rationale : undefined,
+    });
+  }
+  return out;
 }
 
 /**
@@ -272,9 +519,22 @@ export function resolveList(
  * to always-disabled so the "enables when KIP_RESOLVE_LIVE=1 and the model is available" assertion
  * fails on its own diff.
  */
-export function resolveResolveLiveGate(_args: {
+export function resolveResolveLiveGate(args: {
   env: Record<string, string | undefined>;
   probe: () => ResolverHarnessProbe;
 }): ResolverLiveGate {
-  return { enabled: false, reason: "resolver live gate: unimplemented stub (always disabled)" };
+  const flag = args.env.KIP_RESOLVE_LIVE;
+  if (flag === undefined || flag.length === 0 || flag === "0" || flag.toLowerCase() === "false") {
+    return {
+      enabled: false,
+      reason:
+        "the live kip resolve path is opt-in: set KIP_RESOLVE_LIVE=1 to allow this run to spawn (and " +
+        "pay for) the local `claude` CLI per candidate pair. The probe was NOT consulted.",
+    };
+  }
+  const probe = args.probe();
+  if (!probe.available) {
+    return { enabled: false, reason: `KIP_RESOLVE_LIVE is set, but no model is usable — ${probe.reason ?? "unavailable"}` };
+  }
+  return { enabled: true };
 }

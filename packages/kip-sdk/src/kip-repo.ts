@@ -1926,6 +1926,35 @@ export class KipRepo implements Repo {
   }
 
   /**
+   * ADR-B12b (entity-resolver edge-enumeration seam) — the sorted `EID`s of every currently-existing
+   * edge the admitted set names, optionally restricted to `opts.kinds`. Derived from the SAME admitted
+   * fact scan `nodeEids` performs (collect `target.kind==='edge'` eids, keep those whose existence fact
+   * survives at the lens via `edgeExistenceFactId` — so a retracted/invalid edge drops). A pure read
+   * over the current fact set; authors nothing (INV-A1).
+   */
+  edgeEids(opts?: { kinds?: EdgeKind[]; asOf?: AsOf }): Promise<EID[]> {
+    const asOf = opts?.asOf;
+    const facts = asOf !== undefined ? this.selectFactsForAsOf(asOf) : this.currentFacts();
+    const gateInstant = asOf?.validTime !== undefined ? canon(asOf.validTime) : null;
+    const projection = proj(facts, this.projOptions(facts));
+    const kinds = opts?.kinds;
+    const eids = new Set<EID>();
+    for (const f of facts) {
+      if (f.target.kind !== "edge") continue;
+      const t = f.target;
+      if (kinds && kinds.length > 0 && (t.edgeKind === undefined || !kinds.includes(t.edgeKind))) continue;
+      eids.add(t.eid);
+    }
+    const out: EID[] = [];
+    for (const eid of eids) {
+      if (projection.edgeExistenceFactId(eid, gateInstant) === null) continue; // existing edges only.
+      out.push(eid);
+    }
+    out.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    return Promise.resolve(out);
+  }
+
+  /**
    * ADR-B11c/D-66 (entity `same_as` prop-union): the sorted `same_as` equivalence class of `eid` — every
    * EID proj folds into `eid`'s union-find class — or `[eid]` when `eid` has no `same_as` edge. A pure
    * read over the current fact set, derived from proj's ALREADY-computed class members (`sameAsClass`,
@@ -4885,6 +4914,22 @@ export class KipRepo implements Repo {
     // nothing durability + commit-DAG visibility, the SAME batching primitive learn's accept path
     // uses). The returned FactId[] is exactly one id per proposed/sameAs entry — companion existence
     // bookkeeping facts are authored (proj's no-ghost-nodes gate) but NOT part of the returned list.
+    // ADR-B12a idempotent EDGE existence (Layer-2 quarantine `kip:same_as?` re-proposal): an EXPLICIT
+    // edge-existence assert whose edge ALREADY durably exists at the pre-batch frontier authors NO new
+    // existence fact — its existing winner id is returned instead, so `edgeExistenceFactId` is STABLE
+    // across a byte-identical re-proposal of a content-derived candidate eid ("folds onto the same
+    // cell", the SAME idempotence Layer-1's `documentsEdge` intends). Computed BEFORE the txn opens
+    // (pre-batch durable state, `currentFacts`). Edge-PROP entries for the same edge still author
+    // normally (audit props re-fold LWW). Scoped to edges — nodes are unaffected.
+    const preexistingEdgeExistence = new Map<EID, FactId>();
+    for (const entry of acq.proposed) {
+      if (entry.type === "assert" && entry.target.kind === "edge" && !preexistingEdgeExistence.has(entry.target.eid)) {
+        // eslint-disable-next-line no-await-in-loop -- bounded per explicit-edge entry, pre-batch read.
+        const existing = await this.edgeExistenceFactId(entry.target.eid);
+        if (existing !== null) preexistingEdgeExistence.set(entry.target.eid, existing);
+      }
+    }
+
     const { result: committedFactIds } = await this.txn(async (tx) => {
       const ids: FactId[] = [];
       // D-39 parity: pre-seed staged existence eids for any EXPLICIT node/edge existence entry so a
@@ -4895,6 +4940,13 @@ export class KipRepo implements Repo {
         if (entry.target.kind === "node" || entry.target.kind === "edge") stagedExistenceEids.add(entry.target.eid);
       }
       for (const entry of acq.proposed) {
+        // Idempotent edge existence (see above): a re-proposed already-durable edge existence authors
+        // nothing new and returns its existing winner id — keeping the returned count 1:1 with proposed
+        // while leaving the original existence fact (and its FactId) the stable winner.
+        if (entry.type === "assert" && entry.target.kind === "edge" && preexistingEdgeExistence.has(entry.target.eid)) {
+          ids.push(preexistingEdgeExistence.get(entry.target.eid)!);
+          continue;
+        }
         // Companion existence for a node-prop/edge-prop target (proj m2-2) — authored with the SAME
         // acquisition source provenance, but NOT counted in the returned FactId[] (docs/33: one
         // returned id per proposed entry).
