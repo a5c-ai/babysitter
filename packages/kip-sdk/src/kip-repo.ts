@@ -2264,21 +2264,60 @@ export class KipRepo implements Repo {
       // (the retrieved facts are about Tal, so abstain) versus the same question against a graph
       // holding Zara (the retrieved facts are about Zara, so answer). Retrieval's job is to surface
       // what lexically matches; deciding whether that is an ANSWER is the answering layer's job.
-      const scored: Array<{ eid: EID; score: number }> = [];
-      for (const eid of [...viewByEid.keys()].sort()) {
-        const view = viewByEid.get(eid)!;
-        const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
-        let matched = 0;
-        if (queryTerms.size > 0) {
+      // D-57 (lexical-robustness half) — RANK admitted seeds by IDF, not a flat distinct-term count.
+      // A flat count let a common schema key / edge kind (present on nearly every candidate) count as
+      // much as a discriminative rare term. Each matched query term is now weighted by its rarity
+      // across the CANDIDATE corpus (BM25-style IDF), so the rare term dominates. This changes ONLY
+      // the ranking among admitted seeds — the admission bar (`exact || matched > 0`) above is
+      // byte-for-byte the D-52 predicate and stays LOCAL to the candidate. Two deterministic passes
+      // over the SORTED candidate keys (no Map-iteration-order dependence): pass 1 caches each
+      // candidate's surface once and counts per-term document frequency `df`; pass 2 admits and scores
+      // by summed IDF. df is order-free and N is the candidate count, so the ranking is a pure
+      // function of the fact set + query, identical across replicas / fact permutations.
+      const sortedEids = [...viewByEid.keys()].sort();
+      const surfaceByEid = new Map<EID, Set<string>>();
+      const idf = new Map<string, number>();
+      if (queryTerms.size > 0) {
+        const df = new Map<string, number>();
+        for (const term of queryTerms) df.set(term, 0);
+        for (const eid of sortedEids) {
           const surface = recallSurfaceTerms(
             eid,
-            view,
+            viewByEid.get(eid)!,
             gateInstant,
             incidentEdgeKindsOf(projection, eid, gateInstant),
           );
-          for (const term of queryTerms) if (surface.has(term)) matched += 1;
+          surfaceByEid.set(eid, surface);
+          for (const term of queryTerms) if (surface.has(term)) df.set(term, df.get(term)! + 1);
         }
-        if (exact || matched > 0) scored.push({ eid, score: (exact ? RECALL_EXACT_CONTENT_BOOST : 0) + matched });
+        const N = sortedEids.length;
+        // BM25-style IDF with +0.5 smoothing: strictly positive for every df in [0, N] (so a matched
+        // term always adds weight and admission is never affected), and monotonically LARGER the rarer
+        // the term — a term on all N candidates contributes a near-zero weight, a singleton dominates.
+        for (const term of queryTerms) {
+          const dfT = df.get(term)!;
+          idf.set(term, Math.log(1 + (N - dfT + 0.5) / (dfT + 0.5)));
+        }
+      }
+      const scored: Array<{ eid: EID; score: number }> = [];
+      for (const eid of sortedEids) {
+        const view = viewByEid.get(eid)!;
+        const exact = coveringPropValue(view.props.content, gateInstant) === q.text;
+        let matched = 0;
+        let idfSum = 0;
+        const surface = surfaceByEid.get(eid);
+        if (surface) {
+          for (const term of queryTerms) {
+            if (surface.has(term)) {
+              matched += 1;
+              idfSum += idf.get(term)!;
+            }
+          }
+        }
+        // Admission bar UNCHANGED (RETRIEVAL LOCALITY): exact OR ≥1 distinct query term present.
+        // Only the SCORE differs — the flat `matched` is replaced by the summed IDF `idfSum`, with the
+        // exact-content boost kept dominant so an exact match still ranks first.
+        if (exact || matched > 0) scored.push({ eid, score: (exact ? RECALL_EXACT_CONTENT_BOOST : 0) + idfSum });
       }
       scored.sort((a, b) => b.score - a.score || (a.eid < b.eid ? -1 : 1));
       for (const s of scored.slice(0, q.k)) {
