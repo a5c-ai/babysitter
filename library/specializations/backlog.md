@@ -57,6 +57,12 @@ Engineering Specializations (give a proper name to each specialization): (not un
     # library/specializations/customer-support/
 [x] Incident Management - incident response specialization consolidating three prior incident files (flagship process: incident-lifecycle.js)
     # library/specializations/incident-management/
+[x] Release Engineering - release management specialization covering versioning, changelogs, release trains, and rollout gates (flagship process: release-lifecycle.js)
+    # library/specializations/release-engineering/
+[x] Data Privacy Compliance - privacy operations specialization covering DSAR handling, consent, and data-protection workflows (flagship process: dsar-lifecycle.js)
+    # library/specializations/data-privacy-compliance/
+[x] Communication - internal/external communication specialization, now with README and flagship multi-audience announcement pipeline (flagship process: multi-audience-announcement-pipeline.js)
+    # library/specializations/communication/
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
@@ -99,6 +105,8 @@ Business and Finance Specializations (give a proper name to each specialization)
 [x] Knowledge Management
 [x] Advertising, Social Media, Content Marketing,  Influencer Marketing, etc.
 [x] Public Relations, etc.
+[x] Procurement - sourcing, vendor selection, and purchase-order operations (flagship process: procurement-lifecycle.js)
+    # library/specializations/domains/business/procurement/
 
 Social Sciences and Humanities Specializations (give a proper name to each specialization): each in process/specializations/domains/social-sciences-humanities/[specialization-name-slugified]/
 

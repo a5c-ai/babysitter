@@ -1,6 +1,7 @@
 /**
  * @file financial-statement-preparation.js
  * @description Preparation of GAAP/IFRS-compliant financial statements including balance sheet, income statement, cash flow statement, and statement of stockholders' equity
+ * @deprecated Superseded by finance-month-end-close-workflow.js — retire after one green run of the successor. Statement-preparation guidance absorbed into fmc.reporting-package; tie-out rebuilt as executed checks inside the fmc.close-review adversarial gate.
  * @module specializations/domains/business/finance-accounting
   * @graph
  *   domains: [domain:finance]

@@ -1,5 +1,7 @@
 /**
  * @process sales/pipeline-review-forecast
+ * @deprecated Superseded by sales-deal-workflow.js (routed policy-gated breakpoints outbound-email-send/discount-approval/deal-commit, adversarial deal-review gate with executed margin/CRM evidence, kip sales memory). Retire after one green run of the successor.
+ * @supersededBy library/specializations/domains/business/sales/sales-deal-workflow.js
  * @description Weekly cadence for reviewing pipeline health, validating opportunity data, and submitting accurate revenue forecasts.
  * @inputs { salesRep?: string, team?: string, pipeline: array, forecastPeriod: string, previousForecast?: object, targets?: object }
  * @outputs { success: boolean, pipelineHealth: object, forecastSubmission: object, riskAnalysis: object, actionItems: array, artifacts: array }

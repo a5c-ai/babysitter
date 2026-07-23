@@ -1805,7 +1805,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: V-Model + DDD + Cleanroom + Waterfall
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-regulated-greenfield/](./composition-regulated-greenfield/)
 
 **Process Flow**:
 1. **Waterfall Requirements Phase**:
@@ -1874,7 +1874,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: Shape Up + Example Mapping + TDD + Scrum
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-startup-mvp](./composition-startup-mvp/)
 
 **Process Flow**:
 1. **Shape Up: Shaping Phase** (pre-sprint):
@@ -1957,7 +1957,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: Event Storming + DDD + FDD + Strangler Fig Pattern + RUP
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-legacy-modernization/](./composition-legacy-modernization/)
 
 **Process Flow**:
 1. **RUP Inception Phase**:

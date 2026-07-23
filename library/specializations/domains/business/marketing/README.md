@@ -939,6 +939,14 @@ The Marketing and Brand Management specialization aims to:
 
 ---
 
+## Processes
+
+**marketing-campaign-workflow.js** is the composing end-to-end campaign process for this specialization: it takes a campaign brief through kip recall (kind `marketing`) of brand guidelines and prior campaign performance, parallel per-channel content production that composes the point processes in this directory and `../digital-marketing/` as callable stages, a unified campaign package with a claims register, an adversarial brand/claims/legal review gate with executed evidence, policy-gated publish/spend/claims approvals via routed breakpoints (`claims-signoff`, `paid-spend-commit`, per-batch `campaign-publish`), a monitored launch, and an analytics retro that asserts learnings back into kip.
+
+Point processes (brand-guidelines-creation.js, campaign-creative-development.js, integrated-campaign-planning.js, etc.) remain directly runnable on their own.
+
+---
+
 ## Recommended Reading
 
 To deepen expertise in this specialization, see:
