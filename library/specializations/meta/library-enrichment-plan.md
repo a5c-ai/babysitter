@@ -33,30 +33,72 @@ proof-driven quality gates, and knowledge capture into kip so every run builds o
 7. **No fallbacks**: degraded paths must surface as failures or explicit inputs, never
    silent substitution.
 
+## Direction (owner steering, 2026-07-23)
+
+Slates must target **actual work domains** — full agentic-AI work workflows that carry a
+real business process end-to-end. kip and the policy engine are cross-cutting *awareness
+requirements* on every item, never the subject of a slate item. Meta/tooling items only
+when they unblock a work-domain batch.
+
+### Policy-engine awareness (required on every authored workflow)
+
+The policy engine is `packages/adapters/policy`: YAML policy documents declare, per
+action, matchers plus trust-chain requirements (typed evidence steps `human-approval` /
+`model-decision` / `delegation`, distinct-holder quorums; fail-closed on parse errors).
+Authored workflows must:
+- Enumerate their sensitive/irreversible actions (external comms sent, money spent,
+  data deleted, content published, deploys, contract terms accepted, offers extended)
+  as a declared `policyGatedActions` list in the process JSDoc/outputs.
+- Route each such action through a routed breakpoint whose approval is structured so it
+  can serve as `human-approval` evidence in a trust chain (stable breakpointId = the
+  action id; expert = the accountable role; tags include `policy-gated`).
+- Never auto-execute a policy-gated action in non-interactive mode without recording
+  that the gate was auto-approved (fail-closed posture; surface, don't bury).
+
+### kip awareness (required, not the subject)
+
+Recall prior domain facts at start, assert decisions/outcomes at end, per the
+`kip-librarian` skill (`library/specializations/shared/skills/kip-librarian/`). Use the
+`routedBreakpoint`/`adversarialGate`/`kipRecall`/`kipAssert` combinators from
+`library/specializations/common-utilities/` instead of re-implementing.
+
 ## Seed Candidates
 
 The process performs live gap analysis each run; these are starting points, not a quota.
 
-### New specialization domains
-- `knowledge-management` — company-brain curation on kip: ingestion (`kip learn`,
-  `ingest-rdf`), entity resolution reviews (`kip resolve`), retention/rollup hygiene.
-- `release-engineering` — versioning, changelog, staged rollout, post-release verification.
-- `incident-management` — triage, mitigation, blameless postmortem, action-item tracking.
-- `api-design` — contract-first design, breaking-change review, versioning policy.
-- `accessibility` — WCAG audit, remediation, regression-guard processes.
-- `internationalization` — extraction, translation QA, locale regression sweeps.
-- `mlops` — model eval harnesses, drift monitoring, dataset governance.
-- `developer-relations` — docs-driven sample apps, changelog comms, community triage.
+### New work-domain specializations (full agentic workflows)
+- `customer-support` — ticket triage → investigation → resolution → KB-article capture;
+  policy-gated: outbound customer replies, refunds/credits.
+- `sales-revenue-ops` — lead qualification → research → outreach sequencing → proposal →
+  CRM hygiene; policy-gated: outbound emails, discount approvals.
+- `legal-contracts` — contract intake → clause/risk review → redline negotiation cycle →
+  execution; policy-gated: accepting terms, sending redlines externally.
+- `finance-accounting` — AP invoice processing, month-end close checklist, expense audit;
+  policy-gated: payment release, journal postings.
+- `hiring-recruiting` — JD authoring → sourcing → screening → interview loop → offer;
+  policy-gated: candidate outreach, offer extension.
+- `marketing-content` — campaign brief → content production (adversarial brand/claims
+  review) → multi-channel publish → analytics retro; policy-gated: publishing.
+- `procurement` — RFP authoring → vendor evaluation matrix → selection → PO;
+  policy-gated: vendor commitments, spend.
+- `data-privacy-compliance` — DSAR handling, privacy review of features, retention
+  enforcement; policy-gated: data deletion, disclosure responses.
+- `incident-management` — triage → mitigation → comms → blameless postmortem →
+  action-item tracking; policy-gated: status-page/customer comms, prod changes.
+- `release-engineering` — versioning → changelog → staged rollout → post-release
+  verification; policy-gated: production deploy/rollback.
 
-### Enrichment of existing domains
-- Work items already tracked in `specializations/meta/processes-backlog.md`,
-  `methodologies/backlog.md`, and `specializations/backlog.md` (unchecked entries).
-- Retrofit older library processes to the current quality bar (breakpoint routing options,
-  adversarial gates, parallelization, kip hooks) — one retrofit batch per run is a valid slate.
+### Full workflows missing in existing domains
+- product-management: discovery → spec → prioritization → launch retro end-to-end run.
+- research: literature review → experiment design → analysis → publication workflow.
+- communication/authoring: multi-audience announcement pipeline with review gates.
+- business/sourcing: build out or fold per census; vestigial today.
+- Unchecked entries in the three backlogs remain valid candidates when they are
+  work-domain workflows (composition-* methodology examples qualify).
 
 ### Skills / agents
-- `kip-librarian` skill (query/assert patterns for processes) and `knowledge-curator` agent.
-- `adversarial-gatekeeper` agent variants per artifact type if quality-assessor proves too generic.
+- Only in service of a work-domain batch (e.g. a `policy-gate-author` helper that emits
+  the YAML policy document matching a workflow's declared policyGatedActions).
 
 ## Per-Run Flow (implemented by library-enrichment.js)
 
