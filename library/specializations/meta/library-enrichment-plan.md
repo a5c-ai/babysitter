@@ -33,6 +33,13 @@ proof-driven quality gates, and knowledge capture into kip so every run builds o
 7. **No fallbacks**: degraded paths must surface as failures or explicit inputs, never
    silent substitution.
 
+## Throughput (owner decision, 2026-07-23)
+
+Batches of ~12 items; the slate-approval breakpoint is auto-approved under standing owner
+authorization (the orchestrator picks from the ranked gap list). Gate escalations and the
+final run sign-off are still surfaced to the owner. Two large batches are authorized after
+the batch-2 run (~24 items total), then stop and report.
+
 ## Direction (owner steering, 2026-07-23)
 
 Slates must target **actual work domains** — full agentic-AI work workflows that carry a

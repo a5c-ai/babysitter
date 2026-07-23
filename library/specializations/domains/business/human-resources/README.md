@@ -791,6 +791,10 @@ Creating equitable and inclusive workplaces:
 - Rapid prototyping and testing
 - Data-driven continuous improvement
 
+## Processes
+
+- `full-cycle-hiring-workflow.js` — flagship end-to-end hiring process for this specialization (requisition through onboarding). Supersedes the deprecated `full-cycle-recruiting.js`.
+
 ## Conclusion
 
 Human Resources and People Operations has evolved into a critical strategic function that directly impacts organizational performance, culture, and competitive advantage. The modern HR professional must combine deep expertise in people practices with strong business acumen, analytical capabilities, and change leadership skills.

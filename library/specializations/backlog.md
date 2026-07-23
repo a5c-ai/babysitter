@@ -53,6 +53,10 @@ Engineering Specializations (give a proper name to each specialization): (not un
     # library/specializations/backend-development/
 [x] Shared Cross-Domain Assets - home for assets useful across many specializations (first skill: kip-librarian)
     # library/specializations/shared/
+[x] Customer Support - support operations specialization (flagship process: ticket-lifecycle.js)
+    # library/specializations/customer-support/
+[x] Incident Management - incident response specialization consolidating three prior incident files (flagship process: incident-lifecycle.js)
+    # library/specializations/incident-management/
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 

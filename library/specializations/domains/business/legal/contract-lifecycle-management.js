@@ -1,7 +1,11 @@
 /**
  * @process specializations/domains/business/legal/contract-lifecycle-management
+ * @deprecated Superseded by specializations/domains/business/legal/contract-lifecycle-workflow
+ * @supersededBy legal/contract-lifecycle-workflow
  * @description Contract Lifecycle Management (CLM) Implementation - End-to-end CLM system covering request intake,
- * authoring, negotiation, execution, obligation management, and renewal tracking.
+ * authoring, negotiation, execution, obligation management, and renewal tracking. Superseded by
+ * legal/contract-lifecycle-workflow, which rebuilds this lifecycle with routed breakpoints, adversarial
+ * gates, and kip memory; kept for compatibility.
  * @inputs { contractId?: string, stage?: string, action?: string, requestDetails?: object, outputDir?: string }
  * @outputs { success: boolean, contractStatus: object, nextSteps: array, obligations: array, artifacts: array }
  *

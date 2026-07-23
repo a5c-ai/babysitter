@@ -1,5 +1,7 @@
 /**
  * @process specializations/domains/business/human-resources/full-cycle-recruiting
+ * @deprecated Superseded by full-cycle-hiring-workflow.js (routed policy-gated breakpoints, adversarial JD/panel-calibration gates, kip memory). Retire after one green run of the successor.
+ * @supersededBy library/specializations/domains/business/human-resources/full-cycle-hiring-workflow.js
  * @description Full-Cycle Recruiting Process - End-to-end recruiting workflow from requisition approval through sourcing,
  * screening, interviewing, selection, offer negotiation, and acceptance tracking with comprehensive candidate pipeline management.
  * @inputs { requisitionId: string, jobTitle: string, department: string, hiringManager: string, salaryRange?: object, requirements?: object }
