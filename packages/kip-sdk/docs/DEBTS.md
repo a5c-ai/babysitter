@@ -1194,12 +1194,37 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   converge only over facts they actually exchange, per SEC). This is **safe** (each run's facts are
   well-formed and signed; nothing is fabricated) but is a real reproducibility gap intrinsic to the
   model-backed encoding.
-- **Suggested fix:** Reduce non-determinism where the seam allows — e.g. pin decoding temperature/seed if the
-  host model exposes it, and/or add a deterministic canonicalization/normalization pass over the model's
-  `{nodes,edges}` (stable slug derivation, canonical node/edge ordering) before compile — while documenting
-  that the live model path is inherently accelerator-class and not a determinism guarantee.
-- **Status:** Open (tracked). The live learn path is opt-in and accelerator-class; the same document can
-  produce a different graph across runs.
+- **Suggested fix (investigated — the levers are unavailable, moot, or risky; recorded rather than shipped as
+  cosmetic code, to avoid overclaiming a determinism it does not provide):**
+  1. *Pin decoding temperature/seed* — **NOT AVAILABLE.** The authenticated harness is the `claude` CLI
+     (`cli/ask.ts` / `learn/index.ts` spawn), and `claude --help` (v2.1.195) exposes NO
+     `--temperature`/`--seed`/`--top-p`/sampling flag (verified). There is no seam to pin; the SDK cannot make
+     the host model's decode deterministic.
+  2. *Canonical node/edge ORDERING before compile* — **MOOT.** proj's projection is **set-pure /
+     order-independent** (§4.4): the projected graph is invariant to the order of the compiled `AssertInput[]`,
+     so sorting the compiled array changes nothing about the resulting graph. It would only make the raw
+     `AssertInput[]` array byte-identical for a byte-comparison that nothing in the pipeline performs — cosmetic,
+     not a real reproducibility gain.
+  3. *Deterministic slug re-derivation* — **REJECTED as risky.** Re-deriving a node's `doc:<blob>#<slug>` eid
+     from a canonical source (rather than the model's chosen slug) would (a) fold two genuinely-DISTINCT
+     entities that normalize to the same slug (a silent cross-entity collision — the exact harm the namespacing
+     exists to prevent), (b) require model-coupled identity detection (which prop is identity), and (c) churn
+     the frozen learn eids. A trivial whitespace/case slug normalization is marginal (it folds only
+     formatting-different slugs, not the model's actual word-choice/decomposition variance).
+  4. *The consequence is partly MITIGATED downstream by the entity resolver built this session.* The real harm
+     — "a consumer cannot rely on `doc:<blob>#<slug>` eids being stable across re-runs" — is exactly what the
+     Layer-1 linker (`kip link`, ADR-B11) and Layer-2 resolver (`kip resolve`, ADR-B12) address: two runs'
+     divergent eids for the same entity (`doc:runA#orchid` vs `doc:runB#checkout-svc`) can be linked by a signed
+     `same_as`, and — since D-68 — that link is also reversible at read level. So cross-run identity divergence
+     is now RESOLVABLE via `same_as`, even though the raw extraction is not reproducible.
+- **Status:** Open / INHERENT (accelerator-class; no clean fix exists). Investigated: the harness exposes no
+  sampling-determinism seam, canonical ordering is proj-order-independent (moot), and deterministic slug
+  re-derivation is rejected as collision-risky. The core node/edge DECOMPOSITION variance is intrinsic to the
+  model-backed encode and cannot be removed by the SDK; the live path stays honestly documented as
+  accelerator-class and NOT a determinism guarantee (ADR-B10c/B10f). The cross-run eid-instability consequence
+  is mitigable via the entity resolver's `same_as` linking (ADR-B11/B12; read-reversible since D-68). No code
+  change ships for D-58 — a canonicalization pass would be cosmetic (proj order-independence) and pinning is
+  unavailable; shipping either would overstate a reproducibility the model path cannot provide.
 
 ### D-59: a subject named ONLY inside a free-text prop value is lexically retrieved but then abstained on by graph-QA
 
