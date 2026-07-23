@@ -103,6 +103,9 @@ const VALUE_FLAGS = new Set([
   // a content hash) and the data-resource source uri recorded on every authored fact's provenance.
   "graph",
   "source",
+  // `kip ingest-rdf` (D-67 remote half, ADR-B14): an explicit HTTPS URL to fetch N-Triples from (gated
+  // behind the KIP_RDF_FETCH host allowlist; mutually exclusive with the <file> positional).
+  "url",
 ]);
 
 /** Short aliases → canonical long flag name. */

@@ -1604,7 +1604,8 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Build an RDF / linked-data ingestion path that reads `owl:sameAs` statements and authors
   them onto the existing `sameAs` channel (IRIs as global eids), reusing the entity linker's reversible-edge
   machinery, so external linked-data graphs can join kip's memory.
-- **Status:** RESOLVED for LOCAL-FILE N-Triples ingestion (ADR-B14); remote fetch + Turtle/JSON-LD deferred.
+- **Status:** RESOLVED for LOCAL-FILE N-Triples ingestion AND for a GATED, HTTPS-only, host-ALLOWLISTED
+  remote N-Triples fetch (ADR-B14); SPARQL/public-graph querying + Turtle/JSON-LD + auth'd endpoints deferred.
   Built a deterministic, dependency-free **N-Triples reader** (`src/rdf/ntriples.ts`) + a `kip ingest-rdf <file>
   [--graph <id>] [--source <uri>] [--skip-malformed] [--dry-run] [--json]` CLI that authors an external RDF
   graph as signed, reversible kip facts through the EXISTING `runAcquisition` path (INV-A1: the reader is a pure
@@ -1623,9 +1624,30 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   candidate, or stamp a `kip:conflict` kind. **Honest boundaries:** read-level un-merge after a `same_as` retract
   is the pre-existing **[[D-68]]** limitation (D-67 delivers FACT-level reversibility); `getNode` after a join
   is a canonical-representative REDIRECT, not a cross-class prop-union (that is the `sameAsClass`/graph-QA
-  feature, D-66); multi-valued RDF props are LWW at read (lossless at fact). **Deferred (now the remaining D-67
-  surface):** remote RDF fetch / SPARQL / public-graph querying (network + untrusted-download); Turtle /
-  JSON-LD; curie normalization; a multi-value prop read model. See ADR-B14 and
+  feature, D-66); multi-valued RDF props are LWW at read (lossless at fact). **Remote half (ADR-B14, now
+  addressed):** `kip ingest-rdf --url <https-url>` fetches N-Triples SAFELY and feeds the bytes VERBATIM to
+  the SAME `rdfToAcquisition` parse + guard + `runAcquisition` path a local file uses — so every
+  untrusted-data guard above (reserved-channel forge refusal, space-predicate refusal, malformed strict-fail,
+  INV-A1) already applies to fetched content. The fetch is safe BY DESIGN: opt-in behind the `KIP_RDF_FETCH`
+  host-allowlist env var (UNSET/empty ⇒ remote fetch DISABLED — the default; the CLI + the whole test suite
+  make NO network call unless explicitly enabled; a `--url` with the gate off or a non-allowlisted host ⇒ exit
+  7, BEFORE any network call), EXACT case-insensitive hostname match (no suffix/subdomain — `evil-dbpedia.org`
+  ≠ `dbpedia.org`), HTTPS-only, embedded-credentials refused, GET-only with no cookies/auth/added-query and a
+  fixed `Accept`, redirects REFUSED (`redirect: "manual"`, never followed), and hard caps (a STREAMED
+  byte-count size cap — Content-Length is not trusted — and an AbortController timeout); a fetch failure / cap
+  / forge ⇒ a typed refusal that authors NOTHING (N5). SSRF defense-in-depth: a loopback/link-local/metadata IP
+  LITERAL (127/8, 169.254/16 incl. the 169.254.169.254 metadata endpoint, 0/8, IPv6 ::1 and fe80::/10) is
+  refused BEFORE the allowlist — even when allowlisted. Injectable `fetchImpl` makes it fully unit-testable with
+  a mock (no real network). `src/rdf/fetch.ts` (`resolveRdfFetchGate` + `fetchRdfDocument`),
+  `src/__tests__/d67-rdf-fetch.test.ts`. **SSRF residual (accepted, disclosed, not mitigated):** the allowlist
+  is a per-host TRUST decision with no DNS-resolution block — an allowlisted HOSTNAME that RESOLVES to a
+  private/loopback/metadata IP IS fetched (only IP-LITERAL dangerous hosts are blocked, not hostnames resolving
+  to them). Bounded: the fetch does the ONLY DNS resolution (no rebinding TOCTOU) and the body is only parsed
+  locally as N-Triples, NEVER returned to a caller (an internal-probe/data-poison vector, not exfiltration),
+  behind explicit per-host opt-in + https + no-redirect. A private-range/DNS SSRF block is deferred.
+  **Still deferred (the remaining D-67 surface):** open/arbitrary-URL fetch (only an explicit host allowlist is
+  honored); SPARQL / public-graph *querying* endpoints; non-N-Triples serializations (Turtle / JSON-LD); auth'd
+  endpoints; curie normalization; a multi-value prop read model. See ADR-B14 and
   `reviews/d67-rdf-ingestion-report.md`.
 
 ### D-68: a Layer-2 retract does not re-project the merge state — read-level reversibility (re-merge after a veto, un-merge after a confirm) needs a proj change

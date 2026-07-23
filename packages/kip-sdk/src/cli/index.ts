@@ -18,6 +18,7 @@ import { KipError, open } from "../index";
 import { codeMinerDispatch } from "../miner/code-miner";
 import { linkResolver, linkResolverDispatch, type NodeInventory } from "../linker/entity-linker";
 import { formatParseErrors, rdfIngestDispatch, rdfToAcquisition } from "../rdf/ntriples";
+import { RdfFetchError, fetchRdfDocument, rdfFetchExitCode, resolveRdfFetchGate, type RdfFetchImpl } from "../rdf/fetch";
 import {
   DEFAULT_RESOLVE_MAX_PAIRS,
   DEFAULT_RESOLVE_MIN_CONFIDENCE,
@@ -104,6 +105,9 @@ export interface RunCliOptions {
   openRepo?: (options: OpenOptions) => Promise<Repo>;
   dispatchMicroagent?: DispatchMicroagentFn;
   qaManifest?: MicroagentManifest;
+  /** D-67 remote half (ADR-B14): the injectable safe-fetch impl for `kip ingest-rdf --url` — defaults to
+   *  the Node global `fetch`. The deterministic test suite injects a mock so it makes NO real network call. */
+  fetchImpl?: RdfFetchImpl;
 }
 
 type Write = (chunk: string) => void;
@@ -118,6 +122,7 @@ interface HandlerArgs {
   openRepo: OpenRepoFn;
   dispatch: DispatchMicroagentFn;
   qaManifest?: MicroagentManifest;
+  fetchImpl?: RdfFetchImpl;
 }
 
 const USAGE =
@@ -167,6 +172,7 @@ export async function runCli(argv: string[], opts: RunCliOptions): Promise<numbe
     openRepo: opts.openRepo ?? ((o) => open(o)),
     dispatch: opts.dispatchMicroagent ?? defaultDispatchMicroagent,
     qaManifest: opts.qaManifest,
+    fetchImpl: opts.fetchImpl,
   };
 
   try {
@@ -841,64 +847,110 @@ function resolveLinkerManifest(): MicroagentManifest {
 // ===========================================================================
 
 /**
- * `kip ingest-rdf <file> [--graph <id>] [--source <uri>] [--skip-malformed] [--dry-run] [--json]` — the
- * deterministic, dependency-free RDF / linked-data ingestion path (D-67; ADR-B11 "RDF forward-design").
- * Reads a LOCAL N-Triples file (I/O), parses it with the zero-dep, PURE reader (`src/rdf/ntriples.ts`),
- * and authors the mapped `AcquisitionResult` through the SAME `runAcquisition` write path the code miner
- * and entity linker use: IRIs are global eids, `owl:sameAs` becomes a reversible `same_as` edge on the
- * linker's own union-find channel, `rdf:type` sets the subject kind, other IRI predicates become edges,
- * and literals become node props. The reader authors nothing (INV-A1); only `runAcquisition` writes.
+ * `kip ingest-rdf (<file> | --url <https-url>) [--graph <id>] [--source <uri>] [--skip-malformed]
+ * [--dry-run] [--json]` — the deterministic, dependency-free RDF / linked-data ingestion path (D-67;
+ * ADR-B11 "RDF forward-design", ADR-B14). Acquires N-Triples bytes from a LOCAL file (I/O) or — with
+ * `--url` — from an explicit, ALLOWLISTED HTTPS endpoint (`fetchRdfDocument`, gated behind the opt-in
+ * `KIP_RDF_FETCH` host allowlist), then feeds the bytes VERBATIM to the SAME zero-dep PURE reader
+ * (`src/rdf/ntriples.ts`) and authors the mapped `AcquisitionResult` through the SAME `runAcquisition`
+ * write path the code miner and entity linker use: IRIs are global eids, `owl:sameAs` becomes a reversible
+ * `same_as` edge, `rdf:type` sets the subject kind, other IRI predicates become edges, literals become node
+ * props. The reader authors nothing (INV-A1); only `runAcquisition` writes.
  *
- * SCOPE (D-67, honestly bounded): LOCAL-FILE N-Triples ONLY. Remote fetch / SPARQL / public-graph
- * querying and Turtle / JSON-LD are OUT OF SCOPE this pass (deferred follow-ons; see DEBTS D-67).
+ * SAFE-BY-DESIGN remote fetch (`--url`): the fetched body flows through the SAME parse + guard path a local
+ * file does, so the D-67 untrusted-data guards (reserved-channel forge refusal, space-predicate refusal,
+ * malformed strict-fail) ALREADY apply to fetched content. `--url` is opt-in behind `KIP_RDF_FETCH` (exit 7
+ * when disabled or the host is not allowlisted, BEFORE any network call), HTTPS-only, exact-host-matched,
+ * credential-free, redirect-refusing, and size/timeout-capped. `--url` and `<file>` are mutually exclusive.
+ *
+ * SCOPE (honestly bounded): N-Triples ONLY, and for `--url` only a GATED, HTTPS, host-ALLOWLISTED GET of an
+ * N-Triples document. Open/arbitrary-URL fetch, SPARQL / public-graph *querying*, non-N-Triples
+ * serializations (Turtle / JSON-LD), and auth'd endpoints stay OUT OF SCOPE (see DEBTS D-67 / ADR-B14).
  *
  * N5 policy: malformed lines FAIL LOUD by default — the line-numbered reasons print to stderr and the
  * command exits 1 WITHOUT authoring anything. `--skip-malformed` downgrades them to reported skips and
- * ingests the well-formed triples. `--dry-run` parses + reports the would-be facts without authoring.
+ * ingests the well-formed triples. `--dry-run` parses + reports the would-be facts without authoring (and,
+ * with `--url`, STILL fetches the real bytes — behind the same gate — so the report reflects real content).
  */
 async function cmdIngestRdf(a: HandlerArgs): Promise<number> {
   const { flags, positionals, write, werr, json } = a;
 
-  // Usage validation of <file> first (mirrors cmdLearn): a missing/absent file is exit 2, side-effect-free.
   const file = positionals[1];
-  if (!file) {
-    werr("kip: ingest-rdf requires a <file>\n");
-    return 2;
-  }
-  const filePath = isAbsolute(file) ? file : join(a.ctx.cwd, file);
-  if (!existsSync(filePath)) {
-    werr(`kip: ingest-rdf: no such file: ${filePath}\n`);
-    return 2;
-  }
+  const url = flagStr(flags, "url");
 
-  let text: string;
-  try {
-    text = readFileSync(filePath, "utf8");
-  } catch (e) {
-    werr(`kip: ingest-rdf: cannot read ${filePath}: ${e instanceof Error ? e.message : String(e)}\n`);
+  // `--url` and the `<file>` positional are MUTUALLY EXCLUSIVE; neither (in fetch-or-file mode) is a usage
+  // error too. Both refusals are side-effect-free exit 2 (BEFORE any network call or repo write).
+  if (url !== undefined && file !== undefined) {
+    werr("kip: ingest-rdf: pass either a <file> or --url <https-url>, not both (mutually exclusive)\n");
+    return 2;
+  }
+  if (url === undefined && file === undefined) {
+    werr("kip: ingest-rdf requires a <file> or --url <https-url>\n");
     return 2;
   }
 
   const graph = flagStr(flags, "graph");
-  const source = flagStr(flags, "source");
   const skipMalformed = flagBool(flags, "skip-malformed");
+
+  // Acquire the N-Triples bytes + the provenance source. FILE mode: read from disk (I/O). URL mode: SAFE,
+  // gated, allowlisted HTTPS GET (`fetchRdfDocument`) — the gate is checked BEFORE any network call.
+  let text: string;
+  let source: string | undefined;
+  let bytesFetched: number | undefined;
+
+  if (url !== undefined) {
+    // The opt-in gate is checked FIRST (distinct exit 7, matching kip's other live gates) so a `--url` with
+    // the gate disabled or a non-allowlisted host makes NO network call. This holds for `--dry-run` too.
+    const gate = resolveRdfFetchGate({ env: a.ctx.env });
+    if (!gate.enabled) {
+      werr(`kip: ingest-rdf: ${gate.reason ?? "remote RDF fetch is disabled"}\n`);
+      return 7;
+    }
+    try {
+      const fetched = await fetchRdfDocument(url, { env: a.ctx.env, fetchImpl: a.fetchImpl });
+      text = fetched.text;
+      bytesFetched = fetched.bytes;
+      // Provenance defaults to the fetched URL (explicit `--source` may override, mirroring file mode).
+      source = flagStr(flags, "source") ?? fetched.url;
+    } catch (e) {
+      if (e instanceof RdfFetchError) {
+        werr(`kip: ingest-rdf: ${e.message}\n`);
+        return rdfFetchExitCode(e.code); // pre-network refusal ⇒ 7; runtime refusal ⇒ 1 (N5, authors nothing)
+      }
+      throw e;
+    }
+  } else {
+    const filePath = isAbsolute(file!) ? file! : join(a.ctx.cwd, file!);
+    if (!existsSync(filePath)) {
+      werr(`kip: ingest-rdf: no such file: ${filePath}\n`);
+      return 2;
+    }
+    try {
+      text = readFileSync(filePath, "utf8");
+    } catch (e) {
+      werr(`kip: ingest-rdf: cannot read ${filePath}: ${e instanceof Error ? e.message : String(e)}\n`);
+      return 2;
+    }
+    source = flagStr(flags, "source");
+  }
 
   // Run the PURE reader once for honest reporting + the strict/skip gate (it is total). `parseErrors`
   // carries BOTH syntactic malformations AND semantic mapping refusals (reserved-channel / space-
-  // predicate forge attempts) so the one gate covers every N5 refusal.
+  // predicate forge attempts) so the one gate covers every N5 refusal — for fetched bytes identically.
   const { counts, parseErrors: errors } = rdfToAcquisition(text, { graph, source, skipMalformed });
+  const extra = bytesFetched !== undefined ? { source, bytesFetched } : {};
   if (errors.length > 0) {
     for (const e of errors.slice(0, 20)) werr(`kip: ingest-rdf: line ${e.line}: ${e.reason}\n`);
     if (errors.length > 20) werr(`kip: ingest-rdf: (+${errors.length - 20} more malformed/refused line(s))\n`);
     if (!skipMalformed) {
-      // N5: strict-fail the whole file. Nothing is authored (this is BEFORE any repo write).
+      // N5: strict-fail the whole document. Nothing is authored (this is BEFORE any repo write).
       werr(`kip: ingest-rdf: ${formatParseErrors(errors)} — refusing (use --skip-malformed to skip)\n`);
       return 1;
     }
   }
 
   if (flagBool(flags, "dry-run")) {
-    if (json) emitJson(write, { facts: [], ...counts, dryRun: true });
+    if (json) emitJson(write, { facts: [], ...counts, ...extra, dryRun: true });
     else write(renderRdf(counts, true));
     return 0;
   }
@@ -918,7 +970,7 @@ async function cmdIngestRdf(a: HandlerArgs): Promise<number> {
   if (skipMalformed) input.skipMalformed = true;
 
   const { facts } = await repo.runAcquisition(manifest, input, {});
-  if (json) emitJson(write, { facts, ...counts });
+  if (json) emitJson(write, { facts, ...counts, ...extra });
   else write(renderRdf(counts, false, facts.length));
   return 0;
 }
