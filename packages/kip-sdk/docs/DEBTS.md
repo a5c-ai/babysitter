@@ -1311,8 +1311,31 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   `validTo`/supersede facts when the document records that a design choice was later changed, or add a
   post-compile pass that invalidates an edge whose subject a later ADR/decision node supersedes — so stale
   edges project as historical rather than `status:"current"`.
-- **Status:** Open (tracked). The learned graph does not model temporal invalidation; superseded edges can
-  remain marked current.
+- **Status:** PARTIALLY ADDRESSED (ADR-B16). The **deterministic core is SHIPPED**: a `supersedes` edge
+  CONVENTION (`edgeKind:"supersedes"`, `from`=superseding/new node, `to`=superseded/old node — an ordinary
+  signed fact, not a reserved kind) plus a graph-QA **RETRIEVAL-layer** pass (`packages/kip-sdk/src/graph-qa/
+  index.ts`, consistent with D-60/D-66 — **proj.ts / `getNode` UNTOUCHED**). A node X is superseded iff a LIVE
+  `supersedes` edge has `to === X` (liveness reuses the D-68-correct `edgeExistenceFactId !== null`); X's own
+  `status` and its OUTGOING claim edges are then presented in the synthesis context as HISTORICAL — the
+  misleading `status:"current"` VALUE is **overridden** to `"superseded"` (not merely flagged, per the D-60
+  robustness lesson, so a value-reading synthesizer never reads it as current) with `superseded`/`supersededBy`
+  markers, and the `supersedes` edge is itself surfaced (citable "why"). **Supersession is EXPANDED across the
+  `same_as` equivalence class** (`repo.sameAsClass`), so a superseded decision described across two
+  `same_as`-merged documents does NOT leak an alias member's `status:"current"` un-overridden — no status datum
+  reads "current" for ANY class member, in BOTH target directions (a D-60-class robustness fix found by
+  adversarial review and empirically pinned by a test that fails without the expansion). The D-60 cross-document
+  conflict COMPOSITION is handled too (a conflicted+superseded prop's competing "current" value is overridden
+  while the conflict flag/candidates and non-`status` nameability survive). Deterministic (sorted edge eids +
+  sorted literal targets + sorted class members; min-existence-factId tie-break), read-only (INV-A1), N5-honest
+  (only a real live supersedes edge marks historical; a RETRACTED one reverts the target to current; a node
+  outside any superseded class is never touched). The **model EXTRACTION** of supersession
+  is the LIVE, `KIP_LEARN_LIVE`-gated, NONDETERMINISTIC half: the `encode`/`learner` prompts now instruct the
+  model to emit the `supersedes` edge when the document records a superseded choice, but efficacy is
+  **model-dependent** and not guaranteed. **Residual follow-ons (NOT closed):** `getNode`-direct supersession
+  surfacing (proj/`getNode` presenting the historical status itself, not only the retrieval layer); a
+  proj-level projection change; and TRUE bitemporal `validTo` invalidation (the learn path has no real
+  valid-time timestamps — `validFrom` is 0 — so this surfaces supersession via the relationship graph, not a
+  valid-time interval).
 
 ---
 

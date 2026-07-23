@@ -65,6 +65,28 @@ const FREE_TEXT_PROPS: ReadonlySet<string> = new Set(["content", "description", 
  */
 const DOCUMENTS_EDGE_KIND = "documents";
 
+/**
+ * D-61 (TEMPORAL SUPERSESSION). The CONVENTION EdgeKind marking that a LATER decision supersedes an
+ * EARLIER one: `edgeKind: "supersedes"`, `from` = the superseding (new) node, `to` = the superseded
+ * (old) node. It is an ORDINARY signed edge (authored like any other; the learn compiler already
+ * compiles arbitrary edges), and it is NOT a reserved kip kind — reserved are `same_as`/`not_same_as`/
+ * `documents`/`kip:*`, none of which this collides with. graph-QA READS it (never authors it, INV-A1)
+ * to present a superseded node's own `status` and its OUTGOING claim edges as HISTORICAL rather than
+ * `status:"current"`. Node X is SUPERSEDED iff a LIVE `supersedes` edge has `to === X`.
+ */
+const SUPERSEDES_EDGE_KIND = "supersedes";
+
+/**
+ * D-61 status vocabulary. The temporal `status` prop key whose misleading `"current"` value is
+ * OVERRIDDEN to `"superseded"` on a superseded subject — the exact live-demo shape (a superseded
+ * `writes` edge still carrying `status:"current"`). Overriding the VALUE (not merely attaching an
+ * opaque flag) is the D-60 robustness lesson: a value-reading synthesizer must never read the
+ * superseded relationship as current.
+ */
+const STATUS_PROP = "status";
+const CURRENT_STATUS_VALUE = "current";
+const SUPERSEDED_STATUS_VALUE = "superseded";
+
 /** The namespace prefix of a `doc:` concept node eid (`doc:<blob>#<slug>`, ADR-B10d). */
 const CONCEPT_EID_PREFIX = "doc:";
 
@@ -112,6 +134,21 @@ export interface RetrievedFact {
   conflicted?: boolean;
   /** For a conflicted cell: the candidate `factId`s (each also present in `usedFacts`). */
   candidates?: string[];
+  /**
+   * D-61: `true` iff this datum belongs to a subject the graph SUPERSEDES via a LIVE `supersedes` edge
+   * — a node that is a `supersedes` edge's `to`, or an OUTGOING claim edge (existence/edge-prop) whose
+   * `from` is such a node. Its status is HISTORICAL, not current: a `status:"current"` VALUE is
+   * overridden to `"superseded"` on such a datum (so a value-reading synthesizer never reads it as
+   * current, the D-60 lesson). NEVER set without a live `supersedes` edge (N5 — no fabricated
+   * supersession).
+   */
+  superseded?: boolean;
+  /**
+   * D-61: for a superseded datum, the signed `factId` of the LIVE `supersedes` edge that makes it
+   * historical — the citable "why" (also an element of `usedFacts`; the `supersedes` edge is itself
+   * surfaced as an ordinary edge datum, so the relationship is nameable, not just flagged).
+   */
+  supersededBy?: string;
 }
 
 /** The assembled, read-only context handed to the injected model synthesizer (§3.3). */
@@ -448,6 +485,72 @@ export async function answerQuestion(
     }
   }
 
+  // ── 2-super. D-61 TEMPORAL SUPERSESSION PRE-PASS (computed BEFORE assembly so the node loop, the §3a
+  // `same_as` prop-union, and the edge loop can ALL present a superseded subject's status/claims as
+  // historical). A node X is SUPERSEDED iff a LIVE `supersedes` edge has `to === X` (convention:
+  // `from` = the later/superseding decision, `to` = the earlier/superseded one). "LIVE" reuses the
+  // D-68-correct edge liveness — the edge survives the as-of traversal AND its existence fact resolves
+  // (`edgeExistenceFactId !== null`) — so a RETRACTED supersedes edge does NOT invalidate (N5: the
+  // target reverts to `status:"current"`), and a node with no live supersedes edge is never touched
+  // (no fabricated supersession). Read-only (only `edgeExistenceFactId`/`sameAsClass`, authors nothing —
+  // INV-A1). Each superseded node maps to the supersedes edge's OWN signed existence `FactId` — the
+  // citable "why" (also surfaced as an ordinary edge datum by the §3 edge loop, so it lands in
+  // `usedFacts`).
+  //
+  // STEP 1 — the LITERAL live supersedes targets (each supersedes edge's `to`, gated on D-68 liveness).
+  // Deterministic: iterate SORTED edge eids; on the rare tie of two live supersedes edges onto one node,
+  // keep the lexicographically smallest existence `FactId`.
+  const literalSupersededTargets = new Map<EID, FactId>();
+  for (const eid of [...edgeViews.keys()].sort()) {
+    const edge = edgeViews.get(eid)!;
+    if (edge.kind !== SUPERSEDES_EDGE_KIND) continue;
+    // eslint-disable-next-line no-await-in-loop -- sequential liveness read keeps the pass deterministic.
+    const supFactId = await repo.edgeExistenceFactId(eid, asOf);
+    if (supFactId === null) continue; // not live (retracted/invalid) ⇒ does NOT supersede (N5 / D-68).
+    const prev = literalSupersededTargets.get(edge.to);
+    if (prev === undefined || supFactId < prev) literalSupersededTargets.set(edge.to, supFactId);
+  }
+  // STEP 2 — EXPAND across the `same_as` equivalence class (the D-60-CLASS robustness the round-2 review
+  // demanded). `getNode(alias)` returns the CANONICAL merged view and the §3a prop-union reads EACH
+  // member's OWN cells, so if supersession stayed keyed on the LITERAL `to` eid only, a superseded
+  // decision described across two `same_as`-merged documents would leak an alias member's redirect-
+  // duplicate / own-cell `status:"current"` UN-overridden — a value-reading synthesizer would then read
+  // the superseded entity as CURRENT under the alias eid (the exact D-60 hole). So EVERY member of a
+  // superseded node's `same_as` class is itself superseded, mapped to the MIN live supersedes existence
+  // `FactId` across all superseding edges reaching ANY class member (a deterministic tie-break, so the
+  // choice is a pure function of the fact set regardless of authoring order). Reuses `repo.sameAsClass`
+  // (the SAME closure §3a reads — no new traversal), read-only (INV-A1), N5 (a class with no live
+  // supersedes edge is never added). Deterministic: sorted literal keys, sorted class members.
+  const supersededTargets = new Map<EID, FactId>();
+  for (const x of [...literalSupersededTargets.keys()].sort()) {
+    const supFactId = literalSupersededTargets.get(x)!;
+    // eslint-disable-next-line no-await-in-loop -- sequential class read keeps the expansion deterministic.
+    const members = (await repo.sameAsClass(x)).filter((m) => inScope(m));
+    const classMembers = [...new Set<EID>([x, ...members])].sort(); // always include x itself
+    for (const m of classMembers) {
+      const prev = supersededTargets.get(m);
+      if (prev === undefined || supFactId < prev) supersededTargets.set(m, supFactId);
+    }
+  }
+  /**
+   * D-61: the honest datum overlay for a node-prop / edge-prop whose SUBJECT (`subject` = the node's
+   * own eid, or an edge's `from`) the graph supersedes. A misleading `status:"current"` VALUE is
+   * OVERRIDDEN to `"superseded"` (so a value-reading synthesizer never reads it as current — the D-60
+   * robustness lesson), and the `superseded`/`supersededBy` markers are attached. A NON-superseded
+   * subject yields the plain value unchanged (N5 — never fabricate a supersession).
+   */
+  const supersededOverlay = (
+    subject: EID,
+    prop: string,
+    value: PropValue,
+  ): { value: PropValue; superseded?: true; supersededBy?: FactId } => {
+    const sup = supersededTargets.get(subject);
+    if (sup === undefined) return { value };
+    const honest =
+      prop === STATUS_PROP && value === CURRENT_STATUS_VALUE ? SUPERSEDED_STATUS_VALUE : value;
+    return { value: honest, superseded: true, supersededBy: sup };
+  };
+
   // ── 3. Assemble the context subgraph — every datum bound to its signed `FactId` (§3.2). The union
   // of all bound `FactId`s is the `usedFacts` retrieval envelope. ──────────────────────────────────
   const facts: RetrievedFact[] = [];
@@ -619,7 +722,9 @@ export async function answerQuestion(
         // other. Suppress it here; §3a records the correctly-attributed per-member conflicted-with-value
         // datums (both competing values present, neither plain). A non-contradicted prop records plainly.
         if (crossConflictFor(eid, prop) === undefined) {
-          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+          // D-61: present a superseded node's own status/props as HISTORICAL (overriding a misleading
+          // `status:"current"`); a non-superseded node records the plain value unchanged (N5).
+          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, ...supersededOverlay(eid, prop, seg.value) });
         }
       } else {
         // A `conflict` segment is surfaced as an explicit contradiction citing ALL candidates —
@@ -667,9 +772,25 @@ export async function answerQuestion(
           // side's value is never dropped) AND flag it `conflicted: true` with ALL competing candidate
           // `FactId`s (each also lands in `usedFacts` via `record`'s `candidates` fold). The within-cell
           // conflict datum carries no value; the cross-document datum is at least as recoverable.
-          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value, conflicted: true, candidates: crossCandidates });
+          // D-61 COMPOSITION (round-2 review #2): a prop that is BOTH cross-document-conflicted AND
+          // superseded whose competing value is `status:"current"` would otherwise enter the context as a
+          // plain (conflicted-flagged) "current" — the D-60 leak in another shape. Apply the same overlay
+          // here so a superseded member's "current" is overridden to "superseded" (no "current" survives)
+          // while the D-60 conflict flag + candidate list are preserved. A non-`status`/non-"current"
+          // competing value is UNCHANGED by the overlay, so D-60 nameability ("Acme vs Globex") is intact.
+          record({
+            factId: seg.assertedBy,
+            eid,
+            kind: "node-prop",
+            prop,
+            ...supersededOverlay(eid, prop, seg.value),
+            conflicted: true,
+            candidates: crossCandidates,
+          });
         } else {
-          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+          // D-61: a `same_as`-class member's own status/props are likewise presented historical when the
+          // member is a live `supersedes` edge's target (same overlay as the node loop; N5 otherwise).
+          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, ...supersededOverlay(eid, prop, seg.value) });
         }
       } else {
         const memberCandidates = [...seg.candidates];
@@ -687,7 +808,16 @@ export async function answerQuestion(
     // eslint-disable-next-line no-await-in-loop -- sequential read; binds the edge to its signed fact.
     const factId = await repo.edgeExistenceFactId(eid, asOf);
     if (factId !== null) {
-      record({ factId, eid, kind: "edge", edgeKind: edge.kind, from: edge.from, to: edge.to });
+      // D-61: an OUTGOING claim edge whose `from` is a superseded node is a HISTORICAL relationship —
+      // flag the existence datum (and point at the citable `supersedes` edge). The `supersedes` edge
+      // itself (whose `from` is the superseding node) is NOT flagged and stays current.
+      const rf: RetrievedFact = { factId, eid, kind: "edge", edgeKind: edge.kind, from: edge.from, to: edge.to };
+      const sup = supersededTargets.get(edge.from);
+      if (sup !== undefined) {
+        rf.superseded = true;
+        rf.supersededBy = sup;
+      }
+      record(rf);
     }
 
     // AN EDGE'S PROPS ARE FACTS TOO (§3.2). Recording only `edgeExistenceFactId` said an edge EXISTS
@@ -723,12 +853,14 @@ export async function answerQuestion(
         // An edge-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2). A
         // STRUCTURED value anchors; a free-text value does not (same rule as the node walk).
         if (!FREE_TEXT_PROPS.has(prop)) addStructuredValue(seg.value);
+        // D-61: an edge-prop on an OUTGOING claim edge of a superseded node (the misleading
+        // `status:"current"` in the live demo) is presented historical — override on `edge.from`.
         record({
           factId: seg.assertedBy,
           eid,
           kind: "edge-prop",
           prop,
-          value: seg.value,
+          ...supersededOverlay(edge.from, prop, seg.value),
           edgeKind: edge.kind,
           from: edge.from,
           to: edge.to,

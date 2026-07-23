@@ -1858,3 +1858,373 @@ describe("graph-qa D-60 — a cross-document `same_as` disagreement surfaces as 
     expect(employerSegA && "kind" in employerSegA ? employerSegA.kind : undefined).not.toBe("conflict");
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-61 — TEMPORAL SUPERSESSION. A learned graph can retain a superseded design-choice edge marked
+// `status:"current"`, so a `kip ask` presents a superseded choice as present-tense (the live demo saw
+// a pre-decision "Orchid writes Ledger" edge still `status:"current"` after the document's later
+// decision superseded it). The fix lives HERE, in the graph-QA RETRIEVAL layer (consistent with
+// D-60/D-66 — proj/`getNode` are UNTOUCHED): a `supersedes` EDGE (convention `edgeKind:"supersedes"`,
+// `from`=the superseding node, `to`=the superseded node) marks its `to` node HISTORICAL. For a
+// superseded node X, X's own `status` and its OUTGOING claim edges (edges whose `from` is X) are
+// presented in the assembled synthesis context as superseded/historical — the misleading
+// `status:"current"` value is OVERRIDDEN so a VALUE-READING synthesizer never reads it as current (the
+// D-60 robustness lesson: an opaque flag alongside a dominating `"current"` datum is not enough), and
+// the `supersedes` edge itself is surfaced so the "why" is citable. Liveness reuses the D-68-correct
+// edge existence (`edgeExistenceFactId !== null`): a RETRACTED supersedes edge does NOT invalidate
+// (N5 — the target reverts to `status:"current"`), and a node with no live supersedes edge keeps its
+// status unchanged (never a fabricated supersession). These tests assert on the ASSEMBLED CONTEXT
+// (`SynthesisContext.facts`) — a scripted synthesizer cannot answer from a datum it was never handed —
+// and on a VALUE-READING synth's prose, exactly the gap the D-60 round exposed.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-61 — a superseded design-choice edge is presented as HISTORICAL, not `status:\"current\"`", () => {
+  const QUESTION = "What is the Orchid to Ledger data flow?";
+  const OLD = "decision/orchid-writes-ledger"; // the superseded (earlier) decision — localId anchors the subject
+  const NEW = "decision/event-sourced-ledger"; // the superseding (later) decision
+  const LEDGER = "service/ledger";
+  const WRITES_EDGE = "edge/orchid-writes-ledger"; // OLD's OUTGOING claim edge, carrying status:"current"
+  const SUP_EDGE = "edge/new-supersedes-old"; // NEW --supersedes--> OLD
+
+  /** Seed the live-demo shape: an OLD decision node (status:"current") with an outgoing `writes` claim
+   *  edge (edge-prop status:"current") to LEDGER, a NEW decision node, and a `supersedes` edge NEW→OLD.
+   *  `seedOps` lets a test PERMUTE the authoring order (determinism). Returns the load-bearing factIds. */
+  async function seedSuperseded(
+    repo: KipRepo,
+    opts?: { withSupersedes?: boolean },
+  ): Promise<{ Fstatus: string; Fwrites: string; FwritesStatus: string; Fsup: string | null }> {
+    await assertNode(repo, OLD, "decision");
+    await assertProp(repo, OLD, "content", QUESTION); // §5.1 exact text-seed → recall finds OLD
+    const Fstatus = await assertProp(repo, OLD, "status", "current"); // X's OWN status
+    await assertNode(repo, LEDGER, "service");
+    await assertProp(repo, LEDGER, "content", "Ledger service");
+    const Fwrites = await assertEdge(repo, WRITES_EDGE, "writes", OLD, LEDGER); // OLD's outgoing claim edge
+    const FwritesStatus = await assertEdgeProp(repo, WRITES_EDGE, "status", "current"); // the MISLEADING edge-prop
+    await assertNode(repo, NEW, "decision");
+    await assertProp(repo, NEW, "content", "The ledger is now event-sourced.");
+    let Fsup: string | null = null;
+    if (opts?.withSupersedes !== false) {
+      Fsup = await assertEdge(repo, SUP_EDGE, "supersedes", NEW, OLD); // new supersedes old (from=new, to=old)
+    }
+    return { Fstatus, Fwrites, FwritesStatus, Fsup };
+  }
+
+  /** A VALUE-READING synthesizer: it reads the `writes` edge's `status` VALUE straight out of the
+   *  context and puts it in the prose — the exact naive behavior the D-60 round proved a bare flag does
+   *  not defend against. If the context still said "current", this prose would too. */
+  function captureAndRead(): { synth: AnswerQuestionDeps["synthesize"] & { mock: ReturnType<typeof vi.fn> }; seen: () => SynthesisContext | undefined } {
+    let ctx: SynthesisContext | undefined;
+    const synth = spySynth((c) => {
+      ctx = c;
+      const ws = c.facts.find((f) => f.kind === "edge-prop" && f.eid === WRITES_EDGE && f.prop === "status");
+      return {
+        answer: `The Orchid→Ledger write relationship is ${String(ws?.value ?? "unknown")}.`,
+        citations: ws
+          ? [{ factId: ws.factId, eid: WRITES_EDGE, prop: "status", edgeKind: "writes", quote: String(ws.value) }]
+          : [],
+      };
+    });
+    return { synth, seen: () => ctx };
+  }
+
+  it("POSITIVE: the superseded edge's status reads `superseded` (NOT `current`), it carries superseded/supersededBy, and the `supersedes` edge is citable", async () => {
+    const repo = freshRepo("d61-positive");
+    const { Fstatus, Fwrites, FwritesStatus, Fsup } = await seedSuperseded(repo);
+    const { synth, seen } = captureAndRead();
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    const ctx = seen();
+    expect(ctx).toBeDefined();
+
+    // ── The MISLEADING `status:"current"` value is GONE everywhere in the assembled context. This is the
+    // ROBUST assertion (not "a flag exists somewhere"): a value-reading synthesizer cannot read "current".
+    for (const f of ctx!.facts) {
+      if (f.prop === "status") expect(f.value).not.toBe("current");
+    }
+
+    // ── The OLD node's OWN status datum: overridden to "superseded", flagged, and pointing at the WHY.
+    const oldStatus = ctx!.facts.find((f) => f.kind === "node-prop" && f.eid === OLD && f.prop === "status");
+    expect(oldStatus).toBeDefined();
+    expect(oldStatus?.value).toBe("superseded");
+    expect(oldStatus?.superseded).toBe(true);
+    expect(oldStatus?.supersededBy).toBe(Fsup);
+    expect(oldStatus?.factId).toBe(Fstatus); // still the REAL signed fact (citable), just honestly presented
+
+    // ── The OUTGOING `writes` claim edge's status edge-prop: same override + markers.
+    const writesStatus = ctx!.facts.find((f) => f.kind === "edge-prop" && f.eid === WRITES_EDGE && f.prop === "status");
+    expect(writesStatus).toBeDefined();
+    expect(writesStatus?.value).toBe("superseded");
+    expect(writesStatus?.superseded).toBe(true);
+    expect(writesStatus?.supersededBy).toBe(Fsup);
+    expect(writesStatus?.factId).toBe(FwritesStatus);
+
+    // ── The `writes` edge EXISTENCE datum is itself flagged superseded (the relationship is historical).
+    const writesEdge = ctx!.facts.find((f) => f.kind === "edge" && f.eid === WRITES_EDGE);
+    expect(writesEdge).toBeDefined();
+    expect(writesEdge?.superseded).toBe(true);
+    expect(writesEdge?.supersededBy).toBe(Fsup);
+    expect(writesEdge?.factId).toBe(Fwrites);
+
+    // ── The `supersedes` edge itself is SURFACED (the citable "why") and is NOT itself superseded.
+    const supEdge = ctx!.facts.find((f) => f.kind === "edge" && f.edgeKind === "supersedes");
+    expect(supEdge).toBeDefined();
+    expect(supEdge?.factId).toBe(Fsup);
+    expect(supEdge?.from).toBe(NEW);
+    expect(supEdge?.to).toBe(OLD);
+    expect(supEdge?.superseded).not.toBe(true);
+    expect(result.usedFacts).toContain(Fsup); // citable
+
+    // ── A VALUE-READING synth's PROSE reads "superseded", NEVER "current" (the D-60 lesson, end to end).
+    expect(result.answer).toContain("superseded");
+    expect(result.answer).not.toContain("current");
+  });
+
+  it("N5 (NO supersedes edge): the same graph WITHOUT the supersedes edge keeps `status:\"current\"` unchanged — no fabricated supersession", async () => {
+    const repo = freshRepo("d61-n5-none");
+    const { Fstatus, FwritesStatus } = await seedSuperseded(repo, { withSupersedes: false });
+    const { synth, seen } = captureAndRead();
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    const ctx = seen();
+
+    const oldStatus = ctx!.facts.find((f) => f.factId === Fstatus);
+    expect(oldStatus?.value).toBe("current"); // UNCHANGED — no live supersedes edge exists
+    expect(oldStatus?.superseded).toBeUndefined();
+    const writesStatus = ctx!.facts.find((f) => f.factId === FwritesStatus);
+    expect(writesStatus?.value).toBe("current");
+    expect(writesStatus?.superseded).toBeUndefined();
+    // The value-reading synth honestly reads "current" here — there is nothing historical to override.
+    expect(result.answer).toContain("current");
+  });
+
+  it("N5 (RETRACTED supersedes edge): retracting the supersedes edge REVERTS the target to `status:\"current\"` (D-68 liveness)", async () => {
+    const repo = freshRepo("d61-n5-retract");
+    const { Fstatus, FwritesStatus, Fsup } = await seedSuperseded(repo);
+    // Retract the supersedes edge as an ORDINARY signed retract — its existence winner is gone, so the
+    // liveness gate (`edgeExistenceFactId !== null`) no longer fires and the target reverts to current.
+    await repo.retractFact({
+      type: "retract",
+      v: 1,
+      target: { kind: "edge", eid: SUP_EDGE, edgeKind: "supersedes", from: NEW, to: OLD },
+      validFrom: 0,
+      validTo: null,
+      replicaId: repo.replicaId,
+      provenance: fixtureProvenance(),
+    });
+    expect(await repo.edgeExistenceFactId(SUP_EDGE)).toBeNull(); // independently confirm it is not live
+    expect(Fsup).not.toBeNull();
+
+    const { synth, seen } = captureAndRead();
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = seen();
+
+    const oldStatus = ctx!.facts.find((f) => f.factId === Fstatus);
+    expect(oldStatus?.value).toBe("current"); // REVERTED — the supersedes edge is no longer live
+    expect(oldStatus?.superseded).toBeUndefined();
+    const writesStatus = ctx!.facts.find((f) => f.factId === FwritesStatus);
+    expect(writesStatus?.value).toBe("current");
+    expect(writesStatus?.superseded).toBeUndefined();
+    expect(result.answer).toContain("current");
+  });
+
+  it("N5 (DIFFERENT target): a supersedes edge targeting a DIFFERENT node does not invalidate OLD's unrelated `writes` edge", async () => {
+    const repo = freshRepo("d61-n5-different");
+    const OTHER = "decision/some-other-choice";
+    // OLD carries a live writes→LEDGER edge (status:"current"), reachable-linked to a SEPARATE cluster where
+    // NEW supersedes OTHER (never OLD). The supersedes edge IS retrieved, but OLD must stay current.
+    await assertNode(repo, OLD, "decision");
+    await assertProp(repo, OLD, "content", QUESTION);
+    const Fstatus = await assertProp(repo, OLD, "status", "current");
+    await assertNode(repo, LEDGER, "service");
+    await assertProp(repo, LEDGER, "content", "Ledger service");
+    const FwritesStatus = await assertEdgeProp(
+      repo,
+      WRITES_EDGE,
+      "status",
+      "current",
+      { validFrom: 0 },
+    );
+    await assertEdge(repo, WRITES_EDGE, "writes", OLD, LEDGER);
+    await assertNode(repo, OTHER, "decision");
+    await assertProp(repo, OTHER, "status", "current");
+    await assertNode(repo, NEW, "decision");
+    await assertEdge(repo, "edge/old-relates-other", "relates_to", OLD, OTHER); // links OTHER into retrieval
+    const Fsup = await assertEdge(repo, "edge/new-supersedes-other", "supersedes", NEW, OTHER);
+
+    let ctx: SynthesisContext | undefined;
+    const synth = spySynth((c) => {
+      ctx = c;
+      return { answer: "read", citations: [] };
+    });
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+
+    // The supersedes edge WAS retrieved (otherwise the test is vacuous)…
+    const supEdge = ctx!.facts.find((f) => f.kind === "edge" && f.edgeKind === "supersedes");
+    expect(supEdge).toBeDefined();
+    expect(supEdge?.to).toBe(OTHER);
+    // …but OLD (the DIFFERENT node) is untouched — its status and its writes edge stay current.
+    const oldStatus = ctx!.facts.find((f) => f.factId === Fstatus);
+    expect(oldStatus?.value).toBe("current");
+    expect(oldStatus?.superseded).toBeUndefined();
+    const writesStatus = ctx!.facts.find((f) => f.factId === FwritesStatus);
+    expect(writesStatus?.value).toBe("current");
+    expect(writesStatus?.superseded).toBeUndefined();
+    // OTHER, the genuine target, IS marked superseded (the mechanism fired, just on the right node).
+    const otherStatus = ctx!.facts.find((f) => f.kind === "node-prop" && f.eid === OTHER && f.prop === "status");
+    expect(otherStatus?.value).toBe("superseded");
+    expect(otherStatus?.superseded).toBe(true);
+    expect(otherStatus?.supersededBy).toBe(Fsup);
+  });
+
+  it("DETERMINISM: the assembled context is byte-identical across two different fact-authoring permutations", async () => {
+    // Permutation A: canonical order.
+    const repoA = freshRepo("d61-det-a");
+    await assertNode(repoA, OLD, "decision");
+    await assertProp(repoA, OLD, "content", QUESTION);
+    await assertProp(repoA, OLD, "status", "current");
+    await assertNode(repoA, LEDGER, "service");
+    await assertProp(repoA, LEDGER, "content", "Ledger service");
+    await assertEdge(repoA, WRITES_EDGE, "writes", OLD, LEDGER);
+    await assertEdgeProp(repoA, WRITES_EDGE, "status", "current");
+    await assertNode(repoA, NEW, "decision");
+    await assertProp(repoA, NEW, "content", "The ledger is now event-sourced.");
+    await assertEdge(repoA, SUP_EDGE, "supersedes", NEW, OLD);
+
+    // Permutation B: the SUPERSEDES edge + NEW node authored FIRST, LEDGER/edge interleaved differently.
+    const repoB = freshRepo("d61-det-b");
+    await assertNode(repoB, NEW, "decision");
+    await assertProp(repoB, NEW, "content", "The ledger is now event-sourced.");
+    await assertNode(repoB, OLD, "decision");
+    await assertEdge(repoB, SUP_EDGE, "supersedes", NEW, OLD);
+    await assertNode(repoB, LEDGER, "service");
+    await assertEdgeProp(repoB, WRITES_EDGE, "status", "current");
+    await assertEdge(repoB, WRITES_EDGE, "writes", OLD, LEDGER);
+    await assertProp(repoB, OLD, "content", QUESTION);
+    await assertProp(repoB, LEDGER, "content", "Ledger service");
+    await assertProp(repoB, OLD, "status", "current");
+
+    const capture = () => {
+      let ctx: SynthesisContext | undefined;
+      const synth = spySynth((c) => {
+        ctx = c;
+        return { answer: "read", citations: [] };
+      });
+      return { synth, seen: () => ctx };
+    };
+    const a = capture();
+    const b = capture();
+    await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: a.synth });
+    await answerQuestion({ question: QUESTION }, { repo: repoB, synthesize: b.synth });
+
+    // Compare the assembled context MODULO the replica-specific signed factIds (which differ per repo):
+    // the STRUCTURE — order, eids, kinds, values, superseded markers — must be identical.
+    const shape = (ctx: SynthesisContext | undefined): string =>
+      JSON.stringify(
+        (ctx?.facts ?? []).map((f) => ({
+          kind: f.kind,
+          eid: f.eid,
+          prop: f.prop ?? null,
+          value: f.value ?? null,
+          edgeKind: f.edgeKind ?? null,
+          from: f.from ?? null,
+          to: f.to ?? null,
+          superseded: f.superseded ?? false,
+        })),
+      );
+    expect(shape(a.seen())).toBe(shape(b.seen()));
+  });
+
+  // ── D-60-CLASS ROBUSTNESS (round-2 review). A superseded decision described across TWO
+  // `same_as`-merged documents (a realistic `kip link` graph). `getNode(alias)` returns the CANONICAL
+  // merged view (a redirect-duplicate status datum under the alias eid) and the §3a prop-union reads
+  // each member's OWN status cell — so if supersession stayed keyed on the LITERAL `supersedes.to` eid,
+  // an alias member's `status:"current"` would leak UN-overridden and a value-reading synthesizer would
+  // read the superseded entity as CURRENT under the alias. The pre-pass EXPANDS supersession across the
+  // `same_as` class, so NO status datum reads "current" for ANY class member — in BOTH target directions.
+  describe.each([
+    { label: "supersedes → CANONICAL member", targetPick: (a: string, b: string) => (a < b ? a : b) },
+    { label: "supersedes → ALIAS (non-canonical) member", targetPick: (a: string, b: string) => (a < b ? b : a) },
+  ])("same_as + supersedes ($label): no class member leaks status:\"current\"", ({ targetPick }) => {
+    const A = "decision/orchid-flow-doc-a"; // one document's node
+    const B = "decision/orchid-flow-doc-b"; // the other document's node — same real entity
+    const NEWER = "decision/event-sourced-ledger";
+    const WE = "edge/orchid-writes-ledger";
+
+    it("EVERY status datum across the class reads `superseded`, both members are marked, and the supersedes edge is citable", async () => {
+      const repo = freshRepo(`d61-sameas-${targetPick(A, B) === A ? "canon" : "alias"}`);
+      const target = targetPick(A, B); // the LITERAL supersedes `to` — canonical or alias per the case
+      await assertNode(repo, A, "decision");
+      await assertProp(repo, A, "content", QUESTION); // §5.1 recall seed on A
+      await assertProp(repo, A, "status", "current"); // A's own status
+      await assertNode(repo, B, "decision");
+      await assertProp(repo, B, "status", "current"); // B's own status (the alias member)
+      await assertEdge(repo, `same_as:${A}=${B}`, "same_as", A, B); // the cross-doc merge
+      await assertNode(repo, LEDGER, "service");
+      await assertProp(repo, LEDGER, "content", "Ledger service");
+      await assertEdge(repo, WE, "writes", A, LEDGER); // A's outgoing claim edge
+      await assertEdgeProp(repo, WE, "status", "current"); // the misleading edge-prop
+      await assertNode(repo, NEWER, "decision");
+      const Fsup = await assertEdge(repo, `edge/newer-supersedes-${target === A ? "a" : "b"}`, "supersedes", NEWER, target);
+
+      let ctx: SynthesisContext | undefined;
+      const synth = spySynth((c) => {
+        ctx = c;
+        // A VALUE-READING synth: it echoes every status value it can see. If ANY member still said
+        // "current", this prose would too — the exact D-60 failure mode.
+        const statuses = c.facts.filter((f) => f.prop === "status").map((f) => String(f.value));
+        return { answer: `statuses: ${statuses.join(", ")}`, citations: [] };
+      });
+      const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+      expect(result.abstained).toBe(false);
+
+      // THE HOLE: no status datum — node-prop OR edge-prop, canonical OR alias — reads "current".
+      const statusData = ctx!.facts.filter((f) => f.prop === "status");
+      expect(statusData.length).toBeGreaterThan(0);
+      for (const f of statusData) {
+        expect(f.value).not.toBe("current");
+        expect(f.value).toBe("superseded");
+        expect(f.superseded).toBe(true);
+        expect(f.supersededBy).toBe(Fsup);
+      }
+      // Both class members are covered (canonical view, alias own-cell, and the redirect-duplicate).
+      expect(statusData.some((f) => f.eid === A)).toBe(true);
+      expect(statusData.some((f) => f.eid === B)).toBe(true);
+      // The value-reading prose never reads "current".
+      expect(result.answer).not.toContain("current");
+      expect(result.answer).toContain("superseded");
+      // The supersedes edge is citable.
+      expect(result.usedFacts).toContain(Fsup);
+    });
+  });
+
+  it("DETERMINISM (tie-break): with TWO live supersedes edges onto one node, `supersededBy` is the MIN existence factId", async () => {
+    const X = "decision/orchid-writes-ledger";
+    const NEW1 = "decision/newer-one";
+    const NEW2 = "decision/newer-two";
+    const repo = freshRepo("d61-min-factid");
+    await assertNode(repo, X, "decision");
+    await assertProp(repo, X, "content", QUESTION);
+    const Fx = await assertProp(repo, X, "status", "current");
+    await assertNode(repo, NEW1, "decision");
+    await assertNode(repo, NEW2, "decision");
+    const Fsup1 = await assertEdge(repo, "edge/new1-supersedes-x", "supersedes", NEW1, X);
+    const Fsup2 = await assertEdge(repo, "edge/new2-supersedes-x", "supersedes", NEW2, X);
+    const expectedMin = Fsup1 < Fsup2 ? Fsup1 : Fsup2;
+
+    let ctx: SynthesisContext | undefined;
+    const synth = spySynth((c) => {
+      ctx = c;
+      return { answer: "read", citations: [] };
+    });
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+
+    const xStatus = ctx!.facts.find((f) => f.factId === Fx);
+    expect(xStatus?.value).toBe("superseded");
+    expect(xStatus?.superseded).toBe(true);
+    // The tie is broken deterministically toward the lexicographically smallest supersedes existence fact.
+    expect(xStatus?.supersededBy).toBe(expectedMin);
+    // Both supersedes edges are still surfaced/citable (nothing is dropped).
+    expect(ctx!.facts.filter((f) => f.kind === "edge" && f.edgeKind === "supersedes")).toHaveLength(2);
+  });
+});

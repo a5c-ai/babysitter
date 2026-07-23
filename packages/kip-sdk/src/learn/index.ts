@@ -473,6 +473,23 @@ const GRAPH_CONTRACT =
   "envelope fields (`type`, `v`, `validFrom`, `validTo`, `replicaId`, `provenance`); they are not yours.";
 
 /**
+ * D-61 (TEMPORAL SUPERSESSION) extraction instruction — LIVE, model-coupled, and best-effort. When a
+ * document records that a design choice / decision was LATER changed or superseded, the model is asked
+ * to emit a `supersedes` edge from the NEW (superseding) node to the OLD (superseded) one, and to keep
+ * marking genuinely-current claims `status:"current"`. This is the OPT-IN, `KIP_LEARN_LIVE`-gated,
+ * NONDETERMINISTIC half of D-61; the deterministic, testable core is the graph-QA RETRIEVAL-layer
+ * surfacing (a live `supersedes` edge presents the target's status/claims as historical). Efficacy of
+ * the extraction depends on the model — this prompt does not guarantee the edge is emitted.
+ */
+const SUPERSESSION_RULE =
+  "TEMPORAL SUPERSESSION: if the DOCUMENT records that a design choice or decision was LATER changed, " +
+  "reversed or superseded by a subsequent decision, emit a `supersedes` edge whose `from` is the NEW " +
+  "(superseding) node and whose `to` is the OLD (superseded) node, so a reader can tell the earlier " +
+  "choice is historical. Only do this when the DOCUMENT itself states the supersession — never invent " +
+  "one. Keep marking genuinely-current claims `status:\"current\"`; do not downgrade a claim the " +
+  "DOCUMENT still presents as in force.";
+
+/**
  * The document block. `document: string` is NOT an accident of typing — it makes "prompt the model
  * with an absent document" UNREPRESENTABLE: the only producer is {@link requireDocument}, which fails
  * the iteration instead of rendering an apology (ADR-B10b). There is deliberately no `null` branch.
@@ -490,6 +507,7 @@ function renderEncodePrompt(document: string): string {
       "RECONSTRUCT the document's knowledge. Emit only entities and relations the DOCUMENT states; " +
       "never add background knowledge.",
     GRAPH_CONTRACT,
+    SUPERSESSION_RULE,
     "",
     renderDocumentBlock(document),
     "",
@@ -515,6 +533,7 @@ function renderLearnerPrompt(document: string, current: AssertInput[], loss: unk
       "faithfully. Keep every `eid` from the CURRENT graph that still applies, so the improved graph " +
       "folds onto the same entities. Emit the full replacement graph, not a diff.",
     GRAPH_CONTRACT,
+    SUPERSESSION_RULE,
     "",
     lossLine,
     "",
