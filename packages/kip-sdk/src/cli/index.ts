@@ -17,6 +17,7 @@ import { isAbsolute, join } from "node:path";
 import { KipError, open } from "../index";
 import { codeMinerDispatch } from "../miner/code-miner";
 import { linkResolver, linkResolverDispatch, type NodeInventory } from "../linker/entity-linker";
+import { formatParseErrors, rdfIngestDispatch, rdfToAcquisition } from "../rdf/ntriples";
 import {
   DEFAULT_RESOLVE_MAX_PAIRS,
   DEFAULT_RESOLVE_MIN_CONFIDENCE,
@@ -121,7 +122,7 @@ interface HandlerArgs {
 
 const USAGE =
   "usage: kip [GLOBAL_OPTS] <command> [ARGS]\n" +
-  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index, link, resolve, learn\n";
+  "commands: init, open, assert, retract, get, query, recall, asof, fsck, rollup, sync, ask, index, link, resolve, learn, ingest-rdf\n";
 
 /**
  * Parse `argv` (already `process.argv.slice(2)`), dispatch the named subcommand, and resolve with the
@@ -202,6 +203,8 @@ export async function runCli(argv: string[], opts: RunCliOptions): Promise<numbe
         return await cmdResolve(args);
       case "learn":
         return await cmdLearn(args);
+      case "ingest-rdf":
+        return await cmdIngestRdf(args);
       default:
         werr(`kip: unknown command '${command}'\n${USAGE}`);
         return 2;
@@ -829,6 +832,118 @@ function resolveLinkerManifest(): MicroagentManifest {
       "ERR_UNREGISTERED_MANIFEST",
       "kip-linker manifest not found; the kip CLI bundle is incomplete",
     );
+  }
+  return JSON.parse(readFileSync(p, "utf8")) as MicroagentManifest;
+}
+
+// ===========================================================================
+// ingest-rdf (D-67) — ingest a LOCAL N-Triples (.nt) file as signed, reversible facts via runAcquisition.
+// ===========================================================================
+
+/**
+ * `kip ingest-rdf <file> [--graph <id>] [--source <uri>] [--skip-malformed] [--dry-run] [--json]` — the
+ * deterministic, dependency-free RDF / linked-data ingestion path (D-67; ADR-B11 "RDF forward-design").
+ * Reads a LOCAL N-Triples file (I/O), parses it with the zero-dep, PURE reader (`src/rdf/ntriples.ts`),
+ * and authors the mapped `AcquisitionResult` through the SAME `runAcquisition` write path the code miner
+ * and entity linker use: IRIs are global eids, `owl:sameAs` becomes a reversible `same_as` edge on the
+ * linker's own union-find channel, `rdf:type` sets the subject kind, other IRI predicates become edges,
+ * and literals become node props. The reader authors nothing (INV-A1); only `runAcquisition` writes.
+ *
+ * SCOPE (D-67, honestly bounded): LOCAL-FILE N-Triples ONLY. Remote fetch / SPARQL / public-graph
+ * querying and Turtle / JSON-LD are OUT OF SCOPE this pass (deferred follow-ons; see DEBTS D-67).
+ *
+ * N5 policy: malformed lines FAIL LOUD by default — the line-numbered reasons print to stderr and the
+ * command exits 1 WITHOUT authoring anything. `--skip-malformed` downgrades them to reported skips and
+ * ingests the well-formed triples. `--dry-run` parses + reports the would-be facts without authoring.
+ */
+async function cmdIngestRdf(a: HandlerArgs): Promise<number> {
+  const { flags, positionals, write, werr, json } = a;
+
+  // Usage validation of <file> first (mirrors cmdLearn): a missing/absent file is exit 2, side-effect-free.
+  const file = positionals[1];
+  if (!file) {
+    werr("kip: ingest-rdf requires a <file>\n");
+    return 2;
+  }
+  const filePath = isAbsolute(file) ? file : join(a.ctx.cwd, file);
+  if (!existsSync(filePath)) {
+    werr(`kip: ingest-rdf: no such file: ${filePath}\n`);
+    return 2;
+  }
+
+  let text: string;
+  try {
+    text = readFileSync(filePath, "utf8");
+  } catch (e) {
+    werr(`kip: ingest-rdf: cannot read ${filePath}: ${e instanceof Error ? e.message : String(e)}\n`);
+    return 2;
+  }
+
+  const graph = flagStr(flags, "graph");
+  const source = flagStr(flags, "source");
+  const skipMalformed = flagBool(flags, "skip-malformed");
+
+  // Run the PURE reader once for honest reporting + the strict/skip gate (it is total). `parseErrors`
+  // carries BOTH syntactic malformations AND semantic mapping refusals (reserved-channel / space-
+  // predicate forge attempts) so the one gate covers every N5 refusal.
+  const { counts, parseErrors: errors } = rdfToAcquisition(text, { graph, source, skipMalformed });
+  if (errors.length > 0) {
+    for (const e of errors.slice(0, 20)) werr(`kip: ingest-rdf: line ${e.line}: ${e.reason}\n`);
+    if (errors.length > 20) werr(`kip: ingest-rdf: (+${errors.length - 20} more malformed/refused line(s))\n`);
+    if (!skipMalformed) {
+      // N5: strict-fail the whole file. Nothing is authored (this is BEFORE any repo write).
+      werr(`kip: ingest-rdf: ${formatParseErrors(errors)} — refusing (use --skip-malformed to skip)\n`);
+      return 1;
+    }
+  }
+
+  if (flagBool(flags, "dry-run")) {
+    if (json) emitJson(write, { facts: [], ...counts, dryRun: true });
+    else write(renderRdf(counts, true));
+    return 0;
+  }
+
+  // Thread the RDF reader as the repo's dispatch seam via OpenOptions (mirrors cmdIndex/cmdLink).
+  const openRepoWithRdf: OpenRepoFn = (o) => a.openRepo({ ...o, dispatchMicroagent: rdfIngestDispatch });
+  const resolved = await resolveRepo(a.ctx, openRepoWithRdf, { requireInitialized: true, requireKeyring: true });
+  const repo = resolved.repo;
+
+  // Idempotently register the bundled manifest (a byte-identical re-registration is a no-op, INV-7).
+  const manifest = resolveRdfManifest();
+  await repo.registerFunctionality(`kip-rdf:${manifest.name}`, manifest);
+
+  const input: { ntriples: string; graph?: string; source?: string; skipMalformed?: boolean } = { ntriples: text };
+  if (graph !== undefined) input.graph = graph;
+  if (source !== undefined) input.source = source;
+  if (skipMalformed) input.skipMalformed = true;
+
+  const { facts } = await repo.runAcquisition(manifest, input, {});
+  if (json) emitJson(write, { facts, ...counts });
+  else write(renderRdf(counts, false, facts.length));
+  return 0;
+}
+
+/** The human render for `kip ingest-rdf` — by-kind counts (honest reporting, ADR-B10e). */
+function renderRdf(
+  counts: { triples: number; nodes: number; edges: number; sameAs: number; props: number; typed: number; skipped: number },
+  dryRun: boolean,
+  factCount?: number,
+): string {
+  const head = dryRun
+    ? `would ingest ${counts.triples} triple(s)`
+    : `ingested ${counts.triples} triple(s) as ${factCount ?? 0} fact(s)`;
+  const skip = counts.skipped > 0 ? `, skipped: ${counts.skipped} malformed line(s)` : "";
+  return (
+    `${head}: nodes: ${counts.nodes}, edges: ${counts.edges}, same_as: ${counts.sameAs}, ` +
+    `props: ${counts.props}, typed: ${counts.typed}${skip}\n`
+  );
+}
+
+/** Resolve the bundled `kip-rdf` `MicroagentManifest` (mirrors `resolveLinkerManifest`). */
+function resolveRdfManifest(): MicroagentManifest {
+  const p = join(__dirname, "microagents", "kip-rdf", "microagent.json");
+  if (!existsSync(p)) {
+    throw new KipError("ERR_UNREGISTERED_MANIFEST", "kip-rdf manifest not found; the kip CLI bundle is incomplete");
   }
   return JSON.parse(readFileSync(p, "utf8")) as MicroagentManifest;
 }

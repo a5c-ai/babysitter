@@ -30,6 +30,9 @@ const BOOLEAN_FLAGS = new Set([
   // `kip resolve confirm/reject` (ADR-B12): operator override that skips the outstanding-candidate
   // guard (off by default; authors a real same_as/not_same_as without a quarantine lifecycle).
   "force",
+  // `kip ingest-rdf` (D-67): downgrade malformed N-Triples lines from a strict fail (N5, exit 1) to
+  // reported per-line skips, ingesting the well-formed triples.
+  "skip-malformed",
 ]);
 
 /** Value flags that may appear MORE THAN ONCE, accumulated into an array (spec §4: `--root-key`,
@@ -96,6 +99,10 @@ const VALUE_FLAGS = new Set([
   "top-k",
   "max-pairs",
   "min-confidence",
+  // `kip ingest-rdf` (D-67): the blank-node namespace (a stable per-file skolem namespace; defaults to
+  // a content hash) and the data-resource source uri recorded on every authored fact's provenance.
+  "graph",
+  "source",
 ]);
 
 /** Short aliases → canonical long flag name. */

@@ -1525,8 +1525,29 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
 - **Suggested fix:** Build an RDF / linked-data ingestion path that reads `owl:sameAs` statements and authors
   them onto the existing `sameAs` channel (IRIs as global eids), reusing the entity linker's reversible-edge
   machinery, so external linked-data graphs can join kip's memory.
-- **Status:** Open (tracked). Designed to reuse the `sameAs` channel (IRIs as global eids); no RDF/linked-data
-  ingestion path is built.
+- **Status:** RESOLVED for LOCAL-FILE N-Triples ingestion (ADR-B14); remote fetch + Turtle/JSON-LD deferred.
+  Built a deterministic, dependency-free **N-Triples reader** (`src/rdf/ntriples.ts`) + a `kip ingest-rdf <file>
+  [--graph <id>] [--source <uri>] [--skip-malformed] [--dry-run] [--json]` CLI that authors an external RDF
+  graph as signed, reversible kip facts through the EXISTING `runAcquisition` path (INV-A1: the reader is a pure
+  function; only `runAcquisition` writes), IRIs as global eids VERBATIM: **`owl:sameAs`** → a reversible
+  `same_as` edge on the linker's channel (joins two IRIs into one identity class — verified live via
+  `getNode`/`sameAsClass`); `rdf:type` → node kind + lossless `rdf:type` edges; other IRI-object predicates →
+  edges (predicate IRI as edgeKind); literal objects → node props with datatype/lang preserved as adjacent
+  sidecar props (never dropped, N5). Deterministic (sorted `proposed`, content-derived edge eids, idempotent
+  re-ingest); malformed input strict-fails the whole file by default (line-numbered, exit 1, authors nothing)
+  or reports skips under `--skip-malformed`. **Untrusted-data integrity (adversarial-review-hardened):** because
+  ingested RDF is external/untrusted, a generic predicate can NEVER mint a fact on a RESERVED kip channel — the
+  reader refuses any non-`owl:sameAs` predicate whose edgeKind (or any `rdf:type` object) equals a reserved kind
+  (`same_as`, `not_same_as`, `documents`, `kip:same_as?`, `kip:conflict`, enumerated from kip's own constants),
+  and refuses any predicate whose decoded IRI contains a space (closing a datatype/lang sidecar-key collision) —
+  so external data cannot forge an identity join, inject a `not_same_as` veto, impersonate a quarantine
+  candidate, or stamp a `kip:conflict` kind. **Honest boundaries:** read-level un-merge after a `same_as` retract
+  is the pre-existing **[[D-68]]** limitation (D-67 delivers FACT-level reversibility); `getNode` after a join
+  is a canonical-representative REDIRECT, not a cross-class prop-union (that is the `sameAsClass`/graph-QA
+  feature, D-66); multi-valued RDF props are LWW at read (lossless at fact). **Deferred (now the remaining D-67
+  surface):** remote RDF fetch / SPARQL / public-graph querying (network + untrusted-download); Turtle /
+  JSON-LD; curie normalization; a multi-value prop read model. See ADR-B14 and
+  `reviews/d67-rdf-ingestion-report.md`.
 
 ### D-68: a Layer-2 retract does not re-project the merge state — read-level reversibility (re-merge after a veto, un-merge after a confirm) needs a proj change
 

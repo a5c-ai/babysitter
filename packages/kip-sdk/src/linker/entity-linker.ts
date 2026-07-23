@@ -61,8 +61,10 @@ const LINKER_AUTHOR = "kip-linker@1.0.0";
 /** The placeholder replicaId on every emitted candidate — the orchestrator re-stamps it (INV-A1). */
 const LINKER_REPLICA = "kip-linker";
 
-/** The concept→code edge kind (ADR-B11a): a concept DOCUMENTS an implementation. */
-const DOCUMENTS_EDGE_KIND = "documents";
+/** The concept→code edge kind (ADR-B11a): a concept DOCUMENTS an implementation. Exported so other
+ *  acquisition paths (e.g. the D-67 RDF reader) can enumerate it in their reserved-edge-kind guard
+ *  from this single source of truth rather than re-hardcoding the literal (drift-proof). */
+export const DOCUMENTS_EDGE_KIND = "documents";
 
 /** A placeholder source `Provenance` — the orchestrator re-stamps its own signature at commit (INV-A1). */
 function placeholderProvenance(): Provenance {
