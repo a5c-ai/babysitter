@@ -2158,14 +2158,24 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     const rb = sameAsFind(b);
     if (ra !== rb) sameAsParent.set(ra, rb);
   }
-  for (const f of facts) {
-    if (f.type === "retract") continue;
-    if (f.target.kind !== "edge") continue;
-    const t = f.target as Extract<Target, { kind: "edge" }>;
-    if (t.edgeKind !== "same_as") continue;
-    if (!t.from || !t.to) continue;
-    if (f.value !== undefined && !isTruthyExistence(f.value)) continue;
-    sameAsUnion(t.from, t.to);
+  // D-68: fold ONLY over edges whose EXISTENCE is currently LIVE, using the SAME liveness predicate
+  // `getEdge`'s prop-gating, `traverse`, and `edgeExistenceFactId` all apply — `edgeValidAt(eid, null)`
+  // (the edge's existence segments resolve to a TRUTHY value "now"). The pre-D-68 loop RAW-iterated
+  // `same_as` asserts gated only on `f.type !== "retract"` + `isTruthyExistence`, so it folded a
+  // retracted / LWW-superseded-to-falsy / M8-demoted edge forever — a `same_as` retract never
+  // un-merged at READ level (the D-68 bug). Liveness now lives in ONE place (`edgeValidAt` →
+  // `existsAtInstant` → `computeEdgeExistSegments`, which honours retract/demotion/LWW exactly as
+  // `getEdge` does). A live edge's kind/from/to come from `getEdge`'s LWW-winner resolution, so a
+  // CONFLICTED-existence edge (`getEdge` ⇒ KIP_CONFLICT_KIND) is NOT an unambiguous `same_as` and does
+  // NOT silently fold a merge (conservative, consistent with `getEdge`). Iterating edge eids in SORTED
+  // order (as the adjacency materialization below already does) keeps the fold byte-identical across
+  // any fact permutation (INV-A11(a)) — the closure and canonical-EID min are order-independent anyway.
+  for (const edgeEid of [...edgeEids].sort()) {
+    if (!edgeValidAt(edgeEid, null)) continue;
+    const view = getEdge(edgeEid);
+    if (!view || view.kind !== "same_as") continue;
+    if (!view.from || !view.to) continue;
+    sameAsUnion(view.from, view.to);
   }
   function nsLocalKey(eid: EID): string {
     const slash = eid.indexOf("/");
@@ -2221,14 +2231,17 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
    * scoped to the named pair's own correction cell, not the whole transitive class.
    */
   const notSameAsPairs = new Set<string>();
-  for (const f of facts) {
-    if (f.type === "retract") continue;
-    if (f.target.kind !== "edge") continue;
-    const t = f.target as Extract<Target, { kind: "edge" }>;
-    if (t.edgeKind !== "not_same_as") continue;
-    if (!t.from || !t.to) continue;
-    if (f.value !== undefined && !isTruthyExistence(f.value)) continue;
-    const [min, max] = nsLocalKey(t.from) <= nsLocalKey(t.to) ? [t.from, t.to] : [t.to, t.from];
+  // D-68 (see the `same_as` fold above for the full rationale): dispute ONLY over edges whose
+  // existence is LIVE by the SAME `edgeValidAt(eid, null)` predicate. A retract of a `not_same_as(a,b)`
+  // veto (edgeValidAt => false) drops it here, so `getNode(a)`/`getNode(b)` stop surfacing
+  // `kip:conflict` - the read-level un-veto the pre-D-68 raw-fact loop never did. A conflicted-existence
+  // edge (`getEdge` => KIP_CONFLICT_KIND) is not an unambiguous `not_same_as` veto and does not dispute.
+  for (const edgeEid of [...edgeEids].sort()) {
+    if (!edgeValidAt(edgeEid, null)) continue;
+    const view = getEdge(edgeEid);
+    if (!view || view.kind !== "not_same_as") continue;
+    if (!view.from || !view.to) continue;
+    const [min, max] = nsLocalKey(view.from) <= nsLocalKey(view.to) ? [view.from, view.to] : [view.to, view.from];
     notSameAsPairs.add(`${min} ${max}`);
   }
   const disputedEids = new Set<EID>();

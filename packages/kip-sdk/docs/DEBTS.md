@@ -1578,8 +1578,20 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   so a retracted `same_as` auto-un-merges and a retracted `not_same_as` auto-clears the `kip:conflict`. Until
   then, read-level re-merge/un-merge after a Layer-2 retract is a documented follow-on, and reversibility is
   correctly described as fact-level only.
-- **Status:** Open (tracked). Layer-2 links are reversible at the fact level; read-level re-projection of the
-  merge/dispute state after a retract needs a proj change and is deferred.
+- **Status:** RESOLVED (ADR-B15). proj's `same_as` union-find and `not_same_as` dispute loop now fold/dispute
+  ONLY over edges that are LIVE by `edgeValidAt(eid, null)` (the segment-based existence authority
+  `getEdge`/`traverse`/`edgeExistenceFactId` already share — it honours `retract`, an LWW-superseded-to-falsy
+  existence, AND M8 demotion), reading `kind`/`from`/`to` from `getEdge`'s LWW winner (so a conflicted-existence
+  edge is skipped, never a silent merge). So a retracted `same_as` now auto-un-merges at READ level
+  (`getNode`/`sameAsClass` re-project) and a retracted `not_same_as` auto-clears the `kip:conflict` — completing
+  the read-level reversibility the linker (ADR-B11), Layer-2 resolver (ADR-B12), and RDF ingestion (ADR-B14) all
+  previously had only at the fact level. Convergence-safe: the fold iterates `[...edgeEids].sort()` and the
+  canonical/`sameAsClass` output is order-invariant (byte-identity preserved); the NUL pair-key separator and LF
+  are intact; the ~45-line diff is localized to the two loops with no declaration reordering. Adversarial
+  convergence critic 93/100 (no determinism break, no silent-merge-on-conflicted-edge); the one minor (the
+  LWW-to-falsy / demotion parity the code comment claims was only inherited via the shared seam) closed by a
+  dedicated LWW-superseded-to-falsy test. Live-edge behavior unchanged. Suite 959 passed | 8 skipped. See
+  ADR-B15 and `reviews/d68-read-level-unmerge-report.md`.
 
 ### D-69: the Layer-2 resolver's `same`→quarantine recall is model-tier-dependent — the shipped-default `haiku` does not reliably honour `--json-schema`, so it under-fires on true matches (fails SAFE)
 
