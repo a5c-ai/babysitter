@@ -103,6 +103,7 @@ export function generateOhMyPiManifest(manifest: ResolvedManifest, targetName = 
       'README.md',
       'AGENTS.md',
       'extensions/',
+      ...(manifest.name === 'babysitter' ? ['agents/'] : []),
       'skills/',
       'commands/',
       'scripts/',

@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 import { execSync } from "child_process";
 import * as path from "path";
 import { initI18n, t } from "./i18n.js";
+import { OmpDeterministicDriver } from "./driver.js";
 
 const PLUGIN_ROOT = path.resolve(__dirname, "..");
 
@@ -55,6 +56,113 @@ function runProxiedHook(
 
 export default function activate(pi: ExtensionAPI): void {
   initI18n(pi);
+  const driver = new OmpDeterministicDriver({
+    cwd: process.cwd(),
+    runCli: async (args, timeoutMs) => {
+      const result = await pi.exec("babysitter", args, {
+        cwd: process.cwd(),
+        timeout: timeoutMs ?? 120_000,
+      });
+      return {
+        code: result.code,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        killed: result.killed,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "babysitter_agent_complete",
+    label: "Complete owned Babysitter agent effect",
+    description: "Durably deliver the final value for the one Babysitter agent effect identified by a BABYSITTER_OMP_BRIDGE descriptor. Call only when the assignment explicitly provides that descriptor.",
+    parameters: pi.zod.object({
+      runDir: pi.zod.string(),
+      effectId: pi.zod.string(),
+      invocationKey: pi.zod.string(),
+      ownerName: pi.zod.string(),
+      dispatchToken: pi.zod.string(),
+      model: pi.zod.string().optional(),
+      value: pi.zod.unknown(),
+    }),
+    approval: "exec",
+    async execute(_toolCallId, params) {
+      try {
+        const completion = await driver.completeAgentOwnerValue(params);
+        return {
+          content: [{ type: "text", text: JSON.stringify(completion, null, 2) }],
+          details: completion,
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
+          details: { handled: true },
+          isError: true,
+        };
+      }
+    },
+  });
+
+  pi.registerTool({
+    name: "babysitter_drive",
+    label: "Babysitter deterministic driver",
+    description: "Deterministically execute and checkpoint Babysitter shell effects, post completed results, and iterate until an agent or human decision is required.",
+    parameters: pi.zod.object({
+      i: pi.zod.string().describe("Concise intent"),
+      runDir: pi.zod.string().describe("Absolute Babysitter run directory"),
+    }),
+    approval: "exec",
+    async execute(_toolCallId, params) {
+      try {
+        const result = await driver.drive(params.runDir);
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          details: result,
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
+          details: { state: "operator_attention" },
+          isError: true,
+        };
+      }
+    },
+  });
+
+  pi.on("tool_call", async (event) => {
+    if (event.toolName !== "task") return;
+    const decision = await driver.claimAgentToolCall(event.input, event.toolCallId);
+    if (decision.block) return { block: true, reason: decision.reason };
+  });
+
+  pi.on("tool_result", async (event) => {
+    if (event.toolName !== "task") return;
+    try {
+      const completion = await driver.completeAgentToolCall({
+        toolCallId: event.toolCallId,
+        input: event.input,
+        details: event.details,
+        isError: event.isError,
+      });
+      if (!completion.handled) return;
+      const message = completion.continuation
+        ? `Babysitter deterministic continuation:\n${JSON.stringify(completion.continuation, null, 2)}`
+        : completion.reason;
+      if (!message) return;
+      return {
+        content: [...event.content, { type: "text", text: message }],
+      };
+    } catch (error) {
+      return {
+        content: [
+          ...event.content,
+          { type: "text", text: `Babysitter driver stopped: ${error instanceof Error ? error.message : String(error)}` },
+        ],
+        isError: true,
+      };
+    }
+  });
+
 
   // ---------------------------------------------------------------------------
   // Trigger session-start hook on activation
