@@ -49,6 +49,10 @@ Engineering Specializations (give a proper name to each specialization): (not un
 [x] Porting, Refactoring, Modernization, Migration, etc.
 [x] Performance Optimization, Profiling, Benchmarking, Memory Management, Memory Leaks, Memory Leak Detection, Memory Leak Fixing, etc.
 [x] Security Research, Vulnerability Research, Vulnerability Detection, Vulnerability Fixing, etc.
+[x] Backend Development, APIs, Domain-Driven Systems - now has its first process (backend-service-delivery.js)
+    # library/specializations/backend-development/
+[x] Shared Cross-Domain Assets - home for assets useful across many specializations (first skill: kip-librarian)
+    # library/specializations/shared/
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
