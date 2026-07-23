@@ -1634,3 +1634,227 @@ describe("graph-qa D-66 — a `same_as`-linked entity is answerable from the UNI
     expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-60 — CROSS-DOCUMENT CONTRADICTION surfacing (extends the D-66 §3a `same_as` prop-union). Two
+// documents' facts about the SAME real-world entity, joined by a signed `same_as` edge, genuinely
+// DISAGREE about a scalar prop (`doc:A#ed` employer="Acme", `doc:B#ed` employer="Globex"). Before this
+// change the prop-union recorded EACH member's value as a plain, compatible fact and the disagreement
+// was never flagged — `getNode(A)` is a canonical REDIRECT (proj node-merge, UNCHANGED here), so the
+// contradicting value never enters one cell and proj's per-cell conflict detection never fires across
+// documents. The fix (graph-qa/index.ts §3a) detects a CROSS-MEMBER contradiction at the retrieval
+// layer where cross-document facts are consumed: a prop whose covering VALUE differs across ≥2 DISTINCT
+// `same_as`-class members is surfaced as `conflicted: true` citing ALL competing candidate `FactId`s
+// (mirroring the within-cell conflict shape), so §6.3 flags a contradiction instead of presenting both
+// values as compatible. An AGREEING prop stays an ordinary datum; a free-text prop is never a scalar
+// contradiction; a class of one never self-conflicts. getNode stays a pure redirect (retrieval-only).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-60 — a cross-document `same_as` disagreement surfaces as a CONFLICTED datum, not two compatible facts", () => {
+  const QUESTION = "What is Ed's employer?";
+  // Two DIFFERENT-document concept nodes for the same real-world entity "Ed". `blobA` < `blobB`, so the
+  // canonical rule folds the class onto A — B is the MASKED alias under `getNode`.
+  const A = "doc:blobA#ed"; // employer="Acme"
+  const B = "doc:blobB#ed"; // employer="Globex" (CONTRADICTS A) — but AGREES on name="Ed"
+
+  /** Capture the read-only synthesis context (the assembled `facts`) so the tests can assert the
+   *  retrieval half flagged the cross-document contradiction. The scripted synth surfaces both sides. */
+  function capturingSynth(): AnswerQuestionDeps["synthesize"] & { ctx: () => SynthesisContext | undefined } {
+    let seen: SynthesisContext | undefined;
+    const fn: Scripted = (ctx) => {
+      seen = ctx;
+      const employer = ctx.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer");
+      const cites = employer.map((f) => ({ factId: f.factId, eid: f.eid, prop: f.prop, quote: String(f.value ?? "conflict") }));
+      return { answer: "Ed's employer is disputed: doc A says Acme, doc B says Globex.", citations: cites };
+    };
+    return Object.assign((ctx: SynthesisContext) => fn(ctx), { ctx: () => seen }) as never;
+  }
+
+  /** Build the two-document `same_as` graph: A (content text-seed + name + employer), B (name AGREES,
+   *  employer CONTRADICTS), and the `same_as` edge A—B. Returns each side's employer + name factIds. */
+  async function seedDisagree(
+    repo: KipRepo,
+    order: "a-first" | "b-first" = "a-first",
+  ): Promise<{ FemployerA: string; FemployerB: string; FnameA: string; FnameB: string }> {
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION); // §5.1 exact text-seed → recall seeds A
+    await assertNode(repo, B, "concept");
+    const FnameA = await assertProp(repo, A, "name", "Ed");
+    const FnameB = await assertProp(repo, B, "name", "Ed"); // AGREE — must NOT be flagged
+    let FemployerA: string;
+    let FemployerB: string;
+    if (order === "a-first") {
+      FemployerA = await assertProp(repo, A, "employer", "Acme");
+      FemployerB = await assertProp(repo, B, "employer", "Globex");
+    } else {
+      FemployerB = await assertProp(repo, B, "employer", "Globex");
+      FemployerA = await assertProp(repo, A, "employer", "Acme");
+    }
+    await assertEdge(repo, `same_as:${A}=${B}`, "same_as", A, B);
+    return { FemployerA, FemployerB, FnameA, FnameB };
+  }
+
+  it("POSITIVE: the `employer` datum is CONFLICTED citing BOTH Acme's and Globex's factIds; usedFacts carries both", async () => {
+    const repo = freshRepo("d60-positive");
+    const { FemployerA, FemployerB } = await seedDisagree(repo);
+    const synth = capturingSynth();
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    const employer = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer");
+    // The contradiction is surfaced: at least one employer datum is flagged conflicted, and its
+    // candidate set names BOTH competing signed facts (Acme AND Globex) — never two compatible facts.
+    const conflicted = employer.filter((f) => f.conflicted === true);
+    expect(conflicted.length).toBeGreaterThan(0);
+    const cands = conflicted[0]?.candidates ?? [];
+    expect(cands).toContain(FemployerA);
+    expect(cands).toContain(FemployerB);
+    // Both competing signed facts land in the retrieval envelope (via the conflicted `candidates` fold).
+    expect(result.usedFacts).toContain(FemployerA);
+    expect(result.usedFacts).toContain(FemployerB);
+    // Candidate order is deterministic (sorted).
+    expect(cands).toEqual([...cands].sort());
+
+    // SYMMETRY (the property the weak version missed): NO plain, non-conflicted `employer` datum
+    // survives for the class on ANY member — not the canonical member's own value, and not the
+    // getNode-redirect duplicate that mis-attributes the canonical value to the alias eid. A
+    // value-reading synthesizer must not be able to take either side as authoritative.
+    expect(employer.every((f) => f.conflicted === true)).toBe(true);
+
+    // NAMEABILITY (the second missed property): BOTH competing VALUES are recoverable from the assembled
+    // synthesis context — so synthesis can name "sources disagree: Acme vs Globex", not just flag an
+    // opaque dispute. "Globex" (the value the redirect previously erased) is present, as is "Acme".
+    const employerValues = new Set(employer.map((f) => f.value));
+    expect(employerValues.has("Acme")).toBe(true);
+    expect(employerValues.has("Globex")).toBe(true);
+    // Each competing value rides on a conflicted datum bound to its own member eid + own factId.
+    const acme = employer.find((f) => f.value === "Acme");
+    expect(acme?.eid).toBe(A);
+    expect(acme?.factId).toBe(FemployerA);
+    expect(acme?.candidates).toContain(FemployerB);
+    const globex = employer.find((f) => f.value === "Globex");
+    expect(globex?.eid).toBe(B);
+    expect(globex?.factId).toBe(FemployerB);
+    expect(globex?.candidates).toContain(FemployerA);
+  });
+
+  it("AGREEING PROP NOT FLAGGED: both members say name=\"Ed\", so `name` stays an ordinary (non-conflicted) datum (N5 — no fabricated conflict)", async () => {
+    const repo = freshRepo("d60-agree");
+    await seedDisagree(repo);
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    const name = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "name");
+    // The agreeing prop is present as a real datum, and NONE of its datums is flagged conflicted.
+    expect(name.length).toBeGreaterThan(0);
+    expect(name.some((f) => f.value === "Ed")).toBe(true);
+    expect(name.every((f) => f.conflicted !== true)).toBe(true);
+  });
+
+  it("DETERMINISM: the conflicted candidate set + order is the sorted candidate pair, independent of fact-authoring order", async () => {
+    // Each repo signs facts with its OWN keypair, so factIds are not comparable ACROSS repos; the
+    // determinism claim is that the FLAGGED SET + ORDER is a pure function of the fact set, NOT of the
+    // authoring order. Prove it by authoring the two competing employer facts in OPPOSITE orders and
+    // asserting each run's conflicted candidate list is exactly THAT repo's two employer factIds SORTED.
+    const candsOf = (s: ReturnType<typeof capturingSynth>): string[] =>
+      s.ctx()!.facts.find((f) => f.kind === "node-prop" && f.prop === "employer" && f.conflicted === true)?.candidates ?? [];
+
+    const repoA = freshRepo("d60-determinism-a");
+    const { FemployerA: aA, FemployerB: aB } = await seedDisagree(repoA, "a-first");
+    const sA = capturingSynth();
+    await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: sA });
+    expect(candsOf(sA)).toEqual([aA, aB].sort());
+
+    const repoB = freshRepo("d60-determinism-b");
+    const { FemployerA: bA, FemployerB: bB } = await seedDisagree(repoB, "b-first");
+    const sB = capturingSynth();
+    await answerQuestion({ question: QUESTION }, { repo: repoB, synthesize: sB });
+    expect(candsOf(sB)).toEqual([bA, bB].sort());
+
+    // Idempotent WITHIN a repo: two asks over the same fact set produce EQUAL, sorted usedFacts.
+    const sA2 = capturingSynth();
+    const rA2 = await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: sA2 });
+    const rA1 = await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: capturingSynth() });
+    expect([...rA1.usedFacts].sort()).toEqual([...rA2.usedFacts].sort());
+  });
+
+  it("FREE-TEXT NOT A SCALAR CONTRADICTION: distinct `description` prose across members is NOT flagged, while the scalar `employer` disagreement still is", async () => {
+    const repo = freshRepo("d60-freetext");
+    const { FemployerA, FemployerB } = await seedDisagree(repo);
+    // Distinct FREE-TEXT `description` on each member (prose, not a scalar claim) — must NOT be flagged.
+    await assertProp(repo, A, "description", "Ed's role at the first firm.");
+    await assertProp(repo, B, "description", "Ed's role at the second firm.");
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    // The free-text prop is never surfaced as a scalar contradiction…
+    const description = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "description");
+    expect(description.every((f) => f.conflicted !== true)).toBe(true);
+    // …while the structured `employer` disagreement still surfaces with both candidates.
+    const employer = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer" && f.conflicted === true);
+    expect(employer.length).toBeGreaterThan(0);
+    const cands = employer[0]?.candidates ?? [];
+    expect(cands).toContain(FemployerA);
+    expect(cands).toContain(FemployerB);
+  });
+
+  it("NO SHARED PROP KEY: members whose props do not overlap produce NO spurious conflict", async () => {
+    const repo = freshRepo("d60-disjoint");
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION);
+    await assertProp(repo, A, "name", "Ed");
+    await assertProp(repo, A, "employer", "Acme");
+    await assertNode(repo, B, "concept");
+    await assertProp(repo, B, "team", "Platform"); // a DIFFERENT key — no overlap with A's `employer`
+    await assertEdge(repo, `same_as:${A}=${B}`, "same_as", A, B);
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    // Nothing is flagged: no prop key is held by two members with distinct values.
+    expect(ctx!.facts.every((f) => f.conflicted !== true)).toBe(true);
+    // NO D-66 REGRESSION: the prop-union still exposes BOTH members' distinct props PLAINLY, each bound
+    // to its own member eid — A's `employer`="Acme" and B's `team`="Platform" (masked by getNode) both
+    // present as ordinary value datums.
+    expect(ctx!.facts.some((f) => f.prop === "employer" && f.value === "Acme" && f.eid === A && f.conflicted !== true)).toBe(true);
+    expect(ctx!.facts.some((f) => f.prop === "team" && f.value === "Platform" && f.eid === B && f.conflicted !== true)).toBe(true);
+  });
+
+  it("CLASS OF ONE: a single member (no `same_as` peer) never self-conflicts on its own scalar prop", async () => {
+    const repo = freshRepo("d60-single");
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION);
+    await assertProp(repo, A, "name", "Ed");
+    await assertProp(repo, A, "employer", "Acme");
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    const employer = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer");
+    expect(employer.length).toBeGreaterThan(0);
+    expect(employer.every((f) => f.conflicted !== true)).toBe(true);
+  });
+
+  it("PROJ REDIRECT UNCHANGED (retrieval-only): getNode still collapses B to canonical A and masks B's employer; the contradiction lives in retrieval, not in proj", async () => {
+    const repo = freshRepo("d60-redirect");
+    await seedDisagree(repo);
+    // getNode is a pure redirect — B collapses to canonical A, whose employer cell reads ONLY "Acme".
+    // Globex never enters A's cell; proj surfaces NO cross-document conflict (the D-60 gap this fix
+    // closes at the retrieval layer, NOT in proj).
+    const viewA = await repo.getNode(A);
+    expect(viewA?.eid).toBe(A);
+    const viewB = await repo.getNode(B);
+    expect(viewB?.eid).toBe(A); // redirect to canonical
+    const employerSegA = viewA?.props.employer?.segments.find((s) => s.kind === "value");
+    expect(employerSegA && "value" in employerSegA ? employerSegA.value : undefined).toBe("Acme");
+    expect(employerSegA && "kind" in employerSegA ? employerSegA.kind : undefined).not.toBe("conflict");
+  });
+});

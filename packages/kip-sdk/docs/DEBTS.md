@@ -1250,10 +1250,41 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   means the conflict-surfacing guarantee does not extend across documents.
 - **Suggested fix:** Add an explicit cross-document **entity-resolution / `same_as`** layer (which no bundled
   learn role performs today) that links `doc:A#e` and `doc:B#e` when they denote the same real-world entity,
-  so competing values become a surfaced `kip:conflict` through the existing `same_as`/reducer machinery
-  rather than remaining disjoint.
-- **Status:** Open (tracked). Namespacing keeps retrieval local and cross-document contamination closed at the
-  cost of cross-document conflict surfacing; resolving it needs an entity-resolution layer.
+  so competing values become a surfaced contradiction rather than remaining disjoint.
+- **Status:** Resolved at the graph-QA RETRIEVAL layer (the locus D-66 established; `getNode` stays a pure
+  redirect, proj UNCHANGED). The cross-document `same_as` link now exists (`kip link` /
+  `entity-linker.ts` authors `same_as` on a strong distinctive name; Layer-2 `entity-resolver.ts` adjudicates),
+  and the D-66 §3a `same_as` prop-union in `graph-qa/index.ts` was EXTENDED to detect the cross-member
+  contradiction PER CLASS: for every retrieved seed it enumerates the `same_as` class (`repo.sameAsClass`),
+  reads EACH member's OWN cells RAW (`repo.getNodeRaw`), and when ≥2 DISTINCT covering SCALAR values appear for
+  the SAME prop key across DISTINCT members of ONE class, flags that prop. Detection is per-class (two UNRELATED
+  entities sharing a prop key with different values are NEVER cross-flagged). **SYMMETRY + NAMEABILITY (the
+  acceptance bar):** for a contradicted prop it records ONE datum PER MEMBER, each carrying that member's OWN
+  competing VALUE alongside `conflicted: true` + the shared sorted candidate `FactId` list — so BOTH sides'
+  values (e.g. Acme AND Globex) are recoverable from the synthesis context, not just an opaque flag. The main
+  node loop's plain value datum for that prop is SUPPRESSED on EVERY member — including the `getNode`-redirect
+  duplicate that would mis-attribute the canonical value to the alias eid — so NO plain, authoritative value
+  survives for a contradicted prop (matching the within-cell conflict case, where no plain value dominates); a
+  value-reading synthesizer cannot take one side as authoritative. Each candidate also lands in `usedFacts`.
+  Honest / N5: a prop where every member AGREES (one distinct covering value) is NOT flagged and stays a plain
+  D-66-union datum (no regression — both members' distinct props still exposed plainly with citations); a
+  free-text prop (`content`/`description`/`summary`) is prose, not a scalar contradiction, and is excluded; a
+  class of one never self-conflicts. Deterministic (sorted classes + members + prop keys + candidate `FactId`s;
+  distinct-value key type-qualified), read-only (INV-A1 — reads only `sameAsClass`/`getNodeRaw`, authors
+  nothing). Covered by seven tests in `src/__tests__/graph-qa.test.ts` (`graph-qa D-60` block), the POSITIVE
+  one asserting NO plain non-conflicted value survives AND both "Acme"/"Globex" are recoverable as values;
+  mutation-verified (disabling the main-loop suppression fails the POSITIVE symmetry assertion; disabling
+  detection fails the positive-conflict tests). Empirically confirmed against the exact
+  `doc:blobA#e` employer="Acme" / `doc:blobB#e` employer="Globex" fixture (assembled context = two conflicted
+  datums, one per member, each with its own value, no plain datum). **This corrects ADR-B12c**, which
+  previously overclaimed that a confirmed merge surfaces this via "proj's per-cell conflict detection" — FALSE,
+  because `getNode` redirects and the contradicting value never enters the canonical cell (see the ADR-B12c
+  correction). **Disclosed residuals (documented follow-ons):** (i) whether the answer PROSE frames the
+  dispute is the model's — the substrate guarantees only both values + the flag are in the citable context;
+  (ii) a member whose covering segment is itself a WITHIN-cell conflict does not fold its candidate values into
+  the cross-member scalar comparison (a false-negative for that shape — it is already surfaced as internally
+  conflicted); (iii) `getNode`-direct cross-document conflict surfacing (making proj/`getNode` itself expose
+  the contradiction, not only the retrieval layer where `kip ask` consumes cross-document facts) is out of scope.
 
 ### D-61: temporal invalidation is not modeled — a decision that supersedes an earlier design choice leaves the stale edge marked `status:"current"`
 

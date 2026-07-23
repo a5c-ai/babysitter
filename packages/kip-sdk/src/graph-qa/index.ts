@@ -84,9 +84,12 @@ export interface GraphQaInput {
 /**
  * One retrieved datum placed into the model context (kip-graph-qa.md §3.2). Every datum records the
  * backing signed `factId` (the auditable retrieval envelope). The union of all `factId`s is the
- * `usedFacts` output. A `conflict` cell contributes ONE `RetrievedFact` per candidate, each carrying
- * `conflicted: true` and the shared `candidates` list, so both candidate `factId`s land in
- * `usedFacts` and are visible to synthesis (§6.3 — surface, never silently pick a side).
+ * `usedFacts` output. A WITHIN-cell `conflict` contributes ONE `RetrievedFact` per candidate, each
+ * carrying `conflicted: true` and the shared `candidates` list (no `value`), so both candidate
+ * `factId`s land in `usedFacts` and are visible to synthesis (§6.3 — surface, never silently pick a
+ * side). A CROSS-DOCUMENT `same_as` contradiction (D-60) contributes ONE `RetrievedFact` PER MEMBER,
+ * each carrying its OWN competing `value` ALONGSIDE `conflicted: true` + the shared `candidates` — so
+ * BOTH competing values are recoverable from the context (nameability) while no plain value survives.
  */
 export interface RetrievedFact {
   /** The signed fact backing this datum (REQUIRED). */
@@ -505,6 +508,95 @@ export async function answerQuestion(
     }
   };
 
+  // ── 3-pre. `same_as` CLASS RESOLUTION + D-60 CROSS-DOCUMENT CONTRADICTION DETECTION. Computed BEFORE
+  // the main node loop so BOTH the main loop and the §3a prop-union can SUPPRESS a plain value datum for
+  // a prop the class genuinely contradicts (symmetry, below). For each retrieved seed, enumerate its
+  // `same_as` equivalence class (`repo.sameAsClass`, reusing proj's already-computed closure — no new
+  // traversal). Detection is PER CLASS, never across the flat union of all members: two UNRELATED
+  // entities that merely share a prop key with different values are different classes and must NEVER be
+  // flagged as contradicting each other (N5 — a real contradiction is disagreement WITHIN one entity's
+  // equivalence class). Read-only (only `sameAsClass`/`getNodeRaw`, authors nothing — INV-A1);
+  // deterministic (sorted classes, sorted members, sorted prop keys, sorted candidate `FactId`s).
+  const sameAsMembers = new Set<EID>();
+  const memberClassKey = new Map<EID, string>();
+  const uniqueClasses = new Map<string, EID[]>(); // classKey (sorted-members JSON) → its sorted members
+  for (const seed of [...nodeEids].sort()) {
+    if (!inScope(seed)) continue;
+    // eslint-disable-next-line no-await-in-loop -- sequential read keeps class enumeration deterministic.
+    const members = (await repo.sameAsClass(seed)).filter((m) => inScope(m)).sort();
+    if (members.length === 0) continue;
+    const classKey = JSON.stringify(members);
+    for (const m of members) {
+      sameAsMembers.add(m);
+      memberClassKey.set(m, classKey);
+    }
+    if (!uniqueClasses.has(classKey)) uniqueClasses.set(classKey, members);
+  }
+  const sortedSameAsMembers = [...sameAsMembers].sort();
+
+  // Hydrate each `same_as` member's OWN cells RAW exactly once (sorted, so the read order — and thus the
+  // recorded-datum order — is a pure function of the fact set). Cached so contradiction DETECTION and the
+  // §3a recording pass read the IDENTICAL views (INV-A1: read-only, no re-traversal).
+  const rawByMember = new Map<EID, NodeView | null>();
+  for (const eid of sortedSameAsMembers) {
+    // eslint-disable-next-line no-await-in-loop -- sequential raw hydration keeps the read deterministic.
+    rawByMember.set(eid, await repo.getNodeRaw(eid, asOf));
+  }
+
+  // ── D-60 DETECTION. Within EACH class, a prop whose covering VALUE differs across ≥2 DISTINCT members
+  // is a real cross-document contradiction the fact set contains (`doc:A#e` employer="Acme" vs
+  // `doc:B#e` employer="Globex", joined by `same_as(A,B)`). `getNode(A)` is a canonical REDIRECT (proj
+  // node-merge — UNCHANGED here), so the contradicting value never enters one cell and proj's per-cell
+  // conflict detection never fires across documents; surface it HERE, where `kip ask` consumes
+  // cross-document facts. ONLY structured/scalar covering `value` segments count (a free-text prop in
+  // {@link FREE_TEXT_PROPS} is prose, not a scalar contradiction; a `null`/`BlobRef` carries no scalar —
+  // same rule as `addStructuredValue`). A prop where every member AGREES (one distinct covering value)
+  // stays an ordinary datum (N5 — never fabricate a conflict where members agree). RESIDUAL / documented
+  // non-goal (DEBTS D-60): a member whose covering segment is itself a WITHIN-cell `conflict` (not a
+  // single `value`) does NOT contribute its candidate values to this scalar comparison — it is already
+  // surfaced as internally conflicted, and folding its competing values into the cross-member set is a
+  // follow-on. `crossConflictCandidates` is keyed by `${classKey} ${prop}` and holds ALL competing
+  // member `FactId`s (sorted) — the candidate list every side of the contradiction cites.
+  const crossConflictCandidates = new Map<string, string[]>();
+  for (const [classKey, members] of [...uniqueClasses.entries()].sort((a, b) => strCmp(a[0], b[0]))) {
+    const byProp = new Map<string, { values: Set<string>; facts: Set<FactId> }>();
+    for (const eid of members) {
+      const raw = rawByMember.get(eid);
+      if (!raw) continue;
+      for (const prop of Object.keys(raw.props).sort()) {
+        if (FREE_TEXT_PROPS.has(prop)) continue; // free-text prose is not a scalar contradiction.
+        const seg = coveringSegment(raw.props[prop]);
+        if (!seg || seg.kind !== "value") continue;
+        if (!(typeof seg.value === "string" || typeof seg.value === "number" || typeof seg.value === "boolean")) {
+          continue;
+        }
+        let entry = byProp.get(prop);
+        if (entry === undefined) {
+          entry = { values: new Set<string>(), facts: new Set<FactId>() };
+          byProp.set(prop, entry);
+        }
+        // Distinct-value key is type-qualified so number `1` and string `"1"` never collude as one value.
+        entry.values.add(`${typeof seg.value}:${JSON.stringify(seg.value)}`);
+        entry.facts.add(seg.assertedBy);
+      }
+    }
+    for (const [prop, entry] of byProp) {
+      if (entry.values.size >= 2) {
+        crossConflictCandidates.set(`${classKey} ${prop}`, [...entry.facts].sort(strCmp));
+      }
+    }
+  }
+  /** The competing candidate `FactId`s iff `(eid, prop)` is a cross-document contradiction on `eid`'s
+   *  `same_as` class, else `undefined`. Used to SUPPRESS a plain value datum (below) and to FLAG the
+   *  per-member conflicted-with-value datum in §3a — so no plain, authoritative value survives for a
+   *  contradicted prop on ANY member (SYMMETRY, matching the within-cell conflict case where no plain
+   *  value dominates either). */
+  const crossConflictFor = (eid: EID, prop: string): string[] | undefined => {
+    const classKey = memberClassKey.get(eid);
+    if (classKey === undefined) return undefined;
+    return crossConflictCandidates.get(`${classKey} ${prop}`);
+  };
+
   for (const eid of [...nodeEids].sort()) {
     if (!inScope(eid)) continue;
     // eslint-disable-next-line no-await-in-loop -- sequential hydration keeps the read deterministic.
@@ -520,7 +612,15 @@ export async function answerQuestion(
         // A node-prop claim cites the winning covering assert's `assertedBy` FactId (§3.2). A
         // STRUCTURED value anchors; a free-text value (`content`/`description`/`summary`) does not.
         if (!FREE_TEXT_PROPS.has(prop)) addStructuredValue(seg.value);
-        record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+        // D-60 SYMMETRY: `getNode` is a canonical REDIRECT, so for a cross-document-contradicted prop
+        // this datum is either the canonical member's own value OR the redirect DUPLICATE that
+        // mis-attributes the canonical value to a NON-canonical alias eid. Recording either as a PLAIN
+        // fact would let a value-reading synthesizer take one side as authoritative and never see the
+        // other. Suppress it here; §3a records the correctly-attributed per-member conflicted-with-value
+        // datums (both competing values present, neither plain). A non-contradicted prop records plainly.
+        if (crossConflictFor(eid, prop) === undefined) {
+          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+        }
       } else {
         // A `conflict` segment is surfaced as an explicit contradiction citing ALL candidates —
         // never silently collapsed to one side (§3.2/§6.3). One RetrievedFact per candidate so both
@@ -533,30 +633,23 @@ export async function answerQuestion(
     }
   }
 
-  // ── 3a. `same_as` PROP-UNION (ADR-B11c / D-66). Two concepts joined by a signed `same_as` edge are
-  // ONE entity, but `getNode(alias)` returns only the CANONICAL member's cells (proj's node-merge read
-  // semantics — UNCHANGED here), so the loop above recorded one side's facts and MASKED the other
-  // member's distinct props. Close the gap in retrieval, per ADR-B11c: for every already-retrieved
-  // seed, enumerate its `same_as` equivalence class (`repo.sameAsClass`, reusing proj's already-computed
-  // closure — no new traversal), then record EACH class member's OWN node-prop facts read RAW
-  // (`repo.getNodeRaw`, the alias-UNMASKED read `getNode` collapses), each bound to its OWN `assertedBy`
-  // `FactId`. NOTHING is merged — every fact keeps its own eid + `FactId`, so a query seeded on one
-  // alias returns the UNION of the class's distinct props with honest per-fact citations. Bounded (only
-  // the classes of already-retrieved seeds), deterministic (sorted class members + idempotent `record`),
-  // read-only (authors nothing, INV-A1). It runs on the already-non-empty retrieval path and only ADDS
-  // real signed facts, so the §6.1 abstention contract and the §4b subject-anchoring guard (whose
-  // surfaces it extends with each member's OWN identity/schema, never a fabricated one) are untouched.
-  const sameAsMembers = new Set<EID>();
-  for (const seed of [...nodeEids].sort()) {
-    if (!inScope(seed)) continue;
-    // eslint-disable-next-line no-await-in-loop -- sequential read keeps class enumeration deterministic.
-    for (const member of await repo.sameAsClass(seed)) {
-      if (inScope(member)) sameAsMembers.add(member);
-    }
-  }
-  for (const eid of [...sameAsMembers].sort()) {
-    // eslint-disable-next-line no-await-in-loop -- sequential raw hydration keeps the read deterministic.
-    const raw = await repo.getNodeRaw(eid, asOf);
+  // ── 3a. `same_as` PROP-UNION (ADR-B11c / D-66) + CROSS-DOCUMENT CONTRADICTION (D-60). Two concepts
+  // joined by a signed `same_as` edge are ONE entity, but `getNode(alias)` returns only the CANONICAL
+  // member's cells (proj's node-merge read semantics — UNCHANGED here), so the loop above recorded one
+  // side's facts and MASKED the other member's distinct props. Close the gap in retrieval, per ADR-B11c:
+  // record EACH class member's OWN node-prop facts read RAW (`repo.getNodeRaw`, the alias-UNMASKED read
+  // `getNode` collapses), each bound to its OWN `assertedBy` `FactId`. NOTHING is merged — every fact
+  // keeps its own eid + `FactId`, so a query seeded on one alias returns the UNION of the class's
+  // distinct props with honest per-fact citations. For a D-60 cross-document-contradicted prop, the
+  // member's datum carries its OWN competing VALUE **and** `conflicted: true` + the shared candidate
+  // list — so BOTH sides' values are recoverable from the synthesis context (NAMEABILITY: synthesis can
+  // name "sources disagree: Acme vs Globex", not just flag an opaque dispute), and — with the main loop's
+  // suppression above — NO plain authoritative value survives for that prop on ANY member (SYMMETRY).
+  // Read-only (authors nothing, INV-A1); deterministic (sorted members + prop keys + candidates +
+  // idempotent `record`). Runs on the already-non-empty retrieval path and only ADDS real signed facts,
+  // so the §6.1 abstention contract and the §4b subject-anchoring guard are untouched.
+  for (const eid of sortedSameAsMembers) {
+    const raw = rawByMember.get(eid);
     if (!raw) continue;
     addIdentity(stripLearnEidNamespace(eid)); // the member's own eid localId is IDENTITY (round-5).
     addSchema(raw.kind); // a node KIND is schema vocabulary the whole graph shares, not a subject.
@@ -568,7 +661,16 @@ export async function answerQuestion(
         // The member's OWN node-prop claim cites its OWN winning covering assert's `assertedBy` FactId —
         // identical binding to the node loop above; `record` dedupes an already-recorded canonical datum.
         if (!FREE_TEXT_PROPS.has(prop)) addStructuredValue(seg.value);
-        record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+        const crossCandidates = crossConflictFor(eid, prop);
+        if (crossCandidates !== undefined) {
+          // D-60: carry THIS member's own competing VALUE on its OWN datum (nameability — the losing
+          // side's value is never dropped) AND flag it `conflicted: true` with ALL competing candidate
+          // `FactId`s (each also lands in `usedFacts` via `record`'s `candidates` fold). The within-cell
+          // conflict datum carries no value; the cross-document datum is at least as recoverable.
+          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value, conflicted: true, candidates: crossCandidates });
+        } else {
+          record({ factId: seg.assertedBy, eid, kind: "node-prop", prop, value: seg.value });
+        }
       } else {
         const memberCandidates = [...seg.candidates];
         for (const cand of memberCandidates) {
