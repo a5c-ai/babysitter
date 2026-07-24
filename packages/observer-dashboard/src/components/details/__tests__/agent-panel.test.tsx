@@ -234,4 +234,34 @@ describe('AgentPanel', () => {
     // Should still render the title
     expect(screen.getByText(task.title)).toBeInTheDocument();
   });
+  it('renders the checkpoint state and only its safe opaque agent reference', () => {
+    const task = createMockTaskDetail({
+      babysitterCheckpoint: {
+        state: 'agent-owned',
+        attempt: 2,
+        agentRef: 'agent://Babysitter-effect-1-2',
+      },
+    });
+    render(<AgentPanel task={task} />);
+
+    expect(screen.getByTestId('babysitter-checkpoint-state')).toHaveTextContent('Agent owned');
+    expect(screen.getByText('Attempt 2')).toBeInTheDocument();
+    const link = screen.getByTestId('babysitter-agent-ref');
+    expect(link).toHaveAttribute('href', 'agent://Babysitter-effect-1-2');
+    expect(link).toHaveTextContent('agent://Babysitter-effect-1-2');
+  });
+
+  it('renders attention without creating an agent transcript link', () => {
+    const task = createMockTaskDetail({
+      babysitterCheckpoint: {
+        state: 'failed/attention',
+        attention: 'Owning agent identity mismatch',
+      },
+    });
+    render(<AgentPanel task={task} />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Owning agent identity mismatch');
+    expect(screen.queryByTestId('babysitter-agent-ref')).not.toBeInTheDocument();
+  });
+
 });

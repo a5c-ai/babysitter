@@ -87,8 +87,9 @@ export function generateOhMyPiManifest(manifest: ResolvedManifest, targetName = 
       skills: ['./skills'],
     },
     peerDependencies: {
-      '@oh-my-pi/pi-coding-agent': '*',
+      '@oh-my-pi/pi-coding-agent': '>=16.5.2 <17',
     },
+    ...(manifest.name === 'babysitter' ? { dependencies: { zod: '^4.4.3' } } : {}),
     scripts: {
       test: 'node --test test/integration.test.js && node test/packaged-install.test.cjs',
       'validate:ci': 'npm test',

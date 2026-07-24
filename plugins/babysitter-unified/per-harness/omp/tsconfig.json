@@ -5,6 +5,9 @@
     "types": ["node"]
   },
   "include": [
-    "extensions-driver.ts"
+    "extensions-driver.ts",
+    "driver.d.ts",
+    "i18n.d.ts",
+    "extensions-index.ts"
   ]
 }

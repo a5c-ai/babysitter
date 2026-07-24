@@ -53,6 +53,7 @@ export interface CreateMockTaskEffectOptions {
   error?: { name: string; message: string; stack?: string };
   breakpointQuestion?: string;
   agent?: { name: string; prompt?: { role: string; task: string; instructions: string[] } };
+  babysitterCheckpoint?: TaskEffect["babysitterCheckpoint"];
 }
 
 export function createMockTaskEffect(overrides: CreateMockTaskEffectOptions = {}): TaskEffect {
@@ -79,6 +80,7 @@ export function createMockTaskEffect(overrides: CreateMockTaskEffectOptions = {}
     error: overrides.error,
     breakpointQuestion: overrides.breakpointQuestion,
     agent: overrides.agent,
+    babysitterCheckpoint: overrides.babysitterCheckpoint,
   };
 }
 

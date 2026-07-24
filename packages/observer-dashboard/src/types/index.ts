@@ -10,6 +10,23 @@ export type TaskKind = "node" | "agent" | "skill" | "breakpoint" | "shell" | "sl
 // Task status
 export type TaskStatus = "requested" | "resolved" | "error";
 
+export type BabysitterCheckpointState =
+  | "requested"
+  | "shell-running"
+  | "agent-owned"
+  | "awaiting-late-owner"
+  | "failed/attention"
+  | "durable-output-uncommitted"
+  | "committed";
+
+export interface BabysitterCheckpoint {
+  state: BabysitterCheckpointState;
+  attempt?: number;
+  attention?: string;
+  /** Safe opaque OMP reference only; transcript content is never copied. */
+  agentRef?: `agent://${string}`;
+}
+
 // Journal event types
 export type EventType =
   | "RUN_CREATED"
@@ -93,6 +110,7 @@ export interface TaskEffect {
       instructions: string[];
     };
   };
+  babysitterCheckpoint?: BabysitterCheckpoint;
 }
 
 // Full task detail (on-demand)

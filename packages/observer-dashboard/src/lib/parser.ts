@@ -27,6 +27,7 @@ import type {
   EffectRequestedPayload,
   EffectResolvedPayload,
   RunCreatedPayload,
+  BabysitterCheckpoint,
 } from "@/types";
 import { getConfig } from "@/lib/config-loader";
 import { resolveBreakpointPayload } from "@/lib/breakpoint-payload";
@@ -67,6 +68,123 @@ async function readTextSafe(filePath: string): Promise<string | undefined> {
     }
     return undefined;
   }
+}
+
+const OMP_DRIVER_SCHEMA_VERSION = "2026.07.omp-driver-v1";
+const SAFE_AGENT_REF = /^agent:\/\/([A-Za-z0-9][A-Za-z0-9._:-]{0,127})$/;
+
+function isAllocatedOwnerName(agentId: string, requestedName: string): boolean {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(agentId)) return false;
+  if (agentId === requestedName) return true;
+  if (!agentId.startsWith(`${requestedName}-`)) return false;
+  const suffix = agentId.slice(requestedName.length);
+  return /^-[2-9]\d*$/.test(suffix);
+}
+
+interface ArtifactRead {
+  exists: boolean;
+  malformed: boolean;
+  value?: Record<string, unknown>;
+}
+
+async function readArtifact(filePath: string): Promise<ArtifactRead> {
+  try {
+    const parsed = JSON.parse(await fs.readFile(filePath, "utf8")) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { exists: true, malformed: true };
+    }
+    return { exists: true, malformed: false, value: parsed as Record<string, unknown> };
+  } catch (error) {
+    if (isNotFoundError(error)) return { exists: false, malformed: false };
+    return { exists: true, malformed: true };
+  }
+}
+
+function checkpointAttention(attention: string): BabysitterCheckpoint {
+  return { state: "failed/attention", attention };
+}
+
+export async function parseBabysitterCheckpoint(
+  runPath: string,
+  task: Pick<TaskEffect, "effectId" | "invocationKey" | "kind" | "status">,
+): Promise<BabysitterCheckpoint> {
+  if (task.status !== "requested") return { state: "committed" };
+
+  const taskDir = path.join(runPath, "tasks", task.effectId);
+  const executionArtifact = await readArtifact(path.join(taskDir, "execution.json"));
+  if (!executionArtifact.exists) return { state: "requested" };
+  if (executionArtifact.malformed || !executionArtifact.value) {
+    return checkpointAttention("Malformed execution checkpoint");
+  }
+
+  const checkpoint = executionArtifact.value;
+  const expectedKind = task.kind === "skill" ? "agent" : task.kind;
+  if (
+    checkpoint.schemaVersion !== OMP_DRIVER_SCHEMA_VERSION ||
+    checkpoint.effectId !== task.effectId ||
+    checkpoint.invocationKey !== task.invocationKey ||
+    checkpoint.kind !== expectedKind ||
+    (checkpoint.state !== "in_progress" && checkpoint.state !== "completed")
+  ) {
+    return checkpointAttention("Execution checkpoint identity or version mismatch");
+  }
+
+  const attempt = typeof checkpoint.attempt === "number" && Number.isInteger(checkpoint.attempt) && checkpoint.attempt > 0
+    ? checkpoint.attempt
+    : undefined;
+  if (checkpoint.state === "completed") {
+    const expectedOutputRef = `tasks/${task.effectId}/output.json`;
+    if (checkpoint.outputRef !== expectedOutputRef || !(await fileExists(path.join(runPath, expectedOutputRef)))) {
+      return checkpointAttention("Durable output checkpoint is incomplete");
+    }
+    return { state: "durable-output-uncommitted", ...(attempt ? { attempt } : {}) };
+  }
+
+  if (checkpoint.kind === "shell") return { state: "shell-running" };
+  if (checkpoint.kind !== "agent") return checkpointAttention("Unsupported checkpoint kind");
+
+  const attemptState = checkpoint.attemptState;
+  if (attemptState === undefined || attemptState === "prepared" || attemptState === "retry_authorized") {
+    return { state: "requested", ...(attempt ? { attempt } : {}) };
+  }
+  if (attemptState === "failed" || attemptState === "aborted" || attemptState === "cancelled") {
+    return checkpointAttention(`Agent attempt ${attemptState}`);
+  }
+
+  const ownerArtifact = await readArtifact(path.join(taskDir, "agent-owner.json"));
+  if (!ownerArtifact.exists || ownerArtifact.malformed || !ownerArtifact.value) {
+    return checkpointAttention("Owning agent checkpoint is missing or malformed");
+  }
+  const owner = ownerArtifact.value;
+  if (
+    owner.schemaVersion !== OMP_DRIVER_SCHEMA_VERSION ||
+    owner.effectId !== task.effectId ||
+    owner.invocationKey !== task.invocationKey ||
+    owner.ownerName !== checkpoint.ownerName ||
+    owner.dispatchToken !== checkpoint.dispatchToken ||
+    owner.attempt !== (attempt ?? 1) ||
+    typeof owner.toolCallId !== "string" ||
+    owner.toolCallId.length === 0
+  ) {
+    return checkpointAttention("Owning agent identity mismatch");
+  }
+
+  let agentRef: `agent://${string}` | undefined;
+  if (owner.agentRef !== undefined) {
+    const match = typeof owner.agentRef === "string" ? SAFE_AGENT_REF.exec(owner.agentRef) : null;
+    if (!match || !isAllocatedOwnerName(match[1], owner.ownerName as string)) {
+      return checkpointAttention("Forged or non-owner agent reference");
+    }
+    agentRef = owner.agentRef as `agent://${string}`;
+  }
+
+  if (attemptState === "awaiting_late_owner") {
+    return { state: "awaiting-late-owner", ...(attempt ? { attempt } : {}), ...(agentRef ? { agentRef } : {}) };
+  }
+  if (attemptState === "claimed") {
+    return { state: "agent-owned", ...(attempt ? { attempt } : {}), ...(agentRef ? { agentRef } : {}) };
+  }
+  return checkpointAttention("Unknown agent checkpoint state");
 }
 
 /** Maximum concurrent filesystem operations to prevent file descriptor exhaustion. */
@@ -355,6 +473,15 @@ export async function parseRunDir(
   }
 
   const tasks = Array.from(taskMap.values());
+  const checkpointResults = await batchAllSettled(
+    tasks.map((task) => () => parseBabysitterCheckpoint(runPath, task))
+  );
+  for (let index = 0; index < tasks.length; index += 1) {
+    const checkpointResult = checkpointResults[index];
+    if (checkpointResult.status === "fulfilled") {
+      tasks[index].babysitterCheckpoint = checkpointResult.value;
+    }
+  }
   const completedTasks = tasks.filter((t) => t.status === "resolved").length;
   const failedTasks = tasks.filter((t) => t.status === "error").length;
 
@@ -684,7 +811,7 @@ export async function parseTaskDetail(
     ? (result.status === "error")
     : (resolvedPayload?.status === "error");
 
-  return {
+  const detail: TaskDetail = {
     effectId,
     kind,
     title: (taskDef?.title as string) || effectId,
@@ -706,6 +833,8 @@ export async function parseTaskDetail(
     breakpoint: breakpointPayload,
     breakpointQuestion: breakpointPayload?.question,
   };
+  detail.babysitterCheckpoint = await parseBabysitterCheckpoint(runPath, detail);
+  return detail;
 }
 
 export async function getRunDigest(runPath: string): Promise<RunDigest> {

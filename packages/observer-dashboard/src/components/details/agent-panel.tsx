@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { KindBadge } from "@/components/shared/kind-badge";
 import { TruncatedId } from "@/components/shared/truncated-id";
-import type { TaskDetail } from "@/types";
+import type { BabysitterCheckpoint, TaskDetail } from "@/types";
 
 /** Tiny copy-to-clipboard button (icon only) — magenta hover */
 function CopyButton({ text }: { text: string }) {
@@ -36,6 +36,49 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
     <h4 className="text-xs font-medium text-foreground-muted tracking-wider mb-1.5 pl-2 border-l-2 border-primary">
       {children}
     </h4>
+  );
+}
+
+const CHECKPOINT_LABELS: Record<BabysitterCheckpoint["state"], string> = {
+  requested: "Requested",
+  "shell-running": "Shell running",
+  "agent-owned": "Agent owned",
+  "awaiting-late-owner": "Awaiting late owner",
+  "failed/attention": "Needs attention",
+  "durable-output-uncommitted": "Durable output, not committed",
+  committed: "Committed",
+};
+
+export function BabysitterCheckpointSection({ checkpoint }: { checkpoint?: BabysitterCheckpoint }) {
+  if (!checkpoint) return null;
+  return (
+    <div data-testid="babysitter-checkpoint" className="rounded-md border border-foreground-muted/20 p-3">
+      <SectionHeader>Babysitter checkpoint</SectionHeader>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span data-testid="babysitter-checkpoint-state" className="font-medium text-foreground">
+          {CHECKPOINT_LABELS[checkpoint.state]}
+        </span>
+        {checkpoint.attempt != null && (
+          <span className="text-xs text-foreground-muted">Attempt {checkpoint.attempt}</span>
+        )}
+      </div>
+      {checkpoint.agentRef && (
+        <div className="mt-2 flex items-center gap-1">
+          <a
+            data-testid="babysitter-agent-ref"
+            href={checkpoint.agentRef}
+            className="font-mono text-xs text-primary hover:underline"
+            title="Open owning OMP agent transcript"
+          >
+            {checkpoint.agentRef}
+          </a>
+          <CopyButton text={checkpoint.agentRef} />
+        </div>
+      )}
+      {checkpoint.attention && (
+        <p role="alert" className="mt-2 text-xs text-error">{checkpoint.attention}</p>
+      )}
+    </div>
   );
 }
 
@@ -173,6 +216,8 @@ export function AgentPanel({ task }: { task: TaskDetail | null }) {
             <TruncatedId id={task.invocationKey} chars={4} className="text-foreground-muted" />
           )}
         </div>
+
+        <BabysitterCheckpointSection checkpoint={task.babysitterCheckpoint} />
 
         {/* Agent prompt data (if present) */}
         {typeof prompt?.role === "string" && (
