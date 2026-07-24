@@ -88,6 +88,13 @@ const EXPECTED_REPO_METHODS = [
   // a write gate. Both are documented on `Repo`, so the guard must enumerate them.
   "registerSchema",
   "getSchema",
+  // schema / ontology (docs/21 §3 — SCHEMA SLICE 2, ADR-B19): a REUSABLE, IMPORTABLE library — a named,
+  // versioned bundle of node kinds registered in ONE call (`registerSchemaLibrary`) and read back
+  // as-of-queryably (`getSchemaLibrary`/`listSchemaLibraries`). Packaging + versioning on top of Slice 1
+  // (member kinds are authored via the SAME `registerSchema`), documented on `Repo` — the guard enumerates.
+  "registerSchemaLibrary",
+  "getSchemaLibrary",
+  "listSchemaLibraries",
   // active layer (§5b)
   "registerFunctionality",
   "compileContextualQuery",
@@ -167,6 +174,8 @@ describe("public surface (ADR-B5 modularize guard)", () => {
     expectTypeOf<kip.PropSchema>().not.toBeAny();
     expectTypeOf<kip.NodeKindDef>().not.toBeAny();
     expectTypeOf<kip.EdgeKindDef>().not.toBeAny();
+    // SCHEMA SLICE 2 (docs/21 §3, ADR-B19): the reusable, importable library bundle.
+    expectTypeOf<kip.SchemaLibrary>().not.toBeAny();
     expectTypeOf<kip.OpenOptions>().not.toBeAny();
     expectTypeOf<kip.Tx>().not.toBeAny();
     expectTypeOf<kip.ScopeRef>().not.toBeAny();

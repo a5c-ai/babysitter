@@ -39,6 +39,7 @@ import {
   collectDeclaredNodeKinds,
   foldLearnCell,
   isAuthorizedExcisionMarker,
+  maxByOrderKey,
   orderKey,
   proj,
   traverse,
@@ -53,6 +54,7 @@ import { defaultEmbed } from "./embed/default-embedder";
 import {
   collectRegisteredBindings,
   derivedFromEdgeEidFor,
+  describeMalformedSchemaLibrary,
   edgeEidFor,
   evaluateCondition,
   findConditionNodeMalformation,
@@ -60,9 +62,13 @@ import {
   ontologyRefForBinding,
   ontologyRefForManifest,
   ontologyRefForNodeKind,
+  ontologyRefForSchemaLibrary,
+  parseSchemaLibraryManifest,
+  schemaLibraryManifestPayload,
   serializeBindingPayload,
   topologicalOrder,
   validateAgainstOutputSchema,
+  SCHEMA_LIBRARY_ONTOLOGY_PREFIX,
   type RegisteredBindingRecord,
 } from "./contextual";
 import type {
@@ -93,6 +99,7 @@ import type {
   CellSegment,
   PropCell,
   NodeKindDef,
+  SchemaLibrary,
   NodeView,
   EdgeView,
   OpenOptions,
@@ -4024,6 +4031,139 @@ export class KipRepo implements Repo {
     // `collectDeclaredNodeKinds` is the SAME orderKey-winner selection `proj` applies during validation
     // — using it here keeps the read and the validation in lockstep (they can never disagree).
     return collectDeclaredNodeKinds(facts).get(kind) ?? null;
+  }
+
+  /**
+   * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): register a REUSABLE, IMPORTABLE `SchemaLibrary` — a named,
+   * versioned bundle of node kinds — in ONE call. The `lib` ARGUMENT is validated up front
+   * (`describeMalformedSchemaLibrary`: non-empty name, integer version, ≥1 nodeKind, each a well-formed
+   * `NodeKindDef`, NO duplicate kind names). A malformed argument throws `ERR_MALFORMED_INPUT` BEFORE
+   * anything is authored — this is caller-input validation of the ARGUMENT (exactly like
+   * `registerFunctionality` validates its own weight/condition), NOT a write-time gate on facts; N5, we
+   * never author a partial/garbage library.
+   *
+   * Once valid, authors — on the SAME orchestrator-signed schema-fact channel `registerSchema`/
+   * `registerFunctionality` use (INV-A1, nothing else writes the ontology): (a) ONE library-MANIFEST fact
+   * `{ kind:"schema", ontologyRef:"kip:schema-library/<name>" }` carrying `{name, version, description?,
+   * kinds:[kind names]}` (so an installed library is itself a versioned, as-of-queryable fact — `validFrom`
+   * stamped from the repo's monotonic `clock()`), THEN (b) each `nodeKinds[i]` via the SAME Slice-1
+   * `registerSchema` (reused verbatim — a library-registered kind is BYTE-IDENTICAL to a directly-
+   * registered one, so `getSchema`/proj validation work unchanged). Returns every authored `FactId`
+   * (manifest first, then each kind in declared order).
+   *
+   * Versioning is manifest + kind evolution-LITE and LAST-WRITE-WINS by orderKey: the MOST-RECENTLY-AUTHORED
+   * manifest wins (the `version` field is DESCRIPTIVE, NOT a monotonicity guard — a LOWER version registered
+   * later also supersedes) and re-registers its kinds, so a kind whose def changed makes `proj` re-validate
+   * existing nodes against the new winning def (grow-only). This is PACKAGING + VERSIONING, NOT per-fact-
+   * version UPCASTERS / migration (Slice 3, deferred): a node is validated against the CURRENT winning def,
+   * there is no automatic data migration.
+   */
+  async registerSchemaLibrary(lib: SchemaLibrary): Promise<FactId[]> {
+    const malformation = describeMalformedSchemaLibrary(lib);
+    if (malformation) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        `registerSchemaLibrary: malformed library (${malformation}) — nothing authored (N5)`,
+        { library: lib },
+      );
+    }
+
+    const orchestratorProvenance: Provenance = {
+      author: "kip-orchestrator:registerSchemaLibrary",
+      signature: "",
+      publicKeyFingerprint: "",
+      signedFields: [],
+    };
+
+    // (a) the library MANIFEST — a versioned, as-of-queryable fact recording the library's identity and
+    // the NAMES of its member kinds (the full defs live in their own `kip:node-kind/<kind>` facts).
+    const manifestResult = await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "schema", ontologyRef: ontologyRefForSchemaLibrary(lib.name) },
+      value: JSON.stringify(schemaLibraryManifestPayload(lib)),
+      // A real (monotonic) valid-from so `getSchemaLibrary(name, { validTime })` before this instant reads
+      // `null` — the installed library is a fact with genuine bitemporal validity.
+      validFrom: this.clock(),
+      validTo: null,
+      replicaId: this.replicaId,
+      provenance: orchestratorProvenance,
+    });
+
+    const ids: FactId[] = [manifestResult.id];
+    // (b) each member kind via the SAME Slice-1 authoring — ONE authoring path, no drift.
+    for (const def of lib.nodeKinds) {
+      ids.push(await this.registerSchema(def));
+    }
+    return ids;
+  }
+
+  /**
+   * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): read back the orderKey-winning library manifest for `name`,
+   * re-hydrated with the CURRENT winning `NodeKindDef` of each member kind (via the SAME
+   * `collectDeclaredNodeKinds` Slice-1 read/validation path — so the returned `nodeKinds` reflect any
+   * later re-declaration of a kind), or `null` when no manifest is installed. As-of-queryable via the SAME
+   * pinned-frontier selection every other contextual read uses: a library registered at t2 reads `null` at
+   * an `asOf` before t2. READ-ONLY — a pure fold over the fact set, authors nothing (INV-A1).
+   */
+  async getSchemaLibrary(name: string, asOf?: AsOf): Promise<SchemaLibrary | null> {
+    const facts = asOf !== undefined ? this.selectFactsForContextualAsOf(asOf) : this.currentFacts();
+    const ref = ontologyRefForSchemaLibrary(name);
+    const candidates = facts.filter(
+      (f) => f.type !== "retract" && f.target.kind === "schema" && f.target.ontologyRef === ref,
+    );
+    if (candidates.length === 0) return null;
+    // maxByOrderKey (NOT a bare orderKey-max reduce) so a genuine orderKey tie resolves by the SAME
+    // content tiebreak Slice-1's `collectDeclaredNodeKinds` uses — convergent across replicas even on a
+    // colliding-declared-id ingested manifest fact (round-2 critic; parity with getSchema).
+    const winner = maxByOrderKey(candidates).winner;
+    const manifest = parseSchemaLibraryManifest(winner.value);
+    if (!manifest) return null;
+    // DETERMINISM GUARD (mirrors `collectDeclaredNodeKinds`): apply a manifest ONLY when its ref matches
+    // its own payload name (`kip:schema-library/<encodeURIComponent(name)>`), so a ref/payload-mismatched
+    // fact can never make selection depend on Map/ingest order.
+    if (ref !== SCHEMA_LIBRARY_ONTOLOGY_PREFIX + encodeURIComponent(manifest.name)) return null;
+
+    const declared = collectDeclaredNodeKinds(facts);
+    const nodeKinds: NodeKindDef[] = [];
+    for (const k of manifest.kinds) {
+      const def = declared.get(k);
+      if (def) nodeKinds.push(def); // reflects the CURRENT winning def; an absent kind is honestly omitted
+    }
+    const out: SchemaLibrary = { name: manifest.name, version: manifest.version, nodeKinds };
+    if (manifest.description !== undefined) out.description = manifest.description;
+    return out;
+  }
+
+  /**
+   * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): list every installed library manifest as `{name, version,
+   * kinds}`, sorted by `name` (deterministic — the sort makes the result a pure function of content, never
+   * a Map-iteration leak). Per library name, the orderKey-winning manifest wins (so a re-registered higher
+   * version supersedes). As-of-queryable. READ-ONLY (authors nothing, INV-A1).
+   */
+  async listSchemaLibraries(asOf?: AsOf): Promise<Array<{ name: string; version: number; kinds: string[] }>> {
+    const facts = asOf !== undefined ? this.selectFactsForContextualAsOf(asOf) : this.currentFacts();
+    const byRef = new Map<string, Fact[]>();
+    for (const f of facts) {
+      if (f.type === "retract") continue;
+      const t = f.target;
+      if (t.kind !== "schema" || typeof t.ontologyRef !== "string") continue;
+      if (!t.ontologyRef.startsWith(SCHEMA_LIBRARY_ONTOLOGY_PREFIX)) continue;
+      const arr = byRef.get(t.ontologyRef);
+      if (arr) arr.push(f);
+      else byRef.set(t.ontologyRef, [f]);
+    }
+    const out: Array<{ name: string; version: number; kinds: string[] }> = [];
+    for (const [ref, arr] of byRef) {
+      const winner = maxByOrderKey(arr).winner; // content-tiebroken (parity with getSchema / Slice 1), not a bare orderKey-max.
+      const manifest = parseSchemaLibraryManifest(winner.value);
+      if (!manifest) continue;
+      // Same determinism guard as `getSchemaLibrary`: the ref must match its own payload name.
+      if (ref !== SCHEMA_LIBRARY_ONTOLOGY_PREFIX + encodeURIComponent(manifest.name)) continue;
+      out.push({ name: manifest.name, version: manifest.version, kinds: manifest.kinds });
+    }
+    out.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+    return out;
   }
 
   /**

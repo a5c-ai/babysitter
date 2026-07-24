@@ -24,8 +24,10 @@ import type {
   EID,
   Fact,
   FunctionalityBinding,
+  NodeKindDef,
   NodeView,
   PropValue,
+  SchemaLibrary,
 } from "./index";
 import { compareOrderKey, orderKey } from "./proj";
 
@@ -52,6 +54,127 @@ export const NODE_KIND_ONTOLOGY_PREFIX = "kip:node-kind/";
  *  ontology ref uses. */
 export function ontologyRefForNodeKind(kind: string): string {
   return `${NODE_KIND_ONTOLOGY_PREFIX}${encodeRefSegment(kind)}`;
+}
+
+/**
+ * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): the `ontologyRef` prefix a `SchemaLibrary` MANIFEST is stored
+ * under — `kip:schema-library/<name>` (a sibling channel to `kip:node-kind/`). One additive slot per
+ * library name; re-registering a library authors another manifest fact under the SAME ref, resolved by
+ * `orderKey`-max in `getSchemaLibrary`/`listSchemaLibraries` (never overwritten in place).
+ */
+export const SCHEMA_LIBRARY_ONTOLOGY_PREFIX = "kip:schema-library/";
+
+/** SCHEMA SLICE 2 (docs/21 §3, ADR-B19): the `kip:schema-library/<name>` ontology ref a library manifest
+ *  is stored under — the `name` segment is percent-encoded with the SAME separator-collision guard every
+ *  other ontology ref uses, so a library-name reader can recover it by `encodeURIComponent(name)`. */
+export function ontologyRefForSchemaLibrary(name: string): string {
+  return `${SCHEMA_LIBRARY_ONTOLOGY_PREFIX}${encodeRefSegment(name)}`;
+}
+
+/**
+ * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): describe the FIRST way a `NodeKindDef` is malformed as a
+ * library member (or `null` when well-formed). Stricter than proj's tolerant `parseNodeKindDef` (which
+ * simply declares nothing on a bad payload) because this validates a CALLER-SUPPLIED argument up front —
+ * a malformed member must throw before anything is authored (N5), not silently no-op. Pure; never throws.
+ */
+export function describeMalformedNodeKindDef(def: unknown): string | null {
+  if (typeof def !== "object" || def === null) return "nodeKind must be an object";
+  const d = def as Record<string, unknown>;
+  if (typeof d.kind !== "string" || d.kind.length === 0) return "nodeKind.kind must be a non-empty string";
+  const kindLabel = typeof d.kind === "string" ? d.kind : "<unknown>";
+  if (typeof d.version !== "number" || !Number.isInteger(d.version)) {
+    return `nodeKind "${kindLabel}" version must be an integer`;
+  }
+  if (!Array.isArray(d.props)) return `nodeKind "${kindLabel}" props must be an array`;
+  const seenProps = new Set<string>();
+  for (const p of d.props) {
+    if (typeof p !== "object" || p === null) return `nodeKind "${kindLabel}" has a non-object prop`;
+    const pp = p as Record<string, unknown>;
+    if (typeof pp.name !== "string" || pp.name.length === 0) {
+      return `nodeKind "${kindLabel}" has a prop with an empty/non-string name`;
+    }
+    if (pp.type !== "string" && pp.type !== "number" && pp.type !== "boolean") {
+      return `nodeKind "${kindLabel}" prop "${pp.name}" type must be string|number|boolean`;
+    }
+    if (pp.required !== undefined && typeof pp.required !== "boolean") {
+      return `nodeKind "${kindLabel}" prop "${pp.name}" required must be a boolean when present`;
+    }
+    if (seenProps.has(pp.name)) return `nodeKind "${kindLabel}" has a duplicate prop "${pp.name}"`;
+    seenProps.add(pp.name);
+  }
+  return null;
+}
+
+/**
+ * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): describe the FIRST way a `SchemaLibrary` ARGUMENT is malformed
+ * (or `null` when well-formed) — non-empty name, integer version, at least one nodeKind, each a
+ * well-formed `NodeKindDef`, and NO duplicate kind names within the library. `registerSchemaLibrary`
+ * throws `ERR_MALFORMED_INPUT` on a non-null result BEFORE authoring anything (N5). Pure; never throws.
+ */
+export function describeMalformedSchemaLibrary(lib: unknown): string | null {
+  if (typeof lib !== "object" || lib === null) return "library must be an object";
+  const l = lib as Record<string, unknown>;
+  if (typeof l.name !== "string" || l.name.length === 0) return "name must be a non-empty string";
+  if (typeof l.version !== "number" || !Number.isInteger(l.version)) return "version must be an integer";
+  if (l.description !== undefined && typeof l.description !== "string") {
+    return "description must be a string when present";
+  }
+  if (!Array.isArray(l.nodeKinds) || l.nodeKinds.length === 0) return "nodeKinds must be a non-empty array";
+  const seenKinds = new Set<string>();
+  for (const def of l.nodeKinds) {
+    const malformation = describeMalformedNodeKindDef(def);
+    if (malformation) return malformation;
+    const kind = (def as NodeKindDef).kind;
+    if (seenKinds.has(kind)) return `duplicate node kind "${kind}" within library`;
+    seenKinds.add(kind);
+  }
+  return null;
+}
+
+/** SCHEMA SLICE 2 (docs/21 §3, ADR-B19): the manifest payload persisted as a `kip:schema-library/<name>`
+ *  fact's `value` — the library's identity/version/description plus the NAMES of its member kinds (the
+ *  full `NodeKindDef`s live in their own `kip:node-kind/<kind>` facts, read back on hydration). */
+export interface PersistedSchemaLibraryManifest {
+  name: string;
+  version: number;
+  kinds: string[];
+  description?: string;
+}
+
+/** SCHEMA SLICE 2: build the manifest payload for a (already-validated) library — member-kind NAMES in
+ *  the library's declared order. Pure. */
+export function schemaLibraryManifestPayload(lib: SchemaLibrary): PersistedSchemaLibraryManifest {
+  const payload: PersistedSchemaLibraryManifest = {
+    name: lib.name,
+    version: lib.version,
+    kinds: lib.nodeKinds.map((d) => d.kind),
+  };
+  if (lib.description !== undefined) payload.description = lib.description;
+  return payload;
+}
+
+/** SCHEMA SLICE 2: parse a `PersistedSchemaLibraryManifest` out of a manifest fact's JSON `value`, or
+ *  `null` if the payload is not a well-formed manifest (never throws — a malformed manifest reads as
+ *  absent, honoring N5). */
+export function parseSchemaLibraryManifest(value: PropValue | undefined): PersistedSchemaLibraryManifest | null {
+  if (typeof value !== "string") return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== "object" || parsed === null) return null;
+  const obj = parsed as Record<string, unknown>;
+  if (typeof obj.name !== "string" || typeof obj.version !== "number" || !Array.isArray(obj.kinds)) return null;
+  const kinds: string[] = [];
+  for (const k of obj.kinds) {
+    if (typeof k !== "string") return null;
+    kinds.push(k);
+  }
+  const out: PersistedSchemaLibraryManifest = { name: obj.name, version: obj.version, kinds };
+  if (typeof obj.description === "string") out.description = obj.description;
+  return out;
 }
 
 /**

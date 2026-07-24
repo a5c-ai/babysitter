@@ -403,6 +403,35 @@ export interface EdgeKindDef {
   props?: PropSchema[];
 }
 
+/**
+ * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): a REUSABLE, IMPORTABLE schema LIBRARY — a named, versioned
+ * bundle of node kinds you define ONCE and register into ANY number of repos/tenants. It is a PLAIN
+ * DATA OBJECT: the "reusable" property is that the same value can be imported in code (or shipped as
+ * JSON) and registered anywhere — there is no network and no filesystem in the mechanism.
+ *
+ * `Repo.registerSchemaLibrary(lib)` authors, on the SAME orchestrator-signed schema-fact channel
+ * `registerSchema`/`registerFunctionality` use (INV-A1): (a) ONE library-MANIFEST fact
+ * (`kip:schema-library/<name>`, carrying `{name, version, description?, kinds}`) so an installed
+ * library is itself a versioned, as-of-queryable fact, and (b) each `nodeKinds[i]` via the SAME Slice-1
+ * `registerSchema` (ONE authoring path — a library-registered kind is byte-identical to a directly-
+ * registered one). `Repo.getSchemaLibrary`/`listSchemaLibraries` read them back (orderKey-winner, as-of).
+ *
+ * Versioning is manifest + kind evolution-LITE and LAST-WRITE-WINS by orderKey: the MOST-RECENTLY-AUTHORED
+ * manifest wins and re-registers its kinds (a kind whose def changed makes `proj` re-validate existing nodes
+ * against the new winning def, grow-only). The `version` FIELD is DESCRIPTIVE metadata, NOT a monotonicity
+ * guard — re-registering a LOWER `version` later also supersedes (a downgrade). This is PACKAGING + VERSIONING, NOT the per-
+ * fact-version UPCASTER / migration machinery (Slice 3, deferred): a node is validated against the
+ * CURRENT winning def, there is no automatic data migration. Also DEFERRED: `EdgeKindDef` inclusion
+ * beyond what `NodeKindDef` covers, a bundled "standard" ontology library (kip ships the MECHANISM,
+ * not opinionated predefined kinds), and cross-repo network SYNC of a library.
+ */
+export interface SchemaLibrary {
+  name: string;
+  version: number;
+  nodeKinds: NodeKindDef[];
+  description?: string;
+}
+
 // ---------------------------------------------------------------------------
 // 5. Supporting API types (docs/40 "Supporting API types (normative)")
 // ---------------------------------------------------------------------------
@@ -1346,6 +1375,33 @@ export interface Repo {
    * before t2. READ-ONLY (authors nothing, INV-A1).
    */
   getSchema(kind: NodeKind, asOf?: AsOf): Promise<NodeKindDef | null>;
+
+  /**
+   * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): register a REUSABLE, IMPORTABLE `SchemaLibrary` — a named,
+   * versioned bundle of node kinds — in ONE call. Authors, on the SAME orchestrator-signed schema-fact
+   * channel `registerSchema` uses (INV-A1): ONE library-MANIFEST fact (`kip:schema-library/<name>`) plus
+   * each member kind via the SAME Slice-1 `registerSchema` (so a library-registered kind is byte-identical
+   * to a directly-registered one). Returns every authored `FactId` (manifest first, then each kind).
+   *
+   * The `lib` ARGUMENT is validated up front (non-empty name, integer version, at least one nodeKind, each
+   * a well-formed `NodeKindDef`, NO duplicate kind names) — a malformed argument throws `ERR_MALFORMED_INPUT`
+   * BEFORE anything is authored (N5, never a partial/garbage library). This is caller-input validation of
+   * the ARGUMENT, exactly like `registerFunctionality` validates its own — NOT a write-time gate on facts.
+   */
+  registerSchemaLibrary(lib: SchemaLibrary): Promise<FactId[]>;
+  /**
+   * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): read back the orderKey-winning library manifest for `name`,
+   * re-hydrated with the CURRENT winning `NodeKindDef` of each member kind (the Slice-1 read path, so it
+   * reflects any later re-declaration of a kind), or `null`. As-of-queryable (manifest + kinds are facts):
+   * a library registered at t2 is absent at an `asOf` before t2. READ-ONLY (authors nothing, INV-A1).
+   */
+  getSchemaLibrary(name: string, asOf?: AsOf): Promise<SchemaLibrary | null>;
+  /**
+   * SCHEMA SLICE 2 (docs/21 §3, ADR-B19): list every installed library manifest as
+   * `{name, version, kinds}`, sorted by `name` (deterministic — no Map-iteration leak). As-of-queryable.
+   * READ-ONLY (authors nothing, INV-A1).
+   */
+  listSchemaLibraries(asOf?: AsOf): Promise<Array<{ name: string; version: number; kinds: string[] }>>;
 
   registerFunctionality(
     edgeKind: EdgeKind,
