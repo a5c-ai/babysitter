@@ -1155,23 +1155,46 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   corpus searchable surface and match by similarity (reusing the M4 vector infrastructure) — and/or add
   relevance weighting (IDF/BM25), stemming/fuzzy matching, and a Unicode-aware tokenizer. Until then, `ask`
   is robust only for questions that share lexical terms with the graph and should be documented as such.
-- **Status:** LEXICAL half RESOLVED (ADR-B13); SEMANTIC half still Open (tracked). The lexical-robustness
-  fixes shipped deterministically, with zero new deps and NO change to the "never embeds the query" stance: a
-  Unicode-aware, NFC-normalized tokenizer (CJK codepoints tokenized as unigrams instead of dropped; non-Latin
-  scripts no longer discarded), a pure inflectional stemmer applied symmetrically inside the shared
-  `recallSearchTerms` (owns/owned/owning -> own), and IDF/BM25-style ranking of the admitted seeds (a
-  discriminative rare term outranks a common schema key/edge kind). The ADMISSION bar (`exact || matched > 0`)
-  stays byte-identical and LOCAL to the candidate -- IDF feeds only the ranking, never admission -- and N5 /
-  cite-or-abstain and graph-QA subject-anchoring are unweakened (they use the same shared tokenizer).
-  Live-verified over a real `recall({text})` path: a morphological variant and a CJK term now retrieve where
-  they previously missed, the discriminative term ranks first, results are permutation-deterministic, and a
-  true synonym with no shared stemmed root STILL abstains. What remains OPEN and is now the SOLE content of
-  this debt: true SYNONYMY / paraphrase (e.g. "revenue recognition" == "booking settlement"), which lexical
-  matching cannot close and needs the deferred semantic/embedding retrieval (owner-gated on the N2/N5 "never
-  embeds the query" stance). The stemmer is inflectional-only (NOT derivational: ownership does not reduce to
-  own), no lexicon (irregulars not lemmatized), no silent-e restoration, one suffix rule per call -- all
-  documented honestly in `stemInflectional` and pinned by boundary tests, not overclaimed. See ADR-B13 and
+- **Status:** LEXICAL half RESOLVED (ADR-B13); SEMANTIC half ADDRESSED via the OWNER-APPROVED stance LIFT
+  (ADR-B17). The lexical-robustness fixes shipped deterministically, with zero new deps: a Unicode-aware,
+  NFC-normalized tokenizer (CJK codepoints tokenized as unigrams instead of dropped; non-Latin scripts no
+  longer discarded), a pure inflectional stemmer applied symmetrically inside the shared `recallSearchTerms`
+  (owns/owned/owning -> own), and IDF/BM25-style ranking of the admitted seeds (a discriminative rare term
+  outranks a common schema key/edge kind). The ADMISSION bar (`exact || matched > 0`) stays byte-identical and
+  LOCAL to the candidate -- IDF feeds only the ranking, never admission -- and N5 / cite-or-abstain and
+  graph-QA subject-anchoring are unweakened (they use the same shared tokenizer). The stemmer is
+  inflectional-only (NOT derivational: ownership does not reduce to own), no lexicon, no silent-e restoration,
+  one suffix rule per call -- documented honestly in `stemInflectional`, not overclaimed. See ADR-B13 and
   `reviews/d57-lexical-recall-report.md`.
+  - **SEMANTIC half (ADR-B17): the N2/N5 "never embeds the query" stance is LIFTED (owner-approved).** kip now
+    embeds the query ITSELF and drives the existing vector half, as an OPT-IN (`RecallQuery.semantic` /
+    `kip recall --semantic` / `kip ask --semantic` / `KIP_ASK_EMBED`) so default recall is byte-identical
+    (the `m4-retrieval` "kip NEVER embeds the query text" test stays green because it sets no opt-in). When
+    enabled, query and corpus are embedded SYMMETRICALLY by the SAME embedder, chosen by AVAILABILITY (a
+    configured default, NOT a try/catch fallback): an INJECTED `dispatchMicroagent` embedding microagent when
+    one is wired (a genuinely-failed injected embedder throws LOUD, N5), ELSE a dependency-free default. The
+    vector half joins RRF fusion; §5.3 accelerator boundary intact (embeddings OUTSIDE proj, recall authors
+    nothing INV-A1); with the dep-free default the whole path is deterministic.
+  - **HONEST SCOPE — NO overclaim.** kip ships ZERO-DEP, so the built-in `defaultEmbed`
+    (`src/embed/default-embedder.ts`) is a FUZZY / character-token-overlap vector embedding, **NOT learned
+    synonymy**. It closes the fuzzy gap (a compound like `health care` now surfaces a `healthcare` node the
+    flat lexical bar missed; typos/morphology/substrings), but two strings that denote the SAME concept with
+    NO shared characters are ~ORTHOGONAL: `defaultEmbed("revenue recognition")` vs
+    `defaultEmbed("booking settlement")` → cosine ~0 (PINNED by a boundary test). So the canonical
+    `revenue recognition` == `booking settlement` case is STILL not matched by the dep-free default.
+  - **What true synonymy requires, and what remains OPEN.** TRUE synonymy is reachable ONLY by INJECTING a
+    real embedding model through the §5.3 seam (which embeds query AND corpus) — proven by a test with a
+    scripted synonym-aware dispatch where a lexically-disjoint synonym query retrieves. What remains OPEN:
+    out-of-the-box synonymy (needs an injected real model; kip stays zero-dep), an ANN index / embedding
+    cache (the M4 exact per-call scan is unchanged), and D-59's prose-only-subject recall (an injected real
+    embedder makes it possible, but §6.1b anchoring still governs the answer). Two disclosed nits (review,
+    non-blocking): (i) the opt-in flag is named `--semantic` because it is the mode gate — with NO injected
+    embedder it enables the FUZZY default, not synonymy (documented at its call site + here so the name is not
+    read as an out-of-box synonymy promise); (ii) the fuzzy default admits vector candidates on `sim > 0`, so a
+    lone shared char-trigram can inject a low-ranked noise candidate into the RRF fusion — harmless (§6.1b
+    anchoring governs the answer; the char-disjoint boundary is orthogonal), a small positive cosine floor for
+    the dep-free half is a possible follow-on. See ADR-B17 and
+    `src/__tests__/d57-semantic-embedding.test.ts` (11 tests; full kip suite 1021 passed | 8 skipped).
 
 ### D-58: the learn `learner`'s encoding is non-deterministic — the same document produces a different node/edge split across runs
 

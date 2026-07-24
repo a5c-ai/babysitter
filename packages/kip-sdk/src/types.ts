@@ -425,11 +425,14 @@ export interface TraversalSpec {
  * M4/T5.5: `RecallQuery` widened to the normative docs/26 §5.1 shape (the round-4 realization of the
  * former minimal-placeholder's own `TODO(M4/T11.4)`). Every field is docs/26 §5.1-declared:
  *
- * - `text`: ADVISORY exact/keyword GRAPH-SEED input only. kip NEVER embeds it (N2/N5) — no silent
- *   in-kip query embedding. The vector half runs IFF `embedding` is present. A `text` exact-match on a
- *   candidate's `content` cell is a GRAPH SEED (§5.1 flowchart `G0`): the matched node is itself a
- *   hop-0 candidate (it earns a graph rank even with no inbound edge and no vector half), so a
- *   pure-`text` query surfaces the matched nodes THEMSELVES, not only their graph-expanded neighbors.
+ * - `text`: exact/keyword GRAPH-SEED input, AND (D-57 / ADR-B17) the source kip embeds when `semantic`
+ *   is opted in. By DEFAULT (no `semantic`, no `embedding`) kip does NOT embed it and the vector half
+ *   is inert — pure lexical + graph, the pre-ADR-B17 behavior. A `text` exact-match on a candidate's
+ *   `content` cell is a GRAPH SEED (§5.1 flowchart `G0`): the matched node is itself a hop-0 candidate
+ *   (it earns a graph rank even with no inbound edge and no vector half), so a pure-`text` query
+ *   surfaces the matched nodes THEMSELVES, not only their graph-expanded neighbors.
+ * - `semantic`: D-57 (semantic half) OPT-IN — when `true`, kip embeds `text` itself and drives the
+ *   vector half (see the field's own doc). Absent ⇒ unchanged behavior.
  * - `embedding`: the CALLER-SUPPLIED query vector (N2: kip consumes embeddings, never produces them),
  *   the ANN candidate seed. Corpus vectors are built OUTSIDE the deterministic `proj` fold, via the
  *   injectable `dispatchMicroagent` embedding seam (§5.3 accelerator boundary — recall/embeddings
@@ -468,6 +471,20 @@ export interface TraversalSpec {
 export interface RecallQuery {
   text?: string;
   embedding?: number[];
+  /**
+   * D-57 (semantic half) — OPT-IN query embedding (the owner-approved lift of the former N2/N5 "kip
+   * never embeds the query" stance). When `true` AND a `text` is present AND no `embedding` was
+   * supplied, kip embeds `text` ITSELF and drives the vector half with it, embedding the corpus
+   * SYMMETRICALLY through the SAME embedder: the injected `dispatchMicroagent` embedding microagent
+   * when one is available, ELSE the dependency-free fuzzy `defaultEmbed` (`src/embed/default-embedder.ts`).
+   * ABSENT/`false` ⇒ behavior is EXACTLY as before this field existed (pure lexical + graph, the
+   * vector half runs only on a caller-supplied `embedding`) — the frozen suite is byte-identical.
+   * HONEST SCOPE: the built-in `defaultEmbed` is FUZZY character/token overlap, NOT learned synonymy;
+   * true synonymy needs a real embedding model injected through the seam. Reading this field keeps
+   * `computeRecall` a pure function of (fact set, query) — the `--semantic` flag / `KIP_ASK_EMBED`
+   * env are resolved at the `kip ask` / graph-QA wiring layer and merely set this bit.
+   */
+  semantic?: boolean;
   filters?: { kind?: NodeKind[]; props?: Record<PropKey, PropValue>; edgeKinds?: EdgeKind[] };
   scope?: ScopeRef;
   expand?: { hops: number; edgeKinds?: EdgeKind[]; maxFanout?: number };

@@ -48,6 +48,7 @@ import {
 } from "./proj";
 import type { CellReducerAssociations } from "./cell-reducers";
 import { recallSearchTerms, stripLearnEidNamespace } from "./text-terms";
+import { defaultEmbed } from "./embed/default-embedder";
 import {
   collectRegisteredBindings,
   derivedFromEdgeEidFor,
@@ -432,6 +433,14 @@ export class KipRepo implements Repo {
    *  every step — see the constructor option and `DispatchMicroagentFn`'s own doc comment. */
   private readonly dispatchMicroagent: DispatchMicroagentFn;
 
+  /** D-57 (semantic half): `true` iff the constructor was handed a real `dispatchMicroagent` (a
+   *  genuine embedding microagent could be behind it), `false` when it fell back to the deterministic
+   *  "always succeeds" stub. The opt-in query-embedding path BRANCHES ON THIS AVAILABILITY (not a
+   *  try/catch fallback): with an injected dispatch it embeds query AND corpus through the seam (real
+   *  semantics when a real model is behind it, and a genuinely-failed embedder surfaces LOUDLY per
+   *  N5); without one it uses the dependency-free fuzzy `defaultEmbed` for BOTH (symmetry). */
+  private readonly hasInjectedDispatch: boolean;
+
   /**
    * TEST-SUPPORT ADDITION (M6/T7.2, docs/32 §5b.2's declared seam, m7-18): `learn()`'s wall-time
    * budget axis (`LearnerLoopState.elapsedMs` vs. `LearnOptions.maxWallMs`) is declared to read an
@@ -575,6 +584,7 @@ export class KipRepo implements Repo {
     this.trustedExciseKeyFingerprints = new Set(options?.trustedExciseKeys ?? []);
     this.regenBoundaryRule = options?.regenBoundaryRule ?? REGEN_BOUNDARY_RULE_AUTHOR_HLC_CONTIGUOUS;
     this.dispatchMicroagent = options?.dispatchMicroagent ?? KipRepo.defaultDispatchMicroagent;
+    this.hasInjectedDispatch = options?.dispatchMicroagent !== undefined;
     // ROUND-2 FIX (MAJOR #1): genuinely monotonic (never Date.now()) yet still epoch-comparable —
     // see this field's own doc comment and the constructor option's doc comment above.
     this.clock = options?.clock ?? (() => performance.timeOrigin + performance.now());
@@ -2167,25 +2177,61 @@ export class KipRepo implements Repo {
       viewByEid.set(eid, view);
     }
 
-    // (2) Vector half — runs IFF a caller-supplied `embedding` is present (N2/N5: kip never embeds the
-    // query itself). Corpus vectors come from the embedding microagent dispatched through the injectable
-    // seam (§5.3 accelerator, OUTSIDE proj). Candidates below zero cosine are NOT vector candidates.
+    // (2) Vector half. THE QUERY VECTOR is EITHER the caller-supplied `q.embedding`, OR — the D-57
+    // stance lift, owner-approved — kip's OWN embedding of `q.text` when semantic embedding is opted
+    // in (`q.semantic === true`) and no `q.embedding` was supplied. SYMMETRY IS LOAD-BEARING: the
+    // corpus candidates are embedded by the SAME embedder as the query, never a mix (a defaultEmbed
+    // query is compared only against defaultEmbed corpus vectors, an injected-model query only against
+    // injected-model corpus vectors). The embedder is chosen by AVAILABILITY (a configured DEFAULT,
+    // NOT a try/catch fallback — "fallbacks are evil"): with an injected `dispatchMicroagent` the seam
+    // embeds both (real semantics when a real model is behind it; a genuinely-failed embedder throws
+    // LOUD per N5), else the dependency-free fuzzy `defaultEmbed`. When `q.semantic` is absent this
+    // whole block is byte-identical to the pre-D-57 caller-supplied-embedding-only path.
+    //
+    // §5.3 ACCELERATOR BOUNDARY unchanged: every vector is computed OUTSIDE `proj` (recall authors
+    // nothing, INV-A1; embeddings are a SEARCH SIGNAL only, never an `orderKey`/reducer/byte-identity
+    // input). With `defaultEmbed` the whole half is ALSO deterministic (a pure function of text), so a
+    // semantic-default recall stays a pure function of the fact set + query.
+    //
     // HONEST M4 SCOPE: this is an EXACT brute-force cosine scan over all candidates (recomputed
     // per-call), NOT an HNSW/IVF ANN index — so its top-k is recall-EQUAL to exact-kNN by construction
     // (INV-5 recall@10 = 1.0). §5.3's pluggable approximate index is a named follow-up; the
     // recall-equivalence CONTRACT (recall@10 ≥ 0.95) is what M4 pins, and an exact scan meets it.
     const rankVector = new Map<EID, number>();
     const vectorCandidates: EID[] = [];
+
+    // Resolve the (queryVec, corpusEmbedder) pairing — always the SAME embedder on both sides.
+    let queryVec: readonly number[] | undefined;
+    let embedCorpus: ((eid: EID, content: string) => Promise<number[]>) | undefined;
     if (q.embedding && q.embedding.length > 0) {
+      // Caller supplied the query vector (the pre-D-57 path). Corpus via the injected embedding seam.
       const model = this.embeddingModelIdentity(facts);
+      queryVec = q.embedding;
+      embedCorpus = (eid, content) => this.dispatchEmbedding(eid, content, model);
+    } else if (q.semantic === true && typeof q.text === "string" && q.text.length > 0) {
+      if (this.hasInjectedDispatch) {
+        // A real embedding microagent is wired: embed the QUERY through the SAME seam the corpus uses
+        // (true semantics when a real model is behind it; symmetric by construction).
+        const model = this.embeddingModelIdentity(facts);
+        queryVec = await this.dispatchEmbedding(RECALL_QUERY_EID, q.text, model);
+        embedCorpus = (eid, content) => this.dispatchEmbedding(eid, content, model);
+      } else {
+        // No injected model: the dependency-free FUZZY default embeds BOTH sides (honest
+        // character/token overlap, NOT learned synonymy — see `default-embedder.ts`).
+        queryVec = defaultEmbed(q.text);
+        embedCorpus = async (_eid, content) => defaultEmbed(content);
+      }
+    }
+
+    if (queryVec !== undefined && queryVec.length > 0 && embedCorpus !== undefined) {
       const scored: Array<{ eid: EID; sim: number }> = [];
       for (const [eid, view] of viewByEid) {
         const content = coveringPropValue(view.props.content, gateInstant);
         if (typeof content !== "string") continue;
         // eslint-disable-next-line no-await-in-loop -- sequential dispatch keeps the accelerator build
         // deterministic (arrival-ordered) over the fixed candidate set.
-        const vec = await this.dispatchEmbedding(eid, content, model);
-        const sim = recallCosine(q.embedding, vec);
+        const vec = await embedCorpus(eid, content);
+        const sim = recallCosine(queryVec, vec);
         if (sim > 0) scored.push({ eid, sim });
       }
       // The SAME (sim desc, eid asc) total order the exact-kNN ground truth uses (fixtures-m4), so the
@@ -6216,6 +6262,11 @@ function parseRegeneratedCommitBytes(commitBytes: Uint8Array): {
 /** This SDK's built-in embedding-microagent identity (docs/26 §5.4 / M-7.2) — the fallback when the
  *  set carries no `kip:embedding-model` schema fact naming a specific model. */
 const KIP_EMBEDDING_MODEL = { name: "kip-embedding-model", version: "1.0.0" } as const;
+
+/** D-57 (semantic half): the synthetic EID naming the query-embedding dispatch invocation when kip
+ *  embeds `q.text` itself through the injected seam. It identifies the invocation only (the query is
+ *  not a corpus node) — recall still authors nothing (INV-A1). */
+const RECALL_QUERY_EID = "kip:recall-query" as EID;
 
 /**
  * The default §5.4 recency half-life decay constant (ms) when `RecallQuery.rank.halfLifeMs` is

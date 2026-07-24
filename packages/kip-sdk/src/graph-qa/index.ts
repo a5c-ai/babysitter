@@ -87,6 +87,18 @@ const STATUS_PROP = "status";
 const CURRENT_STATUS_VALUE = "current";
 const SUPERSEDED_STATUS_VALUE = "superseded";
 
+/**
+ * D-57 (semantic half): the env opt-in for semantic retrieval on the `kip ask` / graph-QA path — the
+ * `KIP_ASK_EMBED`-style switch. Truthy = any non-empty value other than `0`/`false`/`off`/`no`
+ * (case-insensitive). Read ONLY here at the wiring layer; the pure `computeRecall` never reads env.
+ */
+function askEmbedEnvEnabled(): boolean {
+  const v = process.env.KIP_ASK_EMBED;
+  if (v === undefined) return false;
+  const s = v.trim().toLowerCase();
+  return s.length > 0 && s !== "0" && s !== "false" && s !== "off" && s !== "no";
+}
+
 /** The namespace prefix of a `doc:` concept node eid (`doc:<blob>#<slug>`, ADR-B10d). */
 const CONCEPT_EID_PREFIX = "doc:";
 
@@ -101,6 +113,15 @@ export interface GraphQaInput {
   asOf?: AsOf;
   /** OPTIONAL tenant/namespace/snapshot lens (§8 ScopeRef). */
   scope?: ScopeRef;
+  /**
+   * D-57 (semantic half) — OPT-IN semantic retrieval. When `true` (or when the `KIP_ASK_EMBED` env is
+   * set), the recall query is issued with `semantic: true`, so kip embeds the question and the vector
+   * half joins RRF fusion (the injected embedding microagent when one is wired, else the dependency-
+   * free FUZZY `defaultEmbed`). ABSENT ⇒ retrieval is pure lexical + graph, exactly as before. N5 is
+   * unweakened: the vector half only ADDS candidates; §6.1b subject-anchoring still governs whether a
+   * retrieved node becomes an ANSWER, so better recall never yields a fabricated answer.
+   */
+  semantic?: boolean;
 }
 
 /**
@@ -454,6 +475,11 @@ export async function answerQuestion(
   const K = 64;
   const recallQuery: RecallQuery = { text: question, k: K, expand: { hops: 3, maxFanout: K } };
   if (asOf !== undefined) recallQuery.asOf = asOf;
+  // D-57 (semantic half): the opt-in is either an explicit `input.semantic` (the `--semantic` flag /
+  // programmatic caller) OR the `KIP_ASK_EMBED` env, resolved HERE (not in the pure `computeRecall`)
+  // so recall stays a pure function of (fact set, query). When on, the vector half joins RRF fusion;
+  // N5 subject-anchoring (§6.1b, below) still decides whether a retrieved node becomes an answer.
+  if (input.semantic === true || askEmbedEnvEnabled()) recallQuery.semantic = true;
   const candidates = await repo.recall(recallQuery);
 
   const nodeEids = new Set<EID>();

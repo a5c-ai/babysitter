@@ -1045,6 +1045,7 @@ export const defaultDispatchMicroagent: DispatchMicroagentFn = async (
     scope?: ScopeRef;
     repoDir?: unknown;
     model?: unknown;
+    semantic?: unknown;
   };
   // Round-2 finding #6: a missing/empty `question` is a CALLER-INPUT rejection — the THROW channel the
   // core enforces (kip-graph-qa.md §6.5), NEVER an abstention (a domain OUTCOME, never an error signal).
@@ -1088,7 +1089,14 @@ export const defaultDispatchMicroagent: DispatchMicroagentFn = async (
         ? undefined
         : Math.max(1, invocation.timeout - (Date.now() - started));
     const result = await answerQuestion(
-      { question: input.question, asOf: input.asOf, scope: input.scope },
+      {
+        question: input.question,
+        asOf: input.asOf,
+        scope: input.scope,
+        // D-57 (semantic half): honor the opt-in threaded from `kip ask --semantic` (the env opt-in
+        // is resolved inside `answerQuestion` itself).
+        semantic: input.semantic === true ? true : undefined,
+      },
       // The model gets ONLY `{ question, facts }` — never `repo` (INV-A1 by construction, ADR-B8).
       { repo, synthesize: harnessCliSynthesize({ model, timeoutMs: budget }) },
     );
@@ -1173,6 +1181,9 @@ export interface AskDispatchInput {
   scope?: ScopeRef;
   repoDir: string;
   dispatch: DispatchMicroagentFn;
+  /** D-57 (semantic half): opt into semantic retrieval (embed the question; the vector half joins RRF
+   *  fusion). Threaded to the graph-QA core via `invocationInput.semantic`. */
+  semantic?: boolean;
 }
 
 /** The result of an `ask` dispatch: either a mapped §4.11 payload (exit 0) or a dispatch failure
@@ -1226,6 +1237,7 @@ export async function runAsk(input: AskDispatchInput): Promise<AskOutcome> {
   if (input.asOf) invocationInput.asOf = input.asOf;
   if (input.scope) invocationInput.scope = input.scope;
   if (input.k !== undefined) invocationInput.k = input.k;
+  if (input.semantic === true) invocationInput.semantic = true; // D-57 (semantic half) opt-in.
 
   const invocation: MicroagentInvocation = {
     id: `kip-ask-${Date.now()}`,

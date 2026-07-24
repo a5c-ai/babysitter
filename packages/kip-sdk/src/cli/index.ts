@@ -499,6 +499,11 @@ async function cmdRecall(a: HandlerArgs): Promise<number> {
   const q: RecallQuery = { text: queryText, k: Number(kRaw) };
   const embedding = readEmbedding(a);
   if (embedding) q.embedding = embedding;
+  // D-57 (semantic half): `--semantic` opts into query embedding (the vector half joins RRF fusion —
+  // injected embedding microagent if wired, else the dependency-free fuzzy defaultEmbed). Absent ⇒
+  // pure lexical + graph, exactly as before. HONEST: WITHOUT an injected embedder `--semantic` is
+  // FUZZY character/token OVERLAP, NOT true synonymy — true synonymy needs a real embedder via the seam.
+  if (flagBool(flags, "semantic")) q.semantic = true;
   const asOf = asOfFromFlag(flags);
   if (asOf) q.asOf = asOf;
 
@@ -688,6 +693,9 @@ async function cmdAsk(a: HandlerArgs): Promise<number> {
     scope: resolved.scope,
     repoDir: resolved.dir,
     dispatch: a.dispatch,
+    // D-57 (semantic half): `kip ask --semantic` opts into semantic retrieval (the vector half joins
+    // RRF fusion). N5 subject-anchoring still governs whether a retrieved node becomes an answer.
+    semantic: flagBool(flags, "semantic") ? true : undefined,
   });
 
   if (outcome.kind === "dispatch-failure") {
