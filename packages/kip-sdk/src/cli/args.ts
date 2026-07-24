@@ -30,6 +30,10 @@ const BOOLEAN_FLAGS = new Set([
   // `kip resolve confirm/reject` (ADR-B12): operator override that skips the outstanding-candidate
   // guard (off by default; authors a real same_as/not_same_as without a quarantine lifecycle).
   "force",
+  // `kip ask`/`kip recall` (ADR-B17, D-57 semantic half): opt into query embedding so the vector half
+  // joins RRF fusion (injected embedder if wired, else the dep-free fuzzy defaultEmbed). Both handlers
+  // read `flagBool(flags, "semantic")`; without this registration the parser rejected the flag (exit 2).
+  "semantic",
   // `kip ingest-rdf` (D-67): downgrade malformed N-Triples lines from a strict fail (N5, exit 1) to
   // reported per-line skips, ingesting the well-formed triples.
   "skip-malformed",

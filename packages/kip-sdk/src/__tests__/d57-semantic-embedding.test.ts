@@ -318,3 +318,27 @@ describe("D-57 semantic (5) — dep-free semantic recall is permutation-determin
     expect(shape(b)).toBe(shape(a));
   });
 });
+
+// ── CLI PARSER REGISTRATION (D-57 semantic half; the E2E-caught gap) ──────────────────────────────
+// The `--semantic` opt-in is read by `cmdRecall`/`cmdAsk` via `flagBool(flags, "semantic")`, but the
+// zero-dependency argv parser rejects any flag NOT in its classification tables. The SDK-level tests
+// above exercise `recall({semantic:true})` directly and so never touch the CLI parser — which is
+// exactly how `--semantic` shipped UNREGISTERED (parser returned `unknown option --semantic`, exit 2,
+// the whole CLI surface unreachable). This pins the registration so the flag actually parses.
+describe("D-57 semantic — the `--semantic` flag is REGISTERED in the CLI parser (boolean, not exit-2)", () => {
+  it("`kip recall --semantic` parses to flags.semantic === true with NO usage error", async () => {
+    const { parseArgs } = await import("../cli/args");
+    const r = parseArgs(["recall", "--semantic", "--json"]);
+    expect(r.error).toBeUndefined();
+    expect(r.flags.semantic).toBe(true);
+  });
+
+  it("`kip ask --semantic <q>` parses to flags.semantic === true with NO usage error", async () => {
+    const { parseArgs } = await import("../cli/args");
+    const r = parseArgs(["ask", "--semantic", "who owns the ledger"]);
+    expect(r.error).toBeUndefined();
+    expect(r.flags.semantic).toBe(true);
+    // `--semantic` is a BOOLEAN flag: it must NOT swallow the following positional as its value.
+    expect(r.positionals).toContain("who owns the ledger");
+  });
+});
