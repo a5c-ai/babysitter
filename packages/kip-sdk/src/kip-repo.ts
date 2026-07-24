@@ -1393,6 +1393,17 @@ export class KipRepo implements Repo {
     message: string;
   }): Promise<{ commitOid: string; commitBytes: Uint8Array; treeOid: string }> {
     const { dir, gitdir, facts, parentOid, message } = params;
+    const treeOid = await this.writeFactsTree({ dir, gitdir, facts });
+    const { commitOid, commitBytes } = await this.writeCommitForTree({ dir, gitdir, treeOid, facts, parentOid, message });
+    return { commitOid, commitBytes, treeOid };
+  }
+
+  /** The tree half of the commit recipe: one canonical blob per fact (named by its own content-derived
+   *  blob oid), assembled into a tree; returns the tree oid. Extracted so `commit()` can compute the
+   *  tree oid and compare it to the parent commit's tree BEFORE writing a (possibly redundant) commit
+   *  object — a pure function of `facts` (deterministic tree oid for a given fact set). */
+  private async writeFactsTree(params: { dir: string; gitdir: string; facts: Fact[] }): Promise<string> {
+    const { dir, gitdir, facts } = params;
     const entries: Array<{ mode: "100644"; path: string; oid: string; type: "blob" }> = [];
     for (const f of facts) {
       const canonicalContent = JSON.stringify(deepSortKeys(f));
@@ -1406,8 +1417,21 @@ export class KipRepo implements Repo {
       });
       entries.push({ mode: "100644", path: `f-${blobOid}.json`, oid: blobOid, type: "blob" });
     }
-    const treeOid = await isomorphicGit.writeTree({ fs, dir, gitdir, tree: entries });
+    return isomorphicGit.writeTree({ fs, dir, gitdir, tree: entries });
+  }
 
+  /** The commit half of the recipe: wrap an already-written `treeOid` in a parent-chained commit with
+   *  the fixed sentinel author/committer and a `floor(maxWall/1000)` timestamp. Split out of
+   *  `writeFactsTreeAndCommit` so both it and `commit()` share the IDENTICAL byte recipe. */
+  private async writeCommitForTree(params: {
+    dir: string;
+    gitdir: string;
+    treeOid: string;
+    facts: Fact[];
+    parentOid: string | null;
+    message: string;
+  }): Promise<{ commitOid: string; commitBytes: Uint8Array }> {
+    const { dir, gitdir, treeOid, facts, parentOid, message } = params;
     const maxWall = facts.reduce((max, f) => Math.max(max, f.hlc.wall), facts[0].hlc.wall);
     const timestampSeconds = Math.floor(maxWall / 1000);
     const sentinelAuthor = {
@@ -1430,12 +1454,83 @@ export class KipRepo implements Repo {
     });
     const raw = await isomorphicGit.readObject({ fs, dir, gitdir, oid: commitOid, format: "wrapped" });
     const commitBytes = new Uint8Array(raw.object as Uint8Array);
-    return { commitOid, commitBytes, treeOid };
+    return { commitOid, commitBytes };
   }
 
-  // TODO(M0/T1.5): flush auto-batched facts as the publish point (m-9).
-  async commit(_message?: string): Promise<CID> {
-    throw new Error("unimplemented: commit");
+  /**
+   * m-9 — the PUBLISH POINT. Flush the repo's auto-batched, already-durably-ingested content facts as a
+   * new parent-chained git commit and advance the `CommitTipStore` tip, returning the commit's CID (its
+   * git oid). Outside a `txn()`, the ordinary `assertFact`/`retractFact` path ingests each fact durably
+   * (a substrate blob) but returns `status: "pending"` and leaves the COMMIT tip un-advanced (ADR-012:
+   * no durable ack precedes the commit); `commit()` is the operation that turns that pending, durable
+   * state into a published commit.
+   *
+   * Semantics:
+   *  - The commit tree is the CUMULATIVE snapshot of ALL currently-admitted knowledge-content facts
+   *    (`assert`/`retract`/`supersede`/`re-attest`), sorted by the SAME `orderKey`→`compareByContent`
+   *    recipe `txn()`'s own commit uses — so a `commit()` and a `txn()` over the same fact set produce
+   *    the SAME tree (one authoring path, no drift). Parent = the current tip (a chain, whole-history).
+   *  - IDEMPOTENT no-op: if the resulting tree is byte-identical to the current tip's tree (nothing new
+   *    to publish since the last commit), the tip is NOT advanced and the EXISTING tip CID is returned —
+   *    `commit()` is safe to call in a "publish if dirty" loop without growing an empty-delta chain.
+   *  - Loud on nothing-to-commit: an empty repo (no content facts at all) throws `ERR_MALFORMED_INPUT`
+   *    rather than silently succeeding (N5) — there is no honest CID for an empty publish.
+   *
+   * This advances only the COMMIT tip; `seq`/`hlc` were already durably persisted per-fact by the
+   * ordinary ingest path (unlike `txn()`, whose staged facts defer their seq/hlc fold to commit time).
+   */
+  async commit(message?: string): Promise<CID> {
+    // SINGLE-FLIGHT (adversarial-critic MAJOR M1): reject when a `txn()` is in flight on THIS instance.
+    // `commit()` publishes `this.currentFacts()` (durably-ingested facts only) and advances the tip; a
+    // concurrent txn's staged-but-not-yet-ingested facts are invisible to it, so letting commit() run
+    // mid-txn would publish a STALE snapshot AND clobber the tip the txn is about to write (a lost
+    // update). Mirrors `txn()`'s own `ERR_TXN_ALREADY_ACTIVE` re-entry guard — never silently races.
+    if (this.txnActive) {
+      throw new KipError(
+        "ERR_TXN_ALREADY_ACTIVE",
+        "commit: a txn() is in flight on this repo instance — its staged writes are not yet durable, so " +
+          "commit() would publish a stale snapshot and clobber the txn's tip. Publish through the txn (it " +
+          "commits on resolve) or await the txn() before calling commit().",
+        {},
+      );
+    }
+    const substrate = this.getSubstrate();
+    const gitdir = path.join(substrate.dir, ".git");
+    const tipStore = new CommitTipStore(substrate.dir);
+    const parentOid: string | null = tipStore.load().tip;
+
+    const contentFacts = this.currentFacts().filter((f) => CONTENT_FACT_TYPES.has(f.type));
+    if (contentFacts.length === 0) {
+      throw new KipError(
+        "ERR_MALFORMED_INPUT",
+        "commit: no admitted knowledge-content facts to commit (assert/retract/supersede/re-attest) — " +
+          "there is nothing to publish; assert at least one fact before committing.",
+        {},
+      );
+    }
+    const sorted = [...contentFacts].sort(
+      (a, b) => compareOrderKey(orderKey(a), orderKey(b)) || compareByContent(a, b),
+    );
+
+    const treeOid = await this.writeFactsTree({ dir: substrate.dir, gitdir, facts: sorted });
+    // IDEMPOTENT no-op: if the cumulative snapshot is byte-identical to what the current tip already
+    // published, do NOT write a redundant empty-delta commit — return the existing tip CID unchanged.
+    if (parentOid !== null) {
+      const parentTree = (await isomorphicGit.readCommit({ fs, dir: substrate.dir, gitdir, oid: parentOid })).commit.tree;
+      if (parentTree === treeOid) return parentOid;
+    }
+
+    const commitMessage = message ?? `kip commit: publish (${sorted.length} fact(s))\n`;
+    const { commitOid } = await this.writeCommitForTree({
+      dir: substrate.dir,
+      gitdir,
+      treeOid,
+      facts: sorted,
+      parentOid,
+      message: commitMessage,
+    });
+    tipStore.save({ tip: commitOid });
+    return commitOid;
   }
 
   /**
