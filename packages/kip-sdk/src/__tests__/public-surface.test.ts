@@ -82,6 +82,12 @@ const EXPECTED_REPO_METHODS = [
   "excise",
   "revokeKey",
   "fsck",
+  // schema / ontology (docs/21 §3 — SCHEMA SLICE 1): declare a node kind as a versioned fact
+  // (`registerSchema`) and read it back as-of-queryably (`getSchema`). `proj` validates declared kinds
+  // and surfaces `kip:schema-violation` on `NodeView.schemaViolations` — a proj-time quarantine, never
+  // a write gate. Both are documented on `Repo`, so the guard must enumerate them.
+  "registerSchema",
+  "getSchema",
   // active layer (§5b)
   "registerFunctionality",
   "compileContextualQuery",
@@ -157,6 +163,10 @@ describe("public surface (ADR-B5 modularize guard)", () => {
     expectTypeOf<kip.PropCell>().not.toBeAny();
     expectTypeOf<kip.NodeView>().not.toBeAny();
     expectTypeOf<kip.EdgeView>().not.toBeAny();
+    // SCHEMA SLICE 1 (docs/21 §3): the declared-ontology shapes.
+    expectTypeOf<kip.PropSchema>().not.toBeAny();
+    expectTypeOf<kip.NodeKindDef>().not.toBeAny();
+    expectTypeOf<kip.EdgeKindDef>().not.toBeAny();
     expectTypeOf<kip.OpenOptions>().not.toBeAny();
     expectTypeOf<kip.Tx>().not.toBeAny();
     expectTypeOf<kip.ScopeRef>().not.toBeAny();

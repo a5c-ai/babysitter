@@ -39,6 +39,22 @@ export const FUNCTIONALITY_BINDING_ONTOLOGY_PREFIX = "functionality-binding/";
 export const MICROAGENT_REGISTRATION_ONTOLOGY_PREFIX = "microagent-registration/";
 
 /**
+ * SCHEMA SLICE 1 (docs/21 §3): the `ontologyRef` prefix under which a declared `NodeKindDef` is
+ * stored as a `{ kind:"schema" }` fact — `kip:node-kind/<kind>` (mirroring the existing
+ * `kip:embedding-model/` schema-fact channel). One additive slot per node kind; `registerSchema`
+ * re-declaring a kind authors another fact under the SAME ref, resolved by `orderKey`-max in `proj`
+ * and `getSchema` (never overwritten in place).
+ */
+export const NODE_KIND_ONTOLOGY_PREFIX = "kip:node-kind/";
+
+/** SCHEMA SLICE 1 (docs/21 §3): the `kip:node-kind/<kind>` ontology ref a `NodeKindDef` is stored
+ *  under — the `kind` segment is percent-encoded with the SAME separator-collision guard every other
+ *  ontology ref uses. */
+export function ontologyRefForNodeKind(kind: string): string {
+  return `${NODE_KIND_ONTOLOGY_PREFIX}${encodeRefSegment(kind)}`;
+}
+
+/**
  * ROUND-2 FIX (MINOR finding — separator-collision guard): each path SEGMENT is percent-encoded
  * (`encodeURIComponent`) before being joined with the literal `/` separator, so a `/` occurring
  * INSIDE `edgeKind`/`microagentName`/`version` itself can never be confused with a segment boundary.

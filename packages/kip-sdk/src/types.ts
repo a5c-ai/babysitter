@@ -326,6 +326,19 @@ export interface NodeView {
   kind: NodeKind;
   props: Record<PropKey, PropCell>;
   provenance: Provenance;
+  /**
+   * SCHEMA SLICE 1 (docs/21 §3): non-empty ONLY when this node's `kind` has a DECLARED `NodeKindDef`
+   * (via `Repo.registerSchema`) whose declared props its projected props VIOLATE — each entry a
+   * `kip:schema-violation` message (a missing REQUIRED prop, or a prop whose covering value's runtime
+   * type ≠ the declared type). The node/prop is NEVER dropped and no value is invented (N5); this is a
+   * proj-time QUARANTINE surfacing, never a write-time reject (schema is not an ingest gate — a fact's
+   * SIGNATURE is the sole membership predicate, docs/21 §3/§5.1, so rejecting at write would break
+   * set-union CRDT convergence). Absent (`undefined`) for a node whose `kind` has NO declared schema —
+   * so schema is purely OPT-IN and non-breaking (a free-form node projects exactly as before). Present
+   * on BOTH `getNode` (canonical) and `getNodeRaw` reads. Deterministic: a pure function of the fact
+   * set (node facts + schema facts), independent of authoring/ingest order.
+   */
+  schemaViolations?: string[];
 }
 
 export interface EdgeView {
@@ -337,6 +350,57 @@ export interface EdgeView {
   validFrom: HlcOrTime;
   validTo: HlcOrTime | null;
   provenance: Provenance;
+}
+
+// ---------------------------------------------------------------------------
+// 4b. Schema / ontology declaration (docs/21 §3 — SCHEMA SLICE 1)
+// ---------------------------------------------------------------------------
+
+/**
+ * SCHEMA SLICE 1 (docs/21 §3): one declared property on a node kind. Deliberately MINIMAL — a
+ * `name`, a primitive runtime `type`, and an optional `required` flag. The spec's fuller shape
+ * (per-prop `cellReducer`, identity/cardinality/inverse) is explicitly DEFERRED to later slices.
+ */
+export interface PropSchema {
+  name: PropKey;
+  type: "string" | "number" | "boolean";
+  required?: boolean;
+}
+
+/**
+ * SCHEMA SLICE 1 (docs/21 §3): a VERSIONED, FACT-STORED declaration of a node kind's shape. Authored
+ * via `Repo.registerSchema` as exactly ONE signed `{ kind:"schema", ontologyRef:"kip:node-kind/<kind>" }`
+ * fact carrying this def (mirroring `registerFunctionality`'s orchestrator-signed schema-fact channel),
+ * and read back as-of-queryably via `Repo.getSchema` (schema history is itself auditable, docs/21 §3).
+ *
+ * `proj` validates a node of this `kind` against `props` and surfaces any violation as a
+ * `kip:schema-violation` quarantine on `NodeView.schemaViolations` — NEVER a write-time reject
+ * (docs/21 §3: schema conformance is not an ingest gate; the signature is the sole membership
+ * predicate, so a write-gate would break set-union convergence).
+ *
+ * DEFERRED (later slices, NOT in Slice 1): the spec's `cellReducer: CellReducerRef` and
+ * `identity: IdentityPolicy` fields; versioned UPCASTERS / migration / rename / deprecate (Slice 1
+ * validates against the CURRENTLY-declared def only, never per-fact-version upcasters).
+ */
+export interface NodeKindDef {
+  kind: NodeKind;
+  /** Schema version → upcaster keying (docs/21 §3, HP-8). Recorded, but Slice 1 validates against
+   *  the currently-declared def only; versioned upcasters are DEFERRED. */
+  version: number;
+  props: PropSchema[];
+}
+
+/**
+ * SCHEMA SLICE 1 (docs/21 §3): the edge analogue of `NodeKindDef`, declared for surface completeness.
+ * Slice 1 does NOT validate edges against it — edge-kind prop validation, cardinality/`inverse`
+ * (`kip:cardinality-violation`), and per-kind reducers are explicitly DEFERRED to later slices.
+ */
+export interface EdgeKindDef {
+  kind: EdgeKind;
+  version: number;
+  source?: NodeKind | NodeKind[];
+  target?: NodeKind | NodeKind[];
+  props?: PropSchema[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1264,6 +1328,24 @@ export interface Repo {
     mode?: "ordinary-cutoff" | "causal-cutoff",
   ): Promise<FactId>;
   fsck(): Promise<FsckReport>;
+
+  /**
+   * SCHEMA SLICE 1 (docs/21 §3): declare a node kind as a VERSIONED ontology FACT. Authors exactly ONE
+   * signed `{ kind:"schema", ontologyRef:"kip:node-kind/<def.kind>" }` fact carrying `def` (mirroring
+   * `registerFunctionality`'s orchestrator-signed schema-fact channel — INV-A1, nothing else writes).
+   * Schema is NOT a write-time gate: declaring it never rejects or throws on any fact. `proj` validates
+   * nodes of this kind against `def.props` and surfaces violations as `kip:schema-violation`
+   * (`NodeView.schemaViolations`). Grow-only: declaring a schema AFTER a node exists re-projects that
+   * node on the next read. Returns the schema fact's `FactId`.
+   */
+  registerSchema(def: NodeKindDef): Promise<FactId>;
+  /**
+   * SCHEMA SLICE 1 (docs/21 §3): read back the currently-declared `NodeKindDef` for `kind` (the
+   * orderKey-winning `kip:node-kind/<kind>` schema fact), or `null` if none is declared. As-of-queryable
+   * (the def is stored as a fact with a real `validFrom`): a schema declared at t2 is absent at an `asOf`
+   * before t2. READ-ONLY (authors nothing, INV-A1).
+   */
+  getSchema(kind: NodeKind, asOf?: AsOf): Promise<NodeKindDef | null>;
 
   registerFunctionality(
     edgeKind: EdgeKind,

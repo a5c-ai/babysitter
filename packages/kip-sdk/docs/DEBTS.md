@@ -1769,3 +1769,21 @@ similarity through the existing §5.3 accelerator seam) — that remains the ope
   fix, the higher default cost (sonnet vs haiku) is an owner-visible trade-off — see the run's owner review.
   See **[[D-63]]** (closed by this resolver) and the §5.3 accelerator boundary (the model verdict is a search
   signal; only the resulting quarantined signed fact touches proj, independent of which tier produced it).
+
+---
+
+## Audit round 12 — schema / ontology (docs/21 §3)
+
+### D-70: schema / ontology moved designed→PARTIALLY-BUILT — Slice 1 (declaration + current-version proj-time validation) shipped; library + evolution/upcasters + cardinality/inverse + per-kind reducers still open
+
+- **Status:** Partially built (Slice 1 shipped — **ADR-B18**). Was: DESIGNED-BUT-UNBUILT (docs/21 §3 fully specified `NodeKindDef`/`EdgeKindDef`/`PropSchema` + proj-time validation, but nothing was implemented — the gap cited by D-50 family (b), by the `ERR_ILL_TYPED_SEGMENT` "no NodeKindDef/is_a API" debt, and by inv-8's second skip).
+- **What SHIPPED (Slice 1):** (1) DECLARATION as a versioned, as-of-queryable FACT — `Repo.registerSchema(def: NodeKindDef)` authors one signed `{ kind:"schema", ontologyRef:"kip:node-kind/<kind>" }` fact (the orchestrator-signed schema-fact channel, INV-A1); `Repo.getSchema(kind, asOf?)` reads back the orderKey-winner, `null` before the declaration's `validFrom`. `NodeKindDef`/`EdgeKindDef`/`PropSchema` are exported from `types.ts` (`PropSchema` minimal: `name` + primitive `type` + optional `required`). (2) proj-time VALIDATION of DECLARED kinds — a missing REQUIRED prop or a wrong-runtime-typed prop surfaces `kip:schema-violation` on the new optional `NodeView.schemaViolations` (getNode + getNodeRaw). It is a QUARANTINE, never a drop and never an invented value (N5); NEVER a write-time reject (signature is the sole membership gate — a write-gate would break set-union convergence, M-8). Opt-in / non-breaking (undeclared kind ⇒ validated against nothing); grow-only (a late schema re-projects existing nodes on the next read); deterministic (pure fold, sorted messages, orderKey-winner).
+- **What is STILL OPEN (named follow-on slices, explicitly DEFERRED — see ADR-B18):**
+  - **Versioned UPCASTERS / migration / rename / deprecate (HP-8).** Slice 1 validates against the CURRENTLY-declared def (the orderKey-winning schema fact), NOT per-fact-version upcasters — the full docs/21 §3 "apply the ontology as-of each fact's own `version`" path. This is why **inv-8's second skip stays skipped** (a later schema version adding a REQUIRED prop an older fact omits is the per-version-upcaster sub-case, not current-version validation).
+  - **`EdgeKindDef` validation depth** (edge-prop validation; `EdgeKindDef` is exported as a declaration shape only, not yet validated).
+  - **Cardinality / `inverse`** (`kip:cardinality-violation`, a multi-cell PROJECTED constraint; `inverse`-edge materialization) — docs/21 §3 m-12.
+  - **Per-kind `cellReducer` binding + `identity`/`IdentityPolicy`** (docs/21 §3's fuller `NodeKindDef` fields, dropped from Slice 1's minimal `PropSchema`).
+  - **A reusable, importable schema LIBRARY** (predeclared common ontologies).
+- **Why the remainder is debt, not a bug:** each deferred item is a genuine, independently-testable capability the spec names but Slice 1 deliberately scoped out to keep the diff localized and the write-gate-is-signature invariant airtight. None is required for declaration + current-version validation to be correct and useful; the `ERR_ILL_TYPED_SEGMENT` per-adjacent-pair check (that debt's suggested fix) can now begin to consume `getSchema`/`NodeKindDef`, but wiring it is out of Slice 1's scope.
+- **Evidence:** `packages/kip-sdk/src/__tests__/schema-validation.test.ts` (13 tests — declaration/as-of, conforming, missing-required, wrong-type, getNodeRaw, opt-in, grow-only, determinism, never-write-time-throw ×2). Full kip suite green: **1042 passed | 8 skipped** (baseline 1029 + exactly 13 new; skip count unchanged). Build clean; `proj.ts` NUL count unchanged; diff scoped to `packages/kip-sdk`, `package-lock.json` untouched.
+- **Traceability:** ADR-B18; docs/21-data-model.md §3; ADR-001 (signature-only membership); N5; INV-A1; D-50 family (b); the `ERR_ILL_TYPED_SEGMENT` "no schema/is_a API" debt (the pre-existing gap this opens).

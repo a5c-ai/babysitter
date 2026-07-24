@@ -55,9 +55,11 @@ import type {
   FactId,
   HlcOrTime,
   NodeKind,
+  NodeKindDef,
   NodeView,
   PropCell,
   PropKey,
+  PropSchema,
   PropValue,
   Provenance,
   Target,
@@ -1400,6 +1402,126 @@ function pickProvenance(candidates: readonly Fact[], collidedIds: ReadonlySet<Fa
  */
 export const KIP_CONFLICT_KIND = "kip:conflict";
 
+// ---------------------------------------------------------------------------
+// SCHEMA SLICE 1 (docs/21 §3) — declared-kind prop validation, surfaced as a proj-time QUARANTINE.
+//
+// Schema is a mutable ontology stored AS FACTS (`{ kind:"schema", ontologyRef:"kip:node-kind/<kind>" }`,
+// authored via `Repo.registerSchema`), so validation is a PURE, DETERMINISTIC function of the fact set
+// — byte-identical across replicas, no clock/random. It is NOT a write-time gate (a signature is the
+// sole membership predicate — rejecting a violating fact at write would break set-union convergence,
+// docs/21 §3): a conforming node projects normally; a non-conforming node is NEVER dropped and no value
+// is invented (N5) — the violation surfaces on `NodeView.schemaViolations` as `kip:schema-violation`
+// messages. A node whose kind has NO declared def is validated against NOTHING (opt-in, non-breaking).
+//
+// SCOPE (honest): Slice 1 validates against the CURRENTLY-declared def (the orderKey-winning schema
+// fact in the fold), NOT per-fact-version upcasters. Versioned upcasters/migration, EdgeKindDef
+// validation, cardinality/inverse, and per-kind cellReducers are DEFERRED (docs/21 §3).
+// ---------------------------------------------------------------------------
+
+/** The sentinel prefix marking a schema-violation message on `NodeView.schemaViolations` — reuses the
+ *  same `kip:` quarantine-class vocabulary as `KIP_CONFLICT_KIND` rather than inventing a parallel one. */
+export const KIP_SCHEMA_VIOLATION_KIND = "kip:schema-violation";
+
+/** The `ontologyRef` prefix a declared `NodeKindDef` is stored under (kept in lockstep with
+ *  contextual.ts's `NODE_KIND_ONTOLOGY_PREFIX` — duplicated here to avoid a proj→contextual import
+ *  cycle, since contextual.ts already imports from proj.ts). */
+const NODE_KIND_ONTOLOGY_PREFIX = "kip:node-kind/";
+
+/** Parse a `NodeKindDef` out of a schema fact's JSON `value`, or `null` if the payload is not a
+ *  well-formed def (never throws — a malformed def simply declares nothing, honoring N5). */
+export function parseNodeKindDef(value: PropValue | undefined): NodeKindDef | null {
+  if (typeof value !== "string") return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== "object" || parsed === null) return null;
+  const obj = parsed as Record<string, unknown>;
+  if (typeof obj.kind !== "string" || typeof obj.version !== "number" || !Array.isArray(obj.props)) return null;
+  const props: PropSchema[] = [];
+  for (const p of obj.props) {
+    if (typeof p !== "object" || p === null) return null;
+    const pp = p as Record<string, unknown>;
+    if (typeof pp.name !== "string") return null;
+    if (pp.type !== "string" && pp.type !== "number" && pp.type !== "boolean") return null;
+    const prop: PropSchema = { name: pp.name, type: pp.type };
+    if (pp.required === true) prop.required = true;
+    props.push(prop);
+  }
+  return { kind: obj.kind, version: obj.version, props };
+}
+
+/**
+ * Collect the currently-declared `NodeKindDef` per node kind from the admitted fact set — the
+ * orderKey-WINNING non-retracted `kip:node-kind/<kind>` schema fact for each kind (so re-declaring a
+ * kind is a deterministic, order-independent last-writer-by-orderKey, never an ingest-order pick).
+ * Pure over `facts`.
+ */
+export function collectDeclaredNodeKinds(facts: readonly Fact[]): Map<NodeKind, NodeKindDef> {
+  const byKind = new Map<string, Fact[]>();
+  for (const f of facts) {
+    if (f.type === "retract") continue;
+    const t = f.target;
+    if (t.kind !== "schema" || typeof t.ontologyRef !== "string") continue;
+    if (!t.ontologyRef.startsWith(NODE_KIND_ONTOLOGY_PREFIX)) continue;
+    const arr = byKind.get(t.ontologyRef);
+    if (arr) arr.push(f);
+    else byKind.set(t.ontologyRef, [f]);
+  }
+  const out = new Map<NodeKind, NodeKindDef>();
+  for (const [ref, arr] of byKind) {
+    const { winner } = maxByOrderKey(arr);
+    const def = parseNodeKindDef(winner.value);
+    if (!def) continue;
+    // DETERMINISM GUARD (round-2 convergence critic): apply a schema fact ONLY when its `ontologyRef`
+    // matches its own payload kind (`kip:node-kind/<encodeURIComponent(kind)>` — the SAME encoding
+    // `contextual.ts::ontologyRefForNodeKind` mints; kept inline to avoid a proj→contextual import
+    // cycle). This makes each `def.kind` reachable by exactly ONE canonical ref, so `byKind`'s Map
+    // ITERATION ORDER (= ingest order) can never decide the winner for a kind — a ref/payload-mismatched
+    // fact (only reachable by an out-of-band signer, since registerFunctionality always sets a matching
+    // ref) is ignored rather than allowed to make selection replica-relative and break convergence.
+    if (ref !== NODE_KIND_ONTOLOGY_PREFIX + encodeURIComponent(def.kind)) continue;
+    out.set(def.kind, def);
+  }
+  return out;
+}
+
+/**
+ * Validate a projected `NodeView` against a declared `NodeKindDef` — returns the sorted list of
+ * `kip:schema-violation` messages (empty when conforming). A REQUIRED prop with no covering `value`
+ * segment is a MISSING violation; a prop whose covering value's runtime `typeof` ≠ the declared type
+ * is a TYPE violation. Pure — reads only the view's already-projected segments (never re-folds), so a
+ * schema declared LATER re-projects existing nodes for free (grow-only). Never drops a prop, never
+ * invents a value (N5).
+ */
+export function validateNodeAgainstSchema(view: NodeView, def: NodeKindDef): string[] {
+  const violations: string[] = [];
+  // Iterate props in declared order, but sort the final message list so output is a pure function of
+  // content, not declaration order (determinism / permutation-independence).
+  for (const spec of def.props) {
+    const cell = view.props[spec.name];
+    const valueSegs = cell ? cell.segments.filter((s): s is Extract<CellSegment, { kind: "value" }> => s.kind === "value") : [];
+    if (valueSegs.length === 0) {
+      if (spec.required) {
+        violations.push(`${KIP_SCHEMA_VIOLATION_KIND}: required prop "${spec.name}" is missing on kind "${def.kind}"`);
+      }
+      continue;
+    }
+    for (const seg of valueSegs) {
+      const actual = seg.value === null ? "null" : typeof seg.value;
+      if (actual !== spec.type) {
+        violations.push(
+          `${KIP_SCHEMA_VIOLATION_KIND}: prop "${spec.name}" on kind "${def.kind}" expected ${spec.type}, got ${actual}`,
+        );
+        break; // one type-message per prop is enough; the cell is surfaced, never dropped
+      }
+    }
+  }
+  return violations.sort();
+}
+
 /**
  * A plain `new Map(facts.map(f => [f.id, f]))` would be a last-write-wins index: on an `id`
  * COLLISION (two different-content facts sharing a caller-declared `id`, see `maxByOrderKey`'s doc
@@ -1967,6 +2089,13 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     if (f.target.kind === "edge" || f.target.kind === "edge-prop") edgeEids.add(f.target.eid);
   }
 
+  // SCHEMA SLICE 1 (docs/21 §3): the currently-declared node-kind ontology, folded ONCE from the same
+  // admitted fact set — a pure function of `facts` (schema is stored AS FACTS). `getNodeRaw` validates
+  // each node whose kind has a declared def and surfaces any `kip:schema-violation` on the view; a node
+  // whose kind is undeclared is validated against nothing (opt-in). Empty map ⇒ no validation runs, so
+  // the projection is byte-identical to pre-schema behavior whenever no schema fact exists.
+  const declaredNodeKinds = collectDeclaredNodeKinds(facts);
+
   const nodeViewCache = new Map<EID, NodeView | null>();
   const edgeViewCache = new Map<EID, EdgeView | null>();
   // T5.4: memoized per-edge existence-cell fold, shared between `getEdge` (which needs the full
@@ -2115,6 +2244,17 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     const provenance = pickProvenance(latestCandidates.length > 0 ? latestCandidates : assertOnlyExist, collidedIds);
 
     const view: NodeView = { eid, kind, props, provenance };
+    // SCHEMA SLICE 1 (docs/21 §3): if this node's kind has a DECLARED def, validate its projected props
+    // and surface any `kip:schema-violation` on the view (a proj-time QUARANTINE, NOT a drop — the node
+    // and every prop cell remain fully readable; no value is invented, N5). Undeclared kind ⇒ no field
+    // added, so a free-form node is byte-identical to pre-schema behavior. A `KIP_CONFLICT_KIND` node
+    // (a genuinely disputed kind) is deliberately NOT validated — there is no single declared kind to
+    // validate against, and the conflict is the honest signal to surface.
+    const def = declaredNodeKinds.get(kind);
+    if (def) {
+      const schemaViolations = validateNodeAgainstSchema(view, def);
+      if (schemaViolations.length > 0) view.schemaViolations = schemaViolations;
+    }
     nodeViewCache.set(eid, view);
     return view;
   }
@@ -2265,7 +2405,10 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     if (disputedEids.has(eid)) {
       const raw = getNodeRaw(eid);
       if (!raw) return null;
-      return { ...raw, kind: KIP_CONFLICT_KIND };
+      // A node presented as `kip:conflict` is NOT schema-validated (its real kind is disputed), matching
+      // the kind-conflict tie path — so drop any `schemaViolations` computed against its pre-dispute kind.
+      const { schemaViolations: _dropped, ...rest } = raw;
+      return { ...rest, kind: KIP_CONFLICT_KIND };
     }
     const canonical = canonicalSameAsEid(eid);
     if (canonical === eid) return getNodeRaw(eid);

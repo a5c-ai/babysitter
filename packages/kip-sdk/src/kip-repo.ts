@@ -36,6 +36,7 @@ import {
   compareByContent,
   compareOrderKey,
   computeExcisionRef,
+  collectDeclaredNodeKinds,
   foldLearnCell,
   isAuthorizedExcisionMarker,
   orderKey,
@@ -58,6 +59,7 @@ import {
   materializedEidFor,
   ontologyRefForBinding,
   ontologyRefForManifest,
+  ontologyRefForNodeKind,
   serializeBindingPayload,
   topologicalOrder,
   validateAgainstOutputSchema,
@@ -90,6 +92,7 @@ import type {
   ReAttestInput,
   CellSegment,
   PropCell,
+  NodeKindDef,
   NodeView,
   EdgeView,
   OpenOptions,
@@ -3969,6 +3972,58 @@ export class KipRepo implements Repo {
       missingNonDurable: [],
       promisorMissingDurable: [],
     };
+  }
+
+  /**
+   * SCHEMA SLICE 1 (docs/21 §3): declare a node kind as a VERSIONED ontology FACT. Authors exactly ONE
+   * signed `{ kind:"schema", ontologyRef:"kip:node-kind/<def.kind>" }` fact carrying `JSON.stringify(def)`
+   * — the SAME orchestrator-signed schema-fact channel `registerFunctionality` uses (INV-A1: nothing
+   * else writes the ontology). `validFrom` is stamped from this repo's own monotonic `clock()` so the
+   * declaration is as-of-queryable (a schema declared at t2 is absent at an `asOf` before t2, and
+   * validation over an earlier valid-time still sees only what was declared by then). Schema is NOT a
+   * write-time gate — this method never rejects, gates, or throws on any node/edge fact; `proj` alone
+   * validates nodes of this kind against `def.props` and surfaces `kip:schema-violation` on
+   * `NodeView.schemaViolations`. Returns the schema fact's content-addressed `FactId`.
+   *
+   * DEFERRED (docs/21 §3, NOT Slice 1): versioned upcasters / migration (Slice 1 validates against the
+   * currently-declared def only), EdgeKindDef validation, cardinality/inverse, per-kind cellReducers,
+   * and a reusable importable schema library.
+   */
+  async registerSchema(def: NodeKindDef): Promise<FactId> {
+    const orchestratorProvenance: Provenance = {
+      author: "kip-orchestrator:registerSchema",
+      signature: "",
+      publicKeyFingerprint: "",
+      signedFields: [],
+    };
+    const result = await this.assertFact({
+      type: "assert",
+      v: 1,
+      target: { kind: "schema", ontologyRef: ontologyRefForNodeKind(def.kind) },
+      value: JSON.stringify(def),
+      // A real (monotonic) valid-from so `getSchema(kind, { validTime })` before this instant reads
+      // `null` — the schema is a fact with genuine bitemporal validity, not a validFrom:0 constant.
+      validFrom: this.clock(),
+      validTo: null,
+      replicaId: this.replicaId,
+      provenance: orchestratorProvenance,
+    });
+    return result.id;
+  }
+
+  /**
+   * SCHEMA SLICE 1 (docs/21 §3): read back the currently-declared `NodeKindDef` for `kind` — the
+   * orderKey-winning non-retracted `kip:node-kind/<kind>` schema fact, parsed — or `null` when none is
+   * declared. As-of-queryable via the SAME frontier selection reads use: an `asOf` before the
+   * declaration excludes it (returns `null`). READ-ONLY — a pure fold over the fact set, authors
+   * nothing (INV-A1). Reuses the identical `collectDeclaredNodeKinds`/`maxByOrderKey` machinery `proj`
+   * uses to validate, so `getSchema` can never disagree with what validation applied.
+   */
+  async getSchema(kind: NodeKind, asOf?: AsOf): Promise<NodeKindDef | null> {
+    const facts = asOf !== undefined ? this.selectFactsForContextualAsOf(asOf) : this.currentFacts();
+    // `collectDeclaredNodeKinds` is the SAME orderKey-winner selection `proj` applies during validation
+    // — using it here keeps the read and the validation in lockstep (they can never disagree).
+    return collectDeclaredNodeKinds(facts).get(kind) ?? null;
   }
 
   /**
