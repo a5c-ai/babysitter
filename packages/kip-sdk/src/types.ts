@@ -339,6 +339,16 @@ export interface NodeView {
    * set (node facts + schema facts), independent of authoring/ingest order.
    */
   schemaViolations?: string[];
+  /**
+   * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): non-empty ONLY when this node's `kind` has a DECLARED
+   * `NodeKindDef` that marks one or more props `deprecated` AND this node still carries a value under
+   * such a prop — each entry a `kip:schema-deprecated` advisory (naming the rename target when the def
+   * also renames that prop). This is ADVISORY, held SEPARATE from `schemaViolations` (a deprecated prop
+   * is not non-conformance): the node and every prop cell stay fully readable, nothing is dropped or
+   * invented (N5). Absent (`undefined`) when nothing is deprecated. Same determinism guarantees as
+   * `schemaViolations` — a pure function of the fact set, order-independent, sorted.
+   */
+  schemaDeprecations?: string[];
 }
 
 export interface EdgeView {
@@ -378,16 +388,43 @@ export interface PropSchema {
  * (docs/21 §3: schema conformance is not an ingest gate; the signature is the sole membership
  * predicate, so a write-gate would break set-union convergence).
  *
- * DEFERRED (later slices, NOT in Slice 1): the spec's `cellReducer: CellReducerRef` and
- * `identity: IdentityPolicy` fields; versioned UPCASTERS / migration / rename / deprecate (Slice 1
- * validates against the CURRENTLY-declared def only, never per-fact-version upcasters).
+ * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): DECLARATIVE evolution — `renames` (a prop-rename LINEAGE)
+ * and `deprecated` (advisory-only) ship. A rename declares that an OLD prop name and its NEW name
+ * denote the SAME logical slot, so data still stored under the old name satisfies a requirement
+ * declared under the new name (validated PURELY at proj-time, type-checked against the CURRENT def).
+ * A `deprecated` prop that a node still carries surfaces a `kip:schema-deprecated` ADVISORY on
+ * `NodeView.schemaDeprecations` — NEVER a `schemaViolations` entry (deprecation is not non-conformance).
+ *
+ * DEFERRED (still NOT built): the spec's `cellReducer: CellReducerRef` and `identity: IdentityPolicy`
+ * fields; ARBITRARY per-fact-version CODE upcasters / data migration. The latter is out of scope BY
+ * ARCHITECTURE, not merely unimplemented: `proj` is a pure, deterministic, convergent fold, so it
+ * cannot execute a signer-supplied transform function (non-convergent, unsafe) — only the DECLARATIVE
+ * rename/deprecate rules above are expressible convergently. Data is never rewritten; evolution is a
+ * read-time VIEW over the unchanged facts.
  */
 export interface NodeKindDef {
   kind: NodeKind;
-  /** Schema version → upcaster keying (docs/21 §3, HP-8). Recorded, but Slice 1 validates against
-   *  the currently-declared def only; versioned upcasters are DEFERRED. */
+  /** Schema version — DESCRIPTIVE metadata (docs/21 §3, HP-8). Recorded on the fact and echoed by
+   *  `getSchema`; it is NOT a monotonicity guard and does NOT key an upcaster (arbitrary code
+   *  upcasters are architecturally out of scope, see the interface doc). Evolution is expressed by
+   *  `renames`/`deprecated`, not by the version number. */
   version: number;
   props: PropSchema[];
+  /**
+   * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): a prop-rename LINEAGE. Each `{ from, to }` declares that the
+   * OLD name `from` and the NEW name `to` are the SAME logical slot. At proj-time a required prop is
+   * satisfied by a value stored under EITHER its current name OR any name that (transitively) renames
+   * to it, and every contributing value is type-checked against the CURRENT def's declared type. This
+   * is a DECLARED equivalence (not a silent old-name fallback): only names an author explicitly listed
+   * participate. Chains (`a→b`, `b→c`) resolve transitively; cycles are walked safely (visited-guarded).
+   */
+  renames?: Array<{ from: PropKey; to: PropKey }>;
+  /**
+   * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): prop names that still exist on nodes but should no longer be
+   * used. A node carrying a value under a deprecated name surfaces a `kip:schema-deprecated` advisory on
+   * `NodeView.schemaDeprecations` — NEVER a violation and NEVER a drop (the value stays fully readable).
+   */
+  deprecated?: PropKey[];
 }
 
 /**

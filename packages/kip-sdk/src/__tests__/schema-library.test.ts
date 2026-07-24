@@ -93,6 +93,29 @@ describe("SCHEMA SLICE 2 — registerSchemaLibrary authors a manifest + each kin
     expect(await r.getSchemaLibrary("unknown")).toBeNull();
     expect((await r.listSchemaLibraries()).some((e) => e.name === "unknown")).toBe(false);
   });
+
+  it("a library member carrying SLICE-3 evolution fields (renames/deprecated) round-trips intact", async () => {
+    const EVOLVED_DEF: NodeKindDef = {
+      kind: "user",
+      version: 2,
+      props: [{ name: "emailAddress", type: "string", required: true }],
+      renames: [{ from: "email", to: "emailAddress" }],
+      deprecated: ["email"],
+    };
+    const lib: SchemaLibrary = { name: "accounts", version: 2, nodeKinds: [EVOLVED_DEF] };
+    const r = repo("lib-evolution");
+    await r.registerSchemaLibrary(lib);
+    // The member kind re-hydrates with its evolution fields (byte-identical to a direct registerSchema).
+    expect(await r.getSchema("user")).toEqual(EVOLVED_DEF);
+    expect((await r.getSchemaLibrary("accounts"))?.nodeKinds).toEqual([EVOLVED_DEF]);
+    // And the evolution actually applies through the library-registered kind: old-named data conforms.
+    await r.putNode({ eid: "user/old", kind: "user", props: { email: "a@b.com" } });
+    const v = await r.getNode("user/old");
+    expect(v?.schemaViolations).toBeUndefined();
+    expect(v?.schemaDeprecations).toEqual([
+      'kip:schema-deprecated: prop "email" on kind "user" is deprecated (renamed to "emailAddress")',
+    ]);
+  });
 });
 
 describe("SCHEMA SLICE 2 — a library-registered kind is IDENTICAL to a directly-registered one", () => {
@@ -211,6 +234,23 @@ describe("SCHEMA SLICE 2 — malformed library ARGUMENT throws and authors NOTHI
     [
       "malformed NodeKindDef",
       { name: "x", version: 1, nodeKinds: [{ kind: "bad", version: 1, props: [{ name: "p", type: "bogus" }] }] },
+    ],
+    // SCHEMA SLICE 3 (ADR-B20): the strict library validator also rejects malformed evolution fields.
+    [
+      "malformed rename (empty from)",
+      {
+        name: "x",
+        version: 1,
+        nodeKinds: [{ kind: "bad", version: 1, props: [{ name: "p", type: "string" }], renames: [{ from: "", to: "p" }] }],
+      },
+    ],
+    [
+      "malformed deprecated (non-string entry)",
+      {
+        name: "x",
+        version: 1,
+        nodeKinds: [{ kind: "bad", version: 1, props: [{ name: "p", type: "string" }], deprecated: [7] }],
+      },
     ],
   ];
   for (const [label, lib] of cases) {

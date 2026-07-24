@@ -102,6 +102,30 @@ export function describeMalformedNodeKindDef(def: unknown): string | null {
     if (seenProps.has(pp.name)) return `nodeKind "${kindLabel}" has a duplicate prop "${pp.name}"`;
     seenProps.add(pp.name);
   }
+  // SCHEMA SLICE 3 (docs/21 §3, ADR-B20): validate the OPTIONAL evolution fields when a library member
+  // supplies them (mirrors proj's tolerant `parseNodeKindDef` all-or-nothing rule, but as an up-front
+  // ARGUMENT check that throws rather than silently declaring nothing — N5).
+  if (d.renames !== undefined) {
+    if (!Array.isArray(d.renames)) return `nodeKind "${kindLabel}" renames must be an array when present`;
+    for (const r of d.renames) {
+      if (typeof r !== "object" || r === null) return `nodeKind "${kindLabel}" has a non-object rename`;
+      const rr = r as Record<string, unknown>;
+      if (typeof rr.from !== "string" || rr.from.length === 0) {
+        return `nodeKind "${kindLabel}" has a rename with an empty/non-string "from"`;
+      }
+      if (typeof rr.to !== "string" || rr.to.length === 0) {
+        return `nodeKind "${kindLabel}" has a rename with an empty/non-string "to"`;
+      }
+    }
+  }
+  if (d.deprecated !== undefined) {
+    if (!Array.isArray(d.deprecated)) return `nodeKind "${kindLabel}" deprecated must be an array when present`;
+    for (const dep of d.deprecated) {
+      if (typeof dep !== "string" || dep.length === 0) {
+        return `nodeKind "${kindLabel}" has a deprecated entry that is empty/non-string`;
+      }
+    }
+  }
   return null;
 }
 

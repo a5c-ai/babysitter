@@ -1422,6 +1422,12 @@ export const KIP_CONFLICT_KIND = "kip:conflict";
  *  same `kip:` quarantine-class vocabulary as `KIP_CONFLICT_KIND` rather than inventing a parallel one. */
 export const KIP_SCHEMA_VIOLATION_KIND = "kip:schema-violation";
 
+/** SCHEMA SLICE 3 (docs/21 §3, ADR-B20): the sentinel prefix marking a schema-DEPRECATION advisory on
+ *  `NodeView.schemaDeprecations`. Held in the SAME `kip:` quarantine-class vocabulary as
+ *  `KIP_SCHEMA_VIOLATION_KIND`, but surfaced on a SEPARATE view field — a deprecation is advisory, not
+ *  a conformance violation. */
+export const KIP_SCHEMA_DEPRECATED_KIND = "kip:schema-deprecated";
+
 /** The `ontologyRef` prefix a declared `NodeKindDef` is stored under (kept in lockstep with
  *  contextual.ts's `NODE_KIND_ONTOLOGY_PREFIX` — duplicated here to avoid a proj→contextual import
  *  cycle, since contextual.ts already imports from proj.ts). */
@@ -1450,7 +1456,70 @@ export function parseNodeKindDef(value: PropValue | undefined): NodeKindDef | nu
     if (pp.required === true) prop.required = true;
     props.push(prop);
   }
-  return { kind: obj.kind, version: obj.version, props };
+  const out: NodeKindDef = { kind: obj.kind, version: obj.version, props };
+  // SCHEMA SLICE 3 (docs/21 §3, ADR-B20): parse the OPTIONAL evolution fields. Same all-or-nothing
+  // discipline as `props` above — a def either parses fully or declares NOTHING (returns null); a
+  // PRESENT-but-malformed `renames`/`deprecated` rejects the whole def rather than partially applying
+  // (partial application would make the winning def content-ambiguous and threaten convergence). A
+  // Slice-1/2 def that OMITS both fields still parses (backward compatible — `undefined` is well-formed).
+  if (obj.renames !== undefined) {
+    if (!Array.isArray(obj.renames)) return null;
+    const renames: Array<{ from: PropKey; to: PropKey }> = [];
+    for (const r of obj.renames) {
+      if (typeof r !== "object" || r === null) return null;
+      const rr = r as Record<string, unknown>;
+      if (typeof rr.from !== "string" || rr.from.length === 0) return null;
+      if (typeof rr.to !== "string" || rr.to.length === 0) return null;
+      renames.push({ from: rr.from, to: rr.to });
+    }
+    out.renames = renames;
+  }
+  if (obj.deprecated !== undefined) {
+    if (!Array.isArray(obj.deprecated)) return null;
+    const deprecated: PropKey[] = [];
+    for (const d of obj.deprecated) {
+      if (typeof d !== "string" || d.length === 0) return null;
+      deprecated.push(d);
+    }
+    out.deprecated = deprecated;
+  }
+  return out;
+}
+
+/**
+ * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): resolve, for each prop NAME the def is concerned with, the FULL
+ * set of names that denote its slot — the name itself PLUS every name that (transitively) renames to it.
+ * Pure over `def.renames`; used by `validateNodeAgainstSchema` so a value stored under an OLD name still
+ * satisfies a requirement declared under the NEW name. Cycle-safe (a `visited` guard bounds each walk),
+ * so a pathological `a→b, b→a` rename can never loop. Returns a `Map<targetName, Set<aliasNames>>`.
+ */
+export function resolvePropAliases(def: NodeKindDef): Map<PropKey, Set<PropKey>> {
+  // Reverse adjacency: for each `to`, the set of immediate `from` names that rename INTO it.
+  const incoming = new Map<PropKey, Set<PropKey>>();
+  for (const { from, to } of def.renames ?? []) {
+    const arr = incoming.get(to);
+    if (arr) arr.add(from);
+    else incoming.set(to, new Set([from]));
+  }
+  const out = new Map<PropKey, Set<PropKey>>();
+  // Every current prop name is a resolution target; a rename `to` that is not itself a current prop is
+  // still resolvable (harmlessly contributes no requirement). We seed from BOTH so a rename target that
+  // was dropped from `props` still gathers its old names for deprecation/echo purposes.
+  const targets = new Set<PropKey>([...def.props.map((p) => p.name), ...incoming.keys()]);
+  for (const target of targets) {
+    const aliases = new Set<PropKey>([target]);
+    const stack: PropKey[] = [target];
+    while (stack.length > 0) {
+      const cur = stack.pop() as PropKey;
+      for (const from of incoming.get(cur) ?? []) {
+        if (aliases.has(from)) continue; // visited-guard: bounds cycles + shared sub-chains
+        aliases.add(from);
+        stack.push(from);
+      }
+    }
+    out.set(target, aliases);
+  }
+  return out;
 }
 
 /**
@@ -1488,6 +1557,18 @@ export function collectDeclaredNodeKinds(facts: readonly Fact[]): Map<NodeKind, 
   return out;
 }
 
+/** Collect the `value` segments a `NodeView` carries under ANY of `names` (a slot's rename aliases),
+ *  flattened. Pure over the already-projected view — never re-folds. */
+function valueSegsForNames(view: NodeView, names: Iterable<PropKey>): Array<Extract<CellSegment, { kind: "value" }>> {
+  const segs: Array<Extract<CellSegment, { kind: "value" }>> = [];
+  for (const name of names) {
+    const cell = view.props[name];
+    if (!cell) continue;
+    for (const s of cell.segments) if (s.kind === "value") segs.push(s);
+  }
+  return segs;
+}
+
 /**
  * Validate a projected `NodeView` against a declared `NodeKindDef` — returns the sorted list of
  * `kip:schema-violation` messages (empty when conforming). A REQUIRED prop with no covering `value`
@@ -1495,14 +1576,25 @@ export function collectDeclaredNodeKinds(facts: readonly Fact[]): Map<NodeKind, 
  * is a TYPE violation. Pure — reads only the view's already-projected segments (never re-folds), so a
  * schema declared LATER re-projects existing nodes for free (grow-only). Never drops a prop, never
  * invents a value (N5).
+ *
+ * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): a prop's covering value may be stored under the prop's CURRENT
+ * name OR under any name that (transitively) `renames` to it — a declared rename means the two names are
+ * the SAME slot, so old-named data satisfies a new-named requirement and every contributing value is
+ * type-checked against the CURRENT declared type. `renames`-free defs behave exactly as Slice 1.
  */
 export function validateNodeAgainstSchema(view: NodeView, def: NodeKindDef): string[] {
   const violations: string[] = [];
+  const aliases = resolvePropAliases(def);
   // Iterate props in declared order, but sort the final message list so output is a pure function of
   // content, not declaration order (determinism / permutation-independence).
   for (const spec of def.props) {
-    const cell = view.props[spec.name];
-    const valueSegs = cell ? cell.segments.filter((s): s is Extract<CellSegment, { kind: "value" }> => s.kind === "value") : [];
+    // Gather values under the prop's current name AND every name that renames to it (Slice 3). With no
+    // renames this is exactly `view.props[spec.name]` — byte-identical to Slice 1. `resolvePropAliases`
+    // seeds an entry for EVERY `def.props` name (see its `targets` construction), so the lookup is always
+    // present — a non-null assertion, NOT a `?? [spec.name]` fallback (the repo forbids silent fallbacks;
+    // a missing key would be an internal invariant break, not a value to paper over).
+    const names = aliases.get(spec.name) as Set<PropKey>;
+    const valueSegs = valueSegsForNames(view, names);
     if (valueSegs.length === 0) {
       if (spec.required) {
         violations.push(`${KIP_SCHEMA_VIOLATION_KIND}: required prop "${spec.name}" is missing on kind "${def.kind}"`);
@@ -1520,6 +1612,36 @@ export function validateNodeAgainstSchema(view: NodeView, def: NodeKindDef): str
     }
   }
   return violations.sort();
+}
+
+/**
+ * SCHEMA SLICE 3 (docs/21 §3, ADR-B20): collect the sorted `kip:schema-deprecated` ADVISORIES for a
+ * node — one per `def.deprecated` prop name the node still carries a `value` segment under. Advisory
+ * only (held on `NodeView.schemaDeprecations`, NEVER `schemaViolations`): the value stays fully readable,
+ * nothing is dropped or invented (N5). When the def ALSO renames the deprecated name forward, the message
+ * names the rename target so a reader knows where to migrate. Pure over the projected view + def; sorted.
+ */
+export function collectSchemaDeprecations(view: NodeView, def: NodeKindDef): string[] {
+  const deprecated = def.deprecated;
+  if (!deprecated || deprecated.length === 0) return [];
+  // Immediate forward rename target of a deprecated name, if the def declares one (for the hint text).
+  const renameTargetOf = new Map<PropKey, PropKey>();
+  for (const { from, to } of def.renames ?? []) if (!renameTargetOf.has(from)) renameTargetOf.set(from, to);
+  const out: string[] = [];
+  // Dedup the deprecated NAMES (a def carrying `deprecated:["x","x"]` must not emit the advisory twice) —
+  // a Set preserves determinism and the final list is sorted regardless.
+  for (const name of new Set(deprecated)) {
+    const cell = view.props[name];
+    const carries = cell ? cell.segments.some((s) => s.kind === "value") : false;
+    if (!carries) continue;
+    const target = renameTargetOf.get(name);
+    out.push(
+      target !== undefined
+        ? `${KIP_SCHEMA_DEPRECATED_KIND}: prop "${name}" on kind "${def.kind}" is deprecated (renamed to "${target}")`
+        : `${KIP_SCHEMA_DEPRECATED_KIND}: prop "${name}" on kind "${def.kind}" is deprecated`,
+    );
+  }
+  return out.sort();
 }
 
 /**
@@ -2250,10 +2372,19 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
     // added, so a free-form node is byte-identical to pre-schema behavior. A `KIP_CONFLICT_KIND` node
     // (a genuinely disputed kind) is deliberately NOT validated — there is no single declared kind to
     // validate against, and the conflict is the honest signal to surface.
-    const def = declaredNodeKinds.get(kind);
+    // A node whose resolved `kind` is the reserved `kip:conflict` (the kind-tie path just above, OR a
+    // caller who registered a def under that reserved name) is NEVER schema-validated — there is no single
+    // honest kind to validate against, and the conflict is the signal to surface. Guarding on the reserved
+    // kind here (not merely on "nobody registered kip:conflict") closes the hole the convergence critic
+    // flagged: even a def registered under `kip:conflict` cannot make a disputed node surface violations.
+    const def = kind === KIP_CONFLICT_KIND ? undefined : declaredNodeKinds.get(kind);
     if (def) {
       const schemaViolations = validateNodeAgainstSchema(view, def);
       if (schemaViolations.length > 0) view.schemaViolations = schemaViolations;
+      // SCHEMA SLICE 3 (docs/21 §3, ADR-B20): surface deprecation ADVISORIES on a SEPARATE field — a
+      // deprecated prop the node still carries is advisory, not a conformance violation.
+      const schemaDeprecations = collectSchemaDeprecations(view, def);
+      if (schemaDeprecations.length > 0) view.schemaDeprecations = schemaDeprecations;
     }
     nodeViewCache.set(eid, view);
     return view;
@@ -2406,8 +2537,9 @@ export function proj(facts: readonly Fact[], options?: ProjOptions): ProjResult 
       const raw = getNodeRaw(eid);
       if (!raw) return null;
       // A node presented as `kip:conflict` is NOT schema-validated (its real kind is disputed), matching
-      // the kind-conflict tie path — so drop any `schemaViolations` computed against its pre-dispute kind.
-      const { schemaViolations: _dropped, ...rest } = raw;
+      // the kind-conflict tie path — so drop any `schemaViolations`/`schemaDeprecations` computed against
+      // its pre-dispute kind (Slice 3 adds the deprecation field to the same drop).
+      const { schemaViolations: _dropped, schemaDeprecations: _droppedDep, ...rest } = raw;
       return { ...rest, kind: KIP_CONFLICT_KIND };
     }
     const canonical = canonicalSameAsEid(eid);
