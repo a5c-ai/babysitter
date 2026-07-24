@@ -1879,16 +1879,27 @@ export class KipRepo implements Repo {
   }
 
   /** T2.7.1: project an `EdgeView` from `proj`-materialized cells (see `getNode`'s doc comment).
-   *  NOTE: unlike `getNode`, this does NOT gate on endpoint-node existence — an edge is its own
-   *  entity with its own existence; a node tombstone closes only that node's existence and leaves
-   *  incident edges live (see `getNode`'s SCOPE note). Edge-level as-of validity is enforced by
-   *  `traverse`/`query` via `edgeValidAt`, never here. */
+   *  NOTE: like `getNode`, this does NOT gate on ENDPOINT-NODE existence — an edge is its own entity
+   *  with its own existence; a node tombstone closes only that node's existence and leaves incident
+   *  edges live (see `getNode`'s SCOPE note). It DOES, however, gate on the edge's OWN as-of validity
+   *  at the unbounded-present (`edgeValidAt(eid, null)`), EXACTLY as `getNode` gates on the node's own
+   *  `nodeLiveVisibleAt(eid, null)`: a plain `getEdge`/`getNode` read is a "current" read, so an edge
+   *  whose own `validTo` interval no longer covers the present reads `null` here (matching `edgeEids`,
+   *  which drops it, and the D-68 fold's `edgeValidAt` liveness authority). To read a bounded edge at a
+   *  point inside its interval, pass an explicit `asOf({validTime})`. (Round-D-67-E2E fix: previously
+   *  this skipped the edge's-own-validity gate, so `getEdge` and `edgeEids` DISAGREED on a finite-
+   *  `validTo` edge.) The proj-internal `getEdge` used by the D-68 fold is a DIFFERENT function and is
+   *  unaffected — that fold already gates on `edgeValidAt` before calling it. */
   async getEdge(eid: EID, asOf?: AsOf): Promise<EdgeView | null> {
     if (asOf !== undefined) {
       return (await this.asOf(asOf)).getEdge(eid);
     }
     const facts = this.currentFacts();
-    return applyLiveExcisionLens(proj(facts, this.projOptions(facts)).getEdge(eid));
+    const projection = proj(facts, this.projOptions(facts));
+    const view = projection.getEdge(eid);
+    if (!view) return null;
+    if (!projection.edgeValidAt(eid, null)) return null; // gate on the edge's OWN validity at present (as getNode does).
+    return applyLiveExcisionLens(view);
   }
 
   /**
@@ -2677,7 +2688,17 @@ export class KipRepo implements Repo {
         if (!projection.nodeLiveVisibleAt(eid, gateInstant)) return null;
         return applyValidTimeLens(projection.getNodeRaw(eid));
       },
-      getEdge: async (eid: EID) => applyValidTimeLens(projection.getEdge(eid)),
+      // Gate on the edge's OWN existence at THIS view's instant (`edgeValidAt(eid, gateInstant)`),
+      // the exact analogue of `getNode`'s `nodeLiveVisibleAt` gate above — so `asOf({validTime})` reads a
+      // bounded edge as present ONLY when its `[validFrom, validTo)` interval covers that instant (an
+      // edge that started AFTER, or ended BEFORE, reads `null`). Still NOT gated on endpoint-node
+      // existence (an edge is its own entity). (Round-D-67-E2E fix: previously this applied only the
+      // prop-segment lens and never gated edge existence, so `asOf({validTime}).getEdge` returned an edge
+      // outside its own valid interval — e.g. a `validFrom:2024` edge read live at `validTime:2023`.)
+      getEdge: async (eid: EID) => {
+        if (!projection.edgeValidAt(eid, gateInstant)) return null;
+        return applyValidTimeLens(projection.getEdge(eid));
+      },
       async *query(spec: Omit<TraversalSpec, "asOf">) {
         for (const item of traverse(projection, spec as TraversalSpec)) {
           const filtered = applyValidTimeLens(item);
