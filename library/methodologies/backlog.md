@@ -1747,7 +1747,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: BDD + DDD + Hypothesis-Driven + Kanban
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-smart-product-recommendations/](./composition-smart-product-recommendations/)
 
 **Process Flow**:
 1. **BDD Discovery**: Example Mapping workshop with product team
@@ -2065,7 +2065,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: JTBD + Impact Mapping + Spec-Kit + Kanban + XP Practices
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-saas-analytics-dashboard/](./composition-saas-analytics-dashboard/)
 
 **Process Flow**:
 1. **JTBD Discovery**:
@@ -2186,7 +2186,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: Waterfall + V-Model + Cleanroom + Formal Verification
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-aerospace-flight-control/](./composition-aerospace-flight-control/)
 
 **Process Flow**:
 1. **Waterfall Requirements Phase**:
@@ -2294,7 +2294,7 @@ Real-world scenarios showing how to combine methodologies for specific project t
 
 **Composition**: TDD + BDD + Kanban + XP + Continuous Deployment
 
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented — [composition-open-source-data-validation/](./composition-open-source-data-validation/)
 
 **Process Flow**:
 1. **Community Requirements Gathering**:

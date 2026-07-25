@@ -107,6 +107,16 @@ Business and Finance Specializations (give a proper name to each specialization)
 [x] Public Relations, etc.
 [x] Procurement - sourcing, vendor selection, and purchase-order operations (flagship process: procurement-lifecycle.js)
     # library/specializations/domains/business/procurement/
+[x] Observability - SLO design, instrumentation, alert tuning, error-budget review (flagship process: slo-lifecycle.js; incident-lifecycle.js is a deprecation pointer to the incident-management specialization)
+    # library/specializations/observability/
+[x] Accessibility - WCAG audit, remediation, re-audit gate, conformance-statement publish (flagship process: wcag-audit-remediation.js; supersedes web-development/accessibility-audit-remediation.js)
+    # library/specializations/accessibility/
+[x] Internationalization - string extraction, per-locale translation QA, locale regression sweeps, locale release (flagship process: localization-lifecycle.js)
+    # library/specializations/internationalization/
+[x] MLOps - model eval harnesses, promotion gates, drift monitoring, dataset governance (flagship process: model-lifecycle.js)
+    # library/specializations/mlops/
+[x] Developer Relations - docs-driven sample apps, accuracy gates, multi-channel content, community triage (flagship process: devrel-campaign.js)
+    # library/specializations/developer-relations/
 
 Social Sciences and Humanities Specializations (give a proper name to each specialization): each in process/specializations/domains/social-sciences-humanities/[specialization-name-slugified]/
 

@@ -114,9 +114,73 @@ babysitter run:create \
   }'
 ```
 
+## Second flagship process: onboarding-lifecycle
+
+`onboarding-lifecycle.js` (`@process customer-support/onboarding-lifecycle`) carries one
+**signed deal** end-to-end — from handoff intake through account-context recall, success-plan
+drafting, an adversarial plan/success review with **executed** evidence, policy-gated kickoff
+comms, parallel provisioning/training/integration tracks with per-track verification, milestone
+reviews that route to a policy-gated at-risk escalation, go-live sign-off, and a closing
+health-score baseline asserted into kip. It **composes** the pre-bar customer-experience point
+seeds by name as callable stages — it does not duplicate them.
+
+| Phase | What happens |
+|---|---|
+| 0 | `kipRecall` of prior onboarding outcomes, health signals, and account history (`kipEnabled`, kind `customer-support`, topic keyed by `account:<accountId>`) |
+| 1 | Signed-deal handoff intake (`onb.handoff-intake`) — normalizes account/tier/stakeholders/contractTerms; duplicate or missing contractTerm ids throw before drafting |
+| 2 | Success-plan drafting (`onb.success-plan-draft`) — markdown plan where **every commitment carries a `contractTermId`**; applies customer-onboarding (discovery/plan/milestones) + customer-journey-mapping lenses by name |
+| 3 | Adversarial plan/success review — `adversarialGate` (`onb.success-plan-review`) with two independent critics (`commitment-traceability-critic` re-traces commitments to contract terms; `health-baseline-critic` executes the health-scoring logic over `stubAccountData`); **a failed gate returns `success:false` before any customer contact** |
+| 4 | Policy-gated kickoff comms — `onb.kickoff-comms-draft` then the `customer-comms-send` breakpoint; `onb.send-kickoff-comms` runs only on `approved===true` |
+| 5 | Parallel tracks via `ctx.parallel.map` (`maxConcurrency=maxParallel`) — provisioning (`onb.provision-plan` → `tenant-provisioning-approval` gate → guarded `onb.provision-execute`), training (`onb.training-track-prepare`), integration (`onb.integration-track-prepare`); each ends in `onb.verify-track` with executed evidence and honest `failures[]`. Unknown track name throws (no default-skip); results re-keyed by name via a Map |
+| 6 | Milestone review (`onb.milestone-review`) — a routed breakpoint fires **only** when a milestone is `atRisk===true`, raising the policy-gated `account-escalation-approval` with an `onb.escalation-package` handoff; non-at-risk milestones auto-continue |
+| 7 | Go-live sign-off — `routedBreakpoint` `go-live-sign-off` (expert onboarding-manager, tags `customer-support`/`go-live`; **not** one of the three policy-gated actions); a no-go is final but the closing phases still run |
+| 8 | Health-score baseline (`onb.health-baseline`) — composes the customer-health-scoring scoring-model; not-computable sub-scores are reported, never invented |
+| 9 | `kipAssert` — onboarding-outcome, health-baseline (composite + tier), plan-review gate-outcome, and one policy-decision fact per gated action |
+
+**Inputs:** `{ handoff: {accountId, accountName, contractTerms:[{id,term,commitment,metric?}], productTier, stakeholders:[{name,role,email?}], signedValue?, closeDate?} (required), objectives?, stubAccountData?, repoRoot?='.', maxParallel?=3, maxFixAttempts?=2, kipEnabled?=true, kipDir?='.a5c/kip', kipModel?='sonnet' }` — missing `handoff`/`handoff.accountId`/empty `contractTerms` throws.
+
+**Outputs:** `{ success, handoffSummary, successPlan, planReviewGate, gatedActions, tracks, milestones, goLive, healthBaseline, kipFactsAsserted, artifacts, metadata }` — `success` is true only when `planReviewGate.passed`, kickoff comms `executed===approved`, tenant provisioning `executed===approved` (when required), every track verified, go-live `decision==='go'`, and `healthBaseline.computed`; any at-risk escalation rejection or go-live no-go yields `success:false` with an honest reason.
+
+### Policy-gated actions (onboarding)
+
+Same fail-closed pattern as ticket-lifecycle: `breakpointId` **equals** the actionId, tags are
+`['policy-gated','customer-support']`, the executor runs **only** on `approved===true`, and every
+decision (including skipped conditional gates and non-interactive auto-approvals) is recorded raw
+in `outputs.gatedActions`.
+
+| actionId | expert | when | fail-closed behavior |
+|---|---|---|---|
+| `customer-comms-send` | customer-success-manager | always (Phase 4 kickoff comms) | `onb.send-kickoff-comms` runs only on `approved===true`; rejection records the decision and the run continues with `sent=false` surfaced honestly |
+| `tenant-provisioning-approval` | onboarding-manager | always within the provisioning track (Phase 5) | `onb.provision-execute` runs only on `approved===true`; rejection records `approved=false` and the track verifies with `provisioned=false` |
+| `account-escalation-approval` | customer-success-director | **conditional** — only when a milestone review yields `atRisk===true` (Phase 6) | escalation acted on only when `approved===true`; a skipped conditional gate is recorded as `{required:false,...}`, never omitted |
+
+Additional (non-gated) breakpoints on the surface:
+
+- `go-live-sign-off` — expert onboarding-manager, tags `['customer-support','go-live']`; always raised in Phase 7.
+- `onb.success-plan-review.gate-escalation` — raised internally by the `adversarialGate` combinator on fix-budget exhaustion (expert `owner`); the process does not re-declare it but records it in `breakpointsHit` when the gate escalates.
+
+### Onboarding phase -> customer-experience seed map
+
+The onboarding workflow composes four pre-bar seeds under
+[`../domains/business/customer-experience/`](../domains/business/customer-experience/) **by name**;
+the seeds remain independently callable point methods.
+
+| Seed | Methods used | Composed by |
+|---|---|---|
+| `customer-onboarding` | discovery-assessment, onboarding-plan, training-program, success-milestones | `onb.success-plan-draft` (discovery/plan/milestones lenses) + `onb.training-track-prepare` (training-program lens) |
+| `customer-health-scoring` | indicator-design, scoring-model, threshold-definition | `health-baseline-critic` in the plan-review gate (executed over `stubAccountData`) + `onb.health-baseline` (composite baseline) |
+| `escalation-management` | handoff-package + communication-standards | `onb.escalation-package` on the at-risk path feeding `account-escalation-approval` |
+| `customer-journey-mapping` | journey-map lens | `onb.success-plan-draft` (milestone journey framing) |
+
+`domains/business/customer-experience/customer-onboarding.js` is soft-`@deprecated` as the e2e
+entrypoint (superseded by this workflow) but stays independently callable for standalone
+onboarding-plan drafting.
+
 ## Files
 
 - [`ticket-lifecycle.js`](./ticket-lifecycle.js) — the flagship process (11 `cst.*` Style-A
   agent tasks + orchestration).
+- [`onboarding-lifecycle.js`](./onboarding-lifecycle.js) — the second flagship process (12
+  `onb.*` Style-A agent tasks + orchestration; gated end-to-end signed-deal onboarding).
 - Combinators: [`../common-utilities/routed-gate-combinators.js`](../common-utilities/routed-gate-combinators.js)
   — `routedBreakpoint`, `adversarialGate`, `kipRecall`, `kipAssert`, `gateFixerTask`.
