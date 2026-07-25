@@ -513,6 +513,147 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     }
   });
 
+  it('preserves explicit models through registered retry and cancellation tool contracts', async () => {
+    interface ParameterSchema {
+      optionalField?: boolean;
+      optional(): ParameterSchema;
+      describe(): ParameterSchema;
+      parse(value: unknown): unknown;
+    }
+    interface RegisteredTool {
+      parameters: ParameterSchema;
+      execute: (...args: unknown[]) => Promise<{
+        content?: Array<{ type: string; text: string }>;
+        details?: unknown;
+        isError?: boolean;
+      }>;
+    }
+
+    const stringSchema = (optionalField = false): ParameterSchema => ({
+      optionalField,
+      optional: () => stringSchema(true),
+      describe() { return this; },
+      parse(value) {
+        if (typeof value !== 'string') throw new Error('expected string');
+        return value;
+      },
+    });
+    const unknownSchema: ParameterSchema = {
+      optional: () => unknownSchema,
+      describe() { return this; },
+      parse: (value) => value,
+    };
+    const objectSchema = (shape: Record<string, ParameterSchema>): ParameterSchema => ({
+      optional: () => objectSchema(shape),
+      describe() { return this; },
+      parse(value) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('expected object');
+        const input = value as Record<string, unknown>;
+        const parsed: Record<string, unknown> = {};
+        for (const [key, property] of Object.entries(shape)) {
+          if (!(key in input)) {
+            if (property.optionalField) continue;
+            throw new Error(`missing ${key}`);
+          }
+          parsed[key] = property.parse(input[key]);
+        }
+        return parsed;
+      },
+    });
+
+    const output = await tempRun('omp-modeled-recovery-extension-');
+    const result = compile({ source: UNIFIED_PLUGIN_DIR, target: 'oh-my-pi', output });
+    expect(result.status, result.diagnostics.map((diagnostic) => diagnostic.message).join('\n')).not.toBe('error');
+    const moduleUrl = pathToFileURL(path.join(result.outputDir, 'extensions', 'index.ts')).href;
+    // The compiler chooses this generated module path at runtime, so a static import cannot exercise it.
+    const extensionModule = await import(/* @vite-ignore */ moduleUrl) as unknown as {
+      default: (pi: Record<string, unknown>) => void;
+    };
+
+    const runDir = await tempRun('omp-modeled-recovery-run-');
+    const effect = action('agent', {
+      execution: { model: 'openai-codex/gpt-5.6-sol:high' },
+      agent: { prompt: 'Exercise modeled recovery' },
+    });
+    const tools = new Map<string, RegisteredTool>();
+    const handlers = new Map<string, (event: Record<string, unknown>) => Promise<Record<string, unknown> | undefined>>();
+    const pi: Record<string, unknown> = {
+      logger: { warn: () => undefined },
+      zod: {
+        object: objectSchema,
+        string: stringSchema,
+        unknown: () => unknownSchema,
+      },
+      registerTool: (tool: RegisteredTool & { name: string }) => {
+        tools.set(tool.name, tool);
+      },
+      registerCommand: () => undefined,
+      sendUserMessage: () => undefined,
+      exec: async (_command: string, args: string[]) => {
+        if (args[0] !== 'run:iterate') throw new Error(`unexpected CLI operation ${args[0]}`);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+      on: (
+        event: string,
+        handler: (payload: Record<string, unknown>) => Promise<Record<string, unknown> | undefined>,
+      ) => {
+        handlers.set(event, handler);
+      },
+    };
+    extensionModule.default(pi);
+
+    const driveTool = tools.get('babysitter_drive');
+    const cancelTool = tools.get('babysitter_agent_cancel');
+    const retryTool = tools.get('babysitter_agent_retry');
+    const taskCall = handlers.get('tool_call');
+    if (!driveTool || !cancelTool || !retryTool || !taskCall) throw new Error('missing registered recovery surface');
+
+    const driveResult = await driveTool.execute(
+      'modeled-drive',
+      { i: 'Dispatch modeled agent', runDir },
+      undefined,
+      undefined,
+      {},
+    );
+    const driveText = driveResult.content?.[0]?.text;
+    if (!driveText) throw new Error('missing modeled dispatch result');
+    const dispatch = JSON.parse(driveText) as {
+      state: string;
+      task: { tasks: Array<{ task: string }> };
+    };
+    expect(dispatch.state).toBe('agent');
+    await expect(taskCall({
+      toolName: 'task',
+      toolCallId: 'modeled-owner',
+      input: dispatch.task,
+    })).resolves.toBeUndefined();
+
+    const descriptor = bridgeDescriptor(dispatch.task.tasks[0].task);
+    expect(descriptor.model).toBe('openai-codex/gpt-5.6-sol:high');
+    const cancellationInput = cancelTool.parameters.parse({
+      ...descriptor,
+      reason: 'operator cancelled modeled attempt',
+    });
+    expect(cancellationInput).toMatchObject({ model: 'openai-codex/gpt-5.6-sol:high' });
+    const cancellationResult = await cancelTool.execute('modeled-cancel', cancellationInput);
+    expect(cancellationResult).toMatchObject({ details: { handled: true } });
+    expect(cancellationResult).not.toHaveProperty('isError', true);
+
+    const retryInput = retryTool.parameters.parse({
+      ...descriptor,
+      reason: 'operator approved modeled retry',
+    });
+    expect(retryInput).toMatchObject({ model: 'openai-codex/gpt-5.6-sol:high' });
+    const retryResult = await retryTool.execute('modeled-retry', retryInput);
+    expect(retryResult).toMatchObject({
+      details: {
+        handled: true,
+        continuation: { state: 'agent' },
+      },
+    });
+    expect(retryResult).not.toHaveProperty('isError', true);
+  });
+
   it('reuses a durable completed shell output without rerunning it and continues automatically', async () => {
     const runDir = await tempRun('omp-shell-recovery-');
     const effect = action('shell', { shell: { command: 'must-not-run' } });

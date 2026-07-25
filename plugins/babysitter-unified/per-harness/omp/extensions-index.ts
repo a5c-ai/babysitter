@@ -296,6 +296,7 @@ export default function activate(pi: ExtensionAPI): void {
     invocationKey: pi.zod.string(),
     ownerName: pi.zod.string(),
     dispatchToken: pi.zod.string(),
+    model: pi.zod.string().optional(),
     reason: pi.zod.string(),
   });
   pi.registerTool<typeof agentRetryParameters>({
