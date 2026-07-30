@@ -138,7 +138,18 @@ const cardFor = (page: Page, runId: string) =>
 async function gotoBoard(page: Page) {
   // SSE keeps the "load" event open — same pattern as DashboardPage.goto().
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(board(page)).toBeVisible({ timeout: 30_000 });
+  // Local parallel-worker stampede robustness: the dev server can exceed the
+  // client's 10s fetch budget for the first /api/runs ("Request timed out"),
+  // and the polling hook only retries on a 15s cadence — a single load window
+  // can miss entirely. One reload re-issues the fetch immediately against a
+  // (by then) warmer server. The board must still genuinely render within the
+  // window — nothing asserted is weakened. CI (workers:1) never needs this.
+  try {
+    await expect(board(page)).toBeVisible({ timeout: 45_000 });
+  } catch {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(board(page)).toBeVisible({ timeout: 45_000 });
+  }
 }
 
 async function readCount(page: Page, key: ColumnKey): Promise<number> {
@@ -220,6 +231,67 @@ async function resolveBreakpointOnDisk(runId: string, effectId: string): Promise
     )
   );
   return [journalPath, resultPath];
+}
+
+// ---------------------------------------------------------------------------
+// Cross-worker mutex for the shared approve fixture (parallel-worker fix).
+//
+// THREE tests (AC-15, AC-45, AC-61) exercise the real approve write path on
+// the SAME on-disk fixture (KANBAN_APPROVE_BP_RUN_ID / its single effect) and
+// restore it afterwards. Under local parallel workers they collide: worker B
+// clicks approve while worker A's answer is still on disk ("first answer
+// stands"), or renders mid-restore ("Unknown effectId"). CI (workers:1) never
+// interleaves them. Serialize ONLY these writers with an mkdir-based advisory
+// lock — assertions are untouched; the fixture simply has one writer at a time.
+// ---------------------------------------------------------------------------
+const APPROVE_FIXTURE_LOCK = path.join(FIXTURES_RUNS_DIR, "..", ".approve-fixture-lock");
+const APPROVE_LOCK_STALE_MS = 180_000;
+
+async function withApproveFixtureLock<T>(fn: () => Promise<T>): Promise<T> {
+  const deadline = Date.now() + 180_000;
+  for (;;) {
+    try {
+      await fs.mkdir(APPROVE_FIXTURE_LOCK);
+      break; // acquired
+    } catch {
+      // Reclaim a stale lock left by a crashed holder (never a live one:
+      // holders finish well inside the stale window).
+      const st = await fs.stat(APPROVE_FIXTURE_LOCK).catch(() => null);
+      if (st && Date.now() - st.mtimeMs > APPROVE_LOCK_STALE_MS) {
+        await fs.rm(APPROVE_FIXTURE_LOCK, { recursive: true, force: true }).catch(() => {});
+        continue;
+      }
+      if (Date.now() > deadline) {
+        throw new Error("approve-fixture lock: timed out waiting for a sibling writer test");
+      }
+      await new Promise((r) => setTimeout(r, 250 + Math.floor(Math.random() * 250)));
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    await fs.rm(APPROVE_FIXTURE_LOCK, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+/** Release barrier for approve-fixture writers: while STILL holding the lock,
+ *  wait until the server again reports the fixture's breakpoint as pending —
+ *  the on-disk restore is invisible to other workers until the watcher's next
+ *  discovery pass, and releasing before that hands the next writer a stale
+ *  "already answered" view. */
+async function awaitApproveFixtureRestored(
+  request: import("@playwright/test").APIRequestContext
+): Promise<void> {
+  await expect(async () => {
+    const res = await request.get("/api/runs?limit=500&offset=0&search=&status=&sort=status");
+    expect(res.ok()).toBe(true);
+    const body = (await res.json()) as {
+      runs?: Array<{ runId: string; pendingBreakpoints?: number }>;
+    };
+    const run = (body.runs ?? []).find((r) => r.runId === KANBAN_APPROVE_BP_RUN_ID);
+    expect(run, "approve fixture must be listed").toBeTruthy();
+    expect(run!.pendingBreakpoints ?? 0).toBeGreaterThan(0);
+  }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
 }
 
 // ---------------------------------------------------------------------------
@@ -416,7 +488,11 @@ test.describe("Kanban board — Needs-you cards (SPEC-vibekanban)", () => {
 
   test(
     "AC-15: submitting an option from a Needs-you card invokes the existing approve flow (result.json + EFFECT_RESOLVED on disk) and performs no other network write",
-    async ({ page }) => {
+    async ({ page, request }) => {
+      // Serialized with AC-45/AC-61 (same on-disk fixture) — see the lock's
+      // rationale comment. Lock waits can stack behind two sibling writers.
+      test.setTimeout(240_000);
+      await withApproveFixtureLock(async () => {
       // Fixture prerequisite: KANBAN_APPROVE_BP_RUN_ID — a dedicated pending
       // breakpoint (options include "approve") so the shared banner fixture
       // is never mutated by this test.
@@ -486,7 +562,9 @@ test.describe("Kanban board — Needs-you cards (SPEC-vibekanban)", () => {
           if (!journalBefore.includes(f)) await fs.unlink(path.join(journalDir, f)).catch(() => {});
         }
         await fs.unlink(resultPath).catch(() => {});
+        await awaitApproveFixtureRestored(request);
       }
+      });
     }
   );
 
@@ -714,14 +792,24 @@ test.describe("Kanban board — hidden projects, junk, empty & overflow (SPEC-vi
       // is replaced by the ExecutiveSummaryBanner approvals figure, which reads
       // the same reconciledCounts.needsyou source as the pill and the column, so
       // a hidden-project breakpoint counted in the column is counted in the alarm.
-      const columnN = await readCount(page, "needsyou");
-      const pillText = (await page.getByTestId("filter-pill-needsyou").textContent()) ?? "";
-      const pillN = parseInt(pillText.match(/\d+/)?.[0] ?? "-1", 10);
-      const attentionText =
-        (await page.getByTestId("summary-segment-attention").textContent()) ?? "";
-      const bannerN = parseInt(attentionText.match(/\d+/)?.[0] ?? "-1", 10);
-      expect(pillN).toBe(columnN);
-      expect(bannerN).toBe(columnN);
+      //
+      // Retry-safe sampling (parallel-worker contention fix): all three surfaces
+      // derive from the SAME reconciledCounts pass, but the three DOM reads are
+      // sequential — under parallel workers a sibling test's on-disk breakpoint
+      // resolve/restore (AC-15/18/45/61) can land an SSE refresh BETWEEN reads,
+      // so one bare textContent() samples the old render and the next samples
+      // the new one. toPass re-samples the whole triple until it is internally
+      // consistent; the asserted invariant itself is unchanged.
+      await expect(async () => {
+        const columnN = await readCount(page, "needsyou");
+        const pillText = (await page.getByTestId("filter-pill-needsyou").textContent()) ?? "";
+        const pillN = parseInt(pillText.match(/\d+/)?.[0] ?? "-1", 10);
+        const attentionText =
+          (await page.getByTestId("summary-segment-attention").textContent()) ?? "";
+        const bannerN = parseInt(attentionText.match(/\d+/)?.[0] ?? "-1", 10);
+        expect(pillN).toBe(columnN);
+        expect(bannerN).toBe(columnN);
+      }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
 
       // The "N hidden" indicator chip stays visible in board view.
       await expect(page.getByTestId("hidden-projects-indicator")).toBeVisible();
@@ -751,14 +839,25 @@ test.describe("Kanban board — hidden projects, junk, empty & overflow (SPEC-vi
         // §15.1 AC-77 (owner gate 2026-07-06b): sum EVERY board column,
         // INCLUDING the Scheduled column — a run parked at an unresolved sleep
         // effect lives there, so excluding it drops it from the board total.
-        let headerSum = 0;
-        for (const key of TOTAL_COLUMN_KEYS) {
-          if ((await column(page, key).count()) === 0) continue;
-          headerSum += await readCount(page, key);
-        }
-        const totalCards = await page.locator('[data-testid="kanban-card"]').count();
-        expect(totalCards).toBeLessThanOrEqual(headerSum); // virtualization may render fewer
-        expect(headerSum).toBe(manifest.runCount + 0 /* junk contributes nothing */);
+        //
+        // Retry-safe sampling (parallel-worker contention fix): the headers are
+        // read sequentially, so under parallel workers a straddled read across
+        // an SSE refresh mid-column-move (a sibling test resolving/restoring a
+        // breakpoint on disk) can double-count or drop the moving run, and the
+        // wave-3 in-progress test holds 2 temp run dirs in the watched source
+        // for its own duration (it removes them and barriers on the server
+        // view before finishing). toPass re-samples until the steady state;
+        // the asserted value — headerSum === manifest.runCount — is unchanged.
+        await expect(async () => {
+          let headerSum = 0;
+          for (const key of TOTAL_COLUMN_KEYS) {
+            if ((await column(page, key).count()) === 0) continue;
+            headerSum += await readCount(page, key);
+          }
+          const totalCards = await page.locator('[data-testid="kanban-card"]').count();
+          expect(totalCards).toBeLessThanOrEqual(headerSum); // virtualization may render fewer
+          expect(headerSum).toBe(manifest.runCount + 0 /* junk contributes nothing */);
+        }).toPass({ timeout: 75_000, intervals: [500, 1_000, 2_000, 5_000] });
       } finally {
         await fs.rm(junkDir, { recursive: true, force: true }).catch(() => {});
       }
@@ -1229,7 +1328,11 @@ test.describe("Kanban board — UX-R2 §13.4 read-only clarity (owner gate 2026-
     );
   });
 
-  test("AC-45: answering an orphaned run shows the post-submit confirmation verbatim, and the write is the same approve-flow write (result.json + EFFECT_RESOLVED) with no other write", async ({ page }) => {
+  test("AC-45: answering an orphaned run shows the post-submit confirmation verbatim, and the write is the same approve-flow write (result.json + EFFECT_RESOLVED) with no other write", async ({ page, request }) => {
+    // Serialized with AC-15/AC-61 (same on-disk fixture) — see the lock's
+    // rationale comment. Lock waits can stack behind two sibling writers.
+    test.setTimeout(240_000);
+    await withApproveFixtureLock(async () => {
     // Same dedicated fixture + restore discipline as AC-15 — the fixture has
     // no run.lock, so the board classifies it orphaned (driver "none").
     const dir = runDir(KANBAN_APPROVE_BP_RUN_ID);
@@ -1291,7 +1394,9 @@ test.describe("Kanban board — UX-R2 §13.4 read-only clarity (owner gate 2026-
         if (!journalBefore.includes(f)) await fs.unlink(path.join(journalDir, f)).catch(() => {});
       }
       await fs.unlink(resultPath).catch(() => {});
+      await awaitApproveFixtureRestored(request);
     }
+    });
   });
 });
 
@@ -1607,7 +1712,12 @@ test.describe("Kanban board — UX-R3 §14.5 write-path truth (owner gate 2026-0
 
   test("AC-61: the post-submit confirmation on an orphaned run is honest — 'recorded' + 'resumed', never 'published/approved successfully/done'", async ({
     page,
+    request,
   }) => {
+    // Serialized with AC-15/AC-45 (same on-disk fixture) — see the lock's
+    // rationale comment. Lock waits can stack behind two sibling writers.
+    test.setTimeout(240_000);
+    await withApproveFixtureLock(async () => {
     // Real record on the dedicated orphaned fixture (driver "none"), restored.
     const dir = runDir(KANBAN_APPROVE_BP_RUN_ID);
     const resultPath = path.join(dir, "tasks", KANBAN_APPROVE_BP_EFFECT_ID, "result.json");
@@ -1638,7 +1748,9 @@ test.describe("Kanban board — UX-R3 §14.5 write-path truth (owner gate 2026-0
         if (!journalBefore.includes(f)) await fs.unlink(path.join(journalDir, f)).catch(() => {});
       }
       await fs.unlink(resultPath).catch(() => {});
+      await awaitApproveFixtureRestored(request);
     }
+    });
   });
 
   test("AC-62 (first-answer-stands): re-opening a recorded card shows the existing answer once and offers NO overwrite (the first recorded answer stands)", async ({
@@ -1725,7 +1837,7 @@ test.describe("Kanban board — in-progress indication (UX-R3 wave 3)", () => {
     );
   }
 
-  test("a fresh lock-less run appears in WORKING with a live chip; a stale one does not", async ({ page }) => {
+  test("a fresh lock-less run appears in WORKING with a live chip; a stale one does not", async ({ page, request }) => {
     try {
       await writeInProgressRun(FRESH_RUN_ID, 30_000); // 30s old → within 1h active window
       await writeInProgressRun(STALE_RUN_ID, 3 * 60 * 60 * 1000); // 3h old → past it
@@ -1756,6 +1868,22 @@ test.describe("Kanban board — in-progress indication (UX-R3 wave 3)", () => {
     } finally {
       await fs.rm(runDir(FRESH_RUN_ID), { recursive: true, force: true }).catch(() => {});
       await fs.rm(runDir(STALE_RUN_ID), { recursive: true, force: true }).catch(() => {});
+      // Cleanup BARRIER (parallel-worker contention fix): this test writes 2
+      // temp run dirs into the shared watched fixture source, which inflates
+      // every global-count surface (+2) while they exist. Deleting the dirs is
+      // not enough — the server keeps reporting them until its watcher's next
+      // discovery pass. Do not let this test slot end until /api/runs no
+      // longer lists either temp run, so sibling count assertions (AC-19/20,
+      // dashboard totals) only ever contend with a window this test itself
+      // bounds and closes.
+      await expect(async () => {
+        const res = await request.get("/api/runs?limit=500&offset=0&search=&status=&sort=status");
+        expect(res.ok()).toBe(true);
+        const body = (await res.json()) as { runs?: Array<{ runId: string }> };
+        const listed = (body.runs ?? []).map((r) => r.runId);
+        expect(listed).not.toContain(FRESH_RUN_ID);
+        expect(listed).not.toContain(STALE_RUN_ID);
+      }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
     }
   });
 });
