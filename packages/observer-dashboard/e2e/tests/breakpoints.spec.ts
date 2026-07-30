@@ -34,13 +34,14 @@ function pickRun(status: ManifestRun["status"]): ManifestRun {
 /**
  * Known waiting run with a resolved breakpoint task.
  *
- * Run 01KH47FK2MGMMB37B17PE3Z91Z (sample/roster-update) has a breakpoint
- * task "Approve budget allocation?" at effectId 01KH47YK0HJ1CY5FYT4X1XZ5YZ.
+ * Run 01KHCAK0WD7DMX807EX7T5B81Z (sales/lead-scoring) has a breakpoint
+ * task "Approve budget allocation?" at effectId 01KHCAKZX67KTRQQGPKXAXE6FZ.
  * The breakpoint was already resolved (approved), but the run is still in
- * "waiting" status because a subsequent agent task is pending.
+ * "waiting" status because a subsequent shell task is pending.
+ * (Deterministic generated fixture — stable across regenerations.)
  */
-const BREAKPOINT_RUN_ID = "01KH47FK2MGMMB37B17PE3Z91Z";
-const BREAKPOINT_EFFECT_ID = "01KH47YK0HJ1CY5FYT4X1XZ5YZ";
+const BREAKPOINT_RUN_ID = "01KHCAK0WD7DMX807EX7T5B81Z";
+const BREAKPOINT_EFFECT_ID = "01KHCAKZX67KTRQQGPKXAXE6FZ";
 
 /**
  * Fixture run with a PENDING (unresolved) breakpoint task.
@@ -175,7 +176,7 @@ test.describe("Breakpoint Panel", () => {
     await runDetailPage.waitForData();
 
     // Expand all tasks if "Show all" is visible, since the breakpoint task
-    // may be beyond the initial truncated view (22 tasks in this run)
+    // may be beyond the initial truncated view (15 tasks in this run)
     const showAllBtn = runDetailPage.page.locator("[data-testid='show-all-tasks-btn']");
     if (await showAllBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await showAllBtn.click();

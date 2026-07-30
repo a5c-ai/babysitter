@@ -8,12 +8,15 @@ import { test, expect } from "../fixtures";
  * rapid navigation, and browser refresh resilience.
  */
 
-/* ─── Known fixture run IDs from _manifest.json ─── */
-const COMPLETED_RUN_ID = "01KH507H054PWCPV0ZM3AAMM5J"; // content/draft-review, completed, 7 tasks
-const FAILED_RUN_ID = "01KH45VA2ZEEE8XDMEVMKCGA35"; // demo-project/publish, failed, 24 tasks
-const WAITING_RUN_ID = "01KH47FK2MGMMB37B17PE3Z91Z"; // sample/roster-update, waiting, 22 tasks
-const SECOND_COMPLETED_RUN_ID = "01KH6HKNFCXVSH1PYG9PWXSTDD"; // sales/lead-scoring, completed, 25 tasks
-const THIRD_COMPLETED_RUN_ID = "01KH8J6PXYQ8S3WTH4MH1YSSD2"; // demo-project/publish, completed, 13 tasks
+/* ─── Known fixture run IDs from _manifest.json ───
+ * The generated fixtures are deterministic (seeded PRNG in
+ * e2e/fixtures/generate-fixtures.ts), so these IDs are stable across
+ * regenerations on every machine. */
+const COMPLETED_RUN_ID = "01KH3WYPG8TYACSJ26HC8GE8BN"; // sample/schedule-sync, completed, 5 tasks
+const FAILED_RUN_ID = "01KH52MSWEF4Y739XJ10SMF6KH"; // demo-project/transcribe, failed, 21 tasks
+const WAITING_RUN_ID = "01KHCAK0WD7DMX807EX7T5B81Z"; // sales/lead-scoring, waiting, 15 tasks
+const SECOND_COMPLETED_RUN_ID = "01KH56M7B21HDGMSNJSY2SBF7M"; // sales/deal-sync, completed, 7 tasks
+const THIRD_COMPLETED_RUN_ID = "01KH5714VN73QC6WCP8S0P31QA"; // demo-project/publish, completed, 9 tasks
 const NON_EXISTENT_RUN_ID = "01ZZZZZZZZZZZZZZZZZZZZZZZZ";
 
 test.describe("Navigation: Dashboard -> Run Detail -> Dashboard", () => {

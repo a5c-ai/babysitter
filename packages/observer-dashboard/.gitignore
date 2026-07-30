@@ -45,6 +45,14 @@ test-results/
 playwright-report/
 e2e-*.txt
 
+# E2E fixture runs are (re)generated deterministically at test time
+# (playwright globalSetup -> e2e/fixtures/generate-fixtures.ts), including
+# _manifest.json. Only the hand-authored 01KTEST* fixture dirs are tracked.
+/e2e/fixtures/runs/*
+!/e2e/fixtures/runs/01KTEST*/
+# runtime state written into authored fixtures by the approve-flow specs
+/e2e/fixtures/runs/01KTEST*/state/
+
 # Local docs and screenshots (contents ignored, so a specific file can be re-included)
 /docs/*
 # ...except the README's public board screenshot (public repos only, no private data)

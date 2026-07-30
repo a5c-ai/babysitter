@@ -26,6 +26,11 @@ const chromeExecutable = process.env.OBSERVER_CHROMIUM_PATH;
 
 export default defineConfig({
   testDir: "e2e/tests",
+
+  // Generated fixture runs are not committed; (re)create them deterministically
+  // before anything reads WATCH_DIR. Idempotent — a no-op when already present.
+  globalSetup: path.resolve(__dirname, "e2e/global-setup.ts"),
+
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,

@@ -1,9 +1,0 @@
-{
-  "channels": [
-    "blog",
-    "twitter"
-  ],
-  "timezone": "Europe/London",
-  "draftCount": 18,
-  "autoPublish": false
-}
