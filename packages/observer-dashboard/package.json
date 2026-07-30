@@ -63,6 +63,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "pretest:e2e": "node scripts/ensure-local-deps.mjs",
     "test:e2e": "npx playwright test",
     "test:perf": "npx playwright test e2e/tests/performance.spec.ts",
     "prebuild": "node scripts/ensure-local-deps.mjs"
