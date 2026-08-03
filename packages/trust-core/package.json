@@ -2,8 +2,10 @@
   "name": "@a5c-ai/trust-core",
   "version": "6.0.0",
   "description": "Pure Ed25519 signing, signed-envelope, model-decision, and trust-chain primitives shared across the trust boundary.",
-  "private": true,
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

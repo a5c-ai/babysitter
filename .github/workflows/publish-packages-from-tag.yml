@@ -95,11 +95,19 @@ jobs:
           npm run build --workspace=@a5c-ai/atlas
 
           run_many "Build foundation packages" \
+            @a5c-ai/trust-core \
             @a5c-ai/tasks-adapter \
             @a5c-ai/kradle-installer \
             @a5c-ai/adapters-observability \
             @a5c-ai/triggers-adapter \
             @a5c-ai/babysitter-observer-dashboard
+
+          # policy-adapter sits between the foundation (trust-core, tasks-adapter)
+          # and the packages that consume it (comm-adapter, tools-adapter,
+          # transport-adapter), so it gets its own sequential step rather than
+          # racing its consumers inside a parallel group.
+          run_many "Build policy layer" \
+            @a5c-ai/policy-adapter
 
           run_many "Build core packages" \
             @a5c-ai/hooks-adapter-core \
@@ -193,6 +201,7 @@ jobs:
 
           publish_many "Publish foundation packages" \
             @a5c-ai/atlas \
+            @a5c-ai/trust-core \
             @a5c-ai/tasks-adapter \
             @a5c-ai/kradle-installer \
             @a5c-ai/adapters-observability \
@@ -200,6 +209,7 @@ jobs:
             @a5c-ai/babysitter-observer-dashboard
 
           publish_many "Publish core packages" \
+            @a5c-ai/policy-adapter \
             @a5c-ai/hooks-adapter-core \
             @a5c-ai/comm-adapter \
             @a5c-ai/extensions-adapter
