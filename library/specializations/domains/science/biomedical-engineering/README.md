@@ -369,6 +369,8 @@ This specialization is critical for advancing healthcare delivery, improving pat
    -> Update design as needed
 ```
 
+End-to-end composition: this workflow is carried through submission and post-market by the flagship [Medical Device Total Product Lifecycle (TPLC) Workflow](#medical-device-total-product-lifecycle-tplc-workflow-flagship) (`medical-device-tplc-workflow.js`).
+
 ### Risk Management Process (ISO 14971)
 
 ```
@@ -403,6 +405,8 @@ This specialization is critical for advancing healthcare delivery, improving pat
    -> Evaluate effectiveness of risk controls
    -> Maintain risk management file
 ```
+
+End-to-end composition: the flagship [Medical Device Total Product Lifecycle (TPLC) Workflow](#medical-device-total-product-lifecycle-tplc-workflow-flagship) (`medical-device-tplc-workflow.js`) runs this risk management file as phase P2 and binds every risk control to a P5 verification obligation.
 
 ### Biocompatibility Testing Workflow
 
@@ -473,6 +477,88 @@ This specialization is critical for advancing healthcare delivery, improving pat
    -> Conduct simulated use testing
    -> Perform clinical validation
    -> Document validation conclusions
+```
+
+### Medical Device Total Product Lifecycle (TPLC) Workflow (flagship)
+
+`medical-device-tplc-workflow.js` is the flagship end-to-end process for this specialization: it carries a
+device program from design-control intake all the way through post-market surveillance in a single run,
+accumulating a per-phase evidence index and a Design History File as it goes. Every irreversible boundary
+(design freeze, first-in-human enrollment, regulatory transmission, field action, vigilance filing) is a
+routed breakpoint with a guarded executor, and every quality bar is an adversarial gate that requires
+executed evidence rather than a narrated claim.
+
+Phase chain:
+
+1. **P1 — Intake and design-control plan.** User needs, design inputs (`DI-###`) with objectively verifiable acceptance criteria, design outputs, DHF skeleton.
+2. **P2 — Risk management (ISO 14971).** Hazards traced to design input ids; every risk control carries a verification obligation id (`RC-###`). An untraceable hazard or control FAILS the phase.
+3. **P3 — Parallel design characterization.** Biological evaluation (ISO 10993), sterilization + sterile-barrier validation, human factors (IEC 62366), IEC 62304 software lifecycle — fanned out with `ctx.parallel.all`. The software leg is skipped and recorded `skipped:true` when the device contains no software.
+4. **P4 — DESIGN FREEZE (policy-gated).** The returned `baselineDigest` binds every downstream V&V result.
+5. **P5 — Verification and validation.** Coverage-complete planning against the frozen baseline, protocol execution via `ctx.parallel.map`, and a summary computed from the written protocol reports. Uncovered inputs/controls or a digest mismatch FAIL the phase.
+6. **P6 — Clinical evaluation.** Investigation plan with an explicit prerequisite list, policy-gated enrollment authorization, and a clinical evaluation report that must declare the evidence gap when the investigation was not authorized.
+7. **P7 — Design History File assembly + sufficiency gate.** A missing required DHF section FAILS before the gate even runs; a failed gate FAILS the phase, so P8 is never reached on an insufficient DHF.
+8. **P8 — Regulatory submission.** Dossier assembly for the resolved pathway, a readiness gate over the written manifest, a policy-gated transmission, then bounded deficiency-response rounds that FAIL on exhaustion unless the owner explicitly accepts the open-deficiency state.
+9. **P9 — Post-market surveillance.** PMS plan, signal analysis, a signal-integrity gate, per-signal CAPA investigations in parallel, then severity-routed policy-gated field action and vigilance filing.
+
+Policy-gated actions (adapters/policy ready):
+
+| actionId | accountable expert | why it is irreversible |
+| --- | --- | --- |
+| `medical-device-tplc.design-freeze` | design-assurance-lead | Unfreezing invalidates completed V&V evidence bound to the baseline digest. |
+| `medical-device-tplc.clinical-study-start` | medical-director | First-in-human exposure to an investigational device cannot be undone. |
+| `medical-device-tplc.regulatory-submission` | regulatory-affairs-lead | The submitted record is permanent and starts a statutory clock. |
+| `medical-device-tplc.field-action` | quality-management-representative | A recall/FSCA is publicly and commercially irreversible. |
+| `medical-device-tplc.post-market-report-filing` | regulatory-affairs-lead | A filing to a competent authority is a permanent regulatory record. |
+
+None of the five carries `autoApproveAfterN` or `presentAlwaysApprove` — they are fail-closed with
+`strategy: 'single'`, and each executor is scheduled strictly inside `if (decision.approved === true)`.
+When the harness auto-approves in a non-interactive run, that provenance is never buried: it is copied
+verbatim into `metadata.policyDecisions`, aggregated into `metadata.autoApprovedActions`, threaded into
+the executor context as `authorization.autoApproved`, written into the executor's artifact, and carried
+in the kip run-outcome fact.
+
+The three adversarial gates — `medical-device-tplc.design-history-file-sufficiency`,
+`medical-device-tplc.submission-dossier-readiness` and `medical-device-tplc.post-market-signal-integrity`
+— each require EXECUTED evidence: the critics must open the produced artifacts from disk (and, for the
+signal gate, recompute the exceeded rates from the underlying dataset) and cite file:line references or
+literal command output. A `passed:true` verdict with an empty evidence array is rejected.
+
+The flagship composes these 14 point processes **BY NAME inside agent prompts only** — they are never
+imported and their `process()` functions are never called (importing would double-fire their internal
+breakpoints and can collide task ids in the SDK task registry):
+
+- `design-control-process.js`
+- `risk-management-iso14971.js`
+- `biological-evaluation-iso10993.js`
+- `sterilization-validation.js`
+- `sterile-barrier-validation.js`
+- `human-factors-engineering.js`
+- `software-lifecycle-iec62304.js`
+- `software-verification-validation.js`
+- `verification-validation-planning.js`
+- `clinical-study-design.js`
+- `clinical-evaluation-report.js`
+- `510k-submission.js`
+- `eu-mdr-technical-documentation.js`
+- `post-market-surveillance.js`
+
+Usage:
+
+```js
+const result = await orchestrate(
+  'specializations/domains/science/biomedical-engineering/medical-device-tplc-workflow',
+  {
+    deviceName: 'Acme Infusion Pump X1',
+    intendedUse: 'Continuous intravenous infusion of therapeutic fluids in acute-care settings',
+    deviceClass: 'Class II',
+    regulatoryPathway: '510k',        // '510k' | 'eu-mdr' — throwing lookup, no default
+    markets: ['US'],
+    hasSoftware: true,
+    predicateDevices: [{ name: 'Acme Infusion Pump X0', k510: 'K123456' }],
+    signalDataPath: 'data/post-market/complaints.json',
+    maxSubmissionRounds: 2,
+  }
+);
 ```
 
 ## Skills and Competencies Required

@@ -392,3 +392,7 @@ Business Strategy and Operations interfaces with multiple organizational functio
 ---
 
 This specialization provides the foundation for strategic decision-making and operational excellence across organizations of all sizes and industries.
+
+## Folded-in Processes
+
+- `revenue.js` (`@process specializations/domains/business/business-strategy/revenue`) — folded in from the former `specializations/business/` specialization (batch-4, commit `bf012dbb7`). The old path `specializations/business/revenue.js` remains as a header-only `@deprecated` alias that re-exports this file.

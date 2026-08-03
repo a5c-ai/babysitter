@@ -163,3 +163,15 @@ This document tracks the implementation status of AI-assisted processes for the 
 32. Double-Loop Learning Implementation
 33. Continuous Improvement Knowledge Integration
 34. Reflection and Retrospective Practice
+
+---
+
+## Anchored by the Knowledge Lifecycle Flagship
+
+`knowledge-lifecycle-workflow.js` (`specializations/domains/business/knowledge-management/knowledge-lifecycle-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** kip corpus recall -> multi-method knowledge intake (the capture point-tasks as lane playbooks) -> curation into candidate assets -> parallel per-candidate dedupe/enrichment/taxonomy classification -> adversarial accuracy-and-freshness gate whose critics EXECUTE their checks -> merge adjudication -> policy-gated taxonomy change -> policy-gated KB publish -> conditional policy-gated external exposure -> decay monitoring -> policy-gated retirement/supersession -> kip assert.
+
+It composes the capture, curation and governance point processes in this directory BY NAME rather than re-implementing them.
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

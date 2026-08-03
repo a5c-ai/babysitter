@@ -1,8 +1,9 @@
 /**
  * @process methodologies/shape-up
  * @description Shape Up - Basecamp's methodology for building products through 6-week cycles with shaping, betting, and building phases
- * @inputs { projectName: string, workDescription: string, appetite?: string, cycleWeeks?: number, teamSize?: string, phase?: string }
- * @outputs { success: boolean, pitch?: object, scopeMap?: object, hillChart?: object, cycle?: object, summary: object }
+ * @inputs { projectName: string, workDescription: string, appetite?: string, cycleWeeks?: number, teamSize?: string, phase?: string, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, pitch?: object, scopeMap?: object, hillChart?: object, cycle?: object, summary: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract Anyone can read the end-of-cycle hill chart and see, for every scope, whether it shipped inside the appetite that was bet — with no silently extended cycle.
    * @graph
  *   domains: [domain:software-engineering]
  *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
@@ -12,6 +13,23 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated Shape Up ceremonies. The betting table is the one place where
+ * team capacity is actually committed to a shaped pitch; shaping reviews, the
+ * scope map, weekly hill-chart check-ins and the circuit breaker are all
+ * inspection points, not capacity commitments.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.shape-up.betting-table',
+    expert: 'product-owner',
+    description: 'Bet a shaped pitch into a six-week cycle, committing the team capacity (shape-up/shape-up.js).',
+  },
+];
 
 /**
  * Shape Up Process
@@ -55,8 +73,24 @@ export async function process(inputs, ctx) {
     existingPitch = null,
     competingPitches = [],
     teamCapacity = null,
-    includeCoolDown = true
+    includeCoolDown = true,
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
+
+  // Recall what prior cycles learned about shaping and appetite discipline.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'Shape Up cycle and betting practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per raise of a declared actionId.
+  // Both stay empty/null when the requested phase does not reach them; that is
+  // an honest report, not a defect.
+  const ceremonyDecisions = [];
+  let cycleScopeGate = null;
 
   // Validate inputs
   if (!projectName || !workDescription) {
@@ -91,7 +125,8 @@ export async function process(inputs, ctx) {
       projectName,
       workDescription,
       appetite,
-      cycleWeeks
+      cycleWeeks,
+      priorPractice: priorPractice.insights
     });
 
     results.appetiteDefinition = appetiteResult;
@@ -181,8 +216,8 @@ export async function process(inputs, ctx) {
 
     results.bettingEvaluation = bettingEvaluation;
 
-    // Breakpoint: Betting table decision
-    await ctx.breakpoint({
+    // Ceremony: the betting table. Routed to the product owner.
+    const bettingDecision = await routedBreakpoint(ctx, {
       question: `Betting table evaluation complete. Score: ${bettingEvaluation.score}/100. Recommendation: ${bettingEvaluation.recommendation}. Key factors: ${bettingEvaluation.keyFactors.slice(0, 3).join(', ')}. ${competingPitches.length} competing pitches. Place bet on this work?`,
       title: 'Betting Table Decision',
       context: {
@@ -192,6 +227,21 @@ export async function process(inputs, ctx) {
           { path: 'artifacts/shape-up/betting/comparison.md', format: 'markdown', label: 'Pitch Comparison' }
         ]
       }
+    }, {
+      breakpointId: 'methodology-retrofit.shape-up.betting-table',
+      expert: 'product-owner',
+      tags: ['policy-gated', 'methodology', 'shape-up'],
+      strategy: 'single'
+    });
+
+    ceremonyDecisions.push({
+      actionId: 'methodology-retrofit.shape-up.betting-table',
+      expert: 'product-owner',
+      description: policyGatedActions[0].description,
+      scope: { appetite, cycleWeeks },
+      approved: bettingDecision.approved === true,
+      autoApproved: bettingDecision.autoApproved === true,
+      decidedAt: ctx.now()
     });
 
     // If bet is placed, create cycle plan
@@ -320,7 +370,49 @@ export async function process(inputs, ctx) {
 
     results.circuitBreaker = circuitBreakerCheck;
 
-    // Breakpoint: End of cycle decision
+    // Quality gate at Shape Up's natural checkpoint — the circuit breaker,
+    // where the appetite is either honored or the work is killed. Deliberately
+    // NOT adjacent to the betting ceremony: the bet is a forecast, the circuit
+    // breaker is where the forecast is checked against reality.
+    cycleScopeGate = await adversarialGate(ctx, {
+      gateId: 'methodologies.shape-up.cycle-scope-integrity',
+      artifact: {
+        path: 'artifacts/shape-up/cycle/hill-chart.md',
+        description: 'End-of-cycle hill chart and scope completion against the bet appetite'
+      },
+      critics: [
+        {
+          name: 'hill-chart-honesty-critic',
+          role: 'Shaping reviewer auditing hill-chart claims',
+          focus: 'scopes reported over the hill are genuinely past the unknowns'
+        },
+        {
+          name: 'appetite-integrity-critic',
+          role: 'Betting table proxy auditing appetite adherence',
+          focus: 'the cycle stayed inside its fixed time and variable scope, with no silent extension'
+        }
+      ],
+      ironLaw: [
+        'Open artifacts/shape-up/cycle/hill-chart.md and the scope map and cite file:line for each scope you accept as downhill.',
+        'A scope reported downhill whose remaining work still contains an unsolved unknown is a high-severity issue — the hill chart measures uncertainty, not effort burned.',
+        'Work added after the bet that was not in the shaped pitch is scope creep and an issue, even if it shipped.',
+        'If the cycle exceeded its appetite (cycleWeeks), the circuit breaker MUST have fired; an over-appetite cycle without a recorded kill/extend decision is a high-severity issue.'
+      ],
+      maxFixAttempts: 2,
+      fixer: {},
+      context: {
+        appetite,
+        cycleWeeks,
+        scopeCount: scopeMappingResult.scopes.length,
+        circuitBreakerStatus: circuitBreakerCheck.status
+      }
+    });
+
+    results.qualityGate = cycleScopeGate;
+
+    // Breakpoint: End of cycle decision (stays plain — the gate verdict is
+    // threaded into its payload so the reader sees it, but shipping is not a
+    // declared policy-gated action in this methodology).
     await ctx.breakpoint({
       question: `End of ${cycleWeeks}-week cycle. ${circuitBreakerCheck.completed.length}/${scopeMappingResult.scopes.length} scopes completed. Status: ${circuitBreakerCheck.status}. ${circuitBreakerCheck.status === 'incomplete' ? 'Work is incomplete. Circuit breaker activated - no automatic extension.' : 'Work complete!'} QA ${qaResult.passed ? 'passed' : 'has issues'}. Ship or abandon?`,
       title: 'Circuit Breaker - End of Cycle',
@@ -331,6 +423,13 @@ export async function process(inputs, ctx) {
           { path: 'artifacts/shape-up/building/circuit-breaker.md', format: 'markdown', label: 'Circuit Breaker Report' },
           { path: 'artifacts/shape-up/building/qa-report.md', format: 'markdown', label: 'QA Report' }
         ]
+      },
+      qualityGate: {
+        passed: cycleScopeGate.passed,
+        issues: cycleScopeGate.issues,
+        evidence: cycleScopeGate.evidence,
+        attempts: cycleScopeGate.attempts,
+        escalated: cycleScopeGate.escalated
       }
     });
   }
@@ -391,6 +490,43 @@ export async function process(inputs, ctx) {
     }
   });
 
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:shape-up',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.shape-up.betting-table',
+        props: { raises: ceremonyDecisions.length, phase }
+      },
+      {
+        subject: 'methodology:shape-up',
+        predicate: 'quality-gate-verdict',
+        object: String(cycleScopeGate === null ? 'not-reached' : cycleScopeGate.passed),
+        props: {
+          gateId: 'methodologies.shape-up.cycle-scope-integrity',
+          attempts: cycleScopeGate === null ? 0 : cycleScopeGate.attempts,
+          escalated: cycleScopeGate === null ? false : cycleScopeGate.escalated,
+          phase
+        }
+      },
+      {
+        subject: 'methodology:shape-up',
+        predicate: 'appetite-adherence',
+        object: String(completionRate.toFixed(0) + '%'),
+        props: { appetite, cycleWeeks, shipped }
+      },
+      {
+        subject: 'methodology:shape-up',
+        predicate: 'circuit-breaker-fired',
+        object: String(results.circuitBreaker ? results.circuitBreaker.status === 'incomplete' : false),
+        props: { phase, includeCoolDown }
+      }
+    ]
+  });
+
   return {
     success: allPhasesComplete && (phase !== 'full-cycle' || shipped),
     projectName,
@@ -420,6 +556,13 @@ export async function process(inputs, ctx) {
       methodology: 'Shape Up (Basecamp)',
       creator: 'Ryan Singer',
       timestamp: ctx.now()
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: cycleScopeGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

@@ -494,3 +494,114 @@ This specialization supports professionals who source, evaluate, structure, exec
 - Operational risk management
 - Insurance coverage (D&O, E&O, cyber)
 - Business continuity planning
+
+## Investment Lifecycle Workflow (flagship)
+
+`investment-lifecycle-workflow.js` (`@process venture-capital/investment-lifecycle-workflow`) is
+the end-to-end flagship that closes the deal-shaped triangle with `sales/sales-deal-workflow`
+(stage-gated pursuit + frozen authority matrix) and `legal/contract-lifecycle-workflow`
+(bounded negotiation rounds with per-round severity-routed approvals).
+
+### Phase spine
+
+| Phase | What happens |
+| --- | --- |
+| P1 | Sourcing intake and deal-flow registration |
+| P2 | `kipRecall` of prior passes, founder track record, and market facts (kind `investment-decision`) |
+| P3 | Evidence-backed thesis-fit screening (a screen-out is an honest terminal state) |
+| P4 | Diligence plan declared **before** any workstream runs — the plan is the coverage contract |
+| P5 | Six diligence workstreams in one `ctx.parallel.all` fan-out (market/commercial, technical, team, financial, legal, ESG) |
+| P6 | Adversarial **diligence-completeness** gate (executed coverage check) + a deterministic hard block |
+| P7 | Valuation triangulation: comparables, DCF, and VC-method in parallel (anti-anchoring), then the ownership/cap-table model |
+| P8 | Investment memo with per-claim `sourceRef` file:line anchors |
+| P9 | Adversarial **bear-case / diligence-challenge** gate — the signature element |
+| P10 | Matrix-routed, policy-gated IC investment decision + `kipAssert` of the decision |
+| P11 | Term-sheet drafting and policy-gated issuance (bounded 2-attempt approval loop) |
+| P12 | Bounded term-sheet negotiation loop with per-round-unique breakpointIds |
+| P13 | Signed-LOI withdrawal gate (only reachable once a term sheet has been issued) |
+| P14 | Co-investor syndication + definitive documents |
+| P15 | Policy-gated **irreversible** capital wiring, then the guarded close executor |
+| P16 | Portfolio monitoring cadence via `ctx.parallel.map` + follow-on / reserve decisions |
+| P17 | Thesis outcome synthesis + `kipAssert` of durable outcomes |
+
+### Policy-gated actions (adapters/policy ready)
+
+`breakpointId === actionId` exactly, `strategy: 'single'`, tags `['policy-gated','venture-capital', ...]`,
+and **never** auto-approved — no `autoApproveAfterN`, no `presentAlwaysApprove`:
+
+| Action id | Expert |
+| --- | --- |
+| `investment-lifecycle.ic-investment-decision` | matrix-routed (always includes `investment-committee`) |
+| `investment-lifecycle.term-sheet-issuance` | `general-partner` |
+| `investment-lifecycle.capital-wiring-close` | `cfo` (irreversible — the close executor runs only inside the `approved === true` guard) |
+| `investment-lifecycle.follow-on-commitment` | matrix-routed by requested amount |
+| `investment-lifecycle.signed-loi-withdrawal` | `general-partner` |
+
+A non-interactive auto-approval is recorded with its provenance in `policyDecisions` and mirrored
+into `metadata.autoApprovals` — surfaced explicitly, never silently applied.
+
+### Check-size authority matrix
+
+`CHECK_SIZE_AUTHORITY_MATRIX` is frozen policy (the array **and** every tier). `routeCheckApproval`
+is a pure throwing lookup: it returns the first tier covering the ask and **throws** beyond the
+deepest tier. It never returns a default expert, never clamps, never widens a tier.
+
+| Tier | Up to | Expert route |
+| --- | --- | --- |
+| `partner-quorum` | $1,000,000 | `investment-committee` |
+| `full-partnership` | $10,000,000 | `investment-committee`, `managing-partner` |
+| `lpac-consent` | $25,000,000 | `investment-committee`, `managing-partner`, `lp-advisory-committee` |
+
+Beyond $25,000,000 there is no approval route — an LPA concentration waiver is a separate process,
+not a default expert.
+
+### Adversarial gates
+
+- `ilw.diligence-completeness` — a `diligence-coverage-critic` that EXECUTES the plan-vs-delivered
+  set difference per workstream and per required artifact, plus a `finding-provenance-critic` that
+  opens each cited `sourceRef` and pastes the quoted line. The process then recomputes
+  `computeDiligenceCoverage` itself: an uncovered or incomplete workstream blocks the IC gate even
+  if the gate (or an owner escalation) passed.
+- `ilw.bear-case-challenge` — the signature gate. A `bear-case-critic` must build the strongest
+  disconfirming case from the diligence artifacts with file:line citations, and a
+  `claim-verification-critic` re-opens every memo claim at its cited source and pastes the source
+  text beside the claim. The default verdict is FAIL; the IC breakpoint is unreachable without a
+  pass.
+
+### Deterministic process-code helpers
+
+`routeCheckApproval`, `computeOwnershipPct`, `computeDiligenceCoverage`, `computeReserveAvailability`,
+`computeTriangulatedRange`, and `recordPolicyDecision` all run in process code — the numbers approvers
+see are computed, never trusted from an agent. A follow-on request beyond remaining reserves raises
+no breakpoint and is recorded as an insufficient-reserves decision; the ask is never trimmed to fit.
+
+### Composition
+
+The workflow composes 21 point processes in this directory **by name in prompt prose only** — it
+never imports or orchestrates them: `proactive-deal-sourcing.js`, `deal-flow-tracking.js`,
+`commercial-due-diligence.js`, `technical-due-diligence.js`, `financial-due-diligence.js`,
+`legal-due-diligence.js`, `esg-due-diligence.js`, `management-team-assessment.js`,
+`comparable-analysis.js`, `dcf-analysis.js`, `vc-method-valuation.js`, `cap-table-modeling.js`,
+`investment-committee-process.js`, `term-sheet-drafting.js`, `definitive-document-negotiation.js`,
+`co-investor-syndication.js`, `board-engagement.js`, `portfolio-value-creation.js`,
+`portfolio-risk-rating.js`, `reserve-management.js`, and `quarterly-portfolio-reporting.js`. For a
+full standalone run of any one dimension, use that process directly.
+
+### Usage
+
+```js
+const result = await orchestrate('venture-capital/investment-lifecycle-workflow', {
+  company: {
+    name: 'Northwind Robotics',
+    sector: 'industrial-automation',
+    stage: 'series-a',
+    dataRoomPath: 'dataroom/northwind/',
+  },
+  thesis: 'applied-automation-thesis-2026',
+  proposedCheckSizeUsd: 6000000,
+  postMoneyValuationUsd: 40000000,
+  fundContextPath: 'fund/fund-iii-context.json',
+  reservePoolUsd: 12000000,
+  maxNegotiationRounds: 3,
+});
+```

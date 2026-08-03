@@ -8,11 +8,14 @@ process was vestigial.
 
 ## Disposition
 
-- `revenue.js` — RELOCATED to
-  `specializations/domains/business/business-strategy/revenue.js`.
-  A header-only `@deprecated` pointer remains at `revenue.js` in this directory and
-  re-exports the process, so existing imports of
-  `specializations/business/revenue.js` keep working. Import from the new path.
+- `revenue.js` — this directory now contains ONLY a header-only `@deprecated` alias.
+  The process body lives at
+  `library/specializations/domains/business/business-strategy/revenue.js`; the file
+  here is a single `export * from` re-export with no `defineTask` bodies. The old file
+  was not removed and the alias is retained deliberately — it is not scheduled for
+  deletion, so existing imports of `specializations/business/revenue.js` keep working.
+  Import from the new path. Folded in batch-4 (commit `bf012dbb7`); alias retention
+  confirmed 2026-08-03.
 
 Do not add new processes here. Add business-strategy processes under
 `specializations/domains/business/business-strategy/`.

@@ -5,6 +5,6 @@
  *   header-only pointer re-exports the process so existing references to
  *   'specializations/sourcing/news-intelligence-pipeline.js' keep resolving. Import from
  *   the new path.
- * @process specializations/sourcing/news-intelligence-pipeline (deprecated alias)
+ * @process specializations/sourcing/news-intelligence-pipeline
  */
 export * from '../research/news-intelligence-pipeline.js';

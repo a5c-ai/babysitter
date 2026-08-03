@@ -825,7 +825,7 @@ export const fosterCultureChangeTask = defineTask('foster-culture-change', (args
 }));
 
 // Task 9: Validate Implementation
-export const validateImplementationTask = defineTask('validate-implementation', (args, taskCtx) => ({
+export const validateImplementationTask = defineTask('shift-left-testing.validate-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Validate Shift-Left Implementation',
   agent: {

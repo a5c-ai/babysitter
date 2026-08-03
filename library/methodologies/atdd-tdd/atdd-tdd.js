@@ -1,8 +1,9 @@
 /**
  * @process methodologies/atdd-tdd
  * @description Test-Driven Development combining Acceptance Test-Driven Development (ATDD) and Test-Driven Development (TDD)
- * @inputs { feature: string, acceptanceCriteria?: array, testFramework?: string, iterationCount?: number }
- * @outputs { success: boolean, feature: object, acceptanceTests: array, unitTests: array, implementation: object, coverage: object }
+ * @inputs { feature: string, acceptanceCriteria?: array, testFramework?: string, iterationCount?: number, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, feature: object, acceptanceTests: array, unitTests: array, implementation: object, coverage: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract A customer can read each frozen acceptance criterion and watch the named acceptance test exercise that exact user-visible behaviour and pass.
    * @graph
  *   domains: [domain:software-engineering]
  *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
@@ -12,6 +13,24 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated ATDD/TDD ceremonies. Freezing the acceptance criteria is the
+ * one commitment everything downstream encodes: acceptance tests, unit tests
+ * and the implementation all inherit whatever ambiguity survives it. The
+ * remaining breakpoints in this file are exception handlers (unexpected pass,
+ * refactoring broke tests, max iterations) rather than ceremonies.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.atdd.acceptance-criteria-freeze',
+    expert: 'product-owner',
+    description: 'Freeze the agreed acceptance criteria that downstream tests encode (atdd-tdd/atdd-tdd.js).',
+  },
+];
 
 /**
  * ATDD/TDD Combined Process
@@ -53,8 +72,21 @@ export async function process(inputs, ctx) {
     testFramework = 'jest',
     iterationCount = 10,
     includeIntegrationTests = true,
-    existingCode = null
+    existingCode = null,
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
+
+  // Recall what prior outside-in runs learned about writing testable criteria.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'ATDD and TDD outside-in practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per raise of a declared actionId.
+  const ceremonyDecisions = [];
 
   // ============================================================================
   // ATDD PHASE 1: DEFINE ACCEPTANCE CRITERIA
@@ -63,11 +95,47 @@ export async function process(inputs, ctx) {
   const criteriaResult = await ctx.task(defineAcceptanceCriteriaTask, {
     feature,
     providedCriteria,
-    existingCode
+    existingCode,
+    priorPractice: priorPractice.insights
   });
 
-  // Breakpoint: Review acceptance criteria with stakeholders
-  await ctx.breakpoint({
+  // Quality gate: are these criteria actually testable before we freeze them?
+  const criteriaTestabilityGate = await adversarialGate(ctx, {
+    gateId: 'methodologies.atdd-tdd.acceptance-criteria-testability',
+    artifact: {
+      path: 'artifacts/atdd-tdd/acceptance-criteria.md',
+      description: 'Acceptance criteria about to be frozen as the contract every downstream test encodes'
+    },
+    critics: [
+      {
+        name: 'criteria-testability-critic',
+        role: 'Acceptance-test engineer auditing testability',
+        focus: 'each criterion is executable as a Given/When/Then with an observable assertion'
+      },
+      {
+        name: 'user-visible-behavior-critic',
+        role: 'Product owner proxy auditing behavioral framing',
+        focus: 'criteria describe user-visible behavior, not internal implementation'
+      }
+    ],
+    ironLaw: [
+      'Open artifacts/atdd-tdd/acceptance-criteria.md and cite file:line for every criterion you judge; state the concrete test you would write for it.',
+      'A criterion you cannot turn into a Given/When/Then with a single observable assertion is a high-severity issue — it will be frozen and every downstream test will inherit the ambiguity.',
+      'A criterion phrased in implementation terms (a function returns X, a flag is set, a mock is called) rather than user-visible behavior is an issue. Cross-check against library/methodologies/production-contract/README.md rule 1.',
+      'A criterion with no measurable pass/fail boundary (fast, intuitive, robust) is an issue.',
+      'Do not accept defineAcceptanceCriteriaTask own confidence claims.'
+    ],
+    maxFixAttempts: 2,
+    fixer: {},
+    context: {
+      feature,
+      testFramework,
+      providedCriteriaCount: providedCriteria.length
+    }
+  });
+
+  // Ceremony: freeze the acceptance criteria. Routed to the product owner.
+  const criteriaFreezeDecision = await routedBreakpoint(ctx, {
     question: `Review acceptance criteria for "${feature}". These define when the feature is "done" from a customer perspective. Do these criteria accurately capture business requirements?`,
     title: 'Acceptance Criteria Review',
     context: {
@@ -76,7 +144,28 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/atdd-tdd/acceptance-criteria.md', format: 'markdown', label: 'Acceptance Criteria' },
         { path: 'artifacts/atdd-tdd/acceptance-criteria.json', format: 'json', label: 'Criteria JSON' }
       ]
+    },
+    qualityGate: {
+      passed: criteriaTestabilityGate.passed,
+      issues: criteriaTestabilityGate.issues,
+      evidence: criteriaTestabilityGate.evidence,
+      attempts: criteriaTestabilityGate.attempts,
+      escalated: criteriaTestabilityGate.escalated
     }
+  }, {
+    breakpointId: 'methodology-retrofit.atdd.acceptance-criteria-freeze',
+    expert: 'product-owner',
+    tags: ['policy-gated', 'methodology', 'atdd-tdd'],
+    strategy: 'single'
+  });
+
+  ceremonyDecisions.push({
+    actionId: 'methodology-retrofit.atdd.acceptance-criteria-freeze',
+    expert: 'product-owner',
+    description: policyGatedActions[0].description,
+    approved: criteriaFreezeDecision.approved === true,
+    autoApproved: criteriaFreezeDecision.autoApproved === true,
+    decidedAt: ctx.now()
   });
 
   // ============================================================================
@@ -444,6 +533,42 @@ export async function process(inputs, ctx) {
     }
   });
 
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:atdd-tdd',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.atdd.acceptance-criteria-freeze',
+        props: { raises: ceremonyDecisions.length, feature }
+      },
+      {
+        subject: 'methodology:atdd-tdd',
+        predicate: 'quality-gate-verdict',
+        object: String(criteriaTestabilityGate.passed),
+        props: {
+          gateId: 'methodologies.atdd-tdd.acceptance-criteria-testability',
+          attempts: criteriaTestabilityGate.attempts,
+          escalated: criteriaTestabilityGate.escalated
+        }
+      },
+      {
+        subject: 'methodology:atdd-tdd',
+        predicate: 'tdd-cycle-count',
+        object: String(iteration),
+        props: { maxIterations: iterationCount, acceptanceTestsPassing }
+      },
+      {
+        subject: 'methodology:atdd-tdd',
+        predicate: 'coverage',
+        object: String(coverageResult.coverage),
+        props: { testFramework, unitTestCount: allUnitTests.length }
+      }
+    ]
+  });
+
   return {
     success: acceptanceTestsPassing,
     feature,
@@ -485,6 +610,13 @@ export async function process(inputs, ctx) {
     metadata: {
       processId: 'methodologies/atdd-tdd',
       timestamp: ctx.now()
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: criteriaTestabilityGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

@@ -967,7 +967,7 @@ export const testDataSetupTask = defineTask('test-data-setup', (args, taskCtx) =
 }));
 
 // Phase 5.1: Authentication Tests Implementation
-export const authenticationTestsTask = defineTask('authentication-tests', (args, taskCtx) => ({
+export const authenticationTestsTask = defineTask('e2e-test-suite.authentication-tests', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Authentication Tests Implementation - ${args.projectName}`,
   agent: {
@@ -1159,7 +1159,7 @@ export const dataManagementTestsTask = defineTask('data-management-tests', (args
 }));
 
 // Phase 6: Test Execution
-export const testExecutionTask = defineTask('test-execution', (args, taskCtx) => ({
+export const testExecutionTask = defineTask('e2e-test-suite.test-execution', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Test Suite Execution - ${args.executionType} - ${args.projectName}`,
   agent: {
@@ -1236,7 +1236,7 @@ export const testExecutionTask = defineTask('test-execution', (args, taskCtx) =>
 }));
 
 // Phase 7: Debugging and Fixes
-export const debuggingAndFixesTask = defineTask('debugging-fixes', (args, taskCtx) => ({
+export const debuggingAndFixesTask = defineTask('e2e-test-suite.debugging-fixes', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Test Debugging and Fixes - ${args.projectName}`,
   agent: {
@@ -1320,7 +1320,7 @@ export const debuggingAndFixesTask = defineTask('debugging-fixes', (args, taskCt
 }));
 
 // Phase 8: Stability Improvements
-export const stabilityImprovementsTask = defineTask('stability-improvements', (args, taskCtx) => ({
+export const stabilityImprovementsTask = defineTask('e2e-test-suite.stability-improvements', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Test Stability Improvements - ${args.projectName}`,
   agent: {
@@ -1396,7 +1396,7 @@ export const stabilityImprovementsTask = defineTask('stability-improvements', (a
 }));
 
 // Phase 10: Code Review
-export const codeReviewTask = defineTask('code-review', (args, taskCtx) => ({
+export const codeReviewTask = defineTask('e2e-test-suite.code-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 10: Test Code Review and Refinement - ${args.projectName}`,
   agent: {
@@ -1551,7 +1551,7 @@ export const visualRegressionSetupTask = defineTask('visual-regression-setup', (
 }));
 
 // Phase 12: Documentation Generation
-export const documentationGenerationTask = defineTask('documentation-generation', (args, taskCtx) => ({
+export const documentationGenerationTask = defineTask('e2e-test-suite.documentation-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 12: Test Suite Documentation Generation - ${args.projectName}`,
   agent: {
@@ -1610,7 +1610,7 @@ export const documentationGenerationTask = defineTask('documentation-generation'
 }));
 
 // Phase 13: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('e2e-test-suite.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 13: CI/CD Integration Verification - ${args.projectName}`,
   agent: {
@@ -1674,7 +1674,7 @@ export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx
 }));
 
 // Phase 14: Final Assessment
-export const finalAssessmentTask = defineTask('final-assessment', (args, taskCtx) => ({
+export const finalAssessmentTask = defineTask('e2e-test-suite.final-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 14: Final Assessment and Metrics - ${args.projectName}`,
   agent: {

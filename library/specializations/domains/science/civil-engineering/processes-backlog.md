@@ -285,3 +285,15 @@ This document defines the Phase 2 processes backlog for the Civil Engineering sp
 - Quality assurance checkpoints should be built into each process
 - Documentation requirements per professional engineering standards apply
 - Processes should accommodate varying levels of project complexity
+
+---
+
+## Anchored by the Design-to-Construction Flagship
+
+`design-to-construction-workflow.js` (`specializations/domains/science/civil-engineering/design-to-construction-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Project brief + siting constraints -> concept design and load/seismic analysis -> parallel discipline design (structural, geotechnical, MEP, drainage) with per-element executed capacity checks -> specifications + BIM coordination + code-compliance permit package -> INDEPENDENT adversarial structural peer review (recomputed governing load combinations, file:line citations) plus a constructability/BIM-clash conformance gate -> engineer-of-record stamp -> permit submission to the AHJ -> construction release -> shop-drawing review and fabrication release -> construction QC with inspection hold points and RFI/field-deviation handling -> handover and as-built reconciliation.
+
+It composes the design, review and construction point processes in this directory BY NAME rather than re-implementing them. All five statutory actions are fail-closed policy-gated human approvals; a failed peer-review check blocks the stamp and there is no reduced-scope stamp path.
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

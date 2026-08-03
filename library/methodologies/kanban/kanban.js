@@ -1,8 +1,9 @@
 /**
  * @process methodologies/kanban
  * @description Kanban - Visual flow management with WIP limits and continuous improvement
- * @inputs { projectName: string, workflowStages: array, defaultWipLimits: object, initialBacklog: array, cycles?: number }
- * @outputs { success: boolean, board: object, metrics: object, improvements: array, finalState: object }
+ * @inputs { projectName: string, workflowStages: array, defaultWipLimits: object, initialBacklog: array, cycles?: number, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, board: object, metrics: object, improvements: array, finalState: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract Anyone looking at the board can read the current WIP limit for every stage and see the measured bottleneck that justified the last change to it.
    * @graph
  *   domains: [domain:software-engineering]
  *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:prioritization-frameworks]
@@ -12,6 +13,24 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated Kanban ceremonies. Kanban has exactly one: the retrospective is
+ * the only point where WIP limits and explicit process policies actually
+ * change. The per-cycle checkpoint is a continue-prompt, board initialization
+ * is setup, and replenishment is prioritization — none of those alters the
+ * flow contract, so none is declared here.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.kanban.policy-change',
+    expert: 'delivery-lead',
+    description: 'Change WIP limits or explicit process policies, which alters the whole team flow contract (kanban/kanban.js).',
+  },
+];
 
 /**
  * Kanban Process
@@ -70,8 +89,21 @@ export async function process(inputs, ctx) {
     initialBacklog = [],
     cycles = 5,
     teamCapacity = { developers: 5, reviewers: 2, analysts: 2 },
-    serviceClasses = ['Expedite', 'Standard', 'Fixed Date', 'Intangible']
+    serviceClasses = ['Expedite', 'Standard', 'Fixed Date', 'Intangible'],
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
+
+  // Recall what prior Kanban runs learned about this service's flow.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'Kanban flow management practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per raise of a declared actionId.
+  const ceremonyDecisions = [];
 
   // ============================================================================
   // STEP 1: VISUALIZE WORKFLOW & INITIALIZE BOARD
@@ -214,11 +246,46 @@ export async function process(inputs, ctx) {
     flowCycles,
     board: currentBoard,
     metrics: cumulativeMetrics,
-    wipLimits: defaultWipLimits
+    wipLimits: defaultWipLimits,
+    priorPractice: priorPractice.insights
   });
 
-  // Breakpoint: Review improvements
-  await ctx.breakpoint({
+  // Quality gate: are the proposed policy changes grounded in measured flow?
+  const flowMetricsGate = await adversarialGate(ctx, {
+    gateId: 'methodologies.kanban.flow-metrics-integrity',
+    artifact: {
+      path: 'artifacts/kanban/retrospective.md',
+      description: 'Retrospective proposing WIP-limit and explicit-policy changes, justified by cumulative flow metrics'
+    },
+    critics: [
+      {
+        name: 'flow-metrics-critic',
+        role: 'Flow analyst auditing measurement integrity',
+        focus: 'cycle time, lead time and throughput are computed from real board item timestamps'
+      },
+      {
+        name: 'policy-change-critic',
+        role: 'Delivery lead auditing proposed policy changes',
+        focus: 'each proposed WIP or policy change is justified by a measured bottleneck, not intuition'
+      }
+    ],
+    ironLaw: [
+      'Open artifacts/kanban/retrospective.md, cumulative-flow-diagram.svg and every artifacts/kanban/metrics-cycle-*.json and cite file:line for each metric you accept.',
+      'Recompute avgCycleTime and throughput yourself from the per-item entry/exit timestamps; a figure you cannot reproduce from the raw board data is a high-severity issue.',
+      'A proposed WIP-limit change that does not name the specific stage, the measured queue/bottleneck, and the expected flow effect is an issue.',
+      'An improvement experiment with no falsifiable success measure is an issue — Kanban policy changes are experiments, not opinions.'
+    ],
+    maxFixAttempts: 2,
+    fixer: {},
+    context: {
+      workflowStages,
+      currentWipLimits: defaultWipLimits,
+      cycles
+    }
+  });
+
+  // Ceremony: change the flow contract. Routed to the delivery lead.
+  const policyChangeDecision = await routedBreakpoint(ctx, {
     question: `Retrospective complete. ${retrospectiveResult.experiments.length} improvement experiments proposed. Review metrics and process changes?`,
     title: 'Retrospective & Continuous Improvement',
     context: {
@@ -228,7 +295,28 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/kanban/improvement-experiments.json', format: 'code', language: 'json', label: 'Experiments' },
         { path: 'artifacts/kanban/cumulative-flow-diagram.svg', format: 'image', label: 'CFD' }
       ]
+    },
+    qualityGate: {
+      passed: flowMetricsGate.passed,
+      issues: flowMetricsGate.issues,
+      evidence: flowMetricsGate.evidence,
+      attempts: flowMetricsGate.attempts,
+      escalated: flowMetricsGate.escalated
     }
+  }, {
+    breakpointId: 'methodology-retrofit.kanban.policy-change',
+    expert: 'delivery-lead',
+    tags: ['policy-gated', 'methodology', 'kanban'],
+    strategy: 'single'
+  });
+
+  ceremonyDecisions.push({
+    actionId: 'methodology-retrofit.kanban.policy-change',
+    expert: 'delivery-lead',
+    description: policyGatedActions[0].description,
+    approved: policyChangeDecision.approved === true,
+    autoApproved: policyChangeDecision.autoApproved === true,
+    decidedAt: ctx.now()
   });
 
   // ============================================================================
@@ -259,6 +347,42 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/kanban/cumulative-flow-diagram.svg', format: 'image', label: 'Cumulative Flow' }
       ]
     }
+  });
+
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:kanban',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.kanban.policy-change',
+        props: { raises: ceremonyDecisions.length }
+      },
+      {
+        subject: 'methodology:kanban',
+        predicate: 'quality-gate-verdict',
+        object: String(flowMetricsGate.passed),
+        props: {
+          gateId: 'methodologies.kanban.flow-metrics-integrity',
+          attempts: flowMetricsGate.attempts,
+          escalated: flowMetricsGate.escalated
+        }
+      },
+      {
+        subject: 'methodology:kanban',
+        predicate: 'observed-throughput',
+        object: String(throughput),
+        props: { projectName, cycles, unit: 'items-per-cycle' }
+      },
+      {
+        subject: 'methodology:kanban',
+        predicate: 'avg-cycle-time',
+        object: String(averageCycleTime),
+        props: { averageLeadTime, unit: 'days' }
+      }
+    ]
   });
 
   return {
@@ -295,6 +419,13 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now(),
       teamCapacity,
       serviceClasses
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: flowMetricsGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

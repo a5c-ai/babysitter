@@ -61,7 +61,7 @@ methodologies/
 **Creator**: Basecamp (Ryan Singer)
 **Year**: Modern (2019)
 **Priority**: 🔥 High
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Product Development / Project Management
 
 ### Overview
@@ -583,7 +583,7 @@ Behavior-Driven Development (BDD), also known as Specification by Example, captu
 **Creator**: Eric Evans
 **Year**: Established (2003), still highly relevant
 **Priority**: 🔥 High
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Strategic Design / Tactical Design / Architecture
 
 ### Overview
@@ -844,7 +844,7 @@ Example Mapping is a simple workshop technique for exploring and understanding r
 **Creator**: Kent Beck (TDD), Brian Marick (ATDD concepts)
 **Year**: Established practice (1999-present)
 **Priority**: 🔥 High
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Testing / Development Process
 
 ### Overview
@@ -936,7 +936,7 @@ Test-Driven Development (TDD) and Acceptance Test-Driven Development (ATDD) are 
 **Creator**: Winston W. Royce (1970)
 **Year**: Classic SDLC
 **Priority**: 📋 Classic
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Sequential SDLC
 
 **Implementation Files**:
@@ -1214,7 +1214,7 @@ The Spiral Model is a risk-driven software development process model created by 
 **Creator**: Evolved from waterfall in the 1980s
 **Year**: Classic verification/validation
 **Priority**: 📋 Classic
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Verification & Validation / Testing
 
 ### Overview
@@ -1403,7 +1403,7 @@ Cleanroom Software Engineering is a process intended to produce software with ce
 **Creator**: Adapted from Toyota Production System by David J. Anderson (2007)
 **Year**: Modern flow-based (2007-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Flow Management / Continuous Delivery
 
 ### Overview
@@ -1491,7 +1491,7 @@ Kanban is a visual workflow management method for defining, managing, and improv
 **Creator**: Kent Beck, Ward Cunningham, Ron Jeffries
 **Year**: Established Agile (1996-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Agile Engineering Practices
 
 ### Overview
@@ -1599,7 +1599,7 @@ Extreme Programming (XP) is an agile software development methodology that advoc
 **Creator**: Ken Schwaber and Jeff Sutherland
 **Year**: Dominant Agile framework (1995-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: ✅ Implemented
+**Implementation Status**: ✅ Implemented — batch-5 classic-methodology bar retrofit: routed breakpoints + adversarial gates + kip memory
 **Category**: Agile Sprint-Based Framework
 
 ### Overview
@@ -2439,6 +2439,60 @@ Real-world scenarios showing how to combine methodologies for specific project t
 - Event Storming (domain complexity not going away)
 - Waterfall and V-Model (regulated industries, safety-critical systems)
 - Scrum and Kanban (dominant agile frameworks)
+
+---
+
+## Production Contract
+
+**Directory**: `methodologies/production-contract/`
+**Implementation Status**: ✅ Implemented — [production-contract/](./production-contract/) (`production-contract.js`)
+**Category**: Cross-cutting convention / Verification
+
+A one-line JSDoc convention plus the process that operationalizes it: declare the ONE
+user-visible assertion a run must move, prove it with an EXECUTED verification path, and
+back-fill the `@productionContract` tag into the target process header. Deliberately not
+"the test suite is green" — the assertion is what a user would see. Applies across
+methodologies rather than replacing any of them.
+
+---
+
+## Open Follow-Up: Classic-Methodology Bar Retrofit — Remaining Methodologies
+
+The batch-5 retrofit raised eight classic methodologies to the current library bar
+(routed breakpoints + adversarial gates + kip memory): **Shape Up, Kanban, Extreme
+Programming (`xp-process.js`), Waterfall, V-Model, Scrum, Domain-Driven Design,
+ATDD/TDD**. Their `Implementation Status` lines above are annotated accordingly.
+
+The following classic-methodology directories under `methodologies/` were **NOT** covered
+in that pass and remain at the pre-retrofit bar. Each is an open item — retrofit to the
+same three-part bar, one methodology per item:
+
+- [ ] `bdd-specification-by-example/`
+- [ ] `cleanroom/`
+- [ ] `double-diamond/`
+- [ ] `event-storming/`
+- [ ] `example-mapping/`
+- [ ] `feature-driven-development/`
+- [ ] `hypothesis-driven-development/`
+- [ ] `impact-mapping/`
+- [ ] `jobs-to-be-done/`
+- [ ] `ontology-driven-development/`
+- [ ] `rup/`
+- [ ] `spiral-model/`
+
+Explicitly OUT of scope for this follow-up (not classic methodologies):
+`composition-*/` (cross-methodology compositions, tracked in "Practical Composition
+Examples" above), `production-contract/`, `process-hardening/`, `shared/`, and the
+assimilated-harness directories (`automaker/`, `bmad-method/`, `cc10x/`, `ccpm/`,
+`claudekit/`, `cog-second-brain/`, `everything-claude-code/`, `gastown/`, `gsd/`,
+`maestro/`, `metaswarm/`, `pilot-shell/`, `planning-with-files/`, `rpikit/`, `ruflo/`,
+`spec-kit/`, `superpowers/`).
+
+Secondary, lower-confidence residual: the loose single-file methodology modules at the
+`methodologies/` root (`agile.js`, `tdd.js`, `spec-driven-development.js`,
+`evolutionary.js`, `top-down.js`, `bottom-up.js`, and the pattern modules) were also not
+retrofitted. They were not part of the retrofit design's scope statement, so they are
+recorded here as an observation rather than as committed follow-up items.
 
 ---
 

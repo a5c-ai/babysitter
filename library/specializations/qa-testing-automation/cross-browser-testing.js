@@ -1180,7 +1180,7 @@ export const browserSpecificTestsTask = defineTask('browser-specific-tests', (ar
 }));
 
 // Phase 7: Parallel Execution Configuration
-export const parallelExecutionConfigTask = defineTask('parallel-execution-config', (args, taskCtx) => ({
+export const parallelExecutionConfigTask = defineTask('cross-browser-testing.parallel-execution-config', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Parallel Execution Configuration - ${args.projectName}`,
   agent: {
@@ -1253,7 +1253,7 @@ export const parallelExecutionConfigTask = defineTask('parallel-execution-config
 }));
 
 // Phase 8 & 12: Test Execution (reusable for initial and final)
-export const testExecutionTask = defineTask('test-execution', (args, taskCtx) => ({
+export const testExecutionTask = defineTask('cross-browser-testing.test-execution', (args, taskCtx) => ({
   kind: 'agent',
   title: `Test Execution (${args.executionType}) - ${args.projectName}`,
   agent: {
@@ -1751,7 +1751,7 @@ export const issueDocumentationTask = defineTask('issue-documentation', (args, t
 }));
 
 // Phase 15: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('cross-browser-testing.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 15: CI/CD Integration - ${args.projectName}`,
   agent: {
@@ -1828,7 +1828,7 @@ export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx
 }));
 
 // Phase 16: Reporting and Dashboard Setup
-export const reportingSetupTask = defineTask('reporting-setup', (args, taskCtx) => ({
+export const reportingSetupTask = defineTask('cross-browser-testing.reporting-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 16: Reporting and Dashboard - ${args.projectName}`,
   agent: {
@@ -1896,7 +1896,7 @@ export const reportingSetupTask = defineTask('reporting-setup', (args, taskCtx) 
 }));
 
 // Phase 17: Final Assessment
-export const finalAssessmentTask = defineTask('final-assessment', (args, taskCtx) => ({
+export const finalAssessmentTask = defineTask('cross-browser-testing.final-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 17: Final Assessment - ${args.projectName}`,
   agent: {

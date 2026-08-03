@@ -935,7 +935,7 @@ export const testUtilitiesTask = defineTask('test-utilities', (args, taskCtx) =>
 }));
 
 // Phase 7: Reporting Setup
-export const reportingSetupTask = defineTask('reporting-setup', (args, taskCtx) => ({
+export const reportingSetupTask = defineTask('automation-framework.reporting-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Reporting Setup - ${args.projectName}`,
   agent: {
@@ -998,7 +998,7 @@ export const reportingSetupTask = defineTask('reporting-setup', (args, taskCtx) 
 }));
 
 // Phase 8: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('automation-framework.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: CI/CD Integration - ${args.projectName}`,
   agent: {
@@ -1186,7 +1186,7 @@ export const executeSampleTestsTask = defineTask('execute-sample-tests', (args, 
 }));
 
 // Phase 10: Documentation Generation
-export const documentationGenerationTask = defineTask('documentation-generation', (args, taskCtx) => ({
+export const documentationGenerationTask = defineTask('automation-framework.documentation-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 10: Documentation - ${args.projectName}`,
   agent: {
@@ -1319,7 +1319,7 @@ export const codeQualitySetupTask = defineTask('code-quality-setup', (args, task
 }));
 
 // Phase 12: Parallel Execution Configuration
-export const parallelExecutionConfigTask = defineTask('parallel-execution-config', (args, taskCtx) => ({
+export const parallelExecutionConfigTask = defineTask('automation-framework.parallel-execution-config', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 12: Parallel Execution - ${args.projectName}`,
   agent: {

@@ -10,6 +10,7 @@ Processes for systematic research analysis, standards comparison auditing, and e
 - **novelties-scanner.js** — Novelties Scanner persona point-task: detects, analyzes, and reports on novel innovations, emerging trends, and breakthrough developments.
 - **patentable-novelties.js** — Patentable Novelties persona point-task: extends the novelties scanner with patent-potential assessment and structured invention disclosures.
 - **vendor-researcher.js** — Vendor-researcher persona point-task: discovers candidate vendors, analyses them in parallel against criteria, and produces a comparison and recommendation report.
+- **news-intelligence-pipeline.js** — End-to-end sourcing + intelligence pipeline (folded in from the former sourcing/ specialization): discover -> monitor -> dedupe -> filter signal -> per-portfolio impact assessment -> synthesize -> route alerts -> track follow-through. The former path `specializations/sourcing/news-intelligence-pipeline.js` remains as a header-only `@deprecated` alias that re-exports this file.
 
 ## Usage
 

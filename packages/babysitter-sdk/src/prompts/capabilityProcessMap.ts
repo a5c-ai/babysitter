@@ -60,7 +60,7 @@ export const CAPABILITY_PROCESS_MAP: CapabilityProcessMap = {
   ],
   hasScheduledReportFormat: [
     'processes/shared/reporting/scheduled-report.js',
-    'specializations/sourcing/news-intelligence-pipeline.js',
+    'specializations/research/news-intelligence-pipeline.js',
   ],
   hasLocalDevRelax: [
     'processes/shared/local-dev-workflow.js',

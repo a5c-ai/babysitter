@@ -1,8 +1,9 @@
 /**
  * @process methodologies/scrum
  * @description Scrum - Iterative agile framework with sprints, roles, and ceremonies
- * @inputs { projectName: string, productVision: string, sprintDuration: number, sprintCount: number, teamSize: number, backlogItems?: array }
- * @outputs { success: boolean, productBacklog: object, sprints: array, velocityMetrics: object, retrospectives: array }
+ * @inputs { projectName: string, productVision: string, sprintDuration: number, sprintCount: number, teamSize: number, backlogItems?: array, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, productBacklog: object, sprints: array, velocityMetrics: object, retrospectives: array, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract A stakeholder at the sprint review can see the increment demoed and confirm every item called Done meets the posted Definition of Done.
    * @graph
  *   domains: [domain:software-engineering]
  *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning, skill-area:prioritization-frameworks]
@@ -12,6 +13,27 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated Scrum ceremonies. Each entry is a forward commitment the Product
+ * Owner owns: the sprint commitment made at Sprint Planning, and the release of
+ * the Increment after the Sprint Review.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.scrum.sprint-commitment',
+    expert: 'product-owner',
+    description: 'Commit the sprint backlog at sprint planning — the team forward commitment for the iteration (scrum/scrum.js).',
+  },
+  {
+    actionId: 'methodology-retrofit.scrum.increment-release',
+    expert: 'product-owner',
+    description: 'Release the sprint increment to production/users after the review (scrum/scrum.js).',
+  },
+];
 
 /**
  * Scrum Process
@@ -62,8 +84,22 @@ export async function process(inputs, ctx) {
     backlogItems: predefinedBacklog = null,
     productOwner = 'Product Owner',
     scrumMaster = 'Scrum Master',
-    definitionOfDone = null
+    definitionOfDone = null,
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
+
+  // Recall what prior Scrum runs learned about this team's practice.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'Scrum methodology practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per raise of a declared actionId.
+  const ceremonyDecisions = [];
+  let incrementGate = null;
 
   // ============================================================================
   // INITIAL SETUP: DEFINITION OF DONE
@@ -140,11 +176,12 @@ export async function process(inputs, ctx) {
       previousVelocity: currentVelocity,
       definitionOfDone: definitionOfDoneResult,
       productOwner,
-      scrumMaster
+      scrumMaster,
+      priorPractice: priorPractice.insights
     });
 
-    // Breakpoint: Review Sprint Plan
-    await ctx.breakpoint({
+    // Ceremony: the sprint commitment. Routed to the Product Owner.
+    const sprintCommitmentDecision = await routedBreakpoint(ctx, {
       question: `Review Sprint ${sprintNumber} plan. Sprint Goal: "${sprintPlanningResult.sprintGoal}". ${sprintPlanningResult.selectedItems.length} PBIs selected with ${sprintPlanningResult.totalStoryPoints} story points. Team committed to deliver potentially shippable increment. Approve to start sprint?`,
       title: `Sprint ${sprintNumber} Planning Review`,
       context: {
@@ -154,6 +191,21 @@ export async function process(inputs, ctx) {
           { path: `artifacts/scrum/sprint-${sprintNumber}/sprint-backlog.json`, format: 'code', language: 'json', label: 'Sprint Backlog' }
         ]
       }
+    }, {
+      breakpointId: 'methodology-retrofit.scrum.sprint-commitment',
+      expert: 'product-owner',
+      tags: ['policy-gated', 'methodology', 'scrum'],
+      strategy: 'single'
+    });
+
+    ceremonyDecisions.push({
+      actionId: 'methodology-retrofit.scrum.sprint-commitment',
+      expert: 'product-owner',
+      description: policyGatedActions[0].description,
+      scope: { sprintNumber },
+      approved: sprintCommitmentDecision.approved === true,
+      autoApproved: sprintCommitmentDecision.autoApproved === true,
+      decidedAt: ctx.now()
     });
 
     // ========================================================================
@@ -223,8 +275,44 @@ export async function process(inputs, ctx) {
 
     sprintData.review = sprintReviewResult;
 
-    // Breakpoint: Review Sprint Increment
-    await ctx.breakpoint({
+    // Quality gate: does the Increment actually satisfy the Definition of Done?
+    incrementGate = await adversarialGate(ctx, {
+      gateId: 'methodologies.scrum.increment-dod-conformance',
+      artifact: {
+        path: `artifacts/scrum/sprint-${sprintNumber}/increment.md`,
+        description: `Sprint ${sprintNumber} increment claimed potentially shippable against the Definition of Done`
+      },
+      critics: [
+        {
+          name: 'dod-conformance-critic',
+          role: 'Scrum Master auditing Definition of Done',
+          focus: 'every item claimed Done satisfies every DoD criterion'
+        },
+        {
+          name: 'increment-value-critic',
+          role: 'Product Owner proxy auditing shippability',
+          focus: 'the increment is potentially releasable and the sprint goal was actually met, not partially met'
+        }
+      ],
+      ironLaw: [
+        `Open artifacts/scrum/sprint-${sprintNumber}/increment.md, sprint-review.md and artifacts/scrum/definition-of-done.md and cite file:line for EVERY DoD criterion you mark satisfied.`,
+        'Recompute completedStoryPoints from the sprint backlog items yourself; do not accept the sprintReview report arithmetic. A mismatch is a high-severity issue.',
+        'An item marked Done that cannot be traced to a satisfied DoD criterion is an issue, regardless of what the review narrative says.',
+        'A sprint goal declared met while any committed PBI is incomplete is an issue — Scrum has no partial credit on the goal.'
+      ],
+      maxFixAttempts: 2,
+      fixer: {},
+      context: {
+        sprintNumber,
+        sprintGoal: sprintData.sprintGoal,
+        definitionOfDone: definitionOfDoneResult
+      }
+    });
+
+    sprintData.qualityGate = incrementGate;
+
+    // Ceremony: release the Increment. Routed to the Product Owner.
+    const incrementReleaseDecision = await routedBreakpoint(ctx, {
       question: `Sprint ${sprintNumber} Review: ${sprintReviewResult.completedStoryPoints}/${sprintData.totalStoryPoints} story points completed. Demo increment and gather stakeholder feedback. Product Backlog updated based on learnings. Approve to proceed with retrospective?`,
       title: `Sprint ${sprintNumber} Review`,
       context: {
@@ -234,7 +322,29 @@ export async function process(inputs, ctx) {
           { path: `artifacts/scrum/sprint-${sprintNumber}/increment.md`, format: 'markdown', label: 'Increment' },
           { path: `artifacts/scrum/sprint-${sprintNumber}/burndown.svg`, format: 'image', label: 'Burndown Chart' }
         ]
+      },
+      qualityGate: {
+        passed: incrementGate.passed,
+        issues: incrementGate.issues,
+        evidence: incrementGate.evidence,
+        attempts: incrementGate.attempts,
+        escalated: incrementGate.escalated
       }
+    }, {
+      breakpointId: 'methodology-retrofit.scrum.increment-release',
+      expert: 'product-owner',
+      tags: ['policy-gated', 'methodology', 'scrum'],
+      strategy: 'single'
+    });
+
+    ceremonyDecisions.push({
+      actionId: 'methodology-retrofit.scrum.increment-release',
+      expert: 'product-owner',
+      description: policyGatedActions[1].description,
+      scope: { sprintNumber },
+      approved: incrementReleaseDecision.approved === true,
+      autoApproved: incrementReleaseDecision.autoApproved === true,
+      decidedAt: ctx.now()
     });
 
     // ========================================================================
@@ -303,6 +413,48 @@ export async function process(inputs, ctx) {
     }
   });
 
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:scrum',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.scrum.sprint-commitment',
+        props: { raises: ceremonyDecisions.filter(d => d.actionId === 'methodology-retrofit.scrum.sprint-commitment').length }
+      },
+      {
+        subject: 'methodology:scrum',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.scrum.increment-release',
+        props: { raises: ceremonyDecisions.filter(d => d.actionId === 'methodology-retrofit.scrum.increment-release').length }
+      },
+      {
+        subject: 'methodology:scrum',
+        predicate: 'quality-gate-verdict',
+        object: String(incrementGate === null ? 'not-reached' : incrementGate.passed),
+        props: {
+          gateId: 'methodologies.scrum.increment-dod-conformance',
+          attempts: incrementGate === null ? 0 : incrementGate.attempts,
+          escalated: incrementGate === null ? false : incrementGate.escalated
+        }
+      },
+      {
+        subject: 'methodology:scrum',
+        predicate: 'observed-velocity',
+        object: String(velocityMetrics.averageVelocity),
+        props: { projectName, sprintDuration }
+      },
+      {
+        subject: 'methodology:scrum',
+        predicate: 'sprint-count',
+        object: String(sprintCount),
+        props: { totalCompletedStoryPoints: velocityMetrics.totalCompletedStoryPoints }
+      }
+    ]
+  });
+
   return {
     success: true,
     projectName,
@@ -342,6 +494,13 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now(),
       framework: 'Scrum',
       version: '2020 Scrum Guide'
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: incrementGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

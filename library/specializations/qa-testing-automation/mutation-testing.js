@@ -886,7 +886,7 @@ export const testImprovementExecutionTask = defineTask('test-improvement-executi
 }));
 
 // Task 7: Threshold Configuration
-export const thresholdConfigurationTask = defineTask('threshold-configuration', (args, taskCtx) => ({
+export const thresholdConfigurationTask = defineTask('mutation-testing.threshold-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Configure mutation score thresholds',
   agent: {
@@ -946,7 +946,7 @@ export const thresholdConfigurationTask = defineTask('threshold-configuration', 
 }));
 
 // Task 8: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('mutation-testing.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Integrate mutation testing into CI/CD',
   agent: {

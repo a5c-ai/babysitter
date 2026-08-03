@@ -1935,7 +1935,7 @@ export const contractTestingDocumentationTask = defineTask('contract-testing-doc
 }));
 
 // Phase 16: Final Assessment
-export const finalAssessmentTask = defineTask('final-assessment', (args, taskCtx) => ({
+export const finalAssessmentTask = defineTask('contract-testing.final-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 16: Final Assessment and Metrics`,
   agent: {

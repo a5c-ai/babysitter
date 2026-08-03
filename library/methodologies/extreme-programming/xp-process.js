@@ -1,8 +1,9 @@
 /**
  * @process methodologies/extreme-programming
  * @description Extreme Programming (XP) - Agile engineering practices with frequent releases, TDD, pair programming, and continuous integration
- * @inputs { projectName: string, releaseGoal: string, iterationLength?: number, teamSize?: number, velocity?: number, practices?: array }
- * @outputs { success: boolean, release: object, iterations: array, practices: object, metrics: object, artifacts: object }
+ * @inputs { projectName: string, releaseGoal: string, iterationLength?: number, teamSize?: number, velocity?: number, practices?: array, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, release: object, iterations: array, practices: object, metrics: object, artifacts: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract A customer can run the acceptance test for each released story against the shipped build and watch it pass on the same commit CI reports green for.
    * @graph
  *   domains: [domain:software-engineering]
  *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
@@ -12,6 +13,23 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated XP ceremonies. Under continuous delivery the one irreversible
+ * step is pushing the release out; iteration planning and the mid-point and
+ * retrospective checks are inspection points the team owns, not release
+ * authority, so they stay plain.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.xp.release-to-production',
+    expert: 'tech-lead',
+    description: 'Release under continuous delivery after the acceptance-test gate (extreme-programming/xp-process.js).',
+  },
+];
 
 /**
  * Extreme Programming (XP) Process
@@ -65,13 +83,26 @@ export async function process(inputs, ctx) {
     enablePairProgramming = true,
     enableTDD = true,
     enableCI = true,
-    enableRefactoring = true
+    enableRefactoring = true,
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
 
   // Validate inputs
   if (!projectName || !releaseGoal) {
     throw new Error('projectName and releaseGoal are required');
   }
+
+  // Recall what prior XP releases learned about this team's practice adherence.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'Extreme Programming practice adherence',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per raise of a declared actionId.
+  const ceremonyDecisions = [];
 
   // ============================================================================
   // PHASE 1: RELEASE PLANNING
@@ -325,11 +356,46 @@ export async function process(inputs, ctx) {
     enablePairProgramming,
     enableTDD,
     enableCI,
-    enableRefactoring
+    enableRefactoring,
+    priorPractice: priorPractice.insights
   });
 
-  // Final breakpoint
-  await ctx.breakpoint({
+  // Quality gate: is the release candidate genuinely ready under XP's rules?
+  const releaseReadinessGate = await adversarialGate(ctx, {
+    gateId: 'methodologies.extreme-programming.release-readiness',
+    artifact: {
+      path: 'artifacts/xp/release/release-report.md',
+      description: 'Release candidate report: acceptance test results, CI status, and practice adherence across all iterations'
+    },
+    critics: [
+      {
+        name: 'acceptance-evidence-critic',
+        role: 'Customer-proxy acceptance reviewer',
+        focus: 'every release story has an EXECUTED customer acceptance test with captured output'
+      },
+      {
+        name: 'ci-discipline-critic',
+        role: 'Continuous integration auditor',
+        focus: 'the ten-minute build is genuinely green on the release commit, and CI was not bypassed'
+      }
+    ],
+    ironLaw: [
+      'Quote the raw acceptance-test runner output for each story — a story whose acceptance test you cannot see executed output for is an issue, even if the report says passed.',
+      'Cite the CI build identifier and log excerpt for the release commit. A claim that CI is green without a build reference is an issue.',
+      'A story released without a customer-written acceptance test is an XP violation and a high-severity issue.',
+      'Practice-adherence percentages (pairing, TDD, refactoring) must be recomputed from the per-iteration practice results you open; do not accept practiceMetricsTask summary.'
+    ],
+    maxFixAttempts: 2,
+    fixer: {},
+    context: {
+      releaseGoal,
+      iterationsCompleted: iterations.length,
+      practices
+    }
+  });
+
+  // Ceremony: release to production. Routed to the tech lead.
+  const releaseDecision = await routedBreakpoint(ctx, {
     question: `XP Release "${releaseGoal}" complete! Delivered ${releaseCompleteResult.completedStories} of ${releasePlanResult.userStories.length} stories across ${iterations.length} iterations. Final velocity: ${releaseCompleteResult.finalVelocity}. Practice adherence: ${practiceMetricsResult.overallAdherence}%. Release ready for deployment?`,
     title: 'Release Complete',
     context: {
@@ -339,7 +405,64 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/xp/release/practice-metrics.md', format: 'markdown', label: 'Practice Metrics' },
         { path: 'artifacts/xp/release/velocity-trend.md', format: 'markdown', label: 'Velocity Trend' }
       ]
+    },
+    qualityGate: {
+      passed: releaseReadinessGate.passed,
+      issues: releaseReadinessGate.issues,
+      evidence: releaseReadinessGate.evidence,
+      attempts: releaseReadinessGate.attempts,
+      escalated: releaseReadinessGate.escalated
     }
+  }, {
+    breakpointId: 'methodology-retrofit.xp.release-to-production',
+    expert: 'tech-lead',
+    tags: ['policy-gated', 'methodology', 'extreme-programming'],
+    strategy: 'single'
+  });
+
+  ceremonyDecisions.push({
+    actionId: 'methodology-retrofit.xp.release-to-production',
+    expert: 'tech-lead',
+    description: policyGatedActions[0].description,
+    approved: releaseDecision.approved === true,
+    autoApproved: releaseDecision.autoApproved === true,
+    decidedAt: ctx.now()
+  });
+
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:extreme-programming',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.xp.release-to-production',
+        props: { raises: ceremonyDecisions.length }
+      },
+      {
+        subject: 'methodology:extreme-programming',
+        predicate: 'quality-gate-verdict',
+        object: String(releaseReadinessGate.passed),
+        props: {
+          gateId: 'methodologies.extreme-programming.release-readiness',
+          attempts: releaseReadinessGate.attempts,
+          escalated: releaseReadinessGate.escalated
+        }
+      },
+      {
+        subject: 'methodology:extreme-programming',
+        predicate: 'iteration-count',
+        object: String(iterations.length),
+        props: { projectName, iterationLength, teamSize }
+      },
+      {
+        subject: 'methodology:extreme-programming',
+        predicate: 'practice-adherence',
+        object: String(practiceMetricsResult.overallAdherence),
+        props: { practices, enablePairProgramming, enableTDD, enableCI, enableRefactoring }
+      }
+    ]
   });
 
   return {
@@ -372,6 +495,13 @@ export async function process(inputs, ctx) {
       processId: 'methodologies/extreme-programming',
       practices,
       timestamp: ctx.now()
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: releaseReadinessGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

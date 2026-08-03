@@ -1105,3 +1105,84 @@ Security, Compliance, and Risk Management is a foundational specialization that 
 The specialization emphasizes proactive security measures, defense in depth, and security integration throughout the software development lifecycle. By combining security engineering, compliance management, and risk management practices, organizations can protect their assets, meet regulatory requirements, and build customer trust.
 
 As threats evolve and regulations expand, this specialization will continue to grow in importance, requiring ongoing investment in tools, training, and culture to maintain effective security and compliance programs.
+
+---
+
+## Flagship Workflow: Security Attestation
+
+`security-attestation-workflow.js` is the certification and attestation end-to-end flagship for this specialization (SOC 2 / ISO 27001 shape). It is the security-side counterpart to the `data-privacy-compliance` DSAR flagship, and it anchors the point processes in this directory rather than re-implementing them: every control family names its composed library processes BY NAME.
+
+**Process id:** `specializations/security-compliance/security-attestation-workflow`
+
+### Shape
+
+`P0` kip recall of prior-period findings -> `P1` scope + system-boundary definition (with a policy-gated scope reduction per proposed exclusion) -> `P2` framework control mapping + per-family gap assessment (`ctx.parallel.map`) -> `P3` **scope-integrity adversarial gate** -> `P4` parallel per-control evidence collection fanned out alongside parallel scan-family evidence (`ctx.parallel.all` of two fan-outs) -> `P5` bounded gap-remediation loop -> `P6` **evidence-sufficiency adversarial gate** -> `P7` policy-gated exceptions and residual-risk acceptances -> `P8` attestation package draft + policy-gated management sign-off -> `P9` policy-gated external evidence release and report issuance -> `P10` continuous-monitoring handoff -> `P11` kip assert of the attestation register.
+
+The remediation loop is bounded by `maxRemediationRounds` and always falls through to the evidence-sufficiency gate. There is no control-flow edge from `P5` to `P8` that skips `P6`.
+
+### Inputs
+
+| Input | Required | Notes |
+| --- | --- | --- |
+| `organization` | yes | The entity being attested |
+| `framework` | yes | `soc2-type1` \| `soc2-type2` \| `iso27001` \| `soc2-and-iso27001` |
+| `auditPeriod` | yes | `{ start, end }` ISO dates; period-bound frameworks need the window |
+| `scopeProposal` | yes | `{ systems[], services?, locations?, exclusions? }` with a non-empty `systems` |
+| `controlFamilies` | no | Subset of the 12 families; omitted means ALL families |
+| `scanFamilies` | no | Subset of `sast`/`dast`/`sca`/`container`/`iac`; omitted means all five |
+| `externalAuditor` | conditional | `{ firm, contact }`; required (throws) when `issueExternalReport` is true |
+| `issueExternalReport` | no | Default false; true arms the release gate and the issuance executor |
+| `maxFixAttempts` | no | Critic-gate fixer budget (default 2) |
+| `maxRemediationRounds` | no | Bounded remediation rounds (default 2) |
+| `kipEnabled` / `kipDir` / `kipModel` | no | kip memory under kind `security-attestation` |
+| `artifactsDir` | no | Defaults to `ctx.artifactsDir` |
+
+### Outputs
+
+`success`, `attestationId`, `framework`, `scope`, `controls`, `controlSummary`, `gaps`, `scanEvidence`, `gates`, `exceptions`, `residualRisks`, `attestation`, `externalReport`, `continuousMonitoring`, `autoApprovals`, `kipFactsAsserted`, `artifacts`, `metadata`.
+
+`success` is true only when both gates passed, no control is left `failed` without an approved exception or an accepted residual risk, management sign-off was approved, and — when `issueExternalReport` is set — the report was issued through the approved release gate.
+
+### Policy-gated actions
+
+Each raises a `routedBreakpoint` whose `breakpointId` equals the action id, tagged `policy-gated`.
+
+| Action id | Expert | Auto-approve |
+| --- | --- | --- |
+| `security-attestation.scope-reduction` | `ciso` | never — a rejected reduction leaves the system IN SCOPE |
+| `security-attestation.control-exception` | `compliance-manager` | only for `low` severity (`autoApproveAfterN: 3`); an approved exception with no `expiresAt` throws |
+| `security-attestation.residual-risk-acceptance` | `ciso` | never — accepting risk is a named-officer act |
+| `security-attestation.management-signoff` | `ciso` | never — an attestation is a representation to a third party |
+| `security-attestation.external-evidence-release` | `compliance-manager` | never — detail leaving the organization is irreversible |
+
+The sign-off recorder and the external-report issuer each have exactly one call site, guarded by a strict `approved === true` check. A refused sign-off means nothing is signed and `P9` is never entered.
+
+### Adversarial gates
+
+- **`sa.scope-integrity` (P3)** — boundary-completeness, exclusion-materiality and criteria-coverage critics, run BEFORE any evidence collection so a narrowed boundary cannot be laundered by a clean evidence run. Re-run once when a scope reduction was approved. A failure returns without collecting evidence or drafting anything.
+- **`sa.evidence-sufficiency` (P6)** — the load-bearing element. One critic per attested control family (built dynamically from the selected families) plus an evidence-strength critic and a period-coverage critic. Family critics must INDEPENDENTLY RE-COLLECT a sample of that family's control evidence — re-run the scanner command, open the config, query the system — and cite their own raw output. Reading the collector's evidence file is explicitly not evidence. A control marked satisfied on the strength of a policy document, screenshot, ticket or written assertion is a FAIL, however good the policy is.
+
+Both gates escalate to an owner breakpoint (`<gateId>.gate-escalation`) when the fix budget is exhausted.
+
+### No fallbacks
+
+Unknown framework, control family, scan family, control status, evidence strength or policy action throws. An uncollectable evidence item marks its control `failed` — never assumed-satisfied. A claimed `satisfied` with policy-only evidence is downgraded to `partial` by the orchestrator, and the downgrade is written to the run ledger. There is deliberately no `assumed` or `unknown` control status.
+
+### Composition table
+
+| Control family | Composed processes (BY NAME) |
+| --- | --- |
+| `governance-policy` | `security-policies`, `soc2-compliance`, `iso27001-implementation` |
+| `data-protection` | `data-classification` |
+| `access-control` | `iam-access-control`, `secrets-management` |
+| `cryptography` | `encryption-standards` |
+| `logging-monitoring` | `security-logging-monitoring` |
+| `vulnerability-management` | `vulnerability-management`, `penetration-testing` |
+| `application-security` | `sast-pipeline`, `dast-process`, `sca-dependency-management`, `codebase-security-audit`, `stride-threat-modeling` |
+| `infrastructure-security` | `container-security`, `iac-security-review` |
+| `third-party-risk` | `third-party-risk` |
+| `resilience` | `business-continuity`, `disaster-recovery-testing` |
+| `people-security` | `security-training` |
+| `incident-response` | `incident-response` |
+
+The scan fan-out (`sast`, `dast`, `sca`, `container`, `iac`) composes `sast-pipeline`, `dast-process`, `sca-dependency-management`, `container-security` and `iac-security-review` respectively.

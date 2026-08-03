@@ -778,7 +778,7 @@ export async function process(inputs, ctx) {
 // ============================================================================
 
 // Phase 1: Environment Setup and Validation
-export const environmentSetupTask = defineTask('environment-setup', (args, taskCtx) => ({
+export const environmentSetupTask = defineTask('mobile-testing.environment-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Appium Environment Setup - ${args.appName}`,
   agent: {
@@ -1091,7 +1091,7 @@ export const deviceConfigurationTask = defineTask('device-configuration', (args,
 }));
 
 // Phase 5.1: Authentication Tests
-export const authenticationTestsTask = defineTask('authentication-tests', (args, taskCtx) => ({
+export const authenticationTestsTask = defineTask('mobile-testing.authentication-tests', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Authentication Tests - ${args.appName}`,
   agent: {
@@ -1371,7 +1371,7 @@ export const deviceFeatureTestsTask = defineTask('device-feature-tests', (args, 
 }));
 
 // Phase 6: Test Execution
-export const testExecutionTask = defineTask('test-execution', (args, taskCtx) => ({
+export const testExecutionTask = defineTask('mobile-testing.test-execution', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Test Execution (${args.executionType}) - ${args.appName}`,
   agent: {
@@ -1475,7 +1475,7 @@ export const testExecutionTask = defineTask('test-execution', (args, taskCtx) =>
 }));
 
 // Phase 7: Debugging and Fixes
-export const debuggingAndFixesTask = defineTask('debugging-fixes', (args, taskCtx) => ({
+export const debuggingAndFixesTask = defineTask('mobile-testing.debugging-fixes', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Test Debugging and Fixes - ${args.appName}`,
   agent: {
@@ -1803,7 +1803,7 @@ export const deviceFeatureValidationTask = defineTask('device-feature-validation
 }));
 
 // Phase 11: Stability Improvements
-export const stabilityImprovementsTask = defineTask('stability-improvements', (args, taskCtx) => ({
+export const stabilityImprovementsTask = defineTask('mobile-testing.stability-improvements', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 11: Mobile Test Stability Improvements - ${args.appName}`,
   agent: {
@@ -1880,7 +1880,7 @@ export const stabilityImprovementsTask = defineTask('stability-improvements', (a
 }));
 
 // Phase 14: Code Review
-export const codeReviewTask = defineTask('code-review', (args, taskCtx) => ({
+export const codeReviewTask = defineTask('mobile-testing.code-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 14: Mobile Test Code Review - ${args.appName}`,
   agent: {
@@ -1954,7 +1954,7 @@ export const codeReviewTask = defineTask('code-review', (args, taskCtx) => ({
 }));
 
 // Phase 15: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('mobile-testing.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 15: CI/CD Integration - ${args.appName}`,
   agent: {
@@ -2021,7 +2021,7 @@ export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx
 }));
 
 // Phase 16: Documentation Generation
-export const documentationGenerationTask = defineTask('documentation-generation', (args, taskCtx) => ({
+export const documentationGenerationTask = defineTask('mobile-testing.documentation-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 16: Mobile Test Documentation - ${args.appName}`,
   agent: {
@@ -2079,7 +2079,7 @@ export const documentationGenerationTask = defineTask('documentation-generation'
 }));
 
 // Phase 17: Final Assessment
-export const finalAssessmentTask = defineTask('final-assessment', (args, taskCtx) => ({
+export const finalAssessmentTask = defineTask('mobile-testing.final-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 17: Final Mobile Test Assessment - ${args.appName}`,
   agent: {

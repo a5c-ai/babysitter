@@ -701,7 +701,7 @@ export const integrateCicdTask = defineTask('integrate-cicd', (args, taskCtx) =>
 }));
 
 // Task 5: Setup Monitoring
-export const setupMonitoringTask = defineTask('setup-monitoring', (args, taskCtx) => ({
+export const setupMonitoringTask = defineTask('quality-gates.setup-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Setup quality gate monitoring and reporting',
   agent: {
@@ -957,7 +957,7 @@ export const createDocumentationTask = defineTask('create-documentation', (args,
 }));
 
 // Task 8: Validate Implementation
-export const validateImplementationTask = defineTask('validate-implementation', (args, taskCtx) => ({
+export const validateImplementationTask = defineTask('quality-gates.validate-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Validate quality gate implementation',
   agent: {
@@ -1156,7 +1156,7 @@ export const createRolloutPlanTask = defineTask('create-rollout-plan', (args, ta
 }));
 
 // Task 10: Setup Continuous Improvement
-export const setupContinuousImprovementTask = defineTask('setup-continuous-improvement', (args, taskCtx) => ({
+export const setupContinuousImprovementTask = defineTask('quality-gates.setup-continuous-improvement', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Setup continuous improvement process',
   agent: {

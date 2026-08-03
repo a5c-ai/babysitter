@@ -9,12 +9,15 @@ vendor-researcher, evangelist).
 
 ## Disposition
 
-- `news-intelligence-pipeline.js` — RELOCATED to
-  `specializations/research/news-intelligence-pipeline.js`.
-  A header-only `@deprecated` pointer remains here and re-exports the process, so
+- `news-intelligence-pipeline.js` — this directory now contains ONLY a header-only
+  `@deprecated` alias. The process body lives at
+  `library/specializations/research/news-intelligence-pipeline.js`; the file here is a
+  single `export * from` re-export with no `defineTask` bodies. The old file was not
+  removed and the alias is retained deliberately — it is not scheduled for deletion, so
   existing string-path references keep resolving. The one canonical code reference
   (`packages/babysitter-sdk/src/prompts/capabilityProcessMap.ts`) has been updated to
-  the new path.
+  the new path. Folded in batch-4 (commit `bf012dbb7`); alias retention confirmed
+  2026-08-03.
 
 Do not add new processes here. Add scanning/intelligence pipelines under
 `specializations/research/`.
