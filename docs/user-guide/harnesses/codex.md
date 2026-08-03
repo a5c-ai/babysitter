@@ -39,12 +39,17 @@ codex plugin marketplace add a5c-ai/babysitter-codex
 codex plugin list --marketplace babysitter
 codex plugin add babysitter --marketplace babysitter
 
+# 2a-pre. Prerelease channel (staging / develop) — same per-repo marketplace,
+#         pinned to the channel branch:
+codex plugin marketplace add a5c-ai/babysitter-codex --ref staging
+
 # 2a-alt. From the monorepo with a sparse checkout:
 codex plugin marketplace add a5c-ai/babysitter --ref <released-tag> --sparse .agents/plugins
 ```
 
 > `--marketplace babysitter` is the marketplace **name** declared in the manifest, not the repo name.
-> For the monorepo form, use the released default branch / tag for `--ref` - **never** `--ref staging`. The Codex plugin publishes its own released tag; do not use a `6.0.x-staging.*` build-metadata version.
+> `babysitter-codex` is synced per branch, so `--ref <channel>` on the per-repo form resolves that channel's current plugin. Omitting `--ref` resolves the repo's default branch (`main`) — the released channel.
+> For the monorepo form, use the released default branch / tag for `--ref` - **never** `--ref staging`: that manifest is committed at the main channel's ref, so a prerelease `--ref` still resolves stale released content. The Codex plugin publishes its own released tag; do not use a `6.0.x-staging.*` build-metadata version.
 
 **Alternative (npx installer):**
 

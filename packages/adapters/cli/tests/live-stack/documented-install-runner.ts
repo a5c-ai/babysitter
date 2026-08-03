@@ -13,7 +13,7 @@
  * Documented contracts (see README.md / per-harness READMEs):
  *   claude: `claude plugin marketplace add a5c-ai/babysitter-claude`
  *           `claude plugin install --scope user babysitter@a5c.ai`
- *   codex:  `codex plugin marketplace add a5c-ai/babysitter --ref <channel> --sparse .agents/plugins`
+ *   codex:  `codex plugin marketplace add a5c-ai/babysitter-codex --ref <channel>`
  *           `codex plugin add babysitter --marketplace babysitter`
  */
 
@@ -46,11 +46,12 @@ const DOCUMENTED_INSTALL_SPECS: Readonly<Record<DocumentedInstallHarness, Docume
     marketplaceManifestPath: '.claude-plugin/marketplace.json',
   },
   codex: {
-    // Codex adds the MAIN repo's `.agents/plugins` subdir at the channel ref;
-    // the resolved plugin content lives in babysitter-codex, whose version
-    // manifest is `.codex-plugin/plugin.json` (NOT `.claude-plugin/marketplace.json`,
-    // which does not exist in that repo and 404s). parseManifestPluginVersion
-    // falls back to the top-level `version` for this plugin.json shape.
+    // Codex adds babysitter-codex directly (it ships its own root
+    // `.agents/plugins/marketplace.json`), so the marketplace repo and the repo
+    // holding the version manifest are the same. That manifest is
+    // `.codex-plugin/plugin.json` (NOT `.claude-plugin/marketplace.json`, which
+    // does not exist in that repo and 404s). parseManifestPluginVersion falls
+    // back to the top-level `version` for this plugin.json shape.
     marketplaceRepo: 'a5c-ai/babysitter-codex',
     expectedVersionRef: (channel) => channel,
     marketplaceManifestPath: '.codex-plugin/plugin.json',
@@ -119,8 +120,16 @@ export function buildDocumentedInstallCommands(
   // (the older `plugin install … --source …` subcommand/flag does not exist:
   // `codex plugin --help` lists add/list/marketplace/remove, and `plugin add`
   // takes `PLUGIN@MARKETPLACE` or `PLUGIN --marketplace MARKETPLACE`).
+  //
+  // The marketplace is the PER-REPO one in babysitter-codex (that repo ships its
+  // own root `.agents/plugins/marketplace.json` with `source: {local, ./}`, synced
+  // per branch), pinned to the channel with `--ref` so a prerelease channel does
+  // not resolve the default branch. NOT the monorepo sparse form
+  // (`a5c-ai/babysitter --sparse .agents/plugins`): that manifest is committed at
+  // the MAIN channel's ref/version, so `--ref staging` against it resolves stale
+  // main content — which is why the docs say "never `--ref staging`" for it.
   return [
-    { command: 'codex', args: ['plugin', 'marketplace', 'add', 'a5c-ai/babysitter', '--ref', channel, '--sparse', '.agents/plugins'], ...base },
+    { command: 'codex', args: ['plugin', 'marketplace', 'add', spec.marketplaceRepo, '--ref', channel], ...base },
     { command: 'codex', args: ['plugin', 'add', 'babysitter', '--marketplace', 'babysitter'], ...base },
     { command: 'codex', args: ['plugin', 'list', '--json'], ...base },
   ];
