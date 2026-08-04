@@ -7,16 +7,8 @@
 - 38b4f082b fix(publish): publish trust-core + policy-adapter so @a5c-ai/adapters installs (Tal Muskal, 10 hours ago)
 - fe0e313bd fix(live-stack): documented codex install uses the per-repo marketplace at the channel ref (Tal Muskal, 15 hours ago)
 
-### Documentation
-- 999b074d7 docs: daily changelog update (github-actions[bot], 4 seconds ago)
-## [Unreleased] - 2026-08-04
+# Changelog
 
-### Features
-- 8b3609964 feat(library): batch-5 — 12 work-domain items incl. 5 new flagship domains and the classic-methodology bar retrofit (Tal Muskal, 13 hours ago)
-
-### Bug Fixes
-- 38b4f082b fix(publish): publish trust-core + policy-adapter so @a5c-ai/adapters installs (Tal Muskal, 10 hours ago)
-- fe0e313bd fix(live-stack): documented codex install uses the per-repo marketplace at the channel ref (Tal Muskal, 15 hours ago)
 ## [Unreleased] - 2026-07-15
 
 ### Maintenance
