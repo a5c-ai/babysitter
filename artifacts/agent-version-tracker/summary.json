@@ -236,105 +236,88 @@
       "issue": "https://github.com/a5c-ai/babysitter/issues/1619"
     }
   ],
-  "issuesCreated": [
+  "issuesCreated": [],
+  "issuesExisting": [
     {
-      "id": "amp",
+      "agent": "amp",
       "version": "0.0.1785819659-g30d128",
       "url": "https://github.com/a5c-ai/babysitter/issues/1604"
     },
     {
-      "id": "antigravity",
+      "agent": "antigravity",
       "version": "1.1.10",
       "url": "https://github.com/a5c-ai/babysitter/issues/1605"
     },
     {
-      "id": "claude",
+      "agent": "claude",
       "version": "2.1.221",
       "url": "https://github.com/a5c-ai/babysitter/issues/1606"
     },
     {
-      "id": "claude-agent-sdk",
+      "agent": "claude-agent-sdk",
       "version": "0.3.221",
       "url": "https://github.com/a5c-ai/babysitter/issues/1607"
     },
     {
-      "id": "codex",
+      "agent": "codex",
       "version": "0.146.0",
       "url": "https://github.com/a5c-ai/babysitter/issues/1608"
     },
     {
-      "id": "codex-sdk",
+      "agent": "codex-sdk",
       "version": "7.4.0",
       "url": "https://github.com/a5c-ai/babysitter/issues/1609"
     },
     {
-      "id": "copilot",
+      "agent": "copilot",
       "version": "1.0.78",
       "url": "https://github.com/a5c-ai/babysitter/issues/1610"
     },
     {
-      "id": "cursor",
-      "version": "2026-08-03 changelog",
+      "agent": "cursor",
+      "version": "2026-08-03-changelog",
       "url": "https://github.com/a5c-ai/babysitter/issues/1611"
     },
     {
-      "id": "droid",
+      "agent": "droid",
       "version": "0.187.0",
       "url": "https://github.com/a5c-ai/babysitter/issues/1612"
     },
     {
-      "id": "gemini",
+      "agent": "gemini",
       "version": "0.53.1",
       "url": "https://github.com/a5c-ai/babysitter/issues/1613"
     },
     {
-      "id": "hermes",
+      "agent": "hermes",
       "version": "0.20.0",
       "url": "https://github.com/a5c-ai/babysitter/issues/1614"
     },
     {
-      "id": "omp",
+      "agent": "omp",
       "version": "17.2.7",
       "url": "https://github.com/a5c-ai/babysitter/issues/1615"
     },
     {
-      "id": "openclaw",
+      "agent": "openclaw",
       "version": "2026.7.1-2",
       "url": "https://github.com/a5c-ai/babysitter/issues/1616"
     },
     {
-      "id": "opencode",
+      "agent": "opencode",
       "version": "1.18.12",
       "url": "https://github.com/a5c-ai/babysitter/issues/1617"
     },
     {
-      "id": "pi",
+      "agent": "pi",
       "version": "0.83.0",
       "url": "https://github.com/a5c-ai/babysitter/issues/1618"
     },
     {
-      "id": "qwen",
+      "agent": "qwen",
       "version": "0.21.5",
       "url": "https://github.com/a5c-ai/babysitter/issues/1619"
     }
-  ],
-  "issuesExisting": [
-    { "agent": "amp", "version": "0.0.1785819659-g30d128", "url": "https://github.com/a5c-ai/babysitter/issues/1604" },
-    { "agent": "antigravity", "version": "1.1.10", "url": "https://github.com/a5c-ai/babysitter/issues/1605" },
-    { "agent": "claude", "version": "2.1.221", "url": "https://github.com/a5c-ai/babysitter/issues/1606" },
-    { "agent": "claude-agent-sdk", "version": "0.3.221", "url": "https://github.com/a5c-ai/babysitter/issues/1607" },
-    { "agent": "codex", "version": "0.146.0", "url": "https://github.com/a5c-ai/babysitter/issues/1608" },
-    { "agent": "codex-sdk", "version": "7.4.0", "url": "https://github.com/a5c-ai/babysitter/issues/1609" },
-    { "agent": "copilot", "version": "1.0.78", "url": "https://github.com/a5c-ai/babysitter/issues/1610" },
-    { "agent": "cursor", "version": "2026-08-03-changelog", "url": "https://github.com/a5c-ai/babysitter/issues/1611" },
-    { "agent": "droid", "version": "0.187.0", "url": "https://github.com/a5c-ai/babysitter/issues/1612" },
-    { "agent": "gemini", "version": "0.53.1", "url": "https://github.com/a5c-ai/babysitter/issues/1613" },
-    { "agent": "hermes", "version": "0.20.0", "url": "https://github.com/a5c-ai/babysitter/issues/1614" },
-    { "agent": "omp", "version": "17.2.7", "url": "https://github.com/a5c-ai/babysitter/issues/1615" },
-    { "agent": "openclaw", "version": "2026.7.1-2", "url": "https://github.com/a5c-ai/babysitter/issues/1616" },
-    { "agent": "opencode", "version": "1.18.12", "url": "https://github.com/a5c-ai/babysitter/issues/1617" },
-    { "agent": "pi", "version": "0.83.0", "url": "https://github.com/a5c-ai/babysitter/issues/1618" },
-    { "agent": "qwen", "version": "0.21.5", "url": "https://github.com/a5c-ai/babysitter/issues/1619" }
   ],
   "changedFiles": [
     "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-08-04.yaml"
