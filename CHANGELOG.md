@@ -1,3 +1,5 @@
+# Changelog
+
 ## [Unreleased] - 2026-08-04
 
 ### Features
@@ -6,8 +8,6 @@
 ### Bug Fixes
 - 38b4f082b fix(publish): publish trust-core + policy-adapter so @a5c-ai/adapters installs (Tal Muskal, 10 hours ago)
 - fe0e313bd fix(live-stack): documented codex install uses the per-repo marketplace at the channel ref (Tal Muskal, 15 hours ago)
-
-# Changelog
 
 ## [Unreleased] - 2026-07-15
 
