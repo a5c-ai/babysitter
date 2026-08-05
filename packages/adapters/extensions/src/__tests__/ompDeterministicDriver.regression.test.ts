@@ -202,6 +202,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     let sessionStateRunDir: string | undefined;
     let sessionStateCalls = 0;
     let runIterateSignal: AbortSignal | undefined;
+    let runIterateCwd: string | undefined;
     const projectionWrites: unknown[][] = [];
     const uiStatusWrites: unknown[][] = [];
     const uiWidgetWrites: unknown[][] = [];
@@ -225,7 +226,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         command: { handler: (args: unknown, ctx: Record<string, unknown>) => unknown },
       ) => { commands.set(name, command.handler); },
       sendUserMessage: (message: string) => { sentMessages.push(message); },
-      exec: async (_command: string, args: string[], options?: { signal?: AbortSignal }) => {
+      exec: async (_command: string, args: string[], options?: { cwd?: string; signal?: AbortSignal }) => {
         if (args[0] === 'session:state') {
           sessionStateCalls += 1;
           if (sessionStateFailure) throw sessionStateFailure;
@@ -249,6 +250,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         runIterateSignal = options?.signal;
+        runIterateCwd = options?.cwd;
         return {
           code: 0,
           stdout: JSON.stringify({ status: 'waiting', nextActions: [] }),
@@ -307,6 +309,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       driveAbort.signal,
       undefined,
       {
+        cwd: '/workspace-drive',
         ui: {
           setStatus: (...args: unknown[]) => { uiStatusWrites.push(args); },
           setWidget: (...args: unknown[]) => { uiWidgetWrites.push(args); },
@@ -316,6 +319,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(driveResult).toMatchObject({ details: { state: 'waiting' } });
     expect(driveResult).not.toHaveProperty('isError', true);
     expect(runIterateSignal).toBe(driveAbort.signal);
+    expect(process.cwd()).not.toBe('/workspace-drive');
+    expect(runIterateCwd).toBe('/workspace-drive');
     expect(uiStatusWrites).toHaveLength(1);
     expect(uiWidgetWrites).toHaveLength(1);
     expect(projectionWrites).toHaveLength(1);
@@ -1162,21 +1167,25 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
 
   it('emits ordered sanitized semantic progress after durable shell transitions', async () => {
     const runDir = await tempRun('omp-progress-');
+    const workspaceCwd = await tempRun('omp-progress-workspace-');
     const effect = action('shell');
     const progress: Array<{ stage: string; sequence: number; message: string }> = [];
     let iterations = 0;
     const driver = new OmpDeterministicDriver({
       cwd: runDir,
-      executeShell: async () => ({
-        exitCode: 0,
-        stdout: '',
-        stderr: '',
-        timedOut: false,
-        stdoutTruncated: false,
-        stderrTruncated: false,
-        startedAt: '2026-07-24T00:00:00.000Z',
-        finishedAt: '2026-07-24T00:00:01.000Z',
-      }),
+      executeShell: async (_action, cwd) => {
+        expect(cwd).toBe(workspaceCwd);
+        return {
+          exitCode: 0,
+          stdout: '',
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-07-24T00:00:00.000Z',
+          finishedAt: '2026-07-24T00:00:01.000Z',
+        };
+      },
       onProgress: (snapshot) => {
         progress.push(snapshot);
       },
@@ -1192,6 +1201,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         return { code: 0, stdout: 'token=top-secret command="rm -rf /"', stderr: '' };
       },
     });
+    driver.setWorkspaceCwd(workspaceCwd);
 
     await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
     const stages = progress.map((snapshot) => snapshot.stage);

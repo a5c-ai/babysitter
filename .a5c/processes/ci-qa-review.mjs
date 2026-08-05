@@ -11,7 +11,7 @@ export async function process(inputs, ctx) {
   const pr = await ctx.task(readPrTask, { prNumber: inputs.prNumber });
   const guide = await ctx.task(readQaGuideTask, {});
   const matrix = await ctx.task(selectMatrixTask, { pr, guide, instructions: inputs.instructions });
-  const dispatch = await ctx.task(dispatchLiveStackTask, { branch: inputs.branch, matrix });
+  const dispatch = await ctx.task(dispatchLiveStackTask, { prNumber: inputs.prNumber, branch: inputs.branch, matrix });
 
   if (!dispatch.runId) {
     await ctx.task(reportBlockedTask, { prNumber: inputs.prNumber, reason: dispatch.reason });
@@ -71,11 +71,13 @@ ${args.instructions ? `Custom instructions: ${args.instructions}` : ''}
 
 Choose a focused set of test combinations — not the full cross-product, but enough to cover the affected paths.
 The JSON format is: [{"agent":"...","model":"...","mode":"...","install":"...","live":true,"process_mode":"..."}]
-- agent: codex, claude, pi, gemini, copilot, hermes
-- model: foundry-gpt55, google-gemini31, anthropic-claude-sonnet
-- mode: interactive, non-interactive, bridged-interactive, bridged-hooks
+- agent: codex, claude, pi, gemini, copilot, hermes, omp
+- model: foundry-gpt55, google-gemini31, google-gemini31pro, anthropic-sonnet46
+- mode: ni, interactive, bridged-interactive, bridged-hooks
 - install: vanilla, bp
 - process_mode: predefined, create
+
+OMP requires Bun at runtime and supports ni or interactive mode. Do not select bridged-interactive or bridged-hooks for OMP because its cataloged bridge capability is false.
 
 Return { matrix: <JSON array>, reasoning: string }.`,
     },
@@ -88,8 +90,8 @@ const dispatchLiveStackTask = defineTask('dispatch-live-stack', async (args, ctx
     title: 'Dispatch live-stack workflow',
     labels: ['qa', 'dispatch'],
     io: {
-      instruction: `Dispatch the live-stack workflow with the selected matrix.
-Run: gh workflow run live-stack.yml --ref ${args.branch || 'staging'} -f matrix='${JSON.stringify(args.matrix)}'
+      instruction: `Dispatch the live-stack workflow definition from staging and make it check out the exact PR mergeable head ref.
+Run: gh workflow run live-stack.yml --ref staging -f ref='${args.prNumber ? `refs/pull/${args.prNumber}/head` : (args.branch || 'staging')}' -f matrix='${JSON.stringify(args.matrix)}'
 Then get the run ID: gh run list --workflow=live-stack.yml --limit=1 --json databaseId --jq '.[0].databaseId'
 Return { runId: number | null, reason: string | null }.`,
     },

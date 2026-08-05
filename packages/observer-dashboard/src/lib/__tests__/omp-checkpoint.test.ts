@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
@@ -146,6 +147,7 @@ describe("OMP execution checkpoint parsing", () => {
 
   it("distinguishes durable uncommitted output while canonical journal resolution wins", async () => {
     const runDir = await createRun();
+    const output = { approved: true };
     await writeJson(path.join(runDir, "tasks/effect-1/execution.json"), {
       schemaVersion,
       effectId: "effect-1",
@@ -154,12 +156,18 @@ describe("OMP execution checkpoint parsing", () => {
       state: "completed",
       attempt: 1,
       outputRef: "tasks/effect-1/output.json",
+      outputSha256: createHash("sha256").update(JSON.stringify(output)).digest("hex"),
     });
-    await writeJson(path.join(runDir, "tasks/effect-1/output.json"), { approved: true });
+    await writeJson(path.join(runDir, "tasks/effect-1/output.json"), output);
 
     await expect(parseBabysitterCheckpoint(runDir, task())).resolves.toEqual({
       state: "durable-output-uncommitted",
       attempt: 1,
+    });
+    await writeJson(path.join(runDir, "tasks/effect-1/output.json"), { approved: false });
+    await expect(parseBabysitterCheckpoint(runDir, task())).resolves.toEqual({
+      state: "failed/attention",
+      attention: "Durable output checksum mismatch",
     });
     await fs.writeFile(path.join(runDir, "tasks/effect-1/execution.json"), "not-json");
     await expect(parseBabysitterCheckpoint(runDir, task("resolved"))).resolves.toEqual({ state: "committed" });

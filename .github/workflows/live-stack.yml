@@ -340,6 +340,10 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Setup Bun for OMP
+        if: matrix.scenario.agent == 'omp'
+        uses: oven-sh/setup-bun@v2
+
       - name: Setup Python (for pip-based agents like hermes)
         uses: actions/setup-python@v5
         with:

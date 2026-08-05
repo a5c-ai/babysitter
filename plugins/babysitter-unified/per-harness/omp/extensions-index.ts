@@ -215,7 +215,7 @@ export default function activate(pi: ExtensionAPI): void {
     cwd: process.cwd(),
     runCli: async (args, timeoutMs, signal) => {
       const result = await pi.exec("babysitter", args, {
-        cwd: process.cwd(),
+        cwd: activeContext?.cwd ?? process.cwd(),
         timeout: timeoutMs ?? 120_000,
         signal,
       });
@@ -305,7 +305,9 @@ export default function activate(pi: ExtensionAPI): void {
     description: "Explicitly supersede a failed, aborted, or cancelled retained owner attempt. The prior owner becomes stale and cannot complete the new attempt.",
     parameters: agentRetryParameters,
     approval: "exec",
-    async execute(_toolCallId, params) {
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      activeContext = ctx;
+      driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
       const operationId = projectionOwner?.operationId;
       try {
         const authorization = await driver.withProgressOperation(
@@ -366,6 +368,7 @@ export default function activate(pi: ExtensionAPI): void {
     approval: "exec",
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
       activeContext = ctx;
+      driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
       latestProgress = undefined;
       pendingProjectionProgress = undefined;
       const operationId = `drive:${projectionGeneration}:${++projectionOperationSequence}`;
@@ -545,6 +548,7 @@ export default function activate(pi: ExtensionAPI): void {
 
   const syncSessionEnvironment = (ctx: ExtensionContext): string | undefined => {
     activeContext = ctx;
+    driver.setWorkspaceCwd(ctx.cwd);
     const sessionId = ctx.sessionManager.getSessionId();
     process.env.OMP_PLUGIN_ROOT = PLUGIN_ROOT;
     if (!sessionId) {

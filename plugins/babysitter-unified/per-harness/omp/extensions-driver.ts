@@ -239,11 +239,17 @@ export class OmpDeterministicDriver {
   private readonly progressSignatures = new Map<string, string>();
   private readonly progressOperation = new AsyncLocalStorage<string>();
   private readonly effectLocks = new Map<string, Promise<void>>();
+  private workspaceCwd: string;
 
   constructor(private readonly dependencies: DriverDependencies) {
+    this.workspaceCwd = path.resolve(dependencies.cwd);
     this.executeShell = dependencies.executeShell ?? executeBoundedShell;
     this.now = dependencies.now ?? (() => new Date());
     this.randomId = dependencies.randomId ?? randomUUID;
+  }
+
+  setWorkspaceCwd(cwd: string): void {
+    this.workspaceCwd = path.resolve(cwd);
   }
 
   onProgress(listener: DriverProgressListener): () => void {
@@ -731,7 +737,7 @@ export class OmpDeterministicDriver {
     }
 
     await this.emitProgress(runDir, "shell_start", "running", "Starting bounded shell effect", action);
-    const shellResult = await this.executeShell(action, this.dependencies.cwd, signal);
+    const shellResult = await this.executeShell(action, this.workspaceCwd, signal);
     const stdoutPath = effectArtifactPath(runDir, action.effectId, "stdout.log");
     const stderrPath = effectArtifactPath(runDir, action.effectId, "stderr.log");
     await writeTextAtomic(stdoutPath, shellResult.stdout);
@@ -1456,6 +1462,9 @@ function classifyOwnerOutcome(
   const result = results.length === 1 ? readObject(results[0]) : null;
   const reason = `${typeof result?.error === "string" ? result.error : ""} ${typeof object?.error === "string" ? object.error : ""}`.toLowerCase();
   if (result?.cancelled === true || reason.includes("cancel")) return "cancelled";
+  if (reason.includes("parent wait interrupted") || reason.includes("lost result")) {
+    return "awaiting_late_owner";
+  }
   if (result?.aborted === true || reason.includes("abort") || reason.includes("interrupt")) return "aborted";
   if (result && (
     typeof result.error === "string" ||

@@ -1,4 +1,5 @@
 import { promises as fs } from "fs";
+import { createHash } from "crypto";
 import path from "path";
 import {
   getDriverLiveness,
@@ -134,8 +135,23 @@ export async function parseBabysitterCheckpoint(
     : undefined;
   if (checkpoint.state === "completed") {
     const expectedOutputRef = `tasks/${task.effectId}/output.json`;
-    if (checkpoint.outputRef !== expectedOutputRef || !(await fileExists(path.join(runPath, expectedOutputRef)))) {
+    const outputPath = path.join(runPath, expectedOutputRef);
+    if (checkpoint.outputRef !== expectedOutputRef || !(await fileExists(outputPath))) {
       return checkpointAttention("Durable output checkpoint is incomplete");
+    }
+    if (checkpoint.outputSha256 !== undefined) {
+      if (typeof checkpoint.outputSha256 !== "string" || !/^[a-f0-9]{64}$/.test(checkpoint.outputSha256)) {
+        return checkpointAttention("Durable output checksum is malformed");
+      }
+      try {
+        const outputBytes = await fs.readFile(outputPath);
+        const actualSha256 = createHash("sha256").update(outputBytes).digest("hex");
+        if (actualSha256 !== checkpoint.outputSha256) {
+          return checkpointAttention("Durable output checksum mismatch");
+        }
+      } catch {
+        return checkpointAttention("Durable output checkpoint is incomplete");
+      }
     }
     return { state: "durable-output-uncommitted", ...(attempt ? { attempt } : {}) };
   }
