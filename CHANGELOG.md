@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] - 2026-08-05
+
+### Bug Fixes
+
+- f37319247 fix(live-stack): resolve adapters/adapters-hooks bin collision in published install (Tal Muskal, 20 hours ago)
+
+### Documentation
+
+- 8ed596197 docs: daily changelog update (github-actions[bot], 30 seconds ago)
+
 ## [Unreleased] - 2026-07-15
 
 ### Maintenance
