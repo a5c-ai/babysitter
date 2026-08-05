@@ -730,6 +730,50 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(fs.readFile(path.join(runDir, outputRef), 'utf8')).resolves.toContain('stdout-only-result');
   });
 
+  it('falls back to stdout when a distinct declared shell output path is absent', async () => {
+    const runDir = await tempRun('omp-shell-absent-command-output-');
+    const configuredOutputRef = 'command-output/stdout-only.json';
+    const effect = action('shell', {
+      shell: { command: 'stdout-only-command', outputPath: configuredOutputRef },
+      io: { outputJsonPath: configuredOutputRef },
+    });
+    let iterations = 0;
+    const postedValues: unknown[] = [];
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode: 0,
+        stdout: 'stdout-only-result',
+        stderr: '',
+        timedOut: false,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-05T00:00:00.000Z',
+        finishedAt: '2026-08-05T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return { code: 0, stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }), stderr: '' };
+        }
+        if (args[0] === 'task:show') {
+          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+        }
+        const valuePath = args[args.indexOf('--value') + 1];
+        const value = JSON.parse(await fs.readFile(valuePath, 'utf8'));
+        postedValues.push(value);
+        await recordCommittedResult(runDir, effect, value);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(fs.access(path.join(runDir, configuredOutputRef))).rejects.toMatchObject({ code: 'ENOENT' });
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+    expect(postedValues).toEqual(['stdout-only-result']);
+    await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8'))
+      .resolves.toContain('stdout-only-result');
+  });
+
   it('posts a matching orphaned result artifact when the journal still owns a requested effect', async () => {
     const runDir = await tempRun('omp-shell-orphaned-result-');
     const effect = action('shell');

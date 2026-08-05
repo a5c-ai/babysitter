@@ -1562,7 +1562,13 @@ async function shellResultValue(
     if (typeof io?.outputJsonPath === "string") {
       const configuredOutputPath = resolveRunRelative(runDir, io.outputJsonPath);
       if (path.resolve(configuredOutputPath) !== path.resolve(driverOutputPath)) {
-        const bytes = await fs.readFile(configuredOutputPath);
+        let bytes: Buffer;
+        try {
+          bytes = await fs.readFile(configuredOutputPath);
+        } catch (error) {
+          if (isNotFound(error)) return result.stdout;
+          throw error;
+        }
         if (bytes.length > MAX_CAPTURE_BYTES) {
           throw new DriverError(`Shell output JSON for effect ${action.effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, action.effectId);
         }
