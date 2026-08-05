@@ -1,8 +1,10 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { isDeepStrictEqual } from "node:util";
+import { fromJSONSchema } from "zod";
 
 export const DRIVER_SCHEMA_VERSION = "2026.07.omp-driver-v1";
 export const DEFAULT_SHELL_TIMEOUT_MS = 120_000;
@@ -48,12 +50,58 @@ interface ShellExecutionResult {
   finishedAt: string;
 }
 
+export type DriverProgressStage =
+  | "iteration"
+  | "discovery"
+  | "recovery"
+  | "shell_start"
+  | "shell_finish"
+  | "post"
+  | "agent_preparation"
+  | "agent_claim"
+  | "agent_completion"
+  | "interaction"
+  | "waiting"
+  | "retry_authorized"
+  | "failure"
+  | "attention";
+
+export type DriverProgressState =
+  | "running"
+  | "waiting"
+  | "completed"
+  | "failed"
+  | "aborted"
+  | "cancelled"
+  | "awaiting_late_owner"
+  | "operator_attention";
+
+export interface DriverProgress {
+  schemaVersion: typeof DRIVER_SCHEMA_VERSION;
+  key: string;
+  sequence: number;
+  runId: string;
+  runDir: string;
+  operationId?: string;
+  effectId?: string;
+  invocationKey?: string;
+  kind?: string;
+  stage: DriverProgressStage;
+  state: DriverProgressState;
+  message: string;
+  observedAt: string;
+}
+
+export type DriverProgressListener = (progress: DriverProgress) => void | Promise<void>;
+
 interface DriverDependencies {
   cwd: string;
-  runCli(args: string[], timeoutMs?: number): Promise<CliResult>;
-  executeShell?: (action: EffectAction, cwd: string) => Promise<ShellExecutionResult>;
+  runCli(args: string[], timeoutMs?: number, signal?: AbortSignal): Promise<CliResult>;
+  executeShell?: (action: EffectAction, cwd: string, signal?: AbortSignal) => Promise<ShellExecutionResult>;
   now?: () => Date;
   randomId?: () => string;
+  onProgress?: DriverProgressListener;
+  onProgressError?: (error: unknown, progress: DriverProgress) => void | Promise<void>;
 }
 
 interface ExecutionCheckpoint {
@@ -61,6 +109,7 @@ interface ExecutionCheckpoint {
   effectId: string;
   invocationKey: string;
   kind: "shell" | "agent";
+  effectKind?: string;
   state: "in_progress" | "completed";
   startedAt: string;
   finishedAt?: string;
@@ -73,6 +122,22 @@ interface ExecutionCheckpoint {
   dispatchToken?: string;
   requestedModel?: string;
   outputSchema?: JsonObject;
+  taskEnvelopeSha256?: string;
+  bridgeEnvelopeSha256?: string;
+  attempt?: number;
+  attemptState?:
+    | "prepared"
+    | "claimed"
+    | "failed"
+    | "aborted"
+    | "cancelled"
+    | "awaiting_late_owner"
+    | "retry_authorized"
+    | "completed";
+  lastOwnerOutcome?: "failed" | "aborted" | "cancelled";
+  attemptUpdatedAt?: string;
+  retryAuthorizedAt?: string;
+  retryReason?: string;
 }
 
 interface AgentOwner {
@@ -81,8 +146,11 @@ interface AgentOwner {
   invocationKey: string;
   ownerName: string;
   dispatchToken: string;
+  attempt: number;
   toolCallId: string;
   claimedAt: string;
+  /** Host-issued opaque subagent reference. Never contains transcript content. */
+  agentRef?: `agent://${string}`;
 }
 
 interface AgentBridgeDescriptor {
@@ -91,6 +159,8 @@ interface AgentBridgeDescriptor {
   invocationKey: string;
   ownerName: string;
   dispatchToken: string;
+  bridgeEnvelopeSha256?: string;
+  attempt?: number;
   model?: string;
 }
 
@@ -140,6 +210,22 @@ export interface AgentOwnerCompletionInput extends AgentBridgeDescriptor {
   value: unknown;
 }
 
+export interface AgentRetryInput extends AgentBridgeDescriptor {
+  reason: string;
+}
+
+export interface AgentCancelInput extends AgentBridgeDescriptor {
+  reason: string;
+}
+
+export interface AgentAttemptTransition {
+  handled: boolean;
+  dispatch?: Extract<DriverResult, { state: "agent" }>;
+  reason?: string;
+}
+
+export type AgentRetryAuthorization = AgentAttemptTransition;
+
 class DriverError extends Error {
   constructor(message: string, readonly effectId?: string) {
     super(message);
@@ -148,61 +234,115 @@ class DriverError extends Error {
 }
 
 export class OmpDeterministicDriver {
-  private readonly executeShell: (action: EffectAction, cwd: string) => Promise<ShellExecutionResult>;
+  private readonly executeShell: (action: EffectAction, cwd: string, signal?: AbortSignal) => Promise<ShellExecutionResult>;
   private readonly now: () => Date;
   private readonly randomId: () => string;
+  private readonly progressListeners = new Set<DriverProgressListener>();
+  private readonly progressSequences = new Map<string, number>();
+  private readonly progressSignatures = new Map<string, string>();
+  private readonly progressOperation = new AsyncLocalStorage<string>();
+  private readonly effectLocks = new Map<string, Promise<void>>();
+  private workspaceCwd: string;
 
   constructor(private readonly dependencies: DriverDependencies) {
+    this.workspaceCwd = path.resolve(dependencies.cwd);
     this.executeShell = dependencies.executeShell ?? executeBoundedShell;
     this.now = dependencies.now ?? (() => new Date());
     this.randomId = dependencies.randomId ?? randomUUID;
   }
 
-  async drive(runDirInput: string): Promise<DriverResult> {
+  setWorkspaceCwd(cwd: string): void {
+    this.workspaceCwd = path.resolve(cwd);
+  }
+
+  onProgress(listener: DriverProgressListener): () => void {
+    this.progressListeners.add(listener);
+    return () => this.progressListeners.delete(listener);
+  }
+
+  async withProgressOperation<T>(operationId: string | undefined, operation: () => Promise<T>): Promise<T> {
+    if (!operationId) return await operation();
+    return await this.progressOperation.run(operationId, operation);
+  }
+
+  async drive(runDirInput: string, signal?: AbortSignal, operationId?: string): Promise<DriverResult> {
+    return await this.withProgressOperation(operationId, () => this.driveScoped(runDirInput, signal));
+  }
+
+  private async driveScoped(runDirInput: string, signal?: AbortSignal): Promise<DriverResult> {
     const runDir = path.resolve(runDirInput);
-    for (let step = 0; step < MAX_DRIVER_STEPS; step += 1) {
-      const iteration = await this.runIteration(runDir);
-      if (iteration.status === "completed") {
-        return { state: "completed", completionProof: iteration.completionProof };
-      }
-      if (iteration.status === "halted" || iteration.status === "failed") {
-        return {
-          state: "operator_attention",
-          reason: `Babysitter iteration stopped with status ${iteration.status}${iteration.reason ? `: ${iteration.reason}` : ""}`,
-        };
-      }
-
-      const actions = iteration.nextActions ?? [];
-      if (actions.length === 0) {
-        return { state: "waiting", reason: iteration.reason };
-      }
-
-      let progressed = false;
-      for (const action of actions) {
-        if (action.kind === "shell") {
-          await this.resolveShellEffect(runDir, action);
-          progressed = true;
-          continue;
+    try {
+      for (let step = 0; step < MAX_DRIVER_STEPS; step += 1) {
+        signal?.throwIfAborted();
+        const iteration = await this.runIteration(runDir, signal);
+        await this.emitProgress(runDir, "iteration", "running", `Iteration ${step + 1} observed ${iteration.status}`);
+        if (iteration.status === "completed") {
+          await this.emitProgress(runDir, "iteration", "completed", "Run completed");
+          return { state: "completed", completionProof: iteration.completionProof };
         }
-        if (action.kind === "agent" || action.kind === "skill") {
-          const dispatch = await this.prepareAgentEffect(runDir, action);
-          if (dispatch) return dispatch;
-          progressed = true;
-          continue;
+        if (iteration.status === "halted" || iteration.status === "failed") {
+          const reason = `Babysitter iteration stopped with status ${iteration.status}${iteration.reason ? `: ${iteration.reason}` : ""}`;
+          await this.emitProgress(runDir, "attention", "operator_attention", reason);
+          return { state: "operator_attention", reason };
         }
-        return { state: "interaction", effect: action };
+
+        const actions = iteration.nextActions ?? [];
+        await this.emitProgress(
+          runDir,
+          "discovery",
+          actions.length > 0 ? "running" : "waiting",
+          actions.length > 0 ? `Discovered ${actions.length} durable action${actions.length === 1 ? "" : "s"}` : "No runnable action discovered",
+        );
+        if (actions.length === 0) {
+          await this.emitProgress(runDir, "waiting", "waiting", iteration.reason ?? "Waiting for Babysitter state to advance");
+          return { state: "waiting", reason: iteration.reason };
+        }
+
+        let progressed = false;
+        for (const action of actions) {
+          signal?.throwIfAborted();
+          if (action.kind === "shell") {
+            await this.resolveShellEffect(runDir, action, signal);
+            progressed = true;
+            continue;
+          }
+          if (action.kind === "agent" || action.kind === "skill") {
+            const dispatch = await this.prepareAgentEffect(runDir, action, signal);
+            if (dispatch) return dispatch;
+            progressed = true;
+            continue;
+          }
+          await this.emitProgress(runDir, "interaction", "waiting", `Interaction required for ${action.kind}`, action);
+          return { state: "interaction", effect: action };
+        }
+        if (!progressed) {
+          await this.emitProgress(runDir, "waiting", "waiting", iteration.reason ?? "Waiting for Babysitter state to advance");
+          return { state: "waiting", reason: iteration.reason };
+        }
       }
-      if (!progressed) return { state: "waiting", reason: iteration.reason };
+      const reason = `Deterministic driver exceeded its ${MAX_DRIVER_STEPS}-step safety bound`;
+      await this.emitProgress(runDir, "attention", "operator_attention", reason);
+      return { state: "operator_attention", reason };
+    } catch (error) {
+      await this.emitProgress(
+        runDir,
+        "failure",
+        "failed",
+        error instanceof Error ? error.message : "Driver failed",
+        error instanceof DriverError && error.effectId ? { effectId: error.effectId, invocationKey: "", kind: "unknown" } : undefined,
+      );
+      throw error;
     }
-    return {
-      state: "operator_attention",
-      reason: `Deterministic driver exceeded its ${MAX_DRIVER_STEPS}-step safety bound`,
-    };
   }
 
   async claimAgentToolCall(input: JsonObject, toolCallId: string): Promise<AgentToolCallDecision> {
     const descriptor = parseAgentBridgeInput(input);
-    if (!descriptor) return { handled: false };
+    if (!descriptor) {
+      return containsAgentBridgeMarker(input)
+        ? { handled: true, block: true, reason: "Malformed Babysitter bridge task envelope" }
+        : { handled: false };
+    }
+    return await this.withEffectLock(descriptor.runDir, descriptor.effectId, async () => {
 
     const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
     if (!checkpoint || checkpoint.kind !== "agent") {
@@ -214,12 +354,33 @@ export class OmpDeterministicDriver {
       return { handled: true, block: true, reason: `Effect ${descriptor.effectId} already has an immutable completed result` };
     }
 
-    const model = readTaskItem(input)?.model;
+    const item = readTaskItem(input);
+    const model = item?.model;
     if (checkpoint.requestedModel !== model) {
       return {
         handled: true,
         block: true,
-        reason: `Model mismatch for effect ${descriptor.effectId}: expected ${checkpoint.requestedModel ?? "default"}, received ${model ?? "default"}`,
+        reason: `Model mismatch for effect ${descriptor.effectId}: expected ${checkpoint.requestedModel ?? "default"}, received ${typeof model === "string" ? model : "default"}`,
+      };
+    }
+    const expectedSchema = checkpoint.outputSchema;
+    const receivedSchema = readObject(item?.outputSchema);
+    const schemaMatches = expectedSchema
+      ? item?.schemaMode === "strict" && isDeepStrictEqual(receivedSchema, expectedSchema)
+      : item?.outputSchema === undefined && item?.schemaMode === undefined;
+    if (!schemaMatches) {
+      return {
+        handled: true,
+        block: true,
+        reason: `Output schema mismatch for effect ${descriptor.effectId}`,
+      };
+    }
+    const envelopeMismatch = validateTaskEnvelope(checkpoint, input);
+    if (envelopeMismatch) {
+      return {
+        handled: true,
+        block: true,
+        reason: envelopeMismatch,
       };
     }
 
@@ -229,12 +390,26 @@ export class OmpDeterministicDriver {
       invocationKey: descriptor.invocationKey,
       ownerName: descriptor.ownerName,
       dispatchToken: descriptor.dispatchToken,
+      attempt: checkpoint.attempt ?? descriptor.attempt ?? 1,
       toolCallId,
       claimedAt: this.now().toISOString(),
     };
     const ownerPath = agentOwnerPath(descriptor.runDir, descriptor.effectId);
     try {
       await writeJsonExclusive(ownerPath, owner);
+      await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), {
+        ...checkpoint,
+        attempt: owner.attempt,
+        attemptState: "claimed",
+        attemptUpdatedAt: owner.claimedAt,
+      } satisfies ExecutionCheckpoint);
+      await this.emitProgress(
+        descriptor.runDir,
+        "agent_claim",
+        "running",
+        `Agent attempt ${owner.attempt} claimed`,
+        checkpoint,
+      );
       return { handled: true };
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
@@ -248,11 +423,21 @@ export class OmpDeterministicDriver {
         reason: `Effect ${descriptor.effectId} is already owned by blocking tool call ${existing.toolCallId}`,
       };
     }
+    });
   }
 
   async completeAgentToolCall(event: AgentToolResultEvent): Promise<AgentToolCompletion> {
     const descriptor = parseAgentBridgeInput(event.input);
     if (!descriptor) return { handled: false };
+    return await this.withEffectLock(descriptor.runDir, descriptor.effectId, async () => {
+    const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
+    if (!checkpoint || checkpoint.kind !== "agent") {
+      return { handled: true, reason: `No durable agent checkpoint exists for effect ${descriptor.effectId}` };
+    }
+    const mismatch = validateDescriptor(checkpoint, descriptor);
+    if (mismatch) return { handled: true, reason: `Ignoring stale owner result for effect ${descriptor.effectId}: ${mismatch}` };
+    const envelopeMismatch = validateTaskEnvelope(checkpoint, event.input);
+    if (envelopeMismatch) return { handled: true, reason: `Ignoring mutated owner result: ${envelopeMismatch}` };
 
     const owner = await readJsonIfExists<AgentOwner>(agentOwnerPath(descriptor.runDir, descriptor.effectId));
     if (!owner || owner.toolCallId !== event.toolCallId || owner.dispatchToken !== descriptor.dispatchToken) {
@@ -261,34 +446,68 @@ export class OmpDeterministicDriver {
         reason: `Ignoring non-owner result for effect ${descriptor.effectId}`,
       };
     }
+    const identity = owningAgentRef(event.details, owner);
+    if (identity.invalid) {
+      return {
+        handled: true,
+        reason: `Ignoring forged or non-owner agent reference for effect ${descriptor.effectId}`,
+      };
+    }
+    if (identity.ref && owner.agentRef !== identity.ref) {
+      owner.agentRef = identity.ref;
+      await writeJsonAtomic(agentOwnerPath(descriptor.runDir, descriptor.effectId), owner);
+    }
+
 
     const extracted = extractSingleAgentResult(event.details);
-    if (event.isError) {
-      return {
-        handled: true,
-        reason: `Blocking agent call ${event.toolCallId} failed; effect remains unresolved`,
+    if (event.isError || !extracted.ok) {
+      const outcome = classifyOwnerOutcome(event);
+      const updated: ExecutionCheckpoint = {
+        ...checkpoint,
+        attemptState: outcome,
+        ...(outcome === "awaiting_late_owner"
+          ? { lastOwnerOutcome: undefined }
+          : { lastOwnerOutcome: outcome }),
+        attemptUpdatedAt: this.now().toISOString(),
       };
-    }
-    if (!extracted.ok) {
+      await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), updated);
+      await this.emitProgress(
+        descriptor.runDir,
+        "agent_completion",
+        outcome,
+        outcome === "awaiting_late_owner"
+          ? `Agent attempt ${updated.attempt ?? 1} lost its blocking task result`
+          : `Agent attempt ${updated.attempt ?? 1} ${outcome}`,
+        updated,
+      );
+      if (outcome === "awaiting_late_owner") {
+        await this.emitProgress(
+          descriptor.runDir,
+          "waiting",
+          "awaiting_late_owner",
+          `Awaiting late completion from retained owner for attempt ${updated.attempt ?? 1}`,
+          updated,
+        );
+      }
       return {
         handled: true,
-        reason: extracted.reason,
+        reason: "reason" in extracted
+          ? extracted.reason
+          : outcome === "awaiting_late_owner"
+            ? `Blocking agent call ${event.toolCallId} lost its result; effect remains unresolved and awaits its retained owner`
+            : `Blocking agent call ${event.toolCallId} ${outcome}; explicit retry authorization is required`,
       };
     }
 
-    const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
-    if (!checkpoint || checkpoint.kind !== "agent") {
-      throw new DriverError(`Missing durable agent checkpoint for effect ${descriptor.effectId}`, descriptor.effectId);
-    }
-    const mismatch = validateDescriptor(checkpoint, descriptor);
-    if (mismatch) throw new DriverError(mismatch, descriptor.effectId);
 
     return await this.persistAgentCompletion(descriptor, extracted.value);
+    });
   }
 
   async completeAgentOwnerValue(input: AgentOwnerCompletionInput): Promise<AgentToolCompletion> {
     const descriptor = parseAgentOwnerCompletionInput(input);
     if (!descriptor) return { handled: false };
+    return await this.withEffectLock(descriptor.runDir, descriptor.effectId, async () => {
     const owner = await readJsonIfExists<AgentOwner>(agentOwnerPath(descriptor.runDir, descriptor.effectId));
     if (
       !owner ||
@@ -303,11 +522,80 @@ export class OmpDeterministicDriver {
       };
     }
     return await this.persistAgentCompletion(descriptor, input.value);
+    });
+  }
+
+  async authorizeAgentRetry(input: AgentRetryInput): Promise<AgentRetryAuthorization> {
+    const descriptor = parseAgentOwnerCompletionInput(input, false);
+    if (!descriptor || typeof input.reason !== "string" || input.reason.trim().length === 0) {
+      return { handled: false, reason: "A complete owner descriptor and retry reason are required" };
+    }
+    return await this.withEffectLock(descriptor.runDir, descriptor.effectId, async () => {
+    const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
+    if (!checkpoint || checkpoint.kind !== "agent") {
+      return { handled: true, reason: `No durable agent checkpoint exists for effect ${descriptor.effectId}` };
+    }
+    const mismatch = validateDescriptor(checkpoint, descriptor);
+    if (mismatch) return { handled: true, reason: `Retry rejected: ${mismatch}` };
+    if (checkpoint.state === "completed") {
+      return { handled: true, reason: `Retry rejected: effect ${descriptor.effectId} is already completed` };
+    }
+    if (
+      checkpoint.attemptState !== "failed" &&
+      checkpoint.attemptState !== "aborted" &&
+      checkpoint.attemptState !== "cancelled" &&
+      checkpoint.attemptState !== "awaiting_late_owner"
+    ) {
+      return {
+        handled: true,
+        reason: `Retry rejected: effect ${descriptor.effectId} is ${checkpoint.attemptState ?? "in progress"}, not in a retryable terminal state`,
+      };
+    }
+    const ownerPath = agentOwnerPath(descriptor.runDir, descriptor.effectId);
+    const owner = await readJsonIfExists<AgentOwner>(ownerPath);
+    if (
+      !owner ||
+      owner.invocationKey !== descriptor.invocationKey ||
+      owner.ownerName !== descriptor.ownerName ||
+      owner.dispatchToken !== descriptor.dispatchToken
+    ) {
+      return { handled: true, reason: `Retry rejected: retained owner identity does not match effect ${descriptor.effectId}` };
+    }
+
+    const attempt = checkpoint.attempt ?? owner.attempt ?? 1;
+    await writeImmutableJson(
+      effectArtifactPath(descriptor.runDir, descriptor.effectId, `agent-owner.attempt-${attempt}.json`),
+      owner,
+    );
+    const updatedAt = this.now().toISOString();
+    const updated: ExecutionCheckpoint = {
+      ...checkpoint,
+      attempt: attempt + 1,
+      attemptState: "retry_authorized",
+      attemptUpdatedAt: updatedAt,
+      retryAuthorizedAt: updatedAt,
+      retryReason: sanitizeProgressText(input.reason),
+      dispatchToken: this.randomId(),
+      finishedAt: undefined,
+      lastOwnerOutcome: undefined,
+    };
+    await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), updated);
+    await fs.unlink(ownerPath);
+    await this.emitProgress(
+      descriptor.runDir,
+      "retry_authorized",
+      "running",
+      `Retry authorized for agent attempt ${updated.attempt}`,
+      updated,
+    );
+    return { handled: true };
+    });
   }
 
   private async persistAgentCompletion(
     descriptor: AgentBridgeDescriptor,
     value: unknown,
+
   ): Promise<AgentToolCompletion> {
     const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
     if (!checkpoint || checkpoint.kind !== "agent") {
@@ -329,26 +617,84 @@ export class OmpDeterministicDriver {
     const completed: ExecutionCheckpoint = {
       ...checkpoint,
       state: "completed",
+      attemptState: "completed",
+      attemptUpdatedAt: this.now().toISOString(),
       finishedAt: checkpoint.finishedAt ?? this.now().toISOString(),
       outputRef: taskRelativeRef(descriptor.effectId, "output.json"),
       outputSha256: sha256(outputBytes),
     };
     await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), completed);
+    await this.emitProgress(
+      descriptor.runDir,
+      "agent_completion",
+      "completed",
+      `Agent attempt ${completed.attempt ?? 1} completed durably`,
+      completed,
+    );
 
     const posted = await this.postCompletedCheckpoint(descriptor.runDir, completed);
     const continuation = await this.drive(descriptor.runDir);
     return { handled: true, posted, continuation };
   }
 
-  private async runIteration(runDir: string): Promise<IterationResult> {
-    const result = await this.dependencies.runCli(["run:iterate", runDir, "--json"]);
+  async cancelAgentAttempt(input: AgentCancelInput): Promise<AgentAttemptTransition> {
+    const descriptor = parseAgentOwnerCompletionInput(input, false);
+    if (!descriptor || typeof input.reason !== "string" || input.reason.trim().length === 0) {
+      return { handled: false, reason: "A complete owner descriptor and cancellation reason are required" };
+    }
+    return await this.withEffectLock(descriptor.runDir, descriptor.effectId, async () => {
+      const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
+      if (!checkpoint || checkpoint.kind !== "agent") {
+        return { handled: true, reason: `No durable agent checkpoint exists for effect ${descriptor.effectId}` };
+      }
+      const mismatch = validateDescriptor(checkpoint, descriptor);
+      if (mismatch) return { handled: true, reason: `Cancellation rejected: ${mismatch}` };
+      if (checkpoint.state === "completed") {
+        return { handled: true, reason: `Cancellation rejected: effect ${descriptor.effectId} is already completed` };
+      }
+      if (checkpoint.attemptState === "cancelled") return { handled: true };
+      if (checkpoint.attemptState !== "claimed" && checkpoint.attemptState !== "awaiting_late_owner") {
+        return {
+          handled: true,
+          reason: `Cancellation rejected: effect ${descriptor.effectId} is ${checkpoint.attemptState ?? "in progress"}`,
+        };
+      }
+      const owner = await readJsonIfExists<AgentOwner>(agentOwnerPath(descriptor.runDir, descriptor.effectId));
+      if (
+        !owner ||
+        owner.invocationKey !== descriptor.invocationKey ||
+        owner.ownerName !== descriptor.ownerName ||
+        owner.dispatchToken !== descriptor.dispatchToken
+      ) {
+        return { handled: true, reason: `Cancellation rejected: retained owner identity does not match effect ${descriptor.effectId}` };
+      }
+      const updated: ExecutionCheckpoint = {
+        ...checkpoint,
+        attemptState: "cancelled",
+        lastOwnerOutcome: "cancelled",
+        attemptUpdatedAt: this.now().toISOString(),
+      };
+      await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), updated);
+      await this.emitProgress(
+        descriptor.runDir,
+        "agent_completion",
+        "cancelled",
+        `Agent attempt ${updated.attempt ?? 1} cancelled: ${sanitizeProgressText(input.reason)}`,
+        updated,
+      );
+      return { handled: true };
+    });
+  }
+
+  private async runIteration(runDir: string, signal?: AbortSignal): Promise<IterationResult> {
+    const result = await this.dependencies.runCli(["run:iterate", runDir, "--json"], undefined, signal);
     if (result.code !== 0) {
       throw new DriverError(`run:iterate failed: ${boundedDiagnostic(result.stderr || result.stdout)}`);
     }
     return parseCliJson<IterationResult>(result.stdout, "run:iterate");
   }
 
-  private async resolveShellEffect(runDir: string, action: EffectAction): Promise<void> {
+  private async resolveShellEffect(runDir: string, action: EffectAction, signal?: AbortSignal): Promise<void> {
     const taskDir = effectTaskDir(runDir, action.effectId);
     await fs.mkdir(taskDir, { recursive: true });
     const checkpointFile = executionPath(runDir, action.effectId);
@@ -366,6 +712,7 @@ export class OmpDeterministicDriver {
     try {
       await writeJsonExclusive(checkpointFile, inProgress);
       checkpoint = inProgress;
+      await this.emitProgress(runDir, "shell_start", "running", "Shell effect started durably", action);
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
       checkpoint = await readJson<ExecutionCheckpoint>(checkpointFile);
@@ -379,28 +726,23 @@ export class OmpDeterministicDriver {
         );
       }
       checkpoint = recovered;
-      await this.postCompletedCheckpoint(runDir, checkpoint);
+      await this.emitProgress(runDir, "recovery", "completed", "Recovered durable shell output", action);
+      await this.postCompletedCheckpoint(runDir, checkpoint, signal);
       return;
     }
 
-    const shellResult = await this.executeShell(action, this.dependencies.cwd);
+    await this.emitProgress(runDir, "shell_start", "running", "Starting bounded shell effect", action);
+    const shellResult = await this.executeShell(action, this.workspaceCwd, signal);
     const stdoutPath = effectArtifactPath(runDir, action.effectId, "stdout.log");
     const stderrPath = effectArtifactPath(runDir, action.effectId, "stderr.log");
     await writeTextAtomic(stdoutPath, shellResult.stdout);
     await writeTextAtomic(stderrPath, shellResult.stderr);
 
-    const value = await shellResultValue(runDir, action, shellResult);
     const outputPath = effectArtifactPath(runDir, action.effectId, "output.json");
     const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
     const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
-    const configuredOutput = readObject(action.taskDef?.io)?.outputJsonPath;
-    const shellProducedDurableOutput = (
-      !shellResult.timedOut &&
-      shellResult.exitCode === expectedExitCode &&
-      typeof configuredOutput === "string" &&
-      path.resolve(resolveRunRelative(runDir, configuredOutput)) === path.resolve(outputPath)
-    );
-    if (!shellProducedDurableOutput) await writeImmutableJson(outputPath, value);
+    const value = await shellResultValue(runDir, action, shellResult, outputPath);
+    await writeImmutableJson(outputPath, value);
     const outputBytes = await fs.readFile(outputPath);
     checkpoint = {
       ...checkpoint,
@@ -412,10 +754,19 @@ export class OmpDeterministicDriver {
       stderrRef: taskRelativeRef(action.effectId, "stderr.log"),
     };
     await writeJsonAtomic(checkpointFile, checkpoint);
-    await this.postCompletedCheckpoint(runDir, checkpoint);
+    await this.emitProgress(
+      runDir,
+      "shell_finish",
+      shellResult.timedOut || shellResult.exitCode !== expectedExitCode ? "failed" : "completed",
+      shellResult.timedOut
+        ? "Shell effect timed out and was captured durably"
+        : `Shell effect finished with exit code ${shellResult.exitCode}`,
+      action,
+    );
+    await this.postCompletedCheckpoint(runDir, checkpoint, signal);
   }
 
-  private async prepareAgentEffect(runDir: string, action: EffectAction): Promise<DriverResult | null> {
+  private async prepareAgentEffect(runDir: string, action: EffectAction, signal?: AbortSignal): Promise<DriverResult | null> {
     const taskDir = effectTaskDir(runDir, action.effectId);
     await fs.mkdir(taskDir, { recursive: true });
     const checkpointFile = executionPath(runDir, action.effectId);
@@ -428,39 +779,85 @@ export class OmpDeterministicDriver {
       effectId: action.effectId,
       invocationKey: action.invocationKey,
       kind: "agent",
+      effectKind: action.kind,
       state: "in_progress",
       startedAt: this.now().toISOString(),
       ownerName,
       dispatchToken,
       requestedModel,
       outputSchema: readOutputSchema(taskDef),
+      attempt: 1,
+      attemptState: "prepared",
+      attemptUpdatedAt: this.now().toISOString(),
     };
 
     try {
       await writeJsonExclusive(checkpointFile, checkpoint);
+      await this.emitProgress(runDir, "agent_preparation", "running", "Agent attempt 1 prepared durably", action);
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
       const existing = await readJson<ExecutionCheckpoint>(checkpointFile);
       validateCheckpointIdentity(existing, action);
       const recovered = await this.recoverCompletedOutput(runDir, existing);
       if (recovered) {
-        await this.postCompletedCheckpoint(runDir, recovered);
+        await this.emitProgress(runDir, "recovery", "completed", "Recovered durable agent output", action);
+        await this.postCompletedCheckpoint(runDir, recovered, signal);
         return null;
       }
       const owner = await readJsonIfExists<AgentOwner>(agentOwnerPath(runDir, action.effectId));
-      if (owner) {
+      if (
+        owner &&
+        owner.dispatchToken === existing.dispatchToken &&
+        owner.invocationKey === existing.invocationKey &&
+        owner.attempt === (existing.attempt ?? 1)
+      ) {
+        const terminalOwnerState = existing.attemptState === "failed" ||
+          existing.attemptState === "aborted" ||
+          existing.attemptState === "cancelled"
+          ? existing.attemptState
+          : undefined;
+        await this.emitProgress(
+          runDir,
+          terminalOwnerState ? "attention" : "waiting",
+          terminalOwnerState ?? (existing.attemptState === "awaiting_late_owner" ? "awaiting_late_owner" : "waiting"),
+          terminalOwnerState
+            ? `Agent attempt ${existing.attempt ?? 1} ${terminalOwnerState}; explicit retry authorization is required`
+            : existing.attemptState === "awaiting_late_owner"
+              ? `Awaiting late completion from retained owner for attempt ${existing.attempt ?? 1}`
+              : `Agent attempt ${existing.attempt ?? 1} remains owned`,
+          existing,
+        );
+        if (terminalOwnerState) {
+          return {
+            state: "operator_attention",
+            effectId: action.effectId,
+            reason: `Agent attempt ${existing.attempt ?? 1} ${terminalOwnerState}; authorize retry or resolve the effect explicitly`,
+          };
+        }
         return {
           state: "waiting",
           reason: `Agent effect ${action.effectId} remains owned by ${owner.ownerName} through blocking tool call ${owner.toolCallId}; awaiting that invocation's result`,
         };
       }
-      return this.buildAgentDispatch(runDir, action, existing);
+      if (owner) await fs.unlink(agentOwnerPath(runDir, action.effectId));
+      await this.emitProgress(
+        runDir,
+        "agent_preparation",
+        "running",
+        `Agent attempt ${existing.attempt ?? 1} prepared durably`,
+        existing,
+      );
+      return await this.buildAgentDispatch(runDir, action, existing);
     }
 
-    return this.buildAgentDispatch(runDir, action, checkpoint);
+    return await this.buildAgentDispatch(runDir, action, checkpoint);
   }
 
-  private buildAgentDispatch(runDir: string, action: EffectAction, checkpoint: ExecutionCheckpoint): DriverResult {
+  private async buildAgentDispatch(
+    runDir: string,
+    action: EffectAction,
+    checkpoint: ExecutionCheckpoint,
+  ): Promise<DriverResult> {
     if (!checkpoint.ownerName || !checkpoint.dispatchToken) {
       return {
         state: "operator_attention",
@@ -468,31 +865,57 @@ export class OmpDeterministicDriver {
         reason: `Agent effect ${action.effectId} has an incomplete durable dispatch checkpoint`,
       };
     }
-    const descriptor: AgentBridgeDescriptor = {
+    const descriptorCore = {
       runDir,
       effectId: action.effectId,
       invocationKey: action.invocationKey,
       ownerName: checkpoint.ownerName,
       dispatchToken: checkpoint.dispatchToken,
+      attempt: checkpoint.attempt ?? 1,
       model: checkpoint.requestedModel,
     };
     const outputSchema = readOutputSchema(action.taskDef ?? {});
-    const taskItem = {
+    const context = `Execute exactly one Babysitter effect for run ${path.basename(runDir)}. The plugin owns posting and continuation; do not call Babysitter CLI commands.`;
+    const unsignedTaskItem = {
       name: checkpoint.ownerName,
       agent: "babysitter-task" as const,
-      task: buildAgentPrompt(action, descriptor),
+      task: buildAgentPrompt(action, descriptorCore as AgentBridgeDescriptor),
       ...(checkpoint.requestedModel ? { model: checkpoint.requestedModel } : {}),
       ...(outputSchema ? { outputSchema, schemaMode: "strict" as const } : {}),
     };
-    return {
+    const bridgeEnvelopeSha256 = sha256(Buffer.from(stableJsonStringify({
+      context,
+      tasks: [unsignedTaskItem],
+    }), "utf8"));
+    const descriptor: AgentBridgeDescriptor = {
+      ...descriptorCore,
+      bridgeEnvelopeSha256,
+    };
+    const taskItem = {
+      ...unsignedTaskItem,
+      task: buildAgentPrompt(action, descriptor),
+    };
+    const dispatch: Extract<DriverResult, { state: "agent" }> = {
       state: "agent",
       effectId: action.effectId,
       invocationKey: action.invocationKey,
       task: {
-        context: `Execute exactly one Babysitter effect for run ${path.basename(runDir)}. The plugin owns posting and continuation; do not call Babysitter CLI commands.`,
+        context,
         tasks: [taskItem],
       },
     };
+    const taskEnvelopeSha256 = sha256(Buffer.from(stableJsonStringify(dispatch.task), "utf8"));
+    if (
+      checkpoint.taskEnvelopeSha256 !== taskEnvelopeSha256 ||
+      checkpoint.bridgeEnvelopeSha256 !== bridgeEnvelopeSha256
+    ) {
+      await writeJsonAtomic(executionPath(runDir, action.effectId), {
+        ...checkpoint,
+        taskEnvelopeSha256,
+        bridgeEnvelopeSha256,
+      } satisfies ExecutionCheckpoint);
+    }
+    return dispatch;
   }
 
   private async recoverCompletedOutput(
@@ -526,9 +949,13 @@ export class OmpDeterministicDriver {
     return completed;
   }
 
-  private async hasCommittedResult(runDir: string, checkpoint: ExecutionCheckpoint): Promise<boolean> {
+  private async hasCommittedResult(
+    runDir: string,
+    checkpoint: ExecutionCheckpoint,
+    signal?: AbortSignal,
+  ): Promise<boolean> {
     if (!await hasMatchingCommittedArtifact(runDir, checkpoint)) return false;
-    const shown = await this.dependencies.runCli(["task:show", runDir, checkpoint.effectId, "--json"]);
+    const shown = await this.dependencies.runCli(["task:show", runDir, checkpoint.effectId, "--json"], undefined, signal);
     if (shown.code !== 0) {
       throw new DriverError(
         `Cannot verify committed state for effect ${checkpoint.effectId}: ${boundedDiagnostic(shown.stderr || shown.stdout)}`,
@@ -539,11 +966,18 @@ export class OmpDeterministicDriver {
     return readObject(payload.effect)?.status === "resolved_ok";
   }
 
-  private async postCompletedCheckpoint(runDir: string, checkpoint: ExecutionCheckpoint): Promise<boolean> {
+  private async postCompletedCheckpoint(
+    runDir: string,
+    checkpoint: ExecutionCheckpoint,
+    signal?: AbortSignal,
+  ): Promise<boolean> {
     if (checkpoint.state !== "completed" || !checkpoint.outputRef) {
       throw new DriverError(`Effect ${checkpoint.effectId} has no completed durable output`, checkpoint.effectId);
     }
-    if (await this.hasCommittedResult(runDir, checkpoint)) return false;
+    if (await this.hasCommittedResult(runDir, checkpoint, signal)) {
+      await this.emitProgress(runDir, "post", "completed", "Journal already contains the committed effect result", checkpoint);
+      return false;
+    }
 
     const args = [
       "task:post",
@@ -564,18 +998,208 @@ export class OmpDeterministicDriver {
     if (checkpoint.stdoutRef) args.push("--stdout-file", path.join(runDir, checkpoint.stdoutRef));
     if (checkpoint.stderrRef) args.push("--stderr-file", path.join(runDir, checkpoint.stderrRef));
 
-    const result = await this.dependencies.runCli(args);
+    const result = await this.dependencies.runCli(args, undefined, signal);
     if (result.code !== 0) {
-      if (await this.hasCommittedResult(runDir, checkpoint)) return false;
+      if (await this.hasCommittedResult(runDir, checkpoint, signal)) {
+        await this.emitProgress(runDir, "post", "completed", "Recovered a concurrently committed effect result", checkpoint);
+        return false;
+      }
       throw new DriverError(`task:post failed for effect ${checkpoint.effectId}: ${boundedDiagnostic(result.stderr || result.stdout)}`, checkpoint.effectId);
     }
     const posted = { ...checkpoint, postedAt: this.now().toISOString() };
     await writeJsonAtomic(executionPath(runDir, checkpoint.effectId), posted);
+    await this.emitProgress(runDir, "post", "completed", "Effect result committed to the authoritative journal", posted);
     return true;
+  }
+  private async emitProgress(
+    runDir: string,
+    stage: DriverProgressStage,
+    state: DriverProgressState,
+    message: string,
+    identity?: Pick<EffectAction, "effectId" | "invocationKey" | "kind">,
+  ): Promise<void> {
+    const runId = path.basename(runDir);
+    const key = `${runId}:${identity?.effectId ?? "$run"}`;
+    const operationId = this.progressOperation.getStore();
+    const safeMessage = sanitizeProgressText(message);
+    const signature = `${stage}\u0000${state}\u0000${safeMessage}\u0000${identity?.invocationKey ?? ""}`;
+    const signatureKey = `${operationId ?? "$unowned"}:${key}`;
+    if (this.progressSignatures.get(signatureKey) === signature) return;
+    this.progressSignatures.set(signatureKey, signature);
+    const progress: DriverProgress = {
+      schemaVersion: DRIVER_SCHEMA_VERSION,
+      key,
+      sequence: (this.progressSequences.get(key) ?? 0) + 1,
+      runId,
+      runDir,
+      ...(identity?.effectId ? { effectId: identity.effectId } : {}),
+      ...(operationId ? { operationId } : {}),
+      ...(identity?.invocationKey ? { invocationKey: identity.invocationKey } : {}),
+      ...(identity?.kind ? { kind: identity.kind } : {}),
+      stage,
+      state,
+      message: safeMessage,
+      observedAt: this.now().toISOString(),
+    };
+    this.progressSequences.set(key, progress.sequence);
+    await this.notifyProgressListener(this.dependencies.onProgress, progress);
+    for (const listener of this.progressListeners) {
+      await this.notifyProgressListener(listener, progress);
+    }
+  }
+  private async notifyProgressListener(
+    listener: DriverProgressListener | undefined,
+    progress: DriverProgress,
+  ): Promise<void> {
+    if (!listener) return;
+    try {
+      await listener(progress);
+    } catch (error) {
+      if (this.dependencies.onProgressError) {
+        try {
+          await this.dependencies.onProgressError(error, progress);
+          return;
+        } catch {
+          // Fall through to the non-throwing diagnostic sink.
+        }
+      }
+      console.warn(
+        `Babysitter progress listener failed: ${sanitizeProgressText(error instanceof Error ? error.message : String(error))}`,
+      );
+    }
+  }
+  private async withEffectLock<T>(
+    runDir: string,
+    effectId: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    const key = `${path.resolve(runDir)}\u0000${effectId}`;
+    const predecessor = this.effectLocks.get(key) ?? Promise.resolve();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const tail = predecessor.catch(() => undefined).then(() => gate);
+    this.effectLocks.set(key, tail);
+    await predecessor.catch(() => undefined);
+    try {
+      return await operation();
+    } finally {
+      release();
+      if (this.effectLocks.get(key) === tail) this.effectLocks.delete(key);
+    }
   }
 }
 
-export async function executeBoundedShell(action: EffectAction, defaultCwd: string): Promise<ShellExecutionResult> {
+export interface ProjectionTodoItem {
+  id: string;
+  content: string;
+  status: "pending" | "in_progress" | "completed" | "failed" | "cancelled" | "abandoned";
+}
+
+export interface ProjectionTodoPhase {
+  id: string;
+  name: string;
+  tasks: ProjectionTodoItem[];
+}
+
+interface ProjectedEffect {
+  effectId: string;
+  invocationKey?: string;
+  kind: string;
+  label: string;
+  status: ProjectionTodoItem["status"];
+}
+
+export async function reconstructBabysitterProjection(runDirInput: string): Promise<ProjectionTodoPhase[]> {
+  const runDir = path.resolve(runDirInput);
+  const journalDir = path.join(runDir, "journal");
+  let journalFiles: string[];
+  try {
+    journalFiles = (await fs.readdir(journalDir))
+      .filter((name) => name.endsWith(".json"))
+      .sort((left, right) => left.localeCompare(right));
+  } catch (error) {
+    if (isNotFound(error)) return [];
+    throw error;
+  }
+
+  const effects = new Map<string, ProjectedEffect>();
+  let runState: "active" | "completed" | "failed" | "halted" = "active";
+  for (const filename of journalFiles) {
+    const event = await readJsonIfExists<JsonObject>(path.join(journalDir, filename));
+    const data = readObject(event?.data);
+    const type = typeof event?.type === "string" ? event.type : "";
+    const effectId = typeof data?.effectId === "string" ? data.effectId : undefined;
+    if (type === "EFFECT_REQUESTED" && effectId) {
+      const kind = typeof data?.kind === "string" ? data.kind : "effect";
+      const taskId = typeof data?.taskId === "string" ? data.taskId : effectId;
+      effects.set(effectId, {
+        effectId,
+        ...(typeof data?.invocationKey === "string" ? { invocationKey: data.invocationKey } : {}),
+        kind,
+        label: `${kind}: ${taskId}`,
+        status: "pending",
+      });
+      continue;
+    }
+    if (type === "EFFECT_RESOLVED" && effectId) {
+      const effect = effects.get(effectId);
+      if (effect) effect.status = data?.status === "ok" ? "completed" : "abandoned";
+      continue;
+    }
+    if (type === "EFFECT_CANCELLED" && effectId) {
+      const effect = effects.get(effectId);
+      if (effect) effect.status = "abandoned";
+      continue;
+    }
+    if (type === "RUN_COMPLETED") runState = "completed";
+    else if (type === "RUN_FAILED") runState = "failed";
+    else if (type === "RUN_HALTED") runState = "halted";
+  }
+
+  for (const effect of effects.values()) {
+    if (effect.status !== "pending") continue;
+    const checkpoint = await readCheckpoint(runDir, effect.effectId);
+    if (
+      !checkpoint ||
+      checkpoint.schemaVersion !== DRIVER_SCHEMA_VERSION ||
+      checkpoint.effectId !== effect.effectId ||
+      checkpoint.kind !== (effect.kind === "skill" ? "agent" : effect.kind) ||
+      (effect.invocationKey !== undefined && checkpoint.invocationKey !== effect.invocationKey)
+    ) continue;
+    if (checkpoint.state === "completed") {
+      effect.status = "in_progress";
+    } else if (checkpoint.attemptState === "failed" || checkpoint.attemptState === "aborted") {
+      effect.status = "failed";
+      effect.label += ` (${checkpoint.attemptState}, attempt ${checkpoint.attempt ?? 1})`;
+    } else if (checkpoint.attemptState === "cancelled") {
+      effect.status = "cancelled";
+      effect.label += ` (cancelled, attempt ${checkpoint.attempt ?? 1})`;
+    } else if (checkpoint.attemptState) {
+      effect.status = "in_progress";
+      if (checkpoint.attemptState === "awaiting_late_owner") {
+        effect.label += ` (awaiting late owner, attempt ${checkpoint.attempt ?? 1})`;
+      } else if (checkpoint.attempt && checkpoint.attempt > 1) {
+        effect.label += ` (attempt ${checkpoint.attempt})`;
+      }
+    }
+  }
+
+  if (effects.size === 0) return [];
+  const stateLabel = runState === "active" ? "" : ` — ${runState}`;
+  return [{
+    id: `run:${path.basename(runDir)}`,
+    name: `Babysitter ${path.basename(runDir)}${stateLabel}`,
+    tasks: [...effects.values()].map(({ effectId, label, status }) => ({ id: effectId, content: label, status })),
+  }];
+}
+
+export async function executeBoundedShell(
+  action: EffectAction,
+  defaultCwd: string,
+  signal?: AbortSignal,
+): Promise<ShellExecutionResult> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const command = typeof shell.command === "string" && shell.command.trim() ? shell.command : "echo";
   const args = Array.isArray(shell.args) ? shell.args.filter((value): value is string => typeof value === "string") : [];
@@ -585,6 +1209,7 @@ export async function executeBoundedShell(action: EffectAction, defaultCwd: stri
   const startedAt = new Date().toISOString();
 
   return await new Promise<ShellExecutionResult>((resolve, reject) => {
+    signal?.throwIfAborted();
     const useShell = args.length === 0;
     const child = spawn(command, args, {
       cwd,
@@ -609,6 +1234,7 @@ export async function executeBoundedShell(action: EffectAction, defaultCwd: stri
       clearTimeout(timeoutTimer);
       clearTimeout(escalationTimer);
       clearTimeout(settleTimer);
+      signal?.removeEventListener("abort", abort);
       resolve({
         exitCode: timedOut ? 124 : (code ?? 1),
         stdout: stdout.text(),
@@ -620,6 +1246,20 @@ export async function executeBoundedShell(action: EffectAction, defaultCwd: stri
         finishedAt: new Date().toISOString(),
       });
     };
+    const abort = (): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutTimer);
+      terminateProcessTree(child.pid, false, child.kill.bind(child));
+      escalationTimer = setTimeout(
+        () => terminateProcessTree(child.pid, true, child.kill.bind(child)),
+        SHELL_TERMINATION_GRACE_MS,
+      );
+      escalationTimer.unref();
+      signal?.removeEventListener("abort", abort);
+      reject(signal?.reason ?? new DOMException("The operation was aborted", "AbortError"));
+    };
+    signal?.addEventListener("abort", abort, { once: true });
     const timeoutTimer = setTimeout(() => {
       timedOut = true;
       terminateProcessTree(child.pid, false, child.kill.bind(child));
@@ -633,11 +1273,12 @@ export async function executeBoundedShell(action: EffectAction, defaultCwd: stri
     timeoutTimer.unref();
 
     child.once("error", (error) => {
-      if (timedOut) return;
+      if (timedOut || settled) return;
       settled = true;
       clearTimeout(timeoutTimer);
       clearTimeout(escalationTimer);
       clearTimeout(settleTimer);
+      signal?.removeEventListener("abort", abort);
       reject(error);
     });
     child.once("close", (code) => {
@@ -690,30 +1331,67 @@ function buildAgentPrompt(action: EffectAction, descriptor: AgentBridgeDescripto
           : typeof taskDef.title === "string"
             ? taskDef.title
             : `Complete Babysitter effect ${action.effectId}`;
+  const preview = humanTaskPreview(action, prompt);
   return [
-    `BABYSITTER_OMP_BRIDGE ${JSON.stringify(descriptor)}`,
+    preview,
+    "",
     "Complete only the assignment below. Return the final effect value through the required structured yield path.",
     "Do not call babysitter task:post or run:iterate; the deterministic driver is the sole result writer.",
-    "Before yielding, call `babysitter_agent_complete` exactly once with the bridge descriptor fields above and your final effect value as `value`, then yield the identical value. This durable owner channel lets the original agent finish even if its parent task wait is interrupted.",
+    "Before yielding, call `babysitter_agent_complete` exactly once with the bridge descriptor fields below and your final effect value as `value`, then yield the identical value. This durable owner channel lets the original agent finish even if its parent task wait is interrupted.",
+    `BABYSITTER_OMP_BRIDGE ${JSON.stringify(descriptor)}`,
     "",
     prompt,
   ].join("\n");
 }
 
+function humanTaskPreview(action: EffectAction, prompt: string): string {
+  const taskDef = action.taskDef ?? {};
+  const structuredPrompt = readObject(readObject(taskDef.agent)?.prompt);
+  const metadata = readObject(taskDef.metadata);
+  const candidates = [
+    structuredPrompt?.task,
+    structuredPrompt?.request,
+    structuredPrompt?.goal,
+    structuredPrompt?.title,
+    structuredPrompt?.description,
+    taskDef.description,
+    taskDef.title,
+    metadata?.prompt,
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim()) return candidate.trim().split(/\r?\n/, 1)[0];
+  }
+  if (!structuredPrompt) {
+    const firstPromptLine = prompt.split(/\r?\n/).find((line) => line.trim());
+    if (firstPromptLine) return firstPromptLine.trim();
+  }
+  return `Complete Babysitter effect ${action.effectId}`;
+}
+
 function parseAgentBridgeInput(input: JsonObject): AgentBridgeDescriptor | null {
   const item = readTaskItem(input);
-  if (!item || item.agent !== "babysitter-task" || typeof item.task !== "string") return null;
-  const firstLine = item.task.split("\n", 1)[0];
+  if (
+    !item ||
+    item.agent !== "babysitter-task" ||
+    typeof item.name !== "string" ||
+    typeof item.task !== "string"
+  ) return null;
   const prefix = "BABYSITTER_OMP_BRIDGE ";
-  if (!firstLine.startsWith(prefix)) return null;
+  const bridgeLines = item.task
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith(prefix));
+  if (bridgeLines.length !== 1) return null;
   try {
-    const parsed = JSON.parse(firstLine.slice(prefix.length)) as AgentBridgeDescriptor;
+    const parsed = JSON.parse(bridgeLines[0].slice(prefix.length)) as AgentBridgeDescriptor;
     if (
       typeof parsed.runDir !== "string" ||
       typeof parsed.effectId !== "string" ||
       typeof parsed.invocationKey !== "string" ||
       typeof parsed.ownerName !== "string" ||
-      typeof parsed.dispatchToken !== "string"
+      typeof parsed.dispatchToken !== "string" ||
+      typeof parsed.bridgeEnvelopeSha256 !== "string" ||
+      item.name !== parsed.ownerName
     ) return null;
     return { ...parsed, runDir: path.resolve(parsed.runDir) };
   } catch {
@@ -721,14 +1399,31 @@ function parseAgentBridgeInput(input: JsonObject): AgentBridgeDescriptor | null 
   }
 }
 
-function parseAgentOwnerCompletionInput(input: AgentOwnerCompletionInput): AgentBridgeDescriptor | null {
+function containsAgentBridgeMarker(input: JsonObject): boolean {
+  const candidates = [
+    input,
+    ...(Array.isArray(input.tasks) ? input.tasks.map((value) => readObject(value)).filter(Boolean) : []),
+  ];
+  return candidates.some((candidate) =>
+    typeof candidate?.task === "string" &&
+    candidate.task.split(/\r?\n/).some((line) => line.trim().startsWith("BABYSITTER_OMP_BRIDGE "))
+  );
+}
+
+
+function parseAgentOwnerCompletionInput(
+  input: AgentOwnerCompletionInput | AgentRetryInput | AgentCancelInput,
+  requireValue = true,
+): AgentBridgeDescriptor | null {
   if (
     typeof input.runDir !== "string" ||
     typeof input.effectId !== "string" ||
     typeof input.invocationKey !== "string" ||
     typeof input.ownerName !== "string" ||
     typeof input.dispatchToken !== "string" ||
-    !Object.hasOwn(input, "value")
+    typeof input.bridgeEnvelopeSha256 !== "string" ||
+    (input.attempt !== undefined && (!Number.isInteger(input.attempt) || input.attempt < 1)) ||
+    (requireValue && !Object.hasOwn(input, "value"))
   ) return null;
   return {
     runDir: path.resolve(input.runDir),
@@ -736,15 +1431,56 @@ function parseAgentOwnerCompletionInput(input: AgentOwnerCompletionInput): Agent
     invocationKey: input.invocationKey,
     ownerName: input.ownerName,
     dispatchToken: input.dispatchToken,
+    bridgeEnvelopeSha256: input.bridgeEnvelopeSha256,
+    ...(typeof input.attempt === "number" ? { attempt: input.attempt } : {}),
     ...(typeof input.model === "string" ? { model: input.model } : {}),
   };
 }
 
-function readTaskItem(input: JsonObject): (JsonObject & { task?: string; agent?: string; model?: string }) | null {
-  if (Array.isArray(input.tasks) && input.tasks.length === 1) return readObject(input.tasks[0]);
-  return input;
+function readTaskItem(
+  input: JsonObject,
+): (JsonObject & { task?: string; agent?: string; model?: string; outputSchema?: unknown; schemaMode?: unknown }) | null {
+  if (!Array.isArray(input.tasks) || input.tasks.length !== 1) return null;
+  return readObject(input.tasks[0]);
 }
 
+function owningAgentRef(
+  details: unknown,
+  owner: AgentOwner,
+): { ref?: `agent://${string}`; invalid: boolean } {
+  const object = readObject(details);
+  const results = Array.isArray(object?.results) ? object.results : [];
+  if (results.length !== 1) return { invalid: false };
+  const result = readObject(results[0]);
+  if (!result) return { invalid: false };
+  const hasIdentity = "id" in result || "agent" in result;
+  if (!hasIdentity) return { invalid: false };
+  const agentId = result.id;
+  if (
+    result.agent !== "babysitter-task" ||
+    typeof agentId !== "string" ||
+    !isAllocatedOwnerName(agentId, owner.ownerName)
+  ) return { invalid: true };
+  return { ref: `agent://${agentId}`, invalid: false };
+}
+function classifyOwnerOutcome(
+  event: AgentToolResultEvent,
+): "failed" | "aborted" | "cancelled" | "awaiting_late_owner" {
+  const object = readObject(event.details);
+  const results = Array.isArray(object?.results) ? object.results : [];
+  const result = results.length === 1 ? readObject(results[0]) : null;
+  const reason = `${typeof result?.error === "string" ? result.error : ""} ${typeof object?.error === "string" ? object.error : ""}`.toLowerCase();
+  if (result?.cancelled === true || reason.includes("cancel")) return "cancelled";
+  if (reason.includes("parent wait interrupted") || reason.includes("lost result")) {
+    return "awaiting_late_owner";
+  }
+  if (result?.aborted === true || reason.includes("abort") || reason.includes("interrupt")) return "aborted";
+  if (result && (
+    typeof result.error === "string" ||
+    (typeof result.exitCode === "number" && result.exitCode !== 0)
+  )) return "failed";
+  return "awaiting_late_owner";
+}
 function extractSingleAgentResult(details: unknown): { ok: true; value: unknown } | { ok: false; reason: string } {
   const object = readObject(details);
   const results = Array.isArray(object?.results) ? object.results : [];
@@ -798,66 +1534,40 @@ function stableJsonStringify(value: unknown): string {
   return JSON.stringify(normalize(value), null, 2);
 }
 
-function validateJsonSchema(value: unknown, schema: JsonObject | undefined, location = "root"): string[] {
+
+function validateJsonSchema(value: unknown, schema: JsonObject | undefined): string[] {
   if (!schema) return [];
-  if (Array.isArray(schema.enum) && !schema.enum.some((candidate) => isDeepStrictEqual(candidate, value))) {
-    return [`${location} is not one of the allowed values`];
-  }
-  const expected = schema.type;
-  if (typeof expected === "string" && !matchesJsonType(value, expected)) {
-    return [`Expected ${location} to be ${expected}`];
-  }
-  const errors: string[] = [];
-  if (expected === "object" && readObject(value)) {
-    const object = value as JsonObject;
-    const required = Array.isArray(schema.required)
-      ? schema.required.filter((field): field is string => typeof field === "string")
-      : [];
-    for (const field of required) {
-      if (!Object.hasOwn(object, field)) errors.push(`Missing required field: ${location}.${field}`);
-    }
-    const properties = readObject(schema.properties) ?? {};
-    for (const [key, propertySchema] of Object.entries(properties)) {
-      const nestedSchema = readObject(propertySchema);
-      if (nestedSchema && Object.hasOwn(object, key)) {
-        errors.push(...validateJsonSchema(object[key], nestedSchema, `${location}.${key}`));
-      }
-    }
-  }
-  if (expected === "array" && Array.isArray(value)) {
-    const itemSchema = readObject(schema.items);
-    if (itemSchema) {
-      value.forEach((item, index) => errors.push(...validateJsonSchema(item, itemSchema, `${location}[${index}]`)));
-    }
-  }
-  return errors;
-}
-
-function matchesJsonType(value: unknown, expected: string): boolean {
-  switch (expected) {
-    case "null": return value === null;
-    case "string": return typeof value === "string";
-    case "number": return typeof value === "number" && Number.isFinite(value);
-    case "integer": return typeof value === "number" && Number.isInteger(value);
-    case "boolean": return typeof value === "boolean";
-    case "array": return Array.isArray(value);
-    case "object": return readObject(value) !== null;
-    default: return false;
+  try {
+    const result = fromJSONSchema(schema).safeParse(value);
+    if (result.success) return [];
+    return result.error.issues.map((issue) => {
+      const location = issue.path.length > 0 ? `root.${issue.path.join(".")}` : "root";
+      return `${location}: ${issue.message}`;
+    });
+  } catch {
+    return ["The configured output schema is invalid or unsupported"];
   }
 }
 
-async function shellResultValue(runDir: string, action: EffectAction, result: ShellExecutionResult): Promise<unknown> {
+async function shellResultValue(
+  runDir: string,
+  action: EffectAction,
+  result: ShellExecutionResult,
+  driverOutputPath: string,
+): Promise<unknown> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
   if (!result.timedOut && result.exitCode === expectedExitCode) {
     const io = readObject(action.taskDef?.io);
     if (typeof io?.outputJsonPath === "string") {
-      const outputPath = resolveRunRelative(runDir, io.outputJsonPath);
-      const bytes = await fs.readFile(outputPath);
-      if (bytes.length > MAX_CAPTURE_BYTES) {
-        throw new DriverError(`Shell output JSON for effect ${action.effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, action.effectId);
+      const configuredOutputPath = resolveRunRelative(runDir, io.outputJsonPath);
+      if (path.resolve(configuredOutputPath) !== path.resolve(driverOutputPath)) {
+        const bytes = await fs.readFile(configuredOutputPath);
+        if (bytes.length > MAX_CAPTURE_BYTES) {
+          throw new DriverError(`Shell output JSON for effect ${action.effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, action.effectId);
+        }
+        return JSON.parse(bytes.toString("utf8"));
       }
-      return JSON.parse(bytes.toString("utf8"));
     }
     return result.stdout;
   }
@@ -907,19 +1617,39 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
   return true;
 }
 
+
 function validateCheckpointIdentity(checkpoint: ExecutionCheckpoint, action: EffectAction): void {
-  if (checkpoint.effectId !== action.effectId || checkpoint.invocationKey !== action.invocationKey || checkpoint.kind !== action.kind) {
+  const checkpointEffectKind = checkpoint.effectKind ?? checkpoint.kind;
+  const legacySkillCheckpoint = action.kind === "skill" && checkpoint.kind === "agent" && checkpoint.effectKind === undefined;
+  if (
+    checkpoint.schemaVersion !== DRIVER_SCHEMA_VERSION ||
+    checkpoint.effectId !== action.effectId ||
+    checkpoint.invocationKey !== action.invocationKey ||
+    (checkpointEffectKind !== action.kind && !legacySkillCheckpoint)
+  ) {
     throw new DriverError(`Execution checkpoint identity mismatch for effect ${action.effectId}`, action.effectId);
   }
 }
 
 function validateDescriptor(checkpoint: ExecutionCheckpoint, descriptor: AgentBridgeDescriptor): string | null {
   if (
+    checkpoint.schemaVersion !== DRIVER_SCHEMA_VERSION ||
     checkpoint.effectId !== descriptor.effectId ||
     checkpoint.invocationKey !== descriptor.invocationKey ||
     checkpoint.ownerName !== descriptor.ownerName ||
-    checkpoint.dispatchToken !== descriptor.dispatchToken
+    checkpoint.dispatchToken !== descriptor.dispatchToken ||
+    checkpoint.requestedModel !== descriptor.model ||
+    checkpoint.bridgeEnvelopeSha256 !== descriptor.bridgeEnvelopeSha256 ||
+    (descriptor.attempt !== undefined && (checkpoint.attempt ?? 1) !== descriptor.attempt)
   ) return `Agent bridge identity mismatch for effect ${descriptor.effectId}`;
+  return null;
+}
+
+function validateTaskEnvelope(checkpoint: ExecutionCheckpoint, input: JsonObject): string | null {
+  if (
+    !checkpoint.taskEnvelopeSha256 ||
+    checkpoint.taskEnvelopeSha256 !== sha256(Buffer.from(stableJsonStringify(input), "utf8"))
+  ) return `Task envelope mismatch for effect ${checkpoint.effectId}`;
   return null;
 }
 
@@ -940,6 +1670,14 @@ function readOutputSchema(taskDef: JsonObject): JsonObject | undefined {
 function stableAgentName(effectId: string): string {
   const safe = effectId.replace(/[^A-Za-z0-9_-]/g, "-");
   return `Babysitter-${safe}`;
+}
+
+function isAllocatedOwnerName(agentId: string, requestedName: string): boolean {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(agentId)) return false;
+  if (agentId === requestedName) return true;
+  if (!agentId.startsWith(`${requestedName}-`)) return false;
+  const suffix = agentId.slice(requestedName.length);
+  return /^-[2-9]\d*$/.test(suffix);
 }
 
 function effectTaskDir(runDir: string, effectId: string): string {
@@ -1062,9 +1800,25 @@ function parseCliJson<T>(stdout: string, operation: string): T {
   }
 }
 
-function boundedDiagnostic(value: string): string {
-  const normalized = value.trim();
+function redactSensitiveText(value: string): string {
+  return value
+    .replace(/\bBearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/\b(token|secret|password|authorization|api[-_]?key)\s*[:=]\s*["']?[^"',;\s]+["']?/gi, "$1=[redacted]")
+    .replace(/\b(command|cmd)\s*[:=]\s*["'][^"']*["']/gi, "$1=[redacted]");
+}
+
+function sanitizeProgressText(value: string): string {
+  const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
+  return normalized.length > 240 ? `${normalized.slice(0, 240)}…` : normalized;
+}
+
+export function sanitizeDiagnosticText(value: string): string {
+  const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
   return normalized.length > 2000 ? `${normalized.slice(0, 2000)}…` : normalized;
+}
+
+function boundedDiagnostic(value: string): string {
+  return sanitizeDiagnosticText(value);
 }
 
 function isAlreadyExists(error: unknown): boolean {
