@@ -1,0 +1,69 @@
+---
+nodeKind: Claim
+id: claim:provider-together-ai-serverless-catalog-refresh-2026-08-issue-1642
+attributes:
+  subjectId: provider:together-ai
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: Qwen/Qwen3.7-Max; Qwen/Qwen3.7-Plus; Qwen/Qwen3.6-Plus; moonshotai/Kimi-K3; moonshotai/Kimi-K2.7-Code; moonshotai/Kimi-K2.6; openai/gpt-oss-120b; openai/gpt-oss-20b; deepseek-ai/DeepSeek-V4-Pro; deepseek-ai/DeepSeek-V4-Flash-0731; openai/gpt-image-1.5; openai/gpt-image-2; openai/sora-2; openai/sora-2-pro
+  statement: Together AI serverless catalog refresh on 2026-08-05 lists Qwen 3.7/3.6, Kimi K3/K2.7/K2.6, GPT-OSS, DeepSeek V4, GPT image, and Sora provider model IDs.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:together-ai-serverless-models-2026-08-issue-1642
+edges:
+  about_subject:
+    - provider:together-ai
+  backed_by_evidence:
+    - evidence:together-ai-serverless-models-2026-08-issue-1642
+---
+nodeKind: Claim
+id: claim:provider-groq-hosted-models-refresh-2026-08-issue-1643
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: providerCatalogAvailability
+  value: qwen/qwen3.6-27b; openai/gpt-oss-120b; openai/gpt-oss-20b; openai/gpt-oss-safeguard-20b; meta-llama/llama-4-maverick-17b-128e-instruct; meta-llama/llama-4-scout-17b-16e-instruct; moonshotai/kimi-k2-instruct; compound-beta; compound-beta-mini
+  statement: Groq model catalog refresh on 2026-08-05 lists Qwen 3.6 27B, GPT-OSS and GPT-OSS safeguard, Llama 4 Maverick/Scout, Kimi K2, and Compound beta provider IDs.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-08-issue-1643
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-08-issue-1643
+---
+nodeKind: Claim
+id: claim:provider-groq-compound-modeling-open-question-issue-1643
+attributes:
+  subjectId: provider:groq
+  subjectKind: Provider
+  attribute: modelingOpenQuestion
+  value: compound-beta and compound-beta-mini may be model versions, provider features, or agentic systems.
+  statement: Groq Compound beta IDs require follow-up modeling as either model versions, provider features, or agentic systems before adding stronger model-version claims.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: modeling-open-question
+  evidenceSourceIds:
+    - evidence:groq-console-models-2026-08-issue-1643
+edges:
+  about_subject:
+    - provider:groq
+  backed_by_evidence:
+    - evidence:groq-console-models-2026-08-issue-1643

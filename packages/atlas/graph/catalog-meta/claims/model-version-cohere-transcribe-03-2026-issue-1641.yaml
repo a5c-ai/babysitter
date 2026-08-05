@@ -1,0 +1,122 @@
+---
+nodeKind: Claim
+id: claim:model-version-cohere-transcribe-03-2026-current-model-id-issue-1641
+attributes:
+  subjectId: model:cohere-transcribe-03-2026@current
+  attribute: modelCode
+  value: cohere-transcribe-03-2026
+  subjectKind: ModelVersion
+  statement: model:cohere-transcribe-03-2026@current maps to Cohere model ID cohere-transcribe-03-2026.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1641.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  about_subject:
+    - model:cohere-transcribe-03-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-cohere-transcribe-03-2026-current-kind-issue-1641
+attributes:
+  subjectId: model:cohere-transcribe-03-2026@current
+  attribute: kind
+  value: audio-transcription
+  subjectKind: ModelVersion
+  statement: model:cohere-transcribe-03-2026@current is an audio-in, text-out ASR model.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1641.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  about_subject:
+    - model:cohere-transcribe-03-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-cohere-transcribe-03-2026-current-lifecycle-status-issue-1641
+attributes:
+  subjectId: model:cohere-transcribe-03-2026@current
+  attribute: lifecycleStatus
+  value: live
+  subjectKind: ModelVersion
+  statement: model:cohere-transcribe-03-2026@current lifecycleStatus is live.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1641.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  about_subject:
+    - model:cohere-transcribe-03-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-cohere-transcribe-03-2026-current-max-file-size-issue-1641
+attributes:
+  subjectId: model:cohere-transcribe-03-2026@current
+  attribute: maximumFileSize
+  value: 25MB
+  subjectKind: ModelVersion
+  statement: model:cohere-transcribe-03-2026@current supports transcription files up to 25MB.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1641.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  about_subject:
+    - model:cohere-transcribe-03-2026@current
+---
+nodeKind: Claim
+id: claim:model-version-cohere-transcribe-03-2026-current-foundry-availability-issue-1641
+attributes:
+  subjectId: model:cohere-transcribe-03-2026@current
+  attribute: served_by
+  value: provider:cohere; provider:foundry providerModelId=coherelabs-cohere-transcribe-03-2026
+  subjectKind: ModelVersion
+  statement: model:cohere-transcribe-03-2026@current is served by Cohere and is documented as available on Microsoft Foundry as coherelabs-cohere-transcribe-03-2026.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: provider-catalog-availability
+  note: Evidence binding from issue #1641.
+edges:
+  backed_by_evidence:
+    - evidence:cohere-models-audio-transcribe-issue-1641
+  about_subject:
+    - model:cohere-transcribe-03-2026@current
+    - provider:cohere
+    - provider:foundry
